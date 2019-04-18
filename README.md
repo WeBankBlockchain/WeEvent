@@ -1,14 +1,17 @@
+.. image:: https://weeventdoc.readthedocs.io/en/latest/images/weevent-logo.png
+   :target: https://weeventdoc.readthedocs.io/en/latest/images/weevent-logo.png
+   :alt: weevent-logo.png
+
 ## WeEvent 介绍
-`WeEvent`是一个基于区块链实现的事件中间件，为业务提供事件发布/订阅`Pub/Sub`功能。发布到`WeEvent`上的事件，永久存储和不可篡改，支持事后跟踪和审计。
+`WeEvent`是一个基于区块链实现的事件中间件，为业务提供事件发布订阅`Pub/Sub`功能。发布到`WeEvent`上的事件，永久存储和不可篡改，支持事后跟踪和审计。
 支持`Restful`、`RPC`、`JsonRPC`、`STOMP`等多种接入方式，
 
 
 ## 特性
-- Broker服务：提供主题`Topic`的`CRUD`管理、事件发布/订阅`Pub/Sub`等功能；
+- Broker服务：提供事件发布订阅`Pub/Sub`，事件主题的`CRUD`管理等功能；
 - 适配多协议：支持`Restful`、`JsonRPC`、`STMOP`、`MQTT `等多种接入协议；
-- Java SDK：提供一个符合`JMS`规范的Jar包，封装了`Broker`服务提供的各种能力；
+- SDK及Demo：提供一个符合`JMS`规范的Jar包，各种接入协议的代码样例；
 - 高可用性：完善的主备服务切换和负载均衡能力；
-- 丰富样例：各种接入方式的使用代码样例。
 
 
 ## 快速入门
@@ -18,11 +21,12 @@
 
 - 搭建服务
 
-快速搭建一套`WeEvent`的服务，请参考[文档](http://)。通过一键部署的`WeEvent`的服务，用户可以快速体验和开发。
+快速搭建一套`WeEvent`服务，请参考[文档](https://weeventdoc.readthedocs.io/en/latest/install/quickinstall.html)。通过一键部署的`WeEvent`服务，用户可以快速体验和开发。
 
 - 体验订阅
 
-用户可以下载[Client](http://)，体验创建主题`Topic`，发布/订阅事件`Event`。
+参见[更多代码样例](https://github.com/WeBankFinTech/WeEvent/tree/master/src/test/java/com/webank/weevent/sample)。
+
 
 ## 贡献说明
 WeEvent爱贡献者！请阅读我们的贡献[文档](http://)，了解如何贡献代码，并提交你的贡献。
