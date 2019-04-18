@@ -1,7 +1,3 @@
-.. image:: https://weeventdoc.readthedocs.io/en/latest/images/weevent-logo.png
-   :target: https://weeventdoc.readthedocs.io/en/latest/images/weevent-logo.png
-   :alt: weevent-logo.png
-
 ## WeEvent 介绍
 `WeEvent`是一个基于区块链实现的事件中间件，为业务提供事件发布订阅`Pub/Sub`功能。发布到`WeEvent`上的事件，永久存储和不可篡改，支持事后跟踪和审计。
 支持`Restful`、`RPC`、`JsonRPC`、`STOMP`等多种接入方式，
