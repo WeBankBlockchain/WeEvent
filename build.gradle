@@ -26,7 +26,6 @@ buildscript {
 allprojects {
     repositories {
         maven {
-            //url "http://maven.aliyun.com/nexus/content/groups/public/"
             url "http://maven.aliyun.com/nexus/content/groups/public/"
         }
         mavenLocal()
@@ -142,18 +141,5 @@ bootJar {
     copy {
         from file('.').listFiles().findAll { File f -> (f.name.endsWith('.bat') || f.name.endsWith('.sh') || f.name.endsWith('.env')) }
         into 'dist'
-    }
-}
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: 'http://maven.aliyun.com/nexus/content/repositories/releases/') {
-                authentication(userName: 'deployment', password: 'deployment123')
-            }
-            pom.groupId = 'com.webank.weeventbroker.test'
-            pom.version = 'v1.0'
-            pom.artifactId = 'weevent-broker'
-        }
     }
 }
