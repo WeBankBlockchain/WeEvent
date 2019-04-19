@@ -92,7 +92,7 @@ dependencies {
 
     implementation(lombok, logger, apache_commons)
     implementation(jsonrpc4j)
-    implementation("org.bcos.channel:web3sdk:1.2.5")
+    implementation("org.fisco-bcos:web3sdk:1.2.5")
 
     // redis
     implementation(redis)
