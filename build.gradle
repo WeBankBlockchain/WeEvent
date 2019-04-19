@@ -126,7 +126,7 @@ sourceSets {
 
 bootJar {
     destinationDir file('dist/apps')
-    archiveName project.name + '-' + version + '.jar'
+    archiveName 'weevent-broker-' + version + '.jar'
     exclude '**/*.xml'
     exclude '**/*.properties'
 
