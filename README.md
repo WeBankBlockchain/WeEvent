@@ -13,7 +13,8 @@ WeEvent由微众银行自主研发并完全开源，秉承分布式商业模式�
 
 ### 快速入门
 - 安装前置依赖
-    在体验WeEvent之前，用户需提前搭建好区块链，WeEvent现已支持FISCO BCOS区块链底层平台，具体操作见FISCO-BCOS文档(https://fisco-bcos-documentation.readthedocs.io/zh_CN/release-1.3/docs/tools/index.html)。
+    
+    在体验WeEvent之前，用户需提前搭建好区块链，WeEvent现已支持FISCO BCOS区块链底层平台，具体操作见[FISCO-BCOS文档](https://fisco-bcos-documentation.readthedocs.io/zh_CN/release-1.3/docs/tools/index.html)。
 
 - 搭建服务
 
