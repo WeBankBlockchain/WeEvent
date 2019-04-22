@@ -24,9 +24,6 @@ import org.springframework.web.socket.sockjs.client.SockJsClient;
 import org.springframework.web.socket.sockjs.client.Transport;
 import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 /**
  * STOMP client, see
  * https://docs.spring.io/spring/docs/5.0.8.RELEASE/spring-framework-reference/web.html#websocket-stomp
@@ -38,22 +35,50 @@ import static org.junit.Assert.fail;
  */
 @Slf4j
 public class Stomp {
+    private final static String topic = "com.webank.test";
+
+    private ThreadPoolTaskScheduler taskScheduler;
+    private boolean isConnected;
+
     public static void main(String[] args) {
         System.out.println("This is WeEvent stomp sample.");
 
-        ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-        taskScheduler.initialize();
-
-        stompOverWebSocket(taskScheduler);
-
-        stompOverSockjs(taskScheduler);
+        Stomp stomp = new Stomp();
+        stomp.stompOverWebSocket();
+        //stomp.stompOverSockjs();
     }
 
-    private static StompSessionHandlerAdapter getStompSessionHandlerAdapter() {
+    public Stomp() {
+        this.taskScheduler = new ThreadPoolTaskScheduler();
+        this.taskScheduler.initialize();
+
+        this.isConnected = false;
+    }
+
+    private StompSessionHandlerAdapter getWebsocketSessionHandlerAdapter() {
         return new StompSessionHandlerAdapter() {
             @Override
             public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
                 log.info("connection open, {}", session.getSessionId());
+
+                session.setAutoReceipt(true);
+
+                // auto subscribe when connected
+                log.info("subscribe topic, {}", topic);
+                StompSession.Subscription subscription = session.subscribe(topic, new StompFrameHandler() {
+                    @Override
+                    public Type getPayloadType(StompHeaders headers) {
+                        return String.class;
+                    }
+
+                    @Override
+                    public void handleFrame(StompHeaders headers, Object payload) {
+                        log.info("subscribe handleFrame, header: {} payload: {}", headers, payload);
+                    }
+                });
+                log.info("subscribe result, subscription id: {}", subscription.getSubscriptionId());
+
+                // subscription.unsubscribe() when needed
             }
 
             @Override
@@ -66,7 +91,23 @@ public class Stomp {
             public void handleTransportError(StompSession session, Throwable exception) {
                 if (exception instanceof ConnectionLostException) {
                     log.info("connection closed, {}", session.getSessionId());
-                    // can do auto reconnect in this handle
+
+                    // do auto reconnect in this handle
+                    while (!isConnected) try {
+                        // retry every 3 seconds
+                        Thread.sleep(3000);
+
+                        //new connect start
+                        WebSocketClient webSocketClient = new StandardWebSocketClient();
+                        WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
+                        stompClient.setMessageConverter(new StringMessageConverter());
+                        stompClient.setTaskScheduler(taskScheduler); // for heartbeats
+                        ListenableFuture<StompSession> f = stompClient.connect("ws://localhost:8080/weevent/stomp", this);
+                        f.get();
+                        //new connect end
+                    } catch (Exception e) {
+                        log.error("exception, {}", exception);
+                    }
                 } else {
                     log.info("connection error, {}", session.getSessionId());
                     log.error("exception, {}", exception);
@@ -80,63 +121,106 @@ public class Stomp {
         };
     }
 
-    private static void sendAndsubscribe(StompSession stompSession) throws InterruptedException {
-        stompSession.setAutoReceipt(true);
-
-        String topic = "com.webank.test";
-        log.info("subscribe topic, {}", topic);
-        StompSession.Subscription subscription = stompSession.subscribe(topic, new StompFrameHandler() {
-            @Override
-            public Type getPayloadType(StompHeaders headers) {
-                return String.class;
-            }
-
-            @Override
-            public void handleFrame(StompHeaders headers, Object payload) {
-                log.info("subscribe handleFrame, header: {} payload: {}", headers, payload);
-
-                assertTrue(true);
-            }
-        });
-        log.info("subscribe result, subscription id: {}", subscription.getSubscriptionId());
-
-        log.info("send topic, {}", topic);
-        StompSession.Receiptable receiptable = stompSession.send(topic, "hello world, from web socket");
-        log.info("send result, receipt id: {}", receiptable.getReceiptId());
-
-        Thread.sleep(3 * 1000L);
-        log.info("unsubscribe, {}", subscription.getSubscriptionId());
-        subscription.unsubscribe();
-
-        // webEnvironment is startup by junit client
-        Thread.sleep(20 * 1000L);
-    }
-
-    private static void stompOverWebSocket(ThreadPoolTaskScheduler taskScheduler) {
+    private void stompOverWebSocket() {
         // standard web socket transport
         WebSocketClient webSocketClient = new StandardWebSocketClient();
         WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
 
-        // no difference in the following
         // MappingJackson2MessageConverter
         stompClient.setMessageConverter(new StringMessageConverter());
         stompClient.setTaskScheduler(taskScheduler); // for heartbeats
-        ListenableFuture<StompSession> f = stompClient.connect("ws://localhost:8080/weevent/stomp", getStompSessionHandlerAdapter());
+
+        ListenableFuture<StompSession> f = stompClient.connect("ws://localhost:8080/weevent/stomp", getWebsocketSessionHandlerAdapter());
 
         try {
             StompSession stompSession = f.get();
 
-            sendAndsubscribe(stompSession);
+            log.info("send event to topic, {}", this.topic);
+            for (int i = 0; i < 10; i++) {
+                StompSession.Receiptable receiptable = stompSession.send(this.topic, "hello world, from web socket:" + i);
+                log.info("send result, receipt id: {}", receiptable.getReceiptId());
+            }
 
-            assertTrue(true);
+            Thread.sleep(10000L);
         } catch (InterruptedException | ExecutionException e) {
             log.error("web socket task failed", e);
-            fail();
         }
     }
 
-    private static void stompOverSockjs(ThreadPoolTaskScheduler taskScheduler) {
+    private StompSessionHandlerAdapter getSockjsSessionHandlerAdapter() {
+        return new StompSessionHandlerAdapter() {
+            @Override
+            public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
+                log.info("connection open, {}", session.getSessionId());
 
+                session.setAutoReceipt(true);
+
+                // auto subscribe when connected
+                log.info("subscribe topic, {}", topic);
+                StompSession.Subscription subscription = session.subscribe(topic, new StompFrameHandler() {
+                    @Override
+                    public Type getPayloadType(StompHeaders headers) {
+                        return String.class;
+                    }
+
+                    @Override
+                    public void handleFrame(StompHeaders headers, Object payload) {
+                        log.info("subscribe handleFrame, header: {} payload: {}", headers, payload);
+                    }
+                });
+                log.info("subscribe result, subscription id: {}", subscription.getSubscriptionId());
+
+                // subscription.unsubscribe() when needed
+            }
+
+            @Override
+            public void handleException(StompSession session, StompCommand command, StompHeaders headers, byte[] payload, Throwable exception) {
+                log.info("connection exception, {} {}", session.getSessionId(), command);
+                log.error("exception, {}", exception);
+            }
+
+            @Override
+            public void handleTransportError(StompSession session, Throwable exception) {
+                if (exception instanceof ConnectionLostException) {
+                    log.info("connection closed, {}", session.getSessionId());
+
+                    // do auto reconnect in this handle
+                    while (!isConnected) try {
+                        // retry every 3 seconds
+                        Thread.sleep(3000);
+
+                        //new connect start
+                        // sock js transport
+                        List<Transport> transports = new ArrayList<>(2);
+                        transports.add(new WebSocketTransport(new StandardWebSocketClient()));
+                        transports.add(new RestTemplateXhrTransport());
+
+                        SockJsClient sockjsClient = new SockJsClient(transports);
+                        WebSocketStompClient stompClient = new WebSocketStompClient(sockjsClient);
+
+                        // StringMessageConverter
+                        stompClient.setMessageConverter(new MappingJackson2MessageConverter());
+                        stompClient.setTaskScheduler(taskScheduler); // for heartbeats
+                        ListenableFuture<StompSession> f = stompClient.connect("ws://localhost:8080/weevent/stomp", this);
+                        f.get();
+                        //new connect end
+                    } catch (Exception e) {
+                        log.error("exception, {}", exception);
+                    }
+                } else {
+                    log.info("connection error, {}", session.getSessionId());
+                    log.error("exception, {}", exception);
+                }
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                log.info("session handleFrame, header: {} payload: {}", headers, payload);
+            }
+        };
+    }
+
+    private void stompOverSockjs() {
         // sock js transport
         List<Transport> transports = new ArrayList<>(2);
         transports.add(new WebSocketTransport(new StandardWebSocketClient()));
@@ -145,21 +229,24 @@ public class Stomp {
         SockJsClient sockjsClient = new SockJsClient(transports);
         WebSocketStompClient stompClient = new WebSocketStompClient(sockjsClient);
 
-        // no difference in the following
         // StringMessageConverter
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
         stompClient.setTaskScheduler(taskScheduler); // for heartbeats
-        ListenableFuture<StompSession> f = stompClient.connect("http://localhost:8080/weevent/sockjs", getStompSessionHandlerAdapter());
+
+        ListenableFuture<StompSession> f = stompClient.connect("http://localhost:8080/weevent/sockjs", getSockjsSessionHandlerAdapter());
 
         try {
             StompSession stompSession = f.get();
 
-            sendAndsubscribe(stompSession);
+            log.info("send event to topic, {}", this.topic);
+            for (int i = 0; i < 10; i++) {
+                StompSession.Receiptable receiptable = stompSession.send(this.topic, "hello world, from sock js:" + i);
+                log.info("send result, receipt id: {}", receiptable.getReceiptId());
+            }
 
-            assertTrue(true);
+            Thread.sleep(10000L);
         } catch (InterruptedException | ExecutionException e) {
-            log.error("sockjs task failed", e);
-            fail();
+            log.error("sock js task failed", e);
         }
     }
 }
