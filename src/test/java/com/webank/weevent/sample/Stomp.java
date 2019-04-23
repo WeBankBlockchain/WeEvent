@@ -44,8 +44,8 @@ public class Stomp {
         System.out.println("This is WeEvent stomp sample.");
 
         Stomp stomp = new Stomp();
-        stomp.stompOverWebSocket();
-        //stomp.stompOverSockjs();
+        stomp.testOverWebSocket();
+        //stomp.testOverSockjs();
     }
 
     public Stomp() {
@@ -89,8 +89,10 @@ public class Stomp {
 
             @Override
             public void handleTransportError(StompSession session, Throwable exception) {
-                if (exception instanceof ConnectionLostException) {
+                if (exception instanceof ConnectionLostException||!isConnected) {
                     log.info("connection closed, {}", session.getSessionId());
+
+                    isConnected=false;
 
                     // do auto reconnect in this handle
                     while (!isConnected) try {
@@ -105,6 +107,8 @@ public class Stomp {
                         ListenableFuture<StompSession> f = stompClient.connect("ws://localhost:8080/weevent/stomp", this);
                         f.get();
                         //new connect end
+
+                        isConnected = true;
                     } catch (Exception e) {
                         log.error("exception, {}", exception);
                     }
@@ -121,7 +125,7 @@ public class Stomp {
         };
     }
 
-    private void stompOverWebSocket() {
+    private void testOverWebSocket() {
         // standard web socket transport
         WebSocketClient webSocketClient = new StandardWebSocketClient();
         WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
@@ -135,9 +139,9 @@ public class Stomp {
         try {
             StompSession stompSession = f.get();
 
-            log.info("send event to topic, {}", this.topic);
+            log.info("send event to topic, {}", topic);
             for (int i = 0; i < 10; i++) {
-                StompSession.Receiptable receiptable = stompSession.send(this.topic, "hello world, from web socket:" + i);
+                StompSession.Receiptable receiptable = stompSession.send(topic, "hello world, from web socket:" + i);
                 log.info("send result, receipt id: {}", receiptable.getReceiptId());
             }
 
@@ -204,6 +208,8 @@ public class Stomp {
                         ListenableFuture<StompSession> f = stompClient.connect("ws://localhost:8080/weevent/stomp", this);
                         f.get();
                         //new connect end
+
+                        isConnected = true;
                     } catch (Exception e) {
                         log.error("exception, {}", exception);
                     }
@@ -220,7 +226,7 @@ public class Stomp {
         };
     }
 
-    private void stompOverSockjs() {
+    private void testOverSockjs() {
         // sock js transport
         List<Transport> transports = new ArrayList<>(2);
         transports.add(new WebSocketTransport(new StandardWebSocketClient()));
@@ -238,9 +244,9 @@ public class Stomp {
         try {
             StompSession stompSession = f.get();
 
-            log.info("send event to topic, {}", this.topic);
+            log.info("send event to topic, {}", topic);
             for (int i = 0; i < 10; i++) {
-                StompSession.Receiptable receiptable = stompSession.send(this.topic, "hello world, from sock js:" + i);
+                StompSession.Receiptable receiptable = stompSession.send(topic, "hello world, from sock js:" + i);
                 log.info("send result, receipt id: {}", receiptable.getReceiptId());
             }
 
