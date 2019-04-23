@@ -205,6 +205,7 @@ public class Web3sdkUtils {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            System.exit(1);
         }
 
         // web3sdk can't exit gracefully
