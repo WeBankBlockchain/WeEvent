@@ -20,7 +20,7 @@ start(){
         echo "broker is running, (PID=$currentbroker_pid)"
     else
         nohup java ${JAVA_OPTS} -Xbootclasspath/a:./conf -jar ./apps/*  >/dev/null 2>&1 &
-        sleep 1
+        sleep 3
         eventbroker_pid=$!
         if [ -n "$eventbroker_pid" ];then
             echo "start broker success (PID=$eventbroker_pid)"
@@ -28,7 +28,7 @@ start(){
                  echo "${eventbroker_pid}" >$brokerpid_path
             else
                  touch $brokerpid_path;
-                 sleep 1
+                 sleep 3
                  echo "${eventbroker_pid}" >$brokerpid_path
             fi
            
