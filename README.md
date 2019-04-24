@@ -5,23 +5,25 @@ WeEvent由微众银行自主研发并完全开源，秉承分布式商业模式�
 
 
 ### 特性
-- Broker服务：提供事件发布订阅`Pub/Sub`，事件主题的`CRUD`管理等功能；
-- 适配多协议：支持`Restful`、`JsonRPC`、`STMOP`、`MQTT `等多种接入协议；
-- SDK及Demo：提供一个符合`JMS`规范的Jar包，各种接入协议的代码样例；
-- 高可用性：完善的主备服务切换和负载均衡能力。
+- Broker服务：提供事件主题的CRUD管理，事件发布订阅Publish/Subscribe等功能；
+- 适配多协议：支持RESTful、JsonRPC、STMOP、MQTT等多种接入协议；
+- SDK及Demo：提供一个符合Java JMS规范JAR包，以及各种接入协议的代码样例；
+- 高可用性：通过集群的负载均衡和服务主备切换实现高可用；
+- 事件治理：通过Web管理台可以管理事件主题，可以查看区块链FISCO-BCOS节点、主题订阅等信息;
 
 
 ### 快速入门
-- 安装前置依赖
+- 依赖安装
 
-    在体验WeEvent之前，用户需提前搭建好区块链，WeEvent现已支持FISCO BCOS区块链底层平台，具体操作见[FISCO-BCOS文档](https://fisco-bcos-documentation.readthedocs.io/zh_CN/release-1.3/docs/tools/index.html)。
-- 搭建服务
+    在体验WeEvent之前，用户需提前搭建好区块链，WeEvent现已支持FISCO-BCOS区块链底层平台，具体操作见[FISCO-BCOS文档](https://fisco-bcos-documentation.readthedocs.io/zh_CN/release-1.3/docs/tools/index.html)。
+    
+- 服务搭建
 
-    快速搭建一套`WeEvent`服务，请参考[文档](https://weeventdoc.readthedocs.io/zh_CN/latest/install/quickinstall.html)。通过一键部署的`WeEvent`服务，用户可以快速体验和开发。
+    快速搭建一套WeEvent服务，请参考[快速安装文档](https://weeventdoc.readthedocs.io/zh_CN/latest/install/quickinstall.html)。
 
-- 体验订阅
+- 功能体验
 
-    参见[更多代码样例](https://github.com/WeBankFinTech/WeEvent/tree/master/src/test/java/com/webank/weevent/sample)。
+    用户通过浏览器即可体验事件发布功能。更多样例，请参见[WeEvent代码样例](https://github.com/WeBankFinTech/WeEvent/tree/master/src/test/java/com/webank/weevent/sample)。
 
 
 ### 贡献说明
