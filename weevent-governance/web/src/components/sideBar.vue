@@ -9,8 +9,8 @@
       <span slot="title">当前节点</span>
     </el-menu-item>
     <el-menu-item index="3">
-      <i class="el-icon-document"></i>
-      <span slot="title">Topic管理</span>
+      <i class="el-icon-edit-outline"></i>
+      <span slot="title">主题管理</span>
     </el-menu-item>
     <el-menu-item index="4">
       <i class="el-icon-document"></i>

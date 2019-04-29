@@ -14,7 +14,6 @@
     element-loading-text='数据加载中...'
     element-loading-background='rgba(256,256,256,0.8)'
     style="width: 100%"
-    height="620"
     @expand-change='readDetial'
     >
     <el-table-column type="expand">

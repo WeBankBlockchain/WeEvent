@@ -113,7 +113,7 @@ html,body,#app{
   }
 
   .event-table{
-    height:80%;
+    height:95%;
 
     .refresh{
       float:right;
@@ -130,16 +130,55 @@ html,body,#app{
     }
 
     .el-table{
-      height:100%;
+      background: transparent;
+      height:89%;
+      position: relative;
+      .el-table__empty-block{
+        background:white;
+        height:auto; 
+      }
       .el-table__body-wrapper{
+        position: absolute;
+        top:49px;
+        left:0;
+        right:0;
+        bottom:0;
+        overflow-x: hidden;
+        overflow-y: auto;
+        &::-webkit-scrollbar{
+          width:10px;
+          height:1px;
+        }
+        &::-webkit-scrollbar-thumb{
+          border-radius: 10px;
+          background: #ddd;
+        }
+        &::-webkit-scrollbar-track{
+          border-radius: 10px;
+          border-radius: 10px;
+          background: #ededed;
+        }
         .el-table__body{
           .cell {
             word-break: inherit !important
           }
         } 
       }
+
+      // .el-table--enable-row-hover .el-table__body tr:hover>td{
+      //   background:red;
+      // }
+
+      // .el-table__footer-wrapper, .el-table__header-wrapper{
+      //   position: fixed;
+      //   z-index: 99
+      // }
     }
   }
+}
+
+.el-table--striped .el-table__body tr.el-table__row--striped td{
+  background:#FFF;
 }
 
 .headerBar{

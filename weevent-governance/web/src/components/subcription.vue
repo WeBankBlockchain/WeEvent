@@ -7,7 +7,6 @@
     :data="tableData"
     border
     stripe
-    height='620'
     :span-method='spanMethod'
     v-loading='loading'
     element-loading-spinner='el-icon-loading'
@@ -25,19 +24,20 @@
     </el-table-column>
     <el-table-column
       label="订阅ID"
+      width='400'
       prop='subscribeId'>
     </el-table-column>
     <el-table-column
-      label="来源"
+      label="订阅方式"
       prop="interfaceType">
-    </el-table-column>
-    <el-table-column
-      label="待通知事件"
-      prop="notifyingEventCount">
     </el-table-column>
     <el-table-column
       label="已通知事件"
       prop="notifiedEventCount">
+    </el-table-column>
+    <el-table-column
+      label="待通知事件"
+      prop="notifyingEventCount">
     </el-table-column>
   </el-table>
  </div>
@@ -107,17 +107,15 @@ export default {
             return [row.childs, 1]
           }
         } else {
-          // 非第一行的情况下判断上一行row.childs是否大于2
-          // 如果小于则代表没有合并行
+          // // 非第一行的情况下判断上一行row.childs是否大于2
+          // // 如果小于则代表没有合并行
           if (row.childs < 2) {
             return [1, 1]
           }
-          // 如果该行的row.childs是2以上，并且上一行小于2 则代表此行是合并行的起点
-          if (table[rowIndex - 1].childs < 2 && row.childs > 1) {
+          // 根据IP判断 该行是否需要与上一行合并，如果相同则需要与合并，如果不同则是新起的行
+          if (table[rowIndex - 1].ip !== table[rowIndex].ip) {
             return [row.childs, 1]
-          }
-          // 如果该行的row.childs是2以上，并且上一行小大于于2 则代表此行需与之前的行合并
-          if (table[rowIndex - 1].childs > 1 && row.childs > 1) {
+          } else {
             return [0, 0]
           }
         }

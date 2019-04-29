@@ -27,10 +27,10 @@ allprojects {
 
 subprojects{
     apply plugin: 'java'
-    // 指定JDK版本
+    //sdk verison
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
-    // 指定编码格式
+    //encoding type
     [compileJava,compileTestJava,javadoc]*.options*.encoding = 'UTF-8'
 
     List lombok = [

@@ -1,3 +1,3 @@
-include 'weevent-governance'
-include 'weevent-broker'
 include 'weevent-client'
+include 'weevent-broker'
+include 'weevent-governance'
