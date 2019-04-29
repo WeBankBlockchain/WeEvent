@@ -1,15 +1,3 @@
-group = "com.webank.weevent"
-version = "0.9.0"
-
-apply plugin: "java"
-apply plugin: "maven"
-apply plugin: "idea"
-apply plugin: "eclipse"
-apply plugin: "org.springframework.boot"
-apply plugin: "io.spring.dependency-management"
-springBoot {
-    buildInfo()
-}
 buildscript {
     repositories {
         maven {
@@ -22,8 +10,12 @@ buildscript {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.0.RELEASE")
     }
 }
-
 allprojects {
+    group 'com.webank.weevent'
+    version '0.9.0'
+    apply plugin: 'idea'
+    apply plugin: "maven"
+    apply plugin: "eclipse"
     repositories {
         maven {
             url "http://maven.aliyun.com/nexus/content/groups/public/"
@@ -33,113 +25,33 @@ allprojects {
     }
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-[compileJava, compileTestJava, javadoc]*.options*.encoding = "UTF-8"
-compileJava {
-    options.compilerArgs << "-parameters"
-}
+subprojects{
+    apply plugin: 'java'
+    //sdk verison
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+    //encoding type
+    [compileJava,compileTestJava,javadoc]*.options*.encoding = 'UTF-8'
 
-List lombok = [
-        "org.projectlombok:lombok:1.16.14"
-]
+    List lombok = [
+            "org.projectlombok:lombok:1.16.14"
+    ]
 
-configurations {
-    //exclude spring-boot's default logger logback
-    all*.exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
-}
+    //web3sdk contains logger handler org.slf4j:slf4j-log4j12:1.7.25
+    List logger = [
+            "org.apache.logging.log4j:log4j-api:2.11.2",
+            "org.apache.logging.log4j:log4j-core:2.11.2",
+            "org.apache.logging.log4j:log4j-web:2.11.2",
+            "org.slf4j:slf4j-api:1.7.26",
+            "org.apache.logging.log4j:log4j-slf4j-impl:2.11.2"
+    ]
+    List apache_commons = [
+            "org.apache.commons:commons-lang3:3.6",
+            "org.apache.commons:commons-dbcp2:2.6.0",
+            "org.apache.commons:commons-collections4:4.1"
+    ]
 
-//web3sdk contains logger handler org.slf4j:slf4j-log4j12:1.7.25
-List logger = [
-        "org.apache.logging.log4j:log4j-api:2.11.2",
-        "org.apache.logging.log4j:log4j-core:2.11.2",
-        "org.apache.logging.log4j:log4j-web:2.11.2",
-        "org.slf4j:slf4j-api:1.7.26",
-        "org.apache.logging.log4j:log4j-slf4j-impl:2.11.2"
-]
-
-List apache_commons = [
-        "org.apache.commons:commons-collections4:4.1",
-        "org.apache.commons:commons-lang3:3.5",
-]
-
-List jsonrpc4j = [
-        //https://mvnrepository.com/artifact/com.github.briandilley.jsonrpc4j/jsonrpc4j
-        "com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.3"
-]
-
-//http://curator.apache.org/
-List zookeeper = [
-        "org.apache.zookeeper:zookeeper:3.4.12",
-        "org.apache.curator:curator-recipes:4.2.0"
-]
-
-List redis = [
-        "redis.clients:jedis:3.0.0"
-]
-
-List client_depends = [
-        "javax.jms:jms:1.1",
-        "org.java-websocket:Java-WebSocket:1.4.0",
-        "org.springframework:spring-messaging"
-]
-
-dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-websocket")
-    implementation("org.springframework.integration:spring-integration-mqtt")
-
-    implementation(lombok, logger, apache_commons)
-    implementation(jsonrpc4j)
-    implementation("org.fisco-bcos:web3sdk:1.2.5")
-
-    // redis
-    implementation(redis)
-
-    // ha
-    implementation(zookeeper)
-
-    implementation(client_depends)
-
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-}
-
-sourceSets {
-    main {
-        java {
-            srcDirs = ["src/main/java"]
-        }
-        resources {
-            srcDirs = ["src/main/resources"]
-        }
-    }
-    test {
-        java {
-            srcDirs = ["src/test/java"]
-        }
-        resources {
-            srcDirs = ["src/test/resources"]
-        }
-    }
-}
-
-bootJar {
-    destinationDir file('dist/apps')
-    archiveName 'weevent-broker-' + version + '.jar'
-    exclude '**/*.xml'
-    exclude '**/*.properties'
-
-    copy {
-        from file('src/main/resources/')
-        into 'dist/conf'
-    }
-    copy {
-        from configurations.runtime
-        into 'dist/lib'
-    }
-    copy {
-        from file('.').listFiles().findAll { File f -> (f.name.endsWith('.bat') || f.name.endsWith('.sh') || f.name.endsWith('.env')) }
-        into 'dist'
+    dependencies {
+        implementation(lombok, logger, apache_commons)
     }
 }
