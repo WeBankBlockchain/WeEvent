@@ -1,0 +1,30 @@
+server:
+  port: 8082
+spring:
+  # datasource
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/goverdb?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: xxxx
+    password: yyyy
+    type: org.apache.commons.dbcp2.BasicDataSource
+    dbcp2:
+      max-wait-millis: 10000
+      min-idle: 5
+      initial-size: 5
+      validation-query: SELECT 'x'
+  pid:
+    fail-on-write-error: true
+    file: ./logs/governance.pid
+
+weevent:
+  url: http://localhost:8081/weevent
+governance:
+  influxdb:
+    enabled: false
+    username: admin
+    password: admin
+    openurl: http://127.0.0.1:8086
+    database: telegraf
+logging:
+  config: classpath:log4j2.xml

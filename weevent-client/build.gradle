@@ -1,0 +1,46 @@
+List client_depends = [
+        "com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.3",
+        "javax.jms:jms:1.1",
+        "org.java-websocket:Java-WebSocket:1.4.0",
+        "org.springframework:spring-messaging:5.1.6.RELEASE"
+]
+
+dependencies {
+    compile(client_depends)
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ["src/main/java"]
+        }
+        resources {
+            srcDirs = ["src/main/resources"]
+        }
+    }
+}
+
+jar {
+    from(sourceSets.main.output) {
+        include "com/webank/weevent/sdk/**"
+    }
+    destinationDir file('dist/apps')
+    archiveName 'weevent-client-' + version + '.jar'
+    exclude '**/*.xml'
+    exclude '**/*.properties'
+
+    doLast {
+        copy {
+            from file('src/main/resources/')
+            into 'dist/conf'
+        }
+        copy {
+            from configurations.runtime
+            into 'dist/lib'
+        }
+        copy {
+            from file('.').listFiles().findAll { File f -> (f.name.endsWith('.bat') || f.name.endsWith('.sh') || f.name.endsWith('.env')) }
+            into 'dist'
+        }
+    }
+}

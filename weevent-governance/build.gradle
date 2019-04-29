@@ -1,0 +1,76 @@
+apply plugin: "org.springframework.boot"
+apply plugin: "io.spring.dependency-management"
+configurations {
+    //exclude spring-boot's default logger logback
+    all*.exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
+}
+List db = [
+        "org.mybatis.spring.boot:mybatis-spring-boot-starter:1.3.2",
+        "org.mariadb.jdbc:mariadb-java-client",
+        "org.influxdb:influxdb-java:2.14"
+]
+
+List jsoup = [
+        "org.jsoup:jsoup:1.9.2"
+]
+
+List fastjson = [
+        "com.alibaba:fastjson:1.2.4"
+]
+
+List springboot = [
+        "org.springframework.boot:spring-boot-starter-actuator",
+        "org.springframework.boot:spring-boot-starter-web"
+]
+
+List springboottest = [
+        "org.springframework.boot:spring-boot-starter-test"
+]
+
+dependencies {
+    implementation(db, jsoup, fastjson, springboot)
+    testImplementation(springboottest)
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ["src/main/java"]
+        }
+        resources {
+            srcDirs = ["src/main/resources"]
+        }
+    }
+    test {
+        java {
+            srcDirs = ["src/test/java"]
+        }
+        resources {
+            srcDirs = ["src/test/resources"]
+        }
+    }
+}
+
+bootJar {
+    destinationDir file('dist/apps')
+    archiveName 'weevent-governance-' + version + '.jar'
+    exclude '**/*.xml'
+    exclude '**/*.properties'
+
+    copy {
+        from file('src/main/resources/')
+        into 'dist/conf'
+    }
+    copy {
+        from file('web/html/')
+        into 'dist/html'
+    }
+    copy {
+        from configurations.runtime
+        into 'dist/lib'
+    }
+    copy {
+        from file('.').listFiles().findAll { File f -> (f.name.endsWith('.sql') || f.name.endsWith('.sh') || f.name.endsWith('.env')) }
+        into 'dist'
+    }
+}

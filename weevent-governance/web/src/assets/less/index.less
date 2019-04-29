@@ -1,0 +1,169 @@
+@import './animation';
+@font-face {
+  font-family: 'syyh';
+  src: url('../font/syyh-normal.ttf')
+}
+html,body,div,p,ul,li{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  -moz-box-sizing:border-box;
+  -webkit-box-sizing:border-box; 
+  font-family: 'syyh'
+}
+
+html,body,#app{
+  height:100%;
+}
+
+#app{
+  background:#F0F3F6;
+}
+
+.el-container{
+  height:100%;
+}
+
+.el-header{
+  background:#fff;
+  border-bottom:1px solid #ddd;
+  z-index: 99; 
+
+  .el-dropdown .el-button-group .el-button{
+    background:transparent;
+    color:white;
+    border:0
+  }
+}
+
+.el-aside{
+  background:#FFF;
+  position: relative;
+  
+  .el-menu{
+    background:transparent;
+    border-right:0;
+    padding:20px 0;
+    .el-menu-item{
+      color:#8993a2;
+      border-left:6px solid transparent;
+      font-size: 16px;
+      &:hover{
+        background:rgba(27,121,255,.1);  
+      }
+    }
+  
+    .el-menu-item.is-active{
+      background:rgba(27,121,255,.1);
+      border-left:6px solid #1b79ff;
+      color:#1b79ff;
+    }
+  }
+
+  .el-menu-vertical:not(.el-menu--collapse){
+    width:240px;
+  }
+}
+
+.el-main{
+  position: relative;
+
+  .home-content{
+    height:100%;
+    padding:20px;
+
+    .des-list{
+      margin-top:15px;
+      li{
+        margin:10px;
+      }
+    }
+  }
+  .select-box{
+    width:38px;
+    height:36px;
+    position: absolute;
+    top:30px;
+    left:0;
+    border-radius:0px 18px 18px 0px;
+    text-align: center;
+    background:#1b79ff;
+
+    .arrow-icon{
+      width:9px;
+      height:9px;
+      border-top:2px solid #ddd;
+      border-right:2px solid #ddd;
+      @arrow-left();
+      transform: rotate(45deg);
+      -webkit-transform: rotate(45deg);
+      display: inline-block;
+      margin-top:13px;
+    }
+
+    .arrow-right{
+      @arrow-right();
+      transform: rotate(225deg);
+      -webkit-transform: rotate(225deg);
+    }
+  }
+
+  .el-pagination{
+    margin-top:20px;
+  }
+
+  .event-table{
+    height:80%;
+
+    .refresh{
+      float:right;
+      margin-top:10px;
+      margin-bottom:6px;
+    }
+    .contract-address{
+      height:21px;
+      margin:10px 0;
+      color:#909399;
+      float: right;
+      width: 100%;
+      text-align: right;
+    }
+
+    .el-table{
+      height:100%;
+      .el-table__body-wrapper{
+        .el-table__body{
+          .cell {
+            word-break: inherit !important
+          }
+        } 
+      }
+    }
+  }
+}
+
+.headerBar{
+  .el-dropdown{
+    float:right;
+    color:white;
+    font-size: 14px;
+    margin-top:20px;
+  }
+}
+
+.searchBox{
+  margin:20px 0;
+  text-align: right;
+  .el-input{
+    width:200px;
+  }
+}
+
+.el-button--primary{
+  background: #1b79ff;
+}
+.el-table__expand-icon>.el-icon{
+  font-size: 16px;
+  font-weight: bold;
+  margin-top:-7px;
+}

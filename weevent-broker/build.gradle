@@ -1,0 +1,88 @@
+apply plugin: "org.springframework.boot"
+apply plugin: "io.spring.dependency-management"
+
+configurations {
+    //exclude spring-boot's default logger logback
+    all*.exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
+}
+List jsonrpc4j = [
+        //https://mvnrepository.com/artifact/com.github.briandilley.jsonrpc4j/jsonrpc4j
+        "com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.3"
+]
+
+//http://curator.apache.org/
+List zookeeper = [
+        "org.apache.zookeeper:zookeeper:3.4.12",
+        "org.apache.curator:curator-recipes:4.2.0"
+]
+
+List redis = [
+        "redis.clients:jedis:3.0.0"
+]
+
+List client_depends = [
+        "javax.jms:jms:1.1",
+        "org.java-websocket:Java-WebSocket:1.4.0",
+        "org.springframework:spring-messaging"
+]
+
+List web3sdk = [
+        "org.fisco-bcos:web3sdk:1.2.5"
+]
+
+List springwebsocket = [
+        "org.springframework.boot:spring-boot-starter-websocket"
+]
+
+List springmqtt=[
+        "org.springframework.integration:spring-integration-mqtt"
+]
+
+List springboot = [
+        "org.springframework.boot:spring-boot-starter-actuator",
+        "org.springframework.boot:spring-boot-starter-web"
+]
+
+dependencies {
+    implementation(jsonrpc4j,redis,zookeeper,client_depends,web3sdk,springwebsocket,springmqtt,springboot)
+    implementation project(path: ":weevent-client")
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ["src/main/java"]
+        }
+        resources {
+            srcDirs = ["src/main/resources"]
+        }
+    }
+    test {
+        java {
+            srcDirs = ["src/test/java"]
+        }
+        resources {
+            srcDirs = ["src/test/resources"]
+        }
+    }
+}
+
+bootJar {
+    destinationDir file('dist/apps')
+    archiveName 'weevent-broker-' + version + '.jar'
+    exclude '**/*.xml'
+    exclude '**/*.properties'
+
+    copy {
+        from file('src/main/resources/')
+        into 'dist/conf'
+    }
+    copy {
+        from configurations.runtime
+        into 'dist/lib'
+    }
+    copy {
+        from file('.').listFiles().findAll { File f -> (f.name.endsWith('.bat') || f.name.endsWith('.sh') || f.name.endsWith('.env')) }
+        into 'dist'
+    }
+}

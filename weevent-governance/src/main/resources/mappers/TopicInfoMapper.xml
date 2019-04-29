@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.webank.weevent.governance.mapper.TopicInfoMapper">
+
+	<select id="getCreaterByName" resultType="java.lang.String">
+		select creater
+		from topic_info where 1=1
+		<if test="topicName != null and topicName !=''">
+			AND topic_name = #{topicName}
+		</if>
+	</select>
+
+	<!-- <insert id="openTopic" > insert into topic_info(topic_name,creater) 
+		values( #{topicName}, #{creater} ) </insert> -->
+
+	<insert id="openTopic">
+		<selectKey keyProperty="count" resultType="int" order="BEFORE">
+			select count(*) from topic_info where topic_name = #{topicName}
+		</selectKey>
+		<if test="count > 0">
+			update topic_info
+			<set>
+				<if test="creater != null">
+					creater= #{creater},
+				</if>
+			</set>
+			<where>
+				topic_name = #{topicName}
+			</where>
+		</if>
+		<if test="count==0">
+			insert into topic_info(topic_name,creater) values (#{topicName},#{creater})
+		</if>
+	</insert>
+	
+</mapper>
