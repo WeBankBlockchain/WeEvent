@@ -210,7 +210,7 @@ public class BrokerApplication {
                 jedisPool.getResource().ping();
             }
         } catch (Exception e) {
-            log.error("init redis error!!!,Exception:{}", e);
+            log.error("init redis error", e);
             System.exit(SpringApplication.exit(applicationContext));
         }
         RedisService redisService = new RedisService();

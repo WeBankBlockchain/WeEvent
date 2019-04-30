@@ -28,7 +28,7 @@ allprojects {
 
 subprojects {
     apply plugin: 'java'
-    // jdk verison
+    // jdk version
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
     // encoding type
@@ -54,6 +54,6 @@ subprojects {
     ]
 
     dependencies {
-        implementation(lombok, logger, apache_commons)
+        implementation(lombok, apache_commons, logger)
     }
 }
