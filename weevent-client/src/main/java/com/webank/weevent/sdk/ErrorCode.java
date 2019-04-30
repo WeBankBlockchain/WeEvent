@@ -103,6 +103,10 @@ public enum ErrorCode {
     LOAD_CONTRACT_ERROR(200208, "load contract failed"),
 
     WE3SDK_INIT_ERROR(200209, "init web3sdk failed"),
+
+    WE3SDK_VERRSION_NOT_SUPPORT(200210, "FISCO-BCOS 1.x, do not support group"),
+
+    WE3SDK_UNKONWN_GROUP(200210, "FISCO-BCOS 2.x, unknown group id"),
     ;
 
     /**
