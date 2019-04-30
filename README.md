@@ -23,7 +23,7 @@ WeEvent由微众银行自主研发并完全开源，秉承分布式商业模式�
 
 - 功能体验
 
-    通过浏览器就可以体验事件发布等基本功能，如[发布事件](http://localhost:8080/rest/publish?topic=test&content=helloevent)。 更多功能，请参见[WeEvent接入样例](https://github.com/WeBankFinTech/WeEvent/tree/master/src/test/java/com/webank/weevent/sample)。
+    通过浏览器就可以体验事件发布等基本功能，如[发布事件](http://localhost:8080/weevent/rest/publish?topic=test&content=helloevent)。 更多功能，请参见[WeEvent接入样例](https://github.com/WeBankFinTech/WeEvent/tree/master/weevent-broker/src/test/java/com/webank/weevent/sample)。
 
 
 ### 贡献说明

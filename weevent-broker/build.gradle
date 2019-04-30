@@ -27,14 +27,15 @@ List client_depends = [
 ]
 
 List web3sdk = [
-        "org.fisco-bcos:web3sdk:1.2.5"
+        "org.fisco-bcos:web3sdk:2.0.0-rc1",
+        "org.fisco-bcos:web3sdk-weevent:1.2.5"
 ]
 
 List springwebsocket = [
         "org.springframework.boot:spring-boot-starter-websocket"
 ]
 
-List springmqtt=[
+List springmqtt = [
         "org.springframework.integration:spring-integration-mqtt"
 ]
 
@@ -43,9 +44,18 @@ List springboot = [
         "org.springframework.boot:spring-boot-starter-web"
 ]
 
+List springboottest = [
+        "org.springframework.boot:spring-boot-starter-test"
+]
+
 dependencies {
-    implementation(jsonrpc4j,redis,zookeeper,client_depends,web3sdk,springwebsocket,springmqtt,springboot)
+    implementation(springboot, springwebsocket, springmqtt)
+
+    implementation(jsonrpc4j, redis, zookeeper, client_depends, web3sdk)
+
     implementation project(path: ":weevent-client")
+
+    testImplementation(springboottest)
 }
 
 sourceSets {
