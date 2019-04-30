@@ -1,0 +1,34 @@
+{
+  "topicList": {
+    "method": "post",
+    "url": "weevent-governance/topic/getTopics"
+  },
+  "nodeList": {
+    "method": "post",
+    "url": "weevent-governance/topic/getNodes"
+  },
+  "openTopic": {
+    "method": "post",
+    "url": "weevent-governance/topic/open"
+  },
+  "getHost": {
+    "method": "post",
+    "url": "weevent-governance/topic/getHost"
+  },
+  "blockchaininfo": {
+    "method": "get",
+    "url": "weevent-governance/weevent/admin/blockchaininfo"
+  },
+  "topicState": {
+    "method": "post",
+    "url": "weevent-governance/weevent/rest/state"
+  },
+  "topicControl": {
+    "method": "get",
+    "url": "weevent-governance/weevent/admin/deploy_topic_control"
+  },
+  "subscription": {
+    "method": "get",
+    "url": "weevent-governance/weevent/admin/listSubscription"
+  }
+}

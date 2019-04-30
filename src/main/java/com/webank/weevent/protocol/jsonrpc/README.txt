@@ -1,1 +1,0 @@
-support JsonRpc2.0 access.
