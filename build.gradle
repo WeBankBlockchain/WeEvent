@@ -25,9 +25,8 @@ buildscript {
 
 allprojects {
     repositories {
-        maven {
-            url "http://maven.aliyun.com/nexus/content/groups/public/"
-        }
+        maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
+        maven { url "https://dl.bintray.com/ethereum/maven/" }
         mavenLocal()
         mavenCentral()
     }
@@ -63,6 +62,11 @@ List apache_commons = [
         "org.apache.commons:commons-lang3:3.5",
 ]
 
+List web3sdk = [
+        "org.fisco-bcos:web3sdk:2.0.0-rc1",
+        "org.fisco-bcos:web3sdk-weevent:1.2.5"
+]
+
 List jsonrpc4j = [
         //https://mvnrepository.com/artifact/com.github.briandilley.jsonrpc4j/jsonrpc4j
         "com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.3"
@@ -85,6 +89,8 @@ List client_depends = [
 ]
 
 dependencies {
+    annotationProcessor(lombok)
+
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
@@ -92,7 +98,7 @@ dependencies {
 
     implementation(lombok, logger, apache_commons)
     implementation(jsonrpc4j)
-    implementation("org.fisco-bcos:web3sdk:1.2.5")
+    implementation(web3sdk)
 
     // redis
     implementation(redis)
