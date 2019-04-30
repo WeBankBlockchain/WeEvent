@@ -6,54 +6,47 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
+
+/**
+ * WeEvent Config that auto loaded by spring ApplicationContext
+ *
+ * @author matthewliu
+ * @version 1.0
+ * @since 2019/1/28
+ */
 @Slf4j
 @Data
 @Component
 @PropertySource(value = "classpath:weevent.properties", encoding = "UTF-8")
 public class WeEventConfig {
-    @Value("${fisco.topic-controller.contract-address}")
-    private String topicControllerAddress;
-
-    @Value("${server.port}")
+    @Value("${server.port:8081}")
     private String serverPort;
 
-    @Value("server.ssl.enabled")
-    private String  sslEnable;
+    @Value("server.ssl.enabled:false")
+    private String sslEnable;
 
-    @Value("${ip.check.white-table}")
+    @Value("${ip.check.white-table:}")
     private String ipWhiteTable;
-    /**
-     * Consumer.EventDetectLoop's helper thread number.
-     */
+
+    @Value("${consumer.helper-thread-num:10}")
     private Integer consumerHelperThreadNum;
 
-    /**
-     * Idle time in FiscoBcosBroker4Consumer, ms.
-     */
+    @Value("${consumer.idle-time:1000}")
     private Integer consumerIdleTime;
 
-    /**
-     * Redis Server Ip
-     */
     @Value("${redis.server.ip:}")
     private String redisServerIp;
 
-    /**
-     * Redis Server Password
-     */
     @Value("${redis.server.password:}")
     private String redisServerPassword;
 
-    /**
-     * Redis Server Port
-     */
-    @Value("${redis.server.port:}")
+    @Value("${redis.server.port:6379}")
     private Integer redisServerPort;
-    
+
     @Value("${lru.cache.capacity:65536}")
     private Integer maxCapacity;
 
-    @Value("${restful.subscribe.callback.timeout}")
+    @Value("${restful.subscribe.callback.timeout:5000}")
     private Integer restful_timeout;
 
     @Value("${mqtt.broker.url:}")
@@ -83,31 +76,12 @@ public class WeEventConfig {
     @Value("${broker.zookeeper.timeout:3000}")
     private Integer zookeeperTimeout;
 
-
     @Value("${stomp.user.login:}")
     private String stompLogin;
 
     @Value("${stomp.user.passcode:}")
     private String stompPasscode;
 
-
     @Value("${stomp.heartbeats:30}")
     private Integer stompHeartbeats;
-
-
-    @Value("${fisco.consumer.helper-thread-num:10}")
-    public void setConsumerHelperThreadNum(Integer consumerHelperThreadNum) {
-        this.consumerHelperThreadNum = consumerHelperThreadNum;
-        if (this.consumerHelperThreadNum < 10) {
-            this.consumerHelperThreadNum = 10;
-        }
-    }
-
-    @Value("${fisco.consumer.idle-time:1000}")
-    public void setConsumerIdleTime(Integer consumerIdleTime) {
-        this.consumerIdleTime = consumerIdleTime;
-        if (this.consumerIdleTime < 1000) {
-            this.consumerIdleTime = 1000;
-        }
-    }
 }

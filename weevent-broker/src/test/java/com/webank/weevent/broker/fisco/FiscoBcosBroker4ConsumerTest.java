@@ -2,7 +2,6 @@ package com.webank.weevent.broker.fisco;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.JUnitTestBase;
@@ -259,30 +258,27 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
         this.received = 0;
         this.iConsumer.startConsumer();
-        try {
-            String result = this.iConsumer.subscribe(this.topicName, WeEvent.OFFSET_LAST, "sdk", new IConsumer.ConsumerListener() {
-                @Override
-                public void onEvent(String subscriptionId, WeEvent event) {
-                    log.info("********** {}", event);
+        String result = this.iConsumer.subscribe(this.topicName, WeEvent.OFFSET_LAST, "sdk", new IConsumer.ConsumerListener() {
+            @Override
+            public void onEvent(String subscriptionId, WeEvent event) {
+                log.info("********** {}", event);
 
-                    assertTrue(!event.getEventId().isEmpty());
-                    received++;
-                }
+                assertTrue(!event.getEventId().isEmpty());
+                received++;
+            }
 
-                @Override
-                public void onException(Throwable e) {
-                    log.error("onException", e);
-                    fail();
-                }
-            });
-            assertTrue(!result.isEmpty());
-        } catch (BrokerException e) {
+            @Override
+            public void onException(Throwable e) {
+                log.error("onException", e);
+                fail();
+            }
+        });
+        assertTrue(!result.isEmpty());
 
-        }
         log.info("lastEventId: {}", this.lastEventId);
         assertEquals(SendResult.SendResultStatus.SUCCESS,
                 this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes())).getStatus());
-        Thread.sleep(wait3s);
+        Thread.sleep(1000000);
         assertTrue(this.received > 0);
     }
 
