@@ -1,16 +1,13 @@
 package com.webank.weevent.protocol.rest;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.BrokerApplication;
-import com.webank.weevent.broker.fisco.dto.FiscoBlockChainInfo;
-import com.webank.weevent.broker.fisco.service.impl.BlockChainServiceImpl;
+import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
-import com.webank.weevent.broker.plugin.IConsumer;
 
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
@@ -31,7 +27,6 @@ import org.springframework.web.client.RestTemplate;
 @RestController
 @Slf4j
 public class AdminRest extends RestHA {
-    private BlockChainServiceImpl blockChainService;
     private IConsumer consumer;
 
     @Autowired
@@ -40,21 +35,6 @@ public class AdminRest extends RestHA {
     }
 
     public AdminRest() {
-        this.blockChainService = new BlockChainServiceImpl();
-    }
-
-    @RequestMapping(path = "/blockchaininfo", method = RequestMethod.GET)
-    public FiscoBlockChainInfo getBlockInfo() throws BrokerException, IOException {
-        FiscoBlockChainInfo fiscoBlockChainInfo = new FiscoBlockChainInfo();
-        fiscoBlockChainInfo.setBlockNumber(this.blockChainService.getBlockHeight());
-        fiscoBlockChainInfo.setNodeIdList(this.blockChainService.getNodeInfo().get("nodeId"));
-        fiscoBlockChainInfo.setNodeIpList(this.blockChainService.getNodeInfo().get("nodeIp"));
-        return fiscoBlockChainInfo;
-    }
-
-    @RequestMapping(path = "/deploy_topic_control", method = RequestMethod.GET)
-    public String deployTopicControl() throws BrokerException {
-        return this.blockChainService.deployTopicContracts();
     }
 
     @RequestMapping(path = "/listSubscription")
@@ -67,7 +47,7 @@ public class AdminRest extends RestHA {
         Map<String, Object> nodesInfo = new HashMap<>();
         try {
             List<String> ipList = this.masterJob.getClient().getChildren().forPath(BrokerApplication.weEventConfig.getZookeeperPath() + "/nodes");
-            log.info("zookeeper ip List:{}",ipList);
+            log.info("zookeeper ip List:{}", ipList);
             for (String nodeip : ipList) {
                 byte[] ip = this.masterJob.getZookeeperNode(BrokerApplication.weEventConfig.getZookeeperPath() + "/nodes" + "/" + nodeip);
                 SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();

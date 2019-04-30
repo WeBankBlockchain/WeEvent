@@ -20,14 +20,14 @@ import org.bouncycastle.util.encoders.Hex;
 @Slf4j
 public final class DataTypeUtils {
     /**
-     *  encode eventId
+     * encode eventId
      *
      * @param topicName
      * @param eventBlockNumber blockchain blocknumber
      * @param eventSeq eventSeq number
      * @return encodeString
      */
-    public static String encodeEventId(String topicName,int eventBlockNumber,int eventSeq){
+    public static String encodeEventId(String topicName, int eventBlockNumber, int eventSeq) {
         StringBuilder sb = new StringBuilder();
         sb.append(genTopicNameHash(topicName));
         sb.append(WeEventConstants.EVENT_ID_SPLIT_CHAR);
@@ -38,30 +38,30 @@ public final class DataTypeUtils {
     }
 
     /**
-     *  generate topicName hash
+     * generate topicName hash
      *
      * @param topicName
      * @return substring left 4bit hash data to hex encode
      */
-    public static String genTopicNameHash(String topicName){
+    public static String genTopicNameHash(String topicName) {
         String encodeData = "";
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             byte[] messageDigest = md.digest(topicName.getBytes());
             encodeData = new String(Hex.encode(messageDigest)).substring(0, WeEventConstants.TOPIC_NAME_ENCODE_LENGTH);
-        }catch (NoSuchAlgorithmException e){
-            log.error("NoSuchAlgorithmException:{}",e.getMessage());
+        } catch (NoSuchAlgorithmException e) {
+            log.error("NoSuchAlgorithmException:{}", e.getMessage());
         }
         return encodeData;
     }
 
     /**
-     *  decode eventId get seq
+     * decode eventId get seq
      *
      * @param eventId
      * @return seq
      */
-    public static Long decodeSeq(String eventId) throws BrokerException{
+    public static Long decodeSeq(String eventId) throws BrokerException {
         String[] tokens = eventId.split(WeEventConstants.EVENT_ID_SPLIT_CHAR);
         if (tokens.length != 3) {
             throw new BrokerException(ErrorCode.EVENT_ID_IS_ILLEGAL);
@@ -74,12 +74,12 @@ public final class DataTypeUtils {
     }
 
     /**
-     *  decode eventId get blockNumber
+     * decode eventId get blockNumber
      *
      * @param eventId
      * @return blockNumber
      */
-    public static Long decodeBlockNumber(String eventId) throws BrokerException{
+    public static Long decodeBlockNumber(String eventId) throws BrokerException {
         String[] tokens = eventId.split(WeEventConstants.EVENT_ID_SPLIT_CHAR);
         if (tokens.length != 3) {
             throw new BrokerException(ErrorCode.EVENT_ID_IS_ILLEGAL);
@@ -91,12 +91,12 @@ public final class DataTypeUtils {
     }
 
     /**
-     *  decode eventId get topicName hash
+     * decode eventId get topicName hash
      *
      * @param eventId
      * @return topicName hash
      */
-    public static String decodeTopicNameHash(String eventId) throws BrokerException{
+    public static String decodeTopicNameHash(String eventId) throws BrokerException {
         String[] tokens = eventId.split(WeEventConstants.EVENT_ID_SPLIT_CHAR);
         if (tokens.length != 3) {
             throw new BrokerException(ErrorCode.EVENT_ID_IS_ILLEGAL);
@@ -105,79 +105,6 @@ public final class DataTypeUtils {
             throw new BrokerException(ErrorCode.EVENT_ID_IS_ILLEGAL);
         }
         return tokens[0];
-    }
-    /**
-     * String to bytes 32.
-     *
-     * @param string the string
-     * @return the bytes 32
-     */
-    public static Bytes32 stringToBytes32(String string) {
-        byte[] byteValue = string.getBytes();
-        byte[] byteValueLen32 = new byte[32];
-        System.arraycopy(byteValue, 0, byteValueLen32, 0, byteValue.length);
-        return new Bytes32(byteValueLen32);
-    }
-
-    /**
-     * Uint 256 to int.
-     *
-     * @param value the value
-     * @return the int
-     */
-    public static int uint256ToInt(Uint256 value) {
-        return value.getValue().intValue();
-    }
-
-
-    /**
-     * Convert a Byte32 data to Java String. IMPORTANT NOTE: Byte to String is not 1:1 mapped. So -
-     * Know your data BEFORE do the actual transform! For example, Deximal Bytes, or ASCII Bytes are
-     * OK to be in Java String, but Encrypted Data, or raw Signature, are NOT OK.
-     *
-     * @param bytes32 the bytes 32
-     * @return String
-     */
-    public static String bytes32ToString(Bytes32 bytes32) {
-        byte[] strs = bytes32.getValue();
-        String str = new String(strs);
-        return str.trim();
-    }
-
-    /**
-     * Long to int 256.
-     *
-     * @param value the value
-     * @return the int 256
-     */
-    public static Uint256 longToUint256(long value) {
-        return new Uint256(value);
-    }
-
-    /**
-     * Int to Uint 256.
-     *
-     * @param value the value
-     * @return the Uint 256
-     */
-    public static Uint256 intToUint256(int value) {
-        return new Uint256(value);
-    }
-
-    /**
-     * Bytes 32 dynamic array to string array
-     *
-     * @param bytes32DynamicArray the bytes 32 dynamic array
-     * @return the string[]
-     */
-    public static String[] bytes32DynamicArrayToStringArrayWithoutTrim(
-            DynamicArray<Bytes32> bytes32DynamicArray) {
-        List<Bytes32> bytes32List = bytes32DynamicArray.getValue();
-        String[] stringArray = new String[bytes32List.size()];
-        for (int i = 0; i < bytes32List.size(); i++) {
-            stringArray[i] = bytes32ToString(bytes32List.get(i));
-        }
-        return stringArray;
     }
 
     /**

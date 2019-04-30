@@ -13,25 +13,26 @@ buildscript {
 allprojects {
     group 'com.webank.weevent'
     version '0.9.0'
+
     apply plugin: 'idea'
     apply plugin: "maven"
     apply plugin: "eclipse"
+
     repositories {
-        maven {
-            url "http://maven.aliyun.com/nexus/content/groups/public/"
-        }
+        maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
+        maven { url "https://dl.bintray.com/ethereum/maven/" }
         mavenLocal()
         mavenCentral()
     }
 }
 
-subprojects{
+subprojects {
     apply plugin: 'java'
-    //sdk verison
+    // jdk version
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
-    //encoding type
-    [compileJava,compileTestJava,javadoc]*.options*.encoding = 'UTF-8'
+    // encoding type
+    [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
 
     List lombok = [
             "org.projectlombok:lombok:1.16.14"
@@ -45,13 +46,13 @@ subprojects{
             "org.slf4j:slf4j-api:1.7.26",
             "org.apache.logging.log4j:log4j-slf4j-impl:2.11.2"
     ]
+
     List apache_commons = [
             "org.apache.commons:commons-lang3:3.6",
-            "org.apache.commons:commons-dbcp2:2.6.0",
             "org.apache.commons:commons-collections4:4.1"
     ]
 
     dependencies {
-        implementation(lombok, logger, apache_commons)
+        implementation(lombok, apache_commons, logger)
     }
 }

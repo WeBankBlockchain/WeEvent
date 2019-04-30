@@ -12,13 +12,11 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
 import com.webank.weevent.BrokerApplication;
-import com.webank.weevent.broker.plugin.IConsumer;
-import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.dto.SubscriptionInfo;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
-import com.webank.weevent.broker.fisco.util.SerializeUtils;
 import com.webank.weevent.broker.fisco.util.StoppableTask;
+import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
@@ -51,9 +49,10 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
      */
     private int idleTime;
 
-    public FiscoBcosBroker4Consumer() {
+    public FiscoBcosBroker4Consumer() throws BrokerException {
+        super();
+
         this.idleTime = BrokerApplication.weEventConfig.getConsumerIdleTime();
-        log.info("read from configuration, idleTime: {} ", this.idleTime);
     }
 
     /**
@@ -96,7 +95,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         List<WeEvent> blockEventsList = null;
         List<WeEvent> topicEventsList = new ArrayList<>();
         while (blockEventsList == null) {
-            blockEventsList = this.topicService.loop(blockNum);
+            blockEventsList = this.fiscoBcosDelegate.loop(blockNum, 1L);
             if (blockEventsList == null) {
                 idle();
             } else {
@@ -116,7 +115,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             throw new BrokerException(ErrorCode.TOPIC_MODEL_MAP_IS_NULL);
         }
 
-        Long blockHeight = topicService.getBlockHeight();
+        Long blockHeight = this.fiscoBcosDelegate.getBlockHeight(1L);
         for (Map.Entry<String, String> entry : topics.entrySet()) {
             ParamCheckUtils.validateTopicName(entry.getKey());
             // check topic exist
@@ -193,7 +192,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
         }
         if (!offset.equals(WeEvent.OFFSET_FIRST) && !offset.equals(WeEvent.OFFSET_LAST)) {
-            ParamCheckUtils.validateEventId(topic, offset, topicService.getBlockHeight());
+            ParamCheckUtils.validateEventId(topic, offset, this.fiscoBcosDelegate.getBlockHeight(1L));
         }
 
         log.info("subscribe topics: {} offset: {}", topic, offset);
@@ -211,7 +210,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
         }
         if (!offset.equals(WeEvent.OFFSET_FIRST) && !offset.equals(WeEvent.OFFSET_LAST)) {
-            ParamCheckUtils.validateEventId(topic, offset, topicService.getBlockHeight());
+            ParamCheckUtils.validateEventId(topic, offset, this.fiscoBcosDelegate.getBlockHeight(1L));
         }
 
         log.info("subscribe topics: {} offset: {} subscriptionId:{}", topic, offset, subscriptionId);
@@ -496,7 +495,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             try {
                 // -1 Meanings last block while first loop enter.
                 if (this.lastBlock == -1) {
-                    Long blockHeight = topicService.getBlockHeight();
+                    Long blockHeight = fiscoBcosDelegate.getBlockHeight(1L);
                     if (blockHeight <= 0) {
                         // Don't try too fast if net error.
                         idle();
@@ -511,7 +510,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                 Long currentBlock = this.lastBlock + 1;
                 // Cache may be expired, refresh it.
                 if (currentBlock > this.cachedBlockHeight) {
-                    Long blockHeight = topicService.getBlockHeight();
+                    Long blockHeight = fiscoBcosDelegate.getBlockHeight(1L);
                     if (blockHeight <= 0) {
                         // Don't try too fast if net error.
                         idle();
