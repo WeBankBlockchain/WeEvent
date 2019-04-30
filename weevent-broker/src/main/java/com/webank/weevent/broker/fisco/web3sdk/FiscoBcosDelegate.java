@@ -88,13 +88,13 @@ public class FiscoBcosDelegate {
             log.info("Notice: FISCO-BCOS‘s version is 1.x");
 
             FiscoBcos fiscoBcos = new FiscoBcos(this.fiscoConfig);
-            fiscoBcos.init(BrokerApplication.weEventConfig.getTopicControllerAddress());
+            fiscoBcos.init(this.fiscoConfig.getTopicControllerAddress());
 
             this.fiscoBcos = fiscoBcos;
         } else if (this.fiscoConfig.getVersion().startsWith("2.")) {
             log.info("Notice: FISCO-BCOS‘s version is 2.x");
 
-            String[] tokens = BrokerApplication.weEventConfig.getTopicControllerAddress().split(";");
+            String[] tokens = this.fiscoConfig.getTopicControllerAddress().split(";");
             for (String token : tokens) {
                 String[] groups = token.split(":");
                 if (groups.length != 2) {

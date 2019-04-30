@@ -49,7 +49,6 @@ subprojects {
 
     List apache_commons = [
             "org.apache.commons:commons-lang3:3.6",
-            "org.apache.commons:commons-dbcp2:2.6.0",
             "org.apache.commons:commons-collections4:4.1"
     ]
 

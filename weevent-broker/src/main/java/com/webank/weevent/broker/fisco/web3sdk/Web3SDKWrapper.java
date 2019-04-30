@@ -79,7 +79,7 @@ public class Web3SDKWrapper {
             channelConnections.setKeystorePassWord(fiscoConfig.getV1KeyStorePassword());
             channelConnections.setConnectionsStr(Arrays.asList(fiscoConfig.getNodes().split(";")));
             service.setAllChannelConnections(new ConcurrentHashMap<String, ChannelConnections>() {{
-                put("WeEvent", channelConnections);
+                put(fiscoConfig.getOrgId(), channelConnections);
             }});
 
             // thread pool

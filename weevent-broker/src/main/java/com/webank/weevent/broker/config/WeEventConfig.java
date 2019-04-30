@@ -19,9 +19,6 @@ import org.springframework.stereotype.Component;
 @Component
 @PropertySource(value = "classpath:weevent.properties", encoding = "UTF-8")
 public class WeEventConfig {
-    @Value("${topic-controller.address}")
-    private String topicControllerAddress;
-
     @Value("${server.port:8081}")
     private String serverPort;
 

@@ -44,12 +44,18 @@ List springboot = [
         "org.springframework.boot:spring-boot-starter-web"
 ]
 
+List springboottest = [
+        "org.springframework.boot:spring-boot-starter-test"
+]
+
 dependencies {
     implementation(springboot, springwebsocket, springmqtt)
 
     implementation(jsonrpc4j, redis, zookeeper, client_depends, web3sdk)
 
     implementation project(path: ":weevent-client")
+
+    testImplementation(springboottest)
 }
 
 sourceSets {
