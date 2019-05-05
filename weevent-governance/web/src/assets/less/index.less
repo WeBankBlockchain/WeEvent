@@ -182,11 +182,24 @@ html,body,#app{
 }
 
 .headerBar{
-  .el-dropdown{
-    float:right;
-    color:white;
-    font-size: 14px;
-    margin-top:20px;
+  display:flex;
+  height:60px;
+  line-height: 60px;
+  justify-content: space-between;
+
+  .breadcrumb{
+    display:flex;
+    align-items: center;
+    .el-breadcrumb{
+      margin-left:40px;
+    }
+  }
+  .system{
+    display: flex;
+    span{
+      color:#8993a2;
+      margin-right:20px;  
+    }
   }
 }
 
