@@ -1,0 +1,14 @@
+sudo: false
+dist: trusty
+
+# safelist
+branches:
+  only:
+  - master
+ 
+ language: java
+jdk:
+  - oraclejdk8
+  
+ #before_install:
+ # - gradle wrapper
