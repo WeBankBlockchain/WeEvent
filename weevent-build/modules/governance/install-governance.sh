@@ -5,17 +5,8 @@ function governance_setup() {
     
     #create governance list
     mkdir -p $out_path
-    rm -rf $out_path/*
-    mkdir $out_path/conf
-    mkdir $out_path/apps
-    mkdir $out_path/logs
-    mkdir $out_path/html
-    cp $apps_path/* $out_path/apps/
-    cp -r $conf_path/* $out_path/conf/
-    cp ./governance.sh $out_path/
-    cp ./check-service.sh $out_path/
-    cp ./init-governance.sh $out_path/
-    cp -r ./html/*  $out_path/html/
+    cp -r ./* $out_path/
+    rm -f $out_path/install-governance.sh
     
       
     if [[ -z $server_port ]];
