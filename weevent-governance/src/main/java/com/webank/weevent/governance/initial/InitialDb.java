@@ -26,10 +26,10 @@ public class InitialDb{
                 Map map =(Map)yaml.load(new FileInputStream(url.getFile()));
                 Map springMap = (Map) map.get("spring");
                 Map dataSourceMap = (Map) springMap.get("datasource");
-                goalUrl = (String) dataSourceMap.get("url");
+                goalUrl = dataSourceMap.get("url").toString();
                 user = dataSourceMap.get("username").toString();
                 password = dataSourceMap.get("password").toString();
-                driverName = (String) dataSourceMap.get("driver-class-name");
+                driverName = dataSourceMap.get("driver-class-name").toString();
             }
             
         } catch (Exception e) {
