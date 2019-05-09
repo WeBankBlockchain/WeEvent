@@ -27,8 +27,8 @@ public class InitialDb{
                 Map springMap = (Map) map.get("spring");
                 Map dataSourceMap = (Map) springMap.get("datasource");
                 goalUrl = (String) dataSourceMap.get("url");
-                user = (String) dataSourceMap.get("username");
-                password = (String) dataSourceMap.get("password");
+                user = dataSourceMap.get("username").toString();
+                password = dataSourceMap.get("password").toString();
                 driverName = (String) dataSourceMap.get("driver-class-name");
             }
             
@@ -41,7 +41,8 @@ public class InitialDb{
         int first = goalUrl.lastIndexOf("/");
         int end = goalUrl.lastIndexOf("?");
         String dbName = goalUrl.substring(first+1, end);
-        String defaultUrl = goalUrl.replace(dbName, "mysql");
+        //get mysql default url like jdbc:mysql://127.0.0.1:3306
+        String defaultUrl = goalUrl.substring(0,first);
         
         Class.forName(driverName);
         Connection conn = DriverManager.getConnection(defaultUrl, user, password);  
