@@ -1,10 +1,15 @@
 <template>
 <div class="headerBar">
-  <img src="../assets/image/weEvent.png" alt="">
+     <img src="../assets/image/weEvent.png" alt="">
 </div>
 </template>
 <script>
 export default{
+  data () {
+    return {
+      activeName: 'WeEvent'
+    }
+  }
 }
 </script>
 <style scoped>
