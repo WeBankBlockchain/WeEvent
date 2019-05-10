@@ -42,7 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
-public class HttpForwardFilter implements Filter{
+public class ForwardBrokerFilter implements Filter{
 	
 	@Autowired
     BrokerService brokerService;
