@@ -11,7 +11,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
-import com.webank.weevent.governance.filter.HttpForwardFilter;
+import com.webank.weevent.governance.filter.ForwardWebaseFilter;
+import com.webank.weevent.governance.filter.ForwardBrokerFilter;
 import com.webank.weevent.governance.filter.XssFilter;
 
 @Configuration
@@ -32,7 +33,10 @@ public class WeeventConfiguration {
     private String weeventUrl;
     
     @Autowired
-    private HttpForwardFilter httpForwardFilter;
+    private ForwardBrokerFilter forwardBrokerFilter;
+    
+    @Autowired
+    private ForwardWebaseFilter forwardWebaseFilter;
      
     @Bean
     public InfluxDBConnect getInfluxDBConnect(){
@@ -76,12 +80,22 @@ public class WeeventConfiguration {
     }
     
     @Bean
-    public FilterRegistrationBean<HttpForwardFilter> httpForwardFilterRegistrationBean() {
-        FilterRegistrationBean<HttpForwardFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(httpForwardFilter);
+    public FilterRegistrationBean<ForwardBrokerFilter> httpForwardFilterRegistrationBean() {
+        FilterRegistrationBean<ForwardBrokerFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+        filterRegistrationBean.setFilter(forwardBrokerFilter);
         filterRegistrationBean.setOrder(2);
         filterRegistrationBean.setEnabled(true);
         filterRegistrationBean.addUrlPatterns("/weevent-governance/weevent/*");
+        return filterRegistrationBean;
+    }
+    
+    @Bean
+    public FilterRegistrationBean<ForwardWebaseFilter> forwardWebaseFilterRegistrationBean() {
+        FilterRegistrationBean<ForwardWebaseFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+        filterRegistrationBean.setFilter(forwardWebaseFilter);
+        filterRegistrationBean.setOrder(3);
+        filterRegistrationBean.setEnabled(true);
+        filterRegistrationBean.addUrlPatterns("/weevent-governance/webase-node-mgr/*");
         return filterRegistrationBean;
     }
     
