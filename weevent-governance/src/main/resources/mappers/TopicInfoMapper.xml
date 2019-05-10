@@ -9,6 +9,17 @@
 			AND topic_name = #{topicName}
 		</if>
 	</select>
+	
+	<select id="getCreater" resultType="java.lang.String">
+		select creater
+		from t_topic where 1=1
+		<if test="topicName != null and topicName !=''">
+			AND topic_name = #{topicName}
+		</if>
+		<if test="id != null">
+			AND broker_id = #{id}
+		</if>
+	</select>
 
 	<!-- <insert id="openTopic" > insert into topic_info(topic_name,creater) 
 		values( #{topicName}, #{creater} ) </insert> -->
@@ -30,6 +41,26 @@
 		</if>
 		<if test="count==0">
 			insert into topic_info(topic_name,creater) values (#{topicName},#{creater})
+		</if>
+	</insert>
+	
+	<insert id="openBrokeTopic">
+		<selectKey keyProperty="count" resultType="int" order="BEFORE">
+			select count(*) from t_topic where broker_id=#{id} and topic_name = #{topicName}
+		</selectKey>
+		<if test="count > 0">
+			update t_topic
+			<set>
+				<if test="creater != null">
+					creater= #{creater} 
+				</if>
+			</set>
+			<where>
+				topic_name = #{topicName} and broker_id=#{id}
+			</where>
+		</if>
+		<if test="count==0">
+			insert into t_topic(broker_id,topic_name,creater) values (#{id},#{topicName},#{creater})
 		</if>
 	</insert>
 	

@@ -1,0 +1,22 @@
+package com.webank.weevent.governance.entity;
+
+import java.util.Date;
+
+import lombok.Data;
+import lombok.ToString;
+
+/**
+ * Broker class
+ *
+ * @since 2019/04/28
+ */
+@Data
+@ToString
+public class Broker {
+
+	private Integer id;
+	private String name;
+	private String brokerUrl;
+	private String webaseUrl;
+	private Date lastUpdate;
+}

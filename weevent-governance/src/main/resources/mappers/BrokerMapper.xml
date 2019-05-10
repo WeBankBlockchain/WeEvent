@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.webank.weevent.governance.mapper.BrokerMapper">
+
+	<select id="getBroker" parameterType="java.lang.Integer" resultType="com.webank.weevent.governance.entity.Broker">
+		select id ,name,broker_url brokerUrl,webase_url webaseUrl,last_update lastUpdate from t_broker where id=#{id}
+	</select>
+	
+	<select id="getBrokers" resultType="com.webank.weevent.governance.entity.Broker">
+		select id ,name,broker_url brokerUrl,webase_url webaseUrl,last_update lastUpdate from t_broker
+	</select>
+	
+	<insert id="addBroker" parameterType="com.webank.weevent.governance.entity.Broker">
+		insert into t_broker(name,broker_url,webase_Url,last_update) values(#{name},#{brokerUrl},#{webaseUrl},#{lastUpdate, jdbcType=TIMESTAMP})
+	</insert>
+	
+	<update id="updateBroker" parameterType="com.webank.weevent.governance.entity.Broker">
+		update t_broker set name=#{name},broker_url=#{brokerUrl},webase_url=#{webaseUrl},last_update=#{lastUpdate, jdbcType=TIMESTAMP} where id=#{id}
+	</update>
+	
+	<delete id="deleteBroker" parameterType="java.lang.Integer">
+		delete from t_broker where id=#{id}
+	</delete>
+	
+</mapper>

@@ -8,7 +8,11 @@ public interface TopicInfoMapper {
 
     //get creater by topicName
     String getCreaterByName(@Param(value = "topicName") String topicName);
+    
+    String getCreater(@Param("id")Integer id,@Param("topicName")String topicName);
 
     //save creater into database
-    Boolean openTopic(@Param(value = "topicName") String topicName, @Param(value = "creater") String creater);
+    Boolean openTopic(@Param(value = "topicName")String topicName, @Param(value = "creater") String creater);
+
+	Boolean openBrokeTopic(@Param("id")Integer id, @Param("topicName")String topicName, @Param("creater")String creater);
 }

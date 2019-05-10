@@ -1,5 +1,6 @@
 package com.webank.weevent.governance.configuration;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -10,6 +11,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
+import com.webank.weevent.governance.filter.HttpForwardFilter;
 import com.webank.weevent.governance.filter.XssFilter;
 
 @Configuration
@@ -28,6 +30,9 @@ public class WeeventConfiguration {
     
     @Value("${weevent.url}")
     private String weeventUrl;
+    
+    @Autowired
+    private HttpForwardFilter httpForwardFilter;
      
     @Bean
     public InfluxDBConnect getInfluxDBConnect(){
@@ -62,6 +67,23 @@ public class WeeventConfiguration {
         return factory;
     }
     
+    @Bean
+    public ServletRegistrationBean<DispatcherServlet> weeventGovernanceServletBean(WebApplicationContext wac) {
+        DispatcherServlet ds = new DispatcherServlet(wac);
+        ServletRegistrationBean<DispatcherServlet> bean = new ServletRegistrationBean<>(ds, "/weevent-governance/*");
+        bean.setName("weeventGovernance");
+        return bean;
+    }
+    
+    @Bean
+    public FilterRegistrationBean<HttpForwardFilter> httpForwardFilterRegistrationBean() {
+        FilterRegistrationBean<HttpForwardFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+        filterRegistrationBean.setFilter(httpForwardFilter);
+        filterRegistrationBean.setOrder(2);
+        filterRegistrationBean.setEnabled(true);
+        filterRegistrationBean.addUrlPatterns("/weevent-governance/weevent/*");
+        return filterRegistrationBean;
+    }
     
     @Bean
     public FilterRegistrationBean<XssFilter> xssFilterRegistrationBean() {
@@ -73,12 +95,6 @@ public class WeeventConfiguration {
         return filterRegistrationBean;
     }
     
-    @Bean
-    public ServletRegistrationBean weeventGovernanceServletBean(WebApplicationContext wac) {
-        DispatcherServlet ds = new DispatcherServlet(wac);
-        ServletRegistrationBean bean = new ServletRegistrationBean(ds, "/weevent-governance/*");
-        bean.setName("weeventGovernance");
-        return bean;
-    }
+    
     
 }
