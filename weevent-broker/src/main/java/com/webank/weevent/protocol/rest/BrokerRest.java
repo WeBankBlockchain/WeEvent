@@ -1,5 +1,7 @@
 package com.webank.weevent.protocol.rest;
 
+import java.util.Enumeration;
+
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
@@ -10,6 +12,7 @@ import com.webank.weevent.sdk.WeEvent;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.runners.Parameterized;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -44,9 +47,13 @@ public class BrokerRest extends RestHA implements IBrokerRpc {
     @Override
     @RequestMapping(path = "/publish")
     public SendResult publish(@RequestParam(name = "topic") String topic,
-                              @RequestParam(name = "content") byte[] content) throws BrokerException {
+                              @RequestParam(name = "content") byte[] content,
+                              @RequestParam(name = "extensions",required = false) String extensions) throws BrokerException {
         log.info("topic: {}, content.length: {}", topic, content.length);
-        WeEvent event = new WeEvent(topic, content);
+        if (extensions == null){
+            extensions = "";
+        }
+        WeEvent event = new WeEvent(topic, content, extensions);
         return this.producer.publish(event);
     }
 

@@ -59,8 +59,9 @@ public class BrokerRpc implements IBrokerRpc {
 
     @Override
     public SendResult publish(@JsonRpcParam(value = "topic") String topic,
-                              @JsonRpcParam(value = "content") byte[] content) throws BrokerException {
-        return this.producer.publish(new WeEvent(topic, content));
+                              @JsonRpcParam(value = "content") byte[] content,
+                              @JsonRpcParam(value = "extensions") String extensions) throws BrokerException {
+        return this.producer.publish(new WeEvent(topic, content,extensions));
     }
 
     @Override

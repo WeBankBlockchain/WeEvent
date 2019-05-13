@@ -302,8 +302,8 @@ public class Web3SDK2Wrapper {
                 TransactionReceipt receipt = transactionReceipt.getTransactionReceipt().get();
                 List<Topic.LogWeEventEventResponse> logWeEventEvents = Web3SDK2Wrapper.receipt2LogWeEventEventResponse(web3j, credentials, receipt);
                 for (Topic.LogWeEventEventResponse logEvent : logWeEventEvents) {
-                    String topicName = Web3SDK2Wrapper.bytes32ToString(new Bytes32(logEvent.topicName));
-                    WeEvent event = new WeEvent(topicName, logEvent.eventContent.getBytes(StandardCharsets.UTF_8));
+                    String topicName = logEvent.topicName;
+                    WeEvent event = new WeEvent(topicName, logEvent.eventContent.getBytes(StandardCharsets.UTF_8),logEvent.extensions);
                     event.setEventId(DataTypeUtils.encodeEventId(topicName,
                             logEvent.eventBlockNumer.intValue(),
                             logEvent.eventSeq.intValue()));

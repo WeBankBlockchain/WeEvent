@@ -41,7 +41,7 @@ public class JavaSDK {
 
             // publish event
             for (int i = 0; i < 10; i++) {
-                client.publish(topicName, ("hello weevent: " + i).getBytes(StandardCharsets.UTF_8));
+                client.publish(topicName, ("hello weevent: " + i).getBytes(StandardCharsets.UTF_8),"");
             }
 
             // unSubscribe topic

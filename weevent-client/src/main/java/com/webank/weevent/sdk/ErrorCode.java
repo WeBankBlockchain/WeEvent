@@ -13,7 +13,7 @@ public enum ErrorCode {
 
     TOPIC_NOT_EXIST(100101, "topic not exist"),
 
-    TOPIC_EXCEED_MAX_LENGTH(100102, "topic name exceeds max length[32 bytes]"),
+    TOPIC_EXCEED_MAX_LENGTH(100102, "topic name exceeds max length[64 bytes]"),
 
     TOPIC_IS_BLANK(100103, "topic name is blank"),
 
@@ -34,6 +34,8 @@ public enum ErrorCode {
     SEND_CALL_BACK_IS_NULL(100202, "send call back instance is null"),
 
     EVENT_CONTENT_CHARSET(100203, "event content must be utf-8"),
+
+    EVENT_EXTENSIONS_EXCEEDS_MAX_LENGTH(100204, "event extensions exceeds max length[1k bytes]"),
 
     EVENT_ID_IS_BLANK(100300, "eventId is blank"),
 

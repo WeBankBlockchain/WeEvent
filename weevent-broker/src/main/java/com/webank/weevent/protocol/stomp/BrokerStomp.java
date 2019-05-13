@@ -102,11 +102,15 @@ public class BrokerStomp extends TextWebSocketHandler {
                     frameType = "HEARTBEAT";
                 }
             }
-            String simpDestination = "";
+
             Object simpDestinationObj = msg.getHeaders().get("simpDestination");
-            if (simpDestinationObj != null) {
-                simpDestination = simpDestinationObj.toString();
+            Object extensionsObj = msg.getHeaders().get("extensions");
+            if (simpDestinationObj == null || extensionsObj == null) {
+                log.error("unknown simpDestination or extensions");
+                return;
             }
+            String simpDestination = simpDestinationObj.toString();
+            String extensions = extensionsObj.toString();
 
             String headerReceiptIdStr = "";
             String headerIdStr = "";
@@ -167,7 +171,7 @@ public class BrokerStomp extends TextWebSocketHandler {
                     break;
 
                 case "SEND":
-                    String eventId = handleSend(msg, simpDestination);
+                    String eventId = handleSend(msg, simpDestination, extensions);
                     if (eventId.isEmpty()) {
                         command = StompCommand.ERROR;
                     } else {
@@ -343,7 +347,7 @@ public class BrokerStomp extends TextWebSocketHandler {
      * @param simpDestination topic name
      * @return String return event id if publish ok, else ""
      */
-    private String handleSend(Message<byte[]> msg, String simpDestination) {
+    private String handleSend(Message<byte[]> msg, String simpDestination, String extensions) {
         try {
             if (!this.iproducer.open(simpDestination)) {
                 log.error("producer open failed");
@@ -353,8 +357,7 @@ public class BrokerStomp extends TextWebSocketHandler {
                 log.error("producer start failed");
                 return "";
             }
-
-            SendResult sendResult = this.iproducer.publish(new WeEvent(simpDestination, msg.getPayload()));
+            SendResult sendResult = this.iproducer.publish(new WeEvent(simpDestination, msg.getPayload(), extensions));
             log.info("publish result, {}", sendResult);
             if (sendResult.getStatus() != SendResult.SendResultStatus.SUCCESS) {
                 log.error("producer publish failed");

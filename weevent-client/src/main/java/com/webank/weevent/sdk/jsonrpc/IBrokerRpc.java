@@ -21,7 +21,8 @@ import com.googlecode.jsonrpc4j.JsonRpcService;
 public interface IBrokerRpc {
     // Interface for producer.
     SendResult publish(@JsonRpcParam(value = "topic") String topic,
-                       @JsonRpcParam(value = "content") byte[] content) throws BrokerException;
+                       @JsonRpcParam(value = "content") byte[] content,
+                       @JsonRpcParam(value = "extensions") String extensions) throws BrokerException;
 
     // Interface for consumer.
     String subscribe(@JsonRpcParam(value = "topic") String topic,

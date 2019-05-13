@@ -32,7 +32,7 @@ public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IPr
 
         ParamCheckUtils.validateEvent(event);
 
-        SendResult sendResult = this.fiscoBcosDelegate.publishEvent(event.getTopic(), new String(event.getContent(), StandardCharsets.UTF_8), 1L);
+        SendResult sendResult = this.fiscoBcosDelegate.publishEvent(event.getTopic(), new String(event.getContent(), StandardCharsets.UTF_8),event.getExtensions(), 1L);
         log.info("publish success: {}", sendResult);
         return sendResult;
     }
@@ -45,6 +45,6 @@ public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IPr
         ParamCheckUtils.validateSendCallBackNotNull(callBack);
 
         log.debug("publish with callback input param WeEvent: {}", event);
-        this.fiscoBcosDelegate.publishEvent(event.getTopic(), new String(event.getContent(), StandardCharsets.UTF_8), callBack, 1L);
+        this.fiscoBcosDelegate.publishEvent(event.getTopic(), new String(event.getContent(), StandardCharsets.UTF_8),event.getExtensions(), callBack, 1L);
     }
 }

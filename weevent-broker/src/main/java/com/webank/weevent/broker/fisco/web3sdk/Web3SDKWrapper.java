@@ -77,7 +77,11 @@ public class Web3SDKWrapper {
             channelConnections.setClientCertPassWord(fiscoConfig.getV1ClientCrtPassword());
             channelConnections.setClientKeystorePath("classpath:" + fiscoConfig.getV1ClientKeyStorePath());
             channelConnections.setKeystorePassWord(fiscoConfig.getV1KeyStorePassword());
-            channelConnections.setConnectionsStr(Arrays.asList(fiscoConfig.getNodes().split(";")));
+            List<String> nodeList = Arrays.asList(fiscoConfig.getNodes().split(";"));
+            for (int i = 0; i < nodeList.size(); i++){
+                nodeList.set(i,fiscoConfig.getOrgId() + "@" + nodeList.get(i));
+            }
+            channelConnections.setConnectionsStr(nodeList);
             service.setAllChannelConnections(new ConcurrentHashMap<String, ChannelConnections>() {{
                 put(fiscoConfig.getOrgId(), channelConnections);
             }});
@@ -266,8 +270,8 @@ public class Web3SDKWrapper {
                 TransactionReceipt receipt = transactionReceipt.getTransactionReceipt().get();
                 List<Topic.LogWeEventEventResponse> logWeEventEvents = Topic.getLogWeEventEvents(receipt);
                 for (Topic.LogWeEventEventResponse logEvent : logWeEventEvents) {
-                    String topicName = bytes32ToString(logEvent.topicName);
-                    WeEvent event = new WeEvent(topicName, logEvent.eventContent.getValue().getBytes(StandardCharsets.UTF_8));
+                    String topicName = logEvent.topicName.toString();
+                    WeEvent event = new WeEvent(topicName, logEvent.eventContent.getValue().getBytes(StandardCharsets.UTF_8),logEvent.extensions.toString());
                     event.setEventId(DataTypeUtils.encodeEventId(topicName, uint256ToInt(logEvent.eventBlockNumer), uint256ToInt(logEvent.eventSeq)));
                     log.debug("get a event from fisco-bcos: {}", event);
                     events.add(event);

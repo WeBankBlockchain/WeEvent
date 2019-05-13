@@ -4,20 +4,23 @@ contract Topic {
     uint _sequence_start = 1;
 
     event LogWeEvent(
-        bytes32 topicName,
+        string topicName,
         uint eventSeq,
         uint eventBlockNumer,
-        string eventContent
+        string eventContent,
+        string extensions
     );
 
     function publishWeEvent(
-        bytes32 topicName,
-        string eventContent
+        string topicName,
+        string eventContent,
+        string extensions
     )
         public
-        returns (bool) 
+        returns (bool)
     {
-        LogWeEvent(topicName, _sequence_start++, block.number, eventContent);
+
+        LogWeEvent(topicName, _sequence_start++, block.number, eventContent,extensions);
         return true;
     }
 }

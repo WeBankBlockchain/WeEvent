@@ -35,6 +35,11 @@ public class WeEvent implements Serializable {
     private byte[] content;
 
     /**
+     * json format extension data, everything as you like.
+     * 1k limit.
+     */
+    private String extensions;
+    /**
      * Event id in block chain, it's unique under one topic.
      * It is assigned by system default.
      */
@@ -52,9 +57,10 @@ public class WeEvent implements Serializable {
      * @param topic the topic
      * @param content the content, character utf8
      */
-    public WeEvent(String topic, byte[] content) {
+    public WeEvent(String topic, byte[] content, String extensions) {
         this.topic = topic;
         this.content = content;
+        this.extensions = extensions;
     }
 
     @Override

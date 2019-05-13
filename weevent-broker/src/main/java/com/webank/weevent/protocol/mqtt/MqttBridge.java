@@ -90,19 +90,21 @@ public class MqttBridge implements MessageHandler {
     @Override
     public void handleMessage(Message<?> message) throws MessagingException {
         MessageHeaders handlers = message.getHeaders();
-        Object key = handlers.get("mqtt_receivedTopic");
-        if (key == null) {
-            log.error("unknown mqtt_receivedTopic");
+        Object topicKey = handlers.get("mqtt_receivedTopic");
+        Object extensionsKey = handlers.get("mqtt_extensions");
+        if (topicKey == null || extensionsKey == null) {
+            log.error("unknown mqtt_receivedTopic or mqtt_extensions");
             return;
         }
 
-        String topic = key.toString();
-        log.info("mqtt input message, id: {} topic: {}", handlers.getId(), topic);
+        String topic = topicKey.toString();
+        String extensions = extensionsKey.toString();
+        log.info("mqtt input message, id: {} topic: {} extensions: {}", handlers.getId(), topic, extensions);
 
         String payload = (String) message.getPayload();
 
         // publish to event broker
-        WeEvent weEvent = new WeEvent(topic, payload.getBytes(StandardCharsets.UTF_8));
+        WeEvent weEvent = new WeEvent(topic, payload.getBytes(StandardCharsets.UTF_8), extensions);
 
         try {
             SendResult sendResult = this.producer.publish(weEvent);

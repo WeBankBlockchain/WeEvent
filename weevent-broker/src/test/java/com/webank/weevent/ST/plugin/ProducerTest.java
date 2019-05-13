@@ -38,7 +38,7 @@ public class ProducerTest extends JUnitTestBase {
             iProducer = IProducer.build();
             Assert.assertTrue(iProducer != null);
             Assert.assertTrue(iProducer.open(this.topicName));
-            SendResult result = iProducer.publish(new WeEvent(this.topicName, "你好吗？".getBytes()));
+            SendResult result = iProducer.publish(new WeEvent(this.topicName, "你好吗？".getBytes(),""));
             eventId = result.getEventId();
         } catch (BrokerException e) {
             log.error("test method before error: ", e);
@@ -754,7 +754,7 @@ public class ProducerTest extends JUnitTestBase {
     @Test
     public void testPublishEventCharset1() {
         try {
-            SendResult dto = iProducer.publish(new WeEvent(this.topicName, "中文消息.".getBytes()));
+            SendResult dto = iProducer.publish(new WeEvent(this.topicName, "中文消息.".getBytes(),""));
             assertEquals(SendResult.SendResultStatus.SUCCESS, dto.getStatus());
         } catch (BrokerException e) {
             log.error("method PublishEventCharset error:", e);
@@ -768,7 +768,7 @@ public class ProducerTest extends JUnitTestBase {
     public void testPublishEventCharset2() {
         try {
             String topicNotExists = "fsgdsggdgerer";
-            SendResult dto = iProducer.publish(new WeEvent(topicNotExists, "中文消息.".getBytes()));
+            SendResult dto = iProducer.publish(new WeEvent(topicNotExists, "中文消息.".getBytes(),""));
         } catch (BrokerException e) {
             Assert.assertNotNull(e);
             assertEquals(e.getCode(), ErrorCode.TOPIC_NOT_EXIST.getCode());
@@ -782,7 +782,7 @@ public class ProducerTest extends JUnitTestBase {
     @Test
     public void testPublishEventCharset3() {
         try {
-            SendResult dto = iProducer.publish(new WeEvent("", "中文消息.".getBytes()));
+            SendResult dto = iProducer.publish(new WeEvent("", "中文消息.".getBytes(),""));
         } catch (BrokerException e) {
             Assert.assertNotNull(e);
             assertEquals(e.getCode(), ErrorCode.TOPIC_IS_BLANK.getCode());
@@ -796,7 +796,7 @@ public class ProducerTest extends JUnitTestBase {
     @Test
     public void testPublishEventCharset4() {
         try {
-            SendResult dto = iProducer.publish(new WeEvent(null, "中文消息.".getBytes()));
+            SendResult dto = iProducer.publish(new WeEvent(null, "中文消息.".getBytes(),""));
         } catch (BrokerException e) {
             Assert.assertNotNull(e);
             assertEquals(e.getCode(), ErrorCode.TOPIC_IS_BLANK.getCode());
@@ -812,7 +812,7 @@ public class ProducerTest extends JUnitTestBase {
     public void testPublishEventCharset5() {
         try {
             String topicNotExists = "fsgdsggdgererqwertyuioplkjhgfdsazx";
-            SendResult dto = iProducer.publish(new WeEvent(topicNotExists, "中文消息.".getBytes()));
+            SendResult dto = iProducer.publish(new WeEvent(topicNotExists, "中文消息.".getBytes(),""));
         } catch (BrokerException e) {
             Assert.assertNotNull(e);
             assertEquals(e.getCode(), ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode());
@@ -828,7 +828,7 @@ public class ProducerTest extends JUnitTestBase {
 
         try {
             byte[] bytes = null;
-            SendResult dto = iProducer.publish(new WeEvent(this.topicName, bytes));
+            SendResult dto = iProducer.publish(new WeEvent(this.topicName, bytes,""));
         } catch (BrokerException e) {
             log.error("method PublishEventCharset error:", e);
             assertEquals(e.getCode(), ErrorCode.EVENT_CONTENT_IS_BLANK.getCode());
@@ -843,7 +843,7 @@ public class ProducerTest extends JUnitTestBase {
 
         try {
             byte[] bytes = "".getBytes();
-            SendResult dto = iProducer.publish(new WeEvent(this.topicName, bytes));
+            SendResult dto = iProducer.publish(new WeEvent(this.topicName, bytes,""));
             Assert.assertNull(dto);
         } catch (BrokerException e) {
             log.error("method PublishEventCharset error:", e);
@@ -861,7 +861,7 @@ public class ProducerTest extends JUnitTestBase {
         try {
             String illegalTopic = new String(charStr);
             byte[] bytes = "helloworld".getBytes();
-            SendResult dto = iProducer.publish(new WeEvent(illegalTopic, bytes));
+            SendResult dto = iProducer.publish(new WeEvent(illegalTopic, bytes,""));
             Assert.assertNull(dto);
         } catch (BrokerException e) {
             log.error("producer close error:", e);
@@ -877,7 +877,7 @@ public class ProducerTest extends JUnitTestBase {
 
         try {
             byte[] bytes = "".getBytes();
-            SendResult dto = iProducer.publish(new WeEvent("中国", bytes));
+            SendResult dto = iProducer.publish(new WeEvent("中国", bytes,""));
             Assert.assertNull(dto);
         } catch (BrokerException e) {
             log.error("producer close error:", e);
@@ -1011,7 +1011,7 @@ public class ProducerTest extends JUnitTestBase {
     @Test
     public void testPublishForEventCallBack1() throws InterruptedException {
         try {
-            iProducer.publish(new WeEvent(this.topicName, "中文消息.".getBytes()), new IProducer.SendCallBack() {
+            iProducer.publish(new WeEvent(this.topicName, "中文消息.".getBytes(),""), new IProducer.SendCallBack() {
                 @Override
                 public void onComplete(SendResult sendResult) {
                     assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
@@ -1036,7 +1036,7 @@ public class ProducerTest extends JUnitTestBase {
     public void testPublishForEventCallBack2() throws InterruptedException {
         try {
             String notExistsTopic = "sglsjhglsj";
-            iProducer.publish(new WeEvent(notExistsTopic, "hello world.".getBytes()), new IProducer.SendCallBack() {
+            iProducer.publish(new WeEvent(notExistsTopic, "hello world.".getBytes(),""), new IProducer.SendCallBack() {
                 @Override
                 public void onComplete(SendResult sendResult) {
                     assertEquals(SendResult.SendResultStatus.ERROR, sendResult.getStatus());
@@ -1062,7 +1062,7 @@ public class ProducerTest extends JUnitTestBase {
     public void testPublishForEventCallBack3() throws InterruptedException {
         try {
             String notExistsTopic = "sglsjhglsjqwertyuioplkjhgfdsazxcvbnm";
-            iProducer.publish(new WeEvent(notExistsTopic, "hello world.".getBytes()), new IProducer.SendCallBack() {
+            iProducer.publish(new WeEvent(notExistsTopic, "hello world.".getBytes(),""), new IProducer.SendCallBack() {
                 @Override
                 public void onComplete(SendResult sendResult) {
                 }
@@ -1087,7 +1087,7 @@ public class ProducerTest extends JUnitTestBase {
     @Test
     public void testPublishForEventCallBack4() throws InterruptedException {
         try {
-            iProducer.publish(new WeEvent(null, "hello world.".getBytes()), new IProducer.SendCallBack() {
+            iProducer.publish(new WeEvent(null, "hello world.".getBytes(),""), new IProducer.SendCallBack() {
                 @Override
                 public void onComplete(SendResult sendResult) {
                     assertEquals(SendResult.SendResultStatus.ERROR, sendResult.getStatus());
@@ -1113,7 +1113,7 @@ public class ProducerTest extends JUnitTestBase {
     @Test
     public void testPublishForEventCallBack5() throws InterruptedException {
         try {
-            iProducer.publish(new WeEvent("", "hello world.".getBytes()), new IProducer.SendCallBack() {
+            iProducer.publish(new WeEvent("", "hello world.".getBytes(),""), new IProducer.SendCallBack() {
                 @Override
                 public void onComplete(SendResult sendResult) {
                     assertEquals(SendResult.SendResultStatus.ERROR, sendResult.getStatus());
@@ -1139,7 +1139,7 @@ public class ProducerTest extends JUnitTestBase {
     @Test
     public void testPublishForEventCallBack6() throws InterruptedException {
         try {
-            iProducer.publish(new WeEvent(this.topicName, null), new IProducer.SendCallBack() {
+            iProducer.publish(new WeEvent(this.topicName, null,""), new IProducer.SendCallBack() {
                 @Override
                 public void onComplete(SendResult sendResult) {
                     assertEquals(SendResult.SendResultStatus.ERROR, sendResult.getStatus());
@@ -1164,7 +1164,7 @@ public class ProducerTest extends JUnitTestBase {
     @Test
     public void testPublishForEventCallBack7() throws InterruptedException {
         try {
-            iProducer.publish(new WeEvent(this.topicName, "".getBytes()), new IProducer.SendCallBack() {
+            iProducer.publish(new WeEvent(this.topicName, "".getBytes(),""), new IProducer.SendCallBack() {
                 @Override
                 public void onComplete(SendResult sendResult) {
                     assertEquals(SendResult.SendResultStatus.ERROR, sendResult.getStatus());
@@ -1189,7 +1189,7 @@ public class ProducerTest extends JUnitTestBase {
     @Test
     public void testPublishForEventCallBack8() throws InterruptedException {
         try {
-            iProducer.publish(new WeEvent(this.topicName, "helloWorld".getBytes()), new IProducer.SendCallBack() {
+            iProducer.publish(new WeEvent(this.topicName, "helloWorld".getBytes(),""), new IProducer.SendCallBack() {
                 @Override
                 public void onComplete(SendResult sendResult) {
                     assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
@@ -1215,7 +1215,7 @@ public class ProducerTest extends JUnitTestBase {
         char[] charStr = {69, 72, 31};
         try {
             String illegalTopic = new String(charStr);
-            iProducer.publish(new WeEvent(illegalTopic, "helloWorld".getBytes()), new IProducer.SendCallBack() {
+            iProducer.publish(new WeEvent(illegalTopic, "helloWorld".getBytes(),""), new IProducer.SendCallBack() {
                 @Override
                 public void onComplete(SendResult sendResult) {
 
@@ -1240,7 +1240,7 @@ public class ProducerTest extends JUnitTestBase {
     @Test
     public void testPublishForEventCallBack10() throws InterruptedException {
         try {
-            iProducer.publish(new WeEvent("中国", "helloWorld".getBytes()), new IProducer.SendCallBack() {
+            iProducer.publish(new WeEvent("中国", "helloWorld".getBytes(),""), new IProducer.SendCallBack() {
                 @Override
                 public void onComplete(SendResult sendResult) {
 

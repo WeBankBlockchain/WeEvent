@@ -78,7 +78,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
         for (int i = 0; i < 100; i++) {
             new Thread(() -> {
                 try {
-                    SendResult dto = iProducer.publish(new WeEvent(this.topicName, "中文消息.".getBytes()));
+                    SendResult dto = iProducer.publish(new WeEvent(this.topicName, "中文消息.".getBytes(),""));
                     assertEquals(SendResult.SendResultStatus.SUCCESS, dto.getStatus());
                     sleep(100);
                 } catch (Exception e) {
@@ -93,7 +93,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishEvent() throws Exception {
-        SendResult dto = iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()));
+        SendResult dto = iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes(),""));
         assertEquals(SendResult.SendResultStatus.SUCCESS, dto.getStatus());
     }
 
@@ -102,7 +102,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishForEventCallBack() throws Exception {
-        iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), new IProducer.SendCallBack() {
+        iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes(),""), new IProducer.SendCallBack() {
             @Override
             public void onComplete(SendResult sendResult) {
                 assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());

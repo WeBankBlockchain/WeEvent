@@ -41,7 +41,7 @@ public class WeEventConstants {
     /**
      * Max length for topic name.
      */
-    public static final Integer TOPIC_NAME_MAX_LENGTH = 32;
+    public static final Integer TOPIC_NAME_MAX_LENGTH = 64;
 
     /**
      * topic name encode length.
@@ -63,6 +63,10 @@ public class WeEventConstants {
      */
     public static final Integer EVENT_CONTENT_MAX_LENGTH = 10240;
 
+    /**
+     * Max length for event extensions.
+     */
+    public static final Integer EVENT_EXTENSIONS_MAX_LENGTH = 1024;
     /**
      * Event ID spilt char.
      */
