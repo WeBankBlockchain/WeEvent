@@ -19,8 +19,7 @@ public class BrokerServiceTest extends JUnitTestBase{
 	public void testAddBroker() {
 		Broker broker = new Broker();
 		broker.setName("brokerTestName");
-		broker.setBrokerUrl("http://127.0.0.1:8081/weevent");
-		broker.setWebaseUrl("http://127.0.0.1:8084/webase-node-mgr");
+		broker.setBrokerUrl("http://127.0.0.1:8080");
 		Boolean result = brokerService.addBroker(broker );
 		Assert.assertTrue(result);
 	}
