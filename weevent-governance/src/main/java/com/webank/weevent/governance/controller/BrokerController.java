@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.webank.weevent.governance.entity.Broker;
@@ -40,13 +41,13 @@ public class BrokerController {
 
 	// get broker service by id
 	@PostMapping("/broker")
-	public Boolean addBroker(Broker broker) {
+	public Boolean addBroker(@RequestBody Broker broker) {
 		log.info("add  broker service into db " + broker);
 		return brokerService.addBroker(broker);
 	}
 	
 	@PutMapping("/broker")
-	public Boolean updateBroker(Broker broker) {
+	public Boolean updateBroker(@RequestBody Broker broker) {
 		log.info("update  broker service ,broker: " + broker);
 		return brokerService.updateBroker(broker);
 	}

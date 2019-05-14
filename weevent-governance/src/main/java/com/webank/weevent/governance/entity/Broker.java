@@ -17,6 +17,5 @@ public class Broker {
 	private Integer id;
 	private String name;
 	private String brokerUrl;
-	private String webaseUrl;
 	private Date lastUpdate;
 }

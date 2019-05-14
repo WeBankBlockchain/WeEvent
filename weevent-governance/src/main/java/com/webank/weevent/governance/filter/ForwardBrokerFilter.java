@@ -53,9 +53,6 @@ public class ForwardBrokerFilter implements Filter{
 	@Autowired
 	CloseableHttpClient httpsClient;
 	
-	@Value("${weevent.url}")
-    private String url;
-
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
@@ -63,16 +60,12 @@ public class ForwardBrokerFilter implements Filter{
 		HttpServletResponse res = (HttpServletResponse) response;
 		String idStr = request.getParameter("id");
 		String originUrl = req.getRequestURI();
-		String subStrUrl = originUrl.substring(originUrl.indexOf("/weevent/") + 8);
+		String subStrUrl = originUrl.substring(originUrl.indexOf("/weevent/"));
 		
-		String newUrl = "";
-		if(!StringUtils.isBlank(idStr)) {
-			Integer id = Integer.parseInt(idStr);
-			Broker broker = brokerService.getBroker(id);
-			String brokerUrl = broker.getBrokerUrl();
-			newUrl = brokerUrl + subStrUrl;
-		}
-		newUrl = url + subStrUrl;
+		Integer id = Integer.parseInt(idStr);
+		Broker broker = brokerService.getBroker(id);
+		String brokerUrl = broker.getBrokerUrl();
+		String newUrl = brokerUrl + subStrUrl;
 		
 		CloseableHttpResponse closeResponse = null;
 		if(req.getMethod().equals("GET")) {

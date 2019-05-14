@@ -62,10 +62,9 @@ public class InitialDb{
         		"id int(11) NOT NULL auto_increment primary key,\n" + 
         		"name varchar(256) not null,\n" + 
         		"broker_url varchar(256),\n" + 
-        		"webase_url varchar(256),\n" + 
         		"last_update timestamp NOT NULL , \n" + 
         		"key index_name (name)\n" + 
-        		")engine =Innodb default charset=utf8");  
+        		")engine =Innodb default charset=utf8;");  
         
         //create table t_topic
         stat.executeUpdate("create table if not exists t_topic(\n" + 

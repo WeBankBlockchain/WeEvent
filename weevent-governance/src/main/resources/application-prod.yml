@@ -17,14 +17,5 @@ spring:
     fail-on-write-error: true
     file: ./logs/governance.pid
 
-weevent:
-  url: http://localhost:8081/weevent
-governance:
-  influxdb:
-    enabled: false
-    username: admin
-    password: admin
-    openurl: http://127.0.0.1:8086
-    database: telegraf
 logging:
   config: classpath:log4j2.xml

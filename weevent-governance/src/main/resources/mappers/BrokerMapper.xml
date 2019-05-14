@@ -3,19 +3,19 @@
 <mapper namespace="com.webank.weevent.governance.mapper.BrokerMapper">
 
 	<select id="getBroker" parameterType="java.lang.Integer" resultType="com.webank.weevent.governance.entity.Broker">
-		select id ,name,broker_url brokerUrl,webase_url webaseUrl,last_update lastUpdate from t_broker where id=#{id}
+		select id ,name,broker_url brokerUrl,last_update lastUpdate from t_broker where id=#{id}
 	</select>
 	
 	<select id="getBrokers" resultType="com.webank.weevent.governance.entity.Broker">
-		select id ,name,broker_url brokerUrl,webase_url webaseUrl,last_update lastUpdate from t_broker
+		select id ,name,broker_url brokerUrl,last_update lastUpdate from t_broker
 	</select>
 	
 	<insert id="addBroker" parameterType="com.webank.weevent.governance.entity.Broker">
-		insert into t_broker(name,broker_url,webase_Url,last_update) values(#{name},#{brokerUrl},#{webaseUrl},#{lastUpdate, jdbcType=TIMESTAMP})
+		insert into t_broker(name,broker_url,last_update) values(#{name},#{brokerUrl},#{lastUpdate, jdbcType=TIMESTAMP})
 	</insert>
 	
 	<update id="updateBroker" parameterType="com.webank.weevent.governance.entity.Broker">
-		update t_broker set name=#{name},broker_url=#{brokerUrl},webase_url=#{webaseUrl},last_update=#{lastUpdate, jdbcType=TIMESTAMP} where id=#{id}
+		update t_broker set name=#{name},broker_url=#{brokerUrl},last_update=#{lastUpdate, jdbcType=TIMESTAMP} where id=#{id}
 	</update>
 	
 	<delete id="deleteBroker" parameterType="java.lang.Integer">
