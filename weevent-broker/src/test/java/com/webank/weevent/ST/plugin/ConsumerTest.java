@@ -44,7 +44,7 @@ public class ConsumerTest extends JUnitTestBase {
         assertTrue(this.iProducer.startProducer());
 
         String data = String.format("hello world! %s", System.currentTimeMillis());
-        WeEvent weEvent = new WeEvent(this.topicName, data.getBytes(),"");
+        WeEvent weEvent = new WeEvent(this.topicName, data.getBytes(), "");
         SendResult sendResultDto = this.iProducer.publish(weEvent);
 
         assertEquals(SendResult.SendResultStatus.SUCCESS, sendResultDto.getStatus());
@@ -55,7 +55,7 @@ public class ConsumerTest extends JUnitTestBase {
 
         // charset with utf-8
         data = String.format("中文消息! %s", System.currentTimeMillis());
-        weEvent = new WeEvent(this.topicName, data.getBytes(),"");
+        weEvent = new WeEvent(this.topicName, data.getBytes(), "");
         sendResultDto = this.iProducer.publish(weEvent);
 
         assertEquals(SendResult.SendResultStatus.SUCCESS, sendResultDto.getStatus());

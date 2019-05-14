@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Future;
+
 import org.bcos.channel.client.TransactionSucCallback;
 import org.bcos.web3j.abi.TypeReference;
 import org.bcos.web3j.abi.datatypes.Address;
@@ -26,7 +27,6 @@ import org.bcos.web3j.tx.TransactionManager;
  * Auto generated code.<br>
  * <strong>Do not modify!</strong><br>
  * Please use the <a href="https://docs.web3j.io/command_line.html">web3j command line tools</a>, or {@link org.bcos.web3j.codegen.SolidityFunctionWrapperGenerator} to update.
- *
  * <p>Generated with web3j version none.
  */
 public final class TopicData extends Contract {
@@ -51,23 +51,31 @@ public final class TopicData extends Contract {
     }
 
     public Future<Utf8String> _topicStringArray(Uint256 param0) {
-        Function function = new Function("_topicStringArray", 
-                Arrays.<Type>asList(param0), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+        Function function = new Function("_topicStringArray",
+                Arrays.<Type>asList(param0),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {
+                }));
         return executeCallSingleValueReturnAsync(function);
     }
 
     public Future<List<Type>> listTopic(Uint256 pageIndex, Uint256 pageSize) {
-        Function function = new Function("listTopic", 
-                Arrays.<Type>asList(pageIndex, pageSize), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}, new TypeReference<Uint256>() {}, new TypeReference<StaticArray<Bytes32>>() {}, new TypeReference<StaticArray<Bytes32>>() {}));
+        Function function = new Function("listTopic",
+                Arrays.<Type>asList(pageIndex, pageSize),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {
+                }, new TypeReference<Uint256>() {
+                }, new TypeReference<StaticArray<Bytes32>>() {
+                }, new TypeReference<StaticArray<Bytes32>>() {
+                }));
         return executeCallMultipleValueReturnAsync(function);
     }
 
     public Future<List<Type>> getTopic(Utf8String topicName) {
-        Function function = new Function("getTopic", 
-                Arrays.<Type>asList(topicName), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}, new TypeReference<Address>() {}, new TypeReference<Uint256>() {}));
+        Function function = new Function("getTopic",
+                Arrays.<Type>asList(topicName),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {
+                }, new TypeReference<Address>() {
+                }, new TypeReference<Uint256>() {
+                }));
         return executeCallMultipleValueReturnAsync(function);
     }
 
@@ -82,16 +90,18 @@ public final class TopicData extends Contract {
     }
 
     public Future<Bool> isTopicExist(Utf8String topicName) {
-        Function function = new Function("isTopicExist", 
-                Arrays.<Type>asList(topicName), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
+        Function function = new Function("isTopicExist",
+                Arrays.<Type>asList(topicName),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {
+                }));
         return executeCallSingleValueReturnAsync(function);
     }
 
     public Future<Address> getTopicAddress(Utf8String topicName) {
-        Function function = new Function("getTopicAddress", 
-                Arrays.<Type>asList(topicName), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
+        Function function = new Function("getTopicAddress",
+                Arrays.<Type>asList(topicName),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {
+                }));
         return executeCallSingleValueReturnAsync(function);
     }
 

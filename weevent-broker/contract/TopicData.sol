@@ -1,7 +1,6 @@
 pragma solidity ^0.4.4;
 
 contract TopicData {
-    // try to replace bytes32 with bytes[128] to extend key length
     mapping (string => TopicStruct) _topicMap;
     string[] public _topicStringArray;
 
@@ -108,7 +107,6 @@ contract TopicData {
         size = i;
     }
 
-
     function stringToBytesVer2(string memory source) returns (bytes32 result) {
         assembly {
             result := mload(add(source, 32))
@@ -121,3 +119,4 @@ contract TopicData {
         }
     }
 }
+

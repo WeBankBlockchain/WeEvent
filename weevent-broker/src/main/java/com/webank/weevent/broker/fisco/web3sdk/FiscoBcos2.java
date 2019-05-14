@@ -81,7 +81,7 @@ public class FiscoBcos2 {
      * Gets the contract service.
      *
      * @param contractAddress the contract address
-     * @param cls             the class
+     * @param cls the class
      * @return the contract service
      */
     protected Contract getContractService(String contractAddress, Class<?> cls) throws BrokerException {
@@ -194,8 +194,8 @@ public class FiscoBcos2 {
             listPage.setTotal(result.getValue1().intValue());
             List<byte[]> topicNames1List = result.getValue2();
             List<byte[]> topicNames2List = result.getValue3();
-            for (int i = 0; i < topicNames1List.size(); i++ ){
-                String topicName = new String(topicNames1List.get(i),StandardCharsets.UTF_8) + new String(topicNames2List.get(i),StandardCharsets.UTF_8);
+            for (int i = 0; i < topicNames1List.size(); i++) {
+                String topicName = new String(topicNames1List.get(i), StandardCharsets.UTF_8) + new String(topicNames2List.get(i), StandardCharsets.UTF_8);
                 if (topicName == null || topicName.isEmpty()) {
                     log.error("detect topic name is empty, {}", topicName);
                     continue;

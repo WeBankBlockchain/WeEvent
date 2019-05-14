@@ -1,12 +1,14 @@
 package com.webank.weevent.broker.fisco.contract.v2;
 
 import io.reactivex.Flowable;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
+
 import org.fisco.bcos.channel.client.TransactionSucCallback;
 import org.fisco.bcos.web3j.abi.EventEncoder;
 import org.fisco.bcos.web3j.abi.FunctionEncoder;
@@ -34,9 +36,8 @@ import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
  * <p>Auto generated code.
  * <p><strong>Do not modify!</strong>
  * <p>Please use the <a href="https://docs.web3j.io/command_line.html">web3j command line tools</a>,
- * or the org.fisco.bcos.web3j.codegen.SolidityFunctionWrapperGenerator in the 
+ * or the org.fisco.bcos.web3j.codegen.SolidityFunctionWrapperGenerator in the
  * <a href="https://github.com/web3j/web3j/tree/master/codegen">codegen module</a> to update.
- *
  * <p>Generated with web3j version none.
  */
 @SuppressWarnings("unchecked")
@@ -51,8 +52,9 @@ public class TopicController extends Contract {
 
     public static final String FUNC_ADDTOPICINFO = "addTopicInfo";
 
-    public static final Event LOGADDTOPICNAMEADDRESS_EVENT = new Event("LogAddTopicNameAddress", 
-            Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+    public static final Event LOGADDTOPICNAMEADDRESS_EVENT = new Event("LogAddTopicNameAddress",
+            Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {
+            }));
     ;
 
     @Deprecated
@@ -74,61 +76,68 @@ public class TopicController extends Contract {
     }
 
     public RemoteCall<Tuple3<BigInteger, List<byte[]>, List<byte[]>>> listTopicName(BigInteger pageIndex, BigInteger pageSize) {
-        final Function function = new Function(FUNC_LISTTOPICNAME, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.generated.Uint256(pageIndex), 
-                new org.fisco.bcos.web3j.abi.datatypes.generated.Uint256(pageSize)), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}, new TypeReference<DynamicArray<Bytes32>>() {}, new TypeReference<DynamicArray<Bytes32>>() {}));
+        final Function function = new Function(FUNC_LISTTOPICNAME,
+                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.generated.Uint256(pageIndex),
+                        new org.fisco.bcos.web3j.abi.datatypes.generated.Uint256(pageSize)),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {
+                }, new TypeReference<DynamicArray<Bytes32>>() {
+                }, new TypeReference<DynamicArray<Bytes32>>() {
+                }));
         return new RemoteCall<Tuple3<BigInteger, List<byte[]>, List<byte[]>>>(
                 new Callable<Tuple3<BigInteger, List<byte[]>, List<byte[]>>>() {
                     @Override
                     public Tuple3<BigInteger, List<byte[]>, List<byte[]>> call() throws Exception {
                         List<Type> results = executeCallMultipleValueReturn(function);
                         return new Tuple3<BigInteger, List<byte[]>, List<byte[]>>(
-                                (BigInteger) results.get(0).getValue(), 
-                                convertToNative((List<Bytes32>) results.get(1).getValue()), 
+                                (BigInteger) results.get(0).getValue(),
+                                convertToNative((List<Bytes32>) results.get(1).getValue()),
                                 convertToNative((List<Bytes32>) results.get(2).getValue()));
                     }
                 });
     }
 
     public RemoteCall<Tuple3<String, String, BigInteger>> getTopicInfo(String topicName) {
-        final Function function = new Function(FUNC_GETTOPICINFO, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName)), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}, new TypeReference<Address>() {}, new TypeReference<Uint256>() {}));
+        final Function function = new Function(FUNC_GETTOPICINFO,
+                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName)),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {
+                }, new TypeReference<Address>() {
+                }, new TypeReference<Uint256>() {
+                }));
         return new RemoteCall<Tuple3<String, String, BigInteger>>(
                 new Callable<Tuple3<String, String, BigInteger>>() {
                     @Override
                     public Tuple3<String, String, BigInteger> call() throws Exception {
                         List<Type> results = executeCallMultipleValueReturn(function);
                         return new Tuple3<String, String, BigInteger>(
-                                (String) results.get(0).getValue(), 
-                                (String) results.get(1).getValue(), 
+                                (String) results.get(0).getValue(),
+                                (String) results.get(1).getValue(),
                                 (BigInteger) results.get(2).getValue());
                     }
                 });
     }
 
     public RemoteCall<String> getTopicAddress(String topicName) {
-        final Function function = new Function(FUNC_GETTOPICADDRESS, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName)), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
+        final Function function = new Function(FUNC_GETTOPICADDRESS,
+                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName)),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {
+                }));
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
     public RemoteCall<TransactionReceipt> addTopicInfo(String topicName, String topicAddress) {
         final Function function = new Function(
-                FUNC_ADDTOPICINFO, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName), 
-                new org.fisco.bcos.web3j.abi.datatypes.Address(topicAddress)), 
+                FUNC_ADDTOPICINFO,
+                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName),
+                        new org.fisco.bcos.web3j.abi.datatypes.Address(topicAddress)),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
 
     public void addTopicInfo(String topicName, String topicAddress, TransactionSucCallback callback) {
         final Function function = new Function(
-                FUNC_ADDTOPICINFO, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName), 
-                new org.fisco.bcos.web3j.abi.datatypes.Address(topicAddress)), 
+                FUNC_ADDTOPICINFO,
+                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName),
+                        new org.fisco.bcos.web3j.abi.datatypes.Address(topicAddress)),
                 Collections.<TypeReference<?>>emptyList());
         asyncExecuteTransaction(function, callback);
     }

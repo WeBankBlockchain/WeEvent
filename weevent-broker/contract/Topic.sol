@@ -20,7 +20,7 @@ contract Topic {
         returns (bool)
     {
 
-        LogWeEvent(topicName, _sequence_start++, block.number, eventContent,extensions);
+        LogWeEvent(topicName, _sequence_start++, block.number, eventContent, extensions);
         return true;
     }
 }

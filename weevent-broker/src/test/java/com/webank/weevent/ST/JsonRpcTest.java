@@ -59,7 +59,7 @@ public class JsonRpcTest {
     @Test
     public void testPublish() throws BrokerException {
         String topic = "com.weevent.test.jsonrpc";
-        SendResult publish = iBrokerRpc.publish(topic, "Hello World!".getBytes(),"");
+        SendResult publish = iBrokerRpc.publish(topic, "Hello World!".getBytes(), "");
         System.out.println(publish);
         Assert.assertNotNull(publish.getEventId());
     }
@@ -68,7 +68,7 @@ public class JsonRpcTest {
     public void testPublishContentequal10K() throws BrokerException {
         String str = get10KStr();
         String topic = "com.weevent.test.jsonrpc";
-        SendResult publish = iBrokerRpc.publish(topic, str.getBytes(),"");
+        SendResult publish = iBrokerRpc.publish(topic, str.getBytes(), "");
         System.out.println(publish);
         Assert.assertNotNull(publish.getEventId());
     }
@@ -77,7 +77,7 @@ public class JsonRpcTest {
     public void testPublishContentgt10K() throws BrokerException {
         String str = get10KStr() + "s";
         String topic = "com.weevent.test.jsonrpc";
-        SendResult publish = iBrokerRpc.publish(topic, str.getBytes(),"");
+        SendResult publish = iBrokerRpc.publish(topic, str.getBytes(), "");
         System.out.println(publish);
     }
 

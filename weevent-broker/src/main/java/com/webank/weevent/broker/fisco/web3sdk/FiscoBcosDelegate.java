@@ -181,7 +181,7 @@ public class FiscoBcosDelegate {
         if (this.fiscoBcos != null) {
             return this.fiscoBcos.publishEvent(topicName, eventContent, extensions);
         } else {
-            return this.fiscoBcos2Map.get(groupId).publishEvent(topicName, eventContent,extensions);
+            return this.fiscoBcos2Map.get(groupId).publishEvent(topicName, eventContent, extensions);
         }
     }
 

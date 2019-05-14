@@ -43,9 +43,10 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class WeEventClient {
-    public static void main(String [] args){
+    public static void main(String[] args) {
 
     }
+
     /**
      * Interface for notify callback
      */

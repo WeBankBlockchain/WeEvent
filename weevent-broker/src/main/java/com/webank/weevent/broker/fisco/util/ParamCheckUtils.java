@@ -93,7 +93,7 @@ public class ParamCheckUtils {
         validateEventContent(new String(event.getContent(), StandardCharsets.UTF_8));
     }
 
-    public static void validateEventExtensions(String extensions) throws BrokerException{
+    public static void validateEventExtensions(String extensions) throws BrokerException {
         if (extensions.length() > WeEventConstants.EVENT_EXTENSIONS_MAX_LENGTH) {
             throw new BrokerException(ErrorCode.EVENT_EXTENSIONS_EXCEEDS_MAX_LENGTH);
         }

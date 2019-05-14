@@ -48,9 +48,9 @@ public class BrokerRest extends RestHA implements IBrokerRpc {
     @RequestMapping(path = "/publish")
     public SendResult publish(@RequestParam(name = "topic") String topic,
                               @RequestParam(name = "content") byte[] content,
-                              @RequestParam(name = "extensions",required = false) String extensions) throws BrokerException {
+                              @RequestParam(name = "extensions", required = false) String extensions) throws BrokerException {
         log.info("topic: {}, content.length: {}", topic, content.length);
-        if (extensions == null){
+        if (extensions == null) {
             extensions = "";
         }
         WeEvent event = new WeEvent(topic, content, extensions);

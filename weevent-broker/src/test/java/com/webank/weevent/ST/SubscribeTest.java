@@ -94,7 +94,7 @@ public class SubscribeTest extends JUnitTestBase {
                     "http://localhost:8080/weevent/mock/jsonrpc");
             assertTrue(!subscriptionId.isEmpty());
 
-            SendResult sendResult = rpc.publish(this.topicName, "hello weevent".getBytes(StandardCharsets.UTF_8),"");
+            SendResult sendResult = rpc.publish(this.topicName, "hello weevent".getBytes(StandardCharsets.UTF_8), "");
             assertTrue(sendResult.getStatus() == SendResult.SendResultStatus.SUCCESS);
         } catch (BrokerException e) {
             log.error("error", e);

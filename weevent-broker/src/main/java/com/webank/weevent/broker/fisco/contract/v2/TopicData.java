@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
+
 import org.fisco.bcos.channel.client.TransactionSucCallback;
 import org.fisco.bcos.web3j.abi.TypeReference;
 import org.fisco.bcos.web3j.abi.datatypes.Address;
@@ -29,9 +30,8 @@ import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
  * <p>Auto generated code.
  * <p><strong>Do not modify!</strong>
  * <p>Please use the <a href="https://docs.web3j.io/command_line.html">web3j command line tools</a>,
- * or the org.fisco.bcos.web3j.codegen.SolidityFunctionWrapperGenerator in the 
+ * or the org.fisco.bcos.web3j.codegen.SolidityFunctionWrapperGenerator in the
  * <a href="https://github.com/web3j/web3j/tree/master/codegen">codegen module</a> to update.
- *
  * <p>Generated with web3j version none.
  */
 @SuppressWarnings("unchecked")
@@ -73,43 +73,51 @@ public class TopicData extends Contract {
     }
 
     public RemoteCall<String> _topicStringArray(BigInteger param0) {
-        final Function function = new Function(FUNC__TOPICSTRINGARRAY, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.generated.Uint256(param0)), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+        final Function function = new Function(FUNC__TOPICSTRINGARRAY,
+                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.generated.Uint256(param0)),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {
+                }));
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
     public RemoteCall<Tuple4<BigInteger, BigInteger, List<byte[]>, List<byte[]>>> listTopic(BigInteger pageIndex, BigInteger pageSize) {
-        final Function function = new Function(FUNC_LISTTOPIC, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.generated.Uint256(pageIndex), 
-                new org.fisco.bcos.web3j.abi.datatypes.generated.Uint256(pageSize)), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}, new TypeReference<Uint256>() {}, new TypeReference<StaticArray<Bytes32>>() {}, new TypeReference<StaticArray<Bytes32>>() {}));
+        final Function function = new Function(FUNC_LISTTOPIC,
+                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.generated.Uint256(pageIndex),
+                        new org.fisco.bcos.web3j.abi.datatypes.generated.Uint256(pageSize)),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {
+                }, new TypeReference<Uint256>() {
+                }, new TypeReference<StaticArray<Bytes32>>() {
+                }, new TypeReference<StaticArray<Bytes32>>() {
+                }));
         return new RemoteCall<Tuple4<BigInteger, BigInteger, List<byte[]>, List<byte[]>>>(
                 new Callable<Tuple4<BigInteger, BigInteger, List<byte[]>, List<byte[]>>>() {
                     @Override
                     public Tuple4<BigInteger, BigInteger, List<byte[]>, List<byte[]>> call() throws Exception {
                         List<Type> results = executeCallMultipleValueReturn(function);
                         return new Tuple4<BigInteger, BigInteger, List<byte[]>, List<byte[]>>(
-                                (BigInteger) results.get(0).getValue(), 
-                                (BigInteger) results.get(1).getValue(), 
-                                convertToNative((List<Bytes32>) results.get(2).getValue()), 
+                                (BigInteger) results.get(0).getValue(),
+                                (BigInteger) results.get(1).getValue(),
+                                convertToNative((List<Bytes32>) results.get(2).getValue()),
                                 convertToNative((List<Bytes32>) results.get(3).getValue()));
                     }
                 });
     }
 
     public RemoteCall<Tuple3<String, String, BigInteger>> getTopic(String topicName) {
-        final Function function = new Function(FUNC_GETTOPIC, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName)), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}, new TypeReference<Address>() {}, new TypeReference<Uint256>() {}));
+        final Function function = new Function(FUNC_GETTOPIC,
+                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName)),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {
+                }, new TypeReference<Address>() {
+                }, new TypeReference<Uint256>() {
+                }));
         return new RemoteCall<Tuple3<String, String, BigInteger>>(
                 new Callable<Tuple3<String, String, BigInteger>>() {
                     @Override
                     public Tuple3<String, String, BigInteger> call() throws Exception {
                         List<Type> results = executeCallMultipleValueReturn(function);
                         return new Tuple3<String, String, BigInteger>(
-                                (String) results.get(0).getValue(), 
-                                (String) results.get(1).getValue(), 
+                                (String) results.get(0).getValue(),
+                                (String) results.get(1).getValue(),
                                 (BigInteger) results.get(2).getValue());
                     }
                 });
@@ -117,66 +125,68 @@ public class TopicData extends Contract {
 
     public RemoteCall<TransactionReceipt> putTopic(String topicName, String topicAddress, BigInteger createdTimestamp) {
         final Function function = new Function(
-                FUNC_PUTTOPIC, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName), 
-                new org.fisco.bcos.web3j.abi.datatypes.Address(topicAddress), 
-                new org.fisco.bcos.web3j.abi.datatypes.generated.Uint256(createdTimestamp)), 
+                FUNC_PUTTOPIC,
+                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName),
+                        new org.fisco.bcos.web3j.abi.datatypes.Address(topicAddress),
+                        new org.fisco.bcos.web3j.abi.datatypes.generated.Uint256(createdTimestamp)),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
 
     public void putTopic(String topicName, String topicAddress, BigInteger createdTimestamp, TransactionSucCallback callback) {
         final Function function = new Function(
-                FUNC_PUTTOPIC, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName), 
-                new org.fisco.bcos.web3j.abi.datatypes.Address(topicAddress), 
-                new org.fisco.bcos.web3j.abi.datatypes.generated.Uint256(createdTimestamp)), 
+                FUNC_PUTTOPIC,
+                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName),
+                        new org.fisco.bcos.web3j.abi.datatypes.Address(topicAddress),
+                        new org.fisco.bcos.web3j.abi.datatypes.generated.Uint256(createdTimestamp)),
                 Collections.<TypeReference<?>>emptyList());
         asyncExecuteTransaction(function, callback);
     }
 
     public RemoteCall<Boolean> isTopicExist(String topicName) {
-        final Function function = new Function(FUNC_ISTOPICEXIST, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName)), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
+        final Function function = new Function(FUNC_ISTOPICEXIST,
+                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName)),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {
+                }));
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
     public RemoteCall<String> getTopicAddress(String topicName) {
-        final Function function = new Function(FUNC_GETTOPICADDRESS, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName)), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
+        final Function function = new Function(FUNC_GETTOPICADDRESS,
+                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName)),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {
+                }));
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
     public RemoteCall<TransactionReceipt> bytesToBytes32(byte[] source) {
         final Function function = new Function(
-                FUNC_BYTESTOBYTES32, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.DynamicBytes(source)), 
+                FUNC_BYTESTOBYTES32,
+                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.DynamicBytes(source)),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
 
     public void bytesToBytes32(byte[] source, TransactionSucCallback callback) {
         final Function function = new Function(
-                FUNC_BYTESTOBYTES32, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.DynamicBytes(source)), 
+                FUNC_BYTESTOBYTES32,
+                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.DynamicBytes(source)),
                 Collections.<TypeReference<?>>emptyList());
         asyncExecuteTransaction(function, callback);
     }
 
     public RemoteCall<TransactionReceipt> stringToBytesVer2(String source) {
         final Function function = new Function(
-                FUNC_STRINGTOBYTESVER2, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(source)), 
+                FUNC_STRINGTOBYTESVER2,
+                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(source)),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
 
     public void stringToBytesVer2(String source, TransactionSucCallback callback) {
         final Function function = new Function(
-                FUNC_STRINGTOBYTESVER2, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(source)), 
+                FUNC_STRINGTOBYTESVER2,
+                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(source)),
                 Collections.<TypeReference<?>>emptyList());
         asyncExecuteTransaction(function, callback);
     }

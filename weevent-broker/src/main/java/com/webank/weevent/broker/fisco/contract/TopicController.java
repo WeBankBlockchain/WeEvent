@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Future;
+
 import org.bcos.channel.client.TransactionSucCallback;
 import org.bcos.web3j.abi.EventEncoder;
 import org.bcos.web3j.abi.EventValues;
@@ -34,7 +35,6 @@ import rx.functions.Func1;
  * Auto generated code.<br>
  * <strong>Do not modify!</strong><br>
  * Please use the <a href="https://docs.web3j.io/command_line.html">web3j command line tools</a>, or {@link org.bcos.web3j.codegen.SolidityFunctionWrapperGenerator} to update.
- *
  * <p>Generated with web3j version none.
  */
 public final class TopicController extends Contract {
@@ -59,9 +59,10 @@ public final class TopicController extends Contract {
     }
 
     public static List<LogAddTopicNameAddressEventResponse> getLogAddTopicNameAddressEvents(TransactionReceipt transactionReceipt) {
-        final Event event = new Event("LogAddTopicNameAddress", 
+        final Event event = new Event("LogAddTopicNameAddress",
                 Arrays.<TypeReference<?>>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {
+                }));
         List<EventValues> valueList = extractEventParameters(event, transactionReceipt);
         ArrayList<LogAddTopicNameAddressEventResponse> responses = new ArrayList<LogAddTopicNameAddressEventResponse>(valueList.size());
         for (EventValues eventValues : valueList) {
@@ -73,9 +74,10 @@ public final class TopicController extends Contract {
     }
 
     public Observable<LogAddTopicNameAddressEventResponse> logAddTopicNameAddressEventObservable(DefaultBlockParameter startBlock, DefaultBlockParameter endBlock) {
-        final Event event = new Event("LogAddTopicNameAddress", 
+        final Event event = new Event("LogAddTopicNameAddress",
                 Arrays.<TypeReference<?>>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {
+                }));
         EthFilter filter = new EthFilter(startBlock, endBlock, getContractAddress());
         filter.addSingleTopic(EventEncoder.encode(event));
         return web3j.ethLogObservable(filter).map(new Func1<Log, LogAddTopicNameAddressEventResponse>() {
@@ -90,23 +92,30 @@ public final class TopicController extends Contract {
     }
 
     public Future<List<Type>> listTopicName(Uint256 pageIndex, Uint256 pageSize) {
-        Function function = new Function("listTopicName", 
-                Arrays.<Type>asList(pageIndex, pageSize), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}, new TypeReference<DynamicArray<Bytes32>>() {}, new TypeReference<DynamicArray<Bytes32>>() {}));
+        Function function = new Function("listTopicName",
+                Arrays.<Type>asList(pageIndex, pageSize),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {
+                }, new TypeReference<DynamicArray<Bytes32>>() {
+                }, new TypeReference<DynamicArray<Bytes32>>() {
+                }));
         return executeCallMultipleValueReturnAsync(function);
     }
 
     public Future<List<Type>> getTopicInfo(Utf8String topicName) {
-        Function function = new Function("getTopicInfo", 
-                Arrays.<Type>asList(topicName), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}, new TypeReference<Address>() {}, new TypeReference<Uint256>() {}));
+        Function function = new Function("getTopicInfo",
+                Arrays.<Type>asList(topicName),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {
+                }, new TypeReference<Address>() {
+                }, new TypeReference<Uint256>() {
+                }));
         return executeCallMultipleValueReturnAsync(function);
     }
 
     public Future<Address> getTopicAddress(Utf8String topicName) {
-        Function function = new Function("getTopicAddress", 
-                Arrays.<Type>asList(topicName), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
+        Function function = new Function("getTopicAddress",
+                Arrays.<Type>asList(topicName),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {
+                }));
         return executeCallSingleValueReturnAsync(function);
     }
 

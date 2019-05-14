@@ -257,7 +257,7 @@ public class FiscoBcos {
         throw new BrokerException(ErrorCode.EVENT_ID_NOT_EXIST);
     }
 
-    public SendResult publishEvent(String topicName, String eventContent,String extensions) throws BrokerException {
+    public SendResult publishEvent(String topicName, String eventContent, String extensions) throws BrokerException {
         Topic topic = getTopic(topicName);
         if (topic == null) {
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
@@ -267,7 +267,7 @@ public class FiscoBcos {
             SendResult sendResult = new SendResult(SendResult.SendResultStatus.ERROR);
 
             TransactionReceipt transactionReceipt = topic.publishWeEvent(new Utf8String(topicName),
-                    new Utf8String(eventContent),new Utf8String(extensions)).get(WeEventConstants.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+                    new Utf8String(eventContent), new Utf8String(extensions)).get(WeEventConstants.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
             List<Topic.LogWeEventEventResponse> event = Topic.getLogWeEventEvents(transactionReceipt);
             if (CollectionUtils.isNotEmpty(event)) {
                 sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, Web3SDKWrapper.uint256ToInt(event.get(0).eventBlockNumer), Web3SDKWrapper.uint256ToInt(event.get(0).eventSeq)));
@@ -290,7 +290,7 @@ public class FiscoBcos {
         }
 
         SendResult sendResult = new SendResult(SendResult.SendResultStatus.ERROR);
-        topic.publishWeEvent(new Utf8String(topicName), new Utf8String(eventContent),new Utf8String(extensions),
+        topic.publishWeEvent(new Utf8String(topicName), new Utf8String(eventContent), new Utf8String(extensions),
                 new TransactionSucCallback() {
                     @Override
                     public void onResponse(EthereumResponse response) {

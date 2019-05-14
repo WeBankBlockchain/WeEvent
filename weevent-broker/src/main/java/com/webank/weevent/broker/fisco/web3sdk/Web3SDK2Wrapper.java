@@ -303,7 +303,7 @@ public class Web3SDK2Wrapper {
                 List<Topic.LogWeEventEventResponse> logWeEventEvents = Web3SDK2Wrapper.receipt2LogWeEventEventResponse(web3j, credentials, receipt);
                 for (Topic.LogWeEventEventResponse logEvent : logWeEventEvents) {
                     String topicName = logEvent.topicName;
-                    WeEvent event = new WeEvent(topicName, logEvent.eventContent.getBytes(StandardCharsets.UTF_8),logEvent.extensions);
+                    WeEvent event = new WeEvent(topicName, logEvent.eventContent.getBytes(StandardCharsets.UTF_8), logEvent.extensions);
                     event.setEventId(DataTypeUtils.encodeEventId(topicName,
                             logEvent.eventBlockNumer.intValue(),
                             logEvent.eventSeq.intValue()));

@@ -1,11 +1,13 @@
 package com.webank.weevent.broker.fisco.contract.v2;
 
 import io.reactivex.Flowable;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import org.fisco.bcos.channel.client.TransactionSucCallback;
 import org.fisco.bcos.web3j.abi.EventEncoder;
 import org.fisco.bcos.web3j.abi.TypeReference;
@@ -29,9 +31,8 @@ import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
  * <p>Auto generated code.
  * <p><strong>Do not modify!</strong>
  * <p>Please use the <a href="https://docs.web3j.io/command_line.html">web3j command line tools</a>,
- * or the org.fisco.bcos.web3j.codegen.SolidityFunctionWrapperGenerator in the 
+ * or the org.fisco.bcos.web3j.codegen.SolidityFunctionWrapperGenerator in the
  * <a href="https://github.com/web3j/web3j/tree/master/codegen">codegen module</a> to update.
- *
  * <p>Generated with web3j version none.
  */
 @SuppressWarnings("unchecked")
@@ -40,8 +41,13 @@ public class Topic extends Contract {
 
     public static final String FUNC_PUBLISHWEEVENT = "publishWeEvent";
 
-    public static final Event LOGWEEVENT_EVENT = new Event("LogWeEvent", 
-            Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}, new TypeReference<Uint256>() {}, new TypeReference<Uint256>() {}, new TypeReference<Utf8String>() {}, new TypeReference<Utf8String>() {}));
+    public static final Event LOGWEEVENT_EVENT = new Event("LogWeEvent",
+            Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {
+            }, new TypeReference<Uint256>() {
+            }, new TypeReference<Uint256>() {
+            }, new TypeReference<Utf8String>() {
+            }, new TypeReference<Utf8String>() {
+            }));
     ;
 
     @Deprecated
@@ -64,20 +70,20 @@ public class Topic extends Contract {
 
     public RemoteCall<TransactionReceipt> publishWeEvent(String topicName, String eventContent, String extensions) {
         final Function function = new Function(
-                FUNC_PUBLISHWEEVENT, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName), 
-                new org.fisco.bcos.web3j.abi.datatypes.Utf8String(eventContent), 
-                new org.fisco.bcos.web3j.abi.datatypes.Utf8String(extensions)), 
+                FUNC_PUBLISHWEEVENT,
+                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName),
+                        new org.fisco.bcos.web3j.abi.datatypes.Utf8String(eventContent),
+                        new org.fisco.bcos.web3j.abi.datatypes.Utf8String(extensions)),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
 
     public void publishWeEvent(String topicName, String eventContent, String extensions, TransactionSucCallback callback) {
         final Function function = new Function(
-                FUNC_PUBLISHWEEVENT, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName), 
-                new org.fisco.bcos.web3j.abi.datatypes.Utf8String(eventContent), 
-                new org.fisco.bcos.web3j.abi.datatypes.Utf8String(extensions)), 
+                FUNC_PUBLISHWEEVENT,
+                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName),
+                        new org.fisco.bcos.web3j.abi.datatypes.Utf8String(eventContent),
+                        new org.fisco.bcos.web3j.abi.datatypes.Utf8String(extensions)),
                 Collections.<TypeReference<?>>emptyList());
         asyncExecuteTransaction(function, callback);
     }

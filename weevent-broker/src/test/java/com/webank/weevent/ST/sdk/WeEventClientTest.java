@@ -46,7 +46,7 @@ public class WeEventClientTest extends JUnitTestBase {
     public void testPublish() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
 
-        SendResult sendResult = this.weEventClient.publish(topicName, "hello world".getBytes(StandardCharsets.UTF_8),"");
+        SendResult sendResult = this.weEventClient.publish(topicName, "hello world".getBytes(StandardCharsets.UTF_8), "");
         assertTrue(sendResult.getStatus() == SendResult.SendResultStatus.SUCCESS);
     }
 
@@ -57,14 +57,14 @@ public class WeEventClientTest extends JUnitTestBase {
     public void testPublish_001() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
 
-        this.weEventClient.publish(this.topicName, null,"");
+        this.weEventClient.publish(this.topicName, null, "");
     }
 
     @Test(expected = BrokerException.class)
     public void testPublish_002() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
 
-        this.weEventClient.publish(null, "hello world".getBytes(StandardCharsets.UTF_8),"");
+        this.weEventClient.publish(null, "hello world".getBytes(StandardCharsets.UTF_8), "");
     }
 
     /**
@@ -74,7 +74,7 @@ public class WeEventClientTest extends JUnitTestBase {
     public void testPublish_003() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
 
-        this.weEventClient.publish("111111111111111111111111111111111111111111111111111111", null,"");
+        this.weEventClient.publish("111111111111111111111111111111111111111111111111111111", null, "");
     }
 
     /**
