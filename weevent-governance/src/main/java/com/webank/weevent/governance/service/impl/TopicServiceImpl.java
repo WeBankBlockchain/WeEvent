@@ -3,6 +3,7 @@ package com.webank.weevent.governance.service.impl;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
@@ -10,8 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import com.alibaba.fastjson.JSONArray;
 import lombok.extern.slf4j.Slf4j;
-import retrofit2.HttpException;
-import retrofit2.Response;
 
 import com.webank.weevent.governance.entity.Broker;
 import com.webank.weevent.governance.entity.Topic;
@@ -106,7 +105,7 @@ public class TopicServiceImpl implements TopicService{
             if((response instanceof Boolean) && (Boolean)response) {
                 return response;
             }else {
-            	throw new HttpException((Response<?>) response);
+            	return  new HttpException(response.toString());
             }
         }
         return null;
