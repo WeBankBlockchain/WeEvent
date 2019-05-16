@@ -33,10 +33,14 @@ public class WeEventClientTest extends JUnitTestBase {
 
     @Before
     public void before() throws Exception {
+        log.info("===================={}", this.testName.getMethodName());
+
     }
 
     @After
     public void after() throws Exception {
+        log.info("===================={}", this.testName.getMethodName());
+
     }
 
     /**

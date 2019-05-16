@@ -8,6 +8,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -33,6 +34,8 @@ import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.googlecode.jsonrpc4j.ProxyUtil;
+import io.micrometer.core.instrument.Meter;
+import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -65,7 +68,7 @@ public class WeEventClient {
         void onException(Throwable e);
     }
 
-    private final static String defaultJsonRpcUrl = "http://localhost:8080/weevent/jsonrpc";
+    private final static String defaultJsonRpcUrl = "http://127.0.0.1:8081/weevent/jsonrpc";
     private IBrokerRpc brokerRpc;
 
     // default STOMP url, ws://localhost:8080/weevent/stomp
@@ -73,6 +76,7 @@ public class WeEventClient {
     private TopicConnection connection;
     // (subscriptionId <-> TopicSession)
     private Map<String, TopicSession> sessionMap;
+    //private Map<String, String> subscribeId2HeaderIdMap
 
     /**
      * Get the client handler of weevent's broker with default url, http://localhost:8080/weevent.
@@ -157,9 +161,9 @@ public class WeEventClient {
                     }
                 }
             });
-
             this.sessionMap.put(subscriber.getSubscriptionId(), session);
             return subscriber.getSubscriptionId();
+
         } catch (JMSException e) {
             log.error("jms exception", e);
             throw new BrokerException(ErrorCode.SDK_JMS_EXCEPTION);
@@ -179,6 +183,8 @@ public class WeEventClient {
         if (this.sessionMap.containsKey(subscriptionId)) {
             TopicSession session = this.sessionMap.get(subscriptionId);
             try {
+                log.info("get the  session details {}",session.toString());
+
                 session.unsubscribe(subscriptionId);
             } catch (JMSException e) {
                 log.error("jms exception", e);

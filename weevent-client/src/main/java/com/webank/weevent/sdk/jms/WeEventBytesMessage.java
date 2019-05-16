@@ -163,6 +163,7 @@ public class WeEventBytesMessage implements BytesMessage {
                 this.bytes = mapper.writeValueAsBytes(o);
             } catch (JsonProcessingException e) {
                 log.error("jackson encode failed", e);
+                //SDK_JMS_EXCEPTION_JSON_ENCODE
                 WeEventConnectionFactory.error2JMSException(ErrorCode.SDK_JMS_EXCEPTION_JSON_ENCODE);
             }
         } else {

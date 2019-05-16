@@ -37,6 +37,7 @@ public class WeEventTopicConnection implements TopicConnection, CommandDispatche
         this.transport = transport;
         this.sessions = new ArrayList<>();
         this.subscribers = new HashMap<>();
+        this.transport.setTopicConnection(this);
     }
 
     public void setUserName(String userName) {
@@ -83,8 +84,9 @@ public class WeEventTopicConnection implements TopicConnection, CommandDispatche
     public void createSubscriber(WeEventTopicSubscriber subscriber) throws JMSException {
         WeEventTopic topic = (WeEventTopic) subscriber.getTopic();
         String subscriptionId = this.transport.stompSubscribe(topic, topic.getOffset());
+        // id
         subscriber.setSubscriptionId(subscriptionId);
-
+        //.setHeaderId(headerid);
         this.subscribers.put(subscriber.getSubscriptionId(), subscriber);
     }
 

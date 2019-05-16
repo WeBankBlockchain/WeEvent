@@ -43,13 +43,15 @@ public class JMS {
 
         // create publisher
         TopicPublisher publisher = session.createPublisher(topic);
-        for (int i = 0; i < 10; i++) {
-            // send message
-            BytesMessage msg = session.createBytesMessage();
-            msg.writeBytes(("hello weevent: " + i).getBytes(StandardCharsets.UTF_8));
-            publisher.send(msg);
-        }
-
+//        for (int i = 0; i < 10; i++) {
+//            // send message
+//            BytesMessage msg = session.createBytesMessage();
+//            msg.writeBytes(("hello weevent: " + i).getBytes(StandardCharsets.UTF_8));
+//            publisher.send(msg);
+//        }
+        BytesMessage msg = session.createBytesMessage();
+        msg.writeBytes(("hello weevent: ").getBytes(StandardCharsets.UTF_8));
+        publisher.send(msg);
         System.out.print("send done.");
         connection.close();
     }

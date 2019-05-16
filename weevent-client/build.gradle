@@ -1,3 +1,11 @@
+apply plugin: "org.springframework.boot"
+apply plugin: "io.spring.dependency-management"
+
+configurations {
+    //exclude spring-boot's default logger logback
+    all*.exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
+}
+
 List client_depends = [
         "com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.3",
         "javax.jms:jms:1.1",
@@ -5,8 +13,26 @@ List client_depends = [
         "org.springframework:spring-messaging:5.1.6.RELEASE"
 ]
 
+
+List springwebsocket = [
+        "org.springframework.boot:spring-boot-starter-websocket"
+]
+
+List springboot = [
+        "org.springframework.boot:spring-boot-starter-actuator",
+        "org.springframework.boot:spring-boot-starter-web"
+]
+
+List springboottest = [
+        "org.springframework.boot:spring-boot-starter-test"
+]
+
+
 dependencies {
+    implementation(springboot, springwebsocket)
     compile(client_depends)
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testImplementation(springboottest)
 }
 
 sourceSets {
@@ -16,6 +42,14 @@ sourceSets {
         }
         resources {
             srcDirs = ["src/main/resources"]
+        }
+    }
+    test {
+        java {
+            srcDirs = ["src/test/java"]
+        }
+        resources {
+            srcDirs = ["src/test/resources"]
         }
     }
 }

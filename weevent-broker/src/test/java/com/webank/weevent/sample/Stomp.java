@@ -35,7 +35,7 @@ import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 @Slf4j
 public class Stomp {
     private final static String brokerStomp = "ws://localhost:8081/weevent/stomp";
-    private final static String brokerSockjs = "ws://localhost:8080/weevent/sockjs";
+    private final static String brokerSockjs = "ws://localhost:8081/weevent/sockjs";
     private final static String topic = "com.webank.test";
 
     private ThreadPoolTaskScheduler taskScheduler;

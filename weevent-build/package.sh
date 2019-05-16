@@ -77,11 +77,11 @@ function weevent_build(){
 	mkdir -p $out_path/governance/temp
     #checkout tag
 	cd $gradle_buildpath
-    git checkout v$version
-    if [[ $? -ne 0 ]];then
-		yellow_echo "git checkout to v${version} error"
-		exit 1
-	fi
+    #git checkout v$version
+    #if [[ $? -ne 0 ]];then
+	#	yellow_echo "git checkout to v${version} error"
+	#	exit 1
+	#fi
 	
 	#gradle build 
 	echo "begin gradle build weevent"
