@@ -90,12 +90,12 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
      * @param blockNum the blockNum
      * @return java.util.List<com.webank.weevent.sdk.WeEvent>
      */
-    private List<WeEvent> loopBlock(Long blockNum, String topic)
+    private List<WeEvent> loopBlock(Long blockNum, String topic, Long groupId)
             throws BrokerException, InterruptedException {
         List<WeEvent> blockEventsList = null;
         List<WeEvent> topicEventsList = new ArrayList<>();
         while (blockEventsList == null) {
-            blockEventsList = this.fiscoBcosDelegate.loop(blockNum, 1L);
+            blockEventsList = this.fiscoBcosDelegate.loop(blockNum, groupId);
             if (blockEventsList == null) {
                 idle();
             } else {
@@ -110,16 +110,16 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         return topicEventsList;
     }
 
-    private void validateTopicModelMap(Map<String, String> topics) throws BrokerException {
+    private void validateTopicModelMap(Map<String, String> topics, Long groupId) throws BrokerException {
         if (topics == null || topics.isEmpty()) {
             throw new BrokerException(ErrorCode.TOPIC_MODEL_MAP_IS_NULL);
         }
 
-        Long blockHeight = this.fiscoBcosDelegate.getBlockHeight(1L);
+        Long blockHeight = this.fiscoBcosDelegate.getBlockHeight(groupId);
         for (Map.Entry<String, String> entry : topics.entrySet()) {
             ParamCheckUtils.validateTopicName(entry.getKey());
             // check topic exist
-            if (!exist(entry.getKey())) {
+            if (!exist(entry.getKey(), groupId)) {
                 throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
             }
 
@@ -134,15 +134,15 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     }
 
     @Override
-    public Map<String, String> subscribe(Map<String, String> topics, String interfaceType, ConsumerListener listener) throws BrokerException {
+    public Map<String, String> subscribe(Map<String, String> topics, String interfaceType, Long groupId, ConsumerListener listener) throws BrokerException {
         ParamCheckUtils.validateListenerNotNull(listener);
 
         // check params in map
-        validateTopicModelMap(topics);
+        validateTopicModelMap(topics, groupId);
 
         Map<String, String> subscriptions = new HashMap<>();
         for (Map.Entry<String, String> entry : topics.entrySet()) {
-            String subscriptionId = subscribeTopic(entry.getKey(), entry.getValue(), interfaceType, listener);
+            String subscriptionId = subscribeTopic(entry.getKey(), entry.getValue(), interfaceType, groupId, listener);
             subscriptions.put(entry.getKey(), subscriptionId);
         }
 
@@ -150,7 +150,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         return subscriptions;
     }
 
-    private String subscribeTopic(String topic, String offset, String subscriptionId, String interfaceType, ConsumerListener listener) throws BrokerException {
+    private String subscribeTopic(String topic, String offset, String subscriptionId, String interfaceType, Long groupId, ConsumerListener listener) throws BrokerException {
         try {
             UUID.fromString(subscriptionId);
         } catch (IllegalArgumentException e) {
@@ -158,7 +158,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         }
 
         if (!this.subscriptions.containsKey(subscriptionId)) {
-            Subscription subscription = new Subscription(topic, offset, interfaceType, listener);
+            Subscription subscription = new Subscription(topic, offset, interfaceType, groupId, listener);
             subscription.setUuid(subscriptionId);
             subscription.notifyLoop.setSubscriptionId(subscriptionId);
             subscription.notifyLoop.start();
@@ -171,11 +171,12 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             throw new BrokerException(ErrorCode.TOPIC_NOT_MATCH);
         }
         this.subscriptions.get(subscriptionId).eventDetectLoop.setOffset(offset);
+        this.subscriptions.get(subscriptionId).eventDetectLoop.setGroupId(groupId);
         return this.subscriptions.get(subscriptionId).uuid;
     }
 
-    private String subscribeTopic(String topic, String offset, String interfaceType, ConsumerListener listener) throws BrokerException {
-        Subscription subscription = new Subscription(topic, offset, interfaceType, listener);
+    private String subscribeTopic(String topic, String offset, String interfaceType, Long groupId, ConsumerListener listener) throws BrokerException {
+        Subscription subscription = new Subscription(topic, offset, interfaceType, groupId, listener);
         subscription.notifyLoop.start();
         subscription.eventDetectLoop.start();
 
@@ -184,37 +185,37 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     }
 
     @Override
-    public String subscribe(String topic, String offset, String interfaceType, ConsumerListener listener) throws BrokerException {
+    public String subscribe(String topic, String offset, String interfaceType, Long groupId, ConsumerListener listener) throws BrokerException {
         ParamCheckUtils.validateOffset(offset);
         ParamCheckUtils.validateTopicName(topic);
         ParamCheckUtils.validateListenerNotNull(listener);
-        if (!exist(topic)) {
+        if (!exist(topic, groupId)) {
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
         }
         if (!offset.equals(WeEvent.OFFSET_FIRST) && !offset.equals(WeEvent.OFFSET_LAST)) {
-            ParamCheckUtils.validateEventId(topic, offset, this.fiscoBcosDelegate.getBlockHeight(1L));
+            ParamCheckUtils.validateEventId(topic, offset, this.fiscoBcosDelegate.getBlockHeight(groupId));
         }
 
         log.info("subscribe topics: {} offset: {}", topic, offset);
-        return subscribeTopic(topic, offset, interfaceType, listener);
+        return subscribeTopic(topic, offset, interfaceType, groupId, listener);
     }
 
     @Override
-    public String subscribe(String topic, String offset, String subscriptionId, String interfaceType, ConsumerListener listener) throws BrokerException {
+    public String subscribe(String topic, String offset, String subscriptionId, String interfaceType, Long groupId, ConsumerListener listener) throws BrokerException {
         ParamCheckUtils.validateOffset(offset);
         ParamCheckUtils.validateTopicName(topic);
         ParamCheckUtils.validateListenerNotNull(listener);
         ParamCheckUtils.validateSubscriptionId(subscriptionId);
 
-        if (!exist(topic)) {
+        if (!exist(topic, groupId)) {
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
         }
         if (!offset.equals(WeEvent.OFFSET_FIRST) && !offset.equals(WeEvent.OFFSET_LAST)) {
-            ParamCheckUtils.validateEventId(topic, offset, this.fiscoBcosDelegate.getBlockHeight(1L));
+            ParamCheckUtils.validateEventId(topic, offset, this.fiscoBcosDelegate.getBlockHeight(groupId));
         }
 
         log.info("subscribe topics: {} offset: {} subscriptionId:{}", topic, offset, subscriptionId);
-        return subscribeTopic(topic, offset, subscriptionId, interfaceType, listener);
+        return subscribeTopic(topic, offset, subscriptionId, interfaceType, groupId, listener);
     }
 
     @Override
@@ -292,12 +293,13 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
      */
     @Data
     class Subscription {
-        Subscription(String topic, String offset, String interfaceType, IConsumer.ConsumerListener listener) {
+        Subscription(String topic, String offset, String interfaceType, Long groupId, IConsumer.ConsumerListener listener) {
             this.uuid = UUID.randomUUID().toString();
             this.topic = topic;
+            this.groupId = groupId;
             this.offset = offset;
             this.notifyLoop = new NotifyLoop(this.uuid, listener);
-            this.eventDetectLoop = new EventDetectLoop(topic, offset, this.notifyLoop);
+            this.eventDetectLoop = new EventDetectLoop(topic, groupId, offset, this.notifyLoop);
             this.interfaceType = interfaceType;
         }
 
@@ -342,6 +344,11 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
          * Binding topic.
          */
         private String topic;
+
+        /**
+         * Binding groupId.
+         */
+        private Long groupId;
 
         /**
          * Event offset.
@@ -431,7 +438,14 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         private Long cachedBlockHeight = 0L;
 
         private String topic;
+
+        private Long groupId;
+
         private NotifyLoop notifyLoop;
+
+        public void setGroupId(Long groupId) {
+            this.groupId = groupId;
+        }
 
         public void setOffset(String offset) {
             switch (offset) {
@@ -462,12 +476,11 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         // */
         // FasterLoopHelper fasterLoopHelper;
 
-        EventDetectLoop(String topic, String offset, NotifyLoop notifyLoop) {
+        EventDetectLoop(String topic, Long groupId, String offset, NotifyLoop notifyLoop) {
             super("we-event-loop");
             this.topic = topic;
-
+            this.groupId = groupId;
             setOffset(offset);
-
             this.notifyLoop = notifyLoop;
         }
 
@@ -495,7 +508,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             try {
                 // -1 Meanings last block while first loop enter.
                 if (this.lastBlock == -1) {
-                    Long blockHeight = fiscoBcosDelegate.getBlockHeight(1L);
+                    Long blockHeight = fiscoBcosDelegate.getBlockHeight(groupId);
                     if (blockHeight <= 0) {
                         // Don't try too fast if net error.
                         idle();
@@ -510,7 +523,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                 Long currentBlock = this.lastBlock + 1;
                 // Cache may be expired, refresh it.
                 if (currentBlock > this.cachedBlockHeight) {
-                    Long blockHeight = fiscoBcosDelegate.getBlockHeight(1L);
+                    Long blockHeight = fiscoBcosDelegate.getBlockHeight(groupId);
                     if (blockHeight <= 0) {
                         // Don't try too fast if net error.
                         idle();
@@ -528,7 +541,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
                 // Normal loop one block as following.
                 log.debug("once loop, topic: {} cached block height: {}", topic, this.cachedBlockHeight);
-                List<WeEvent> events = loopBlock(currentBlock, topic);
+                List<WeEvent> events = loopBlock(currentBlock, topic, groupId);
                 log.debug("once loop done, block: {} event size: {}", currentBlock, events.size());
 
                 this.pushNotify(events);

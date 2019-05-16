@@ -2,12 +2,14 @@ package com.webank.weevent.broker.fisco;
 
 import java.nio.charset.StandardCharsets;
 
+import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
 
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -32,7 +34,7 @@ public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IPr
 
         ParamCheckUtils.validateEvent(event);
 
-        SendResult sendResult = this.fiscoBcosDelegate.publishEvent(event.getTopic(), new String(event.getContent(), StandardCharsets.UTF_8), event.getExtensions(), 1L);
+        SendResult sendResult = this.fiscoBcosDelegate.publishEvent(event.getTopic(), new String(event.getContent(), StandardCharsets.UTF_8), JSON.toJSONString(event.getExtensions()), Long.parseLong(event.getExtensions().get(WeEventConstants.EXTENSIONS_GROUP_ID)));
         log.info("publish success: {}", sendResult);
         return sendResult;
     }
@@ -45,6 +47,6 @@ public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IPr
         ParamCheckUtils.validateSendCallBackNotNull(callBack);
 
         log.debug("publish with callback input param WeEvent: {}", event);
-        this.fiscoBcosDelegate.publishEvent(event.getTopic(), new String(event.getContent(), StandardCharsets.UTF_8), event.getExtensions(), callBack, 1L);
+        this.fiscoBcosDelegate.publishEvent(event.getTopic(), new String(event.getContent(), StandardCharsets.UTF_8), JSON.toJSONString(event.getExtensions()), callBack, Long.parseLong(event.getExtensions().get(WeEventConstants.EXTENSIONS_GROUP_ID)));
     }
 }

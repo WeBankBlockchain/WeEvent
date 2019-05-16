@@ -106,9 +106,9 @@ public class CGISubscription {
             ZKSubscription zkSubscription = subscription.getValue();
             try {
                 if (zkSubscription.getRestful()) {
-                    doRestSubscribe(zkSubscription.getTopic(), zkSubscription.getSubscriptionId(), zkSubscription.getCallbackUrl());
+                    doRestSubscribe(zkSubscription.getTopic(), zkSubscription.getGroupId(), zkSubscription.getSubscriptionId(), zkSubscription.getCallbackUrl());
                 } else {
-                    doJsonRpcSubscribe(zkSubscription.getTopic(), zkSubscription.getSubscriptionId(), zkSubscription.getCallbackUrl());
+                    doJsonRpcSubscribe(zkSubscription.getTopic(), zkSubscription.getGroupId(), zkSubscription.getSubscriptionId(), zkSubscription.getCallbackUrl());
                 }
             } catch (BrokerException e) {
                 log.error("subscribe from zookeeper failed", e);
@@ -158,7 +158,7 @@ public class CGISubscription {
         }
     }
 
-    private ZKSubscription doJsonRpcSubscribe(String topic, String subscriptionId, String url) throws BrokerException {
+    private ZKSubscription doJsonRpcSubscribe(String topic, Long groupId, String subscriptionId, String url) throws BrokerException {
         IBrokerRpcCallback callback = getJsonRpcCallback(url);
         if (callback == null) {
             log.error("invalid notify url, {}", url);
@@ -186,14 +186,15 @@ public class CGISubscription {
         String subId;
         if (StringUtils.isBlank(subscriptionId)) {
             log.info("new subscribe, topic: {}", topic);
-            subId = this.consumer.subscribe(topic, WeEvent.OFFSET_LAST, "jsonrpc", listener);
+            subId = this.consumer.subscribe(topic, WeEvent.OFFSET_LAST, "jsonrpc", groupId, listener);
         } else {
             log.info("subscribe again, subscriptionId: {}", subscriptionId);
-            subId = this.consumer.subscribe(topic, WeEvent.OFFSET_LAST, subscriptionId, "jsonrpc", listener);
+            subId = this.consumer.subscribe(topic, WeEvent.OFFSET_LAST, subscriptionId, "jsonrpc", groupId, listener);
         }
 
         ZKSubscription zkSubscription = new ZKSubscription();
         zkSubscription.setTopic(topic);
+        zkSubscription.setGroupId(groupId);
         zkSubscription.setSubscriptionId(subId);
         zkSubscription.setRestful(false);
         zkSubscription.setCallbackUrl(url);
@@ -201,14 +202,14 @@ public class CGISubscription {
         return zkSubscription;
     }
 
-    public String jsonRpcSubscribe(String topic, String subscriptionId, String url) throws BrokerException {
+    public String jsonRpcSubscribe(String topic, Long groupId, String subscriptionId, String url) throws BrokerException {
         log.info("json rpc subscribe topic: {}, subscriptionId: {}, url: {}", topic, subscriptionId, url);
 
         if (this.isMaster) {
             log.info("i am leader, do it directly");
 
             ParamCheckUtils.validateUrl(url);
-            ZKSubscription zkSubscription = doJsonRpcSubscribe(topic, subscriptionId, url);
+            ZKSubscription zkSubscription = doJsonRpcSubscribe(topic, groupId, subscriptionId, url);
 
             // local cache
             this.topics.put(zkSubscription.getSubscriptionId(), zkSubscription);
@@ -226,7 +227,7 @@ public class CGISubscription {
                 throw new BrokerException(ErrorCode.HA_ROUTE_TO_MASTER_FAILED);
             }
 
-            return brokerRpc.subscribe(topic, subscriptionId, url);
+            return brokerRpc.subscribe(topic, subscriptionId, url, groupId);
         }
     }
 
@@ -258,7 +259,7 @@ public class CGISubscription {
                 throw new BrokerException(ErrorCode.HA_ROUTE_TO_MASTER_FAILED);
             }
 
-            return brokerRpc.unSubscribe(subscriptionId);
+            return brokerRpc.unSubscribe(subscriptionId, topics.get(subscriptionId).getGroupId());
         }
     }
 
@@ -269,7 +270,7 @@ public class CGISubscription {
         return new RestTemplate(requestFactory);
     }
 
-    private ZKSubscription doRestSubscribe(String topic, String subscriptionId, String url) throws BrokerException {
+    private ZKSubscription doRestSubscribe(String topic, Long groupId, String subscriptionId, String url) throws BrokerException {
         RestTemplate callback = getRestCallback();
 
         IConsumer.ConsumerListener listener = new IConsumer.ConsumerListener() {
@@ -297,28 +298,29 @@ public class CGISubscription {
         String subId;
         if (StringUtils.isBlank(subscriptionId)) {
             log.info("new subscribe, topic: {}", topic);
-            subId = this.consumer.subscribe(topic, WeEvent.OFFSET_LAST, "restful", listener);
+            subId = this.consumer.subscribe(topic, WeEvent.OFFSET_LAST, "restful", groupId, listener);
         } else {
             log.info("subscribe again, subscriptionId: {}", subscriptionId);
-            subId = this.consumer.subscribe(topic, WeEvent.OFFSET_LAST, subscriptionId, "restful", listener);
+            subId = this.consumer.subscribe(topic, WeEvent.OFFSET_LAST, subscriptionId, "restful", groupId, listener);
         }
 
         ZKSubscription zkSubscription = new ZKSubscription();
         zkSubscription.setTopic(topic);
+        zkSubscription.setGroupId(groupId);
         zkSubscription.setSubscriptionId(subId);
         zkSubscription.setRestful(true);
         zkSubscription.setCallbackUrl(url);
         return zkSubscription;
     }
 
-    public String restSubscribe(String topic, String subscriptionId, String url, String urlFormat) throws BrokerException {
+    public String restSubscribe(String topic, Long groupId, String subscriptionId, String url, String urlFormat) throws BrokerException {
         log.info("subscribe topic: {}, url: {} subscriptionId:{}", topic, url, subscriptionId);
 
         if (this.isMaster) {
             log.info("i am leader, do it directly");
 
             ParamCheckUtils.validateUrl(url);
-            ZKSubscription zkSubscription = doRestSubscribe(topic, subscriptionId, url);
+            ZKSubscription zkSubscription = doRestSubscribe(topic, groupId, subscriptionId, url);
 
             // local cache
             this.topics.put(zkSubscription.getSubscriptionId(), zkSubscription);

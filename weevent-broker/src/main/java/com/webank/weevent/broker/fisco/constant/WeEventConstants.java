@@ -68,7 +68,39 @@ public class WeEventConstants {
      */
     public static final Integer EVENT_EXTENSIONS_MAX_LENGTH = 1024;
     /**
-     * Event ID spilt char.
+     * Event ID split char.
      */
     public static final String EVENT_ID_SPLIT_CHAR = "-";
+
+    /**
+     * Extensions split char.
+     */
+    public static final String EXTENSIONS_SPLIT_CHAR = "weevent-";
+
+    /**
+     * Extensions groupid.
+     */
+    public static final String EXTENSIONS_GROUP_ID = "weevent-groupid";
+
+    /**
+     * Extensions eventid.
+     */
+    public static final String EXTENSIONS_EVENT_ID = "weevent-eventid";
+
+    /**
+     * Extensions receivedtopic.
+     */
+    public static final String EXTENSIONS_RECEIVED_TOPIC = "weevent-eventid";
+
+    /**
+     * topic split char.
+     */
+    public static final String TOPIC_SPLIT_ID = "topic";
+
+    /**
+     * content split char.
+     */
+    public static final String CONTENT_SPLIT_ID = "content";
+
+
 }

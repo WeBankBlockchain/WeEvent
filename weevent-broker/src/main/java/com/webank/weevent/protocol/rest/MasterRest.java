@@ -21,9 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class MasterRest extends RestHA {
     // mqtt_add_inbound_topic/mqtt_remove_inbound_topic control mqtt inbound topic
     @RequestMapping(path = "/mqtt_add_inbound_topic", method = RequestMethod.GET)
-    public boolean mqttAddInBoundTopic(@RequestParam(name = "topic") String topic) throws BrokerException {
+    public boolean mqttAddInBoundTopic(@RequestParam(name = "topic") String topic,
+                                       @RequestParam(name = "groupId") String groupId) throws BrokerException {
         checkSupport();
-        return this.masterJob.getMqttTopic().mqttAddInBoundTopic(topic, getUrlFormat(this.request));
+        return this.masterJob.getMqttTopic().mqttAddInBoundTopic(topic, Long.parseLong(groupId), getUrlFormat(this.request));
     }
 
     @RequestMapping(path = "/mqtt_remove_inbound_topic", method = RequestMethod.GET)
@@ -34,9 +35,10 @@ public class MasterRest extends RestHA {
 
     // mqtt_add_outbound_topic/mqtt_remove_outbound_topic control mqtt outbound topic
     @RequestMapping(path = "/mqtt_add_outbound_topic", method = RequestMethod.GET)
-    public boolean mqttAddOutBoundTopic(@RequestParam(name = "topic") String topic) throws BrokerException {
+    public boolean mqttAddOutBoundTopic(@RequestParam(name = "topic") String topic,
+                                        @RequestParam(name = "groupId") String groupId) throws BrokerException {
         checkSupport();
-        return this.masterJob.getMqttTopic().mqttAddOutBoundTopic(topic, getUrlFormat(this.request));
+        return this.masterJob.getMqttTopic().mqttAddOutBoundTopic(topic, Long.parseLong(groupId), getUrlFormat(this.request));
     }
 
     @RequestMapping(path = "/mqtt_remove_outbound_topic", method = RequestMethod.GET)
