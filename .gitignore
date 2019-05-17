@@ -1,6 +1,7 @@
 .gradle
 /logs/
 */build/
+*/dist/
 */out/
 !gradle/wrapper/gradle-wrapper.jar
 
