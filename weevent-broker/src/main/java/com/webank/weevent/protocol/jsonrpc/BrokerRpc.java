@@ -2,7 +2,6 @@ package com.webank.weevent.protocol.jsonrpc;
 
 import java.util.Map;
 
-import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.util.WeEventUtils;
 import com.webank.weevent.broker.ha.MasterJob;
 import com.webank.weevent.sdk.BrokerException;
@@ -67,7 +66,7 @@ public class BrokerRpc implements IBrokerRpc {
                               @JsonRpcParam(value = "content") byte[] content,
                               @JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException {
 
-        return this.producer.publish(new WeEvent(topic, content, extensions),WeEventUtils.getGroupId(groupId));
+        return this.producer.publish(new WeEvent(topic, content, extensions), WeEventUtils.getGroupId(groupId));
     }
 
     @Override
