@@ -203,7 +203,7 @@ public class WeEventClient {
      * @return true if success
      * @throws BrokerException broker exception
      */
-    public boolean open(String topic, Long groupId) throws BrokerException {
+    public boolean open(String topic, String groupId) throws BrokerException {
         return this.brokerRpc.open(topic, groupId);
     }
 
@@ -215,7 +215,7 @@ public class WeEventClient {
      * @return true if success
      * @throws BrokerException broker exception
      */
-    public boolean close(String topic, Long groupId) throws BrokerException {
+    public boolean close(String topic, String groupId) throws BrokerException {
         return this.brokerRpc.close(topic, groupId);
     }
 
@@ -227,7 +227,7 @@ public class WeEventClient {
      * @return true if exist
      * @throws BrokerException broker exception
      */
-    public boolean exist(String topic, Long groupId) throws BrokerException {
+    public boolean exist(String topic, String groupId) throws BrokerException {
         return this.brokerRpc.exist(topic, groupId);
     }
 
@@ -239,7 +239,7 @@ public class WeEventClient {
      * @return topic list
      * @throws BrokerException broker exception
      */
-    public TopicPage list(Integer pageIndex, Integer pageSize, Long groupId) throws BrokerException {
+    public TopicPage list(Integer pageIndex, Integer pageSize, String groupId) throws BrokerException {
         return this.brokerRpc.list(pageIndex, pageSize, groupId);
     }
 
@@ -250,7 +250,7 @@ public class WeEventClient {
      * @return topic information
      * @throws BrokerException broker exception
      */
-    public TopicInfo state(String topic, Long groupId) throws BrokerException {
+    public TopicInfo state(String topic, String groupId) throws BrokerException {
         return this.brokerRpc.state(topic, groupId);
     }
 
@@ -261,7 +261,7 @@ public class WeEventClient {
      * @return weevent
      * @throws BrokerException broker exception
      */
-    public WeEvent getEvent(String eventId, Long groupId) throws BrokerException {
+    public WeEvent getEvent(String eventId, String groupId) throws BrokerException {
         return this.brokerRpc.getEvent(eventId, groupId);
     }
 

@@ -36,28 +36,27 @@ public interface IBrokerRpc {
     String subscribe(@JsonRpcParam(value = "topic") String topic,
                      @JsonRpcParam(value = "subscriptionId") String subscriptionId,
                      @JsonRpcParam(value = "url") String url,
-                     @JsonRpcParam(value = "groupId") Long groupId) throws BrokerException;
+                     @JsonRpcParam(value = "groupId") String groupId) throws BrokerException;
 
-    boolean unSubscribe(@JsonRpcParam(value = "subscriptionId") String subscriptionId,
-                        @JsonRpcParam(value = "groupId") Long groupId) throws BrokerException;
+    boolean unSubscribe(@JsonRpcParam(value = "subscriptionId") String subscriptionId) throws BrokerException;
 
     // The following is interface for IEventTopic.
     boolean open(@JsonRpcParam(value = "topic") String topic,
-                 @JsonRpcParam(value = "groupId") Long groupId) throws BrokerException;
+                 @JsonRpcParam(value = "groupId") String groupId) throws BrokerException;
 
     boolean close(@JsonRpcParam(value = "topic") String topic,
-                  @JsonRpcParam(value = "groupId") Long groupId) throws BrokerException;
+                  @JsonRpcParam(value = "groupId") String groupId) throws BrokerException;
 
     boolean exist(@JsonRpcParam(value = "topic") String topic,
-                  @JsonRpcParam(value = "groupId") Long groupId) throws BrokerException;
+                  @JsonRpcParam(value = "groupId") String groupId) throws BrokerException;
 
     TopicPage list(@JsonRpcParam(value = "pageIndex") Integer pageIndex,
                    @JsonRpcParam(value = "pageSize") Integer pageSize,
-                   @JsonRpcParam(value = "groupId") Long groupId) throws BrokerException;
+                   @JsonRpcParam(value = "groupId") String groupId) throws BrokerException;
 
     TopicInfo state(@JsonRpcParam(value = "topic") String topic,
-                    @JsonRpcParam(value = "groupId") Long groupId) throws BrokerException;
+                    @JsonRpcParam(value = "groupId") String groupId) throws BrokerException;
 
     WeEvent getEvent(@JsonRpcParam(value = "eventId") String eventId,
-                     @JsonRpcParam(value = "groupId") Long groupId) throws BrokerException;
+                     @JsonRpcParam(value = "groupId") String groupId) throws BrokerException;
 }

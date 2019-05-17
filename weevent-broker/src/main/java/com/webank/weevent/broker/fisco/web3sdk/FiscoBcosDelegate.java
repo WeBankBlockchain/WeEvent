@@ -185,7 +185,7 @@ public class FiscoBcosDelegate {
         }
     }
 
-    public void publishEvent(String topicName, String eventContent, String extensions, IProducer.SendCallBack callBack, Long groupId) throws BrokerException {
+    public void publishEvent(String topicName, String eventContent, String extensions, Long groupId, IProducer.SendCallBack callBack) throws BrokerException {
         checkVersion(groupId);
 
         if (this.fiscoBcos != null) {

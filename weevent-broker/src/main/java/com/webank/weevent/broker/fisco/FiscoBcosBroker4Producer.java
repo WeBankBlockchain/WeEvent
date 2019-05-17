@@ -47,6 +47,6 @@ public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IPr
         ParamCheckUtils.validateSendCallBackNotNull(callBack);
 
         log.debug("publish with callback input param WeEvent: {}", event);
-        this.fiscoBcosDelegate.publishEvent(event.getTopic(), new String(event.getContent(), StandardCharsets.UTF_8), JSON.toJSONString(event.getExtensions()), callBack, Long.parseLong(event.getExtensions().get(WeEventConstants.EXTENSIONS_GROUP_ID)));
+        this.fiscoBcosDelegate.publishEvent(event.getTopic(), new String(event.getContent(), StandardCharsets.UTF_8), JSON.toJSONString(event.getExtensions()), Long.parseLong(event.getExtensions().get(WeEventConstants.EXTENSIONS_GROUP_ID)), callBack);
     }
 }

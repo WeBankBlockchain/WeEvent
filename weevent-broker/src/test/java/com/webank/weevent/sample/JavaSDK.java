@@ -15,6 +15,7 @@ import com.webank.weevent.sdk.WeEventClient;
  */
 public class JavaSDK {
     private final static String topicName = "com.weevent.test";
+    private final static String groupId = "1";
 
     public static void main(String[] args) {
         System.out.println("This is WeEvent Java SDK sample.");
@@ -24,7 +25,7 @@ public class JavaSDK {
             WeEventClient client = new WeEventClient("http://localhost:8080/weevent");
 
             // ensure topic exist
-            client.open(topicName);
+            client.open(topicName, groupId);
 
             // subscribe topic
             String subscriptionId = client.subscribe(topicName, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
@@ -41,7 +42,7 @@ public class JavaSDK {
 
             // publish event
             for (int i = 0; i < 10; i++) {
-                client.publish(topicName, ("hello weevent: " + i).getBytes(StandardCharsets.UTF_8), "");
+                client.publish(topicName, ("hello weevent: " + i).getBytes(StandardCharsets.UTF_8), null);
             }
 
             // unSubscribe topic

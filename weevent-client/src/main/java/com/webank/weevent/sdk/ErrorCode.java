@@ -39,6 +39,8 @@ public enum ErrorCode {
 
     EVENT_EXTENSIONS_GROUP_ID_NOT_FOUND(100205, "event extensions groupid is notfound"),
 
+    EVENT_EXTENSIONS_GROUP_ID_INVALID(100206, "event extensions groupid should be an string start from 1"),
+
     EVENT_ID_IS_BLANK(100300, "eventId is blank"),
 
     EVENT_ID_EXCEEDS_MAX_LENGTH(100301, "eventId exceeds max length[32 bytes]"),

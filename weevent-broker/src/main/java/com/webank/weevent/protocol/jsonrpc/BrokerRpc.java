@@ -3,6 +3,7 @@ package com.webank.weevent.protocol.jsonrpc;
 import java.util.Map;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.util.WeEventUtils;
 import com.webank.weevent.broker.ha.MasterJob;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
@@ -74,54 +75,53 @@ public class BrokerRpc implements IBrokerRpc {
 
     @Override
     public WeEvent getEvent(@JsonRpcParam(value = "eventId") String eventId,
-                            @JsonRpcParam(value = "groupId") Long groupId) throws BrokerException {
-        return this.producer.getEvent(eventId, groupId);
+                            @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
+        return this.producer.getEvent(eventId, WeEventUtils.getGroupId(groupId));
     }
 
     @Override
     public String subscribe(@JsonRpcParam(value = "topic") String topic,
                             @JsonRpcParam(value = "subscriptionId") String subscriptionId,
                             @JsonRpcParam(value = "url") String url,
-                            @JsonRpcParam(value = "groupId") Long groupId) throws BrokerException {
+                            @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
         checkSupport();
-        return this.masterJob.getCgiSubscription().jsonRpcSubscribe(topic, groupId, subscriptionId, url);
+        return this.masterJob.getCgiSubscription().jsonRpcSubscribe(topic, WeEventUtils.getGroupId(groupId), subscriptionId, url);
     }
 
     @Override
-    public boolean unSubscribe(@JsonRpcParam(value = "subscriptionId") String subscriptionId,
-                               @JsonRpcParam(value = "groupId") Long groupId) throws BrokerException {
+    public boolean unSubscribe(@JsonRpcParam(value = "subscriptionId") String subscriptionId) throws BrokerException {
         checkSupport();
         return this.masterJob.getCgiSubscription().jsonRpcUnSubscribe(subscriptionId);
     }
 
     @Override
     public boolean open(@JsonRpcParam(value = "topic") String topic,
-                        @JsonRpcParam(value = "groupId") Long groupId) throws BrokerException {
-        return this.producer.open(topic, groupId);
+                        @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
+        return this.producer.open(topic, WeEventUtils.getGroupId(groupId));
     }
 
     @Override
     public boolean close(@JsonRpcParam(value = "topic") String topic,
-                         @JsonRpcParam(value = "groupId") Long groupId) throws BrokerException {
-        return this.producer.close(topic, groupId);
+                         @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
+        return this.producer.close(topic, WeEventUtils.getGroupId(groupId));
     }
 
     @Override
     public boolean exist(@JsonRpcParam(value = "topic") String topic,
-                         @JsonRpcParam(value = "groupId") Long groupId) throws BrokerException {
-        return this.producer.exist(topic, groupId);
+                         @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
+        return this.producer.exist(topic, WeEventUtils.getGroupId(groupId));
     }
 
     @Override
     public TopicPage list(@JsonRpcParam(value = "pageIndex") Integer pageIndex,
                           @JsonRpcParam(value = "pageSize") Integer pageSize,
-                          @JsonRpcParam(value = "groupId") Long groupId) throws BrokerException {
-        return this.producer.list(pageIndex, pageSize, groupId);
+                          @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
+        return this.producer.list(pageIndex, pageSize, WeEventUtils.getGroupId(groupId));
     }
 
     @Override
     public TopicInfo state(@JsonRpcParam(value = "topic") String topic,
-                           @JsonRpcParam(value = "groupId") Long groupId) throws BrokerException {
-        return this.producer.state(topic, groupId);
+                           @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
+        return this.producer.state(topic, WeEventUtils.getGroupId(groupId));
     }
 }
