@@ -186,10 +186,10 @@ public class CGISubscription {
         String subId;
         if (StringUtils.isBlank(subscriptionId)) {
             log.info("new subscribe, topic: {}", topic);
-            subId = this.consumer.subscribe(topic, WeEvent.OFFSET_LAST, "jsonrpc", groupId, listener);
+            subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, "jsonrpc", listener);
         } else {
             log.info("subscribe again, subscriptionId: {}", subscriptionId);
-            subId = this.consumer.subscribe(topic, WeEvent.OFFSET_LAST, subscriptionId, "jsonrpc", groupId, listener);
+            subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, subscriptionId, "jsonrpc", listener);
         }
 
         ZKSubscription zkSubscription = new ZKSubscription();
@@ -298,10 +298,10 @@ public class CGISubscription {
         String subId;
         if (StringUtils.isBlank(subscriptionId)) {
             log.info("new subscribe, topic: {}", topic);
-            subId = this.consumer.subscribe(topic, WeEvent.OFFSET_LAST, "restful", groupId, listener);
+            subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, "restful", listener);
         } else {
             log.info("subscribe again, subscriptionId: {}", subscriptionId);
-            subId = this.consumer.subscribe(topic, WeEvent.OFFSET_LAST, subscriptionId, "restful", groupId, listener);
+            subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, subscriptionId, "restful", listener);
         }
 
         ZKSubscription zkSubscription = new ZKSubscription();

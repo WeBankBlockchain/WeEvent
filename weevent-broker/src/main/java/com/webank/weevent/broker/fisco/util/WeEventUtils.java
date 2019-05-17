@@ -17,7 +17,7 @@ public class WeEventUtils {
     public static Map<String, String> getExtensions(Map<String, String> eventData) throws BrokerException {
         Map<String, String> extensions = new HashMap<>();
         for (Map.Entry<String, String> extension : eventData.entrySet()) {
-            if (extension.getKey().contains(WeEventConstants.EXTENSIONS_PREFIX_CHAR)) {
+            if (extension.getKey().startsWith(WeEventConstants.EXTENSIONS_PREFIX_CHAR)) {
                 extensions.put(extension.getKey(), extension.getValue());
             }
         }
@@ -32,7 +32,7 @@ public class WeEventUtils {
     public static Map<String, String> getObjectExtensions(Map<String, Object> eventData) throws BrokerException {
         Map<String, String> extensions = new HashMap<>();
         for (Map.Entry<String, Object> extension : eventData.entrySet()) {
-            if (extension.getKey().contains(WeEventConstants.EXTENSIONS_PREFIX_CHAR)) {
+            if (extension.getKey().startsWith(WeEventConstants.EXTENSIONS_PREFIX_CHAR)) {
                 extensions.put(extension.getKey(), extension.getValue().toString());
             }
         }

@@ -134,7 +134,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     }
 
     @Override
-    public Map<String, String> subscribe(Map<String, String> topics, String interfaceType, Long groupId, ConsumerListener listener) throws BrokerException {
+    public Map<String, String> subscribe(Map<String, String> topics, Long groupId, String interfaceType, ConsumerListener listener) throws BrokerException {
         ParamCheckUtils.validateListenerNotNull(listener);
 
         // check params in map
@@ -142,7 +142,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
         Map<String, String> subscriptions = new HashMap<>();
         for (Map.Entry<String, String> entry : topics.entrySet()) {
-            String subscriptionId = subscribeTopic(entry.getKey(), entry.getValue(), interfaceType, groupId, listener);
+            String subscriptionId = subscribeTopic(entry.getKey(), groupId, entry.getValue(), interfaceType, listener);
             subscriptions.put(entry.getKey(), subscriptionId);
         }
 
@@ -150,7 +150,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         return subscriptions;
     }
 
-    private String subscribeTopic(String topic, String offset, String subscriptionId, String interfaceType, Long groupId, ConsumerListener listener) throws BrokerException {
+    private String subscribeTopic(String topic, Long groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener) throws BrokerException {
         try {
             UUID.fromString(subscriptionId);
         } catch (IllegalArgumentException e) {
@@ -158,7 +158,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         }
 
         if (!this.subscriptions.containsKey(subscriptionId)) {
-            Subscription subscription = new Subscription(topic, offset, interfaceType, groupId, listener);
+            Subscription subscription = new Subscription(topic, groupId, offset, interfaceType, listener);
             subscription.setUuid(subscriptionId);
             subscription.notifyLoop.setSubscriptionId(subscriptionId);
             subscription.notifyLoop.start();
@@ -175,8 +175,8 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         return this.subscriptions.get(subscriptionId).uuid;
     }
 
-    private String subscribeTopic(String topic, String offset, String interfaceType, Long groupId, ConsumerListener listener) throws BrokerException {
-        Subscription subscription = new Subscription(topic, offset, interfaceType, groupId, listener);
+    private String subscribeTopic(String topic, Long groupId, String offset, String interfaceType, ConsumerListener listener) throws BrokerException {
+        Subscription subscription = new Subscription(topic, groupId, offset, interfaceType, listener);
         subscription.notifyLoop.start();
         subscription.eventDetectLoop.start();
 
@@ -185,7 +185,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     }
 
     @Override
-    public String subscribe(String topic, String offset, String interfaceType, Long groupId, ConsumerListener listener) throws BrokerException {
+    public String subscribe(String topic, Long groupId, String offset, String interfaceType, ConsumerListener listener) throws BrokerException {
         ParamCheckUtils.validateOffset(offset);
         ParamCheckUtils.validateTopicName(topic);
         ParamCheckUtils.validateListenerNotNull(listener);
@@ -197,11 +197,11 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         }
 
         log.info("subscribe topics: {} offset: {}", topic, offset);
-        return subscribeTopic(topic, offset, interfaceType, groupId, listener);
+        return subscribeTopic(topic, groupId, offset, interfaceType, listener);
     }
 
     @Override
-    public String subscribe(String topic, String offset, String subscriptionId, String interfaceType, Long groupId, ConsumerListener listener) throws BrokerException {
+    public String subscribe(String topic, Long groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener) throws BrokerException {
         ParamCheckUtils.validateOffset(offset);
         ParamCheckUtils.validateTopicName(topic);
         ParamCheckUtils.validateListenerNotNull(listener);
@@ -215,7 +215,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         }
 
         log.info("subscribe topics: {} offset: {} subscriptionId:{}", topic, offset, subscriptionId);
-        return subscribeTopic(topic, offset, subscriptionId, interfaceType, groupId, listener);
+        return subscribeTopic(topic, groupId, offset, subscriptionId, interfaceType, listener);
     }
 
     @Override
@@ -293,7 +293,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
      */
     @Data
     class Subscription {
-        Subscription(String topic, String offset, String interfaceType, Long groupId, IConsumer.ConsumerListener listener) {
+        Subscription(String topic, Long groupId, String offset, String interfaceType, IConsumer.ConsumerListener listener) {
             this.uuid = UUID.randomUUID().toString();
             this.topic = topic;
             this.groupId = groupId;

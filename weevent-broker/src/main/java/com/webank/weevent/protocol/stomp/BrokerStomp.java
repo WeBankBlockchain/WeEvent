@@ -386,9 +386,9 @@ public class BrokerStomp extends TextWebSocketHandler {
         // support only one topic
         try {
             String subscriptionId = this.iconsumer.subscribe(curTopicList[0],
+                    groupId,
                     subEventId,
                     "stomp",
-                    groupId,
                     new IConsumer.ConsumerListener() {
                         @Override
                         public void onEvent(String subscriptionId, WeEvent event) {
