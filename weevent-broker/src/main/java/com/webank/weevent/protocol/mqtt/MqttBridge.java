@@ -96,6 +96,11 @@ public class MqttBridge implements MessageHandler {
     public void handleMessage(Message<?> message) throws MessagingException {
         MessageHeaders handlers = message.getHeaders();
         Object topicKey = handlers.get(WeEventConstants.EXTENSIONS_RECEIVED_TOPIC);
+        if (topicKey == null) {
+            log.error("unknown {} extension", WeEventConstants.EXTENSIONS_RECEIVED_TOPIC);
+            return;
+        }
+
         Map<String, String> extensions = new HashMap<>();
         try {
             extensions = WeEventUtils.getObjectExtensions(handlers);
@@ -103,10 +108,13 @@ public class MqttBridge implements MessageHandler {
             log.error("getExtensions exception:{}", e);
             return;
         }
-
-        if (topicKey == null) {
-            log.error("unknown {} extension", WeEventConstants.EXTENSIONS_RECEIVED_TOPIC);
-            return;
+        Long groupId = WeEventConstants.DEFAULT_GROUP_ID;
+        if (handlers.containsKey(WeEventConstants.EVENT_GROUP_ID)) {
+            try {
+                groupId = WeEventUtils.getGroupId(handlers.get(WeEventConstants.EVENT_GROUP_ID).toString());
+            } catch (BrokerException e) {
+                return;
+            }
         }
 
         String topic = topicKey.toString();
@@ -116,7 +124,7 @@ public class MqttBridge implements MessageHandler {
         // publish to event broker
         WeEvent weEvent = new WeEvent(topic, payload.getBytes(StandardCharsets.UTF_8), extensions);
         try {
-            SendResult sendResult = this.producer.publish(weEvent);
+            SendResult sendResult = this.producer.publish(weEvent, groupId);
             log.info("publish ok, {}", sendResult);
         } catch (BrokerException e) {
             log.error("publish failed", e);

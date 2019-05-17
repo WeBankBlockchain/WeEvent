@@ -23,12 +23,9 @@ import com.googlecode.jsonrpc4j.JsonRpcService;
 public interface IBrokerRpc {
     // Interface for producer.
     default SendResult publish(@JsonRpcParam(value = "topic") String topic,
+                               @JsonRpcParam(value = "groupId") String groupId,
                                @JsonRpcParam(value = "content") byte[] content,
                                @JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException {
-        return null;
-    }
-
-    default SendResult publish(@JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException {
         return null;
     }
 

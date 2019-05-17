@@ -22,8 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.webank.weevent.sdk.ErrorCode.EVENT_EXTENSIONS_GROUP_ID_NOT_FOUND;
-
 /**
  * Implement of Restful service.
  * Client access over restful api only, no client sdk.
@@ -50,21 +48,24 @@ public class BrokerRest extends RestHA implements IBrokerRpc {
         this.consumer = consumer;
     }
 
-    @Override
     @RequestMapping(path = "/publish")
     public SendResult publish(@RequestParam Map<String, String> eventData) throws BrokerException {
         log.debug("topic: {}, content.length: {}", eventData.get("topic"), eventData.get("content").getBytes().length);
         Map<String, String> extensions = WeEventUtils.getExtensions(eventData);
         WeEvent event = new WeEvent(eventData.get(WeEventConstants.EVENT_TOPIC), eventData.get(WeEventConstants.EVENT_CONTENT).getBytes(), extensions);
-        return this.producer.publish(event);
+        Long group = WeEventConstants.DEFAULT_GROUP_ID;
+        if (eventData.containsKey(WeEventConstants.EVENT_GROUP_ID)) {
+            group = WeEventUtils.getGroupId(eventData.get(WeEventConstants.EVENT_GROUP_ID));
+        }
+        return this.producer.publish(event, group);
     }
 
     @Override
     @RequestMapping(path = "/subscribe")
     public String subscribe(@RequestParam(name = "topic") String topic,
+                            @RequestParam(name = "groupId", required = false) String groupId,
                             @RequestParam(name = "subscriptionId", required = false) String subscriptionId,
-                            @RequestParam(name = "url") String url,
-                            @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+                            @RequestParam(name = "url") String url) throws BrokerException {
         checkSupport();
         return this.masterJob.getCgiSubscription().restSubscribe(topic,
                 WeEventUtils.getGroupId(groupId),

@@ -117,8 +117,8 @@ public class WeEventClient {
      * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
      * @throws BrokerException broker exception
      */
-    public SendResult publish(String topic, byte[] content, Map<String, String> extensions) throws BrokerException {
-        return this.brokerRpc.publish(topic, content, extensions);
+    public SendResult publish(String topic, String groupId, byte[] content, Map<String, String> extensions) throws BrokerException {
+        return this.brokerRpc.publish(topic, groupId, content, extensions);
     }
 
     /**

@@ -21,8 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static com.webank.weevent.sdk.ErrorCode.EVENT_EXTENSIONS_GROUP_ID_NOT_FOUND;
-
 /**
  * Implement of JsonRpc service.
  *
@@ -65,12 +63,11 @@ public class BrokerRpc implements IBrokerRpc {
 
     @Override
     public SendResult publish(@JsonRpcParam(value = "topic") String topic,
+                              @JsonRpcParam(value = "groupId") String groupId,
                               @JsonRpcParam(value = "content") byte[] content,
                               @JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException {
-        if (!extensions.containsKey(WeEventConstants.EXTENSIONS_GROUP_ID)) {
-            throw new BrokerException(EVENT_EXTENSIONS_GROUP_ID_NOT_FOUND);
-        }
-        return this.producer.publish(new WeEvent(topic, content, extensions));
+
+        return this.producer.publish(new WeEvent(topic, content, extensions),WeEventUtils.getGroupId(groupId));
     }
 
     @Override

@@ -113,7 +113,7 @@ public class BrokerStomp extends TextWebSocketHandler {
             StompCommand command;
             LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) msg.getHeaders().get("nativeHeaders"));
             Map<String, String> extensions = new HashMap<>();
-            Long groupId = 1L;
+            Long groupId = WeEventConstants.DEFAULT_GROUP_ID;
             if (nativeHeaders != null) {
                 // send command receipt Id
                 Object headerReceiptId = nativeHeaders.get("receipt");
@@ -127,7 +127,13 @@ public class BrokerStomp extends TextWebSocketHandler {
                 }
                 //extensions
                 extensions = WeEventUtils.getExtensions(nativeHeaders);
-                groupId = Long.parseLong(extensions.get(WeEventConstants.EXTENSIONS_GROUP_ID));
+                if (nativeHeaders.containsKey(WeEventConstants.EVENT_GROUP_ID)) {
+                    try {
+                        groupId = WeEventUtils.getGroupId(nativeHeaders.get(WeEventConstants.EVENT_GROUP_ID).toString());
+                    } catch (BrokerException e) {
+                        return;
+                    }
+                }
                 // client send event id
                 Object headerEventId = nativeHeaders.get(WeEventConstants.EXTENSIONS_EVENT_ID);
                 if (headerEventId != null) {
@@ -161,7 +167,7 @@ public class BrokerStomp extends TextWebSocketHandler {
                     break;
 
                 case "SEND":
-                    String eventId = handleSend(msg, simpDestination, extensions);
+                    String eventId = handleSend(msg, simpDestination, extensions, groupId);
                     if (eventId.isEmpty()) {
                         command = StompCommand.ERROR;
                     } else {
@@ -177,9 +183,9 @@ public class BrokerStomp extends TextWebSocketHandler {
                     String subscriptionId;
                     log.info("SUBSCRIBE subEventId:{}", subEventId);
                     if (null == subEventId || "".equals(subEventId)) {
-                        subscriptionId = handleSubscribe(session, simpDestination, headerIdStr, WeEvent.OFFSET_LAST, groupId);
+                        subscriptionId = handleSubscribe(session, simpDestination, groupId, headerIdStr, WeEvent.OFFSET_LAST);
                     } else {
-                        subscriptionId = handleSubscribe(session, simpDestination, headerIdStr, subEventId, groupId);
+                        subscriptionId = handleSubscribe(session, simpDestination, groupId, headerIdStr, subEventId);
                     }
 
                     if (subscriptionId.isEmpty()) {
@@ -334,7 +340,7 @@ public class BrokerStomp extends TextWebSocketHandler {
      * @param simpDestination topic name
      * @return String return event id if publish ok, else ""
      */
-    private String handleSend(Message<byte[]> msg, String simpDestination, Map<String, String> extensions) {
+    private String handleSend(Message<byte[]> msg, String simpDestination, Map<String, String> extensions, Long groupId) {
         try {
             if (!this.iproducer.open(simpDestination, Long.parseLong(extensions.get(WeEventConstants.EXTENSIONS_GROUP_ID)))) {
                 log.error("producer open failed");
@@ -344,7 +350,7 @@ public class BrokerStomp extends TextWebSocketHandler {
                 log.error("producer start failed");
                 return "";
             }
-            SendResult sendResult = this.iproducer.publish(new WeEvent(simpDestination, msg.getPayload(), extensions));
+            SendResult sendResult = this.iproducer.publish(new WeEvent(simpDestination, msg.getPayload(), extensions), groupId);
             log.info("publish result, {}", sendResult);
             if (sendResult.getStatus() != SendResult.SendResultStatus.SUCCESS) {
                 log.error("producer publish failed");
@@ -366,7 +372,7 @@ public class BrokerStomp extends TextWebSocketHandler {
      * @return String consumer subscription id, return "" if error
      * @throws Exception Exception
      */
-    private String handleSubscribe(WebSocketSession session, String simpDestination, String headerIdStr, String subEventId, Long groupId) throws Exception {
+    private String handleSubscribe(WebSocketSession session, String simpDestination, Long groupId, String headerIdStr, String subEventId) throws Exception {
         log.info("destination: {} header subscribe id: {}", simpDestination, headerIdStr);
 
         String[] curTopicList;

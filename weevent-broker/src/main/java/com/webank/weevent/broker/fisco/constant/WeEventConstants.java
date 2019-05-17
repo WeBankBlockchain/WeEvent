@@ -85,7 +85,7 @@ public class WeEventConstants {
     /**
      * Extensions default groupid.
      */
-    public static final String EXTENSIONS_DEFAULT_GROUP_ID = "1";
+    public static final Long DEFAULT_GROUP_ID = 1L;
 
     /**
      * Extensions eventid.
@@ -101,6 +101,11 @@ public class WeEventConstants {
      * event topic.
      */
     public static final String EVENT_TOPIC = "topic";
+
+    /**
+     * event topic.
+     */
+    public static final String EVENT_GROUP_ID = "groupId";
 
     /**
      * event content.
