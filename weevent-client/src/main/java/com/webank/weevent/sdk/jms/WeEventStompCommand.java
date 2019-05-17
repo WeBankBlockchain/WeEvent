@@ -77,11 +77,11 @@ public class WeEventStompCommand {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
         accessor.setDestination(topic.getTopicName());
         accessor.setNativeHeader("eventId", offset);
-        accessor.setNativeHeader("id",Long.toString(id));
+        accessor.setNativeHeader("id", Long.toString(id));
         return encodeRaw(accessor);
     }
 
-    public String encodeUnSubscribe(String subscriptionId,String headerId) {
+    public String encodeUnSubscribe(String subscriptionId, String headerId) {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.UNSUBSCRIBE);
         accessor.setNativeHeader(StompHeaderAccessor.SUBSCRIPTION_ID_HEADER, subscriptionId);
         accessor.setNativeHeader(StompHeaderAccessor.STOMP_SUBSCRIPTION_HEADER, subscriptionId);
@@ -95,7 +95,7 @@ public class WeEventStompCommand {
         accessor.setDestination(topic.getTopicName());
         accessor.setContentType(new MimeType("application", "json", StandardCharsets.UTF_8));
         accessor.setContentLength(payload.length);
-        accessor.setNativeHeader("receipt",Long.toString(id));
+        accessor.setNativeHeader("receipt", Long.toString(id));
 
         return encodeRaw(accessor, payload);
     }
@@ -118,6 +118,6 @@ public class WeEventStompCommand {
     public String getSubscriptionId(Message message) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
 
-        return  accessor.getNativeHeader("subscription-id").get(0).toString();
+        return accessor.getNativeHeader("subscription-id").get(0).toString();
     }
 }

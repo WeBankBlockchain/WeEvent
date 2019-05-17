@@ -111,7 +111,6 @@ public class BrokerStomp extends TextWebSocketHandler {
             String headerReceiptIdStr = "";
             String headerIdStr = "";
             String subEventId = "";
-
             StompCommand command;
 
             LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) msg.getHeaders().get("nativeHeaders"));
@@ -125,12 +124,9 @@ public class BrokerStomp extends TextWebSocketHandler {
 
                 // subscribe command id
                 Object headerId = nativeHeaders.get("id");
-                Object fromclientsubscription = nativeHeaders.get("subscription");
                 // client send event id
                 Object headerEventId;
                 headerEventId = nativeHeaders.get("eventId");
-
-
                 if (headerId != null) {
                     headerIdStr = ((List) headerId).get(0).toString();
                 }
@@ -196,8 +192,8 @@ public class BrokerStomp extends TextWebSocketHandler {
                     // a unique identifier for that message and a subscription header matching the identifier of the subscription that is receiving the message.
                     accessor.setReceiptId(headerIdStr);
                     accessor.setSubscriptionId(subscriptionId);
-                    accessor.setNativeHeader("subscription-id",subscriptionId);
-                    log.info("receipt id {},sub id{}",headerIdStr,subscriptionId);
+                    accessor.setNativeHeader("subscription-id", subscriptionId);
+                    log.info("receipt id {},sub id{}", headerIdStr, subscriptionId);
                     sendSimpleMessage(session, accessor);
                     break;
 
@@ -323,7 +319,7 @@ public class BrokerStomp extends TextWebSocketHandler {
                 return;
             }
 
-            log.info("send message to remote, {},text message{}", session.getId(),textMessage.toString());
+            log.info("send message to remote, {},text message{}", session.getId(), textMessage.toString());
             session.sendMessage(textMessage);
         } catch (IOException e) {
             log.error("exception in send simple message to remote", e);
@@ -340,7 +336,7 @@ public class BrokerStomp extends TextWebSocketHandler {
     }
 
     /**
-     * @param msg message
+     * @param msg             message
      * @param simpDestination topic name
      * @return String return event id if publish ok, else ""
      */
@@ -371,9 +367,9 @@ public class BrokerStomp extends TextWebSocketHandler {
     }
 
     /**
-     * @param session stomp session
+     * @param session         stomp session
      * @param simpDestination topic name
-     * @param headerIdStr header id
+     * @param headerIdStr     header id
      * @return String consumer subscription id, return "" if error
      * @throws Exception Exception
      */
@@ -414,13 +410,12 @@ public class BrokerStomp extends TextWebSocketHandler {
                             }
 
                             try {
-                                log.info("consumer onEvent, subscriptionId: {} event: {} headerIdStr: {}", subscriptionId, event,headerIdStr);
-
+                                log.info("consumer onEvent, subscriptionId: {} event: {} headerIdStr: {}", subscriptionId, event, headerIdStr);
 
                                 StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.MESSAGE);
                                 accessor.setSubscriptionId(headerIdStr);
-                                accessor.setNativeHeader("subscription-id",subscriptionId);
-                                accessor.setNativeHeader("message-id",headerIdStr);
+                                accessor.setNativeHeader("subscription-id", subscriptionId);
+                                accessor.setNativeHeader("message-id", headerIdStr);
                                 accessor.setMessageId(headerIdStr);
                                 accessor.setContentType(new MimeType("text", "plain", StandardCharsets.UTF_8));
                                 ObjectMapper mapper = new ObjectMapper();
@@ -428,7 +423,6 @@ public class BrokerStomp extends TextWebSocketHandler {
                                 Message<byte[]> message1 = MessageBuilder.createMessage(mapper.writeValueAsBytes(event), headers);
                                 byte[] bytes = new StompEncoder().encode(message1);
                                 TextMessage textMessage = new TextMessage(bytes);
-
                                 send2Remote(session, textMessage);
                             } catch (IOException e) {
                                 log.error("exception in session.sendMessage", e);
@@ -454,17 +448,16 @@ public class BrokerStomp extends TextWebSocketHandler {
     }
 
     /**
-     * @param session stomp session
+     * @param session     stomp session
      * @param headerIdStr subscription id on stomp
      * @return boolean true if ok
      */
     private boolean handleUnSubscribe(WebSocketSession session, String headerIdStr) {
         log.info("session id: {} header id: {} subscription id: {}", session.getId(), headerIdStr);
-        if(sessionContext.get(session.getId()).get(headerIdStr).getKey().equals(headerIdStr)){
+        if (sessionContext.get(session.getId()).get(headerIdStr).getKey().equals(headerIdStr)) {
             log.info("unknown subscription id, {}", headerIdStr);
             return false;
         }
-
         try {
             String subscriptionId = sessionContext.get(session.getId()).get(headerIdStr).getKey();
             // unSubscribe
@@ -474,7 +467,6 @@ public class BrokerStomp extends TextWebSocketHandler {
                 // at the same session, remove subscription id in stomp
                 sessionContext.get(session.getId()).remove(headerIdStr);
             }
-
             return result;
         } catch (BrokerException e) {
             log.error("exception in consumer unSubscribe", e);

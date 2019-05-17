@@ -49,7 +49,7 @@ public class WeEvent implements Serializable {
     /**
      * Construction.
      *
-     * @param topic the topic
+     * @param topic   the topic
      * @param content the content, character utf8
      */
     public WeEvent(String topic, byte[] content) {

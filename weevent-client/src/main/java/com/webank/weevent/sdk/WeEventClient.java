@@ -34,8 +34,6 @@ import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.googlecode.jsonrpc4j.ProxyUtil;
-import io.micrometer.core.instrument.Meter;
-import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -46,9 +44,10 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class WeEventClient {
-    public static void main(String [] args){
+    public static void main(String[] args) {
 
     }
+
     /**
      * Interface for notify callback
      */
@@ -76,7 +75,6 @@ public class WeEventClient {
     private TopicConnection connection;
     // (subscriptionId <-> TopicSession)
     private Map<String, TopicSession> sessionMap;
-    //private Map<String, String> subscribeId2HeaderIdMap
 
     /**
      * Get the client handler of weevent's broker with default url, http://localhost:8080/weevent.
@@ -103,8 +101,8 @@ public class WeEventClient {
      * Get the client handler of weevent's broker custom url and account authorization.
      *
      * @param brokerUrl weevent's broker url, like http://localhost:8080/weevent
-     * @param userName account name
-     * @param password password
+     * @param userName  account name
+     * @param password  password
      * @throws BrokerException broker exception
      */
     public WeEventClient(String brokerUrl, String userName, String password) throws BrokerException {
@@ -115,7 +113,7 @@ public class WeEventClient {
     /**
      * Publish an event to topic.
      *
-     * @param topic topic name
+     * @param topic   topic name
      * @param content topic data
      * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
      * @throws BrokerException broker exception
@@ -127,8 +125,8 @@ public class WeEventClient {
     /**
      * Subscribe events from topic.
      *
-     * @param topic topic name
-     * @param offset, from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
+     * @param topic    topic name
+     * @param offset,  from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
      * @param listener callback
      * @return subscription Id
      * @throws BrokerException invalid input param
@@ -183,7 +181,7 @@ public class WeEventClient {
         if (this.sessionMap.containsKey(subscriptionId)) {
             TopicSession session = this.sessionMap.get(subscriptionId);
             try {
-                log.info("get the  session details {}",session.toString());
+                log.info("get the  session details {}", session.toString());
 
                 session.unsubscribe(subscriptionId);
             } catch (JMSException e) {
@@ -237,7 +235,7 @@ public class WeEventClient {
      * List all topics in weevent's broker.
      *
      * @param pageIndex page index, from 0
-     * @param pageSize page size, [10, 100)
+     * @param pageSize  page size, [10, 100)
      * @return topic list
      * @throws BrokerException broker exception
      */

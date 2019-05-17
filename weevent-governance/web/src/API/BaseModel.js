@@ -1,9 +1,9 @@
 import axios from 'axios'
 import qs from 'qs'
-import { Message } from 'element-ui'
+import {Message} from 'element-ui'
 
 class BaseModule {
-  constructor () {
+  constructor() {
     this.$http = axios.create({
       timeout: 15 * 1000,
       withCredentials: true // 进行cookie数据传递
@@ -16,26 +16,35 @@ class BaseModule {
       }
     }
     // 收到数据的拦截
-    this.$http.interceptors.response.use(config => {
-      return new Promise((resolve, reject) => {
+    this.$http.interceptors.response.use(config = > {
+      return new Promise((resolve, reject) = > {
         let data = config.data
         let status = config.status
-        if (((status >= 200 && status < 300) || status === 304) && data) {
-          resolve(config)
-        } else {
-          Message({
-            type: 'warning',
-            message: '请求异常'
-          })
-          reject(config)
-        }
-      }).catch((e) => {
-        Message({
-          type: 'error',
-          message: '请求未响应,稍后重试'
-        })
+        if(((status >= 200 && status < 300) || status === 304) && data
+  )
+    {
+      resolve(config)
+    }
+  else
+    {
+      Message({
+        type: 'warning',
+        message: '请求异常'
       })
-    }, error => {
+      reject(config)
+    }
+  }).
+    catch((e) = > {
+      Message({
+                type: 'error',
+                message: '请求未响应,稍后重试'
+              })
+    }
+  )
+  },
+    error =
+  >
+    {
       if (error.message.includes('timeout')) {
         Message({
           type: 'error',
@@ -47,10 +56,11 @@ class BaseModule {
           message: '数据请求失败'
         })
       }
-    })
+    }
+  )
   }
 
-  request (config, data = undefined) {
+  request(config, data = undefined) {
     if (config.method && config.method.toLowerCase() === 'post') {
       data = qs.stringify(data)
       return this.post(config.url, data, config)
@@ -63,12 +73,13 @@ class BaseModule {
     }
   }
 
-  get (url, config = {}) {
+  get(url, config = {}) {
     return this.$http.get(url.config)
   }
 
-  post (url, data = undefined, config = {}) {
-    return this.$http.post(url, data, { ...this.dataMethodDefaults, ...config })
+  post(url, data = undefined, config = {}) {
+    return this.$http.post(url, data, {...this.dataMethodDefaults,...config
+  })
   }
 }
 

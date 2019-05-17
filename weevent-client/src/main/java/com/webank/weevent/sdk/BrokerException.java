@@ -33,7 +33,7 @@ public class BrokerException extends Exception {
     /**
      * getText
      *
-     * @param code the code
+     * @param code    the code
      * @param message the message
      * @return java.lang.String
      */
@@ -52,7 +52,7 @@ public class BrokerException extends Exception {
      * Construction.
      *
      * @param message the message
-     * @param cause the cause
+     * @param cause   the cause
      */
     public BrokerException(String message, Throwable cause) {
         super(getText(-1, message), cause);
@@ -85,7 +85,7 @@ public class BrokerException extends Exception {
     /**
      * Construction.
      *
-     * @param code the code
+     * @param code    the code
      * @param message reason
      */
     public BrokerException(int code, String message) {

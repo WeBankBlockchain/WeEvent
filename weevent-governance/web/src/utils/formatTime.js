@@ -1,9 +1,11 @@
 /**
-* @function getDate 获取日期
-* @param  {timestamp} timestamp {时间戳}
-* @return {String} {2017-02-02}
-*/
-const getDate = (timestamp) => {
+ * @function getDate 获取日期
+ * @param  {timestamp} timestamp {时间戳}
+ * @return {String} {2017-02-02}
+ */
+const getDate = (timestamp) =
+>
+{
   const date = new Date(timestamp)
   const year = date.getFullYear()
   const month = date.getMonth() + 1
@@ -11,7 +13,9 @@ const getDate = (timestamp) => {
   return `${year}年${month >= 10 ? month : '0' + month}月${day >= 10 ? day : '0' + day}日`
 }
 
-const getDateDetial = (timestamp) => {
+const getDateDetial = (timestamp) =
+>
+{
   const date = new Date(timestamp)
   const year = date.getFullYear()
   const month = date.getMonth() + 1
@@ -26,7 +30,9 @@ const getDateDetial = (timestamp) => {
  * @param  {String} duration 00:00格式的时间
  * @return {[type]}          [description]
  */
-const convertStrToInt = (duration) => {
+const convertStrToInt = (duration) =
+>
+{
   duration = duration || '00:00'
   const arr = duration.split(':')
   if (arr[0] === '00' && Number(arr[1]) > 0) {
@@ -48,7 +54,9 @@ const convertStrToInt = (duration) => {
  * @param  {[type]} timestamp [description]
  * @return {[type]}           [description]
  */
-const convertIntToStr = (duration) => {
+const convertIntToStr = (duration) =
+>
+{
   let formatTime = '00:00'
   if (duration < 60) {
     formatTime = duration < 10 ? ('00:0' + duration) : '00:' + duration
@@ -66,11 +74,13 @@ const convertIntToStr = (duration) => {
   return formatTime
 }
 /**
-* @function dateFormat 时间格式化
-* @param  {timestamp} timestamp {时间戳}
-* @return {String}
-*/
-const dateBeforeAfter = (timestamp) => {
+ * @function dateFormat 时间格式化
+ * @param  {timestamp} timestamp {时间戳}
+ * @return {String}
+ */
+const dateBeforeAfter = (timestamp) =
+>
+{
   const now = Date.now()
   console.log(now + 'timestamp：' + timestamp)
   const minute = 1000 * 60
@@ -95,7 +105,9 @@ const dateBeforeAfter = (timestamp) => {
  * @param  {Number} day   [日期]
  * @return {[type]}       [description]
  */
-const getAstro = (month, day) => {
+const getAstro = (month, day) =
+>
+{
   var s = '魔羯水瓶双鱼白羊金牛双子巨蟹狮子处女天秤天蝎射手魔羯'
   var arr = [20, 19, 21, 21, 21, 22, 23, 23, 23, 23, 22, 22]
   return s.substr(month * 2 - (day < arr[month - 1] ? 2 : 0), 2)
@@ -107,7 +119,9 @@ const getAstro = (month, day) => {
  * @param  {[Number]} d [日]
  * @return {[type]}   [description]
  */
-const getAge = (y, m, d) => {
+const getAge = (y, m, d) =
+>
+{
   var today = new Date()
   var birthDate = new Date(y, m, d)
   var age = today.getFullYear() - birthDate.getFullYear()

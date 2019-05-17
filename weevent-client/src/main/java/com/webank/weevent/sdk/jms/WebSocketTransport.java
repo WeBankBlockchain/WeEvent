@@ -57,7 +57,8 @@ public class WebSocketTransport extends WebSocketClient {
     // (receiptId in stomp <-> subscriptionId in biz)
     private Map<String, Long> subscriptionId2ReceiptId;
 
-    private Map<Long,String> receiptId2subscriptionId;
+    private Map<Long, String> receiptId2subscriptionId;
+
     class ResponseFuture implements Future<Message> {
         private Long key;
         private CountDownLatch latch;
@@ -67,7 +68,6 @@ public class WebSocketTransport extends WebSocketClient {
         ResponseFuture(Long key) {
             this.key = key;
             this.latch = new CountDownLatch(1);
-
             futures.put(this.key, this);
         }
 
@@ -166,10 +166,7 @@ public class WebSocketTransport extends WebSocketClient {
 
     public void stompConnect(String userName, String password) throws JMSException {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
-        // add id
-
         String req = stompCommand.encodeConnect(userName, password);
-
         this.stompRequest(req);
 
         // initialize connection context
@@ -204,16 +201,15 @@ public class WebSocketTransport extends WebSocketClient {
         Long id = this.sequence.longValue();
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         String req = stompCommand.encodeSubscribe(topic, offset, id);
-        // this.sequence.longValue();
+
         Message stompResponse = this.stompRequest(req, id);
         return stompCommand.getSubscriptionId(stompResponse);
     }
 
     public boolean stompUnsubscribe(String subscriptionId) throws JMSException {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
-
         Long headerId = this.subscriptionId2ReceiptId.get(subscriptionId);
-        String req = stompCommand.encodeUnSubscribe(subscriptionId,Long.toString(headerId));
+        String req = stompCommand.encodeUnSubscribe(subscriptionId, Long.toString(headerId));
 
         Message stompResponse = this.stompRequest(req);
         return !stompCommand.isError(stompResponse);
@@ -228,7 +224,7 @@ public class WebSocketTransport extends WebSocketClient {
         this.sequence = new AtomicLong(0);
         this.futures = new ConcurrentHashMap<>();
         this.receiptId2subscriptionId = new ConcurrentHashMap<>();
-        this.subscriptionId2ReceiptId=new ConcurrentHashMap<>();
+        this.subscriptionId2ReceiptId = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -248,8 +244,6 @@ public class WebSocketTransport extends WebSocketClient {
         //decode from message
         StompDecoder decoder = new StompDecoder();
         List<Message<byte[]>> messages = decoder.decode(ByteBuffer.wrap(message.getBytes(StandardCharsets.UTF_8)));
-        // List<Message<byte[]>> stompMsg1 = decoder.decode(ByteBuffer.wrap(message.getPayload().getBytes(StandardCharsets.UTF_8)));
-
         StompHeaderAccessor accessor;
 
         for (Message<byte[]> stompMsg : messages) {
@@ -261,8 +255,8 @@ public class WebSocketTransport extends WebSocketClient {
 
             String cmd = command.name();
             String receiptId = null;
-            if(cmd.equals("RECEIPT")){
-                if (accessor.getReceiptId()!= null) {
+            if (cmd.equals("RECEIPT")) {
+                if (accessor.getReceiptId() != null) {
                     receiptId = accessor.getReceiptId();
                 }
             }
@@ -288,9 +282,9 @@ public class WebSocketTransport extends WebSocketClient {
                     // add the map<receiptId2SubscriptionId>
                     if (futures.containsKey((Long.valueOf(receiptId).longValue()))) {
                         if (subscriptionId != null) {
-                            log.info("subscriptionId {}",subscriptionId);
-                            this.receiptId2subscriptionId.put( Long.valueOf(receiptId).longValue(),subscriptionId);
-                            this.subscriptionId2ReceiptId.put(subscriptionId,Long.valueOf(receiptId).longValue());
+                            log.info("subscriptionId {}", subscriptionId);
+                            this.receiptId2subscriptionId.put(Long.valueOf(receiptId).longValue(), subscriptionId);
+                            this.subscriptionId2ReceiptId.put(subscriptionId, Long.valueOf(receiptId).longValue());
                         }
                         futures.get((Long.valueOf(receiptId).longValue())).setResponse(stompMsg);
                     } else {
@@ -299,9 +293,10 @@ public class WebSocketTransport extends WebSocketClient {
                     break;
 
                 case "ERROR":
-
                     log.error("command from stomp server: {}", cmd);
+
                     break;
+
                 case "MESSAGE":
                     WeEvent event = null;
                     try {
@@ -313,13 +308,13 @@ public class WebSocketTransport extends WebSocketClient {
 
                     // check SubscriptionId
                     if (this.receiptId2subscriptionId.containsKey(messageId)) {
-                    WeEventStompCommand weEventStompCommand = new WeEventStompCommand(event);
-                    weEventStompCommand.setSubscriptionId(subscriptionId);
-                    weEventStompCommand.setHeaderId(messageId);
+                        WeEventStompCommand weEventStompCommand = new WeEventStompCommand(event);
+                        weEventStompCommand.setSubscriptionId(subscriptionId);
+                        weEventStompCommand.setHeaderId(messageId);
 
-                    this.topicConnection.dispatch(weEventStompCommand);
+                        this.topicConnection.dispatch(weEventStompCommand);
                     } else {
-                       log.error("unknown receipt-id: {}", receiptId);
+                        log.error("unknown receipt-id: {}", receiptId);
                     }
 
                     break;

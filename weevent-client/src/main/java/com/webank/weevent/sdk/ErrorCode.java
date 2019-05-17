@@ -122,7 +122,7 @@ public enum ErrorCode {
     /**
      * Error Code Constructor.
      *
-     * @param code The ErrorCode
+     * @param code     The ErrorCode
      * @param codeDesc The ErrorCode Description
      */
     ErrorCode(int code, String codeDesc) {
