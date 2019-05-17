@@ -227,7 +227,7 @@ public class CGISubscription {
                 throw new BrokerException(ErrorCode.HA_ROUTE_TO_MASTER_FAILED);
             }
 
-            return brokerRpc.subscribe(topic, subscriptionId, url, groupId.toString());
+            return brokerRpc.subscribe(topic, groupId.toString(), subscriptionId, url);
         }
     }
 

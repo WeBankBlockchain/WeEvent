@@ -23,20 +23,20 @@ import com.googlecode.jsonrpc4j.JsonRpcService;
 public interface IBrokerRpc {
     // Interface for producer.
     default SendResult publish(@JsonRpcParam(value = "topic") String topic,
-                       @JsonRpcParam(value = "content") byte[] content,
-                       @JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException{
+                               @JsonRpcParam(value = "content") byte[] content,
+                               @JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException {
         return null;
     }
 
-    default SendResult publish(@JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException{
+    default SendResult publish(@JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException {
         return null;
     }
 
     // Interface for consumer.
     String subscribe(@JsonRpcParam(value = "topic") String topic,
+                     @JsonRpcParam(value = "groupId") String groupId,
                      @JsonRpcParam(value = "subscriptionId") String subscriptionId,
-                     @JsonRpcParam(value = "url") String url,
-                     @JsonRpcParam(value = "groupId") String groupId) throws BrokerException;
+                     @JsonRpcParam(value = "url") String url) throws BrokerException;
 
     boolean unSubscribe(@JsonRpcParam(value = "subscriptionId") String subscriptionId) throws BrokerException;
 

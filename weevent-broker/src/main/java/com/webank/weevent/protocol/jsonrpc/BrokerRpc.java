@@ -81,9 +81,9 @@ public class BrokerRpc implements IBrokerRpc {
 
     @Override
     public String subscribe(@JsonRpcParam(value = "topic") String topic,
+                            @JsonRpcParam(value = "groupId") String groupId,
                             @JsonRpcParam(value = "subscriptionId") String subscriptionId,
-                            @JsonRpcParam(value = "url") String url,
-                            @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
+                            @JsonRpcParam(value = "url") String url) throws BrokerException {
         checkSupport();
         return this.masterJob.getCgiSubscription().jsonRpcSubscribe(topic, WeEventUtils.getGroupId(groupId), subscriptionId, url);
     }

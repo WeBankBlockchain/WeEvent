@@ -64,7 +64,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     public boolean close(String topic, Long groupId) throws BrokerException {
         ParamCheckUtils.validateTopicName(topic);
 
-        if (exist(topic,groupId)) {
+        if (exist(topic, groupId)) {
             return true;
         }
 
@@ -95,7 +95,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
         topicPage.setPageIndex(listPage.getPageIndex());
         topicPage.setPageSize(listPage.getPageSize());
         for (String topic : listPage.getPageData()) {
-            topicPage.getTopicInfoList().add(state(topic,groupId));
+            topicPage.getTopicInfoList().add(state(topic, groupId));
         }
 
         log.debug("block chain topic name list: {} block chain topic info list: {}", listPage, topicPage);
