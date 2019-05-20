@@ -124,7 +124,7 @@ public class MqttTopic {
         }
     }
 
-    public boolean mqttAddInBoundTopic(String topic, String urlFormat) throws BrokerException {
+    public boolean mqttAddInBoundTopic(String topic, Long groupId, String urlFormat) throws BrokerException {
         log.info("add mqtt inbound topic: {}", topic);
 
         checkSupport();
@@ -132,12 +132,13 @@ public class MqttTopic {
         if (this.isMaster) {
             log.info("i am leader, do it directly");
 
-            this.mqttBridge.assertExist(topic);
+            this.mqttBridge.assertExist(topic, groupId);
 
             this.mqttPahoMessageDrivenChannelAdapter.addTopic(topic, BrokerApplication.weEventConfig.getMqttBrokerQos());
 
             ZKSubscription zkSubscription = new ZKSubscription();
             zkSubscription.setTopic(topic);
+            zkSubscription.setGroupId(groupId);
 
             // local cache
             this.topics.get(MQTT_IN_BOUND).put(zkSubscription.getTopic(), zkSubscription);
@@ -173,7 +174,7 @@ public class MqttTopic {
         }
     }
 
-    public boolean mqttAddOutBoundTopic(String topic, String urlFormat) throws BrokerException {
+    public boolean mqttAddOutBoundTopic(String topic, Long groupId, String urlFormat) throws BrokerException {
         log.info("add mqtt outbound topic: {}", topic);
 
         checkSupport();
@@ -181,14 +182,14 @@ public class MqttTopic {
         if (this.isMaster) {
             log.info("i am leader, do it directly");
 
-            String subscriptionId = this.mqttBridge.bindOutboundTopic(topic);
+            String subscriptionId = this.mqttBridge.bindOutboundTopic(topic, groupId);
             log.info("bind subscriptionId: {}", subscriptionId);
 
             if (!subscriptionId.isEmpty()) {
 
                 ZKSubscription zkSubscription = new ZKSubscription();
                 zkSubscription.setTopic(topic);
-
+                zkSubscription.setGroupId(groupId);
                 // local cache
                 zkSubscription.setSubscriptionId(subscriptionId);
                 this.topics.get(MQTT_OUT_BOUND).put(zkSubscription.getTopic(), zkSubscription);

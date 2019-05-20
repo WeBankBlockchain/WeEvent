@@ -1,5 +1,9 @@
 package com.webank.weevent.protocol.rest;
 
+import java.util.Map;
+
+import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.util.WeEventUtils;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
@@ -41,22 +45,27 @@ public class BrokerRest extends RestHA implements IBrokerRpc {
         this.consumer = consumer;
     }
 
-    @Override
     @RequestMapping(path = "/publish")
-    public SendResult publish(@RequestParam(name = "topic") String topic,
-                              @RequestParam(name = "content") byte[] content) throws BrokerException {
-        log.info("topic: {}, content.length: {}", topic, content.length);
-        WeEvent event = new WeEvent(topic, content);
-        return this.producer.publish(event);
+    public SendResult publish(@RequestParam Map<String, String> eventData) throws BrokerException {
+        log.debug("topic: {}, content.length: {}", eventData.get("topic"), eventData.get("content").getBytes().length);
+        Map<String, String> extensions = WeEventUtils.getExtensions(eventData);
+        WeEvent event = new WeEvent(eventData.get(WeEventConstants.EVENT_TOPIC), eventData.get(WeEventConstants.EVENT_CONTENT).getBytes(), extensions);
+        Long group = WeEventConstants.DEFAULT_GROUP_ID;
+        if (eventData.containsKey(WeEventConstants.EVENT_GROUP_ID)) {
+            group = WeEventUtils.getGroupId(eventData.get(WeEventConstants.EVENT_GROUP_ID));
+        }
+        return this.producer.publish(event, group);
     }
 
     @Override
     @RequestMapping(path = "/subscribe")
     public String subscribe(@RequestParam(name = "topic") String topic,
+                            @RequestParam(name = "groupId", required = false) String groupId,
                             @RequestParam(name = "subscriptionId", required = false) String subscriptionId,
                             @RequestParam(name = "url") String url) throws BrokerException {
         checkSupport();
         return this.masterJob.getCgiSubscription().restSubscribe(topic,
+                WeEventUtils.getGroupId(groupId),
                 subscriptionId,
                 url,
                 getUrlFormat(this.request));
@@ -71,38 +80,44 @@ public class BrokerRest extends RestHA implements IBrokerRpc {
 
     @Override
     @RequestMapping(path = "/getEvent")
-    public WeEvent getEvent(@RequestParam(name = "eventId") String eventId) throws BrokerException {
-        return this.producer.getEvent(eventId);
+    public WeEvent getEvent(@RequestParam(name = "eventId") String eventId,
+                            @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+        return this.producer.getEvent(eventId, WeEventUtils.getGroupId(groupId));
     }
 
     @Override
     @RequestMapping(path = "/open")
-    public boolean open(@RequestParam(name = "topic") String topic) throws BrokerException {
-        return this.producer.open(topic);
+    public boolean open(@RequestParam(name = "topic") String topic,
+                        @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+        return this.producer.open(topic, WeEventUtils.getGroupId(groupId));
     }
 
     @Override
     @RequestMapping(path = "/close")
-    public boolean close(@RequestParam(name = "topic") String topic) throws BrokerException {
-        return this.producer.close(topic);
+    public boolean close(@RequestParam(name = "topic") String topic,
+                         @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+        return this.producer.close(topic, WeEventUtils.getGroupId(groupId));
     }
 
     @Override
     @RequestMapping(path = "/exist")
-    public boolean exist(@RequestParam(name = "topic") String topic) throws BrokerException {
-        return this.producer.exist(topic);
+    public boolean exist(@RequestParam(name = "topic") String topic,
+                         @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+        return this.producer.exist(topic, WeEventUtils.getGroupId(groupId));
     }
 
     @Override
     @RequestMapping(path = "/list")
     public TopicPage list(@RequestParam(name = "pageIndex") Integer pageIndex,
-                          @RequestParam(name = "pageSize") Integer pageSize) throws BrokerException {
-        return this.producer.list(pageIndex, pageSize);
+                          @RequestParam(name = "pageSize") Integer pageSize,
+                          @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+        return this.producer.list(pageIndex, pageSize, WeEventUtils.getGroupId(groupId));
     }
 
     @Override
     @RequestMapping(path = "/state")
-    public TopicInfo state(@RequestParam(name = "topic") String topic) throws BrokerException {
-        return this.producer.state(topic);
+    public TopicInfo state(@RequestParam(name = "topic") String topic,
+                           @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+        return this.producer.state(topic, WeEventUtils.getGroupId(groupId));
     }
 }

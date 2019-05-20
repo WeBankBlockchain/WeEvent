@@ -2,8 +2,12 @@ package com.webank.weevent.protocol.mqtt;
 
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.webank.weevent.BrokerApplication;
+import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.util.WeEventUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
@@ -47,16 +51,16 @@ public class MqttBridge implements MessageHandler {
         return result;
     }
 
-    public void assertExist(String topic) throws BrokerException {
-        if (!this.producer.exist(topic)) {
+    public void assertExist(String topic, Long groupId) throws BrokerException {
+        if (!this.producer.exist(topic, groupId)) {
             log.error("not exist topic: {}", topic);
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
         }
     }
 
-    public String bindOutboundTopic(String topic) throws BrokerException {
+    public String bindOutboundTopic(String topic, Long groupId) throws BrokerException {
         log.info("bind mqtt outbound topic: {}", topic);
-        if (!this.consumer.exist(topic)) {
+        if (!this.consumer.exist(topic, groupId)) {
             log.error("not exist topic: {}", topic);
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
         }
@@ -70,7 +74,7 @@ public class MqttBridge implements MessageHandler {
             }
         }
 
-        String subscriptionId = this.consumer.subscribe(topic, WeEvent.OFFSET_LAST, "mqtt", new IConsumer.ConsumerListener() {
+        String subscriptionId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, "mqtt", new IConsumer.ConsumerListener() {
             @Override
             public void onEvent(String subscriptionId, WeEvent event) {
                 log.info("subscribe onEvent, subscriptionId: {} event: {}", subscriptionId, event);
@@ -90,22 +94,36 @@ public class MqttBridge implements MessageHandler {
     @Override
     public void handleMessage(Message<?> message) throws MessagingException {
         MessageHeaders handlers = message.getHeaders();
-        Object key = handlers.get("mqtt_receivedTopic");
-        if (key == null) {
-            log.error("unknown mqtt_receivedTopic");
+        Object topicKey = handlers.get(WeEventConstants.EXTENSIONS_RECEIVED_TOPIC);
+        if (topicKey == null) {
+            log.error("unknown {} extension", WeEventConstants.EXTENSIONS_RECEIVED_TOPIC);
             return;
         }
 
-        String topic = key.toString();
-        log.info("mqtt input message, id: {} topic: {}", handlers.getId(), topic);
+        Map<String, String> extensions = new HashMap<>();
+        try {
+            extensions = WeEventUtils.getObjectExtensions(handlers);
+        } catch (BrokerException e) {
+            log.error("getExtensions exception:{}", e);
+            return;
+        }
+        Long groupId = WeEventConstants.DEFAULT_GROUP_ID;
+        if (handlers.containsKey(WeEventConstants.EVENT_GROUP_ID)) {
+            try {
+                groupId = WeEventUtils.getGroupId(handlers.get(WeEventConstants.EVENT_GROUP_ID).toString());
+            } catch (BrokerException e) {
+                return;
+            }
+        }
 
+        String topic = topicKey.toString();
+        log.info("mqtt input message, id: {} topic: {} extensions: {}", handlers.getId(), topic, extensions.toString());
         String payload = (String) message.getPayload();
 
         // publish to event broker
-        WeEvent weEvent = new WeEvent(topic, payload.getBytes(StandardCharsets.UTF_8));
-
+        WeEvent weEvent = new WeEvent(topic, payload.getBytes(StandardCharsets.UTF_8), extensions);
         try {
-            SendResult sendResult = this.producer.publish(weEvent);
+            SendResult sendResult = this.producer.publish(weEvent, groupId);
             log.info("publish ok, {}", sendResult);
         } catch (BrokerException e) {
             log.error("publish failed", e);

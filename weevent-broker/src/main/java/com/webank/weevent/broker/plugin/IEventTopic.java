@@ -22,7 +22,7 @@ public interface IEventTopic {
      * @return boolean true is success
      * @throws BrokerException BrokerException
      */
-    boolean open(String topic) throws BrokerException;
+    boolean open(String topic, Long groupId) throws BrokerException;
 
     /**
      * Close a topic in clock chain, can not pub/sub event again after this.
@@ -31,7 +31,7 @@ public interface IEventTopic {
      * @return boolean true if success
      * @throws BrokerException BrokerException
      */
-    boolean close(String topic) throws BrokerException;
+    boolean close(String topic, Long groupId) throws BrokerException;
 
     /**
      * get WeEvent by eventId
@@ -40,7 +40,7 @@ public interface IEventTopic {
      * @return boolean true if success
      * @throws BrokerException BrokerException
      */
-    WeEvent getEvent(String eventId) throws BrokerException;
+    WeEvent getEvent(String eventId, Long groupId) throws BrokerException;
 
 
     /**
@@ -50,7 +50,7 @@ public interface IEventTopic {
      * @return boolean true if exist
      * @throws BrokerException BrokerException
      */
-    boolean exist(String topic) throws BrokerException;
+    boolean exist(String topic, Long groupId) throws BrokerException;
 
     /**
      * List all topic in system.
@@ -60,7 +60,7 @@ public interface IEventTopic {
      * @return TopicPage page list
      * @throws BrokerException BrokerException
      */
-    TopicPage list(Integer pageIndex, Integer pageSize) throws BrokerException;
+    TopicPage list(Integer pageIndex, Integer pageSize, Long groupId) throws BrokerException;
 
     /**
      * Get one topic state.
@@ -69,5 +69,5 @@ public interface IEventTopic {
      * @return TopicInfo topic info
      * @throws BrokerException BrokerException
      */
-    TopicInfo state(String topic) throws BrokerException;
+    TopicInfo state(String topic, Long groupId) throws BrokerException;
 }
