@@ -56,7 +56,7 @@ public class ForwardWebaseFilter implements Filter{
 			throws IOException, ServletException {
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse res = (HttpServletResponse) response;
-		String idStr = request.getParameter("id");
+		String idStr = request.getParameter("brokerId");
 		String originUrl = req.getRequestURI();
 		String subStrUrl = originUrl.substring(originUrl.indexOf("/webase-node-mgr/"));
 		

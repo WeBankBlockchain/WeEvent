@@ -42,16 +42,16 @@ public class ConnectionManager {
    private  int maxTotal;
    
    @Value("${http.client.max-per-route}")
-   private  int maxPerRoute = 500;
+   private  int maxPerRoute;
    
    @Value("${http.client.connection-request-timeout}")
-   private int connectionRequestTimeout= 3000;
+   private int connectionRequestTimeout;
    
    @Value("${http.client.connection-timeout}")
-   private int connectionTimeout = 3000;
+   private int connectionTimeout;
    
    @Value("${http.client.socket-timeout}")
-   private int socketTimeout = 5000;
+   private int socketTimeout;
 
    private PoolingHttpClientConnectionManager cm;
    private CloseableHttpClient httpClient;
@@ -102,18 +102,17 @@ public class ConnectionManager {
 
    public ConnectionManager() {
        cm = new PoolingHttpClientConnectionManager();
-       cm.setMaxTotal(maxTotal);
-       cm.setDefaultMaxPerRoute(maxPerRoute);
-
-       httpClient = HttpClients.custom()
-           .setConnectionManager(cm)
-           .setDefaultRequestConfig(requestConfig)
-           .setRetryHandler(retryHandler)
-           .build();
    }
 
    @Bean("httpClient")
    public CloseableHttpClient getHttpClient() {
+	   cm.setMaxTotal(maxTotal);
+       cm.setDefaultMaxPerRoute(maxPerRoute);
+       httpClient = HttpClients.custom()
+               .setConnectionManager(cm)
+               .setDefaultRequestConfig(requestConfig)
+               .setRetryHandler(retryHandler)
+               .build();
        return httpClient;
    }
 

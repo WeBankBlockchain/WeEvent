@@ -31,14 +31,11 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
 import com.webank.weevent.governance.entity.Broker;
 import com.webank.weevent.governance.service.BrokerService;
-
-import io.micrometer.core.instrument.util.StringUtils;
-import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
@@ -58,7 +55,7 @@ public class ForwardBrokerFilter implements Filter{
 			throws IOException, ServletException {
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse res = (HttpServletResponse) response;
-		String idStr = request.getParameter("id");
+		String idStr = request.getParameter("brokerId");
 		String originUrl = req.getRequestURI();
 		String subStrUrl = originUrl.substring(originUrl.indexOf("/weevent/"));
 		
