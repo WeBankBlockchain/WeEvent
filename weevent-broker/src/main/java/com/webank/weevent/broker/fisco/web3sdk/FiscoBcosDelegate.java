@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.RedisService;
+import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.LRUCache;
 import com.webank.weevent.broker.plugin.IProducer;
@@ -114,7 +115,7 @@ public class FiscoBcosDelegate {
 
     public void checkVersion(Long groupId) throws BrokerException {
         if (this.fiscoBcos != null) {
-            if (groupId != 0L) {
+            if (groupId.longValue() != WeEventConstants.DEFAULT_GROUP_ID.longValue()) {
                 throw new BrokerException(ErrorCode.WE3SDK_VERRSION_NOT_SUPPORT);
             }
             return;

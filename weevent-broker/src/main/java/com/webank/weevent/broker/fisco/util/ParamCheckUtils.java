@@ -89,8 +89,12 @@ public class ParamCheckUtils {
         if (event.getContent() == null) {
             throw new BrokerException(ErrorCode.EVENT_CONTENT_IS_BLANK);
         }
+        if (event.getExtensions() == null){
+            throw new BrokerException(ErrorCode.EVENT_EXTENSIONS_IS_NUll);
+        }
         validateTopicName(event.getTopic());
         validateEventContent(new String(event.getContent(), StandardCharsets.UTF_8));
+        validateEventExtensions(event.getExtensions().toString());
     }
 
     public static void validateEventExtensions(String extensions) throws BrokerException {
