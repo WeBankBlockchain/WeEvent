@@ -1,9 +1,8 @@
 pragma solidity ^0.4.4;
 
 contract TopicData {
-    // try to replace bytes32 with bytes[128] to extend key length
-    mapping (bytes32 => TopicStruct) _topicMap;
-    bytes32[] public _topicArray;
+    mapping (string => TopicStruct) _topicMap;
+    string[] public _topicStringArray;
 
     struct TopicStruct {
         address _topicAddress;
@@ -12,28 +11,28 @@ contract TopicData {
     }
 
     function putTopic(
-        bytes32 topicName,
+        string topicName,
         address topicAddress,
         uint createdTimestamp
-    ) 
+    )
         public
         returns (bool)
     {
         TopicStruct memory topicStruct = TopicStruct({_topicAddress : topicAddress, _senderAddress: tx.origin, _createdTimestamp: createdTimestamp});
         _topicMap[topicName] = topicStruct;
-        _topicArray.push(topicName);
+        _topicStringArray.push(topicName);
         return true;
     }
 
     function getTopic(
-        bytes32 topicName
+        string topicName
     )
-        public 
+        public
         constant
         returns (
             address topicAddress,
             address senderAddress,
-            uint createTimestamp) 
+            uint createTimestamp)
     {
         TopicStruct memory topicStruct = _topicMap[topicName];
         topicAddress = topicStruct._topicAddress;
@@ -42,7 +41,7 @@ contract TopicData {
     }
 
     function getTopicAddress(
-        bytes32 topicName
+        string topicName
     )
         public
         constant
@@ -54,7 +53,7 @@ contract TopicData {
     }
 
     function isTopicExist(
-        bytes32 topicName
+        string topicName
     )
         public
         constant
@@ -67,26 +66,57 @@ contract TopicData {
     function listTopic(
         uint pageIndex,
         uint pageSize
-    ) 
+    )
         public
-        constant 
+        constant
         returns (
             uint total,
             uint size,
-            bytes32[100] topicList)
+            bytes32[100] topicList1,
+            bytes32[100] topicList2)
     {
         uint topicIndexInArray = pageIndex * pageSize;
 
         for (uint i = 0; i < pageSize; i++) {
-            if (topicIndexInArray >= _topicArray.length) {
+            if (topicIndexInArray >= _topicStringArray.length) {
                 break;
             }
-            topicList[i] = _topicArray[topicIndexInArray];
+            if(bytes(_topicStringArray[topicIndexInArray]).length <= 32){
+                topicList1[i] = stringToBytesVer2(_topicStringArray[topicIndexInArray]);
+                topicList2[i] = "";
+            }else{
+                bytes memory bytesTopicName = bytes(_topicStringArray[topicIndexInArray]);
+                string memory subStringTopicName1 = new string(32);
+                string memory subStringTopicName2 = new string(32);
+                bytes memory subBytesTopicName1 = bytes(subStringTopicName1);
+                bytes memory subBytesTopicName2 = bytes(subStringTopicName2);
+
+                for (uint k = 0; k < 32; k++) subBytesTopicName1[k] = bytesTopicName[k];
+                uint h = 0;
+                for (k = 32; k < bytesTopicName.length; k++) {
+                    subBytesTopicName2[h] = bytesTopicName[k];
+                    h++;
+                }
+                topicList1[i] = bytesToBytes32(subBytesTopicName1);
+                topicList2[i] = bytesToBytes32(subBytesTopicName2);
+            }
             topicIndexInArray++;
         }
 
-        total = _topicArray.length;
+        total = _topicStringArray.length;
         size = i;
     }
 
+    function stringToBytesVer2(string memory source) returns (bytes32 result) {
+        assembly {
+            result := mload(add(source, 32))
+        }
+    }
+
+    function bytesToBytes32(bytes memory source) returns (bytes32 result) {
+        assembly {
+            result := mload(add(source, 32))
+        }
+    }
 }
+
