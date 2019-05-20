@@ -89,7 +89,7 @@ public class ParamCheckUtils {
         if (event.getContent() == null) {
             throw new BrokerException(ErrorCode.EVENT_CONTENT_IS_BLANK);
         }
-        if (event.getExtensions() == null){
+        if (event.getExtensions() == null) {
             throw new BrokerException(ErrorCode.EVENT_EXTENSIONS_IS_NUll);
         }
         validateTopicName(event.getTopic());
