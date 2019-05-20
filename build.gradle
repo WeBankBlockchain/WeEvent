@@ -16,7 +16,6 @@ allprojects {
 
     apply plugin: 'idea'
     apply plugin: "maven"
-    apply plugin: "eclipse"
 
     repositories {
         maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }

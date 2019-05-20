@@ -175,23 +175,23 @@ public class FiscoBcosDelegate {
         }
     }
 
-    public SendResult publishEvent(String topicName, String eventContent, Long groupId) throws BrokerException {
+    public SendResult publishEvent(String topicName, Long groupId, String eventContent, String extensions) throws BrokerException {
         checkVersion(groupId);
 
         if (this.fiscoBcos != null) {
-            return this.fiscoBcos.publishEvent(topicName, eventContent);
+            return this.fiscoBcos.publishEvent(topicName, eventContent, extensions);
         } else {
-            return this.fiscoBcos2Map.get(groupId).publishEvent(topicName, eventContent);
+            return this.fiscoBcos2Map.get(groupId).publishEvent(topicName, eventContent, extensions);
         }
     }
 
-    public void publishEvent(String topicName, String eventContent, IProducer.SendCallBack callBack, Long groupId) throws BrokerException {
+    public void publishEvent(String topicName, Long groupId, String eventContent, String extensions, IProducer.SendCallBack callBack) throws BrokerException {
         checkVersion(groupId);
 
         if (this.fiscoBcos != null) {
-            this.fiscoBcos.publishEvent(topicName, eventContent, callBack);
+            this.fiscoBcos.publishEvent(topicName, eventContent, extensions, callBack);
         } else {
-            this.fiscoBcos2Map.get(groupId).publishEvent(topicName, eventContent, callBack);
+            this.fiscoBcos2Map.get(groupId).publishEvent(topicName, eventContent, extensions, callBack);
         }
     }
 
