@@ -16,7 +16,7 @@ import com.googlecode.jsonrpc4j.ProxyUtil;
 
 public class JsonRPC {
     private final static String groupId = "1";
-    private final static Map<String,String> extensions = new HashMap<>();
+    private final static Map<String, String> extensions = new HashMap<>();
 
     public static void main(String[] args) {
 
@@ -30,11 +30,11 @@ public class JsonRPC {
             IBrokerRpc rpc = ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);
 
             // 确认主题存在
-            rpc.open("com.weevent.test",groupId);
+            rpc.open("com.weevent.test", groupId);
 
             // 发布事件，主题“com.weevent.test”，事件内容为"hello weevent"
-            extensions.put(WeEventConstants.EXTENSIONS_GROUP_ID,"1");
-            SendResult sendResult = rpc.publish("com.weevent.test",groupId, "hello weevent".getBytes(StandardCharsets.UTF_8), extensions);
+            extensions.put(WeEventConstants.EXTENSIONS_GROUP_ID, "1");
+            SendResult sendResult = rpc.publish("com.weevent.test", groupId, "hello weevent".getBytes(StandardCharsets.UTF_8), extensions);
             System.out.println(sendResult.getStatus());
         } catch (MalformedURLException e) {
             e.printStackTrace();

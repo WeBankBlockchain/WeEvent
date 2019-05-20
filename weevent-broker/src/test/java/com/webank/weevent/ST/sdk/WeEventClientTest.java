@@ -33,7 +33,7 @@ import static org.junit.Assert.assertTrue;
  */
 @Slf4j
 public class WeEventClientTest {
-    private Map<String,String> extensions = new HashMap<>();
+    private Map<String, String> extensions = new HashMap<>();
     @Rule
     public TestName testName = new TestName();
 
@@ -44,12 +44,12 @@ public class WeEventClientTest {
     @Before
     public void before() throws Exception {
         weEventClient = new WeEventClient();
-        weEventClient.open(topicName,"1");
+        weEventClient.open(topicName, "1");
     }
 
     @After
     public void after() throws Exception {
-        weEventClient.close(topicName,"1");
+        weEventClient.close(topicName, "1");
     }
 
     /**
@@ -58,8 +58,8 @@ public class WeEventClientTest {
     @Test
     public void testPublish() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-        // test groupId ÊÇ·ñ´æÔÚ
-        SendResult sendResult = this.weEventClient.publish(topicName, "1","hello world".getBytes(StandardCharsets.UTF_8),extensions);
+        // test groupId ï¿½Ç·ï¿½ï¿½ï¿½ï¿½
+        SendResult sendResult = this.weEventClient.publish(topicName, "1", "hello world".getBytes(StandardCharsets.UTF_8), extensions);
         assertTrue(sendResult.getStatus() == SendResult.SendResultStatus.SUCCESS);
     }
 
@@ -70,30 +70,29 @@ public class WeEventClientTest {
     public void testPublish_001() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
 
-        this.weEventClient.publish(this.topicName, "1",null,null);
+        this.weEventClient.publish(this.topicName, "1", null, null);
     }
 
     @Test(expected = BrokerException.class)
     public void testPublish_002() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
 
-        this.weEventClient.publish(null, "1","hello world".getBytes(StandardCharsets.UTF_8),extensions);
+        this.weEventClient.publish(null, "1", "hello world".getBytes(StandardCharsets.UTF_8), extensions);
     }
-
 
 
     @Test(expected = BrokerException.class)
     public void testPublish_004() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-        // test groupId ÊÇ·ñ´æÔÚ
-        this.weEventClient.publish(topicName, null,"hello world".getBytes(StandardCharsets.UTF_8),extensions);
+        // test groupId ï¿½Ç·ï¿½ï¿½ï¿½ï¿½
+        this.weEventClient.publish(topicName, null, "hello world".getBytes(StandardCharsets.UTF_8), extensions);
     }
 
     @Test(expected = BrokerException.class)
     public void testPublish_005() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-        // test groupId ÊÇ·ñ´æÔÚ
-        this.weEventClient.publish(topicName, "1","hello world".getBytes(StandardCharsets.UTF_8),null);
+        // test groupId ï¿½Ç·ï¿½ï¿½ï¿½ï¿½
+        this.weEventClient.publish(topicName, "1", "hello world".getBytes(StandardCharsets.UTF_8), null);
     }
 
 
@@ -104,9 +103,8 @@ public class WeEventClientTest {
     public void testPublish_003() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
 
-        this.weEventClient.publish("111111111111111111111111111111111111111111111111111111", null,null,extensions);
+        this.weEventClient.publish("111111111111111111111111111111111111111111111111111111", null, null, extensions);
     }
-
 
 
     /**
@@ -158,7 +156,7 @@ public class WeEventClientTest {
      */
     @Test
     public void testOpen() throws Exception {
-        boolean result = this.weEventClient.open(this.topicName,"1");
+        boolean result = this.weEventClient.open(this.topicName, "1");
         assertTrue(result);
     }
 
@@ -167,7 +165,7 @@ public class WeEventClientTest {
      */
     @Test
     public void testClose() throws Exception {
-        boolean result = weEventClient.close(topicName,"1");
+        boolean result = weEventClient.close(topicName, "1");
         assertTrue(result);
     }
 
@@ -176,7 +174,7 @@ public class WeEventClientTest {
      */
     @Test
     public void testExist() throws Exception {
-        boolean result = this.weEventClient.exist(this.topicName,"1");
+        boolean result = this.weEventClient.exist(this.topicName, "1");
         assertTrue(result);
     }
 
@@ -185,7 +183,7 @@ public class WeEventClientTest {
      */
     @Test
     public void testExist_001() throws Exception {
-        boolean result = this.weEventClient.exist("not exist","1");
+        boolean result = this.weEventClient.exist("not exist", "1");
         assertFalse(result);
     }
 
@@ -194,7 +192,7 @@ public class WeEventClientTest {
      */
     @Test
     public void testList() throws Exception {
-        TopicPage list = this.weEventClient.list(0, 10,"1");
+        TopicPage list = this.weEventClient.list(0, 10, "1");
         assertTrue(list.getTotal() > 0);
     }
 
@@ -203,7 +201,7 @@ public class WeEventClientTest {
      */
     @Test
     public void testState() throws Exception {
-        TopicInfo info = this.weEventClient.state(this.topicName,"1");
+        TopicInfo info = this.weEventClient.state(this.topicName, "1");
         assertTrue(info.getTopicName().equals(this.topicName));
     }
 
@@ -212,7 +210,7 @@ public class WeEventClientTest {
      */
     @Test(expected = BrokerException.class)
     public void testGetEvent() throws Exception {
-        this.weEventClient.getEvent("not exist","1");
+        this.weEventClient.getEvent("not exist", "1");
     }
 
     /**

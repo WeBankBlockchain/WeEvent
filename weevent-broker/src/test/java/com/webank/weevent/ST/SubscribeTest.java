@@ -35,7 +35,8 @@ import static org.junit.Assert.fail;
 @Slf4j
 public class SubscribeTest extends JUnitTestBase {
     private final static String groupId = "1";
-    private final static Map<String,String> extensions = new HashMap<>();
+    private final static Map<String, String> extensions = new HashMap<>();
+
     @Before
     public void before() throws Exception {
     }
@@ -94,11 +95,11 @@ public class SubscribeTest extends JUnitTestBase {
 
         try {
             String subscriptionId = rpc.subscribe(this.topicName,
-                    "1","",
+                    "1", "",
                     "http://localhost:8080/weevent/mock/jsonrpc");
             assertTrue(!subscriptionId.isEmpty());
 
-            SendResult sendResult = rpc.publish(this.topicName,groupId, "hello weevent".getBytes(StandardCharsets.UTF_8), extensions);
+            SendResult sendResult = rpc.publish(this.topicName, groupId, "hello weevent".getBytes(StandardCharsets.UTF_8), extensions);
             assertTrue(sendResult.getStatus() == SendResult.SendResultStatus.SUCCESS);
         } catch (BrokerException e) {
             log.error("error", e);

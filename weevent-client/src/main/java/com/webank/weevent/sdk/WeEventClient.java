@@ -67,7 +67,7 @@ public class WeEventClient {
         void onException(Throwable e);
     }
 
-    private final static String defaultJsonRpcUrl = "http://localhost:8081/weevent/jsonrpc";
+    private final static String defaultJsonRpcUrl = "http://localhost:8080/weevent/jsonrpc";
     private IBrokerRpc brokerRpc;
 
     // default STOMP url, ws://localhost:8080/weevent/stomp

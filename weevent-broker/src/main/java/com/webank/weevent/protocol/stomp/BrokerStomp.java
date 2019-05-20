@@ -453,7 +453,7 @@ public class BrokerStomp extends TextWebSocketHandler {
      */
     private boolean handleUnSubscribe(WebSocketSession session, String headerIdStr, Long groupId) {
         log.info("session id: {} header id: {} subscription id: {}", session.getId(), headerIdStr);
-        if (sessionContext.get(session.getId()).get(headerIdStr).getKey().equals(headerIdStr)) {
+        if (!sessionContext.get(session.getId()).containsKey(headerIdStr)) {
             log.info("unknown subscription id, {}", headerIdStr);
             return false;
         }
