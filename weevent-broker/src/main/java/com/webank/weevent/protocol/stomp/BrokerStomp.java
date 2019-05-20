@@ -200,7 +200,7 @@ public class BrokerStomp extends TextWebSocketHandler {
                     break;
 
                 case "UNSUBSCRIBE":
-                    boolean result = handleUnSubscribe(session, headerIdStr);
+                    boolean result = handleUnSubscribe(session, headerIdStr, groupId);
                     if (result) {
                         accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
                     } else {
@@ -447,7 +447,7 @@ public class BrokerStomp extends TextWebSocketHandler {
      * @param headerIdStr subscription id on stomp
      * @return boolean true if ok
      */
-    private boolean handleUnSubscribe(WebSocketSession session, String headerIdStr) {
+    private boolean handleUnSubscribe(WebSocketSession session, String headerIdStr, Long groupId) {
         log.info("session id: {} header subscription id: {}", session.getId(), headerIdStr);
 
         if (!sessionContext.get(session.getId()).containsKey(headerIdStr)) {

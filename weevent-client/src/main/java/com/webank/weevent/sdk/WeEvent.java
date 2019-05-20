@@ -39,6 +39,7 @@ public class WeEvent implements Serializable {
      * json format extension data, everything as you like.
      * 1k limit.
      */
+
     private Map<String, String> extensions;
     /**
      * Event id in block chain, it's unique under one topic.
