@@ -26,6 +26,7 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -37,11 +38,20 @@ import org.springframework.context.annotation.Configuration;
 public class ConnectionManager {
 
    // max connect
-   private static final int MAX_TOTAL = 200;
-   private static final int MAX_PER_ROUTE = 500;
-   private static final int CONNECTION_REQUEST_TIMEOUT = 3000;
-   private static final int CONNECTION_TIMEOUT = 3000;
-   private static final int SOCKET_TIMEOUT = 5000;
+   @Value("${http.client.max-total}")
+   private  int maxTotal;
+   
+   @Value("${http.client.max-per-route}")
+   private  int maxPerRoute = 500;
+   
+   @Value("${http.client.connection-request-timeout}")
+   private int connectionRequestTimeout= 3000;
+   
+   @Value("${http.client.connection-timeout}")
+   private int connectionTimeout = 3000;
+   
+   @Value("${http.client.socket-timeout}")
+   private int socketTimeout = 5000;
 
    private PoolingHttpClientConnectionManager cm;
    private CloseableHttpClient httpClient;
@@ -85,15 +95,15 @@ public class ConnectionManager {
     * config connect parameter
     */
    RequestConfig requestConfig = RequestConfig.custom()
-       .setConnectionRequestTimeout(CONNECTION_REQUEST_TIMEOUT)
-       .setConnectTimeout(CONNECTION_TIMEOUT)
-       .setSocketTimeout(SOCKET_TIMEOUT)
+       .setConnectionRequestTimeout(connectionRequestTimeout)
+       .setConnectTimeout(connectionTimeout)
+       .setSocketTimeout(socketTimeout)
        .build();
 
    public ConnectionManager() {
        cm = new PoolingHttpClientConnectionManager();
-       cm.setMaxTotal(MAX_TOTAL);
-       cm.setDefaultMaxPerRoute(MAX_PER_ROUTE);
+       cm.setMaxTotal(maxTotal);
+       cm.setDefaultMaxPerRoute(maxPerRoute);
 
        httpClient = HttpClients.custom()
            .setConnectionManager(cm)

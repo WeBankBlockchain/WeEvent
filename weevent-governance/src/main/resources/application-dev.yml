@@ -16,6 +16,12 @@ spring:
   pid:
     fail-on-write-error: true
     file: ./logs/governance.pid
-
+http: 
+  client: 
+    max-total: 200
+    max-per-route: 500
+    connection-request-timeout: 3000
+    connection-timeout: 3000
+    socket-timeout: 5000
 logging:
   config: classpath:log4j2.xml
