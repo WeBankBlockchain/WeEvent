@@ -56,7 +56,6 @@ public class WebSocketTransport extends WebSocketClient {
 
     // (receiptId in stomp <-> subscriptionId in biz)
     private Map<String, Long> subscriptionId2ReceiptId;
-
     private Map<Long, String> receiptId2subscriptionId;
 
     class ResponseFuture implements Future<Message> {
@@ -68,6 +67,7 @@ public class WebSocketTransport extends WebSocketClient {
         ResponseFuture(Long key) {
             this.key = key;
             this.latch = new CountDownLatch(1);
+
             futures.put(this.key, this);
         }
 
@@ -120,7 +120,6 @@ public class WebSocketTransport extends WebSocketClient {
 
     public void setTimeout(int timeout) {
         this.timeout = timeout;
-        // this.timeout = 8;
     }
 
     public boolean isConnected() {
@@ -145,12 +144,10 @@ public class WebSocketTransport extends WebSocketClient {
         }
     }
 
-
     public Message stompRequest(String req) throws JMSException {
         log.info("stomp request, size: {}", req.length());
 
         try {
-            // this.sequence is error
             ResponseFuture response = new ResponseFuture(this.sequence.longValue());
             this.send(req);
 
@@ -167,6 +164,7 @@ public class WebSocketTransport extends WebSocketClient {
     public void stompConnect(String userName, String password) throws JMSException {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         String req = stompCommand.encodeConnect(userName, password);
+
         this.stompRequest(req);
 
         // initialize connection context
@@ -230,7 +228,6 @@ public class WebSocketTransport extends WebSocketClient {
     @Override
     public void onOpen(ServerHandshake handshakedata) {
         log.info("WebSocket transport opened, remote address: {}", this.getRemoteSocketAddress().toString());
-        // this.setTopicConnection();
     }
 
     @Override
@@ -245,7 +242,6 @@ public class WebSocketTransport extends WebSocketClient {
         StompDecoder decoder = new StompDecoder();
         List<Message<byte[]>> messages = decoder.decode(ByteBuffer.wrap(message.getBytes(StandardCharsets.UTF_8)));
         StompHeaderAccessor accessor;
-
         for (Message<byte[]> stompMsg : messages) {
             accessor = StompHeaderAccessor.wrap(stompMsg);
             StompCommand command = accessor.getCommand();
@@ -269,9 +265,9 @@ public class WebSocketTransport extends WebSocketClient {
             if (accessor.getNativeHeader("message-id") != null) {
                 messageId = accessor.getNativeHeader("message-id").get(0);
             }
-
             log.debug("stomp command from server: {}", cmd);
             switch (cmd) {
+                // connect response
                 case "CONNECTED":
                     // connect command always 0
                     futures.get(0L).setResponse(stompMsg);
@@ -296,7 +292,6 @@ public class WebSocketTransport extends WebSocketClient {
                     log.error("command from stomp server: {}", cmd);
 
                     break;
-
                 case "MESSAGE":
                     WeEvent event = null;
                     try {
@@ -311,7 +306,6 @@ public class WebSocketTransport extends WebSocketClient {
                         WeEventStompCommand weEventStompCommand = new WeEventStompCommand(event);
                         weEventStompCommand.setSubscriptionId(subscriptionId);
                         weEventStompCommand.setHeaderId(messageId);
-
                         this.topicConnection.dispatch(weEventStompCommand);
                     } else {
                         log.error("unknown receipt-id: {}", receiptId);

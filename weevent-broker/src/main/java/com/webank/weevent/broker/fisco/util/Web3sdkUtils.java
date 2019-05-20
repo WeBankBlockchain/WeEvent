@@ -33,8 +33,8 @@ public class Web3sdkUtils {
      * tool to generate system contract, 'TopicController'.
      *
      * @param args optional param, save data into file if set.
-     * Usage:
-     * java -Xbootclasspath/a:./config -cp weevent-broker-2.0.0.jar -Dloader.main=com.webank.weevent.broker.fisco.util.Web3sdkUtils org.springframework.boot.loader.PropertiesLauncher ./address.txt [1]
+     *             Usage:
+     *             java -Xbootclasspath/a:./config -cp weevent-broker-2.0.0.jar -Dloader.main=com.webank.weevent.broker.fisco.util.Web3sdkUtils org.springframework.boot.loader.PropertiesLauncher ./address.txt [1]
      */
     public static void main(String[] args) {
         try {

@@ -79,7 +79,7 @@ public class FiscoBcos {
      * Gets the contract service.
      *
      * @param contractAddress the contract address
-     * @param cls the class
+     * @param cls             the class
      * @return the contract service
      */
     private Contract getContractService(String contractAddress, Class<?> cls) throws BrokerException {
@@ -116,7 +116,7 @@ public class FiscoBcos {
         }
 
         try {
-            Address address = this.topicController.getTopicAddress(Web3SDKWrapper.stringToBytes32(topicName)).get();
+            Address address = this.topicController.getTopicAddress(new Utf8String(topicName)).get();
             if (address == null) {
                 log.error("topic contact address is null, check configuration `fisco.topic-controller.contract-address`");
                 throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
@@ -158,7 +158,7 @@ public class FiscoBcos {
             }
 
             TransactionReceipt transactionReceipt = this.topicController
-                    .addTopicInfo(Web3SDKWrapper.stringToBytes32(topicName), new Address(topic.getContractAddress()))
+                    .addTopicInfo(new Utf8String(topicName), new Address(topic.getContractAddress()))
                     .get(WeEventConstants.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
             List<TopicController.LogAddTopicNameAddressEventResponse> event = TopicController
                     .getLogAddTopicNameAddressEvents(transactionReceipt);
@@ -215,7 +215,7 @@ public class FiscoBcos {
 
     public TopicInfo getTopicInfo(String topicName) throws BrokerException {
         try {
-            List<Type> typeList = this.topicController.getTopicInfo(Web3SDKWrapper.stringToBytes32(topicName)).get();
+            List<Type> typeList = this.topicController.getTopicInfo(new Utf8String(topicName)).get();
             if (typeList == null || typeList.isEmpty()) {
                 log.error("TopicController.getTopicInfo result is empty");
                 throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
@@ -257,7 +257,7 @@ public class FiscoBcos {
         throw new BrokerException(ErrorCode.EVENT_ID_NOT_EXIST);
     }
 
-    public SendResult publishEvent(String topicName, String eventContent) throws BrokerException {
+    public SendResult publishEvent(String topicName, String eventContent, String extensions) throws BrokerException {
         Topic topic = getTopic(topicName);
         if (topic == null) {
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
@@ -266,8 +266,8 @@ public class FiscoBcos {
         try {
             SendResult sendResult = new SendResult(SendResult.SendResultStatus.ERROR);
 
-            TransactionReceipt transactionReceipt = topic.publishWeEvent(Web3SDKWrapper.stringToBytes32(topicName),
-                    new Utf8String(eventContent)).get(WeEventConstants.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+            TransactionReceipt transactionReceipt = topic.publishWeEvent(new Utf8String(topicName),
+                    new Utf8String(eventContent), new Utf8String(extensions)).get(WeEventConstants.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
             List<Topic.LogWeEventEventResponse> event = Topic.getLogWeEventEvents(transactionReceipt);
             if (CollectionUtils.isNotEmpty(event)) {
                 sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, Web3SDKWrapper.uint256ToInt(event.get(0).eventBlockNumer), Web3SDKWrapper.uint256ToInt(event.get(0).eventSeq)));
@@ -283,14 +283,14 @@ public class FiscoBcos {
         }
     }
 
-    public void publishEvent(String topicName, String eventContent, IProducer.SendCallBack callBack) throws BrokerException {
+    public void publishEvent(String topicName, String eventContent, String extensions, IProducer.SendCallBack callBack) throws BrokerException {
         Topic topic = getTopic(topicName);
         if (topic == null) {
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
         }
 
         SendResult sendResult = new SendResult(SendResult.SendResultStatus.ERROR);
-        topic.publishWeEvent(Web3SDKWrapper.stringToBytes32(topicName), new Utf8String(eventContent),
+        topic.publishWeEvent(new Utf8String(topicName), new Utf8String(eventContent), new Utf8String(extensions),
                 new TransactionSucCallback() {
                     @Override
                     public void onResponse(EthereumResponse response) {
@@ -301,7 +301,7 @@ public class FiscoBcos {
                             List<Topic.LogWeEventEventResponse> event = Topic.getLogWeEventEvents(transactionReceipt);
                             if (CollectionUtils.isNotEmpty(event)) {
                                 sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, Web3SDKWrapper.uint256ToInt(event.get(0).eventBlockNumer), Web3SDKWrapper.uint256ToInt(event.get(0).eventSeq)));
-                                sendResult.setTopic(Web3SDKWrapper.bytes32ToString(event.get(0).topicName));
+                                sendResult.setTopic(event.get(0).topicName.toString());
                                 if (response.getErrorCode().equals(WeEventConstants.TIME_OUT)) {
                                     sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
                                 } else {

@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -24,6 +25,7 @@ import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.bcos.channel.client.Service;
 import org.bcos.channel.handler.ChannelConnections;
@@ -77,7 +79,11 @@ public class Web3SDKWrapper {
             channelConnections.setClientCertPassWord(fiscoConfig.getV1ClientCrtPassword());
             channelConnections.setClientKeystorePath("classpath:" + fiscoConfig.getV1ClientKeyStorePath());
             channelConnections.setKeystorePassWord(fiscoConfig.getV1KeyStorePassword());
-            channelConnections.setConnectionsStr(Arrays.asList(fiscoConfig.getNodes().split(";")));
+            List<String> nodeList = Arrays.asList(fiscoConfig.getNodes().split(";"));
+            for (int i = 0; i < nodeList.size(); i++) {
+                nodeList.set(i, fiscoConfig.getOrgId() + "@" + nodeList.get(i));
+            }
+            channelConnections.setConnectionsStr(nodeList);
             service.setAllChannelConnections(new ConcurrentHashMap<String, ChannelConnections>() {{
                 put(fiscoConfig.getOrgId(), channelConnections);
             }});
@@ -132,9 +138,9 @@ public class Web3SDKWrapper {
      * load contract handler
      *
      * @param contractAddress contractAddress
-     * @param web3j web3j
-     * @param credentials credentials
-     * @param cls contract java class
+     * @param web3j           web3j
+     * @param credentials     credentials
+     * @param cls             contract java class
      * @return Contract return null if error
      */
     public static Contract loadContract(String contractAddress, Web3j web3j, Credentials credentials, Class<?> cls) {
@@ -172,7 +178,7 @@ public class Web3SDKWrapper {
     /**
      * deploy topic control into web3j
      *
-     * @param web3j web3j handler
+     * @param web3j       web3j handler
      * @param credentials credentials
      * @return contract address
      * @throws BrokerException BrokerException
@@ -266,8 +272,9 @@ public class Web3SDKWrapper {
                 TransactionReceipt receipt = transactionReceipt.getTransactionReceipt().get();
                 List<Topic.LogWeEventEventResponse> logWeEventEvents = Topic.getLogWeEventEvents(receipt);
                 for (Topic.LogWeEventEventResponse logEvent : logWeEventEvents) {
-                    String topicName = bytes32ToString(logEvent.topicName);
-                    WeEvent event = new WeEvent(topicName, logEvent.eventContent.getValue().getBytes(StandardCharsets.UTF_8));
+                    String topicName = logEvent.topicName.toString();
+                    Map<String, String> extensions = (Map<String, String>) JSON.parse(logEvent.extensions.toString());
+                    WeEvent event = new WeEvent(topicName, logEvent.eventContent.getValue().getBytes(StandardCharsets.UTF_8), extensions);
                     event.setEventId(DataTypeUtils.encodeEventId(topicName, uint256ToInt(logEvent.eventBlockNumer), uint256ToInt(logEvent.eventSeq)));
                     log.debug("get a event from fisco-bcos: {}", event);
                     events.add(event);

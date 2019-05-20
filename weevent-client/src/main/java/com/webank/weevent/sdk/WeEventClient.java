@@ -67,7 +67,7 @@ public class WeEventClient {
         void onException(Throwable e);
     }
 
-    private final static String defaultJsonRpcUrl = "http://127.0.0.1:8081/weevent/jsonrpc";
+    private final static String defaultJsonRpcUrl = "http://localhost:8081/weevent/jsonrpc";
     private IBrokerRpc brokerRpc;
 
     // default STOMP url, ws://localhost:8080/weevent/stomp
@@ -118,8 +118,8 @@ public class WeEventClient {
      * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
      * @throws BrokerException broker exception
      */
-    public SendResult publish(String topic, byte[] content) throws BrokerException {
-        return this.brokerRpc.publish(topic, content);
+    public SendResult publish(String topic, String groupId, byte[] content, Map<String, String> extensions) throws BrokerException {
+        return this.brokerRpc.publish(topic, groupId, content, extensions);
     }
 
     /**
@@ -159,9 +159,9 @@ public class WeEventClient {
                     }
                 }
             });
+
             this.sessionMap.put(subscriber.getSubscriptionId(), session);
             return subscriber.getSubscriptionId();
-
         } catch (JMSException e) {
             log.error("jms exception", e);
             throw new BrokerException(ErrorCode.SDK_JMS_EXCEPTION);
@@ -181,8 +181,6 @@ public class WeEventClient {
         if (this.sessionMap.containsKey(subscriptionId)) {
             TopicSession session = this.sessionMap.get(subscriptionId);
             try {
-                log.info("get the  session details {}", session.toString());
-
                 session.unsubscribe(subscriptionId);
             } catch (JMSException e) {
                 log.error("jms exception", e);
@@ -201,34 +199,37 @@ public class WeEventClient {
     /**
      * Open a topic.
      *
-     * @param topic topic name
+     * @param topic   topic name
+     * @param groupId which group to open
      * @return true if success
      * @throws BrokerException broker exception
      */
-    public boolean open(String topic) throws BrokerException {
-        return this.brokerRpc.open(topic);
+    public boolean open(String topic, String groupId) throws BrokerException {
+        return this.brokerRpc.open(topic, groupId);
     }
 
     /**
      * Close a topic.
      *
-     * @param topic topic name
+     * @param topic   topic name
+     * @param groupId which group to close
      * @return true if success
      * @throws BrokerException broker exception
      */
-    public boolean close(String topic) throws BrokerException {
-        return this.brokerRpc.close(topic);
+    public boolean close(String topic, String groupId) throws BrokerException {
+        return this.brokerRpc.close(topic, groupId);
     }
 
     /**
      * Check a topic is exist or not.
      *
-     * @param topic topic name
+     * @param topic   topic name
+     * @param groupId which group to exit
      * @return true if exist
      * @throws BrokerException broker exception
      */
-    public boolean exist(String topic) throws BrokerException {
-        return this.brokerRpc.exist(topic);
+    public boolean exist(String topic, String groupId) throws BrokerException {
+        return this.brokerRpc.exist(topic, groupId);
     }
 
     /**
@@ -239,8 +240,8 @@ public class WeEventClient {
      * @return topic list
      * @throws BrokerException broker exception
      */
-    public TopicPage list(Integer pageIndex, Integer pageSize) throws BrokerException {
-        return this.brokerRpc.list(pageIndex, pageSize);
+    public TopicPage list(Integer pageIndex, Integer pageSize, String groupId) throws BrokerException {
+        return this.brokerRpc.list(pageIndex, pageSize, groupId);
     }
 
     /**
@@ -250,8 +251,8 @@ public class WeEventClient {
      * @return topic information
      * @throws BrokerException broker exception
      */
-    public TopicInfo state(String topic) throws BrokerException {
-        return this.brokerRpc.state(topic);
+    public TopicInfo state(String topic, String groupId) throws BrokerException {
+        return this.brokerRpc.state(topic, groupId);
     }
 
     /**
@@ -261,8 +262,8 @@ public class WeEventClient {
      * @return weevent
      * @throws BrokerException broker exception
      */
-    public WeEvent getEvent(String eventId) throws BrokerException {
-        return this.brokerRpc.getEvent(eventId);
+    public WeEvent getEvent(String eventId, String groupId) throws BrokerException {
+        return this.brokerRpc.getEvent(eventId, groupId);
     }
 
     // implements

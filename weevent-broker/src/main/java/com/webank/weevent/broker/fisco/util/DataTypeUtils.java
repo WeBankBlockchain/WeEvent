@@ -24,7 +24,7 @@ public final class DataTypeUtils {
      *
      * @param topicName
      * @param eventBlockNumber blockchain blocknumber
-     * @param eventSeq eventSeq number
+     * @param eventSeq         eventSeq number
      * @return encodeString
      */
     public static String encodeEventId(String topicName, int eventBlockNumber, int eventSeq) {

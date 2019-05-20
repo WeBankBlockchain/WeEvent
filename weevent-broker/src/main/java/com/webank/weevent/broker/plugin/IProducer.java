@@ -94,7 +94,7 @@ public interface IProducer extends IEventTopic {
      * @return SendResult SendResult
      * @throws BrokerException BrokerException
      */
-    SendResult publish(WeEvent event) throws BrokerException;
+    SendResult publish(WeEvent event, Long groupId) throws BrokerException;
 
     /*
      * TODO
@@ -123,9 +123,9 @@ public interface IProducer extends IEventTopic {
     /**
      * Publish a event in asynchronous way.
      *
-     * @param event the event
+     * @param event    the event
      * @param callBack the callBack {@link SendCallBack}
      * @throws BrokerException BrokerException
      */
-    void publish(WeEvent event, SendCallBack callBack) throws BrokerException;
+    void publish(WeEvent event, Long groupId, SendCallBack callBack) throws BrokerException;
 }
