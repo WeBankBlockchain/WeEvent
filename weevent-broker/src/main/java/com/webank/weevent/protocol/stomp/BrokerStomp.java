@@ -100,12 +100,12 @@ public class BrokerStomp extends TextWebSocketHandler {
                     frameType = "HEARTBEAT";
                 }
             }
-            String simpDestination = "";
             Object simpDestinationObj = msg.getHeaders().get("simpDestination");
-            if (simpDestinationObj != null) {
-                simpDestination = simpDestinationObj.toString();
+            if (simpDestinationObj == null) {
+                log.error("unknown simpDestination or extensions");
+                return;
             }
-
+            String simpDestination = simpDestinationObj.toString();
             String headerReceiptIdStr = "";
             String headerIdStr = "";
             String subEventId = "";

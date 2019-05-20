@@ -105,7 +105,7 @@ public interface IConsumer extends IEventTopic {
      * @return subscription Id relation to topic
      * @throws BrokerException invalid input
      */
-    Map<String, String> subscribe(Map<String, String> topics, String interfaceType, ConsumerListener listener) throws BrokerException;
+    Map<String, String> subscribe(Map<String, String> topics, Long groupId, String interfaceType, ConsumerListener listener) throws BrokerException;
 
     /**
      * This support single topic subscribe
@@ -117,7 +117,7 @@ public interface IConsumer extends IEventTopic {
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
-    String subscribe(String topic, String offset, String interfaceType, ConsumerListener listener) throws BrokerException;
+    String subscribe(String topic, Long groupId, String offset, String interfaceType, ConsumerListener listener) throws BrokerException;
 
     /**
      * This support single topic subscribe
@@ -130,7 +130,7 @@ public interface IConsumer extends IEventTopic {
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
-    String subscribe(String topic, String offset, String subscriptionId, String interfaceType, ConsumerListener listener) throws BrokerException;
+    String subscribe(String topic, Long groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener) throws BrokerException;
 
     /**
      * unsubscribe an exist subscription subscribed by subscribe interface.

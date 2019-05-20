@@ -41,7 +41,7 @@ public class WeEventConstants {
     /**
      * Max length for topic name.
      */
-    public static final Integer TOPIC_NAME_MAX_LENGTH = 32;
+    public static final Integer TOPIC_NAME_MAX_LENGTH = 64;
 
     /**
      * topic name encode length.
@@ -64,7 +64,53 @@ public class WeEventConstants {
     public static final Integer EVENT_CONTENT_MAX_LENGTH = 10240;
 
     /**
-     * Event ID spilt char.
+     * Max length for event extensions.
+     */
+    public static final Integer EVENT_EXTENSIONS_MAX_LENGTH = 1024;
+    /**
+     * Event ID split char.
      */
     public static final String EVENT_ID_SPLIT_CHAR = "-";
+
+    /**
+     * Extensions prefix char.
+     */
+    public static final String EXTENSIONS_PREFIX_CHAR = "weevent-";
+
+    /**
+     * Extensions groupid.
+     */
+    public static final String EXTENSIONS_GROUP_ID = "weevent-groupid";
+
+    /**
+     * Extensions default groupid.
+     */
+    public static final Long DEFAULT_GROUP_ID = 1L;
+
+    /**
+     * Extensions eventid.
+     */
+    public static final String EXTENSIONS_EVENT_ID = "weevent-eventid";
+
+    /**
+     * Extensions receivedtopic.
+     */
+    public static final String EXTENSIONS_RECEIVED_TOPIC = "weevent-receivedtopic";
+
+    /**
+     * event topic.
+     */
+    public static final String EVENT_TOPIC = "topic";
+
+    /**
+     * event topic.
+     */
+    public static final String EVENT_GROUP_ID = "groupId";
+
+    /**
+     * event content.
+     */
+    public static final String EVENT_CONTENT = "content";
+
+
 }

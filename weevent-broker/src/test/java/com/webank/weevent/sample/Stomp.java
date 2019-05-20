@@ -105,9 +105,9 @@ public class Stomp {
 
             @Override
             public void handleTransportError(StompSession session, Throwable exception) {
-                if (exception instanceof ConnectionLostException||!isConnected) {
+                if (exception instanceof ConnectionLostException || !isConnected) {
                     log.info("connection closed, {}", session.getSessionId());
-                    isConnected=false;
+                    isConnected = false;
                     // do auto reconnect in this handle
                     while (!isConnected) try {
                         // retry every 3 seconds

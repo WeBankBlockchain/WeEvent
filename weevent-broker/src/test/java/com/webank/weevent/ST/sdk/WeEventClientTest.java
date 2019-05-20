@@ -69,7 +69,6 @@ public class WeEventClientTest {
     @Test(expected = BrokerException.class)
     public void testPublish_001() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-
         this.weEventClient.publish(this.topicName, "1", null, null);
     }
 
@@ -102,7 +101,6 @@ public class WeEventClientTest {
     @Test(expected = BrokerException.class)
     public void testPublish_003() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-
         this.weEventClient.publish("111111111111111111111111111111111111111111111111111111", null, null, extensions);
     }
 

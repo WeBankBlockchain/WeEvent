@@ -9,7 +9,6 @@ import com.webank.weevent.sdk.BrokerException;
 import lombok.extern.slf4j.Slf4j;
 
 import static com.webank.weevent.sdk.ErrorCode.EVENT_GROUP_ID_INVALID;
-
 @Slf4j
 public class WeEventUtils {
     public static Map<String, String> getExtensions(Map<String, String> eventData) throws BrokerException {
@@ -38,6 +37,7 @@ public class WeEventUtils {
             try {
                 groupId = Long.parseLong(strGroupId);
             } catch (Exception e) {
+
                 log.error("{}", EVENT_GROUP_ID_INVALID.getCodeDesc());
                 throw new BrokerException(EVENT_GROUP_ID_INVALID);
             }

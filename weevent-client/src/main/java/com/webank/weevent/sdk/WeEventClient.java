@@ -210,8 +210,7 @@ public class WeEventClient {
 
     /**
      * Close a topic.
-     *
-     * @param topic   topic name
+     * @param topic topic name
      * @param groupId which group to close
      * @return true if success
      * @throws BrokerException broker exception
@@ -221,9 +220,8 @@ public class WeEventClient {
     }
 
     /**
-     * Check a topic is exist or not.
-     *
-     * @param topic   topic name
+     * Check a topic is exist or not
+     * @param topic topic name
      * @param groupId which group to exit
      * @return true if exist
      * @throws BrokerException broker exception

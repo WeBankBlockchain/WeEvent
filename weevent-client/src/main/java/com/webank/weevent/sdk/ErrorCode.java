@@ -13,7 +13,7 @@ public enum ErrorCode {
 
     TOPIC_NOT_EXIST(100101, "topic not exist"),
 
-    TOPIC_EXCEED_MAX_LENGTH(100102, "topic name exceeds max length[32 bytes]"),
+    TOPIC_EXCEED_MAX_LENGTH(100102, "topic name exceeds max length[64 bytes]"),
 
     TOPIC_IS_BLANK(100103, "topic name is blank"),
 
@@ -35,6 +35,8 @@ public enum ErrorCode {
 
     EVENT_CONTENT_CHARSET(100203, "event content must be utf-8"),
 
+    EVENT_EXTENSIONS_EXCEEDS_MAX_LENGTH(100204, "event extensions exceeds max length[1k bytes]"),
+
     EVENT_ID_IS_BLANK(100300, "eventId is blank"),
 
     EVENT_ID_EXCEEDS_MAX_LENGTH(100301, "eventId exceeds max length[32 bytes]"),
@@ -44,6 +46,10 @@ public enum ErrorCode {
     EVENT_ID_NOT_EXIST(100303, "eventId is not exist"),
 
     EVENT_ID_IS_MISMATCH(100304, "eventId is mismatch with block chain"),
+
+    EVENT_GROUP_ID_NOT_FOUND(100305, "event groupid is notfound"),
+
+    EVENT_GROUP_ID_INVALID(100306, "event groupid should be an string start from 1"),
 
     OFFSET_IS_BLANK(100500, "subscribe interface offset param is blank"),
 
