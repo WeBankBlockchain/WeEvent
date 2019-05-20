@@ -2,6 +2,8 @@ package com.webank.weevent.sample;
 
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.WeEvent;
@@ -16,10 +18,10 @@ import com.webank.weevent.sdk.WeEventClient;
 public class JavaSDK {
     private final static String topicName = "com.weevent.test";
     private final static String groupId = "1";
+    private final static Map<String,String> extensions = new HashMap<>();
 
     public static void main(String[] args) {
         System.out.println("This is WeEvent Java SDK sample.");
-
         try {
             // get client
             WeEventClient client = new WeEventClient("http://localhost:8080/weevent");
@@ -42,7 +44,7 @@ public class JavaSDK {
 
             // publish event
             for (int i = 0; i < 10; i++) {
-                client.publish(topicName, ("hello weevent: " + i).getBytes(StandardCharsets.UTF_8), null);
+                client.publish(topicName, groupId,("hello weevent: " + i).getBytes(StandardCharsets.UTF_8), extensions);
             }
 
             // unSubscribe topic

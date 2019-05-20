@@ -8,6 +8,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -66,7 +67,7 @@ public class WeEventClient {
         void onException(Throwable e);
     }
 
-    private final static String defaultJsonRpcUrl = "http://localhost:8080/weevent/jsonrpc";
+    private final static String defaultJsonRpcUrl = "http://localhost:8081/weevent/jsonrpc";
     private IBrokerRpc brokerRpc;
 
     // default STOMP url, ws://localhost:8080/weevent/stomp

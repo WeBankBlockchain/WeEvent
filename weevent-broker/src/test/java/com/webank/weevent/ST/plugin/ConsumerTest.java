@@ -32,6 +32,7 @@ public class ConsumerTest extends JUnitTestBase {
     private IProducer iProducer;
     private IConsumer iConsumer;
     private String lastEventId = "";
+    private String groupId="1";
 
     @Before
     public void before() throws Exception {
