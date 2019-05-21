@@ -62,7 +62,6 @@ public class TopicService {
 		log.info("result json=" + result);
 		if (result != null) {
 			List<Topic> topicList = null;
-			TopicPage topicPage = null;
 
 			topicList = result.getTopicInfoList();
 			//get creater from database
@@ -75,7 +74,7 @@ public class TopicService {
 				}
 			}
 			result.setTopicInfoList(topicList);
-			return topicPage;
+			return result;
 		}
 		return null;
 	}
