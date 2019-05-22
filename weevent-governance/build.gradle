@@ -19,6 +19,10 @@ List fastjson = [
         "com.alibaba:fastjson:1.2.4"
 ]
 
+List httpclient = [
+        "org.apache.httpcomponents:httpclient:4.5.2"
+]
+
 List springboot = [
         "org.springframework.boot:spring-boot-starter-actuator",
         "org.springframework.boot:spring-boot-starter-web"
@@ -29,7 +33,7 @@ List springboottest = [
 ]
 
 dependencies {
-    implementation(db, jsoup, fastjson, springboot)
+    implementation(db, jsoup, fastjson, httpclient, springboot)
 
     testImplementation(springboottest)
 }
