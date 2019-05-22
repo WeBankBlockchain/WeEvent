@@ -169,10 +169,12 @@ public class BrokerStomp extends TextWebSocketHandler {
                     String eventId = handleSend(msg, simpDestination, extensions, groupId);
                     if (eventId.isEmpty()) {
                         command = StompCommand.ERROR;
+                        accessor = StompHeaderAccessor.create(command);
+                        accessor.setNativeHeader("message","subscribetion id is null");
                     } else {
                         command = StompCommand.RECEIPT;
+                        accessor = StompHeaderAccessor.create(command);
                     }
-                    accessor = StompHeaderAccessor.create(command);
                     accessor.setDestination(simpDestination);
                     accessor.setReceiptId(headerReceiptIdStr);
                     sendSimpleMessage(session, accessor);
@@ -189,6 +191,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
                     if (subscriptionId.isEmpty()) {
                         accessor = StompHeaderAccessor.create(StompCommand.ERROR);
+                        accessor.setNativeHeader("message","subscribetion id is null");
                     } else {
                         accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
                         accessor.setDestination(simpDestination);
@@ -206,6 +209,7 @@ public class BrokerStomp extends TextWebSocketHandler {
                         accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
                     } else {
                         accessor = StompHeaderAccessor.create(StompCommand.ERROR);
+                        accessor.setNativeHeader("message","unsubscribe fail ");
                     }
 
                     accessor.setDestination(simpDestination);
@@ -220,6 +224,7 @@ public class BrokerStomp extends TextWebSocketHandler {
                     accessor = StompHeaderAccessor.create(StompCommand.ERROR);
                     accessor.setDestination(simpDestination);
                     accessor.setMessage("NOT SUPPORT COMMAND");
+                    accessor.setNativeHeader("message","NOT SUPPORT COMMAND");
                     // a unique identifier for that message and a subscription header matching the identifier of the subscription that is receiving the message.
                     sendSimpleMessage(session, accessor);
                     super.handleTransportError(session, new Exception("unknown command"));

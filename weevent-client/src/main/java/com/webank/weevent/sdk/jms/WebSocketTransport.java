@@ -184,13 +184,17 @@ public class WebSocketTransport extends WebSocketClient {
 
     // return eventId
     public String stompSend(WeEventTopic topic, BytesMessage bytesMessage) throws JMSException {
-        Long id = this.sequence.longValue();
+        Long id = (this.sequence.incrementAndGet());
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         byte[] body = new byte[(int) bytesMessage.getBodyLength()];
         bytesMessage.readBytes(body);
         String req = stompCommand.encodeSend(topic, body, id);
 
         Message stompResponse = this.stompRequest(req, id);
+        if(stompCommand.isError(stompResponse)){
+            log.info("stomp request is fail");
+            return "";
+        }
         return stompCommand.getReceipt(stompResponse);
     }
 
@@ -201,6 +205,10 @@ public class WebSocketTransport extends WebSocketClient {
         String req = stompCommand.encodeSubscribe(topic, offset, id);
 
         Message stompResponse = this.stompRequest(req, id);
+        if(stompCommand.isError(stompResponse)){
+            log.info("stomp request is fail");
+            return "";
+        }
         return stompCommand.getSubscriptionId(stompResponse);
     }
 
@@ -290,7 +298,11 @@ public class WebSocketTransport extends WebSocketClient {
 
                 case "ERROR":
                     log.error("command from stomp server: {}", cmd);
-
+                    String recepitId="";
+                    if (accessor.getNativeHeader("receipt-id") != null) {
+                        recepitId = accessor.getNativeHeader("receipt-id").get(0);
+                    }
+                    futures.get(recepitId).setResponse(stompMsg);
                     break;
                 case "MESSAGE":
                     WeEvent event = null;
