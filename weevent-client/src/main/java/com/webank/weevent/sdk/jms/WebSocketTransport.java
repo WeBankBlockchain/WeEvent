@@ -34,7 +34,8 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 /**
  * stomp transport over web socket.
  *
- * @author matthewliu, cristic
+ * @author matthewliu
+ * @author cristicmei
  * @since 2019/04/01
  */
 @Slf4j

@@ -20,7 +20,8 @@ import org.springframework.util.MimeType;
 /**
  * Stomp command.
  *
- * @author matthewliu, cristic
+ * @author matthewliu
+ * @author cristicmei
  * @since 2019/04/11
  */
 @Data
