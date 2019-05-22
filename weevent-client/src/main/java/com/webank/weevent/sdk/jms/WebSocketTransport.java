@@ -34,7 +34,7 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 /**
  * stomp transport over web socket.
  *
- * @author matthewliu
+ * @author matthewliu, cristic
  * @since 2019/04/01
  */
 @Slf4j
@@ -56,7 +56,12 @@ public class WebSocketTransport extends WebSocketClient {
 
     // (receiptId in stomp <-> subscriptionId in biz)
     private Map<String, Long> subscriptionId2ReceiptId;
+
+    // (subcriptionId  <-> receiptId)
     private Map<Long, String> receiptId2SubscriptionId;
+
+    // (headerId in stomp <-> asyncSeq in biz )
+    private Map<String, Long> sequence2Id;
 
     class ResponseFuture implements Future<Message> {
         private Long key;
@@ -127,11 +132,12 @@ public class WebSocketTransport extends WebSocketClient {
     }
 
     // Stomp command
-    public Message stompRequest(String req, Long id) throws JMSException {
+    public Message stompRequest(String req, Long asyncSeq) throws JMSException {
         log.info("stomp request, size: {}", req.length());
 
         try {
-            ResponseFuture response = new ResponseFuture(id);
+            // asyncSeq use for synchronous to asynchronous
+            ResponseFuture response = new ResponseFuture(asyncSeq);
             this.send(req);
 
             return response.get(timeout, TimeUnit.SECONDS);
@@ -144,54 +150,40 @@ public class WebSocketTransport extends WebSocketClient {
         }
     }
 
-    public Message stompRequest(String req) throws JMSException {
-        log.info("stomp request, size: {}", req.length());
-
-        try {
-            ResponseFuture response = new ResponseFuture(this.sequence.longValue());
-            this.send(req);
-
-            return response.get(timeout, TimeUnit.SECONDS);
-        } catch (ExecutionException | InterruptedException e) {
-            log.error("stomp command invoke failed", e);
-            throw WeEventConnectionFactory.error2JMSException(ErrorCode.SDK_JMS_EXCEPTION_STOMP_EXECUTE);
-        } catch (TimeoutException e) {
-            log.error("stomp command invoke timeout", e);
-            throw WeEventConnectionFactory.error2JMSException(ErrorCode.SDK_JMS_EXCEPTION_STOMP_TIMEOUT);
-        }
-    }
 
     public void stompConnect(String userName, String password) throws JMSException {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         String req = stompCommand.encodeConnect(userName, password);
-
-        this.stompRequest(req);
+        sequence2Id.put(Long.toString(0L), 0L);
+        this.stompRequest(req, 0L);
 
         // initialize connection context
         this.sequence.set(0L);
         this.futures.clear();
         this.receiptId2SubscriptionId.clear();
         this.subscriptionId2ReceiptId.clear();
+        this.sequence2Id.clear();
     }
 
     public boolean stompDisconnect() throws JMSException {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         String req = stompCommand.encodeDisConnect();
-
-        Message stompResponse = this.stompRequest(req);
+        sequence2Id.put(Long.toString(1L), 1L);
+        Message stompResponse = this.stompRequest(req, 1L);
         return !stompCommand.isError(stompResponse);
     }
 
     // return eventId
     public String stompSend(WeEventTopic topic, BytesMessage bytesMessage) throws JMSException {
-        Long id = (this.sequence.incrementAndGet());
+        Long asyncSeq = (this.sequence.incrementAndGet());
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         byte[] body = new byte[(int) bytesMessage.getBodyLength()];
         bytesMessage.readBytes(body);
-        String req = stompCommand.encodeSend(topic, body, id);
-
-        Message stompResponse = this.stompRequest(req, id);
-        if(stompCommand.isError(stompResponse)){
+        //header id equal asyncSeq
+        String req = stompCommand.encodeSend(topic, body, asyncSeq);
+        sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
+        Message stompResponse = this.stompRequest(req, asyncSeq);
+        if (stompCommand.isError(stompResponse)) {
             log.info("stomp request is fail");
             return "";
         }
@@ -200,12 +192,12 @@ public class WebSocketTransport extends WebSocketClient {
 
     // return subscriptionId
     public String stompSubscribe(WeEventTopic topic, String offset) throws JMSException {
-        Long id = this.sequence.longValue();
+        Long asyncSeq = this.sequence.incrementAndGet();
         WeEventStompCommand stompCommand = new WeEventStompCommand();
-        String req = stompCommand.encodeSubscribe(topic, offset, id);
-
-        Message stompResponse = this.stompRequest(req, id);
-        if(stompCommand.isError(stompResponse)){
+        String req = stompCommand.encodeSubscribe(topic, offset, asyncSeq);
+        sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
+        Message stompResponse = this.stompRequest(req, asyncSeq);
+        if (stompCommand.isError(stompResponse)) {
             log.info("stomp request is fail");
             return "";
         }
@@ -217,7 +209,9 @@ public class WebSocketTransport extends WebSocketClient {
         Long headerId = this.subscriptionId2ReceiptId.get(subscriptionId);
         String req = stompCommand.encodeUnSubscribe(subscriptionId, Long.toString(headerId));
 
-        Message stompResponse = this.stompRequest(req);
+        Long asyncSeq = this.sequence.incrementAndGet();
+        sequence2Id.put(Long.toString(headerId), asyncSeq);
+        Message stompResponse = this.stompRequest(req, asyncSeq);
         return !stompCommand.isError(stompResponse);
     }
 
@@ -231,6 +225,7 @@ public class WebSocketTransport extends WebSocketClient {
         this.futures = new ConcurrentHashMap<>();
         this.receiptId2SubscriptionId = new ConcurrentHashMap<>();
         this.subscriptionId2ReceiptId = new ConcurrentHashMap<>();
+        this.sequence2Id = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -284,13 +279,13 @@ public class WebSocketTransport extends WebSocketClient {
                 // disconnect/send/subscribe/unsubscribe response
                 case "RECEIPT":
                     // add the map<receiptId2SubscriptionId>
-                    if (futures.containsKey((Long.valueOf(receiptId).longValue()))) {
+                    if (futures.containsKey(sequence2Id.get(receiptId))) {
                         if (subscriptionId != null) {
                             log.info("subscriptionId {}", subscriptionId);
                             this.receiptId2SubscriptionId.put(Long.valueOf(receiptId).longValue(), subscriptionId);
                             this.subscriptionId2ReceiptId.put(subscriptionId, Long.valueOf(receiptId).longValue());
                         }
-                        futures.get((Long.valueOf(receiptId).longValue())).setResponse(stompMsg);
+                        futures.get(sequence2Id.get(receiptId)).setResponse(stompMsg);
                     } else {
                         log.error("unknown receipt-id: {}", receiptId);
                     }
@@ -298,11 +293,11 @@ public class WebSocketTransport extends WebSocketClient {
 
                 case "ERROR":
                     log.error("command from stomp server: {}", cmd);
-                    String recepitId="";
+                    String recepitId = "";
                     if (accessor.getNativeHeader("receipt-id") != null) {
                         recepitId = accessor.getNativeHeader("receipt-id").get(0);
                     }
-                    futures.get(recepitId).setResponse(stompMsg);
+                    futures.get(sequence2Id.get(receiptId)).setResponse(stompMsg);
                     break;
                 case "MESSAGE":
                     WeEvent event = null;
