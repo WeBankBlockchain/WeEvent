@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 @CrossOrigin
-@RestController
 @Slf4j
 public class ForwardController {
     
