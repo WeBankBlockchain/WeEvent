@@ -2,34 +2,34 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.webank.weevent.governance.mapper.TopicInfoMapper">
 
-	<select id="getCreaterByName" resultType="java.lang.String">
+	<select id="getCreater" resultType="java.lang.String">
 		select creater
-		from topic_info where 1=1
+		from t_topic where 1=1
 		<if test="topicName != null and topicName !=''">
 			AND topic_name = #{topicName}
 		</if>
+		<if test="id != null">
+			AND broker_id = #{id}
+		</if>
 	</select>
 
-	<!-- <insert id="openTopic" > insert into topic_info(topic_name,creater) 
-		values( #{topicName}, #{creater} ) </insert> -->
-
-	<insert id="openTopic">
+	<insert id="openBrokeTopic">
 		<selectKey keyProperty="count" resultType="int" order="BEFORE">
-			select count(*) from topic_info where topic_name = #{topicName}
+			select count(*) from t_topic where broker_id=#{id} and topic_name = #{topicName}
 		</selectKey>
 		<if test="count > 0">
-			update topic_info
+			update t_topic
 			<set>
 				<if test="creater != null">
-					creater= #{creater},
+					creater= #{creater} 
 				</if>
 			</set>
 			<where>
-				topic_name = #{topicName}
+				topic_name = #{topicName} and broker_id=#{id}
 			</where>
 		</if>
 		<if test="count==0">
-			insert into topic_info(topic_name,creater) values (#{topicName},#{creater})
+			insert into t_topic(broker_id,topic_name,creater) values (#{id},#{topicName},#{creater})
 		</if>
 	</insert>
 	

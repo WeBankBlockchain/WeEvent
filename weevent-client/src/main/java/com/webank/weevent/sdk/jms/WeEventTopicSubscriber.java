@@ -20,6 +20,17 @@ import lombok.extern.slf4j.Slf4j;
 public class WeEventTopicSubscriber implements TopicSubscriber, CommandDispatcher {
     private WeEventTopic topic;
     private String subscriptionId;
+
+    public String getHeaderId() {
+        return headerId;
+    }
+
+    public void setHeaderId(String headerId) {
+        this.headerId = headerId;
+    }
+
+    private String headerId;
+
     private MessageListener messageListener;
 
     public WeEventTopicSubscriber(WeEventTopic topic) {

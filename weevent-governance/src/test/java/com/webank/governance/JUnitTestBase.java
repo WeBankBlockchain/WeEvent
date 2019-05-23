@@ -2,7 +2,7 @@ package com.webank.governance;
 
 import java.util.concurrent.TimeUnit;
 
-import com.webank.weevent.governance.Application;
+import com.webank.weevent.governance.GovernanceApplication;
 
 import org.junit.Rule;
 import org.junit.rules.TestName;
@@ -20,7 +20,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * @since 2019/02/14
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(classes = GovernanceApplication.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class JUnitTestBase {
     @Value("${server.port}")
     public String listenPort;

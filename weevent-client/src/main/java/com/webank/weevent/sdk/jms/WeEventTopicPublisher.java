@@ -42,7 +42,7 @@ public class WeEventTopicPublisher implements TopicPublisher {
             this.topicSession.publish(this.topic, (BytesMessage) message);
         }
 
-        throw new JMSException(WeEventConnectionFactory.NotSupportTips);
+        //throw new JMSException(WeEventConnectionFactory.NotSupportTips);
     }
 
     @Override

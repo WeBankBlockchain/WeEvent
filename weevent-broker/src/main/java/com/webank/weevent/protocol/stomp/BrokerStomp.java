@@ -100,12 +100,12 @@ public class BrokerStomp extends TextWebSocketHandler {
                     frameType = "HEARTBEAT";
                 }
             }
+            String simpDestination = "";
             Object simpDestinationObj = msg.getHeaders().get("simpDestination");
-            if (simpDestinationObj == null) {
-                log.error("unknown simpDestination or extensions");
-                return;
+            if (simpDestinationObj != null) {
+                simpDestination = simpDestinationObj.toString();
             }
-            String simpDestination = simpDestinationObj.toString();
+
             String headerReceiptIdStr = "";
             String headerIdStr = "";
             String subEventId = "";
@@ -169,10 +169,12 @@ public class BrokerStomp extends TextWebSocketHandler {
                     String eventId = handleSend(msg, simpDestination, extensions, groupId);
                     if (eventId.isEmpty()) {
                         command = StompCommand.ERROR;
+                        accessor = StompHeaderAccessor.create(command);
+                        accessor.setNativeHeader("message","subscribetion id is null");
                     } else {
                         command = StompCommand.RECEIPT;
+                        accessor = StompHeaderAccessor.create(command);
                     }
-                    accessor = StompHeaderAccessor.create(command);
                     accessor.setDestination(simpDestination);
                     accessor.setReceiptId(headerReceiptIdStr);
                     sendSimpleMessage(session, accessor);
@@ -189,6 +191,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
                     if (subscriptionId.isEmpty()) {
                         accessor = StompHeaderAccessor.create(StompCommand.ERROR);
+                        accessor.setNativeHeader("message","subscribetion id is null");
                     } else {
                         accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
                         accessor.setDestination(simpDestination);
@@ -196,6 +199,7 @@ public class BrokerStomp extends TextWebSocketHandler {
                     // a unique identifier for that message and a subscription header matching the identifier of the subscription that is receiving the message.
                     accessor.setReceiptId(headerIdStr);
                     accessor.setSubscriptionId(subscriptionId);
+                    accessor.setNativeHeader("subscription-id", subscriptionId);
                     sendSimpleMessage(session, accessor);
                     break;
 
@@ -205,6 +209,7 @@ public class BrokerStomp extends TextWebSocketHandler {
                         accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
                     } else {
                         accessor = StompHeaderAccessor.create(StompCommand.ERROR);
+                        accessor.setNativeHeader("message","unsubscribe fail ");
                     }
 
                     accessor.setDestination(simpDestination);
@@ -219,6 +224,7 @@ public class BrokerStomp extends TextWebSocketHandler {
                     accessor = StompHeaderAccessor.create(StompCommand.ERROR);
                     accessor.setDestination(simpDestination);
                     accessor.setMessage("NOT SUPPORT COMMAND");
+                    accessor.setNativeHeader("message","NOT SUPPORT COMMAND");
                     // a unique identifier for that message and a subscription header matching the identifier of the subscription that is receiving the message.
                     sendSimpleMessage(session, accessor);
                     super.handleTransportError(session, new Exception("unknown command"));
@@ -411,6 +417,9 @@ public class BrokerStomp extends TextWebSocketHandler {
                             try {
                                 StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.MESSAGE);
                                 accessor.setSubscriptionId(headerIdStr);
+                                accessor.setNativeHeader("subscription-id", subscriptionId);
+                                accessor.setNativeHeader("message-id", headerIdStr);
+                                accessor.setMessageId(headerIdStr);
                                 accessor.setContentType(new MimeType("text", "plain", StandardCharsets.UTF_8));
                                 ObjectMapper mapper = new ObjectMapper();
                                 MessageHeaders headers = accessor.getMessageHeaders();
@@ -448,8 +457,7 @@ public class BrokerStomp extends TextWebSocketHandler {
      * @return boolean true if ok
      */
     private boolean handleUnSubscribe(WebSocketSession session, String headerIdStr, Long groupId) {
-        log.info("session id: {} header subscription id: {}", session.getId(), headerIdStr);
-
+        log.info("session id: {} header id: {} subscription id: {}", session.getId(), headerIdStr);
         if (!sessionContext.get(session.getId()).containsKey(headerIdStr)) {
             log.info("unknown subscription id, {}", headerIdStr);
             return false;
