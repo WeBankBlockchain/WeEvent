@@ -37,6 +37,7 @@ public class WeEventTopicConnection implements TopicConnection, CommandDispatche
         this.transport = transport;
         this.sessions = new ArrayList<>();
         this.subscribers = new HashMap<>();
+        this.transport.setTopicConnection(this);
     }
 
     public void setUserName(String userName) {
