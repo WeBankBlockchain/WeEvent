@@ -21,6 +21,7 @@ import org.springframework.util.MimeType;
  * Stomp command.
  *
  * @author matthewliu
+ * @author cristicmei
  * @since 2019/04/11
  */
 @Data
@@ -57,6 +58,7 @@ public class WeEventStompCommand {
         accessor.setVersion(stompVersion);
         accessor.setAcceptVersion(stompVersion);
         accessor.setHeartbeat(stompHeartBeat, 0);
+
         if (!userName.isEmpty()) {
             accessor.setLogin(userName);
         }
@@ -83,7 +85,7 @@ public class WeEventStompCommand {
 
     public String encodeUnSubscribe(String subscriptionId, String headerId) {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.UNSUBSCRIBE);
-        accessor.setNativeHeader(StompHeaderAccessor.SUBSCRIPTION_ID_HEADER, subscriptionId);
+        accessor.setNativeHeader(StompHeaderAccessor.SUBSCRIPTION_ID_HEADER, headerId);
         accessor.setNativeHeader(StompHeaderAccessor.STOMP_SUBSCRIPTION_HEADER, subscriptionId);
         accessor.setNativeHeader(StompHeaderAccessor.STOMP_ID_HEADER, headerId);
         return encodeRaw(accessor);
