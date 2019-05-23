@@ -95,7 +95,7 @@ public class SubscribeTest extends JUnitTestBase {
 
         try {
             String subscriptionId = rpc.subscribe(this.topicName,
-                    "1", "",
+                    groupId,"",
                     "http://localhost:8080/weevent/mock/jsonrpc");
             assertTrue(!subscriptionId.isEmpty());
 
