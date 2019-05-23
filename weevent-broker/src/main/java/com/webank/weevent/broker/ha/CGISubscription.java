@@ -24,6 +24,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -33,6 +35,7 @@ import org.springframework.web.client.RestTemplate;
  * @since 2019/03/13
  */
 @Slf4j
+@EnableRetry
 public class CGISubscription {
     // consumer handler
     private IConsumer consumer;
@@ -172,6 +175,7 @@ public class CGISubscription {
                     callback.onEvent(subscriptionId, event);
                     log.info("subscribe callback notify, url: {} subscriptionId: {} event: {}",
                             url, subscriptionId, event);
+
                 } catch (Exception e) {
                     log.error(String.format("subscribe callback notify failed, url: %s subscriptionId: %s",
                             url, subscriptionId), e);
@@ -270,22 +274,34 @@ public class CGISubscription {
         return new RestTemplate(requestFactory);
     }
 
+
     private ZKSubscription doRestSubscribe(String topic, Long groupId, String subscriptionId, String url) throws BrokerException {
         RestTemplate callback = getRestCallback();
 
         IConsumer.ConsumerListener listener = new IConsumer.ConsumerListener() {
             @Override
             public void onEvent(String subscriptionId, WeEvent event) {
-                try {
-                    SubscriptionWeEvent subscriptionWeEvent = new SubscriptionWeEvent();
-                    subscriptionWeEvent.setSubscriptionId(subscriptionId);
-                    subscriptionWeEvent.setEvent(event);
-                    ResponseEntity<Void> response = callback.postForEntity(url, subscriptionWeEvent, Void.class);
-                    log.info("subscribe callback notify, url: {} subscriptionId: {} event: {} status code: {}",
-                            url, subscriptionId, event, response.getStatusCode());
-                } catch (Exception e) {
-                    log.error(String.format("subscribe callback notify failed, url: %s subscriptionId: %s",
-                            url, subscriptionId), e);
+
+                SubscriptionWeEvent subscriptionWeEvent = new SubscriptionWeEvent();
+                subscriptionWeEvent.setSubscriptionId(subscriptionId);
+                subscriptionWeEvent.setEvent(event);
+
+                int code = 0;
+                while (code != 200) {
+                    try {
+                        ResponseEntity<Void> response = callback.postForEntity(url, subscriptionWeEvent, Void.class);
+                        log.info("subscribe callback notify, url: {} subscriptionId: {} event: {} status code: {}",
+                                url, subscriptionId, event, response.getStatusCode());
+
+                        code = response.getStatusCode().value();
+                        if (code == 200) {
+                            break;
+                        }
+                    } catch (Exception e) {
+                        log.error(String.format("subscribe callback notify failed, url: %s subscriptionId: %s",
+                                url, subscriptionId), e);
+                        code = 0;
+                    }
                 }
             }
 
@@ -356,12 +372,13 @@ public class CGISubscription {
 
             return true;
         } else {
-            log.info("i am not leader, route to master");
-
+            log.info("i am not leader, route to master------");
+            // Object a = routeRestMaster(urlFormat, boolean.class);
             return routeRestMaster(urlFormat, boolean.class);
         }
     }
 
+    @Retryable(value = BrokerException.class, maxAttempts = 3)
     private <T> T routeRestMaster(String urlFormat, Class<T> responseType) throws BrokerException {
         try {
             SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
@@ -376,6 +393,7 @@ public class CGISubscription {
             return response.getBody();
         } catch (Exception e) {
             log.error("route request to master failed", e);
+            //return null;
             throw new BrokerException(ErrorCode.HA_ROUTE_TO_MASTER_FAILED);
         }
     }
