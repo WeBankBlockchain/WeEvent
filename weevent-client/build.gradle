@@ -7,6 +7,7 @@ List client_depends = [
 
 dependencies {
     compile(client_depends)
+    testCompile("junit:junit:4.12")
 }
 
 sourceSets {
@@ -16,6 +17,14 @@ sourceSets {
         }
         resources {
             srcDirs = ["src/main/resources"]
+        }
+    }
+    test {
+        java {
+            srcDirs = ["src/test/java"]
+        }
+        resources {
+            srcDirs = ["src/test/resources"]
         }
     }
 }

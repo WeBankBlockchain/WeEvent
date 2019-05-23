@@ -8,6 +8,7 @@ import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
 
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -27,24 +28,24 @@ public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IPr
     }
 
     @Override
-    public SendResult publish(WeEvent event) throws BrokerException {
+    public SendResult publish(WeEvent event, Long groupId) throws BrokerException {
         log.debug("publish input param WeEvent: {}", event);
 
         ParamCheckUtils.validateEvent(event);
 
-        SendResult sendResult = this.fiscoBcosDelegate.publishEvent(event.getTopic(), new String(event.getContent(), StandardCharsets.UTF_8), 1L);
+        SendResult sendResult = this.fiscoBcosDelegate.publishEvent(event.getTopic(), groupId, new String(event.getContent(), StandardCharsets.UTF_8), JSON.toJSONString(event.getExtensions()));
         log.info("publish success: {}", sendResult);
         return sendResult;
     }
 
     @Override
-    public void publish(WeEvent event, SendCallBack callBack) throws BrokerException {
+    public void publish(WeEvent event, Long groupId, SendCallBack callBack) throws BrokerException {
         log.debug("publish input param WeEvent: {}", event);
 
         ParamCheckUtils.validateEvent(event);
         ParamCheckUtils.validateSendCallBackNotNull(callBack);
 
         log.debug("publish with callback input param WeEvent: {}", event);
-        this.fiscoBcosDelegate.publishEvent(event.getTopic(), new String(event.getContent(), StandardCharsets.UTF_8), callBack, 1L);
+        this.fiscoBcosDelegate.publishEvent(event.getTopic(), groupId, new String(event.getContent(), StandardCharsets.UTF_8), JSON.toJSONString(event.getExtensions()), callBack);
     }
 }

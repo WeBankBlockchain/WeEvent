@@ -51,7 +51,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
         assertTrue(this.iProducer.startProducer());
 
         String data = String.format("hello world! %s", System.currentTimeMillis());
-        WeEvent weEvent = new WeEvent(topicName, data.getBytes());
+        WeEvent weEvent = new WeEvent(topicName, data.getBytes(), "");
         SendResult sendResultDto = this.iProducer.publish(weEvent);
 
         assertEquals(SendResult.SendResultStatus.SUCCESS, sendResultDto.getStatus());
@@ -62,7 +62,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
         // charset with utf-8
         data = String.format("中文消息! %s", System.currentTimeMillis());
-        weEvent = new WeEvent(this.topicName, data.getBytes());
+        weEvent = new WeEvent(this.topicName, data.getBytes(), "");
         sendResultDto = this.iProducer.publish(weEvent);
 
         assertEquals(SendResult.SendResultStatus.SUCCESS, sendResultDto.getStatus());
@@ -210,7 +210,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
         }
         log.info("lastEventId: {}", this.lastEventId);
         assertEquals(SendResult.SendResultStatus.SUCCESS,
-                this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes())).getStatus());
+                this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes(), "")).getStatus());
     }
 
     /**
@@ -245,7 +245,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
         }
 
         assertEquals(SendResult.SendResultStatus.SUCCESS,
-                this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes())).getStatus());
+                this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes(), "")).getStatus());
         Thread.sleep(wait3s);
     }
 
@@ -277,7 +277,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
         log.info("lastEventId: {}", this.lastEventId);
         assertEquals(SendResult.SendResultStatus.SUCCESS,
-                this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes())).getStatus());
+                this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes(), "")).getStatus());
         Thread.sleep(1000000);
         assertTrue(this.received > 0);
     }
@@ -767,7 +767,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
         assertEquals(SendResult.SendResultStatus.SUCCESS,
                 this.iProducer
                         .publish(new WeEvent(this.topicName,
-                                String.format("我是中文. %s", System.currentTimeMillis()).getBytes(StandardCharsets.UTF_8)))
+                                String.format("我是中文. %s", System.currentTimeMillis()).getBytes(StandardCharsets.UTF_8), ""))
                         .getStatus());
         Thread.sleep(wait3s);
     }

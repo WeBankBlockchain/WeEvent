@@ -8,6 +8,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -43,9 +44,10 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class WeEventClient {
-    public static void main(String [] args){
+    public static void main(String[] args) {
 
     }
+
     /**
      * Interface for notify callback
      */
@@ -116,8 +118,8 @@ public class WeEventClient {
      * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
      * @throws BrokerException broker exception
      */
-    public SendResult publish(String topic, byte[] content) throws BrokerException {
-        return this.brokerRpc.publish(topic, content);
+    public SendResult publish(String topic, String groupId, byte[] content, Map<String, String> extensions) throws BrokerException {
+        return this.brokerRpc.publish(topic, groupId, content, extensions);
     }
 
     /**
@@ -198,33 +200,36 @@ public class WeEventClient {
      * Open a topic.
      *
      * @param topic topic name
+     * @param groupId which group to open
      * @return true if success
      * @throws BrokerException broker exception
      */
-    public boolean open(String topic) throws BrokerException {
-        return this.brokerRpc.open(topic);
+    public boolean open(String topic, String groupId) throws BrokerException {
+        return this.brokerRpc.open(topic, groupId);
     }
 
     /**
      * Close a topic.
      *
      * @param topic topic name
+     * @param groupId which group to close
      * @return true if success
      * @throws BrokerException broker exception
      */
-    public boolean close(String topic) throws BrokerException {
-        return this.brokerRpc.close(topic);
+    public boolean close(String topic, String groupId) throws BrokerException {
+        return this.brokerRpc.close(topic, groupId);
     }
 
     /**
      * Check a topic is exist or not.
      *
      * @param topic topic name
+     * @param groupId which group to exit
      * @return true if exist
      * @throws BrokerException broker exception
      */
-    public boolean exist(String topic) throws BrokerException {
-        return this.brokerRpc.exist(topic);
+    public boolean exist(String topic, String groupId) throws BrokerException {
+        return this.brokerRpc.exist(topic, groupId);
     }
 
     /**
@@ -235,8 +240,8 @@ public class WeEventClient {
      * @return topic list
      * @throws BrokerException broker exception
      */
-    public TopicPage list(Integer pageIndex, Integer pageSize) throws BrokerException {
-        return this.brokerRpc.list(pageIndex, pageSize);
+    public TopicPage list(Integer pageIndex, Integer pageSize, String groupId) throws BrokerException {
+        return this.brokerRpc.list(pageIndex, pageSize, groupId);
     }
 
     /**
@@ -246,8 +251,8 @@ public class WeEventClient {
      * @return topic information
      * @throws BrokerException broker exception
      */
-    public TopicInfo state(String topic) throws BrokerException {
-        return this.brokerRpc.state(topic);
+    public TopicInfo state(String topic, String groupId) throws BrokerException {
+        return this.brokerRpc.state(topic, groupId);
     }
 
     /**
@@ -257,8 +262,8 @@ public class WeEventClient {
      * @return weevent
      * @throws BrokerException broker exception
      */
-    public WeEvent getEvent(String eventId) throws BrokerException {
-        return this.brokerRpc.getEvent(eventId);
+    public WeEvent getEvent(String eventId, String groupId) throws BrokerException {
+        return this.brokerRpc.getEvent(eventId, groupId);
     }
 
     // implements
