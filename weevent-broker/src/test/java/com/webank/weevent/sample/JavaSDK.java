@@ -32,7 +32,7 @@ public class JavaSDK {
             // subscribe topic
             String subscriptionId = client.subscribe(topicName, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
                 @Override
-                public void receiptId2SubscriptionId(WeEvent event) {
+                public void onEvent(WeEvent event) {
                     System.out.println("received event: " + event.toString());
                 }
 
