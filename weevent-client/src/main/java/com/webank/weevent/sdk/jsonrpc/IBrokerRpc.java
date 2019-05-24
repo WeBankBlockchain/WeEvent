@@ -1,6 +1,7 @@
 package com.webank.weevent.sdk.jsonrpc;
 
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.webank.weevent.sdk.BrokerException;
@@ -29,11 +30,40 @@ public interface IBrokerRpc {
         return null;
     }
 
+    default SendResult publish(@JsonRpcParam(value = "topic") String topic,
+                               @JsonRpcParam(value = "content") byte[] content,
+                               @JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException {
+        return null;
+    }
+
+    default SendResult publish(@JsonRpcParam(value = "topic") String topic,
+                               @JsonRpcParam(value = "content") byte[] content) throws BrokerException {
+        return null;
+    }
+
+    default SendResult publish(@JsonRpcParam(value = "topic") String topic,
+                               @JsonRpcParam(value = "groupId") String groupId,
+                               @JsonRpcParam(value = "content") byte[] content) throws BrokerException {
+        return null;
+    }
+
     // Interface for consumer.
     String subscribe(@JsonRpcParam(value = "topic") String topic,
                      @JsonRpcParam(value = "groupId") String groupId,
                      @JsonRpcParam(value = "subscriptionId") String subscriptionId,
                      @JsonRpcParam(value = "url") String url) throws BrokerException;
+
+    default String subscribe(@JsonRpcParam(value = "topic") String topic,
+                             @JsonRpcParam(value = "subscriptionId") String subscriptionId,
+                             @JsonRpcParam(value = "url") String url) throws BrokerException {
+        return null;
+    }
+
+    default String subscribe(@JsonRpcParam(value = "topic") String topic,
+                             @JsonRpcParam(value = "url") String url) throws BrokerException {
+        return null;
+    }
+
 
     boolean unSubscribe(@JsonRpcParam(value = "subscriptionId") String subscriptionId) throws BrokerException;
 
@@ -41,19 +71,44 @@ public interface IBrokerRpc {
     boolean open(@JsonRpcParam(value = "topic") String topic,
                  @JsonRpcParam(value = "groupId") String groupId) throws BrokerException;
 
+    default boolean open(@JsonRpcParam(value = "topic") String topic) throws BrokerException {
+        return false;
+    }
+
     boolean close(@JsonRpcParam(value = "topic") String topic,
                   @JsonRpcParam(value = "groupId") String groupId) throws BrokerException;
 
+    default boolean close(@JsonRpcParam(value = "topic") String topic) throws BrokerException {
+        return false;
+    }
+
     boolean exist(@JsonRpcParam(value = "topic") String topic,
                   @JsonRpcParam(value = "groupId") String groupId) throws BrokerException;
+
+    default boolean exist(@JsonRpcParam(value = "topic") String topic) throws BrokerException {
+        return false;
+    }
 
     TopicPage list(@JsonRpcParam(value = "pageIndex") Integer pageIndex,
                    @JsonRpcParam(value = "pageSize") Integer pageSize,
                    @JsonRpcParam(value = "groupId") String groupId) throws BrokerException;
 
+    default TopicPage list(@JsonRpcParam(value = "pageIndex") Integer pageIndex,
+                           @JsonRpcParam(value = "pageSize") Integer pageSize) throws BrokerException {
+        return null;
+    }
+
     TopicInfo state(@JsonRpcParam(value = "topic") String topic,
                     @JsonRpcParam(value = "groupId") String groupId) throws BrokerException;
 
+    default TopicInfo state(@JsonRpcParam(value = "topic") String topic) throws BrokerException {
+        return null;
+    }
+
     WeEvent getEvent(@JsonRpcParam(value = "eventId") String eventId,
                      @JsonRpcParam(value = "groupId") String groupId) throws BrokerException;
+
+    default WeEvent getEvent(@JsonRpcParam(value = "eventId") String eventId) throws BrokerException {
+        return null;
+    }
 }

@@ -50,11 +50,11 @@ public class BrokerRest extends RestHA implements IBrokerRpc {
         log.debug("topic: {}, content.length: {}", eventData.get("topic"), eventData.get("content").getBytes().length);
         Map<String, String> extensions = WeEventUtils.getExtensions(eventData);
         WeEvent event = new WeEvent(eventData.get(WeEventConstants.EVENT_TOPIC), eventData.get(WeEventConstants.EVENT_CONTENT).getBytes(), extensions);
-        Long group = WeEventConstants.DEFAULT_GROUP_ID;
+        Long groupId = WeEventConstants.DEFAULT_GROUP_ID;
         if (eventData.containsKey(WeEventConstants.EVENT_GROUP_ID)) {
-            group = WeEventUtils.getGroupId(eventData.get(WeEventConstants.EVENT_GROUP_ID));
+            groupId = WeEventUtils.getGroupId(eventData.get(WeEventConstants.EVENT_GROUP_ID));
         }
-        return this.producer.publish(event, group);
+        return this.producer.publish(event, groupId);
     }
 
     @Override
