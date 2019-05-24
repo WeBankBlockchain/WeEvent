@@ -3,16 +3,22 @@ server:
 spring:
   # datasource
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/governance?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://192.168.58.138:3306/governance?useUnicode=true&characterEncoding=utf-8&useSSL=false
     driver-class-name: org.mariadb.jdbc.Driver
-    username: xxxx
-    password: yyyy
+    username: fisco
+    password: zjy2019
     type: org.apache.commons.dbcp2.BasicDataSource
     dbcp2:
       max-wait-millis: 10000
       min-idle: 5
       initial-size: 5
       validation-query: SELECT 'x'
+  mail: 
+    default-encoding: UTF-8
+    host: smtp.qq.com
+    username: 284617893@qq.com
+    password: zjy621138
+    from: 284617893@qq.com
   pid:
     fail-on-write-error: true
     file: ./logs/governance.pid
