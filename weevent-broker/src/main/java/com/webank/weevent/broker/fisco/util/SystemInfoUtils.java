@@ -7,7 +7,7 @@ import java.net.SocketException;
 import java.util.Enumeration;
 
 /**
- * @author websterchen@webank.com
+ * @author websterchen
  * @version 1.0
  * @since 2019/4/1
  */
