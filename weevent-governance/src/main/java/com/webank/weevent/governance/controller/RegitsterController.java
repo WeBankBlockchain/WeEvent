@@ -2,6 +2,7 @@ package com.webank.weevent.governance.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -28,4 +29,12 @@ public class RegitsterController {
 		GovernanceResult governanceResult = registerService.register(user);
 		return governanceResult;
 	}
+	
+	@PutMapping(value="/user/update")
+	public GovernanceResult updatePassword(@RequestBody Account user) {
+		GovernanceResult governanceResult = registerService.register(user);
+		return governanceResult;
+	}
+	
+	
 }
