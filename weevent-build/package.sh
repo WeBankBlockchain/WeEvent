@@ -1,5 +1,7 @@
 #!/bin/bash
-# generate weevent package from github project
+#
+# generate weevent tar package from github project
+#
 ################################################################################
 
 version=""

@@ -1,11 +1,10 @@
 #!/bin/bash
 #get parameter
-para="";
+para=""
 conf_path="./conf"
 lib_path="./lib"
 apps_path="./apps"
 installPWD=$(dirname $(dirname `pwd`))
-
 
 while [ $# -ge 2 ] ; do
     case "$1" in
@@ -13,6 +12,7 @@ while [ $# -ge 2 ] ; do
     --listen_port) para="$1 = $2;";listen_port="$2";shift 2;;
     --web3sdk_certpath) para="$1 = $2;";web3sdk_certpath="$2";shift 2;;
     --channel_info) para="$1 = $2;";channel_info="$2";shift 2;;
+    --version) para="$1 = $2;";version="$2";shift 2;;
     *) echo "unknown parameter $1." ; exit 1 ; break;;
     esac
 done
@@ -32,7 +32,6 @@ function copy_file(){
     cp $conf_path/../check-service.sh $out_path/   
 }
 
-
 #mkdir file
 function make_file(){
     mkdir -p $out_path/conf
@@ -41,12 +40,19 @@ function make_file(){
     mkdir -p $out_path/logs
 }
 
-
 #deploy contract
 function deploy_contract(){
-    java -Xbootclasspath/a:$out_path/conf -cp $out_path/apps/* -Dloader.main=com.webank.weevent.broker.fisco.util.Web3sdkUtils org.springframework.boot.loader.PropertiesLauncher $out_path/conf/address.txt  &>> $installPWD/install.log
+    if [ $# == 1 ];then
+        java -Xbootclasspath/a:$out_path/conf -cp $out_path/apps/* -Dloader.main=com.webank.weevent.broker.fisco.util.Web3sdkUtils org.springframework.boot.loader.PropertiesLauncher $out_path/conf/address.txt &>> $installPWD/install.log
+    else
+        java -Xbootclasspath/a:$out_path/conf -cp $out_path/apps/* -Dloader.main=com.webank.weevent.broker.fisco.util.Web3sdkUtils org.springframework.boot.loader.PropertiesLauncher $out_path/conf/address.txt $1 &>> $installPWD/install.log
+    fi
 }
 
+if [[ -z $channel_info ]];then
+    echo "channel_info is empty."
+    exit -1
+fi
 
 #replace conf parameter
 if [[ -d $out_path ]]; then
@@ -58,47 +64,55 @@ else
     exit -1
 fi
 
-if [[ -f $web3sdk_certpath/ca.crt ]] && [[ -f $web3sdk_certpath/client.keystore ]] && [[ -f $web3sdk_certpath/applicationContext.xml ]]; then
-    rm -rf $out_path/conf/applicationContext.xml
-    rm -rf $out_path/conf/ca.crt
-    rm -rf $out_path/conf/client.keystore
-    cp $web3sdk_certpath/ca.crt $out_path/conf/
-    cp $web3sdk_certpath/client.keystore $out_path/conf/
-    cp $web3sdk_certpath/applicationContext.xml $out_path/conf/
-else
-    echo "ca.crt or client.keystore or applicationContext.xml is not exist."
-    exit -1
-fi
-
-if [[ -z $channel_info ]];
-then
-    echo "channel_info is empty."
-    exit -1
-else
-    channel_ipport=""
-    array=(${channel_info//;/ })
-    for var in ${array[@]}
-    do
-       channel_ipport=$channel_ipport"<value>"$var"</value>"
-    done
-    line1=$(grep -n -o "<list>" $out_path/conf/applicationContext.xml | awk -F: '{print $1}')
-    line2=$(grep -n -o "</list>" $out_path/conf/applicationContext.xml | awk -F: '{print $1}')
-    sed -i "${line1},${line2}d" $out_path/conf/applicationContext.xml
-    channel_port="<list>"$channel_ipport"</list>"
-    sed -i "${line1}i ${channel_port}" $out_path/conf/applicationContext.xml
-fi
+sed -i "s/127.0.0.1:8501/$channel_info/g" $out_path/conf/fisco.properties
 echo "set channel_info success" &>> $installPWD/install.log
+if [[$version -eq "1.3"]];then
+    sed -i "/version=2.0/cversion=1.3" $out_path/conf/fisco.properties
+    if [[ -f $web3sdk_certpath/ca.crt ]] && [[ -f $web3sdk_certpath/client.keystore ]]; then
+        rm -rf $out_path/conf/ca.crt
+        rm -rf $out_path/conf/client.keystore
+        cp $web3sdk_certpath/ca.crt $out_path/conf/
+        cp $web3sdk_certpath/client.keystore $out_path/conf/
+    else
+        echo "ca.crt or client.keystore is not exist."
+        exit -1
+    fi
 
-deploy_contract
-contract_address=`cat $out_path/conf/address.txt | awk -F '=' '{print $2}'`
-if [[ -z $contract_address ]];
-then
-    echo "deploy contract error"
-    exit -1
+    deploy_contract
+    contract_address=`cat $out_path/conf/address.txt | awk -F '=' '{print $2}'`
+    if [[ -z $contract_address ]];
+    then
+        echo "deploy contract error"
+        exit -1
+    else
+        echo "deploy contract success"
+        echo "contract_address:"$contract_address
+        sed -i "/topic-controller.address=0x/ctopic-controller.address=${contract_address}" $out_path/conf/fisco.properties
+    fi
 else
-    echo "deploy contract success"
-    echo "contract_address:"$contract_address
-    sed -i "/fisco.topic-controller.contract-address=/cfisco.topic-controller.contract-address=${contract_address}" $out_path/conf/weevent.properties
+    if [[ -f $web3sdk_certpath/conf/ca.crt ]] && [[ -f $web3sdk_certpath/conf/node.crt ]] && [[ -f $web3sdk_certpath/conf/node.key ]]; then
+        rm -rf $out_path/conf/v2/ca.crt
+        rm -rf $out_path/conf/v2/node.crt
+        rm -rf $out_path/conf/v2/node.key
+        cp $web3sdk_certpath/ca.crt $out_path/conf/v2/
+        cp $web3sdk_certpath/node.crt $out_path/conf/v2/
+        cp $web3sdk_certpath/node.key $out_path/conf/v2/
+    else
+        echo "ca.crt or node.crt or node.key is not exist."
+        exit -1
+    fi
+
+    deploy-topic-control.sh 1
+    contract_address=`cat $out_path/conf/address.txt | awk -F '=' '{print $2}'`
+    if [[ -z $contract_address ]];
+    then
+        echo "deploy contract error"
+        exit -1
+    else
+        echo "deploy contract success"
+        echo "contract_address:"$contract_address
+        sed -i "/topic-controller.address=1/ctopic-controller.address=1:${contract_address}" $out_path/conf/fisco.properties
+    fi
 fi
 
 if [[ $listen_port -gt 0 ]]; then
