@@ -57,7 +57,7 @@ fi
 
 #replace conf parameter
 if [[ -d $out_path ]]; then
-    out_path=$out_path/broker
+    mkdir -p $out_path
     make_file
     copy_file
 else

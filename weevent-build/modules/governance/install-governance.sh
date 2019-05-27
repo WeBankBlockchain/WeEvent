@@ -129,14 +129,5 @@ while [ $# -ge 2 ] ; do
     esac
 done
 
-# confirm
-if [ -d $out_path ]; then
-    read -p "$out_path already exist, continue? [Y/N]" cmd_input
-    if [ "Y" != "$cmd_input" ]; then
-        exit 1
-    fi
-fi
-
-
 governance_setup
 

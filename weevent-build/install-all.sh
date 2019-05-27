@@ -55,7 +55,7 @@ function ini_get(){
 
 function set_global_param(){
     block_chain_version=$(ini_get "fisco-bcos" "version")
-    block_chain_rpc=$(ini_get "fisco-bcos" "channel")
+    block_chain_channel=$(ini_get "fisco-bcos" "channel")
     block_chain_node_path=$(ini_get  "fisco-bcos" "node_path")
     block_chain_node_path=`realpath $block_chain_node_path`
 
@@ -106,7 +106,7 @@ function check_result(){
 function install_module(){
     yellow_echo "install module broker"
     cd $installPWD/modules/broker
-    ./install-broker.sh --out_path $out_path --listen_port $broker_port --block_chain_node_path $block_chain_node_path --channel_info $block_chain_channel --version $block_chain_version
+    ./install-broker.sh --out_path $out_path/broker --listen_port $broker_port --block_chain_node_path $block_chain_node_path --channel_info $block_chain_channel --version $block_chain_version
     check_result "install broker success"
 
     yellow_echo "install module nginx"
@@ -144,15 +144,6 @@ function update_check_server(){
 }
 
 function main(){
-    #crudini
-    install_crudini
-
-    # set the params
-    set_global_param
-
-    # check the dir is exist or not
-    check_param
-
     # confirm
     if [ -d $2 ]; then
         read -p "$2 already exist, continue? [Y/N]" cmd_input
@@ -167,6 +158,15 @@ function main(){
         exit 1
     fi
     out_path=`realpath $2`
+
+    #crudini
+    install_crudini
+
+    # set the params
+    set_global_param
+
+    # check the dir is exist or not
+    check_param
 
     # set the check service port
     update_check_server
