@@ -14,6 +14,8 @@ import com.webank.weevent.sdk.WeEvent;
 
 import org.apache.commons.lang3.StringUtils;
 
+import static com.webank.weevent.sdk.ErrorCode.EVENT_GROUP_ID_INVALID;
+
 /**
  * @author websterchen
  * @version 1.0
@@ -95,6 +97,16 @@ public class ParamCheckUtils {
         validateTopicName(event.getTopic());
         validateEventContent(new String(event.getContent(), StandardCharsets.UTF_8));
         validateEventExtensions(event.getExtensions().toString());
+    }
+
+    public static void validateGroupId(String groupId) throws BrokerException{
+        if (groupId != null && !groupId.isEmpty()) {
+            try {
+                Long.parseLong(groupId);
+            } catch (Exception e) {
+                throw new BrokerException(EVENT_GROUP_ID_INVALID);
+            }
+        }
     }
 
     public static void validateEventExtensions(String extensions) throws BrokerException {

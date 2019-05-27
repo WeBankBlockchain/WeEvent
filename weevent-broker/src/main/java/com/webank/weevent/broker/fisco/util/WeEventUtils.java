@@ -30,17 +30,4 @@ public class WeEventUtils {
         }
         return extensions;
     }
-
-    public static Long getGroupId(String strGroupId) throws BrokerException {
-        Long groupId = WeEventConstants.DEFAULT_GROUP_ID;
-        if (strGroupId != null && !strGroupId.isEmpty()) {
-            try {
-                groupId = Long.parseLong(strGroupId);
-            } catch (Exception e) {
-                log.error("{}",EVENT_GROUP_ID_INVALID.getCodeDesc());
-                throw new BrokerException(EVENT_GROUP_ID_INVALID);
-            }
-        }
-        return groupId;
-    }
 }
