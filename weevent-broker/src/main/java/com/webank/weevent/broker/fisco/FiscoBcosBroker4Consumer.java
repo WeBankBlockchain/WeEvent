@@ -101,8 +101,14 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                 idle();
             } else {
                 for (WeEvent event : blockEventsList) {
-                    if (topic.equals(event.getTopic())) {
-                        topicEventsList.add(event);
+                    if (ParamCheckUtils.isTopicPattern(topic)) {
+                        if (WeEventUtils.match(event.getTopic(), topic)) {
+                            topicEventsList.add(event);
+                        }
+                    } else {
+                        if (topic.equals(event.getTopic())) {
+                            topicEventsList.add(event);
+                        }
                     }
                 }
             }
@@ -118,10 +124,10 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
         Long blockHeight = this.fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId));
         for (Map.Entry<String, String> entry : topics.entrySet()) {
-            ParamCheckUtils.validateTopicName(entry.getKey());
-            // check topic exist
-            if (!exist(entry.getKey(), groupId)) {
-                throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
+            if (ParamCheckUtils.isTopicPattern(entry.getKey())) {
+                ParamCheckUtils.validateTopicPattern(entry.getKey());
+            } else {
+                ParamCheckUtils.validateTopicName(entry.getKey());
             }
 
             // check offset
@@ -186,8 +192,12 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
     @Override
     public String subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener) throws BrokerException {
+        if (ParamCheckUtils.isTopicPattern(topic)) {
+            ParamCheckUtils.validateTopicPattern(topic);
+        } else {
+            ParamCheckUtils.validateTopicName(topic);
+        }
         ParamCheckUtils.validateOffset(offset);
-        ParamCheckUtils.validateTopicName(topic);
         ParamCheckUtils.validateListenerNotNull(listener);
         ParamCheckUtils.validateGroupId(groupId);
         if (!exist(topic, groupId)) {
@@ -203,8 +213,12 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
     @Override
     public String subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener) throws BrokerException {
+        if (ParamCheckUtils.isTopicPattern(topic)) {
+            ParamCheckUtils.validateTopicPattern(topic);
+        } else {
+            ParamCheckUtils.validateTopicName(topic);
+        }
         ParamCheckUtils.validateOffset(offset);
-        ParamCheckUtils.validateTopicName(topic);
         ParamCheckUtils.validateListenerNotNull(listener);
         ParamCheckUtils.validateSubscriptionId(subscriptionId);
         ParamCheckUtils.validateGroupId(groupId);
