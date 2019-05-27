@@ -28,7 +28,7 @@ cache:
   - $HOME/.gradle/wrapper/
 
 before_install:
-- gradle assemble
+- gradle-4.4 assemble
 
 script:
 - gradle build -x test
