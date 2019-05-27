@@ -1,5 +1,6 @@
 package com.webank.weevent.protocol.rest;
 
+import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.sdk.BrokerException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -22,9 +23,12 @@ public class MasterRest extends RestHA {
     // mqtt_add_inbound_topic/mqtt_remove_inbound_topic control mqtt inbound topic
     @RequestMapping(path = "/mqtt_add_inbound_topic", method = RequestMethod.GET)
     public boolean mqttAddInBoundTopic(@RequestParam(name = "topic") String topic,
-                                       @RequestParam(name = "groupId") String groupId) throws BrokerException {
+                                       @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         checkSupport();
-        return this.masterJob.getMqttTopic().mqttAddInBoundTopic(topic, Long.parseLong(groupId), getUrlFormat(this.request));
+        if (groupId == null || groupId.isEmpty()) {
+            groupId = WeEventConstants.DEFAULT_GROUP_ID;
+        }
+        return this.masterJob.getMqttTopic().mqttAddInBoundTopic(topic, groupId, getUrlFormat(this.request));
     }
 
     @RequestMapping(path = "/mqtt_remove_inbound_topic", method = RequestMethod.GET)
@@ -36,9 +40,12 @@ public class MasterRest extends RestHA {
     // mqtt_add_outbound_topic/mqtt_remove_outbound_topic control mqtt outbound topic
     @RequestMapping(path = "/mqtt_add_outbound_topic", method = RequestMethod.GET)
     public boolean mqttAddOutBoundTopic(@RequestParam(name = "topic") String topic,
-                                        @RequestParam(name = "groupId") String groupId) throws BrokerException {
+                                        @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         checkSupport();
-        return this.masterJob.getMqttTopic().mqttAddOutBoundTopic(topic, Long.parseLong(groupId), getUrlFormat(this.request));
+        if (groupId == null || groupId.isEmpty()) {
+            groupId = WeEventConstants.DEFAULT_GROUP_ID;
+        }
+        return this.masterJob.getMqttTopic().mqttAddOutBoundTopic(topic, groupId, getUrlFormat(this.request));
     }
 
     @RequestMapping(path = "/mqtt_remove_outbound_topic", method = RequestMethod.GET)
