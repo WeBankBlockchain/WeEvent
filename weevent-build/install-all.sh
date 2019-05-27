@@ -114,14 +114,12 @@ function install_module(){
     ./install-nginx.sh --nginx_path $out_path/nginx --nginx_port $nginx_port --broker_port $broker_port --governance_port $governance_port
     check_result "install nginx success"
 
-    if [ $governance_enable ];then
+    if [ $governance_enable = "true" ];then
         yellow_echo "install module governance"
         cd $installPWD/modules/governance
         ./install-governance.sh --out_path $out_path/governance --server_port $governance_port --broker_port $broker_port --mysql_ip $mysql_ip --mysql_port $mysql_port --mysql_user $mysql_user --mysql_pwd $mysql_password
         check_result "install governance success"
     fi
-    
-    cd $installPWD 
 }
 
 function install_crudini(){
@@ -174,6 +172,7 @@ function main(){
     # install module
     install_module
 
+    cd $installPWD
     cp start-all.sh check-service.sh stop-all.sh uninstall-all.sh $out_path
 }
 
