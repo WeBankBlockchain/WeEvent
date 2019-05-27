@@ -14,8 +14,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  * Junit base class.
- *
- * @author matthewliu
+ * @author matthewliu@webank.com
  * @version 1.0
  * @since 2019/02/14
  */
