@@ -57,7 +57,7 @@ function set_global_param(){
     block_chain_version=$(ini_get "fisco-bcos" "version")
     block_chain_rpc=$(ini_get "fisco-bcos" "channel")
     block_chain_node_path=$(ini_get  "fisco-bcos" "node_path")
-    block_chain_node_path=`realpath $web3sdk_conf_path`
+    block_chain_node_path=`realpath $block_chain_node_path`
 
     nginx_port=$(ini_get "nginx" "port")
     
@@ -73,24 +73,23 @@ function set_global_param(){
 }
 
 function check_port(){
-    lsof -i:${1} &>> $installPWD/install.log
+    lsof -i:${1}
     
-    if [ $? -eq 1 ]
-    then 
-        echo "$1 port is okay"  &>> $installPWD/install.log
+    if [ $? -eq 1 ];then
+        echo "$1 port is okay"
     else 
-        echo "$1 port is use" 
+        echo "$1 port is use"
         exit 1
     fi
 }
 
 function check_param(){
-    if [ -d $web3sdk_conf_path ]; then
+    if [ -d $block_chain_node_path ]; then
         check_port $broker_port
         check_port $nginx_port
-        echo "param ok" &>> $installPWD/install.log
+        echo "param ok"
     else
-        echo "path not exist, $web3sdk_conf_path"
+        echo "path not exist, $block_chain_node_path"
         exit 1;
     fi
 }
@@ -104,42 +103,34 @@ function check_result(){
    fi
 }
 
-### set the module and params
-function set_module(){
-    params="--out_path $out_path --listen_port $broker_port --block_chain_node_path $block_chain_node_path --channel_info $block_chain_channel --version $block_chain_version"
-    
-    yellow_echo $params &>> $installPWD/install.log
+function install_module(){
+    yellow_echo "install module broker"
     cd $installPWD/modules/broker
-    ./install-broker.sh $params
-    check_result "broker install success"
+    ./install-broker.sh --out_path $out_path --listen_port $broker_port --block_chain_node_path $block_chain_node_path --channel_info $block_chain_channel --version $block_chain_version
+    check_result "install broker success"
 
-    nginxpath=$out_path"/nginx"
-    params="--nginx_path $nginxpath --nginx_port $nginx_port --broker_port $broker_port --governance_port $governance_port"
-
+    yellow_echo "install module nginx"
     cd $installPWD/modules/nginx
-    ./install-nginx.sh $params
-    check_result "nginx install success"
+    ./install-nginx.sh --nginx_path $out_path/nginx --nginx_port $nginx_port --broker_port $broker_port --governance_port $governance_port
+    check_result "install nginx success"
 
-    if $governance_enable;then 
-        governancepath=$out_path"/governance"
-        params="--out_path $governancepath --server_port $governance_port --broker_port $broker_port --mysql_ip $mysql_ip --mysql_port $mysql_port  --mysql_user $mysql_user --mysql_pwd $mysql_password"
-
-        yellow_echo "$params" &>> $installPWD/install.log
+    if [ $governance_enable ];then
+        yellow_echo "install module governance"
         cd $installPWD/modules/governance
-        ./install-governance.sh $params
-        check_result "governance install success"
+        ./install-governance.sh --out_path $out_path/governance --server_port $governance_port --broker_port $broker_port --mysql_ip $mysql_ip --mysql_port $mysql_port --mysql_user $mysql_user --mysql_pwd $mysql_password
+        check_result "install governance success"
     fi
     
     cd $installPWD 
 }
 
 function install_crudini(){
-    echo "install crudini" &>> $installPWD/install.log
+    yellow_echo "install crudini"
+
     mkdir -p $installPWD/build/
     tar -zxf $installPWD/third-packages/crudini-0.9.tar.gz -C $installPWD/build/  
        
-    $installPWD/build/crudini-0.9/crudini --version &>> $installPWD/install.log
- 
+    $installPWD/build/crudini-0.9/crudini --version
     sleep 1
     if [ $? -ne 0 ];then
         echo "install crudini failed, skip"
@@ -158,6 +149,7 @@ function main(){
 
     # set the params
     set_global_param
+
     # check the dir is exist or not
     check_param
 
@@ -171,24 +163,18 @@ function main(){
     fi
     mkdir -p $2
     if [ $? -ne 0 ];then
-        echo "create dir $2 fail !!! "
+        echo "create path $2 fail !!! "
         exit 1
     fi
-    out_path=$2
-    
-    if [[ $2 == .* ]];then
-       out_path=`cd $2; pwd`
-    fi
-    
-    # set module and the params
-    set_module
+    out_path=`realpath $2`
+
     # set the check service port
     update_check_server
 
-    cp start-all.sh $out_path
-    cp stop-all.sh $out_path
-    cp check-service.sh $out_path
-    cp uninstall-all.sh $out_path
+    # install module
+    install_module
+
+    cp start-all.sh check-service.sh stop-all.sh uninstall-all.sh $out_path
 }
 
 # Usage message

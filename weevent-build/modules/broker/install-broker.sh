@@ -17,15 +17,16 @@ while [ $# -ge 2 ] ; do
     esac
 done
 
-echo "param out_path:"$out_path &>> $installPWD/install.log
-echo "param listen_port:"$listen_port &>> $installPWD/install.log
-echo "param block_chain_node_path:"block_chain_node_path &>> $installPWD/install.log
-echo "param channel_info:"$channel_info &>> $installPWD/install.log
+echo "param out_path: $out_path"
+echo "param listen_port: $listen_port"
+echo "param version: $version"
+echo "param block_chain_node_path: $block_chain_node_path"
+echo "param channel_info: $channel_info"
 
 #copy file
 function copy_file(){
     cp $apps_path/* $out_path/apps/
-    cp $conf_path/* $out_path/conf/
+    cp -r $conf_path/* $out_path/conf/
     cp $conf_path/../deploy-topic-control.sh $out_path/
     cp $conf_path/../gen-cert-key.sh $out_path/
     cp $conf_path/../broker.sh $out_path/
@@ -43,9 +44,9 @@ function make_file(){
 #deploy contract
 function deploy_contract(){
     if [ $# == 1 ];then
-        java -Xbootclasspath/a:$out_path/conf -cp $out_path/apps/* -Dloader.main=com.webank.weevent.broker.fisco.util.Web3sdkUtils org.springframework.boot.loader.PropertiesLauncher $out_path/conf/address.txt &>> $installPWD/install.log
+        java -Xbootclasspath/a:$out_path/conf -cp $out_path/apps/* -Dloader.main=com.webank.weevent.broker.fisco.util.Web3sdkUtils org.springframework.boot.loader.PropertiesLauncher $out_path/conf/address.txt
     else
-        java -Xbootclasspath/a:$out_path/conf -cp $out_path/apps/* -Dloader.main=com.webank.weevent.broker.fisco.util.Web3sdkUtils org.springframework.boot.loader.PropertiesLauncher $out_path/conf/address.txt $1 &>> $installPWD/install.log
+        java -Xbootclasspath/a:$out_path/conf -cp $out_path/apps/* -Dloader.main=com.webank.weevent.broker.fisco.util.Web3sdkUtils org.springframework.boot.loader.PropertiesLauncher $out_path/conf/address.txt $1
     fi
 }
 
@@ -65,14 +66,14 @@ else
 fi
 
 sed -i "s/127.0.0.1:8501/$channel_info/g" $out_path/conf/fisco.properties
-echo "set channel_info success" &>> $installPWD/install.log
-if [[$version -eq "1.3"]];then
+echo "set channel_info success"
+if [[ $version = "1.3" ]];then
     sed -i "/version=2.0/cversion=1.3" $out_path/conf/fisco.properties
-    if [[ -f $block_chain_node_path/conf/ca.crt ]] && [[ -f $block_chain_node_path/conf/client.keystore ]]; then
+    if [[ -f $block_chain_node_path/data/ca.crt ]] && [[ -f $block_chain_node_path/data/client.keystore ]]; then
         rm -rf $out_path/conf/ca.crt
         rm -rf $out_path/conf/client.keystore
-        cp $block_chain_node_path/conf/ca.crt $out_path/conf/
-        cp $block_chain_node_path/conf/client.keystore $out_path/conf/
+        cp $block_chain_node_path/data/ca.crt $out_path/conf/
+        cp $block_chain_node_path/data/client.keystore $out_path/conf/
     else
         echo "ca.crt or client.keystore is not exist."
         exit -1
@@ -121,6 +122,6 @@ else
     echo "listen_port is err"
     exit -1
 fi
-echo "set lister_port success" &>> $installPWD/install.log
+echo "set lister_port success"
 
-echo "broker setup success" &>> $installPWD/install.log
+echo "broker module install success"
