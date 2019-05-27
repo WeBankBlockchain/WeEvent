@@ -1,7 +1,3 @@
-env:
-  global:
-  - CODECOV_TOKEN: your-uuid
-
 sudo: false
 dist: trusty
 
@@ -32,21 +28,21 @@ cache:
   - $HOME/.gradle/wrapper/
 
 before_install:
-- gradle wrapper
+- gradle assemble
 
 script:
-- chmod +x ci/script/build-ci.sh
-- ci/script/build-ci.sh
-- travis_wait 30 ./gradlew check
-- ./gradlew jacocoTestReport
+- gradle build -x test
+- chmod +x ci/script/deploy-contract.sh
+- ci/script/deploy-contract.sh
+- travis_wait 30 ./gradle check
+- ./gradle jacocoTestReport
 
 after_success:
-- export CODECOV_TOKEN="token"
 - bash <(curl -s https://codecov.io/bash)
 
 deploy:
   provider: releases
-  api_key: $GIT_REPO_TOKEN
+  api_key: e5867aa5fc10b22b0d74d982d39afa4632902e93
   file_glob: true
   file: dist/app/weevent.jar
   skip_cleanup: true

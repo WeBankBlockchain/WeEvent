@@ -1,3 +1,5 @@
+apply plugin: 'jacoco'
+
 buildscript {
     repositories {
         maven {
@@ -56,14 +58,14 @@ subprojects {
         implementation(lombok, apache_commons, logger)
     }
 }
-//CI
-//jacocoTestReport {
-//    reports {
-//        xml.enabled true
-//        html.enabled false
-//    }
-//}
-//
-//check.dependsOn jacocoTestReport
-//
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled false
+    }
+}
+
+check.dependsOn jacocoTestReport
+
 
