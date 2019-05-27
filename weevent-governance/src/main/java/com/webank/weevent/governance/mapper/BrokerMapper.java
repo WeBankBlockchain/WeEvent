@@ -13,7 +13,7 @@ public interface BrokerMapper {
 	Broker getBroker(Integer id);
 	
 	//get Brokers
-	List<Broker> getBrokers();
+	List<Broker> getBrokers(Integer userId);
 	
 	//add Broker
 	Boolean addBroker(Broker broker);
@@ -23,5 +23,7 @@ public interface BrokerMapper {
 	
 	//update Broker
 	Boolean updateBroker(Broker broker);
+
+	Integer count();
 
 }

@@ -26,4 +26,15 @@ public class AccountService {
 		Account user = list.get(0);
 		return user;
 	}
+	
+	public Account queryById(Integer id) {
+		AccountExample example = new AccountExample();
+		Criteria criteria = example.createCriteria();
+		criteria.andIdEqualTo(id);
+		// execute select
+		List<Account> list = userMapper.selectByExample(example);
+		// get user info
+		Account user = list.get(0);
+		return user;
+	}
 }

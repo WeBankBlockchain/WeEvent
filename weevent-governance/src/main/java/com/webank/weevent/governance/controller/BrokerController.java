@@ -2,6 +2,7 @@ package com.webank.weevent.governance.controller;
 
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -10,12 +11,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.webank.weevent.governance.entity.Broker;
 import com.webank.weevent.governance.service.BrokerService;
-
-import lombok.extern.slf4j.Slf4j;
 
 @CrossOrigin
 @RestController
@@ -27,9 +27,9 @@ public class BrokerController {
 
 	// get all broker service
 	@GetMapping("/broker/list")
-	public List<Broker> getAllBrokers() {
+	public List<Broker> getAllBrokers(@RequestParam Integer userId) {
 		log.info("get all brokers");
-		return brokerService.getBrokers();
+		return brokerService.getBrokers(userId);
 	}
 
 	// get broker service by id

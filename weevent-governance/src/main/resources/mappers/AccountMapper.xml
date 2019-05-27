@@ -3,7 +3,7 @@
 <mapper namespace="com.webank.weevent.governance.mapper.AccountMapper">
 
 	 <resultMap id="BaseResultMap" type="com.webank.weevent.governance.entity.Account" >
-    <id column="id" property="id" jdbcType="BIGINT" />
+    <id column="id" property="id" jdbcType="INTEGER" />
     <result column="username" property="username" jdbcType="VARCHAR" />
     <result column="password" property="password" jdbcType="VARCHAR" />
     <result column="email" property="email" jdbcType="VARCHAR" />
@@ -88,11 +88,11 @@
     select 
     <include refid="Base_Column_List" />
     from t_account
-    where id = #{id,jdbcType=BIGINT}
+    where id = #{id,jdbcType=INTEGER}
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
     delete from t_account
-    where id = #{id,jdbcType=BIGINT}
+    where id = #{id,jdbcType=INTEGER}
   </delete>
   <delete id="deleteByExample" parameterType="com.webank.weevent.governance.entity.AccountExample" >
     delete from t_account
@@ -103,7 +103,7 @@
   <insert id="insert" parameterType="com.webank.weevent.governance.entity.Account" >
     insert into t_account (id, username, password, 
       email, last_update)
-    values (#{id,jdbcType=BIGINT}, #{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
+    values (#{id,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
       #{email,jdbcType=VARCHAR},#{lastUpdate,jdbcType=TIMESTAMP})
   </insert>
   <insert id="insertSelective" parameterType="com.webank.weevent.governance.entity.Account" >
@@ -153,7 +153,7 @@
     update t_account
     <set >
       <if test="record.id != null" >
-        id = #{record.id,jdbcType=BIGINT},
+        id = #{record.id,jdbcType=INTEGER},
       </if>
       <if test="record.username != null" >
         username = #{record.username,jdbcType=VARCHAR},
@@ -174,7 +174,7 @@
   </update>
   <update id="updateByExample" parameterType="map" >
     update t_account
-    set id = #{record.id,jdbcType=BIGINT},
+    set id = #{record.id,jdbcType=INTEGER},
       username = #{record.username,jdbcType=VARCHAR},
       password = #{record.password,jdbcType=VARCHAR},
       email = #{record.email,jdbcType=VARCHAR},
@@ -199,7 +199,7 @@
         last_update = #{lastUpdate,jdbcType=TIMESTAMP},
       </if>
     </set>
-    where id = #{id,jdbcType=BIGINT}
+    where id = #{id,jdbcType=INTEGER}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.webank.weevent.governance.entity.Account" >
     update t_account
@@ -207,7 +207,7 @@
       password = #{password,jdbcType=VARCHAR},
       email = #{email,jdbcType=VARCHAR},
       last_update = #{lastUpdate,jdbcType=TIMESTAMP}
-    where id = #{id,jdbcType=BIGINT}
+    where id = #{id,jdbcType=INTEGER}
   </update>
 	
 </mapper>

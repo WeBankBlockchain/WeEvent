@@ -2,7 +2,12 @@ package com.webank.weevent.governance.service;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.webank.weevent.governance.entity.Broker;
@@ -15,13 +20,27 @@ import com.webank.weevent.governance.mapper.BrokerMapper;
  *
  */
 @Service
+@Slf4j
 public class BrokerService {
 	
 	@Autowired
 	BrokerMapper brokerMapper;
+	
+	@Autowired
+	ApplicationContext context;
+	
+	@PostConstruct
+	public void init() {
+		try {
+			brokerMapper.count();
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			System.exit(SpringApplication.exit(context));;
+		}
+	}
 
-	public List<Broker> getBrokers() {
-		return brokerMapper.getBrokers();
+	public List<Broker> getBrokers(Integer userId) {
+		return brokerMapper.getBrokers(userId);
 	}
 
 	public Broker getBroker(Integer id) {

@@ -1,18 +1,3 @@
-/**
- * Copyright 2014-2019  the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.webank.weevent.governance.utils;
 
 import java.util.HashMap;
@@ -41,10 +26,10 @@ public class CookiesTools {
      */
     public void reSetCookie(HttpServletRequest request, HttpServletResponse response, String name) {
         String value = null;
-        // 根据名字获取cookie
+        // get cookie by name
         Cookie cookie = getCookieByName(request, name);
         if (cookie != null) {
-            // 获取cookie的值
+            // get cookie value
             value = cookie.getValue();
         }
         if (StringUtils.isNotBlank(value)) {
@@ -58,10 +43,10 @@ public class CookiesTools {
      */
     public void addCookie(HttpServletRequest request, HttpServletResponse response, String name,
         String value) {
-        // 默认cookie路径
+        // default cookie path
         // String path = request.getContextPath();
         String path = "/";
-        // 默认cookie最大生命周期
+        // default cookie max age
         Integer maxAge = constantProperties.getCookieMaxAge();
 
         addCookie(request, response, name, value, maxAge, path);
@@ -76,7 +61,7 @@ public class CookiesTools {
         if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(realValue)) {
             Cookie cookie = getCookieByName(request, name);
 
-            // 根据name获取request中的cookie
+            // get cookie from request by name
             if (cookie == null) {
                 cookie = new Cookie(name, realValue);
             } else {
