@@ -29,7 +29,8 @@ List springboot = [
 ]
 
 List springboottest = [
-        "org.springframework.boot:spring-boot-starter-test"
+        "org.springframework.boot:spring-boot-starter-test",
+        "junit:junit:4.12"
 ]
 
 dependencies {

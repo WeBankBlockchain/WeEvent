@@ -1,16 +1,19 @@
 #!/bin/bash
+#
+# install weevent service, support FISCO-BCOS 1.3 and 2.0
+#
+################################################################################
 
-outpath=""
-blockchain_rpc=
-web3sdk_conf_path=
-
+out_path=""
+block_chain_version=
+block_chain_channel=
+block_chain_node_path=
 broker_port=8081
 
 nginx_port=8080
 
 governance=
 governance_port=
-
 mysql_ip=
 mysql_port=
 mysql_user=
@@ -18,24 +21,20 @@ mysql_password=
 
 installPWD=$PWD
 
-
-function yellow_echo () {
+function yellow_echo (){
     local what=$*
     if true;then
         echo -e "\e[1;33m${what} \e[0m"
     fi
 }
 
-
-function error_message()
-{
+function error_message(){
     local message=$1
     echo "ERROR - ${message}"
     exit 1
 }
 
-function ini_get()
-{
+function ini_get(){
     local file="config.ini"
     local section=$1
     local param=$2
@@ -54,14 +53,11 @@ function ini_get()
     echo "$value"
 }
 
-
-
-function setgparam(){
-    blockchain_rpc=$(ini_get "fisco-bcos" "channel")
-    web3sdk_conf_path=$(ini_get  "fisco-bcos" "web3sdk_conf_path")
-    if [[ $web3sdk_conf_path == .* ]];then
-       web3sdk_conf_path=`cd $web3sdk_conf_path; pwd`
-    fi
+function set_global_param(){
+    block_chain_version=$(ini_get "fisco-bcos" "version")
+    block_chain_channel=$(ini_get "fisco-bcos" "channel")
+    block_chain_node_path=$(ini_get  "fisco-bcos" "node_path")
+    block_chain_node_path=`realpath $block_chain_node_path`
 
     nginx_port=$(ini_get "nginx" "port")
     
@@ -76,98 +72,63 @@ function setgparam(){
     mysql_password=$(ini_get "governance" "mysql_password")
 }
 
-function checkIp(){
-    if [[ $ip =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-      exit 0
-    else
-      echo "fail"
-      exit 1
-    fi
-}
-
-function checkPort(){
-    local port="$1"
-    local -i port_num=$(to_int "${port}" 2>/dev/null)
-
-    if (( $port_num < 1 || $port_num > 65535 )) ; then
-        echo "*** ${port} is not a valid port" 1>&2
-        exit 1
-    fi
-}
-
-function isPortFree(){ 
-    lsof -i:${1} &>> $installPWD/install.log
+function check_port(){
+    lsof -i:${1}
     
-    if [ $? -eq 1 ]
-    then 
-        echo "$1 port is okay"  &>> $installPWD/install.log
+    if [ $? -eq 1 ];then
+        echo "$1 port is okay"
     else 
-        echo "$1 port is use" 
+        echo "$1 port is use"
         exit 1
     fi
 }
 
-
-function check-param(){
-    if [ -d $web3sdk_conf_path ]; then
-        isPortFree $broker_port
-        isPortFree $nginx_port
-        echo "param ok" &>> $installPWD/install.log
+function check_param(){
+    if [ -d $block_chain_node_path ]; then
+        check_port $broker_port
+        check_port $nginx_port
+        echo "param ok"
     else
-        echo "path not exist, $web3sdk_conf_path"
+        echo "path not exist, $block_chain_node_path"
         exit 1;
     fi
 }
 
 ### check the result and print it
-function getReturn(){    
-    if [[ $1 -eq 0 ]];then
-        yellow_echo "$2 install success"
+function check_result(){
+    if [[ $? -eq 0 ]];then
+        yellow_echo $1
     else
-        exit 1;     
+        exit 1;
    fi
 }
 
-
-### set the module and params
-function setModule(){
-    
-    params="--out_path $outpath --listen_port $broker_port --web3sdk_certpath $web3sdk_conf_path --channel_info $blockchain_rpc"       
-    
-    yellow_echo $params &>> $installPWD/install.log
+function install_module(){
+    yellow_echo "install module broker"
     cd $installPWD/modules/broker
-    ./install-broker.sh $params 
-    getReturn $? broker
+    ./install-broker.sh --out_path $out_path/broker --listen_port $broker_port --block_chain_node_path $block_chain_node_path --channel_info $block_chain_channel --version $block_chain_version
+    check_result "install broker success"
 
-
-    nginxpath=$outpath"/nginx"
-    params="--nginx_path $nginxpath --nginx_port $nginx_port --broker_port $broker_port --governance_port $governance_port"
-
+    yellow_echo "install module nginx"
     cd $installPWD/modules/nginx
-    ./install-nginx.sh $params
-    getReturn $? nginx
+    ./install-nginx.sh --nginx_path $out_path/nginx --nginx_port $nginx_port --broker_port $broker_port --governance_port $governance_port
+    check_result "install nginx success"
 
-    if $governance_enable;then 
-        governancepath=$outpath"/governance"
-        params="--out_path $governancepath --server_port $governance_port --broker_port $broker_port --mysql_ip $mysql_ip --mysql_port $mysql_port  --mysql_user $mysql_user --mysql_pwd $mysql_password"
-
-        yellow_echo "$params" &>> $installPWD/install.log
+    if [ $governance_enable = "true" ];then
+        yellow_echo "install module governance"
         cd $installPWD/modules/governance
-        ./install-governance.sh $params
-        getReturn $? governance
+        ./install-governance.sh --out_path $out_path/governance --server_port $governance_port --broker_port $broker_port --mysql_ip $mysql_ip --mysql_port $mysql_port --mysql_user $mysql_user --mysql_pwd $mysql_password
+        check_result "install governance success"
     fi
-    
-    cd $installPWD 
 }
 
-function install_crudini(){    
-       
-    echo "install crudini" &>> $installPWD/install.log
+function install_crudini(){
+    yellow_echo "install crudini"
+
     mkdir -p $installPWD/build/
     tar -zxf $installPWD/third-packages/crudini-0.9.tar.gz -C $installPWD/build/  
        
-    $installPWD/build/crudini-0.9/crudini --version &>> $installPWD/install.log
- 
+    $installPWD/build/crudini-0.9/crudini --version
     sleep 1
     if [ $? -ne 0 ];then
         echo "install crudini failed, skip"
@@ -175,20 +136,12 @@ function install_crudini(){
     fi
 }
 
-function update-check-server(){
+function update_check_server(){
     sed -i "s/8080\/weevent/$broker_port\/weevent/" check-service.sh
     sed -i "s/8082\/weevent-governance/$governance_port\/weevent-governance/" check-service.sh
 }
-function main(){  
-    
-    #crudini
-    install_crudini
 
-    # set the params
-    setgparam
-    # check the dir is exist or not
-    check-param
-
+function main(){
     # confirm
     if [ -d $2 ]; then
         read -p "$2 already exist, continue? [Y/N]" cmd_input
@@ -199,27 +152,29 @@ function main(){
     fi
     mkdir -p $2
     if [ $? -ne 0 ];then
-        echo "create dir $2 fail !!! "
+        echo "create path $2 fail !!! "
         exit 1
     fi
-    outpath=$2
-    
-    if [[ $2 == .* ]];then
-       outpath=`cd $2; pwd`
-    fi
-    
-    # set module and the params
-    setModule
+    out_path=`realpath $2`
+
+    #crudini
+    install_crudini
+
+    # set the params
+    set_global_param
+
+    # check the dir is exist or not
+    check_param
+
     # set the check service port
-    update-check-server
+    update_check_server
 
-    cp start-all.sh $outpath/
-    cp stop-all.sh $outpath/
-    cp check-service.sh $outpath/
-    cp uninstall-all.sh $outpath/
+    # install module
+    install_module
 
+    cd $installPWD
+    cp start-all.sh check-service.sh stop-all.sh uninstall-all.sh $out_path
 }
-
 
 # Usage message
 if [ $# -lt 2 ]; then
