@@ -48,16 +48,8 @@ List springboottest = [
         "org.springframework.boot:spring-boot-starter-test"
 ]
 
-List encrypt = [
-        "cn.hutool:hutool-crypto:4.5.10"
-]
-
-List ignite = [
-        "org.apache.ignite:ignite-core:2.7.0"
-]
-
 dependencies {
-    implementation(springboot, springwebsocket, springmqtt, encrypt, ignite)
+    implementation(springboot, springwebsocket, springmqtt)
 
     implementation(jsonrpc4j, redis, zookeeper, client_depends, web3sdk)
 
