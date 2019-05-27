@@ -31,18 +31,6 @@ public class WeEventUtils {
         return extensions;
     }
 
-    public static Long getGroupId(String strGroupId) throws BrokerException {
-        Long groupId = WeEventConstants.DEFAULT_GROUP_ID;
-        if (strGroupId != null && !strGroupId.isEmpty()) {
-            try {
-                groupId = Long.parseLong(strGroupId);
-            } catch (Exception e) {
-                throw new BrokerException(ErrorCode.EVENT_GROUP_ID_INVALID);
-            }
-        }
-        return groupId;
-    }
-
     /**
      * check is topic name matched the input pattern.
      * see MQTT specification http://public.dhe.ibm.com/software/dw/webservices/ws-mqtt/mqtt-v3r1.html.
