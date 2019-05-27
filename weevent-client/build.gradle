@@ -1,4 +1,15 @@
+apply plugin: 'maven'
 apply plugin: "io.spring.dependency-management"
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'signing'
+apply plugin: 'jacoco'
+
+archivesBaseName="weevent"
+group = 'com.webank.webank'
+version ='0.1.0'
+
 
 List client_depends = [
         "com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.3",
@@ -7,11 +18,15 @@ List client_depends = [
         "org.springframework:spring-messaging:5.1.6.RELEASE"
 ]
 
-
-
+allprojects {
+    tasks.withType(Javadoc) {
+        options.encoding = 'UTF-8'
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
+}
 dependencies {
     compile(client_depends)
-    testCompile("junit:junit:4.12")
+    testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
 sourceSets {
@@ -33,10 +48,12 @@ sourceSets {
     }
 }
 
+
+
 jar {
-    from(sourceSets.main.output) {
-        include "com/webank/weevent/sdk/**"
-    }
+//    from(sourceSets.main.output) {
+//        include "com/webank/weevent/sdk/**"
+//    }
     destinationDir file('dist/apps')
     archiveName 'weevent-client-' + version + '.jar'
     exclude '**/*.xml'
@@ -52,8 +69,79 @@ jar {
             into 'dist/lib'
         }
         copy {
+            from file('build/libs/')
+            into 'dist/apps'
+        }
+
+        copy {
             from file('.').listFiles().findAll { File f -> (f.name.endsWith('.bat') || f.name.endsWith('.sh') || f.name.endsWith('.env')) }
             into 'dist'
         }
+
     }
 }
+// for upload to maven
+task sourcesJar(type: Jar) {
+	classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+	classifier = 'javadoc'
+	from javadoc.destinationDir
+}
+
+artifacts {
+	archives jar
+	archives sourcesJar
+	archives javadocJar
+}
+
+
+signing {
+	required { gradle.taskGraph.hasTask("uploadArchives") }
+	sign configurations.archives
+}
+
+uploadArchives {
+	repositories {
+		mavenDeployer {
+			beforeDeployment { deployment -> signing.signPom(deployment) }
+
+			repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+				authentication(userName: ossrhUsername, password: ossrhPassword)
+			}
+
+			snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
+				authentication(userName: sonatypeUsername, password: sonatypePassword)
+			}
+
+			pom.project {
+				name 'weevent'
+				packaging 'jar'
+				description 'weevent'
+				url 'http://fintech.webank.com/weevent'
+
+				scm {
+					url 'https://github.com/WeBankFinTech/WeEvent.git'
+					connection 'https://github.com/WeBankFinTech/WeEvent.git'
+				}
+
+				licenses {
+					license {
+						name 'The Apache License, Version 2.0'
+						url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+					}
+				}
+				developers {
+					developer {
+						id 'cristic'
+						name 'cristic'
+						email 'meifen20160710@gmail.com'
+					}
+				}
+			}
+		}
+	}
+}
+
