@@ -23,7 +23,7 @@ public interface AccountMapper {
 
     List<Account> selectByExample(AccountExample example);
 
-    Account selectByPrimaryKey(Long id);
+    Account selectByPrimaryKey(Integer id);
 
     int updateByExampleSelective(@Param("record") Account record, @Param("example") AccountExample example);
 

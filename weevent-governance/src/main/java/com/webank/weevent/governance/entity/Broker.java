@@ -15,6 +15,7 @@ import lombok.ToString;
 public class Broker {
 
 	private Integer id;
+	private Integer userId;
 	private String name;
 	private String brokerUrl;
 	private Date lastUpdate;

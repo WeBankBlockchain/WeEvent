@@ -2,6 +2,10 @@ package com.webank.weevent.governance.entity;
 
 import java.util.Date;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+
+
 import lombok.Data;
 import lombok.ToString;
 
@@ -14,13 +18,18 @@ import lombok.ToString;
 @ToString
 public class Account {
 
-	private Long id;
+	private Integer id;
 
+	@NotBlank
     private String username;
 
+    @NotBlank
     private String password;
 
+    @Email
     private String email;
+    
+    private String oldPassword;
 
     private Date lastUpdate;
 }

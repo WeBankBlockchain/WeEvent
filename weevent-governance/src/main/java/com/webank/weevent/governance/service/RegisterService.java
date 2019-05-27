@@ -5,14 +5,15 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.DigestUtils;
 
 import com.webank.weevent.governance.entity.Account;
 import com.webank.weevent.governance.entity.AccountExample;
 import com.webank.weevent.governance.entity.AccountExample.Criteria;
 import com.webank.weevent.governance.mapper.AccountMapper;
 import com.webank.weevent.governance.result.GovernanceResult;
+import com.webank.weevent.governance.utils.GeneratePasswordUtil;
 
 /**
  * user registerservice
@@ -24,6 +25,15 @@ public class RegisterService {
 
 	@Autowired
 	private AccountMapper accountMapper;
+	
+	@Autowired
+    private PasswordEncoder passwordEncoder;
+	
+	@Autowired
+	private AccountService accountService;
+	
+	@Autowired
+	private MailService mailService;
 
 	public GovernanceResult checkData(String param, int type) {
 		//according type generate select condition
@@ -64,12 +74,59 @@ public class RegisterService {
 			return GovernanceResult.build(400, "this email occupied");
 		}
 		user.setLastUpdate(new Date());
-//		//md5 secret
-//		String md5Pass = DigestUtils.md5DigestAsHex(user.getPassword().getBytes());
-		user.setPassword(user.getPassword());
+		// secret
+		String storePassword = passwordEncoder.encode(user.getPassword());
+		user.setPassword(storePassword);
 		//insert user into database
 		accountMapper.insert(user);
 		//return true
 		return GovernanceResult.ok();
 	}
+
+	public GovernanceResult updatePassword(Account user) {
+		//data criteral
+		if (StringUtils.isBlank(user.getPassword())
+				||StringUtils.isBlank(user.getOldPassword())) {
+			return GovernanceResult.build(400, "password is blank，update fail");
+		}
+		//check oldPassword is correct
+		String oldPassword = user.getOldPassword();
+		
+		Integer userId = user.getId();
+		Account storeUser = accountService.queryById(userId);
+		if(!passwordEncoder.matches(oldPassword, storeUser.getPassword())) {
+			return GovernanceResult.build(400, "old password is incorrect");
+		}
+		
+		String password = passwordEncoder.encode(user.getPassword());
+		storeUser.setPassword(password);
+		storeUser.setLastUpdate(new Date());
+		
+		accountMapper.updateByPrimaryKey(storeUser);
+		return GovernanceResult.ok();
+	}
+
+	public GovernanceResult forgetPassword(String username) {
+		GovernanceResult result = checkData(username, 1);
+		//user not exist
+		if((boolean) result.getData()) {
+			return GovernanceResult.build(400, "username not exists");
+		}
+		//get user by username
+		Account user = accountService.queryByUsername(username);
+		
+		//generate new password
+		String newPassword = GeneratePasswordUtil.generatePassword();
+		String pwd = passwordEncoder.encode(newPassword);
+		user.setPassword(pwd);
+		user.setLastUpdate(new Date());
+		//update password into database
+		accountMapper.updateByPrimaryKey(user);
+		
+		String content = "The new reset password is : " + newPassword;
+		mailService.sendSimpleMail(user.getEmail(), "Reset Password", content);
+		return GovernanceResult.ok();
+	}
+	
+	
 }

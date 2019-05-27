@@ -19,7 +19,11 @@ import com.webank.weevent.governance.handler.LoginFailHandler;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.service.AccountDetailsService;
 
-
+/**
+ * BrowerSecurityConfig class
+ * @since 2019/05/23
+ *
+ */
 @Configuration
 public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
 	
@@ -45,16 +49,16 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
 		
 		http.exceptionHandling().accessDeniedHandler(jsonAccessDeniedHandler);
 		
-	    http.formLogin()          // 定义当需要用户登录时候，转到的登录页面。
+	    http.formLogin()          // define user login page
 //	    	.loginPage("/login.html")
 //	    	.loginProcessingUrl("/user/login")
 		    .usernameParameter("username").passwordParameter("password").permitAll()
 	        .successHandler(loginSuccessHandler) // if login success
 	        .failureHandler(loginfailHandler) // if login fail
 	        .and()
-	        .authorizeRequests()    // 定义哪些URL需要被保护、哪些不需要被保护
+	        .authorizeRequests()
 	        .antMatchers("/login.html","/user/**").permitAll()
-	        .anyRequest()        // 任何请求,登录后可以访问
+	        .anyRequest()
 	        .authenticated()
 	        .and()
             .csrf()
