@@ -115,7 +115,7 @@ public class FiscoBcosDelegate {
 
     public void checkVersion(Long groupId) throws BrokerException {
         if (this.fiscoBcos != null) {
-            if (groupId.longValue() != WeEventConstants.DEFAULT_GROUP_ID.longValue()) {
+            if (groupId.longValue() != Long.parseLong(WeEventConstants.DEFAULT_GROUP_ID)) {
                 throw new BrokerException(ErrorCode.WE3SDK_VERRSION_NOT_SUPPORT);
             }
             return;

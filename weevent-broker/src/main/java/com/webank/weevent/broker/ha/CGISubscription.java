@@ -158,7 +158,7 @@ public class CGISubscription {
         }
     }
 
-    private ZKSubscription doJsonRpcSubscribe(String topic, Long groupId, String subscriptionId, String url) throws BrokerException {
+    private ZKSubscription doJsonRpcSubscribe(String topic, String groupId, String subscriptionId, String url) throws BrokerException {
         IBrokerRpcCallback callback = getJsonRpcCallback(url);
         if (callback == null) {
             log.error("invalid notify url, {}", url);
@@ -202,7 +202,7 @@ public class CGISubscription {
         return zkSubscription;
     }
 
-    public String jsonRpcSubscribe(String topic, Long groupId, String subscriptionId, String url) throws BrokerException {
+    public String jsonRpcSubscribe(String topic, String groupId, String subscriptionId, String url) throws BrokerException {
         log.info("json rpc subscribe topic: {}, subscriptionId: {}, url: {}", topic, subscriptionId, url);
 
         if (this.isMaster) {
@@ -270,7 +270,7 @@ public class CGISubscription {
         return new RestTemplate(requestFactory);
     }
 
-    private ZKSubscription doRestSubscribe(String topic, Long groupId, String subscriptionId, String url) throws BrokerException {
+    private ZKSubscription doRestSubscribe(String topic, String groupId, String subscriptionId, String url) throws BrokerException {
         RestTemplate callback = getRestCallback();
 
         IConsumer.ConsumerListener listener = new IConsumer.ConsumerListener() {
@@ -313,7 +313,7 @@ public class CGISubscription {
         return zkSubscription;
     }
 
-    public String restSubscribe(String topic, Long groupId, String subscriptionId, String url, String urlFormat) throws BrokerException {
+    public String restSubscribe(String topic, String groupId, String subscriptionId, String url, String urlFormat) throws BrokerException {
         log.info("subscribe topic: {}, url: {} subscriptionId:{}", topic, url, subscriptionId);
 
         if (this.isMaster) {
