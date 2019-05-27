@@ -9,8 +9,7 @@ function governance_setup() {
     rm -f $out_path/install-governance.sh
     
       
-    if [[ -z $server_port ]];
-    then
+    if [[ -z $server_port ]];then
         echo "server_port is empty."
         echo "set server_port failed"
         exit 1
@@ -19,8 +18,7 @@ function governance_setup() {
     fi
     echo "set server_port success"
  
-    if [[ -z $mysql_ip ]];
-    then
+    if [[ -z $mysql_ip ]];then
         echo "mysql_ip is empty."
         echo "set mysql_ip failed"
         exit 1
@@ -29,8 +27,7 @@ function governance_setup() {
     fi
     echo "set mysql_ip success"
      
-    if [[ -z $mysql_port ]];
-    then
+    if [[ -z $mysql_port ]];then
         echo "mysql_port is empty."
         echo "set mysql_port failed"
         exit 1
@@ -39,8 +36,7 @@ function governance_setup() {
     fi
     echo "set mysql_port success"
 
-    if [[ -z $mysql_user ]];
-    then
+    if [[ -z $mysql_user ]];then
         echo "mysql_user is empty."
         echo "set mysql_user failed"
         exit 1
@@ -49,8 +45,7 @@ function governance_setup() {
     fi
     echo "set mysql_user success"
   
-    if [[ -z $mysql_pwd ]];
-    then
+    if [[ -z $mysql_pwd ]];then
         echo "mysql_pwd is empty"
         echo "set mysql_pwd failed"
         exit 1
@@ -59,8 +54,7 @@ function governance_setup() {
     fi
     echo "set mysql_pwd success"
        
-    if [[ -z $broker_port ]];
-    then
+    if [[ -z $broker_port ]];then
         echo "broker_port is empty"
         echo "set broker_port failed"
         exit 1

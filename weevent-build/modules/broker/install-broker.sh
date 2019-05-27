@@ -55,15 +55,9 @@ if [[ -z $channel_info ]];then
     exit -1
 fi
 
-#replace conf parameter
-if [[ -d $out_path ]]; then
-    mkdir -p $out_path
-    make_file
-    copy_file
-else
-    echo "out_path is not exist"
-    exit -1
-fi
+mkdir -p $out_path
+make_file
+copy_file
 
 sed -i "s/127.0.0.1:8501/$channel_info/g" $out_path/conf/fisco.properties
 echo "set channel_info success"
@@ -81,8 +75,7 @@ if [[ $version = "1.3" ]];then
 
     deploy_contract
     contract_address=`cat $out_path/conf/address.txt | awk -F '=' '{print $2}'`
-    if [[ -z $contract_address ]];
-    then
+    if [[ -z $contract_address ]];then
         echo "deploy contract error"
         exit -1
     else
@@ -105,8 +98,7 @@ else
 
     deploy_contract 1
     contract_address=`cat $out_path/conf/address.txt | awk -F '=' '{print $2}'`
-    if [[ -z $contract_address ]];
-    then
+    if [[ -z $contract_address ]];then
         echo "deploy contract error"
         exit -1
     else
