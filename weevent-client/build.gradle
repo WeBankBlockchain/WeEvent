@@ -98,50 +98,50 @@ artifacts {
 }
 
 
-signing {
-	required { gradle.taskGraph.hasTask("uploadArchives") }
-	sign configurations.archives
-}
-
-uploadArchives {
-	repositories {
-		mavenDeployer {
-			beforeDeployment { deployment -> signing.signPom(deployment) }
-
-			repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-				authentication(userName: ossrhUsername, password: ossrhPassword)
-			}
-
-			snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
-				authentication(userName: sonatypeUsername, password: sonatypePassword)
-			}
-
-			pom.project {
-				name 'weevent'
-				packaging 'jar'
-				description 'weevent'
-				url 'http://fintech.webank.com/weevent'
-
-				scm {
-					url 'https://github.com/WeBankFinTech/WeEvent.git'
-					connection 'https://github.com/WeBankFinTech/WeEvent.git'
-				}
-
-				licenses {
-					license {
-						name 'The Apache License, Version 2.0'
-						url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-					}
-				}
-				developers {
-					developer {
-						id 'cristic'
-						name 'cristic'
-						email 'meifen20160710@gmail.com'
-					}
-				}
-			}
-		}
-	}
-}
+//signing {
+//	required { gradle.taskGraph.hasTask("uploadArchives") }
+//	sign configurations.archives
+//}
+//
+//uploadArchives {
+//	repositories {
+//		mavenDeployer {
+//			beforeDeployment { deployment -> signing.signPom(deployment) }
+//
+//			repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+//				authentication(userName: ossrhUsername, password: ossrhPassword)
+//			}
+//
+//			snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
+//				authentication(userName: sonatypeUsername, password: sonatypePassword)
+//			}
+//
+//			pom.project {
+//				name 'weevent'
+//				packaging 'jar'
+//				description 'weevent'
+//				url 'http://fintech.webank.com/weevent'
+//
+//				scm {
+//					url 'https://github.com/WeBankFinTech/WeEvent.git'
+//					connection 'https://github.com/WeBankFinTech/WeEvent.git'
+//				}
+//
+//				licenses {
+//					license {
+//						name 'The Apache License, Version 2.0'
+//						url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+//					}
+//				}
+//				developers {
+//					developer {
+//						id 'cristic'
+//						name 'cristic'
+//						email 'meifen20160710@gmail.com'
+//					}
+//				}
+//			}
+//		}
+//	}
+//}
 
