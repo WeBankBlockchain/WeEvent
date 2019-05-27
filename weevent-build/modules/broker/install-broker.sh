@@ -10,7 +10,7 @@ while [ $# -ge 2 ] ; do
     case "$1" in
     --out_path) para="$1 = $2;";out_path="$2";shift 2;;
     --listen_port) para="$1 = $2;";listen_port="$2";shift 2;;
-    --web3sdk_certpath) para="$1 = $2;";web3sdk_certpath="$2";shift 2;;
+    --block_chain_node_path) para="$1 = $2;";block_chain_node_path="$2";shift 2;;
     --channel_info) para="$1 = $2;";channel_info="$2";shift 2;;
     --version) para="$1 = $2;";version="$2";shift 2;;
     *) echo "unknown parameter $1." ; exit 1 ; break;;
@@ -19,7 +19,7 @@ done
 
 echo "param out_path:"$out_path &>> $installPWD/install.log
 echo "param listen_port:"$listen_port &>> $installPWD/install.log
-echo "param web3sdk_certpath:"$web3sdk_certpath &>> $installPWD/install.log
+echo "param block_chain_node_path:"block_chain_node_path &>> $installPWD/install.log
 echo "param channel_info:"$channel_info &>> $installPWD/install.log
 
 #copy file
@@ -68,11 +68,11 @@ sed -i "s/127.0.0.1:8501/$channel_info/g" $out_path/conf/fisco.properties
 echo "set channel_info success" &>> $installPWD/install.log
 if [[$version -eq "1.3"]];then
     sed -i "/version=2.0/cversion=1.3" $out_path/conf/fisco.properties
-    if [[ -f $web3sdk_certpath/ca.crt ]] && [[ -f $web3sdk_certpath/client.keystore ]]; then
+    if [[ -f $block_chain_node_path/conf/ca.crt ]] && [[ -f $block_chain_node_path/conf/client.keystore ]]; then
         rm -rf $out_path/conf/ca.crt
         rm -rf $out_path/conf/client.keystore
-        cp $web3sdk_certpath/ca.crt $out_path/conf/
-        cp $web3sdk_certpath/client.keystore $out_path/conf/
+        cp $block_chain_node_path/conf/ca.crt $out_path/conf/
+        cp $block_chain_node_path/conf/client.keystore $out_path/conf/
     else
         echo "ca.crt or client.keystore is not exist."
         exit -1
@@ -90,19 +90,19 @@ if [[$version -eq "1.3"]];then
         sed -i "/topic-controller.address=0x/ctopic-controller.address=${contract_address}" $out_path/conf/fisco.properties
     fi
 else
-    if [[ -f $web3sdk_certpath/conf/ca.crt ]] && [[ -f $web3sdk_certpath/conf/node.crt ]] && [[ -f $web3sdk_certpath/conf/node.key ]]; then
+    if [[ -f $block_chain_node_path/conf/ca.crt ]] && [[ -f $block_chain_node_path/conf/node.crt ]] && [[ -f $block_chain_node_path/conf/node.key ]]; then
         rm -rf $out_path/conf/v2/ca.crt
         rm -rf $out_path/conf/v2/node.crt
         rm -rf $out_path/conf/v2/node.key
-        cp $web3sdk_certpath/ca.crt $out_path/conf/v2/
-        cp $web3sdk_certpath/node.crt $out_path/conf/v2/
-        cp $web3sdk_certpath/node.key $out_path/conf/v2/
+        cp $block_chain_node_path/conf/ca.crt $out_path/conf/v2/
+        cp $block_chain_node_path/conf/node.crt $out_path/conf/v2/
+        cp $block_chain_node_path/conf/node.key $out_path/conf/v2/
     else
         echo "ca.crt or node.crt or node.key is not exist."
         exit -1
     fi
 
-    deploy-topic-control.sh 1
+    deploy_contract 1
     contract_address=`cat $out_path/conf/address.txt | awk -F '=' '{print $2}'`
     if [[ -z $contract_address ]];
     then

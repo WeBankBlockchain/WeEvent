@@ -7,7 +7,7 @@
 out_path=""
 block_chain_version=
 block_chain_channel=
-web3sdk_conf_path=
+block_chain_node_path=
 broker_port=8081
 
 nginx_port=8080
@@ -56,8 +56,8 @@ function ini_get(){
 function set_global_param(){
     block_chain_version=$(ini_get "fisco-bcos" "version")
     block_chain_rpc=$(ini_get "fisco-bcos" "channel")
-    web3sdk_conf_path=$(ini_get  "fisco-bcos" "web3sdk_conf_path")
-    web3sdk_conf_path=`realpath $web3sdk_conf_path`
+    block_chain_node_path=$(ini_get  "fisco-bcos" "node_path")
+    block_chain_node_path=`realpath $web3sdk_conf_path`
 
     nginx_port=$(ini_get "nginx" "port")
     
@@ -106,7 +106,7 @@ function check_result(){
 
 ### set the module and params
 function set_module(){
-    params="--out_path $out_path --listen_port $broker_port --web3sdk_certpath $web3sdk_conf_path --channel_info $block_chain_channel --version $block_chain_version"
+    params="--out_path $out_path --listen_port $broker_port --block_chain_node_path $block_chain_node_path --channel_info $block_chain_channel --version $block_chain_version"
     
     yellow_echo $params &>> $installPWD/install.log
     cd $installPWD/modules/broker
