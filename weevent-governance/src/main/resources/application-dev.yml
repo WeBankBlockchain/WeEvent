@@ -13,6 +13,12 @@ spring:
       min-idle: 5
       initial-size: 5
       validation-query: SELECT 'x'
+  mail: 
+    default-encoding: UTF-8
+    host: smtp.163.com
+    username: mailusername@163.com
+    password: mailpwd
+    from: mailusername@163.com
   pid:
     fail-on-write-error: true
     file: ./logs/governance.pid

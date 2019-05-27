@@ -2,6 +2,7 @@ package com.webank.weevent.governance.controller;
 
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -10,12 +11,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.webank.weevent.governance.entity.Account;
 import com.webank.weevent.governance.entity.Broker;
+import com.webank.weevent.governance.service.AccountService;
 import com.webank.weevent.governance.service.BrokerService;
-
-import lombok.extern.slf4j.Slf4j;
 
 @CrossOrigin
 @RestController
@@ -24,12 +26,17 @@ public class BrokerController {
 
 	@Autowired
 	BrokerService brokerService;
+	
+	@Autowired
+	AccountService accountService;
 
 	// get all broker service
 	@GetMapping("/broker/list")
-	public List<Broker> getAllBrokers() {
-		log.info("get all brokers");
-		return brokerService.getBrokers();
+	public List<Broker> getAllBrokers(@RequestParam String username) {
+		log.info("get all brokers by username = " + username);
+		Account user  = accountService.queryByUsername(username);
+		
+		return brokerService.getBrokers(user.getId());
 	}
 
 	// get broker service by id
