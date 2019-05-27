@@ -43,7 +43,7 @@ function make_file(){
 
 #deploy contract
 function deploy_contract(){
-    if [ $# == 1 ];then
+    if [ $# -eq 1 ];then
         java -Xbootclasspath/a:$out_path/conf -cp $out_path/apps/* -Dloader.main=com.webank.weevent.broker.fisco.util.Web3sdkUtils org.springframework.boot.loader.PropertiesLauncher $out_path/conf/address.txt
     else
         java -Xbootclasspath/a:$out_path/conf -cp $out_path/apps/* -Dloader.main=com.webank.weevent.broker.fisco.util.Web3sdkUtils org.springframework.boot.loader.PropertiesLauncher $out_path/conf/address.txt $1
