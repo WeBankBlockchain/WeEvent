@@ -14,7 +14,7 @@ import lombok.Data;
 @Data
 public class ZKSubscription implements Serializable {
     private String topic;
-    private Long groupId;
+    private String groupId;
     private String subscriptionId;
 
     // for json rpc and restful

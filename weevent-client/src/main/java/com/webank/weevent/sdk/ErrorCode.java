@@ -27,6 +27,8 @@ public enum ErrorCode {
 
     TOPIC_NOT_MATCH(100108, "topic name not match with last"),
 
+    PATTERN_INVALID(100109, "invalid topic pattern"),
+
     EVENT_CONTENT_IS_BLANK(100200, "event content is blank"),
 
     EVENT_CONTENT_EXCEEDS_MAX_LENGTH(100201, "event content exceeds max length[10k bytes]"),
@@ -36,6 +38,8 @@ public enum ErrorCode {
     EVENT_CONTENT_CHARSET(100203, "event content must be utf-8"),
 
     EVENT_EXTENSIONS_EXCEEDS_MAX_LENGTH(100204, "event extensions exceeds max length[1k bytes]"),
+
+    EVENT_EXTENSIONS_IS_NUll(100205, "event extensions is null"),
 
     EVENT_ID_IS_BLANK(100300, "eventId is blank"),
 

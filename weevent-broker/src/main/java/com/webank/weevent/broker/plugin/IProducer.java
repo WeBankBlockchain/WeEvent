@@ -94,7 +94,7 @@ public interface IProducer extends IEventTopic {
      * @return SendResult SendResult
      * @throws BrokerException BrokerException
      */
-    SendResult publish(WeEvent event, Long groupId) throws BrokerException;
+    SendResult publish(WeEvent event, String groupId) throws BrokerException;
 
     /*
      * TODO
@@ -127,5 +127,5 @@ public interface IProducer extends IEventTopic {
      * @param callBack the callBack {@link SendCallBack}
      * @throws BrokerException BrokerException
      */
-    void publish(WeEvent event, Long groupId, SendCallBack callBack) throws BrokerException;
+    void publish(WeEvent event, String groupId, SendCallBack callBack) throws BrokerException;
 }

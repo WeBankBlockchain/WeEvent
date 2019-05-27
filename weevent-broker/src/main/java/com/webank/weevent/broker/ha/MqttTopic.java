@@ -124,7 +124,7 @@ public class MqttTopic {
         }
     }
 
-    public boolean mqttAddInBoundTopic(String topic, Long groupId, String urlFormat) throws BrokerException {
+    public boolean mqttAddInBoundTopic(String topic, String groupId, String urlFormat) throws BrokerException {
         log.info("add mqtt inbound topic: {}", topic);
 
         checkSupport();
@@ -174,7 +174,7 @@ public class MqttTopic {
         }
     }
 
-    public boolean mqttAddOutBoundTopic(String topic, Long groupId, String urlFormat) throws BrokerException {
+    public boolean mqttAddOutBoundTopic(String topic, String groupId, String urlFormat) throws BrokerException {
         log.info("add mqtt outbound topic: {}", topic);
 
         checkSupport();

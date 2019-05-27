@@ -5,10 +5,10 @@ import java.util.Map;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.ErrorCode;
 
 import lombok.extern.slf4j.Slf4j;
 
-import static com.webank.weevent.sdk.ErrorCode.EVENT_GROUP_ID_INVALID;
 @Slf4j
 public class WeEventUtils {
     public static Map<String, String> getExtensions(Map<String, String> eventData) throws BrokerException {
@@ -31,16 +31,52 @@ public class WeEventUtils {
         return extensions;
     }
 
-    public static Long getGroupId(String strGroupId) throws BrokerException {
-        Long groupId = WeEventConstants.DEFAULT_GROUP_ID;
-        if (strGroupId != null && !strGroupId.isEmpty()) {
-            try {
-                groupId = Long.parseLong(strGroupId);
-            } catch (Exception e) {
-                log.error("{}",EVENT_GROUP_ID_INVALID.getCodeDesc());
-                throw new BrokerException(EVENT_GROUP_ID_INVALID);
+    /**
+     * check is topic name matched the input pattern.
+     * see MQTT specification http://public.dhe.ibm.com/software/dw/webservices/ws-mqtt/mqtt-v3r1.html.
+     * notice:
+     * "com/webank/weevent/" is invalid
+     * "com/webank/weevent" is different from "/com.webank/weevent"
+     *
+     * @param topic topic name
+     * @param pattern mqtt pattern with wildcard
+     * @return true if match
+     */
+    public static boolean match(String topic, String pattern) {
+        String topicLayer[] = topic.split(WeEventConstants.LAYER_SEPARATE);
+        String patternLayer[] = pattern.split(WeEventConstants.LAYER_SEPARATE);
+
+        // '+' means 1 layer
+        if (pattern.contains(WeEventConstants.WILD_CARD_ONE_LAYER)) {
+            if (topicLayer.length != patternLayer.length) {
+                return false;
             }
+
+            for (int idx = 0; idx < patternLayer.length; idx++) {
+                // the layer except '+' must be match
+                if (!patternLayer[idx].equals(WeEventConstants.WILD_CARD_ONE_LAYER)
+                        && !patternLayer[idx].equals(topicLayer[idx])) {
+                    return false;
+                }
+            }
+            return true;
+        } else if (pattern.contains(WeEventConstants.WILD_CARD_ALL_LAYER)) {    // '#' means 0 or n layer
+            if (!patternLayer[patternLayer.length - 1].equals(WeEventConstants.WILD_CARD_ALL_LAYER)) {
+                log.error("'#' must be in last layer");
+                return false;
+            }
+
+            // skip last layer '#'
+            for (int idx = 0; idx < patternLayer.length - 1; idx++) {
+                // the layer before '#' must be match
+                if (!patternLayer[idx].equals(topicLayer[idx])) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            log.error("no wildcard character in pattern");
+            return false;
         }
-        return groupId;
     }
 }
