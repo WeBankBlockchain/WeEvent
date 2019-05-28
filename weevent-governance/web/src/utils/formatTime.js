@@ -72,7 +72,6 @@ const convertIntToStr = (duration) => {
 */
 const dateBeforeAfter = (timestamp) => {
   const now = Date.now()
-  console.log(now + 'timestamp：' + timestamp)
   const minute = 1000 * 60
   const hour = minute * 60
   const publishTime = String(now).length === String(timestamp).length ? timestamp : timestamp * 1000
@@ -117,6 +116,23 @@ const getAge = (y, m, d) => {
   }
   return age
 }
+
+const getLastWeek = () => {
+  let lastWeek = []
+  for (let i = 6; i > -1; i--) {
+    let time = new Date().getTime()
+    time = time - (i * 24 * 3600 * 1000)
+    let y = new Date(time).getFullYear()
+    let m = new Date(time).getMonth() + 1
+    m = m > 9 ? m : '0' + m
+    let d = new Date(time).getDate()
+    d = d > 9 ? d : '0' + d
+    let day = y + '-' + m + '-' + d
+    lastWeek.push(day)
+  }
+  return lastWeek
+}
+
 export {
   getAge,
   getAstro,
@@ -124,5 +140,6 @@ export {
   convertIntToStr,
   convertStrToInt,
   getDate,
-  getDateDetial
+  getDateDetial,
+  getLastWeek
 }

@@ -7,7 +7,6 @@
   </div>
   <el-table
     :data="tableData"
-    border
     stripe
     v-loading='loading'
     element-loading-spinner='el-icon-loading'
@@ -107,7 +106,8 @@ export default {
       vm.loading = true
       let data = {
         pageIndex: vm.pageIndex - 1,
-        pageSize: vm.pageSize
+        pageSize: vm.pageSize,
+        brokerId: Number(sessionStorage.getItem('userId'))
       }
       API.topicList(data).then(res => {
         if (res.status === 200) {
@@ -135,11 +135,9 @@ export default {
       }, 1000)
     },
     readDetial (e) {
-      let data = {
-        topic: e.topicName
-      }
       var vm = this
-      API.topicState(data).then(res => {
+      let url = '?brokerId=' + sessionStorage.getItem('userId') + '&topic=' + e.topicName
+      API.topicState(url).then(res => {
         let time = getDateDetial(res.data.createdTimestamp)
         res.data.createdTimestamp = time
         vm.$set(e, 'detial', res.data)
@@ -182,7 +180,8 @@ export default {
           let data = {
             topic: vm.form.name,
             // creater: this.$store.state.userName
-            creater: 'unknow'
+            creater: 'unknow',
+            brokerId: Number(sessionStorage.getItem('userId'))
           }
           API.openTopic(data).then(res => {
             if (res.status === 200) {
@@ -230,7 +229,8 @@ export default {
         background: 'rgba(0,0,0,0.7)'
       })
       let vm = this
-      API.topicControl().then(res => {
+      let url = '?brokerId=' + sessionStorage.getItem('userId')
+      API.topicControl(url).then(res => {
         if (res.status === 200) {
           this.$message({
             type: 'success',
