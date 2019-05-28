@@ -18,12 +18,12 @@ import lombok.ToString;
 @ToString
 public class Broker {
 
-	private Integer id;
-	
-	@Min(1)
-	private Integer userId;
-	private String name;
-	@URL
-	private String brokerUrl;
-	private Date lastUpdate;
+    private Integer id;
+
+    @Min(1)
+    private Integer userId;
+    private String name;
+    @URL
+    private String brokerUrl;
+    private Date lastUpdate;
 }

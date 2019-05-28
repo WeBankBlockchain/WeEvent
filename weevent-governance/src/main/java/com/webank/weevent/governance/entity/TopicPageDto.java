@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class TopicPageDto {
 
-	private Integer brokerId;
-	private Integer pageSize;
-	private Integer pageIndex;
+    private Integer brokerId;
+    private Integer pageSize;
+    private Integer pageIndex;
 }

@@ -2,28 +2,38 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.webank.weevent.governance.mapper.BrokerMapper">
 
-	<select id="getBroker" parameterType="java.lang.Integer" resultType="com.webank.weevent.governance.entity.Broker">
-		select id ,name,broker_url brokerUrl,user_id userId,last_update lastUpdate from t_broker where id=#{id}
+	<select id="getBroker" parameterType="java.lang.Integer"
+		resultType="com.webank.weevent.governance.entity.Broker">
+		select id ,name,broker_url brokerUrl,user_id
+		userId,last_update lastUpdate from t_broker where id=#{id}
 	</select>
-	
+
 	<select id="getBrokers" resultType="com.webank.weevent.governance.entity.Broker">
-		select id ,name,broker_url brokerUrl,user_id userId,last_update lastUpdate from t_broker where user_id=#{userId}
+		select id ,name,broker_url
+		brokerUrl,user_id userId,last_update lastUpdate from t_broker where
+		user_id=#{userId}
 	</select>
-	
+
 	<insert id="addBroker" parameterType="com.webank.weevent.governance.entity.Broker">
-		insert into t_broker(name,broker_url,user_id,last_update) values(#{name},#{brokerUrl},#{userId},#{lastUpdate, jdbcType=TIMESTAMP})
+		insert into
+		t_broker(name,broker_url,user_id,last_update)
+		values(#{name},#{brokerUrl},#{userId},#{lastUpdate,
+		jdbcType=TIMESTAMP})
 	</insert>
-	
+
 	<update id="updateBroker" parameterType="com.webank.weevent.governance.entity.Broker">
-		update t_broker set name=#{name},broker_url=#{brokerUrl},last_update=#{lastUpdate, jdbcType=TIMESTAMP} where id=#{id}
+		update t_broker set
+		name=#{name},broker_url=#{brokerUrl},last_update=#{lastUpdate,
+		jdbcType=TIMESTAMP} where id=#{id}
 	</update>
-	
+
 	<delete id="deleteBroker" parameterType="java.lang.Integer">
-		delete from t_broker where id=#{id}
+		delete from t_broker
+		where id=#{id}
 	</delete>
-	
+
 	<select id="count" resultType="java.lang.Integer">
 		select count(1) from t_broker
 	</select>
-	
+
 </mapper>

@@ -30,45 +30,42 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     @Autowired
     private AccountService accountService;
-    
+
     @Autowired
     private CookiesTools cookiesTools;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-        Authentication authentication)
-        throws IOException, ServletException {
-        log.debug("login success");
+	    Authentication authentication) throws IOException, ServletException {
+	log.debug("login success");
 
-        Object obj = authentication.getPrincipal();
-        JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(obj));
-        String username = jsonObject.getString("username");
+	Object obj = authentication.getPrincipal();
+	JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(obj));
+	String username = jsonObject.getString("username");
 
-        //clear cookie
-        cookiesTools.clearAllCookie(request,response);
-        //reset session
-        request.getSession().invalidate();
-        request.getSession().setAttribute(ConstantProperties.SESSION_MGR_ACCOUNT, username);
+	// clear cookie
+	cookiesTools.clearAllCookie(request, response);
+	// reset session
+	request.getSession().invalidate();
+	request.getSession().setAttribute(ConstantProperties.SESSION_MGR_ACCOUNT, username);
 
-        // reset cookie
-        cookiesTools
-            .addCookie(request, response, ConstantProperties.COOKIE_MGR_ACCOUNT, username);
-        cookiesTools.addCookie(request, response, ConstantProperties.COOKIE_JSESSIONID,
-            request.getSession().getId());
+	// reset cookie
+	cookiesTools.addCookie(request, response, ConstantProperties.COOKIE_MGR_ACCOUNT, username);
+	cookiesTools.addCookie(request, response, ConstantProperties.COOKIE_JSESSIONID, request.getSession().getId());
 
-        // response account info
-        Account account = accountService.queryByUsername(username);
-        Map<String, Object> rsp = new HashMap<>();
-        rsp.put("username", username);
-        rsp.put("userId", account.getId());
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        baseResponse.setData(rsp);
+	// response account info
+	Account account = accountService.queryByUsername(username);
+	Map<String, Object> rsp = new HashMap<>();
+	rsp.put("username", username);
+	rsp.put("userId", account.getId());
+	BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+	baseResponse.setData(rsp);
 
-        String backStr = JSON.toJSONString(baseResponse);
-        log.debug("login backInfo:{}", backStr);
+	String backStr = JSON.toJSONString(baseResponse);
+	log.debug("login backInfo:{}", backStr);
 
-        response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(backStr);
+	response.setContentType("application/json;charset=UTF-8");
+	response.getWriter().write(backStr);
     }
 
 }

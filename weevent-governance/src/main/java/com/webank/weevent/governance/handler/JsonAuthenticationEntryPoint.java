@@ -19,14 +19,14 @@ import com.webank.weevent.governance.entity.BaseResponse;
 @Component
 public class JsonAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
-	@Override
-	public void commence(HttpServletRequest request, HttpServletResponse response,
-			AuthenticationException authException) throws IOException, ServletException {
-		log.debug("user not logged in");
-		BaseResponse baseResponse = new BaseResponse(ConstantCode.USER_NOT_LOGGED_IN);
+    @Override
+    public void commence(HttpServletRequest request, HttpServletResponse response,
+	    AuthenticationException authException) throws IOException, ServletException {
+	log.debug("user not logged in");
+	BaseResponse baseResponse = new BaseResponse(ConstantCode.USER_NOT_LOGGED_IN);
 
-		response.setContentType("application/json;charset=UTF-8");
-		response.getWriter().write(JSON.toJSONString(baseResponse));
-	}
+	response.setContentType("application/json;charset=UTF-8");
+	response.getWriter().write(JSON.toJSONString(baseResponse));
+    }
 
 }

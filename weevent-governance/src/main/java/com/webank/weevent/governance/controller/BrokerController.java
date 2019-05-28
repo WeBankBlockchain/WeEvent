@@ -26,45 +26,44 @@ import com.webank.weevent.governance.service.BrokerService;
 @Slf4j
 public class BrokerController {
 
-	@Autowired
-	BrokerService brokerService;
-	
-	@Autowired
-	AccountService accountService;
+    @Autowired
+    BrokerService brokerService;
 
-	// get all broker service
-	@GetMapping("/broker/list")
-	public List<Broker> getAllBrokers(@RequestParam String username) {
-		log.info("get all brokers by username = " + username);
-		Account user  = accountService.queryByUsername(username);
-		
-		return brokerService.getBrokers(user.getId());
-	}
+    @Autowired
+    AccountService accountService;
 
-	// get broker service by id
-	@GetMapping("/broker/{id}")
-	public Broker getBroker(@PathVariable("id") Integer id) {
-		log.info("get  broker service by id = " + id);
-		return brokerService.getBroker(id);
-	}
+    // get all broker service
+    @GetMapping("/broker/list")
+    public List<Broker> getAllBrokers(@RequestParam String username) {
+	log.info("get all brokers by username = " + username);
+	Account user = accountService.queryByUsername(username);
 
-	// get broker service by id
-	@PostMapping("/broker")
-	public Boolean addBroker(@Valid @RequestBody Broker broker) {
-		log.info("add  broker service into db " + broker);
-		return brokerService.addBroker(broker);
-	}
-	
-	@PutMapping("/broker")
-	public Boolean updateBroker(@RequestBody Broker broker) {
-		log.info("update  broker service ,broker: " + broker);
-		return brokerService.updateBroker(broker);
-	}
-	
-	@DeleteMapping("/broker/{id}")
-	public Boolean deleteBroker(@PathVariable("id") Integer id) {
-		log.info("delete  broker service ,id: " + id);
-		return brokerService.deleteBroker(id);
-	}
+	return brokerService.getBrokers(user.getId());
+    }
 
+    // get broker service by id
+    @GetMapping("/broker/{id}")
+    public Broker getBroker(@PathVariable("id") Integer id) {
+	log.info("get  broker service by id = " + id);
+	return brokerService.getBroker(id);
+    }
+
+    // get broker service by id
+    @PostMapping("/broker")
+    public Boolean addBroker(@Valid @RequestBody Broker broker) {
+	log.info("add  broker service into db " + broker);
+	return brokerService.addBroker(broker);
+    }
+
+    @PutMapping("/broker")
+    public Boolean updateBroker(@RequestBody Broker broker) {
+	log.info("update  broker service ,broker: " + broker);
+	return brokerService.updateBroker(broker);
+    }
+
+    @DeleteMapping("/broker/{id}")
+    public Boolean deleteBroker(@PathVariable("id") Integer id) {
+	log.info("delete  broker service ,id: " + id);
+	return brokerService.deleteBroker(id);
+    }
 }

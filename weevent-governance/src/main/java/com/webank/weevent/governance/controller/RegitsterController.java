@@ -21,38 +21,37 @@ import com.webank.weevent.governance.service.RegisterService;
 @RestController
 @CrossOrigin
 public class RegitsterController {
-	
-	@Autowired
-	private RegisterService registerService;
 
-	@RequestMapping("/user/check/{param}/{type}")
-	public GovernanceResult checkData(@PathVariable String param, @PathVariable Integer type) {
-		GovernanceResult governanceResult = registerService.checkData(param, type);
-		return governanceResult;
-	}
-	
-	@PostMapping(value="/user/register")
-	public GovernanceResult register(@Valid @RequestBody Account user,BindingResult result) {
-		GovernanceResult governanceResult = registerService.register(user);
-		return governanceResult;
-	}
-	
-	@PutMapping(value="/user/update")
-	public GovernanceResult updatePassword(@RequestBody Account user) {
-		GovernanceResult governanceResult = registerService.updatePassword(user);
-		return governanceResult;
-	}
-	
-	@GetMapping("/user/forget")
-	public GovernanceResult forgetPassword(@RequestParam String username) {
-		GovernanceResult governanceResult = registerService.forgetPassword(username);
-		return governanceResult;
-	}
-	
-	@GetMapping("/user/getUserId")
-	public GovernanceResult getUserId(@RequestParam String username) {
-		GovernanceResult governanceResult = registerService.getUserId(username);
-		return governanceResult;
-	}
-	
+    @Autowired
+    private RegisterService registerService;
+
+    @RequestMapping("/user/check/{param}/{type}")
+    public GovernanceResult checkData(@PathVariable String param, @PathVariable Integer type) {
+	GovernanceResult governanceResult = registerService.checkData(param, type);
+	return governanceResult;
+    }
+
+    @PostMapping(value = "/user/register")
+    public GovernanceResult register(@Valid @RequestBody Account user, BindingResult result) {
+	GovernanceResult governanceResult = registerService.register(user);
+	return governanceResult;
+    }
+
+    @PutMapping(value = "/user/update")
+    public GovernanceResult updatePassword(@RequestBody Account user) {
+	GovernanceResult governanceResult = registerService.updatePassword(user);
+	return governanceResult;
+    }
+
+    @GetMapping("/user/forget")
+    public GovernanceResult forgetPassword(@RequestParam String username) {
+	GovernanceResult governanceResult = registerService.forgetPassword(username);
+	return governanceResult;
+    }
+
+    @GetMapping("/user/getUserId")
+    public GovernanceResult getUserId(@RequestParam String username) {
+	GovernanceResult governanceResult = registerService.getUserId(username);
+	return governanceResult;
+    }
 }

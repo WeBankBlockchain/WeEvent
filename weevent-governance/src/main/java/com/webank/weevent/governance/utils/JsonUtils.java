@@ -16,56 +16,67 @@ public class JsonUtils {
 
     /**
      * convert class to json string。
-     * <p>Title: pojoToJson</p>
-     * <p>Description: </p>
+     * <p>
+     * Title: pojoToJson
+     * </p>
+     * <p>
+     * Description:
+     * </p>
+     * 
      * @param data
      * @return
      */
     public static String objectToJson(Object data) {
-    	try {
-			String string = MAPPER.writeValueAsString(data);
-			return string;
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-    	return null;
+	try {
+	    String string = MAPPER.writeValueAsString(data);
+	    return string;
+	} catch (JsonProcessingException e) {
+	    e.printStackTrace();
+	}
+	return null;
     }
-    
+
     /**
      * convert json to class
      * 
-     * @param jsonData json
-     * @param clazz 
+     * @param jsonData
+     *            json
+     * @param clazz
      * @return
      */
     public static <T> T jsonToPojo(String jsonData, Class<T> beanType) {
-        try {
-            T t = MAPPER.readValue(jsonData, beanType);
-            return t;
-        } catch (Exception e) {
-        	e.printStackTrace();
-        }
-        return null;
+	try {
+	    T t = MAPPER.readValue(jsonData, beanType);
+	    return t;
+	} catch (Exception e) {
+	    e.printStackTrace();
+	}
+	return null;
     }
-    
+
     /**
      * covert json to list
-     * <p>Title: jsonToList</p>
-     * <p>Description: </p>
+     * <p>
+     * Title: jsonToList
+     * </p>
+     * <p>
+     * Description:
+     * </p>
+     * 
      * @param jsonData
      * @param beanType
      * @return
      */
-    public static <T>List<T> jsonToList(String jsonData, Class<T> beanType) {
-    	JavaType javaType = MAPPER.getTypeFactory().constructParametricType(List.class, beanType);
-    	try {
-    		List<T> list = MAPPER.readValue(jsonData, javaType);
-    		return list;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-    	
-    	return null;
+    public static <T> List<T> jsonToList(String jsonData, Class<T> beanType) {
+	JavaType javaType = MAPPER.getTypeFactory().constructParametricType(List.class, beanType);
+	try {
+	    List<T> list = MAPPER.readValue(jsonData, javaType);
+	    return list;
+	} catch (Exception e) {
+	    e.printStackTrace();
+	}
+
+	return null;
     }
-    
+
 }

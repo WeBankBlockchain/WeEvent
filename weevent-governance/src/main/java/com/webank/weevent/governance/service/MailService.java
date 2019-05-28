@@ -10,25 +10,25 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class MailService{
+public class MailService {
 
-	@Autowired
-	private JavaMailSender mailSender;
-	
-	@Value("${spring.mail.from}")
-	private String from;
-	
-	public void sendSimpleMail(String to,String subject,String content) {
-		SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-		simpleMailMessage.setFrom(from);
-		simpleMailMessage.setTo(to);
-		simpleMailMessage.setSubject(subject);
-		simpleMailMessage.setText(content);
-		try {
-			mailSender.send(simpleMailMessage);
-		} catch (MailException e) {
-			e.printStackTrace();
-			log.error(e.getMessage());
-		}
+    @Autowired
+    private JavaMailSender mailSender;
+
+    @Value("${spring.mail.from}")
+    private String from;
+
+    public void sendSimpleMail(String to, String subject, String content) {
+	SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+	simpleMailMessage.setFrom(from);
+	simpleMailMessage.setTo(to);
+	simpleMailMessage.setSubject(subject);
+	simpleMailMessage.setText(content);
+	try {
+	    mailSender.send(simpleMailMessage);
+	} catch (MailException e) {
+	    e.printStackTrace();
+	    log.error(e.getMessage());
 	}
+    }
 }

@@ -21,12 +21,11 @@ public class LoginFailHandler implements AuthenticationFailureHandler {
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
-        AuthenticationException ex)
-        throws JsonProcessingException, IOException {
-        log.info("login fail", ex);
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.LOGIN_FAIL);
-        baseResponse.setMessage(ex.getMessage());
-        response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(JSON.toJSONString(baseResponse));
+	    AuthenticationException ex) throws JsonProcessingException, IOException {
+	log.info("login fail", ex);
+	BaseResponse baseResponse = new BaseResponse(ConstantCode.LOGIN_FAIL);
+	baseResponse.setMessage(ex.getMessage());
+	response.setContentType("application/json;charset=UTF-8");
+	response.getWriter().write(JSON.toJSONString(baseResponse));
     }
 }

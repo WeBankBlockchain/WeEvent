@@ -30,16 +30,15 @@ public class ConstantProperties {
     private String statisticsTransDailyCron = "0 0/1 * * * ?";// Execute once every minute
     private String deleteInfoCron = "0 0/2 * * * ?";// Execute once every two minute
     private String insertTransMonitorCron = "0 0/10 * * * ?";
-    private Long resetGroupListCycle = 600000L; //10 min
-    private Long pullBlockSleepTime = 20L; //20 mills
+    private Long resetGroupListCycle = 600000L; // 10 min
+    private Long pullBlockSleepTime = 20L; // 20 mills
     private Long analysisSleepTime = 200L;
-    private Long pullBlockTaskFixedDelay = 30000L; //30 s
+    private Long pullBlockTaskFixedDelay = 30000L; // 30 s
     private Boolean isBlockPullFromZero = false;
     private Integer maxRequestFail = 3;
-    private Long sleepWhenHttpMaxFail = 60000L;  //default 1min
+    private Long sleepWhenHttpMaxFail = 60000L; // default 1min
     private String ignoreCheckFront = null;
     private String cnsAddress = null;
-
 
     // http
     private Integer contractDeployTimeOut = 30000;
@@ -51,6 +50,6 @@ public class ConstantProperties {
     // COOKIE
     private Integer cookieMaxAge = 900; // seconds
 
-    //spring security
+    // spring security
     private Boolean isUseSecurity = true;
 }

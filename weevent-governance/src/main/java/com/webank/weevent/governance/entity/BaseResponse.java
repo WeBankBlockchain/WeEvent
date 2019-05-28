@@ -18,7 +18,7 @@ public class BaseResponse {
     }
 
     public BaseResponse(RetCode retcode) {
-        this.code = retcode.getCode();
-        this.message = retcode.getMsg();
+	this.code = retcode.getCode();
+	this.message = retcode.getMsg();
     }
 }

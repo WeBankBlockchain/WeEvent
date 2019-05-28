@@ -5,7 +5,6 @@ import java.util.Date;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
-
 import lombok.Data;
 import lombok.ToString;
 
@@ -18,9 +17,9 @@ import lombok.ToString;
 @ToString
 public class Account {
 
-	private Integer id;
+    private Integer id;
 
-	@NotBlank
+    @NotBlank
     private String username;
 
     @NotBlank
@@ -28,7 +27,7 @@ public class Account {
 
     @Email
     private String email;
-    
+
     private String oldPassword;
 
     private Date lastUpdate;

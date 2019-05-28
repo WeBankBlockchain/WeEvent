@@ -2,13 +2,14 @@ package com.webank.weevent.governance.code;
 
 /**
  * ConstantCode class
+ * 
  * @since 2019/05/23
  */
 public class ConstantCode {
 
     /* return success */
     public static final RetCode SUCCESS = RetCode.mark(0, "success");
-    
+
     public static final RetCode LOGIN_FAIL = RetCode.mark(202034, "login fail");
 
     /* auth */

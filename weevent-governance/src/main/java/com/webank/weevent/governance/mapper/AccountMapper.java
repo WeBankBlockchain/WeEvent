@@ -11,7 +11,7 @@ import com.webank.weevent.governance.entity.AccountExample;
 @Mapper
 public interface AccountMapper {
 
-	int countByExample(AccountExample example);
+    int countByExample(AccountExample example);
 
     int deleteByExample(AccountExample example);
 

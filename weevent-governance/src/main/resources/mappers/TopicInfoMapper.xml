@@ -15,13 +15,14 @@
 
 	<insert id="openBrokeTopic">
 		<selectKey keyProperty="count" resultType="int" order="BEFORE">
-			select count(*) from t_topic where broker_id=#{id} and topic_name = #{topicName}
+			select count(*) from t_topic where broker_id=#{id} and topic_name =
+			#{topicName}
 		</selectKey>
 		<if test="count > 0">
 			update t_topic
 			<set>
 				<if test="creater != null">
-					creater= #{creater} 
+					creater= #{creater}
 				</if>
 			</set>
 			<where>
@@ -29,8 +30,9 @@
 			</where>
 		</if>
 		<if test="count==0">
-			insert into t_topic(broker_id,topic_name,creater) values (#{id},#{topicName},#{creater})
+			insert into t_topic(broker_id,topic_name,creater) values
+			(#{id},#{topicName},#{creater})
 		</if>
 	</insert>
-	
+
 </mapper>

@@ -15,59 +15,56 @@ import com.webank.weevent.governance.filter.XssFilter;
 
 @Configuration
 public class WeeventConfiguration {
-    
+
     @Autowired
     private ForwardBrokerFilter forwardBrokerFilter;
-    
+
     @Autowired
     private ForwardWebaseFilter forwardWebaseFilter;
 
     @Bean
     public ClientHttpRequestFactory httpsClientRequestFactory() {
-        HttpsClientRequestFactory factory = new HttpsClientRequestFactory();
-        factory.setReadTimeout(5000);// ms
-        factory.setConnectTimeout(15000);// ms
-        return factory;
+	HttpsClientRequestFactory factory = new HttpsClientRequestFactory();
+	factory.setReadTimeout(5000);// ms
+	factory.setConnectTimeout(15000);// ms
+	return factory;
     }
-    
+
     @Bean
     public ServletRegistrationBean<DispatcherServlet> weeventGovernanceServletBean(WebApplicationContext wac) {
-        DispatcherServlet ds = new DispatcherServlet(wac);
-        ServletRegistrationBean<DispatcherServlet> bean = new ServletRegistrationBean<>(ds, "/weevent-governance/*");
-        bean.setName("weeventGovernance");
-        return bean;
+	DispatcherServlet ds = new DispatcherServlet(wac);
+	ServletRegistrationBean<DispatcherServlet> bean = new ServletRegistrationBean<>(ds, "/weevent-governance/*");
+	bean.setName("weeventGovernance");
+	return bean;
     }
-    
+
     @Bean
     public FilterRegistrationBean<ForwardBrokerFilter> httpForwardFilterRegistrationBean() {
-        FilterRegistrationBean<ForwardBrokerFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(forwardBrokerFilter);
-        filterRegistrationBean.setOrder(2);
-        filterRegistrationBean.setEnabled(true);
-        filterRegistrationBean.addUrlPatterns("/weevent-governance/weevent/*");
-        return filterRegistrationBean;
+	FilterRegistrationBean<ForwardBrokerFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+	filterRegistrationBean.setFilter(forwardBrokerFilter);
+	filterRegistrationBean.setOrder(2);
+	filterRegistrationBean.setEnabled(true);
+	filterRegistrationBean.addUrlPatterns("/weevent-governance/weevent/*");
+	return filterRegistrationBean;
     }
-    
+
     @Bean
     public FilterRegistrationBean<ForwardWebaseFilter> forwardWebaseFilterRegistrationBean() {
-        FilterRegistrationBean<ForwardWebaseFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(forwardWebaseFilter);
-        filterRegistrationBean.setOrder(3);
-        filterRegistrationBean.setEnabled(true);
-        filterRegistrationBean.addUrlPatterns("/weevent-governance/webase-node-mgr/*");
-        return filterRegistrationBean;
+	FilterRegistrationBean<ForwardWebaseFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+	filterRegistrationBean.setFilter(forwardWebaseFilter);
+	filterRegistrationBean.setOrder(3);
+	filterRegistrationBean.setEnabled(true);
+	filterRegistrationBean.addUrlPatterns("/weevent-governance/webase-node-mgr/*");
+	return filterRegistrationBean;
     }
-    
+
     @Bean
     public FilterRegistrationBean<XssFilter> xssFilterRegistrationBean() {
-        FilterRegistrationBean<XssFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(new XssFilter());
-        filterRegistrationBean.setOrder(1);
-        filterRegistrationBean.setEnabled(true);
-        filterRegistrationBean.addUrlPatterns("/weevent-governance/topic/*");
-        return filterRegistrationBean;
+	FilterRegistrationBean<XssFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+	filterRegistrationBean.setFilter(new XssFilter());
+	filterRegistrationBean.setOrder(1);
+	filterRegistrationBean.setEnabled(true);
+	filterRegistrationBean.addUrlPatterns("/weevent-governance/topic/*");
+	return filterRegistrationBean;
     }
-    
-    
-    
 }

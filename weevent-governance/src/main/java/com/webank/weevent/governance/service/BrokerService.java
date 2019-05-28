@@ -16,46 +16,48 @@ import com.webank.weevent.governance.mapper.BrokerMapper;
 /**
  * 
  * BrokerService
+ * 
  * @since 2019/04/28
  *
  */
 @Service
 @Slf4j
 public class BrokerService {
-	
-	@Autowired
-	BrokerMapper brokerMapper;
-	
-	@Autowired
-	ApplicationContext context;
-	
-	@PostConstruct
-	public void init() {
-		try {
-			brokerMapper.count();
-		} catch (Exception e) {
-			log.error(e.getMessage());
-			System.exit(SpringApplication.exit(context));;
-		}
-	}
 
-	public List<Broker> getBrokers(Integer userId) {
-		return brokerMapper.getBrokers(userId);
-	}
+    @Autowired
+    BrokerMapper brokerMapper;
 
-	public Broker getBroker(Integer id) {
-		return brokerMapper.getBroker(id);
-	}
+    @Autowired
+    ApplicationContext context;
 
-	public Boolean addBroker(Broker broker) {
-		return brokerMapper.addBroker(broker);
+    @PostConstruct
+    public void init() {
+	try {
+	    brokerMapper.count();
+	} catch (Exception e) {
+	    log.error(e.getMessage());
+	    System.exit(SpringApplication.exit(context));
+	    ;
 	}
+    }
 
-	public Boolean deleteBroker(Integer id) {
-		return brokerMapper.deleteBroker(id);
-	}
+    public List<Broker> getBrokers(Integer userId) {
+	return brokerMapper.getBrokers(userId);
+    }
 
-	public Boolean updateBroker(Broker broker) {
-		return brokerMapper.updateBroker(broker);
-	}
+    public Broker getBroker(Integer id) {
+	return brokerMapper.getBroker(id);
+    }
+
+    public Boolean addBroker(Broker broker) {
+	return brokerMapper.addBroker(broker);
+    }
+
+    public Boolean deleteBroker(Integer id) {
+	return brokerMapper.deleteBroker(id);
+    }
+
+    public Boolean updateBroker(Broker broker) {
+	return brokerMapper.updateBroker(broker);
+    }
 }

@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class TopicCreaterDto {
 
-	private Integer brokerId;
-	private String topic;
-	private String creater;
+    private Integer brokerId;
+    private String topic;
+    private String creater;
 }
