@@ -1,7 +1,5 @@
 package com.webank.weevent.broker.fisco.contract.v2;
 
-import io.reactivex.Flowable;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import io.reactivex.Flowable;
 import org.fisco.bcos.channel.client.TransactionSucCallback;
 import org.fisco.bcos.web3j.abi.EventEncoder;
 import org.fisco.bcos.web3j.abi.FunctionEncoder;
