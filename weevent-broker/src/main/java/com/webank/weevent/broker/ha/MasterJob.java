@@ -152,7 +152,7 @@ public class MasterJob {
                 log.info("zookeeper connection state changed, {}", newState);
                 if (newState == ConnectionState.RECONNECTED) {
                     //when reconnection upload the nodes ip and port to zookeeper
-                    if (writeNodes(client,CreateMode.EPHEMERAL ,nodesPath,nodeName)) {
+                    if (writeNodes(client, CreateMode.EPHEMERAL, nodesPath, nodeName)) {
                         log.info("reconnected writer nodes to zookeeper success");
                     }
                 }
@@ -170,7 +170,7 @@ public class MasterJob {
         }
 
         //when connection upload the nodes ip and port to zookeeper
-        if (!writeNodes(client,CreateMode.EPHEMERAL ,nodesPath,nodeName)) {
+        if (!writeNodes(client, CreateMode.EPHEMERAL, nodesPath, nodeName)) {
             return null;
         }
 
