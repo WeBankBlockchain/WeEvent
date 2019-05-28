@@ -60,6 +60,11 @@ subprojects {
     }
 }
 
+task createWrapper(type: Wrapper) {
+    gradleVersion = '4.8'
+}
+
+
 jacocoTestReport {
     reports {
         xml.enabled true
