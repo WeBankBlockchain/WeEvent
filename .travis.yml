@@ -31,7 +31,7 @@ before_install:
 - gradle wrapper
 
 script:
-- gradle build -x test
+- gradle -version
 - chmod +x ci/script/deploy-contract.sh
 - ci/script/deploy-contract.sh
 - travis_wait 30 ./gradle check
