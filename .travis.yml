@@ -32,21 +32,15 @@ cache:
 
 script:
 - chmod +x ./gradlew
-#- ./gradlew build -x test
 - chmod +x ci/script/deploy-contract.sh
 - ci/script/deploy-contract.sh
-<<<<<<< HEAD
 - chmod +x ci/script/build-ci.sh
 - ci/script/build-ci.sh
-- travis_wait 30 ./gradlew check
-=======
 #- travis_wait 30 ./gradlew check
->>>>>>> f3426f40a3436e62c0e25541e125f252df1cea45
 - ./gradlew jacocoTestReport
 
 after_success:
-- CODECOV_TOKEN="4a3996bd-c91a-4f1d-a99e-3db2b79c0597"
-- bash <(curl -s https://codecov.io/bash)
+- bash <(curl -s https://codecov.io/bash) -t 4a3996bd-c91a-4f1d-a99e-3db2b79c0597
 
 deploy:
   provider: releases
