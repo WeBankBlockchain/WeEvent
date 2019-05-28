@@ -32,12 +32,14 @@ cache:
 
 script:
 - chmod +x ./gradlew
-- ls
+#- travis_wait 30 ./gradlew check
 - chmod +x ci/script/deploy-contract.sh
 - ./ci/script/deploy-contract.sh
 - chmod +x ci/script/build-ci.sh
-- ./ci/script/build-ci.sh
-#- travis_wait 30 ./gradlew check
+- cp ./ci/script/build-ci.sh ./weevent-broker/dist/
+- cd ./weevent-broker/dist/
+- ./build-ci.sh
+- cd ../../
 - ./gradlew jacocoTestReport
 
 after_success:

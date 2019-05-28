@@ -2,7 +2,15 @@
 
 nodes="182.254.159.91:20200"
 
-function updatefisco(){
+function gradleBroker(){
+
+    cd weevent-broker
+    gradle build -x test
+    cd dist
+}
+
+
+function updateFisco(){
     cp ./conf/fisco.properties ./conf/fisco.properties.default
     # set the nodes
     sed -i "/nodes=/cnodes=${nodes}" ./conf/fisco.properties
@@ -33,7 +41,8 @@ function cleanup(){
 }
 
 function main(){
-updatefisco
+gradleBroker
+updateFisco
 getContractAddress
 checkService
 cleanup
