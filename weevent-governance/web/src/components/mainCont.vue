@@ -8,6 +8,13 @@
       <li>系统监控：监控系统接口调用情况，在系统异常情况下触发各种告警。</li>
     </ul>
     <br/>
-    <p>更多WeEvent信息，请参见<a href="https://github.com/WeBankFinTech/WeEvent">github源码</a></p>
+    <p>更多WeEvent信息，请参见<a target='_blank' href="https://github.com/WeBankFinTech/WeEvent">github源码</a></p>
   </div>
 </template>
+<script>
+export default {
+  mounted () {
+    this.$store.commit('set_menu', '首页')
+  }
+}
+</script>
