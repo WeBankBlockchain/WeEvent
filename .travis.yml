@@ -27,8 +27,8 @@ cache:
   - $HOME/.gradle/caches/
   - $HOME/.gradle/wrapper/
 
-before_install:
-- gradle wrapper
+#before_install:
+#- gradle wrapper
 
 script:
 - chmod +x ./gradlew
