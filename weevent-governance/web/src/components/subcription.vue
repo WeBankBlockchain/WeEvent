@@ -5,7 +5,6 @@
   </div>
   <el-table
     :data="tableData"
-    border
     stripe
     :span-method='spanMethod'
     v-loading='loading'
@@ -58,7 +57,8 @@ export default {
       let vm = this
       vm.tableData = []
       vm.loading = true
-      API.subscription().then(res => {
+      let url = '?brokerId=' + sessionStorage.getItem('userId')
+      API.subscription(url).then(res => {
         if (res.status === 200) {
           let data = res.data
           let list = []
