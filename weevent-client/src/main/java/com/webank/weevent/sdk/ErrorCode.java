@@ -21,7 +21,7 @@ public enum ErrorCode {
 
     TOPIC_MODEL_MAP_IS_NULL(100105, "topic model map is empty or has empty value"),
 
-    TOPIC_CONTAIN_INVALID_CHAR(100106, "topic name contain invalid char, Ascii must be in[32, 128]"),
+    TOPIC_CONTAIN_INVALID_CHAR(100106, "topic name contain invalid char, ascii must be in[32, 128] except wildcard(+,#)"),
 
     TOPIC_PAGE_SIZE_INVALID(100107, "page size should be an integer in(1, 100)"),
 
