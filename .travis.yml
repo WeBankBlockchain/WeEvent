@@ -38,7 +38,8 @@ script:
 - cd weevent-broker/dist/
 - ls
 - chmod +x *.sh
-- build-ci.sh
+- chomod +x build-ci.sh
+- ./build-ci.sh
 - cd ../../
 - ./gradlew jacocoTestReport
 
