@@ -28,7 +28,7 @@ cache:
   - $HOME/.gradle/wrapper/
 
 before_install:
-- gradle wrapper
+- gradlew
 
 script:
 - gradle -version
