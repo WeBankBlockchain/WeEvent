@@ -2,6 +2,8 @@ package com.webank.weevent.governance.controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -48,7 +50,7 @@ public class BrokerController {
 
 	// get broker service by id
 	@PostMapping("/broker")
-	public Boolean addBroker(@RequestBody Broker broker) {
+	public Boolean addBroker(@Valid @RequestBody Broker broker) {
 		log.info("add  broker service into db " + broker);
 		return brokerService.addBroker(broker);
 	}

@@ -31,6 +31,15 @@ public class RegisterControllerTest {
 	}
 	
 	@Test
+	public void testGetUserId() throws Exception {
+		mockMvc.perform(get("/user/getUserId?username=zjy142214")
+				.contentType(MediaType.APPLICATION_JSON_UTF8))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data").value(4));
+				
+	}
+	
+	@Test
 	public void testForgetPassword() throws Exception {
 		mockMvc.perform(get("/user/forget?username=zjy142214")
 				.contentType(MediaType.APPLICATION_JSON_UTF8))

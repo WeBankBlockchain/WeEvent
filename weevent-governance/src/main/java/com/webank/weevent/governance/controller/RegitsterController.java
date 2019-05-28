@@ -49,5 +49,10 @@ public class RegitsterController {
 		return governanceResult;
 	}
 	
+	@GetMapping("/user/getUserId")
+	public GovernanceResult getUserId(@RequestParam String username) {
+		GovernanceResult governanceResult = registerService.getUserId(username);
+		return governanceResult;
+	}
 	
 }

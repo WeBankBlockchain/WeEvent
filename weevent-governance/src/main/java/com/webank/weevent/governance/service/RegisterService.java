@@ -127,6 +127,13 @@ public class RegisterService {
 		mailService.sendSimpleMail(user.getEmail(), "Reset Password", content);
 		return GovernanceResult.ok();
 	}
+
+	public GovernanceResult getUserId(String username) {
+		//get user by username
+		Account user = accountService.queryByUsername(username);
+		Integer userId = user.getId();
+		return GovernanceResult.ok(userId);
+	}
 	
 	
 }
