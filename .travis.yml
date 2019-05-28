@@ -37,7 +37,10 @@ script:
 - ./ci/script/deploy-contract.sh
 - chmod +x ci/script/build-ci.sh
 - cp ./ci/script/build-ci.sh ./weevent-broker/dist/
-- cd ./weevent-broker/dist/
+- cd weevent-broker
+- gradlew build -x test
+- cd ./dist/
+- chmod +x *.sh
 - ./build-ci.sh
 - cd ../../
 - ./gradlew jacocoTestReport
