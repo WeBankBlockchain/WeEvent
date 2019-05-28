@@ -34,13 +34,8 @@ script:
 - chmod +x ./gradlew
 - ./gradlew build -x test
 #- travis_wait 30 ./gradlew check
-- chmod +x ci/script/deploy-contract.sh
-- ./ci/script/deploy-contract.sh
-- chmod +x ci/script/build-ci.sh
 - cp ./ci/script/build-ci.sh ./weevent-broker/dist/
-- cd weevent-broker
-- gradle build -x test
-- cd ./dist/
+- cd weevent-broker/dist/
 - chmod +x *.sh
 - ./build-ci.sh
 - cd ../../
