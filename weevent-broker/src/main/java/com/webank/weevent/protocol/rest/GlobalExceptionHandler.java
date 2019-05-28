@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @Data
 class SimpleException {
@@ -33,7 +34,7 @@ class SimpleException {
 @Slf4j
 @ControllerAdvice
 @RestController
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = BrokerException.class)
     public Object baseErrorHandler(HttpServletRequest req, BrokerException e) {
         log.error("detect BrokerException", e);
@@ -42,7 +43,7 @@ public class GlobalExceptionHandler {
         simpleException.setCode(e.getCode());
         simpleException.setMessage(e.getMessage());
 
-        log.error("rest api BrokerException, remote: {} uri: {} {}", req.getRemoteHost(), req.getRequestURL(), simpleException);
+        log.error("rest api BrokerException, remote: {} uri: {}", req.getRemoteHost(), req.getRequestURL());
         return simpleException;
     }
 
@@ -50,7 +51,7 @@ public class GlobalExceptionHandler {
     public Object baseErrorHandler(HttpServletRequest req, Exception e) {
         log.error("detect Exception", e);
 
-        log.error("rest api Exception, remote: {} uri: {} {}", req.getRemoteHost(), req.getRequestURL(), e.getMessage());
+        log.error("rest api Exception, remote: {} uri: {}", req.getRemoteHost(), req.getRequestURL());
         return e;
     }
 }
