@@ -1,4 +1,5 @@
 @import './animation';
+@import './webase';
 @font-face {
   font-family: 'syyh';
   src: url('../font/syyh-normal.ttf')
@@ -11,13 +12,15 @@ html,body,div,p,ul,li{
   -webkit-box-sizing:border-box; 
   font-family: 'syyh'
 }
-
+li{
+  list-style: none;
+}
 html,body,#app{
   height:100%;
 }
 
 #app{
-  background:#F0F3F6;
+  background:rgba(0,0,0, 0.03);
 }
 
 .el-container{
@@ -27,12 +30,41 @@ html,body,#app{
 .el-header{
   background:#fff;
   border-bottom:1px solid #ddd;
-  z-index: 99; 
+  z-index: 99;
+  .el-dropdown {
+    font-size: 16px;
+    cursor: pointer;
+    span i {
+      margin-left:5px;
+    }
+  }
+}
 
-  .el-dropdown .el-button-group .el-button{
-    background:transparent;
-    color:white;
-    border:0
+.headerBar{
+  display:flex;
+  height:60px;
+  line-height: 60px;
+  justify-content: space-between;
+  
+  .navigation{
+    display: flex;
+    .el-breadcrumb{
+      line-height:60px;
+      font-size: 16px;
+      margin-left:86px;
+    }
+  }
+
+  .right_part{
+    display: flex;
+    align-items: center;
+    .back_home{
+      width:20px;
+      margin-right:15px;
+    }
+    .el-dropdown{
+      font-size: 18px;
+    }
   }
 }
 
@@ -43,7 +75,6 @@ html,body,#app{
   .el-menu{
     background:transparent;
     border-right:0;
-    padding:20px 0;
     .el-menu-item{
       color:#8993a2;
       border-left:6px solid transparent;
@@ -109,12 +140,14 @@ html,body,#app{
   }
 
   .el-pagination{
-    margin-top:20px;
+    margin-top:10px;
   }
 
   .event-table{
     height:95%;
-
+    background:#fff;
+    padding:20px;
+    border-radius: 5px;
     .refresh{
       float:right;
       margin-top:10px;
@@ -164,43 +197,12 @@ html,body,#app{
           }
         } 
       }
-
-      // .el-table--enable-row-hover .el-table__body tr:hover>td{
-      //   background:red;
-      // }
-
-      // .el-table__footer-wrapper, .el-table__header-wrapper{
-      //   position: fixed;
-      //   z-index: 99
-      // }
     }
   }
 }
 
 .el-table--striped .el-table__body tr.el-table__row--striped td{
   background:#FFF;
-}
-
-.headerBar{
-  display:flex;
-  height:60px;
-  line-height: 60px;
-  justify-content: space-between;
-
-  .breadcrumb{
-    display:flex;
-    align-items: center;
-    .el-breadcrumb{
-      margin-left:40px;
-    }
-  }
-  .system{
-    display: flex;
-    span{
-      color:#8993a2;
-      margin-right:20px;  
-    }
-  }
 }
 
 .searchBox{
@@ -218,4 +220,114 @@ html,body,#app{
   font-size: 16px;
   font-weight: bold;
   margin-top:-7px;
+}
+
+.el-submenu__title{
+  padding-left:26px !important;
+  color:#8993a2 !important;
+}
+
+.el-submenu .el-menu-item{
+  padding-left:60px !important;
+}
+
+.setPart{
+  max-width:870px;
+  background:#fff;
+  height:100%;
+  margin:auto;
+  box-shadow: 0 4px 12px 0 #dfe2e9;
+  padding:20px;
+  .setContent{
+    max-width:870px;
+    margin:auto;
+    h3{
+      margin-top:0;
+      padding-bottom:10px;
+      border-bottom:1px solid #EBEEF5
+    }
+    .login_part {
+      span{
+        display:inline-block;
+        margin:10px;
+      }
+      .midify{
+        font-size: 12px;
+        cursor: pointer;
+        color:#2d5f9e;
+        text-decoration: none;
+      }
+    }
+ 
+  }
+}
+
+.servers{
+  max-width:1100px;
+  background:#fff;
+  height:100%;
+  margin:auto;
+  box-shadow: 0 4px 12px 0 #dfe2e9;
+
+  .headerBar{
+    padding:0 20px;
+    border-bottom:1px solid #ebeef5;
+    .el-dropdown{
+      margin-right:22px;
+    }
+  }
+  .title{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding:15px 0;
+    span{
+      font-weight: bold;
+      color:#8993a2;
+    }
+    i{
+      color:#2d5f9e;
+      font-weight: bolder;
+      cursor: pointer;
+      margin-right:15px;
+    }
+  }
+
+  .list_part{
+    padding:0 40px;
+  }
+
+  ul{
+    border:1px solid #ebeef5;
+    border-radius:5px;
+  }
+  ul li{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding:15px 10px;
+    border-bottom:1px solid #ebeef5;
+    color:#8993a2;
+    &:first-child{
+      color:#000;
+    }
+    &:last-child{
+      border-bottom:0;
+    }
+    i{
+      cursor: pointer;
+      color:#2d5f9e;
+      width:40px;
+    }
+    span{
+      width:15%;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      &:nth-child(2){
+        flex-grow:1
+      }
+    }
+  }
 }
