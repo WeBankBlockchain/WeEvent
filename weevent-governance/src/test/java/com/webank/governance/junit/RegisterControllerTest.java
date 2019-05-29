@@ -41,7 +41,7 @@ public class RegisterControllerTest extends JUnitTestBase {
 
     @Test
     public void testUpdatePassword() throws Exception {
-	String content = "{\"id\":\"5\",\"oldPassword\":\"111111\",\"password\":\"123456\"}";
+	String content = "{\"username\":\"zjy03\",\"oldPassword\":\"111111\",\"password\":\"123456\"}";
 	mockMvc.perform(put("/user/update").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
 		.andExpect(status().isOk()).andExpect(jsonPath("$.status").value(400));
 
@@ -49,7 +49,7 @@ public class RegisterControllerTest extends JUnitTestBase {
 
     @Test
     public void testRegister() throws Exception {
-	String content = "{\"username\":\"zjy02\",\"email\":\"zjy142214@sohu.com\",\"password\":\"123456\"}";
+	String content = "{\"username\":\"zjy03\",\"email\":\"zjy142214@sohu.com\",\"password\":\"123456\"}";
 	mockMvc.perform(post("/user/register").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
 		.andExpect(status().isOk());
 

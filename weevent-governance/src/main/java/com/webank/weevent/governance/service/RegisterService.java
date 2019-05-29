@@ -92,8 +92,7 @@ public class RegisterService {
 	// check oldPassword is correct
 	String oldPassword = user.getOldPassword();
 
-	Integer userId = user.getId();
-	Account storeUser = accountService.queryById(userId);
+	Account storeUser = accountService.queryByUsername(user.getUsername());
 	if (!passwordEncoder.matches(oldPassword, storeUser.getPassword())) {
 	    return GovernanceResult.build(400, "old password is incorrect");
 	}
