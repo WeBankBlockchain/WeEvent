@@ -5,14 +5,12 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import lombok.Data;
+import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Global exception handler for restful.
- *
- * @author v_wbjnzhang
- * @since 2019/03/14
- */
+import com.webank.weevent.governance.exception.GovernanceException;
+
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 @Data
 class SimpleException {
@@ -27,19 +25,33 @@ class SimpleException {
     private String message;
 }
 
+/**
+ * Global exception handler for restful.
+ *
+ * @author matthewliu
+ * @since 2019/02/01
+ */
+@Slf4j
 @ControllerAdvice
+@RestController
 public class GlobalExceptionHandler {
+    @ExceptionHandler(value = GovernanceException.class)
+    public Object baseErrorHandler(HttpServletRequest req, GovernanceException e) {
+        log.error("detect BrokerException", e);
 
-    @ExceptionHandler(value = Exception.class)
-    @ResponseBody
-    public SimpleException jsonErrorHandler(HttpServletRequest req, Exception e) throws Exception {
-	SimpleException r = new SimpleException();
-	String msg = e.getMessage();
-	// remove input string return
-	msg = msg.substring(0, msg.indexOf("nested exception"));
-	r.setMessage(msg);
-	r.setCode(100);
-	return r;
+        SimpleException simpleException = new SimpleException();
+        simpleException.setCode(e.getCode());
+        simpleException.setMessage(e.getMessage());
+
+        log.error("rest api BrokerException, remote: {} uri: {} {}", req.getRemoteHost(), req.getRequestURL(), simpleException);
+        return simpleException;
     }
 
+    @ExceptionHandler(value = Exception.class)
+    public Object baseErrorHandler(HttpServletRequest req, Exception e) {
+        log.error("detect Exception", e);
+
+        log.error("rest api Exception, remote: {} uri: {} {}", req.getRemoteHost(), req.getRequestURL(), e.getMessage());
+        return e;
+    }
 }
