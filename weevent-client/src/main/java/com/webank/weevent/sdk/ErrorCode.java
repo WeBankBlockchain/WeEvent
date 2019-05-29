@@ -19,7 +19,7 @@ public enum ErrorCode {
 
     TOPIC_PAGE_INDEX_INVALID(100104, "page index should be an integer start from 0"),
 
-    TOPIC_MODEL_MAP_IS_NULL(100105, "topic model map is empty or has empty value"),
+    TOPIC_LIST_IS_NULL(100105, "topic list is empty or has empty value"),
 
     TOPIC_CONTAIN_INVALID_CHAR(100106, "topic name contain invalid char, ascii must be in[32, 128] except wildcard(+,#)"),
 
