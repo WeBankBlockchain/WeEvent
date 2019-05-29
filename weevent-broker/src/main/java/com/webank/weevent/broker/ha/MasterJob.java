@@ -43,6 +43,10 @@ public class MasterJob {
             if (this.client == null) {
                 log.error("init zookeeper failed");
             }
+        } else {
+            if (this.cgiSubscription == null) {
+                this.cgiSubscription = new CGISubscription(this, "test");
+            }
         }
     }
 
@@ -146,13 +150,14 @@ public class MasterJob {
                 BrokerApplication.weEventConfig.getZookeeperTimeout(),
                 1000,
                 retryPolicy);
+
         client.getConnectionStateListenable().addListener(new ConnectionStateListener() {
             @Override
             public void stateChanged(CuratorFramework client, ConnectionState newState) {
                 log.info("zookeeper connection state changed, {}", newState);
                 if (newState == ConnectionState.RECONNECTED) {
                     //when reconnection upload the nodes ip and port to zookeeper
-                    if (writeNodes(client,CreateMode.EPHEMERAL ,nodesPath,nodeName)) {
+                    if (writeNodes(client, CreateMode.EPHEMERAL, nodesPath, nodeName)) {
                         log.info("reconnected writer nodes to zookeeper success");
                     }
                 }
@@ -170,7 +175,7 @@ public class MasterJob {
         }
 
         //when connection upload the nodes ip and port to zookeeper
-        if (!writeNodes(client,CreateMode.EPHEMERAL ,nodesPath,nodeName)) {
+        if (!writeNodes(client, CreateMode.EPHEMERAL, nodesPath, nodeName)) {
             return null;
         }
 

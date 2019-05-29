@@ -4,6 +4,8 @@ import java.util.Map;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.util.WeEventUtils;
+import com.webank.weevent.broker.ha.CGISubscription;
+import com.webank.weevent.broker.ha.MasterJob;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
@@ -63,7 +65,7 @@ public class BrokerRest extends RestHA implements IBrokerRpc {
                             @RequestParam(name = "groupId", required = false) String groupId,
                             @RequestParam(name = "subscriptionId", required = false) String subscriptionId,
                             @RequestParam(name = "url") String url) throws BrokerException {
-        checkSupport();
+
         return this.masterJob.getCgiSubscription().restSubscribe(topic,
                 WeEventUtils.getGroupId(groupId),
                 subscriptionId,

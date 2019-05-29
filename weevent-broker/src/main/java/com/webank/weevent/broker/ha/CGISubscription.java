@@ -346,9 +346,12 @@ public class CGISubscription {
 
             return zkSubscription.getSubscriptionId();
         } else {
-            log.info("i am not leader, route to master");
 
-            return routeRestMaster(urlFormat, String.class);
+            log.info("i am not leader, route to master");
+            // return routeRestMaster(urlFormat, String.class);
+
+            ZKSubscription zkSubscription = doRestSubscribe(topic, groupId, subscriptionId, url);
+            return zkSubscription.getSubscriptionId();
         }
     }
 
@@ -372,8 +375,7 @@ public class CGISubscription {
 
             return true;
         } else {
-            log.info("i am not leader, route to master------");
-            // Object a = routeRestMaster(urlFormat, boolean.class);
+            log.info("i am not leader, route to master");
             return routeRestMaster(urlFormat, boolean.class);
         }
     }
