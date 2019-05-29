@@ -11,6 +11,7 @@ import lombok.Data;
 public class RetCode {
 
     private Integer code;
+    
     private String msg;
 
     public RetCode(int code, String msg) {

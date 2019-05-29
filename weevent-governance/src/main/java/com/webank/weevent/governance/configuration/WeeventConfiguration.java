@@ -1,6 +1,11 @@
 package com.webank.weevent.governance.configuration;
 
+import com.webank.weevent.governance.filter.ForwardWebaseFilter;
+import com.webank.weevent.governance.filter.ForwardBrokerFilter;
+import com.webank.weevent.governance.filter.XssFilter;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -9,12 +14,14 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
-import com.webank.weevent.governance.filter.ForwardWebaseFilter;
-import com.webank.weevent.governance.filter.ForwardBrokerFilter;
-import com.webank.weevent.governance.filter.XssFilter;
-
 @Configuration
 public class WeeventConfiguration {
+    
+    @Value("${https.read-timeout:5000}")
+    private int readTimeout;
+    
+    @Value("${https.connect-timeout:15000}")
+    private int connectTimeOut;
 
     @Autowired
     private ForwardBrokerFilter forwardBrokerFilter;
@@ -25,8 +32,8 @@ public class WeeventConfiguration {
     @Bean
     public ClientHttpRequestFactory httpsClientRequestFactory() {
 	HttpsClientRequestFactory factory = new HttpsClientRequestFactory();
-	factory.setReadTimeout(5000);// ms
-	factory.setConnectTimeout(15000);// ms
+	factory.setReadTimeout(readTimeout);// ms
+	factory.setConnectTimeout(connectTimeOut);// ms
 	return factory;
     }
 

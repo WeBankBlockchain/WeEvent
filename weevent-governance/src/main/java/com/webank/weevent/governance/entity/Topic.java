@@ -1,6 +1,7 @@
 package com.webank.weevent.governance.entity;
 
 import java.util.Date;
+
 import lombok.Data;
 
 /**

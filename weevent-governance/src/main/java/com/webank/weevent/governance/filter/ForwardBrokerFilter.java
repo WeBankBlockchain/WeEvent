@@ -8,7 +8,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -17,6 +16,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.webank.weevent.governance.entity.Broker;
+import com.webank.weevent.governance.service.BrokerService;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -33,9 +35,6 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
-
-import com.webank.weevent.governance.entity.Broker;
-import com.webank.weevent.governance.service.BrokerService;
 
 @Component
 @Slf4j
@@ -105,7 +104,7 @@ public class ForwardBrokerFilter implements Filter {
 	    }
 	    return new HttpGet(builder.build());
 	} catch (URISyntaxException e) {
-	    e.printStackTrace();
+	    log.error(e.getMessage());
 	}
 	return null;
     }
@@ -135,7 +134,7 @@ public class ForwardBrokerFilter implements Filter {
 
 	    urlEncodedFormEntity = new UrlEncodedFormEntity(pairs, request.getCharacterEncoding());
 	} catch (UnsupportedEncodingException e) {
-	    e.printStackTrace();
+	    log.error(e.getMessage());
 	}
 	return urlEncodedFormEntity;
     }
@@ -152,12 +151,12 @@ public class ForwardBrokerFilter implements Filter {
 	    }
 	    return new StringEntity(sb.toString(), request.getCharacterEncoding());
 	} catch (IOException e) {
-	    e.printStackTrace();
+	    log.error(e.getMessage());
 	} finally {
 	    try {
 		is.close();
 	    } catch (IOException e) {
-		e.printStackTrace();
+		log.error(e.getMessage());
 	    }
 	}
 	return null;
@@ -174,14 +173,14 @@ public class ForwardBrokerFilter implements Filter {
 	    entity.writeTo(out);
 	    out.flush();
 	} catch (IOException e) {
-	    e.printStackTrace();
+	    log.error(e.getMessage());
 	} finally {
 	    try {
 		if (out != null) {
 		    out.close();
 		}
 	    } catch (IOException e) {
-		e.printStackTrace();
+		log.error(e.getMessage());
 	    }
 	}
     }

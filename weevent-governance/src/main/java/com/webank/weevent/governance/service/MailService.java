@@ -27,7 +27,6 @@ public class MailService {
 	try {
 	    mailSender.send(simpleMailMessage);
 	} catch (MailException e) {
-	    e.printStackTrace();
 	    log.error(e.getMessage());
 	}
     }

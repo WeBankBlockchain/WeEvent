@@ -1,7 +1,6 @@
 package com.webank.governance.junit;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import com.webank.governance.JUnitTestBase;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -10,8 +9,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import com.webank.governance.JUnitTestBase;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 public class RegisterControllerTest extends JUnitTestBase {
 
@@ -49,7 +48,7 @@ public class RegisterControllerTest extends JUnitTestBase {
 
     @Test
     public void testRegister() throws Exception {
-	String content = "{\"username\":\"zjy03\",\"email\":\"zjy142214@sohu.com\",\"password\":\"123456\"}";
+	String content = "{\"username\":\"zjy03\",\"email\":\"zjyxxx@sohu.com\",\"password\":\"123456\"}";
 	mockMvc.perform(post("/user/register").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
 		.andExpect(status().isOk());
 

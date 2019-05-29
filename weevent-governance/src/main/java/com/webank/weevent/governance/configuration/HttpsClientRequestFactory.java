@@ -5,7 +5,6 @@ import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.security.cert.X509Certificate;
-
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -16,7 +15,9 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class HttpsClientRequestFactory extends SimpleClientHttpRequestFactory {
 
     @Override
@@ -57,7 +58,7 @@ public class HttpsClientRequestFactory extends SimpleClientHttpRequestFactory {
 
 	    super.prepareConnection(httpsConnection, httpMethod);
 	} catch (Exception e) {
-	    e.printStackTrace();
+	    log.error(e.getMessage());
 	}
     }
 

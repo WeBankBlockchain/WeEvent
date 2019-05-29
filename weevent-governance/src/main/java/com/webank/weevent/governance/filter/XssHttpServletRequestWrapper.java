@@ -3,9 +3,9 @@ package com.webank.weevent.governance.filter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.webank.weevent.governance.filter.util.JsoupUtil;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * <code>{@link XssHttpServletRequestWrapper}</code>
@@ -13,7 +13,9 @@ import com.webank.weevent.governance.filter.util.JsoupUtil;
  * @author
  */
 public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
+    
     HttpServletRequest orgRequest = null;
+    
     private boolean isIncludeRichText = false;
 
     public XssHttpServletRequestWrapper(HttpServletRequest request, boolean isIncludeRichText) {

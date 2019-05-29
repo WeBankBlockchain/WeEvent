@@ -5,10 +5,12 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * JsonUtils
  */
+@Slf4j
 public class JsonUtils {
 
     // jackson class
@@ -31,7 +33,7 @@ public class JsonUtils {
 	    String string = MAPPER.writeValueAsString(data);
 	    return string;
 	} catch (JsonProcessingException e) {
-	    e.printStackTrace();
+	    log.error(e.getMessage());
 	}
 	return null;
     }
@@ -49,7 +51,7 @@ public class JsonUtils {
 	    T t = MAPPER.readValue(jsonData, beanType);
 	    return t;
 	} catch (Exception e) {
-	    e.printStackTrace();
+	    log.error(e.getMessage());
 	}
 	return null;
     }
@@ -73,7 +75,7 @@ public class JsonUtils {
 	    List<T> list = MAPPER.readValue(jsonData, javaType);
 	    return list;
 	} catch (Exception e) {
-	    e.printStackTrace();
+	    log.error(e.getMessage());
 	}
 
 	return null;

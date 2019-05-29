@@ -2,11 +2,11 @@ package com.webank.weevent.governance.mapper;
 
 import java.util.List;
 
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-
 import com.webank.weevent.governance.entity.Account;
 import com.webank.weevent.governance.entity.AccountExample;
+
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface AccountMapper {

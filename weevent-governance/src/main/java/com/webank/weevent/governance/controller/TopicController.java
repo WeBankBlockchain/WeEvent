@@ -1,5 +1,9 @@
 package com.webank.weevent.governance.controller;
 
+import com.webank.weevent.governance.entity.TopicCreaterDto;
+import com.webank.weevent.governance.entity.TopicPage;
+import com.webank.weevent.governance.entity.TopicPageDto;
+import com.webank.weevent.governance.service.TopicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -8,11 +12,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import lombok.extern.slf4j.Slf4j;
-
-import com.webank.weevent.governance.entity.TopicCreaterDto;
-import com.webank.weevent.governance.entity.TopicPage;
-import com.webank.weevent.governance.entity.TopicPageDto;
-import com.webank.weevent.governance.service.TopicService;
 
 @CrossOrigin
 @RestController

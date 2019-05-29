@@ -2,6 +2,11 @@ package com.webank.weevent.governance.service;
 
 import java.util.List;
 
+import com.webank.weevent.governance.entity.Broker;
+import com.webank.weevent.governance.entity.Topic;
+import com.webank.weevent.governance.entity.TopicPage;
+import com.webank.weevent.governance.mapper.TopicInfoMapper;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -9,11 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import lombok.extern.slf4j.Slf4j;
-
-import com.webank.weevent.governance.entity.Broker;
-import com.webank.weevent.governance.entity.Topic;
-import com.webank.weevent.governance.entity.TopicPage;
-import com.webank.weevent.governance.mapper.TopicInfoMapper;
 
 /**
  * topic service

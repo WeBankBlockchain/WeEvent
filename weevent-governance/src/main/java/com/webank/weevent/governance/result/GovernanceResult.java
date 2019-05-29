@@ -4,7 +4,11 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
+@Data
 public class GovernanceResult {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -50,30 +54,6 @@ public class GovernanceResult {
 	this.data = data;
     }
 
-    public Integer getStatus() {
-	return status;
-    }
-
-    public void setStatus(Integer status) {
-	this.status = status;
-    }
-
-    public String getMsg() {
-	return msg;
-    }
-
-    public void setMsg(String msg) {
-	this.msg = msg;
-    }
-
-    public Object getData() {
-	return data;
-    }
-
-    public void setData(Object data) {
-	this.data = data;
-    }
-
     /**
      * 
      * @param jsonData
@@ -113,7 +93,7 @@ public class GovernanceResult {
 	try {
 	    return MAPPER.readValue(json, GovernanceResult.class);
 	} catch (Exception e) {
-	    e.printStackTrace();
+	    log.error(e.getMessage());
 	}
 	return null;
     }

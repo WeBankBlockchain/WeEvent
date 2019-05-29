@@ -2,13 +2,13 @@ package com.webank.weevent.governance.service;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.webank.weevent.governance.entity.Account;
 import com.webank.weevent.governance.entity.AccountExample;
 import com.webank.weevent.governance.entity.AccountExample.Criteria;
 import com.webank.weevent.governance.mapper.AccountMapper;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class AccountService {

@@ -18,6 +18,7 @@ public class ConstantProperties {
     public static final String CONSTANT_PREFIX = "constant";
     public static final String COOKIE_JSESSIONID = "JSESSIONID"; // cookie key---session
     public static final String COOKIE_MGR_ACCOUNT = "GOVERNANCE_MGR_ACCOUNT_C"; // cookie key---account
+    public static final String COOKIE_MGR_ACCOUNT_ID = "GOVERNANCE_MGR_ACCOUNT_ID";
     public static final String SESSION_MGR_ACCOUNT = "GOVERNANCE_MGR_ACCOUNT_S"; // session key---account
     public static final String CONTRACT_NAME_ZERO = "0x00000000";
     public static final int PUBLICKEY_LENGTH = 130;

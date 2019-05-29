@@ -10,6 +10,7 @@ public class JsoupUtil {
     private static final Whitelist whitelist = Whitelist.basicWithImages();
 
     private static final Document.OutputSettings outputSettings = new Document.OutputSettings().prettyPrint(false);
+    
     static {
 	whitelist.addAttributes(":all", "style");
     }

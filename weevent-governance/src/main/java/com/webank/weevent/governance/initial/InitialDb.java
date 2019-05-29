@@ -6,11 +6,14 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.Map;
+
 import org.yaml.snakeyaml.Yaml;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * tool to initdb
  */
+@Slf4j
 public class InitialDb {
 
     public static void main(String[] args) throws Exception {
@@ -32,7 +35,7 @@ public class InitialDb {
 	    }
 
 	} catch (Exception e) {
-	    e.printStackTrace();
+	    log.error(e.getMessage());
 	}
 
 	// first use dbself database

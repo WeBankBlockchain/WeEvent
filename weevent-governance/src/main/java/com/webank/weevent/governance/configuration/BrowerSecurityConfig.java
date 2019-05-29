@@ -30,18 +30,24 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private AccountDetailsService userDetailService;
+    
     @Qualifier(value = "loginSuccessHandler")
     @Autowired
     private AuthenticationSuccessHandler loginSuccessHandler;
+    
     @Qualifier(value = "loginFailHandler")
     @Autowired
     private LoginFailHandler loginfailHandler;
+    
     @Autowired
     private JsonAuthenticationEntryPoint jsonAuthenticationEntryPoint;
+    
     @Autowired
     private JsonAccessDeniedHandler jsonAccessDeniedHandler;
+    
     @Autowired
     private JsonLogoutSuccessHandler jsonLogoutSuccessHandler;
+    
     @Autowired
     private ConstantProperties constants;
 
@@ -52,7 +58,7 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	http.formLogin() // define user login page
 		// .loginPage("/login.html")
-		// .loginProcessingUrl("/user/login")
+		.loginProcessingUrl("/user/login")
 		.usernameParameter("username").passwordParameter("password").permitAll()
 		.successHandler(loginSuccessHandler) // if login success
 		.failureHandler(loginfailHandler) // if login fail
