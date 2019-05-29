@@ -16,9 +16,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class GovernanceApplication {
     public static void main(String[] args) {
-        SpringApplication app = new SpringApplication(GovernanceApplication.class);
-        app.addListeners(new ApplicationPidFileWriter());
-        app.run(args);
-        log.info("Start Governance success");
+	SpringApplication app = new SpringApplication(GovernanceApplication.class);
+	app.addListeners(new ApplicationPidFileWriter());
+	app.run(args);
+	log.info("Start Governance success");
     }
 }
