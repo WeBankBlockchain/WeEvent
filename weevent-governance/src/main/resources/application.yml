@@ -1,22 +1,21 @@
-server: 
-  servlet: 
+server:
+  servlet:
     context-path: /weevent-governance
-  ssl: 
+  ssl:
     enabled: false
     key-store: classpath:server.p12
     key-store-password: 123456
     keyStoreType: PKCS12
-    keyAlias: weevent  
-    
+    keyAlias: weevent
 spring:
   profiles:
     active: dev
-  http: 
-    encoding: 
+  http:
+    encoding:
       charset: UTF-8
       force: true
   mvc:
-    static-path-pattern: /** 
+    static-path-pattern: /**
     throw-exception-if-no-handler-found: true
   resources:
     static-locations: classpath:/
