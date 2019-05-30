@@ -6,6 +6,7 @@ import router from './router'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import VueClipboard from 'vue-clipboard2'
+import store from './store/index'
 
 Vue.use(ElementUI)
 Vue.config.productionTip = false
@@ -15,6 +16,7 @@ Vue.use(VueClipboard)
 new Vue({
   el: '#app',
   router,
+  store,
   components: { App },
   template: '<App/>'
 })

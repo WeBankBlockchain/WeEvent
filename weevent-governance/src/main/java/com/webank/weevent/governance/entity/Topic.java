@@ -1,6 +1,7 @@
 package com.webank.weevent.governance.entity;
 
 import java.util.Date;
+
 import lombok.Data;
 
 /**
@@ -12,12 +13,12 @@ import lombok.Data;
 public class Topic {
 
     private String topicName;
-    
+
     private String creater;
-    
+
     private String topicAddress;
-    
+
     private String senderAddress;
-    
+
     private Date createdTimestamp;
 }

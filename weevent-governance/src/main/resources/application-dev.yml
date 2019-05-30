@@ -1,7 +1,6 @@
 server:
   port: 8082
 spring:
-  # datasource
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/governance?useUnicode=true&characterEncoding=utf-8&useSSL=false
     driver-class-name: org.mariadb.jdbc.Driver
@@ -13,15 +12,24 @@ spring:
       min-idle: 5
       initial-size: 5
       validation-query: SELECT 'x'
+  mail:
+    default-encoding: UTF-8
+    host: smtp.163.com
+    username: mailusername@163.com
+    password: mailpwd
+    from: mailusername@163.com
   pid:
     fail-on-write-error: true
     file: ./logs/governance.pid
-http: 
-  client: 
+http:
+  client:
     max-total: 200
     max-per-route: 500
     connection-request-timeout: 3000
     connection-timeout: 3000
     socket-timeout: 5000
+https: 
+  read-timeout: 5000
+  connect-timeout: 15000       
 logging:
   config: classpath:log4j2.xml
