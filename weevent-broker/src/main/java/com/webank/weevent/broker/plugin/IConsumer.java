@@ -100,17 +100,20 @@ public interface IConsumer extends IEventTopic {
      * from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
      *
      * @param topics topic list
-     * @param interfaceType interface type jsonrpc or restful or stomp
+     * @param groupId groupId
+     * @param offset offset
+     * @param interfaceType interface type json rpc or restful or stomp
      * @param listener callback
-     * @return subscription Id relation to topic
+     * @return subscription Id
      * @throws BrokerException invalid input
      */
-    Map<String, String> subscribe(Map<String, String> topics, String groupId, String interfaceType, ConsumerListener listener) throws BrokerException;
+    String subscribe(String[] topics, String groupId, String offset, String interfaceType, ConsumerListener listener) throws BrokerException;
 
     /**
      * This support single topic subscribe
      *
      * @param topic topic name
+     * @param groupId groupId
      * @param offset, from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
      * @param interfaceType interface type jsonrpc or restful or stomp
      * @param listener callback
@@ -123,6 +126,7 @@ public interface IConsumer extends IEventTopic {
      * This support single topic subscribe
      *
      * @param topic topic name
+     * @param groupId groupId
      * @param offset, from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
      * @param subscriptionId Continue the client last time listening
      * @param interfaceType interface type jsonrpc or restful or stomp

@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -284,38 +285,10 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
         assertTrue(this.received > 0);
     }
 
-    /**
-     * Method: subscribe(Map<String, Object> map, ConsumerListener listener)
-     */
     @Test
-    public void testSingleTopicSubscribe_map_01() throws Exception {
+    public void testSingleTopicSubscribe_list_01() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-        Map<String, String> topicModelMap = new HashMap<>();
-        topicModelMap.put(this.topicName, WeEvent.OFFSET_LAST);
-        this.iConsumer.startConsumer();
-        IConsumer.ConsumerListener consumerListener = new IConsumer.ConsumerListener() {
-            @Override
-            public void onEvent(String subscriptionId, WeEvent event) {
 
-            }
-
-            @Override
-            public void onException(Throwable e) {
-                log.error("onException", e);
-            }
-        };
-        Map<String, String> result = this.iConsumer.subscribe(topicModelMap, groupId, "sdk", consumerListener);
-        assertTrue(!result.isEmpty());
-    }
-
-    /**
-     * Method: subscribe(Map<String, Object> map, ConsumerListener listener)
-     */
-    @Test
-    public void testSingleTopicSubscribe_map_02() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-        Map<String, String> topicModelMap = new HashMap<>();
-        topicModelMap.put(this.topicName, this.lastEventId);
         this.iConsumer.startConsumer();
         IConsumer.ConsumerListener consumerListener = new IConsumer.ConsumerListener() {
             @Override
@@ -329,18 +302,16 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
             }
         };
 
-        Map<String, String> result = this.iConsumer.subscribe(topicModelMap, groupId, "sdk", consumerListener);
-        assertTrue(!result.isEmpty());
-
+        String[] topics = {this.topicName};
+        String result = this.iConsumer.subscribe(topics, groupId, WeEvent.OFFSET_LAST, "sdk", consumerListener);
+        assertFalse(result.isEmpty());
     }
 
     @Test
-    public void testSingleTopicSubscribe_map_03() throws Exception {
+    public void testSingleTopicSubscribe_list_02() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-        this.iConsumer.startConsumer();
-        Map<String, String> topicModelMap = new HashMap<>();
-        topicModelMap.put(null, this.lastEventId);
 
+        this.iConsumer.startConsumer();
         IConsumer.ConsumerListener consumerListener = new IConsumer.ConsumerListener() {
             @Override
             public void onEvent(String subscriptionId, WeEvent event) {
@@ -352,20 +323,17 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
                 log.error("onException", e);
             }
         };
-        try {
-            this.iConsumer.subscribe(topicModelMap, groupId, "sdk", consumerListener);
-        } catch (BrokerException e) {
-            assertEquals(e.getCode(), ErrorCode.TOPIC_IS_BLANK.getCode());
-        }
+
+        String[] topics = {this.topicName};
+        String result = this.iConsumer.subscribe(topics, groupId, this.lastEventId, "sdk", consumerListener);
+        assertFalse(result.isEmpty());
     }
 
     @Test
-    public void testSingleTopicSubscribe_map_04() throws Exception {
+    public void testSingleTopicSubscribe_list_04() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-        this.iConsumer.startConsumer();
-        Map<String, String> topicModelMap = new HashMap<>();
-        topicModelMap.put(this.topicName, null);
 
+        this.iConsumer.startConsumer();
         IConsumer.ConsumerListener consumerListener = new IConsumer.ConsumerListener() {
             @Override
             public void onEvent(String subscriptionId, WeEvent event) {
@@ -379,11 +347,11 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
         };
 
         try {
-            this.iConsumer.subscribe(topicModelMap, groupId, "sdk", consumerListener);
+            String[] topics = {this.topicName};
+            this.iConsumer.subscribe(topics, groupId, null, "sdk", consumerListener);
         } catch (BrokerException e) {
-            assertEquals(e.getCode(), ErrorCode.TOPIC_MODEL_MAP_IS_NULL.getCode());
+            assertEquals(e.getCode(), ErrorCode.OFFSET_IS_BLANK.getCode());
         }
-
     }
 
     /**
@@ -424,12 +392,8 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
     @Test
     public void testMultipleTopicSubscribe_01() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-        Map<String, String> topicModelMap = new HashMap<>();
-        topicModelMap.put(this.topicName, this.lastEventId);
-        topicModelMap.put(this.topic2, WeEvent.OFFSET_FIRST);
-        topicModelMap.put(this.topic3, WeEvent.OFFSET_LAST);
-        this.iConsumer.startConsumer();
 
+        this.iConsumer.startConsumer();
         IConsumer.ConsumerListener consumerListener = new IConsumer.ConsumerListener() {
             @Override
             public void onEvent(String subscriptionId, WeEvent event) {
@@ -442,8 +406,9 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
             }
         };
 
-        Map<String, String> result = this.iConsumer.subscribe(topicModelMap, groupId, "sdk", consumerListener);
-        assertTrue(!result.isEmpty());
+        String[] topics = {this.topicName, this.topic2, this.topic3};
+        String result = this.iConsumer.subscribe(topics, groupId, this.lastEventId, "sdk", consumerListener);
+        assertFalse(result.isEmpty());
     }
 
     /**
@@ -452,12 +417,8 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
     @Test
     public void testMultipleTopicSubscribe_02() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-        Map<String, String> topicModelMap = new HashMap<>();
-        topicModelMap.put(this.topicName, WeEvent.OFFSET_LAST);
-        topicModelMap.put(this.topic2, "xxx_xxx");
-        topicModelMap.put(this.topic3, this.lastEventId);
-        this.iConsumer.startConsumer();
 
+        this.iConsumer.startConsumer();
         IConsumer.ConsumerListener consumerListener = new IConsumer.ConsumerListener() {
             @Override
             public void onEvent(String subscriptionId, WeEvent event) {
@@ -469,85 +430,20 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
                 log.error("onException", e);
             }
         };
+
         try {
-            this.iConsumer.subscribe(topicModelMap, groupId, "sdk", consumerListener);
+            String[] topics = {this.topicName, this.topic2, this.topic3};
+            this.iConsumer.subscribe(topics, groupId, "xxx_xxx", "sdk", consumerListener);
         } catch (BrokerException e) {
             assertEquals(e.getCode(), ErrorCode.EVENT_ID_IS_ILLEGAL.getCode());
         }
     }
 
-    /**
-     * Method: subscribe(Map<String, Object> map, ConsumerListener listener)
-     */
-    @Test
-    public void testMultipleTopicSubscribe_03() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-        Map<String, String> topicModelMap = new HashMap<>();
-        topicModelMap.put(this.topicName, this.lastEventId);
-        topicModelMap.put(this.topic2, WeEvent.OFFSET_LAST);
-        topicModelMap.put(this.topic3, null);
-        this.iConsumer.startConsumer();
-
-        IConsumer.ConsumerListener consumerListener = new IConsumer.ConsumerListener() {
-            @Override
-            public void onEvent(String subscriptionId, WeEvent event) {
-
-            }
-
-            @Override
-            public void onException(Throwable e) {
-                log.error("onException", e);
-            }
-        };
-        try {
-            this.iConsumer.subscribe(topicModelMap, groupId, "sdk", consumerListener);
-        } catch (BrokerException e) {
-            assertEquals(e.getCode(), ErrorCode.TOPIC_MODEL_MAP_IS_NULL.getCode());
-        }
-    }
-
-    /**
-     * Method: subscribe(Map<String, Object> map, ConsumerListener listener)
-     */
-    @Test
-    public void testMultipleTopicSubscribe_04() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-        Map<String, String> topicModelMap = new HashMap<>();
-        topicModelMap.put(this.topicName, this.lastEventId);
-        topicModelMap.put(this.topic2, WeEvent.OFFSET_LAST);
-        topicModelMap.put("topic-AAA", WeEvent.OFFSET_LAST);
-        this.iConsumer.startConsumer();
-
-        IConsumer.ConsumerListener consumerListener = new IConsumer.ConsumerListener() {
-            @Override
-            public void onEvent(String subscriptionId, WeEvent event) {
-
-            }
-
-            @Override
-            public void onException(Throwable e) {
-                log.error("onException", e);
-            }
-        };
-        try {
-            this.iConsumer.subscribe(topicModelMap, groupId, "sdk", consumerListener);
-        } catch (BrokerException e) {
-            assertEquals(e.getCode(), ErrorCode.TOPIC_NOT_EXIST.getCode());
-        }
-    }
-
-
-    /**
-     * Method: subscribe(Map<String, Object> map, ConsumerListener listener)
-     */
     @Test
     public void testMultipleTopicSubscribe_05() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-        Map<String, String> topicModelMap = new HashMap<>();
-        topicModelMap.put(this.topicName, this.lastEventId);
-        topicModelMap.put(this.topic2, WeEvent.OFFSET_LAST);
-        this.iConsumer.startConsumer();
 
+        this.iConsumer.startConsumer();
         IConsumer.ConsumerListener consumerListener = new IConsumer.ConsumerListener() {
             @Override
             public void onEvent(String subscriptionId, WeEvent event) {
@@ -560,45 +456,9 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
             }
         };
 
-        Map<String, String> result = this.iConsumer.subscribe(topicModelMap, groupId, "sdk", consumerListener);
-        assertTrue(!result.isEmpty());
-
-        topicModelMap.clear();
-        topicModelMap.put(this.topic3, WeEvent.OFFSET_LAST);
-        result = this.iConsumer.subscribe(topicModelMap, groupId, "sdk", consumerListener);
-        assertTrue(!result.isEmpty());
-    }
-
-    /**
-     * Method: subscribe(Map<String, Object> map, ConsumerListener listener)
-     */
-    @Test
-    public void testMultipleTopicSubscribe_06() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-        Map<String, String> topicModelMap = new HashMap<>();
-        topicModelMap.put(this.topicName, this.lastEventId);
-        topicModelMap.put(this.topic2, WeEvent.OFFSET_LAST);
-        this.iConsumer.startConsumer();
-
-        IConsumer.ConsumerListener consumerListener = new IConsumer.ConsumerListener() {
-            @Override
-            public void onEvent(String subscriptionId, WeEvent event) {
-
-            }
-
-            @Override
-            public void onException(Throwable e) {
-                log.error("onException", e);
-            }
-        };
-
-        Map<String, String> result = this.iConsumer.subscribe(topicModelMap, groupId, "sdk", consumerListener);
-        assertTrue(!result.isEmpty());
-
-        topicModelMap.clear();
-        topicModelMap.put(this.topic2, WeEvent.OFFSET_LAST);
-        result = this.iConsumer.subscribe(topicModelMap, groupId, "sdk", consumerListener);
-        assertTrue(!result.isEmpty());
+        String[] topics = {this.topicName};
+        String result = this.iConsumer.subscribe(topics, groupId, WeEvent.OFFSET_LAST, "sdk", consumerListener);
+        assertFalse(result.isEmpty());
     }
 
     /**
@@ -657,11 +517,8 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
     @Test
     public void testUnsubscribe_04() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-        Map<String, String> topicModelMap = new HashMap<>();
-        topicModelMap.put(this.topicName, this.lastEventId);
-        topicModelMap.put(this.topic2, WeEvent.OFFSET_LAST);
-        this.iConsumer.startConsumer();
 
+        this.iConsumer.startConsumer();
         IConsumer.ConsumerListener consumerListener = new IConsumer.ConsumerListener() {
             @Override
             public void onEvent(String subscriptionId, WeEvent event) {
@@ -673,13 +530,13 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
                 log.error("onException", e);
             }
         };
-        Map<String, String> result = this.iConsumer.subscribe(topicModelMap, groupId, "sdk", consumerListener);
-        assertTrue(!result.isEmpty());
 
-        for (Map.Entry<String, String> entry : result.entrySet()) {
-            this.result = this.iConsumer.unSubscribe(entry.getValue());
-            assertTrue(this.result);
-        }
+        String[] topics = {this.topicName, this.topic2};
+        String result = this.iConsumer.subscribe(topics, groupId, this.lastEventId, "sdk", consumerListener);
+        assertFalse(result.isEmpty());
+
+        this.result = this.iConsumer.unSubscribe(result);
+        assertTrue(this.result);
     }
 
 
@@ -719,11 +576,9 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
         this.iConsumer.startConsumer();
 
         this.received = 0;
-        Map<String, String> topicModelMap = new HashMap<>();
-        topicModelMap.put(this.topicName, this.lastEventId);
-        Map<String, String> result = new HashMap<>();
         try {
-            result = this.iConsumer.subscribe(topicModelMap, groupId, "sdk", new IConsumer.ConsumerListener() {
+            String[] topics = {this.topicName};
+            String result = this.iConsumer.subscribe(topics, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
                 @Override
                 public void onEvent(String subscriptionId, WeEvent event) {
                     log.info("********** {}, content {}", event, new String(event.getContent()));
@@ -738,15 +593,17 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
                     fail();
                 }
             });
+
+            assertFalse(result.isEmpty());
         } catch (BrokerException e) {
-            assertTrue(!result.isEmpty());
+            fail();
         }
 
-        assertEquals(SendResult.SendResultStatus.SUCCESS,
-                this.iProducer
-                        .publish(new WeEvent(this.topicName,
-                                String.format("我是中文. %s", System.currentTimeMillis()).getBytes(StandardCharsets.UTF_8), extensions), groupId)
-                        .getStatus());
+        SendResult sendResult = this.iProducer
+                .publish(new WeEvent(this.topicName,
+                        String.format("我是中文. %s", System.currentTimeMillis()).getBytes(StandardCharsets.UTF_8), extensions), groupId);
+
+        assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
         Thread.sleep(wait3s);
     }
 

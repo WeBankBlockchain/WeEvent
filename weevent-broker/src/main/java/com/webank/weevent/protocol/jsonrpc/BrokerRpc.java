@@ -5,10 +5,9 @@ import java.util.Map;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.ha.MasterJob;
+import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
-import com.webank.weevent.broker.plugin.IConsumer;
-import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.TopicPage;
@@ -32,7 +31,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class BrokerRpc implements IBrokerRpc {
     private IProducer producer;
-    private IConsumer consumer;
 
     private MasterJob masterJob;
 
@@ -42,11 +40,6 @@ public class BrokerRpc implements IBrokerRpc {
     @Autowired
     public void setProducer(IProducer producer) {
         this.producer = producer;
-    }
-
-    @Autowired
-    public void setConsumer(IConsumer iConsumer) {
-        this.consumer = iConsumer;
     }
 
     @Autowired(required = false)
