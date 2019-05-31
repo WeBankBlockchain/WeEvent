@@ -1,6 +1,6 @@
 #!/bin/bash
 
-nodes="182.254.159.91:20200"
+nodes=$NODEPORT
 
 function gradleBroker(){
 
@@ -13,6 +13,8 @@ function updateFisco(){
     cd dist
     ls
     cp ./conf/fisco.properties ./conf/fisco.properties.default
+    echo "===================================="
+    echo $NODEPORT
     # set the nodes
     sed -i "/nodes=/cnodes=${nodes}" ./conf/fisco.properties
 }
