@@ -1,7 +1,6 @@
 package com.webank.weevent.ST.plugin;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.JUnitTestBase;
@@ -581,7 +580,7 @@ public class ConsumerTest extends JUnitTestBase {
 
     /**
      * test subscribe(String topic, String offset, ConsumerListener listener)
-     * topic  exists,offset eventId "317e7c4c-75-329"
+     * topic  exists,offset eventId extists
      *
      * @throws InterruptedException
      */
@@ -591,7 +590,7 @@ public class ConsumerTest extends JUnitTestBase {
 
         try {
             this.iConsumer.startConsumer();
-            String result = this.iConsumer.subscribe(this.topicName, groupId, "317e7c4c-75-329", "sdk", new IConsumer.ConsumerListener() {
+            String result = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
                 @Override
                 public void onEvent(String subscriptionId, WeEvent event) {
 
@@ -613,7 +612,7 @@ public class ConsumerTest extends JUnitTestBase {
 
     /**
      * test subscribe(String topic, String offset, ConsumerListener listener)
-     * topic is not exists,offset 为eventId "317e7c4c-75-329"
+     * topic is not exists,offset is eventId exists
      *
      * @throws InterruptedException
      */
@@ -657,7 +656,7 @@ public class ConsumerTest extends JUnitTestBase {
         try {
             String illegalTopic = new String(charStr);
             this.iConsumer.startConsumer();
-            String result = this.iConsumer.subscribe(illegalTopic, groupId, "317e7c4c-75-329", "sdk", new IConsumer.ConsumerListener() {
+            String result = this.iConsumer.subscribe(illegalTopic, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
                 @Override
                 public void onException(Throwable e) {
                     log.error("onException", e);
@@ -687,7 +686,7 @@ public class ConsumerTest extends JUnitTestBase {
 
         try {
             this.iConsumer.startConsumer();
-            String result = this.iConsumer.subscribe("中国", groupId, "317e7c4c-75-329", "sdk", new IConsumer.ConsumerListener() {
+            String result = this.iConsumer.subscribe("中国", groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
                 @Override
                 public void onEvent(String subscriptionId, WeEvent event) {
 
@@ -778,7 +777,7 @@ public class ConsumerTest extends JUnitTestBase {
     public void testMapSubscribe3() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
         Map<String, String> topics = new HashMap<>();
-        topics.put(" ", "317e7c4c-75-329");
+        topics.put(" ", this.lastEventId);
         try {
             this.iConsumer.startConsumer();
             Map<String, String> result = this.iConsumer.subscribe(topics, groupId, "sdk", new IConsumer.ConsumerListener() {
@@ -811,7 +810,7 @@ public class ConsumerTest extends JUnitTestBase {
         log.info("===================={}", this.testName.getMethodName());
         Map<String, String> topics = new HashMap<>();
         topics.put("jshfljjdkdkfeffslkfsnkhkhhjjjjhggfsfsffdfdegeslkpoijuhytredswqazxcvfbnh", 
-        	"317e7c4c-75-329");
+        	this.lastEventId);
         try {
             this.iConsumer.startConsumer();
             Map<String, String> result = this.iConsumer.subscribe(topics, groupId, "sdk", new IConsumer.ConsumerListener() {
@@ -900,7 +899,7 @@ public class ConsumerTest extends JUnitTestBase {
 
     /**
      * test subscribe(Map<String, String> topics, ConsumerListener listener)
-     * topics key  exists,topis value=WeEvent.OFFSET_LAST
+     * topics key  exists,topics value=WeEvent.OFFSET_LAST
      *
      * @throws InterruptedException
      */
@@ -1343,7 +1342,7 @@ public class ConsumerTest extends JUnitTestBase {
 
     /**
      * test subscribe(Map<String, String> topics, ConsumerListener listener)
-     * topic key exists,value eventId "317e7c4c-75-329"
+     * topic key exists,value eventId exists
      *
      * @throws InterruptedException
      */
@@ -1351,7 +1350,7 @@ public class ConsumerTest extends JUnitTestBase {
     public void testMapSubscribe18() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
         Map<String, String> topics = new HashMap<>();
-        topics.put(this.topicName, "317e7c4c-75-329");
+        topics.put(this.topicName, this.lastEventId);
         try {
             this.iConsumer.startConsumer();
             Map<String, String> result = this.iConsumer.subscribe(topics, groupId, "sdk", new IConsumer.ConsumerListener() {
@@ -1384,9 +1383,9 @@ public class ConsumerTest extends JUnitTestBase {
     public void testMapSubscribe19() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
         Map<String, String> topics = new HashMap<>();
-        topics.put(this.topicName, "317e7c4c-75-329");
-        topics.put(this.topic2, "a52ca4c2-75-329");
-        topics.put(this.topic3, "808bce45-75-329");
+        topics.put(this.topicName, this.lastEventId);
+        topics.put(this.topic2, WeEvent.OFFSET_LAST);
+        topics.put(this.topic3, WeEvent.OFFSET_LAST);
         try {
             this.iConsumer.startConsumer();
             Map<String, String> result = this.iConsumer.subscribe(topics, groupId, "sdk", new IConsumer.ConsumerListener() {
@@ -1421,7 +1420,7 @@ public class ConsumerTest extends JUnitTestBase {
         log.info("===================={}", this.testName.getMethodName());
         try {
             this.iConsumer.startConsumer();
-            String subId = this.iConsumer.subscribe(this.topicName, groupId, "317e7c4c-75-329", "sdk", new IConsumer.ConsumerListener() {
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
                 @Override
                 public void onEvent(String subscriptionId, WeEvent event) {
                     log.info("onEvent: {}", event);
