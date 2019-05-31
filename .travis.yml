@@ -19,14 +19,6 @@ language: java
 jdk:
 - oraclejdk8
 
-before_cache:
-- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
-- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
-cache:
-  directories:
-  - $HOME/.gradle/caches/
-  - $HOME/.gradle/wrapper/
-
 #before_install:
 #- gradle wrapper
 
@@ -45,7 +37,7 @@ after_success:
 
 deploy:
   provider: releases
-  api_key: e5867aa5fc10b22b0d74d982d39afa4632902e93
+  api_key: $APIKEY
   file_glob: true
   file: dist/app/weevent.jar
   skip_cleanup: true

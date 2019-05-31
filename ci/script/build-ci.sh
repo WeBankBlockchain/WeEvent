@@ -13,8 +13,6 @@ function updateFisco(){
     cd dist
     ls
     cp ./conf/fisco.properties ./conf/fisco.properties.default
-    echo "===================================="
-    echo $NODEPORT
     # set the nodes
     sed -i "/nodes=/cnodes=${nodes}" ./conf/fisco.properties
 }
