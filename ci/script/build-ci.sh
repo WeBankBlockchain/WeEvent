@@ -6,11 +6,12 @@ function gradleBroker(){
 
     cd weevent-broker
     gradle build -x test
-    cd dist
 }
 
 
 function updateFisco(){
+    cd dist
+    ls
     cp ./conf/fisco.properties ./conf/fisco.properties.default
     # set the nodes
     sed -i "/nodes=/cnodes=${nodes}" ./conf/fisco.properties
