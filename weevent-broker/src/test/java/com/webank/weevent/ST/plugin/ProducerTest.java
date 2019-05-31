@@ -105,12 +105,12 @@ public class ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * Method: open topic length >32
+     * Method: open topic length > 64
      */
     @Test
     public void testOpen3() {
         try {
-            String topicStr = "topiclengthlonger32-" + System.currentTimeMillis();
+            String topicStr = "topiclengthlonger64asdfghjklpoiuytrewqazxswcdevfrbg-" + System.currentTimeMillis();
             boolean result = iProducer.open(topicStr, groupId);
             assertFalse(result);
         } catch (BrokerException e) {
@@ -120,12 +120,12 @@ public class ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * Method: open topic length equal 32
+     * Method: open topic length equal 64
      */
     @Test
     public void testOpen4() {
         try {
-            String topicStr = "topiclengthequal32-" + System.currentTimeMillis();
+            String topicStr = "topiclengthequal64zxcvbnmlkjhgfdsaqwertyuioplokiuj-" + System.currentTimeMillis();
             boolean result = iProducer.open(topicStr, groupId);
             assertTrue(result);
         } catch (BrokerException e) {
@@ -259,12 +259,13 @@ public class ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * Method: Close topic length  > 32
+     * Method: Close topic length  > 64
      */
     @Test
     public void testClose5() {
         try {
-            String topicStr = "topiclengthlonger32-" + System.currentTimeMillis();
+            String topicStr = "topiclengthlonger64azxsqwedcvfrtgbnhyujmkiolpoiuytr-" 
+        	    + System.currentTimeMillis();
             Assert.assertFalse(iProducer.close(topicStr, groupId));
         } catch (BrokerException e) {
             log.error("producer close error:", e);
@@ -344,12 +345,12 @@ public class ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * topic length >32
+     * topic length > 64
      */
     @Test
     public void testExist4() {
         try {
-            String falseTopic = "fasssglsjggtyuioplkjhgfdsaqwezxcv";
+            String falseTopic = "fasssglsjggtyuioplkjhgfdsaqwezxcvqazxswedcvfrtgbnhyujmkiolpoiuytr";
             iProducer.exist(falseTopic, groupId);
         } catch (BrokerException e) {
             log.error("method Exist error:", e);
@@ -389,12 +390,12 @@ public class ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * topic length = 32 not exists
+     * topic length = 64 not exists
      */
     @Test
     public void testExist7() {
         try {
-            String falseTopic = "sdfghjklpoiuytrewqazxcvbnmklopiu";
+            String falseTopic = "sdfghjklpoiuytrewqazxcvbnmklopiuqazxswedcvfrtgbnhyujmkiolpoiuytr";
             boolean result = iProducer.exist(falseTopic, groupId);
             assertFalse(result);
         } catch (BrokerException e) {
@@ -466,13 +467,13 @@ public class ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * topic length >32
+     * topic length > 64
      */
     @Test
     public void state3() {
         TopicInfo topicInfo = null;
         try {
-            String notExistTopic = "hdflsjglsgqwertyuioplkjhgfdsazxcvb";
+            String notExistTopic = "hdflsjglsgqwertyuioplkjhgfdsazxcvbqwertyuioplkjhgfdsazxcvbnmkoiujy";
             topicInfo = iProducer.state(notExistTopic, groupId);
         } catch (BrokerException e) {
             log.error("method state error:", e);
@@ -512,7 +513,7 @@ public class ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * topic is blank topic 为" "
+     * topic is blank topic " "
      */
     @Test
     public void state6() {
@@ -527,13 +528,13 @@ public class ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * topic length =32
+     * topic length = 64
      */
     @Test
     public void state7() {
         TopicInfo topicInfo = null;
         try {
-            String notExistTopic = "hdflsjglsgqwertyuioplkjhgfdsazxc";
+            String notExistTopic = "hdflsjglsgqwertyuioplkjhgfdsazxcqazxswedcvfrtgbnhyujmkiolppoiuyt";
             topicInfo = iProducer.state(notExistTopic, groupId);
         } catch (BrokerException e) {
             log.error("method state error:", e);
@@ -812,12 +813,12 @@ public class ProducerTest extends JUnitTestBase {
 
 
     /**
-     * topic length >32
+     * topic length > 64
      */
     @Test
     public void testPublishEventCharset5() {
         try {
-            String topicNotExists = "fsgdsggdgererqwertyuioplkjhgfdsazx";
+            String topicNotExists = "fsgdsggdgererqwertyuioplkjhgfdsazxqazwsxedcrfvtgbyhnujmikolppoiuyt";
             SendResult dto = iProducer.publish(new WeEvent(topicNotExists, "中文消息.".getBytes(), extensions), groupId);
         } catch (BrokerException e) {
             Assert.assertNotNull(e);
@@ -923,7 +924,7 @@ public class ProducerTest extends JUnitTestBase {
     @Test
     public void testGetEvent3() {
         try {
-            WeEvent weEvent = iProducer.getEvent("7-958gjg14", groupId);
+            WeEvent weEvent = iProducer.getEvent("317e7c4c-75-hkhgjhg", groupId);
         } catch (BrokerException e) {
             assertEquals(e.getCode(), ErrorCode.EVENT_ID_IS_ILLEGAL.getCode());
             log.error("get event error: ", e);
@@ -936,7 +937,7 @@ public class ProducerTest extends JUnitTestBase {
     @Test
     public void testGetEvent4() {
         try {
-            WeEvent weEvent = iProducer.getEvent("7-95843514", groupId);
+            WeEvent weEvent = iProducer.getEvent("317e7c4c-75-32900000", groupId);
         } catch (BrokerException e) {
             assertEquals(e.getCode(), ErrorCode.EVENT_ID_IS_MISMATCH.getCode());
             log.error("get event error: ", e);
@@ -949,7 +950,7 @@ public class ProducerTest extends JUnitTestBase {
     @Test
     public void testGetEvent5() {
         try {
-            WeEvent weEvent = iProducer.getEvent("7-95814", groupId);
+            WeEvent weEvent = iProducer.getEvent("317e7c4c-278-329", groupId);
         } catch (BrokerException e) {
             log.error("get event error: ", e);
             assertEquals(e.getCode(), ErrorCode.EVENT_ID_NOT_EXIST.getCode());
@@ -996,12 +997,12 @@ public class ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * test get Event : eventId length >32
+     * test get Event : eventId length > 64
      */
     @Test
     public void testGetEvent9() {
         try {
-            String id = "123456789-123456789123456789123456";
+            String id = "317e7c4csdxcfvbhjklpoutredwsaqsdfghjkoiuf-2782345678901234567-329";
             WeEvent weEvent = iProducer.getEvent(id, groupId);
         } catch (BrokerException e) {
             log.error("get event error: ", e);
@@ -1060,14 +1061,14 @@ public class ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * Method: publish(WeEvent event, SendCallBack callBack) topic length > 32
+     * Method: publish(WeEvent event, SendCallBack callBack) topic length > 64
      *
      * @throws InterruptedException
      */
     @Test
     public void testPublishForEventCallBack3() throws InterruptedException {
         try {
-            String notExistsTopic = "sglsjhglsjqwertyuioplkjhgfdsazxcvbnm";
+            String notExistsTopic = "qazwsxedcrfvtgbnhyujmkiolpoiuytrsglsjhglsjqwertyuioplkjhgfdsazxcvbnm";
             iProducer.publish(new WeEvent(notExistsTopic, "hello world.".getBytes(), extensions), groupId, new IProducer.SendCallBack() {
                 @Override
                 public void onComplete(SendResult sendResult) {
