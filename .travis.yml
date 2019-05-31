@@ -37,9 +37,11 @@ script:
 - cp ./ci/script/build-ci.sh ./weevent-broker/dist/
 - cd weevent-broker/dist/
 - ls
-- chmod +x *.sh
 - chmod +x build-ci.sh
-- ./build-ci.sh
+- chmod +x deploy-contract.sh
+- deploy-contract.sh
+- build-ci.sh
+- ci/script/deploy-contract.sh
 - cd ../../
 - ./gradlew jacocoTestReport
 
