@@ -469,7 +469,7 @@ public class ProducerTest extends JUnitTestBase {
     /**
      * topic length > 64
      */
-    @Test
+//    @Test
     public void state3() {
         TopicInfo topicInfo = null;
         try {
@@ -485,7 +485,7 @@ public class ProducerTest extends JUnitTestBase {
     /**
      * topic is null
      */
-    @Test
+//    @Test
     public void state4() {
         TopicInfo topicInfo = null;
         try {
@@ -500,7 +500,7 @@ public class ProducerTest extends JUnitTestBase {
     /**
      * topic is blank
      */
-    @Test
+//    @Test
     public void state5() {
         TopicInfo topicInfo = null;
         try {
@@ -515,7 +515,7 @@ public class ProducerTest extends JUnitTestBase {
     /**
      * topic is blank topic " "
      */
-    @Test
+//    @Test
     public void state6() {
         TopicInfo topicInfo = null;
         try {
@@ -546,7 +546,7 @@ public class ProducerTest extends JUnitTestBase {
     /**
      * topic contain special character withoutin [32,128]
      */
-    @Test
+//    @Test
     public void state8() {
         TopicInfo topicInfo = null;
         char[] charStr = {69, 72, 31};
@@ -562,7 +562,7 @@ public class ProducerTest extends JUnitTestBase {
     /**
      * topic contain Chinese character
      */
-    @Test
+//    @Test
     public void state9() {
         TopicInfo topicInfo = null;
         try {
