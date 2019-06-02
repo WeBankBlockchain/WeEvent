@@ -919,7 +919,7 @@ public class ConsumerTest extends JUnitTestBase {
                 }
             });
         } catch (BrokerException e) {
-            assertEquals(e.getCode(), ErrorCode.TOPIC_LIST_IS_NULL.getCode());
+            assertEquals(e.getCode(), ErrorCode.OFFSET_IS_BLANK.getCode());
             log.error("subscribe(topics,groupId,offset,interfaceType,listener", e);
         }
 
