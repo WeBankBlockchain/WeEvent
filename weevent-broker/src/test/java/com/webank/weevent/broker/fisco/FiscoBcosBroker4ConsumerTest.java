@@ -12,15 +12,12 @@ import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import lombok.extern.slf4j.Slf4j;
+import static org.junit.Assert.*;
 
 /**
  * FiscoBcosBroker4Consumer Tester.
@@ -111,9 +108,9 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
                     fail();
                 }
             });
+            assertNotNull(result);
         } catch (BrokerException e) {
             log.error("subscribe error:{}", e);
-            assertEquals(e.getCode(), ErrorCode.OFFSET_IS_BLANK.getCode());
         }
     }
 
@@ -412,7 +409,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * Method: subscribe(Map<String, Object> map, ConsumerListener listener)
+     * Method: subscribe(topics, groupId, offset, interfaceType, consumerListener);
      */
     @Test
     public void testMultipleTopicSubscribe_02() throws Exception {
@@ -489,7 +486,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * Method: unsubscribe(String, subId)
+     * Method: unsubscribe(String subId)
      */
     @Test
     public void testUnsubscribe_03() throws Exception {
@@ -568,7 +565,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * Method: subscribe(String topic, ConsumerListener listener)
+     * Method: subscribe(String[] topics, groupId,offset ,interfaceType,ConsumerListener listener)
      */
     @Test
     public void testSubscribeCharacterSet() throws Exception {
