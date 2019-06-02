@@ -29,7 +29,6 @@ public class RestfullTest {
         this.rest = new RestTemplate(requestFactory);
     }
 
-    @Test
     public void testOpenTopic() {
         String topic = "com.weevent.test.rest";
         ResponseEntity<Boolean> rsp =
@@ -38,7 +37,6 @@ public class RestfullTest {
         assertTrue(rsp.getBody());
     }
 
-    @Test
     public void testCloseTopic() {
         String topic = "com.weevent.test.rest";
         ResponseEntity<Boolean> rsp =
@@ -47,7 +45,6 @@ public class RestfullTest {
         assertTrue(rsp.getBody());
     }
 
-    @Test
     public void testExistTopic() {
         ResponseEntity<Boolean> rsp =
                 rest.getForEntity(URL + "exist?topic={topic}", Boolean.class, "com.weevent.test.rest");
@@ -55,7 +52,6 @@ public class RestfullTest {
         assertTrue(rsp.getBody());
     }
 
-    @Test
     public void testState() {
         ResponseEntity<String> rsp = rest.getForEntity(URL + "state?topic={topic}",
                 String.class,
@@ -65,7 +61,6 @@ public class RestfullTest {
         assertTrue(rsp.getBody().contains("}"));
     }
 
-    @Test
     public void testList() {
         ResponseEntity<String> rsp = rest.getForEntity(URL
                 + "list?pageIndex={pageIndex}&pageSize={pageSize}", String.class, "0", "10");
@@ -74,7 +69,6 @@ public class RestfullTest {
         assertTrue(rsp.getBody().contains("]"));
     }
 
-    @Test
     public void testSubscribe() {
         ResponseEntity<String> rsp = rest.getForEntity(
                 URL + "subscribe?topic={topic}&subscriptionId={subscriptionId}&url={url}",
@@ -88,7 +82,6 @@ public class RestfullTest {
         assertTrue(rsp.getBody().contains("-"));
     }
 
-    @Test
     public void testReSubscribe() {
         ResponseEntity<String> rsp = rest.getForEntity(
                 URL + "subscribe?topic={topic}&subscriptionId={subscriptionId}&url={url}",
@@ -101,7 +94,6 @@ public class RestfullTest {
         assertTrue(rsp.getBody().contains("-"));
     }
 
-    @Test
     public void testPublish() {
         ResponseEntity<SendResult> rsp =
                 rest.getForEntity(URL + "publish?topic={topic}&content={content}",
@@ -115,7 +107,6 @@ public class RestfullTest {
         assertTrue(rsp.getBody().getEventId().contains("-"));
     }
 
-    @Test
     public void testGetEvent() {
         ResponseEntity<WeEvent> rsp =
                 rest.getForEntity(URL + "getEvent?eventId={eventId}", WeEvent.class, "e39837d63efaffaa-4-74573");
@@ -127,7 +118,6 @@ public class RestfullTest {
     }
 
 
-    @Test
     public void testGetBlockinfo() {
         ResponseEntity<String> rsp = rest
                 .getForEntity("http://localhost:8081/weevent/admin/blockchaininfo", String.class);
@@ -137,7 +127,6 @@ public class RestfullTest {
         assertTrue(rsp.getBody().contains("]"));
     }
 
-    @Test
     public void testDeployTopicControl() {
         ResponseEntity<String> rsp =
                 rest.getForEntity("http://localhost:8081/weevent/admin/deploy_topic_control",
@@ -147,7 +136,6 @@ public class RestfullTest {
         assertTrue(rsp.getStatusCodeValue() == 200);
     }
 
-    @Test
     public void testListSubId() {
         ResponseEntity<Map> rsp = rest
                 .getForEntity("http://localhost:8081/weevent/admin/listSubscription", Map.class);
@@ -158,7 +146,6 @@ public class RestfullTest {
         assertTrue(rsp.getStatusCodeValue() == 200);
     }
 
-    @Test
     public void testUnsubscribe() {
         ResponseEntity<String> rsp =
                 rest.getForEntity(URL + "unSubscribe?subscriptionId={subscriptionId}",
