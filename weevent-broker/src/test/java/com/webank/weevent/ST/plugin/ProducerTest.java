@@ -950,7 +950,7 @@ public class ProducerTest extends JUnitTestBase {
     @Test
     public void testGetEvent5() {
         try {
-            WeEvent weEvent = iProducer.getEvent("317e7c4c-278-329", groupId);
+            WeEvent weEvent = iProducer.getEvent("317e7c4c-278-3", groupId);
         } catch (BrokerException e) {
             log.error("get event error: ", e);
             assertEquals(e.getCode(), ErrorCode.EVENT_ID_NOT_EXIST.getCode());

@@ -6,6 +6,7 @@ import java.util.Map;
 import com.webank.weevent.JUnitTestBase;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
+import com.webank.weevent.broker.plugin.IConsumer.ConsumerListener;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.SendResult;
@@ -86,13 +87,13 @@ public class ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * test subscribe(String topic, String offset, ConsumerListener listener)
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
      * topic is ""
      *
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe2() throws InterruptedException {
+    public void testSubscribe1() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -117,13 +118,13 @@ public class ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * test subscribe(String topic, String offset, ConsumerListener listener)
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
      * topic is " "
      *
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe3() throws InterruptedException {
+    public void testSubscribe2() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -148,13 +149,13 @@ public class ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * test subscribe(String topic, String offset, ConsumerListener listener)
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
      * topic  length > 64
      *
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe4() throws InterruptedException {
+    public void testSubscribe3() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -182,13 +183,13 @@ public class ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * test subscribe(String topic, String offset, ConsumerListener listener)
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
      * topic  exists,offset=WeEvent.OFFSET_FIRST
      *
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe5() throws InterruptedException {
+    public void testSubscribe4() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -214,13 +215,13 @@ public class ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * test subscribe(String topic, String offset, ConsumerListener listener)
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
      * topic  exists,offset=WeEvent.OFFSET_LAST
      *
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe6() throws InterruptedException {
+    public void testSubscribe5() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -246,13 +247,13 @@ public class ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * test subscribe(String topic, String offset, ConsumerListener listener)
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
      * topic  exists,offset is general string like lsjflsjfljls
      *
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe7() throws InterruptedException {
+    public void testSubscribe6() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -277,13 +278,13 @@ public class ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * test subscribe(String topic, String offset, ConsumerListener listener)
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
      * topic  exists,offset string like 317e7c4c-fsfds-sdfsdf
      *
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe8() throws InterruptedException {
+    public void testSubscribe7() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -308,13 +309,13 @@ public class ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * test subscribe(String topic, String offset, ConsumerListener listener)
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
      * topic  exists,offset string like 317e7c4c-75-sdfsdf
      *
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe9() throws InterruptedException {
+    public void testSubscribe8() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -339,13 +340,13 @@ public class ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * test subscribe(String topic, String offset, ConsumerListener listener)
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
      * topic  exists,offset string like 317e7c4c-lsjfls-329
      *
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe10() throws InterruptedException {
+    public void testSubscribe9() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -370,13 +371,13 @@ public class ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * test subscribe(String topic, String offset, ConsumerListener listener)
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
      * topic  exists,offset eventId  blolck number > blockchain block height
      *
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe11() throws InterruptedException {
+    public void testSubscribe10() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -401,13 +402,13 @@ public class ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * test subscribe(String topic, String offset, ConsumerListener listener)
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
      * topic  exists,offset eventId length >64
      *
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe12() throws InterruptedException {
+    public void testSubscribe11() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -436,13 +437,13 @@ public class ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * test subscribe(String topic, String offset, ConsumerListener listener)
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
      * topic  exists,offset is null
      *
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe13() throws InterruptedException {
+    public void testSubscribe12() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -467,13 +468,13 @@ public class ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * test subscribe(String topic, String offset, ConsumerListener listener)
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
      * topic  exists,offset is ""
      *
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe14() throws InterruptedException {
+    public void testSubscribe13() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -498,13 +499,13 @@ public class ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * test subscribe(String topic, String offset, ConsumerListener listener)
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
      * topic  exists,offset is " "
      *
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe15() throws InterruptedException {
+    public void testSubscribe14() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -529,18 +530,18 @@ public class ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * test subscribe(String topic, String offset, ConsumerListener listener)
-     * topic  exists,listener is null 500401
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
+     * topic  exists,listener is null 
      *
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe16() throws InterruptedException {
+    public void testSubscribe15() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
             this.iConsumer.startConsumer();
-            String result = this.iConsumer.subscribe(this.topicName, groupId, "6464-464", "sdk", null);
+            String result = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", null);
         } catch (BrokerException e) {
             assertEquals(e.getCode(), ErrorCode.CONSUMER_LISTENER_IS_NULL.getCode());
             log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
@@ -550,13 +551,13 @@ public class ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * test subscribe(String topic, String offset, ConsumerListener listener)
-     * topic  exists,offset eventId extists
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset eventId exist
      *
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe17() throws InterruptedException {
+    public void testSubscribe16() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -582,18 +583,18 @@ public class ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * test subscribe(String topic, String offset, ConsumerListener listener)
-     * topic is not exists,offset is eventId exists
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
+     * topic is not exists,offset is eventId legal
      *
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe18() throws InterruptedException {
+    public void testSubscribe17() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
             this.iConsumer.startConsumer();
-            String result = this.iConsumer.subscribe("sdlkufhdsighfskhdsf", groupId, "sdk", "317e7c4c-75-329", new IConsumer.ConsumerListener() {
+            String result = this.iConsumer.subscribe("sdlkufhdsighfskhdsf", groupId, "df47fc12-75-3", "sdk", new IConsumer.ConsumerListener() {
                 @Override
                 public void onEvent(String subscriptionId, WeEvent event) {
 
@@ -614,13 +615,13 @@ public class ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * test subscribe(String topic, String offset, ConsumerListener listener)
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
      * topic contian special character withoutin 32-128
      *
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe19() throws InterruptedException {
+    public void testSubscribe18() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         char[] charStr = {69, 72, 31};
@@ -646,13 +647,13 @@ public class ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * test subscribe(String topic, String offset, ConsumerListener listener)
-     * topic contian Chinese character
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
+     * topic contain Chinese character
      *
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe20() throws InterruptedException {
+    public void testSubscribe19() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -681,13 +682,13 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe2() throws InterruptedException {
+    public void testListSubscribe1() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
             this.iConsumer.startConsumer();
             String[] topics = {""};
-            String result = this.iConsumer.subscribe(topics, groupId, "5486-5848", "sdk", new IConsumer.ConsumerListener() {
+            String result = this.iConsumer.subscribe(topics, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
                 @Override
                 public void onEvent(String subscriptionId, WeEvent event) {
                 }
@@ -700,7 +701,7 @@ public class ConsumerTest extends JUnitTestBase {
             });
         } catch (BrokerException e) {
             assertEquals(e.getCode(), ErrorCode.TOPIC_IS_BLANK.getCode());
-            log.error("subscribe(topics,listener) method error: ", e);
+            log.error("subscribe(topics,groupId,offset,interfaceType,listener) method error: ", e);
         }
 
         Thread.sleep(wait3s);
@@ -712,13 +713,13 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe3() throws InterruptedException {
+    public void testListSubscribe2() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
             this.iConsumer.startConsumer();
             String[] topics = {" "};
-            String result = this.iConsumer.subscribe(topics, groupId, "5486-5848", "sdk", new IConsumer.ConsumerListener() {
+            String result = this.iConsumer.subscribe(topics, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
                 @Override
                 public void onEvent(String subscriptionId, WeEvent event) {
                 }
@@ -738,18 +739,18 @@ public class ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * topics key  length > 84
+     * topics key  length > 64
      *
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe4() throws InterruptedException {
+    public void testListSubscribe3() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
             this.iConsumer.startConsumer();
-            String[] topics = {"jshfljjdkdkfeffslkfsnkhkhhjjjjhggfsfsffjshfljjdkdkfeffslkfsnkhkhhjjjjhggfsfsff"};
-            String result = this.iConsumer.subscribe(topics, groupId, "5486-5848", "sdk", new IConsumer.ConsumerListener() {
+            String[] topics = {"jshfljjdkdkfeffslkfsnkhkhhjjjjhggfsfsffjshfljjdkdkfeffslkfsnkhkhhj"};
+            String result = this.iConsumer.subscribe(topics, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
                 @Override
                 public void onEvent(String subscriptionId, WeEvent event) {
                 }
@@ -761,7 +762,7 @@ public class ConsumerTest extends JUnitTestBase {
                 }
             });
         } catch (BrokerException e) {
-            log.error("subscribe(topics,listener) method error: ", e);
+            log.error("subscribe(topics,groupId,offset,interfaceType,listener", e);
             assertEquals(e.getCode(), ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode());
         }
 
@@ -769,12 +770,12 @@ public class ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * topics key  exists, topis value=WeEvent.OFFSET_FIRST
+     * topics  exists, offset = WeEvent.OFFSET_FIRST
      *
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe6() throws InterruptedException {
+    public void testListSubscribe4() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -795,18 +796,18 @@ public class ConsumerTest extends JUnitTestBase {
             });
             assertNotNull(result);
         } catch (BrokerException e) {
-            log.error("subscribe(topics,listener) method error: ", e);
+            log.error("subscribe(topics,groupId,offset,interfaceType,listener", e);
         }
         Thread.sleep(wait3s);
     }
 
     /**
-     * topics key  exists,topis value=WeEvent.OFFSET_LAST
+     * topics exists,offset = WeEvent.OFFSET_LAST
      *
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe7() throws InterruptedException {
+    public void testListSubscribe5() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -827,18 +828,18 @@ public class ConsumerTest extends JUnitTestBase {
             });
             assertNotNull(result);
         } catch (BrokerException e) {
-            log.error("subscribe(topics,listener) method error: ", e);
+            log.error("subscribe(topics,groupId,offset,interfaceType,listener", e);
         }
         Thread.sleep(wait3s);
     }
 
     /**
-     * topics key  exists,topis value除WeEvent.OFFSET_LAST外的不合法字符串
+     * topics exists, offset is illegal
      *
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe8() throws InterruptedException {
+    public void testListSubscribe6() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -857,25 +858,25 @@ public class ConsumerTest extends JUnitTestBase {
             });
         } catch (BrokerException e) {
             assertEquals(e.getCode(), ErrorCode.EVENT_ID_IS_ILLEGAL.getCode());
-            log.error("subscribe(topics,listener) method error: ", e);
+            log.error("subscribe(topics,groupId,offset,interfaceType,listener", e);
         }
 
         Thread.sleep(wait3s);
     }
 
     /**
-     * topics key  exists,topis value 块高大于当前区块链块高     36451过大
+     * topics exists,offset height > current block height 
      *
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe12() throws InterruptedException {
+    public void testListSubscribe7() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
             this.iConsumer.startConsumer();
             String[] topics = {this.topicName};
-            String result = this.iConsumer.subscribe(topics, groupId, "64864-364510000", "sdk", new IConsumer.ConsumerListener() {
+            String result = this.iConsumer.subscribe(topics, groupId, this.lastEventId + "000", "sdk", new IConsumer.ConsumerListener() {
                 @Override
                 public void onEvent(String subscriptionId, WeEvent event) {
                 }
@@ -888,19 +889,19 @@ public class ConsumerTest extends JUnitTestBase {
             });
         } catch (BrokerException e) {
             assertEquals(e.getCode(), ErrorCode.EVENT_ID_IS_MISMATCH.getCode());
-            log.error("subscribe(topics,listener) method error: ", e);
+            log.error("subscribe(topics,groupId,offset,interfaceType,listener", e);
         }
 
         Thread.sleep(wait3s);
     }
 
     /**
-     * topics key  exists,topis value is null
+     * topics exists,offset is null
      *
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe14() throws InterruptedException {
+    public void testListSubscribe8() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -918,20 +919,20 @@ public class ConsumerTest extends JUnitTestBase {
                 }
             });
         } catch (BrokerException e) {
-            assertEquals(e.getCode(), ErrorCode.OFFSET_IS_BLANK.getCode());
-            log.error("subscribe(topics,listener) method error: ", e);
+            assertEquals(e.getCode(), ErrorCode.TOPIC_LIST_IS_NULL.getCode());
+            log.error("subscribe(topics,groupId,offset,interfaceType,listener", e);
         }
 
         Thread.sleep(wait3s);
     }
 
     /**
-     * topics key  exists,topis value ""
+     * topics exists,offset value ""
      *
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe15() throws InterruptedException {
+    public void testListSubscribe9() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -949,8 +950,8 @@ public class ConsumerTest extends JUnitTestBase {
                 }
             });
         } catch (BrokerException e) {
-            assertEquals(e.getCode(), ErrorCode.EVENT_ID_IS_ILLEGAL.getCode());
-            log.error("subscribe(topics,listener) method error: ", e);
+            assertEquals(e.getCode(), ErrorCode.TOPIC_LIST_IS_NULL.getCode());
+            log.error("subscribe(topics,groupId,offset,interfaceType,listener", e);
         }
 
         Thread.sleep(wait3s);
@@ -962,7 +963,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe16() throws InterruptedException {
+    public void testListSubscribe10() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -980,20 +981,20 @@ public class ConsumerTest extends JUnitTestBase {
                 }
             });
         } catch (BrokerException e) {
-            assertEquals(e.getCode(), ErrorCode.EVENT_ID_IS_ILLEGAL.getCode());
-            log.error("subscribe(topics,listener) method error: ", e);
+            assertEquals(e.getCode(), ErrorCode.TOPIC_LIST_IS_NULL.getCode());
+            log.error("subscribe(topics,groupId,offset,interfaceType,listener", e);
         }
 
         Thread.sleep(wait3s);
     }
 
     /**
-     * topics  exists,listener is null 500401
+     * topics  exists,listener is null 
      *
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe17() throws InterruptedException {
+    public void testListSubscribe11() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -1002,19 +1003,19 @@ public class ConsumerTest extends JUnitTestBase {
             this.iConsumer.subscribe(topics, groupId, this.lastEventId, "sdk", null);
         } catch (BrokerException e) {
             assertEquals(e.getCode(), ErrorCode.CONSUMER_LISTENER_IS_NULL.getCode());
-            log.error("subscribe(topics,listener) method error: ", e);
+            log.error("subscribe(topics,groupId,offset,interfaceType,listener", e);
         }
 
         Thread.sleep(wait3s);
     }
 
     /**
-     * topics 是空的
+     * topics is blank
      *
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe20() throws InterruptedException {
+    public void testListSubscribe12() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -1033,7 +1034,7 @@ public class ConsumerTest extends JUnitTestBase {
             });
         } catch (BrokerException e) {
             assertEquals(e.getCode(), ErrorCode.TOPIC_LIST_IS_NULL.getCode());
-            log.error("subscribe(topics,listener) method error: ", e);
+            log.error("subscribe(topics,groupId,offset,interfaceType,listener", e);
         }
 
         Thread.sleep(wait3s);
@@ -1045,7 +1046,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe21() throws InterruptedException {
+    public void testListSubscribe13() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -1066,7 +1067,7 @@ public class ConsumerTest extends JUnitTestBase {
                 }
             });
         } catch (BrokerException e) {
-            log.error("subscribe(topics,listener) method error: ", e);
+            log.error("subscribe(topics,groupId,offset,interfaceType,listener", e);
             assertEquals(e.getCode(), ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode());
         }
 
@@ -1079,7 +1080,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe22() throws InterruptedException {
+    public void testListSubscribe14() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -1097,13 +1098,74 @@ public class ConsumerTest extends JUnitTestBase {
                 }
             });
         } catch (BrokerException e) {
-            log.error("subscribe(topics,listener) method error: ", e);
+            log.error("subscribe(topics,groupId,offset,interfaceType,listener", e);
             assertEquals(e.getCode(), ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode());
         }
 
         Thread.sleep(wait3s);
     }
 
+    /**
+     * topics exists ,offset is legal and exists
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testListSubscribe15() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String[] topics = {this.topicName};
+            String result = this.iConsumer.subscribe(topics, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            assertNotNull(result);
+        } catch (BrokerException e) {
+            log.error("subscribe(topics,groupId,offset,interfaceType,listener", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+    
+    /**
+     * topics contain multipe topic ,offset is legal and exists
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testListSubscribe16() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String[] topics = {this.topicName,topic2,topic3};
+            String result = this.iConsumer.subscribe(topics, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            assertNotNull(result);
+        } catch (BrokerException e) {
+            log.error("subscribe(topics,groupId,offset,interfaceType,listener", e);
+        }
+
+        Thread.sleep(wait3s);
+    }    
     /**
      * test unSubscribe method
      * subId  exists
@@ -1130,7 +1192,7 @@ public class ConsumerTest extends JUnitTestBase {
             boolean result = this.iConsumer.unSubscribe(subId);
             assertTrue(result);
         } catch (BrokerException e) {
-            log.error("subscribe(topics,listener) method error: ", e);
+            log.error("unSubscribe(subId)", e);
         }
 
         Thread.sleep(wait3s);
@@ -1147,7 +1209,7 @@ public class ConsumerTest extends JUnitTestBase {
         log.info("===================={}", this.testName.getMethodName());
         try {
             this.iConsumer.startConsumer();
-            String subId = this.iConsumer.subscribe(this.topicName, groupId, "317e7c4c-175-329", "sdk", new IConsumer.ConsumerListener() {
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
                 @Override
                 public void onEvent(String subscriptionId, WeEvent event) {
                     log.info("onEvent: {}", event);
@@ -1162,7 +1224,7 @@ public class ConsumerTest extends JUnitTestBase {
             boolean result = this.iConsumer.unSubscribe("sfsghhr");
             assertFalse(result);
         } catch (BrokerException e) {
-            log.error("subscribe(topics,listener) method error: ", e);
+            log.error("unSubscribe(subId) ", e);
         }
 
         Thread.sleep(wait3s);
@@ -1194,7 +1256,7 @@ public class ConsumerTest extends JUnitTestBase {
             boolean result = this.iConsumer.unSubscribe("");
             assertFalse(result);
         } catch (BrokerException e) {
-            log.error("subscribe(topics,listener) method error: ", e);
+            log.error("unSubscribe(subId)", e);
         }
 
         Thread.sleep(wait3s);
@@ -1226,7 +1288,7 @@ public class ConsumerTest extends JUnitTestBase {
             boolean result = this.iConsumer.unSubscribe(" ");
             assertFalse(result);
         } catch (BrokerException e) {
-            log.error("subscribe(topics,listener) method error: ", e);
+            log.error("unSubscribe(subId) ", e);
         }
 
         Thread.sleep(wait3s);
@@ -1258,7 +1320,7 @@ public class ConsumerTest extends JUnitTestBase {
             boolean result = this.iConsumer.unSubscribe(null);
             assertFalse(result);
         } catch (BrokerException e) {
-            log.error("subscribe(topics,listener) method error: ", e);
+            log.error("unSubscribe(subId)", e);
         }
 
         Thread.sleep(wait3s);
