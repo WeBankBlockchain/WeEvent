@@ -43,10 +43,6 @@ public class MasterJob {
             if (this.client == null) {
                 log.error("init zookeeper failed");
             }
-        } else {
-            if (this.cgiSubscription == null) {
-                this.cgiSubscription = new CGISubscription(this, "test");
-            }
         }
     }
 

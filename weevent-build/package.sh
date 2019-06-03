@@ -1,166 +1,46 @@
 #!/bin/bash
-broker_tag=""
-broker_project_name=""
-governance_tag=""
-governance_project_name=""
-nginx_tag=""
+#
+# generate weevent tar package from github project
+#
+################################################################################
+
 version=""
-top_path=`pwd`
-gradle_buildpath=$(dirname "${top_path}")
-function usage(){
-    echo "Usage:"
-    echo "     package weevent: ./package.sh --version 0.9.0"
-    echo "     package broker module: ./package.sh --broker tag --version 0.9.0"
-    echo "     package nginx module: ./package.sh --nginx tag --version 0.9.0"
-    echo "     package governance module: ./package.sh --governance tag --version 0.9.0"
-    exit 1
-}
+tag="master"
 
-param_count=$#
-
-if [ $param_count -ne 2 ] && [ $param_count -ne 4 ]; then
-    usage
-fi
+current_path=`pwd`
+top_path=`dirname ${current_path}`
+out_path=""
 
 while [ $# -ge 2 ] ; do
     case "$1" in
-    --broker) para="$1 = $2;";broker_tag=$2;shift 2;;
-    --nginx) para="$1 = $2;";nginx_tag=$2;shift 2;;
-    --governance) para="$1 = $2;";governance_tag=$2;shift 2;;
-    --version) para="$1 = $2;";version="$2";shift 2;;
+    --tag) param="$1 = $2;";tag=$2;shift 2;;
+    --version) param="$1 = $2;";version="$2";shift 2;;
     *) echo "unknown parameter $1." ; exit 1 ; break;;
     esac
 done
 
-weevent_out_path=$top_path/weevent-$version
-module_out_path=$top_path/modules
-
-if [ -n "$version" ];then
-    echo "param version:"$version
-else
-    echo "package version is null"
-    exit 1
-fi	
-
-
-function copy_file(){ 
-    cp ./check-service.sh $weevent_out_path
-    cp ./config.ini $weevent_out_path
-    cp ./install-all.sh $weevent_out_path
-    cp ./README.md $weevent_out_path
-    cp ./start-all.sh $weevent_out_path
-    cp ./stop-all.sh $weevent_out_path
-    cp ./uninstall-all.sh $weevent_out_path
-    cp -r ./third-packages $weevent_out_path
-	
-    mkdir -p $weevent_out_path/modules/broker
-    cp ./modules/broker/install-broker.sh $weevent_out_path/modules/broker
-    mkdir -p $weevent_out_path/modules/governance
-    cp ./modules/governance/install-governance.sh $weevent_out_path/modules/governance
-    mkdir -p $weevent_out_path/modules/nginx
-    cp ./modules/nginx/install-nginx.sh $weevent_out_path/modules/nginx  
-    cp ./modules/nginx/nginx.sh $weevent_out_path/modules/nginx 
-    cp -r ./modules/nginx/conf $weevent_out_path/modules/nginx 
+function usage(){
+    echo "Usage:"
+    echo "    package master: ./package.sh --version 1.0.0"
+    echo "    package tag: ./package.sh --tag v1.0.0 --version 1.0.0"
 }
 
-#gradle build broker,governance,weevent-client
-function weevent_build(){
-	echo "out_path is $out_path"
-    if [ -d $out_path/broker/temp ];then
-        rm -rf $out_path/broker/temp
+function yellow_echo(){
+    local what=$*
+    if true;then
+        echo -e "\e[1;33m${what} \e[0m"
     fi
-    mkdir -p $out_path/broker/temp
-	
-	if [ -d $out_path/governance/temp ];then
-        rm -rf $out_path/governance/temp
-    fi
-	mkdir -p $out_path/governance/temp
-    #checkout tag
-	cd $gradle_buildpath
-    git checkout v$version
-    if [[ $? -ne 0 ]];then
-		yellow_echo "git checkout to v${version} error"
-		exit 1
-	fi
-	
-	#gradle build 
-	echo "begin gradle build weevent"
-	gradle clean build -x test
-	if [[ $? -ne 0 ]];then
-		yellow_echo "gradle build weevent error"
-		exit 1
-	fi
-	execute_result "weevent build success"
-	
-	#copy file to temp path
-	cp -r $gradle_buildpath/weevent-broker/dist/* $out_path/broker/temp/
-	cp -r $gradle_buildpath/weevent-governance/dist/* $out_path/governance/temp/
-    if [ -e $out_path/broker/temp/conf/application-dev.properties ]; then 
-        rm $out_path/broker/temp/conf/application-dev.properties
-    fi
-	
-	if [ -e $out_path/governance/temp/conf/application-dev.yml ]; then
-        rm $out_path/governance/temp/conf/application-dev.yml                       
-    fi  
 }
-
 
 function execute_result(){
     if [ $? -ne 0 ];then
         echo "$1 fail"
         exit 1
-    fi	 	 
-}
-
-# chmod $ dos2unix
-function set_permission(){
-    cd $1	
-    find $1 -name "*.sh" -exec chmod +x {} \;
-    find $1 -name "*.sh" -exec dos2unix {} \;
-    find $1 -name "*.ini" -exec dos2unix {} \;
-    find $1 -name "*.properties" -exec dos2unix {} \;
-    cd ..
-}
-
-# switch to prod,remove dev properties
-function switch_to_prod(){
-    if [ -z "$broker_tag" ] && [ -z "$governance_tag" ];then
-        if [ -e $out_path/broker/conf/application.properties ]; then	    
-            sed -i 's/dev/prod/' $out_path/broker/conf/application.properties
-        fi
-
-        if [ -e $out_path/governance/conf/application.yml ]; then	    
-            sed -i 's/dev/prod/' $out_path/governance/conf/application.yml		
-        fi
-	
-        if [ -e $out_path/broker/conf/application-dev.properties ]; then	
-            rm $out_path/broker/conf/application-dev.properties
-        fi
-
-        if [ -e $out_path/governance/conf/application-dev.yml ]; then	    
-            rm $out_path/governance/conf/application-dev.yml	
-        fi
-    else
-        if [ -e $out_path/broker/weevent-broker-$version/conf/application.properties ]; then	    
-            sed -i 's/dev/prod/' $out_path/broker/weevent-broker-$version/conf/application.properties
-        fi
-
-        if [ -e $out_path/governance/weevent-governance-$version/conf/application.yml ]; then	    
-            sed -i 's/dev/prod/' $out_path/governance/weevent-governance-$version/conf/application.yml		
-        fi
-	
-        if [ -e $out_path/broker/weevent-broker-$version/conf/application-dev.properties ]; then	
-            rm $out_path/broker/weevent-broker-$version/conf/application-dev.properties
-        fi
-
-        if [ -e $out_path/governance/weevent-governance-$version/conf/application-dev.yml ]; then	    
-            rm $out_path/governance/weevent-governance-$version/conf/application-dev.yml	
-        fi
     fi
 }
 
+# confirm whether to override input path
 function confirm(){
-    # confirm
     if [ -d $1 ]; then
         read -p "$out_path already exist, continue? [Y/N]" cmd_input
         if [ "Y" != "$cmd_input" ]; then
@@ -170,136 +50,153 @@ function confirm(){
     fi
 }
 
-function yellow_echo () {
-    local what=$*
-    if true;then
-        echo -e "\e[1;33m${what} \e[0m"
+# chmod & dos2unix
+function set_permission(){
+    cd ${out_path}
+
+    find -name "*.sh" -exec chmod +x {} \;
+    find -name "*.sh" -exec dos2unix {} \;
+    find -name "*.ini" -exec dos2unix {} \;
+    find -name "*.properties" -exec dos2unix {} \;
+}
+
+#gradle build broker, governance, client
+function build_weevent(){
+    cd ${top_path}
+
+    #switch tag
+    git checkout ${tag}
+    execute_result "git checkout ${tag}"
+
+    #gradle build
+    gradle clean build -x test
+    execute_result "build weevent"
+}
+
+function copy_install_file(){
+    cd ${current_path}
+
+    cp ./README.md ./config.ini ./install-all.sh ./start-all.sh ./check-service.sh ./stop-all.sh ./uninstall-all.sh ${out_path}
+    cp -r ./third-packages ${out_path}
+
+    mkdir -p ${out_path}/modules/broker
+    cp ./modules/broker/install-broker.sh ${out_path}/modules/broker
+    cp -r ${top_path}/weevent-broker/dist/* ${out_path}/modules/broker
+
+    mkdir -p ${out_path}/modules/governance
+    cp ./modules/governance/install-governance.sh ${out_path}/modules/governance
+    cp -r ${top_path}/weevent-governance/dist/* ${out_path}/modules/governance
+
+    mkdir -p ${out_path}/modules/nginx
+    cp ./modules/nginx/install-nginx.sh ./modules/nginx/nginx.sh ${out_path}/modules/nginx
+    cp -r ./modules/nginx/conf ${out_path}/modules/nginx
+}
+
+# switch to prod,remove dev properties
+function switch_to_prod(){
+    cd ${current_path}
+
+    if [ -e ${out_path}/modules/broker/conf/application-dev.properties ]; then
+        rm ${out_path}/modules/broker/conf/application-dev.properties
+    fi
+
+    if [ -e ${out_path}/modules/broker/conf/application.properties ]; then
+        sed -i 's/dev/prod/' ${out_path}/modules/broker/conf/application.properties
+    fi
+
+    if [ -e ${out_path}/modules/governance/conf/application-dev.yml ]; then
+        rm ${out_path}/modules/governance/conf/application-dev.yml
+    fi
+
+    if [ -e ${out_path}/modules/governance/conf/application.yml ]; then
+        sed -i 's/dev/prod/' ${out_path}/modules/governance/conf/application.yml
     fi
 }
 
+function tar_broker(){
+    local target=$1
+
+    yellow_echo "generate ${target}"
+    cd ${out_path}/modules
+
+    cp -r broker broker-${version}
+    tar -czpvf ${target} broker-${version}
+    mv ${target} ${current_path}
+}
+
+function tar_governance(){
+    local target=$1
+
+    yellow_echo "generate ${target}"
+    cd ${out_path}/modules
+
+    cp -r governance governance-${version}
+    tar -czpvf ${target} governance-${version}
+    mv ${target} ${current_path}
+}
+
+function tar_nginx(){
+    local target=$1
+
+    yellow_echo "generate ${target}"
+    cd ${out_path}/modules
+
+    mkdir -p ./nginx/third-packages
+    cp ${current_path}/third-packages/nginx-1.14.2.tar.gz ./nginx/third-packages
+    cp ${current_path}/third-packages/pcre-8.20.tar.gz ./nginx/third-packages
+    cp -r nginx nginx-${version}
+    tar -czpvf ${target} nginx-${version}
+    mv ${target} ${current_path}
+}
+
 # package weevent-$version
-function package_weevent(){
-    local out_path=""
-    confirm $weevent_out_path 
-    mkdir -p weevent-$version
-    execute_result "mkdir weevent-$version"
-    copy_file
-    out_path=$weevent_out_path/modules
-        
-    weevent_build $out_path
-    cp -r $out_path/broker/temp/* $out_path/broker
-    cd $out_path/broker
-    rm -rf temp
-    echo "copy broker dist over "
-    
-    cp -r $out_path/governance/temp/* $out_path/governance
-    cd $out_path/governance
-    rm -rf temp
-    echo "copy governance dist over " 
-                 
-    switch_to_prod $out_path            
-    set_permission $weevent_out_path
-        
-    echo "tar weevent-$version start "
-    tar -czvf weevent-$version.tar.gz weevent-$version
-    rm -rf weevent-$version
-    execute_result "remove folder weevent-$version"
+function package(){
+    confirm ${out_path}
+    mkdir -p ${out_path}
+    execute_result "mkdir ${out_path}"
+
+    yellow_echo "begin to package weevent-${version}"
+
+    yellow_echo "build weevent [${tag}]"
+    #generate jar
+    build_weevent
+
+    #copy file from build path
+    yellow_echo "prepare install file"
+    copy_install_file
+    switch_to_prod
+    set_permission
+
+    #package weevent
+    yellow_echo "generate weevent-${version}.tar.gz"
+    cd ${current_path}
+    tar -czpvf weevent-${version}.tar.gz `basename ${out_path}`
+
+    #package module
+    #tar broker
+    tar_broker weevent-broker-${version}.tar.gz
+
+    #tar governance
+    tar_governance weevent-governance-${version}.tar.gz
+
+    #tar nginx
+    tar_nginx weevent-nginx-${version}.tar.gz
+
+    #remove template
+    rm -rf ${out_path}
 }
 
-# package weevent-broker-$version
-function package_weevent_broker(){
-    local out_path=""
-    out_path=$module_out_path 
-    confirm $out_path/broker/weevent-broker-$version 
-    cd $out_path/broker           
-    mkdir -p weevent-broker-$version
-    execute_result "mkdir weevent-broker-$version"
-           
-    weevent_build $out_path 
-    
-    cp -r $out_path/broker/temp/* $out_path/broker/weevent-broker-$version
-    cd $out_path/broker
-    rm -rf temp
-    echo "copy weevent-broker dist over " 
-        
-    switch_to_prod $out_path    
-    set_permission $out_path/broker/weevent-broker-$version
-    
-    echo "tar weevent-broker-$version start "
-    tar -czvf weevent-broker-$version.tar.gz weevent-broker-$version
-    rm -rf weevent-broker-$version
-    execute_result "remove folder weevent-broker-$version"
-}
+function main(){
+    if [ -z "$version" ];then
+        usage
+        exit 1
+    fi
 
-# package weevent-governance-$version
-function package_weevent_governance(){
-    local out_path=""
-    out_path=$module_out_path       
-    confirm $out_path/governance/weevent-governance-$version  
-    cd $out_path/governance      
-    mkdir -p weevent-governance-$version
-    execute_result "mkdir weevent-governance-$version"
-    
-    weevent_build $out_path
-    
-    cp -r $out_path/governance/temp/* $out_path/governance/weevent-governance-$version
-    cd $out_path/governance
-    rm -rf temp
-    echo "copy weevent-governance dist over  " 
-          
-    switch_to_prod $out_path   
-    set_permission $out_path/governance/weevent-governance-$version
-    
-    echo "tar weevent-governance-$version start "
-    tar -czvf weevent-governance-$version.tar.gz weevent-governance-$version
-    rm -rf weevent-governance-$version
-    execute_result "remove folder weevent-governance-$version"
-}
+    out_path=${current_path}/weevent-${version}
+    package
 
-# package weevent-nginx-$version
-function package_weevent_nginx(){
-    local out_path=""
-    out_path=$module_out_path       
-    confirm $out_path/nginx/weevent-nginx-$version  
-    cd $out_path/nginx      
-    mkdir -p weevent-nginx-$version
-    execute_result "mkdir weevent-nginx-$version"
-     
-    cp -r ./conf/ ./weevent-nginx-$version
-    cp ./nginx.sh ./weevent-nginx-$version
-    cp ./build-nginx.sh ./weevent-nginx-$version
-    mkdir -p weevent-nginx-$version/third-packages
-    cp $top_path/third-packages/nginx-1.14.2.tar.gz ./weevent-nginx-$version/third-packages
-    cp $top_path/third-packages/pcre-8.20.tar.gz ./weevent-nginx-$version/third-packages  
-           
-    set_permission $out_path/nginx/weevent-nginx-$version
-    
-    echo "tar weevent-nginx-$version start "
-    tar -czvf weevent-nginx-$version.tar.gz weevent-nginx-$version
-    rm -rf weevent-nginx-$version
-    execute_result "remove folder weevent-nginx-$version"
-}
-
-function main(){ 
-           
-    # package
-    if [ -z "$broker_tag" ] && [ -z "$governance_tag" ] && [ -z "$nginx_tag" ];then
-		package_weevent        
-    else
-        if [ -n "$broker_tag" ];then
-            package_weevent_broker
-        fi
-		
-        if [ -n "$governance_tag" ];then
-            package_weevent_governance
-        fi
-		
-        if [ -n "$nginx_tag" ];then
-            package_weevent_nginx
-        fi   
-    fi  
-    
-    yellow_echo "package success "
+    cd ${current_path}
+    yellow_echo "package success"
 }
 
 main

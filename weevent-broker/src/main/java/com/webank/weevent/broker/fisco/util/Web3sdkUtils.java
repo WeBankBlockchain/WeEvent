@@ -41,17 +41,24 @@ public class Web3sdkUtils {
             FiscoConfig fiscoConfig = new FiscoConfig();
             fiscoConfig.load();
 
-            String address;
-            if (args.length >= 2) {
+            String address = "";
+            if (fiscoConfig.getVersion().startsWith("2.")) {
                 // 2.0x
+                Long groupId = 1L;
+                if (args.length >= 2) {
+                    groupId = Long.valueOf(args[1]);
+                }
                 org.fisco.bcos.web3j.crypto.Credentials credentials = Web3SDK2Wrapper.getCredentials(fiscoConfig);
-                org.fisco.bcos.web3j.protocol.Web3j web3j = Web3SDK2Wrapper.initWeb3j(Long.valueOf(args[1]), fiscoConfig);
+                org.fisco.bcos.web3j.protocol.Web3j web3j = Web3SDK2Wrapper.initWeb3j(groupId, fiscoConfig);
                 address = Web3SDK2Wrapper.deployTopicControl(web3j, credentials);
-            } else {
+            } else if (fiscoConfig.getVersion().startsWith("1.3")) {
                 // 1.x
                 org.bcos.web3j.crypto.Credentials credentials = Web3SDKWrapper.getCredentials(fiscoConfig);
                 org.bcos.web3j.protocol.Web3j web3j = Web3SDKWrapper.initWeb3j(fiscoConfig);
                 address = Web3SDKWrapper.deployTopicControl(web3j, credentials);
+            } else {
+                log.error("unknown FISCO-BCOS version: {}", fiscoConfig.getVersion());
+                System.exit(1);
             }
 
             System.out.println("deploy contract[TopicController] success, address: " + address);

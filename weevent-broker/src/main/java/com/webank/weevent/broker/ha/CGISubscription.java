@@ -346,9 +346,7 @@ public class CGISubscription {
 
             return zkSubscription.getSubscriptionId();
         } else {
-
             log.info("i am not leader, route to master");
-            // return routeRestMaster(urlFormat, String.class);
 
             ZKSubscription zkSubscription = doRestSubscribe(topic, groupId, subscriptionId, url);
             return zkSubscription.getSubscriptionId();
@@ -380,7 +378,6 @@ public class CGISubscription {
         }
     }
 
-    @Retryable(value = BrokerException.class, maxAttempts = 3)
     private <T> T routeRestMaster(String urlFormat, Class<T> responseType) throws BrokerException {
         try {
             SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
@@ -395,7 +392,6 @@ public class CGISubscription {
             return response.getBody();
         } catch (Exception e) {
             log.error("route request to master failed", e);
-            //return null;
             throw new BrokerException(ErrorCode.HA_ROUTE_TO_MASTER_FAILED);
         }
     }

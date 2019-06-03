@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function governance_setup() { 
-    echo "install governance into $out_path " &>> $installPWD/install.log
+    echo "install governance into $out_path "
     
     #create governance list
     mkdir -p $out_path
@@ -9,65 +9,59 @@ function governance_setup() {
     rm -f $out_path/install-governance.sh
     
       
-    if [[ -z $server_port ]];
-    then
+    if [[ -z $server_port ]];then
         echo "server_port is empty."
         echo "set server_port failed"
         exit 1
     else
        eval sed -i "s/8082/${server_port}/" $out_path/conf/application-prod.yml
     fi
-    echo "set server_port success" &>> $installPWD/install.log
+    echo "set server_port success"
  
-    if [[ -z $mysql_ip ]];
-    then
+    if [[ -z $mysql_ip ]];then
         echo "mysql_ip is empty."
         echo "set mysql_ip failed"
         exit 1
     else
        eval sed -i "s/127.0.0.1:3306/${mysql_ip}:3306/" $out_path/conf/application-prod.yml
     fi
-    echo "set mysql_ip success" &>> $installPWD/install.log    
+    echo "set mysql_ip success"
      
-    if [[ -z $mysql_port ]];
-    then
+    if [[ -z $mysql_port ]];then
         echo "mysql_port is empty."
         echo "set mysql_port failed"
         exit 1
     else
        eval sed -i "s/3306/${mysql_port}/" $out_path/conf/application-prod.yml
     fi
-    echo "set mysql_port success"  &>> $installPWD/install.log 
+    echo "set mysql_port success"
 
-    if [[ -z $mysql_user ]];
-    then
+    if [[ -z $mysql_user ]];then
         echo "mysql_user is empty."
         echo "set mysql_user failed"
         exit 1
     else
        eval sed -i "s/xxxx/${mysql_user}/" $out_path/conf/application-prod.yml
     fi
-    echo "set mysql_user success"  &>> $installPWD/install.log  
+    echo "set mysql_user success"
   
-    if [[ -z $mysql_pwd ]];
-    then
+    if [[ -z $mysql_pwd ]];then
         echo "mysql_pwd is empty"
         echo "set mysql_pwd failed"
         exit 1
     else
        eval sed -i "s/yyyy/${mysql_pwd}/" $out_path/conf/application-prod.yml
     fi
-    echo "set mysql_pwd success" &>> $installPWD/install.log
+    echo "set mysql_pwd success"
        
-    if [[ -z $broker_port ]];
-    then
+    if [[ -z $broker_port ]];then
         echo "broker_port is empty"
         echo "set broker_port failed"
         exit 1
     else
        eval sed -i "s/8081/${broker_port}/" $out_path/conf/application-prod.yml
     fi
-    echo "set broker_port success" &>> $installPWD/install.log
+    echo "set broker_port success"
 
     
     # init db,create datebase and tables
@@ -77,9 +71,9 @@ function governance_setup() {
         echo "Error,init mysql fail"
         exit 1
     fi
-    echo "init db success" &>> $installPWD/install.log
+    echo "init db success"
     
-    echo "governance mdoule install ok!" &>> $installPWD/install.log
+    echo "governance module install success"
 }
 
 #get parameter
@@ -107,7 +101,7 @@ influxdb_ip=""
 influxdb_port=""
 out_path=""
 current_path=`pwd`
-echo "current path $current_path" &>> $installPWD/install.log
+echo "current path $current_path"
 
 while [ $# -ge 2 ] ; do
     case "$1" in
@@ -128,15 +122,6 @@ while [ $# -ge 2 ] ; do
         *) echo "unknown parameter $1." ; exit 1 ; break;;
     esac
 done
-
-# confirm
-if [ -d $out_path ]; then
-    read -p "$out_path already exist, continue? [Y/N]" cmd_input
-    if [ "Y" != "$cmd_input" ]; then
-        exit 1
-    fi
-fi
-
 
 governance_setup
 
