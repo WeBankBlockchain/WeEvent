@@ -19,6 +19,11 @@ language: java
 jdk:
 - oraclejdk8
 
+notifications:
+  email:
+    - meifen20160710@gmail.com
+
+
 before_cache:
 - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
 - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
@@ -29,6 +34,13 @@ cache:
 
 #before_install:
 #- gradle wrapper
+
+[skip travis] Update README
+
+# for governance
+#services:
+#- mysql
+
 
 script:
 - chmod +x ./gradlew
@@ -49,6 +61,7 @@ deploy:
   file_glob: true
   file: dist/app/weevent.jar
   skip_cleanup: true
+  github_token:$GITHUB_TOKEN
   on:
     tags: true
     all_branches: true
