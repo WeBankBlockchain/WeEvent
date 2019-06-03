@@ -6,7 +6,6 @@ import java.util.Map;
 import com.webank.weevent.JUnitTestBase;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
-import com.webank.weevent.broker.plugin.IConsumer.ConsumerListener;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.SendResult;
@@ -85,7 +84,30 @@ public class ConsumerTest extends JUnitTestBase {
 
         assertTrue(this.iConsumer.startConsumer());
     }
+    
+    /**
+     * Method: shutDownConsumer()
+     */
+    @Test
+    public void testShutdownConsumer() throws Exception {
+        log.info("===================={}", this.testName.getMethodName());
 
+        assertTrue(this.iConsumer.shutdownConsumer());
+    }
+
+    /**
+     * test shutdown Multiple 3 times
+     */
+    @Test
+    public void testMultipleShutdownConsumer() throws Exception {
+        log.info("===================={}", this.testName.getMethodName());
+
+        assertTrue(this.iConsumer.shutdownConsumer());
+        assertTrue(this.iConsumer.shutdownConsumer());
+        assertTrue(this.iConsumer.shutdownConsumer());
+    }
+
+    
     /**
      * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
      * topic is ""
@@ -93,7 +115,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe1() throws InterruptedException {
+    public void testSubscribe_topicIsBlank() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -124,7 +146,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe2() throws InterruptedException {
+    public void testSubscribe_topicIsBlank2() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -155,7 +177,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe3() throws InterruptedException {
+    public void testSubscribe_topicLenGt64() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -189,7 +211,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe4() throws InterruptedException {
+    public void testSubscribe_offsetIsFrist() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -198,6 +220,8 @@ public class ConsumerTest extends JUnitTestBase {
                 @Override
                 public void onEvent(String subscriptionId, WeEvent event) {
                     assertNotNull(event);
+                    assertEquals(topicName,event.getTopic());
+                    assertNotNull(event.getEventId());
                 }
 
                 @Override
@@ -221,7 +245,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe5() throws InterruptedException {
+    public void testSubscribe_offsetIsLast() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -230,7 +254,9 @@ public class ConsumerTest extends JUnitTestBase {
                 @Override
                 public void onEvent(String subscriptionId, WeEvent event) {
                     log.info("onEvent {}", event);
-                    assertTrue(!event.getEventId().isEmpty());
+                    assertNotNull(event);
+                    assertEquals(topicName,event.getTopic());
+                    assertNotNull(event.getEventId());
                 }
 
                 @Override
@@ -245,7 +271,198 @@ public class ConsumerTest extends JUnitTestBase {
         }
         Thread.sleep(wait3s);
     }
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset= this.lastEventId
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testSubscribe_normalEventId() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
 
+        try {
+            this.iConsumer.startConsumer();
+            String result = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                    log.info("onEvent {}", event);
+                    assertNotNull(event);
+                    assertEquals(topicName,event.getTopic());
+                    assertNotNull(event.getEventId());
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            assertNotNull(result);
+        } catch (BrokerException e) {
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+        Thread.sleep(wait3s);
+    }
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset= this.lastEventId
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testSubscribe_groupIdIsNull() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String result = this.iConsumer.subscribe(this.topicName, null, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                    log.info("onEvent {}", event);
+                    assertTrue(!event.getEventId().isEmpty());
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+        Thread.sleep(wait3s);
+    }
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset= this.lastEventId groupId is not number
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testSubscribe_groupIdIsNotNum() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String result = this.iConsumer.subscribe(this.topicName, "sdfsf", this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                    log.info("onEvent {}", event);
+                    assertTrue(!event.getEventId().isEmpty());
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+        Thread.sleep(wait3s);
+    }
+
+    /**
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset= this.lastEventId groupId = 0
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testSubscribe_groupIdNumEq0() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String result = this.iConsumer.subscribe(this.topicName, "0", this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                    log.info("onEvent {}", event);
+                    assertTrue(!event.getEventId().isEmpty());
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+        Thread.sleep(wait3s);
+    }
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset= this.lastEventId groupId < 0
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testSubscribe_groupIdNumLt0() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String result = this.iConsumer.subscribe(this.topicName, "-1", this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset= this.lastEventId groupId is not currentGroupId
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testSubscribe_groupIdNotCurrentId() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String result = this.iConsumer.subscribe(this.topicName, "4", this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    } 
+    
     /**
      * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
      * topic  exists,offset is general string like lsjflsjfljls
@@ -253,7 +470,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe6() throws InterruptedException {
+    public void testSubscribe_offsetIsIllegal() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -277,6 +494,7 @@ public class ConsumerTest extends JUnitTestBase {
         Thread.sleep(wait3s);
     }
 
+
     /**
      * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
      * topic  exists,offset string like 317e7c4c-fsfds-sdfsdf
@@ -284,7 +502,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe7() throws InterruptedException {
+    public void testSubscribe_ofssetIsIllegal2() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -315,7 +533,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe8() throws InterruptedException {
+    public void testSubscribe_ofssetIsIllegal3() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -346,7 +564,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe9() throws InterruptedException {
+    public void testSubscribe_ofssetIsIllegal4() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -377,7 +595,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe10() throws InterruptedException {
+    public void testSubscribe_offsetNumGtBlock() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -408,7 +626,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe11() throws InterruptedException {
+    public void testSubscribe_offsetLenGt64() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -443,7 +661,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe12() throws InterruptedException {
+    public void testSubscribe_offsetIsNull() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -474,7 +692,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe13() throws InterruptedException {
+    public void testSubscribe_offsetIsBlank() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -505,7 +723,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe14() throws InterruptedException {
+    public void testSubscribe_offsetIsBlank2() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -536,7 +754,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe15() throws InterruptedException {
+    public void testSubscribe_listenerIsNull() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -552,44 +770,12 @@ public class ConsumerTest extends JUnitTestBase {
 
     /**
      * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
-     * topic  exists,offset eventId exist
-     *
-     * @throws InterruptedException
-     */
-    @Test
-    public void testSubscribe16() throws InterruptedException {
-        log.info("===================={}", this.testName.getMethodName());
-
-        try {
-            this.iConsumer.startConsumer();
-            String result = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
-                @Override
-                public void onEvent(String subscriptionId, WeEvent event) {
-
-                }
-
-                @Override
-                public void onException(Throwable e) {
-                    log.error("onException", e);
-                    fail();
-                }
-            });
-            assertNotNull(result);
-        } catch (BrokerException e) {
-            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
-        }
-
-        Thread.sleep(wait3s);
-    }
-
-    /**
-     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
      * topic is not exists,offset is eventId legal
      *
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe17() throws InterruptedException {
+    public void testSubscribe_topicIsUnexists() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -621,7 +807,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe18() throws InterruptedException {
+    public void testSubscribe_containSpeciaChar() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         char[] charStr = {69, 72, 31};
@@ -653,7 +839,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testSubscribe19() throws InterruptedException {
+    public void testSubscribe_containChinChar() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -675,14 +861,1300 @@ public class ConsumerTest extends JUnitTestBase {
             assertEquals(e.getCode(), ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode());
         }
     }
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
+     * interfaceType is null
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testSubscribe_typeIsNull() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
 
+        try {
+            this.iConsumer.startConsumer();
+            String result = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, null, new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+    }
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
+     * interfaceType is not illegal
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testSubscribe_typeIsIllegal() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String result = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sfsg", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                    log.info("onEvent {}", event);
+                    assertNotNull(event);
+                    assertEquals(topicName,event.getTopic());
+                    assertNotNull(event.getEventId());
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            assertNotNull(result);
+        } catch (BrokerException e) {
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+    }
+
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * subId is null
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_subIdIsNull() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String result = this.iConsumer.subscribe(this.topicName, groupId, WeEvent.OFFSET_LAST, null, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.SUBSCRIPTIONID_IS_BLANK.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * subId is blank ""
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_subIdIsBlank() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String result = this.iConsumer.subscribe(this.topicName, groupId, WeEvent.OFFSET_LAST, "", "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.SUBSCRIPTIONID_IS_BLANK.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * subId is blank " "
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_subIdIsBlank2() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String result = this.iConsumer.subscribe(this.topicName, groupId, WeEvent.OFFSET_LAST, " ", "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.SUBSCRIPTIONID_IS_BLANK.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * subId is illegal
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_subIdIsIllegal() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String result = this.iConsumer.subscribe(this.topicName, groupId, WeEvent.OFFSET_LAST, "sdgsgsgdg", "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.SUBSCRIPTIONID_FORMAT_INVALID.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * subId is legal but not exists
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_subIdIsNotExists() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String result = this.iConsumer.subscribe(this.topicName, groupId, WeEvent.OFFSET_LAST, "ec1776da-1748-4c68-b0eb-ed3e97f9aadb", "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.SUBSCRIPTIONID_NOT_EXIST.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * topic not same first
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_topicNotSameFirst() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            String result = this.iConsumer.subscribe(topic2, groupId, WeEvent.OFFSET_LAST, subId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.TOPIC_NOT_MATCH.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * topic is ""
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_topicIsBlank() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            String result = this.iConsumer.subscribe("", groupId, WeEvent.OFFSET_FIRST, subId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.TOPIC_IS_BLANK.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * topic is " "
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_topicIsBlank2() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            String result = this.iConsumer.subscribe(" ", groupId, WeEvent.OFFSET_FIRST, subId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.TOPIC_IS_BLANK.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * topic  length > 64
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_topicLenGt64() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            String result = this.iConsumer.subscribe(
+        	    "qwertyuioplkjhgfdsazxcvbnmlkjhgfjshfljjdkdkfeffslkfsnkhkhhjjjjhggfsfsff", 
+        	    groupId, WeEvent.OFFSET_FIRST,
+        	    subId,
+        	    "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset=WeEvent.OFFSET_FIRST
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_offsetIsFrist() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            String result = this.iConsumer.subscribe(this.topicName, groupId, WeEvent.OFFSET_FIRST, subId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                    assertNotNull(event);
+                    assertEquals(topicName,event.getTopic());
+                    assertNotNull(event.getEventId());
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            log.info("result id: " + result);
+            assertNotNull(result);
+        } catch (BrokerException e) {
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+        Thread.sleep(wait3s);
+    }
+
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset=WeEvent.OFFSET_LAST
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_offsetIsLast() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            String result = this.iConsumer.subscribe(this.topicName, groupId, WeEvent.OFFSET_LAST, subId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                    log.info("onEvent {}", event);
+                    assertNotNull(event);
+                    assertEquals(topicName,event.getTopic());
+                    assertNotNull(event.getEventId());
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            assertNotNull(result);
+        } catch (BrokerException e) {
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+        Thread.sleep(wait3s);
+    }
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset= this.lastEventId
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_normalEventId() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            String result = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, subId,"sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                    log.info("onEvent {}", event);
+                    assertNotNull(event);
+                    assertEquals(topicName,event.getTopic());
+                    assertNotNull(event.getEventId());
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            assertNotNull(result);
+        } catch (BrokerException e) {
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+        Thread.sleep(wait3s);
+    }
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset= this.lastEventId
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_groupIdIsNull() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            String result = this.iConsumer.subscribe(this.topicName, null, this.lastEventId, subId,"sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                    log.info("onEvent {}", event);
+                    assertTrue(!event.getEventId().isEmpty());
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+        Thread.sleep(wait3s);
+    }
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset= this.lastEventId groupId is not number
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_groupIdIsNotNum() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            String result = this.iConsumer.subscribe(this.topicName, "sdfsf", this.lastEventId, subId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                    log.info("onEvent {}", event);
+                    assertTrue(!event.getEventId().isEmpty());
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+        Thread.sleep(wait3s);
+    }
+
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset= this.lastEventId groupId = 0
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_groupIdNumEq0() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            String result = this.iConsumer.subscribe(this.topicName, "0", this.lastEventId, subId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                    log.info("onEvent {}", event);
+                    assertTrue(!event.getEventId().isEmpty());
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+        Thread.sleep(wait3s);
+    }
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset= this.lastEventId groupId < 0
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_groupIdNumLt0() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            String result = this.iConsumer.subscribe(this.topicName, "-1", this.lastEventId, subId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset= this.lastEventId groupId is not currentGroupId
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_groupIdNotCurrentId() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            String result = this.iConsumer.subscribe(this.topicName, "4", this.lastEventId, subId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    } 
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset is general string like lsjflsjfljls
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_offsetIsIllegal() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            String result = this.iConsumer.subscribe(this.topicName, groupId, "lsjflsjfljls", subId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.EVENT_ID_IS_ILLEGAL.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+
+
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset string like 317e7c4c-fsfds-sdfsdf
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_ofssetIsIllegal2() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            String result = this.iConsumer.subscribe(this.topicName, groupId, "317e7c4c-fsfds-sdfsdf", subId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.EVENT_ID_IS_ILLEGAL.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset string like 317e7c4c-75-sdfsdf
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_ofssetIsIllegal3() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            String result = this.iConsumer.subscribe(this.topicName, groupId, "317e7c4c-75-sdfsdf", subId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.EVENT_ID_IS_ILLEGAL.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset string like 317e7c4c-lsjfls-329
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_ofssetIsIllegal4() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            String result = this.iConsumer.subscribe(this.topicName, groupId, "317e7c4c-lsjfls-329", subId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.EVENT_ID_IS_ILLEGAL.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset eventId  blolck number > blockchain block height
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_offsetNumGtBlock() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            String result = this.iConsumer.subscribe(this.topicName, groupId, "317e7c4c-75-32900000", subId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.EVENT_ID_IS_MISMATCH.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+
+    /**
+     *  test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset eventId length >64
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_offsetLenGt64() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            String result = this.iConsumer.subscribe(
+        	    this.topicName, 
+        	    groupId, 
+        	    "317e7c4c45gfjfs5369875452364875962-1213456789632145678564547896354775-329", 
+        	    subId,
+        	    "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.EVENT_ID_EXCEEDS_MAX_LENGTH.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset is null
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_offsetIsNull() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            
+            String result = this.iConsumer.subscribe(this.topicName, groupId, null, subId,"sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.OFFSET_IS_BLANK.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset is ""
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_offsetIsBlank() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            
+            String result = this.iConsumer.subscribe(this.topicName, groupId, "", subId,"sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.OFFSET_IS_BLANK.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset is " "
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_offsetIsBlank2() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            
+            String result = this.iConsumer.subscribe(this.topicName, groupId, " ", subId,"sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.OFFSET_IS_BLANK.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * topic  exists,listener is null
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_listenerIsNull() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            
+            String result = this.iConsumer.subscribe(this.topicName, groupId, " ", subId,"sdk", null);
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.CONSUMER_LISTENER_IS_NULL.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+
+    /**
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
+     * topic is not exists,offset is eventId legal
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_topicIsUnexists() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            String result = this.iConsumer.subscribe("sdlkufhdsighfskhdsf", groupId, "df47fc12-75-3", subId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.TOPIC_NOT_EXIST.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * interfaceType is null
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_typeIsNull() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            String result = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, subId, null, new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+    }
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener)
+     * interfaceType is not sdk
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testReSubscribe_typeIsNotLegal() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String subId = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            String result = this.iConsumer.subscribe(this.topicName, groupId, this.lastEventId, subId, "sfsg", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                    log.info("onEvent {}", event);
+                    assertNotNull(event);
+                    assertEquals(topicName,event.getTopic());
+                    assertNotNull(event.getEventId());
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+            assertNotNull(result);
+        } catch (BrokerException e) {
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+    }    
+    
     /**
      * topics key is ""
      *
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe1() throws InterruptedException {
+    public void testListSubscribe_topicIsBlank() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -713,7 +2185,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe2() throws InterruptedException {
+    public void testListSubscribe_topicIsBlank2() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -744,7 +2216,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe3() throws InterruptedException {
+    public void testListSubscribe_topicLenGt64() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -775,7 +2247,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe4() throws InterruptedException {
+    public void testListSubscribe_offsetIsFrist() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -807,7 +2279,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe5() throws InterruptedException {
+    public void testListSubscribe_offsetIsLast() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -839,7 +2311,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe6() throws InterruptedException {
+    public void testListSubscribe_offsetIsIllegal() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -870,7 +2342,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe7() throws InterruptedException {
+    public void testListSubscribe_offsetHeightGtBlock() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -901,7 +2373,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe8() throws InterruptedException {
+    public void testListSubscribe_offsetIsNull() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -932,7 +2404,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe9() throws InterruptedException {
+    public void testListSubscribe_offsetIsBlank() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -963,7 +2435,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe10() throws InterruptedException {
+    public void testListSubscribe_offsetIsBlank2() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -994,7 +2466,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe11() throws InterruptedException {
+    public void testListSubscribe_listernerIsNull() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -1015,7 +2487,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe12() throws InterruptedException {
+    public void testListSubscribe_topicsIsEmpty() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -1046,7 +2518,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe13() throws InterruptedException {
+    public void testListSubscribe_topicsContainSpecialChar() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -1080,7 +2552,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe14() throws InterruptedException {
+    public void testListSubscribe_topicsContainChiChar() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -1111,7 +2583,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe15() throws InterruptedException {
+    public void testListSubscribe_normal() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -1137,12 +2609,12 @@ public class ConsumerTest extends JUnitTestBase {
     }
     
     /**
-     * topics contain multipe topic ,offset is legal and exists
+     * topics contain multiple topic ,offset is legal and exists
      *
      * @throws InterruptedException
      */
     @Test
-    public void testListSubscribe16() throws InterruptedException {
+    public void testListSubscribe_topicsContainMultipleTopic() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -1165,7 +2637,169 @@ public class ConsumerTest extends JUnitTestBase {
         }
 
         Thread.sleep(wait3s);
-    }    
+    } 
+    /**
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset= this.lastEventId
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testListSubscribe_groupIdIsNull() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String[] topics = {this.topicName};
+            String result = this.iConsumer.subscribe(topics, null, this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                    log.info("onEvent {}", event);
+                    assertTrue(!event.getEventId().isEmpty());
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+        Thread.sleep(wait3s);
+    }
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset= this.lastEventId groupId is not number
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testListSubscribe_groupIdIsNotNum() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String[] topics = {this.topicName};
+            String result = this.iConsumer.subscribe(topics, "sdfsf", this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                    log.info("onEvent {}", event);
+                    assertTrue(!event.getEventId().isEmpty());
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+        Thread.sleep(wait3s);
+    }
+
+    /**
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset= this.lastEventId groupId = 0
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testListSubscribe_groupIdNumEq0() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String[] topics = {this.topicName};
+            String result = this.iConsumer.subscribe(topics, "0", this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                    log.info("onEvent {}", event);
+                    assertTrue(!event.getEventId().isEmpty());
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+        Thread.sleep(wait3s);
+    }
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset= this.lastEventId groupId < 0
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testListSubscribe_groupIdNumLt0() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String[] topics = {this.topicName};
+            String result = this.iConsumer.subscribe(topics, "-1", this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    }
+    
+    /**
+     * test subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener)
+     * topic  exists,offset= this.lastEventId groupId is not currentGroupId
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testListSubscribe_groupIdNotCurrentId() throws InterruptedException {
+        log.info("===================={}", this.testName.getMethodName());
+
+        try {
+            this.iConsumer.startConsumer();
+            String[] topics = {this.topicName};
+            String result = this.iConsumer.subscribe(topics, "4", this.lastEventId, "sdk", new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("onException", e);
+                    fail();
+                }
+            });
+        } catch (BrokerException e) {
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+            log.error("SingleTopicSubscribe_lastEventIdCheck methed error: ", e);
+        }
+
+        Thread.sleep(wait3s);
+    } 
+    
     /**
      * test unSubscribe method
      * subId  exists
@@ -1173,7 +2807,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testUnSubscribe1() throws InterruptedException {
+    public void testUnSubscribe_existsSuId() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
         try {
             this.iConsumer.startConsumer();
@@ -1205,7 +2839,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testUnSubscribe2() throws InterruptedException {
+    public void testUnSubscribe_subIdNotExists() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
         try {
             this.iConsumer.startConsumer();
@@ -1237,7 +2871,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testUnSubscribe3() throws InterruptedException {
+    public void testUnSubscribe_subIdIsBlank() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
         try {
             this.iConsumer.startConsumer();
@@ -1269,7 +2903,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testUnSubscribe4() throws InterruptedException {
+    public void testUnSubscribe_subIdIsBlank2() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
         try {
             this.iConsumer.startConsumer();
@@ -1301,7 +2935,7 @@ public class ConsumerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testUnSubscribe5() throws InterruptedException {
+    public void testUnSubscribe_subIdIsNull() throws InterruptedException {
         log.info("===================={}", this.testName.getMethodName());
         try {
             this.iConsumer.startConsumer();
@@ -1325,4 +2959,5 @@ public class ConsumerTest extends JUnitTestBase {
 
         Thread.sleep(wait3s);
     }
+    
 }

@@ -1,5 +1,7 @@
 package com.webank.weevent.ST.plugin;
 
+import static org.junit.Assert.*;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,11 +19,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * FiscoBcosBroker4Producer Tester.
@@ -74,12 +71,22 @@ public class ProducerTest extends JUnitTestBase {
     public void testShutdownProducer() {
         Assert.assertTrue(iProducer.shutdownProducer());
     }
+    
+    /**
+     * Method: test shutdownProducer()
+     */
+    @Test
+    public void testShutdownProducer_manyTimes() {
+        Assert.assertTrue(iProducer.shutdownProducer());
+        Assert.assertTrue(iProducer.shutdownProducer());
+        Assert.assertTrue(iProducer.shutdownProducer());
+    }
 
     /**
      * Method: open topic exists
      */
     @Test
-    public void testOpen1() {
+    public void testOpen_topicExists() {
         try {
             boolean result = iProducer.open(this.topicName, groupId);
             assertTrue(result);
@@ -93,7 +100,7 @@ public class ProducerTest extends JUnitTestBase {
      * Method: open topic not exists
      */
     @Test
-    public void testOpen2() {
+    public void testOpen_topicNotExists() {
         try {
             String topicStr = "testtopic" + System.currentTimeMillis();
             boolean result = iProducer.open(topicStr, groupId);
@@ -108,7 +115,7 @@ public class ProducerTest extends JUnitTestBase {
      * Method: open topic length > 64
      */
     @Test
-    public void testOpen3() {
+    public void testOpen_topicLenGt64() {
         try {
             String topicStr = "topiclengthlonger64asdfghjklpoiuytrewqazxswcdevfrbg-" + System.currentTimeMillis();
             boolean result = iProducer.open(topicStr, groupId);
@@ -123,7 +130,7 @@ public class ProducerTest extends JUnitTestBase {
      * Method: open topic length equal 64
      */
     @Test
-    public void testOpen4() {
+    public void testOpen_topicLenEqual64() {
         try {
             String topicStr = "topiclengthequal64zxcvbnmlkjhgfdsaqwertyuioplokiuj-" + System.currentTimeMillis();
             boolean result = iProducer.open(topicStr, groupId);
@@ -138,7 +145,7 @@ public class ProducerTest extends JUnitTestBase {
      * Method: open topic is null
      */
     @Test
-    public void testOpen5() {
+    public void testOpen_topicIsNull() {
         try {
             boolean result = iProducer.open(null, groupId);
             assertFalse(result);
@@ -152,7 +159,7 @@ public class ProducerTest extends JUnitTestBase {
      * Method: open topic is ""
      */
     @Test
-    public void testOpen6() {
+    public void testOpen_topicIsBlank() {
         try {
             boolean result = iProducer.open("", groupId);
             assertFalse(result);
@@ -166,7 +173,7 @@ public class ProducerTest extends JUnitTestBase {
      * Method: open topic is " "
      */
     @Test
-    public void testOpen7() {
+    public void testOpen_topicIsBlank2() {
         try {
             boolean result = iProducer.open(" ", groupId);
             assertFalse(result);
@@ -175,12 +182,82 @@ public class ProducerTest extends JUnitTestBase {
             assertEquals(e.getCode(), ErrorCode.TOPIC_IS_BLANK.getCode());
         }
     }
+    
+    /**
+     * Method: open topic ,groupId is null
+     */
+    @Test
+    public void testOpen_groupIdIsNull() {
+        try {
+            boolean result = iProducer.open(this.topicName, null);
+            assertFalse(result);
+        } catch (BrokerException e) {
+            log.error("producer open error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * Method: open topic ,groupId is not number
+     */
+    @Test
+    public void testOpen_groupIdIsNotNum() {
+        try {
+            boolean result = iProducer.open(this.topicName, "sdfsg");
+            assertFalse(result);
+        } catch (BrokerException e) {
+            log.error("producer open error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * Method: open topic ,groupId = 0
+     */
+    @Test
+    public void testOpen_groupIdIsEqual0() {
+        try {
+            boolean result = iProducer.open(this.topicName, "0");
+            assertFalse(result);
+        } catch (BrokerException e) {
+            log.error("producer open error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * Method: open topic ,groupId < 0
+     */
+    @Test
+    public void testOpen_groupIdIsLt0() {
+        try {
+            boolean result = iProducer.open(this.topicName, "-1");
+            assertFalse(result);
+        } catch (BrokerException e) {
+            log.error("producer open error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * Method: open topic ,groupId is not current groupId
+     */
+    @Test
+    public void testOpen_groupIdIsNotCurrentGroupId() {
+        try {
+            boolean result = iProducer.open(this.topicName, "4");
+            assertFalse(result);
+        } catch (BrokerException e) {
+            log.error("producer open error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
 
     /**
      * Method: open topic contain special character withoutin[32,128]
      */
     @Test
-    public void testOpen8() {
+    public void testOpen_topicContainSpeciaChar() {
         char[] charStr = {69, 72, 31};
         try {
             String illegalTopic = new String(charStr);
@@ -196,7 +273,7 @@ public class ProducerTest extends JUnitTestBase {
      * Method: open topic contain Chinese character
      */
     @Test
-    public void testOpen9() {
+    public void testOpen_containChiChar() {
         try {
             boolean result = iProducer.open("中国", groupId);
             assert (result);
@@ -210,7 +287,7 @@ public class ProducerTest extends JUnitTestBase {
      * Method: Close this.topicName exists
      */
     @Test
-    public void testClose1() {
+    public void testClose_topicExists() {
         try {
             Assert.assertTrue(iProducer.close(this.topicName, groupId));
         } catch (BrokerException e) {
@@ -223,7 +300,7 @@ public class ProducerTest extends JUnitTestBase {
      * Method: Close topic is null
      */
     @Test
-    public void testClose2() {
+    public void testClose_topicIsNull() {
         try {
             Assert.assertFalse(iProducer.close(null, groupId));
         } catch (BrokerException e) {
@@ -233,10 +310,10 @@ public class ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * Method: Close topic为""
+     * Method: Close topic is""
      */
     @Test
-    public void testClose3() {
+    public void testClose_topicIsBlank() {
         try {
             Assert.assertFalse(iProducer.close("", groupId));
         } catch (BrokerException e) {
@@ -249,7 +326,7 @@ public class ProducerTest extends JUnitTestBase {
      * Method: Close topic is " "
      */
     @Test
-    public void testClose4() {
+    public void testClose_topicIsBlank2() {
         try {
             Assert.assertFalse(iProducer.close(" ", groupId));
         } catch (BrokerException e) {
@@ -259,10 +336,80 @@ public class ProducerTest extends JUnitTestBase {
     }
 
     /**
+     * Method: open topic ,groupId is null
+     */
+    @Test
+    public void testClose_groupIdIsNull() {
+        try {
+            boolean result = iProducer.close(this.topicName, null);
+            assertFalse(result);
+        } catch (BrokerException e) {
+            log.error("producer close error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * Method: open topic ,groupId is not number
+     */
+    @Test
+    public void testClose_groupIdIsNotNum() {
+        try {
+            boolean result = iProducer.close(this.topicName, "sdfsg");
+            assertFalse(result);
+        } catch (BrokerException e) {
+            log.error("producer close error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * Method: open topic ,groupId = 0
+     */
+    @Test
+    public void testClose_groupIdIsEqual0() {
+        try {
+            boolean result = iProducer.close(this.topicName, "0");
+            assertFalse(result);
+        } catch (BrokerException e) {
+            log.error("producer close error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * Method: open topic ,groupId < 0
+     */
+    @Test
+    public void testClose_groupIdIsLt0() {
+        try {
+            boolean result = iProducer.close(this.topicName, "-1");
+            assertFalse(result);
+        } catch (BrokerException e) {
+            log.error("producer close error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * Method: open topic ,groupId is current groupId
+     */
+    @Test
+    public void testClose_groupIdIsNotCurrentGroupId() {
+        try {
+            boolean result = iProducer.close(this.topicName, "4");
+            assertFalse(result);
+        } catch (BrokerException e) {
+            log.error("producer close error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
      * Method: Close topic length  > 64
      */
     @Test
-    public void testClose5() {
+    public void testClose_topicLenGt64() {
         try {
             String topicStr = "topiclengthlonger64azxsqwedcvfrtgbnhyujmkiolpoiuytr-" 
         	    + System.currentTimeMillis();
@@ -277,7 +424,7 @@ public class ProducerTest extends JUnitTestBase {
      * Method: Close topic topic contain special character withoutin[32,128]
      */
     @Test
-    public void testClose6() {
+    public void testClose_topicContainSpecialChar() {
         char[] charStr = {69, 72, 31};
         try {
             String illegalTopic = new String(charStr);
@@ -292,7 +439,8 @@ public class ProducerTest extends JUnitTestBase {
      * Method: Close topic contain Chinese character
      */
     @Test
-    public void testClose7() {
+    public void testClose_topicContainChiChar() {
+	
         try {
             Assert.assertFalse(iProducer.close("中国", groupId));
         } catch (BrokerException e) {
@@ -306,7 +454,7 @@ public class ProducerTest extends JUnitTestBase {
      * topic exist topic exists
      */
     @Test
-    public void testExist1() {
+    public void testExist_topicExists() {
         try {
             boolean result = iProducer.exist(this.topicName, groupId);
             Assert.assertTrue(result);
@@ -320,7 +468,7 @@ public class ProducerTest extends JUnitTestBase {
      * topic not exists
      */
     @Test
-    public void testExist2() {
+    public void testExist_topicNotExists() {
         try {
             String falseTopic = "fasssglsjgg";
             Assert.assertFalse(iProducer.exist(falseTopic, groupId));
@@ -334,7 +482,7 @@ public class ProducerTest extends JUnitTestBase {
      * topic is null
      */
     @Test
-    public void testExist3() {
+    public void testExist_topicIsNull() {
         try {
             Assert.assertFalse(iProducer.exist(null, groupId));
         } catch (BrokerException e) {
@@ -348,7 +496,7 @@ public class ProducerTest extends JUnitTestBase {
      * topic length > 64
      */
     @Test
-    public void testExist4() {
+    public void testExist_topicLenGt64() {
         try {
             String falseTopic = "fasssglsjggtyuioplkjhgfdsaqwezxcvqazxswedcvfrtgbnhyujmkiolpoiuytr";
             iProducer.exist(falseTopic, groupId);
@@ -363,7 +511,7 @@ public class ProducerTest extends JUnitTestBase {
      * topic blank
      */
     @Test
-    public void testExist5() {
+    public void testExist_topicIsBlank() {
         try {
             String falseTopic = "";
             Assert.assertFalse(iProducer.exist(falseTopic, groupId));
@@ -375,10 +523,10 @@ public class ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * topic blank
+     * topic blank " "
      */
     @Test
-    public void testExist6() {
+    public void testExist_topicIsBlank2() {
         try {
             String falseTopic = "  ";
             Assert.assertFalse(iProducer.exist(falseTopic, groupId));
@@ -393,7 +541,7 @@ public class ProducerTest extends JUnitTestBase {
      * topic length = 64 not exists
      */
     @Test
-    public void testExist7() {
+    public void testExist_topicLenEqual64() {
         try {
             String falseTopic = "sdfghjklpoiuytrewqazxcvbnmklopiuqazxswedcvfrtgbnhyujmkiolpoiuytr";
             boolean result = iProducer.exist(falseTopic, groupId);
@@ -402,12 +550,82 @@ public class ProducerTest extends JUnitTestBase {
             Assert.assertNull(e);
         }
     }
+    
+    /**
+     * Method: open topic ,groupId is null
+     */
+    @Test
+    public void testExists_groupIdIsNull() {
+        try {
+            boolean result = iProducer.exist(this.topicName, null);
+            assertFalse(result);
+        } catch (BrokerException e) {
+            log.error("producer exist error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * Method: open topic ,groupId is not number
+     */
+    @Test
+    public void testExist_groupIdIsNotNum() {
+        try {
+            boolean result = iProducer.exist(this.topicName, "sdfsg");
+            assertFalse(result);
+        } catch (BrokerException e) {
+            log.error("producer exist error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * Method: open topic ,groupId = 0
+     */
+    @Test
+    public void testExist_groupIdIsEqual0() {
+        try {
+            boolean result = iProducer.exist(this.topicName, "0");
+            assertFalse(result);
+        } catch (BrokerException e) {
+            log.error("producer exist error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * Method: open topic ,groupId < 0
+     */
+    @Test
+    public void testExist_groupIdIsLt0() {
+        try {
+            boolean result = iProducer.exist(this.topicName, "-1");
+            assertFalse(result);
+        } catch (BrokerException e) {
+            log.error("producer exist error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * Method: open topic ,groupId is not current groupId
+     */
+    @Test
+    public void testExist_groupIdIsNotCurrentGroupId() {
+        try {
+            boolean result = iProducer.exist(this.topicName, "4");
+            assertFalse(result);
+        } catch (BrokerException e) {
+            log.error("producer exist error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
 
     /**
      * topic contain special character withoutin [32,128]
      */
     @Test
-    public void testExist8() {
+    public void testExist_topicContainSpecialChar() {
         char[] charStr = {69, 72, 31};
         try {
             String illegalTopic = new String(charStr);
@@ -423,7 +641,7 @@ public class ProducerTest extends JUnitTestBase {
      * topic contain Chinese character
      */
     @Test
-    public void testExist9() {
+    public void testExist_topicContainChiChar() {
         try {
             boolean result = iProducer.exist("中国", groupId);
             assertFalse(result);
@@ -437,7 +655,7 @@ public class ProducerTest extends JUnitTestBase {
      * this.topicName is exists
      */
     @Test
-    public void state1() {
+    public void testState_topicExists() {
         try {
             TopicInfo topicInfo = iProducer.state(this.topicName, groupId);
             Assert.assertTrue(topicInfo != null);
@@ -454,11 +672,10 @@ public class ProducerTest extends JUnitTestBase {
      * topic not exists
      */
     @Test
-    public void state2() {
-        TopicInfo topicInfo = null;
+    public void testState_topicNotExists() {
         try {
             String notExistTopic = "hdflsjglsg";
-            topicInfo = iProducer.state(notExistTopic, groupId);
+            iProducer.state(notExistTopic, groupId);
         } catch (BrokerException e) {
             log.error("method state error:", e);
             Assert.assertNotNull(e);
@@ -469,12 +686,11 @@ public class ProducerTest extends JUnitTestBase {
     /**
      * topic length > 64
      */
-//    @Test
-    public void state3() {
-        TopicInfo topicInfo = null;
+    @Test
+    public void testState_topicLenGt64() {
         try {
-            String notExistTopic = "hdflsjglsgqwertyuioplkjhgfdsazxcvbqwertyuioplkjhgfdsazxcvbnmkoiujy";
-            topicInfo = iProducer.state(notExistTopic, groupId);
+            String lengthTopic = "hdflsjglsgqwertyuioplkjhgfdsazxcvbqwertyuioplkjhgfdsazxcvbnmkoiujy";
+            iProducer.state(lengthTopic, groupId);
         } catch (BrokerException e) {
             log.error("method state error:", e);
             Assert.assertNotNull(e);
@@ -485,11 +701,10 @@ public class ProducerTest extends JUnitTestBase {
     /**
      * topic is null
      */
-//    @Test
-    public void state4() {
-        TopicInfo topicInfo = null;
+    @Test
+    public void testState_topicIsNull() {
         try {
-            topicInfo = iProducer.state(null, groupId);
+            iProducer.state(null, groupId);
         } catch (BrokerException e) {
             log.error("method state error:", e);
             Assert.assertNotNull(e);
@@ -498,13 +713,12 @@ public class ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * topic is blank
+     * topic is blank ""
      */
-//    @Test
-    public void state5() {
-        TopicInfo topicInfo = null;
+    @Test
+    public void testState_topicIsBlank() {
         try {
-            topicInfo = iProducer.state("", groupId);
+            iProducer.state("", groupId);
         } catch (BrokerException e) {
             log.error("method state error:", e);
             Assert.assertNotNull(e);
@@ -515,11 +729,10 @@ public class ProducerTest extends JUnitTestBase {
     /**
      * topic is blank topic " "
      */
-//    @Test
-    public void state6() {
-        TopicInfo topicInfo = null;
+    @Test
+    public void testState_topicIsBlank2() {
         try {
-            topicInfo = iProducer.state(" ", groupId);
+            iProducer.state(" ", groupId);
         } catch (BrokerException e) {
             log.error("method state error:", e);
             Assert.assertNotNull(e);
@@ -531,11 +744,10 @@ public class ProducerTest extends JUnitTestBase {
      * topic length = 64
      */
     @Test
-    public void state7() {
-        TopicInfo topicInfo = null;
+    public void testState_topicLenEqual64() {
         try {
             String notExistTopic = "hdflsjglsgqwertyuioplkjhgfdsazxcqazxswedcvfrtgbnhyujmkiolppoiuyt";
-            topicInfo = iProducer.state(notExistTopic, groupId);
+            iProducer.state(notExistTopic, groupId);
         } catch (BrokerException e) {
             log.error("method state error:", e);
             Assert.assertNotNull(e);
@@ -546,13 +758,12 @@ public class ProducerTest extends JUnitTestBase {
     /**
      * topic contain special character withoutin [32,128]
      */
-//    @Test
-    public void state8() {
-        TopicInfo topicInfo = null;
+    @Test
+    public void testState_topicContainSpeciaChar() {
         char[] charStr = {69, 72, 31};
         try {
             String illegalTopic = new String(charStr);
-            topicInfo = iProducer.state(illegalTopic, groupId);
+            iProducer.state(illegalTopic, groupId);
         } catch (BrokerException e) {
             log.error("producer close error:", e);
             assertEquals(e.getCode(), ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode());
@@ -562,11 +773,10 @@ public class ProducerTest extends JUnitTestBase {
     /**
      * topic contain Chinese character
      */
-//    @Test
-    public void state9() {
-        TopicInfo topicInfo = null;
+    @Test
+    public void testState_topicContainChiChar() {
         try {
-            topicInfo = iProducer.state("中国", groupId);
+            iProducer.state("中国", groupId);
         } catch (BrokerException e) {
             log.error("producer close error:", e);
             assertEquals(e.getCode(), ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode());
@@ -735,6 +945,8 @@ public class ProducerTest extends JUnitTestBase {
             log.error("method list error:", e);
         }
     }
+    
+    
 
     /**
      * list test pageIndex is out of all page
@@ -751,7 +963,86 @@ public class ProducerTest extends JUnitTestBase {
             Assert.assertTrue(topicPage.getTopicInfoList().size() == 0);
         } catch (BrokerException e) {
             Assert.assertNull(e);
-            log.error("method list error:", e);
+        }
+    }
+    
+    /**
+     * list test ,groupId is null
+     */
+    @Test
+    public void testList_groupIdIsNull() {
+	Integer pageIndex = 0;
+        Integer pageSize = 10;
+        try {
+            TopicPage topicPage = iProducer.list(pageIndex, pageSize, null);
+            Assert.assertNull(topicPage);
+        } catch (BrokerException e) {
+            log.error("producer exist error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * list test ,groupId is not number
+     */
+    @Test
+    public void testList_groupIdIsNotNum() {
+	Integer pageIndex = 0;
+        Integer pageSize = 10;
+        try {
+            TopicPage topicPage = iProducer.list(pageIndex, pageSize, "sdfsg");
+            Assert.assertNull(topicPage);
+        } catch (BrokerException e) {
+            log.error("producer exist error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * list test ,groupId = 0
+     */
+    @Test
+    public void testList_groupIdIsEqual0() {
+	Integer pageIndex = 0;
+        Integer pageSize = 10;
+        try {
+            TopicPage topicPage = iProducer.list(pageIndex, pageSize, "0");
+            Assert.assertNull(topicPage);
+        } catch (BrokerException e) {
+            log.error("producer exist error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * list test ,groupId < 0
+     */
+    @Test
+    public void testList_groupIdIsLt0() {
+	Integer pageIndex = 0;
+        Integer pageSize = 10;
+        try {
+            TopicPage topicPage = iProducer.list(pageIndex, pageSize, "-1");
+            Assert.assertNull(topicPage);
+        } catch (BrokerException e) {
+            log.error("producer exist error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * list test ,groupId is not current groupId
+     */
+    @Test
+    public void testList_groupIdIsNotCurrentGroupId() {
+	Integer pageIndex = 0;
+        Integer pageSize = 10;
+        try {
+            TopicPage topicPage = iProducer.list(pageIndex, pageSize, "4");
+            Assert.assertNull(topicPage);
+        } catch (BrokerException e) {
+            log.error("producer exist error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
         }
     }
 
@@ -759,23 +1050,105 @@ public class ProducerTest extends JUnitTestBase {
      * topic is exits and content is Chinese
      */
     @Test
-    public void testPublishEventCharset1() {
+    public void testPublishEventCharset_topicExists() {
         try {
             SendResult dto = iProducer.publish(new WeEvent(this.topicName, "中文消息.".getBytes(), extensions), groupId);
             assertEquals(SendResult.SendResultStatus.SUCCESS, dto.getStatus());
         } catch (BrokerException e) {
             log.error("method PublishEventCharset error:", e);
+            Assert.assertNull(e);
+        }
+    }
+    
+    /**
+     * test extensions is null
+     */
+    @Test
+    public void testPublishEventCharset_extIsNull() {
+        try {
+            SendResult dto = iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), null), groupId);
+            assertNotNull(dto);
+        } catch (BrokerException e) {
+            log.error("method PublishEventCharset error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCode());
+        }
+    }
+    
+    /**
+     * extensions key is null
+     */
+    @Test
+    public void testPublishEventCharset_extKeyIsNull() {
+	Map<String, String> ext = new HashMap<>();
+        try {
+            ext.put(null, "this is a test!");
+            SendResult dto = iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), ext), groupId);
+            assertNotNull(dto);
+        } catch (BrokerException e) {
+            log.error("method PublishEventCharset error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCode());
         }
     }
 
     /**
+     * extensions value is null
+     */
+    @Test
+    public void testPublishEventCharset_extValueIsNull() {
+	Map<String, String> ext = new HashMap<>();
+        try {
+            ext.put("test", null);
+            SendResult dto = iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), ext), groupId);
+            assertNotNull(dto);
+        } catch (BrokerException e) {
+            log.error("method PublishEventCharset error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCode());
+        }
+    }
+
+    /**
+     * extensions contain multiple key,value
+     */
+    @Test
+    public void testPublishEventCharset_extContainMulKeyValue() {
+	Map<String, String> ext = new HashMap<>();
+        try {
+            ext.put("test1", "test value");
+            ext.put("test2", "test value2");
+            ext.put("test3", "test value3");
+            SendResult dto = iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), ext), groupId);
+            assertEquals(SendResult.SendResultStatus.SUCCESS, dto.getStatus());
+        } catch (BrokerException e) {
+            log.error("method PublishEventCharset error:", e);
+            Assert.assertNull(e);
+        }
+    }
+    
+    /**
+     * extensions contain one key,value
+     */
+    @Test
+    public void testPublishEventCharset_extContainOneKeyValue() {
+	Map<String, String> ext = new HashMap<>();
+        try {
+            ext.put("test1", "test value");
+            SendResult dto = iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), ext), groupId);
+            assertEquals(SendResult.SendResultStatus.SUCCESS, dto.getStatus());
+        } catch (BrokerException e) {
+            log.error("method PublishEventCharset error:", e);
+            Assert.assertNull(e);
+        }
+    }
+    
+    /**
      * topic is not exists
      */
     @Test
-    public void testPublishEventCharset2() {
+    public void testPublishEventCharset_topicNotExists() {
         try {
             String topicNotExists = "fsgdsggdgerer";
             SendResult dto = iProducer.publish(new WeEvent(topicNotExists, "中文消息.".getBytes(), extensions), groupId);
+            Assert.assertNull(dto);
         } catch (BrokerException e) {
             Assert.assertNotNull(e);
             assertEquals(e.getCode(), ErrorCode.TOPIC_NOT_EXIST.getCode());
@@ -787,9 +1160,10 @@ public class ProducerTest extends JUnitTestBase {
      * topic is blank
      */
     @Test
-    public void testPublishEventCharset3() {
+    public void testPublishEventCharset_topicIsBlank() {
         try {
             SendResult dto = iProducer.publish(new WeEvent("", "中文消息.".getBytes(), extensions), groupId);
+            Assert.assertNull(dto);
         } catch (BrokerException e) {
             Assert.assertNotNull(e);
             assertEquals(e.getCode(), ErrorCode.TOPIC_IS_BLANK.getCode());
@@ -801,9 +1175,10 @@ public class ProducerTest extends JUnitTestBase {
      * topic is null
      */
     @Test
-    public void testPublishEventCharset4() {
+    public void testPublishEventCharset_topicIsNull() {
         try {
             SendResult dto = iProducer.publish(new WeEvent(null, "中文消息.".getBytes(), extensions), groupId);
+            Assert.assertNull(dto);
         } catch (BrokerException e) {
             Assert.assertNotNull(e);
             assertEquals(e.getCode(), ErrorCode.TOPIC_IS_BLANK.getCode());
@@ -816,10 +1191,11 @@ public class ProducerTest extends JUnitTestBase {
      * topic length > 64
      */
     @Test
-    public void testPublishEventCharset5() {
+    public void testPublishEventCharset_topicLengthGt64() {
         try {
             String topicNotExists = "fsgdsggdgererqwertyuioplkjhgfdsazxqazwsxedcrfvtgbyhnujmikolppoiuyt";
             SendResult dto = iProducer.publish(new WeEvent(topicNotExists, "中文消息.".getBytes(), extensions), groupId);
+            Assert.assertNull(dto);
         } catch (BrokerException e) {
             Assert.assertNotNull(e);
             assertEquals(e.getCode(), ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode());
@@ -831,11 +1207,12 @@ public class ProducerTest extends JUnitTestBase {
      * topic is exits and content is null
      */
     @Test
-    public void testPublishEventCharset6() {
+    public void testPublishEventCharset_contentIsNull() {
 
         try {
             byte[] bytes = null;
             SendResult dto = iProducer.publish(new WeEvent(this.topicName, bytes, extensions), groupId);
+            Assert.assertNull(dto);
         } catch (BrokerException e) {
             log.error("method PublishEventCharset error:", e);
             assertEquals(e.getCode(), ErrorCode.EVENT_CONTENT_IS_BLANK.getCode());
@@ -846,7 +1223,7 @@ public class ProducerTest extends JUnitTestBase {
      * topic is exits and content is blank
      */
     @Test
-    public void testPublishEventCharset7() {
+    public void testPublishEventCharset_contenIsBlank() {
 
         try {
             byte[] bytes = "".getBytes();
@@ -857,12 +1234,82 @@ public class ProducerTest extends JUnitTestBase {
             assertEquals(e.getCode(), ErrorCode.EVENT_CONTENT_IS_BLANK.getCode());
         }
     }
-
+    
     /**
-     * topic contain special character withoutin [32,128]
+     * list test ,groupId is null
      */
     @Test
-    public void testPublishEventCharset8() {
+    public void testPublishEventCharset_groupIdIsNull() {
+        try {
+            SendResult dto = iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), extensions), null);
+            Assert.assertNull(dto);
+        } catch (BrokerException e) {
+            log.error("producer publish error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * list test ,groupId is not number
+     */
+    @Test
+    public void testPublishEventCharset_groupIdIsNotNum() {
+        try {
+            SendResult dto = iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), extensions), "sfsdf");
+            Assert.assertNull(dto);
+        } catch (BrokerException e) {
+            log.error("producer publish error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * list test ,groupId = 0
+     */
+    @Test
+    public void testPublishEventCharset_groupIdIsEqual0() {
+        try {
+            SendResult dto = iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), extensions), "0");
+            Assert.assertNull(dto);
+        } catch (BrokerException e) {
+            log.error("producer publish error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * list test ,groupId < 0
+     */
+    @Test
+    public void testPublishEventCharset_groupIdIsLt0() {
+        try {
+            SendResult dto = iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), extensions), "-1");
+            Assert.assertNull(dto);
+        } catch (BrokerException e) {
+            log.error("producer publish error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * list test ,groupId is not current groupId
+     */
+    @Test
+    public void testPublishEventCharset_groupIdIsNotCurrentGroupId() {
+        try {
+            SendResult dto = iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), extensions), "4");
+            Assert.assertNull(dto);
+        } catch (BrokerException e) {
+            log.error("producer publish error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+
+    /**
+     * topic contain special character without in [32,128]
+     */
+    @Test
+    public void testPublishEventCharset_topicContainSpecialChar() {
 
         char[] charStr = {69, 72, 31};
         try {
@@ -880,7 +1327,7 @@ public class ProducerTest extends JUnitTestBase {
      * topic is Chinese character
      */
     @Test
-    public void testPublishEventCharset9() {
+    public void testPublishEventCharset_topicContainChinChar() {
 
         try {
             byte[] bytes = "".getBytes();
@@ -896,12 +1343,13 @@ public class ProducerTest extends JUnitTestBase {
      * test get Event : eventId is exists
      */
     @Test
-    public void testGetEvent1() {
+    public void testGetEvent_eventIdExist() {
         try {
             WeEvent weEvent = iProducer.getEvent(eventId, groupId);
             assertEquals(weEvent.getEventId(), eventId);
         } catch (BrokerException e) {
             log.error("get event error: ", e);
+            assertNull(e);
         }
     }
 
@@ -909,9 +1357,10 @@ public class ProducerTest extends JUnitTestBase {
      * test get Event : eventId is illegal1
      */
     @Test
-    public void testGetEvent2() {
+    public void testGetEvent_eventIdIsIllegal1() {
         try {
             WeEvent weEvent = iProducer.getEvent("sfshfwefjf", groupId);
+            assertNull(weEvent);
         } catch (BrokerException e) {
             assertEquals(e.getCode(), ErrorCode.EVENT_ID_IS_ILLEGAL.getCode());
             log.error("get event error: ", e);
@@ -922,9 +1371,10 @@ public class ProducerTest extends JUnitTestBase {
      * test get Event : eventId is illegal2
      */
     @Test
-    public void testGetEvent3() {
+    public void testGetEvent_eventIdIsIllegal2() {
         try {
             WeEvent weEvent = iProducer.getEvent("317e7c4c-75-hkhgjhg", groupId);
+            assertNull(weEvent);
         } catch (BrokerException e) {
             assertEquals(e.getCode(), ErrorCode.EVENT_ID_IS_ILLEGAL.getCode());
             log.error("get event error: ", e);
@@ -935,9 +1385,10 @@ public class ProducerTest extends JUnitTestBase {
      * test get Event : eventId is legal but not exists & eventId > blockNumber
      */
     @Test
-    public void testGetEvent4() {
+    public void testGetEvent_eventIdHeightGtBlock() {
         try {
             WeEvent weEvent = iProducer.getEvent("317e7c4c-75-32900000", groupId);
+            assertNull(weEvent);
         } catch (BrokerException e) {
             assertEquals(e.getCode(), ErrorCode.EVENT_ID_IS_MISMATCH.getCode());
             log.error("get event error: ", e);
@@ -948,9 +1399,10 @@ public class ProducerTest extends JUnitTestBase {
      * test get Event : eventId is legal but not exists
      */
     @Test
-    public void testGetEvent5() {
+    public void testGetEvent_eventIdLegalNotExist() {
         try {
             WeEvent weEvent = iProducer.getEvent("317e7c4c-278-3", groupId);
+            assertNull(weEvent);
         } catch (BrokerException e) {
             log.error("get event error: ", e);
             assertEquals(e.getCode(), ErrorCode.EVENT_ID_NOT_EXIST.getCode());
@@ -961,9 +1413,10 @@ public class ProducerTest extends JUnitTestBase {
      * test get Event : eventId is null
      */
     @Test
-    public void testGetEvent6() {
+    public void testGetEvent_eventIdIsNull() {
         try {
             WeEvent weEvent = iProducer.getEvent(null, groupId);
+            assertNull(weEvent);
         } catch (BrokerException e) {
             log.error("get event error: ", e);
             assertEquals(e.getCode(), ErrorCode.EVENT_ID_IS_ILLEGAL.getCode());
@@ -974,9 +1427,10 @@ public class ProducerTest extends JUnitTestBase {
      * test get Event : eventId is blank
      */
     @Test
-    public void testGetEvent7() {
+    public void testGetEvent_eventIdIsBlank() {
         try {
             WeEvent weEvent = iProducer.getEvent("", groupId);
+            assertNull(weEvent);
         } catch (BrokerException e) {
             log.error("get event error: ", e);
             assertEquals(e.getCode(), ErrorCode.EVENT_ID_IS_ILLEGAL.getCode());
@@ -987,9 +1441,10 @@ public class ProducerTest extends JUnitTestBase {
      * test get Event : eventId is blank
      */
     @Test
-    public void testGetEvent8() {
+    public void testGetEvent_eventIdIsBlank2() {
         try {
             WeEvent weEvent = iProducer.getEvent(" ", groupId);
+            assertNull(weEvent);
         } catch (BrokerException e) {
             assertEquals(e.getCode(), ErrorCode.EVENT_ID_IS_ILLEGAL.getCode());
             log.error("get event error: ", e);
@@ -1000,15 +1455,87 @@ public class ProducerTest extends JUnitTestBase {
      * test get Event : eventId length > 64
      */
     @Test
-    public void testGetEvent9() {
+    public void testGetEvent_eventIdLenGt64() {
         try {
             String id = "317e7c4csdxcfvbhjklpoutredwsaqsdfghjkoiuf-2782345678901234567-329";
             WeEvent weEvent = iProducer.getEvent(id, groupId);
+            assertNull(weEvent);
         } catch (BrokerException e) {
             log.error("get event error: ", e);
             assertEquals(e.getCode(), ErrorCode.EVENT_ID_EXCEEDS_MAX_LENGTH.getCode());
         }
     }
+    
+    /**
+     * get event test,groupId is null
+     */
+    @Test
+    public void testGetEvent_groupIdIsNull() {
+        try {
+            WeEvent weEvent = iProducer.getEvent(eventId, null);
+            Assert.assertNull(weEvent);
+        } catch (BrokerException e) {
+            log.error("producer getEvent error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * get event test ,groupId is not number
+     */
+    @Test
+    public void testGetEvent_groupIdIsNotNum() {
+        try {
+            WeEvent weEvent = iProducer.getEvent(eventId, "sfdsfs");
+            Assert.assertNull(weEvent);
+        } catch (BrokerException e) {
+            log.error("producer getEvent error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * get event test ,groupId = 0
+     */
+    @Test
+    public void testGetEvent_groupIdIsEqual0() {
+        try {
+            WeEvent weEvent = iProducer.getEvent(eventId, "0");
+            Assert.assertNull(weEvent);
+        } catch (BrokerException e) {
+            log.error("producer publish error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * get event test ,groupId < 0
+     */
+    @Test
+    public void testGetEvent_groupIdIsLt0() {
+        try {
+            WeEvent weEvent = iProducer.getEvent(eventId, "-1");
+            Assert.assertNull(weEvent);
+        } catch (BrokerException e) {
+            log.error("producer getEvent error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * get event test ,groupId is not current groupId
+     */
+    @Test
+    public void testGetEvent_groupIdIsNotCurrentGroupId() {
+        try {
+            WeEvent weEvent = iProducer.getEvent(eventId, "4");
+            Assert.assertNull(weEvent);
+        } catch (BrokerException e) {
+            log.error("producer getEvent error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+
 
     /**
      * Method: publish(WeEvent event, SendCallBack callBack) topic is exists ,content is Chinese
@@ -1016,7 +1543,7 @@ public class ProducerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testPublishForEventCallBack1() throws InterruptedException {
+    public void testPublishForEventCallBack_topicExist() throws InterruptedException {
         try {
             iProducer.publish(new WeEvent(this.topicName, "中文消息.".getBytes(), extensions), groupId, new IProducer.SendCallBack() {
                 @Override
@@ -1040,7 +1567,7 @@ public class ProducerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testPublishForEventCallBack2() throws InterruptedException {
+    public void testPublishForEventCallBack_topicNotExist() throws InterruptedException {
         try {
             String notExistsTopic = "sglsjhglsj";
             iProducer.publish(new WeEvent(notExistsTopic, "hello world.".getBytes(), extensions), groupId, new IProducer.SendCallBack() {
@@ -1066,7 +1593,7 @@ public class ProducerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testPublishForEventCallBack3() throws InterruptedException {
+    public void testPublishForEventCallBack_topicLenGt64() throws InterruptedException {
         try {
             String notExistsTopic = "qazwsxedcrfvtgbnhyujmkiolpoiuytrsglsjhglsjqwertyuioplkjhgfdsazxcvbnm";
             iProducer.publish(new WeEvent(notExistsTopic, "hello world.".getBytes(), extensions), groupId, new IProducer.SendCallBack() {
@@ -1092,7 +1619,7 @@ public class ProducerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testPublishForEventCallBack4() throws InterruptedException {
+    public void testPublishForEventCallBack_topicIsNull() throws InterruptedException {
         try {
             iProducer.publish(new WeEvent(null, "hello world.".getBytes(), extensions), groupId, new IProducer.SendCallBack() {
                 @Override
@@ -1118,7 +1645,7 @@ public class ProducerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testPublishForEventCallBack5() throws InterruptedException {
+    public void testPublishForEventCallBack_topicIsBlank() throws InterruptedException {
         try {
             iProducer.publish(new WeEvent("", "hello world.".getBytes(), extensions), groupId, new IProducer.SendCallBack() {
                 @Override
@@ -1144,7 +1671,7 @@ public class ProducerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testPublishForEventCallBack6() throws InterruptedException {
+    public void testPublishForEventCallBack_contentIsNull() throws InterruptedException {
         try {
             iProducer.publish(new WeEvent(this.topicName, null, extensions), groupId, new IProducer.SendCallBack() {
                 @Override
@@ -1169,7 +1696,7 @@ public class ProducerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testPublishForEventCallBack7() throws InterruptedException {
+    public void testPublishForEventCallBack_contentIsBlank() throws InterruptedException {
         try {
             iProducer.publish(new WeEvent(this.topicName, "".getBytes(), extensions), groupId, new IProducer.SendCallBack() {
                 @Override
@@ -1194,7 +1721,7 @@ public class ProducerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testPublishForEventCallBack8() throws InterruptedException {
+    public void testPublishForEventCallBack_contentIsEnglish() throws InterruptedException {
         try {
             iProducer.publish(new WeEvent(this.topicName, "helloWorld".getBytes(), extensions), groupId, new IProducer.SendCallBack() {
                 @Override
@@ -1218,7 +1745,7 @@ public class ProducerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testPublishForEventCallBack9() throws InterruptedException {
+    public void testPublishForEventCallBack_topicContainSpecialChar() throws InterruptedException {
         char[] charStr = {69, 72, 31};
         try {
             String illegalTopic = new String(charStr);
@@ -1245,7 +1772,7 @@ public class ProducerTest extends JUnitTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void testPublishForEventCallBack10() throws InterruptedException {
+    public void testPublishForEventCallBack_topicContainChiChar() throws InterruptedException {
         try {
             iProducer.publish(new WeEvent("中国", "helloWorld".getBytes(), extensions), groupId, new IProducer.SendCallBack() {
                 @Override
@@ -1263,5 +1790,236 @@ public class ProducerTest extends JUnitTestBase {
         }
         Thread.sleep(3000);
     }
+    
+    /**
+     * test extensions is null
+     */
+    @Test
+    public void testPublishForEventCallBack_extIsNull() {
+        try {
+            iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), null), groupId, new IProducer.SendCallBack() {
+                @Override
+                public void onComplete(SendResult sendResult) {
+
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                }
+            });
+        } catch (BrokerException e) {
+            log.error("method PublishForEventCallBack error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCode());
+        }
+    }
+    
+    /**
+     * extensions key is null
+     */
+    @Test
+    public void testPublishForEventCallBack_extKeyIsNull() {
+	Map<String, String> ext = new HashMap<>();
+        try {
+            ext.put(null, "this is a test!");
+            iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), ext), groupId, new IProducer.SendCallBack() {
+                @Override
+                public void onComplete(SendResult sendResult) {
+
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                }
+            });
+        } catch (BrokerException e) {
+            log.error("method PublishForEventCallBack error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCode());
+        }
+    }
+
+    /**
+     * extensions value is null
+     */
+    @Test
+    public void testPublishForEventCallBack_extValueIsNull() {
+	Map<String, String> ext = new HashMap<>();
+        try {
+            ext.put("test", null);
+            iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), ext), groupId, new IProducer.SendCallBack() {
+                @Override
+                public void onComplete(SendResult sendResult) {
+
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                }
+            });
+        } catch (BrokerException e) {
+            log.error("method PublishForEventCallBack error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCode());
+        }
+    }
+
+    /**
+     * extensions contain multiple key,value
+     */
+    @Test
+    public void testPublishForEventCallBack_extContainMulKeyValue() {
+	Map<String, String> ext = new HashMap<>();
+        try {
+            ext.put("test1", "test value");
+            ext.put("test2", "test value2");
+            ext.put("test3", "test value3");
+            iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), ext), groupId, new IProducer.SendCallBack() {
+                @Override
+                public void onComplete(SendResult sendResult) {
+                    assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                }
+            });
+        } catch (BrokerException e) {
+            log.error("method PublishForEventCallBack error:", e);
+            Assert.assertNull(e);
+        }
+    }
+    
+    /**
+     * extensions contain one key,value
+     */
+    @Test
+    public void testPublishForEventCallBack_extContainOneKeyValue() {
+	Map<String, String> ext = new HashMap<>();
+        try {
+            ext.put("test1", "test value");
+            iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), ext), groupId, new IProducer.SendCallBack() {
+                @Override
+                public void onComplete(SendResult sendResult) {
+                    assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                }
+            });
+        } catch (BrokerException e) {
+            log.error("method PublishForEventCallBack error:", e);
+            Assert.assertNull(e);
+        }
+    }
+    
+    /**
+     * PublishForEventCallBack test,groupId is null
+     */
+    @Test
+    public void testPublishForEventCallBack_groupIdIsNull() {
+        try {
+            iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), extensions), null, new IProducer.SendCallBack() {
+                @Override
+                public void onComplete(SendResult sendResult) {
+
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                }
+            });
+        } catch (BrokerException e) {
+            log.error("method PublishForEventCallBack error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * PublishForEventCallBack test,groupId is not number
+     */
+    @Test
+    public void testPublishForEventCallBack_groupIdIsNotNum() {
+        try {
+            iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), extensions), "sfsdf", new IProducer.SendCallBack() {
+                @Override
+                public void onComplete(SendResult sendResult) {
+
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                }
+            });
+        } catch (BrokerException e) {
+            log.error("method PublishForEventCallBack error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * PublishForEventCallBack test ,groupId = 0
+     */
+    @Test
+    public void testPublishForEventCallBack_groupIdIsEqual0() {
+        try {
+            iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), extensions), "0", new IProducer.SendCallBack() {
+                @Override
+                public void onComplete(SendResult sendResult) {
+
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                }
+            });
+        } catch (BrokerException e) {
+            log.error("method PublishForEventCallBack error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * PublishForEventCallBack test ,groupId < 0
+     */
+    @Test
+    public void testPublishForEventCallBack_groupIdIsLt0() {
+        try {
+            iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), extensions), "-1", new IProducer.SendCallBack() {
+                @Override
+                public void onComplete(SendResult sendResult) {
+
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                }
+            });
+        } catch (BrokerException e) {
+            log.error("method PublishForEventCallBack error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * PublishForEventCallBack test ,groupId is not current groupId
+     */
+    @Test
+    public void testPublishForEventCallBack_groupIdIsNotCurrentGroupId() {
+        try {
+            iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), extensions), "4", new IProducer.SendCallBack() {
+                @Override
+                public void onComplete(SendResult sendResult) {
+
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                }
+            });
+        } catch (BrokerException e) {
+            log.error("method PublishForEventCallBack error:", e);
+            assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+
 }
 
