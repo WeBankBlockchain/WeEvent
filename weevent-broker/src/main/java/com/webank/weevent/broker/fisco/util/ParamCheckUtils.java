@@ -102,6 +102,16 @@ public class ParamCheckUtils {
         validateEventExtensions(event.getExtensions().toString());
     }
 
+    public static void validateGroupId(String groupId) throws BrokerException {
+        if (!StringUtils.isBlank(groupId)) {
+            try {
+                Long.parseLong(groupId);
+            } catch (Exception e) {
+                throw new BrokerException(ErrorCode.EVENT_GROUP_ID_INVALID);
+            }
+        }
+    }
+
     public static void validateEventExtensions(String extensions) throws BrokerException {
         if (extensions.length() > WeEventConstants.EVENT_EXTENSIONS_MAX_LENGTH) {
             throw new BrokerException(ErrorCode.EVENT_EXTENSIONS_EXCEEDS_MAX_LENGTH);
@@ -137,6 +147,9 @@ public class ParamCheckUtils {
      * @return true if yes
      */
     public static boolean isTopicPattern(String pattern) {
+        if (StringUtils.isBlank(pattern)) {
+            return false;
+        }
         return pattern.contains("" + WeEventConstants.WILD_CARD_ALL_LAYER) || pattern.contains("" + WeEventConstants.WILD_CARD_ONE_LAYER);
     }
 

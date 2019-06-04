@@ -4,12 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
-import com.webank.weevent.broker.fisco.util.WeEventUtils;
 import com.webank.weevent.broker.ha.MasterJob;
+import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
-import com.webank.weevent.broker.plugin.IConsumer;
-import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.TopicPage;
@@ -33,7 +31,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class BrokerRpc implements IBrokerRpc {
     private IProducer producer;
-    private IConsumer consumer;
 
     private MasterJob masterJob;
 
@@ -43,11 +40,6 @@ public class BrokerRpc implements IBrokerRpc {
     @Autowired
     public void setProducer(IProducer producer) {
         this.producer = producer;
-    }
-
-    @Autowired
-    public void setConsumer(IConsumer iConsumer) {
-        this.consumer = iConsumer;
     }
 
     @Autowired(required = false)
@@ -68,7 +60,7 @@ public class BrokerRpc implements IBrokerRpc {
                               @JsonRpcParam(value = "content") byte[] content,
                               @JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException {
 
-        return this.producer.publish(new WeEvent(topic, content, extensions), WeEventUtils.getGroupId(groupId));
+        return this.producer.publish(new WeEvent(topic, content, extensions), groupId);
     }
 
     @Override
@@ -91,13 +83,13 @@ public class BrokerRpc implements IBrokerRpc {
                               @JsonRpcParam(value = "groupId") String groupId,
                               @JsonRpcParam(value = "content") byte[] content) throws BrokerException {
 
-        return this.producer.publish(new WeEvent(topic, content, new HashMap<>()), WeEventUtils.getGroupId(groupId));
+        return this.producer.publish(new WeEvent(topic, content, new HashMap<>()), groupId);
     }
 
     @Override
     public WeEvent getEvent(@JsonRpcParam(value = "eventId") String eventId,
                             @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
-        return this.producer.getEvent(eventId, WeEventUtils.getGroupId(groupId));
+        return this.producer.getEvent(eventId, groupId);
     }
 
     @Override
@@ -111,7 +103,7 @@ public class BrokerRpc implements IBrokerRpc {
                             @JsonRpcParam(value = "subscriptionId") String subscriptionId,
                             @JsonRpcParam(value = "url") String url) throws BrokerException {
         checkSupport();
-        return this.masterJob.getCgiSubscription().jsonRpcSubscribe(topic, WeEventUtils.getGroupId(groupId), subscriptionId, url);
+        return this.masterJob.getCgiSubscription().jsonRpcSubscribe(topic, groupId, subscriptionId, url);
     }
 
     @Override
@@ -138,7 +130,7 @@ public class BrokerRpc implements IBrokerRpc {
     @Override
     public boolean open(@JsonRpcParam(value = "topic") String topic,
                         @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
-        return this.producer.open(topic, WeEventUtils.getGroupId(groupId));
+        return this.producer.open(topic, groupId);
     }
 
     @Override
@@ -149,7 +141,7 @@ public class BrokerRpc implements IBrokerRpc {
     @Override
     public boolean close(@JsonRpcParam(value = "topic") String topic,
                          @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
-        return this.producer.close(topic, WeEventUtils.getGroupId(groupId));
+        return this.producer.close(topic, groupId);
     }
 
     @Override
@@ -160,7 +152,7 @@ public class BrokerRpc implements IBrokerRpc {
     @Override
     public boolean exist(@JsonRpcParam(value = "topic") String topic,
                          @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
-        return this.producer.exist(topic, WeEventUtils.getGroupId(groupId));
+        return this.producer.exist(topic, groupId);
     }
 
     @Override
@@ -172,7 +164,7 @@ public class BrokerRpc implements IBrokerRpc {
     public TopicPage list(@JsonRpcParam(value = "pageIndex") Integer pageIndex,
                           @JsonRpcParam(value = "pageSize") Integer pageSize,
                           @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
-        return this.producer.list(pageIndex, pageSize, WeEventUtils.getGroupId(groupId));
+        return this.producer.list(pageIndex, pageSize, groupId);
     }
 
     @Override
@@ -184,7 +176,7 @@ public class BrokerRpc implements IBrokerRpc {
     @Override
     public TopicInfo state(@JsonRpcParam(value = "topic") String topic,
                            @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
-        return this.producer.state(topic, WeEventUtils.getGroupId(groupId));
+        return this.producer.state(topic, groupId);
     }
 
     @Override
