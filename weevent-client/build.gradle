@@ -98,11 +98,13 @@ artifacts {
 }
 
 
-//signing {
-//	required { gradle.taskGraph.hasTask("uploadArchives") }
-//	sign configurations.archives
-//}
-//
+signing {
+	required { gradle.taskGraph.hasTask("uploadArchives") }
+	sign configurations.archives
+}
+
+
+
 //uploadArchives {
 //	repositories {
 //		mavenDeployer {
@@ -144,4 +146,4 @@ artifacts {
 //		}
 //	}
 //}
-
+//

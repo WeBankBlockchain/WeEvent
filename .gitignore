@@ -12,7 +12,8 @@
 .settings
 .springBeans
 .sts4-cache
-*/.gradle.properties
+weevet-client/gradle.properties
+gradle.properties
 
 ### IntelliJ IDEA ###
 .idea
