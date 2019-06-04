@@ -19,13 +19,15 @@ public enum ErrorCode {
 
     TOPIC_PAGE_INDEX_INVALID(100104, "page index should be an integer start from 0"),
 
-    TOPIC_MODEL_MAP_IS_NULL(100105, "topic model map is empty or has empty value"),
+    TOPIC_LIST_IS_NULL(100105, "topic list is empty or has empty value"),
 
-    TOPIC_CONTAIN_INVALID_CHAR(100106, "topic name contain invalid char, Ascii must be in[32, 128]"),
+    TOPIC_CONTAIN_INVALID_CHAR(100106, "topic name contain invalid char, ascii must be in[32, 128] except wildcard(+,#)"),
 
     TOPIC_PAGE_SIZE_INVALID(100107, "page size should be an integer in(1, 100)"),
 
     TOPIC_NOT_MATCH(100108, "topic name not match with last"),
+
+    PATTERN_INVALID(100109, "invalid topic pattern"),
 
     EVENT_CONTENT_IS_BLANK(100200, "event content is blank"),
 
@@ -36,6 +38,8 @@ public enum ErrorCode {
     EVENT_CONTENT_CHARSET(100203, "event content must be utf-8"),
 
     EVENT_EXTENSIONS_EXCEEDS_MAX_LENGTH(100204, "event extensions exceeds max length[1k bytes]"),
+
+    EVENT_EXTENSIONS_IS_NUll(100205, "event extensions is null"),
 
     EVENT_ID_IS_BLANK(100300, "eventId is blank"),
 

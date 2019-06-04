@@ -1,11 +1,17 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+
 import index from '../module/index'
-import nodeList from '../components/nodeList'
 import topicList from '../components/topicList'
 import mainCont from '../components/mainCont'
-import machine from '../components/machine'
 import subcription from '../components/subcription'
+// WeBase Module
+import overview from '../components/webase/overview'
+import group from '../components/webase/group'
+import blockInfor from '../components/webase/blockInfor'
+import transactionInfor from '../components/webase/transactionInfor'
+import setting from '../components/setting'
+import servers from '../components/servers'
 
 Vue.use(Router)
 
@@ -16,10 +22,6 @@ export default new Router({
       name: 'index',
       component: index,
       children: [{
-        path: '/nodeList',
-        name: 'nodeList',
-        component: nodeList
-      }, {
         path: '/topicList',
         name: 'topicList',
         component: topicList
@@ -28,14 +30,34 @@ export default new Router({
         name: 'mainCont',
         component: mainCont
       }, {
-        path: '/machine',
-        name: 'machine',
-        component: machine
-      }, {
         path: '/subcription',
         name: 'subcription',
         component: subcription
+      }, {
+        path: '/overview',
+        name: 'overview',
+        component: overview
+      }, {
+        path: '/group',
+        name: 'group',
+        component: group
+      }, {
+        path: '/blockInfor',
+        name: 'blockInfor',
+        component: blockInfor
+      }, {
+        path: '/transactionInfor',
+        name: 'transactionInfor',
+        component: transactionInfor
       }]
+    }, {
+      path: '/setting',
+      name: 'setting',
+      component: setting
+    }, {
+      path: '/servers',
+      name: 'servers',
+      component: servers
     }
   ]
 })

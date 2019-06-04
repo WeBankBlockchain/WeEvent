@@ -85,7 +85,7 @@ public class WeEventConstants {
     /**
      * Extensions default groupid.
      */
-    public static final Long DEFAULT_GROUP_ID = 1L;
+    public static final String DEFAULT_GROUP_ID = "1";
 
     /**
      * Extensions eventid.
@@ -112,5 +112,21 @@ public class WeEventConstants {
      */
     public static final String EVENT_CONTENT = "content";
 
+    /**
+     * wildcard character for one layer.
+     * see MQTT specification.
+     */
+    public static final String WILD_CARD_ONE_LAYER = "+";
 
+    /**
+     * wildcard for one layer.
+     * see MQTT specification.
+     */
+    public static final String WILD_CARD_ALL_LAYER = "#";
+
+    /**
+     * character to split layer.
+     * see MQTT specification.
+     */
+    public static final String LAYER_SEPARATE = "/";
 }

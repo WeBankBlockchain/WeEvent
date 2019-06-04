@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.fisco.util.WeEventUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
@@ -51,14 +52,14 @@ public class MqttBridge implements MessageHandler {
         return result;
     }
 
-    public void assertExist(String topic, Long groupId) throws BrokerException {
+    public void assertExist(String topic, String groupId) throws BrokerException {
         if (!this.producer.exist(topic, groupId)) {
             log.error("not exist topic: {}", topic);
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
         }
     }
 
-    public String bindOutboundTopic(String topic, Long groupId) throws BrokerException {
+    public String bindOutboundTopic(String topic, String groupId) throws BrokerException {
         log.info("bind mqtt outbound topic: {}", topic);
         if (!this.consumer.exist(topic, groupId)) {
             log.error("not exist topic: {}", topic);
@@ -107,10 +108,11 @@ public class MqttBridge implements MessageHandler {
             log.error("getExtensions exception:{}", e);
             return;
         }
-        Long groupId = WeEventConstants.DEFAULT_GROUP_ID;
+        String groupId = WeEventConstants.DEFAULT_GROUP_ID;
         if (handlers.containsKey(WeEventConstants.EVENT_GROUP_ID)) {
             try {
-                groupId = WeEventUtils.getGroupId(handlers.get(WeEventConstants.EVENT_GROUP_ID).toString());
+                groupId = handlers.get(WeEventConstants.EVENT_GROUP_ID).toString();
+                ParamCheckUtils.validateGroupId(groupId);
             } catch (BrokerException e) {
                 return;
             }

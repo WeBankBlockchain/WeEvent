@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function nginx_setup() { 
-    echo "install nginx into $nginx_path" &>> $top_path/install.log
+    echo "install nginx into $nginx_path"
     mkdir -p $nginx_path
     
     tar -zxf $top_path/third-packages/nginx-1.14.2.tar.gz -C $top_path/build/
@@ -18,9 +18,9 @@ function nginx_setup() {
 
     echo "build & install pcre" 
     cd $top_path/build/pcre-8.20
-    ./configure --prefix=$current_path/../third-packages --with-http_ssl_module &>> $top_path/install.log
-    make &>> $top_path/install.log
-    make install &>> $top_path/install.log
+    ./configure --prefix=$current_path/../third-packages --with-http_ssl_module
+    make
+    make install
     if [ $? -ne 0 ]; then
         echo "install pcre failed, skip"
         exit 1
@@ -28,16 +28,16 @@ function nginx_setup() {
            
     echo "build & install nginx"
     cd ../nginx-1.14.2
-    ./configure --prefix=$nginx_path --with-http_ssl_module --with-pcre=../pcre-8.20 &>> $top_path/install.log
-    make &>> $top_path/install.log
-    make install &>> $top_path/install.log
+    ./configure --prefix=$nginx_path --with-http_ssl_module --with-pcre=../pcre-8.20
+    make
+    make install
     if [ $? -ne 0 ]; then
         echo "install nginx failed, skip"
         exit 1
     fi
     cd $current_path
 
-    echo "configure nginx.conf" &>> $top_path/install.log
+    echo "configure nginx.conf"
     mkdir -p $nginx_path/nginx_temp
     mkdir -p $nginx_path/conf/conf.d
     cp ./conf/nginx.conf $nginx_path/conf/
@@ -54,18 +54,18 @@ function nginx_setup() {
     
     if [[ -n $broker_port ]]; then
         broker_url="localhost:$broker_port"
-        echo "set broker_url: $broker_url" &>> $top_path/install.log
+        echo "set broker_url: $broker_url"
         sed -i "s/localhost:8081/$broker_url/g" $nginx_path/conf/conf.d/rs.conf
     fi
     if  [[ -n $governance_port ]]; then
         governance_url="localhost:$governance_port"
-        echo "set governance_url: $governance_url" &>> $top_path/install.log
+        echo "set governance_url: $governance_url"
         sed -i "s/localhost:8082/$governance_url/g" $nginx_path/conf/conf.d/rs.conf
     fi
     
     cp nginx.sh $nginx_path
 
-    echo "nginx mdoule install complete!" &>> $top_path/install.log
+    echo "nginx module install success"
 }
 
 # usage

@@ -1,27 +1,12 @@
+
 {
-  "topicList": {
-    "method": "post",
-    "url": "weevent-governance/topic/getTopics"
-  },
-  "nodeList": {
-    "method": "post",
-    "url": "weevent-governance/topic/getNodes"
-  },
   "openTopic": {
     "method": "post",
-    "url": "weevent-governance/topic/open"
+    "url": "weevent-governance/topic/openTopic"
   },
-  "getHost": {
+  "topicList": {
     "method": "post",
-    "url": "weevent-governance/topic/getHost"
-  },
-  "blockchaininfo": {
-    "method": "get",
-    "url": "weevent-governance/weevent/admin/blockchaininfo"
-  },
-  "topicState": {
-    "method": "post",
-    "url": "weevent-governance/weevent/rest/state"
+    "url": "weevent-governance/topic/list"
   },
   "topicControl": {
     "method": "get",
@@ -30,5 +15,25 @@
   "subscription": {
     "method": "get",
     "url": "weevent-governance/weevent/admin/listSubscription"
+  },
+  "addServer": {
+    "method": "post",
+    "url": "weevent-governance/broker"
+  },
+  "updateServer": {
+    "method": "put",
+    "url": "weevent-governance/broker"
+  },
+  "getServer": {
+    "method": "get",
+    "url": "weevent-governance/broker/list"
+  },
+  "deleteServer": {
+    "method": "delete",
+    "url": "weevent-governance/broker"
+  },
+  "topicState": {
+    "method": "get",
+    "url": "weevent-governance/weevent/rest/state"
   }
 }
