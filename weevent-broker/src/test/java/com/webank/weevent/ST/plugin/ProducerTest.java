@@ -240,16 +240,30 @@ public class ProducerTest extends JUnitTestBase {
     }
     
     /**
-     * Method: open topic ,groupId is not current groupId
+     * Method: open topic ,groupId is not exist
      */
     @Test
-    public void testOpen_groupIdIsNotCurrentGroupId() {
+    public void testOpen_groupIdNotExist() {
         try {
             boolean result = iProducer.open(this.topicName, "4");
             assertFalse(result);
         } catch (BrokerException e) {
             log.error("producer open error:", e);
             assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+        }
+    }
+    
+    /**
+     * Method: open topic ,groupId is exists in fisco.properties
+     */
+    @Test
+    public void testOpen_groupIdOtherExistId() {
+        try {
+            boolean result = iProducer.open(this.topicName, "2");
+            assertTrue(result);
+        } catch (BrokerException e) {
+            log.error("producer open error:", e);
+            assertNull(e);
         }
     }
 
@@ -470,7 +484,7 @@ public class ProducerTest extends JUnitTestBase {
     @Test
     public void testExist_topicNotExists() {
         try {
-            String falseTopic = "fasssglsjgg";
+            String falseTopic = "sdlkufhdsighfskhdsf";
             Assert.assertFalse(iProducer.exist(falseTopic, groupId));
         } catch (BrokerException e) {
             log.error("method Exist error:", e);
