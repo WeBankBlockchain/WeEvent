@@ -1,17 +1,19 @@
 import axios from 'axios'
-// import qs from 'qs'
 import { Message } from 'element-ui'
+import qs from 'qs'
+import store from '../store'
 const con = require('../../config/config.js')
 
 class BaseModule {
   constructor () {
     this.$http = axios.create({
-      timeout: 15 * 1000
+      timeout: 15 * 1000,
+      withCredentials: true
     })
 
     this.dataMethodDefaults = {
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json;charset=UTF-8',
         'X-Requested-With': 'XMLHttpRequest'
       }
     }
@@ -28,8 +30,12 @@ class BaseModule {
       return new Promise((resolve, reject) => {
         let data = config.data
         let status = config.status
-        if (((status >= 200 && status < 300) || status === 304) && data) {
-          resolve(config)
+        if (((status >= 200 && status < 300) || status === 302) && data) {
+          if (data.code === 302000) {
+            store.commit('back', true)
+          } else {
+            resolve(config)
+          }
         } else {
           Message({
             type: 'warning',
@@ -60,7 +66,16 @@ class BaseModule {
 
   request (config, data = undefined) {
     if (config.method && config.method.toLowerCase() === 'post') {
-      return this.post(config.url, data, config)
+      if (config.headers) {
+        return this.$http({
+          url: config.url,
+          method: 'post',
+          data: qs.stringify(data),
+          headers: config.headers
+        })
+      } else {
+        return this.post(config.url, data, config)
+      }
     } else if (config.method && config.method.toLowerCase() === 'put') {
       return this.put(config.url, data, config)
     } else if (config.method && config.method.toLowerCase() === 'delete') {
