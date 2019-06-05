@@ -1,5 +1,14 @@
 
 {
+  "login": {
+    "method": "post",
+    "url": "weevent-governance/user/login",
+    "headers": {"Content-Type": "application/x-www-form-urlencoded"}
+  },
+  "loginOut": {
+    "method": "get",
+    "url": "weevent-governance/user/logout"
+  },
   "openTopic": {
     "method": "post",
     "url": "weevent-governance/topic/openTopic"
@@ -35,5 +44,21 @@
   "topicState": {
     "method": "get",
     "url": "weevent-governance/weevent/rest/state"
+  },
+  "checkExsit": {
+    "method": "get",
+    "url": "weevent-governance/user/check"
+  },
+  "register": {
+    "method": "post",
+    "url": "weevent-governance/user/register"
+  },
+  "forget": {
+    "method": "get",
+    "url": "weevent-governance/user/forget"
+  },
+  "update": {
+    "method": "put",
+    "url": "weevent-governance/user/update"
   }
 }

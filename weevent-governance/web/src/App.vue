@@ -16,6 +16,18 @@ export default {
     if (top.location !== location) {
       parent.location = self.location
     }
+  },
+  watch: {
+    isLogin (nVal) {
+      if (nVal) {
+        this.$router.push('./login')
+      }
+    }
+  },
+  computed: {
+    isLogin () {
+      return this.$store.state.goLogin
+    }
   }
 }
 </script>

@@ -107,7 +107,7 @@ export default {
       let data = {
         pageIndex: vm.pageIndex - 1,
         pageSize: vm.pageSize,
-        brokerId: Number(sessionStorage.getItem('userId'))
+        brokerId: Number(sessionStorage.getItem('brokerId'))
       }
       API.topicList(data).then(res => {
         if (res.status === 200) {
@@ -136,7 +136,7 @@ export default {
     },
     readDetial (e) {
       var vm = this
-      let url = '?brokerId=' + sessionStorage.getItem('userId') + '&topic=' + e.topicName
+      let url = '?brokerId=' + sessionStorage.getItem('brokerId') + '&topic=' + e.topicName
       API.topicState(url).then(res => {
         let time = getDateDetial(res.data.createdTimestamp)
         res.data.createdTimestamp = time
@@ -179,9 +179,8 @@ export default {
         if (valid) {
           let data = {
             topic: vm.form.name,
-            // creater: this.$store.state.userName
-            creater: 'unknow',
-            brokerId: Number(sessionStorage.getItem('userId'))
+            creater: sessionStorage.getItem('user'),
+            brokerId: Number(sessionStorage.getItem('brokerId'))
           }
           API.openTopic(data).then(res => {
             if (res.status === 200) {
@@ -229,7 +228,7 @@ export default {
         background: 'rgba(0,0,0,0.7)'
       })
       let vm = this
-      let url = '?brokerId=' + sessionStorage.getItem('userId')
+      let url = '?brokerId=' + sessionStorage.getItem('brokerId')
       API.topicControl(url).then(res => {
         if (res.status === 200) {
           this.$message({

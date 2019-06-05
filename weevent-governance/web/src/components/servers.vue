@@ -1,6 +1,8 @@
 <template>
   <div class="servers">
-    <header-bar :noServer = true></header-bar>
+    <div class='top_part'>
+       <header-bar :noServer = true></header-bar>
+    </div>
     <div class='list_part'>
       <p class='title'>
         <span>服务管理</span>
@@ -114,7 +116,8 @@ export default {
       })
     },
     getServer () {
-      API.getServer('').then(res => {
+      let url = '?userId=' + sessionStorage.getItem('userId')
+      API.getServer(url).then(res => {
         if (res.status === 200) {
           this.server = [].concat(res.data)
         }
