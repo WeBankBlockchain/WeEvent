@@ -103,7 +103,7 @@ public class ParamCheckUtils {
     }
 
     public static void validateGroupId(String groupId) throws BrokerException {
-        if (groupId != null && !groupId.isEmpty()) {
+        if (!StringUtils.isBlank(groupId)) {
             try {
                 Long.parseLong(groupId);
             } catch (Exception e) {
@@ -147,6 +147,9 @@ public class ParamCheckUtils {
      * @return true if yes
      */
     public static boolean isTopicPattern(String pattern) {
+        if (StringUtils.isBlank(pattern)) {
+            return false;
+        }
         return pattern.contains("" + WeEventConstants.WILD_CARD_ALL_LAYER) || pattern.contains("" + WeEventConstants.WILD_CARD_ONE_LAYER);
     }
 

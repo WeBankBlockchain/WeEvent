@@ -1,7 +1,9 @@
 package com.webank.weevent.governance.entity;
 
 import java.util.Date;
+import javax.validation.constraints.Min;
 
+import org.hibernate.validator.constraints.URL;
 import lombok.Data;
 import lombok.ToString;
 
@@ -14,8 +16,15 @@ import lombok.ToString;
 @ToString
 public class Broker {
 
-	private Integer id;
-	private String name;
-	private String brokerUrl;
-	private Date lastUpdate;
+    private Integer id;
+
+    @Min(1)
+    private Integer userId;
+    
+    private String name;
+    
+    @URL
+    private String brokerUrl;
+    
+    private Date lastUpdate;
 }

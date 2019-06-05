@@ -1,6 +1,5 @@
 package com.webank.weevent.governance.entity;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,8 +12,12 @@ import lombok.Data;
  */
 @Data
 public class TopicPage {
+    
     Integer total;
+    
     Integer pageIndex;
+    
     Integer pageSize;
+    
     List<Topic> topicInfoList = new ArrayList<>();
 }
