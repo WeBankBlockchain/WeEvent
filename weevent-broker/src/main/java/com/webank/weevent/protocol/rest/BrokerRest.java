@@ -72,82 +72,81 @@ public class BrokerRest extends RestHA implements IBrokerRpc {
                             @RequestParam(name = "groupId", required = false) String groupId,
                             @RequestParam(name = "subscriptionId", required = false) String subscriptionId,
                             @RequestParam(name = "url") String url) throws BrokerException {
-            if (StringUtils.isBlank(groupId)) {
-                        groupId = WeEventConstants.DEFAULT_GROUP_ID;
-            }
-            return this.masterJob.getCgiSubscription().restSubscribe(topic,
-                    groupId,
-                    subscriptionId,
-                    url,
-                    getUrlFormat(this.request));
+        if (StringUtils.isBlank(groupId)) {
+            groupId = WeEventConstants.DEFAULT_GROUP_ID;
         }
+        return this.masterJob.getCgiSubscription().restSubscribe(topic,
+                groupId,
+                subscriptionId,
+                url,
+                getUrlFormat(this.request));
+    }
 
-        @Override
-        @RequestMapping(path = "/unSubscribe")
-        public boolean unSubscribe (@RequestParam(name = "subscriptionId") String subscriptionId) throws BrokerException
-        {
-            checkSupport();
-            return this.masterJob.getCgiSubscription().restUnsubscribe(subscriptionId, getUrlFormat(this.request));
+    @Override
+    @RequestMapping(path = "/unSubscribe")
+    public boolean unSubscribe(@RequestParam(name = "subscriptionId") String subscriptionId) throws BrokerException {
+        checkSupport();
+        return this.masterJob.getCgiSubscription().restUnsubscribe(subscriptionId, getUrlFormat(this.request));
+    }
+
+    @Override
+    @RequestMapping(path = "/getEvent")
+    public WeEvent getEvent(@RequestParam(name = "eventId") String eventId,
+                            @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+        if (StringUtils.isBlank(groupId)) {
+            groupId = WeEventConstants.DEFAULT_GROUP_ID;
         }
+        return this.producer.getEvent(eventId, groupId);
+    }
 
-        @Override
-        @RequestMapping(path = "/getEvent")
-        public WeEvent getEvent (@RequestParam(name = "eventId") String eventId,
-                @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
-                if (StringUtils.isBlank(groupId)) {
-                            groupId = WeEventConstants.DEFAULT_GROUP_ID;
-                }
-                return this.producer.getEvent(eventId, groupId);
-            }
-
-            @Override
-            @RequestMapping(path = "/open")
-            public boolean open (@RequestParam(name = "topic") String topic,
-                    @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
-                if (StringUtils.isBlank(groupId)) {
-                    groupId = WeEventConstants.DEFAULT_GROUP_ID;
-                }
-                return this.producer.open(topic, groupId);
-            }
-
-            @Override
-            @RequestMapping(path = "/close")
-            public boolean close (@RequestParam(name = "topic") String topic,
-                    @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
-                if (StringUtils.isBlank(groupId)) {
-                    groupId = WeEventConstants.DEFAULT_GROUP_ID;
-                }
-                return this.producer.close(topic, groupId);
-            }
-
-            @Override
-            @RequestMapping(path = "/exist")
-            public boolean exist (@RequestParam(name = "topic") String topic,
-                    @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
-                if (StringUtils.isBlank(groupId)) {
-                    groupId = WeEventConstants.DEFAULT_GROUP_ID;
-                }
-                return this.producer.exist(topic, groupId);
-            }
-
-            @Override
-            @RequestMapping(path = "/list")
-            public TopicPage list (@RequestParam(name = "pageIndex") Integer pageIndex,
-                    @RequestParam(name = "pageSize") Integer pageSize,
-                    @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
-                if (StringUtils.isBlank(groupId)) {
-                    groupId = WeEventConstants.DEFAULT_GROUP_ID;
-                }
-                return this.producer.list(pageIndex, pageSize, groupId);
-            }
-
-            @Override
-            @RequestMapping(path = "/state")
-            public TopicInfo state (@RequestParam(name = "topic") String topic,
-                    @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
-                if (StringUtils.isBlank(groupId)) {
-                    groupId = WeEventConstants.DEFAULT_GROUP_ID;
-                }
-                return this.producer.state(topic, groupId);
-            }
+    @Override
+    @RequestMapping(path = "/open")
+    public boolean open(@RequestParam(name = "topic") String topic,
+                        @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+        if (StringUtils.isBlank(groupId)) {
+            groupId = WeEventConstants.DEFAULT_GROUP_ID;
         }
+        return this.producer.open(topic, groupId);
+    }
+
+    @Override
+    @RequestMapping(path = "/close")
+    public boolean close(@RequestParam(name = "topic") String topic,
+                         @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+        if (StringUtils.isBlank(groupId)) {
+            groupId = WeEventConstants.DEFAULT_GROUP_ID;
+        }
+        return this.producer.close(topic, groupId);
+    }
+
+    @Override
+    @RequestMapping(path = "/exist")
+    public boolean exist(@RequestParam(name = "topic") String topic,
+                         @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+        if (StringUtils.isBlank(groupId)) {
+            groupId = WeEventConstants.DEFAULT_GROUP_ID;
+        }
+        return this.producer.exist(topic, groupId);
+    }
+
+    @Override
+    @RequestMapping(path = "/list")
+    public TopicPage list(@RequestParam(name = "pageIndex") Integer pageIndex,
+                          @RequestParam(name = "pageSize") Integer pageSize,
+                          @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+        if (StringUtils.isBlank(groupId)) {
+            groupId = WeEventConstants.DEFAULT_GROUP_ID;
+        }
+        return this.producer.list(pageIndex, pageSize, groupId);
+    }
+
+    @Override
+    @RequestMapping(path = "/state")
+    public TopicInfo state(@RequestParam(name = "topic") String topic,
+                           @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+        if (StringUtils.isBlank(groupId)) {
+            groupId = WeEventConstants.DEFAULT_GROUP_ID;
+        }
+        return this.producer.state(topic, groupId);
+    }
+}

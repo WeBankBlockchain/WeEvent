@@ -6,11 +6,6 @@ apply plugin: 'eclipse'
 apply plugin: 'signing'
 apply plugin: 'jacoco'
 
-archivesBaseName="weevent"
-group = 'com.webank.webank'
-version ='0.1.0'
-
-
 List client_depends = [
         "com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.3",
         "javax.jms:jms:1.1",
@@ -82,68 +77,21 @@ jar {
 }
 // for upload to maven
 task sourcesJar(type: Jar) {
-	classifier = 'sources'
+    classifier = 'sources'
     from sourceSets.main.allSource
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-	classifier = 'javadoc'
-	from javadoc.destinationDir
+    classifier = 'javadoc'
+    from javadoc.destinationDir
 }
 
 artifacts {
-	archives jar
-	archives sourcesJar
-	archives javadocJar
-}
-
-
-signing {
-	required { gradle.taskGraph.hasTask("uploadArchives") }
-	sign configurations.archives
+    archives jar
+    archives sourcesJar
+    archives javadocJar
 }
 
 
 
-//uploadArchives {
-//	repositories {
-//		mavenDeployer {
-//			beforeDeployment { deployment -> signing.signPom(deployment) }
-//
-//			repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-//				authentication(userName: ossrhUsername, password: ossrhPassword)
-//			}
-//
-//			snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
-//				authentication(userName: sonatypeUsername, password: sonatypePassword)
-//			}
-//
-//			pom.project {
-//				name 'weevent'
-//				packaging 'jar'
-//				description 'weevent'
-//				url 'http://fintech.webank.com/weevent'
-//
-//				scm {
-//					url 'https://github.com/WeBankFinTech/WeEvent.git'
-//					connection 'https://github.com/WeBankFinTech/WeEvent.git'
-//				}
-//
-//				licenses {
-//					license {
-//						name 'The Apache License, Version 2.0'
-//						url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-//					}
-//				}
-//				developers {
-//					developer {
-//						id 'cristic'
-//						name 'cristic'
-//						email 'meifen20160710@gmail.com'
-//					}
-//				}
-//			}
-//		}
-//	}
-//}
-//
+
