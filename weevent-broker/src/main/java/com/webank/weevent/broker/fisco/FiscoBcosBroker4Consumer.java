@@ -140,11 +140,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
         // check offset
         if ((!offset.equals(WeEvent.OFFSET_FIRST) && !offset.equals(WeEvent.OFFSET_LAST))) {
-<<<<<<< HEAD
             Long blockHeight = fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId));
-=======
-            Long blockHeight = this.fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId));
->>>>>>> remotes/upstream/master
             Long lastBlock = DataTypeUtils.decodeBlockNumber(offset);
             if (blockHeight == 0L) {
                 throw new BrokerException(ErrorCode.GET_BLOCK_HEIGHT_ERROR);
