@@ -33,7 +33,7 @@ public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IPr
         log.debug("publish input param WeEvent: {}", event);
         ParamCheckUtils.validateEvent(event);
         ParamCheckUtils.validateGroupId(groupId);
-        SendResult sendResult = this.fiscoBcosDelegate.publishEvent(event.getTopic(), Long.parseLong(groupId), new String(event.getContent(), StandardCharsets.UTF_8), JSON.toJSONString(event.getExtensions()));
+        SendResult sendResult = fiscoBcosDelegate.publishEvent(event.getTopic(), Long.parseLong(groupId), new String(event.getContent(), StandardCharsets.UTF_8), JSON.toJSONString(event.getExtensions()));
         log.info("publish success: {}", sendResult);
         return sendResult;
     }
@@ -46,6 +46,6 @@ public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IPr
         ParamCheckUtils.validateSendCallBackNotNull(callBack);
 
         log.debug("publish with callback input param WeEvent: {}", event);
-        this.fiscoBcosDelegate.publishEvent(event.getTopic(), Long.parseLong(groupId), new String(event.getContent(), StandardCharsets.UTF_8), JSON.toJSONString(event.getExtensions()), callBack);
+        fiscoBcosDelegate.publishEvent(event.getTopic(), Long.parseLong(groupId), new String(event.getContent(), StandardCharsets.UTF_8), JSON.toJSONString(event.getExtensions()), callBack);
     }
 }
