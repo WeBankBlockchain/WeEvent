@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 55 (78076) - https://sketchapp.com -->
+    <title>Profile</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Profile" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.5,12.5238095 C7.81747407,12.5238095 5.64285714,10.1679745 5.64285714,7.26190476 C5.64285714,4.35583501 7.81747407,2 10.5,2 C13.1825259,2 15.3571429,4.35583501 15.3571429,7.26190476 C15.3571429,10.1679745 13.1825259,12.5238095 10.5,12.5238095 Z M10.5,12.5238095 C15.3571429,12.5238095 18.1904762,14.6825397 19,19 L2,19 C2.80952381,14.6825397 5.64285714,12.5238095 10.5,12.5238095 Z" stroke="#B0BAC9" stroke-width="1.8"></path>
+    </g>
+</svg>

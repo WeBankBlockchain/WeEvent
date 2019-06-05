@@ -53,7 +53,7 @@ export default {
   methods: {
     transDaily () {
       let vm = this
-      let url = '/' + sessionStorage.getItem('groupId') + '?brokerId=' + sessionStorage.getItem('userId')
+      let url = '/' + sessionStorage.getItem('groupId') + '?brokerId=' + sessionStorage.getItem('brokerId')
       API.transDaily(url).then(res => {
         if (res.status === 200) {
           let chatData = res.data.data
