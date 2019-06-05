@@ -78,7 +78,7 @@ export default {
       this.getNode()
     },
     getNode () {
-      let url = '/' + sessionStorage.getItem('groupId') + '/' + this.pageIndex + '/' + this.pageSize + '?brokerId=' + sessionStorage.getItem('userId')
+      let url = '/' + sessionStorage.getItem('groupId') + '/' + this.pageIndex + '/' + this.pageSize + '?brokerId=' + sessionStorage.getItem('brokerId')
       API.nodeList(url).then(res => {
         if (res.status === 200) {
           this.tableData = res.data.data
