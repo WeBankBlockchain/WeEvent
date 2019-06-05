@@ -1,14 +1,14 @@
 #!/bin/bash 
-current_path=`pwd`
-governancepid_path=$current_path/logs/governance.pid
+
+pidfile=./logs/governance.pid
 eventgovernance_pid=
 currentgovernance_pid=
 
-JAVA_OPTS=" -Xmx2048m -Xms512m -XX:NewSize=256m -XX:MaxNewSize=1024m -XX:+DisableExplicitGC"
+JAVA_OPTS="-Xverify:none -XX:TieredStopAtLevel=1 -Xms512m -Xmx2048m -XX:NewSize=256m -XX:MaxNewSize=1024m -XX:PermSize=128m -XX:+DisableExplicitGC"
 
 getTradeProtalPID(){
-    if [ -e $governancepid_path ]; then
-        eventgovernance_pid=`cat $governancepid_path`
+    if [ -e $pidfile ]; then
+        eventgovernance_pid=`cat $pidfile`
         currentgovernance_pid=`ps aux|grep "governance" | grep "$eventgovernance_pid" | grep -v grep|awk '{print $2}'|head -1`
     fi
 }
@@ -24,12 +24,12 @@ start(){
         eventgovernance_pid=$!
         if [ -n "$eventgovernance_pid" ];then
             echo "start governance success (PID=$eventgovernance_pid)"
-            if [ -f $governancepid_path ]; then 
-                 echo "${eventgovernance_pid}" >$governancepid_path
+            if [ -f $pidfile ]; then
+                 echo "${eventgovernance_pid}" > $pidfile
             else
-                 touch $governancepid_path;
+                 touch $pidfile;
                  sleep 3
-                 echo "${eventgovernance_pid}" >$governancepid_path
+                 echo "${eventgovernance_pid}" > $pidfile
             fi
             
             if [ `crontab -l | grep -w governance | wc -l` -eq 0 ]; then

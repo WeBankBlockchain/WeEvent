@@ -1,15 +1,15 @@
 #!/bin/bash
-current_path=`pwd`
-brokerpid_path=$current_path/logs/broker.pid
+
+pidfile=./logs/broker.pid
 eventbroker_pid=
 currentbroker_pid=
 
-JAVA_OPTS=" -Xmx2048m -Xms512m -XX:NewSize=256m -XX:MaxNewSize=1024m -XX:+DisableExplicitGC"
+JAVA_OPTS="-Xverify:none -XX:TieredStopAtLevel=1 -Xms512m -Xmx2048m -XX:NewSize=256m -XX:MaxNewSize=1024m -XX:PermSize=128m -XX:+DisableExplicitGC"
 
 getTradeProtalPID(){
     #eventbroker_pid=`ps aux|grep "broker" | grep "conf" | grep -v grep|awk '{print $2}'|head -1`
-    if [ -e $brokerpid_path ]; then
-        eventbroker_pid=`cat $brokerpid_path`
+    if [ -e $pidfile ]; then
+        eventbroker_pid=`cat $pidfile`
         currentbroker_pid=`ps aux|grep "broker" | grep "$eventbroker_pid" | grep -v grep|awk '{print $2}'|head -1`
     fi
 }
@@ -24,12 +24,12 @@ start(){
         eventbroker_pid=$!
         if [ -n "$eventbroker_pid" ];then
             echo "start broker success (PID=$eventbroker_pid)"
-            if [ -f $brokerpid_path ]; then 
-                 echo "${eventbroker_pid}" >$brokerpid_path
+            if [ -f $pidfile ]; then
+                 echo "${eventbroker_pid}" > $pidfile
             else
-                 touch $brokerpid_path;
+                 touch $pidfile;
                  sleep 3
-                 echo "${eventbroker_pid}" >$brokerpid_path
+                 echo "${eventbroker_pid}" > $pidfile
             fi
            
             if [ `crontab -l | grep -w broker | wc -l` -eq 0 ]; then
@@ -101,8 +101,8 @@ monitor)
     monitor
     ;;
 *)
-    echo "     illegal param: $1"
+    echo "    illegal param: $1"
     echo "Usage:"    
-    echo "     ./broker.sh start|stop|monitor"
+    echo "    ./broker.sh start|stop|monitor"
     ;;
 esac
