@@ -2,6 +2,7 @@ package com.webank.weevent.ST;
 
 import java.util.Map;
 
+import com.webank.weevent.JUnitTestBase;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
 
@@ -11,49 +12,53 @@ import org.junit.Test;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @Slf4j
-public class RestfullTest {
+public class RestfullTest extends JUnitTestBase {
 
-    private static String URL = "http://localhost:8080/weevent/rest/";
+    private  String url;
     private RestTemplate rest = null;
     private static String subId = "";
     private static String eventId = "";
 
     @Before
     public void before() {
+	url = "http://localhost:"+ listenPort +"/weevent/rest/";
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         this.rest = new RestTemplate(requestFactory);
     }
 
+    @Test
     public void testOpenTopic() {
         String topic = "com.weevent.test.rest";
         ResponseEntity<Boolean> rsp =
-                rest.getForEntity(URL + "open?topic={topic}", Boolean.class, topic);
+                rest.getForEntity(url + "open?topic={topic}", Boolean.class, topic);
         assertTrue(rsp.getStatusCodeValue() == 200);
         assertTrue(rsp.getBody());
     }
 
+    @Test
     public void testCloseTopic() {
         String topic = "com.weevent.test.rest";
         ResponseEntity<Boolean> rsp =
-                rest.getForEntity(URL + "close?topic={topic}", Boolean.class, topic);
+                rest.getForEntity(url + "close?topic={topic}", Boolean.class, topic);
         assertTrue(rsp.getStatusCodeValue() == 200);
         assertTrue(rsp.getBody());
     }
 
+    @Test
     public void testExistTopic() {
         ResponseEntity<Boolean> rsp =
-                rest.getForEntity(URL + "exist?topic={topic}", Boolean.class, "com.weevent.test.rest");
+                rest.getForEntity(url + "exist?topic={topic}", Boolean.class, "com.weevent.test.rest");
         assertTrue(rsp.getStatusCodeValue() == 200);
         assertTrue(rsp.getBody());
     }
 
+    @Test
     public void testState() {
-        ResponseEntity<String> rsp = rest.getForEntity(URL + "state?topic={topic}",
+        ResponseEntity<String> rsp = rest.getForEntity(url + "state?topic={topic}",
                 String.class,
                 "com.weevent.test.rest");
         System.out.println("state, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
@@ -61,17 +66,19 @@ public class RestfullTest {
         assertTrue(rsp.getBody().contains("}"));
     }
 
+    @Test
     public void testList() {
-        ResponseEntity<String> rsp = rest.getForEntity(URL
+        ResponseEntity<String> rsp = rest.getForEntity(url
                 + "list?pageIndex={pageIndex}&pageSize={pageSize}", String.class, "0", "10");
         System.out.println("getEvent, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
         assertTrue(rsp.getStatusCodeValue() == 200);
         assertTrue(rsp.getBody().contains("]"));
     }
 
+    @Test
     public void testSubscribe() {
         ResponseEntity<String> rsp = rest.getForEntity(
-                URL + "subscribe?topic={topic}&subscriptionId={subscriptionId}&url={url}",
+                url + "subscribe?topic={topic}&subscriptionId={subscriptionId}&url={url}",
                 String.class,
                 "com.weevent.test.rest",
                 "",
@@ -82,9 +89,10 @@ public class RestfullTest {
         assertTrue(rsp.getBody().contains("-"));
     }
 
+    @Test
     public void testReSubscribe() {
         ResponseEntity<String> rsp = rest.getForEntity(
-                URL + "subscribe?topic={topic}&subscriptionId={subscriptionId}&url={url}",
+                url + "subscribe?topic={topic}&subscriptionId={subscriptionId}&url={url}",
                 String.class,
                 "com.weevent.test.rest",
                 subId,
@@ -94,9 +102,10 @@ public class RestfullTest {
         assertTrue(rsp.getBody().contains("-"));
     }
 
+    @Test
     public void testPublish() {
         ResponseEntity<SendResult> rsp =
-                rest.getForEntity(URL + "publish?topic={topic}&content={content}",
+                rest.getForEntity(url + "publish?topic={topic}&content={content}",
                         SendResult.class,
                         "com.weevent.test.rest",
                         "hellow eevent");
@@ -107,9 +116,10 @@ public class RestfullTest {
         assertTrue(rsp.getBody().getEventId().contains("-"));
     }
 
+    @Test
     public void testGetEvent() {
         ResponseEntity<WeEvent> rsp =
-                rest.getForEntity(URL + "getEvent?eventId={eventId}", WeEvent.class, "e39837d63efaffaa-4-74573");
+                rest.getForEntity(url + "getEvent?eventId={eventId}", WeEvent.class, "e39837d63efaffaa-4-74573");
         WeEvent event = rsp.getBody();
         String content = new String(event.getContent());
         System.out.println("getEvent, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
@@ -117,25 +127,7 @@ public class RestfullTest {
         assertTrue(content.equals("hello weevent"));
     }
 
-
-    public void testGetBlockinfo() {
-        ResponseEntity<String> rsp = rest
-                .getForEntity("http://localhost:8081/weevent/admin/blockchaininfo", String.class);
-        System.out
-                .println("getBlockInfo, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
-        assertTrue(rsp.getStatusCodeValue() == 200);
-        assertTrue(rsp.getBody().contains("]"));
-    }
-
-    public void testDeployTopicControl() {
-        ResponseEntity<String> rsp =
-                rest.getForEntity("http://localhost:8081/weevent/admin/deploy_topic_control",
-                        String.class);
-        System.out.println(
-                "deploy_topic_control, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
-        assertTrue(rsp.getStatusCodeValue() == 200);
-    }
-
+    @Test
     public void testListSubId() {
         ResponseEntity<Map> rsp = rest
                 .getForEntity("http://localhost:8081/weevent/admin/listSubscription", Map.class);
@@ -146,9 +138,10 @@ public class RestfullTest {
         assertTrue(rsp.getStatusCodeValue() == 200);
     }
 
+    @Test
     public void testUnsubscribe() {
         ResponseEntity<String> rsp =
-                rest.getForEntity(URL + "unSubscribe?subscriptionId={subscriptionId}",
+                rest.getForEntity(url + "unSubscribe?subscriptionId={subscriptionId}",
                         String.class,
                         "96da5b3b-8cfa-442e-969e-5af9c65791aa");
         System.out

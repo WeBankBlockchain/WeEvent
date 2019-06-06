@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.webank.weevent.JUnitTestBase;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.TopicInfo;
@@ -16,19 +17,20 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class JsonRpcTest {
+public class JsonRpcTest extends JUnitTestBase {
     private IBrokerRpc iBrokerRpc;
     private String groupId = "1";
     private Map<String, String> extension = new HashMap<>();
 
     @Before
     public void before() throws Exception {
-        String url = "http://127.0.0.1:8080/weevent/jsonrpc";
+        String url = "http://localhost:"+ listenPort +"/weevent/jsonrpc";
 
         JsonRpcHttpClient client = new JsonRpcHttpClient(new URL(url));
         this.iBrokerRpc = ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);
     }
 
+    @Test
     public void testOpenTopic() throws BrokerException {
         String topic = "com.weevent.test.jsonrpc";
         boolean open = iBrokerRpc.open(topic, groupId);
@@ -36,6 +38,7 @@ public class JsonRpcTest {
         Assert.assertTrue(open);
     }
 
+    @Test
     public void testCloseTopic() throws BrokerException {
         String topic = "com.weevent.test.jsonrpc";
         boolean open = iBrokerRpc.close(topic, groupId);
@@ -43,12 +46,14 @@ public class JsonRpcTest {
         Assert.assertTrue(open);
     }
 
+    @Test
     public void testList() throws BrokerException {
         TopicPage list = iBrokerRpc.list(0, 10, groupId);
         System.out.println("list topic : " + list);
         Assert.assertTrue(list.getTotal() > 0);
     }
 
+    @Test
     public void testState() throws BrokerException {
         String topic = "com.weevent.test.jsonrpc";
         TopicInfo state = iBrokerRpc.state(topic, groupId);
@@ -56,6 +61,7 @@ public class JsonRpcTest {
         Assert.assertNotNull(state.getTopicAddress());
     }
 
+    @Test
     public void testPublish() throws BrokerException {
         String topic = "com.weevent.test.jsonrpc";
         SendResult publish = iBrokerRpc.publish(topic, groupId, "Hello World!".getBytes(), extension);
@@ -63,6 +69,7 @@ public class JsonRpcTest {
         Assert.assertNotNull(publish.getEventId());
     }
 
+    @Test
     public void testPublishContentequal10K() throws BrokerException {
         String str = get10KStr();
         String topic = "com.weevent.test.jsonrpc";
@@ -71,6 +78,7 @@ public class JsonRpcTest {
         Assert.assertNotNull(publish.getEventId());
     }
 
+    @Test
     public void testPublishContentgt10K() throws BrokerException {
         String str = get10KStr() + "s";
         String topic = "com.weevent.test.jsonrpc";
@@ -78,6 +86,7 @@ public class JsonRpcTest {
         System.out.println(publish);
     }
 
+    @Test
     public void testSubscribe() throws BrokerException {
         String subscriptionId = iBrokerRpc.subscribe("com.weevent.test.jsonrpc",
                 groupId, "",
@@ -85,6 +94,7 @@ public class JsonRpcTest {
         System.out.println(subscriptionId);
     }
 
+    @Test
     public void testReSubscribe() throws BrokerException {
         String subscriptionId = iBrokerRpc.subscribe("com.weevent.test.jsonrpc",
                 groupId,
@@ -93,6 +103,7 @@ public class JsonRpcTest {
         System.out.println(subscriptionId);
     }
 
+    @Test
     public void testUnSubscribe() throws BrokerException {
         String subscriptionId = "48d607c8-1ea9-4e7a-8b69-e1d01e801d1d";
         boolean unSubscribe = iBrokerRpc.unSubscribe(subscriptionId);
