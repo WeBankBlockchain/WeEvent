@@ -75,8 +75,7 @@ public class BrokerRest extends RestHA implements IBrokerRpc {
         if (StringUtils.isBlank(groupId)) {
             groupId = WeEventConstants.DEFAULT_GROUP_ID;
         }
-            groupId="1";
-            return this.masterJob.getCgiSubscription().restSubscribe(topic,
+        return this.masterJob.getCgiSubscription().restSubscribe(topic,
                 groupId,
                 subscriptionId,
                 url,
