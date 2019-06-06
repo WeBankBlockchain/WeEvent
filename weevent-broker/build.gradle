@@ -78,7 +78,6 @@ sourceSets {
     }
 }
 
-
 bootJar {
     destinationDir file('dist/apps')
     archiveName 'weevent-broker-' + version + '.jar'

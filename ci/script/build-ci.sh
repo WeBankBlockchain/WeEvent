@@ -20,7 +20,8 @@ function updateFisco(){
 # deploy contract and get the address
 function getContractAddress(){
     # deploy contract
-    ./deploy-contract.sh 1
+    chomod +x /weevent-broker/dist/deploy-topic-control.sh
+    ./weevent-broker/dist/deploy-topic-control.sh 1
     # get address
     contractAddress=$(cat ./address.txt)
     # set topic-controller.address
