@@ -30,5 +30,4 @@ public class JUnitTestBase {
 
     @Rule
     public Timeout timeout = new Timeout(120, TimeUnit.SECONDS);
-    
 }
