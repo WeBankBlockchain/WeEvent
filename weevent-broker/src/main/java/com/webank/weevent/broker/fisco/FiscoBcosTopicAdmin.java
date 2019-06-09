@@ -21,15 +21,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FiscoBcosTopicAdmin implements IEventTopic {
     // FISCO-BCOS handler
-    protected FiscoBcosDelegate fiscoBcosDelegate;
+    protected static FiscoBcosDelegate fiscoBcosDelegate;
 
-    FiscoBcosTopicAdmin() throws BrokerException {
-        this.fiscoBcosDelegate = new FiscoBcosDelegate();
-        this.fiscoBcosDelegate.initProxy();
-    }
-
-    public FiscoBcosDelegate getFiscoBcosDelegate() {
-        return this.fiscoBcosDelegate;
+    static {
+        try {
+            fiscoBcosDelegate = new FiscoBcosDelegate();
+            fiscoBcosDelegate.initProxy();
+        } catch (BrokerException e) {
+            log.error("init fisco-bcos failed", e);
+            fiscoBcosDelegate = null;
+        }
     }
 
     @Override
@@ -37,7 +38,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
         ParamCheckUtils.validateTopicName(topic);
         ParamCheckUtils.validateGroupId(groupId);
         try {
-            boolean result = this.fiscoBcosDelegate.createTopic(topic, Long.parseLong(groupId));
+            boolean result = fiscoBcosDelegate.createTopic(topic, Long.parseLong(groupId));
 
             log.debug("createTopic result: {}", result);
 
@@ -54,7 +55,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     public boolean exist(String topic, String groupId) throws BrokerException {
         ParamCheckUtils.validateTopicName(topic);
         ParamCheckUtils.validateGroupId(groupId);
-        boolean result = this.fiscoBcosDelegate.isTopicExist(topic, Long.parseLong(groupId));
+        boolean result = fiscoBcosDelegate.isTopicExist(topic, Long.parseLong(groupId));
 
         log.debug("isTopicExist result: {}", result);
         return result;
@@ -88,7 +89,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
         }
         ParamCheckUtils.validateGroupId(groupId);
         @SuppressWarnings(value = "unchecked")
-        ListPage<String> listPage = this.fiscoBcosDelegate.listTopicName(pageIndex, pageSize, Long.parseLong(groupId));
+        ListPage<String> listPage = fiscoBcosDelegate.listTopicName(pageIndex, pageSize, Long.parseLong(groupId));
 
         TopicPage topicPage = new TopicPage();
         topicPage.setTotal(listPage.getTotal());
@@ -107,13 +108,13 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
         // fetch target topic info in block chain
         log.debug("state function input param topic: {}", topic);
         ParamCheckUtils.validateGroupId(groupId);
-        return this.fiscoBcosDelegate.getTopicInfo(topic, Long.parseLong(groupId));
+        return fiscoBcosDelegate.getTopicInfo(topic, Long.parseLong(groupId));
     }
 
     @Override
     public WeEvent getEvent(String eventId, String groupId) throws BrokerException {
         log.debug("getEvent function input param eventId: {}", eventId);
         ParamCheckUtils.validateGroupId(groupId);
-        return this.fiscoBcosDelegate.getEvent(eventId, Long.parseLong(groupId));
+        return fiscoBcosDelegate.getEvent(eventId, Long.parseLong(groupId));
     }
 }

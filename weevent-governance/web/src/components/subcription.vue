@@ -57,7 +57,7 @@ export default {
       let vm = this
       vm.tableData = []
       vm.loading = true
-      let url = '?brokerId=' + sessionStorage.getItem('userId')
+      let url = '?brokerId=' + sessionStorage.getItem('brokerId')
       API.subscription(url).then(res => {
         if (res.status === 200) {
           let data = res.data

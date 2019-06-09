@@ -23,6 +23,7 @@
           </span>
         </p>
         <ul class='block_data_list'>
+          <li  style='justify-content: center;color:#8993a2' v-show='!b_data.length'>暂无数据</li>
           <li v-for='(item, index) in b_data' :key='index'>
             <div>
               <p>块高: {{item.blockNumber}}</p>
@@ -47,6 +48,7 @@
           </span>
         </p>
         <ul class='transaction_data_list'>
+          <li style='justify-content: center;color:#8993a2' v-show='!t_data.length'>暂无数据</li>
           <li v-for='(item, index) in t_data' :key='index'>
              <div>
               <p :title='item.transHash'>{{item.transHash}}</p>
@@ -68,7 +70,6 @@
 <script>
 import chart from './chart.vue'
 import API from '../../API/resource.js'
-// import res from '../../API/res.json'
 export default {
   components: {
     chart
@@ -84,7 +85,7 @@ export default {
   },
   methods: {
     general () {
-      let url = '/' + sessionStorage.getItem('groupId') + '?brokerId=' + sessionStorage.getItem('userId')
+      let url = '/' + sessionStorage.getItem('groupId') + '?brokerId=' + sessionStorage.getItem('brokerId')
       API.general(url).then(res => {
         if (res.status === 200) {
           this.node = res.data.data.nodeCount
@@ -94,7 +95,7 @@ export default {
       })
     },
     transList () {
-      let url = '/' + sessionStorage.getItem('groupId') + '/1/6?brokerId=' + sessionStorage.getItem('userId')
+      let url = '/' + sessionStorage.getItem('groupId') + '/1/6?brokerId=' + sessionStorage.getItem('brokerId')
       API.transList(url).then(res => {
         if (res.status === 200) {
           this.t_data = res.data.data
@@ -102,7 +103,7 @@ export default {
       })
     },
     blockList () {
-      let url = '/' + sessionStorage.getItem('groupId') + '/1/6?brokerId=' + sessionStorage.getItem('userId')
+      let url = '/' + sessionStorage.getItem('groupId') + '/1/6?brokerId=' + sessionStorage.getItem('brokerId')
       API.blockList(url).then(res => {
         if (res.status === 200) {
           this.b_data = res.data.data
