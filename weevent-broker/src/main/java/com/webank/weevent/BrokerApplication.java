@@ -8,7 +8,6 @@ import com.webank.weevent.broker.fisco.RedisService;
 import com.webank.weevent.broker.ha.MasterJob;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
-import com.webank.weevent.protocol.mqtt.MqttConfiguration;
 
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImplExporter;
 import lombok.extern.slf4j.Slf4j;
@@ -118,7 +117,6 @@ class HttpInterceptorConfig implements WebMvcConfigurer {
  */
 @Slf4j
 @SpringBootApplication
-@Import(MqttConfiguration.class)
 public class BrokerApplication {
     public static ApplicationContext applicationContext;
 

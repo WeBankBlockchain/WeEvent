@@ -39,6 +39,16 @@ List springmqtt = [
         "org.springframework.integration:spring-integration-mqtt"
 ]
 
+List ignite = [
+        "org.apache.ignite:ignite-core:2.6.0",
+        "org.apache.ignite:ignite-slf4j:2.6.0"
+
+]
+
+List hutool = [
+        "cn.hutool:hutool-core:4.5.11"
+]
+
 List springboot = [
         "org.springframework.boot:spring-boot-starter-actuator",
         "org.springframework.boot:spring-boot-starter-web"
@@ -50,7 +60,7 @@ List springboottest = [
 ]
 
 dependencies {
-    implementation(springboot, springwebsocket, springmqtt)
+    implementation(springboot, springwebsocket, springmqtt, ignite, hutool)
 
     implementation(jsonrpc4j, redis, zookeeper, client_depends, web3sdk)
 
