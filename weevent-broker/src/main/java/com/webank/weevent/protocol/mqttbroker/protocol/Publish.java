@@ -72,8 +72,10 @@ public class Publish {
                     .setDup(false).setRetain(false);
             internalCommunication.internalSend(internalMessage);
             Map<String, String> extensions = new HashMap<>();
-            this.sendMessageToFisco(msg.variableHeader().topicName(), messageBytes, WeEventConstants.DEFAULT_GROUP_ID, extensions);
-            this.sendPubAckMessage(channel, msg.variableHeader().packetId());
+            SendResult sendResult = this.sendMessageToFisco(msg.variableHeader().topicName(), messageBytes, WeEventConstants.DEFAULT_GROUP_ID, extensions);
+            if (sendResult.getStatus() == SendResult.SendResultStatus.SUCCESS) {
+                this.sendPubAckMessage(channel, msg.variableHeader().packetId());
+            }
         }
         // QoS=2
         if (msg.fixedHeader().qosLevel() == MqttQoS.EXACTLY_ONCE) {
@@ -84,8 +86,10 @@ public class Publish {
                     .setDup(false).setRetain(false);
             internalCommunication.internalSend(internalMessage);
             Map<String, String> extensions = new HashMap<>();
-            this.sendMessageToFisco(msg.variableHeader().topicName(), messageBytes, WeEventConstants.DEFAULT_GROUP_ID, extensions);
-            this.sendPubRecMessage(channel, msg.variableHeader().packetId());
+            SendResult sendResult = this.sendMessageToFisco(msg.variableHeader().topicName(), messageBytes, WeEventConstants.DEFAULT_GROUP_ID, extensions);
+            if (sendResult.getStatus() == SendResult.SendResultStatus.SUCCESS) {
+                this.sendPubRecMessage(channel, msg.variableHeader().packetId());
+            }
         }
         // retain=1, retain message
         if (msg.fixedHeader().isRetain()) {
