@@ -47,9 +47,6 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
     
     @Autowired
     private JsonLogoutSuccessHandler jsonLogoutSuccessHandler;
-    
-    @Autowired
-    private ConstantProperties constants;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -62,7 +59,7 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
 		.usernameParameter("username").passwordParameter("password").permitAll()
 		.successHandler(loginSuccessHandler) // if login success
 		.failureHandler(loginfailHandler) // if login fail
-		.and().authorizeRequests().antMatchers("/login.html", "/user/**").permitAll().anyRequest()
+		.and().authorizeRequests().antMatchers("/**", "/user/**").permitAll().anyRequest()
 		.authenticated().and().csrf().disable().httpBasic()
 		.authenticationEntryPoint(jsonAuthenticationEntryPoint).and().logout().logoutUrl("/user/logout")
 		.deleteCookies(ConstantProperties.COOKIE_JSESSIONID, ConstantProperties.COOKIE_MGR_ACCOUNT)
@@ -78,9 +75,6 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
 	super.configure(web);
-	if (!constants.getIsUseSecurity()) {
-	    web.ignoring().antMatchers("/**");
-	}
     }
 
     @Override

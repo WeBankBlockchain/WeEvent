@@ -40,11 +40,9 @@ public class RegisterService {
 	// according type generate select condition
 	AccountExample example = new AccountExample();
 	Criteria criteria = example.createCriteria();
-	// 1：username 2：email
+	// 1：username
 	if (type == 1) {
 	    criteria.andUsernameEqualTo(param);
-	} else if (type == 2) {
-	    criteria.andEmailEqualTo(param);
 	} else {
 	    return GovernanceResult.build(400, "data type error");
 	}
@@ -65,14 +63,10 @@ public class RegisterService {
 		|| StringUtils.isBlank(user.getEmail())) {
 	    return GovernanceResult.build(400, "user data incomplete，regist fail");
 	}
-	// 1：username 2：email
+	// check username exist
 	GovernanceResult result = checkData(user.getUsername(), 1);
 	if (!(boolean) result.getData()) {
 	    return GovernanceResult.build(400, "this username occupied");
-	}
-	result = checkData(user.getEmail(), 2);
-	if (!(boolean) result.getData()) {
-	    return GovernanceResult.build(400, "this email occupied");
 	}
 	user.setLastUpdate(new Date());
 	// secret
