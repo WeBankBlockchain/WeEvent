@@ -129,4 +129,15 @@ public class WeEventConstants {
      * see MQTT specification.
      */
     public static final String LAYER_SEPARATE = "/";
+
+    /**
+     *  check the API type,this is use for jsonrpc
+     */
+    public static final String JSONTYPE = "JSON";
+
+    /**
+     *  check the API type,this is use for restful
+     */
+    public static final String RESTTYPE = "REST";
+
 }

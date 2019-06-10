@@ -3,6 +3,7 @@ package com.webank.weevent.protocol.jsonrpc;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.ha.MasterJob;
 import com.webank.weevent.broker.plugin.IProducer;
@@ -14,11 +15,14 @@ import com.webank.weevent.sdk.TopicPage;
 import com.webank.weevent.sdk.WeEvent;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 
+import com.alibaba.fastjson.annotation.JSONType;
 import com.googlecode.jsonrpc4j.JsonRpcParam;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static com.webank.weevent.broker.fisco.constant.WeEventConstants.JSONTYPE;
 
 /**
  * Implement of JsonRpc service.
@@ -102,29 +106,26 @@ public class BrokerRpc implements IBrokerRpc {
                             @JsonRpcParam(value = "groupId") String groupId,
                             @JsonRpcParam(value = "subscriptionId") String subscriptionId,
                             @JsonRpcParam(value = "url") String url) throws BrokerException {
-        checkSupport();
-        return this.masterJob.getCgiSubscription().jsonRpcSubscribe(topic, groupId, subscriptionId, url);
+        return this.masterJob.doSubscribe(JSONTYPE, topic, groupId, subscriptionId, url, "");
     }
 
     @Override
     public String subscribe(@JsonRpcParam(value = "topic") String topic,
                             @JsonRpcParam(value = "subscriptionId") String subscriptionId,
                             @JsonRpcParam(value = "url") String url) throws BrokerException {
-        checkSupport();
-        return this.masterJob.getCgiSubscription().jsonRpcSubscribe(topic, WeEventConstants.DEFAULT_GROUP_ID, subscriptionId, url);
+
+        return this.masterJob.doSubscribe(JSONTYPE, topic, WeEventConstants.DEFAULT_GROUP_ID, subscriptionId, url, "");
     }
 
     @Override
     public String subscribe(@JsonRpcParam(value = "topic") String topic,
                             @JsonRpcParam(value = "url") String url) throws BrokerException {
-        checkSupport();
-        return this.masterJob.getCgiSubscription().jsonRpcSubscribe(topic, WeEventConstants.DEFAULT_GROUP_ID, "", url);
+        return this.masterJob.doSubscribe(JSONTYPE, topic, WeEventConstants.DEFAULT_GROUP_ID, "", url, "");
     }
 
     @Override
     public boolean unSubscribe(@JsonRpcParam(value = "subscriptionId") String subscriptionId) throws BrokerException {
-        checkSupport();
-        return this.masterJob.getCgiSubscription().jsonRpcUnSubscribe(subscriptionId);
+        return this.masterJob.doUnsubscribe(JSONTYPE, subscriptionId, "");
     }
 
     @Override

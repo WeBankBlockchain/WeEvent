@@ -332,15 +332,7 @@ public class CGISubscription {
         } else {
 
             log.info("i am not leader, route to master");
-
-            if (this.zookeeperPath.isEmpty() || this.zookeeperPath.equals(null)) {
-                // there is no zookeeper
-                ZKSubscription zkSubscription = doRestSubscribe(topic, groupId, subscriptionId, url);
-                return zkSubscription.getSubscriptionId();
-            } else {
-                // route to the other nodes
-                return routeRestMaster(urlFormat, String.class);
-            }
+            return routeRestMaster(urlFormat, String.class);
         }
     }
 

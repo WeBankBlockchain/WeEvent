@@ -2,6 +2,7 @@ package com.webank.weevent.protocol.rest;
 
 import java.util.Map;
 
+import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.util.WeEventUtils;
 import com.webank.weevent.sdk.BrokerException;
@@ -19,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import static com.webank.weevent.broker.fisco.constant.WeEventConstants.RESTTYPE;
 
 /**
  * Implement of Restful service.
@@ -75,18 +78,14 @@ public class BrokerRest extends RestHA implements IBrokerRpc {
         if (StringUtils.isBlank(groupId)) {
             groupId = WeEventConstants.DEFAULT_GROUP_ID;
         }
-        return this.masterJob.getCgiSubscription().restSubscribe(topic,
-                groupId,
-                subscriptionId,
-                url,
-                getUrlFormat(this.request));
+
+        return this.masterJob.doSubscribe(RESTTYPE, topic, groupId, subscriptionId, url, getUrlFormat(this.request));
     }
 
     @Override
     @RequestMapping(path = "/unSubscribe")
     public boolean unSubscribe(@RequestParam(name = "subscriptionId") String subscriptionId) throws BrokerException {
-        checkSupport();
-        return this.masterJob.getCgiSubscription().restUnsubscribe(subscriptionId, getUrlFormat(this.request));
+        return this.masterJob.doUnsubscribe(RESTTYPE, subscriptionId, getUrlFormat(this.request));
     }
 
     @Override
