@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.webank.weevent.JUnitTestBase;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.TopicInfo;
@@ -16,14 +17,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class JsonRpcTest {
+public class JsonRpcTest extends JUnitTestBase {
     private IBrokerRpc iBrokerRpc;
     private String groupId = "1";
     private Map<String, String> extension = new HashMap<>();
 
     @Before
     public void before() throws Exception {
-        String url = "http://127.0.0.1:8080/weevent/jsonrpc";
+        String url = "http://localhost:"+ listenPort +"/weevent/jsonrpc";
 
         JsonRpcHttpClient client = new JsonRpcHttpClient(new URL(url));
         this.iBrokerRpc = ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);
