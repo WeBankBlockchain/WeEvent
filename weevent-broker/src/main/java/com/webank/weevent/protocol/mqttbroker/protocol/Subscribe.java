@@ -1,13 +1,21 @@
 package com.webank.weevent.protocol.mqttbroker.protocol;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.plugin.IConsumer;
+import com.webank.weevent.protocol.mqttbroker.store.IDupPublishMessageStore;
 import com.webank.weevent.protocol.mqttbroker.store.IMessageIdStore;
 import com.webank.weevent.protocol.mqttbroker.store.IRetainMessageStore;
+import com.webank.weevent.protocol.mqttbroker.store.ISessionStore;
 import com.webank.weevent.protocol.mqttbroker.store.ISubscribeStore;
+import com.webank.weevent.protocol.mqttbroker.store.dto.DupPublishMessageStore;
 import com.webank.weevent.protocol.mqttbroker.store.dto.RetainMessageStore;
 import com.webank.weevent.protocol.mqttbroker.store.dto.SubscribeStore;
+import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.WeEvent;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -35,11 +43,17 @@ public class Subscribe {
     private IRetainMessageStore iRetainMessageStore;
     private ISubscribeStore iSubscribeStore;
     private IMessageIdStore iMessageIdStore;
+    private ISessionStore iSessionStore;
+    private IDupPublishMessageStore iDupPublishMessageStore;
+    private IConsumer iConsumer;
 
-    public Subscribe(ISubscribeStore iSubscribeStore, IRetainMessageStore iRetainMessageStore, IMessageIdStore iMessageIdStore) {
+    public Subscribe(ISessionStore iSessionStore, IDupPublishMessageStore iDupPublishMessageStore, ISubscribeStore iSubscribeStore, IRetainMessageStore iRetainMessageStore, IMessageIdStore iMessageIdStore, IConsumer iConsumer) {
         this.iSubscribeStore = iSubscribeStore;
         this.iRetainMessageStore = iRetainMessageStore;
         this.iMessageIdStore = iMessageIdStore;
+        this.iSessionStore = iSessionStore;
+        this.iDupPublishMessageStore = iDupPublishMessageStore;
+        this.iConsumer = iConsumer;
     }
 
     public void processSubscribe(Channel channel, MqttSubscribeMessage msg) {
@@ -65,6 +79,28 @@ public class Subscribe {
                 String topicFilter = topicSubscription.topicName();
                 MqttQoS mqttQoS = topicSubscription.qualityOfService();
                 this.sendRetainMessage(channel, topicFilter, mqttQoS);
+            });
+            // send to subscribe
+            topicSubscriptions.forEach(topicSubscription -> {
+                String topicFilter = topicSubscription.topicName();
+                MqttQoS mqttQoS = topicSubscription.qualityOfService();
+                try {
+                    String subscriptionId = this.iConsumer.subscribe(topicFilter, WeEventConstants.DEFAULT_GROUP_ID, WeEvent.OFFSET_LAST, "mqtt", new IConsumer.ConsumerListener() {
+                        @Override
+                        public void onEvent(String subscriptionId, WeEvent event) {
+                            log.info("consumer onEvent, subscriptionId: {} event: {}", subscriptionId, event);
+                            sendPublishMessage(topicFilter, mqttQoS, event.toString().getBytes(), false, false);
+
+                        }
+
+                        @Override
+                        public void onException(Throwable e) {
+                            log.error("consumer onException", e);
+                        }
+                    });
+                } catch (BrokerException e) {
+                    log.error("subscribe exception:{}", e.getMessage());
+                }
             });
         } else {
             channel.close();
@@ -114,6 +150,45 @@ public class Subscribe {
                         new MqttPublishVariableHeader(retainMessageStore.getTopic(), messageId), Unpooled.buffer().writeBytes(retainMessageStore.getMessageBytes()));
                 log.debug("PUBLISH - clientId: {}, topic: {}, Qos: {}, messageId: {}", (String) channel.attr(AttributeKey.valueOf("clientId")).get(), retainMessageStore.getTopic(), respQoS.value(), messageId);
                 channel.writeAndFlush(publishMessage);
+            }
+        });
+    }
+
+    private void sendPublishMessage(String topic, MqttQoS mqttQoS, byte[] messageBytes, boolean retain, boolean dup) {
+        List<SubscribeStore> subscribeStores = iSubscribeStore.search(topic);
+        subscribeStores.forEach(subscribeStore -> {
+            if (iSessionStore.containsKey(subscribeStore.getClientId())) {
+                //get subscribe QOS value
+                MqttQoS respQoS = mqttQoS.value() > subscribeStore.getMqttQoS() ? MqttQoS.valueOf(subscribeStore.getMqttQoS()) : mqttQoS;
+                if (respQoS == MqttQoS.AT_MOST_ONCE) {
+                    MqttPublishMessage publishMessage = (MqttPublishMessage) MqttMessageFactory.newMessage(
+                            new MqttFixedHeader(MqttMessageType.PUBLISH, dup, respQoS, retain, 0),
+                            new MqttPublishVariableHeader(topic, 0), Unpooled.buffer().writeBytes(messageBytes));
+                    log.debug("PUBLISH - clientId: {}, topic: {}, Qos: {}", subscribeStore.getClientId(), topic, respQoS.value());
+                    iSessionStore.get(subscribeStore.getClientId()).getChannel().writeAndFlush(publishMessage);
+                }
+                if (respQoS == MqttQoS.AT_LEAST_ONCE) {
+                    int messageId = iMessageIdStore.getNextMessageId();
+                    MqttPublishMessage publishMessage = (MqttPublishMessage) MqttMessageFactory.newMessage(
+                            new MqttFixedHeader(MqttMessageType.PUBLISH, dup, respQoS, retain, 0),
+                            new MqttPublishVariableHeader(topic, messageId), Unpooled.buffer().writeBytes(messageBytes));
+                    log.debug("PUBLISH AT_LEAST_ONCE- clientId: {}, topic: {}, Qos: {}, messageId: {}", subscribeStore.getClientId(), topic, respQoS.value(), messageId);
+                    DupPublishMessageStore dupPublishMessageStore = new DupPublishMessageStore().setClientId(subscribeStore.getClientId())
+                            .setTopic(topic).setMqttQoS(respQoS.value()).setMessageBytes(messageBytes);
+                    iDupPublishMessageStore.put(subscribeStore.getClientId(), dupPublishMessageStore);
+                    iSessionStore.get(subscribeStore.getClientId()).getChannel().writeAndFlush(publishMessage);
+                }
+                if (respQoS == MqttQoS.EXACTLY_ONCE) {
+                    int messageId = iMessageIdStore.getNextMessageId();
+                    MqttPublishMessage publishMessage = (MqttPublishMessage) MqttMessageFactory.newMessage(
+                            new MqttFixedHeader(MqttMessageType.PUBLISH, dup, respQoS, retain, 0),
+                            new MqttPublishVariableHeader(topic, messageId), Unpooled.buffer().writeBytes(messageBytes));
+                    log.debug("PUBLISH EXACTLY_ONCE- clientId: {}, topic: {}, Qos: {}, messageId: {}", subscribeStore.getClientId(), topic, respQoS.value(), messageId);
+                    DupPublishMessageStore dupPublishMessageStore = new DupPublishMessageStore().setClientId(subscribeStore.getClientId())
+                            .setTopic(topic).setMqttQoS(respQoS.value()).setMessageBytes(messageBytes);
+                    iDupPublishMessageStore.put(subscribeStore.getClientId(), dupPublishMessageStore);
+                    iSessionStore.get(subscribeStore.getClientId()).getChannel().writeAndFlush(publishMessage);
+                }
             }
         });
     }

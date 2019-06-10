@@ -78,7 +78,7 @@ public class ProtocolProcess {
 
     public Publish publish() {
         if (publish == null) {
-            publish = new Publish(iRetainMessageStore, iSessionStore, iSubscribeStore, iDupPublishMessageStore, internalCommunication, iMessageIdStore, iproducer, iconsumer);
+            publish = new Publish(iRetainMessageStore, internalCommunication, iproducer);
         }
         return publish;
     }
@@ -113,7 +113,7 @@ public class ProtocolProcess {
 
     public Subscribe subscribe() {
         if (subscribe == null) {
-            subscribe = new Subscribe(iSubscribeStore, iRetainMessageStore, iMessageIdStore);
+            subscribe = new Subscribe(iSessionStore, iDupPublishMessageStore, iSubscribeStore, iRetainMessageStore, iMessageIdStore, iconsumer);
         }
         return subscribe;
     }

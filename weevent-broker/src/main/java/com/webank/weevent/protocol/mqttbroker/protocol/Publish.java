@@ -42,23 +42,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Publish {
     private IRetainMessageStore iRetainMessageStore;
-    private ISessionStore iSessionStore;
-    private ISubscribeStore iSubscribeStore;
-    private IDupPublishMessageStore iDupPublishMessageStore;
     private InternalCommunication internalCommunication;
-    private IMessageIdStore iMessageIdStore;
     private IProducer iproducer;
-    private IConsumer iconsumer;
 
-    public Publish(IRetainMessageStore iRetainMessageStore, ISessionStore iSessionStore, ISubscribeStore iSubscribeStore, IDupPublishMessageStore iDupPublishMessageStore, InternalCommunication internalCommunication, IMessageIdStore iMessageIdStore, IProducer iproducer, IConsumer iconsumer) {
+    public Publish(IRetainMessageStore iRetainMessageStore, InternalCommunication internalCommunication, IProducer iproducer) {
         this.iRetainMessageStore = iRetainMessageStore;
-        this.iSessionStore = iSessionStore;
-        this.iSubscribeStore = iSubscribeStore;
-        this.iDupPublishMessageStore = iDupPublishMessageStore;
         this.internalCommunication = internalCommunication;
-        this.iMessageIdStore = iMessageIdStore;
         this.iproducer = iproducer;
-        this.iconsumer = iconsumer;
     }
 
     public void processPublish(Channel channel, MqttPublishMessage msg) {
@@ -72,7 +62,6 @@ public class Publish {
             internalCommunication.internalSend(internalMessage);
             Map<String, String> extensions = new HashMap<>();
             this.sendMessageToFisco(msg.variableHeader().topicName(), messageBytes, WeEventConstants.DEFAULT_GROUP_ID, extensions);
-            this.sendPublishMessage(msg.variableHeader().topicName(), msg.fixedHeader().qosLevel(), messageBytes, false, false);
         }
         // QoS=1
         if (msg.fixedHeader().qosLevel() == MqttQoS.AT_LEAST_ONCE) {
@@ -84,7 +73,6 @@ public class Publish {
             internalCommunication.internalSend(internalMessage);
             Map<String, String> extensions = new HashMap<>();
             this.sendMessageToFisco(msg.variableHeader().topicName(), messageBytes, WeEventConstants.DEFAULT_GROUP_ID, extensions);
-            this.sendPublishMessage(msg.variableHeader().topicName(), msg.fixedHeader().qosLevel(), messageBytes, false, false);
             this.sendPubAckMessage(channel, msg.variableHeader().packetId());
         }
         // QoS=2
@@ -97,7 +85,6 @@ public class Publish {
             internalCommunication.internalSend(internalMessage);
             Map<String, String> extensions = new HashMap<>();
             this.sendMessageToFisco(msg.variableHeader().topicName(), messageBytes, WeEventConstants.DEFAULT_GROUP_ID, extensions);
-            this.sendPublishMessage(msg.variableHeader().topicName(), msg.fixedHeader().qosLevel(), messageBytes, false, false);
             this.sendPubRecMessage(channel, msg.variableHeader().packetId());
         }
         // retain=1, retain message
@@ -114,57 +101,15 @@ public class Publish {
         }
     }
 
-    private boolean sendMessageToFisco(String topic, byte[] messageBytes, String groupId, Map<String, String> extensions) {
+    private SendResult sendMessageToFisco(String topic, byte[] messageBytes, String groupId, Map<String, String> extensions) {
         SendResult sendResult = new SendResult();
         try {
+            this.iproducer.open(topic, groupId);
             sendResult = this.iproducer.publish(new WeEvent(topic, messageBytes, extensions), groupId);
         } catch (BrokerException e) {
             log.error("publish error:{}", sendResult.toString());
-            return false;
         }
-        if (sendResult.getStatus() != SendResult.SendResultStatus.SUCCESS) {
-            return false;
-        }
-        return true;
-    }
-
-    private void sendPublishMessage(String topic, MqttQoS mqttQoS, byte[] messageBytes, boolean retain, boolean dup) {
-        List<SubscribeStore> subscribeStores = iSubscribeStore.search(topic);
-        subscribeStores.forEach(subscribeStore -> {
-            if (iSessionStore.containsKey(subscribeStore.getClientId())) {
-                //get subscribe QOS value
-                MqttQoS respQoS = mqttQoS.value() > subscribeStore.getMqttQoS() ? MqttQoS.valueOf(subscribeStore.getMqttQoS()) : mqttQoS;
-                if (respQoS == MqttQoS.AT_MOST_ONCE) {
-                    MqttPublishMessage publishMessage = (MqttPublishMessage) MqttMessageFactory.newMessage(
-                            new MqttFixedHeader(MqttMessageType.PUBLISH, dup, respQoS, retain, 0),
-                            new MqttPublishVariableHeader(topic, 0), Unpooled.buffer().writeBytes(messageBytes));
-                    log.debug("PUBLISH - clientId: {}, topic: {}, Qos: {}", subscribeStore.getClientId(), topic, respQoS.value());
-                    iSessionStore.get(subscribeStore.getClientId()).getChannel().writeAndFlush(publishMessage);
-                }
-                if (respQoS == MqttQoS.AT_LEAST_ONCE) {
-                    int messageId = iMessageIdStore.getNextMessageId();
-                    MqttPublishMessage publishMessage = (MqttPublishMessage) MqttMessageFactory.newMessage(
-                            new MqttFixedHeader(MqttMessageType.PUBLISH, dup, respQoS, retain, 0),
-                            new MqttPublishVariableHeader(topic, messageId), Unpooled.buffer().writeBytes(messageBytes));
-                    log.debug("PUBLISH AT_LEAST_ONCE- clientId: {}, topic: {}, Qos: {}, messageId: {}", subscribeStore.getClientId(), topic, respQoS.value(), messageId);
-                    DupPublishMessageStore dupPublishMessageStore = new DupPublishMessageStore().setClientId(subscribeStore.getClientId())
-                            .setTopic(topic).setMqttQoS(respQoS.value()).setMessageBytes(messageBytes);
-                    iDupPublishMessageStore.put(subscribeStore.getClientId(), dupPublishMessageStore);
-                    iSessionStore.get(subscribeStore.getClientId()).getChannel().writeAndFlush(publishMessage);
-                }
-                if (respQoS == MqttQoS.EXACTLY_ONCE) {
-                    int messageId = iMessageIdStore.getNextMessageId();
-                    MqttPublishMessage publishMessage = (MqttPublishMessage) MqttMessageFactory.newMessage(
-                            new MqttFixedHeader(MqttMessageType.PUBLISH, dup, respQoS, retain, 0),
-                            new MqttPublishVariableHeader(topic, messageId), Unpooled.buffer().writeBytes(messageBytes));
-                    log.debug("PUBLISH EXACTLY_ONCE- clientId: {}, topic: {}, Qos: {}, messageId: {}", subscribeStore.getClientId(), topic, respQoS.value(), messageId);
-                    DupPublishMessageStore dupPublishMessageStore = new DupPublishMessageStore().setClientId(subscribeStore.getClientId())
-                            .setTopic(topic).setMqttQoS(respQoS.value()).setMessageBytes(messageBytes);
-                    iDupPublishMessageStore.put(subscribeStore.getClientId(), dupPublishMessageStore);
-                    iSessionStore.get(subscribeStore.getClientId()).getChannel().writeAndFlush(publishMessage);
-                }
-            }
-        });
+        return sendResult;
     }
 
     private void sendPubAckMessage(Channel channel, int messageId) {
