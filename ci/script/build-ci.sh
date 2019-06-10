@@ -43,11 +43,11 @@ function cleanup(){
 }
 
 function main(){
-gradleBroker
-updateFisco
-getContractAddress
-checkService
-cleanup
+    gradleBroker
+    updateFisco
+    getContractAddress
+    checkService
+    cleanup
 }
 
 main

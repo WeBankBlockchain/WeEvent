@@ -338,7 +338,6 @@ public class CGISubscription {
                 ZKSubscription zkSubscription = doRestSubscribe(topic, groupId, subscriptionId, url);
                 return zkSubscription.getSubscriptionId();
             } else {
-
                 // route to the other nodes
                 return routeRestMaster(urlFormat, String.class);
             }
