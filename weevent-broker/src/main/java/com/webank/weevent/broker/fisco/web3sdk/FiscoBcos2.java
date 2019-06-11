@@ -3,7 +3,8 @@ package com.webank.weevent.broker.fisco.web3sdk;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,6 +12,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.contract.v2.Topic;
@@ -25,16 +27,13 @@ import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.WeEvent;
 
-import jnr.ffi.Struct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.bcos.web3j.abi.datatypes.DynamicArray;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.client.TransactionSucCallback;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.fisco.bcos.web3j.tuples.generated.Tuple2;
 import org.fisco.bcos.web3j.tuples.generated.Tuple3;
 import org.fisco.bcos.web3j.tx.Contract;
 
@@ -63,6 +62,8 @@ public class FiscoBcos2 {
 
     // topic list
     private Map<String, Topic> topicMap = new ConcurrentHashMap<>();
+
+    private Service service;
 
     public FiscoBcos2(FiscoConfig fiscoConfig) {
         this.fiscoConfig = fiscoConfig;
@@ -253,6 +254,7 @@ public class FiscoBcos2 {
         throw new BrokerException(ErrorCode.EVENT_ID_NOT_EXIST);
     }
 
+
     public SendResult publishEvent(String topicName, String eventContent, String extensions) throws BrokerException {
         Topic topic = getTopic(topicName);
         if (topic == null) {
@@ -269,6 +271,9 @@ public class FiscoBcos2 {
                 sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, event.get(0).eventBlockNumer.intValue(), event.get(0).eventSeq.intValue()));
                 sendResult.setTopic(topicName);
                 sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+
+                // send the client message to server
+                Web3SDK2Wrapper.Channel2Server(DataTypeUtils.encodeEventId(topicName, event.get(0).eventBlockNumer.intValue(), event.get(0).eventSeq.intValue()));
                 return sendResult;
             } else {
                 return sendResult;

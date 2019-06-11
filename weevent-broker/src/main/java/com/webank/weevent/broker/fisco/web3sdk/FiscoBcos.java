@@ -1,6 +1,8 @@
 package com.webank.weevent.broker.fisco.web3sdk;
 
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -8,6 +10,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.contract.Topic;
@@ -39,6 +42,8 @@ import org.bcos.web3j.protocol.ObjectMapperFactory;
 import org.bcos.web3j.protocol.Web3j;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.bcos.web3j.tx.Contract;
+import org.fisco.bcos.channel.dto.ChannelRequest;
+import org.fisco.bcos.channel.dto.ChannelResponse;
 
 /**
  * Access to FISCO-BCOS 1.x.
@@ -273,7 +278,10 @@ public class FiscoBcos {
                 sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, Web3SDKWrapper.uint256ToInt(event.get(0).eventBlockNumer), Web3SDKWrapper.uint256ToInt(event.get(0).eventSeq)));
                 sendResult.setTopic(topicName);
                 sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+                // send the client message to server
+                Web3SDKWrapper.Channel2Server(DataTypeUtils.encodeEventId(topicName, Web3SDKWrapper.uint256ToInt(event.get(0).eventBlockNumer), Web3SDKWrapper.uint256ToInt(event.get(0).eventSeq)));
                 return sendResult;
+
             } else {
                 return sendResult;
             }
@@ -306,6 +314,7 @@ public class FiscoBcos {
                                     sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
                                 } else {
                                     sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+                                    Web3SDKWrapper.Channel2Server(DataTypeUtils.encodeEventId(topicName, Web3SDKWrapper.uint256ToInt(event.get(0).eventBlockNumer), Web3SDKWrapper.uint256ToInt(event.get(0).eventSeq)));
                                 }
                                 callBack.onComplete(sendResult);
                             }

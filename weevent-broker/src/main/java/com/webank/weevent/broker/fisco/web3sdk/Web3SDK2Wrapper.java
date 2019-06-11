@@ -4,10 +4,14 @@ package com.webank.weevent.broker.fisco.web3sdk;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -26,6 +30,8 @@ import com.webank.weevent.sdk.WeEvent;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.Service;
+import org.fisco.bcos.channel.dto.ChannelRequest;
+import org.fisco.bcos.channel.dto.ChannelResponse;
 import org.fisco.bcos.channel.handler.ChannelConnections;
 import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
 import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32;
@@ -44,6 +50,9 @@ import org.fisco.bcos.web3j.tx.Contract;
 import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+
 /**
  * Wrapper of Web3SDK 2.x function.
  * This class can run without spring's ApplicationContext.
@@ -55,6 +64,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class Web3SDK2Wrapper {
     // it's a trick. Topic.getLogWeEventEvents is not static
     private static Topic topic;
+    private static Service service;
+    public static Boolean stateIsChange;
+
 
     // static gas provider
     public static final ContractGasProvider gasProvider = new ContractGasProvider() {
@@ -113,6 +125,7 @@ public class Web3SDK2Wrapper {
             connectionsConfig.setAllChannelConnections(Arrays.asList(channelConnections));
             service.setAllChannelConnections(connectionsConfig);
 
+
             // thread pool
             ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
             pool.setBeanName("web3sdk-" + groupId);
@@ -125,6 +138,18 @@ public class Web3SDK2Wrapper {
             service.setThreadPool(pool);
             service.run();
 
+            // topic for the amop
+            String topic = "amop-message-id2";
+            // set topic , support multi topic
+            Set<String> topics = new HashSet<>();
+            topics.add(topic);
+            service.setTopics(topics);
+
+            PushCallback cb = new PushCallback();
+            service.setPushCallback(cb);
+
+            Web3SDK2Wrapper.service = service;
+
             ChannelEthereumService channelEthereumService = new ChannelEthereumService();
             channelEthereumService.setChannelService(service);
             channelEthereumService.setTimeout(web3sdkTimeout);
@@ -132,6 +157,7 @@ public class Web3SDK2Wrapper {
 
             // check connect with getBlockNumber command
             web3j.getBlockNumber().send().getBlockNumber();
+
 
             log.info("initialize web3sdk success, group id: {}", groupId);
             return web3j;
@@ -197,6 +223,28 @@ public class Web3SDK2Wrapper {
         } catch (Exception e) {
             log.error("load contract failed, {} {}", cls.getSimpleName(), e.getMessage());
             return null;
+        }
+    }
+
+    public static void Channel2Server(String eventId) {
+        ChannelRequest request = new ChannelRequest();
+         request.setFromOrg("fisco2");
+        request.setToTopic("amop-message-id");
+        request.setToOrg("fisco");
+
+        request.setMessageID(Web3SDK2Wrapper.service.newSeq());
+        request.setTimeout(5000);
+
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        //request.setContent("request seq:{}" + String.valueOf(request.getMessageID()) + ",event id:{}" + eventId);
+        request.setContent("0");
+        log.info(df.format(LocalDateTime.now()), " request seq: {}, Content:{}", String.valueOf(request.getMessageID()), request.getContent());
+        // send message
+        ChannelResponse response = service.sendChannelMessage2(request);
+        log.info("time:{},response seq: {}, ErrorCode:{}, Content:{}", df.format(LocalDateTime.now()), String.valueOf(response.getMessageID()), response.getErrorCode(), response.getContent());
+        if (response.getErrorCode().equals(0)) {
+            // set the state for the notify loop task
+            Web3SDK2Wrapper.stateIsChange = TRUE;
         }
     }
 

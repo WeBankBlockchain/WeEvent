@@ -18,6 +18,7 @@ import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.fisco.util.StoppableTask;
 import com.webank.weevent.broker.fisco.util.WeEventUtils;
+import com.webank.weevent.broker.fisco.web3sdk.Web3SDK2Wrapper;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
@@ -538,6 +539,15 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                 }
 
                 Long currentBlock = this.lastBlock + 1;
+
+                // according to the amop message get to the change state
+                if (!Web3SDK2Wrapper.stateIsChange.equals(Boolean.TRUE)) {
+                    // Normal loop one block as following.
+                    log.debug("once loop, topics: {} cached block height: {}", Arrays.toString(topics), this.cachedBlockHeight);
+                    List<WeEvent> events = loopBlock(currentBlock, topics, groupId);
+                    log.debug("once loop done, block: {} event size: {}", currentBlock, events.size());
+                    this.pushNotify(events);
+                }
                 // Cache may be expired, refresh it.
                 if (currentBlock > this.cachedBlockHeight) {
                     Long blockHeight = fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId));
@@ -555,12 +565,10 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                         return;
                     }
                 }
-
                 // Normal loop one block as following.
                 log.debug("once loop, topics: {} cached block height: {}", Arrays.toString(topics), this.cachedBlockHeight);
                 List<WeEvent> events = loopBlock(currentBlock, topics, groupId);
                 log.debug("once loop done, block: {} event size: {}", currentBlock, events.size());
-
                 this.pushNotify(events);
 
                 // Init for next block.
