@@ -3,6 +3,12 @@ import api from './api.json'
 import weBaseAPI from './weBaseAPI'
 
 class ResoruceService extends BaseModel {
+  login (data) {
+    return this.request(api.login, data)
+  }
+  loginOut (data) {
+    return this.request(api.loginOut, data)
+  }
   topicList (data) {
     return this.request(api.topicList, data)
   }
@@ -53,6 +59,18 @@ class ResoruceService extends BaseModel {
   }
   getEvent (data) {
     return this.request(weBaseAPI.getEvent, data)
+  }
+  checkExsit (data) {
+    return this.request(api.checkExsit, data)
+  }
+  register (data) {
+    return this.request(api.register, data)
+  }
+  forget (data) {
+    return this.request(api.forget, data)
+  }
+  update (data) {
+    return this.request(api.update, data)
   }
 }
 

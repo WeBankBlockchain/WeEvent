@@ -99,7 +99,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         List<WeEvent> blockEventsList = null;
         List<WeEvent> topicEventsList = new ArrayList<>();
         while (blockEventsList == null) {
-            blockEventsList = this.fiscoBcosDelegate.loop(blockNum, Long.parseLong(groupId));
+            blockEventsList = fiscoBcosDelegate.loop(blockNum, Long.parseLong(groupId));
             if (blockEventsList == null) {
                 idle();
             } else {
@@ -141,7 +141,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
         // check offset
         if ((!offset.equals(WeEvent.OFFSET_FIRST) && !offset.equals(WeEvent.OFFSET_LAST))) {
-            Long blockHeight = this.fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId));
+            Long blockHeight = fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId));
             Long lastBlock = DataTypeUtils.decodeBlockNumber(offset);
             if (blockHeight == 0L) {
                 throw new BrokerException(ErrorCode.GET_BLOCK_HEIGHT_ERROR);
@@ -210,7 +210,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         ParamCheckUtils.validateListenerNotNull(listener);
         ParamCheckUtils.validateGroupId(groupId);
         if (!offset.equals(WeEvent.OFFSET_FIRST) && !offset.equals(WeEvent.OFFSET_LAST)) {
-            ParamCheckUtils.validateEventId(topic, offset, this.fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId)));
+            ParamCheckUtils.validateEventId(topic, offset, fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId)));
         }
 
         log.info("subscribe topic: {} offset: {}", topic, offset);
@@ -229,7 +229,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         ParamCheckUtils.validateSubscriptionId(subscriptionId);
         ParamCheckUtils.validateGroupId(groupId);
         if (!offset.equals(WeEvent.OFFSET_FIRST) && !offset.equals(WeEvent.OFFSET_LAST)) {
-            ParamCheckUtils.validateEventId(topic, offset, this.fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId)));
+            ParamCheckUtils.validateEventId(topic, offset, fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId)));
         }
 
         log.info("subscribe topic: {} offset: {} subscriptionId:{}", topic, offset, subscriptionId);

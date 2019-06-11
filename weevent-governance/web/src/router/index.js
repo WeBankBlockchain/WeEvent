@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
+import login from '../login/login'
+import registered from '../components/registered'
 import index from '../module/index'
 import topicList from '../components/topicList'
 import mainCont from '../components/mainCont'
@@ -16,8 +18,17 @@ import servers from '../components/servers'
 Vue.use(Router)
 
 export default new Router({
+  mode: 'history',
   routes: [
     {
+      path: '/login',
+      name: 'login',
+      component: login
+    }, {
+      path: '/registered',
+      name: 'registered',
+      component: registered
+    }, {
       path: '/',
       name: 'index',
       component: index,

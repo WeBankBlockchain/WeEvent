@@ -114,7 +114,7 @@ export default {
       this.$alert(e, '错误信息')
     },
     transList () {
-      let url = '/' + sessionStorage.getItem('groupId') + '/' + this.pageIndex + '/' + this.pageSize + '?brokerId=' + sessionStorage.getItem('userId')
+      let url = '/' + sessionStorage.getItem('groupId') + '/' + this.pageIndex + '/' + this.pageSize + '?brokerId=' + sessionStorage.getItem('brokerId')
       if (this.search_name.length < 10 && this.search_name.length > 0) {
         url = url + '&blockNumber=' + this.search_name
       } else if (this.search_name.length >= 10) {
@@ -132,7 +132,7 @@ export default {
       })
     },
     readDetial (e) {
-      let url = '/' + sessionStorage.getItem('groupId') + '/' + e.blockNumber + '?brokerId=' + sessionStorage.getItem('userId')
+      let url = '/' + sessionStorage.getItem('groupId') + '/' + e.blockNumber + '?brokerId=' + sessionStorage.getItem('brokerId')
       let index = this.tableData.indexOf(e)
       API.blockByNumber(url).then(res => {
         if (res.status === 200) {
@@ -142,7 +142,7 @@ export default {
       })
     },
     getEvent (e, i) {
-      let url = '/' + sessionStorage.getItem('groupId') + '/' + e + '?brokerId=' + sessionStorage.getItem('userId')
+      let url = '/' + sessionStorage.getItem('groupId') + '/' + e + '?brokerId=' + sessionStorage.getItem('brokerId')
       API.getEvent(url).then(res => {
         if (res.status === 200 && res.status.code === 0) {
           this.tableData[i].logs.address = res.data.data.logs[0].address
