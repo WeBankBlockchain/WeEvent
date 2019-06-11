@@ -69,7 +69,7 @@ public class RegisterService {
 	    return GovernanceResult.build(400, "this username occupied");
 	}
 	
-	if(user.getPassword().length() > 6) {
+	if(user.getPassword().length() < 6) {
 	    return GovernanceResult.build(400, "password is too short");
 	}
 	
