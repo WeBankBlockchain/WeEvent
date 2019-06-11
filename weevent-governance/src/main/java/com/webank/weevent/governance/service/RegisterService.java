@@ -68,6 +68,11 @@ public class RegisterService {
 	if (!(boolean) result.getData()) {
 	    return GovernanceResult.build(400, "this username occupied");
 	}
+	
+	if(user.getPassword().length() > 6) {
+	    return GovernanceResult.build(400, "password is too short");
+	}
+	
 	user.setLastUpdate(new Date());
 	// secret
 	String storePassword = passwordEncoder.encode(user.getPassword());

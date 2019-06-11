@@ -65,6 +65,7 @@ public class BrokerService {
 	try {
 	    restTemplate.getForEntity(brokerUrl, TopicPage.class).getBody();
 	} catch (Exception e) {
+	    log.error(e.getMessage());
 	    throw new GovernanceException(ErrorCode.BROKER_CONNECT_ERROR);
 	}
 
