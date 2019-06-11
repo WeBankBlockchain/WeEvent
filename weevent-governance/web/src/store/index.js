@@ -5,6 +5,7 @@ Vue.use(vuex)
 export default new vuex.Store({
   state: {
     userName: '',
+    goLogin: false,
     menu: '首页'
   },
   mutations: {
@@ -13,6 +14,9 @@ export default new vuex.Store({
     },
     set_menu (state, menu) {
       state.menu = menu
+    },
+    back (state, goLogin) {
+      state.goLogin = goLogin
     }
   }
 })

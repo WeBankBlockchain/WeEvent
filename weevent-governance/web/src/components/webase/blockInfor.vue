@@ -76,7 +76,7 @@ export default {
       this.$alert(e, '错误信息')
     },
     blockList () {
-      let url = '/' + sessionStorage.getItem('groupId') + '/' + this.pageIndex + '/' + this.pageSize + '?brokerId=' + sessionStorage.getItem('userId')
+      let url = '/' + sessionStorage.getItem('groupId') + '/' + this.pageIndex + '/' + this.pageSize + '?brokerId=' + sessionStorage.getItem('brokerId')
       if (this.search_name.length < 10 && this.search_name.length > 0) {
         url = url + '&blockNumber=' + this.search_name
       } else if (this.search_name.length >= 10) {
