@@ -72,6 +72,6 @@ public class AdminRest extends RestHA {
 
     @RequestMapping(path = "/innerListSubscription")
     public Map<String, Object> innerListSubscription() throws BrokerException {
-        return consumer.getInnerSubscription();
+        return this.consumer.listSubscription();
     }
 }
