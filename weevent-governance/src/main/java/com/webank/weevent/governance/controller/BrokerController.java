@@ -3,8 +3,8 @@ package com.webank.weevent.governance.controller;
 import java.util.List;
 import javax.validation.Valid;
 
-import com.webank.weevent.governance.entity.Account;
 import com.webank.weevent.governance.entity.Broker;
+import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.service.AccountService;
 import com.webank.weevent.governance.service.BrokerService;
 
@@ -48,13 +48,13 @@ public class BrokerController {
 
     // get broker service by id
     @PostMapping("/broker")
-    public Boolean addBroker(@Valid @RequestBody Broker broker) {
+    public Boolean addBroker(@Valid @RequestBody Broker broker) throws GovernanceException {
 	log.info("add  broker service into db " + broker);
 	return brokerService.addBroker(broker);
     }
 
     @PutMapping("/broker")
-    public Boolean updateBroker(@RequestBody Broker broker) {
+    public Boolean updateBroker(@RequestBody Broker broker) throws GovernanceException {
 	log.info("update  broker service ,broker: " + broker);
 	return brokerService.updateBroker(broker);
     }
