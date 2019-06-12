@@ -47,7 +47,7 @@ public class HandShakeWebSocketInterceptor implements HandshakeInterceptor {
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
                                    Map<String, Object> attributes) {
-    	String ip = getIpAddress(request);
+        String ip = getIpAddress(request);
         if (this.ipWhiteTable.equals("")) {
             return true;
         }
