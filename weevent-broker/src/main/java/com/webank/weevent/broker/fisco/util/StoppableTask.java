@@ -1,56 +1,48 @@
 package com.webank.weevent.broker.fisco.util;
 
 
-import com.webank.weevent.BrokerApplication;
-
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Task can be stopped by flag setting and InterruptedException.
- * Prefer to flag setting.
+ * Task can be stopped by exit flag and interrupt().
+ * Prefer to exit flag.
  *
  * @author matthewliu
  * @since 2018/11/09
  */
 @Slf4j
 public abstract class StoppableTask extends Thread {
+    // flag to exit task
     private volatile boolean exit = false;
 
     public StoppableTask(String name) {
         super(name);
     }
 
-    public boolean isExit() {
-        return this.exit;
-    }
-
     public void doExit() {
-        log.info("doExit enter");
+        log.info("enter");
 
         this.exit = true;
 
-        int idleTime = BrokerApplication.weEventConfig.getConsumerIdleTime();
         for (int i = 0; i < 15; i++) {
             try {
-                log.debug("idle to graceful exit");
-                Thread.sleep(idleTime);
+                log.debug("try to graceful exit");
+                // idle 1 second
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
-                log.error("doExit failed, due to InterruptedException");
+                log.error("exit failed, due to InterruptedException");
                 Thread.currentThread().interrupt();
             }
 
             if (!isAlive()) {
-                log.info("doExit exit while not alive");
+                log.info("not alive, doExit carefully");
                 return;
             }
         }
 
         // Force terminate, Web3sdk will throw NullPointException if interrupt()
         //this.interrupt();
-        log.info("doExit force exit after wait");
-    }
-
-    private void onExit() {
+        log.info("force to exit after wait");
     }
 
     protected abstract void taskOnceLoop() throws InterruptedException;
@@ -71,7 +63,6 @@ public abstract class StoppableTask extends Thread {
             Thread.currentThread().interrupt();
         }
 
-        this.onExit();
         log.info("task thread exit, name: {}", this.getName());
     }
 }

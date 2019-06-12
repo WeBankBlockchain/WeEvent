@@ -315,9 +315,7 @@ public class Web3SDK2Wrapper {
                         log.error("parse extensions failed");
                     }
                     WeEvent event = new WeEvent(topicName, logEvent.eventContent.getBytes(StandardCharsets.UTF_8), extensions);
-                    event.setEventId(DataTypeUtils.encodeEventId(topicName,
-                            logEvent.eventBlockNumer.intValue(),
-                            logEvent.eventSeq.intValue()));
+                    event.setEventId(DataTypeUtils.encodeEventId(topicName, logEvent.eventBlockNumer.intValue(), logEvent.eventSeq.intValue()));
                     log.debug("get a event from fisco-bcos: {}", event);
                     events.add(event);
                 }

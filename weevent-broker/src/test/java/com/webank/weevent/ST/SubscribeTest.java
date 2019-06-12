@@ -52,7 +52,7 @@ public class SubscribeTest extends JUnitTestBase {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         RestTemplate rest = new RestTemplate(requestFactory);
 
-        ResponseEntity<String> rsp = rest.getForEntity("http://localhost:8080/weevent/rest/subscribe?topic={topic}&subscriptionId={subscriptionId}&url={url}",
+        ResponseEntity<String> rsp = rest.getForEntity("http://localhost:"+ listenPort +"/weevent/rest/subscribe?topic={topic}&subscriptionId={subscriptionId}&url={url}",
                 String.class,
                 this.topicName,
                 "",
@@ -84,7 +84,7 @@ public class SubscribeTest extends JUnitTestBase {
 
         URL remote = null;
         try {
-            remote = new URL("http://localhost:8080/weevent/jsonrpc");
+            remote = new URL("http://localhost:" + listenPort + "/weevent/jsonrpc");
         } catch (MalformedURLException e) {
             log.error("invalid url", e);
             fail();
@@ -96,7 +96,7 @@ public class SubscribeTest extends JUnitTestBase {
         try {
             String subscriptionId = rpc.subscribe(this.topicName,
                     groupId,"",
-                    "http://localhost:8080/weevent/mock/jsonrpc");
+                    "http://localhost:" + listenPort + "/weevent/mock/jsonrpc");
             assertTrue(!subscriptionId.isEmpty());
 
             SendResult sendResult = rpc.publish(this.topicName, groupId, "hello weevent".getBytes(StandardCharsets.UTF_8), extensions);

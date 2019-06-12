@@ -4,7 +4,7 @@
     <img src="../assets/image/weEvent.png" alt="" @click='home'>
     <el-breadcrumb separator="/" v-show='!noServer'>
       <el-breadcrumb-item >
-        <el-dropdown trigger="click" @command='selectItem'>
+        <el-dropdown trigger="click" @command='selecServers'>
           <span>{{server}}</span>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item v-for='(item, index) in servers' :key='index' :command='index'>{{item.name}}</el-dropdown-item>
@@ -17,7 +17,8 @@
   </div>
   <div class='right_part'>
     <img src="../assets/image/backhome.svg" v-show='noServer' class='back_home' @click='home' title='返回首页'/>
-    <!-- <el-dropdown trigger="click" @command='selectItem'>
+    <span class='el-icon-s-custom custom'></span>
+    <el-dropdown trigger="click" @command='selectItem'>
       <span v-if='!userName' @click='loginIn'>请登录</span>
       <span class="el-dropdown-link" v-else-if='userName'>
         {{userName}}<i class="el-icon-arrow-down el-icon-caret-bottom"></i>
@@ -26,7 +27,7 @@
         <el-dropdown-item command='setting'>设置</el-dropdown-item>
         <el-dropdown-item command='loginOut'>退出</el-dropdown-item>
       </el-dropdown-menu>
-    </el-dropdown> -->
+    </el-dropdown>
   </div>
 </div>
 </template>
@@ -39,7 +40,7 @@ export default{
   data () {
     return {
       activeName: 'WeEvent',
-      userName: 'xxxx',
+      userName: sessionStorage.getItem('user'),
       server: '',
       servers: [],
       group: []
@@ -50,9 +51,30 @@ export default{
   },
   methods: {
     home () {
-      this.$router.push('./index')
+      this.$router.push('./')
+    },
+    loginIn () {
+      this.$router.push('./login')
     },
     selectItem (e) {
+      switch (e) {
+        case 'setting':
+          this.$router.push({path: './registered', query: { reset: 0 }})
+          break
+        case 'loginOut':
+          API.loginOut('').then(res => {
+            if (res.status === 200 && res.data.code === 0) {
+              sessionStorage.removeItem('user')
+              sessionStorage.removeItem('userId')
+              sessionStorage.removeItem('groupId')
+              sessionStorage.removeItem('brokerId')
+              this.$router.push('./login')
+            }
+          })
+          break
+      }
+    },
+    selecServers (e) {
       if (e === 'servers') {
         this.$router.push('./servers')
       } else {
@@ -61,14 +83,22 @@ export default{
       }
     },
     getServer () {
-      API.getServer('').then(res => {
+      let url = '?userId=' + sessionStorage.getItem('userId')
+      API.getServer(url).then(res => {
         if (res.status === 200) {
-          this.servers = [].concat(res.data)
-          this.server = res.data[0].name
-          let id = res.data[0].id
-          sessionStorage.setItem('userId', id)
-          sessionStorage.setItem('groupId', 1)
-          // this.getAll(res.data[0].id)
+          if (res.data.length) {
+            this.servers = [].concat(res.data)
+            this.server = res.data[0].name
+            let id = res.data[0].id
+            sessionStorage.setItem('brokerId', id)
+            sessionStorage.setItem('groupId', 1)
+          } else {
+            this.$message({
+              type: 'warning',
+              message: '检测到您还未添加任何服务,请先添加相关服务!'
+            })
+            this.$router.push('./servers')
+          }
         }
       })
     },
