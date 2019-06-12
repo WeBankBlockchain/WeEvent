@@ -56,11 +56,13 @@ public class ForwardBrokerFilter implements Filter {
 	HttpServletResponse res = (HttpServletResponse) response;
 	String idStr = request.getParameter("brokerId");
 	String originUrl = req.getRequestURI();
-	String subStrUrl = originUrl.substring(originUrl.indexOf("/weevent/"));
+	//get tail of broker url
+	String subStrUrl = originUrl.substring(originUrl.indexOf("/weevent/") + "/weevent".length());
 
 	Integer id = Integer.parseInt(idStr);
 	Broker broker = brokerService.getBroker(id);
 	String brokerUrl = broker.getBrokerUrl();
+	//get complete forward broker url
 	String newUrl = brokerUrl + subStrUrl;
 
 	CloseableHttpResponse closeResponse = null;

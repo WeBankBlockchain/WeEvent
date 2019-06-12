@@ -40,7 +40,7 @@ public class TopicService {
 	Broker broker = brokerService.getBroker(brokerId);
 	if (broker != null) {
 	    generateRestTemplate(broker.getBrokerUrl());
-	    String url = broker.getBrokerUrl() + "/weevent/rest/close?topic=" + topic;
+	    String url = broker.getBrokerUrl() + "/rest/close?topic=" + topic;
 	    log.info("url: " + url);
 	    Boolean response = restTemplate.getForEntity(url, Boolean.class).getBody();
 	    return response;
@@ -55,7 +55,7 @@ public class TopicService {
 	generateRestTemplate(broker.getBrokerUrl());
 
 	// get eventbroker url
-	String url = broker.getBrokerUrl() + "/weevent/rest/list";
+	String url = broker.getBrokerUrl() + "/rest/list";
 	url = url + "?pageIndex=" + pageIndex + "&pageSize=" + pageSize;
 	log.info(url);
 	TopicPage result = restTemplate.getForEntity(url, TopicPage.class).getBody();
@@ -86,7 +86,7 @@ public class TopicService {
 	if (broker != null) {
 	    topicInfoMapper.openBrokeTopic(brokerId, topic, creater);
 	    generateRestTemplate(broker.getBrokerUrl());
-	    String url = broker.getBrokerUrl() + "/weevent/rest/open?topic=" + topic;
+	    String url = broker.getBrokerUrl() + "/rest/open?topic=" + topic;
 	    log.info("topic: " + topic + " creater: " + creater);
 	    Boolean response = restTemplate.getForEntity(url, Boolean.class).getBody();
 	    return response;
