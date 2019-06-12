@@ -21,7 +21,7 @@ allprojects {
 }
 dependencies {
     compile(client_depends)
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile("junit:junit:4.12")
 }
 
 sourceSets {

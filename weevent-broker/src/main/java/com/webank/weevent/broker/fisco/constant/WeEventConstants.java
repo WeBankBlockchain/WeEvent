@@ -133,11 +133,21 @@ public class WeEventConstants {
     /**
      *  check the API type,this is use for jsonrpc
      */
-    public static final String JSONTYPE = "JSON";
+    public static final String JSONRPCTYPE = "JSONRPC";
 
     /**
      *  check the API type,this is use for restful
      */
-    public static final String RESTTYPE = "REST";
+    public static final String RESTFULTYPE = "RESTFUL";
+
+    /**
+     *  check the API type,this is use for mqtt
+     */
+    public static final String MQTTTYPE = "MQTT";
+
+    /**
+     *  check the API type,this is use for mqtt
+     */
+    public static final String STOMPTYPE = "STOMP";
 
 }

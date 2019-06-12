@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.webank.weevent.broker.fisco.constant.WeEventConstants.RESTTYPE;
-
 /**
  * Implement of Restful service.
  * Client access over restful api only, no client sdk.
@@ -79,13 +77,13 @@ public class BrokerRest extends RestHA implements IBrokerRpc {
             groupId = WeEventConstants.DEFAULT_GROUP_ID;
         }
 
-        return this.masterJob.doSubscribe(RESTTYPE, topic, groupId, subscriptionId, url, getUrlFormat(this.request));
+        return this.masterJob.doSubscribe(WeEventConstants.RESTFULTYPE, topic, groupId, subscriptionId, url, getUrlFormat(this.request));
     }
 
     @Override
     @RequestMapping(path = "/unSubscribe")
     public boolean unSubscribe(@RequestParam(name = "subscriptionId") String subscriptionId) throws BrokerException {
-        return this.masterJob.doUnsubscribe(RESTTYPE, subscriptionId, getUrlFormat(this.request));
+        return this.masterJob.doUnsubscribe(WeEventConstants.RESTFULTYPE, subscriptionId, getUrlFormat(this.request));
     }
 
     @Override
