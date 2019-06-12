@@ -395,7 +395,7 @@ public class BrokerStomp extends TextWebSocketHandler {
             String subscriptionId = this.iconsumer.subscribe(curTopicList[0],
                     groupId,
                     subEventId,
-                    "stomp",
+                    WeEventConstants.STOMPTYPE,
                     new IConsumer.ConsumerListener() {
                         @Override
                         public void onEvent(String subscriptionId, WeEvent event) {
