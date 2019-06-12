@@ -1,3 +1,11 @@
+apply plugin: 'maven'
+apply plugin: "io.spring.dependency-management"
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'signing'
+apply plugin: 'jacoco'
+
 List client_depends = [
         "com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.3",
         "javax.jms:jms:1.1",
@@ -5,6 +13,12 @@ List client_depends = [
         "org.springframework:spring-messaging:5.1.6.RELEASE"
 ]
 
+allprojects {
+    tasks.withType(Javadoc) {
+        options.encoding = 'UTF-8'
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
+}
 dependencies {
     compile(client_depends)
     testCompile("junit:junit:4.12")
@@ -29,10 +43,12 @@ sourceSets {
     }
 }
 
+
+
 jar {
-    from(sourceSets.main.output) {
-        include "com/webank/weevent/sdk/**"
-    }
+//    from(sourceSets.main.output) {
+//        include "com/webank/weevent/sdk/**"
+//    }
     destinationDir file('dist/apps')
     archiveName 'weevent-client-' + version + '.jar'
     exclude '**/*.xml'
@@ -48,8 +64,34 @@ jar {
             into 'dist/lib'
         }
         copy {
+            from file('build/libs/')
+            into 'dist/apps'
+        }
+
+        copy {
             from file('.').listFiles().findAll { File f -> (f.name.endsWith('.bat') || f.name.endsWith('.sh') || f.name.endsWith('.env')) }
             into 'dist'
         }
+
     }
 }
+// for upload to maven
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives jar
+    archives sourcesJar
+    archives javadocJar
+}
+
+
+
+

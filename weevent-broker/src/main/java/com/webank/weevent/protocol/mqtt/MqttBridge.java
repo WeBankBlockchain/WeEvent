@@ -75,7 +75,7 @@ public class MqttBridge implements MessageHandler {
             }
         }
 
-        String subscriptionId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, "mqtt", new IConsumer.ConsumerListener() {
+        String subscriptionId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, WeEventConstants.MQTTTYPE, new IConsumer.ConsumerListener() {
             @Override
             public void onEvent(String subscriptionId, WeEvent event) {
                 log.info("subscribe onEvent, subscriptionId: {} event: {}", subscriptionId, event);

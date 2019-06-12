@@ -306,7 +306,6 @@ public class Web3SDK2Wrapper {
                 List<Topic.LogWeEventEventResponse> logWeEventEvents = Web3SDK2Wrapper.receipt2LogWeEventEventResponse(web3j, credentials, receipt);
                 for (Topic.LogWeEventEventResponse logEvent : logWeEventEvents) {
                     String topicName = logEvent.topicName;
-
                     Map<String, String> extensions = null;
                     try {
                         if (StringUtils.isBlank(logEvent.extensions)) {
@@ -315,8 +314,6 @@ public class Web3SDK2Wrapper {
                     } catch (Exception e) {
                         log.error("parse extensions failed");
                     }
-
-
                     WeEvent event = new WeEvent(topicName, logEvent.eventContent.getBytes(StandardCharsets.UTF_8), extensions);
                     event.setEventId(DataTypeUtils.encodeEventId(topicName, logEvent.eventBlockNumer.intValue(), logEvent.eventSeq.intValue()));
                     log.debug("get a event from fisco-bcos: {}", event);

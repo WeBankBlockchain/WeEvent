@@ -14,6 +14,7 @@ import com.webank.weevent.sdk.TopicPage;
 import com.webank.weevent.sdk.WeEvent;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 
+import com.alibaba.fastjson.annotation.JSONType;
 import com.googlecode.jsonrpc4j.JsonRpcParam;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -102,29 +103,26 @@ public class BrokerRpc implements IBrokerRpc {
                             @JsonRpcParam(value = "groupId") String groupId,
                             @JsonRpcParam(value = "subscriptionId") String subscriptionId,
                             @JsonRpcParam(value = "url") String url) throws BrokerException {
-        checkSupport();
-        return this.masterJob.getCgiSubscription().jsonRpcSubscribe(topic, groupId, subscriptionId, url);
+        return this.masterJob.doSubscribe(WeEventConstants.JSONRPCTYPE, topic, groupId, subscriptionId, url, "");
     }
 
     @Override
     public String subscribe(@JsonRpcParam(value = "topic") String topic,
                             @JsonRpcParam(value = "subscriptionId") String subscriptionId,
                             @JsonRpcParam(value = "url") String url) throws BrokerException {
-        checkSupport();
-        return this.masterJob.getCgiSubscription().jsonRpcSubscribe(topic, WeEventConstants.DEFAULT_GROUP_ID, subscriptionId, url);
+
+        return this.masterJob.doSubscribe(WeEventConstants.JSONRPCTYPE, topic, WeEventConstants.DEFAULT_GROUP_ID, subscriptionId, url, "");
     }
 
     @Override
     public String subscribe(@JsonRpcParam(value = "topic") String topic,
                             @JsonRpcParam(value = "url") String url) throws BrokerException {
-        checkSupport();
-        return this.masterJob.getCgiSubscription().jsonRpcSubscribe(topic, WeEventConstants.DEFAULT_GROUP_ID, "", url);
+        return this.masterJob.doSubscribe(WeEventConstants.JSONRPCTYPE, topic, WeEventConstants.DEFAULT_GROUP_ID, "", url, "");
     }
 
     @Override
     public boolean unSubscribe(@JsonRpcParam(value = "subscriptionId") String subscriptionId) throws BrokerException {
-        checkSupport();
-        return this.masterJob.getCgiSubscription().jsonRpcUnSubscribe(subscriptionId);
+        return this.masterJob.doUnsubscribe(WeEventConstants.JSONRPCTYPE, subscriptionId, "");
     }
 
     @Override
