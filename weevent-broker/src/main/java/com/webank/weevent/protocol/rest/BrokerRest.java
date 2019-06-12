@@ -2,10 +2,11 @@ package com.webank.weevent.protocol.rest;
 
 import java.util.Map;
 
+import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.util.WeEventUtils;
-import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.TopicInfo;
@@ -63,7 +64,6 @@ public class BrokerRest extends RestHA implements IBrokerRpc {
                 throw new BrokerException(ErrorCode.EVENT_GROUP_ID_INVALID);
             }
         }
-
         return this.producer.publish(event, groupId);
     }
 
@@ -73,22 +73,17 @@ public class BrokerRest extends RestHA implements IBrokerRpc {
                             @RequestParam(name = "groupId", required = false) String groupId,
                             @RequestParam(name = "subscriptionId", required = false) String subscriptionId,
                             @RequestParam(name = "url") String url) throws BrokerException {
-        checkSupport();
         if (StringUtils.isBlank(groupId)) {
             groupId = WeEventConstants.DEFAULT_GROUP_ID;
         }
-        return this.masterJob.getCgiSubscription().restSubscribe(topic,
-                groupId,
-                subscriptionId,
-                url,
-                getUrlFormat(this.request));
+
+        return this.masterJob.doSubscribe(WeEventConstants.RESTFULTYPE, topic, groupId, subscriptionId, url, getUrlFormat(this.request));
     }
 
     @Override
     @RequestMapping(path = "/unSubscribe")
     public boolean unSubscribe(@RequestParam(name = "subscriptionId") String subscriptionId) throws BrokerException {
-        checkSupport();
-        return this.masterJob.getCgiSubscription().restUnsubscribe(subscriptionId, getUrlFormat(this.request));
+        return this.masterJob.doUnsubscribe(WeEventConstants.RESTFULTYPE, subscriptionId, getUrlFormat(this.request));
     }
 
     @Override

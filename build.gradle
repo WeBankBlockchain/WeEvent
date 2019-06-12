@@ -1,3 +1,6 @@
+apply plugin: 'java'
+apply plugin: 'jacoco'
+
 buildscript {
     repositories {
         maven {
@@ -26,6 +29,7 @@ allprojects {
 }
 
 subprojects {
+
     apply plugin: 'java'
     // jdk version
     sourceCompatibility = 1.8
@@ -55,3 +59,18 @@ subprojects {
         implementation(lombok, apache_commons, logger)
     }
 }
+
+
+
+
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled false
+    }
+}
+
+check.dependsOn jacocoTestReport
+
+
