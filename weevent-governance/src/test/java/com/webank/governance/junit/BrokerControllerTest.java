@@ -26,7 +26,7 @@ public class BrokerControllerTest extends JUnitTestBase{
 	
 	@Test
 	public void testAddBroker() throws Exception {
-		String content = "{\"name\":\"broker2\",\"brokerUrl\":\"http://127.0.0.1:8080\",\"userId\":\"4\"}";
+		String content = "{\"name\":\"broker2\",\"brokerUrl\":\"http://127.0.0.1:8080/weevent\",\"webaseUrl\":\"http://127.0.0.1:8080/webase-node-mgr\",\"userId\":\"4\"}";
 		mockMvc.perform(post("/broker")
 				.contentType(MediaType.APPLICATION_JSON_UTF8)
 				.content(content))
@@ -37,7 +37,7 @@ public class BrokerControllerTest extends JUnitTestBase{
 	
 	@Test
 	public void testUpdateBroker() throws Exception {
-		String content = "{\"id\":\"2\",\"name\":\"broker1\",\"brokerUrl\":\"http://127.0.0.1:8080\",\"userId\":\"4\"}";
+		String content = "{\"id\":\"2\",\"name\":\"broker1\",\"brokerUrl\":\"http://127.0.0.1:8080\",\"webaseUrl\":\"http://127.0.0.1:8080/webase-node-mgr\",\"userId\":\"4\"}";
 		mockMvc.perform(put("/broker")
 				.contentType(MediaType.APPLICATION_JSON_UTF8)
 				.content(content))
