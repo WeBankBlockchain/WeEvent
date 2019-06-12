@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import com.webank.weevent.BrokerApplication;
+import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.util.SystemInfoUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.protocol.jsonrpc.IBrokerRpcCallback;
@@ -12,9 +13,7 @@ import com.webank.weevent.protocol.rest.SubscriptionWeEvent;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
-import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 
-import com.alibaba.fastjson.annotation.JSONType;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.googlecode.jsonrpc4j.ProxyUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +33,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
-import static com.webank.weevent.broker.fisco.constant.WeEventConstants.JSONTYPE;
 
 /**
  * Jobs that running in master node.
@@ -92,7 +90,7 @@ public class MasterJob {
             boolean result = this.consumer.unSubscribe(subscriptionId);
             return result;
         } else {
-            if (type.equals(JSONTYPE)) {
+            if (type.equals(WeEventConstants.JSONRPCTYPE)) {
                 return this.getCgiSubscription().jsonRpcUnSubscribe(subscriptionId);
             } else {
                 return this.getCgiSubscription().restUnsubscribe(subscriptionId, urlFormat);
@@ -122,7 +120,7 @@ public class MasterJob {
         }
         if (this.cgiSubscription == null) {
             IConsumer.ConsumerListener listener;
-            if (type.equals("REST")) {
+            if (type.equals(WeEventConstants.RESTFULTYPE)) {
                 listener = new IConsumer.ConsumerListener() {
                     @Override
                     public void onEvent(String subscriptionId, WeEvent event) {
@@ -167,10 +165,10 @@ public class MasterJob {
             String subId;
             if (StringUtils.isBlank(subscriptionId)) {
                 log.info("new subscribe, topic: {}", topic);
-                subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, "jsonrpc", listener);
+                subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, WeEventConstants.JSONRPCTYPE, listener);
             } else {
                 log.info("subscribe again, subscriptionId: {}", subscriptionId);
-                subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, subscriptionId, "jsonrpc", listener);
+                subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, subscriptionId, WeEventConstants.JSONRPCTYPE, listener);
             }
             return subId;
         } else {

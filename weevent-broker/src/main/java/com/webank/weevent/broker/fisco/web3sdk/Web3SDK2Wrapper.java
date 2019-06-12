@@ -29,6 +29,7 @@ import com.webank.weevent.sdk.WeEvent;
 
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.dto.ChannelRequest;
 import org.fisco.bcos.channel.dto.ChannelResponse;
@@ -349,11 +350,16 @@ public class Web3SDK2Wrapper {
                 List<Topic.LogWeEventEventResponse> logWeEventEvents = Web3SDK2Wrapper.receipt2LogWeEventEventResponse(web3j, credentials, receipt);
                 for (Topic.LogWeEventEventResponse logEvent : logWeEventEvents) {
                     String topicName = logEvent.topicName;
-                    Map<String, String> extensions = (Map<String, String>) JSON.parse(logEvent.extensions);
+                    Map<String, String> extensions = null;
+                    try {
+                        if (StringUtils.isBlank(logEvent.extensions)) {
+                            extensions = (Map<String, String>) JSON.parse(logEvent.extensions);
+                        }
+                    } catch (Exception e) {
+                        log.error("parse extensions failed");
+                    }
                     WeEvent event = new WeEvent(topicName, logEvent.eventContent.getBytes(StandardCharsets.UTF_8), extensions);
-                    event.setEventId(DataTypeUtils.encodeEventId(topicName,
-                            logEvent.eventBlockNumer.intValue(),
-                            logEvent.eventSeq.intValue()));
+                    event.setEventId(DataTypeUtils.encodeEventId(topicName, logEvent.eventBlockNumer.intValue(), logEvent.eventSeq.intValue()));
                     log.debug("get a event from fisco-bcos: {}", event);
                     events.add(event);
                 }

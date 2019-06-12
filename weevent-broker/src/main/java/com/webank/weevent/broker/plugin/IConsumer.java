@@ -172,9 +172,9 @@ public interface IConsumer extends IEventTopic {
     boolean shutdownConsumer();
 
     /**
-     * get local listen subscribeid list
+     * get subscription list
      *
      * @return boolean true if success
      */
-    Map<String, Object> getInnerSubscription();
+    Map<String, Object> listSubscription();
 }

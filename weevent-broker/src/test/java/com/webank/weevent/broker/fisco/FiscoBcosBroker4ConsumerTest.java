@@ -22,6 +22,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
 /**
  * FiscoBcosBroker4Consumer Tester.
  *
@@ -208,12 +209,15 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
                     fail();
                 }
             });
+            assertTrue(!result.isEmpty());
         } catch (BrokerException e) {
             assertEquals(e.getCode(), ErrorCode.OFFSET_IS_BLANK.getCode());
         }
         log.info("lastEventId: {}", this.lastEventId);
         assertEquals(SendResult.SendResultStatus.SUCCESS,
                 this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes(), extensions), groupId).getStatus());
+
+        Thread.sleep(wait3s);
     }
 
     /**

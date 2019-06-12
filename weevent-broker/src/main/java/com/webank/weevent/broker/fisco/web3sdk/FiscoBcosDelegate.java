@@ -2,8 +2,10 @@ package com.webank.weevent.broker.fisco.web3sdk;
 
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.BrokerApplication;
@@ -100,7 +102,7 @@ public class FiscoBcosDelegate {
             for (String token : tokens) {
                 String[] groups = token.split(":");
                 if (groups.length != 2) {
-                    log.error("invalid address format, like 1:0xaaaaa;2:0xbbbbb");
+                    log.error("invalid address format, like 1:0xa;2:0xb");
                     throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
                 }
                 Long groupId = Long.valueOf(groups[0]);
@@ -114,16 +116,31 @@ public class FiscoBcosDelegate {
         initRedisService();
     }
 
+    /**
+     * list all group id
+     *
+     * @return
+     */
+    public Set<Long> listGroupId() {
+        if (this.fiscoBcos != null) {
+            return new HashSet<Long>() {{
+                add(Long.valueOf(WeEventConstants.DEFAULT_GROUP_ID));
+            }};
+        } else {
+            return this.fiscoBcos2Map.keySet();
+        }
+    }
+
     public void checkVersion(Long groupId) throws BrokerException {
         if (this.fiscoBcos != null) {
-            if (groupId.longValue() != Long.parseLong(WeEventConstants.DEFAULT_GROUP_ID)) {
-                throw new BrokerException(ErrorCode.WE3SDK_VERRSION_NOT_SUPPORT);
+            if (groupId != Long.parseLong(WeEventConstants.DEFAULT_GROUP_ID)) {
+                throw new BrokerException(ErrorCode.WE3SDK_VERSION_NOT_SUPPORT);
             }
             return;
         }
 
         if (!this.fiscoBcos2Map.containsKey(groupId)) {
-            throw new BrokerException(ErrorCode.WE3SDK_UNKONWN_GROUP);
+            throw new BrokerException(ErrorCode.WE3SDK_UNKNOWN_GROUP);
         }
     }
 
@@ -218,8 +235,8 @@ public class FiscoBcosDelegate {
     /**
      * get data from block chain and it's cache
      *
-     * @param blockNum
-     * @param groupId
+     * @param blockNum block height
+     * @param groupId group id
      * @return
      * @throws BrokerException
      */
