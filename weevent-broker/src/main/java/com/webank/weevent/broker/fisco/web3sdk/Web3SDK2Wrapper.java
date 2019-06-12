@@ -226,9 +226,9 @@ public class Web3SDK2Wrapper {
         }
     }
 
-    public static void Channel2Server(String eventId) {
+    public static void Channel2Server(Long blockNumber, Long groupId) {
         ChannelRequest request = new ChannelRequest();
-         request.setFromOrg("fisco2");
+        request.setFromOrg("fisco2");
         request.setToTopic("amop-message-id");
         request.setToOrg("fisco");
 
@@ -236,16 +236,12 @@ public class Web3SDK2Wrapper {
         request.setTimeout(5000);
 
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        //request.setContent("request seq:{}" + String.valueOf(request.getMessageID()) + ",event id:{}" + eventId);
-        request.setContent("0");
+        request.setContent(groupId+","+blockNumber);
+
         log.info(df.format(LocalDateTime.now()), " request seq: {}, Content:{}", String.valueOf(request.getMessageID()), request.getContent());
         // send message
         ChannelResponse response = service.sendChannelMessage2(request);
         log.info("time:{},response seq: {}, ErrorCode:{}, Content:{}", df.format(LocalDateTime.now()), String.valueOf(response.getMessageID()), response.getErrorCode(), response.getContent());
-        if (response.getErrorCode().equals(0)) {
-            // set the state for the notify loop task
-            Web3SDK2Wrapper.stateIsChange = TRUE;
-        }
     }
 
     /**

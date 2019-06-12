@@ -122,6 +122,24 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         return topicEventsList;
     }
 
+    /**
+     * use for fisco-bcos 2.0.* version
+     * @param blockNumber
+     * @param groupId
+     */
+    public static void onNotify(Long blockNumber,Long groupId){
+     // the state change
+    }
+
+    /**
+     * use for fisco-bcos 1.3.* version
+     * @param blockNumber
+     */
+    public static void onNotify(Long blockNumber){
+        // the state change
+
+    }
+
     @Override
     public String subscribe(String[] topics, String groupId, String offset, String interfaceType, ConsumerListener listener) throws BrokerException {
         // check params
@@ -540,14 +558,6 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
                 Long currentBlock = this.lastBlock + 1;
 
-                // according to the amop message get to the change state
-                if (!Web3SDK2Wrapper.stateIsChange.equals(Boolean.TRUE)) {
-                    // Normal loop one block as following.
-                    log.debug("once loop, topics: {} cached block height: {}", Arrays.toString(topics), this.cachedBlockHeight);
-                    List<WeEvent> events = loopBlock(currentBlock, topics, groupId);
-                    log.debug("once loop done, block: {} event size: {}", currentBlock, events.size());
-                    this.pushNotify(events);
-                }
                 // Cache may be expired, refresh it.
                 if (currentBlock > this.cachedBlockHeight) {
                     Long blockHeight = fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId));

@@ -8,10 +8,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -127,23 +125,19 @@ public class Web3SDKWrapper {
     }
 
 
-    public static void Channel2Server(String eventId) {
+    public static void Channel2Server(Long blockNumber) {
         ChannelRequest request = new ChannelRequest();
-
         // topic for the amop
         request.setToTopic("amop-message-id");
         request.setMessageID(Web3SDKWrapper.service.newSeq());
         request.setTimeout(5000);
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        request.setContent("request seq:{}" + String.valueOf(request.getMessageID()) + ",event id:{}" + eventId);
+
+        request.setContent(blockNumber.toString());
         log.info(df.format(LocalDateTime.now()), " request seq: {}, Content:{}", String.valueOf(request.getMessageID()), request.getContent());
         // send message
         ChannelResponse response = service.sendChannelMessage(request);
         log.info("time:{},response seq: {}, ErrorCode:{}, Content:{}", df.format(LocalDateTime.now()), String.valueOf(response.getMessageID()), response.getErrorCode(), response.getContent());
-        if (response.getErrorCode().equals(0)) {
-            // set the state for the notify loop task
-            Web3SDK2Wrapper.stateIsChange = TRUE;
-        }
     }
 
     /**
