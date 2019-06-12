@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.BrokerApplication;
+import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.fisco.util.SerializeUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
@@ -186,10 +187,10 @@ public class CGISubscription {
         String subId;
         if (StringUtils.isBlank(subscriptionId)) {
             log.info("new subscribe, topic: {}", topic);
-            subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, "jsonrpc", listener);
+            subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, WeEventConstants.JSONRPCTYPE, listener);
         } else {
             log.info("subscribe again, subscriptionId: {}", subscriptionId);
-            subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, subscriptionId, "jsonrpc", listener);
+            subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, subscriptionId, WeEventConstants.JSONRPCTYPE, listener);
         }
 
         ZKSubscription zkSubscription = new ZKSubscription();
@@ -298,10 +299,10 @@ public class CGISubscription {
         String subId;
         if (StringUtils.isBlank(subscriptionId)) {
             log.info("new subscribe, topic: {}", topic);
-            subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, "restful", listener);
+            subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST,  WeEventConstants.RESTFULTYPE, listener);
         } else {
             log.info("subscribe again, subscriptionId: {}", subscriptionId);
-            subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, subscriptionId, "restful", listener);
+            subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, subscriptionId, WeEventConstants.RESTFULTYPE, listener);
         }
 
         ZKSubscription zkSubscription = new ZKSubscription();

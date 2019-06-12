@@ -133,7 +133,7 @@ public class WeEventConstants {
     /**
      *  check the API type,this is use for jsonrpc
      */
-    public static final String JSONRPCTYPE = "jsonful";
+    public static final String JSONRPCTYPE = "jsonrpc";
 
     /**
      *  check the API type,this is use for restful
