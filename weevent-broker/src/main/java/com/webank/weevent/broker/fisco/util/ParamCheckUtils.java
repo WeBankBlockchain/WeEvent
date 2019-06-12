@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.plugin.IConsumer;
@@ -48,6 +49,12 @@ public class ParamCheckUtils {
     public static void validateSubscriptionId(String subscriptionId) throws BrokerException {
         if (StringUtils.isBlank(subscriptionId)) {
             throw new BrokerException(ErrorCode.SUBSCRIPTIONID_IS_BLANK);
+        }
+
+        try {
+            UUID.fromString(subscriptionId);
+        } catch (IllegalArgumentException e) {
+            throw new BrokerException(ErrorCode.SUBSCRIPTIONID_FORMAT_INVALID);
         }
     }
 

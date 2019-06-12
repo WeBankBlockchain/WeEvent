@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
@@ -24,11 +25,12 @@ import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 /**
- * Event broker's consumer implement in fisco-bcos.
+ * Event broker's consumer implement in FISCO-BCOS.
+ * This class is thread safe.
  *
  * @author matthewliu
  * @since 2018/11/02
@@ -39,12 +41,12 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     /**
      * Subscription ID <-> Subscription
      */
-    private Map<String, Subscription> subscriptions = new HashMap<>();
+    private Map<String, Subscription> subscriptions = new ConcurrentHashMap<>();
 
     /**
      * Group ID <-> MainEventLoop
      */
-    private Map<Long, MainEventLoop> mainEventLoops = new HashMap<>();
+    private Map<Long, MainEventLoop> mainEventLoops = new ConcurrentHashMap<>();
 
     /**
      * Whether the Consumer has started
@@ -201,22 +203,18 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     }
 
     private String subscribeTopic(String[] topics, Long groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener) throws BrokerException {
-        try {
-            UUID.fromString(subscriptionId);
-        } catch (IllegalArgumentException e) {
-            throw new BrokerException(ErrorCode.SUBSCRIPTIONID_FORMAT_INVALID);
-        }
-
         // already exist
         if (this.subscriptions.containsKey(subscriptionId)) {
             Subscription subscription = this.subscriptions.get(subscriptionId);
+            if (!subscription.getGroupId().equals(groupId)) {
+                throw new BrokerException(ErrorCode.TOPIC_NOT_MATCH);
+            }
             if (!Arrays.equals(subscription.topics, topics)) {
                 throw new BrokerException(ErrorCode.TOPIC_NOT_MATCH);
             }
 
             if (subscription.getHistoryEventLoop() != null) {
                 subscription.getHistoryEventLoop().setOffset(offset);
-                subscription.getHistoryEventLoop().setGroupId(groupId);
             }
 
             return subscription.uuid;
@@ -239,6 +237,10 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
     @Override
     public boolean unSubscribe(String subscriptionId) throws BrokerException {
+        if (StringUtils.isBlank(subscriptionId)) {
+            throw new BrokerException(ErrorCode.SUBSCRIPTIONID_IS_BLANK);
+        }
+
         if (!this.subscriptions.containsKey(subscriptionId)) {
             log.warn("not exist subscriptionId {}", subscriptionId);
             throw new BrokerException(ErrorCode.SUBSCRIPTIONID_NOT_EXIST);
@@ -258,7 +260,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     }
 
     @Override
-    public boolean startConsumer() throws BrokerException {
+    public synchronized boolean startConsumer() throws BrokerException {
         if (this.consumerStarted) {
             throw new BrokerException(ErrorCode.CONSUMER_ALREADY_STARTED);
         }
@@ -276,7 +278,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     }
 
     @Override
-    public boolean shutdownConsumer() {
+    public synchronized boolean shutdownConsumer() {
         // stop main event loop and referred subscription
         for (Map.Entry<Long, MainEventLoop> mainEventLoop : this.mainEventLoops.entrySet()) {
             mainEventLoop.getValue().doStop();
@@ -286,22 +288,24 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
         this.consumerStarted = false;
 
-        log.info("shut down consumer finish");
+        log.info("shutdown consumer finish");
         return true;
     }
 
     @Override
-    public Map<String, Object> listSubscription() {
+    public synchronized Map<String, Object> listSubscription() {
         Map<String, Object> subscribeIdList = new HashMap<>();
         for (Map.Entry<String, Subscription> entry : this.subscriptions.entrySet()) {
+            Subscription subscription = entry.getValue();
             SubscriptionInfo subscriptionInfo = new SubscriptionInfo();
-            subscriptionInfo.setInterfaceType(entry.getValue().getInterfaceType());
-            subscriptionInfo.setNotifiedEventCount(entry.getValue().getNotifiedEventCount().toString());
-            subscriptionInfo.setNotifyingEventCount(entry.getValue().getNotifyingEventCount().toString());
-            subscriptionInfo.setNotifyTimeStamp(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(entry.getValue().getNotifyTimeStamp()));
-            subscriptionInfo.setTopicName(Arrays.toString(entry.getValue().getTopics()));
-            subscriptionInfo.setSubscribeId(entry.getValue().getUuid());
-            subscribeIdList.put(entry.getValue().getUuid(), subscriptionInfo);
+
+            subscriptionInfo.setInterfaceType(subscription.getInterfaceType());
+            subscriptionInfo.setNotifiedEventCount(subscription.getNotifiedEventCount().toString());
+            subscriptionInfo.setNotifyingEventCount(subscription.getNotifyingEventCount().toString());
+            subscriptionInfo.setNotifyTimeStamp(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(subscription.getNotifyTimeStamp()));
+            subscriptionInfo.setTopicName(Arrays.toString(subscription.getTopics()));
+            subscriptionInfo.setSubscribeId(subscription.getUuid());
+            subscribeIdList.put(subscription.getUuid(), subscriptionInfo);
         }
 
         log.debug("subscriptions: {}", this.subscriptions.toString());
@@ -373,21 +377,21 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         }
 
         Long getNotifyingEventCount() {
-            return (long) this.notifyTask.getEventQueue().size();
+            return (long) this.notifyTask.eventQueue.size();
         }
 
         Long getNotifiedEventCount() {
-            return this.notifyTask.getNotifiedCount();
+            return this.notifyTask.notifiedCount;
         }
 
         Date getNotifyTimeStamp() {
-            return this.notifyTask.getLastTimeStamp();
+            return this.notifyTask.lastTimeStamp;
 
         }
 
         void resetSubscriptionId(String subscriptionId) {
             this.uuid = subscriptionId;
-            this.notifyTask.setSubscriptionId(subscriptionId);
+            this.notifyTask.subscriptionId = subscriptionId;
         }
 
         void dispatch(List<WeEvent> events) {
@@ -419,35 +423,52 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
         // can not doStart again after doStop
         void doStop() {
-            try {
-                if (this.historyEventLoop != null) {
-                    this.historyEventLoop.doExit();
-                    this.historyEventLoop.join();
-                    this.historyEventLoop = null;
-                }
+            stopHistory();
 
+            try {
                 if (this.notifyTask != null) {
                     this.notifyTask.doExit();
                     this.notifyTask.join();
                     this.notifyTask = null;
                 }
             } catch (InterruptedException e) {
-                log.error("stop task failed", e);
+                log.error("stop notify task failed", e);
             }
+        }
+
+        synchronized void stopHistory() {
+            try {
+                if (this.historyEventLoop != null) {
+                    this.historyEventLoop.doExit();
+                    this.historyEventLoop.join();
+                    this.historyEventLoop = null;
+                }
+            } catch (InterruptedException e) {
+                log.error("stop history task failed", e);
+            }
+        }
+
+        synchronized boolean tryStopHistory(Long mainLastBlock) {
+            if (mainLastBlock > 0 && mainLastBlock <= this.historyEventLoop.lastBlock) {
+                log.info("switch history to main event loop, subscription: {}", this.uuid);
+
+                stopHistory();
+                return true;
+            }
+
+            return false;
         }
     }
 
     /**
      * Notify task within unique thread.
      */
-    @Data
-    @EqualsAndHashCode(callSuper = true)
     class NotifyTask extends StoppableTask {
         private String subscriptionId;
-        private Long lastEventSeq = 0L;
         private IConsumer.ConsumerListener consumerListener;
 
         private BlockingDeque<WeEvent> eventQueue = new LinkedBlockingDeque<>();
+        private Long lastEventSeq = 0L;
         private Long notifiedCount = 0L;
         private Date lastTimeStamp = new Date();
 
@@ -472,6 +493,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                         return;
                     }
                     log.debug("offer notify queue, event: {}", event);
+
                     // Ordered by event seq.
                     this.lastEventSeq = getEventSeq(event.getEventId());
                 }
@@ -505,126 +527,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     }
 
     /**
-     * Detect new event from target group
-     */
-    class MainEventLoop extends StoppableTask {
-        // binding group
-        private Long groupId;
-
-        // last well done block
-        private Long lastBlock = 0L;
-
-        // subscriptionId
-        private List<String> subscriptionIds = new ArrayList<>();
-
-        MainEventLoop(Long groupId) {
-            super("main-event-loop-" + groupId);
-            this.groupId = groupId;
-        }
-
-        void doStop() {
-            for (String subscriptionId : this.subscriptionIds) {
-                if (subscriptions.containsKey(subscriptionId)) {
-                    subscriptions.get(subscriptionId).doStop();
-                }
-            }
-
-            this.doExit();
-        }
-
-        void addSubscription(Subscription subscription) {
-            subscription.doStart();
-            this.subscriptionIds.add(subscription.getUuid());
-        }
-
-        void removeSubscription(Subscription subscription) {
-            subscription.doStop();
-            this.subscriptionIds.remove(subscription.getUuid());
-        }
-
-        void mergeHistory() {
-            for (String subscriptionId : this.subscriptionIds) {
-                if (subscriptions.containsKey(subscriptionId)) {
-                    Subscription subscription = subscriptions.get(subscriptionId);
-                    if (subscription.getHistoryEventLoop() != null) {
-                        if (subscription.getHistoryEventLoop().lastBlock >= this.lastBlock) {
-                            log.info("switch history to main event loop, subscription: {}", subscriptionId);
-
-                            // switch history to main loop
-                            subscription.getHistoryEventLoop().doExit();
-                            subscription.setHistoryEventLoop(null);
-                        }
-                    }
-                }
-            }
-        }
-
-        void dispatch(List<WeEvent> events) {
-            for (String subscriptionId : this.subscriptionIds) {
-                if (subscriptions.get(subscriptionId).getHistoryEventLoop() == null) {
-                    subscriptions.get(subscriptionId).dispatch(events);
-                }
-            }
-        }
-
-        void dispatch(Throwable e) {
-            for (String subscriptionId : this.subscriptionIds) {
-                if (subscriptions.get(subscriptionId).getHistoryEventLoop() == null) {
-                    subscriptions.get(subscriptionId).getNotifyTask().getConsumerListener().onException(e);
-                }
-            }
-        }
-
-        @Override
-        protected void taskOnceLoop() throws InterruptedException {
-            try {
-                // get current block
-                Long currentBlock = fiscoBcosDelegate.getBlockHeight(this.groupId);
-                if (currentBlock <= 0) {
-                    // Don't try too fast if net error.
-                    idle();
-                    return;
-                }
-
-                // no new block
-                if (currentBlock <= this.lastBlock) {
-                    idle();
-                    return;
-                }
-
-                // merge history if needed
-                this.mergeHistory();
-
-                // skip if no subscription
-                if (this.subscriptionIds.isEmpty()) {
-                    return;
-                }
-
-                // Fetch all event from this block.
-                log.debug("fetch events from block height: {}", currentBlock);
-                List<WeEvent> events = null;
-                while (events == null) {
-                    events = fiscoBcosDelegate.loop(currentBlock, this.groupId);
-                    // idle until get event information(include empty)
-                    if (events == null) {
-                        idle();
-                    }
-                }
-                log.debug("fetch done, block: {} event size: {}", currentBlock, events.size());
-
-                this.dispatch(events);
-
-                // next block.
-                this.lastBlock = currentBlock;
-            } catch (BrokerException e) {
-                log.error("main event loop exception", e);
-                this.dispatch(e);
-            }
-        }
-    }
-
-    /**
-     * Event loop task within unique thread.
+     * History event loop task within unique thread.
      */
     class HistoryEventLoop extends StoppableTask {
         /**
@@ -643,11 +546,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
         private NotifyTask notifyTask;
 
-        public void setGroupId(Long groupId) {
-            this.groupId = groupId;
-        }
-
-        public void setOffset(String offset) throws BrokerException {
+        void setOffset(String offset) throws BrokerException {
             Long lastEventSeq = 0L;
 
             switch (offset) {
@@ -664,7 +563,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                     lastEventSeq = DataTypeUtils.decodeSeq(offset);
             }
 
-            this.notifyTask.setLastEventSeq(lastEventSeq);
+            this.notifyTask.lastEventSeq = lastEventSeq;
         }
 
         HistoryEventLoop(String[] topics, Long groupId, String offset, NotifyTask notifyTask) throws BrokerException {
@@ -709,9 +608,137 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                 // Init for next block.
                 this.lastBlock = currentBlock;
             } catch (BrokerException e) {
-                this.notifyTask.getConsumerListener().onException(e);
+                this.notifyTask.consumerListener.onException(e);
+            }
+        }
+    }
+
+    /**
+     * Detect new event from target group
+     */
+    class MainEventLoop extends StoppableTask {
+        // binding group
+        private Long groupId;
+
+        // last well done block
+        private Long lastBlock = 0L;
+
+        // subscription in main loop
+        private List<String> mainSubscriptionIds = new ArrayList<>();
+
+        private List<String> historySubscriptionIds = new ArrayList<>();
+
+        MainEventLoop(Long groupId) {
+            super("main-event-loop-" + groupId);
+            this.groupId = groupId;
+        }
+
+        synchronized void doStop() {
+            for (String subscriptionId : this.mainSubscriptionIds) {
+                if (subscriptions.containsKey(subscriptionId)) {
+                    subscriptions.get(subscriptionId).doStop();
+                }
+            }
+
+            for (String subscriptionId : this.historySubscriptionIds) {
+                if (subscriptions.containsKey(subscriptionId)) {
+                    subscriptions.get(subscriptionId).doStop();
+                }
+            }
+
+            this.doExit();
+        }
+
+        synchronized void addSubscription(Subscription subscription) {
+            subscription.doStart();
+
+            if (subscription.getHistoryEventLoop() == null) {
+                this.mainSubscriptionIds.add(subscription.getUuid());
+            } else {
+                this.historySubscriptionIds.add(subscription.getUuid());
+            }
+        }
+
+        synchronized void removeSubscription(Subscription subscription) {
+            if (subscription.getHistoryEventLoop() == null) {
+                this.historySubscriptionIds.remove(subscription.getUuid());
+            } else {
+                this.mainSubscriptionIds.remove(subscription.getUuid());
+            }
+
+            subscription.doStop();
+        }
+
+        synchronized void mergeHistory() {
+            for (String subscriptionId : this.historySubscriptionIds) {
+                if (subscriptions.containsKey(subscriptionId)) {
+                    // try to switch history to main loop
+                    boolean stopped = subscriptions.get(subscriptionId).tryStopHistory(this.lastBlock);
+                    if (stopped) {
+                        this.historySubscriptionIds.remove(subscriptionId);
+                        this.mainSubscriptionIds.add(subscriptionId);
+                    }
+                }
+            }
+        }
+
+        synchronized void dispatch(List<WeEvent> events) {
+            for (String subscriptionId : this.mainSubscriptionIds) {
+                subscriptions.get(subscriptionId).dispatch(events);
+            }
+        }
+
+        synchronized void dispatch(Throwable e) {
+            for (String subscriptionId : this.mainSubscriptionIds) {
+                subscriptions.get(subscriptionId).getNotifyTask().consumerListener.onException(e);
+            }
+        }
+
+        @Override
+        protected void taskOnceLoop() throws InterruptedException {
+            try {
+                // get current block
+                Long currentBlock = fiscoBcosDelegate.getBlockHeight(this.groupId);
+                if (currentBlock <= 0) {
+                    // Don't try too fast if net error.
+                    idle();
+                    return;
+                }
+
+                // no new block
+                if (currentBlock <= this.lastBlock) {
+                    idle();
+                    return;
+                }
+
+                // merge history if needed
+                this.mergeHistory();
+
+                // skip if no subscription
+                if (this.mainSubscriptionIds.isEmpty()) {
+                    return;
+                }
+
+                // Fetch all event from this block.
+                log.debug("fetch events from block height: {}", currentBlock);
+                List<WeEvent> events = null;
+                while (events == null) {
+                    events = fiscoBcosDelegate.loop(currentBlock, this.groupId);
+                    // idle until get event information(include empty)
+                    if (events == null) {
+                        idle();
+                    }
+                }
+                log.debug("fetch done, block: {} event size: {}", currentBlock, events.size());
+
+                this.dispatch(events);
+
+                // next block.
+                this.lastBlock = currentBlock;
+            } catch (BrokerException e) {
+                log.error("main event loop exception", e);
+                this.dispatch(e);
             }
         }
     }
 }
-
