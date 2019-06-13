@@ -4,6 +4,8 @@ import org.apache.ignite.IgniteCache;
 import org.apache.ignite.internal.processors.cache.IgniteCacheProxyImpl;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 
 import javax.annotation.Resource;
@@ -19,15 +21,11 @@ import com.webank.weevent.protocol.mqttbroker.store.IMessageIdStore;
 public class IMessageIdStoreImpl implements IMessageIdStore {
     private final int MIN_MSG_ID = 1;
     private final int MAX_MSG_ID = 65535;
-    private final int lock = 0;
-    @Resource
-    private IgniteCache<Integer, Integer> messageIdCache;
+    private Map<Integer, Integer> messageIdCache = new ConcurrentHashMap<>();
     private int nextMsgId = MIN_MSG_ID - 1;
 
     @Override
     public int getNextMessageId() {
-        Lock lock = messageIdCache.lock(this.lock);
-        lock.lock();
         try {
             do {
                 nextMsgId++;
@@ -38,22 +36,16 @@ public class IMessageIdStoreImpl implements IMessageIdStore {
             messageIdCache.put(nextMsgId, nextMsgId);
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            lock.unlock();
         }
         return nextMsgId;
     }
 
     @Override
     public void releaseMessageId(int messageId) {
-        Lock lock = messageIdCache.lock(this.lock);
-        lock.lock();
         try {
             messageIdCache.remove(messageId);
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            lock.unlock();
         }
     }
 }

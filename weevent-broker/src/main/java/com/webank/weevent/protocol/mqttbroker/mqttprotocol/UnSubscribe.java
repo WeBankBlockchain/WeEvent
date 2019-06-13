@@ -1,8 +1,10 @@
-package com.webank.weevent.protocol.mqttbroker.protocol;
+package com.webank.weevent.protocol.mqttbroker.mqttprotocol;
 
 import java.util.List;
 
+import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.protocol.mqttbroker.store.ISubscribeStore;
+import com.webank.weevent.sdk.BrokerException;
 
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttFixedHeader;
@@ -23,15 +25,23 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UnSubscribe {
     private ISubscribeStore iSubscribeStore;
+    private IConsumer iConsumer;
 
-    public UnSubscribe(ISubscribeStore iSubscribeStore) {
+    public UnSubscribe(ISubscribeStore iSubscribeStore, IConsumer iConsumer) {
         this.iSubscribeStore = iSubscribeStore;
+        this.iConsumer = iConsumer;
     }
 
     public void processUnSubscribe(Channel channel, MqttUnsubscribeMessage msg) {
         List<String> topicFilters = msg.payload().topics();
         String clinetId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
         topicFilters.forEach(topicFilter -> {
+            try {
+                iConsumer.unSubscribe(iSubscribeStore.get(topicFilter, clinetId).getSubscriptionId());
+            } catch (BrokerException e) {
+                log.error("UNSUBSCRIBE error - subscriptionId: {}", iSubscribeStore.get(topicFilter, clinetId).getSubscriptionId());
+            }
+
             iSubscribeStore.remove(topicFilter, clinetId);
             log.debug("UNSUBSCRIBE - clientId: {}, topicFilter: {}", clinetId, topicFilter);
         });

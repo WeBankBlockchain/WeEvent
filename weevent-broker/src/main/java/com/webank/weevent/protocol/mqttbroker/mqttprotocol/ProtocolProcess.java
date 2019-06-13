@@ -1,13 +1,9 @@
-package com.webank.weevent.protocol.mqttbroker.protocol;
+package com.webank.weevent.protocol.mqttbroker.mqttprotocol;
 
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.protocol.mqttbroker.common.IAuthService;
-import com.webank.weevent.protocol.mqttbroker.internal.InternalCommunication;
-import com.webank.weevent.protocol.mqttbroker.store.IDupPubRelMessageStore;
-import com.webank.weevent.protocol.mqttbroker.store.IDupPublishMessageStore;
 import com.webank.weevent.protocol.mqttbroker.store.IMessageIdStore;
-import com.webank.weevent.protocol.mqttbroker.store.IRetainMessageStore;
 import com.webank.weevent.protocol.mqttbroker.store.ISessionStore;
 import com.webank.weevent.protocol.mqttbroker.store.ISubscribeStore;
 
@@ -39,17 +35,9 @@ public class ProtocolProcess {
     @Autowired
     private IAuthService iAuthService;
     @Autowired
-    private IRetainMessageStore iRetainMessageStore;
-    @Autowired
     private ISubscribeStore iSubscribeStore;
     @Autowired
-    private IDupPublishMessageStore iDupPublishMessageStore;
-    @Autowired
-    private IDupPubRelMessageStore iDupPubRelMessageStore;
-    @Autowired
     private IMessageIdStore iMessageIdStore;
-    @Autowired
-    private InternalCommunication internalCommunication;
 
     @Autowired
     public void setProducer(IProducer producer) {
@@ -61,24 +49,23 @@ public class ProtocolProcess {
         this.iconsumer = consumer;
     }
 
-
     public Connect connect() {
         if (connect == null) {
-            connect = new Connect(iSubscribeStore, iDupPublishMessageStore, iDupPubRelMessageStore, iSessionStore, iAuthService);
+            connect = new Connect(iSubscribeStore, iSessionStore, iAuthService);
         }
         return connect;
     }
 
     public DisConnect disConnect() {
         if (disConnect == null) {
-            disConnect = new DisConnect(iSubscribeStore, iDupPublishMessageStore, iDupPubRelMessageStore, iSessionStore);
+            disConnect = new DisConnect(iSubscribeStore, iSessionStore);
         }
         return disConnect;
     }
 
     public Publish publish() {
         if (publish == null) {
-            publish = new Publish(iRetainMessageStore, internalCommunication, iproducer);
+            publish = new Publish(iproducer);
         }
         return publish;
     }
@@ -92,35 +79,35 @@ public class ProtocolProcess {
 
     public PubAck pubAck() {
         if (pubAck == null) {
-            pubAck = new PubAck(iDupPublishMessageStore, iMessageIdStore);
+            pubAck = new PubAck(iMessageIdStore);
         }
         return pubAck;
     }
 
     public PubRec pubRec() {
         if (pubRec == null) {
-            pubRec = new PubRec(iDupPublishMessageStore, iDupPubRelMessageStore);
+            pubRec = new PubRec();
         }
         return pubRec;
     }
 
     public PubComp pubComp() {
         if (pubComp == null) {
-            pubComp = new PubComp(iDupPubRelMessageStore, iMessageIdStore);
+            pubComp = new PubComp(iMessageIdStore);
         }
         return pubComp;
     }
 
     public Subscribe subscribe() {
         if (subscribe == null) {
-            subscribe = new Subscribe(iSessionStore, iDupPublishMessageStore, iSubscribeStore, iRetainMessageStore, iMessageIdStore, iconsumer);
+            subscribe = new Subscribe(iSessionStore, iSubscribeStore, iMessageIdStore, iconsumer);
         }
         return subscribe;
     }
 
     public UnSubscribe unSubscribe() {
         if (unSubscribe == null) {
-            unSubscribe = new UnSubscribe(iSubscribeStore);
+            unSubscribe = new UnSubscribe(iSubscribeStore, iconsumer);
         }
         return unSubscribe;
     }

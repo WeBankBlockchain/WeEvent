@@ -3,15 +3,13 @@ package com.webank.weevent.protocol.mqttbroker.store.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.Resource;
 
 import com.webank.weevent.protocol.mqttbroker.store.ISubscribeStore;
 import com.webank.weevent.protocol.mqttbroker.store.dto.SubscribeStore;
 
 import cn.hutool.core.util.StrUtil;
-import org.apache.ignite.IgniteCache;
 import org.springframework.stereotype.Service;
 
 /**
@@ -21,10 +19,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class ISubscribeStoreImpl implements ISubscribeStore {
-    @Resource
-    private IgniteCache<String, ConcurrentHashMap<String, SubscribeStore>> subscribeNotWildcardCache;
-    @Resource
-    private IgniteCache<String, ConcurrentHashMap<String, SubscribeStore>> subscribeWildcardCache;
+    private Map<String, ConcurrentHashMap<String, SubscribeStore>> subscribeNotWildcardCache = new ConcurrentHashMap<>();
+    private Map<String, ConcurrentHashMap<String, SubscribeStore>> subscribeWildcardCache = new ConcurrentHashMap<>();
 
     @Override
     public void put(String topicFilter, SubscribeStore subscribeStore) {
@@ -39,6 +35,14 @@ public class ISubscribeStoreImpl implements ISubscribeStore {
             map.put(subscribeStore.getClientId(), subscribeStore);
             subscribeNotWildcardCache.put(topicFilter, map);
         }
+    }
+
+    @Override
+    public SubscribeStore get(String topicFilter, String clientId) {
+        if (subscribeNotWildcardCache.get(topicFilter).get(clientId).getClientId().isEmpty()) {
+            return subscribeWildcardCache.get(topicFilter).get(clientId);
+        }
+        return subscribeNotWildcardCache.get(topicFilter).get(clientId);
     }
 
     @Override
@@ -72,7 +76,7 @@ public class ISubscribeStoreImpl implements ISubscribeStore {
 
     @Override
     public void removeForClient(String clientId) {
-        subscribeNotWildcardCache.forEach(entry -> {
+        for (Map.Entry<String, ConcurrentHashMap<String, SubscribeStore>> entry : subscribeNotWildcardCache.entrySet()) {
             ConcurrentHashMap<String, SubscribeStore> map = entry.getValue();
             if (map.containsKey(clientId)) {
                 map.remove(clientId);
@@ -82,8 +86,9 @@ public class ISubscribeStoreImpl implements ISubscribeStore {
                     subscribeNotWildcardCache.remove(entry.getKey());
                 }
             }
-        });
-        subscribeWildcardCache.forEach(entry -> {
+        }
+
+        for (Map.Entry<String, ConcurrentHashMap<String, SubscribeStore>> entry : subscribeWildcardCache.entrySet()) {
             ConcurrentHashMap<String, SubscribeStore> map = entry.getValue();
             if (map.containsKey(clientId)) {
                 map.remove(clientId);
@@ -93,7 +98,7 @@ public class ISubscribeStoreImpl implements ISubscribeStore {
                     subscribeWildcardCache.remove(entry.getKey());
                 }
             }
-        });
+        }
     }
 
     @Override
@@ -105,7 +110,8 @@ public class ISubscribeStoreImpl implements ISubscribeStore {
             List<SubscribeStore> list = new ArrayList<SubscribeStore>(collection);
             subscribeStores.addAll(list);
         }
-        subscribeWildcardCache.forEach(entry -> {
+
+        for (Map.Entry<String, ConcurrentHashMap<String, SubscribeStore>> entry : subscribeWildcardCache.entrySet()) {
             String topicFilter = entry.getKey();
             if (StrUtil.split(topic, '/').size() >= StrUtil.split(topicFilter, '/').size()) {
                 List<String> splitTopics = StrUtil.split(topic, '/');
@@ -130,7 +136,7 @@ public class ISubscribeStoreImpl implements ISubscribeStore {
                     subscribeStores.addAll(list);
                 }
             }
-        });
+        }
         return subscribeStores;
     }
 }

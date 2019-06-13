@@ -11,7 +11,7 @@ import javax.net.ssl.SSLEngine;
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.protocol.mqttbroker.common.MqttWebSocketCodec;
 import com.webank.weevent.protocol.mqttbroker.handler.BrokerHandler;
-import com.webank.weevent.protocol.mqttbroker.protocol.ProtocolProcess;
+import com.webank.weevent.protocol.mqttbroker.mqttprotocol.ProtocolProcess;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBufAllocator;

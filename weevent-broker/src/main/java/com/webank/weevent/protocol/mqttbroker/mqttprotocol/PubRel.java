@@ -1,4 +1,4 @@
-package com.webank.weevent.protocol.mqttbroker.protocol;
+package com.webank.weevent.protocol.mqttbroker.mqttprotocol;
 
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttFixedHeader;

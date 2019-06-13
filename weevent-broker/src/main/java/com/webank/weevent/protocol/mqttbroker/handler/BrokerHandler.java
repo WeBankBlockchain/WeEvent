@@ -3,7 +3,7 @@ package com.webank.weevent.protocol.mqttbroker.handler;
 import java.io.IOException;
 
 import com.webank.weevent.protocol.mqttbroker.common.dto.SessionStore;
-import com.webank.weevent.protocol.mqttbroker.protocol.ProtocolProcess;
+import com.webank.weevent.protocol.mqttbroker.mqttprotocol.ProtocolProcess;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -41,7 +41,7 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
             case CONNACK:
                 break;
             case PUBLISH:
-                protocolProcess.publish().processPublish(ctx.channel(), (MqttPublishMessage) msg);
+                protocolProcess.publish().processPublish(ctx.channel(), (MqttPublishMessage) msg, false);
                 break;
             case PUBACK: //for QOS1
                 protocolProcess.pubAck().processPubAck(ctx.channel(), (MqttMessageIdVariableHeader) msg.variableHeader());
@@ -97,7 +97,7 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
                 if (this.protocolProcess.getSessionStore().containsKey(clientId)) {
                     SessionStore sessionStore = this.protocolProcess.getSessionStore().get(clientId);
                     if (sessionStore.getWillMessage() != null) {
-                        this.protocolProcess.publish().processPublish(ctx.channel(), sessionStore.getWillMessage());
+                        this.protocolProcess.publish().processPublish(ctx.channel(), sessionStore.getWillMessage(), true);
                     }
                 }
                 ctx.close();

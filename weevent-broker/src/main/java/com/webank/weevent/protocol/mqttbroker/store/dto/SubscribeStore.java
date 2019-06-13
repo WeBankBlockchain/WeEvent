@@ -1,5 +1,7 @@
 package com.webank.weevent.protocol.mqttbroker.store.dto;
 
+import lombok.Data;
+
 /**
  * @author websterchen
  * @version v1.0
@@ -7,19 +9,24 @@ package com.webank.weevent.protocol.mqttbroker.store.dto;
  */
 public class SubscribeStore {
     private String clientId;
-
+    private String subscriptionId;
     private String topicFilter;
 
     private int mqttQoS;
 
-    public SubscribeStore(String clientId, String topicFilter, int mqttQoS) {
+    public SubscribeStore(String clientId, String subscriptionId, String topicFilter, int mqttQoS) {
         this.clientId = clientId;
+        this.subscriptionId = subscriptionId;
         this.topicFilter = topicFilter;
         this.mqttQoS = mqttQoS;
     }
 
     public String getClientId() {
         return clientId;
+    }
+
+    public String getSubscriptionId() {
+        return subscriptionId;
     }
 
     public SubscribeStore setClientId(String clientId) {

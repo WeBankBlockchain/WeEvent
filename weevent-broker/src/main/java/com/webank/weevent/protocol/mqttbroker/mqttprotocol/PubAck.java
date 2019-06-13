@@ -1,6 +1,5 @@
-package com.webank.weevent.protocol.mqttbroker.protocol;
+package com.webank.weevent.protocol.mqttbroker.mqttprotocol;
 
-import com.webank.weevent.protocol.mqttbroker.store.IDupPublishMessageStore;
 import com.webank.weevent.protocol.mqttbroker.store.IMessageIdStore;
 
 import io.netty.channel.Channel;
@@ -16,17 +15,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PubAck {
     private IMessageIdStore iMessageIdStore;
-    private IDupPublishMessageStore iDupPublishMessageStore;
 
-    public PubAck(IDupPublishMessageStore iDupPublishMessageStore, IMessageIdStore iMessageIdStore) {
-        this.iDupPublishMessageStore = iDupPublishMessageStore;
+    public PubAck(IMessageIdStore iMessageIdStore) {
         this.iMessageIdStore = iMessageIdStore;
     }
 
     public void processPubAck(Channel channel, MqttMessageIdVariableHeader variableHeader) {
         int messageId = variableHeader.messageId();
         log.debug("PUBACK - clientId: {}, messageId: {}", (String) channel.attr(AttributeKey.valueOf("clientId")).get(), messageId);
-        iDupPublishMessageStore.remove((String) channel.attr(AttributeKey.valueOf("clientId")).get(), messageId);
         iMessageIdStore.releaseMessageId(messageId);
     }
 }

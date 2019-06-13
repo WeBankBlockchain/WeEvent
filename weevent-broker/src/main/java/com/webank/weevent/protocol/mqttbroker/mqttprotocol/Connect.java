@@ -1,16 +1,10 @@
-package com.webank.weevent.protocol.mqttbroker.protocol;
-
-import java.util.List;
+package com.webank.weevent.protocol.mqttbroker.mqttprotocol;
 
 import com.webank.weevent.protocol.mqttbroker.common.IAuthService;
 import com.webank.weevent.protocol.mqttbroker.common.dto.SessionStore;
-import com.webank.weevent.protocol.mqttbroker.store.dto.DupPubRelMessageStore;
-import com.webank.weevent.protocol.mqttbroker.store.dto.DupPublishMessageStore;
-import com.webank.weevent.protocol.mqttbroker.store.IDupPubRelMessageStore;
-import com.webank.weevent.protocol.mqttbroker.store.IDupPublishMessageStore;
 import com.webank.weevent.protocol.mqttbroker.store.ISessionStore;
-import com.webank.weevent.protocol.mqttbroker.store.ISubscribeStore;
 
+import com.webank.weevent.protocol.mqttbroker.store.ISubscribeStore;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttConnAckMessage;
@@ -19,9 +13,7 @@ import io.netty.handler.codec.mqtt.MqttConnectMessage;
 import io.netty.handler.codec.mqtt.MqttConnectReturnCode;
 import io.netty.handler.codec.mqtt.MqttFixedHeader;
 import io.netty.handler.codec.mqtt.MqttIdentifierRejectedException;
-import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttMessageFactory;
-import io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader;
 import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
@@ -43,13 +35,9 @@ public class Connect {
     private IAuthService iAuthService;
     private ISessionStore iSessionStore;
     private ISubscribeStore iSubscribeStore;
-    private IDupPublishMessageStore iDupPublishMessageStore;
-    private IDupPubRelMessageStore iDupPubRelMessageStore;
 
-    public Connect(ISubscribeStore iSubscribeStore, IDupPublishMessageStore iDupPublishMessageStore, IDupPubRelMessageStore iDupPubRelMessageStore, ISessionStore iSessionStore, IAuthService iAuthService) {
+    public Connect(ISubscribeStore iSubscribeStore, ISessionStore iSessionStore, IAuthService iAuthService) {
         this.iSubscribeStore = iSubscribeStore;
-        this.iDupPublishMessageStore = iDupPublishMessageStore;
-        this.iDupPubRelMessageStore = iDupPubRelMessageStore;
         this.iSessionStore = iSessionStore;
         this.iAuthService = iAuthService;
     }
@@ -78,7 +66,6 @@ public class Connect {
             return;
         }
 
-
         if (StringUtils.isBlank(msg.payload().clientIdentifier())) {
             MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
                     new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
@@ -100,18 +87,12 @@ public class Connect {
             return;
         }
 
-
-        //when connection if clientId session exist close it
+        //if clientId session exist close it
         if (iSessionStore.containsKey(msg.payload().clientIdentifier())) {
             SessionStore sessionStore = iSessionStore.get(msg.payload().clientIdentifier());
             Channel previous = sessionStore.getChannel();
-            Boolean cleanSession = sessionStore.isCleanSession();
-            if (cleanSession) {
-                iSessionStore.remove(msg.payload().clientIdentifier());
-                iSubscribeStore.removeForClient(msg.payload().clientIdentifier());
-                iDupPublishMessageStore.removeByClient(msg.payload().clientIdentifier());
-                iDupPubRelMessageStore.removeByClient(msg.payload().clientIdentifier());
-            }
+            iSessionStore.remove(msg.payload().clientIdentifier());
+            iSubscribeStore.removeForClient(msg.payload().clientIdentifier());
             previous.close();
         }
 
@@ -141,23 +122,5 @@ public class Connect {
                 new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_ACCEPTED, sessionPresent), null);
         channel.writeAndFlush(okResp);
         log.debug("CONNECT - clientId: {}, cleanSession: {}", msg.payload().clientIdentifier(), msg.variableHeader().isCleanSession());
-
-        // if cleanSession 0, store clientId QoS1 or QoS2 DUP message
-        if (!msg.variableHeader().isCleanSession()) {
-            List<DupPublishMessageStore> dupPublishMessageStoreList = iDupPublishMessageStore.get(msg.payload().clientIdentifier());
-            List<DupPubRelMessageStore> dupPubRelMessageStoreList = iDupPubRelMessageStore.get(msg.payload().clientIdentifier());
-            dupPublishMessageStoreList.forEach(dupPublishMessageStore -> {
-                MqttPublishMessage publishMessage = (MqttPublishMessage) MqttMessageFactory.newMessage(
-                        new MqttFixedHeader(MqttMessageType.PUBLISH, true, MqttQoS.valueOf(dupPublishMessageStore.getMqttQoS()), false, 0),
-                        new MqttPublishVariableHeader(dupPublishMessageStore.getTopic(), dupPublishMessageStore.getMessageId()), Unpooled.buffer().writeBytes(dupPublishMessageStore.getMessageBytes()));
-                channel.writeAndFlush(publishMessage);
-            });
-            dupPubRelMessageStoreList.forEach(dupPubRelMessageStore -> {
-                MqttMessage pubRelMessage = MqttMessageFactory.newMessage(
-                        new MqttFixedHeader(MqttMessageType.PUBREL, true, MqttQoS.AT_MOST_ONCE, false, 0),
-                        MqttMessageIdVariableHeader.from(dupPubRelMessageStore.getMessageId()), null);
-                channel.writeAndFlush(pubRelMessage);
-            });
-        }
     }
 }

@@ -12,6 +12,8 @@ import com.webank.weevent.protocol.mqttbroker.store.dto.SubscribeStore;
 public interface ISubscribeStore {
     void put(String topicFilter, SubscribeStore subscribeStore);
 
+    SubscribeStore get(String topicFilter, String clientId);
+
     void remove(String topicFilter, String clientId);
 
     void removeForClient(String clientId);

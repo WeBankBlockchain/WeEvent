@@ -1,5 +1,6 @@
 package com.webank.weevent.broker.fisco;
 
+import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
@@ -10,7 +11,10 @@ import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.TopicPage;
 import com.webank.weevent.sdk.WeEvent;
 
+import javafx.application.Application;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.core.ApplicationContext;
+import org.springframework.boot.SpringApplication;
 
 /**
  * Topic level's admin api. The underlying implement is a routing contract in
@@ -29,7 +33,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
             fiscoBcosDelegate.initProxy();
         } catch (BrokerException e) {
             log.error("init fisco-bcos failed", e);
-            fiscoBcosDelegate = null;
+            System.exit(SpringApplication.exit(BrokerApplication.applicationContext));
         }
     }
 
