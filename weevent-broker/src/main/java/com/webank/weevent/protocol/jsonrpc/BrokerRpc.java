@@ -106,8 +106,7 @@ public class BrokerRpc implements IBrokerRpc {
                             @JsonRpcParam(value = "subscriptionId") String subscriptionId,
                             @JsonRpcParam(value = "url") String url) throws BrokerException {
         log.info("jsonrpc protocol subscribe interface topic:{} groupId:{} subscriptionId:{} url:{}", topic, groupId, subscriptionId, url);
-        checkSupport();
-        return this.masterJob.getCgiSubscription().jsonRpcSubscribe(topic, groupId, subscriptionId, url);
+        return this.masterJob.doSubscribe(WeEventConstants.JSONRPCTYPE, topic, groupId, subscriptionId, url, "");
     }
 
     @Override
@@ -115,23 +114,20 @@ public class BrokerRpc implements IBrokerRpc {
                             @JsonRpcParam(value = "subscriptionId") String subscriptionId,
                             @JsonRpcParam(value = "url") String url) throws BrokerException {
         log.info("jsonrpc protocol subscribe interface topic:{} subscriptionId:{} url:{}", topic, subscriptionId, url);
-        checkSupport();
-        return this.masterJob.getCgiSubscription().jsonRpcSubscribe(topic, WeEventConstants.DEFAULT_GROUP_ID, subscriptionId, url);
+        return this.masterJob.doSubscribe(WeEventConstants.JSONRPCTYPE, topic, WeEventConstants.DEFAULT_GROUP_ID, subscriptionId, url, "");
     }
 
     @Override
     public String subscribe(@JsonRpcParam(value = "topic") String topic,
                             @JsonRpcParam(value = "url") String url) throws BrokerException {
         log.info("jsonrpc protocol subscribe interface topic:{} url:{}", topic, url);
-        checkSupport();
-        return this.masterJob.getCgiSubscription().jsonRpcSubscribe(topic, WeEventConstants.DEFAULT_GROUP_ID, "", url);
+        return this.masterJob.doSubscribe(WeEventConstants.JSONRPCTYPE, topic, WeEventConstants.DEFAULT_GROUP_ID, "", url, "");
     }
 
     @Override
     public boolean unSubscribe(@JsonRpcParam(value = "subscriptionId") String subscriptionId) throws BrokerException {
         log.info("jsonrpc protocol unSubscribe interface subscriptionId:{}", subscriptionId);
-        checkSupport();
-        return this.masterJob.getCgiSubscription().jsonRpcUnSubscribe(subscriptionId);
+        return this.masterJob.doUnsubscribe(WeEventConstants.JSONRPCTYPE, subscriptionId, "");
     }
 
     @Override

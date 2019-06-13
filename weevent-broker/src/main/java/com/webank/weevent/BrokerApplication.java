@@ -218,7 +218,6 @@ public class BrokerApplication {
 
     //ha
     @Bean
-    @ConditionalOnProperty("broker.zookeeper.ip")
     public static MasterJob getMasterJob() {
         return new MasterJob();
     }

@@ -26,5 +26,8 @@ public class Broker {
     @URL
     private String brokerUrl;
     
+    @URL
+    private String webaseUrl;
+    
     private Date lastUpdate;
 }

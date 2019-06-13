@@ -18,8 +18,7 @@ public class IAuthServiceImpl implements IAuthService {
     @Override
     public boolean verifyUserName(String userName, String password) {
         if (StringUtils.isBlank(userName) || StringUtils.isBlank(password)) {
-            log.error("userName or password is blank");
-            return false;
+            return true;
         }
 
         if (StringUtils.isBlank(BrokerApplication.weEventConfig.getMqttUserName()) || StringUtils.isBlank(BrokerApplication.weEventConfig.getMqttPassCode())) {
