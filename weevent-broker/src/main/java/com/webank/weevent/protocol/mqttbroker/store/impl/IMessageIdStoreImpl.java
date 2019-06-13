@@ -1,14 +1,9 @@
 package com.webank.weevent.protocol.mqttbroker.store.impl;
 
-import org.apache.ignite.IgniteCache;
-import org.apache.ignite.internal.processors.cache.IgniteCacheProxyImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-
-import javax.annotation.Resource;
 
 import com.webank.weevent.protocol.mqttbroker.store.IMessageIdStore;
 
