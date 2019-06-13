@@ -8,6 +8,7 @@ import com.webank.weevent.broker.fisco.RedisService;
 import com.webank.weevent.broker.ha.MasterJob;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
+import com.webank.weevent.sdk.BrokerException;
 
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImplExporter;
 import lombok.extern.slf4j.Slf4j;
@@ -178,13 +179,28 @@ public class BrokerApplication {
     //IProducer
     @Bean
     public static IProducer iProducer() {
-        return IProducer.build();
+        try {
+            IProducer iProducer = IProducer.build();
+            iProducer.startProducer();
+            return iProducer;
+        } catch (BrokerException e) {
+            System.exit(SpringApplication.exit(applicationContext));
+        }
+        return null;
     }
 
     //IConsumer
     @Bean
     public static IConsumer iConsumer() {
-        return IConsumer.build();
+
+        try {
+            IConsumer iConsumer = IConsumer.build();
+            iConsumer.startConsumer();
+            return iConsumer;
+        } catch (BrokerException e) {
+            System.exit(SpringApplication.exit(applicationContext));
+        }
+        return null;
     }
 
     //http filter
