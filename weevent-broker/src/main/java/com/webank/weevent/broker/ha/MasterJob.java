@@ -48,7 +48,6 @@ public class MasterJob {
     private String zookeeperRootPath;
     private String leaderPath;
     private boolean isMaster = false;
-    private MqttTopic mqttTopic;
     private CGISubscription cgiSubscription;
     private IConsumer consumer;
 
@@ -67,10 +66,6 @@ public class MasterJob {
 
     public CuratorFramework getClient() {
         return this.client;
-    }
-
-    public MqttTopic getMqttTopic() {
-        return this.mqttTopic;
     }
 
     public CGISubscription getCgiSubscription() {
@@ -304,7 +299,6 @@ public class MasterJob {
             return null;
         }
 
-        this.mqttTopic = new MqttTopic(this, mqttTopicPath);
         this.cgiSubscription = new CGISubscription(this, cgiSubscriptionPath);
 
         // leader path "/event-broker/master"
@@ -356,7 +350,6 @@ public class MasterJob {
     }
 
     private void showJob() {
-        log.info("mqtt topic: {}", mqttTopic);
         log.info("cgi subscription: {}", cgiSubscription);
     }
 
@@ -368,11 +361,6 @@ public class MasterJob {
             log.error("CGISubscription switch to master mode failed");
             return;
         }
-
-        result = this.mqttTopic.switchMode(true);
-        if (!result) {
-            log.error("MqttTopic switch to master mode failed");
-        }
     }
 
     private void stopJob() {
@@ -382,11 +370,6 @@ public class MasterJob {
         if (!result) {
             log.error("CGISubscription switch to slave mode failed");
             return;
-        }
-
-        result = this.mqttTopic.switchMode(false);
-        if (!result) {
-            log.error("MqttTopic switch to slave mode failed");
         }
     }
 }

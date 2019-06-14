@@ -39,6 +39,10 @@ List springmqtt = [
         "org.springframework.integration:spring-integration-mqtt"
 ]
 
+List hutool = [
+        "cn.hutool:hutool-core:4.5.11"
+]
+
 List springboot = [
         "org.springframework.boot:spring-boot-starter-actuator",
         "org.springframework.boot:spring-boot-starter-web"
@@ -50,7 +54,7 @@ List springboottest = [
 ]
 
 dependencies {
-    implementation(springboot, springwebsocket, springmqtt)
+    implementation(springboot, springwebsocket, springmqtt, hutool)
 
     implementation(jsonrpc4j, redis, zookeeper, client_depends, web3sdk)
 
