@@ -184,6 +184,7 @@ public class BrokerApplication {
             iProducer.startProducer();
             return iProducer;
         } catch (BrokerException e) {
+            log.error("start producer error");
             System.exit(SpringApplication.exit(applicationContext));
         }
         return null;
@@ -198,6 +199,7 @@ public class BrokerApplication {
             iConsumer.startConsumer();
             return iConsumer;
         } catch (BrokerException e) {
+            log.error("start consumer error");
             System.exit(SpringApplication.exit(applicationContext));
         }
         return null;
