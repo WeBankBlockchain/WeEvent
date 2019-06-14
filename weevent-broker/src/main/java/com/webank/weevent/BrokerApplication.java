@@ -8,7 +8,7 @@ import com.webank.weevent.broker.fisco.RedisService;
 import com.webank.weevent.broker.ha.MasterJob;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
-import com.webank.weevent.protocol.mqtt.MqttConfiguration;
+import com.webank.weevent.sdk.BrokerException;
 
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImplExporter;
 import lombok.extern.slf4j.Slf4j;
@@ -118,7 +118,6 @@ class HttpInterceptorConfig implements WebMvcConfigurer {
  */
 @Slf4j
 @SpringBootApplication
-@Import(MqttConfiguration.class)
 public class BrokerApplication {
     public static ApplicationContext applicationContext;
 
@@ -180,13 +179,30 @@ public class BrokerApplication {
     //IProducer
     @Bean
     public static IProducer iProducer() {
-        return IProducer.build();
+        try {
+            IProducer iProducer = IProducer.build();
+            iProducer.startProducer();
+            return iProducer;
+        } catch (BrokerException e) {
+            log.error("start producer error");
+            System.exit(SpringApplication.exit(applicationContext));
+        }
+        return null;
     }
 
     //IConsumer
     @Bean
     public static IConsumer iConsumer() {
-        return IConsumer.build();
+
+        try {
+            IConsumer iConsumer = IConsumer.build();
+            iConsumer.startConsumer();
+            return iConsumer;
+        } catch (BrokerException e) {
+            log.error("start consumer error");
+            System.exit(SpringApplication.exit(applicationContext));
+        }
+        return null;
     }
 
     //http filter
