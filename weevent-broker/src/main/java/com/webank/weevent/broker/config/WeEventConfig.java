@@ -25,6 +25,9 @@ public class WeEventConfig {
     @Value("${server.ssl.enabled:false}")
     private String sslEnable;
 
+    @Value("${server.ssl.key-store-password:}")
+    private String sslPassword;
+
     @Value("${ip.check.white-table:}")
     private String ipWhiteTable;
 
