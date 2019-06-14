@@ -22,8 +22,11 @@ public class WeEventConfig {
     @Value("${server.port:8081}")
     private String serverPort;
 
-    @Value("server.ssl.enabled:false")
+    @Value("${server.ssl.enabled:false}")
     private String sslEnable;
+
+    @Value("${server.ssl.key-store-password:}")
+    private String sslPassword;
 
     @Value("${ip.check.white-table:}")
     private String ipWhiteTable;
@@ -84,4 +87,28 @@ public class WeEventConfig {
 
     @Value("${stomp.heartbeats:30}")
     private Integer stompHeartbeats;
+
+    @Value("${mqtt.brokerserver.port:8083}")
+    private Integer brokerServerPort;
+
+    @Value("${mqtt.brokerserver.sobacklog:511}")
+    private Integer soBackLog;
+
+    @Value("${mqtt.brokerserver.sokeepalive:true}")
+    private Boolean soKeepAlive;
+
+    @Value("${mqtt.brokerserver.keepalive:60}")
+    private Integer keepAlive;
+
+    @Value("${mqtt.websocketserver.path:/weevent/mqtt}")
+    private String webSocketServerPath;
+
+    @Value("${mqtt.websocketserver.port:8084}")
+    private Integer webSocketPort;
+
+    @Value("${mqtt.user.login:}")
+    private String mqttUserName;
+
+    @Value("${mqtt.user.passcode:}")
+    private String mqttPassCode;
 }
