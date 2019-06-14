@@ -22,7 +22,7 @@ public class WeEventConfig {
     @Value("${server.port:8081}")
     private String serverPort;
 
-    @Value("server.ssl.enabled:false")
+    @Value("${server.ssl.enabled:false}")
     private String sslEnable;
 
     @Value("${ip.check.white-table:}")
