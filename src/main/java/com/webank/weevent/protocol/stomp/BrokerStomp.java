@@ -191,7 +191,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
                     if (subscriptionId.isEmpty()) {
                         accessor = StompHeaderAccessor.create(StompCommand.ERROR);
-                        accessor.setNativeHeader("message", "subscribetion id is null");
+                        accessor.setNativeHeader("message", "subscription id is null");
                     } else {
                         accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
                         accessor.setDestination(simpDestination);
