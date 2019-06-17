@@ -31,6 +31,9 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+
 /**
  * stomp transport over web socket.
  *
@@ -69,9 +72,9 @@ public class WebSocketTransport extends WebSocketClient {
 
     public Map<WeEventTopicSubscriber, String> Subscriber;
 
-    private WSThread wSThread;
+   // private WSThread wSThread;
 
-    public String connectFlag = "0";
+    public Boolean connectFlag = FALSE;
 
     class ResponseFuture implements Future<Message> {
         private Long key;
@@ -211,12 +214,12 @@ public class WebSocketTransport extends WebSocketClient {
         String req = stompCommand.encodeSubscribe(topic, topic.getOffset(), asyncSeq);
         sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
         Message stompResponse = this.stompRequest(req, asyncSeq);
-        //hack asyncSeq
 
         if (stompCommand.isError(stompResponse)) {
             log.info("stomp request is fail");
             return "";
         }
+
         return stompCommand.getSubscriptionId(stompResponse);
     }
 
@@ -233,7 +236,6 @@ public class WebSocketTransport extends WebSocketClient {
     }
 
     // overwrite method from WebSocketClient
-
     public WebSocketTransport(URI server) {
         super(server, new Draft_6455());
 
@@ -245,7 +247,6 @@ public class WebSocketTransport extends WebSocketClient {
         this.sequence2Id = new ConcurrentHashMap<>();
         this.subscriptionCache = new ConcurrentHashMap<>();
         this.Subscriber = new ConcurrentHashMap<>();
-        this.wSThread = new WSThread(this);
     }
 
     @Override
@@ -303,7 +304,6 @@ public class WebSocketTransport extends WebSocketClient {
                     if (futures.containsKey(sequence2Id.get(receiptId))) {
                         if (subscriptionId != null) {
                             log.info("subscriptionId {}", subscriptionId);
-                            System.out.println("subscriptionId："+subscriptionId);
                             // receiptId2SubscriptionId length subscriptionId2ReceiptId length
                             this.receiptId2SubscriptionId.put(receiptId, subscriptionId);
                             this.subscriptionId2ReceiptId.put(subscriptionId, receiptId);
@@ -334,7 +334,7 @@ public class WebSocketTransport extends WebSocketClient {
                     // check SubscriptionId
                     log.info("messageId:{}", messageId);
                     this.subscriptionCache.put(event.getTopic(), event.getEventId());
-                    if (this.receiptId2SubscriptionId.size()==this.subscriptionId2ReceiptId.size()) {
+                    if (this.receiptId2SubscriptionId.size() == this.subscriptionId2ReceiptId.size()) {
                         if (this.receiptId2SubscriptionId.containsKey(messageId)) {
                             WeEventStompCommand weEventStompCommand = new WeEventStompCommand(event);
                             weEventStompCommand.setSubscriptionId(subscriptionId);
@@ -356,7 +356,7 @@ public class WebSocketTransport extends WebSocketClient {
                                         weEventStompCommand.setSubscriptionId(sub2reid.getKey());
                                         weEventStompCommand.setHeaderId(messageId);
                                         this.topicConnection.dispatch(weEventStompCommand);
-                                        this.connectFlag="0";
+                                        this.connectFlag = FALSE;
                                     }
                                 }
 
@@ -378,15 +378,15 @@ public class WebSocketTransport extends WebSocketClient {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        System.out.println("WebSocket transport closed, code: {} reason: {} remote: {}" + "code:" + code + "reason:" + reason + "remote," + remote);
+        log.info("WebSocket transport closed, code: {} reason: {} remote: {}", code, reason, remote);
         this.connected = false;
         this.cleanup();
 
         // reconnect if connection lost
-        System.out.println("reconnect");
         if (remote) {
-            if (this.connectFlag.equals("0")&&this.subscriptionCache.size()>0) {
-                this.wSThread.start();
+            if (this.connectFlag.equals(FALSE)) {
+                WSThread wSThread = new WSThread(this);
+                wSThread.start();
             }
         }
 
@@ -396,7 +396,6 @@ public class WebSocketTransport extends WebSocketClient {
     @Override
     public void onError(Exception ex) {
         log.error("WebSocket transport error", ex);
-        System.out.println("onError");
     }
 }
 
@@ -409,7 +408,7 @@ class WSThread extends Thread {
     }
 
     public void run() {
-        System.out.println("Thread Running");
+        log.info("thread running");
 
         try {
             while (!this.webSocketTransport.reconnectBlocking()) {
@@ -423,11 +422,11 @@ class WSThread extends Thread {
         for (Map.Entry<String, String> subscription : this.webSocketTransport.subscriptionCache.entrySet()) {
 
             try {
-                System.out.println("subscription cache:" + subscription.toString()+",");
+                log.info("subscription cache:{}", subscription.toString());
                 WeEventTopic weEventTopic = new WeEventTopic(subscription.getKey());
                 weEventTopic.setOffset(subscription.getValue());
                 this.webSocketTransport.stompSubscribe(weEventTopic);
-                this.webSocketTransport.connectFlag = "1";
+                this.webSocketTransport.connectFlag = TRUE;
 
             } catch (JMSException e) {
                 e.printStackTrace();

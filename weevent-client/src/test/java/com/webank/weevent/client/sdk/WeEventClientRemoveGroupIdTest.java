@@ -46,7 +46,7 @@ public class WeEventClientRemoveGroupIdTest {
 
     @Before
     public void before() throws Exception {
-        weEventClient = new WeEventClient("http://127.0.0.1:8080/weevent");
+        weEventClient = new WeEventClient("http://10.107.96.107:7681/weevent");
         weEventClient.open(topicName);
 
     }

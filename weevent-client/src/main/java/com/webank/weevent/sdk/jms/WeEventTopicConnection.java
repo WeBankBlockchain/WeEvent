@@ -62,7 +62,7 @@ public class WeEventTopicConnection implements TopicConnection, CommandDispatche
 
     public void checkConnected() throws JMSException {
         if (!this.transport.isConnected()) {
-            throw new JMSException("connect is breakdown");
+            throw new JMSException("connecttion is breakdown");
         }
     }
 
@@ -89,7 +89,6 @@ public class WeEventTopicConnection implements TopicConnection, CommandDispatche
         WeEventTopic topic = (WeEventTopic) subscriber.getTopic();
         String subscriptionId = this.transport.stompSubscribe(topic);
         subscriber.setSubscriptionId(subscriptionId);
-        System.out.println("subscriptionId:" + subscriptionId);
         this.subscribers.put(subscriber.getSubscriptionId(), subscriber);
     }
 
