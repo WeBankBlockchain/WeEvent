@@ -198,6 +198,7 @@ public class BrokerStomp extends TextWebSocketHandler {
                     // a unique identifier for that message and a subscription header matching the identifier of the subscription that is receiving the message.
                     accessor.setReceiptId(headerIdStr);
                     accessor.setSubscriptionId(subscriptionId);
+                    accessor.setNativeHeader("subscription-id",subscriptionId);
                     sendSimpleMessage(session, accessor);
                     break;
 
@@ -415,6 +416,9 @@ public class BrokerStomp extends TextWebSocketHandler {
                             try {
                                 StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.MESSAGE);
                                 accessor.setSubscriptionId(headerIdStr);
+                                accessor.setNativeHeader("subscription-id", subscriptionId);
+                                accessor.setNativeHeader("message-id", headerIdStr);
+                                accessor.setMessageId(headerIdStr);
                                 accessor.setContentType(new MimeType("text", "plain", StandardCharsets.UTF_8));
                                 ObjectMapper mapper = new ObjectMapper();
                                 MessageHeaders headers = accessor.getMessageHeaders();
