@@ -176,6 +176,7 @@ public class BrokerStomp extends TextWebSocketHandler {
                     accessor = StompHeaderAccessor.create(command);
                     accessor.setDestination(simpDestination);
                     accessor.setReceiptId(headerReceiptIdStr);
+                    accessor.setNativeHeader("receipt-id",headerIdStr);
                     sendSimpleMessage(session, accessor);
                     break;
 
@@ -191,7 +192,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
                     if (subscriptionId.isEmpty()) {
                         accessor = StompHeaderAccessor.create(StompCommand.ERROR);
-                        accessor.setNativeHeader("message", "subscription id is null");
+                        accessor.setNativeHeader("message", "subscribetion id is null");
                     } else {
                         accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
                         accessor.setDestination(simpDestination);
@@ -200,6 +201,7 @@ public class BrokerStomp extends TextWebSocketHandler {
                     accessor.setReceiptId(headerIdStr);
                     accessor.setSubscriptionId(subscriptionId);
                     accessor.setNativeHeader("subscription-id",subscriptionId);
+                    accessor.setNativeHeader("receipt-id",headerIdStr);
                     sendSimpleMessage(session, accessor);
                     break;
 
@@ -216,6 +218,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
                     // a unique identifier for that message and a subscription header matching the identifier of the subscription that is receiving the message.
                     accessor.setReceiptId(headerIdStr);
+                    accessor.setNativeHeader("receipt-id",headerIdStr);
                     sendSimpleMessage(session, accessor);
                     break;
                 default:
