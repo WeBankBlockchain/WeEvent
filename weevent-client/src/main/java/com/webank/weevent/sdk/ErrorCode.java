@@ -87,6 +87,10 @@ public enum ErrorCode {
 
     SDK_JMS_EXCEPTION(101010, "jms exception"),
 
+    USER_PASSWORD_ISBLANK(101011,"stomp password is blank"),
+
+    USER_NAME_ISBLANK(101012,"stomp user name is blank"),
+
     //server error(200000, 300000)
     TOPIC_CONTROLLER_IS_NULL(200100, "init failed, see fisco.topic-controller.contract-address in properties"),
 
