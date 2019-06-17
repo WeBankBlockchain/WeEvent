@@ -191,6 +191,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
                     if (subscriptionId.isEmpty()) {
                         accessor = StompHeaderAccessor.create(StompCommand.ERROR);
+                        accessor.setNativeHeader("message", "subscribetion id is null");
                     } else {
                         accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
                         accessor.setDestination(simpDestination);
@@ -208,6 +209,7 @@ public class BrokerStomp extends TextWebSocketHandler {
                         accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
                     } else {
                         accessor = StompHeaderAccessor.create(StompCommand.ERROR);
+                        accessor.setNativeHeader("message", "unsubscribe fail ");
                     }
 
                     accessor.setDestination(simpDestination);
@@ -222,6 +224,7 @@ public class BrokerStomp extends TextWebSocketHandler {
                     accessor = StompHeaderAccessor.create(StompCommand.ERROR);
                     accessor.setDestination(simpDestination);
                     accessor.setMessage("NOT SUPPORT COMMAND");
+                    accessor.setNativeHeader("message", "NOT SUPPORT COMMAND");
                     // a unique identifier for that message and a subscription header matching the identifier of the subscription that is receiving the message.
                     sendSimpleMessage(session, accessor);
                     super.handleTransportError(session, new Exception("unknown command"));
@@ -243,32 +246,27 @@ public class BrokerStomp extends TextWebSocketHandler {
     }
 
     private StompCommand checkConnect(Message<?> msg) {
-        Object passcode = "";
-        LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) msg.getHeaders().get("nativeHeaders"));
-        if (nativeHeaders != null) {
-            // get the client's passcode
-            if (msg.getHeaders().get("stompCredentials") != null) {
-                passcode = StompHeaderAccessor.getPasscode(msg.getHeaders());
-            }
-        }
-        Object login;
-        String loginName = "";
+        StompCommand command = StompCommand.CONNECTED;
 
-        if (nativeHeaders != null) if (nativeHeaders.get("login") != null) {
-            login = nativeHeaders.get("login");
-            if (login != null) loginName = ((List) login).get(0).toString();
-        }
-        StompCommand command;
-        if (StringUtils.isBlank(BrokerApplication.weEventConfig.getStompLogin()) || StringUtils.isBlank(BrokerApplication.weEventConfig.getStompPasscode())) {
-            command = StompCommand.CONNECTED;
-        } else {
-            if (BrokerApplication.weEventConfig.getStompLogin().equals(loginName) && BrokerApplication.weEventConfig.getStompPasscode().equals(passcode)) {
-                command = StompCommand.CONNECTED;
-            } else {
+        String authAccount = BrokerApplication.weEventConfig.getStompLogin();
+        String authPassword = BrokerApplication.weEventConfig.getStompPasscode();
+        // check login/password if needed
+        if (!authAccount.isEmpty() && !authPassword.isEmpty()) {
+            try {
+                LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) msg.getHeaders().get("nativeHeaders"));
+                String loginName = nativeHeaders.get("login").get(0).toString();
+                // get the client's passcode
+                String passcode = StompHeaderAccessor.getPasscode(msg.getHeaders());
+                if (loginName.equals(authAccount) && passcode.equals(authPassword)) {
+                    command = StompCommand.CONNECTED;
+                } else {
+                    command = StompCommand.ERROR;
+                }
+            } catch (Exception e) {
+                log.error("authorize failed");
                 command = StompCommand.ERROR;
             }
         }
-
 
         return command;
     }
