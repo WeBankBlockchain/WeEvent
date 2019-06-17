@@ -178,6 +178,7 @@ public class BrokerStomp extends TextWebSocketHandler {
                     }
                     accessor.setDestination(simpDestination);
                     accessor.setReceiptId(headerReceiptIdStr);
+					accessor.setNativeHeader("receipt-id",headerReceiptIdStr);
                     sendSimpleMessage(session, accessor);
                     break;
 
@@ -217,6 +218,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
                     // a unique identifier for that message and a subscription header matching the identifier of the subscription that is receiving the message.
                     accessor.setReceiptId(headerIdStr);
+					accessor.setNativeHeader("receipt-id",headerIdStr);
                     sendSimpleMessage(session, accessor);
                     break;
                 default:
