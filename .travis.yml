@@ -40,14 +40,3 @@ script:
 
 after_success:
 - bash <(curl -s https://codecov.io/bash)
-
-deploy:
-  provider: releases
-  api_key: $APIKEY
-  file_glob: true
-  file: dist/app/weevent.jar
-  skip_cleanup: true
-  github_token:$GITHUB_TOKEN
-  on:
-    tags: true
-    all_branches: true
