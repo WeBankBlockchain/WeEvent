@@ -70,9 +70,7 @@ public class WebSocketTransport extends WebSocketClient {
     //(topic <-> eventId)
     public Map<String, String> subscriptionCache;
 
-    public Map<WeEventTopicSubscriber, String> Subscriber;
-
-   // private WSThread wSThread;
+    // private WSThread wSThread;
 
     public Boolean connectFlag = FALSE;
 
@@ -226,11 +224,11 @@ public class WebSocketTransport extends WebSocketClient {
 
     public boolean stompUnsubscribe(String subscriptionId) throws JMSException {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
-        Long headerId = Long.valueOf(this.subscriptionId2ReceiptId.get(subscriptionId));
-        String req = stompCommand.encodeUnSubscribe(subscriptionId, Long.toString(headerId));
+        String headerId = this.subscriptionId2ReceiptId.get(subscriptionId);
+        String req = stompCommand.encodeUnSubscribe(subscriptionId,headerId);
 
         Long asyncSeq = this.sequence.incrementAndGet();
-        sequence2Id.put(Long.toString(headerId), asyncSeq);
+        sequence2Id.put(headerId, asyncSeq);
         Message stompResponse = this.stompRequest(req, asyncSeq);
         return !stompCommand.isError(stompResponse);
     }
@@ -246,7 +244,6 @@ public class WebSocketTransport extends WebSocketClient {
         this.subscriptionId2ReceiptId = new ConcurrentHashMap<>();
         this.sequence2Id = new ConcurrentHashMap<>();
         this.subscriptionCache = new ConcurrentHashMap<>();
-        this.Subscriber = new ConcurrentHashMap<>();
     }
 
     @Override
