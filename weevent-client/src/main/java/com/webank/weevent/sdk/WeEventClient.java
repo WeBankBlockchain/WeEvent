@@ -8,7 +8,6 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -35,6 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.googlecode.jsonrpc4j.ProxyUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Java Client for WeEvent.
@@ -76,6 +76,7 @@ public class WeEventClient {
     // (subscriptionId <-> TopicSession)
     private Map<String, TopicSession> sessionMap;
 
+
     /**
      * Get the client handler of weevent's broker with default url, http://localhost:8080/weevent.
      *
@@ -93,6 +94,7 @@ public class WeEventClient {
      * @throws BrokerException broker exception
      */
     public WeEventClient(String brokerUrl) throws BrokerException {
+        validateParam(brokerUrl);
         buildRpc(brokerUrl + "/jsonrpc");
         buildJms(getStompUrl(brokerUrl), "", "");
     }
@@ -106,6 +108,8 @@ public class WeEventClient {
      * @throws BrokerException broker exception
      */
     public WeEventClient(String brokerUrl, String userName, String password) throws BrokerException {
+        validateParam(brokerUrl);
+        validateUser(userName, password);
         buildRpc(brokerUrl);
         buildJms(getStompUrl(brokerUrl), userName, password);
     }
@@ -118,8 +122,9 @@ public class WeEventClient {
      * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
      * @throws BrokerException broker exception
      */
-    public SendResult publish(String topic, String groupId, byte[] content, Map<String, String> extensions) throws BrokerException {
-        return this.brokerRpc.publish(topic, groupId, content, extensions);
+    public SendResult publish(String topic, byte[] content) throws BrokerException {
+        validateParam(topic);
+        return this.brokerRpc.publish(topic, content);
     }
 
     /**
@@ -133,6 +138,8 @@ public class WeEventClient {
      */
     public String subscribe(String topic, String offset, EventListener listener) throws BrokerException {
         try {
+            validateParam(topic);
+            validateParam(offset);
             TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
             // create topic
             Topic destination = session.createTopic(topic);
@@ -164,7 +171,7 @@ public class WeEventClient {
             return subscriber.getSubscriptionId();
         } catch (JMSException e) {
             log.error("jms exception", e);
-            throw new BrokerException(ErrorCode.SDK_JMS_EXCEPTION);
+            throw jms2BrokerException(e);
         }
     }
 
@@ -178,13 +185,15 @@ public class WeEventClient {
      * @throws BrokerException broker exception
      */
     public boolean unSubscribe(String subscriptionId) throws BrokerException {
+        validateParam(subscriptionId);
+
         if (this.sessionMap.containsKey(subscriptionId)) {
             TopicSession session = this.sessionMap.get(subscriptionId);
             try {
                 session.unsubscribe(subscriptionId);
             } catch (JMSException e) {
                 log.error("jms exception", e);
-                throw new BrokerException(ErrorCode.SDK_JMS_EXCEPTION);
+                throw jms2BrokerException(e);
             }
 
             this.sessionMap.remove(subscriptionId);
@@ -194,18 +203,111 @@ public class WeEventClient {
         return false;
     }
 
-    // The following is interface for IEventTopic.
 
     /**
-     * Open a topic.
+     * Open a topic
      *
      * @param topic topic name
-     * @param groupId which group to open
      * @return true if success
      * @throws BrokerException broker exception
      */
-    public boolean open(String topic, String groupId) throws BrokerException {
-        return this.brokerRpc.open(topic, groupId);
+
+    public boolean open(String topic) throws BrokerException {
+        validateParam(topic);
+        return this.brokerRpc.open(topic);
+    }
+
+
+    /**
+     * Close a topic.
+     *
+     * @param topic topic name
+     * @return true if success
+     * @throws BrokerException broker exception
+     */
+    public boolean close(String topic) throws BrokerException {
+        validateParam(topic);
+        return this.brokerRpc.close(topic);
+    }
+
+
+    /**
+     * Check a topic is exist or not.
+     *
+     * @param topic topic name
+     * @return true if exist
+     * @throws BrokerException broker exception
+     */
+    public boolean exist(String topic) throws BrokerException {
+        validateParam(topic);
+        return this.brokerRpc.exist(topic);
+    }
+
+
+    /**
+     * List all topics in weevent's broker.
+     *
+     * @param pageIndex page index, from 0
+     * @param pageSize page size, [10, 100)
+     * @return topic list
+     * @throws BrokerException broker exception
+     */
+    public TopicPage list(Integer pageIndex, Integer pageSize) throws BrokerException {
+        return this.brokerRpc.list(pageIndex, pageSize);
+    }
+
+
+    /**
+     * Get a topic information.
+     *
+     * @param topic topic name
+     * @return topic information
+     * @throws BrokerException broker exception
+     */
+    public TopicInfo state(String topic) throws BrokerException {
+        validateParam(topic);
+        return this.brokerRpc.state(topic);
+    }
+
+
+    /**
+     * Get an event information.
+     *
+     * @param eventId event id
+     * @return weevent
+     * @throws BrokerException broker exception
+     */
+    public WeEvent getEvent(String eventId) throws BrokerException {
+        validateParam(eventId);
+        return this.brokerRpc.getEvent(eventId);
+    }
+
+
+    /**
+     * Publish an event to topic.
+     *
+     * @param topic topic name
+     * @param content topic data
+     * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
+     * @throws BrokerException broker exception
+     */
+    public SendResult publish(String topic, String groupId, byte[] content, Map<String, String> extensions) throws BrokerException {
+        validateParam(topic);
+        validateParam(groupId);
+        return this.brokerRpc.publish(topic, groupId, content, extensions);
+    }
+
+    /**
+     * Publish an event to topic.
+     *
+     * @param topic topic name
+     * @param content topic data
+     * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
+     * @throws BrokerException broker exception
+     */
+    public SendResult publish(String topic, byte[] content, Map<String, String> extensions) throws BrokerException {
+        validateParam(topic);
+        return this.brokerRpc.publish(topic, content, extensions);
     }
 
     /**
@@ -217,6 +319,8 @@ public class WeEventClient {
      * @throws BrokerException broker exception
      */
     public boolean close(String topic, String groupId) throws BrokerException {
+        validateParam(topic);
+        validateParam(groupId);
         return this.brokerRpc.close(topic, groupId);
     }
 
@@ -229,7 +333,24 @@ public class WeEventClient {
      * @throws BrokerException broker exception
      */
     public boolean exist(String topic, String groupId) throws BrokerException {
+        validateParam(topic);
+        validateParam(groupId);
         return this.brokerRpc.exist(topic, groupId);
+    }
+
+
+    /**
+     * Open a topic.
+     *
+     * @param topic topic name
+     * @param groupId which group to open
+     * @return true if success
+     * @throws BrokerException broker exception
+     */
+    public boolean open(String topic, String groupId) throws BrokerException {
+        validateParam(topic);
+        validateParam(groupId);
+        return this.brokerRpc.open(topic, groupId);
     }
 
     /**
@@ -241,6 +362,7 @@ public class WeEventClient {
      * @throws BrokerException broker exception
      */
     public TopicPage list(Integer pageIndex, Integer pageSize, String groupId) throws BrokerException {
+        validateParam(groupId);
         return this.brokerRpc.list(pageIndex, pageSize, groupId);
     }
 
@@ -252,8 +374,11 @@ public class WeEventClient {
      * @throws BrokerException broker exception
      */
     public TopicInfo state(String topic, String groupId) throws BrokerException {
+        validateParam(topic);
+        validateParam(groupId);
         return this.brokerRpc.state(topic, groupId);
     }
+
 
     /**
      * Get an event information.
@@ -263,10 +388,11 @@ public class WeEventClient {
      * @throws BrokerException broker exception
      */
     public WeEvent getEvent(String eventId, String groupId) throws BrokerException {
+        validateParam(groupId);
+        validateParam(eventId);
         return this.brokerRpc.getEvent(eventId, groupId);
     }
 
-    // implements
 
     private String getStompUrl(String brokerUrl) throws BrokerException {
         String stompUrl;
@@ -275,7 +401,7 @@ public class WeEventClient {
         } else if (brokerUrl.contains("https://")) {
             stompUrl = brokerUrl.replace("https://", "wss://");
         } else {
-            throw new BrokerException(ErrorCode.URL_INVALID_FORMAT);
+            throw new BrokerException(ErrorCode.PARAM_ISBLANK);
         }
         stompUrl += "/stomp";
         return stompUrl;
@@ -325,7 +451,7 @@ public class WeEventClient {
             url = new URL(jsonRpcUrl);
         } catch (MalformedURLException e) {
             log.error("invalid url format", e);
-            throw new BrokerException(ErrorCode.URL_INVALID_FORMAT);
+            throw new BrokerException(ErrorCode.PARAM_ISBLANK);
         }
 
         JsonRpcHttpClient client = new JsonRpcHttpClient(url);
@@ -369,7 +495,37 @@ public class WeEventClient {
         }
     }
 
-    public static BrokerException jms2BrokerException(JMSException e) {
+
+    /**
+     * check the param
+     *
+     * @param param param
+     * @throws BrokerException
+     */
+    private static void validateParam(String param) throws BrokerException {
+        if (StringUtils.isBlank(param)) {
+            throw new BrokerException(ErrorCode.PARAM_ISBLANK);
+        }
+    }
+
+
+    /**
+     * check the username and the password
+     *
+     * @param userName stomp username
+     * @param password stomp user password
+     * @throws BrokerException
+     */
+    private static void validateUser(String userName, String password) throws BrokerException {
+        if (StringUtils.isBlank(userName)) {
+            throw new BrokerException(ErrorCode.PARAM_ISBLANK);
+        }
+        if (StringUtils.isBlank(password)) {
+            throw new BrokerException(ErrorCode.PARAM_ISBLANK);
+        }
+    }
+
+    private static BrokerException jms2BrokerException(JMSException e) {
         return new BrokerException(Integer.valueOf(e.getErrorCode()), e.getMessage());
     }
 }
