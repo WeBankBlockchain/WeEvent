@@ -3,21 +3,21 @@ dist: trusty
 
 # blocklist
 branches:
-  except:
-  - /^release.*/
-  - /^feature.*/
+    except:
+    - /^release.*/
+    - /^feature.*/
 
 # safelist
-branches:
-  only:
-  - master
-  - develop
-  - /^v\d+\.\d+\.\d+$/
+#branches:
+#  only:
+#  - master
+#  - develop
+#  - /^v\d+\.\d+\.\d+$/
 
 
 language: java
 jdk:
-- oraclejdk8
+    - oraclejdk8
 
 notifications:
   email:
@@ -34,8 +34,6 @@ cache:
 
 #before_install:
 #- gradle wrapper
-
-[skip travis] Update README
 
 # for governance
 #services:
