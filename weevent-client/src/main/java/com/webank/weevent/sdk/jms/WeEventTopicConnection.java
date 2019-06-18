@@ -18,6 +18,9 @@ import javax.jms.Topic;
 import javax.jms.TopicConnection;
 import javax.jms.TopicSession;
 
+import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.ErrorCode;
+
 /**
  * WeEvent JMS TopicConnection.
  *
@@ -40,6 +43,7 @@ public class WeEventTopicConnection implements TopicConnection, CommandDispatche
         this.transport.setTopicConnection(this);
     }
 
+
     public void setUserName(String userName) {
         this.userName = userName;
     }
@@ -58,7 +62,7 @@ public class WeEventTopicConnection implements TopicConnection, CommandDispatche
 
     public void checkConnected() throws JMSException {
         if (!this.transport.isConnected()) {
-            this.transport.stompConnect(this.userName, this.password);
+            throw new JMSException("connecttion is breakdown");
         }
     }
 
@@ -83,9 +87,8 @@ public class WeEventTopicConnection implements TopicConnection, CommandDispatche
 
     public void createSubscriber(WeEventTopicSubscriber subscriber) throws JMSException {
         WeEventTopic topic = (WeEventTopic) subscriber.getTopic();
-        String subscriptionId = this.transport.stompSubscribe(topic, topic.getOffset());
+        String subscriptionId = this.transport.stompSubscribe(topic);
         subscriber.setSubscriptionId(subscriptionId);
-
         this.subscribers.put(subscriber.getSubscriptionId(), subscriber);
     }
 
@@ -153,7 +156,9 @@ public class WeEventTopicConnection implements TopicConnection, CommandDispatche
 
     @Override
     public void start() throws JMSException {
-        checkConnected();
+        if (!this.transport.isConnected()) {
+            this.transport.stompConnect(this.userName, this.password);
+        }
 
         for (WeEventTopicSession s : this.sessions) {
             s.start();

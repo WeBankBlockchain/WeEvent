@@ -4,64 +4,39 @@ dist: trusty
 # blocklist
 branches:
   except:
-  - /^release.*/
-  - /^feature.*/
+    - /^release.*/
+    - /^feature.*/
 
 # safelist
 branches:
   only:
-  - master
-  - develop
-  - /^v\d+\.\d+\.\d+$/
-
+    - master
+    - develop
+    - /^v\d+\.\d+\.\d+$/
 
 language: java
 jdk:
-- oraclejdk8
+    - oraclejdk8
 
 notifications:
   email:
     - meifen20160710@gmail.com
 
-
 before_cache:
 - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
 - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
 cache:
   directories:
   - $HOME/.gradle/caches/
   - $HOME/.gradle/wrapper/
 
-#before_install:
-#- gradle wrapper
-
-[skip travis] Update README
-
-# for governance
-#services:
-#- mysql
-
 script:
-- chmod +x ./gradlew
-- ./gradlew build -x test
-#- travis_wait 30 ./gradlew check
-- chmod +x  ci/script/build-ci.sh
-- ci/script/build-ci.sh
-- ./gradlew jacocoTestReport
+  - chmod +x  ci/script/demo-ci.sh
+  - ci/script/demo-ci.sh
+  - chmod +x ./gradlew
+  - ./gradlew build -x test
+  - ./gradlew jacocoTestReport
 
 after_success:
 - bash <(curl -s https://codecov.io/bash)
-
-deploy:
-  provider: releases
-  api_key: $APIKEY
-  file_glob: true
-  file: dist/app/weevent.jar
-  skip_cleanup: true
-  github_token:$GITHUB_TOKEN
-  on:
-    tags: true
-    all_branches: true
-
-
-
