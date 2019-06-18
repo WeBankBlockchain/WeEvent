@@ -159,8 +159,9 @@ public class BrokerStomp extends TextWebSocketHandler {
                 case "DISCONNECT":
                     accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
                     clearSession(session);
+                    accessor.setReceiptId(headerReceiptIdStr);
                     sendSimpleMessage(session, accessor);
-
+                    accessor.setNativeHeader("receipt-id", headerReceiptIdStr);
                     // close session after reply to client
                     session.close(CloseStatus.NORMAL);
                     break;
