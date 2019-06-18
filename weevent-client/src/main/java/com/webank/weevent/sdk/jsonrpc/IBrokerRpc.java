@@ -1,7 +1,5 @@
 package com.webank.weevent.sdk.jsonrpc;
 
-
-import java.util.HashMap;
 import java.util.Map;
 
 import com.webank.weevent.sdk.BrokerException;
