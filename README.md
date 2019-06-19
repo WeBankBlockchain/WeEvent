@@ -3,11 +3,8 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b7cd883f89d740ca9fe71db35b701018)](https://app.codacy.com/app/cristicmf/WeEvent?utm_source=github.com&utm_medium=referral&utm_content=WeBankFinTech/WeEvent&utm_campaign=Badge_Grade_Settings)
 [![CodeFactor](https://www.codefactor.io/repository/github/webankfintech/weevent/badge)](https://www.codefactor.io/repository/github/webankfintech/weevent)
-<<<<<<< HEAD
-=======
 [![Build Status](https://travis-ci.org/WeBankFinTech/WeEvent.svg?branch=master)](https://travis-ci.org/WeBankFinTech/WeEvent)
 
->>>>>>> ae96f50d8899983b6d1bdaf9ddfb7411b900d163
 ## 什么是WeEvent？
 WeEvent是一套分布式事件驱动架构，实现了可信、可靠、高效的跨机构、跨平台事件通知机制。
 
