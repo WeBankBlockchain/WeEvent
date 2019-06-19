@@ -1,10 +1,17 @@
 <template>
   <div class="group event-table">
-    <div class='refresh'>
-      <el-button type="primary" icon="el-icon-refresh" @click='update'>刷新</el-button>
+    <div class='refresh' >
+      <div class='update_btn' @click='update'>
+        <img src="../../assets/image/update.png" alt="">
+      </div>
     </div>
     <el-table
       :data='tableData'
+      stripe
+      v-loading='loading'
+      element-loading-spinner='el-icon-loading'
+      element-loading-text='数据加载中...'
+      element-loading-background='rgba(256,256,256,0.8)'
     >
       <el-table-column
         prop='nodeName'
@@ -13,21 +20,16 @@
       <el-table-column
         prop='blockNumber'
         label='块高'
+         width='300'
       ></el-table-column>
       <el-table-column
         prop='pbftView'
         label='pbftView'
-      ></el-table-column>
-      <el-table-column
-        prop='nodeIp'
-        label='IP'
-      ></el-table-column>
-      <el-table-column
-        prop='p2pPort'
-        label='p2p端口'
+         width='300'
       ></el-table-column>
       <el-table-column
         label='状态'
+        width='100'
       >
         <template  slot-scope="scope">
           <span style='color:#67c23a' v-show='scope.row.nodeActive === 1'>
@@ -55,6 +57,7 @@ import API from '../../API/resource.js'
 export default {
   data () {
     return {
+      loading: false,
       node_name: '',
       tableData: [],
       pageIndex: 1,
@@ -73,12 +76,16 @@ export default {
       this.getNode()
     },
     update () {
+      this.loading = true
       this.pageSize = 1
       this.pageIndex = 1
-      this.getNode()
+      setTimeout(fun => {
+        this.getNode()
+      }, 1000)
     },
     getNode () {
-      let url = '/' + sessionStorage.getItem('groupId') + '/' + this.pageIndex + '/' + this.pageSize + '?brokerId=' + sessionStorage.getItem('brokerId')
+      this.loading = true
+      let url = '/' + localStorage.getItem('groupId') + '/' + this.pageIndex + '/' + this.pageSize + '?brokerId=' + localStorage.getItem('brokerId')
       API.nodeList(url).then(res => {
         if (res.status === 200) {
           this.tableData = res.data.data
@@ -90,10 +97,21 @@ export default {
           })
         }
       })
+      this.loading = false
     }
   },
   mounted () {
     this.getNode()
+  },
+  computed: {
+    brokerId () {
+      return this.$store.state.brokerId
+    }
+  },
+  watch: {
+    brokerId () {
+      this.update()
+    }
   }
 }
 </script>
