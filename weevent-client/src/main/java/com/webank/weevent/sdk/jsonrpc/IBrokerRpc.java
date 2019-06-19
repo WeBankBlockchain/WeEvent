@@ -69,9 +69,9 @@ public interface IBrokerRpc {
     boolean open(@JsonRpcParam(value = "topic") String topic,
                  @JsonRpcParam(value = "groupId") String groupId) throws BrokerException;
 
-    default boolean open(@JsonRpcParam(value = "topic") String topic) throws BrokerException {
-        return false;
-    }
+
+     boolean open(@JsonRpcParam(value = "topic") String topic) throws BrokerException;
+
 
     boolean close(@JsonRpcParam(value = "topic") String topic,
                   @JsonRpcParam(value = "groupId") String groupId) throws BrokerException;
