@@ -9,7 +9,12 @@
     </div>
     <el-table
       :data='tableData'
-       @expand-change='readDetial'
+      stripe
+      v-loading='loading'
+      element-loading-spinner='el-icon-loading'
+      element-loading-text='数据加载中...'
+      element-loading-background='rgba(256,256,256,0.8)'
+      @expand-change='readDetial'
     >
       <el-table-column type='expand'>
         <template slot-scope='props'>
@@ -87,6 +92,7 @@ import API from '../../API/resource.js'
 export default {
   data () {
     return {
+      loading: false,
       search_name: '',
       tableData: [],
       pageIndex: 1,
@@ -114,7 +120,8 @@ export default {
       this.$alert(e, '错误信息')
     },
     transList () {
-      let url = '/' + sessionStorage.getItem('groupId') + '/' + this.pageIndex + '/' + this.pageSize + '?brokerId=' + sessionStorage.getItem('brokerId')
+      this.loading = true
+      let url = '/' + localStorage.getItem('groupId') + '/' + this.pageIndex + '/' + this.pageSize + '?brokerId=' + localStorage.getItem('brokerId')
       if (this.search_name.length < 10 && this.search_name.length > 0) {
         url = url + '&blockNumber=' + this.search_name
       } else if (this.search_name.length >= 10) {
@@ -130,9 +137,10 @@ export default {
           this.total = res.data.totalCount
         }
       })
+      this.loading = false
     },
     readDetial (e) {
-      let url = '/' + sessionStorage.getItem('groupId') + '/' + e.blockNumber + '?brokerId=' + sessionStorage.getItem('brokerId')
+      let url = '/' + localStorage.getItem('groupId') + '/' + e.blockNumber + '?brokerId=' + localStorage.getItem('brokerId')
       let index = this.tableData.indexOf(e)
       API.blockByNumber(url).then(res => {
         if (res.status === 200) {
@@ -142,7 +150,7 @@ export default {
       })
     },
     getEvent (e, i) {
-      let url = '/' + sessionStorage.getItem('groupId') + '/' + e + '?brokerId=' + sessionStorage.getItem('brokerId')
+      let url = '/' + localStorage.getItem('groupId') + '/' + e + '?brokerId=' + localStorage.getItem('brokerId')
       API.getEvent(url).then(res => {
         if (res.status === 200 && res.status.code === 0) {
           this.tableData[i].logs.address = res.data.data.logs[0].address
@@ -159,6 +167,19 @@ export default {
   },
   mounted () {
     this.transList()
+  },
+  computed: {
+    brokerId () {
+      return this.$store.state.brokerId
+    }
+  },
+  watch: {
+    brokerId () {
+      this.loading = true
+      setTimeout(fun => {
+        this.transList()
+      }, 1000)
+    }
   }
 }
 </script>
