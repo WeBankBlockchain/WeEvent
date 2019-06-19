@@ -9,6 +9,11 @@
     </div>
     <el-table
       :data='tableData'
+      stripe
+      v-loading='loading'
+      element-loading-spinner='el-icon-loading'
+      element-loading-text='数据加载中...'
+      element-loading-background='rgba(256,256,256,0.8)'
     >
       <el-table-column
         prop='blockNumber'
@@ -49,6 +54,7 @@ import API from '../../API/resource.js'
 export default {
   data () {
     return {
+      loading: false,
       search_name: '',
       tableData: [],
       pageIndex: 1,
@@ -76,7 +82,8 @@ export default {
       this.$alert(e, '错误信息')
     },
     blockList () {
-      let url = '/' + sessionStorage.getItem('groupId') + '/' + this.pageIndex + '/' + this.pageSize + '?brokerId=' + sessionStorage.getItem('brokerId')
+      this.loading = true
+      let url = '/' + localStorage.getItem('groupId') + '/' + this.pageIndex + '/' + this.pageSize + '?brokerId=' + localStorage.getItem('brokerId')
       if (this.search_name.length < 10 && this.search_name.length > 0) {
         url = url + '&blockNumber=' + this.search_name
       } else if (this.search_name.length >= 10) {
@@ -88,6 +95,7 @@ export default {
           this.total = res.data.totalCount
         }
       })
+      this.loading = false
     },
     search () {
       this.pageIndex = 1
@@ -97,6 +105,19 @@ export default {
   },
   mounted () {
     this.blockList()
+  },
+  computed: {
+    brokerId () {
+      return this.$store.state.brokerId
+    }
+  },
+  watch: {
+    brokerId () {
+      this.loading = true
+      setTimeout(fun => {
+        this.blockList()
+      }, 1000)
+    }
   }
 }
 </script>

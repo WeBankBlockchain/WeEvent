@@ -1,7 +1,9 @@
 <template>
 <div class='event-table'>
   <div class='refresh'>
-    <el-button type="primary" icon="el-icon-refresh" @click='subscription'>刷新</el-button>
+    <div class='update_btn' @click='update'>
+      <img src="../assets/image/update.png" alt=""/>
+    </div>
   </div>
   <el-table
     :data="tableData"
@@ -43,6 +45,7 @@
 </template>
 <script>
 import API from '../API/resource.js'
+import { setTimeout } from 'timers'
 export default {
   data () {
     return {
@@ -57,7 +60,7 @@ export default {
       let vm = this
       vm.tableData = []
       vm.loading = true
-      let url = '?brokerId=' + sessionStorage.getItem('brokerId')
+      let url = '?brokerId=' + localStorage.getItem('brokerId')
       API.subscription(url).then(res => {
         if (res.status === 200) {
           let data = res.data
@@ -120,6 +123,22 @@ export default {
           }
         }
       }
+    },
+    update () {
+      this.loading = true
+      setTimeout(fun => {
+        this.subscription()
+      }, 1000)
+    }
+  },
+  computed: {
+    brokerId () {
+      return this.$store.state.brokerId
+    }
+  },
+  watch: {
+    brokerId () {
+      this.update()
     }
   },
   mounted () {

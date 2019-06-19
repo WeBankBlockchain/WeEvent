@@ -1,9 +1,10 @@
 <template>
 <div class='event-table'>
   <div class='refresh'>
-    <el-button type='primary' @click='addNewOne'>新增</el-button>
-    <el-button type='primary' @click='installTopic'>部署Topic Control合约</el-button>
-    <el-button type="primary" icon="el-icon-refresh" @click='refresh'>刷新</el-button>
+    <el-button type='primary' icon='el-icon-plus' @click='addNewOne'>新增</el-button>
+    <div class='update_btn' @click='refresh'>
+      <img src="../assets/image/update.png" alt=""/>
+    </div>
   </div>
   <el-table
     :data="tableData"
@@ -91,14 +92,6 @@ export default {
       creater: ''
     }
   },
-  watch: {
-    dialogFormVisible (nVal) {
-      if (!nVal) {
-        this.form.name = ''
-        this.$refs.form.resetFields()
-      }
-    }
-  },
   methods: {
     // 数据获取
     getLsitData () {
@@ -107,7 +100,7 @@ export default {
       let data = {
         pageIndex: vm.pageIndex - 1,
         pageSize: vm.pageSize,
-        brokerId: Number(sessionStorage.getItem('brokerId'))
+        brokerId: Number(localStorage.getItem('brokerId'))
       }
       API.topicList(data).then(res => {
         if (res.status === 200) {
@@ -136,7 +129,7 @@ export default {
     },
     readDetial (e) {
       var vm = this
-      let url = '?brokerId=' + sessionStorage.getItem('brokerId') + '&topic=' + e.topicName
+      let url = '?brokerId=' + localStorage.getItem('brokerId') + '&topic=' + e.topicName
       API.topicState(url).then(res => {
         let time = getDateDetial(res.data.createdTimestamp)
         res.data.createdTimestamp = time
@@ -179,8 +172,8 @@ export default {
         if (valid) {
           let data = {
             topic: vm.form.name,
-            creater: sessionStorage.getItem('user'),
-            brokerId: Number(sessionStorage.getItem('brokerId'))
+            creater: localStorage.getItem('user'),
+            brokerId: Number(localStorage.getItem('brokerId'))
           }
           API.openTopic(data).then(res => {
             if (res.status === 200) {
@@ -219,54 +212,26 @@ export default {
           return false
         }
       })
-    },
-    installTopic () {
-      const loading = this.$loading({
-        lock: true,
-        text: 'loading',
-        spinner: 'el-icon-loading',
-        background: 'rgba(0,0,0,0.7)'
-      })
-      let vm = this
-      let url = '?brokerId=' + sessionStorage.getItem('brokerId')
-      API.topicControl(url).then(res => {
-        if (res.status === 200) {
-          this.$message({
-            type: 'success',
-            duration: 3000,
-            dangerouslyUseHTMLString: true,
-            message: '<span>合约地址生成成功</span> <a id="xx" style="margin-left:30px;color:blue;cursor: pointer">复制</a>'
-          })
-          let xx = document.getElementById('xx')
-          xx.onclick = function () {
-            vm.$copyText(res.data).then(e => {
-              vm.$notify({
-                title: '提示',
-                message: '合约地址复制成功',
-                type: 'success'
-              })
-            }, e => {
-              vm.$notify({
-                title: '提示',
-                message: '合约地址复制失败，请稍候重试',
-                type: 'warning'
-              })
-            })
-          }
-        } else {
-          this.$message({
-            type: 'error',
-            message: '操作失败'
-          })
-        }
-        loading.close()
-      }).catch(e => {
-        loading.close()
-      })
     }
   },
   mounted () {
     this.getLsitData()
+  },
+  computed: {
+    brokerId () {
+      return this.$store.state.brokerId
+    }
+  },
+  watch: {
+    dialogFormVisible (nVal) {
+      if (!nVal) {
+        this.form.name = ''
+        this.$refs.form.resetFields()
+      }
+    },
+    brokerId () {
+      this.refresh()
+    }
   }
 }
 

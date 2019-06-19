@@ -33,20 +33,20 @@ export default{
   methods: {
     menuChange (e) {
       switch (e) {
-        case '1':
-          this.$store.commit('set_menu', '节点管理')
-          this.$router.push('./group')
-          break
-        case '2-1':
-          this.$store.commit('set_menu', '数据概览')
+        case '1-1':
+          this.$store.commit('set_menu', ['区块链信息', '数据概览'])
           this.$router.push('./overview')
           break
-        case '3':
-          this.$store.commit('set_menu', '主题管理')
+        case '1-2':
+          this.$store.commit('set_menu', ['区块链信息', '节点管理'])
+          this.$router.push('./group')
+          break
+        case '2':
+          this.$store.commit('set_menu', ['主题管理'])
           this.$router.push('./topicList')
           break
-        case '4':
-          this.$store.commit('set_menu', '订阅列表')
+        case '3':
+          this.$store.commit('set_menu', ['订阅列表'])
           this.$router.push('./subcription')
           break
       }

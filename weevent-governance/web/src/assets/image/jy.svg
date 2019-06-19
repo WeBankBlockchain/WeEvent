@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 55 (78076) - https://sketchapp.com -->
+    <title>Element/Icon/Calendar</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Element/Icon/Calendar" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+        <g id="pie_chart" transform="translate(2.000000, 1.000000)" stroke="#F7C137">
+            <path d="M5.69667464,7.15777512 L1.93460526,11.1523206" id="Shape"></path>
+            <path d="M3.97441094,9.67963517 L7.00670759,12.724061" id="Shape"></path>
+            <path d="M5.24991627,7.63485646 L9.22020335,11.7244139" id="Shape-Copy"></path>
+            <path d="M8.29893577,7.58998077 L11.2989358,10.3554393" id="Shape"></path>
+            <path d="M0.946076555,9.87471292 C0.510412458,9.14866199 0.223196078,8.34335673 0.101076555,7.50547847" id="Shape"></path>
+            <path d="M12.6345694,7.54186603 C12.2056365,10.6729966 9.52819274,13.0049637 6.36782297,13 C4.76176192,13.0016172 3.21707435,12.3831629 2.05589713,11.2736124" id="Shape"></path>
+            <path d="M12.6183971,5.9084689 C12.551843,5.48921813 12.4441829,5.07753639 12.2969737,4.67937799 C11.5298875,2.41334505 9.54210853,0.779854804 7.17037081,0.466507177 L7.17037081,0.533217703 L7.17037081,5.92464115 L12.575945,5.92464115" id="Shape"></path>
+            <path d="M0.101076555,5.882189 C0.485250344,3.05206035 2.72050817,0.831720811 5.55314593,0.466507177 L5.6097488,0.466507177 L5.55921053,6.6948445 C5.55559741,7.14929611 5.91369271,7.52440093 6.36782297,7.54186603 L12.6345694,7.54186603" id="Shape"></path>
+        </g>
+    </g>
+</svg>

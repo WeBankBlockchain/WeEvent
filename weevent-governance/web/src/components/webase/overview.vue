@@ -3,13 +3,31 @@
     <div class='top_content'>
       <div class='num_block'>
         <div class="num_part">
-          <span>节点个数</span><span>{{node}}</span>
+          <div class='color_part puple'>
+            <img src="../../assets/image/jd.svg" alt="">
+          </div>
+          <div class='right_part'>
+            <p class='title_name'>{{node}}</p>
+            <p class='number'>节点个数</p>
+          </div>
         </div>
         <div class="num_part">
-          <span>区块数量</span><span>{{block}}</span>
+          <div class='color_part blue'>
+            <img src="../../assets/image/qk.svg" alt="">
+          </div>
+          <div class='right_part'>
+            <p class='title_name'>{{block}}</p>
+            <p class='number'>区块数量</p>
+          </div>
         </div>
         <div class="num_part">
-          <span>交易数量</span><span>{{transaction}}</span>
+          <div class='color_part yellow'>
+            <img src="../../assets/image/jy.svg" alt="">
+          </div>
+          <div class='right_part'>
+            <p class='title_name'>{{transaction}}</p>
+            <p class='number'>交易数量</p>
+          </div>
         </div>
       </div>
      <chart></chart>
@@ -83,9 +101,21 @@ export default {
       t_data: []
     }
   },
+  computed: {
+    brokerId () {
+      return this.$store.state.brokerId
+    }
+  },
+  watch: {
+    brokerId () {
+      this.general()
+      this.transList()
+      this.blockList()
+    }
+  },
   methods: {
     general () {
-      let url = '/' + sessionStorage.getItem('groupId') + '?brokerId=' + sessionStorage.getItem('brokerId')
+      let url = '/' + localStorage.getItem('groupId') + '?brokerId=' + localStorage.getItem('brokerId')
       API.general(url).then(res => {
         if (res.status === 200) {
           this.node = res.data.data.nodeCount
@@ -95,7 +125,7 @@ export default {
       })
     },
     transList () {
-      let url = '/' + sessionStorage.getItem('groupId') + '/1/6?brokerId=' + sessionStorage.getItem('brokerId')
+      let url = '/' + localStorage.getItem('groupId') + '/1/6?brokerId=' + localStorage.getItem('brokerId')
       API.transList(url).then(res => {
         if (res.status === 200) {
           this.t_data = res.data.data
@@ -103,7 +133,7 @@ export default {
       })
     },
     blockList () {
-      let url = '/' + sessionStorage.getItem('groupId') + '/1/6?brokerId=' + sessionStorage.getItem('brokerId')
+      let url = '/' + localStorage.getItem('groupId') + '/1/6?brokerId=' + localStorage.getItem('brokerId')
       API.blockList(url).then(res => {
         if (res.status === 200) {
           this.b_data = res.data.data

@@ -12,13 +12,11 @@ import overview from '../components/webase/overview'
 import group from '../components/webase/group'
 import blockInfor from '../components/webase/blockInfor'
 import transactionInfor from '../components/webase/transactionInfor'
-import setting from '../components/setting'
 import servers from '../components/servers'
 
 Vue.use(Router)
 
 export default new Router({
-  mode: 'history',
   routes: [
     {
       path: '/login',
@@ -61,10 +59,6 @@ export default new Router({
         name: 'transactionInfor',
         component: transactionInfor
       }]
-    }, {
-      path: '/setting',
-      name: 'setting',
-      component: setting
     }, {
       path: '/servers',
       name: 'servers',

@@ -6,7 +6,9 @@ export default new vuex.Store({
   state: {
     userName: '',
     goLogin: false,
-    menu: '首页'
+    active: '0',
+    menu: '首页',
+    brokerId: ''
   },
   mutations: {
     set_name (state, note) {
@@ -15,8 +17,14 @@ export default new vuex.Store({
     set_menu (state, menu) {
       state.menu = menu
     },
+    set_active (state, active) {
+      state.active = active
+    },
     back (state, goLogin) {
       state.goLogin = goLogin
+    },
+    set_id (state, id) {
+      state.brokerId = id
     }
   }
 })
