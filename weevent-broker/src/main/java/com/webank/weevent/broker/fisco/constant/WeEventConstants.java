@@ -93,6 +93,11 @@ public class WeEventConstants {
     public static final String EXTENSIONS_EVENT_ID = "weevent-eventid";
 
     /**
+     * Extensions eventid.
+     */
+    public static final String EXTENSIONS_WILL_MESSAGE = "weevent-weillmessage";
+
+    /**
      * Extensions receivedtopic.
      */
     public static final String EXTENSIONS_RECEIVED_TOPIC = "weevent-receivedtopic";
