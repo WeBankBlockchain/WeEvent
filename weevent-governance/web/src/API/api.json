@@ -2,12 +2,12 @@
 {
   "login": {
     "method": "post",
-    "url": "weevent-governance/user/login",
+    "url": "user/login",
     "headers": {"Content-Type": "application/x-www-form-urlencoded"}
   },
   "loginOut": {
     "method": "get",
-    "url": "weevent-governance/user/logout"
+    "url": "user/logout"
   },
   "openTopic": {
     "method": "post",
@@ -16,10 +16,6 @@
   "topicList": {
     "method": "post",
     "url": "weevent-governance/topic/list"
-  },
-  "topicControl": {
-    "method": "get",
-    "url": "weevent-governance/weevent/admin/deploy_topic_control"
   },
   "subscription": {
     "method": "get",
