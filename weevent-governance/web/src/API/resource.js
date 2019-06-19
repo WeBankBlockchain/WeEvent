@@ -18,9 +18,6 @@ class ResoruceService extends BaseModel {
   topicState (data) {
     return this.request(api.topicState, data)
   }
-  topicControl (data) {
-    return this.request(api.topicControl, data)
-  }
   subscription (data) {
     return this.request(api.subscription, data)
   }
