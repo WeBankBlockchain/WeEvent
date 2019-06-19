@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 55 (78076) - https://sketchapp.com -->
+    <title>Element/Icon/Message</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Element/Icon/Message" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+        <g id="blockchain" transform="translate(0.850000, 2.051477)" stroke="#00C1D4" stroke-width="0.838808511">
+            <polyline id="Shape" points="1.92539487 7.57173132 0 6.30068421 0 2.12647368 3.53058821 0.0560652632 7.11558974 2.12647368 7.11558974 6.30068421 5.13578154 7.57173132"></polyline>
+            <polyline id="Shape" points="7.11558974 2.12647368 10.6461779 0.0560652632 14.2311795 2.12647368 14.2311795 6.30068421 12.2513713 7.57173132"></polyline>
+            <path d="M9.04098462,7.57173132 L7.11558974,6.30068421" id="Shape"></path>
+            <polyline id="Shape" points="8.74798974 5.04424684 10.6733846 6.31738105 10.6733846 10.4915916 7.14279641 12.562 3.55779487 10.4915916 3.55779487 6.31738105 5.53760308 5.04633395"></polyline>
+        </g>
+    </g>
+</svg>
