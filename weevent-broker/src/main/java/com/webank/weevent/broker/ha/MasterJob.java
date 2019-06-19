@@ -1,10 +1,23 @@
 package com.webank.weevent.broker.ha;
 
 
-import com.webank.weevent.BrokerApplication;
-import com.webank.weevent.broker.fisco.util.SystemInfoUtils;
+import java.net.MalformedURLException;
+import java.net.URL;
 
+import com.webank.weevent.BrokerApplication;
+import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.util.SystemInfoUtils;
+import com.webank.weevent.broker.plugin.IConsumer;
+import com.webank.weevent.protocol.jsonrpc.IBrokerRpcCallback;
+import com.webank.weevent.protocol.rest.SubscriptionWeEvent;
+import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.ErrorCode;
+import com.webank.weevent.sdk.WeEvent;
+
+import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
+import com.googlecode.jsonrpc4j.ProxyUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -16,6 +29,10 @@ import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.curator.utils.PathUtils;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.Stat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
+
 
 /**
  * Jobs that running in master node.
@@ -31,8 +48,8 @@ public class MasterJob {
     private String zookeeperRootPath;
     private String leaderPath;
     private boolean isMaster = false;
-    private MqttTopic mqttTopic;
     private CGISubscription cgiSubscription;
+    private IConsumer consumer;
 
     public MasterJob() {
         // handler ha and master job
@@ -44,19 +61,126 @@ public class MasterJob {
                 log.error("init zookeeper failed");
             }
         }
+        this.consumer = BrokerApplication.applicationContext.getBean(IConsumer.class);
     }
 
     public CuratorFramework getClient() {
         return this.client;
     }
 
-    public MqttTopic getMqttTopic() {
-        return this.mqttTopic;
-    }
-
     public CGISubscription getCgiSubscription() {
         return this.cgiSubscription;
     }
+
+    private RestTemplate getRestCallback() {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(BrokerApplication.weEventConfig.getRestful_timeout());
+        requestFactory.setReadTimeout(BrokerApplication.weEventConfig.getRestful_timeout());
+        return new RestTemplate(requestFactory);
+    }
+
+    public boolean doUnsubscribe(String type, String subscriptionId, String urlFormat) throws BrokerException {
+        log.info("json rpc unSubscribe, subscriptionId: {}", subscriptionId);
+        if (this.cgiSubscription == null) {
+            boolean result = this.consumer.unSubscribe(subscriptionId);
+            return result;
+        } else {
+            if (type.equals(WeEventConstants.JSONRPCTYPE)) {
+                return this.getCgiSubscription().jsonRpcUnSubscribe(subscriptionId);
+            } else {
+                return this.getCgiSubscription().restUnsubscribe(subscriptionId, urlFormat);
+            }
+        }
+
+
+    }
+
+    private IBrokerRpcCallback getJsonRpcCallback(String url) {
+        try {
+            JsonRpcHttpClient client = new JsonRpcHttpClient(new URL(url));
+            // check url format only, do no check whether it can be accessed
+            return ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpcCallback.class, client);
+        } catch (MalformedURLException e) {
+            log.error("getCallback handler exception", e);
+            return null;
+        }
+    }
+
+    public String doSubscribe(String type, String topic, String groupId, String subscriptionId, String url, String urlFormat) throws BrokerException {
+        RestTemplate restCallback = getRestCallback();
+        IBrokerRpcCallback jsonCallback = getJsonRpcCallback(url);
+        if (jsonCallback == null) {
+            log.error("invalid notify url, {}", url);
+            throw new BrokerException(ErrorCode.URL_INVALID_FORMAT);
+        }
+        if (this.cgiSubscription == null) {
+            IConsumer.ConsumerListener listener;
+            if (type.equals(WeEventConstants.RESTFULTYPE)) {
+                listener = new IConsumer.ConsumerListener() {
+                    @Override
+                    public void onEvent(String subscriptionId, WeEvent event) {
+                        try {
+                            SubscriptionWeEvent subscriptionWeEvent = new SubscriptionWeEvent();
+                            subscriptionWeEvent.setSubscriptionId(subscriptionId);
+                            subscriptionWeEvent.setEvent(event);
+                            ResponseEntity<Void> response = restCallback.postForEntity(url, subscriptionWeEvent, Void.class);
+                            log.info("subscribe callback notify, url: {} subscriptionId: {} event: {} status code: {}",
+                                    url, subscriptionId, event, response.getStatusCode());
+                        } catch (Exception e) {
+                            log.error(String.format("subscribe callback notify failed, url: %s subscriptionId: %s",
+                                    url, subscriptionId), e);
+                        }
+                    }
+
+                    @Override
+                    public void onException(Throwable e) {
+                        log.error("subscribe notify failed", e);
+                    }
+                };
+            } else {
+                listener = new IConsumer.ConsumerListener() {
+                    @Override
+                    public void onEvent(String subscriptionId, WeEvent event) {
+                        try {
+                            jsonCallback.onEvent(subscriptionId, event);
+                            log.info("subscribe callback notify, url: {} subscriptionId: {} event: {}",
+                                    url, subscriptionId, event);
+                        } catch (Exception e) {
+                            log.error(String.format("subscribe callback notify failed, url: %s subscriptionId: %s",
+                                    url, subscriptionId), e);
+                        }
+                    }
+
+                    @Override
+                    public void onException(Throwable e) {
+                        log.error("subscribe failed", e);
+                    }
+                };
+            }
+            String subId;
+            if (StringUtils.isBlank(subscriptionId)) {
+                log.info("new subscribe, topic: {}", topic);
+                subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, WeEventConstants.JSONRPCTYPE, listener);
+            } else {
+                log.info("subscribe again, subscriptionId: {}", subscriptionId);
+                subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, subscriptionId, WeEventConstants.JSONRPCTYPE, listener);
+            }
+            return subId;
+        } else {
+            if (type.equals("REST")) {
+                return this.getCgiSubscription().restSubscribe(topic,
+                        groupId,
+                        subscriptionId,
+                        url,
+                        urlFormat);
+
+            } else {
+                return this.getCgiSubscription().jsonRpcSubscribe(topic, groupId, subscriptionId, url);
+            }
+        }
+
+    }
+
 
     // create path/node if not exist
     private boolean ensurePath(CuratorFramework client, String... paths) {
@@ -146,6 +270,7 @@ public class MasterJob {
                 BrokerApplication.weEventConfig.getZookeeperTimeout(),
                 1000,
                 retryPolicy);
+
         client.getConnectionStateListenable().addListener(new ConnectionStateListener() {
             @Override
             public void stateChanged(CuratorFramework client, ConnectionState newState) {
@@ -174,7 +299,6 @@ public class MasterJob {
             return null;
         }
 
-        this.mqttTopic = new MqttTopic(this, mqttTopicPath);
         this.cgiSubscription = new CGISubscription(this, cgiSubscriptionPath);
 
         // leader path "/event-broker/master"
@@ -226,7 +350,6 @@ public class MasterJob {
     }
 
     private void showJob() {
-        log.info("mqtt topic: {}", mqttTopic);
         log.info("cgi subscription: {}", cgiSubscription);
     }
 
@@ -238,11 +361,6 @@ public class MasterJob {
             log.error("CGISubscription switch to master mode failed");
             return;
         }
-
-        result = this.mqttTopic.switchMode(true);
-        if (!result) {
-            log.error("MqttTopic switch to master mode failed");
-        }
     }
 
     private void stopJob() {
@@ -252,11 +370,6 @@ public class MasterJob {
         if (!result) {
             log.error("CGISubscription switch to slave mode failed");
             return;
-        }
-
-        result = this.mqttTopic.switchMode(false);
-        if (!result) {
-            log.error("MqttTopic switch to slave mode failed");
         }
     }
 }

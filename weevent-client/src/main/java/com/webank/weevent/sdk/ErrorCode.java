@@ -51,9 +51,9 @@ public enum ErrorCode {
 
     EVENT_ID_IS_MISMATCH(100304, "eventId is mismatch with block chain"),
 
-    EVENT_GROUP_ID_NOT_FOUND(100305, "event groupid is notfound"),
+    EVENT_GROUP_ID_NOT_FOUND(100305, "event group id is not found"),
 
-    EVENT_GROUP_ID_INVALID(100306, "event groupid should be an string start from 1"),
+    EVENT_GROUP_ID_INVALID(100306, "event group id should be a string start from 1"),
 
     OFFSET_IS_BLANK(100500, "subscribe interface offset param is blank"),
 
@@ -87,6 +87,11 @@ public enum ErrorCode {
 
     SDK_JMS_EXCEPTION(101010, "jms exception"),
 
+    USER_PASSWORD_ISBLANK(101011, "stomp password is blank"),
+
+    USER_NAME_ISBLANK(101012, "stomp user name is blank"),
+
+    PARAM_ISBLANK(101013, "the input param is blank"),
     //server error(200000, 300000)
     TOPIC_CONTROLLER_IS_NULL(200100, "init failed, see fisco.topic-controller.contract-address in properties"),
 
@@ -114,9 +119,11 @@ public enum ErrorCode {
 
     WE3SDK_INIT_ERROR(200209, "init web3sdk failed"),
 
-    WE3SDK_VERRSION_NOT_SUPPORT(200210, "FISCO-BCOS 1.x, do not support group"),
+    WE3SDK_VERSION_NOT_SUPPORT(200210, "FISCO-BCOS 1.x, do not support group"),
 
-    WE3SDK_UNKONWN_GROUP(200210, "FISCO-BCOS 2.x, unknown group id"),
+    WE3SDK_UNKNOWN_GROUP(200211, "FISCO-BCOS 2.x, unknown group id"),
+
+    SUBSCRIPTION_NOTIFY_QUEUE_FULL(200212, "onEvent is blocked too long, notify queue is full"),
     ;
 
     /**

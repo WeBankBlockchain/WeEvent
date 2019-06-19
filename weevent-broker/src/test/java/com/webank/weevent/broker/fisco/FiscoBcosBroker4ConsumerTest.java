@@ -19,6 +19,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -111,9 +112,9 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
                     fail();
                 }
             });
+            assertNotNull(result);
         } catch (BrokerException e) {
             log.error("subscribe error:{}", e);
-            assertEquals(e.getCode(), ErrorCode.OFFSET_IS_BLANK.getCode());
         }
     }
 
@@ -145,7 +146,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
         this.iConsumer.startConsumer();
 
         try {
-            String result = this.iConsumer.subscribe(this.topicName, groupId, "1234567890123456789012345678901234567890", "sdk", new IConsumer.ConsumerListener() {
+            String result = this.iConsumer.subscribe(this.topicName, groupId, "123456789012345678901234567890123456789012345678901234567890123456", "sdk", new IConsumer.ConsumerListener() {
                 @Override
                 public void onEvent(String subscriptionId, WeEvent event) {
                 }
@@ -208,12 +209,15 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
                     fail();
                 }
             });
+            assertTrue(!result.isEmpty());
         } catch (BrokerException e) {
             assertEquals(e.getCode(), ErrorCode.OFFSET_IS_BLANK.getCode());
         }
         log.info("lastEventId: {}", this.lastEventId);
         assertEquals(SendResult.SendResultStatus.SUCCESS,
                 this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes(), extensions), groupId).getStatus());
+
+        Thread.sleep(wait3s);
     }
 
     /**
@@ -281,7 +285,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
         log.info("lastEventId: {}", this.lastEventId);
         assertEquals(SendResult.SendResultStatus.SUCCESS,
                 this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes(), extensions), groupId).getStatus());
-        Thread.sleep(1000000);
+        Thread.sleep(wait3s);
         assertTrue(this.received > 0);
     }
 
@@ -412,7 +416,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * Method: subscribe(Map<String, Object> map, ConsumerListener listener)
+     * Method: subscribe(topics, groupId, offset, interfaceType, consumerListener);
      */
     @Test
     public void testMultipleTopicSubscribe_02() throws Exception {
@@ -489,31 +493,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * Method: unsubscribe(String, topic)
-     */
-    @Test
-    public void testUnsubscribe_02() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-        this.iConsumer.startConsumer();
-
-        this.iConsumer.subscribe(this.topicName, groupId, WeEvent.OFFSET_LAST, "sdk", new IConsumer.ConsumerListener() {
-            @Override
-            public void onEvent(String subscriptionId, WeEvent event) {
-
-            }
-
-            @Override
-            public void onException(Throwable e) {
-                log.error("onException", e);
-            }
-        });
-
-        this.result = this.iConsumer.unSubscribe("topic-AAA");
-        assertTrue(!this.result);
-    }
-
-    /**
-     * Method: unsubscribe(String, topic)
+     * Method: unsubscribe(String subId)
      */
     @Test
     public void testUnsubscribe_03() throws Exception {
@@ -592,7 +572,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
     }
 
     /**
-     * Method: subscribe(String topic, ConsumerListener listener)
+     * Method: subscribe(String[] topics, groupId,offset ,interfaceType,ConsumerListener listener)
      */
     @Test
     public void testSubscribeCharacterSet() throws Exception {

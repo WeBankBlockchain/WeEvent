@@ -4,26 +4,27 @@
 
 	<select id="getBroker" parameterType="java.lang.Integer"
 		resultType="com.webank.weevent.governance.entity.Broker">
-		select id ,name,broker_url brokerUrl,user_id
-		userId,last_update lastUpdate from t_broker where id=#{id}
+		select id ,name,broker_url brokerUrl,webase_url webaseUrl,user_id
+		userId,last_update lastUpdate 
+		from t_broker where id=#{id}
 	</select>
 
 	<select id="getBrokers" resultType="com.webank.weevent.governance.entity.Broker">
-		select id ,name,broker_url
-		brokerUrl,user_id userId,last_update lastUpdate from t_broker where
-		user_id=#{userId}
+		select id ,name,broker_url brokerUrl,webase_url webaseUrl,
+		user_id userId,last_update lastUpdate 
+		from t_broker where user_id=#{userId}
 	</select>
 
 	<insert id="addBroker" parameterType="com.webank.weevent.governance.entity.Broker">
 		insert into
-		t_broker(name,broker_url,user_id,last_update)
-		values(#{name},#{brokerUrl},#{userId},#{lastUpdate,
+		t_broker(name,broker_url,webase_url,user_id,last_update)
+		values(#{name},#{brokerUrl},#{webaseUrl},#{userId},#{lastUpdate,
 		jdbcType=TIMESTAMP})
 	</insert>
 
 	<update id="updateBroker" parameterType="com.webank.weevent.governance.entity.Broker">
 		update t_broker set
-		name=#{name},broker_url=#{brokerUrl},last_update=#{lastUpdate,
+		name=#{name},broker_url=#{brokerUrl},webase_url=#{webaseUrl},last_update=#{lastUpdate,
 		jdbcType=TIMESTAMP} where id=#{id}
 	</update>
 
