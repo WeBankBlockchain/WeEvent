@@ -69,8 +69,8 @@ export default{
           // 登录操作
           API.login(data).then(res => {
             if (res.status === 200 && res.data.code === 0) {
-              sessionStorage.setItem('userId', res.data.data.userId)
-              sessionStorage.setItem('user', res.data.data.username)
+              localStorage.setItem('userId', res.data.data.userId)
+              localStorage.setItem('user', res.data.data.username)
               this.$router.push('./index')
             } else if (res.data.code === 202034) {
               this.form.name = ''
@@ -92,7 +92,8 @@ export default{
     },
     getPassWord () {
       this.$prompt('请输入用户名', '获取密码', {
-        confirmButtonText: '确定'
+        confirmButtonText: '确定',
+        inputValue: this.form.name
       }).then(({ value }) => {
         let url = '?username=' + value
         API.forget(url).then(res => {
@@ -112,6 +113,7 @@ export default{
     }
   },
   mounted () {
+    localStorage.removeItem('brokerId')
     this.$store.commit('back', false)
     let vm = this
     this.$nextTick(fun => {
