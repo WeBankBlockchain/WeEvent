@@ -2,6 +2,7 @@ package com.webank.weevent.sdk.jms;
 
 
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.jms.JMSException;
@@ -72,6 +73,15 @@ public class WeEventStompCommand {
     public String encodeDisConnect() {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 
+        return encodeRaw(accessor);
+    }
+
+    public String encodeSubscribe(WeEventTopic topic, String groupId, String offset, Long id) throws JMSException {
+        StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
+        accessor.setDestination(topic.getTopicName());
+        accessor.setNativeHeader("eventId", offset);
+        accessor.setNativeHeader("id", Long.toString(id));
+        accessor.setNativeHeader("groupId", groupId);
         return encodeRaw(accessor);
     }
 

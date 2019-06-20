@@ -13,6 +13,15 @@ import javax.jms.Topic;
 public class WeEventTopic implements Topic {
     private String topicName;
     private String offset;
+    private String groupId;
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
+    }
 
     public WeEventTopic(String topicName) {
         this.topicName = topicName;

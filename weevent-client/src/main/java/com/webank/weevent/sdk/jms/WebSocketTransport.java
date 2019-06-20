@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -206,6 +207,22 @@ public class WebSocketTransport extends WebSocketClient {
     }
 
     // return subscriptionId
+    public String stompSubscribe(WeEventTopic topic, String groupId) throws JMSException {
+        Long asyncSeq = this.sequence.incrementAndGet();
+        WeEventStompCommand stompCommand = new WeEventStompCommand();
+        String req = stompCommand.encodeSubscribe(topic, groupId, topic.getOffset(), asyncSeq);
+        sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
+        Message stompResponse = this.stompRequest(req, asyncSeq);
+
+        if (stompCommand.isError(stompResponse)) {
+            log.info("stomp request is fail");
+            return "";
+        }
+
+        return stompCommand.getSubscriptionId(stompResponse);
+    }
+
+    // return subscriptionId
     public String stompSubscribe(WeEventTopic topic) throws JMSException {
         Long asyncSeq = this.sequence.incrementAndGet();
         WeEventStompCommand stompCommand = new WeEventStompCommand();
@@ -221,11 +238,10 @@ public class WebSocketTransport extends WebSocketClient {
         return stompCommand.getSubscriptionId(stompResponse);
     }
 
-
     public boolean stompUnsubscribe(String subscriptionId) throws JMSException {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         String headerId = this.subscriptionId2ReceiptId.get(subscriptionId);
-        String req = stompCommand.encodeUnSubscribe(subscriptionId,headerId);
+        String req = stompCommand.encodeUnSubscribe(subscriptionId, headerId);
 
         Long asyncSeq = this.sequence.incrementAndGet();
         sequence2Id.put(headerId, asyncSeq);
@@ -422,9 +438,8 @@ class WSThread extends Thread {
                 log.info("subscription cache:{}", subscription.toString());
                 WeEventTopic weEventTopic = new WeEventTopic(subscription.getKey());
                 weEventTopic.setOffset(subscription.getValue());
-                this.webSocketTransport.stompSubscribe(weEventTopic);
+                this.webSocketTransport.stompSubscribe(weEventTopic, "1");
                 this.webSocketTransport.connectFlag = TRUE;
-
             } catch (JMSException e) {
                 e.printStackTrace();
             }

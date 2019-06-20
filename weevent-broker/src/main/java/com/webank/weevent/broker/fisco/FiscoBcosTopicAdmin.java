@@ -112,6 +112,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
         // fetch target topic info in block chain
         log.debug("state function input param topic: {}", topic);
         ParamCheckUtils.validateGroupId(groupId);
+        ParamCheckUtils.validateTopicName(topic);
         return fiscoBcosDelegate.getTopicInfo(topic, Long.parseLong(groupId));
     }
 

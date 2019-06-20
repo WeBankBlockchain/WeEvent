@@ -80,7 +80,7 @@ public class WeEventConstants {
     /**
      * Extensions groupid.
      */
-    public static final String EXTENSIONS_GROUP_ID = "weevent-groupid";
+    public static final String EXTENSIONS_GROUP_ID = "groupId";
 
     /**
      * Extensions default groupid.
@@ -90,7 +90,7 @@ public class WeEventConstants {
     /**
      * Extensions eventid.
      */
-    public static final String EXTENSIONS_EVENT_ID = "weevent-eventid";
+    public static final String EXTENSIONS_EVENT_ID = "eventId";
 
     /**
      * Extensions eventid.

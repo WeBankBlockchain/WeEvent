@@ -62,16 +62,15 @@ public interface IBrokerRpc {
         return null;
     }
 
-
     boolean unSubscribe(@JsonRpcParam(value = "subscriptionId") String subscriptionId) throws BrokerException;
 
     // The following is interface for IEventTopic.
     boolean open(@JsonRpcParam(value = "topic") String topic,
                  @JsonRpcParam(value = "groupId") String groupId) throws BrokerException;
 
-
-     boolean open(@JsonRpcParam(value = "topic") String topic) throws BrokerException;
-
+    default boolean open(@JsonRpcParam(value = "topic") String topic) throws BrokerException {
+        return false;
+    }
 
     boolean close(@JsonRpcParam(value = "topic") String topic,
                   @JsonRpcParam(value = "groupId") String groupId) throws BrokerException;

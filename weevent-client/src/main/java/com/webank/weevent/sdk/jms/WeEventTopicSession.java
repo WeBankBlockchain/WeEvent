@@ -2,6 +2,7 @@ package com.webank.weevent.sdk.jms;
 
 
 import java.io.Serializable;
+import java.util.Map;
 
 import javax.jms.BytesMessage;
 import javax.jms.Destination;
@@ -66,8 +67,11 @@ public class WeEventTopicSession implements TopicSession {
     public TopicSubscriber createSubscriber(Topic topic) throws JMSException {
         if (topic instanceof WeEventTopic) {
             WeEventTopicSubscriber subscriber = new WeEventTopicSubscriber((WeEventTopic) topic);
-
-            this.topicConnection.createSubscriber(subscriber);
+            if (((WeEventTopic) topic).getGroupId() == null) {
+                this.topicConnection.createSubscriber(subscriber);
+            } else {
+                this.topicConnection.createSubscriber(subscriber, ((WeEventTopic) topic).getGroupId());
+            }
             return subscriber;
         }
 

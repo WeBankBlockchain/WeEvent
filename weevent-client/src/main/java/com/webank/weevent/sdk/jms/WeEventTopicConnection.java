@@ -85,6 +85,13 @@ public class WeEventTopicConnection implements TopicConnection, CommandDispatche
         this.transport.stompSend(topic, bytesMessage);
     }
 
+    public void createSubscriber(WeEventTopicSubscriber subscriber, String groupId) throws JMSException {
+        WeEventTopic topic = (WeEventTopic) subscriber.getTopic();
+        String subscriptionId = this.transport.stompSubscribe(topic, groupId);
+        subscriber.setSubscriptionId(subscriptionId);
+        this.subscribers.put(subscriber.getSubscriptionId(), subscriber);
+    }
+
     public void createSubscriber(WeEventTopicSubscriber subscriber) throws JMSException {
         WeEventTopic topic = (WeEventTopic) subscriber.getTopic();
         String subscriptionId = this.transport.stompSubscribe(topic);
