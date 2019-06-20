@@ -36,7 +36,6 @@ import static org.junit.Assert.assertTrue;
  */
 @Slf4j
 public class WeEventClientRemoveGroupIdTest {
-    private Map<String,String> extensions = new HashMap<>();
     @Rule
     public TestName testName = new TestName();
 
