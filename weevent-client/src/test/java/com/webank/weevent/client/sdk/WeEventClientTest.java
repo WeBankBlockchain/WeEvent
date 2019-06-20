@@ -44,6 +44,7 @@ public class WeEventClientTest {
 
     @Before
     public void before() throws Exception {
+        extensions.put("weevent-url", "https://github.com/WeBankFinTech/WeEvent");
         weEventClient = new WeEventClient("http://127.0.0.1:8080/weevent");
         weEventClient.open(topicName);
     }
@@ -126,7 +127,7 @@ public class WeEventClientTest {
     public void testSubscribe() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
         // create subscriber
-        this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_FIRST, new WeEventClient.EventListener() {
+        String subscriptionId = this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
                 System.out.println(event.toString());
@@ -137,18 +138,18 @@ public class WeEventClientTest {
                 e.printStackTrace();
             }
         });
-
         Thread.sleep(60000);
     }
 
     /**
-     * Method: subscribe(String topic, String offset, IConsumer.ConsumerListener listener)
+     * Method: subscribe(String topic, groupId, String offset, IConsumer.ConsumerListener listener)
      */
     @Test
     public void testSubscribe_01() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
         // create subscriber
-        this.weEventClient.subscribe(this.topicName, "317e7c4c-8-26", new WeEventClient.EventListener() {
+        String groupId = "1";//if not set default 1
+        String subscriptionId = this.weEventClient.subscribe(this.topicName, groupId, "317e7c4c-8-26", new WeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
                 log.info(event.toString());
@@ -159,6 +160,7 @@ public class WeEventClientTest {
                 e.printStackTrace();
             }
         });
+        Thread.sleep(60000);
     }
 
     /**
@@ -167,8 +169,8 @@ public class WeEventClientTest {
     @Test
     public void testUnSubscribe() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-
-        String subscriptionId = this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
+        String groupId = "1";//if not set default 1
+        String subscriptionId = this.weEventClient.subscribe(this.topicName, groupId, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
                 log.info(event.toString());

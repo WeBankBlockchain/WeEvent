@@ -248,7 +248,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
             });
             assertTrue(!result.isEmpty());
         } catch (BrokerException e) {
-
+            log.error("onException", e);
         }
 
         assertEquals(SendResult.SendResultStatus.SUCCESS,

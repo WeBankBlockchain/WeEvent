@@ -1,54 +1,48 @@
 <template>
   <div class='registered'>
-    <div class="header_part">
-      <div class='logo_part'>
-        <img src="../assets/image/weEvent.png" alt="">
-        <img src="../assets/image/backhome.svg" alt="" @click='goBack'>
-      </div>
-    </div>
     <div class='registered_part'>
-      <h3>
-        {{reset ?'用户注册':'修改用户密码'}}
-      </h3>
-      <el-form :model="ruleForm"  label-position='top' status-icon :rules="rules" ref="ruleForm" label-width="80px" class="demo-ruleForm" v-show='reset'>
-        <el-form-item label="用户名:" prop="name">
+      <img src="../assets/image/login.png" alt="">
+      <p style='margin:5px 0 30px'>区块链应用平台</p>
+      <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm"  class="demo-ruleForm" v-show='reset'>
+        <el-form-item label="用户名" prop="name">
           <el-input v-model="ruleForm.name" ></el-input>
         </el-form-item>
-        <el-form-item label="密码:" prop="pass">
+        <el-form-item label="密码" prop="pass">
           <el-input type="password" v-model="ruleForm.pass" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="确认密码:" prop="checkPass" >
+        <el-form-item label="确认密码" prop="checkPass" >
           <el-input type="password" v-model="ruleForm.checkPass" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item
-          label='邮箱:'
+          label='邮箱'
           prop='email'
           v-show='reset'
           >
           <el-input type="email" v-model="ruleForm.email" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item v-show='reset'>
-          <el-button type="success" @click="submitForm('ruleForm')">提交</el-button>
+          <el-button type="primary" @click="submitForm('ruleForm')">注册</el-button>
         </el-form-item>
       </el-form>
-
-      <el-form :model="ruleForm2"  label-position='top' status-icon :rules="rules2" ref="ruleForm2" label-width="80px" class="demo-ruleForm" v-show='!reset'>
-        <el-form-item label="用户名:" prop="name">
+      <el-form :model="ruleForm2" status-icon :rules="rules2" ref="ruleForm2" class="demo-ruleForm" v-show='!reset'>
+        <el-form-item label="用户名" prop="name">
           <el-input v-model="ruleForm2.name" disabled></el-input>
         </el-form-item>
-        <el-form-item label="密码:" prop="pass">
+        <el-form-item label="旧密码" prop="pass">
           <el-input type="password" v-model="ruleForm2.pass" autocomplete="off"></el-input>
         </el-form-item>
-         <el-form-item label="输入新密码:" prop="newPass" >
+         <el-form-item label="新密码" prop="newPass" >
           <el-input type="password" v-model="ruleForm2.newPass" autocomplete="off"></el-input>
         </el-form-item>
-         <el-form-item label="再次输入新密码:" prop="checkNewPass" >
+         <el-form-item label="再次输入" prop="checkNewPass" >
           <el-input type="password" v-model="ruleForm2.checkNewPass" autocomplete="off"></el-input>
         </el-form-item>
          <el-form-item>
           <el-button type="primary" @click="submit('ruleForm2')">修改</el-button>
         </el-form-item>
       </el-form>
+      <router-link to='./login' v-show='reset'><i class='el-icon-back'></i>已有帐号,登录</router-link>
+      <a v-show='!reset' @click='goBack'><i class='el-icon-back' ></i>返回</a>
     </div>
   </div>
 </template>
@@ -108,14 +102,7 @@ export default {
         callback(new Error('邮箱不能为空'))
       } else {
         if (reg.test(value)) {
-          let url = '/' + value + '/2'
-          API.checkExsit(url).then(res => {
-            if (res.data) {
-              callback()
-            } else {
-              callback(new Error('该邮箱已存在'))
-            }
-          })
+          callback()
         } else {
           callback(new Error('邮箱格式错误'))
         }
@@ -129,7 +116,7 @@ export default {
         email: ''
       },
       ruleForm2: {
-        name: sessionStorage.getItem('user'),
+        name: localStorage.getItem('user'),
         pass: '',
         newPass: '',
         checkNewPass: ''
@@ -167,7 +154,6 @@ export default {
   methods: {
     submitForm (formName) {
       this.$refs[formName].validate((valid) => {
-        console.log(valid)
         if (valid) {
           let data = {
             'username': this.ruleForm.name,
@@ -175,13 +161,18 @@ export default {
             'email': this.ruleForm.email
           }
           API.register(data).then(res => {
-            console.log(res)
             if (res.status === 200) {
               this.$message({
                 type: 'success',
                 message: '注册成功'
               })
-              this.$router.push('./')
+              let e = {
+                'username': this.ruleForm.name,
+                'password': this.ruleForm.pass
+              }
+              setTimeout(fun => {
+                this.login(e)
+              }, 1000)
             } else {
               this.$message({
                 type: 'warning',
@@ -226,6 +217,20 @@ export default {
     },
     goBack () {
       this.$router.go(-1)
+    },
+    login (e) {
+      API.login(e).then(res => {
+        if (res.status === 200 && res.data.code === 0) {
+          localStorage.setItem('userId', res.data.data.userId)
+          localStorage.setItem('user', res.data.data.username)
+          this.$router.push('./index')
+        } else {
+          this.$message({
+            type: 'warning',
+            message: '登录失败'
+          })
+        }
+      })
     }
   },
   computed: {

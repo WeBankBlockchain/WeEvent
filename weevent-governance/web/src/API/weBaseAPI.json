@@ -17,7 +17,7 @@
   },
   "transList": {
     "methods": "get",
-    "url": "weevent-governance/webase-node-mgr/transaction/transList/"
+    "url": "weevent-governance/webase-node-mgr/transaction/transList"
   },
   "blockList": {
     "methods": "get",
