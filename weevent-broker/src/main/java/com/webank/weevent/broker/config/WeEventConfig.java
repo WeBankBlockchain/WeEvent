@@ -52,24 +52,6 @@ public class WeEventConfig {
     @Value("${restful.subscribe.callback.timeout:5000}")
     private Integer restful_timeout;
 
-    @Value("${mqtt.broker.url:}")
-    private String mqttBrokerUrl;
-
-    @Value("${mqtt.broker.user:}")
-    private String mqttBrokerUser;
-
-    @Value("${mqtt.broker.password:}")
-    private String mqttBrokerPassword;
-
-    @Value("${mqtt.broker.qos:2}")
-    private Integer mqttBrokerQos;
-
-    @Value("${mqtt.broker.keep-alive:15}")
-    private Integer mqttBrokerKeepAlive;
-
-    @Value("${mqtt.broker.timeout:5000}")
-    private Integer mqttBrokerTimeout;
-
     @Value("${broker.zookeeper.ip:}")
     private String zookeeperIp;
 

@@ -28,9 +28,10 @@ public class JavaSDK {
 
             // ensure topic exist
             client.open(topicName, groupId);
-
-            // subscribe topic
-            String subscriptionId = client.subscribe(topicName, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
+            Map<String, String> extensions = new HashMap<>();
+            extensions.put("weevent-url", "https://github.com/WeBankFinTech/WeEvent");
+            // subscribe topic with groupId
+            String subscriptionId = client.subscribe(topicName, groupId, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
                 @Override
                 public void onEvent(WeEvent event) {
                     System.out.println("received event: " + event.toString());

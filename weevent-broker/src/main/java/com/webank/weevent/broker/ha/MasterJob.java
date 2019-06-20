@@ -167,7 +167,7 @@ public class MasterJob {
             }
             return subId;
         } else {
-            if (type.equals("REST")) {
+            if (type.equals(WeEventConstants.RESTFULTYPE)) {
                 return this.getCgiSubscription().restSubscribe(topic,
                         groupId,
                         subscriptionId,

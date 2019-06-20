@@ -68,6 +68,7 @@ public class JMS {
         Topic topic = session.createTopic(topicName);
         // optional, default is OFFSET_LAST
         ((WeEventTopic) topic).setOffset(WeEvent.OFFSET_LAST);
+        ((WeEventTopic) topic).setGroupId("1");//if not set default 1
 
         // create subscriber
         TopicSubscriber subscriber = session.createSubscriber(topic);

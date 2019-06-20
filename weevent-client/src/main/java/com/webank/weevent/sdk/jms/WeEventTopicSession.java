@@ -24,8 +24,6 @@ import javax.jms.TopicPublisher;
 import javax.jms.TopicSession;
 import javax.jms.TopicSubscriber;
 
-import com.webank.weevent.sdk.WeEvent;
-
 import lombok.Data;
 
 /**
@@ -66,7 +64,6 @@ public class WeEventTopicSession implements TopicSession {
     public TopicSubscriber createSubscriber(Topic topic) throws JMSException {
         if (topic instanceof WeEventTopic) {
             WeEventTopicSubscriber subscriber = new WeEventTopicSubscriber((WeEventTopic) topic);
-
             this.topicConnection.createSubscriber(subscriber);
             return subscriber;
         }

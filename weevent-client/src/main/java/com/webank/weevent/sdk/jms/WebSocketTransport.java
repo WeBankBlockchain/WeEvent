@@ -1,6 +1,5 @@
 package com.webank.weevent.sdk.jms;
 
-
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -68,7 +67,7 @@ public class WebSocketTransport extends WebSocketClient {
     private Map<String, Long> sequence2Id;
 
     //(topic <-> eventId)
-    public Map<String, String> subscriptionCache;
+    public Map<String, WeEventTopic> subscriptionCache;
 
     // private WSThread wSThread;
 
@@ -211,6 +210,7 @@ public class WebSocketTransport extends WebSocketClient {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         String req = stompCommand.encodeSubscribe(topic, topic.getOffset(), asyncSeq);
         sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
+        this.subscriptionCache.put(topic.getTopicName(), topic);
         Message stompResponse = this.stompRequest(req, asyncSeq);
 
         if (stompCommand.isError(stompResponse)) {
@@ -221,12 +221,10 @@ public class WebSocketTransport extends WebSocketClient {
         return stompCommand.getSubscriptionId(stompResponse);
     }
 
-
     public boolean stompUnsubscribe(String subscriptionId) throws JMSException {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         String headerId = this.subscriptionId2ReceiptId.get(subscriptionId);
-        String req = stompCommand.encodeUnSubscribe(subscriptionId,headerId);
-
+        String req = stompCommand.encodeUnSubscribe(subscriptionId, headerId);
         Long asyncSeq = this.sequence.incrementAndGet();
         sequence2Id.put(headerId, asyncSeq);
         Message stompResponse = this.stompRequest(req, asyncSeq);
@@ -330,7 +328,7 @@ public class WebSocketTransport extends WebSocketClient {
 
                     // check SubscriptionId
                     log.info("messageId:{}", messageId);
-                    this.subscriptionCache.put(event.getTopic(), event.getEventId());
+                    this.subscriptionCache.get(event.getTopic()).setOffset(event.getEventId());
                     if (this.receiptId2SubscriptionId.size() == this.subscriptionId2ReceiptId.size()) {
                         if (this.receiptId2SubscriptionId.containsKey(messageId)) {
                             WeEventStompCommand weEventStompCommand = new WeEventStompCommand(event);
@@ -415,16 +413,11 @@ class WSThread extends Thread {
             e.printStackTrace();
         }
 
-
-        for (Map.Entry<String, String> subscription : this.webSocketTransport.subscriptionCache.entrySet()) {
-
+        for (Map.Entry<String, WeEventTopic> subscription : this.webSocketTransport.subscriptionCache.entrySet()) {
             try {
                 log.info("subscription cache:{}", subscription.toString());
-                WeEventTopic weEventTopic = new WeEventTopic(subscription.getKey());
-                weEventTopic.setOffset(subscription.getValue());
-                this.webSocketTransport.stompSubscribe(weEventTopic);
+                this.webSocketTransport.stompSubscribe(subscription.getValue());
                 this.webSocketTransport.connectFlag = TRUE;
-
             } catch (JMSException e) {
                 e.printStackTrace();
             }

@@ -128,7 +128,7 @@ public class BrokerStomp extends TextWebSocketHandler {
                 extensions = WeEventUtils.getExtensions(nativeHeaders);
                 if (nativeHeaders.containsKey(WeEventConstants.EVENT_GROUP_ID)) {
                     try {
-                        groupId = nativeHeaders.get(WeEventConstants.EVENT_GROUP_ID).toString();
+                        groupId = nativeHeaders.get(WeEventConstants.EVENT_GROUP_ID).get(0).toString();
                         ParamCheckUtils.validateGroupId(groupId);
                     } catch (BrokerException e) {
                         return;

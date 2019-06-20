@@ -2,13 +2,13 @@ package com.webank.weevent.sdk.jms;
 
 
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.atomic.AtomicLong;
 
 import javax.jms.JMSException;
 
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -80,6 +80,9 @@ public class WeEventStompCommand {
         accessor.setDestination(topic.getTopicName());
         accessor.setNativeHeader("eventId", offset);
         accessor.setNativeHeader("id", Long.toString(id));
+        if (!StringUtils.isBlank(topic.getGroupId())) {
+            accessor.setNativeHeader("groupId", topic.getGroupId());
+        }
         return encodeRaw(accessor);
     }
 

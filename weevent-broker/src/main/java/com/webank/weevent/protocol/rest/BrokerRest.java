@@ -2,7 +2,6 @@ package com.webank.weevent.protocol.rest;
 
 import java.util.Map;
 
-import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.util.WeEventUtils;
 import com.webank.weevent.sdk.BrokerException;
