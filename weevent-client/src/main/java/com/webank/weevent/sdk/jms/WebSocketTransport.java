@@ -1,12 +1,9 @@
 package com.webank.weevent.sdk.jms;
 
-
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,7 +22,6 @@ import com.webank.weevent.sdk.WeEvent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ServerHandshake;

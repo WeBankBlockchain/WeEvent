@@ -2,7 +2,6 @@ package com.webank.weevent.sdk.jms;
 
 
 import java.io.Serializable;
-import java.util.Map;
 
 import javax.jms.BytesMessage;
 import javax.jms.Destination;
@@ -25,10 +24,7 @@ import javax.jms.TopicPublisher;
 import javax.jms.TopicSession;
 import javax.jms.TopicSubscriber;
 
-import com.webank.weevent.sdk.WeEvent;
-
 import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * WeEvent JMS TopicSession.
