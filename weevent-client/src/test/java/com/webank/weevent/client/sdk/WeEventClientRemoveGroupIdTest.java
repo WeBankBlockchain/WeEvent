@@ -36,7 +36,7 @@ import static org.junit.Assert.assertTrue;
  */
 @Slf4j
 public class WeEventClientRemoveGroupIdTest {
-    private Map<String,String> extensions = new HashMap<>();
+    private Map<String, String> extensions = new HashMap<>();
     @Rule
     public TestName testName = new TestName();
 
@@ -46,7 +46,7 @@ public class WeEventClientRemoveGroupIdTest {
 
     @Before
     public void before() throws Exception {
-        weEventClient = new WeEventClient("http://10.107.96.107:7681/weevent");
+        weEventClient = new WeEventClient("http://127.0.0.1:8080/weevent");
         weEventClient.open(topicName);
 
     }
@@ -57,17 +57,15 @@ public class WeEventClientRemoveGroupIdTest {
     }
 
 
-
     /**
      * Method: publish(String topic, byte[] content, Map<String, String> extensions)
      */
     @Test
     public void testPublish() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-        SendResult sendResult = this.weEventClient.publish(topicName,"hello world".getBytes(StandardCharsets.UTF_8));
+        SendResult sendResult = this.weEventClient.publish(topicName, "hello world".getBytes(StandardCharsets.UTF_8));
         assertTrue(sendResult.getStatus() == SendResult.SendResultStatus.SUCCESS);
     }
-
 
 
     /**
@@ -77,11 +75,12 @@ public class WeEventClientRemoveGroupIdTest {
     public void testSubscribe() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
         // create subscriber
-        this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
+        String groupId = "1";//if not set default 1
+        this.weEventClient.subscribe(this.topicName, groupId, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
-                System.out.println("onEvent:"+event.toString());
-                log.info("onEvent:"+event.toString());
+                System.out.println("onEvent:" + event.toString());
+                log.info("onEvent:" + event.toString());
             }
 
             @Override
@@ -105,15 +104,17 @@ public class WeEventClientRemoveGroupIdTest {
             assertEquals(e.getCode(), ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode());
         }
     }
+
     /**
      * Method: subscribe(String topic, String offset, IConsumer.ConsumerListener listener)
      */
     @Test
     public void testSubscribeEventId() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-        SendResult sendResult = this.weEventClient.publish(topicName,"hello world".getBytes(StandardCharsets.UTF_8));
-        System.out.print("sendResult getEventId"+sendResult.getEventId());
-        this.weEventClient.subscribe(this.topicName, sendResult.getEventId(), new WeEventClient.EventListener() {
+        SendResult sendResult = this.weEventClient.publish(topicName, "hello world".getBytes(StandardCharsets.UTF_8));
+        System.out.print("sendResult getEventId" + sendResult.getEventId());
+        String groupId = "1";//if not set default 1
+        this.weEventClient.subscribe(this.topicName, groupId, sendResult.getEventId(), new WeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
                 System.out.print(event.toString());
@@ -134,8 +135,8 @@ public class WeEventClientRemoveGroupIdTest {
     @Test
     public void testUnSubscribe() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-
-        String subscriptionId = this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
+        String groupId = "1";//if not set default 1
+        String subscriptionId = this.weEventClient.subscribe(this.topicName, groupId, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
                 log.info(event.toString());
@@ -206,6 +207,7 @@ public class WeEventClientRemoveGroupIdTest {
     public void testGetEvent() throws Exception {
         this.weEventClient.getEvent("not exist");
     }
+
     /**
      * Method: getSSLContext()
      */

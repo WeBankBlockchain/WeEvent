@@ -136,6 +136,47 @@ public class WeEventClient {
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
+    public String subscribe(String topic, String groupId, String offset, EventListener listener) throws BrokerException {
+        try {
+            validateParam(topic);
+            validateParam(offset);
+            TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+            // create topic
+            Topic destination = session.createTopic(topic);
+
+            // create subscriber
+            ((WeEventTopic) destination).setOffset(offset);
+            ((WeEventTopic) destination).setGroupId(groupId);//if not set default 1
+            WeEventTopicSubscriber subscriber = (WeEventTopicSubscriber) session.createSubscriber(destination);
+
+            // create listener
+            subscriber.setMessageListener(new MessageListener() {
+                public void onMessage(Message message) {
+                    if (message instanceof BytesMessage) {
+                        try {
+                            BytesMessage bytesMessage = (BytesMessage) message;
+                            ObjectMapper mapper = new ObjectMapper();
+                            byte[] body = new byte[(int) bytesMessage.getBodyLength()];
+                            bytesMessage.readBytes(body);
+                            WeEvent event = mapper.readValue(body, WeEvent.class);
+                            listener.onEvent(event);
+                        } catch (IOException | JMSException e) {
+                            log.error("onMessage exception", e);
+                            listener.onException(e);
+                        }
+                    }
+                }
+            });
+
+            this.sessionMap.put(subscriber.getSubscriptionId(), session);
+            return subscriber.getSubscriptionId();
+        } catch (JMSException e) {
+            log.error("jms exception", e);
+            throw jms2BrokerException(e);
+        }
+    }
+
+
     public String subscribe(String topic, String offset, EventListener listener) throws BrokerException {
         try {
             validateParam(topic);
@@ -174,7 +215,6 @@ public class WeEventClient {
             throw jms2BrokerException(e);
         }
     }
-
 
     /**
      * Unsubscribe an exist subscription subscribed by subscribe interface.
