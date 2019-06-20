@@ -3,35 +3,51 @@
     <div class='top_part'>
        <header-bar :noServer = true></header-bar>
     </div>
-    <div class='list_part'>
-      <p class='title'>
-        <span>服务管理</span>
-        <i class='el-icon-plus' @click='showLog = true' ></i>
-      </p>
-      <ul class='block_data_list'>
-        <li >
-          <span>服务名称</span>
-          <span >URL地址</span>
-          <span>操作</span>
-        </li>
-        <li v-show='!server.length' style='justify-content:center'>暂无关联服务</li>
-        <li v-for='(item, index) in server' :key='index'>
-          <span :title='item.name'>{{item.name}}</span>
-          <span :title='item.brokerUrl'>{{item.brokerUrl}}</span>
-          <span>
-            <i class='el-icon-edit' @click='adit(item)' title='编辑'></i>
-            <i class='el-icon-delete' @click='deleteItem(item)' title='删除'></i>
-            </span>
-        </li>
-      </ul>
+    <div class='cont_part'>
+      <P class='back' @click='back'><i class='el-icon-arrow-left'></i>返回</P>
+      <div class='table_part'>
+        <p class='title'>
+          <span>服务管理</span>
+          <i class='el-icon-plus' @click='showLog = true' ></i>
+        </p>
+        <el-table
+          :data="server"
+          style="width: 100%">
+          <el-table-column
+            label="服务名称"
+            prop='name'
+            width='120'
+            >
+          </el-table-column>
+          <el-table-column
+            label="URL地址"
+            prop='brokerUrl'>
+          </el-table-column>
+          <el-table-column
+            label="WebaseURL地址"
+            prop='webaseUrl'>
+          </el-table-column>
+          <el-table-column
+            width='80'
+            label="操作">
+            <template slot-scope='scope'>
+              <i class='el-icon-edit table_icon' @click='adit(scope.row)' title='编辑'></i>
+              <i class='el-icon-delete table_icon' @click='deleteItem(scope.row)' title='删除'></i>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
     </div>
     <el-dialog :title="title" :visible.sync="showLog">
       <el-form :model="form" :rules="rules" ref='form'>
         <el-form-item label="名称:" prop='name'>
-          <el-input v-model="form.name" autocomplete="off"></el-input>
+          <el-input v-model="form.name" autocomplete="off" placeholder="请输入服务名称"></el-input>
         </el-form-item>
         <el-form-item label="Broker服务地址:" prop='brokerUrl'>
-          <el-input v-model="form.brokerUrl" autocomplete="off"></el-input>
+          <el-input v-model="form.brokerUrl" autocomplete="off"  placeholder="例如: 'http://127.0.0.1:8080/xxxx/xxxx'"></el-input>
+        </el-form-item>
+         <el-form-item label="Webase服务地址:" prop='webaseUrl'>
+          <el-input v-model="form.webaseUrl" autocomplete="off"  placeholder="例如: 'http://127.0.0.1:8080/xxxx/xxxx'"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -56,7 +72,8 @@ export default {
       title: '新增服务',
       form: {
         name: '',
-        brokerUrl: ''
+        brokerUrl: '',
+        webaseUrl: ''
       },
       brokerId: '',
       rules: {
@@ -64,6 +81,9 @@ export default {
           {required: true, message: 'IP不能为空', trigger: 'blur'}
         ],
         brokerUrl: [
+          {required: true, message: '服务端口不能为空', trigger: 'blur'}
+        ],
+        webaseUrl: [
           {required: true, message: '服务端口不能为空', trigger: 'blur'}
         ]
       }
@@ -76,6 +96,7 @@ export default {
         this.$refs.form.resetFields()
         this.$set(this.form, 'name', '')
         this.$set(this.form, 'brokerUrl', '')
+        this.$set(this.form, 'webaseUrl', '')
         this.brokerId = ''
       }
     }
@@ -99,7 +120,13 @@ export default {
       })
     },
     addServer () {
-      API.addServer(this.form).then(res => {
+      let data = {
+        name: this.form.name,
+        brokerUrl: this.form.brokerUrl,
+        webaseUrl: this.form.webaseUrl,
+        userId: Number(localStorage.getItem('userId'))
+      }
+      API.addServer(data).then(res => {
         if (res.status === 200) {
           this.$message({
             type: 'success',
@@ -116,7 +143,7 @@ export default {
       })
     },
     getServer () {
-      let url = '?userId=' + sessionStorage.getItem('userId')
+      let url = '?userId=' + localStorage.getItem('userId')
       API.getServer(url).then(res => {
         if (res.status === 200) {
           this.server = [].concat(res.data)
@@ -124,9 +151,11 @@ export default {
       })
     },
     editServer () {
+      this.isEdit = false
       let data = {
         name: this.form.name,
         brokerUrl: this.form.brokerUrl,
+        webaseUrl: this.form.webaseUrl,
         id: this.brokerId
       }
       API.updateServer(data).then(res => {
@@ -151,6 +180,7 @@ export default {
       this.isEdit = true
       this.$set(this.form, 'name', e.name)
       this.$set(this.form, 'brokerUrl', e.brokerUrl)
+      this.$set(this.form, 'webaseUrl', e.webaseUrl)
       this.brokerId = e.id
     },
     deleteItem (e) {
