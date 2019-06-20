@@ -28,6 +28,7 @@ import javax.jms.TopicSubscriber;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * WeEvent JMS TopicSession.
@@ -67,11 +68,7 @@ public class WeEventTopicSession implements TopicSession {
     public TopicSubscriber createSubscriber(Topic topic) throws JMSException {
         if (topic instanceof WeEventTopic) {
             WeEventTopicSubscriber subscriber = new WeEventTopicSubscriber((WeEventTopic) topic);
-            if (((WeEventTopic) topic).getGroupId() == null) {
-                this.topicConnection.createSubscriber(subscriber);
-            } else {
-                this.topicConnection.createSubscriber(subscriber, ((WeEventTopic) topic).getGroupId());
-            }
+            this.topicConnection.createSubscriber(subscriber);
             return subscriber;
         }
 

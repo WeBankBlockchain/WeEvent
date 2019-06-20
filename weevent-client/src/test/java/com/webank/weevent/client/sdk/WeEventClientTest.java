@@ -127,7 +127,7 @@ public class WeEventClientTest {
     public void testSubscribe() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
         // create subscriber
-        this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
+        String subscriptionId = this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
                 System.out.println(event.toString());
@@ -138,7 +138,6 @@ public class WeEventClientTest {
                 e.printStackTrace();
             }
         });
-
         Thread.sleep(60000);
     }
 
@@ -150,7 +149,7 @@ public class WeEventClientTest {
         log.info("===================={}", this.testName.getMethodName());
         // create subscriber
         String groupId = "1";//if not set default 1
-        this.weEventClient.subscribe(this.topicName, groupId, "317e7c4c-8-26", new WeEventClient.EventListener() {
+        String subscriptionId = this.weEventClient.subscribe(this.topicName, groupId, "317e7c4c-8-26", new WeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
                 log.info(event.toString());
@@ -161,6 +160,7 @@ public class WeEventClientTest {
                 e.printStackTrace();
             }
         });
+        Thread.sleep(60000);
     }
 
     /**
