@@ -35,7 +35,7 @@ import static org.junit.Assert.assertTrue;
  * @since <pre>05/10/2019</pre>
  */
 @Slf4j
-public class WeEventClientRemoveGroupIdTest {
+public class WeEventClientTest {
 
     @Rule
     public TestName testName = new TestName();

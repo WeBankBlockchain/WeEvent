@@ -31,7 +31,7 @@ import static org.junit.Assert.assertTrue;
  * @since <pre>05/10/2019</pre>
  */
 @Slf4j
-public class WeEventClientTest {
+public class WeEventClientGroupIdTest {
     private Map<String, String> extensions = new HashMap<>();
     @Rule
     public TestName testName = new TestName();
