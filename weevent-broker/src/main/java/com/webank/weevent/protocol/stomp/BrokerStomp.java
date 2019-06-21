@@ -231,7 +231,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
                         //return error message and error code
                         accessor.setNativeHeader("message", e.getMessage());
-                        accessor.setNativeHeader("code",String.valueOf(e.getCode()));
+                        accessor.setNativeHeader("code", String.valueOf(e.getCode()));
                     }
                     if (result) {
                         accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
@@ -367,14 +367,11 @@ public class BrokerStomp extends TextWebSocketHandler {
      * @return String return event id if publish ok, else ""
      */
     private String handleSend(Message<byte[]> msg, String simpDestination, Map<String, String> extensions, String groupId) throws BrokerException {
-        if (!this.iproducer.open(simpDestination, groupId)) {
-            log.error("producer open failed");
-            return "";
-        }
         if (!this.iproducer.startProducer()) {
             log.error("producer start failed");
             return "";
         }
+        
         SendResult sendResult = this.iproducer.publish(new WeEvent(simpDestination, msg.getPayload(), extensions), groupId);
         log.info("publish result, {}", sendResult);
         if (sendResult.getStatus() != SendResult.SendResultStatus.SUCCESS) {
