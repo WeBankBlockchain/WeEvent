@@ -120,7 +120,7 @@ public class WeEventConnectionFactory implements ConnectionFactory, QueueConnect
         }
         if (userName != null && password != null) {
             connection.setUserName(userName);
-            connection.setUserName(password);
+            connection.setPassword(password);
         }
 
         return connection;
