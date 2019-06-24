@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Future;
+
 import org.bcos.channel.client.TransactionSucCallback;
 import org.bcos.web3j.abi.EventEncoder;
 import org.bcos.web3j.abi.EventValues;
@@ -55,9 +56,14 @@ public final class Topic extends Contract {
     }
 
     public static List<LogWeEventEventResponse> getLogWeEventEvents(TransactionReceipt transactionReceipt) {
-        final Event event = new Event("LogWeEvent", 
+        final Event event = new Event("LogWeEvent",
                 Arrays.<TypeReference<?>>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}, new TypeReference<Uint256>() {}, new TypeReference<Uint256>() {}, new TypeReference<Utf8String>() {}, new TypeReference<Utf8String>() {}));
+                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {
+                }, new TypeReference<Uint256>() {
+                }, new TypeReference<Uint256>() {
+                }, new TypeReference<Utf8String>() {
+                }, new TypeReference<Utf8String>() {
+                }));
         List<EventValues> valueList = extractEventParameters(event, transactionReceipt);
         ArrayList<LogWeEventEventResponse> responses = new ArrayList<LogWeEventEventResponse>(valueList.size());
         for (EventValues eventValues : valueList) {
@@ -73,9 +79,14 @@ public final class Topic extends Contract {
     }
 
     public Observable<LogWeEventEventResponse> logWeEventEventObservable(DefaultBlockParameter startBlock, DefaultBlockParameter endBlock) {
-        final Event event = new Event("LogWeEvent", 
+        final Event event = new Event("LogWeEvent",
                 Arrays.<TypeReference<?>>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}, new TypeReference<Uint256>() {}, new TypeReference<Uint256>() {}, new TypeReference<Utf8String>() {}, new TypeReference<Utf8String>() {}));
+                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {
+                }, new TypeReference<Uint256>() {
+                }, new TypeReference<Uint256>() {
+                }, new TypeReference<Utf8String>() {
+                }, new TypeReference<Utf8String>() {
+                }));
         EthFilter filter = new EthFilter(startBlock, endBlock, getContractAddress());
         filter.addSingleTopic(EventEncoder.encode(event));
         return web3j.ethLogObservable(filter).map(new Func1<Log, LogWeEventEventResponse>() {
@@ -94,16 +105,18 @@ public final class Topic extends Contract {
     }
 
     public Future<Uint256> getSequenceNumber() {
-        Function function = new Function("getSequenceNumber", 
-                Arrays.<Type>asList(), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+        Function function = new Function("getSequenceNumber",
+                Arrays.<Type>asList(),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {
+                }));
         return executeCallSingleValueReturnAsync(function);
     }
 
     public Future<Uint256> getBlockNumber() {
-        Function function = new Function("getBlockNumber", 
-                Arrays.<Type>asList(), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+        Function function = new Function("getBlockNumber",
+                Arrays.<Type>asList(),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {
+                }));
         return executeCallSingleValueReturnAsync(function);
     }
 
