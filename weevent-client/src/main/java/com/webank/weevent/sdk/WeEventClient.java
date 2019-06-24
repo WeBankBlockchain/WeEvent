@@ -43,7 +43,7 @@ import org.apache.commons.lang3.StringUtils;
  * @since 2019/04/07
  */
 @Slf4j
-public class WeEventClient {
+public class WeEventClient implements IWeEventClient {
     public static void main(String[] args) {
 
     }
@@ -99,14 +99,6 @@ public class WeEventClient {
         buildJms(getStompUrl(brokerUrl), "", "");
     }
 
-    /**
-     * Get the client handler of weevent's broker custom url and account authorization.
-     *
-     * @param brokerUrl weevent's broker url, like http://localhost:8080/weevent
-     * @param userName account name
-     * @param password password
-     * @throws BrokerException broker exception
-     */
     public WeEventClient(String brokerUrl, String userName, String password) throws BrokerException {
         validateParam(brokerUrl);
         validateUser(userName, password);
@@ -114,14 +106,6 @@ public class WeEventClient {
         buildJms(getStompUrl(brokerUrl), userName, password);
     }
 
-    /**
-     * Publish an event to topic.
-     *
-     * @param topic topic name
-     * @param content topic data
-     * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
-     * @throws BrokerException broker exception
-     */
     public SendResult publish(String topic, byte[] content) throws BrokerException {
         validateParam(topic);
         return this.brokerRpc.publish(topic, content);
@@ -131,6 +115,7 @@ public class WeEventClient {
      * Subscribe events from topic.
      *
      * @param topic topic name
+     * @param groupId groupId
      * @param offset, from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
      * @param listener callback
      * @return subscription Id
@@ -175,7 +160,6 @@ public class WeEventClient {
             throw jms2BrokerException(e);
         }
     }
-
 
     public String subscribe(String topic, String offset, EventListener listener) throws BrokerException {
         try {
@@ -244,189 +228,75 @@ public class WeEventClient {
     }
 
 
-    /**
-     * Open a topic
-     *
-     * @param topic topic name
-     * @return true if success
-     * @throws BrokerException broker exception
-     */
-
     public boolean open(String topic) throws BrokerException {
         validateParam(topic);
         return this.brokerRpc.open(topic);
     }
 
 
-    /**
-     * Close a topic.
-     *
-     * @param topic topic name
-     * @return true if success
-     * @throws BrokerException broker exception
-     */
     public boolean close(String topic) throws BrokerException {
         validateParam(topic);
         return this.brokerRpc.close(topic);
     }
 
-
-    /**
-     * Check a topic is exist or not.
-     *
-     * @param topic topic name
-     * @return true if exist
-     * @throws BrokerException broker exception
-     */
     public boolean exist(String topic) throws BrokerException {
         validateParam(topic);
         return this.brokerRpc.exist(topic);
     }
 
-
-    /**
-     * List all topics in weevent's broker.
-     *
-     * @param pageIndex page index, from 0
-     * @param pageSize page size, [10, 100)
-     * @return topic list
-     * @throws BrokerException broker exception
-     */
     public TopicPage list(Integer pageIndex, Integer pageSize) throws BrokerException {
         return this.brokerRpc.list(pageIndex, pageSize);
     }
 
-
-    /**
-     * Get a topic information.
-     *
-     * @param topic topic name
-     * @return topic information
-     * @throws BrokerException broker exception
-     */
     public TopicInfo state(String topic) throws BrokerException {
         validateParam(topic);
         return this.brokerRpc.state(topic);
     }
 
-
-    /**
-     * Get an event information.
-     *
-     * @param eventId event id
-     * @return weevent
-     * @throws BrokerException broker exception
-     */
     public WeEvent getEvent(String eventId) throws BrokerException {
         validateParam(eventId);
         return this.brokerRpc.getEvent(eventId);
     }
 
-
-    /**
-     * Publish an event to topic.
-     *
-     * @param topic topic name
-     * @param content topic data
-     * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
-     * @throws BrokerException broker exception
-     */
     public SendResult publish(String topic, String groupId, byte[] content, Map<String, String> extensions) throws BrokerException {
         validateParam(topic);
         validateParam(groupId);
         return this.brokerRpc.publish(topic, groupId, content, extensions);
     }
 
-    /**
-     * Publish an event to topic.
-     *
-     * @param topic topic name
-     * @param content topic data
-     * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
-     * @throws BrokerException broker exception
-     */
     public SendResult publish(String topic, byte[] content, Map<String, String> extensions) throws BrokerException {
         validateParam(topic);
         return this.brokerRpc.publish(topic, content, extensions);
     }
 
-    /**
-     * Close a topic.
-     *
-     * @param topic topic name
-     * @param groupId which group to close
-     * @return true if success
-     * @throws BrokerException broker exception
-     */
     public boolean close(String topic, String groupId) throws BrokerException {
         validateParam(topic);
         validateParam(groupId);
         return this.brokerRpc.close(topic, groupId);
     }
-
-    /**
-     * Check a topic is exist or not.
-     *
-     * @param topic topic name
-     * @param groupId which group to exit
-     * @return true if exist
-     * @throws BrokerException broker exception
-     */
     public boolean exist(String topic, String groupId) throws BrokerException {
         validateParam(topic);
         validateParam(groupId);
         return this.brokerRpc.exist(topic, groupId);
     }
 
-
-    /**
-     * Open a topic.
-     *
-     * @param topic topic name
-     * @param groupId which group to open
-     * @return true if success
-     * @throws BrokerException broker exception
-     */
     public boolean open(String topic, String groupId) throws BrokerException {
         validateParam(topic);
         validateParam(groupId);
         return this.brokerRpc.open(topic, groupId);
     }
 
-    /**
-     * List all topics in weevent's broker.
-     *
-     * @param pageIndex page index, from 0
-     * @param pageSize page size, [10, 100)
-     * @return topic list
-     * @throws BrokerException broker exception
-     */
     public TopicPage list(Integer pageIndex, Integer pageSize, String groupId) throws BrokerException {
         validateParam(groupId);
         return this.brokerRpc.list(pageIndex, pageSize, groupId);
     }
 
-    /**
-     * Get a topic information.
-     *
-     * @param topic topic name
-     * @return topic information
-     * @throws BrokerException broker exception
-     */
     public TopicInfo state(String topic, String groupId) throws BrokerException {
         validateParam(topic);
         validateParam(groupId);
         return this.brokerRpc.state(topic, groupId);
     }
 
-
-    /**
-     * Get an event information.
-     *
-     * @param eventId event id
-     * @return weevent
-     * @throws BrokerException broker exception
-     */
     public WeEvent getEvent(String eventId, String groupId) throws BrokerException {
         validateParam(groupId);
         validateParam(eventId);
