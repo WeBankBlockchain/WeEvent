@@ -1,7 +1,5 @@
 package com.webank.weevent.sdk.jsonrpc;
 
-
-import java.util.HashMap;
 import java.util.Map;
 
 import com.webank.weevent.sdk.BrokerException;
@@ -63,7 +61,6 @@ public interface IBrokerRpc {
                              @JsonRpcParam(value = "url") String url) throws BrokerException {
         return null;
     }
-
 
     boolean unSubscribe(@JsonRpcParam(value = "subscriptionId") String subscriptionId) throws BrokerException;
 

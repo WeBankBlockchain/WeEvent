@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 55 (78076) - https://sketchapp.com -->
+    <title>Element/Icon/Mail</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Element/Icon/Mail" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="servers" transform="translate(2.000000, 2.000000)">
+            <path d="M9.43807229,-3.7081449e-14 L9.43807229,3.31746032" id="Shape" stroke="#8C54FF" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M9.43807229,6 L9.43807229,9.31746032" id="Shape" stroke="#8C54FF" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M11.9942169,1 L11.9942169,2.45138889 C11.9393578,2.88321325 11.6172198,3.22290549 11.2077108,3.28075397 L0.80813494,3.28075397 C0.458139759,3.28075397 -7.37188088e-14,2.82875 -7.37188088e-14,2.45138889 L-7.37188088e-14,2.45138889" id="Shape" stroke="#8C54FF" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M-7.37188088e-14,0.829365079 C0.026136572,0.37446422 0.376191788,0.0152128653 0.80813494,-1.4077628e-13 L11.2077108,-1.4077628e-13 C11.6172198,0.0578484749 11.9393578,0.397540715 11.9942169,0.829365079 L11.9942169,2.48809524" id="Shape" stroke="#8C54FF" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M11.9942169,7.03670635 L11.9942169,8.48809524 C11.9393578,8.9199196 11.6172198,9.25961184 11.2077108,9.31746032 L0.80813494,9.31746032 C0.458139759,9.31746032 0,8.86545635 0,8.48809524 L0,8.48809524" id="Shape" stroke="#8C54FF" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M0,6.82936508 C0,6.45200397 0.458139759,6 0.80813494,6 L11.2077108,6 C11.6172198,6.05784847 11.9393578,6.39754072 11.9942169,6.82936508 L11.9942169,8.48809524" id="Shape" stroke="#8C54FF" stroke-linecap="round" stroke-linejoin="round"></path>
+            <ellipse id="Oval" fill="#8C54FF" fill-rule="nonzero" transform="translate(2.825174, 1.659765) rotate(-30.000000) translate(-2.825174, -1.659765) " cx="2.82517403" cy="1.65976495" rx="1" ry="1"></ellipse>
+            <ellipse id="Oval" fill="#8C54FF" fill-rule="nonzero" transform="translate(2.825174, 7.658647) rotate(-30.000000) translate(-2.825174, -7.658647) " cx="2.82517403" cy="7.65864731" rx="1" ry="1"></ellipse>
+            <path d="M0.196626506,11.7926587 L11.6009639,11.7926587" id="Shape" stroke="#8C54FF" stroke-linecap="round" stroke-linejoin="round"></path>
+        </g>
+    </g>
+</svg>

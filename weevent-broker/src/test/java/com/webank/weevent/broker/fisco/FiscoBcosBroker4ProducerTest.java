@@ -35,6 +35,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
     public void before() throws Exception {
         extensions.put("weevent-url", "https://github.com/WeBankFinTech/WeEvent");
         iProducer = IProducer.build();
+        iProducer.startProducer();
         assertTrue(iProducer != null);
         assertTrue(iProducer.open(this.topicName, groupId));
     }
