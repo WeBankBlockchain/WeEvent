@@ -504,15 +504,6 @@ public class BrokerStomp extends TextWebSocketHandler {
                     public void onEvent(String subscriptionId, WeEvent event) {
                         log.info("consumer onEvent, subscriptionId: {} event: {}", subscriptionId, event);
 
-                        if (!sessionContext.get(session.getId()).containsKey(headerIdStr)) {
-                            log.error("unknown topic on session, {}", event.getTopic());
-                            return;
-                        }
-                        if (!sessionContext.get(session.getId()).get(headerIdStr).getValue().equals(event.getTopic())) {
-                            log.error("unknown topic on session, {}", event.getTopic());
-                            return;
-                        }
-
                         try {
                             StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.MESSAGE);
                             accessor.setSubscriptionId(headerIdStr);
