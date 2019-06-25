@@ -112,7 +112,9 @@ public class WeEventClient implements IWeEventClient {
         return this.brokerRpc.publish(topic, content);
     }
 
-    public String subscribe(String topic, String offset, EventListener  listener) throws BrokerException {
+
+
+    public String subscribe(String topic, String offset, EventListener listener) throws BrokerException {
         try {
             validateParam(topic);
             validateParam(offset);
@@ -152,6 +154,14 @@ public class WeEventClient implements IWeEventClient {
         }
     }
 
+    /**
+     * Unsubscribe an exist subscription subscribed by subscribe interface.
+     * The consumer will no longer receive messages from broker after this.
+     *
+     * @param subscriptionId invalid input
+     * @return success if true
+     * @throws BrokerException broker exception
+     */
     public boolean unSubscribe(String subscriptionId) throws BrokerException {
         validateParam(subscriptionId);
 
@@ -209,27 +219,20 @@ public class WeEventClient implements IWeEventClient {
         validateExtensions(extensions);
         return this.brokerRpc.publish(topic, groupId, content, extensions);
     }
-
-    public SendResult publish(String topic, byte[] content, Map<String, String> extensions) throws BrokerException {
-        validateParam(topic);
-        validateArrayParam(content);
-        validateExtensions(extensions);
-        return this.brokerRpc.publish(topic, content, extensions);
-    }
-
-    public boolean close(String topic, String groupId) throws BrokerException {
-        validateParam(topic);
-        validateParam(groupId);
-        return this.brokerRpc.close(topic, groupId);
-    }
-
-
+    /**
+     * Subscribe events from topic.
+     *
+     * @param topic topic name
+     * @param groupId groupId
+     * @param offset, from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
+     * @param listener callback
+     * @return subscription Id
+     * @throws BrokerException invalid input param
+     */
     public String subscribe(String topic, String groupId, String offset, EventListener listener) throws BrokerException {
         try {
             validateParam(topic);
-            validateParam(groupId);
             validateParam(offset);
-            validateEventListener(listener);
             TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
             // create topic
             Topic destination = session.createTopic(topic);
@@ -264,9 +267,19 @@ public class WeEventClient implements IWeEventClient {
             log.error("jms exception", e);
             throw jms2BrokerException(e);
         }
+    }git
+    public SendResult publish(String topic, byte[] content, Map<String, String> extensions) throws BrokerException {
+        validateParam(topic);
+        validateArrayParam(content);
+        validateExtensions(extensions);
+        return this.brokerRpc.publish(topic, content, extensions);
     }
 
-
+    public boolean close(String topic, String groupId) throws BrokerException {
+        validateParam(topic);
+        validateParam(groupId);
+        return this.brokerRpc.close(topic, groupId);
+    }
     public boolean exist(String topic, String groupId) throws BrokerException {
         validateParam(topic);
         validateParam(groupId);

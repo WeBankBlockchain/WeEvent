@@ -1,8 +1,6 @@
 package com.webank.weevent.client.sdk;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.net.ssl.SSLContext;
 
@@ -24,7 +22,6 @@ import org.junit.rules.TestName;
 
 import static java.lang.Thread.sleep;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -106,7 +103,7 @@ public class WeEventClientTest {
     }
 
     /**
-     * Method: subscribe(String topic, String offset, IConsumer.ConsumerListener listener)
+     * Method: subscribe(String topic, groupId, String offset, IConsumer.ConsumerListener listener)
      */
     @Test
     public void testSubscribeEventId() throws Exception {
