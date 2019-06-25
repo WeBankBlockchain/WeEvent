@@ -1,13 +1,12 @@
 package com.webank.weevent.client.sdk;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.net.ssl.SSLContext;
 
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
+import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.TopicPage;
@@ -23,7 +22,6 @@ import org.junit.rules.TestName;
 
 import static java.lang.Thread.sleep;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -42,13 +40,12 @@ public class WeEventClientTest {
 
     public String topicName = "com.webank.weevent";
 
-    private WeEventClient weEventClient;
+    private IWeEventClient weEventClient;
 
     @Before
     public void before() throws Exception {
-        weEventClient = new WeEventClient("http://127.0.0.1:8080/weevent");
+        weEventClient = IWeEventClient.build("http://127.0.0.1:8080/weevent");
         weEventClient.open(topicName);
-
     }
 
     @After
@@ -106,7 +103,7 @@ public class WeEventClientTest {
     }
 
     /**
-     * Method: subscribe(String topic, String offset, IConsumer.ConsumerListener listener)
+     * Method: subscribe(String topic, groupId, String offset, IConsumer.ConsumerListener listener)
      */
     @Test
     public void testSubscribeEventId() throws Exception {

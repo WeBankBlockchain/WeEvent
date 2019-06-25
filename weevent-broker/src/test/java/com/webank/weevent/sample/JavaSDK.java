@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.WeEvent;
 import com.webank.weevent.sdk.WeEventClient;
 
@@ -24,7 +25,7 @@ public class JavaSDK {
         System.out.println("This is WeEvent Java SDK sample.");
         try {
             // get client
-            WeEventClient client = new WeEventClient("http://localhost:8080/weevent");
+            IWeEventClient client = IWeEventClient.build("http://localhost:8080/weevent");
 
             // ensure topic exist
             client.open(topicName, groupId);
