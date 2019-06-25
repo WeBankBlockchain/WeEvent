@@ -1,6 +1,5 @@
 package com.webank.weevent.ST;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import com.webank.weevent.JUnitTestBase;
@@ -10,9 +9,7 @@ import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.TopicPage;
 import com.webank.weevent.sdk.WeEvent;
 
-import io.netty.handler.codec.http.HttpMethod;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.MultiValuedMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.HttpEntity;
@@ -22,11 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @Slf4j
@@ -203,72 +197,102 @@ public class RestfullTest extends JUnitTestBase {
 	ResponseEntity<String> rsp = rest.postForEntity(url + "publish", request, String.class);
 	log.info("subscribe, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
 	assertTrue(rsp.getStatusCodeValue() == 200);
-	assertTrue(rsp.getBody().contains(ErrorCode.EVENT_CONTENT_EXCEEDS_MAX_LENGTH.getCode()+""));
+	assertTrue(rsp.getBody().contains(ErrorCode.EVENT_CONTENT_EXCEEDS_MAX_LENGTH.getCode() + ""));
     }
-    
+
     @Test
     public void testPublish_noGroupIdContainExt() {
-	ResponseEntity<SendResult> rsp = rest.getForEntity(url + "publish?topic={topic}&content={content}&weevent-test1={value1}&weevent-test2={value2}",
-		SendResult.class, this.restTopic, this.content,"test1value","test2vlaue");
-	log.info("subscribe, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
-	assertTrue(rsp.getStatusCodeValue() == 200);
-	assertTrue(rsp.getBody().getEventId().contains("-"));
-    }
-    
-    @Test
-    public void testPublish_containGroupIdContainExt() {
-	ResponseEntity<SendResult> rsp = rest.getForEntity(url + "publish?topic={topic}&content={content}&weevent-test1={value1}&weevent-test2={value2}&groupId={groupId}",
-		SendResult.class, this.restTopic, this.content,"test1value","test2vlaue","1");
+	ResponseEntity<SendResult> rsp = rest.getForEntity(
+		url + "publish?topic={topic}&content={content}&weevent-test1={value1}&weevent-test2={value2}",
+		SendResult.class, this.restTopic, this.content, "test1value", "test2vlaue");
 	log.info("subscribe, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
 	assertTrue(rsp.getStatusCodeValue() == 200);
 	assertTrue(rsp.getBody().getEventId().contains("-"));
     }
 
+    @Test
+    public void testPublish_containGroupIdContainExt() {
+	ResponseEntity<SendResult> rsp = rest.getForEntity(url
+		+ "publish?topic={topic}&content={content}&weevent-test1={value1}&weevent-test2={value2}&groupId={groupId}",
+		SendResult.class, this.restTopic, this.content, "test1value", "test2vlaue", "1");
+	log.info("subscribe, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
+	assertTrue(rsp.getStatusCodeValue() == 200);
+	assertTrue(rsp.getBody().getEventId().contains("-"));
+    }
 
     @Test
     public void testSubscribe_containTopicUrl() {
-	ResponseEntity<String> rsp = rest.getForEntity(
-		url + "subscribe?topic={topic}&url={url}", String.class, this.restTopic, "http://localhost:"+ listenPort +"/weevent/mock/rest/onEvent");
+	ResponseEntity<String> rsp = rest.getForEntity(url + "subscribe?topic={topic}&url={url}", String.class,
+		this.restTopic, "http://localhost:" + listenPort + "/weevent/mock/rest/onEvent");
 	log.info("subId: " + rsp.getBody());
 	assertTrue(rsp.getStatusCodeValue() == 200);
 	assertTrue(rsp.getBody().contains("-"));
     }
-    
+
     @Test
     public void testSubscribe_errorUrl() {
-	ResponseEntity<String> rsp = rest.getForEntity(
-		url + "subscribe?topic={topic}&url={url}", String.class, this.restTopic, "http://localhost:"+ listenPort +"/weevent/mock/resvvt/onEvent");
+
+	ResponseEntity<String> rsp = rest.getForEntity(url + "subscribe?topic={topic}&url={url}", String.class,
+		this.restTopic, "http://localhost:" + 8088 + "/weevent/mock/rest/onEvent");
 	log.info("result: " + rsp.getBody());
 	assertTrue(rsp.getStatusCodeValue() == 200);
+	assertTrue(rsp.getBody().contains(ErrorCode.URL_CONNECT_FAILED.getCodeDesc()));
+    }
+
+    @Test
+    public void testSubscribe_containTopicGroupIdUrl() {
+	ResponseEntity<String> rsp = rest.getForEntity(url + "subscribe?topic={topic}&url={url}&groupId={groupId}",
+		String.class, this.restTopic, "http://localhost:" + listenPort + "/weevent/mock/rest/onEvent", "1");
+	log.info("subId: " + rsp.getBody());
+	assertTrue(rsp.getStatusCodeValue() == 200);
 	assertTrue(rsp.getBody().contains("-"));
+    }
+
+    @Test
+    public void testSubscribe_containTopicGroupIdErrorUrl() {
+	ResponseEntity<String> rsp = rest.getForEntity(url + "subscribe?topic={topic}&url={url}&groupId={groupId}",
+		String.class, this.restTopic, "http://localhost:" + 8088 + "/weevent/mock/rest/onEvent", "1");
+	log.info("result: " + rsp.getBody());
+	assertTrue(rsp.getStatusCodeValue() == 200);
+	assertTrue(rsp.getBody().contains(ErrorCode.URL_CONNECT_FAILED.getCodeDesc()));
+    }
+
+    @Test
+    public void testSubscribe_containTopicGroupIdSubIdErrorUrl() {
+	ResponseEntity<String> result = rest.getForEntity(url + "subscribe?topic={topic}&url={url}", String.class,
+		this.restTopic, "http://localhost:" + listenPort + "/weevent/mock/rest/onEvent");
+	subId = result.getBody();
+	ResponseEntity<String> rsp = rest.getForEntity(
+		url + "subscribe?topic={topic}&url={url}&groupId={groupId}&subscriptionId={subscriptionId}",
+		String.class, this.restTopic, "http://localhost:" + 8088 + "/weevent/mock/rest/onEvent", "1", subId);
+	log.info("result: " + rsp.getBody());
+	assertTrue(rsp.getStatusCodeValue() == 200);
+	assertTrue(rsp.getBody().contains(ErrorCode.URL_CONNECT_FAILED.getCodeDesc()));
     }
 
     @Test
     public void testReSubscribe() {
+	ResponseEntity<String> result = rest.getForEntity(url + "subscribe?topic={topic}&url={url}", String.class,
+		this.restTopic, "http://localhost:" + listenPort + "/weevent/mock/rest/onEvent");
+	subId = result.getBody();
 	ResponseEntity<String> rsp = rest.getForEntity(
 		url + "subscribe?topic={topic}&subscriptionId={subscriptionId}&url={url}", String.class, this.restTopic,
-		subId, "http://localhost:"+ listenPort +"/weevent/mock/rest/onEvent");
+		subId, "http://localhost:" + listenPort + "/weevent/mock/rest/onEvent");
 	log.info("subId: " + rsp.getBody());
 	assertTrue(rsp.getStatusCodeValue() == 200);
-	assertTrue(rsp.getBody().contains("-"));
-    }
-
-    @Test
-    public void testListSubId() {
-	ResponseEntity<Map> rsp = rest.getForEntity("http://localhost:8081/weevent/admin/listSubscription", Map.class);
-
-	Map subMap = rsp.getBody();
-	System.out.println("testListSubId, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
-	assertTrue(rsp.getStatusCodeValue() == 200);
+	assertTrue(rsp.getBody().equals(subId));
     }
 
     @Test
     public void testUnsubscribe() {
+	ResponseEntity<String> result = rest.getForEntity(url + "subscribe?topic={topic}&url={url}", String.class,
+		this.restTopic, "http://localhost:" + listenPort + "/weevent/mock/rest/onEvent");
+	subId = result.getBody();
 	ResponseEntity<String> rsp = rest.getForEntity(url + "unSubscribe?subscriptionId={subscriptionId}",
-		String.class, "96da5b3b-8cfa-442e-969e-5af9c65791aa");
-	System.out.println("unsubscribe, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
+		String.class, subId);
+	log.info("unsubscribe, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
 	assertTrue(rsp.getStatusCodeValue() == 200);
-	assertFalse(rsp.getBody().contains("{"));
+	assertTrue(rsp.getBody().equals("true"));
     }
 
     // get 10K string

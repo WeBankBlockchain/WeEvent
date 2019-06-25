@@ -1,6 +1,5 @@
 package com.webank.weevent.ST;
 
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,7 +13,6 @@ import com.webank.weevent.sdk.WeEvent;
 import com.webank.weevent.sdk.WeEventClient;
 
 import lombok.extern.slf4j.Slf4j;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -79,7 +77,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    boolean result = client.open(topic, groupId);
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -108,7 +106,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("open topic error: ", e);
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -122,7 +120,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("open topic error: ", e);
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCode(), e.getCode());
 	}
     }
 
@@ -138,7 +136,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("open topic error: ", e);
-	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -152,7 +150,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("open topic error: ", e);
-	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -180,7 +178,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("open topic error: ", e);
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -194,7 +192,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("open topic error: ", e);
-	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -208,7 +206,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("open topic error: ", e);
-	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -222,7 +220,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("open topic error: ", e);
-	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -236,7 +234,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("open topic error: ", e);
-	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -247,6 +245,20 @@ public class JavaSdkTest extends JUnitTestBase {
     public void testOpen_otherGroupIdExist() {
 	try {
 	    boolean result = client.open(topicName, "2");
+	    assertTrue(result);
+	} catch (BrokerException e) {
+	    log.error("open topic error: ", e);
+	    assertNull(e);
+	}
+    }
+
+    /**
+     * test topic no groupId
+     */
+    @Test
+    public void testOpen_noGroupId() {
+	try {
+	    boolean result = client.open(topicName);
 	    assertTrue(result);
 	} catch (BrokerException e) {
 	    log.error("open topic error: ", e);
@@ -279,7 +291,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("close topic error: ", e);
-	    assertEquals(ErrorCode.TOPIC_NOT_EXIST.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_NOT_EXIST.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -293,7 +305,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    boolean result = client.close(topic, groupId);
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -307,7 +319,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("close topic error: ", e);
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -321,7 +333,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("close topic error: ", e);
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -337,7 +349,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("close topic error: ", e);
-	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -351,7 +363,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("close topic error: ", e);
-	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -365,7 +377,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("close topic error: ", e);
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -379,7 +391,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("close topic error: ", e);
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -393,7 +405,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("close topic error: ", e);
-	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -407,7 +419,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("close topic error: ", e);
-	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -421,7 +433,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("close topic error: ", e);
-	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -435,7 +447,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("close topic error: ", e);
-	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -446,6 +458,20 @@ public class JavaSdkTest extends JUnitTestBase {
     public void testClose_otherGroupIdExist() {
 	try {
 	    boolean result = client.close(topicName, "2");
+	    assertTrue(result);
+	} catch (BrokerException e) {
+	    log.error("close topic error: ", e);
+	    assertNull(e);
+	}
+    }
+
+    /**
+     * test no group Id
+     */
+    @Test
+    public void testClose_noGroupId() {
+	try {
+	    boolean result = client.close(topicName);
 	    assertTrue(result);
 	} catch (BrokerException e) {
 	    log.error("close topic error: ", e);
@@ -492,7 +518,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    boolean result = client.exist(topic, groupId);
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -506,7 +532,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -520,7 +546,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -536,7 +562,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -550,7 +576,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -564,7 +590,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -578,7 +604,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("existerror: ", e);
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -592,7 +618,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -606,7 +632,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -620,7 +646,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -634,7 +660,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -645,6 +671,20 @@ public class JavaSdkTest extends JUnitTestBase {
     public void testExist_otherGroupIdExist() {
 	try {
 	    boolean result = client.exist(topicName, "2");
+	    assertTrue(result);
+	} catch (BrokerException e) {
+	    log.error("exist error: ", e);
+	    assertNull(e);
+	}
+    }
+
+    /**
+     * test no groupId
+     */
+    @Test
+    public void testExist_noGroupId() {
+	try {
+	    boolean result = client.exist(topicName);
 	    assertTrue(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
@@ -680,7 +720,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.TOPIC_NOT_EXIST.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_NOT_EXIST.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -694,7 +734,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    TopicInfo result = client.state(topic, groupId);
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -708,7 +748,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -722,7 +762,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -738,7 +778,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -752,7 +792,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -766,7 +806,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -780,7 +820,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("existerror: ", e);
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -794,7 +834,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -808,7 +848,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -822,7 +862,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -836,7 +876,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -847,6 +887,23 @@ public class JavaSdkTest extends JUnitTestBase {
     public void testState_otherGroupIdExist() {
 	try {
 	    TopicInfo result = client.state(topicName, "2");
+	} catch (BrokerException e) {
+	    log.error("exist error: ", e);
+	    assertNull(e);
+	}
+    }
+
+    /**
+     * test no groupId
+     */
+    @Test
+    public void testState_noGroupId() {
+	try {
+	    TopicInfo result = client.state(topicName);
+	    Assert.assertTrue(result != null);
+	    Assert.assertTrue(!result.getTopicAddress().equals(""));
+	    Assert.assertTrue(!result.getSenderAddress().equals(""));
+	    Assert.assertTrue(!(result.getCreatedTimestamp() == 0));
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
 	    assertNull(e);
@@ -897,7 +954,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    Assert.assertNotNull(e);
-	    assertEquals(ErrorCode.TOPIC_PAGE_INDEX_INVALID.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_PAGE_INDEX_INVALID.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -913,7 +970,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    Assert.assertNotNull(e);
-	    assertEquals(ErrorCode.TOPIC_PAGE_INDEX_INVALID.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_PAGE_INDEX_INVALID.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -929,21 +986,21 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    Assert.assertNotNull(e);
-	    assertEquals(ErrorCode.TOPIC_PAGE_SIZE_INVALID.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_PAGE_SIZE_INVALID.getCodeDesc(), e.getMessage());
 	}
     }
 
     /**
-     * list test pageIndex = 0 & pageSize = 100
+     * list test pageIndex = 1000 & pageSize = 50
      */
     @Test
     public void testList6() {
-	Integer pageIndex = 0;
-	Integer pageSize = 100;
+	Integer pageIndex = 1000;
+	Integer pageSize = 50;
 	try {
 	    TopicPage result = client.list(pageIndex, pageSize, groupId);
 	    Assert.assertTrue(result != null);
-	    Assert.assertTrue(result.getTopicInfoList().size() > 0);
+	    Assert.assertTrue(result.getTotal() > 0);
 	} catch (BrokerException e) {
 	    assertNull(e);
 	}
@@ -961,7 +1018,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    Assert.assertNotNull(e);
-	    assertEquals(ErrorCode.TOPIC_PAGE_SIZE_INVALID.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_PAGE_SIZE_INVALID.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -977,7 +1034,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    Assert.assertNotNull(e);
-	    assertEquals(ErrorCode.TOPIC_PAGE_SIZE_INVALID.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_PAGE_SIZE_INVALID.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -993,7 +1050,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    Assert.assertNotNull(e);
-	    assertEquals(ErrorCode.TOPIC_PAGE_SIZE_INVALID.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_PAGE_SIZE_INVALID.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1003,11 +1060,11 @@ public class JavaSdkTest extends JUnitTestBase {
     @Test
     public void testList_groupIdIsNull() {
 	try {
-	    TopicPage result = client.list(0, 10, groupId);
+	    TopicPage result = client.list(0, 10, null);
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("existerror: ", e);
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1021,7 +1078,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1035,7 +1092,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1049,7 +1106,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1063,7 +1120,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1076,6 +1133,22 @@ public class JavaSdkTest extends JUnitTestBase {
 	    TopicPage result = client.list(0, 10, "2");
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
+	    assertNull(e);
+	}
+    }
+
+    /**
+     * list test no groupId
+     */
+    @Test
+    public void testList_noGroupId() {
+	Integer pageIndex = 0;
+	Integer pageSize = 10;
+	try {
+	    TopicPage result = client.list(pageIndex, pageSize);
+	    Assert.assertTrue(result != null);
+	    Assert.assertTrue(result.getTopicInfoList().size() > 0);
+	} catch (BrokerException e) {
 	    assertNull(e);
 	}
     }
@@ -1107,7 +1180,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.TOPIC_NOT_EXIST.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_NOT_EXIST.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1121,7 +1194,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    SendResult result = client.publish(topic, groupId, "hello".getBytes(), extensions);
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1135,7 +1208,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1149,7 +1222,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1165,7 +1238,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1179,7 +1252,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1193,7 +1266,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1206,8 +1279,8 @@ public class JavaSdkTest extends JUnitTestBase {
 	    SendResult result = client.publish(this.topicName, null, "hello".getBytes(), extensions);
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    log.error("existerror: ", e);
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    log.error("publish error: ", e);
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1221,7 +1294,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1235,7 +1308,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1249,7 +1322,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1263,7 +1336,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1289,7 +1362,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    SendResult result = client.publish(this.topicName, groupId, null, extensions);
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.EVENT_CONTENT_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.EVENT_CONTENT_IS_BLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1302,7 +1375,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    SendResult result = client.publish(this.topicName, groupId, "".getBytes(), extensions);
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.EVENT_CONTENT_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.EVENT_CONTENT_IS_BLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1315,7 +1388,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    SendResult result = client.publish(this.topicName, groupId, " ".getBytes(), extensions);
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.EVENT_CONTENT_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.EVENT_CONTENT_IS_BLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1325,10 +1398,10 @@ public class JavaSdkTest extends JUnitTestBase {
     @Test
     public void testPublish_extIsNull() {
 	try {
-	    SendResult result = client.publish(this.topicName, groupId, "hello".getBytes(), extensions);
+	    SendResult result = client.publish(this.topicName, groupId, "hello".getBytes(), null);
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCode(), e.getCode());
+	    assertEquals(ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1343,7 +1416,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    SendResult result = client.publish(this.topicName, groupId, "hello".getBytes(), ext);
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCode(), e.getCode());
+	    assertEquals(ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1398,6 +1471,21 @@ public class JavaSdkTest extends JUnitTestBase {
     }
 
     /**
+     * test topic no groupId
+     */
+    @Test
+    public void testPublish_noGroupId() {
+	try {
+	    SendResult result = client.publish(this.topicName, "hello".getBytes(), extensions);
+	    assertEquals(SendResult.SendResultStatus.SUCCESS, result.getStatus());
+	    assertNotNull(result.getEventId());
+	    assertEquals(result.getTopic(), topicName);
+	} catch (BrokerException e) {
+	    assertNull(e);
+	}
+    }
+
+    /**
      * test eventId exist
      */
     @Test
@@ -1420,7 +1508,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    WeEvent result = client.getEvent("sdfs", groupId);
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.EVENT_ID_IS_ILLEGAL.getCode(), e.getCode());
+	    assertEquals(ErrorCode.EVENT_ID_IS_ILLEGAL.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1433,7 +1521,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    WeEvent result = client.getEvent("317e7c4c-75-dsff", groupId);
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.EVENT_ID_IS_ILLEGAL.getCode(), e.getCode());
+	    assertEquals(ErrorCode.EVENT_ID_IS_ILLEGAL.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1446,7 +1534,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    WeEvent result = client.getEvent("317e7c4c-75-329000", groupId);
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.EVENT_ID_IS_MISMATCH.getCode(), e.getCode());
+	    assertEquals(ErrorCode.EVENT_ID_IS_MISMATCH.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1459,7 +1547,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    WeEvent result = client.getEvent("317e7c4c-75-3", groupId);
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.EVENT_ID_NOT_EXIST.getCode(), e.getCode());
+	    assertEquals(ErrorCode.EVENT_ID_NOT_EXIST.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1472,7 +1560,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    WeEvent result = client.getEvent(null, groupId);
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.EVENT_ID_IS_ILLEGAL.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1485,7 +1573,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    WeEvent result = client.getEvent("", groupId);
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.EVENT_ID_IS_ILLEGAL.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1498,7 +1586,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    WeEvent result = client.getEvent(" ", groupId);
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.EVENT_ID_IS_ILLEGAL.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1512,7 +1600,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    WeEvent result = client.getEvent(id, groupId);
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.EVENT_ID_EXCEEDS_MAX_LENGTH.getCode(), e.getCode());
+	    assertEquals(ErrorCode.EVENT_ID_EXCEEDS_MAX_LENGTH.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1526,7 +1614,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("existerror: ", e);
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1540,7 +1628,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1554,7 +1642,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1568,7 +1656,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1582,7 +1670,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertNull(result);
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
-	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1598,6 +1686,20 @@ public class JavaSdkTest extends JUnitTestBase {
 	    assertEquals(new String(result.getContent()), "Hello World!");
 	} catch (BrokerException e) {
 	    log.error("exist error: ", e);
+	    assertNull(e);
+	}
+    }
+
+    /**
+     * test no groupId
+     */
+    @Test
+    public void testEvent_noGroupId() {
+	try {
+	    WeEvent event = client.getEvent(this.eventId);
+	    assertEquals(event.getEventId(), this.eventId);
+	    assertEquals(new String(event.getContent()), "Hello World!");
+	} catch (BrokerException e) {
 	    assertNull(e);
 	}
     }
@@ -1622,7 +1724,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    });
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1646,7 +1748,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    });
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1670,7 +1772,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    });
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1695,7 +1797,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    });
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1721,7 +1823,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    });
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1745,7 +1847,187 @@ public class JavaSdkTest extends JUnitTestBase {
 	    });
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCodeDesc(), e.getMessage());
+	}
+    }
+
+    /**
+     * test topic contain WildCard
+     */
+    @Test
+    public void testSubscribe_topicContainWildCard() throws InterruptedException {
+	try {
+	    client.open("com.weevent.testzjy/test");
+	    String result = client.subscribe("com.weevent.testzjy/#", WeEvent.OFFSET_LAST,
+		    new WeEventClient.EventListener() {
+
+			@Override
+			public void onException(Throwable e) {
+
+			}
+
+			@Override
+			public void onEvent(WeEvent event) {
+			    log.info(event.getEventId());
+
+			}
+		    });
+	    assertNotNull(result);
+	    client.publish("com.weevent.testzjy/test", "Hello World!".getBytes());
+	    Thread.sleep(3000);
+	} catch (BrokerException e) {
+	    assertNull(e);
+	}
+    }
+
+    /**
+     * test groupId is null
+     */
+    @Test
+    public void testSubscribe_groupIdIsNull() throws InterruptedException {
+	try {
+	    String result = client.subscribe(this.topicName, null, WeEvent.OFFSET_LAST,
+		    new WeEventClient.EventListener() {
+
+			@Override
+			public void onException(Throwable e) {
+
+			}
+
+			@Override
+			public void onEvent(WeEvent event) {
+			    log.info(event.getEventId());
+
+			}
+		    });
+	    assertNull(result);
+	} catch (BrokerException e) {
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
+	}
+    }
+
+    /**
+     * test groupId is not a number
+     */
+    @Test
+    public void testSubscribe_groupIdIsNotNum() throws InterruptedException {
+	try {
+	    String result = client.subscribe(this.topicName, "sadsa", WeEvent.OFFSET_LAST,
+		    new WeEventClient.EventListener() {
+
+			@Override
+			public void onException(Throwable e) {
+
+			}
+
+			@Override
+			public void onEvent(WeEvent event) {
+
+			}
+		    });
+	    assertNull(result);
+	} catch (BrokerException e) {
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCodeDesc(), e.getMessage());
+	}
+    }
+
+    /**
+     * test groupId = 0
+     */
+    @Test
+    public void testSubscribe_groupIdEq0() throws InterruptedException {
+	try {
+	    String result = client.subscribe(this.topicName, "0", WeEvent.OFFSET_LAST,
+		    new WeEventClient.EventListener() {
+
+			@Override
+			public void onException(Throwable e) {
+
+			}
+
+			@Override
+			public void onEvent(WeEvent event) {
+
+			}
+		    });
+	    assertNull(result);
+	} catch (BrokerException e) {
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
+	}
+    }
+
+    /**
+     * test groupId < 0
+     */
+    @Test
+    public void testSubscribe_groupIdLt0() throws InterruptedException {
+	try {
+	    String result = client.subscribe(this.topicName, "-1", WeEvent.OFFSET_LAST,
+		    new WeEventClient.EventListener() {
+
+			@Override
+			public void onException(Throwable e) {
+
+			}
+
+			@Override
+			public void onEvent(WeEvent event) {
+
+			}
+		    });
+	    assertNull(result);
+	} catch (BrokerException e) {
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
+	}
+    }
+
+    /**
+     * test groupId not Exist
+     */
+    @Test
+    public void testSubscribe_groupIdNotExist() throws InterruptedException {
+	try {
+	    String result = client.subscribe(this.topicName, "4", WeEvent.OFFSET_LAST,
+		    new WeEventClient.EventListener() {
+
+			@Override
+			public void onException(Throwable e) {
+
+			}
+
+			@Override
+			public void onEvent(WeEvent event) {
+
+			}
+		    });
+	    assertNull(result);
+	} catch (BrokerException e) {
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCodeDesc(), e.getMessage());
+	}
+    }
+
+    /**
+     * test groupId other Exist
+     */
+    @Test
+    public void testSubscribe_groupIdOtherExist() throws InterruptedException {
+	try {
+	    String result = client.subscribe(this.topicName, "2", WeEvent.OFFSET_LAST,
+		    new WeEventClient.EventListener() {
+
+			@Override
+			public void onException(Throwable e) {
+
+			}
+
+			@Override
+			public void onEvent(WeEvent event) {
+
+			}
+		    });
+	    assertNotNull(result);
+	} catch (BrokerException e) {
+	    assertNotNull(e);
 	}
     }
 
@@ -1839,10 +2121,9 @@ public class JavaSdkTest extends JUnitTestBase {
 
 		}
 	    });
-	    System.out.println(result);
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.EVENT_ID_IS_ILLEGAL.getCode(), e.getCode());
+	    assertEquals(ErrorCode.EVENT_ID_IS_ILLEGAL.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1866,7 +2147,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    });
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.EVENT_ID_IS_ILLEGAL.getCode(), e.getCode());
+	    assertEquals(ErrorCode.EVENT_ID_IS_ILLEGAL.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1890,7 +2171,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    });
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.EVENT_ID_IS_ILLEGAL.getCode(), e.getCode());
+	    assertEquals(ErrorCode.EVENT_ID_IS_ILLEGAL.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1914,7 +2195,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    });
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.EVENT_ID_IS_ILLEGAL.getCode(), e.getCode());
+	    assertEquals(ErrorCode.EVENT_ID_IS_ILLEGAL.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1938,7 +2219,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    });
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.EVENT_ID_IS_MISMATCH.getCode(), e.getCode());
+	    assertEquals(ErrorCode.EVENT_ID_IS_MISMATCH.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1964,7 +2245,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    });
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.EVENT_ID_EXCEEDS_MAX_LENGTH.getCode(), e.getCode());
+	    assertEquals(ErrorCode.EVENT_ID_EXCEEDS_MAX_LENGTH.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -1989,7 +2270,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    });
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.OFFSET_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -2014,7 +2295,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    });
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.OFFSET_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -2039,7 +2320,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    });
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.OFFSET_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -2050,10 +2331,10 @@ public class JavaSdkTest extends JUnitTestBase {
     public void testSubscribe_listennerIsNull() {
 
 	try {
-	    String result = client.subscribe(this.topicName, " ", null);
+	    String result = client.subscribe(this.topicName, WeEvent.OFFSET_LAST, null);
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.OFFSET_IS_BLANK.getCode(), e.getCode());
+	    assertEquals(ErrorCode.OFFSET_IS_BLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -2093,7 +2374,7 @@ public class JavaSdkTest extends JUnitTestBase {
 	    Boolean result = client.unSubscribe("sfsghhr");
 	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertEquals(ErrorCode.SUBSCRIPTIONID_NOT_EXIST.getCode(), e.getCode());
+	    assertEquals(ErrorCode.SUBSCRIPTIONID_NOT_EXIST.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -2105,9 +2386,9 @@ public class JavaSdkTest extends JUnitTestBase {
 
 	try {
 	    Boolean result = client.unSubscribe(null);
-	    assertFalse(result);
+	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertNull(e);
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -2119,9 +2400,9 @@ public class JavaSdkTest extends JUnitTestBase {
 
 	try {
 	    Boolean result = client.unSubscribe("");
-	    assertFalse(result);
+	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertNull(e);
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
@@ -2133,9 +2414,9 @@ public class JavaSdkTest extends JUnitTestBase {
 
 	try {
 	    Boolean result = client.unSubscribe(" ");
-	    assertFalse(result);
+	    assertNull(result);
 	} catch (BrokerException e) {
-	    assertNull(e);
+	    assertEquals(ErrorCode.PARAM_ISBLANK.getCodeDesc(), e.getMessage());
 	}
     }
 
