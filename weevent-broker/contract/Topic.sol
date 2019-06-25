@@ -1,8 +1,8 @@
 pragma solidity ^0.4.4;
 
 contract Topic {
-    uint _sequence_start = 1;
-
+    uint sequenceNumber = 0;
+    uint blockNumber = 0;
     event LogWeEvent(
         string topicName,
         uint eventSeq,
@@ -19,8 +19,23 @@ contract Topic {
         public
         returns (bool)
     {
-
-        LogWeEvent(topicName, _sequence_start++, block.number, eventContent, extensions);
+        blockNumber = block.number;
+        sequenceNumber = sequenceNumber + 1;
+        LogWeEvent(topicName, sequenceNumber, block.number, eventContent, extensions);
         return true;
+    }
+
+    function getBlockNumber()
+        public
+        constant
+        returns (uint){
+        return blockNumber;
+    }
+
+    function getSequenceNumber()
+        public
+        constant
+        returns (uint){
+        return sequenceNumber;
     }
 }

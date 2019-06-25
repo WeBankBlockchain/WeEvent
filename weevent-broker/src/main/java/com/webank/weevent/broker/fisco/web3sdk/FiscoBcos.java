@@ -229,12 +229,18 @@ public class FiscoBcos {
 
             String senderAddress = typeList.get(1).toString();
             Long createdTimestamp = ((Uint256) typeList.get(2)).getValue().longValue();
-
+            //get topic.sol contract info
+            Topic topicData = getTopic(topicName);
+            if (topicData == null) {
+                throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
+            }
             TopicInfo topicInfo = new TopicInfo();
             topicInfo.setTopicName(topicName);
             topicInfo.setTopicAddress(topicAddress);
             topicInfo.setCreatedTimestamp(createdTimestamp);
             topicInfo.setSenderAddress(senderAddress);
+            topicInfo.setBlockNumber(topicData.getBlockNumber().get().getValue().longValue());
+            topicInfo.setSequenceNumber(topicData.getSequenceNumber().get().getValue().longValue());
             return topicInfo;
         } catch (InterruptedException | ExecutionException e) {
             log.error("get topic info failed due to transaction execution error. ", e);
