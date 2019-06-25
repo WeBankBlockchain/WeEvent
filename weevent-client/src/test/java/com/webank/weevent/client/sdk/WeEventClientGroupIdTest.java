@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.net.ssl.SSLContext;
 
 import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.TopicPage;
@@ -40,12 +41,12 @@ public class WeEventClientGroupIdTest {
 
     public String groupId = "1";
 
-    private WeEventClient weEventClient;
+    private IWeEventClient weEventClient;
 
     @Before
     public void before() throws Exception {
         extensions.put("weevent-url", "https://github.com/WeBankFinTech/WeEvent");
-        weEventClient = new WeEventClient("http://127.0.0.1:8080/weevent");
+        weEventClient = IWeEventClient.build("http://127.0.0.1:8080/weevent");
         weEventClient.open(topicName);
     }
 
