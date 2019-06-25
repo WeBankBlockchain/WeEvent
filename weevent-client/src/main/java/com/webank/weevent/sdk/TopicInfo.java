@@ -30,4 +30,14 @@ public class TopicInfo {
      * Create time.
      */
     private Long createdTimestamp;
+
+    /**
+     * Sequence number.
+     */
+    private Long sequenceNumber;
+
+    /**
+     * block number.
+     */
+    private Long blockNumber;
 }

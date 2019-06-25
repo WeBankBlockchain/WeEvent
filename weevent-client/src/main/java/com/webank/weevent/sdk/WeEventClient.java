@@ -111,6 +111,56 @@ public class WeEventClient implements IWeEventClient {
         return this.brokerRpc.publish(topic, content);
     }
 
+    /**
+     * Subscribe events from topic.
+     *
+     * @param topic topic name
+     * @param groupId groupId
+     * @param offset, from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
+     * @param listener callback
+     * @return subscription Id
+     * @throws BrokerException invalid input param
+     */
+    public String subscribe(String topic, String groupId, String offset, EventListener listener) throws BrokerException {
+        try {
+            validateParam(topic);
+            validateParam(offset);
+            TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+            // create topic
+            Topic destination = session.createTopic(topic);
+
+            // create subscriber
+            ((WeEventTopic) destination).setOffset(offset);
+            ((WeEventTopic) destination).setGroupId(groupId);//if not set default 1
+            WeEventTopicSubscriber subscriber = (WeEventTopicSubscriber) session.createSubscriber(destination);
+
+            // create listener
+            subscriber.setMessageListener(new MessageListener() {
+                public void onMessage(Message message) {
+                    if (message instanceof BytesMessage) {
+                        try {
+                            BytesMessage bytesMessage = (BytesMessage) message;
+                            ObjectMapper mapper = new ObjectMapper();
+                            byte[] body = new byte[(int) bytesMessage.getBodyLength()];
+                            bytesMessage.readBytes(body);
+                            WeEvent event = mapper.readValue(body, WeEvent.class);
+                            listener.onEvent(event);
+                        } catch (IOException | JMSException e) {
+                            log.error("onMessage exception", e);
+                            listener.onException(e);
+                        }
+                    }
+                }
+            });
+
+            this.sessionMap.put(subscriber.getSubscriptionId(), session);
+            return subscriber.getSubscriptionId();
+        } catch (JMSException e) {
+            log.error("jms exception", e);
+            throw jms2BrokerException(e);
+        }
+    }
+
     public String subscribe(String topic, String offset, EventListener listener) throws BrokerException {
         try {
             validateParam(topic);
@@ -150,6 +200,14 @@ public class WeEventClient implements IWeEventClient {
         }
     }
 
+    /**
+     * Unsubscribe an exist subscription subscribed by subscribe interface.
+     * The consumer will no longer receive messages from broker after this.
+     *
+     * @param subscriptionId invalid input
+     * @return success if true
+     * @throws BrokerException broker exception
+     */
     public boolean unSubscribe(String subscriptionId) throws BrokerException {
         validateParam(subscriptionId);
 
@@ -216,50 +274,6 @@ public class WeEventClient implements IWeEventClient {
         validateParam(groupId);
         return this.brokerRpc.close(topic, groupId);
     }
-
-
-    public String subscribe(String topic, String groupId, String offset, EventListener listener) throws BrokerException {
-        try {
-            validateParam(topic);
-            validateParam(offset);
-            TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-            // create topic
-            Topic destination = session.createTopic(topic);
-
-            // create subscriber
-            ((WeEventTopic) destination).setOffset(offset);
-            ((WeEventTopic) destination).setGroupId(groupId);//if not set default 1
-            WeEventTopicSubscriber subscriber = (WeEventTopicSubscriber) session.createSubscriber(destination);
-
-            // create listener
-            subscriber.setMessageListener(new MessageListener() {
-                public void onMessage(Message message) {
-                    if (message instanceof BytesMessage) {
-                        try {
-                            BytesMessage bytesMessage = (BytesMessage) message;
-                            ObjectMapper mapper = new ObjectMapper();
-                            byte[] body = new byte[(int) bytesMessage.getBodyLength()];
-                            bytesMessage.readBytes(body);
-                            WeEvent event = mapper.readValue(body, WeEvent.class);
-                            listener.onEvent(event);
-                        } catch (IOException | JMSException e) {
-                            log.error("onMessage exception", e);
-                            listener.onException(e);
-                        }
-                    }
-                }
-            });
-
-            this.sessionMap.put(subscriber.getSubscriptionId(), session);
-            return subscriber.getSubscriptionId();
-        } catch (JMSException e) {
-            log.error("jms exception", e);
-            throw jms2BrokerException(e);
-        }
-    }
-
-
-
     public boolean exist(String topic, String groupId) throws BrokerException {
         validateParam(topic);
         validateParam(groupId);
