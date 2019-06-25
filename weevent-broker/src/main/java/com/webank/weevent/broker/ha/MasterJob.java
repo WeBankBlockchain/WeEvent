@@ -6,6 +6,7 @@ import java.net.URL;
 
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.fisco.util.SystemInfoUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.protocol.jsonrpc.IBrokerRpcCallback;
@@ -107,6 +108,7 @@ public class MasterJob {
     }
 
     public String doSubscribe(String type, String topic, String groupId, String subscriptionId, String url, String urlFormat) throws BrokerException {
+        ParamCheckUtils.validateUrl(url);
         RestTemplate restCallback = getRestCallback();
         IBrokerRpcCallback jsonCallback = getJsonRpcCallback(url);
         if (jsonCallback == null) {
