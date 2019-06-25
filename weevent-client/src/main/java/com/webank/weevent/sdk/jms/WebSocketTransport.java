@@ -328,6 +328,7 @@ public class WebSocketTransport extends WebSocketClient {
 
                     // check SubscriptionId
                     log.info("messageId:{}", messageId);
+                    log.info("event:{}",event.toString());
                     this.subscriptionCache.get(event.getTopic()).setOffset(event.getEventId());
                     if (this.receiptId2SubscriptionId.size() == this.subscriptionId2ReceiptId.size()) {
                         if (this.receiptId2SubscriptionId.containsKey(messageId)) {
