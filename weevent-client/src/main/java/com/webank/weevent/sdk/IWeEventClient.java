@@ -9,7 +9,7 @@ public interface IWeEventClient {
      *
      * @throws BrokerException broker exception
      */
-    public static IWeEventClient build() throws BrokerException {
+    static IWeEventClient build() throws BrokerException {
         return new WeEventClient();
     }
 

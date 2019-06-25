@@ -108,13 +108,15 @@ public class WeEventClient implements IWeEventClient {
 
     public SendResult publish(String topic, byte[] content) throws BrokerException {
         validateParam(topic);
+        validateArrayParam(content);
         return this.brokerRpc.publish(topic, content);
     }
 
-    public String subscribe(String topic, String offset, EventListener listener) throws BrokerException {
+    public String subscribe(String topic, String offset, EventListener  listener) throws BrokerException {
         try {
             validateParam(topic);
             validateParam(offset);
+            validateEventListener(listener);
             TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
             // create topic
             Topic destination = session.createTopic(topic);
@@ -203,11 +205,15 @@ public class WeEventClient implements IWeEventClient {
     public SendResult publish(String topic, String groupId, byte[] content, Map<String, String> extensions) throws BrokerException {
         validateParam(topic);
         validateParam(groupId);
+        validateArrayParam(content);
+        validateExtensions(extensions);
         return this.brokerRpc.publish(topic, groupId, content, extensions);
     }
 
     public SendResult publish(String topic, byte[] content, Map<String, String> extensions) throws BrokerException {
         validateParam(topic);
+        validateArrayParam(content);
+        validateExtensions(extensions);
         return this.brokerRpc.publish(topic, content, extensions);
     }
 
@@ -221,7 +227,9 @@ public class WeEventClient implements IWeEventClient {
     public String subscribe(String topic, String groupId, String offset, EventListener listener) throws BrokerException {
         try {
             validateParam(topic);
+            validateParam(groupId);
             validateParam(offset);
+            validateEventListener(listener);
             TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
             // create topic
             Topic destination = session.createTopic(topic);
@@ -257,7 +265,6 @@ public class WeEventClient implements IWeEventClient {
             throw jms2BrokerException(e);
         }
     }
-
 
 
     public boolean exist(String topic, String groupId) throws BrokerException {
@@ -405,6 +412,41 @@ public class WeEventClient implements IWeEventClient {
     }
 
 
+    /**
+     * check the param
+     *
+     * @param param param
+     * @throws BrokerException
+     */
+    private static void validateArrayParam(byte[] param) throws BrokerException {
+        if (param.length == 0) {
+            throw new BrokerException(ErrorCode.PARAM_ISEMPTY);
+        }
+    }
+
+
+    /**
+     * check the param
+     *
+     * @param listener param
+     * @throws BrokerException
+     */
+    private static void validateEventListener(EventListener  listener) throws BrokerException {
+        if( listener == null) {
+            throw new BrokerException(ErrorCode.PARAM_ISNULL);
+        }
+    }
+    /**
+     * check the param
+     *
+     * @param extensions extensions param
+     * @throws BrokerException
+     */
+    private static void validateExtensions(Map<String,String>  extensions) throws BrokerException {
+        if( extensions == null) {
+            throw new BrokerException(ErrorCode.PARAM_ISNULL);
+        }
+    }
     /**
      * check the username and the password
      *
