@@ -22,7 +22,7 @@
 				.color_part{
 					width:40px;
 					height:40px;
-					margin-left: 20px;
+					margin-left: 10px;
 					border-radius: 20px;
 					display: flex;
 					justify-content:space-between;
@@ -51,18 +51,20 @@
 				}
 
 				.number{
-					font-size: 14px;
+					font-size: 12px;
 					color:@gray_text
 				}
 				&:nth-child(2){
-					margin:20px 0;
+					margin:24px 0;
 				}
 			}
 		}
 		.chart{
 			width:78%;
-			height:280px;
+			height:288px;
 			border-radius: 5px;
+			padding:10px 15px;
+			background:#fff;
 			@shadow();
 		}
 	}
@@ -70,17 +72,17 @@
 		display: flex;
 		flex-direction: row;
 		justify-content: space-between;
-		margin-top:20px;
+		margin-top:24px;
 		.block,.transaction{
 			width:49%;
 			border-radius: 5px;
 			background:#fff;
-			box-shadow: 0 4px 12px 0 #dfe2e9;
+			@shadow();
 			.title{
 				display: flex;
 				flex-direction: row;
 				justify-content: space-between;
-				padding:0 15px;
+				padding:0 24px;
 				height:70px;
 				line-height: 70px;
 				border-bottom:1px solid #f1f1f1;
@@ -101,7 +103,7 @@
 				flex-direction: row;
 				justify-content: space-between;
 				align-items: center;
-				padding:15px 10px;
+				padding:15px 24px;
 				font-size: 14px;
 				&>div{
 					p:first-child{
@@ -198,12 +200,17 @@
 
 	.trans_detial li{
 		display: flex;
-		color:rgb(115, 122, 134);
 		padding:5px 0;
 		span:nth-child(1){
 			width:100px;
 			font-weight: 700;
 			font-size: 12px;
+			text-align: right;
+			padding-right: 20px;
+			font-weight: bold;
+		}
+		span:last-child{
+			color:@gray_text;
 		}
 		.funciton_detial{
 			border:1px solid #EBEEF5;
