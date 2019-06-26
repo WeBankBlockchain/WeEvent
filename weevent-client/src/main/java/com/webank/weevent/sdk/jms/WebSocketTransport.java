@@ -66,10 +66,11 @@ public class WebSocketTransport extends WebSocketClient {
     // (headerId in stomp <-> asyncSeq in biz )
     private Map<String, Long> sequence2Id;
 
-    //(topic <-> eventId)
+    //(topic <-> event topic)
     public Map<String, WeEventTopic> subscriptionCache;
 
-    // private WSThread wSThread;
+    //(subscription <-> weevent topic)
+    public Map<String, WeEventTopic> subscription2EventCache;
 
     public Boolean connectFlag = FALSE;
 
@@ -256,120 +257,158 @@ public class WebSocketTransport extends WebSocketClient {
             log.info("topic Connection is null");
             return;
         }
-
         //decode from message
         StompDecoder decoder = new StompDecoder();
         List<Message<byte[]>> messages = decoder.decode(ByteBuffer.wrap(message.getBytes(StandardCharsets.UTF_8)));
-        StompHeaderAccessor accessor;
         for (Message<byte[]> stompMsg : messages) {
-            accessor = StompHeaderAccessor.wrap(stompMsg);
-            StompCommand command = accessor.getCommand();
-            if (command == null) {
-                continue;
-            }
+            // handle the frame from the server
+            handleFrame(stompMsg);
+        }
+    }
 
-            String cmd = command.name();
-            String receiptId = null;
-            if (cmd.equals("RECEIPT")) {
-                if (accessor.getReceiptId() != null) {
-                    receiptId = accessor.getReceiptId();
-                }
-            }
+    private void handleFrame(Message<byte[]> stompMsg) {
+        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(stompMsg);
+        StompCommand command = accessor.getCommand();
 
-            String subscriptionId = null;
-            String messageId = null;
-            if (accessor.getNativeHeader("subscription-id") != null) {
-                subscriptionId = accessor.getNativeHeader("subscription-id").get(0);
-            }
-            if (accessor.getNativeHeader("message-id") != null) {
-                messageId = accessor.getNativeHeader("message-id").get(0);
-            }
-            log.debug("stomp command from server: {}", cmd);
-            switch (cmd) {
-                // connect response
-                case "CONNECTED":
-                    // connect command always 0
+        String cmd = command.name();
 
-                    futures.get(0L).setResponse(stompMsg);
-                    break;
+        log.debug("stomp command from server: {}", cmd);
+        switch (cmd) {
+            // connect response
+            case "CONNECTED":
+                // connect command always 0
+                futures.get(0L).setResponse(stompMsg);
+                break;
+            // disconnect/send/subscribe/unsubscribe response
+            case "RECEIPT":
+                handleReceiptFrame(stompMsg);
+                break;
 
-                // disconnect/send/subscribe/unsubscribe response
-                case "RECEIPT":
-                    // add the map<receiptId2SubscriptionId>
-                    if (futures.containsKey(sequence2Id.get(receiptId))) {
-                        if (subscriptionId != null) {
-                            log.info("subscriptionId {}", subscriptionId);
-                            // receiptId2SubscriptionId length subscriptionId2ReceiptId length
-                            this.receiptId2SubscriptionId.put(receiptId, subscriptionId);
-                            this.subscriptionId2ReceiptId.put(subscriptionId, receiptId);
-                        }
-                        futures.get(sequence2Id.get(receiptId)).setResponse(stompMsg);
-                    } else {
-                        log.error("unknown receipt-id: {}", receiptId);
-                    }
-                    break;
+            case "ERROR":
+                handleErrorMessage(stompMsg);
+                break;
+            case "MESSAGE":
+                handleMessageFrame(stompMsg);
 
-                case "ERROR":
-                    log.error("command from stomp server: {}", cmd);
-                    String recepitId = "";
-                    if (accessor.getNativeHeader("receipt-id") != null) {
-                        recepitId = accessor.getNativeHeader("receipt-id").get(0);
-                    }
-                    futures.get(sequence2Id.get(receiptId)).setResponse(stompMsg);
-                    break;
-                case "MESSAGE":
-                    WeEvent event = null;
-                    try {
-                        ObjectMapper mapper = new ObjectMapper();
-                        event = mapper.readValue(stompMsg.getPayload(), WeEvent.class);
-                    } catch (IOException e) {
-                        log.error("jackson decode WeEvent failed", e);
-                    }
+                break;
 
-                    // check SubscriptionId
-                    log.info("messageId:{}", messageId);
-                    log.info("event:{}",event.toString());
-                    this.subscriptionCache.get(event.getTopic()).setOffset(event.getEventId());
-                    if (this.receiptId2SubscriptionId.size() == this.subscriptionId2ReceiptId.size()) {
-                        if (this.receiptId2SubscriptionId.containsKey(messageId)) {
-                            WeEventStompCommand weEventStompCommand = new WeEventStompCommand(event);
-                            weEventStompCommand.setSubscriptionId(subscriptionId);
-                            weEventStompCommand.setHeaderId(messageId);
-                            this.topicConnection.dispatch(weEventStompCommand);
+            case "HEARTBEAT":
+                break;
 
+            default:
+                log.error("unknown command from stomp server: {}", cmd);
+        }
+    }
 
-                        } else {
-                            log.error("unknown receipt-id: {}", receiptId);
-                        }
-                    } else {
-                        for (Map.Entry<String, String> sub2reid : this.subscriptionId2ReceiptId.entrySet()) {
-                            for (Map.Entry<String, String> reid2sub : this.receiptId2SubscriptionId.entrySet()) {
+    /**
+     * handle the receipt frame from the server
+     *
+     * @param stompMsg
+     */
+    private void handleReceiptFrame(Message<byte[]> stompMsg) {
+        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(stompMsg);
+        StompCommand command = accessor.getCommand();
 
-                                // messageId match two SubscriptionId
-                                if (sub2reid.getValue().equals(messageId)) {
-                                    if (!reid2sub.getValue().equals(sub2reid.getKey())) {
-                                        WeEventStompCommand weEventStompCommand = new WeEventStompCommand(event);
-                                        weEventStompCommand.setSubscriptionId(sub2reid.getKey());
-                                        weEventStompCommand.setHeaderId(messageId);
-                                        this.topicConnection.dispatch(weEventStompCommand);
-                                        this.connectFlag = FALSE;
-                                    }
-                                }
-
-
-                            }
-                        }
-                    }
-
-                    break;
-
-                case "HEARTBEAT":
-                    break;
-
-                default:
-                    log.error("unknown command from stomp server: {}", cmd);
+        String cmd = command.name();
+        String receiptId = null;
+        if (cmd.equals("RECEIPT")) {
+            if (accessor.getReceiptId() != null) {
+                receiptId = accessor.getReceiptId();
             }
         }
+
+        String subscriptionId = null;
+        if (accessor.getNativeHeader("subscription-id") != null) {
+            subscriptionId = accessor.getNativeHeader("subscription-id").get(0);
+        }
+
+        // add the map<receiptId2SubscriptionId>
+        if (futures.containsKey(sequence2Id.get(receiptId))) {
+            if (subscriptionId != null) {
+                log.info("subscriptionId {}", subscriptionId);
+                // receiptId2SubscriptionId length subscriptionId2ReceiptId length
+                this.receiptId2SubscriptionId.put(receiptId, subscriptionId);
+                this.subscriptionId2ReceiptId.put(subscriptionId, receiptId);
+
+                //this.subscription2EventCache.put(subscriptionId, null);
+            }
+            futures.get(sequence2Id.get(receiptId)).setResponse(stompMsg);
+        } else {
+            log.error("unknown receipt-id: {}", receiptId);
+        }
+    }
+
+    /**
+     * handle the message frame from the server
+     *
+     * @param stompMsg
+     */
+    private void handleMessageFrame(Message<byte[]> stompMsg) {
+        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(stompMsg);
+
+        String subscriptionId = null;
+        String messageId = null;
+        if (accessor.getNativeHeader("subscription-id") != null) {
+            subscriptionId = accessor.getNativeHeader("subscription-id").get(0);
+        }
+        if (accessor.getNativeHeader("message-id") != null) {
+            messageId = accessor.getNativeHeader("message-id").get(0);
+        }
+        WeEvent event = null;
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            event = mapper.readValue(stompMsg.getPayload(), WeEvent.class);
+        } catch (IOException e) {
+            log.error("jackson decode WeEvent failed", e);
+        }
+
+        // check SubscriptionId
+        log.info("messageId:{}", messageId);
+        log.info("event:{}", event.toString());
+        this.subscriptionCache.get(event.getTopic()).setOffset(event.getEventId());
+        if (this.receiptId2SubscriptionId.size() == this.subscriptionId2ReceiptId.size()) {
+            if (this.receiptId2SubscriptionId.containsKey(messageId)) {
+                WeEventStompCommand weEventStompCommand = new WeEventStompCommand(event);
+                weEventStompCommand.setSubscriptionId(subscriptionId);
+                weEventStompCommand.setHeaderId(messageId);
+                this.topicConnection.dispatch(weEventStompCommand);
+
+
+            } else {
+                log.error("unknown receipt-id: {}", messageId);
+            }
+        } else {
+            for (Map.Entry<String, String> sub2reid : this.subscriptionId2ReceiptId.entrySet()) {
+                for (Map.Entry<String, String> reid2sub : this.receiptId2SubscriptionId.entrySet()) {
+                    // messageId match two SubscriptionId
+                    if (sub2reid.getValue().equals(messageId)) {
+                        if (!reid2sub.getValue().equals(sub2reid.getKey())) {
+                            WeEventStompCommand weEventStompCommand = new WeEventStompCommand(event);
+                            weEventStompCommand.setSubscriptionId(sub2reid.getKey());
+                            weEventStompCommand.setHeaderId(messageId);
+                            this.topicConnection.dispatch(weEventStompCommand);
+                            this.connectFlag = FALSE;
+                        }
+                    }
+
+
+                }
+            }
+        }
+    }
+
+    /**
+     * handle the error frame from the server
+     *
+     * @param stompMsg
+     */
+    private void handleErrorMessage(Message<byte[]> stompMsg) {
+        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(stompMsg);
+        String receiptId = "";
+        if (accessor.getNativeHeader("receipt-id") != null) {
+            receiptId = accessor.getNativeHeader("receipt-id").get(0);
+        }
+        futures.get(sequence2Id.get(receiptId)).setResponse(stompMsg);
     }
 
     @Override

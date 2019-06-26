@@ -267,7 +267,7 @@ public class WeEventClient implements IWeEventClient {
             log.error("jms exception", e);
             throw jms2BrokerException(e);
         }
-    }git
+    }
     public SendResult publish(String topic, byte[] content, Map<String, String> extensions) throws BrokerException {
         validateParam(topic);
         validateArrayParam(content);

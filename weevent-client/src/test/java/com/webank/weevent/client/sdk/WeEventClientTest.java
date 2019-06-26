@@ -73,7 +73,7 @@ public class WeEventClientTest {
         log.info("===================={}", this.testName.getMethodName());
         // create subscriber
         String groupId = "1";//if not set default 1
-        this.weEventClient.subscribe(this.topicName, "dfdf", new WeEventClient.EventListener() {
+        this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
                 System.out.println("onEvent:" + event.toString());
