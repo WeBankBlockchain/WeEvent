@@ -65,10 +65,7 @@ public class WebSocketTransport extends WebSocketClient {
 
     // (headerId in stomp <-> asyncSeq in biz )
     private Map<String, Long> sequence2Id;
-
-    //(topic <-> event topic)
-    public Map<String, WeEventTopic> subscriptionCache;
-
+    
     //(subscription <-> weevent topic)
     public Map<String, WeEventTopic> subscription2EventCache;
 
@@ -211,8 +208,10 @@ public class WebSocketTransport extends WebSocketClient {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         String req = stompCommand.encodeSubscribe(topic, topic.getOffset(), asyncSeq);
         sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
-        this.subscriptionCache.put(topic.getTopicName(), topic);
         Message stompResponse = this.stompRequest(req, asyncSeq);
+
+        // cache the subscribption id and the WeEventTopic,the subscription2EventCache which can use for reconnect
+        this.subscription2EventCache.put(stompCommand.getSubscriptionId(stompResponse), topic);
 
         if (stompCommand.isError(stompResponse)) {
             log.info("stomp request is fail");
@@ -242,7 +241,6 @@ public class WebSocketTransport extends WebSocketClient {
         this.receiptId2SubscriptionId = new ConcurrentHashMap<>();
         this.subscriptionId2ReceiptId = new ConcurrentHashMap<>();
         this.sequence2Id = new ConcurrentHashMap<>();
-        this.subscriptionCache = new ConcurrentHashMap<>();
         this.subscription2EventCache = new ConcurrentHashMap<>();
     }
 
@@ -336,13 +334,6 @@ public class WebSocketTransport extends WebSocketClient {
                 // receiptId2SubscriptionId length subscriptionId2ReceiptId length
                 this.receiptId2SubscriptionId.put(receiptId, subscriptionId);
                 this.subscriptionId2ReceiptId.put(subscriptionId, receiptId);
-
-                // cache the subscribption id and the WeEventTopic which can use for reconnect
-                if (subscriptionCache.containsKey(destination)) {
-                    WeEventTopic weEventTopic = subscriptionCache.get(destination);
-                    this.subscription2EventCache.put(subscriptionId, weEventTopic);
-                    log.info("subscription2EventCache size: {}", this.subscription2EventCache.size());
-                }
             }
             futures.get(sequence2Id.get(receiptId)).setResponse(stompMsg);
         } else {
@@ -377,6 +368,13 @@ public class WebSocketTransport extends WebSocketClient {
         // check SubscriptionId
         log.info("messageId:{}", messageId);
         log.info("event:{}", event.toString());
+
+        // update the cache eventid
+        if(this.subscription2EventCache.containsKey(subscriptionId)){
+            this.subscription2EventCache.get(subscriptionId).setOffset(event.getEventId());
+        }
+        log.info("subscription2EventCache size: {}", this.subscription2EventCache.size());
+
         //this.subscriptionCache.get(event.getTopic()).setOffset(event.getEventId());
         this.subscription2EventCache.get(subscriptionId).setOffset(event.getEventId());
         if (this.receiptId2SubscriptionId.size() == this.subscriptionId2ReceiptId.size()) {
@@ -402,8 +400,6 @@ public class WebSocketTransport extends WebSocketClient {
                             this.connectFlag = FALSE;
                         }
                     }
-
-
                 }
             }
         }
