@@ -49,10 +49,10 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class BrokerServer {
-    private EventLoopGroup bossGroup;
-    private EventLoopGroup workerGroup;
-    private SslContext sslContext;
-    private Channel websocketChannel;
+    private EventLoopGroup bossGroup = null;
+    private EventLoopGroup workerGroup = null;
+    private SslContext sslContext = null;
+    private Channel websocketChannel = null;
     @Autowired
     private ProtocolProcess protocolProcess;
 
@@ -60,12 +60,15 @@ public class BrokerServer {
     public void start() throws Exception {
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup();
-        KeyStore keyStore = KeyStore.getInstance("PKCS12");
-        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("server.p12");
-        keyStore.load(inputStream, BrokerApplication.weEventConfig.getSslPassword().toCharArray());
-        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-        kmf.init(keyStore, BrokerApplication.weEventConfig.getSslPassword().toCharArray());
-        sslContext = SslContextBuilder.forServer(kmf).build();
+        if (BrokerApplication.weEventConfig.getSslEnable().equals("true")) {
+            KeyStore keyStore = KeyStore.getInstance("PKCS12");
+            InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("server.p12");
+            keyStore.load(inputStream, BrokerApplication.weEventConfig.getSslPassword().toCharArray());
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            kmf.init(keyStore, BrokerApplication.weEventConfig.getSslPassword().toCharArray());
+            sslContext = SslContextBuilder.forServer(kmf).build();
+            log.info("mqtt protocol must start with ssl");
+        }
         mqttServer();
         webSocketServer();
     }
