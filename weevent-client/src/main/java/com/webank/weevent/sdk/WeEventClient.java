@@ -113,7 +113,6 @@ public class WeEventClient implements IWeEventClient {
     }
 
 
-
     public String subscribe(String topic, String offset, EventListener listener) throws BrokerException {
         try {
             validateParam(topic);
@@ -219,6 +218,7 @@ public class WeEventClient implements IWeEventClient {
         validateExtensions(extensions);
         return this.brokerRpc.publish(topic, groupId, content, extensions);
     }
+
     /**
      * Subscribe events from topic.
      *
@@ -268,6 +268,7 @@ public class WeEventClient implements IWeEventClient {
             throw jms2BrokerException(e);
         }
     }
+
     public SendResult publish(String topic, byte[] content, Map<String, String> extensions) throws BrokerException {
         validateParam(topic);
         validateArrayParam(content);
@@ -280,6 +281,7 @@ public class WeEventClient implements IWeEventClient {
         validateParam(groupId);
         return this.brokerRpc.close(topic, groupId);
     }
+
     public boolean exist(String topic, String groupId) throws BrokerException {
         validateParam(topic);
         validateParam(groupId);
@@ -444,22 +446,24 @@ public class WeEventClient implements IWeEventClient {
      * @param listener param
      * @throws BrokerException
      */
-    private static void validateEventListener(EventListener  listener) throws BrokerException {
-        if( listener == null) {
+    private static void validateEventListener(EventListener listener) throws BrokerException {
+        if (listener == null) {
             throw new BrokerException(ErrorCode.PARAM_ISNULL);
         }
     }
+
     /**
      * check the param
      *
      * @param extensions extensions param
      * @throws BrokerException
      */
-    private static void validateExtensions(Map<String,String>  extensions) throws BrokerException {
-        if( extensions == null) {
+    private static void validateExtensions(Map<String, String> extensions) throws BrokerException {
+        if (extensions == null) {
             throw new BrokerException(ErrorCode.PARAM_ISNULL);
         }
     }
+
     /**
      * check the username and the password
      *

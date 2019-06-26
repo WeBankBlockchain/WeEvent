@@ -243,6 +243,7 @@ public class WebSocketTransport extends WebSocketClient {
         this.subscriptionId2ReceiptId = new ConcurrentHashMap<>();
         this.sequence2Id = new ConcurrentHashMap<>();
         this.subscriptionCache = new ConcurrentHashMap<>();
+        this.subscription2EventCache = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -307,6 +308,7 @@ public class WebSocketTransport extends WebSocketClient {
      */
     private void handleReceiptFrame(Message<byte[]> stompMsg) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(stompMsg);
+        log.info("receipt frame: {}", accessor.toString());
         StompCommand command = accessor.getCommand();
 
         String cmd = command.name();
@@ -315,6 +317,11 @@ public class WebSocketTransport extends WebSocketClient {
             if (accessor.getReceiptId() != null) {
                 receiptId = accessor.getReceiptId();
             }
+        }
+        String destination = "";
+        // get the topic from the server frame
+        if (accessor.getDestination() != null) {
+            destination = accessor.getDestination();
         }
 
         String subscriptionId = null;
@@ -330,7 +337,12 @@ public class WebSocketTransport extends WebSocketClient {
                 this.receiptId2SubscriptionId.put(receiptId, subscriptionId);
                 this.subscriptionId2ReceiptId.put(subscriptionId, receiptId);
 
-                //this.subscription2EventCache.put(subscriptionId, null);
+                // cache the subscribption id and the WeEventTopic which can use for reconnect
+                if (subscriptionCache.containsKey(destination)) {
+                    WeEventTopic weEventTopic = subscriptionCache.get(destination);
+                    this.subscription2EventCache.put(subscriptionId, weEventTopic);
+                    log.info("subscription2EventCache size: {}", this.subscription2EventCache.size());
+                }
             }
             futures.get(sequence2Id.get(receiptId)).setResponse(stompMsg);
         } else {
@@ -365,14 +377,14 @@ public class WebSocketTransport extends WebSocketClient {
         // check SubscriptionId
         log.info("messageId:{}", messageId);
         log.info("event:{}", event.toString());
-        this.subscriptionCache.get(event.getTopic()).setOffset(event.getEventId());
+        //this.subscriptionCache.get(event.getTopic()).setOffset(event.getEventId());
+        this.subscription2EventCache.get(subscriptionId).setOffset(event.getEventId());
         if (this.receiptId2SubscriptionId.size() == this.subscriptionId2ReceiptId.size()) {
             if (this.receiptId2SubscriptionId.containsKey(messageId)) {
                 WeEventStompCommand weEventStompCommand = new WeEventStompCommand(event);
                 weEventStompCommand.setSubscriptionId(subscriptionId);
                 weEventStompCommand.setHeaderId(messageId);
                 this.topicConnection.dispatch(weEventStompCommand);
-
 
             } else {
                 log.error("unknown receipt-id: {}", messageId);
@@ -452,8 +464,17 @@ class WSThread extends Thread {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        for (Map.Entry<String, WeEventTopic> subscription : this.webSocketTransport.subscriptionCache.entrySet()) {
+//
+//        for (Map.Entry<String, WeEventTopic> subscription : this.webSocketTransport.subscriptionCache.entrySet()) {
+//            try {
+//                log.info("subscription cache:{}", subscription.toString());
+//                this.webSocketTransport.stompSubscribe(subscription.getValue());
+//                this.webSocketTransport.connectFlag = TRUE;
+//            } catch (JMSException e) {
+//                e.printStackTrace();
+//            }
+//        }
+        for (Map.Entry<String, WeEventTopic> subscription : this.webSocketTransport.subscription2EventCache.entrySet()) {
             try {
                 log.info("subscription cache:{}", subscription.toString());
                 this.webSocketTransport.stompSubscribe(subscription.getValue());
