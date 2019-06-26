@@ -1,7 +1,7 @@
 <template>
   <div class="group  event-table">
     <div class='control_part'>
-      <el-input placeholder="请输入交易哈希或块高" v-model='search_name'>
+      <el-input placeholder="请输入交易哈希或块高" v-model.trim='search_name'>
         <template slot='append'>
           <el-button type='primary' icon='el-icon-search' @click='search'></el-button>
         </template>

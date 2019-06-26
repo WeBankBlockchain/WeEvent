@@ -3,24 +3,37 @@
     <img src="../assets/image/role1.png" class='role1' alt="">
     <img src="../assets/image/role2.svg" class='role2' alt="">
     <img src="../assets/image/role2.svg" class='role3' alt="">
+    <img src="../assets/image/bg.png" class='bg_img' alt="">
     <div class='login_box'>
       <img src="../assets/image/login.png" alt="" class='login_logo'>
       <p class='words'>区块链应用平台</p>
       <el-form label-position="right" :rules="rules" :model='form' ref='loginForm'>
         <el-form-item label='' prop='name'>
-          <el-input v-model='form.name' auto-complete="off" prefix-icon='el-icon-user' placeholder="请输入用户名"></el-input>
+          <el-input v-model.trim='form.name' auto-complete="off" prefix-icon='el-icon-user' placeholder="请输入用户名"></el-input>
         </el-form-item>
         <el-form-item label='' prop='passWord'>
-          <el-input v-model='form.passWord' auto-complete="off" type='password' prefix-icon='el-icon-lock' placeholder="请输入密码"></el-input>
-          <span class='forget' @click='getPassWord'>忘记密码？</span>
+          <el-input v-model.trim='form.passWord' auto-complete="off" type='password' prefix-icon='el-icon-lock' placeholder="请输入密码"></el-input>
+          <span class='forget' @click='changePass'>忘记密码？</span>
         </el-form-item>
         <el-form-item>
           <el-button type='primary' @click='onSubmit("loginForm")' @keyup.enter.native='onSubmit("loginForm")'>登录</el-button>
           <span class='registered_btn' @click='registered'>快速注册</span>
         </el-form-item>
       </el-form>
-      <img src="../assets/image/shape.svg" class='shape' alt="">
     </div>
+    <el-dialog
+      title='获取密码'
+      :visible.sync="getPass"
+      width='420px'
+    >
+      <p class='input_title'>请输入用户名:</p>
+      <el-input v-model='userName'></el-input>
+      <p class='input_warning'><i>*</i>请注意，重置密码的链接将会发送到帐号绑定的邮箱!</p>
+      <span slot='footer' class='dialog-footer'>
+        <el-button @click='getPass=false'>取消</el-button>
+        <el-button type='primary' @click='getPassWord'>确认</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -44,6 +57,8 @@ export default{
       callback()
     }
     return {
+      getPass: false,
+      userName: '',
       form: {
         name: '',
         passWord: ''
@@ -55,6 +70,13 @@ export default{
         passWord: [
           { validator: checkPassWord, trigger: 'blur' }
         ]
+      }
+    }
+  },
+  watch: {
+    getPass (nVal) {
+      if (!nVal) {
+        this.userName = ''
       }
     }
   },
@@ -91,25 +113,25 @@ export default{
       this.$router.push({path: './registered', query: { reset: 1 }})
     },
     getPassWord () {
-      this.$prompt('请输入用户名', '获取密码', {
-        confirmButtonText: '确定',
-        inputValue: this.form.name
-      }).then(({ value }) => {
-        let url = '?username=' + value
-        API.forget(url).then(res => {
-          if (res.status === 200) {
-            this.$message({
-              type: 'success',
-              message: '密码已发送到注册邮箱!'
-            })
-          } else {
-            this.$message({
-              type: 'warning',
-              message: '获取密码失败'
-            })
-          }
-        })
-      })
+      this.$router.push({path: './reset', query: { userName: this.userName }})
+      // let url = '?username=' + this.userName
+      // API.forget(url).then(res => {
+      //   if (res.status === 200) {
+      //     this.$message({
+      //       type: 'success',
+      //       message: '密码已发送到注册邮箱!'
+      //     })
+      //   } else {
+      //     this.$message({
+      //       type: 'warning',
+      //       message: '获取密码失败'
+      //     })
+      //   }
+      // })
+    },
+    changePass () {
+      this.getPass = true
+      this.userName = this.form.name
     }
   },
   mounted () {

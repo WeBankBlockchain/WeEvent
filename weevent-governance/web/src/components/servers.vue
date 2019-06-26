@@ -28,7 +28,7 @@
             prop='webaseUrl'>
           </el-table-column>
           <el-table-column
-            width='80'
+            width='100'
             label="操作">
             <template slot-scope='scope'>
               <i class='el-icon-edit table_icon' @click='adit(scope.row)' title='编辑'></i>
@@ -41,13 +41,13 @@
     <el-dialog :title="title" :visible.sync="showLog">
       <el-form :model="form" :rules="rules" ref='form'>
         <el-form-item label="名称:" prop='name'>
-          <el-input v-model="form.name" autocomplete="off" placeholder="请输入服务名称"></el-input>
+          <el-input v-model.trim="form.name" autocomplete="off" placeholder="请输入服务名称"></el-input>
         </el-form-item>
         <el-form-item label="Broker服务地址:" prop='brokerUrl'>
-          <el-input v-model="form.brokerUrl" autocomplete="off"  placeholder="例如: 'http://127.0.0.1:8080/xxxx/xxxx'"></el-input>
+          <el-input v-model.trim="form.brokerUrl" autocomplete="off"  placeholder="例如: 'http://127.0.0.1:8080/weevent'"></el-input>
         </el-form-item>
          <el-form-item label="Webase服务地址:" prop='webaseUrl'>
-          <el-input v-model="form.webaseUrl" autocomplete="off"  placeholder="例如: 'http://127.0.0.1:8080/xxxx/xxxx'"></el-input>
+          <el-input v-model.trim="form.webaseUrl" autocomplete="off"  placeholder="例如: 'http://127.0.0.1:8080/webase'"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -78,7 +78,7 @@ export default {
       brokerId: '',
       rules: {
         name: [
-          {required: true, message: 'IP不能为空', trigger: 'blur'}
+          {required: true, message: '名称不能为空', trigger: 'blur'}
         ],
         brokerUrl: [
           {required: true, message: '服务端口不能为空', trigger: 'blur'}
@@ -128,11 +128,23 @@ export default {
       }
       API.addServer(data).then(res => {
         if (res.status === 200) {
-          this.$message({
-            type: 'success',
-            message: '新增成功'
-          })
-          this.getServer()
+          if (res.data.code === 100100) {
+            this.$message({
+              type: 'warning',
+              message: 'Broker服务地址无法连接'
+            })
+          } else if (res.data.code === 100101) {
+            this.$message({
+              type: 'warning',
+              message: 'Webase服务地址无法连接'
+            })
+          } else if (res.data) {
+            this.$message({
+              type: 'success',
+              message: '新增成功'
+            })
+            this.getServer()
+          }
         } else {
           this.$message({
             type: 'warning',
@@ -160,11 +172,23 @@ export default {
       }
       API.updateServer(data).then(res => {
         if (res.status === 200) {
-          this.$message({
-            type: 'success',
-            message: '编辑成功'
-          })
-          this.getServer()
+          if (res.data.code === 100100) {
+            this.$message({
+              type: 'warning',
+              message: 'Broker服务地址无法连接'
+            })
+          } else if (res.data.code === 100101) {
+            this.$message({
+              type: 'warning',
+              message: 'Webase服务地址无法连接'
+            })
+          } else if (res.data) {
+            this.$message({
+              type: 'success',
+              message: '编辑成功'
+            })
+            this.getServer()
+          }
         } else {
           this.$message({
             type: 'warning',

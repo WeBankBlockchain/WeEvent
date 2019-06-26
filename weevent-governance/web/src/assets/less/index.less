@@ -29,25 +29,36 @@ html,body,#app{
   width:100%;
   height:100%;
   align-items: center;
-  background-image:url('../image/bg.png');
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
+  // background-image:url('../image/bg.png');
+  // background-repeat: no-repeat;
+  // background-size: 100% 100%;
   position: relative;
   overflow: hidden;
   .role1,.role2,.role3{
     position: absolute;
   }
+  .bg_img{
+    position: absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index: 1;
+  }
   .role1{
     top:100px;
     right:380px;
+    z-index: 2;
   }
   .role2{
     top:-265px;
     right:-120px;
+    z-index: 2;
   }
   .role3{
     bottom:-265px;
     left:-185px;
+    z-index: 2;
   }
 
   .login_box{
@@ -60,14 +71,8 @@ html,body,#app{
     padding:40px;
     border-radius: 8px;
     box-shadow:0 20px 70px rgba(0,0,0,.2);
+    z-index: 3;
     position: relative;
-
-    .shape{
-      position: absolute;
-      bottom:-36px;
-      left:-45px;
-      z-index: -1
-    }
 
     .login_logo{
       width:190px;
@@ -119,6 +124,24 @@ html,body,#app{
         color:#2e5bff;
         cursor: pointer;
         float: right
+      }
+    }
+  }
+
+  .el-dialog__wrapper .el-dialog .el-dialog__body{
+    padding:10px 20px;
+    .input_title{
+      font-size: 16px;
+      color:@gray_title;
+      padding-bottom:10px;
+    }
+    .input_warning{
+      color:@gray_text;
+      padding-top:15px;
+      i{
+        color:#ca0021;
+        font-weight: bolder;
+        padding:5px;
       }
     }
   }
@@ -448,7 +471,28 @@ html,body,#app{
           .cell {
             word-break: inherit !important
           }
-        } 
+        }
+
+        tbody tr td .el-form .el-form-item{
+          margin-bottom:5px;
+          .el-form-item__label{
+            width:80px;
+            font-weight: bold;
+          }
+          .el-form-item__content{
+            color:@gray_text
+          }
+        }
+        .el-tabs--border-card>.el-tabs__header .el-tabs__item.is-active{
+          color:@blue;
+          font-weight: bold;
+          border-right-color:transparent;
+          border-left-color:transparent;
+          border-bottom:2px solid @blue;
+        }
+        .el-tabs--border-card>.el-tabs__header .el-tabs__item.is-disabled{
+          display: none;
+        }
       }
       td{
         color:@black_text;
@@ -472,7 +516,7 @@ html,body,#app{
 }
 
 .el-button--primary{
-  background: #1b79ff;
+  background:@blue;
 }
 .el-table__expand-icon>.el-icon{
   font-size: 16px;
@@ -583,6 +627,9 @@ html,body,#app{
     cursor: pointer;
     font-size: 16px;
     color:@bg_blue;
+  }
+  .el-dialog{
+    width:600px;
   }
 }
 

@@ -19,7 +19,7 @@
     <el-table-column type="expand">
       <template slot-scope="props">
         <el-form label-position="left" inline class="demo-table-expand">
-          <el-form-item label="名称:">
+          <el-form-item label="Topic:">
             <span>{{ props.row.detial.topicName }}</span>
           </el-form-item><br/>
           <el-form-item label="创建时间:">
@@ -32,7 +32,7 @@
       </template>
     </el-table-column>
     <el-table-column
-      label="名称"
+      label="Topic"
       prop="topicName"
       :formatter="checkName">
     </el-table-column>
@@ -55,10 +55,10 @@
     layout="sizes,total, prev, pager, next, jumper"
     :total="total">
   </el-pagination>
-  <el-dialog title="新增 topic" :visible.sync="dialogFormVisible" center width='450px' >
+  <el-dialog title="新增 Topic" :visible.sync="dialogFormVisible" center width='450px' >
     <el-form :model="form" :rules="rules" ref='form'>
       <el-form-item label="名称:" prop='name'>
-        <el-input v-model.trim="form.name" autocomplete="off"></el-input>
+        <el-input v-model.trim.trim="form.name" autocomplete="off"></el-input>
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">

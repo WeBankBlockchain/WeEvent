@@ -3,6 +3,7 @@ import Router from 'vue-router'
 
 import login from '../login/login'
 import registered from '../components/registered'
+import reset from '../components/reset'
 import index from '../module/index'
 import topicList from '../components/topicList'
 import mainCont from '../components/mainCont'
@@ -17,16 +18,9 @@ import servers from '../components/servers'
 Vue.use(Router)
 
 export default new Router({
+  // mode: 'history',
   routes: [
     {
-      path: '/login',
-      name: 'login',
-      component: login
-    }, {
-      path: '/registered',
-      name: 'registered',
-      component: registered
-    }, {
       path: '/',
       name: 'index',
       component: index,
@@ -63,6 +57,18 @@ export default new Router({
       path: '/servers',
       name: 'servers',
       component: servers
+    }, {
+      path: '/login',
+      name: 'login',
+      component: login
+    }, {
+      path: '/registered',
+      name: 'registered',
+      component: registered
+    }, {
+      path: '/reset',
+      name: 'reset',
+      component: reset
     }
   ]
 })

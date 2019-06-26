@@ -1,7 +1,7 @@
 <template>
   <div class="group  event-table">
     <div class='control_part'>
-      <el-input placeholder="请输入交易哈希或块高" v-model='search_name'>
+      <el-input placeholder="请输入交易哈希或块高" v-model.trim='search_name'>
         <template slot='append'>
           <el-button type='primary' icon='el-icon-search' @click='search'></el-button>
         </template>
@@ -40,7 +40,7 @@
                 </ul>
               </el-tab-pane>
 
-              <el-tab-pane :label="props.row.logs.hasEvent?'event':''">
+              <el-tab-pane label="event" :disabled="!props.row.logs.hasEvent">
                 <ul class='trans_detial'>
                   <li>
                     <span>Address:</span>
@@ -125,7 +125,7 @@ export default {
       if (this.search_name.length < 10 && this.search_name.length > 0) {
         url = url + '&blockNumber=' + this.search_name
       } else if (this.search_name.length >= 10) {
-        url = url + '&pkHash=' + this.search_name
+        url = url + '&transactionHash=' + this.search_name
       }
       API.transList(url).then(res => {
         if (res.status === 200) {
