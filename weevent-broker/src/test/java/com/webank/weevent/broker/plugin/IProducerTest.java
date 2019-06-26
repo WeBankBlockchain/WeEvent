@@ -16,7 +16,6 @@ import org.junit.Test;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -127,7 +126,7 @@ public class IProducerTest extends JUnitTestBase {
 	    assertFalse(result);
 	} catch (BrokerException e) {
 	    log.error("producer open error::", e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode());
+	    assertEquals(ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode(), e.getCode());
 	}
     }
 
@@ -156,7 +155,7 @@ public class IProducerTest extends JUnitTestBase {
 	    assertFalse(result);
 	} catch (BrokerException e) {
 	    log.error("producer open error::", e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_IS_BLANK.getCode());
+	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
 	}
     }
 
@@ -170,7 +169,7 @@ public class IProducerTest extends JUnitTestBase {
 	    assertFalse(result);
 	} catch (BrokerException e) {
 	    log.error("producer open error::", e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_IS_BLANK.getCode());
+	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
 	}
     }
 
@@ -186,7 +185,7 @@ public class IProducerTest extends JUnitTestBase {
 	    assertFalse(result);
 	} catch (BrokerException e) {
 	    log.error("producer open error:", e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
 	}
     }
 
@@ -200,7 +199,7 @@ public class IProducerTest extends JUnitTestBase {
 	    assert (result);
 	} catch (BrokerException e) {
 	    log.error("producer open error:", e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
 	}
     }
 
@@ -214,7 +213,7 @@ public class IProducerTest extends JUnitTestBase {
 	    assertFalse(result);
 	} catch (BrokerException e) {
 	    log.error("producer open error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
 	}
     }
 
@@ -228,7 +227,7 @@ public class IProducerTest extends JUnitTestBase {
 	    assertFalse(result);
 	} catch (BrokerException e) {
 	    log.error("producer open error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
 	}
     }
 
@@ -236,13 +235,13 @@ public class IProducerTest extends JUnitTestBase {
      * groupId is not exist
      */
     @Test
-    public void testOpen_groupIdIsExist() {
+    public void testOpen_groupIdIsNotExist() {
 	try {
 	    boolean result = iProducer.open(this.topicName, "4");
 	    assertFalse(result);
 	} catch (BrokerException e) {
 	    log.error("producer open error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
 	}
     }
 
@@ -268,7 +267,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertFalse(iProducer.close(null, groupId));
 	} catch (BrokerException e) {
 	    log.error("producer close error:", e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_IS_BLANK.getCode());
+	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
 	}
     }
 
@@ -281,7 +280,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertFalse(iProducer.close(" ", groupId));
 	} catch (BrokerException e) {
 	    log.error("producer close error:", e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_IS_BLANK.getCode());
+	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
 	}
     }
 
@@ -295,7 +294,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertFalse(iProducer.close(topicStr, groupId));
 	} catch (BrokerException e) {
 	    log.error("producer close error:", e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode());
+	    assertEquals(ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode(), e.getCode());
 	}
     }
 
@@ -310,7 +309,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertFalse(iProducer.close(illegalTopic, groupId));
 	} catch (BrokerException e) {
 	    log.error("producer close error:", e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
 	}
     }
 
@@ -323,7 +322,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertFalse(iProducer.close("中国", groupId));
 	} catch (BrokerException e) {
 	    log.error("producer close error:", e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
 	}
     }
 
@@ -337,7 +336,7 @@ public class IProducerTest extends JUnitTestBase {
 	    assertFalse(result);
 	} catch (BrokerException e) {
 	    log.error("producer close error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
 	}
     }
 
@@ -351,7 +350,7 @@ public class IProducerTest extends JUnitTestBase {
 	    assertFalse(result);
 	} catch (BrokerException e) {
 	    log.error("producer close error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
 	}
     }
 
@@ -365,7 +364,7 @@ public class IProducerTest extends JUnitTestBase {
 	    assertFalse(result);
 	} catch (BrokerException e) {
 	    log.error("producer close error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
 	}
     }
 
@@ -407,7 +406,7 @@ public class IProducerTest extends JUnitTestBase {
 	} catch (BrokerException e) {
 	    log.error("method Exist error:", e);
 	    Assert.assertNotNull(e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_IS_BLANK.getCode());
+	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
 	}
     }
 
@@ -422,7 +421,7 @@ public class IProducerTest extends JUnitTestBase {
 	} catch (BrokerException e) {
 	    log.error("method Exist error:", e);
 	    Assert.assertNotNull(e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode());
+	    assertEquals(ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode(), e.getCode());
 	}
     }
 
@@ -437,7 +436,7 @@ public class IProducerTest extends JUnitTestBase {
 	} catch (BrokerException e) {
 	    log.error("method Exist error:", e);
 	    Assert.assertNotNull(e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_IS_BLANK.getCode());
+	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
 	}
     }
 
@@ -453,7 +452,7 @@ public class IProducerTest extends JUnitTestBase {
 	    assertFalse(result);
 	} catch (BrokerException e) {
 	    log.error("producer close error:", e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
 	}
     }
 
@@ -467,7 +466,7 @@ public class IProducerTest extends JUnitTestBase {
 	    assertFalse(result);
 	} catch (BrokerException e) {
 	    log.error("producer close error:", e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
 	}
     }
 
@@ -481,7 +480,7 @@ public class IProducerTest extends JUnitTestBase {
 	    assertFalse(result);
 	} catch (BrokerException e) {
 	    log.error("producer exist error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
 	}
     }
 
@@ -495,7 +494,7 @@ public class IProducerTest extends JUnitTestBase {
 	    assertFalse(result);
 	} catch (BrokerException e) {
 	    log.error("producer exist error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
 	}
     }
 
@@ -509,7 +508,7 @@ public class IProducerTest extends JUnitTestBase {
 	    assertFalse(result);
 	} catch (BrokerException e) {
 	    log.error("producer exist error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
 	}
     }
 
@@ -541,7 +540,7 @@ public class IProducerTest extends JUnitTestBase {
 	} catch (BrokerException e) {
 	    log.error("method state error:", e);
 	    Assert.assertNotNull(e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode());
+	    assertEquals(ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode(), e.getCode());
 	}
     }
 
@@ -556,7 +555,7 @@ public class IProducerTest extends JUnitTestBase {
 	} catch (BrokerException e) {
 	    log.error("method state error:", e);
 	    Assert.assertNotNull(e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_NOT_EXIST.getCode());
+	    assertEquals(ErrorCode.TOPIC_NOT_EXIST.getCode(), e.getCode());
 	}
     }
 
@@ -570,7 +569,7 @@ public class IProducerTest extends JUnitTestBase {
 	} catch (BrokerException e) {
 	    log.error("method state error:", e);
 	    Assert.assertNotNull(e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_IS_BLANK.getCode());
+	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
 	}
     }
 
@@ -584,7 +583,7 @@ public class IProducerTest extends JUnitTestBase {
 	} catch (BrokerException e) {
 	    log.error("method state error:", e);
 	    Assert.assertNotNull(e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_IS_BLANK.getCode());
+	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
 	}
     }
 
@@ -599,7 +598,7 @@ public class IProducerTest extends JUnitTestBase {
 	    iProducer.state(illegalTopic, groupId);
 	} catch (BrokerException e) {
 	    log.error("producer close error:", e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
 	}
     }
 
@@ -612,7 +611,7 @@ public class IProducerTest extends JUnitTestBase {
 	    iProducer.state("中国", groupId);
 	} catch (BrokerException e) {
 	    log.error("producer close error:", e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
 	}
     }
 
@@ -625,7 +624,7 @@ public class IProducerTest extends JUnitTestBase {
 	    iProducer.state(this.topicName, groupId);
 	} catch (BrokerException e) {
 	    log.error("producer close error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
 	}
     }
 
@@ -638,7 +637,7 @@ public class IProducerTest extends JUnitTestBase {
 	    iProducer.state(this.topicName, groupId);
 	} catch (BrokerException e) {
 	    log.error("producer close error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
 	}
     }
 
@@ -651,7 +650,7 @@ public class IProducerTest extends JUnitTestBase {
 	    iProducer.state(this.topicName, groupId);
 	} catch (BrokerException e) {
 	    log.error("producer close error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
 	}
     }
 
@@ -705,7 +704,7 @@ public class IProducerTest extends JUnitTestBase {
 	} catch (BrokerException e) {
 	    log.error("method list error:", e);
 	    Assert.assertNotNull(e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_PAGE_INDEX_INVALID.getCode());
+	    assertEquals(ErrorCode.TOPIC_PAGE_INDEX_INVALID.getCode(), e.getCode());
 	}
     }
 
@@ -723,7 +722,7 @@ public class IProducerTest extends JUnitTestBase {
 	} catch (BrokerException e) {
 	    log.error("method list error:", e);
 	    Assert.assertNotNull(e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_PAGE_INDEX_INVALID.getCode());
+	    assertEquals(ErrorCode.TOPIC_PAGE_INDEX_INVALID.getCode(), e.getCode());
 	}
     }
 
@@ -741,7 +740,7 @@ public class IProducerTest extends JUnitTestBase {
 	} catch (BrokerException e) {
 	    log.error("method list error:", e);
 	    Assert.assertNotNull(e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_PAGE_SIZE_INVALID.getCode());
+	    assertEquals(ErrorCode.TOPIC_PAGE_SIZE_INVALID.getCode(), e.getCode());
 	}
     }
 
@@ -776,7 +775,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertTrue(topicPage == null);
 	} catch (BrokerException e) {
 	    Assert.assertNotNull(e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_PAGE_SIZE_INVALID.getCode());
+	    assertEquals(ErrorCode.TOPIC_PAGE_SIZE_INVALID.getCode(), e.getCode());
 	    log.error("method list error:", e);
 	}
     }
@@ -794,7 +793,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertTrue(topicPage == null);
 	} catch (BrokerException e) {
 	    Assert.assertNotNull(e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_PAGE_SIZE_INVALID.getCode());
+	    assertEquals(ErrorCode.TOPIC_PAGE_SIZE_INVALID.getCode(), e.getCode());
 	    log.error("method list error:", e);
 	}
     }
@@ -812,7 +811,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertTrue(topicPage == null);
 	} catch (BrokerException e) {
 	    Assert.assertNotNull(e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_PAGE_SIZE_INVALID.getCode());
+	    assertEquals(ErrorCode.TOPIC_PAGE_SIZE_INVALID.getCode(), e.getCode());
 	    log.error("method list error:", e);
 	}
     }
@@ -847,7 +846,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertNull(topicPage);
 	} catch (BrokerException e) {
 	    log.error("producer exist error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
 	}
     }
 
@@ -863,7 +862,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertNull(topicPage);
 	} catch (BrokerException e) {
 	    log.error("producer exist error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
 	}
     }
 
@@ -879,7 +878,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertNull(topicPage);
 	} catch (BrokerException e) {
 	    log.error("producer exist error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
 	}
     }
 
@@ -906,7 +905,7 @@ public class IProducerTest extends JUnitTestBase {
 	    WeEvent weEvent = iProducer.getEvent("sfshfwefjf", groupId);
 	    assertNull(weEvent);
 	} catch (BrokerException e) {
-	    assertEquals(e.getCode(), ErrorCode.EVENT_ID_IS_ILLEGAL.getCode());
+	    assertEquals(ErrorCode.EVENT_ID_IS_ILLEGAL.getCode(), e.getCode());
 	    log.error("get event error: ", e);
 	}
     }
@@ -920,7 +919,7 @@ public class IProducerTest extends JUnitTestBase {
 	    WeEvent weEvent = iProducer.getEvent("317e7c4c-75-32900000", groupId);
 	    assertNull(weEvent);
 	} catch (BrokerException e) {
-	    assertEquals(e.getCode(), ErrorCode.EVENT_ID_IS_MISMATCH.getCode());
+	    assertEquals(ErrorCode.EVENT_ID_IS_MISMATCH.getCode(), e.getCode());
 	    log.error("get event error: ", e);
 	}
     }
@@ -935,7 +934,7 @@ public class IProducerTest extends JUnitTestBase {
 	    assertNull(weEvent);
 	} catch (BrokerException e) {
 	    log.error("get event error: ", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_ID_NOT_EXIST.getCode());
+	    assertEquals(ErrorCode.EVENT_ID_NOT_EXIST.getCode(), e.getCode());
 	}
     }
 
@@ -949,7 +948,7 @@ public class IProducerTest extends JUnitTestBase {
 	    assertNull(weEvent);
 	} catch (BrokerException e) {
 	    log.error("get event error: ", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_ID_IS_ILLEGAL.getCode());
+	    assertEquals(ErrorCode.EVENT_ID_IS_ILLEGAL.getCode(), e.getCode());
 	}
     }
 
@@ -963,7 +962,7 @@ public class IProducerTest extends JUnitTestBase {
 	    assertNull(weEvent);
 	} catch (BrokerException e) {
 	    log.error("get event error: ", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_ID_IS_ILLEGAL.getCode());
+	    assertEquals(ErrorCode.EVENT_ID_IS_ILLEGAL.getCode(), e.getCode());
 	}
     }
 
@@ -978,7 +977,7 @@ public class IProducerTest extends JUnitTestBase {
 	    assertNull(weEvent);
 	} catch (BrokerException e) {
 	    log.error("get event error: ", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_ID_EXCEEDS_MAX_LENGTH.getCode());
+	    assertEquals(ErrorCode.EVENT_ID_EXCEEDS_MAX_LENGTH.getCode(), e.getCode());
 	}
     }
 
@@ -992,7 +991,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertNull(weEvent);
 	} catch (BrokerException e) {
 	    log.error("producer getEvent error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
 	}
     }
 
@@ -1006,7 +1005,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertNull(weEvent);
 	} catch (BrokerException e) {
 	    log.error("producer getEvent error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
 	}
     }
 
@@ -1020,7 +1019,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertNull(weEvent);
 	} catch (BrokerException e) {
 	    log.error("producer getEvent error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
 	}
     }
 
@@ -1049,7 +1048,7 @@ public class IProducerTest extends JUnitTestBase {
 	    assertNotNull(dto);
 	} catch (BrokerException e) {
 	    log.error("method PublishEventCharset error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCode());
+	    assertEquals(ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCode(), e.getCode());
 	}
     }
 
@@ -1066,7 +1065,7 @@ public class IProducerTest extends JUnitTestBase {
 	    assertNotNull(dto);
 	} catch (BrokerException e) {
 	    log.error("method PublishEventCharset error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCode());
+	    assertEquals(ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCode(), e.getCode());
 	}
     }
 
@@ -1083,7 +1082,7 @@ public class IProducerTest extends JUnitTestBase {
 	    assertNotNull(dto);
 	} catch (BrokerException e) {
 	    log.error("method PublishEventCharset error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCode());
+	    assertEquals(ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCode(), e.getCode());
 	}
     }
 
@@ -1134,7 +1133,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertNull(dto);
 	} catch (BrokerException e) {
 	    Assert.assertNotNull(e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_NOT_EXIST.getCode());
+	    assertEquals(ErrorCode.TOPIC_NOT_EXIST.getCode(), e.getCode());
 	    log.error("method PublishEventCharset error:", e);
 	}
     }
@@ -1149,7 +1148,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertNull(dto);
 	} catch (BrokerException e) {
 	    Assert.assertNotNull(e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_IS_BLANK.getCode());
+	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
 	    log.error("method PublishEventCharset error:", e);
 	}
     }
@@ -1164,7 +1163,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertNull(dto);
 	} catch (BrokerException e) {
 	    Assert.assertNotNull(e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_IS_BLANK.getCode());
+	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
 	    log.error("method PublishEventCharset error:", e);
 	}
     }
@@ -1180,7 +1179,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertNull(dto);
 	} catch (BrokerException e) {
 	    Assert.assertNotNull(e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode());
+	    assertEquals(ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode(), e.getCode());
 	    log.error("method PublishEventCharset error:", e);
 	}
     }
@@ -1197,7 +1196,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertNull(dto);
 	} catch (BrokerException e) {
 	    log.error("method PublishEventCharset error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_CONTENT_IS_BLANK.getCode());
+	    assertEquals(ErrorCode.EVENT_CONTENT_IS_BLANK.getCode(), e.getCode());
 	}
     }
 
@@ -1213,7 +1212,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertNull(dto);
 	} catch (BrokerException e) {
 	    log.error("method PublishEventCharset error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_CONTENT_IS_BLANK.getCode());
+	    assertEquals(ErrorCode.EVENT_CONTENT_IS_BLANK.getCode(), e.getCode());
 	}
     }
 
@@ -1228,7 +1227,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertNull(dto);
 	} catch (BrokerException e) {
 	    log.error("producer publish error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
 	}
     }
 
@@ -1243,7 +1242,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertNull(dto);
 	} catch (BrokerException e) {
 	    log.error("producer publish error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
 	}
     }
 
@@ -1258,7 +1257,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertNull(dto);
 	} catch (BrokerException e) {
 	    log.error("producer publish error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
 	}
     }
 
@@ -1276,7 +1275,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertNull(dto);
 	} catch (BrokerException e) {
 	    log.error("producer close error:", e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
 	}
     }
 
@@ -1292,7 +1291,7 @@ public class IProducerTest extends JUnitTestBase {
 	    Assert.assertNull(dto);
 	} catch (BrokerException e) {
 	    log.error("producer close error:", e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
 	}
     }
 
@@ -1344,7 +1343,7 @@ public class IProducerTest extends JUnitTestBase {
 		    });
 	} catch (BrokerException e) {
 	    log.error("method PublishForEventCallBack error:", e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_NOT_EXIST.getCode());
+	    assertEquals(ErrorCode.TOPIC_NOT_EXIST.getCode(), e.getCode());
 	}
 
 	Thread.sleep(wait3s);
@@ -1372,7 +1371,7 @@ public class IProducerTest extends JUnitTestBase {
 	} catch (BrokerException e) {
 	    log.error("method PublishEventCallback error:", e);
 	    Assert.assertNotNull(e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode());
+	    assertEquals(ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode(), e.getCode());
 	}
 
 	Thread.sleep(wait3s);
@@ -1400,7 +1399,7 @@ public class IProducerTest extends JUnitTestBase {
 	} catch (BrokerException e) {
 	    log.error("method PublishEventCallback error:", e);
 	    Assert.assertNotNull(e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_IS_BLANK.getCode());
+	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
 	}
 
 	Thread.sleep(wait3s);
@@ -1427,7 +1426,7 @@ public class IProducerTest extends JUnitTestBase {
 		    });
 	} catch (BrokerException e) {
 	    Assert.assertNotNull(e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_IS_BLANK.getCode());
+	    assertEquals(ErrorCode.TOPIC_IS_BLANK.getCode(), e.getCode());
 	    log.error("method PublishEventCallback error:", e);
 	}
 
@@ -1454,7 +1453,7 @@ public class IProducerTest extends JUnitTestBase {
 	    });
 	} catch (BrokerException e) {
 	    log.error("method PublishForEventCallBack error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_CONTENT_IS_BLANK.getCode());
+	    assertEquals(ErrorCode.EVENT_CONTENT_IS_BLANK.getCode(), e.getCode());
 	}
 
 	Thread.sleep(wait3s);
@@ -1481,7 +1480,7 @@ public class IProducerTest extends JUnitTestBase {
 		    });
 	} catch (BrokerException e) {
 	    log.error("method PublishForEventCallBack error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_CONTENT_IS_BLANK.getCode());
+	    assertEquals(ErrorCode.EVENT_CONTENT_IS_BLANK.getCode(), e.getCode());
 	}
 
 	Thread.sleep(wait3s);
@@ -1536,7 +1535,7 @@ public class IProducerTest extends JUnitTestBase {
 		    });
 	} catch (BrokerException e) {
 	    log.error("method PublishForEventCallBack error:", e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
 	}
 
 	Thread.sleep(wait3s);
@@ -1563,7 +1562,7 @@ public class IProducerTest extends JUnitTestBase {
 		    });
 	} catch (BrokerException e) {
 	    log.error("method PublishForEventCallBack error:", e);
-	    assertEquals(e.getCode(), ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode());
+	    assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
 	}
 
 	Thread.sleep(wait3s);
@@ -1590,7 +1589,7 @@ public class IProducerTest extends JUnitTestBase {
 		    });
 	} catch (BrokerException e) {
 	    log.error("method PublishForEventCallBack error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCode());
+	    assertEquals(ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCode(), e.getCode());
 	}
 
 	Thread.sleep(wait3s);
@@ -1619,7 +1618,7 @@ public class IProducerTest extends JUnitTestBase {
 		    });
 	} catch (BrokerException e) {
 	    log.error("method PublishForEventCallBack error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCode());
+	    assertEquals(ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCode(), e.getCode());
 	}
 
 	Thread.sleep(wait3s);
@@ -1648,7 +1647,7 @@ public class IProducerTest extends JUnitTestBase {
 		    });
 	} catch (BrokerException e) {
 	    log.error("method PublishForEventCallBack error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCode());
+	    assertEquals(ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCode(), e.getCode());
 	}
 
 	Thread.sleep(wait3s);
@@ -1735,7 +1734,7 @@ public class IProducerTest extends JUnitTestBase {
 		    });
 	} catch (BrokerException e) {
 	    log.error("method PublishForEventCallBack error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
 	}
 
 	Thread.sleep(wait3s);
@@ -1762,7 +1761,7 @@ public class IProducerTest extends JUnitTestBase {
 		    });
 	} catch (BrokerException e) {
 	    log.error("method PublishForEventCallBack error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
 	}
 
 	Thread.sleep(wait3s);
@@ -1789,7 +1788,7 @@ public class IProducerTest extends JUnitTestBase {
 		    });
 	} catch (BrokerException e) {
 	    log.error("method PublishForEventCallBack error:", e);
-	    assertEquals(e.getCode(), ErrorCode.EVENT_GROUP_ID_INVALID.getCode());
+	    assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
 	}
 
 	Thread.sleep(wait3s);
