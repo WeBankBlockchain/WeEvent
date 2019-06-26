@@ -20,7 +20,7 @@
       >
     </el-table-column>
      <el-table-column
-      label="Topic名称"
+      label="Topic"
       prop='topicName'>
     </el-table-column>
     <el-table-column

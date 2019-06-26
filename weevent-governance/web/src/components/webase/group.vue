@@ -15,7 +15,7 @@
     >
       <el-table-column
         prop='nodeName'
-        label='节点名称'
+        label='Topic'
       ></el-table-column>
       <el-table-column
         prop='blockNumber'
