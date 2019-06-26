@@ -110,12 +110,10 @@ public class ParamCheckUtils {
     }
 
     public static void validateGroupId(String groupId) throws BrokerException {
-        if (!StringUtils.isBlank(groupId)) {
-            try {
-                Long.parseLong(groupId);
-            } catch (Exception e) {
-                throw new BrokerException(ErrorCode.EVENT_GROUP_ID_INVALID);
-            }
+        try {
+            Long.parseLong(groupId);
+        } catch (Exception e) {
+            throw new BrokerException(ErrorCode.EVENT_GROUP_ID_INVALID);
         }
     }
 
