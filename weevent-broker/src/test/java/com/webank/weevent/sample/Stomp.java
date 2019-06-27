@@ -182,10 +182,14 @@ public class Stomp {
                     Thread.sleep(5000L);
                 } catch (InterruptedException e) {
                 }
-
+                StompHeaders header = new StompHeaders();
+                header.setDestination(topic);
+                header.set("groupId", "1");
+                // header.set("eventId", "8ee829fd-35-1818");
+                header.set("weevent-url", "https://github.com/WeBankFinTech/WeEvent");
                 log.info("send event to topic, {}", topic);
                 for (int i = 0; i < 10; i++) {
-                    StompSession.Receiptable receiptable = session.send(topic, "hello world, from sock js:" + i);
+                    StompSession.Receiptable receiptable = session.send(header, "hello world, from sock js:" + i);
                     log.info("send result, receipt id: {}", receiptable.getReceiptId());
                 }
             }
