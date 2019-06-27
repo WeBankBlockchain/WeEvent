@@ -439,22 +439,24 @@ public class WeEventClient implements IWeEventClient {
      * @param listener param
      * @throws BrokerException
      */
-    private static void validateEventListener(EventListener  listener) throws BrokerException {
-        if( listener == null) {
+    private static void validateEventListener(EventListener listener) throws BrokerException {
+        if (listener == null) {
             throw new BrokerException(ErrorCode.PARAM_ISNULL);
         }
     }
+
     /**
      * check the param
      *
      * @param extensions extensions param
      * @throws BrokerException
      */
-    private static void validateExtensions(Map<String,String>  extensions) throws BrokerException {
-        if( extensions == null) {
+    private static void validateExtensions(Map<String, String> extensions) throws BrokerException {
+        if (extensions == null) {
             throw new BrokerException(ErrorCode.PARAM_ISNULL);
         }
     }
+
     /**
      * check the username and the password
      *

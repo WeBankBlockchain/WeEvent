@@ -188,14 +188,14 @@ public class BrokerStomp extends TextWebSocketHandler {
         StompHeaderAccessor accessor = null;
         log.info("stomp header: {}", msg.getHeaders());
 
-        String simpDestination = "";
+        String simpDestination = null;
         Object simpDestinationObj = msg.getHeaders().get("simpDestination");
         if (simpDestinationObj != null) {
             simpDestination = simpDestinationObj.toString();
         }
 
-        String headerReceiptIdStr = "";
-        String subEventId = "";
+        String headerReceiptIdStr = null;
+        String subEventId = null;
         StompCommand command;
         LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) msg.getHeaders().get("nativeHeaders"));
         Map<String, String> extensions = new HashMap<>();
@@ -227,22 +227,17 @@ public class BrokerStomp extends TextWebSocketHandler {
             }
         }
 
-        String eventId;
-
         try {
-            eventId = handleSend(msg, simpDestination, extensions, groupId);
-        } catch (BrokerException e) {
-            eventId = "";
-            handleErrorMessage(session, e,headerReceiptIdStr);
-        }
-        if (!eventId.isEmpty()) {
+            handleSend(msg, simpDestination, extensions, groupId);
             command = StompCommand.RECEIPT;
             accessor = StompHeaderAccessor.create(command);
+            accessor.setDestination(simpDestination);
+            accessor.setReceiptId(headerReceiptIdStr);
+            accessor.setNativeHeader("receipt-id", headerReceiptIdStr);
+            sendSimpleMessage(session, accessor);
+        } catch (BrokerException e) {
+            handleErrorMessage(session, e, headerReceiptIdStr);
         }
-        accessor.setDestination(simpDestination);
-        accessor.setReceiptId(headerReceiptIdStr);
-        accessor.setNativeHeader("receipt-id", headerReceiptIdStr);
-        sendSimpleMessage(session, accessor);
     }
 
     private void handleSubscribeMessage(Message<byte[]> msg, WebSocketSession session) {
@@ -254,8 +249,9 @@ public class BrokerStomp extends TextWebSocketHandler {
             simpDestination = simpDestinationObj.toString();
         }
 
-        String headerIdStr = "";
-        String subEventId = "";
+        String headerIdStr = null;
+        String subEventId = null;
+        String continueSubscriptionIdStr = null;
         LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) msg.getHeaders().get("nativeHeaders"));
         String groupId = WeEventConstants.DEFAULT_GROUP_ID;
         if (nativeHeaders != null) {
@@ -270,16 +266,18 @@ public class BrokerStomp extends TextWebSocketHandler {
                 subEventId = ((List) headerEventId).get(0).toString();
                 log.info("subEventId:{}", subEventId);
             }
+            Object continueSubscriptionId = nativeHeaders.get(WeEventConstants.EXTENSIONS_SUBSCRIPTION_ID);
+            if (continueSubscriptionId != null) {
+                continueSubscriptionIdStr = ((List) continueSubscriptionId).get(0).toString();
+            }
         }
 
-        String subscriptionId;
-        log.info("SUBSCRIBE subEventId:{}", subEventId);
-
         try {
+            String subscriptionId;
             if (null == subEventId || "".equals(subEventId)) {
-                subscriptionId = handleSubscribe(session, simpDestination, groupId, headerIdStr, WeEvent.OFFSET_LAST);
+                subscriptionId = handleSubscribe(session, simpDestination, groupId, headerIdStr, WeEvent.OFFSET_LAST, continueSubscriptionIdStr);
             } else {
-                subscriptionId = handleSubscribe(session, simpDestination, groupId, headerIdStr, subEventId);
+                subscriptionId = handleSubscribe(session, simpDestination, groupId, headerIdStr, subEventId, continueSubscriptionIdStr);
             }
             accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
             accessor.setDestination(simpDestination);
@@ -288,9 +286,9 @@ public class BrokerStomp extends TextWebSocketHandler {
             accessor.setSubscriptionId(subscriptionId);
             accessor.setNativeHeader("subscription-id", subscriptionId);
             accessor.setNativeHeader("receipt-id", headerIdStr);
-
+            sendSimpleMessage(session, accessor);
         } catch (BrokerException e) {
-            handleErrorMessage(session, e,headerIdStr);
+            handleErrorMessage(session, e, headerIdStr);
         }
     }
 
@@ -319,7 +317,7 @@ public class BrokerStomp extends TextWebSocketHandler {
         try {
             result = handleUnSubscribe(session, headerIdStr);
         } catch (BrokerException e) {
-            handleErrorMessage(session, e,headerIdStr);
+            handleErrorMessage(session, e, headerIdStr);
         }
         if (result) {
             accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
@@ -416,7 +414,7 @@ public class BrokerStomp extends TextWebSocketHandler {
         sessionContext.remove(session.getId());
     }
 
-    private void handleErrorMessage(WebSocketSession session, BrokerException e,String receiptId) {
+    private void handleErrorMessage(WebSocketSession session, BrokerException e, String receiptId) {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
 
         // return the error message and error code
@@ -493,7 +491,7 @@ public class BrokerStomp extends TextWebSocketHandler {
      * @return String consumer subscription id, return "" if error
      * @throws BrokerException Exception
      */
-    private String handleSubscribe(WebSocketSession session, String simpDestination, String groupId, String headerIdStr, String subEventId) throws BrokerException {
+    private String handleSubscribe(WebSocketSession session, String simpDestination, String groupId, String headerIdStr, String subEventId, String continueSubscriptionId) throws BrokerException {
         log.info("destination: {} header subscribe id: {}", simpDestination, headerIdStr);
 
         String[] curTopicList;
@@ -510,40 +508,55 @@ public class BrokerStomp extends TextWebSocketHandler {
             this.iconsumer.startConsumer();
         }
 
-        // support only one topic
-        String subscriptionId = this.iconsumer.subscribe(curTopicList[0],
-                groupId,
-                subEventId,
-                WeEventConstants.STOMPTYPE,
-                new IConsumer.ConsumerListener() {
-                    @Override
-                    public void onEvent(String subscriptionId, WeEvent event) {
-                        log.info("consumer onEvent, subscriptionId: {} event: {}", subscriptionId, event);
+        String subscriptionId = null;
 
-                        try {
-                            StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.MESSAGE);
-                            accessor.setSubscriptionId(headerIdStr);
-                            accessor.setNativeHeader("subscription-id", subscriptionId);
-                            accessor.setNativeHeader("message-id", headerIdStr);
-                            accessor.setMessageId(headerIdStr);
-                            accessor.setContentType(new MimeType("text", "plain", StandardCharsets.UTF_8));
-                            ObjectMapper mapper = new ObjectMapper();
-                            MessageHeaders headers = accessor.getMessageHeaders();
-                            Message<byte[]> message1 = MessageBuilder.createMessage(mapper.writeValueAsBytes(event), headers);
-                            byte[] bytes = new StompEncoder().encode(message1);
-                            TextMessage textMessage = new TextMessage(bytes);
-
-                            send2Remote(session, textMessage);
-                        } catch (IOException e) {
-                            log.error("exception in session.sendMessage", e);
+        if (null == continueSubscriptionId || "".equals(continueSubscriptionId)) {
+            // support only one topic
+            subscriptionId = this.iconsumer.subscribe(curTopicList[0],
+                    groupId,
+                    subEventId,
+                    WeEventConstants.STOMPTYPE,
+                    new IConsumer.ConsumerListener() {
+                        @Override
+                        public void onEvent(String subscriptionId, WeEvent event) {
+                            log.info("consumer onEvent, subscriptionId: {} event: {}", subscriptionId, event);
+                            try {
+                                handleOnEvent(headerIdStr, subscriptionId, event, session);
+                            } catch (IOException e) {
+                                log.error("exception in session.sendMessage", e);
+                            }
                         }
-                    }
 
-                    @Override
-                    public void onException(Throwable e) {
-                        log.error("consumer onException", e);
-                    }
-                });
+                        @Override
+                        public void onException(Throwable e) {
+                            log.error("consumer onException", e);
+                        }
+                    });
+        } else {
+            //continue subscription
+            subscriptionId = this.iconsumer.subscribe(curTopicList[0],
+                    groupId,
+                    subEventId,
+                    continueSubscriptionId,
+                    WeEventConstants.STOMPTYPE,
+                    new IConsumer.ConsumerListener() {
+                        @Override
+                        public void onEvent(String subscriptionId, WeEvent event) {
+                            log.info("consumer onEvent, subscriptionId: {} event: {}", subscriptionId, event);
+                            try {
+                                handleOnEvent(headerIdStr, subscriptionId, event, session);
+                            } catch (IOException e) {
+                                log.error("exception in session.sendMessage", e);
+                            }
+                        }
+
+                        @Override
+                        public void onException(Throwable e) {
+                            log.error("consumer onException", e);
+                        }
+                    });
+        }
+
 
         log.info("bind context, session id: {} header subscription id: {} consumer subscription id: {} topic: {}",
                 session.getId(), headerIdStr, subscriptionId, curTopicList[0]);
@@ -551,6 +564,22 @@ public class BrokerStomp extends TextWebSocketHandler {
 
         log.info("consumer subscribe success, consumer subscriptionId: {}", subscriptionId);
         return subscriptionId;
+    }
+
+    private void handleOnEvent(String headerIdStr, String subscriptionId, WeEvent event, WebSocketSession session) throws IOException {
+        StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.MESSAGE);
+        accessor.setSubscriptionId(headerIdStr);
+        accessor.setNativeHeader("subscription-id", subscriptionId);
+        accessor.setNativeHeader("message-id", headerIdStr);
+        accessor.setMessageId(headerIdStr);
+        accessor.setContentType(new MimeType("text", "plain", StandardCharsets.UTF_8));
+        ObjectMapper mapper = new ObjectMapper();
+        MessageHeaders headers = accessor.getMessageHeaders();
+        Message<byte[]> message1 = MessageBuilder.createMessage(mapper.writeValueAsBytes(event), headers);
+        byte[] bytes = new StompEncoder().encode(message1);
+        TextMessage textMessage = new TextMessage(bytes);
+
+        send2Remote(session, textMessage);
     }
 
     /**
