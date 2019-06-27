@@ -9,7 +9,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
-@Slf4j
 public class MailService {
 
     @Autowired
@@ -18,7 +17,7 @@ public class MailService {
     @Value("${spring.mail.from}")
     private String from;
 
-    public void sendSimpleMail(String to, String subject, String content) {
+    public void sendSimpleMail(String to, String subject, String content) throws MailException{
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
         simpleMailMessage.setFrom(from);
         simpleMailMessage.setTo(to);
@@ -27,7 +26,7 @@ public class MailService {
         try {
             mailSender.send(simpleMailMessage);
         } catch (MailException e) {
-            log.error(e.getMessage());
+            throw e;
         }
     }
 }

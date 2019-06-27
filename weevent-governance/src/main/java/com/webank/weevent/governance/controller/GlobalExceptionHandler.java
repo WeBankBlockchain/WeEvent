@@ -37,13 +37,13 @@ class SimpleException {
 public class GlobalExceptionHandler {
     @ExceptionHandler(value = GovernanceException.class)
     public Object baseErrorHandler(HttpServletRequest req, GovernanceException e) {
-        log.error("detect BrokerException", e);
+        log.error("detect GovernanceException", e);
 
         SimpleException simpleException = new SimpleException();
         simpleException.setCode(e.getCode());
         simpleException.setMessage(e.getMessage());
 
-        log.error("rest api BrokerException, remote: {} uri: {} {}", req.getRemoteHost(), req.getRequestURL(),
+        log.error("rest api GovernanceException, remote: {} uri: {} {}", req.getRemoteHost(), req.getRequestURL(),
                 simpleException);
         return simpleException;
     }

@@ -1,8 +1,11 @@
 package com.webank.weevent.governance.controller;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.webank.weevent.governance.entity.Account;
+import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.service.RegisterService;
 
@@ -50,8 +53,13 @@ public class RegitsterController {
     }
 
     @GetMapping("/forget")
-    public GovernanceResult forgetPassword(@RequestParam String username) {
-        GovernanceResult governanceResult = registerService.forgetPassword(username);
+    public GovernanceResult forgetPassword(@RequestParam String username,HttpServletRequest request,HttpServletResponse response) throws GovernanceException {
+        String url = request.getRequestURL().toString();
+        int index = url.indexOf("weevent-governance");
+        String emailSendUrl = url.substring(0, index + "weevent-governance".length());
+        emailSendUrl = emailSendUrl + "/#/reset?username=" + username;
+        System.out.println(emailSendUrl);
+        GovernanceResult governanceResult = registerService.forgetPassword(username,emailSendUrl);
         return governanceResult;
     }
 

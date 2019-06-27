@@ -3,9 +3,11 @@ package com.webank.weevent.governance.service;
 import java.util.Date;
 import java.util.List;
 
+import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.Account;
 import com.webank.weevent.governance.entity.AccountExample;
 import com.webank.weevent.governance.entity.AccountExample.Criteria;
+import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.AccountMapper;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.utils.GeneratePasswordUtil;
@@ -108,7 +110,7 @@ public class RegisterService {
         return GovernanceResult.ok();
     }
 
-    public GovernanceResult forgetPassword(String username) {
+    public GovernanceResult forgetPassword(String username, String emailSendUrl) throws GovernanceException {
         GovernanceResult result = checkData(username, 1);
         // user not exist
         if ((boolean) result.getData()) {
@@ -117,9 +119,13 @@ public class RegisterService {
         // get user by username
         Account user = accountService.queryByUsername(username);
 
-        String content = "";
-        mailService.sendSimpleMail(user.getEmail(), "Reset Password", content);
-        return GovernanceResult.ok(true);
+        String content = "reset url is : " + emailSendUrl;
+        try {
+            mailService.sendSimpleMail(user.getEmail(), "Reset Password url", content);
+        } catch (Exception e) {
+            throw new GovernanceException(ErrorCode.SEND_EMAIL_ERROR);
+        }
+        return GovernanceResult.ok(user.getEmail());
     }
 
     public GovernanceResult getUserId(String username) {
