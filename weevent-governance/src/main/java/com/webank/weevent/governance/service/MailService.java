@@ -19,15 +19,15 @@ public class MailService {
     private String from;
 
     public void sendSimpleMail(String to, String subject, String content) {
-	SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-	simpleMailMessage.setFrom(from);
-	simpleMailMessage.setTo(to);
-	simpleMailMessage.setSubject(subject);
-	simpleMailMessage.setText(content);
-	try {
-	    mailSender.send(simpleMailMessage);
-	} catch (MailException e) {
-	    log.error(e.getMessage());
-	}
+        SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+        simpleMailMessage.setFrom(from);
+        simpleMailMessage.setTo(to);
+        simpleMailMessage.setSubject(subject);
+        simpleMailMessage.setText(content);
+        try {
+            mailSender.send(simpleMailMessage);
+        } catch (MailException e) {
+            log.error(e.getMessage());
+        }
     }
 }

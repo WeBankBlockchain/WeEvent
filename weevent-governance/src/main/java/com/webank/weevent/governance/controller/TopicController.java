@@ -29,28 +29,29 @@ public class TopicController {
      */
     @RequestMapping(value = "/hello", method = RequestMethod.GET)
     public String hello() {
-	log.info("Hello World test...");
-	return "Hello World!";
+        log.info("Hello World test...");
+        return "Hello World!";
     }
 
     @RequestMapping(value = "/close")
     public Boolean close(@RequestParam("brokerId") Integer brokerId, @RequestParam String topic) {
-	log.info("brokerId:" + brokerId + "close: " + topic);
-	return topicService.close(brokerId, topic);
+        log.info("brokerId:" + brokerId + "close: " + topic);
+        return topicService.close(brokerId, topic);
+
     }
 
     @RequestMapping(value = "/list")
     public TopicPage getTopis(@RequestBody TopicPageDto topicPageDto) {
 
-	log.info("pageIndex: " + topicPageDto.getPageIndex() + " pageSize: " + topicPageDto.getPageSize());
-	return topicService.getTopics(topicPageDto.getBrokerId(), topicPageDto.getPageIndex(),
-		topicPageDto.getPageSize());
+        log.info("pageIndex: " + topicPageDto.getPageIndex() + " pageSize: " + topicPageDto.getPageSize());
+        return topicService.getTopics(topicPageDto.getBrokerId(), topicPageDto.getPageIndex(),
+                topicPageDto.getPageSize());
     }
 
     @RequestMapping(value = "/openTopic")
     public Boolean open(@RequestBody TopicCreaterDto topicCreaterDto) {
-	log.info("creater: " + topicCreaterDto.getCreater() + " open: " + topicCreaterDto.getTopic());
-	return topicService.open(topicCreaterDto.getBrokerId(), topicCreaterDto.getTopic(),
-		topicCreaterDto.getCreater());
+        log.info("creater: " + topicCreaterDto.getCreater() + " open: " + topicCreaterDto.getTopic());
+        return topicService.open(topicCreaterDto.getBrokerId(), topicCreaterDto.getTopic(),
+                topicCreaterDto.getCreater());
     }
 }

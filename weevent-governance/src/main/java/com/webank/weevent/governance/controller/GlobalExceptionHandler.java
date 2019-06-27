@@ -43,7 +43,8 @@ public class GlobalExceptionHandler {
         simpleException.setCode(e.getCode());
         simpleException.setMessage(e.getMessage());
 
-        log.error("rest api BrokerException, remote: {} uri: {} {}", req.getRemoteHost(), req.getRequestURL(), simpleException);
+        log.error("rest api BrokerException, remote: {} uri: {} {}", req.getRemoteHost(), req.getRequestURL(),
+                simpleException);
         return simpleException;
     }
 
@@ -51,7 +52,8 @@ public class GlobalExceptionHandler {
     public Object baseErrorHandler(HttpServletRequest req, Exception e) {
         log.error("detect Exception", e);
 
-        log.error("rest api Exception, remote: {} uri: {} {}", req.getRemoteHost(), req.getRequestURL(), e.getMessage());
+        log.error("rest api Exception, remote: {} uri: {} {}", req.getRemoteHost(), req.getRequestURL(),
+                e.getMessage());
         return e;
     }
 }

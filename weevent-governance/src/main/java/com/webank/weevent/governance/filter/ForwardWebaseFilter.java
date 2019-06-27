@@ -51,45 +51,45 @@ public class ForwardWebaseFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-	    throws IOException, ServletException {
-	HttpServletRequest req = (HttpServletRequest) request;
-	HttpServletResponse res = (HttpServletResponse) response;
-	String idStr = request.getParameter("brokerId");
-	String originUrl = req.getRequestURI();
-	//get tail of webase url
-	String subStrUrl = originUrl.substring(originUrl.indexOf("/webase-node-mgr/") + "/webase-node-mgr".length());
+            throws IOException, ServletException {
+        HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletResponse res = (HttpServletResponse) response;
+        String idStr = request.getParameter("brokerId");
+        String originUrl = req.getRequestURI();
+        // get tail of webase url
+        String subStrUrl = originUrl.substring(originUrl.indexOf("/webase-node-mgr/") + "/webase-node-mgr".length());
 
-	Integer id = Integer.parseInt(idStr);
-	Broker broker = brokerService.getBroker(id);
-	String webaseUrl = broker.getWebaseUrl();
-	//get complete url of webase
-	String newUrl = webaseUrl + subStrUrl;
+        Integer id = Integer.parseInt(idStr);
+        Broker broker = brokerService.getBroker(id);
+        String webaseUrl = broker.getWebaseUrl();
+        // get complete url of webase
+        String newUrl = webaseUrl + subStrUrl;
 
-	CloseableHttpResponse closeResponse = null;
-	if (req.getMethod().equals("GET")) {
-	    HttpGet get = getMethod(newUrl, req);
-	    if (newUrl.startsWith("https")) {
-		closeResponse = httpsClient.execute(get);
-	    } else {
-		closeResponse = httpClient.execute(get);
-	    }
+        CloseableHttpResponse closeResponse = null;
+        if (req.getMethod().equals("GET")) {
+            HttpGet get = getMethod(newUrl, req);
+            if (newUrl.startsWith("https")) {
+                closeResponse = httpsClient.execute(get);
+            } else {
+                closeResponse = httpClient.execute(get);
+            }
 
-	} else {
-	    HttpPost postMethod = postMethod(newUrl, req);
-	    if (newUrl.startsWith("https")) {
-		closeResponse = httpsClient.execute(postMethod);
-	    } else {
-		closeResponse = httpClient.execute(postMethod);
-	    }
-	}
-	String mes = EntityUtils.toString(closeResponse.getEntity());
-	log.info("response: " + mes);
-	Header encode = closeResponse.getFirstHeader("Content-Type");
-	res.setHeader(encode.getName(), encode.getValue());
-	ServletOutputStream out = response.getOutputStream();
-	out.write(mes.getBytes());
-	return;
-	// chain.doFilter(request, response);
+        } else {
+            HttpPost postMethod = postMethod(newUrl, req);
+            if (newUrl.startsWith("https")) {
+                closeResponse = httpsClient.execute(postMethod);
+            } else {
+                closeResponse = httpClient.execute(postMethod);
+            }
+        }
+        String mes = EntityUtils.toString(closeResponse.getEntity());
+        log.info("response: " + mes);
+        Header encode = closeResponse.getFirstHeader("Content-Type");
+        res.setHeader(encode.getName(), encode.getValue());
+        ServletOutputStream out = response.getOutputStream();
+        out.write(mes.getBytes());
+        return;
+        // chain.doFilter(request, response);
     }
 
     /**
@@ -97,94 +97,94 @@ public class ForwardWebaseFilter implements Filter {
      *
      */
     HttpGet getMethod(String uri, HttpServletRequest request) {
-	try {
-	    URIBuilder builder = new URIBuilder(uri);
-	    Enumeration<String> enumeration = request.getParameterNames();
-	    while (enumeration.hasMoreElements()) {
-		String nex = enumeration.nextElement();
-		builder.setParameter(nex, request.getParameter(nex));
-	    }
-	    return new HttpGet(builder.build());
-	} catch (URISyntaxException e) {
-	    log.error(e.getMessage());
-	}
-	return null;
+        try {
+            URIBuilder builder = new URIBuilder(uri);
+            Enumeration<String> enumeration = request.getParameterNames();
+            while (enumeration.hasMoreElements()) {
+                String nex = enumeration.nextElement();
+                builder.setParameter(nex, request.getParameter(nex));
+            }
+            return new HttpGet(builder.build());
+        } catch (URISyntaxException e) {
+            log.error(e.getMessage());
+        }
+        return null;
     }
 
     HttpPost postMethod(String uri, HttpServletRequest request) {
-	StringEntity entity = null;
-	if (request.getContentType().contains("json")) {
-	    entity = jsonData(request);
-	} else {
-	    entity = formData(request);
-	}
-	HttpPost httpPost = new HttpPost(uri);
-	httpPost.setHeader("Content-Type", request.getHeader("Content-Type"));
-	httpPost.setEntity(entity);
-	return httpPost;
+        StringEntity entity = null;
+        if (request.getContentType().contains("json")) {
+            entity = jsonData(request);
+        } else {
+            entity = formData(request);
+        }
+        HttpPost httpPost = new HttpPost(uri);
+        httpPost.setHeader("Content-Type", request.getHeader("Content-Type"));
+        httpPost.setEntity(entity);
+        return httpPost;
     }
 
     public UrlEncodedFormEntity formData(HttpServletRequest request) {
-	UrlEncodedFormEntity urlEncodedFormEntity = null;
-	try {
-	    List<NameValuePair> pairs = new ArrayList<>();
-	    Enumeration<String> params = request.getParameterNames();
-	    while (params.hasMoreElements()) {
-		String name = params.nextElement();
-		pairs.add(new BasicNameValuePair(name, request.getParameter(name)));
-	    }
+        UrlEncodedFormEntity urlEncodedFormEntity = null;
+        try {
+            List<NameValuePair> pairs = new ArrayList<>();
+            Enumeration<String> params = request.getParameterNames();
+            while (params.hasMoreElements()) {
+                String name = params.nextElement();
+                pairs.add(new BasicNameValuePair(name, request.getParameter(name)));
+            }
 
-	    urlEncodedFormEntity = new UrlEncodedFormEntity(pairs, request.getCharacterEncoding());
-	} catch (UnsupportedEncodingException e) {
-	    log.error(e.getMessage());
-	}
-	return urlEncodedFormEntity;
+            urlEncodedFormEntity = new UrlEncodedFormEntity(pairs, request.getCharacterEncoding());
+        } catch (UnsupportedEncodingException e) {
+            log.error(e.getMessage());
+        }
+        return urlEncodedFormEntity;
     }
 
     public StringEntity jsonData(HttpServletRequest request) {
-	InputStreamReader is = null;
-	try {
-	    is = new InputStreamReader(request.getInputStream(), request.getCharacterEncoding());
-	    BufferedReader reader = new BufferedReader(is);
-	    StringBuilder sb = new StringBuilder();
-	    String line = null;
-	    while ((line = reader.readLine()) != null) {
-		sb.append(line);
-	    }
-	    return new StringEntity(sb.toString(), request.getCharacterEncoding());
-	} catch (IOException e) {
-	    log.error(e.getMessage());
-	} finally {
-	    try {
-		is.close();
-	    } catch (IOException e) {
-		log.error(e.getMessage());
-	    }
-	}
-	return null;
+        InputStreamReader is = null;
+        try {
+            is = new InputStreamReader(request.getInputStream(), request.getCharacterEncoding());
+            BufferedReader reader = new BufferedReader(is);
+            StringBuilder sb = new StringBuilder();
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+            return new StringEntity(sb.toString(), request.getCharacterEncoding());
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                log.error(e.getMessage());
+            }
+        }
+        return null;
     }
 
     public void fileHandle(HttpServletResponse response, CloseableHttpResponse closeableHttpResponse) {
-	ServletOutputStream out = null;
-	try {
-	    Header encode = closeableHttpResponse.getFirstHeader("Content-Type");
-	    response.setHeader(encode.getName(), encode.getValue());
-	    HttpEntity entity = closeableHttpResponse.getEntity();
+        ServletOutputStream out = null;
+        try {
+            Header encode = closeableHttpResponse.getFirstHeader("Content-Type");
+            response.setHeader(encode.getName(), encode.getValue());
+            HttpEntity entity = closeableHttpResponse.getEntity();
 
-	    out = response.getOutputStream();
-	    entity.writeTo(out);
-	    out.flush();
-	} catch (IOException e) {
-	    log.error(e.getMessage());
-	} finally {
-	    try {
-		if (out != null) {
-		    out.close();
-		}
-	    } catch (IOException e) {
-		log.error(e.getMessage());
-	    }
-	}
+            out = response.getOutputStream();
+            entity.writeTo(out);
+            out.flush();
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        } finally {
+            try {
+                if (out != null) {
+                    out.close();
+                }
+            } catch (IOException e) {
+                log.error(e.getMessage());
+            }
+        }
     }
 
 }

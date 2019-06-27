@@ -2,10 +2,8 @@ package com.webank.weevent.governance.code;
 
 public enum ErrorCode {
 
-    SUCCESS(0, "success"),
-    BROKER_CONNECT_ERROR(100100, "broker cannot connect!"),
-    WEBASE_CONNECT_ERROR(100101, "webase cannot connect!"),
-    ;
+    SUCCESS(0, "success"), BROKER_CONNECT_ERROR(100100, "broker cannot connect!"), WEBASE_CONNECT_ERROR(100101,
+            "webase cannot connect!"),;
 
     /**
      * error code
@@ -20,8 +18,10 @@ public enum ErrorCode {
     /**
      * Error Code Constructor.
      *
-     * @param code The ErrorCode
-     * @param codeDesc The ErrorCode Description
+     * @param code
+     *            The ErrorCode
+     * @param codeDesc
+     *            The ErrorCode Description
      */
     ErrorCode(int code, String codeDesc) {
         this.code = code;

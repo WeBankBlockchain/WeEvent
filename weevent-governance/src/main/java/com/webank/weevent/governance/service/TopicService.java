@@ -36,71 +36,71 @@ public class TopicService {
     ClientHttpRequestFactory factory;
 
     public Boolean close(Integer brokerId, String topic) {
-	// get broker
-	Broker broker = brokerService.getBroker(brokerId);
-	if (broker != null) {
-	    generateRestTemplate(broker.getBrokerUrl());
-	    String url = broker.getBrokerUrl() + "/rest/close?topic=" + topic;
-	    log.info("url: " + url);
-	    Boolean response = restTemplate.getForEntity(url, Boolean.class).getBody();
-	    return response;
-	}
-	return false;
+        // get broker
+        Broker broker = brokerService.getBroker(brokerId);
+        if (broker != null) {
+            generateRestTemplate(broker.getBrokerUrl());
+            String url = broker.getBrokerUrl() + "/rest/close?topic=" + topic;
+            log.info("url: " + url);
+            Boolean response = restTemplate.getForEntity(url, Boolean.class).getBody();
+            return response;
+        }
+        return false;
     }
 
     public TopicPage getTopics(Integer brokerId, Integer pageIndex, Integer pageSize) {
-	// getBroker
-	Broker broker = brokerService.getBroker(brokerId);
+        // getBroker
+        Broker broker = brokerService.getBroker(brokerId);
 
-	generateRestTemplate(broker.getBrokerUrl());
+        generateRestTemplate(broker.getBrokerUrl());
 
-	// get eventbroker url
-	String url = broker.getBrokerUrl() + "/rest/list";
-	url = url + "?pageIndex=" + pageIndex + "&pageSize=" + pageSize;
-	log.info(url);
-	TopicPage result = restTemplate.getForEntity(url, TopicPage.class).getBody();
-	log.info("result json=" + result);
-	if (result != null) {
-	    List<Topic> topicList = null;
+        // get eventbroker url
+        String url = broker.getBrokerUrl() + "/rest/list";
+        url = url + "?pageIndex=" + pageIndex + "&pageSize=" + pageSize;
+        log.info(url);
+        TopicPage result = restTemplate.getForEntity(url, TopicPage.class).getBody();
+        log.info("result json=" + result);
+        if (result != null) {
+            List<Topic> topicList = null;
 
-	    topicList = result.getTopicInfoList();
-	    // get creater from database
-	    if (topicList.size() > 0) {
-		for (int i = 0; i < topicList.size(); i++) {
-		    String creater = topicInfoMapper.getCreater(brokerId, topicList.get(i).getTopicName());
-		    if (!StringUtils.isEmpty(creater)) {
-			topicList.get(i).setCreater(creater);
-		    }
-		}
-	    }
-	    result.setTopicInfoList(topicList);
-	    return result;
-	}
-	return null;
+            topicList = result.getTopicInfoList();
+            // get creater from database
+            if (topicList.size() > 0) {
+                for (int i = 0; i < topicList.size(); i++) {
+                    String creater = topicInfoMapper.getCreater(brokerId, topicList.get(i).getTopicName());
+                    if (!StringUtils.isEmpty(creater)) {
+                        topicList.get(i).setCreater(creater);
+                    }
+                }
+            }
+            result.setTopicInfoList(topicList);
+            return result;
+        }
+        return null;
     }
 
     @Transactional
     public Boolean open(Integer brokerId, String topic, String creater) {
-	// get broker
-	Broker broker = brokerService.getBroker(brokerId);
-	if (broker != null) {
-	    topicInfoMapper.openBrokeTopic(brokerId, topic, creater);
-	    generateRestTemplate(broker.getBrokerUrl());
-	    String url = broker.getBrokerUrl() + "/rest/open?topic=" + topic;
-	    log.info("topic: " + topic + " creater: " + creater);
-	    Boolean response = restTemplate.getForEntity(url, Boolean.class).getBody();
-	    return response;
-	}
-	return false;
+        // get broker
+        Broker broker = brokerService.getBroker(brokerId);
+        if (broker != null) {
+            topicInfoMapper.openBrokeTopic(brokerId, topic, creater);
+            generateRestTemplate(broker.getBrokerUrl());
+            String url = broker.getBrokerUrl() + "/rest/open?topic=" + topic;
+            log.info("topic: " + topic + " creater: " + creater);
+            Boolean response = restTemplate.getForEntity(url, Boolean.class).getBody();
+            return response;
+        }
+        return false;
     }
 
     // generate Restemplate from url
     private void generateRestTemplate(String url) {
-	if (url.startsWith("https")) {
-	    restTemplate = new RestTemplate(factory);
-	} else {
-	    restTemplate = new RestTemplate();
-	}
+        if (url.startsWith("https")) {
+            restTemplate = new RestTemplate(factory);
+        } else {
+            restTemplate = new RestTemplate();
+        }
     }
 
 }

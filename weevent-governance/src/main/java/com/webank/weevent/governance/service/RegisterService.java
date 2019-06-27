@@ -37,100 +37,111 @@ public class RegisterService {
     private MailService mailService;
 
     public GovernanceResult checkData(String param, int type) {
-	// according type generate select condition
-	AccountExample example = new AccountExample();
-	Criteria criteria = example.createCriteria();
-	// 1：username
-	if (type == 1) {
-	    criteria.andUsernameEqualTo(param);
-	} else {
-	    return GovernanceResult.build(400, "data type error");
-	}
-	// excute select
-	List<Account> list = accountMapper.selectByExample(example);
-	// is list contain data
-	if (list != null && list.size() > 0) {
-	    // if list contain data return false
-	    return GovernanceResult.ok(false);
-	}
-	// if not contain data true
-	return GovernanceResult.ok(true);
+        // according type generate select condition
+        AccountExample example = new AccountExample();
+        Criteria criteria = example.createCriteria();
+        // 1：username
+        if (type == 1) {
+            criteria.andUsernameEqualTo(param);
+        } else {
+            return GovernanceResult.build(400, "data type error");
+        }
+        // excute select
+        List<Account> list = accountMapper.selectByExample(example);
+        // is list contain data
+        if (list != null && list.size() > 0) {
+            // if list contain data return false
+            return GovernanceResult.ok(false);
+        }
+        // if not contain data true
+        return GovernanceResult.ok(true);
     }
 
     public GovernanceResult register(Account user) {
-	// data criteral
-	if (StringUtils.isBlank(user.getUsername()) || StringUtils.isBlank(user.getPassword())
-		|| StringUtils.isBlank(user.getEmail())) {
-	    return GovernanceResult.build(400, "user data incomplete，regist fail");
-	}
-	// check username exist
-	GovernanceResult result = checkData(user.getUsername(), 1);
-	if (!(boolean) result.getData()) {
-	    return GovernanceResult.build(400, "this username occupied");
-	}
-	
-	if(user.getPassword().length() < 6) {
-	    return GovernanceResult.build(400, "password is too short");
-	}
-	
-	user.setLastUpdate(new Date());
-	// secret
-	String storePassword = passwordEncoder.encode(user.getPassword());
-	user.setPassword(storePassword);
-	// insert user into database
-	accountMapper.insert(user);
-	// return true
-	return GovernanceResult.ok();
+        // data criteral
+        if (StringUtils.isBlank(user.getUsername()) || StringUtils.isBlank(user.getPassword())
+                || StringUtils.isBlank(user.getEmail())) {
+            return GovernanceResult.build(400, "user data incomplete，regist fail");
+        }
+        // check username exist
+        GovernanceResult result = checkData(user.getUsername(), 1);
+        if (!(boolean) result.getData()) {
+            return GovernanceResult.build(400, "this username occupied");
+        }
+
+        if (user.getPassword().length() < 6) {
+            return GovernanceResult.build(400, "password is too short");
+        }
+
+        user.setLastUpdate(new Date());
+        // secret
+        String storePassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(storePassword);
+        // insert user into database
+        accountMapper.insert(user);
+        // return true
+        return GovernanceResult.ok();
     }
 
     public GovernanceResult updatePassword(Account user) {
-	// data criteral
-	if (StringUtils.isBlank(user.getPassword()) || StringUtils.isBlank(user.getOldPassword())) {
-	    return GovernanceResult.build(400, "password is blank，update fail");
-	}
-	// check oldPassword is correct
-	String oldPassword = user.getOldPassword();
+        // data criteral
+        if (StringUtils.isBlank(user.getPassword()) || StringUtils.isBlank(user.getOldPassword())) {
+            return GovernanceResult.build(400, "password is blank，update fail");
+        }
 
-	Account storeUser = accountService.queryByUsername(user.getUsername());
-	if (!passwordEncoder.matches(oldPassword, storeUser.getPassword())) {
-	    return GovernanceResult.build(400, "old password is incorrect");
-	}
+        if (user.getPassword().length() < 6) {
+            return GovernanceResult.build(400, "password is too short");
+        }
+        // check oldPassword is correct
+        String oldPassword = user.getOldPassword();
 
-	String password = passwordEncoder.encode(user.getPassword());
-	storeUser.setPassword(password);
-	storeUser.setLastUpdate(new Date());
+        Account storeUser = accountService.queryByUsername(user.getUsername());
+        if (!passwordEncoder.matches(oldPassword, storeUser.getPassword())) {
+            return GovernanceResult.build(400, "old password is incorrect");
+        }
 
-	accountMapper.updateByPrimaryKey(storeUser);
-	return GovernanceResult.ok();
+        String password = passwordEncoder.encode(user.getPassword());
+        storeUser.setPassword(password);
+        storeUser.setLastUpdate(new Date());
+
+        accountMapper.updateByPrimaryKey(storeUser);
+        return GovernanceResult.ok();
     }
 
     public GovernanceResult forgetPassword(String username) {
-	GovernanceResult result = checkData(username, 1);
-	// user not exist
-	if ((boolean) result.getData()) {
-	    return GovernanceResult.build(400, "username not exists");
-	}
-	// get user by username
-	Account user = accountService.queryByUsername(username);
+        GovernanceResult result = checkData(username, 1);
+        // user not exist
+        if ((boolean) result.getData()) {
+            return GovernanceResult.build(400, "username not exists");
+        }
+        // get user by username
+        Account user = accountService.queryByUsername(username);
 
-	// generate new password
-	String newPassword = GeneratePasswordUtil.generatePassword();
-	String pwd = passwordEncoder.encode(newPassword);
-	user.setPassword(pwd);
-	user.setLastUpdate(new Date());
-	// update password into database
-	accountMapper.updateByPrimaryKey(user);
-
-	String content = "The new reset password is : " + newPassword;
-	mailService.sendSimpleMail(user.getEmail(), "Reset Password", content);
-	return GovernanceResult.ok();
+        String content = "";
+        mailService.sendSimpleMail(user.getEmail(), "Reset Password", content);
+        return GovernanceResult.ok(true);
     }
 
     public GovernanceResult getUserId(String username) {
-	// get user by username
-	Account user = accountService.queryByUsername(username);
-	Integer userId = user.getId();
-	return GovernanceResult.ok(userId);
+        // get user by username
+        Account user = accountService.queryByUsername(username);
+        Integer userId = user.getId();
+        return GovernanceResult.ok(userId);
+    }
+
+    public GovernanceResult resetPassword(Account user) {
+        if (user.getPassword().length() < 6) {
+            return GovernanceResult.build(400, "password is too short");
+        }
+
+        Account storeUser = accountService.queryByUsername(user.getUsername());
+
+        String password = passwordEncoder.encode(user.getPassword());
+        storeUser.setPassword(password);
+        storeUser.setLastUpdate(new Date());
+
+        accountMapper.updateByPrimaryKey(storeUser);
+        return GovernanceResult.ok(true);
     }
 
 }

@@ -29,13 +29,13 @@ public class JsonUtils {
      * @return
      */
     public static String objectToJson(Object data) {
-	try {
-	    String string = MAPPER.writeValueAsString(data);
-	    return string;
-	} catch (JsonProcessingException e) {
-	    log.error(e.getMessage());
-	}
-	return null;
+        try {
+            String string = MAPPER.writeValueAsString(data);
+            return string;
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage());
+        }
+        return null;
     }
 
     /**
@@ -47,13 +47,13 @@ public class JsonUtils {
      * @return
      */
     public static <T> T jsonToPojo(String jsonData, Class<T> beanType) {
-	try {
-	    T t = MAPPER.readValue(jsonData, beanType);
-	    return t;
-	} catch (Exception e) {
-	    log.error(e.getMessage());
-	}
-	return null;
+        try {
+            T t = MAPPER.readValue(jsonData, beanType);
+            return t;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return null;
     }
 
     /**
@@ -70,15 +70,15 @@ public class JsonUtils {
      * @return
      */
     public static <T> List<T> jsonToList(String jsonData, Class<T> beanType) {
-	JavaType javaType = MAPPER.getTypeFactory().constructParametricType(List.class, beanType);
-	try {
-	    List<T> list = MAPPER.readValue(jsonData, javaType);
-	    return list;
-	} catch (Exception e) {
-	    log.error(e.getMessage());
-	}
+        JavaType javaType = MAPPER.getTypeFactory().constructParametricType(List.class, beanType);
+        try {
+            List<T> list = MAPPER.readValue(jsonData, javaType);
+            return list;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
 
-	return null;
+        return null;
     }
 
 }
