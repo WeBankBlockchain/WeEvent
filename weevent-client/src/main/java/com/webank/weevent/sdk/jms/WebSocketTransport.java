@@ -315,6 +315,8 @@ public class WebSocketTransport extends WebSocketClient {
                     if (accessor.getNativeHeader("receipt-id") != null) {
                         recepitId = accessor.getNativeHeader("receipt-id").get(0);
                     }
+                    log.info("accessor :{}",accessor.toString());
+
                     futures.get(sequence2Id.get(receiptId)).setResponse(stompMsg);
                     break;
                 case "MESSAGE":
