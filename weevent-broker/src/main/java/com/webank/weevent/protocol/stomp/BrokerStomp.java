@@ -154,7 +154,6 @@ public class BrokerStomp extends TextWebSocketHandler {
         // if check the user login and password is wring,return the message
         if (command == StompCommand.ERROR) {
             accessor.setNativeHeader("message", "login or password is wrong");
-            accessor.setNativeHeader("code", "1");
         }
         sendSimpleMessage(session, accessor);
     }
