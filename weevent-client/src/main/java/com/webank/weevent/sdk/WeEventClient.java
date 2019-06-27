@@ -112,7 +112,6 @@ public class WeEventClient implements IWeEventClient {
         return this.brokerRpc.publish(topic, content);
     }
 
-
     public String subscribe(String topic, String offset, EventListener listener) throws BrokerException {
         try {
             validateParam(topic);
@@ -219,20 +218,26 @@ public class WeEventClient implements IWeEventClient {
         return this.brokerRpc.publish(topic, groupId, content, extensions);
     }
 
-    /**
-     * Subscribe events from topic.
-     *
-     * @param topic topic name
-     * @param groupId groupId
-     * @param offset, from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
-     * @param listener callback
-     * @return subscription Id
-     * @throws BrokerException invalid input param
-     */
+    public SendResult publish(String topic, byte[] content, Map<String, String> extensions) throws BrokerException {
+        validateParam(topic);
+        validateArrayParam(content);
+        validateExtensions(extensions);
+        return this.brokerRpc.publish(topic, content, extensions);
+    }
+
+    public boolean close(String topic, String groupId) throws BrokerException {
+        validateParam(topic);
+        validateParam(groupId);
+        return this.brokerRpc.close(topic, groupId);
+    }
+
+
     public String subscribe(String topic, String groupId, String offset, EventListener listener) throws BrokerException {
         try {
             validateParam(topic);
+            validateParam(groupId);
             validateParam(offset);
+            validateEventListener(listener);
             TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
             // create topic
             Topic destination = session.createTopic(topic);
@@ -269,18 +274,6 @@ public class WeEventClient implements IWeEventClient {
         }
     }
 
-    public SendResult publish(String topic, byte[] content, Map<String, String> extensions) throws BrokerException {
-        validateParam(topic);
-        validateArrayParam(content);
-        validateExtensions(extensions);
-        return this.brokerRpc.publish(topic, content, extensions);
-    }
-
-    public boolean close(String topic, String groupId) throws BrokerException {
-        validateParam(topic);
-        validateParam(groupId);
-        return this.brokerRpc.close(topic, groupId);
-    }
 
     public boolean exist(String topic, String groupId) throws BrokerException {
         validateParam(topic);
@@ -446,24 +439,22 @@ public class WeEventClient implements IWeEventClient {
      * @param listener param
      * @throws BrokerException
      */
-    private static void validateEventListener(EventListener listener) throws BrokerException {
-        if (listener == null) {
+    private static void validateEventListener(EventListener  listener) throws BrokerException {
+        if( listener == null) {
             throw new BrokerException(ErrorCode.PARAM_ISNULL);
         }
     }
-
     /**
      * check the param
      *
      * @param extensions extensions param
      * @throws BrokerException
      */
-    private static void validateExtensions(Map<String, String> extensions) throws BrokerException {
-        if (extensions == null) {
+    private static void validateExtensions(Map<String,String>  extensions) throws BrokerException {
+        if( extensions == null) {
             throw new BrokerException(ErrorCode.PARAM_ISNULL);
         }
     }
-
     /**
      * check the username and the password
      *
