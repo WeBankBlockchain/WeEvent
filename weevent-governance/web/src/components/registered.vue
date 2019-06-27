@@ -5,37 +5,37 @@
       <p style='margin:5px 0 30px'>区块链应用平台</p>
       <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm"  class="demo-ruleForm" v-show='reset'>
         <el-form-item label="用户名" prop="name">
-          <el-input v-model="ruleForm.name" ></el-input>
+          <el-input v-model.trim.trim="ruleForm.name" ></el-input>
         </el-form-item>
         <el-form-item label="密码" prop="pass">
-          <el-input type="password" v-model="ruleForm.pass" autocomplete="off"></el-input>
+          <el-input type="password" v-model.trim="ruleForm.pass" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="确认密码" prop="checkPass" >
-          <el-input type="password" v-model="ruleForm.checkPass" autocomplete="off"></el-input>
+          <el-input type="password" v-model.trim="ruleForm.checkPass" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item
           label='邮箱'
           prop='email'
           v-show='reset'
           >
-          <el-input type="email" v-model="ruleForm.email" autocomplete="off"></el-input>
+          <el-input type="email" v-model.trim="ruleForm.email" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item v-show='reset'>
           <el-button type="primary" @click="submitForm('ruleForm')">注册</el-button>
         </el-form-item>
       </el-form>
       <el-form :model="ruleForm2" status-icon :rules="rules2" ref="ruleForm2" class="demo-ruleForm" v-show='!reset'>
-        <el-form-item label="用户名" prop="name">
-          <el-input v-model="ruleForm2.name" disabled></el-input>
+        <el-form-item label="用户名">
+          <el-input v-model.trim="ruleForm2.name" disabled></el-input>
         </el-form-item>
         <el-form-item label="旧密码" prop="pass">
-          <el-input type="password" v-model="ruleForm2.pass" autocomplete="off"></el-input>
+          <el-input type="password" v-model.trim="ruleForm2.pass" autocomplete="off"></el-input>
         </el-form-item>
          <el-form-item label="新密码" prop="newPass" >
-          <el-input type="password" v-model="ruleForm2.newPass" autocomplete="off"></el-input>
+          <el-input type="password" v-model.trim="ruleForm2.newPass" autocomplete="off"></el-input>
         </el-form-item>
          <el-form-item label="再次输入" prop="checkNewPass" >
-          <el-input type="password" v-model="ruleForm2.checkNewPass" autocomplete="off"></el-input>
+          <el-input type="password" v-model.trim="ruleForm2.checkNewPass" autocomplete="off"></el-input>
         </el-form-item>
          <el-form-item>
           <el-button type="primary" @click="submit('ruleForm2')">修改</el-button>
@@ -51,17 +51,22 @@ import API from '../API/resource'
 export default {
   data () {
     var checkName = (rule, value, callback) => {
+      let regex = /^[0-9A-Za-z]{6,20}$/
       if (!value) {
         return callback(new Error('用户名不能为空'))
       } else {
-        let url = '/' + value + '/1'
-        API.checkExsit(url).then(res => {
-          if (res.data) {
-            callback()
-          } else {
-            callback(new Error('用户名已存在'))
-          }
-        })
+        if (!regex.exec(value)) {
+          return callback(new Error('用户名只能是6~20位的字母和数字'))
+        } else {
+          let url = '/' + value + '/1'
+          API.checkExsit(url).then(res => {
+            if (res.data.data) {
+              callback()
+            } else {
+              callback(new Error('用户名已存在'))
+            }
+          })
+        }
       }
     }
     var pass = (rule, value, callback) => {
@@ -136,9 +141,6 @@ export default {
         ]
       },
       rules2: {
-        name: [
-          { validator: checkName, trigger: 'blur' }
-        ],
         pass: [
           { validator: pass, trigger: 'blur' }
         ],
