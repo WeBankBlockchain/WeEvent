@@ -58,7 +58,7 @@ public class Subscribe {
                 MqttQoS mqttQoS = topicSubscription.qualityOfService();
                 String subscriptionId = "";
                 try {
-                    subscriptionId = this.iConsumer.subscribe(topicFilter, WeEventConstants.DEFAULT_GROUP_ID, WeEvent.OFFSET_LAST, "mqtt", new IConsumer.ConsumerListener() {
+                    subscriptionId = this.iConsumer.subscribe(topicFilter, WeEventConstants.DEFAULT_GROUP_ID, WeEvent.OFFSET_LAST, WeEventConstants.MQTTTYPE, new IConsumer.ConsumerListener() {
                         @Override
                         public void onEvent(String subscriptionId, WeEvent event) {
                             log.info("consumer onEvent, subscriptionId: {} event: {}", subscriptionId, event);
@@ -107,7 +107,7 @@ public class Subscribe {
     }
 
     private void sendPublishMessage(String topic, MqttQoS mqttQoS, byte[] messageBytes, boolean retain, boolean dup) {
-        List<SubscribeStore> subscribeStores = iSubscribeStore.search(topic);
+        List<SubscribeStore> subscribeStores = iSubscribeStore.searchByTopic(topic);
         subscribeStores.forEach(subscribeStore -> {
             if (iSessionStore.containsKey(subscribeStore.getClientId())) {
                 //get subscribe QOS value
