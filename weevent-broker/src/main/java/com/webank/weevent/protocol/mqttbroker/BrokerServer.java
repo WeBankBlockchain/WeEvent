@@ -53,6 +53,7 @@ public class BrokerServer {
     private EventLoopGroup workerGroup = null;
     private SslContext sslContext = null;
     private Channel websocketChannel = null;
+    private Channel mqttChannel = null;
     @Autowired
     private ProtocolProcess protocolProcess;
 
@@ -69,8 +70,12 @@ public class BrokerServer {
             sslContext = SslContextBuilder.forServer(kmf).build();
             log.info("mqtt protocol must start with ssl");
         }
-        mqttServer();
-        webSocketServer();
+        if (BrokerApplication.weEventConfig.getBrokerServerPort() != null) {
+            mqttServer();
+        }
+        if (BrokerApplication.weEventConfig.getWebSocketPort() != null) {
+            webSocketServer();
+        }
     }
 
     @PreDestroy
@@ -79,8 +84,14 @@ public class BrokerServer {
         bossGroup = null;
         workerGroup.shutdownGracefully();
         workerGroup = null;
-        websocketChannel.closeFuture().syncUninterruptibly();
-        websocketChannel = null;
+        if (BrokerApplication.weEventConfig.getBrokerServerPort() != null) {
+            mqttChannel.closeFuture().syncUninterruptibly();
+            mqttChannel = null;
+        }
+        if (BrokerApplication.weEventConfig.getWebSocketPort() != null) {
+            websocketChannel.closeFuture().syncUninterruptibly();
+            websocketChannel = null;
+        }
     }
 
     private SslHandler getSslHandler(SslContext sslContext, ByteBufAllocator byteBufAllocator) {
@@ -110,7 +121,7 @@ public class BrokerServer {
                 })
                 .option(ChannelOption.SO_BACKLOG, BrokerApplication.weEventConfig.getSoBackLog())
                 .childOption(ChannelOption.SO_KEEPALIVE, BrokerApplication.weEventConfig.getSoKeepAlive());
-        serverBootstrap.bind(BrokerApplication.weEventConfig.getBrokerServerPort()).sync().channel();
+        mqttChannel = serverBootstrap.bind(BrokerApplication.weEventConfig.getBrokerServerPort()).sync().channel();
     }
 
     private void webSocketServer() throws Exception {
