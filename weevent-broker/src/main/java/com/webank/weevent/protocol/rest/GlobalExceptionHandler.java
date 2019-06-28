@@ -34,7 +34,7 @@ class SimpleException {
 @Slf4j
 @ControllerAdvice
 @RestController
-public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+public class GlobalExceptionHandler{
     @ExceptionHandler(value = BrokerException.class)
     public Object baseErrorHandler(HttpServletRequest req, BrokerException e) {
         log.error("detect BrokerException", e);
