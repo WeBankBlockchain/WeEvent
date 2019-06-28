@@ -70,11 +70,12 @@ public class Stomp {
                 // auto subscribe when connected
                 log.info("subscribe topic, {}", topic);
                 StompHeaders header = new StompHeaders();
+                header.setDestination(topic);
                 header.set("eventId","2cf24dba-59-1124");
                 header.set("groupId","1");
                 // extension params
                 header.set("weevent-format","json");
-                header.setDestination(topic);
+
                 StompSession.Subscription subscription = session.subscribe(header, new StompFrameHandler() {
                     @Override
                     public Type getPayloadType(StompHeaders headers) {
@@ -116,7 +117,6 @@ public class Stomp {
                     while (!isConnected) try {
                         // retry every 3 seconds
                         Thread.sleep(3000);
-
                         //new connect start
                         WebSocketClient webSocketClient = new StandardWebSocketClient();
                         WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
@@ -166,11 +166,12 @@ public class Stomp {
                 session.setAutoReceipt(true);
                 // auto subscribe when connected
                 StompHeaders header = new StompHeaders();
+                header.setDestination(topic);
                 header.set("eventId","2cf24dba-59-1124");
                 header.set("groupId","1");
                 // extension params
                 header.set("weevent-format","json");
-                header.setDestination(topic);
+
                 StompSession.Subscription subscription = session.subscribe(header, new StompFrameHandler() {
                     @Override
                     public Type getPayloadType(StompHeaders headers) {
@@ -183,15 +184,12 @@ public class Stomp {
                     }
                 });
                 log.info("subscribe result, subscription id: {}", subscription.getSubscriptionId());
-
                 // subscription.unsubscribe() when needed
 
                 try {
                     Thread.sleep(5000L);
                 } catch (InterruptedException e) {
                 }
-                StompHeaders header = new StompHeaders();
-                header.setDestination(topic);
                 log.info("send event to topic, {}", topic);
                 for (int i = 0; i < 10; i++) {
                     StompSession.Receiptable receiptable = session.send(topic, "hello world, from sock js:" + i);

@@ -218,27 +218,24 @@ public class WebSocketTransport extends WebSocketClient {
         if (stompCommand.isError(stompResponse)) {
             log.info("stomp request is fail");
             return "";
-        } else {
-            // cache the subscribption id and the WeEventTopic,the subscription2EventCache which can use for reconnect
-            topic.setContinueSubscriptionId(stompCommand.getSubscriptionId(stompResponse));
-            this.subscription2EventCache.put(stompCommand.getSubscriptionId(stompResponse), topic);
-
-            LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) stompResponse.getHeaders().get("nativeHeaders"));
-
-            if (nativeHeaders != null) {
-                // send command receipt Id
-                Object subscriptionId = nativeHeaders.get("subscription-id");
-                String subscriptionIdStr = null;
-                if (subscriptionId != null) {
-                    subscriptionIdStr = ((List) subscriptionId).get(0).toString();
-                    // map the receipt id and the subscription id
-                    this.receiptId2SubscriptionId.put(String.valueOf(asyncSeq), subscriptionIdStr);
-                    this.subscriptionId2ReceiptId.put(subscriptionIdStr, String.valueOf(asyncSeq));
-                }
-            }
-
         }
+        // cache the subscribption id and the WeEventTopic,the subscription2EventCache which can use for reconnect
+        topic.setContinueSubscriptionId(stompCommand.getSubscriptionId(stompResponse));
+        this.subscription2EventCache.put(stompCommand.getSubscriptionId(stompResponse), topic);
 
+        LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) stompResponse.getHeaders().get("nativeHeaders"));
+
+        if (nativeHeaders != null) {
+            // send command receipt Id
+            Object subscriptionId = nativeHeaders.get("subscription-id");
+            String subscriptionIdStr = null;
+            if (subscriptionId != null) {
+                subscriptionIdStr = ((List) subscriptionId).get(0).toString();
+                // map the receipt id and the subscription id
+                this.receiptId2SubscriptionId.put(String.valueOf(asyncSeq), subscriptionIdStr);
+                this.subscriptionId2ReceiptId.put(subscriptionIdStr, String.valueOf(asyncSeq));
+            }
+        }
         return stompCommand.getSubscriptionId(stompResponse);
     }
 
@@ -469,7 +466,7 @@ class WSThread extends Thread {
             while (!this.webSocketTransport.stompConnect(this.webSocketTransport.userInfo.getKey(), this.webSocketTransport.userInfo.getValue())) {
                 Thread.sleep(3000);
             }
-            this.webSocketTransport.connectFlag = false;
+
         } catch (InterruptedException | JMSException e) {
             e.printStackTrace();
         }
@@ -481,5 +478,6 @@ class WSThread extends Thread {
                 e.printStackTrace();
             }
         }
+        this.webSocketTransport.connectFlag = false;
     }
 }
