@@ -308,7 +308,7 @@ public class Web3SDK2Wrapper {
                     String topicName = logEvent.topicName;
                     Map<String, String> extensions = null;
                     try {
-                        if (StringUtils.isBlank(logEvent.extensions)) {
+                        if (!StringUtils.isBlank(logEvent.extensions)) {
                             extensions = (Map<String, String>) JSON.parse(logEvent.extensions);
                         }
                     } catch (Exception e) {
