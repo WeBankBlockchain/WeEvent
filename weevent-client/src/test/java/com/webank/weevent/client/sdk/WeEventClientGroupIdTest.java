@@ -46,7 +46,7 @@ public class WeEventClientGroupIdTest {
     @Before
     public void before() throws Exception {
         extensions.put("weevent-url", "https://github.com/WeBankFinTech/WeEvent");
-        weEventClient = IWeEventClient.build("http://127.0.0.1:8080/weevent");
+        weEventClient = IWeEventClient.build("http://localhost:8080/weevent");
         weEventClient.open(topicName);
     }
 

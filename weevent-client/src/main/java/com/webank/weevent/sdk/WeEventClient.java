@@ -102,69 +102,21 @@ public class WeEventClient implements IWeEventClient {
     public WeEventClient(String brokerUrl, String userName, String password) throws BrokerException {
         validateParam(brokerUrl);
         validateUser(userName, password);
-        buildRpc(brokerUrl);
+        buildRpc(brokerUrl+ "/jsonrpc");
         buildJms(getStompUrl(brokerUrl), userName, password);
     }
 
     public SendResult publish(String topic, byte[] content) throws BrokerException {
         validateParam(topic);
+        validateArrayParam(content);
         return this.brokerRpc.publish(topic, content);
-    }
-
-    /**
-     * Subscribe events from topic.
-     *
-     * @param topic topic name
-     * @param groupId groupId
-     * @param offset, from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
-     * @param listener callback
-     * @return subscription Id
-     * @throws BrokerException invalid input param
-     */
-    public String subscribe(String topic, String groupId, String offset, EventListener listener) throws BrokerException {
-        try {
-            validateParam(topic);
-            validateParam(offset);
-            TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-            // create topic
-            Topic destination = session.createTopic(topic);
-
-            // create subscriber
-            ((WeEventTopic) destination).setOffset(offset);
-            ((WeEventTopic) destination).setGroupId(groupId);//if not set default 1
-            WeEventTopicSubscriber subscriber = (WeEventTopicSubscriber) session.createSubscriber(destination);
-
-            // create listener
-            subscriber.setMessageListener(new MessageListener() {
-                public void onMessage(Message message) {
-                    if (message instanceof BytesMessage) {
-                        try {
-                            BytesMessage bytesMessage = (BytesMessage) message;
-                            ObjectMapper mapper = new ObjectMapper();
-                            byte[] body = new byte[(int) bytesMessage.getBodyLength()];
-                            bytesMessage.readBytes(body);
-                            WeEvent event = mapper.readValue(body, WeEvent.class);
-                            listener.onEvent(event);
-                        } catch (IOException | JMSException e) {
-                            log.error("onMessage exception", e);
-                            listener.onException(e);
-                        }
-                    }
-                }
-            });
-
-            this.sessionMap.put(subscriber.getSubscriptionId(), session);
-            return subscriber.getSubscriptionId();
-        } catch (JMSException e) {
-            log.error("jms exception", e);
-            throw jms2BrokerException(e);
-        }
     }
 
     public String subscribe(String topic, String offset, EventListener listener) throws BrokerException {
         try {
             validateParam(topic);
             validateParam(offset);
+            validateEventListener(listener);
             TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
             // create topic
             Topic destination = session.createTopic(topic);
@@ -261,11 +213,15 @@ public class WeEventClient implements IWeEventClient {
     public SendResult publish(String topic, String groupId, byte[] content, Map<String, String> extensions) throws BrokerException {
         validateParam(topic);
         validateParam(groupId);
+        validateArrayParam(content);
+        validateExtensions(extensions);
         return this.brokerRpc.publish(topic, groupId, content, extensions);
     }
 
     public SendResult publish(String topic, byte[] content, Map<String, String> extensions) throws BrokerException {
         validateParam(topic);
+        validateArrayParam(content);
+        validateExtensions(extensions);
         return this.brokerRpc.publish(topic, content, extensions);
     }
 
@@ -274,6 +230,93 @@ public class WeEventClient implements IWeEventClient {
         validateParam(groupId);
         return this.brokerRpc.close(topic, groupId);
     }
+
+
+    public String subscribe(String topic, String groupId, String offset, EventListener listener) throws BrokerException {
+        try {
+            validateParam(topic);
+            validateParam(groupId);
+            validateParam(offset);
+            validateEventListener(listener);
+            TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+            // create topic
+            Topic destination = session.createTopic(topic);
+
+            // create subscriber
+            ((WeEventTopic) destination).setOffset(offset);
+            ((WeEventTopic) destination).setGroupId(groupId);//if not set default 1
+            WeEventTopicSubscriber subscriber = (WeEventTopicSubscriber) session.createSubscriber(destination);
+
+            // create listener
+            subscriber.setMessageListener(new MessageListener() {
+                public void onMessage(Message message) {
+                    if (message instanceof BytesMessage) {
+                        try {
+                            BytesMessage bytesMessage = (BytesMessage) message;
+                            ObjectMapper mapper = new ObjectMapper();
+                            byte[] body = new byte[(int) bytesMessage.getBodyLength()];
+                            bytesMessage.readBytes(body);
+                            WeEvent event = mapper.readValue(body, WeEvent.class);
+                            listener.onEvent(event);
+                        } catch (IOException | JMSException e) {
+                            log.error("onMessage exception", e);
+                            listener.onException(e);
+                        }
+                    }
+                }
+            });
+
+            this.sessionMap.put(subscriber.getSubscriptionId(), session);
+            return subscriber.getSubscriptionId();
+        } catch (JMSException e) {
+            log.error("jms exception", e);
+            throw jms2BrokerException(e);
+        }
+    }
+    public String subscribe(String topic, String groupId, String offset,String continueSubacriptionId, EventListener listener) throws BrokerException {
+        try {
+            validateParam(topic);
+            validateParam(groupId);
+            validateParam(offset);
+            validateEventListener(listener);
+            TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+            // create topic
+            Topic destination = session.createTopic(topic);
+
+            // create subscriber
+            ((WeEventTopic) destination).setOffset(offset);
+            ((WeEventTopic) destination).setGroupId(groupId);//if not set default 1
+            ((WeEventTopic) destination).setContinueSubscriptionId(continueSubacriptionId);
+            WeEventTopicSubscriber subscriber = (WeEventTopicSubscriber) session.createSubscriber(destination);
+
+            // create listener
+            subscriber.setMessageListener(new MessageListener() {
+                public void onMessage(Message message) {
+                    if (message instanceof BytesMessage) {
+                        try {
+                            BytesMessage bytesMessage = (BytesMessage) message;
+                            ObjectMapper mapper = new ObjectMapper();
+                            byte[] body = new byte[(int) bytesMessage.getBodyLength()];
+                            bytesMessage.readBytes(body);
+                            WeEvent event = mapper.readValue(body, WeEvent.class);
+                            listener.onEvent(event);
+                        } catch (IOException | JMSException e) {
+                            log.error("onMessage exception", e);
+                            listener.onException(e);
+                        }
+                    }
+                }
+            });
+
+            this.sessionMap.put(subscriber.getSubscriptionId(), session);
+            return subscriber.getSubscriptionId();
+        } catch (JMSException e) {
+            log.error("jms exception", e);
+            throw jms2BrokerException(e);
+        }
+    }
+
+
     public boolean exist(String topic, String groupId) throws BrokerException {
         validateParam(topic);
         validateParam(groupId);
@@ -410,7 +453,7 @@ public class WeEventClient implements IWeEventClient {
      * check the param
      *
      * @param param param
-     * @throws BrokerException
+     * @throws BrokerException if the param is blank ,throw the exception
      */
     private static void validateParam(String param) throws BrokerException {
         if (StringUtils.isBlank(param)) {
@@ -420,11 +463,48 @@ public class WeEventClient implements IWeEventClient {
 
 
     /**
+     * check the param
+     *
+     * @param param param
+     * @throws BrokerException if the param is empty ,throw the exception
+     */
+    private static void validateArrayParam(byte[] param) throws BrokerException {
+        if (param.length == 0) {
+            throw new BrokerException(ErrorCode.PARAM_ISEMPTY);
+        }
+    }
+
+
+    /**
+     * check the param
+     *
+     * @param listener param
+     * @throws BrokerException if the param is null ,throw the exception
+     */
+    private static void validateEventListener(EventListener listener) throws BrokerException {
+        if (listener == null) {
+            throw new BrokerException(ErrorCode.PARAM_ISNULL);
+        }
+    }
+
+    /**
+     * check the param
+     *
+     * @param extensions extensions param
+     * @throws BrokerException if the param is null ,throw the exception
+     */
+    private static void validateExtensions(Map<String, String> extensions) throws BrokerException {
+        if (extensions == null) {
+            throw new BrokerException(ErrorCode.PARAM_ISNULL);
+        }
+    }
+
+    /**
      * check the username and the password
      *
      * @param userName stomp username
      * @param password stomp user password
-     * @throws BrokerException
+     * @throws BrokerException if the username and password is blank
      */
     private static void validateUser(String userName, String password) throws BrokerException {
         if (StringUtils.isBlank(userName)) {
