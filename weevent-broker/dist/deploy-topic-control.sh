@@ -6,9 +6,7 @@ if [[ $# -gt 0 ]];then
         echo "groupId is error must  start at 1"
         exit -1
     fi
-    echo "fisco-bcos 2.0x verison"
     ${java_cmd} ./address.txt $groupId
 else
-    echo "fisco-bcos 1.3x verison"
     ${java_cmd} ./address.txt
 fi

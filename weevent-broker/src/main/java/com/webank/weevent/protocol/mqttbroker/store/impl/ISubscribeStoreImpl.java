@@ -102,7 +102,7 @@ public class ISubscribeStoreImpl implements ISubscribeStore {
     }
 
     @Override
-    public List<SubscribeStore> search(String topic) {
+    public List<SubscribeStore> searchByTopic(String topic) {
         List<SubscribeStore> subscribeStores = new ArrayList<SubscribeStore>();
         if (subscribeNotWildcardCache.containsKey(topic)) {
             ConcurrentHashMap<String, SubscribeStore> map = subscribeNotWildcardCache.get(topic);
@@ -135,6 +135,25 @@ public class ISubscribeStoreImpl implements ISubscribeStore {
                     List<SubscribeStore> list = new ArrayList<SubscribeStore>(collection);
                     subscribeStores.addAll(list);
                 }
+            }
+        }
+        return subscribeStores;
+    }
+
+    @Override
+    public List<SubscribeStore> searchByClientId(String clientId) {
+        List<SubscribeStore> subscribeStores = new ArrayList<SubscribeStore>();
+        for (Map.Entry<String, ConcurrentHashMap<String, SubscribeStore>> entry : subscribeWildcardCache.entrySet()) {
+            ConcurrentHashMap<String, SubscribeStore> map = entry.getValue();
+            if (map.containsKey(clientId)) {
+                subscribeStores.add(map.get(clientId));
+            }
+        }
+
+        for (Map.Entry<String, ConcurrentHashMap<String, SubscribeStore>> entry : subscribeNotWildcardCache.entrySet()) {
+            ConcurrentHashMap<String, SubscribeStore> map = entry.getValue();
+            if (map.containsKey(clientId)) {
+                subscribeStores.add(map.get(clientId));
             }
         }
         return subscribeStores;
