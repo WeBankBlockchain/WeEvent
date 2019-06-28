@@ -92,6 +92,10 @@ public enum ErrorCode {
     USER_NAME_ISBLANK(101012, "stomp user name is blank"),
 
     PARAM_ISBLANK(101013, "the input param is blank"),
+
+    PARAM_ISEMPTY(101014, "the input param is empty"),
+
+    PARAM_ISNULL(101014, "the input param is null"),
     //server error(200000, 300000)
     TOPIC_CONTROLLER_IS_NULL(200100, "init failed, see fisco.topic-controller.contract-address in properties"),
 
