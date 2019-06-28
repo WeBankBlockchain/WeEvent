@@ -49,10 +49,11 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class BrokerServer {
-    private EventLoopGroup bossGroup;
-    private EventLoopGroup workerGroup;
-    private SslContext sslContext;
-    private Channel websocketChannel;
+    private EventLoopGroup bossGroup = null;
+    private EventLoopGroup workerGroup = null;
+    private SslContext sslContext = null;
+    private Channel websocketChannel = null;
+    private Channel mqttChannel = null;
     @Autowired
     private ProtocolProcess protocolProcess;
 
@@ -60,14 +61,21 @@ public class BrokerServer {
     public void start() throws Exception {
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup();
-        KeyStore keyStore = KeyStore.getInstance("PKCS12");
-        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("server.p12");
-        keyStore.load(inputStream, BrokerApplication.weEventConfig.getSslPassword().toCharArray());
-        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-        kmf.init(keyStore, BrokerApplication.weEventConfig.getSslPassword().toCharArray());
-        sslContext = SslContextBuilder.forServer(kmf).build();
-        mqttServer();
-        webSocketServer();
+        if (BrokerApplication.weEventConfig.getSslEnable().equals("true")) {
+            KeyStore keyStore = KeyStore.getInstance("PKCS12");
+            InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("server.p12");
+            keyStore.load(inputStream, BrokerApplication.weEventConfig.getSslPassword().toCharArray());
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            kmf.init(keyStore, BrokerApplication.weEventConfig.getSslPassword().toCharArray());
+            sslContext = SslContextBuilder.forServer(kmf).build();
+            log.info("mqtt protocol must start with ssl");
+        }
+        if (BrokerApplication.weEventConfig.getBrokerServerPort() != null) {
+            mqttServer();
+        }
+        if (BrokerApplication.weEventConfig.getWebSocketPort() != null) {
+            webSocketServer();
+        }
     }
 
     @PreDestroy
@@ -76,8 +84,14 @@ public class BrokerServer {
         bossGroup = null;
         workerGroup.shutdownGracefully();
         workerGroup = null;
-        websocketChannel.closeFuture().syncUninterruptibly();
-        websocketChannel = null;
+        if (BrokerApplication.weEventConfig.getBrokerServerPort() != null) {
+            mqttChannel.closeFuture().syncUninterruptibly();
+            mqttChannel = null;
+        }
+        if (BrokerApplication.weEventConfig.getWebSocketPort() != null) {
+            websocketChannel.closeFuture().syncUninterruptibly();
+            websocketChannel = null;
+        }
     }
 
     private SslHandler getSslHandler(SslContext sslContext, ByteBufAllocator byteBufAllocator) {
@@ -107,7 +121,7 @@ public class BrokerServer {
                 })
                 .option(ChannelOption.SO_BACKLOG, BrokerApplication.weEventConfig.getSoBackLog())
                 .childOption(ChannelOption.SO_KEEPALIVE, BrokerApplication.weEventConfig.getSoKeepAlive());
-        serverBootstrap.bind(BrokerApplication.weEventConfig.getBrokerServerPort()).sync().channel();
+        mqttChannel = serverBootstrap.bind(BrokerApplication.weEventConfig.getBrokerServerPort()).sync().channel();
     }
 
     private void webSocketServer() throws Exception {
