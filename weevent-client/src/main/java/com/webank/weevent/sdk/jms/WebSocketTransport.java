@@ -321,9 +321,7 @@ public class WebSocketTransport extends WebSocketClient {
                 break;
             case "MESSAGE":
                 handleMessageFrame(stompMsg);
-
                 break;
-
             case "HEARTBEAT":
                 break;
 
