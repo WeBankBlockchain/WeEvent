@@ -41,16 +41,16 @@ function nginx_setup() {
     mkdir -p $nginx_path/nginx_temp
     mkdir -p $nginx_path/conf/conf.d
     cp ./conf/nginx.conf $nginx_path/conf/
-    cp ./conf/cert.* $nginx_path/conf/
-    
+    cp ./conf/server.* $nginx_path/conf/
+    cp ./conf/conf.d/*.conf $nginx_path/conf/conf.d/
+
+    sed -i "s/8080/$nginx_port/g" $nginx_path/conf/conf.d/https.conf
+    sed -i "s/8080/$nginx_port/g" $nginx_path/conf/conf.d/http.conf
+
     if [ "$ssl" = "true" ]; then
-        cp ./conf/conf.d/https.conf $nginx_path/conf/conf.d/
-        sed -i "s/8080/$nginx_port/g" $nginx_path/conf/conf.d/https.conf
-    else
-        cp ./conf/conf.d/http.conf $nginx_path/conf/conf.d/
-        sed -i "s/8080/$nginx_port/g" $nginx_path/conf/conf.d/http.conf
+        sed -i "s/http.conf/https.conf/g" $nginx_path/conf/nginx.conf
+        sed -i "s/tcp.conf/tcp_tls.conf/g" $nginx_path/conf/nginx.conf
     fi
-    cp ./conf/conf.d/rs.conf $nginx_path/conf/conf.d/
     
     if [[ -n $broker_port ]]; then
         broker_url="localhost:$broker_port"
