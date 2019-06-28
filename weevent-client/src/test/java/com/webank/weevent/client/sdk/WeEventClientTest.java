@@ -44,7 +44,7 @@ public class WeEventClientTest {
 
     @Before
     public void before() throws Exception {
-        weEventClient = IWeEventClient.build("http://127.0.0.1:8081/weevent");
+        weEventClient = IWeEventClient.build("http://127.0.0.1:8080/weevent");
         weEventClient.open(topicName);
     }
 
