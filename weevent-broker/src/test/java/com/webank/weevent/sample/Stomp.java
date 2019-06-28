@@ -67,15 +67,19 @@ public class Stomp {
                 log.info("connection open, {}", session.getSessionId());
 
                 session.setAutoReceipt(true);
-
                 // auto subscribe when connected
                 log.info("subscribe topic, {}", topic);
-                StompSession.Subscription subscription = session.subscribe(topic, new StompFrameHandler() {
+                StompHeaders header = new StompHeaders();
+                header.set("eventId","2cf24dba-59-1124");
+                header.set("groupId","1");
+                // extension params
+                header.set("weevent-format","json");
+                header.setDestination(topic);
+                StompSession.Subscription subscription = session.subscribe(header, new StompFrameHandler() {
                     @Override
                     public Type getPayloadType(StompHeaders headers) {
                         return String.class;
                     }
-
                     @Override
                     public void handleFrame(StompHeaders headers, Object payload) {
                         log.info("subscribe handleFrame, header: {} payload: {}", headers, payload);
@@ -160,10 +164,14 @@ public class Stomp {
                 log.info("connection open, {}", session.getSessionId());
 
                 session.setAutoReceipt(true);
-
                 // auto subscribe when connected
-                log.info("subscribe topic, {}", topic);
-                StompSession.Subscription subscription = session.subscribe(topic, new StompFrameHandler() {
+                StompHeaders header = new StompHeaders();
+                header.set("eventId","2cf24dba-59-1124");
+                header.set("groupId","1");
+                // extension params
+                header.set("weevent-format","json");
+                header.setDestination(topic);
+                StompSession.Subscription subscription = session.subscribe(header, new StompFrameHandler() {
                     @Override
                     public Type getPayloadType(StompHeaders headers) {
                         return String.class;
@@ -182,7 +190,8 @@ public class Stomp {
                     Thread.sleep(5000L);
                 } catch (InterruptedException e) {
                 }
-
+                StompHeaders header = new StompHeaders();
+                header.setDestination(topic);
                 log.info("send event to topic, {}", topic);
                 for (int i = 0; i < 10; i++) {
                     StompSession.Receiptable receiptable = session.send(topic, "hello world, from sock js:" + i);

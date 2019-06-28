@@ -14,6 +14,7 @@ public class WeEventTopic implements Topic {
     private String topicName;
     private String offset;
     private String groupId;
+    private String continueSubscriptionId;
 
     public String getGroupId() {
         return groupId;
@@ -33,6 +34,14 @@ public class WeEventTopic implements Topic {
 
     public void setOffset(String offset) {
         this.offset = offset;
+    }
+
+    public String getContinueSubscriptionId() {
+        return continueSubscriptionId;
+    }
+
+    public void setContinueSubscriptionId(String continueSubscriptionId) {
+        this.continueSubscriptionId = continueSubscriptionId;
     }
 
     @Override
