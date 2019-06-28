@@ -102,7 +102,7 @@ public class WeEventClient implements IWeEventClient {
     public WeEventClient(String brokerUrl, String userName, String password) throws BrokerException {
         validateParam(brokerUrl);
         validateUser(userName, password);
-        buildRpc(brokerUrl);
+        buildRpc(brokerUrl+ "/jsonrpc");
         buildJms(getStompUrl(brokerUrl), userName, password);
     }
 
