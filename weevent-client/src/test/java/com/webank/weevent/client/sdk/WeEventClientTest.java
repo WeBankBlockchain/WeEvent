@@ -44,7 +44,7 @@ public class WeEventClientTest {
 
     @Before
     public void before() throws Exception {
-        weEventClient = IWeEventClient.build("http://127.0.0.1:8080/weevent");
+        weEventClient = IWeEventClient.build("http://localhost:8081/weevent");
         weEventClient.open(topicName);
     }
 
@@ -73,7 +73,7 @@ public class WeEventClientTest {
         log.info("===================={}", this.testName.getMethodName());
         // create subscriber
         String groupId = "1";//if not set default 1
-        this.weEventClient.subscribe(this.topicName, groupId, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
+        this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
                 System.out.println("onEvent:" + event.toString());
