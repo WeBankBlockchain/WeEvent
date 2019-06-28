@@ -2,6 +2,7 @@ package com.webank.weevent.governance.service;
 
 import java.util.Date;
 import java.util.List;
+import javax.annotation.PostConstruct;
 
 import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.Account;
@@ -10,10 +11,12 @@ import com.webank.weevent.governance.entity.AccountExample.Criteria;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.AccountMapper;
 import com.webank.weevent.governance.result.GovernanceResult;
-import com.webank.weevent.governance.utils.GeneratePasswordUtil;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +27,7 @@ import org.springframework.stereotype.Service;
  *
  */
 @Service
+@Slf4j
 public class RegisterService {
 
     @Autowired
@@ -37,6 +41,28 @@ public class RegisterService {
 
     @Autowired
     private MailService mailService;
+
+    @Autowired
+    ApplicationContext context;
+
+    @PostConstruct
+    public void init() {
+        try {
+            // check database contain admin
+            Account account = accountService.queryByUsername("admin");
+            if (account == null) {
+                account = new Account();
+                account.setUsername("admin");
+                account.setPassword(passwordEncoder.encode("123456"));
+                account.setLastUpdate(new Date());
+                account.setEmail("admin@xxx.com");
+                accountMapper.insert(account);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            System.exit(SpringApplication.exit(context));
+        }
+    }
 
     public GovernanceResult checkData(String param, int type) {
         // according type generate select condition

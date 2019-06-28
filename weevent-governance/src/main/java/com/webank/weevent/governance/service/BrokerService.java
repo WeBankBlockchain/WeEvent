@@ -34,20 +34,7 @@ public class BrokerService {
     BrokerMapper brokerMapper;
 
     @Autowired
-    ApplicationContext context;
-
-    @Autowired
     ClientHttpRequestFactory factory;
-
-    @PostConstruct
-    public void init() {
-        try {
-            brokerMapper.count();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            System.exit(SpringApplication.exit(context));
-        }
-    }
 
     public List<Broker> getBrokers(Integer userId) {
         return brokerMapper.getBrokers(userId);

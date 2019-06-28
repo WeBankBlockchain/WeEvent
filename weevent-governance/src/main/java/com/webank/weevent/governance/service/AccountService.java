@@ -22,9 +22,12 @@ public class AccountService {
         criteria.andUsernameEqualTo(username);
         // execute select
         List<Account> list = userMapper.selectByExample(example);
-        // get user info
-        Account user = list.get(0);
-        return user;
+        if (list.size() > 0) {
+            // get user info
+            Account user = list.get(0);
+            return user;
+        }
+        return null;
     }
 
     public Account queryById(Integer id) {

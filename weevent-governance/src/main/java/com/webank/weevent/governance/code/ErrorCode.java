@@ -5,7 +5,7 @@ public enum ErrorCode {
     SUCCESS(0, "success"), 
     BROKER_CONNECT_ERROR(100100, "broker cannot connect!"), 
     WEBASE_CONNECT_ERROR(100101, "webase cannot connect!"),
-    SEND_EMAIL_ERROR(100102,"send email msg error"),;
+    SEND_EMAIL_ERROR(100102,"send email failed"),;
 
     /**
      * error code

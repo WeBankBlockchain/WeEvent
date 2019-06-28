@@ -14,10 +14,10 @@ public class MailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    @Value("${spring.mail.from}")
+    @Value("${spring.mail.username}")
     private String from;
 
-    public void sendSimpleMail(String to, String subject, String content) throws MailException{
+    public void sendSimpleMail(String to, String subject, String content) throws MailException {
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
         simpleMailMessage.setFrom(from);
         simpleMailMessage.setTo(to);

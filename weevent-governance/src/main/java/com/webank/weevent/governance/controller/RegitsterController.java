@@ -53,13 +53,14 @@ public class RegitsterController {
     }
 
     @GetMapping("/forget")
-    public GovernanceResult forgetPassword(@RequestParam String username,HttpServletRequest request,HttpServletResponse response) throws GovernanceException {
+    public GovernanceResult forgetPassword(@RequestParam String username, HttpServletRequest request,
+            HttpServletResponse response) throws GovernanceException {
         String url = request.getRequestURL().toString();
         int index = url.indexOf("weevent-governance");
         String emailSendUrl = url.substring(0, index + "weevent-governance".length());
         emailSendUrl = emailSendUrl + "/#/reset?username=" + username;
         System.out.println(emailSendUrl);
-        GovernanceResult governanceResult = registerService.forgetPassword(username,emailSendUrl);
+        GovernanceResult governanceResult = registerService.forgetPassword(username, emailSendUrl);
         return governanceResult;
     }
 
