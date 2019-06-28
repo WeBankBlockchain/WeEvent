@@ -58,7 +58,7 @@ public class ProtocolProcess {
 
     public DisConnect disConnect() {
         if (disConnect == null) {
-            disConnect = new DisConnect(iSubscribeStore, iSessionStore);
+            disConnect = new DisConnect(iSubscribeStore, iSessionStore, iconsumer);
         }
         return disConnect;
     }

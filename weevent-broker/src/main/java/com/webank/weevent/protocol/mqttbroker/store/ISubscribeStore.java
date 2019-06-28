@@ -18,5 +18,7 @@ public interface ISubscribeStore {
 
     void removeForClient(String clientId);
 
-    List<SubscribeStore> search(String topic);
+    List<SubscribeStore> searchByTopic(String topic);
+
+    List<SubscribeStore> searchByClientId(String clientId);
 }
