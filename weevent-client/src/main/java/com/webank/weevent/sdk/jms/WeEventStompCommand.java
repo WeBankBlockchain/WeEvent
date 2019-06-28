@@ -83,6 +83,9 @@ public class WeEventStompCommand {
         if (!StringUtils.isBlank(topic.getGroupId())) {
             accessor.setNativeHeader("groupId", topic.getGroupId());
         }
+        if (!StringUtils.isBlank(topic.getContinueSubscriptionId())) {
+            accessor.setNativeHeader("weevent-subscriptionId", topic.getContinueSubscriptionId());
+        }
         return encodeRaw(accessor);
     }
 

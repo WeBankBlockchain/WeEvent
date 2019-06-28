@@ -273,6 +273,48 @@ public class WeEventClient implements IWeEventClient {
             throw jms2BrokerException(e);
         }
     }
+    public String subscribe(String topic, String groupId, String offset,String continueSubacriptionId, EventListener listener) throws BrokerException {
+        try {
+            validateParam(topic);
+            validateParam(groupId);
+            validateParam(offset);
+            validateEventListener(listener);
+            TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+            // create topic
+            Topic destination = session.createTopic(topic);
+
+            // create subscriber
+            ((WeEventTopic) destination).setOffset(offset);
+            ((WeEventTopic) destination).setGroupId(groupId);//if not set default 1
+            ((WeEventTopic) destination).setContinueSubscriptionId(continueSubacriptionId);
+            WeEventTopicSubscriber subscriber = (WeEventTopicSubscriber) session.createSubscriber(destination);
+
+            // create listener
+            subscriber.setMessageListener(new MessageListener() {
+                public void onMessage(Message message) {
+                    if (message instanceof BytesMessage) {
+                        try {
+                            BytesMessage bytesMessage = (BytesMessage) message;
+                            ObjectMapper mapper = new ObjectMapper();
+                            byte[] body = new byte[(int) bytesMessage.getBodyLength()];
+                            bytesMessage.readBytes(body);
+                            WeEvent event = mapper.readValue(body, WeEvent.class);
+                            listener.onEvent(event);
+                        } catch (IOException | JMSException e) {
+                            log.error("onMessage exception", e);
+                            listener.onException(e);
+                        }
+                    }
+                }
+            });
+
+            this.sessionMap.put(subscriber.getSubscriptionId(), session);
+            return subscriber.getSubscriptionId();
+        } catch (JMSException e) {
+            log.error("jms exception", e);
+            throw jms2BrokerException(e);
+        }
+    }
 
 
     public boolean exist(String topic, String groupId) throws BrokerException {
@@ -411,7 +453,7 @@ public class WeEventClient implements IWeEventClient {
      * check the param
      *
      * @param param param
-     * @throws BrokerException
+     * @throws BrokerException if the param is blank ,throw the exception
      */
     private static void validateParam(String param) throws BrokerException {
         if (StringUtils.isBlank(param)) {
@@ -424,7 +466,7 @@ public class WeEventClient implements IWeEventClient {
      * check the param
      *
      * @param param param
-     * @throws BrokerException
+     * @throws BrokerException if the param is empty ,throw the exception
      */
     private static void validateArrayParam(byte[] param) throws BrokerException {
         if (param.length == 0) {
@@ -437,7 +479,7 @@ public class WeEventClient implements IWeEventClient {
      * check the param
      *
      * @param listener param
-     * @throws BrokerException
+     * @throws BrokerException if the param is null ,throw the exception
      */
     private static void validateEventListener(EventListener listener) throws BrokerException {
         if (listener == null) {
@@ -449,7 +491,7 @@ public class WeEventClient implements IWeEventClient {
      * check the param
      *
      * @param extensions extensions param
-     * @throws BrokerException
+     * @throws BrokerException if the param is null ,throw the exception
      */
     private static void validateExtensions(Map<String, String> extensions) throws BrokerException {
         if (extensions == null) {
@@ -462,7 +504,7 @@ public class WeEventClient implements IWeEventClient {
      *
      * @param userName stomp username
      * @param password stomp user password
-     * @throws BrokerException
+     * @throws BrokerException if the username and password is blank
      */
     private static void validateUser(String userName, String password) throws BrokerException {
         if (StringUtils.isBlank(userName)) {

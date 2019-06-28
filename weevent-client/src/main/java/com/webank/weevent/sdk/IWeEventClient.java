@@ -145,6 +145,17 @@ public interface IWeEventClient {
     String subscribe(String topic, String groupId, String offset, WeEventClient.EventListener listener) throws BrokerException;
 
     /**
+     * Subscribe events from topic.
+     *
+     * @param topic topic name
+     * @param offset, from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
+     * @param listener callback
+     * @return subscription Id
+     * @throws BrokerException invalid input param
+     */
+    String subscribe(String topic, String groupId, String offset,String contnueSubScriptionId, WeEventClient.EventListener listener) throws BrokerException;
+
+    /**
      * Publish an event to topic.
      *
      * @param topic topic name
