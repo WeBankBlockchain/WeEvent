@@ -60,7 +60,7 @@ function set_permission(){
     find -name "*.properties" -exec dos2unix {} \;
 }
 
-#gradle build broker, governance, client
+#gradle build broker, governance, client, web
 function build_weevent(){
     cd ${top_path}
 
@@ -71,6 +71,11 @@ function build_weevent(){
     #gradle build
     gradle clean build -x test
     execute_result "build weevent"
+
+    #npm build html and css
+    cd ${top_path}/weevent-governance/web
+    npm install
+    npm run build
 }
 
 function copy_install_file(){
@@ -158,7 +163,7 @@ function package(){
     yellow_echo "begin to package weevent-${version}"
 
     yellow_echo "build weevent [${tag}]"
-    #generate jar
+    #generate jar and web
     build_weevent
 
     #copy file from build path
@@ -172,14 +177,14 @@ function package(){
     cd ${current_path}
     tar -czpvf weevent-${version}.tar.gz `basename ${out_path}`
 
-    #package module
+    #tar broker module
     #tar broker
     tar_broker weevent-broker-${version}.tar.gz
 
-    #tar governance
+    #tar governance module
     tar_governance weevent-governance-${version}.tar.gz
 
-    #tar nginx
+    #tar nginx module
     tar_nginx weevent-nginx-${version}.tar.gz
 
     #remove template
