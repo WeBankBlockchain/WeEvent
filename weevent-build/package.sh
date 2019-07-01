@@ -76,6 +76,7 @@ function build_weevent(){
     ./build-web.sh
 
     #gradle build
+    cd ${top_path}
     gradle clean build -x test
     execute_result "build weevent"
 }
