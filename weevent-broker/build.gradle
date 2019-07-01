@@ -83,21 +83,23 @@ sourceSets {
 }
 
 bootJar {
-    destinationDir file('dist/apps')
-    archiveName 'weevent-broker-' + version + '.jar'
-    exclude '**/*.xml'
-    exclude '**/*.properties'
+    destinationDir file("dist/apps")
+    archiveName "weevent-broker-" + version + ".jar"
+    exclude "**/*.xml"
+    exclude "**/*.properties"
 
     copy {
-        from file('src/main/resources/')
-        into 'dist/conf'
+        from file("src/main/resources/")
+        into "dist/conf"
     }
     copy {
         from configurations.runtime
-        into 'dist/lib'
+        into "dist/lib"
     }
     copy {
-        from file('.').listFiles().findAll { File f -> (f.name.endsWith('.bat') || f.name.endsWith('.sh') || f.name.endsWith('.env')) }
-        into 'dist'
+        from file(".").listFiles().findAll {
+            File f -> (f.name.endsWith(".bat") || f.name.endsWith(".sh") || f.name.endsWith(".env"))
+        }
+        into "dist"
     }
 }
