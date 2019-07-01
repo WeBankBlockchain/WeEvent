@@ -83,6 +83,21 @@ public class WeEventStompCommand {
         if (!StringUtils.isBlank(topic.getGroupId())) {
             accessor.setNativeHeader("groupId", topic.getGroupId());
         }
+        if (!StringUtils.isBlank(topic.getContinueSubscriptionId())) {
+            accessor.setNativeHeader("weevent-subscriptionId", topic.getContinueSubscriptionId());
+        }
+        return encodeRaw(accessor);
+    }
+
+    public String encodeSubscribe(WeEventTopic topic, String offset, Long id, String continueSubscriptionId) throws JMSException {
+        StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
+        accessor.setDestination(topic.getTopicName());
+        accessor.setNativeHeader("eventId", offset);
+        accessor.setNativeHeader("id", Long.toString(id));
+        if (!StringUtils.isBlank(topic.getGroupId())) {
+            accessor.setNativeHeader("groupId", topic.getGroupId());
+        }
+        accessor.setNativeHeader("weevent-subscriptionId", continueSubscriptionId);
         return encodeRaw(accessor);
     }
 
@@ -106,13 +121,11 @@ public class WeEventStompCommand {
     }
 
     public boolean isError(Message message) {
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
-        StompCommand command = accessor.getCommand();
+        String command = message.getHeaders().get("stompCommand").toString();
         if (command == null) {
             return false;
         }
-
-        return command.getMessageType().toString().equals("ERROR");
+        return command.equals("ERROR");
     }
 
     public String getReceipt(Message message) {
