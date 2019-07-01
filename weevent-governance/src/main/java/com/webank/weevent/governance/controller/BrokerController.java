@@ -1,6 +1,9 @@
 package com.webank.weevent.governance.controller;
 
 import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.webank.weevent.governance.entity.Broker;
@@ -49,15 +52,17 @@ public class BrokerController {
 
     // get broker service by id
     @PostMapping("/add")
-    public GovernanceResult addBroker(@Valid @RequestBody Broker broker) throws GovernanceException {
+    public GovernanceResult addBroker(@Valid @RequestBody Broker broker, HttpServletRequest request,
+            HttpServletResponse response) throws GovernanceException {
         log.info("add  broker service into db " + broker);
-        return brokerService.addBroker(broker);
+        return brokerService.addBroker(broker, request, response);
     }
 
     @PostMapping("/update")
-    public GovernanceResult updateBroker(@RequestBody Broker broker) throws GovernanceException {
+    public GovernanceResult updateBroker(@RequestBody Broker broker, HttpServletRequest request,
+            HttpServletResponse response) throws GovernanceException {
         log.info("update  broker service ,broker: " + broker);
-        return brokerService.updateBroker(broker);
+        return brokerService.updateBroker(broker, request, response);
     }
 
     @GetMapping("/delete/{id}")

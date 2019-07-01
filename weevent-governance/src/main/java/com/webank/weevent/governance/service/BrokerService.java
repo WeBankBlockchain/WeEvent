@@ -1,23 +1,25 @@
 package com.webank.weevent.governance.service;
 
+import java.net.URISyntaxException;
+import java.util.Enumeration;
 import java.util.List;
-import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.Broker;
-import com.webank.weevent.governance.entity.TopicPage;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.BrokerMapper;
+import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.result.GovernanceResult;
+import com.webank.weevent.governance.utils.CookiesTools;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
-import org.springframework.context.ApplicationContext;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * 
@@ -34,7 +36,13 @@ public class BrokerService {
     BrokerMapper brokerMapper;
 
     @Autowired
-    ClientHttpRequestFactory factory;
+    CloseableHttpClient httpClient;
+
+    @Autowired
+    CloseableHttpClient httpsClient;
+
+    @Autowired
+    private CookiesTools cookiesTools;
 
     public List<Broker> getBrokers(Integer userId) {
         return brokerMapper.getBrokers(userId);
@@ -44,15 +52,24 @@ public class BrokerService {
         return brokerMapper.getBroker(id);
     }
 
-    public GovernanceResult addBroker(Broker broker) throws GovernanceException {
+    public GovernanceResult addBroker(Broker broker, HttpServletRequest request, HttpServletResponse response)
+            throws GovernanceException {
+        HttpServletRequest req = (HttpServletRequest) request;
+
+        String accountId = cookiesTools.getCookieValueByName(req, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
+        if (!accountId.equals(broker.getUserId().toString())) {
+            throw new GovernanceException(ErrorCode.ACCESS_DENIED);
+        }
+
         // get brokerUrl
         String brokerUrl = broker.getBrokerUrl();
-        // get restTemplate
-        RestTemplate restTemplate = generateRestTemplate(brokerUrl);
+        // get httpclient
+        CloseableHttpClient client = generateHttpClient(brokerUrl);
         // get one of broker urls
         brokerUrl = brokerUrl + "/rest/list?pageIndex=0&pageSize=10";
+        HttpGet get = getMethod(brokerUrl, request);
         try {
-            restTemplate.getForEntity(brokerUrl, TopicPage.class).getBody();
+            client.execute(get);
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new GovernanceException(ErrorCode.BROKER_CONNECT_ERROR);
@@ -61,11 +78,12 @@ public class BrokerService {
         // get webaseUrl
         String webaseUrl = broker.getWebaseUrl();
         // get restTemplate
-        restTemplate = generateRestTemplate(webaseUrl);
+        client = generateHttpClient(webaseUrl);
+        get = getMethod(webaseUrl, request);
         // get one of broker urls
         webaseUrl = webaseUrl + "/node/nodeInfo/1";
         try {
-            restTemplate.getForEntity(webaseUrl, String.class);
+            client.execute(get);
         } catch (Exception e) {
             throw new GovernanceException(ErrorCode.WEBASE_CONNECT_ERROR);
         }
@@ -79,27 +97,39 @@ public class BrokerService {
         return brokerMapper.deleteBroker(id);
     }
 
-    public GovernanceResult updateBroker(Broker broker) throws GovernanceException {
+    public GovernanceResult updateBroker(Broker broker, HttpServletRequest request, HttpServletResponse response)
+            throws GovernanceException {
+        HttpServletRequest req = (HttpServletRequest) request;
+
+        String accountId = cookiesTools.getCookieValueByName(req, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
+        Broker oldBroker = brokerMapper.getBroker(broker.getId());
+        if (!accountId.equals(oldBroker.getUserId().toString())) {
+            throw new GovernanceException(ErrorCode.ACCESS_DENIED);
+        }
+
         // get brokerUrl
         String brokerUrl = broker.getBrokerUrl();
-        // get restTemplate
-        RestTemplate restTemplate = generateRestTemplate(brokerUrl);
+        // get httpclient
+        CloseableHttpClient client = generateHttpClient(brokerUrl);
         // get one of broker urls
         brokerUrl = brokerUrl + "/rest/list?pageIndex=0&pageSize=10";
+        HttpGet get = getMethod(brokerUrl, request);
         try {
-            restTemplate.getForEntity(brokerUrl, TopicPage.class).getBody();
+            client.execute(get);
         } catch (Exception e) {
+            log.error(e.getMessage());
             throw new GovernanceException(ErrorCode.BROKER_CONNECT_ERROR);
         }
 
         // get webaseUrl
         String webaseUrl = broker.getWebaseUrl();
         // get restTemplate
-        restTemplate = generateRestTemplate(webaseUrl);
+        client = generateHttpClient(webaseUrl);
+        get = getMethod(webaseUrl, request);
         // get one of broker urls
         webaseUrl = webaseUrl + "/node/nodeInfo/1";
         try {
-            restTemplate.getForEntity(webaseUrl, String.class);
+            client.execute(get);
         } catch (Exception e) {
             throw new GovernanceException(ErrorCode.WEBASE_CONNECT_ERROR);
         }
@@ -107,19 +137,27 @@ public class BrokerService {
         return GovernanceResult.ok(true);
     }
 
-    // generate Restemplate from url
-    private RestTemplate generateRestTemplate(String url) {
-        RestTemplate restTemplate = null;
+    // generate CloseableHttpClient from url
+    private CloseableHttpClient generateHttpClient(String url) {
         if (url.startsWith("https")) {
-            restTemplate = new RestTemplate(factory);
+            return this.httpsClient;
         } else {
-            HttpComponentsClientHttpRequestFactory httpRequestFactory = new HttpComponentsClientHttpRequestFactory();
-            httpRequestFactory.setConnectionRequestTimeout(3000);
-            httpRequestFactory.setConnectTimeout(3000);
-            httpRequestFactory.setReadTimeout(3000);
-            restTemplate = new RestTemplate(httpRequestFactory);
+            return this.httpClient;
         }
+    }
 
-        return restTemplate;
+    private HttpGet getMethod(String uri, HttpServletRequest request) {
+        try {
+            URIBuilder builder = new URIBuilder(uri);
+            Enumeration<String> enumeration = request.getParameterNames();
+            while (enumeration.hasMoreElements()) {
+                String nex = enumeration.nextElement();
+                builder.setParameter(nex, request.getParameter(nex));
+            }
+            return new HttpGet(builder.build());
+        } catch (URISyntaxException e) {
+            log.error(e.getMessage());
+        }
+        return null;
     }
 }
