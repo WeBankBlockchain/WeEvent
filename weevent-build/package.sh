@@ -73,7 +73,7 @@ function build_weevent(){
 
     #npm build html and css
     cd ${top_path}/weevent-governance/web
-    ./build_web.sh
+    ./build-web.sh
 
     #gradle build
     gradle clean build -x test
