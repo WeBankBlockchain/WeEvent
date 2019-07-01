@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.entity.Broker;
 import com.webank.weevent.governance.service.BrokerService;
+import com.webank.weevent.governance.utils.SpringContextUtil;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -65,22 +66,15 @@ public class ForwardBrokerFilter implements Filter {
         // get complete forward broker url
         String newUrl = brokerUrl + subStrUrl;
 
+        // get client according url
+        CloseableHttpClient client = generateHttpClient(newUrl);
         CloseableHttpResponse closeResponse = null;
         if (req.getMethod().equals("GET")) {
             HttpGet get = getMethod(newUrl, req);
-            if (newUrl.startsWith("https")) {
-                closeResponse = httpsClient.execute(get);
-            } else {
-                closeResponse = httpClient.execute(get);
-            }
-
+            closeResponse = client.execute(get);
         } else {
             HttpPost postMethod = postMethod(newUrl, req);
-            if (newUrl.startsWith("https")) {
-                closeResponse = httpsClient.execute(postMethod);
-            } else {
-                closeResponse = httpClient.execute(postMethod);
-            }
+            closeResponse = client.execute(postMethod);
         }
         String mes = EntityUtils.toString(closeResponse.getEntity());
         log.info("response: " + mes);
@@ -122,6 +116,17 @@ public class ForwardBrokerFilter implements Filter {
         httpPost.setHeader("Content-Type", request.getHeader("Content-Type"));
         httpPost.setEntity(entity);
         return httpPost;
+    }
+
+    // generate CloseableHttpClient from url
+    private CloseableHttpClient generateHttpClient(String url) {
+        if (url.startsWith("https")) {
+            CloseableHttpClient bean = (CloseableHttpClient) SpringContextUtil.getBean("httpsClient");
+            return bean;
+        } else {
+            CloseableHttpClient bean = (CloseableHttpClient) SpringContextUtil.getBean("httpClient");
+            return bean;
+        }
     }
 
     public UrlEncodedFormEntity formData(HttpServletRequest request) {

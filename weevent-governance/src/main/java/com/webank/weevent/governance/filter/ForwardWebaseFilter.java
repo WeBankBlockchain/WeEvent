@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.entity.Broker;
 import com.webank.weevent.governance.service.BrokerService;
+import com.webank.weevent.governance.utils.SpringContextUtil;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -43,12 +44,6 @@ public class ForwardWebaseFilter implements Filter {
     @Autowired
     BrokerService brokerService;
 
-    @Autowired
-    CloseableHttpClient httpClient;
-
-    @Autowired
-    CloseableHttpClient httpsClient;
-
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
@@ -64,24 +59,17 @@ public class ForwardWebaseFilter implements Filter {
         String webaseUrl = broker.getWebaseUrl();
         // get complete url of webase
         String newUrl = webaseUrl + subStrUrl;
-
+        //get client according url
+        CloseableHttpClient client = generateHttpClient(newUrl);
         CloseableHttpResponse closeResponse = null;
         if (req.getMethod().equals("GET")) {
             HttpGet get = getMethod(newUrl, req);
-            if (newUrl.startsWith("https")) {
-                closeResponse = httpsClient.execute(get);
-            } else {
-                closeResponse = httpClient.execute(get);
-            }
-
+            closeResponse = client.execute(get);
         } else {
             HttpPost postMethod = postMethod(newUrl, req);
-            if (newUrl.startsWith("https")) {
-                closeResponse = httpsClient.execute(postMethod);
-            } else {
-                closeResponse = httpClient.execute(postMethod);
-            }
+            closeResponse = client.execute(postMethod);
         }
+        
         String mes = EntityUtils.toString(closeResponse.getEntity());
         log.info("response: " + mes);
         Header encode = closeResponse.getFirstHeader("Content-Type");
@@ -96,7 +84,7 @@ public class ForwardWebaseFilter implements Filter {
      * return HttpGet
      *
      */
-    HttpGet getMethod(String uri, HttpServletRequest request) {
+    private HttpGet getMethod(String uri, HttpServletRequest request) {
         try {
             URIBuilder builder = new URIBuilder(uri);
             Enumeration<String> enumeration = request.getParameterNames();
@@ -111,7 +99,7 @@ public class ForwardWebaseFilter implements Filter {
         return null;
     }
 
-    HttpPost postMethod(String uri, HttpServletRequest request) {
+    private HttpPost postMethod(String uri, HttpServletRequest request) {
         StringEntity entity = null;
         if (request.getContentType().contains("json")) {
             entity = jsonData(request);
@@ -122,6 +110,17 @@ public class ForwardWebaseFilter implements Filter {
         httpPost.setHeader("Content-Type", request.getHeader("Content-Type"));
         httpPost.setEntity(entity);
         return httpPost;
+    }
+
+    // generate CloseableHttpClient from url
+    private CloseableHttpClient generateHttpClient(String url) {
+        if (url.startsWith("https")) {
+            CloseableHttpClient bean = (CloseableHttpClient) SpringContextUtil.getBean("httpsClient");
+            return bean;
+        } else {
+            CloseableHttpClient bean = (CloseableHttpClient) SpringContextUtil.getBean("httpClient");
+            return bean;
+        }
     }
 
     public UrlEncodedFormEntity formData(HttpServletRequest request) {

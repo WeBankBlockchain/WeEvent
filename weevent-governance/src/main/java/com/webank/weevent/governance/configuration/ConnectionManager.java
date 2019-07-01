@@ -28,6 +28,8 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -102,6 +104,7 @@ public class ConnectionManager {
         cm = new PoolingHttpClientConnectionManager();
     }
 
+    @Scope("prototype")
     @Bean("httpClient")
     public CloseableHttpClient getHttpClient() {
         cm.setMaxTotal(maxTotal);
@@ -111,6 +114,7 @@ public class ConnectionManager {
         return httpClient;
     }
 
+    @Scope("prototype")
     @Bean("httpsClient")
     public CloseableHttpClient getHttpsClient() {
         Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
@@ -118,7 +122,8 @@ public class ConnectionManager {
                 .build();
         PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(
                 socketFactoryRegistry);
-        CloseableHttpClient httpsClient = HttpClients.custom().setConnectionManager(connectionManager).build();
+        CloseableHttpClient httpsClient = HttpClients.custom().setConnectionManager(connectionManager)
+                .setDefaultRequestConfig(requestConfig).setRetryHandler(retryHandler).build();
         return httpsClient;
     }
 

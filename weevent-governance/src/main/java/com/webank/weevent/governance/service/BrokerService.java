@@ -1,5 +1,6 @@
 package com.webank.weevent.governance.service;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Enumeration;
 import java.util.List;
@@ -13,12 +14,14 @@ import com.webank.weevent.governance.mapper.BrokerMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.utils.CookiesTools;
+import com.webank.weevent.governance.utils.SpringContextUtil;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 /**
@@ -34,12 +37,6 @@ public class BrokerService {
 
     @Autowired
     BrokerMapper brokerMapper;
-
-    @Autowired
-    CloseableHttpClient httpClient;
-
-    @Autowired
-    CloseableHttpClient httpsClient;
 
     @Autowired
     private CookiesTools cookiesTools;
@@ -133,6 +130,7 @@ public class BrokerService {
         } catch (Exception e) {
             throw new GovernanceException(ErrorCode.WEBASE_CONNECT_ERROR);
         }
+        
         brokerMapper.updateBroker(broker);
         return GovernanceResult.ok(true);
     }
@@ -140,9 +138,11 @@ public class BrokerService {
     // generate CloseableHttpClient from url
     private CloseableHttpClient generateHttpClient(String url) {
         if (url.startsWith("https")) {
-            return this.httpsClient;
+            CloseableHttpClient bean = (CloseableHttpClient) SpringContextUtil.getBean("httpsClient");
+            return bean;
         } else {
-            return this.httpClient;
+            CloseableHttpClient bean = (CloseableHttpClient) SpringContextUtil.getBean("httpClient");
+            return bean;
         }
     }
 

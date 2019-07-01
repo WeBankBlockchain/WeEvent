@@ -1,5 +1,6 @@
 package com.webank.weevent.governance.service;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Enumeration;
 import java.util.List;
@@ -15,6 +16,7 @@ import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.TopicInfoMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.utils.CookiesTools;
+import com.webank.weevent.governance.utils.SpringContextUtil;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -41,12 +43,6 @@ public class TopicService {
 
     @Autowired
     BrokerService brokerService;
-
-    @Autowired
-    CloseableHttpClient httpClient;
-
-    @Autowired
-    CloseableHttpClient httpsClient;
 
     @Autowired
     private CookiesTools cookiesTools;
@@ -159,9 +155,11 @@ public class TopicService {
     // generate CloseableHttpClient from url
     private CloseableHttpClient generateHttpClient(String url) {
         if (url.startsWith("https")) {
-            return this.httpsClient;
+            CloseableHttpClient bean = (CloseableHttpClient) SpringContextUtil.getBean("httpsClient");
+            return bean;
         } else {
-            return this.httpClient;
+            CloseableHttpClient bean = (CloseableHttpClient) SpringContextUtil.getBean("httpClient");
+            return bean;
         }
     }
 
