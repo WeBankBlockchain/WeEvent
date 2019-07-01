@@ -1,7 +1,10 @@
 #!/bin/bash
-#
-# generate weevent tar package from github project
-#
+# generate WeEvent-x.x.x.tar.gz package from github project.
+# depend internet online and tools as followings:
+# 1. git
+# 2. gradle 4.10
+# 3. java 1.8
+# 4. npm 10.16
 ################################################################################
 
 version=""
@@ -68,14 +71,13 @@ function build_weevent(){
     git checkout ${tag}
     execute_result "git checkout ${tag}"
 
+    #npm build html and css
+    cd ${top_path}/weevent-governance/web
+    ./build_web.sh
+
     #gradle build
     gradle clean build -x test
     execute_result "build weevent"
-
-    #npm build html and css
-    cd ${top_path}/weevent-governance/web
-    npm install
-    npm run build
 }
 
 function copy_install_file(){
@@ -178,7 +180,6 @@ function package(){
     tar -czpvf weevent-${version}.tar.gz `basename ${out_path}`
 
     #tar broker module
-    #tar broker
     tar_broker weevent-broker-${version}.tar.gz
 
     #tar governance module
