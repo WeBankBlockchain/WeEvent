@@ -34,5 +34,10 @@
 			(#{id},#{topicName},#{creater})
 		</if>
 	</insert>
+	
+	<delete id="deleteTopicInfo" parameterType="java.lang.Integer">
+	   delete from t_topic
+       where broker_id=#{brokerId}
+	</delete>
 
 </mapper>
