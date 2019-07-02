@@ -69,6 +69,9 @@ class ResoruceService extends BaseModel {
   update (data) {
     return this.request(api.update, data)
   }
+  reset (data) {
+    return this.request(api.reset, data)
+  }
 }
 
 export default new ResoruceService()
