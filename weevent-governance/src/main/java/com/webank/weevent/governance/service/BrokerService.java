@@ -35,10 +35,10 @@ import org.springframework.stereotype.Service;
 public class BrokerService {
 
     @Autowired
-    BrokerMapper brokerMapper;
-    
+    private BrokerMapper brokerMapper;
+
     @Autowired
-    TopicInfoMapper topicInfoMapper;
+    private TopicInfoMapper topicInfoMapper;
 
     @Autowired
     private CookiesTools cookiesTools;
@@ -131,7 +131,7 @@ public class BrokerService {
         } catch (Exception e) {
             throw new GovernanceException(ErrorCode.WEBASE_CONNECT_ERROR);
         }
-        
+
         brokerMapper.updateBroker(broker);
         return GovernanceResult.ok(true);
     }

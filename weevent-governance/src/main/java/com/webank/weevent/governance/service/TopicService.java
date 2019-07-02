@@ -1,6 +1,5 @@
 package com.webank.weevent.governance.service;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Enumeration;
 import java.util.List;
@@ -39,10 +38,10 @@ import lombok.extern.slf4j.Slf4j;
 public class TopicService {
 
     @Autowired
-    TopicInfoMapper topicInfoMapper;
+    private TopicInfoMapper topicInfoMapper;
 
     @Autowired
-    BrokerService brokerService;
+    private BrokerService brokerService;
 
     @Autowired
     private CookiesTools cookiesTools;

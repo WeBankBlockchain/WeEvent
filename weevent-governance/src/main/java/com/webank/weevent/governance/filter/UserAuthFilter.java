@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 public class UserAuthFilter implements Filter {
 
     @Autowired
-    BrokerService brokerService;
+    private BrokerService brokerService;
 
     @Autowired
     private CookiesTools cookiesTools;
@@ -38,7 +38,7 @@ public class UserAuthFilter implements Filter {
         Enumeration<String> attributeNames = request.getParameterNames();
         while (attributeNames.hasMoreElements()) {
             String requestParam = attributeNames.nextElement();
-            if (requestParam.equals("brokerId")) {
+            if ("brokerId".equals(requestParam)) {
                 String brokerId = request.getParameter("brokerId");
                 Broker broker = brokerService.getBroker(Integer.parseInt(brokerId));
                 if (!accountId.equals(broker.getUserId().toString())) {

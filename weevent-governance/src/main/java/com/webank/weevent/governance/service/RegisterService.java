@@ -43,7 +43,7 @@ public class RegisterService {
     private MailService mailService;
 
     @Autowired
-    ApplicationContext context;
+    private ApplicationContext context;
 
     @PostConstruct
     public void init() {
