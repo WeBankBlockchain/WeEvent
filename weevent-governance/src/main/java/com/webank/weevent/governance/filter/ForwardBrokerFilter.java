@@ -148,9 +148,10 @@ public class ForwardBrokerFilter implements Filter {
 
     public StringEntity jsonData(HttpServletRequest request) {
         InputStreamReader is = null;
+        BufferedReader reader = null;
         try {
             is = new InputStreamReader(request.getInputStream(), request.getCharacterEncoding());
-            BufferedReader reader = new BufferedReader(is);
+            reader = new BufferedReader(is);
             StringBuilder sb = new StringBuilder();
             String line = null;
             while ((line = reader.readLine()) != null) {
@@ -161,7 +162,16 @@ public class ForwardBrokerFilter implements Filter {
             log.error(e.getMessage());
         } finally {
             try {
-                is.close();
+                if (reader != null) {
+                    reader.close();
+                }
+            } catch (IOException e) {
+                log.error(e.getMessage());
+            }
+            try {
+                if (is != null) {
+                    is.close();
+                }
             } catch (IOException e) {
                 log.error(e.getMessage());
             }

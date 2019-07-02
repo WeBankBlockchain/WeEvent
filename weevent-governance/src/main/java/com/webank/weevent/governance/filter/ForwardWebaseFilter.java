@@ -59,7 +59,7 @@ public class ForwardWebaseFilter implements Filter {
         String webaseUrl = broker.getWebaseUrl();
         // get complete url of webase
         String newUrl = webaseUrl + subStrUrl;
-        //get client according url
+        // get client according url
         CloseableHttpClient client = generateHttpClient(newUrl);
         CloseableHttpResponse closeResponse = null;
         if (req.getMethod().equals("GET")) {
@@ -69,7 +69,7 @@ public class ForwardWebaseFilter implements Filter {
             HttpPost postMethod = postMethod(newUrl, req);
             closeResponse = client.execute(postMethod);
         }
-        
+
         String mes = EntityUtils.toString(closeResponse.getEntity());
         log.info("response: " + mes);
         Header encode = closeResponse.getFirstHeader("Content-Type");
@@ -142,9 +142,10 @@ public class ForwardWebaseFilter implements Filter {
 
     public StringEntity jsonData(HttpServletRequest request) {
         InputStreamReader is = null;
+        BufferedReader reader = null;
         try {
             is = new InputStreamReader(request.getInputStream(), request.getCharacterEncoding());
-            BufferedReader reader = new BufferedReader(is);
+            reader = new BufferedReader(is);
             StringBuilder sb = new StringBuilder();
             String line = null;
             while ((line = reader.readLine()) != null) {
@@ -155,7 +156,16 @@ public class ForwardWebaseFilter implements Filter {
             log.error(e.getMessage());
         } finally {
             try {
-                is.close();
+                if (reader != null) {
+                    reader.close();
+                }
+            } catch (IOException e) {
+                log.error(e.getMessage());
+            }
+            try {
+                if (is != null) {
+                    is.close();
+                }
             } catch (IOException e) {
                 log.error(e.getMessage());
             }
