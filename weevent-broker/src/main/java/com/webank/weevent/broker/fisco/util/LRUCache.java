@@ -42,9 +42,6 @@ public class LRUCache<K, V> extends LinkedHashMap<K, V> {
 
     @Override
     public boolean removeEldestEntry(Map.Entry<K, V> eldest) {
-        if (size() > capacity) {
-            return true;
-        }
-        return false;
+        return size() > capacity;
     }
 }

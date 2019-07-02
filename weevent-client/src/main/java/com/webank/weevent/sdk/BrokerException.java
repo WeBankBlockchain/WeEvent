@@ -3,14 +3,14 @@ package com.webank.weevent.sdk;
 
 /**
  * Broker's exception.
- * code in (100000, 200000) meanings client side error.
- * code in (200000, 300000) meanings server side error.
+ * code in (100000, 200000) meanings client error.
+ * code in (200000, 300000) meanings server error.
  *
  * @author matthewliu
  * @since 2018/11/08
  */
 public class BrokerException extends Exception {
-    private final static String WIKIUrl = "https://github.com/webankopen/weevent-broker/wiki/faq";
+    private final static String WIKIUrl = "https://weeventdoc.readthedocs.io/zh_CN/latest/faq/weevent.html";
 
     /**
      * Error code.
