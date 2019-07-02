@@ -79,11 +79,11 @@ public class ParamCheckUtils {
             throw new BrokerException(ErrorCode.EVENT_ID_EXCEEDS_MAX_LENGTH);
         }
 
-        if (!StringUtils.isBlank(topicName)) {
-            if (!DataTypeUtils.genTopicNameHash(topicName).equals(DataTypeUtils.decodeTopicNameHash(eventId))) {
-                throw new BrokerException(ErrorCode.EVENT_ID_IS_ILLEGAL);
-            }
+        if (!StringUtils.isBlank(topicName)
+                && !DataTypeUtils.genTopicNameHash(topicName).equals(DataTypeUtils.decodeTopicNameHash(eventId))) {
+            throw new BrokerException(ErrorCode.EVENT_ID_IS_ILLEGAL);
         }
+
         Long lastEventSeq = DataTypeUtils.decodeSeq(eventId);
         Long lastBlock = DataTypeUtils.decodeBlockNumber(eventId);
         if (lastEventSeq <= 0 || lastBlock <= 0) {
