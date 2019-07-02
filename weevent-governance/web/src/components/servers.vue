@@ -155,8 +155,7 @@ export default {
       })
     },
     getServer () {
-      let url = '?userId=' + localStorage.getItem('userId')
-      API.getServer(url).then(res => {
+      API.getServer('').then(res => {
         if (res.status === 200) {
           this.server = [].concat(res.data)
         }
@@ -182,12 +181,17 @@ export default {
               type: 'warning',
               message: 'Webase服务地址无法连接'
             })
-          } else if (res.data) {
+          } else if (res.data.status === 200) {
             this.$message({
               type: 'success',
               message: '编辑成功'
             })
             this.getServer()
+          } else {
+            this.$message({
+              type: 'warning',
+              message: '编辑失败'
+            })
           }
         } else {
           this.$message({
@@ -209,8 +213,11 @@ export default {
     },
     deleteItem (e) {
       this.$confirm('确认删除该服务？').then(_ => {
-        API.deleteServer('/' + e.id).then(res => {
-          if (res.status === 200) {
+        let data = {
+          'id': e.id
+        }
+        API.deleteServer(data).then(res => {
+          if (res.status === 200 && res.data.status === 200) {
             this.$message({
               type: 'success',
               message: '删除成功'
@@ -219,7 +226,7 @@ export default {
           } else {
             this.$message({
               type: 'warning',
-              message: '删除成功'
+              message: '删除操作失败'
             })
           }
         })

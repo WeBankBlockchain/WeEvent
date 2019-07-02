@@ -23,19 +23,19 @@
   },
   "addServer": {
     "method": "post",
-    "url": "weevent-governance/broker"
+    "url": "weevent-governance/broker/add"
   },
   "updateServer": {
-    "method": "put",
-    "url": "weevent-governance/broker"
+    "method": "post",
+    "url": "weevent-governance/broker/update"
   },
   "getServer": {
     "method": "get",
     "url": "weevent-governance/broker/list"
   },
   "deleteServer": {
-    "method": "delete",
-    "url": "weevent-governance/broker"
+    "method": "post",
+    "url": "weevent-governance/broker/delete"
   },
   "topicState": {
     "method": "get",
@@ -54,7 +54,11 @@
     "url": "weevent-governance/user/forget"
   },
   "update": {
-    "method": "put",
+    "method": "post",
     "url": "weevent-governance/user/update"
+  },
+  "reset": {
+    "method": "post",
+    "url": "weevent-governance/user/reset"
   }
 }
