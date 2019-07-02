@@ -113,21 +113,20 @@ export default{
       this.$router.push({path: './registered', query: { reset: 1 }})
     },
     getPassWord () {
-      this.$router.push({path: './reset', query: { userName: this.userName }})
-      // let url = '?username=' + this.userName
-      // API.forget(url).then(res => {
-      //   if (res.status === 200) {
-      //     this.$message({
-      //       type: 'success',
-      //       message: '密码已发送到注册邮箱!'
-      //     })
-      //   } else {
-      //     this.$message({
-      //       type: 'warning',
-      //       message: '获取密码失败'
-      //     })
-      //   }
-      // })
+      let url = '?username=' + this.userName
+      API.forget(url).then(res => {
+        if (res.status === 200) {
+          this.$message({
+            type: 'success',
+            message: '密码已发送到注册邮箱!'
+          })
+        } else {
+          this.$message({
+            type: 'warning',
+            message: '操作失败'
+          })
+        }
+      })
     },
     changePass () {
       this.getPass = true
