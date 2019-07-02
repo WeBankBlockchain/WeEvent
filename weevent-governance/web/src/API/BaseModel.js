@@ -76,14 +76,6 @@ class BaseModule {
       } else {
         return this.post(config.url, data, config)
       }
-    } else if (config.method && config.method.toLowerCase() === 'put') {
-      return this.put(config.url, data, config)
-    } else if (config.method && config.method.toLowerCase() === 'delete') {
-      return this.$http({
-        url: config.url,
-        method: 'delete',
-        data: data
-      })
     } else {
       return this.$http({
         url: config.url,
