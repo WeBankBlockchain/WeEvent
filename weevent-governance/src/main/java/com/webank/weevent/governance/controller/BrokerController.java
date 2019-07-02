@@ -65,7 +65,7 @@ public class BrokerController {
         return brokerService.updateBroker(broker, request, response);
     }
 
-    @GetMapping("/delete/{id}")
+    @PostMapping("/delete/{id}")
     public Boolean deleteBroker(@PathVariable("id") Integer id) {
         log.info("delete  broker service ,id: " + id);
         return brokerService.deleteBroker(id);
