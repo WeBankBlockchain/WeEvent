@@ -64,7 +64,7 @@ public class WeEventTopicPublisher implements TopicPublisher {
 
     @Override
     public void setDisableMessageID(boolean b) throws JMSException {
-
+        throw new JMSException(WeEventConnectionFactory.NotSupportTips);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class WeEventTopicPublisher implements TopicPublisher {
 
     @Override
     public void setDisableMessageTimestamp(boolean b) throws JMSException {
-
+        throw new JMSException(WeEventConnectionFactory.NotSupportTips);
     }
 
     @Override
@@ -84,7 +84,7 @@ public class WeEventTopicPublisher implements TopicPublisher {
 
     @Override
     public void setDeliveryMode(int i) throws JMSException {
-
+        throw new JMSException(WeEventConnectionFactory.NotSupportTips);
     }
 
     @Override
@@ -94,7 +94,7 @@ public class WeEventTopicPublisher implements TopicPublisher {
 
     @Override
     public void setPriority(int i) throws JMSException {
-
+        throw new JMSException(WeEventConnectionFactory.NotSupportTips);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class WeEventTopicPublisher implements TopicPublisher {
 
     @Override
     public void setTimeToLive(long l) throws JMSException {
-
+        throw new JMSException(WeEventConnectionFactory.NotSupportTips);
     }
 
     @Override
