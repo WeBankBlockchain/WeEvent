@@ -34,37 +34,37 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-	    Authentication authentication) throws IOException, ServletException {
-	log.debug("login success");
+            Authentication authentication) throws IOException, ServletException {
+        log.debug("login success");
 
-	Object obj = authentication.getPrincipal();
-	JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(obj));
-	String username = jsonObject.getString("username");
-	// response account info
-	Account account = accountService.queryByUsername(username);
-	Map<String, Object> rsp = new HashMap<>();
-	rsp.put("username", username);
-	rsp.put("userId", account.getId());
-	BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-	baseResponse.setData(rsp);
-	
+        Object obj = authentication.getPrincipal();
+        JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(obj));
+        String username = jsonObject.getString("username");
+        // response account info
+        Account account = accountService.queryByUsername(username);
+        Map<String, Object> rsp = new HashMap<>();
+        rsp.put("username", username);
+        rsp.put("userId", account.getId());
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        baseResponse.setData(rsp);
+
         Integer userId = account.getId();
-	// clear cookie
-	cookiesTools.clearAllCookie(request, response);
-	// reset session
-	request.getSession().invalidate();
-	request.getSession().setAttribute(ConstantProperties.SESSION_MGR_ACCOUNT, username);
+        // clear cookie
+        cookiesTools.clearAllCookie(request, response);
+        // reset session
+        request.getSession().invalidate();
+        request.getSession().setAttribute(ConstantProperties.SESSION_MGR_ACCOUNT, username);
 
-	// reset cookie
-	cookiesTools.addCookie(request, response, ConstantProperties.COOKIE_MGR_ACCOUNT, username);
-	cookiesTools.addCookie(request, response, ConstantProperties.COOKIE_MGR_ACCOUNT_ID, userId.toString());
-	cookiesTools.addCookie(request, response, ConstantProperties.COOKIE_JSESSIONID, request.getSession().getId());
+        // reset cookie
+        cookiesTools.addCookie(request, response, ConstantProperties.COOKIE_MGR_ACCOUNT, username);
+        cookiesTools.addCookie(request, response, ConstantProperties.COOKIE_MGR_ACCOUNT_ID, userId.toString());
+        cookiesTools.addCookie(request, response, ConstantProperties.COOKIE_JSESSIONID, request.getSession().getId());
 
-	String backStr = JSON.toJSONString(baseResponse);
-	log.debug("login backInfo:{}", backStr);
+        String backStr = JSON.toJSONString(baseResponse);
+        log.debug("login backInfo:{}", backStr);
 
-	response.setContentType("application/json;charset=UTF-8");
-	response.getWriter().write(backStr);
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write(backStr);
     }
 
 }

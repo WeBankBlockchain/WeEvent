@@ -6,13 +6,17 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface TopicInfoMapper {
 
-    //get creater by topicName
+    // get creater by topicName
     String getCreaterByName(@Param(value = "topicName") String topicName);
+
+    String getCreater(@Param("id") Integer id, @Param("topicName") String topicName);
+
+    // save creater into database
+    Boolean openTopic(@Param(value = "topicName") String topicName, @Param(value = "creater") String creater);
+
+    Boolean openBrokeTopic(@Param("id") Integer id, @Param("topicName") String topicName,
+            @Param("creater") String creater);
     
-    String getCreater(@Param("id")Integer id,@Param("topicName")String topicName);
-
-    //save creater into database
-    Boolean openTopic(@Param(value = "topicName")String topicName, @Param(value = "creater") String creater);
-
-	Boolean openBrokeTopic(@Param("id")Integer id, @Param("topicName")String topicName, @Param("creater")String creater);
+    //delete brokerService first delete topicInfo 
+    Boolean deleteTopicInfo(@Param("brokerId") Integer brokerId);
 }

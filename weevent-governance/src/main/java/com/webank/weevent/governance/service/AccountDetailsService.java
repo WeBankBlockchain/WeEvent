@@ -20,19 +20,19 @@ public class AccountDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-	log.info("username: {}", username);
-	Account account = null;
-	try {
-	    account = accountService.queryByUsername(username);
-	} catch (Exception e) {
-	    throw new UsernameNotFoundException("sql execute error!");
-	}
-	String password = account.getPassword();
+        log.info("username: {}", username);
+        Account account = null;
+        try {
+            account = accountService.queryByUsername(username);
+        } catch (Exception e) {
+            throw new UsernameNotFoundException("sql execute error!");
+        }
+        String password = account.getPassword();
 
-	log.info("password: {}", password);
+        log.info("password: {}", password);
 
-	User user = new User(username, password, AuthorityUtils.commaSeparatedStringToAuthorityList("admin"));
-	return user;
+        User user = new User(username, password, AuthorityUtils.commaSeparatedStringToAuthorityList("admin"));
+        return user;
     }
 
 }
