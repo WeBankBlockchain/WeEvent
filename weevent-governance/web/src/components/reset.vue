@@ -60,6 +60,24 @@ export default {
     submit (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
+          let data = {
+            username: this.ruleForm2.name,
+            password: this.ruleForm2.newPass
+          }
+          API.reset(data).then(res => {
+            if (res.status === 200 && res.data.data) {
+              this.$message({
+                type: 'success',
+                message: '密码更新成功'
+              })
+              this.login(data)
+            } else {
+              this.$message({
+                type: 'warning',
+                message: '密码重置失败'
+              })
+            }
+          })
         } else {
           return false
         }
