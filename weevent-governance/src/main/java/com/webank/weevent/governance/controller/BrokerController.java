@@ -37,10 +37,10 @@ public class BrokerController {
 
     // get all broker service
     @GetMapping("/list")
-    public List<Broker> getAllBrokers(@RequestParam Integer userId) {
-        log.info("get all brokers by userId = " + userId);
+    public List<Broker> getAllBrokers(HttpServletRequest request) {
+        log.info("get all brokers ");
 
-        return brokerService.getBrokers(userId);
+        return brokerService.getBrokers(request);
     }
 
     // get broker service by id

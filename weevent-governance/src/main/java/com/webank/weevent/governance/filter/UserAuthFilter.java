@@ -8,7 +8,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.weevent.governance.code.ConstantCode;
@@ -34,7 +33,6 @@ public class UserAuthFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
-        HttpServletResponse res = (HttpServletResponse) response;
 
         String accountId = cookiesTools.getCookieValueByName(req, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
         Enumeration<String> attributeNames = request.getParameterNames();
@@ -47,15 +45,6 @@ public class UserAuthFilter implements Filter {
                     BaseResponse baseResponse = new BaseResponse(ConstantCode.ACCESS_DENIED);
                     response.setContentType("application/json;charset=UTF-8");
                     response.getWriter().write(JSON.toJSONString(baseResponse));
-                    return;
-                }
-            }
-            if (requestParam.equals("userId")) {
-                String userId = request.getParameter("userId");
-                if (!accountId.equals(userId)) {
-                    BaseResponse baseResponse = new BaseResponse(ConstantCode.ACCESS_DENIED);
-                    res.setContentType("application/json;charset=UTF-8");
-                    res.getWriter().write(JSON.toJSONString(baseResponse));
                     return;
                 }
             }
