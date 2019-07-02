@@ -14,8 +14,8 @@ import lombok.Data;
  */
 @Data
 public class TopicPage {
-    Integer total;
-    Integer pageIndex;
-    Integer pageSize;
-    List<TopicInfo> topicInfoList = new ArrayList<>();
+    private Integer total;
+    private Integer pageIndex;
+    private Integer pageSize;
+    private List<TopicInfo> topicInfoList = new ArrayList<>();
 }

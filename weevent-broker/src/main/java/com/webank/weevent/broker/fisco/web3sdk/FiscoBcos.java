@@ -163,11 +163,10 @@ public class FiscoBcos {
             List<TopicController.LogAddTopicNameAddressEventResponse> event = TopicController
                     .getLogAddTopicNameAddressEvents(transactionReceipt);
 
-            if (CollectionUtils.isNotEmpty(event)) {
-                if (Web3SDKWrapper.uint256ToInt(event.get(0).retCode) == ErrorCode.TOPIC_ALREADY_EXIST.getCode()) {
-                    log.info("topic name already exist, {}", topicName);
-                    throw new BrokerException(ErrorCode.TOPIC_ALREADY_EXIST);
-                }
+            if (CollectionUtils.isNotEmpty(event)
+                    && Web3SDKWrapper.uint256ToInt(event.get(0).retCode) == ErrorCode.TOPIC_ALREADY_EXIST.getCode()) {
+                log.info("topic name already exist, {}", topicName);
+                throw new BrokerException(ErrorCode.TOPIC_ALREADY_EXIST);
             }
 
             return true;

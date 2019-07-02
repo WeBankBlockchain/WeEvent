@@ -24,13 +24,14 @@ import lombok.extern.slf4j.Slf4j;
 public class WeEventBytesMessage implements BytesMessage {
     private byte[] bytes;
 
-    public WeEventBytesMessage() {
-    }
-
     // BytesMessage override methods
 
     @Override
     public long getBodyLength() throws JMSException {
+        if (this.bytes == null) {
+            return 0;
+        }
+
         return bytes.length;
     }
 
@@ -91,6 +92,10 @@ public class WeEventBytesMessage implements BytesMessage {
 
     @Override
     public int readBytes(byte[] bytes) throws JMSException {
+        if (this.bytes == null) {
+            return 0;
+        }
+
         System.arraycopy(this.bytes, 0, bytes, 0, this.bytes.length);
         return this.bytes.length;
     }
