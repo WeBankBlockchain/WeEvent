@@ -46,7 +46,7 @@ public class WeEventTopicSession implements TopicSession {
     }
 
     public void stop() {
-
+        this.topicConnection.removeSession(this);
     }
 
     public void publish(WeEventTopic topic, BytesMessage bytesMessage) throws JMSException {
