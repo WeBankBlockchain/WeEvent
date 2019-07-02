@@ -11,6 +11,21 @@ import lombok.Data;
  */
 @Data
 public class SendResult {
+    /**
+     * Topic name.
+     */
+    String topic;
+
+    /**
+     * Event ID.
+     */
+    String eventId;
+
+    /**
+     * Result status.
+     */
+    SendResultStatus status;
+
     public enum SendResultStatus {
         SUCCESS,
         TIMEOUT,
@@ -32,19 +47,4 @@ public class SendResult {
         this.topic = topic;
         this.eventId = eventId;
     }
-
-    /**
-     * Topic name.
-     */
-    String topic;
-
-    /**
-     * Event ID.
-     */
-    String eventId;
-
-    /**
-     * Result status.
-     */
-    SendResultStatus status;
 }

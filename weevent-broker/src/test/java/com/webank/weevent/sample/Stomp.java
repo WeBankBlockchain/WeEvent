@@ -35,7 +35,7 @@ import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 @Slf4j
 public class Stomp {
     private final static String brokerStomp = "ws://localhost:8081/weevent/stomp";
-    private final static String brokerSockjs = "ws://localhost:8080/weevent/sockjs";
+    private final static String brokerSockjs = "ws://localhost:8081/weevent/sockjs";
     private final static String topic = "com.webank.test";
 
     private ThreadPoolTaskScheduler taskScheduler;
@@ -71,16 +71,17 @@ public class Stomp {
                 log.info("subscribe topic, {}", topic);
                 StompHeaders header = new StompHeaders();
                 header.setDestination(topic);
-                header.set("eventId","2cf24dba-59-1124");
-                header.set("groupId","1");
+                header.set("eventId", "2cf24dba-59-1124");
+                header.set("groupId", "1");
                 // extension params
-                header.set("weevent-format","json");
+                header.set("weevent-format", "json");
 
                 StompSession.Subscription subscription = session.subscribe(header, new StompFrameHandler() {
                     @Override
                     public Type getPayloadType(StompHeaders headers) {
                         return String.class;
                     }
+
                     @Override
                     public void handleFrame(StompHeaders headers, Object payload) {
                         log.info("subscribe handleFrame, header: {} payload: {}", headers, payload);
@@ -93,6 +94,7 @@ public class Stomp {
                 try {
                     Thread.sleep(5000L);
                 } catch (InterruptedException e) {
+                    log.info("interruptef:{}", e);
                 }
 
                 log.info("send event to topic, {}", topic);
@@ -167,10 +169,10 @@ public class Stomp {
                 // auto subscribe when connected
                 StompHeaders header = new StompHeaders();
                 header.setDestination(topic);
-                header.set("eventId","2cf24dba-59-1124");
-                header.set("groupId","1");
+                header.set("eventId", "2cf24dba-59-1124");
+                header.set("groupId", "1");
                 // extension params
-                header.set("weevent-format","json");
+                header.set("weevent-format", "json");
 
                 StompSession.Subscription subscription = session.subscribe(header, new StompFrameHandler() {
                     @Override
@@ -191,8 +193,9 @@ public class Stomp {
                 } catch (InterruptedException e) {
                 }
                 log.info("send event to topic, {}", topic);
+                // extension params
                 for (int i = 0; i < 10; i++) {
-                    StompSession.Receiptable receiptable = session.send(topic, "hello world, from sock js:" + i);
+                    StompSession.Receiptable receiptable = session.send(header, "hello world, from sock js:" + i);
                     log.info("send result, receipt id: {}", receiptable.getReceiptId());
                 }
             }

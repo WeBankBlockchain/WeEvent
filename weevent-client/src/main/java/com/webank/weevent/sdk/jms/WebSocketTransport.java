@@ -298,8 +298,8 @@ public class WebSocketTransport extends WebSocketClient {
         ;
 
         log.debug("stomp command from server: {}", cmd);
+        // connect response
         switch (cmd) {
-            // connect response
             case "CONNECTED":
                 // connect command always 0
                 futures.get(0L).setResponse(stompMsg);
