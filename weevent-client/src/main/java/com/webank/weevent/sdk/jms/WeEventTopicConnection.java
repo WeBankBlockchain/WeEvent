@@ -18,9 +18,6 @@ import javax.jms.Topic;
 import javax.jms.TopicConnection;
 import javax.jms.TopicSession;
 
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.ErrorCode;
-
 /**
  * WeEvent JMS TopicConnection.
  *
@@ -151,7 +148,7 @@ public class WeEventTopicConnection implements TopicConnection, CommandDispatche
 
     @Override
     public void setExceptionListener(ExceptionListener exceptionListener) throws JMSException {
-
+        throw new JMSException(WeEventConnectionFactory.NotSupportTips);
     }
 
     @Override
