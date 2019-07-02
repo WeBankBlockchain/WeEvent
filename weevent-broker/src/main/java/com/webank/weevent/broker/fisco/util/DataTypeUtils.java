@@ -2,16 +2,15 @@ package com.webank.weevent.broker.fisco.util;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
+import java.util.Map;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
-import org.bcos.web3j.abi.datatypes.DynamicArray;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.bcos.web3j.abi.datatypes.generated.Uint256;
+import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.util.encoders.Hex;
 
 /**
@@ -22,7 +21,7 @@ public final class DataTypeUtils {
     /**
      * encode eventId
      *
-     * @param topicName
+     * @param topicName topic name
      * @param eventBlockNumber blockchain blocknumber
      * @param eventSeq eventSeq number
      * @return encodeString
@@ -40,7 +39,7 @@ public final class DataTypeUtils {
     /**
      * generate topicName hash
      *
-     * @param topicName
+     * @param topicName topic name
      * @return substring left 4bit hash data to hex encode
      */
     public static String genTopicNameHash(String topicName) {
@@ -58,7 +57,7 @@ public final class DataTypeUtils {
     /**
      * decode eventId get seq
      *
-     * @param eventId
+     * @param eventId event id
      * @return seq
      */
     public static Long decodeSeq(String eventId) throws BrokerException {
@@ -76,7 +75,7 @@ public final class DataTypeUtils {
     /**
      * decode eventId get blockNumber
      *
-     * @param eventId
+     * @param eventId event id
      * @return blockNumber
      */
     public static Long decodeBlockNumber(String eventId) throws BrokerException {
@@ -93,7 +92,7 @@ public final class DataTypeUtils {
     /**
      * decode eventId get topicName hash
      *
-     * @param eventId
+     * @param eventId event id
      * @return topicName hash
      */
     public static String decodeTopicNameHash(String eventId) throws BrokerException {
@@ -118,6 +117,20 @@ public final class DataTypeUtils {
             return Long.valueOf(value);
         } catch (NumberFormatException e) {
             return 0L;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Map<String, String> json2Map(String json) {
+        if (!StringUtils.isBlank(json)) {
+            return null;
+        }
+
+        try {
+            return (Map<String, String>) JSON.parse(json);
+        } catch (Exception e) {
+            log.error("parse extensions failed");
+            return null;
         }
     }
 }
