@@ -16,4 +16,7 @@ public interface TopicInfoMapper {
 
     Boolean openBrokeTopic(@Param("id") Integer id, @Param("topicName") String topicName,
             @Param("creater") String creater);
+    
+    //delete brokerService first delete topicInfo 
+    Boolean deleteTopicInfo(@Param("brokerId") Integer brokerId);
 }

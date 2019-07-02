@@ -1,6 +1,5 @@
 package com.webank.weevent.governance.service;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Enumeration;
 import java.util.List;
@@ -11,6 +10,7 @@ import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.Broker;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.BrokerMapper;
+import com.webank.weevent.governance.mapper.TopicInfoMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.utils.CookiesTools;
@@ -21,7 +21,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 /**
@@ -37,6 +36,9 @@ public class BrokerService {
 
     @Autowired
     BrokerMapper brokerMapper;
+    
+    @Autowired
+    TopicInfoMapper topicInfoMapper;
 
     @Autowired
     private CookiesTools cookiesTools;
@@ -92,19 +94,16 @@ public class BrokerService {
         return GovernanceResult.ok(true);
     }
 
-    public Boolean deleteBroker(Integer id) {
-        return brokerMapper.deleteBroker(id);
+    public GovernanceResult deleteBroker(Broker broker, HttpServletRequest request) throws GovernanceException {
+        authCheck(broker, request);
+        topicInfoMapper.deleteTopicInfo(broker.getId());
+        brokerMapper.deleteBroker(broker.getId());
+        return GovernanceResult.ok(true);
     }
 
     public GovernanceResult updateBroker(Broker broker, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
-        HttpServletRequest req = (HttpServletRequest) request;
-
-        String accountId = cookiesTools.getCookieValueByName(req, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-        Broker oldBroker = brokerMapper.getBroker(broker.getId());
-        if (!accountId.equals(oldBroker.getUserId().toString())) {
-            throw new GovernanceException(ErrorCode.ACCESS_DENIED);
-        }
+        authCheck(broker, request);
 
         // get brokerUrl
         String brokerUrl = broker.getBrokerUrl();
@@ -135,6 +134,15 @@ public class BrokerService {
         
         brokerMapper.updateBroker(broker);
         return GovernanceResult.ok(true);
+    }
+
+    private void authCheck(Broker broker, HttpServletRequest request) throws GovernanceException {
+        HttpServletRequest req = (HttpServletRequest) request;
+        String accountId = cookiesTools.getCookieValueByName(req, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
+        Broker oldBroker = brokerMapper.getBroker(broker.getId());
+        if (!accountId.equals(oldBroker.getUserId().toString())) {
+            throw new GovernanceException(ErrorCode.ACCESS_DENIED);
+        }
     }
 
     // generate CloseableHttpClient from url
