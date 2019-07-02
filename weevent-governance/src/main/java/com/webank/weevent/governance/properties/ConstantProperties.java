@@ -25,6 +25,6 @@ public class ConstantProperties {
     private Long sleepWhenHttpMaxFail = 60000L; // default 1min
 
     // COOKIE
-    private Integer cookieMaxAge = 24*60*60; // seconds
+    private Integer cookieMaxAge = 24 * 60 * 60; // seconds
 
 }

@@ -21,36 +21,36 @@ public class RegisterControllerTest extends JUnitTestBase {
 
     @Before
     public void setup() {
-	mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
     }
 
     @Test
     public void testGetUserId() throws Exception {
-	mockMvc.perform(get("/user/getUserId?username=zjy142214").contentType(MediaType.APPLICATION_JSON_UTF8))
-		.andExpect(status().isOk()).andExpect(jsonPath("$.data").value(4));
+        mockMvc.perform(get("/user/getUserId?username=zjy142214").contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data").value(4));
 
     }
 
     @Test
     public void testForgetPassword() throws Exception {
-	mockMvc.perform(get("/user/forget?username=zjy142214").contentType(MediaType.APPLICATION_JSON_UTF8))
-		.andExpect(status().isOk()).andExpect(jsonPath("$.status").value(200));
+        mockMvc.perform(get("/user/forget?username=zjy142214").contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.status").value(200));
 
     }
 
     @Test
     public void testUpdatePassword() throws Exception {
-	String content = "{\"username\":\"zjy03\",\"oldPassword\":\"111111\",\"password\":\"123456\"}";
-	mockMvc.perform(put("/user/update").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
-		.andExpect(status().isOk()).andExpect(jsonPath("$.status").value(400));
+        String content = "{\"username\":\"zjy03\",\"oldPassword\":\"111111\",\"password\":\"123456\"}";
+        mockMvc.perform(put("/user/update").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.status").value(400));
 
     }
 
     @Test
     public void testRegister() throws Exception {
-	String content = "{\"username\":\"zjy03\",\"email\":\"zjyxxx@sohu.com\",\"password\":\"123456\"}";
-	mockMvc.perform(post("/user/register").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
-		.andExpect(status().isOk());
+        String content = "{\"username\":\"zjy03\",\"email\":\"zjyxxx@sohu.com\",\"password\":\"123456\"}";
+        mockMvc.perform(post("/user/register").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
+                .andExpect(status().isOk());
 
     }
 
