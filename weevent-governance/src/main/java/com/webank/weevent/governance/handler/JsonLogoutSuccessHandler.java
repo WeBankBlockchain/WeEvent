@@ -19,24 +19,24 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class JsonLogoutSuccessHandler implements LogoutSuccessHandler {
-    
+
     @Autowired
     private CookiesTools cookiesTools;
 
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
-	    throws IOException, ServletException {
+            throws IOException, ServletException {
 
-	// clear cookie
-	cookiesTools.clearAllCookie(request, response);
-	// session invaild
-	request.getSession().invalidate();
+        // clear cookie
+        cookiesTools.clearAllCookie(request, response);
+        // session invaild
+        request.getSession().invalidate();
 
-	log.debug("logout success");
-	BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        log.debug("logout success");
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
 
-	response.setContentType("application/json;charset=UTF-8");
-	response.getWriter().write(JSON.toJSONString(baseResponse));
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write(JSON.toJSONString(baseResponse));
     }
 
 }

@@ -20,12 +20,12 @@ public class JsonAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response,
-	    AccessDeniedException accessDeniedException) throws IOException, ServletException {
-	log.debug("access denied");
-	BaseResponse baseResponse = new BaseResponse(ConstantCode.ACCESS_DENIED);
+            AccessDeniedException accessDeniedException) throws IOException, ServletException {
+        log.debug("access denied");
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.ACCESS_DENIED);
 
-	response.setContentType("application/json;charset=UTF-8");
-	response.getWriter().write(JSON.toJSONString(baseResponse));
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write(JSON.toJSONString(baseResponse));
     }
 
 }

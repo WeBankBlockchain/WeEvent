@@ -12,12 +12,12 @@ import lombok.Data;
  */
 @Data
 public class TopicPage {
-    
+
     Integer total;
-    
+
     Integer pageIndex;
-    
+
     Integer pageSize;
-    
+
     List<Topic> topicInfoList = new ArrayList<>();
 }

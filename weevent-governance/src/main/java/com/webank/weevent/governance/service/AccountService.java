@@ -17,24 +17,27 @@ public class AccountService {
     private AccountMapper userMapper;
 
     public Account queryByUsername(String username) {
-	AccountExample example = new AccountExample();
-	Criteria criteria = example.createCriteria();
-	criteria.andUsernameEqualTo(username);
-	// execute select
-	List<Account> list = userMapper.selectByExample(example);
-	// get user info
-	Account user = list.get(0);
-	return user;
+        AccountExample example = new AccountExample();
+        Criteria criteria = example.createCriteria();
+        criteria.andUsernameEqualTo(username);
+        // execute select
+        List<Account> list = userMapper.selectByExample(example);
+        if (list.size() > 0) {
+            // get user info
+            Account user = list.get(0);
+            return user;
+        }
+        return null;
     }
 
     public Account queryById(Integer id) {
-	AccountExample example = new AccountExample();
-	Criteria criteria = example.createCriteria();
-	criteria.andIdEqualTo(id);
-	// execute select
-	List<Account> list = userMapper.selectByExample(example);
-	// get user info
-	Account user = list.get(0);
-	return user;
+        AccountExample example = new AccountExample();
+        Criteria criteria = example.createCriteria();
+        criteria.andIdEqualTo(id);
+        // execute select
+        List<Account> list = userMapper.selectByExample(example);
+        // get user info
+        Account user = list.get(0);
+        return user;
     }
 }
