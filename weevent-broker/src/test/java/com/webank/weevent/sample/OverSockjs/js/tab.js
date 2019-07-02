@@ -1,6 +1,6 @@
 var stompClient = null;
 var topic = null;
-var url = "http://127.0.0.1:8080/";
+var url = "http://localhost:8080/";
 
 function setConnected(connected) {
     $("#connect").prop("disabled", connected);
@@ -30,8 +30,8 @@ function connect() {
         console.log('Connected: ' + frame);
         showGreeting("connect", "", "");
         // 通过rest 连接open
-        var url= $("#urlparam");
-        fetch('http://127.0.0.1:8080/weevent/rest/open?topic=com.webank.test.matthew', {
+        var url = $("#urlparam");
+        fetch('http://localhost:8080/weevent/rest/open?topic=com.webank.test.matthew', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

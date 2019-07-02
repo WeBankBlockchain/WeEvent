@@ -242,13 +242,11 @@ input.ui-button.ui-icon-notext .ui-icon {
     padding: .4em 1em;
 }
 
-
 input.ui-button::-moz-focus-inner,
 button.ui-button::-moz-focus-inner {
     border: 0;
     padding: 0;
 }
-
 
 .ui-checkboxradio-label .ui-icon-background {
     box-shadow: inset 1px 1px 1px #ccc;
