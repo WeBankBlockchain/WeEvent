@@ -59,7 +59,7 @@ mkdir -p $out_path
 make_file
 copy_file
 
-sed -i "s/127.0.0.1:8501/$channel_info/g" $out_path/conf/fisco.properties
+sed -i "s/^.*nodes=.*$/nodes=$channel_info/g" $out_path/conf/fisco.properties
 echo "set channel_info success"
 if [[ $version = "1.3" ]];then
     sed -i "/version=2.0/cversion=1.3" $out_path/conf/fisco.properties
@@ -104,7 +104,7 @@ else
     else
         echo "deploy contract success"
         echo "contract_address:"$contract_address
-        sed -i "/topic-controller.address=1/ctopic-controller.address=1:${contract_address}" $out_path/conf/fisco.properties
+        sed -i "s/^.*topic-controller.address.*$/topic-controller.address=1:${contract_address}/g" $out_path/conf/fisco.properties
     fi
 fi
 
