@@ -99,3 +99,54 @@ to{
   -webkit-animation: arrowChange-left 0.3s ;
   -o-animation: arrowChange-left 0.3s ;
 }
+
+@keyframes show-error {
+  from{
+    transform:translateY(-24px);
+    -webkit-transform: translateY(-24px);
+  }
+  to{
+    transform:translateY(0);
+    -webkit-transform: translateY(0);
+  }
+}
+
+@-webkit-keyframes show-error {
+  from{
+    transform:translateY(-24px);
+    -webkit-transform: translateY(-24px);
+  }
+  to{
+    transform:translateY(0);
+    -webkit-transform: translateY(0);
+  }
+}
+
+@-moz-keyframes show-error {
+  from{
+    transform:translateY(-24px);
+    -webkit-transform: translateY(-24px);
+  }
+  to{
+    transform:translateY(0);
+    -webkit-transform: translateY(0);
+  }
+}
+
+@-o-keyframes show-error {
+  from{
+    transform:translateY(-24px);
+    -webkit-transform: translateY(-24px);
+  }
+  to{
+    transform:translateY(0);
+    -webkit-transform: translateY(0);
+  }
+}
+
+@show-error:{
+  animation: show-error 0.3s ;
+  -moz-animation: show-error 0.3s ;
+  -webkit-animation: show-error 0.3s ;
+  -o-animation: show-error 0.3s ;
+}

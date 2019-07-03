@@ -75,13 +75,19 @@ html,body,#app{
     position: relative;
 
     .login_logo{
-      width:190px;
+      width:260px;
     }
-
-    .words{
-      font-size: 32px;
-      color:#2e5bff;
-      margin:20px 0 30px;
+    .login_error{
+      height:24px;
+      margin:5px 0;
+      overflow: hidden;
+      p{
+        color:transparent
+      }
+      .show_error{
+        color:#F56C6C;
+        @show-error()
+      }
     }
     .el-form{
       width:85%;
