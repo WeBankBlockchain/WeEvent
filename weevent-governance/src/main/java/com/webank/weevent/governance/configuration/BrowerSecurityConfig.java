@@ -69,10 +69,17 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .anyRequest()
                 .authenticated()
-                .and().csrf().disable().httpBasic()
-                .authenticationEntryPoint(jsonAuthenticationEntryPoint).and().logout().logoutUrl("/user/logout")
+                .and()
+                .csrf()
+                .disable()
+                .httpBasic()
+                .authenticationEntryPoint(jsonAuthenticationEntryPoint)
+                .and()
+                .logout()
+                .logoutUrl("/user/logout")
                 .deleteCookies(ConstantProperties.COOKIE_JSESSIONID, ConstantProperties.COOKIE_MGR_ACCOUNT)
-                .logoutSuccessHandler(jsonLogoutSuccessHandler).permitAll();
+                .logoutSuccessHandler(jsonLogoutSuccessHandler)
+                .permitAll();
     }
 
     // BrowerSecurityConfig
