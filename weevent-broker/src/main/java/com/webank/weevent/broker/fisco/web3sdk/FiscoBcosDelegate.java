@@ -37,9 +37,6 @@ import org.apache.commons.lang3.StringUtils;
  */
 @Slf4j
 public class FiscoBcosDelegate {
-    // fisco.propterties
-    private FiscoConfig fiscoConfig;
-
     // access to version 1.x
     private FiscoBcos fiscoBcos;
 
@@ -85,19 +82,18 @@ public class FiscoBcosDelegate {
             log.error("load FISCO-BCOS configuration failed");
             throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
         }
-        this.fiscoConfig = fiscoConfig;
 
-        if (this.fiscoConfig.getVersion().startsWith("1.3")) {
+        if (fiscoConfig.getVersion().startsWith("1.3")) {
             log.info("Notice: FISCO-BCOS‘s version is 1.x");
 
-            FiscoBcos fiscoBcos = new FiscoBcos(this.fiscoConfig);
-            fiscoBcos.init(this.fiscoConfig.getTopicControllerAddress());
+            FiscoBcos fiscoBcos = new FiscoBcos(fiscoConfig);
+            fiscoBcos.init(fiscoConfig.getTopicControllerAddress());
 
             this.fiscoBcos = fiscoBcos;
-        } else if (this.fiscoConfig.getVersion().startsWith("2.")) {
+        } else if (fiscoConfig.getVersion().startsWith("2.")) {
             log.info("Notice: FISCO-BCOS‘s version is 2.x");
 
-            String[] tokens = this.fiscoConfig.getTopicControllerAddress().split(";");
+            String[] tokens = fiscoConfig.getTopicControllerAddress().split(";");
             for (String token : tokens) {
                 String[] groups = token.split(":");
                 if (groups.length != 2) {
@@ -105,7 +101,7 @@ public class FiscoBcosDelegate {
                     throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
                 }
                 Long groupId = Long.valueOf(groups[0]);
-                FiscoBcos2 fiscoBcos2 = new FiscoBcos2(this.fiscoConfig);
+                FiscoBcos2 fiscoBcos2 = new FiscoBcos2(fiscoConfig);
                 fiscoBcos2.init(groupId, groups[1]);
 
                 this.fiscoBcos2Map.put(groupId, fiscoBcos2);
@@ -118,19 +114,19 @@ public class FiscoBcosDelegate {
     /**
      * list all group id
      *
-     * @return
+     * @return list of groupId
      */
     public Set<Long> listGroupId() {
         if (this.fiscoBcos != null) {
-            return new HashSet<Long>() {{
-                add(Long.valueOf(WeEventConstants.DEFAULT_GROUP_ID));
-            }};
+            Set<Long> list = new HashSet<>();
+            list.add(Long.valueOf(WeEventConstants.DEFAULT_GROUP_ID));
+            return list;
         } else {
             return this.fiscoBcos2Map.keySet();
         }
     }
 
-    public void checkVersion(Long groupId) throws BrokerException {
+    private void checkVersion(Long groupId) throws BrokerException {
         if (this.fiscoBcos != null) {
             if (groupId != Long.parseLong(WeEventConstants.DEFAULT_GROUP_ID)) {
                 throw new BrokerException(ErrorCode.WE3SDK_VERSION_NOT_SUPPORT);
@@ -223,7 +219,7 @@ public class FiscoBcosDelegate {
         }
     }
 
-    public String getRedisKey(Long blockNum, Long groupId) {
+    private String getRedisKey(Long blockNum, Long groupId) {
         if (this.fiscoBcos != null) {
             return Long.toString(blockNum);
         } else {
@@ -236,8 +232,8 @@ public class FiscoBcosDelegate {
      *
      * @param blockNum block height
      * @param groupId group id
-     * @return
-     * @throws BrokerException
+     * @return list of WeEvent
+     * @throws BrokerException BrokerException
      */
     public List<WeEvent> loop(Long blockNum, Long groupId) throws BrokerException {
         checkVersion(groupId);
