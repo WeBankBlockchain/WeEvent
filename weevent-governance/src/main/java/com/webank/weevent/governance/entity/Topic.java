@@ -21,4 +21,8 @@ public class Topic {
     private String senderAddress;
 
     private Date createdTimestamp;
+
+    private Long sequenceNumber;
+
+    private Long blockNumber;
 }

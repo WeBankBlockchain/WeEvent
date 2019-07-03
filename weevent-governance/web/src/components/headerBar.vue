@@ -45,6 +45,11 @@ export default{
       group: []
     }
   },
+  watch: {
+    aa (nVal) {
+      console.log(nVal)
+    }
+  },
   mounted () {
     this.getServer()
   },
