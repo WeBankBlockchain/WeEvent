@@ -60,25 +60,30 @@ sourceSets {
 }
 
 bootJar {
-    destinationDir file('dist/apps')
-    archiveName 'weevent-governance-' + version + '.jar'
-    exclude '**/*.xml'
-    exclude '**/*.properties'
+    destinationDir file("dist/apps")
+    archiveName "weevent-governance-" + version + ".jar"
+    exclude "**/*.xml"
+    exclude "**/*.properties"
 
     copy {
-        from file('src/main/resources/')
-        into 'dist/conf'
+        from file("src/main/resources/")
+        into "dist/conf"
     }
+
     copy {
-        from file('web/html/')
-        into 'dist/html'
+        from file("web/html/")
+        into "dist/html"
     }
+
     copy {
         from configurations.runtime
-        into 'dist/lib'
+        into "dist/lib"
     }
+
     copy {
-        from file('.').listFiles().findAll { File f -> (f.name.endsWith('.sql') || f.name.endsWith('.sh') || f.name.endsWith('.env')) }
-        into 'dist'
+        from file(".").listFiles().findAll {
+            File f -> (f.name.endsWith(".sql") || f.name.endsWith(".sh") || f.name.endsWith(".env"))
+        }
+        into "dist"
     }
 }

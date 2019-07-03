@@ -5,7 +5,7 @@ import com.webank.weevent.governance.code.ErrorCode;
 public class GovernanceException extends Exception {
 
     private static final long serialVersionUID = 1L;
-    
+
     /**
      * Error code.
      */
@@ -27,8 +27,10 @@ public class GovernanceException extends Exception {
     /**
      * getText
      *
-     * @param code the code
-     * @param message the message
+     * @param code
+     *            the code
+     * @param message
+     *            the message
      * @return java.lang.String
      */
     private static String getText(int code, String message) {
@@ -43,8 +45,10 @@ public class GovernanceException extends Exception {
     /**
      * Construction.
      *
-     * @param message the message
-     * @param cause the cause
+     * @param message
+     *            the message
+     * @param cause
+     *            the cause
      */
     public GovernanceException(String message, Throwable cause) {
         super(getText(-1, message), cause);
@@ -55,7 +59,8 @@ public class GovernanceException extends Exception {
     /**
      * Construction.
      *
-     * @param message the message
+     * @param message
+     *            the message
      */
     public GovernanceException(String message) {
         super(getText(-1, message));
@@ -66,7 +71,8 @@ public class GovernanceException extends Exception {
     /**
      * Construction.
      *
-     * @param errorCode the code and message
+     * @param errorCode
+     *            the code and message
      */
     public GovernanceException(ErrorCode errorCode) {
         super(getText(errorCode.getCode(), errorCode.getCodeDesc()));
@@ -77,8 +83,10 @@ public class GovernanceException extends Exception {
     /**
      * Construction.
      *
-     * @param code the code
-     * @param message reason
+     * @param code
+     *            the code
+     * @param message
+     *            reason
      */
     public GovernanceException(int code, String message) {
         super(message);

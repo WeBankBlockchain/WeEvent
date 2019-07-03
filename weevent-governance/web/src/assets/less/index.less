@@ -118,10 +118,13 @@ html,body,#app{
         cursor: pointer;
         color:#b0bac9;
         border-left:1px solid #b0bac9;
+        &:hover{
+          color:@blue;
+        }
       }
 
       .registered_btn{
-        color:#2e5bff;
+        color:@blue;
         cursor: pointer;
         float: right
       }
@@ -476,7 +479,7 @@ html,body,#app{
         tbody tr td .el-form .el-form-item{
           margin-bottom:5px;
           .el-form-item__label{
-            width:80px;
+            width:140px;
             font-weight: bold;
           }
           .el-form-item__content{
