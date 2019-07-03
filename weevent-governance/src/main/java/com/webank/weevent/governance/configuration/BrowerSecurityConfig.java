@@ -56,11 +56,20 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
         http.exceptionHandling().accessDeniedHandler(jsonAccessDeniedHandler);
 
         http.formLogin() // define user login page
-                .loginPage("/#/login").loginProcessingUrl("/user/login").usernameParameter("username")
-                .passwordParameter("password").permitAll().successHandler(loginSuccessHandler) // if login success
+                .loginPage("/user/require")
+                .loginProcessingUrl("/user/login")
+                .usernameParameter("username")
+                .passwordParameter("password")
+                .permitAll()
+                .successHandler(loginSuccessHandler) // if login success
                 .failureHandler(loginfailHandler) // if login fail
-                .and().authorizeRequests().antMatchers("/user/**", "/", "/static/**", "/weevent-governance/user/**")
-                .permitAll().anyRequest().authenticated().and().csrf().disable().httpBasic()
+                .and()
+                .authorizeRequests()
+                .antMatchers("/user/**", "/", "/static/**", "/weevent-governance/user/**")
+                .permitAll()
+                .anyRequest()
+                .authenticated()
+                .and().csrf().disable().httpBasic()
                 .authenticationEntryPoint(jsonAuthenticationEntryPoint).and().logout().logoutUrl("/user/logout")
                 .deleteCookies(ConstantProperties.COOKIE_JSESSIONID, ConstantProperties.COOKIE_MGR_ACCOUNT)
                 .logoutSuccessHandler(jsonLogoutSuccessHandler).permitAll();
