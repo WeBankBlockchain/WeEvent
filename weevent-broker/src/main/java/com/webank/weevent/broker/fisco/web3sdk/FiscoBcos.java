@@ -279,6 +279,8 @@ public class FiscoBcos {
                 sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, Web3SDKWrapper.uint256ToInt(event.get(0).eventBlockNumer), Web3SDKWrapper.uint256ToInt(event.get(0).eventSeq)));
                 sendResult.setTopic(topicName);
                 sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+                // send the client message to server
+                Web3SDKWrapper.Channel2Server(getBlockHeight());
                 return sendResult;
             } else {
                 return sendResult;
@@ -312,6 +314,7 @@ public class FiscoBcos {
                                     sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
                                 } else {
                                     sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+                                    Web3SDKWrapper.Channel2Server(getBlockHeight());
                                 }
                                 callBack.onComplete(sendResult);
                             }

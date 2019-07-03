@@ -465,7 +465,7 @@ public class WeEventClient implements IWeEventClient {
      * @throws BrokerException if the param is empty ,throw the exception
      */
     private static void validateArrayParam(byte[] param) throws BrokerException {
-        if (param.length == 0) {
+        if (param == null || param.length == 0) {
             throw new BrokerException(ErrorCode.PARAM_ISEMPTY);
         }
     }
