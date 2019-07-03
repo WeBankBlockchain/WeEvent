@@ -20,14 +20,14 @@ public class Broker {
 
     @Min(1)
     private Integer userId;
-    
+
     private String name;
-    
+
     @URL
     private String brokerUrl;
-    
+
     @URL
     private String webaseUrl;
-    
+
     private Date lastUpdate;
 }

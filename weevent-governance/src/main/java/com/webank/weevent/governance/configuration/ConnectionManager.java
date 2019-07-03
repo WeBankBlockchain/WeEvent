@@ -28,6 +28,8 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -56,108 +58,106 @@ public class ConnectionManager {
     private int socketTimeout;
 
     private PoolingHttpClientConnectionManager cm;
-    
+
     /**
      * reconnet str
      */
     private HttpRequestRetryHandler retryHandler = (exception, executionCount, context) -> {
-	if (executionCount >= 3) {
-	    // Do not retry if over max retry count
-	    return false;
-	}
-	if (exception instanceof InterruptedIOException) {
-	    // Timeout
-	    return false;
-	}
-	if (exception instanceof UnknownHostException) {
-	    // Unknown host
-	    return false;
-	}
-	if (exception instanceof ConnectTimeoutException) {
-	    // Connection refused
-	    return false;
-	}
-	if (exception instanceof SSLException) {
-	    // SSL handshake exception
-	    return false;
-	}
+        if (executionCount >= 3) {
+            // Do not retry if over max retry count
+            return false;
+        }
+        if (exception instanceof InterruptedIOException) {
+            // Timeout
+            return false;
+        }
+        if (exception instanceof UnknownHostException) {
+            // Unknown host
+            return false;
+        }
+        if (exception instanceof ConnectTimeoutException) {
+            // Connection refused
+            return false;
+        }
+        if (exception instanceof SSLException) {
+            // SSL handshake exception
+            return false;
+        }
 
-	HttpClientContext clientContext = HttpClientContext.adapt(context);
-	HttpRequest request = clientContext.getRequest();
-	boolean idempotent = !(request instanceof HttpEntityEnclosingRequest);
-	if (idempotent) {
-	    // Retry if the request is considered idempotent
-	    return true;
-	}
-	return false;
+        HttpClientContext clientContext = HttpClientContext.adapt(context);
+        HttpRequest request = clientContext.getRequest();
+        boolean idempotent = !(request instanceof HttpEntityEnclosingRequest);
+        if (idempotent) {
+            // Retry if the request is considered idempotent
+            return true;
+        }
+        return false;
     };
 
     /**
      * config connect parameter
      */
-    private RequestConfig requestConfig = RequestConfig.custom()
-	    .setConnectionRequestTimeout(connectionRequestTimeout)
-	    .setConnectTimeout(connectionTimeout)
-	    .setSocketTimeout(socketTimeout)
-	    .build();
+    private RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(connectionRequestTimeout)
+            .setConnectTimeout(connectionTimeout).setSocketTimeout(socketTimeout).build();
 
     public ConnectionManager() {
-	cm = new PoolingHttpClientConnectionManager();
+        cm = new PoolingHttpClientConnectionManager();
     }
 
+    @Scope("prototype")
     @Bean("httpClient")
     public CloseableHttpClient getHttpClient() {
-	cm.setMaxTotal(maxTotal);
-	cm.setDefaultMaxPerRoute(maxPerRoute);
-	CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm).setDefaultRequestConfig(requestConfig)
-		.setRetryHandler(retryHandler).build();
-	return httpClient;
+        cm.setMaxTotal(maxTotal);
+        cm.setDefaultMaxPerRoute(maxPerRoute);
+        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm)
+                .setDefaultRequestConfig(requestConfig).setRetryHandler(retryHandler).build();
+        return httpClient;
     }
 
+    @Scope("prototype")
     @Bean("httpsClient")
     public CloseableHttpClient getHttpsClient() {
-	Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder
-		.<ConnectionSocketFactory>create()
-		.register("http", PlainConnectionSocketFactory.INSTANCE)
-		.register("https", trustAllHttpsCertificates())
-		.build();
-	PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(
-		socketFactoryRegistry);
-	CloseableHttpClient httpsClient = HttpClients.custom().setConnectionManager(connectionManager).build();
-	return httpsClient;
+        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+                .register("http", PlainConnectionSocketFactory.INSTANCE).register("https", trustAllHttpsCertificates())
+                .build();
+        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(
+                socketFactoryRegistry);
+        CloseableHttpClient httpsClient = HttpClients.custom().setConnectionManager(connectionManager)
+                .setDefaultRequestConfig(requestConfig).setRetryHandler(retryHandler).build();
+        return httpsClient;
     }
 
     private SSLConnectionSocketFactory trustAllHttpsCertificates() {
-	SSLConnectionSocketFactory socketFactory = null;
-	TrustManager[] trustAllCerts = new TrustManager[1];
-	TrustManager tm = new miTM();
-	trustAllCerts[0] = tm;
-	SSLContext sc = null;
-	try {
-	    sc = SSLContext.getInstance("TLS");// sc = SSLContext.getInstance("TLS")
-	    sc.init(null, trustAllCerts, null);
-	    socketFactory = new SSLConnectionSocketFactory(sc, NoopHostnameVerifier.INSTANCE);
-	    // HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-	} catch (NoSuchAlgorithmException e) {
-	    log.error(e.getMessage());
-	} catch (KeyManagementException e) {
-	    log.error(e.getMessage());
-	}
-	return socketFactory;
+        SSLConnectionSocketFactory socketFactory = null;
+        TrustManager[] trustAllCerts = new TrustManager[1];
+        TrustManager tm = new miTM();
+        trustAllCerts[0] = tm;
+        SSLContext sc = null;
+        try {
+            sc = SSLContext.getInstance("TLS");// sc = SSLContext.getInstance("TLS")
+            sc.init(null, trustAllCerts, null);
+            socketFactory = new SSLConnectionSocketFactory(sc, NoopHostnameVerifier.INSTANCE);
+            // HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+        } catch (NoSuchAlgorithmException e) {
+            log.error(e.getMessage());
+        } catch (KeyManagementException e) {
+            log.error(e.getMessage());
+        }
+        return socketFactory;
     }
 
     private class miTM implements TrustManager, X509TrustManager {
 
-	public X509Certificate[] getAcceptedIssuers() {
-	    return null;
-	}
+        public X509Certificate[] getAcceptedIssuers() {
+            return null;
+        }
 
-	public void checkServerTrusted(X509Certificate[] certs, String authType) {
-	    // don't check
-	}
+        public void checkServerTrusted(X509Certificate[] certs, String authType) {
+            // don't check
+        }
 
-	public void checkClientTrusted(X509Certificate[] certs, String authType) {
-	    // don't check
-	}
+        public void checkClientTrusted(X509Certificate[] certs, String authType) {
+            // don't check
+        }
     }
 }
