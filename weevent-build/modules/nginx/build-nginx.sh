@@ -13,7 +13,7 @@ out_path=""
 function nginx_setup() { 
     echo "install nginx into $out_path"
     
-	if [ ! -d $current_path/build ];then
+	if [[ ! -d $current_path/build ]];then
 	    mkdir -p $current_path/build
 	fi
     	
