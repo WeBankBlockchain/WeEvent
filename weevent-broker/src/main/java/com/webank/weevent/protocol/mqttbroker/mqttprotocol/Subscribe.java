@@ -52,7 +52,7 @@ public class Subscribe {
         List<MqttTopicSubscription> topicSubscriptions = msg.payload().topicSubscriptions();
         if (this.validTopicFilter(topicSubscriptions)) {
             String clientId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
-            List<Integer> mqttQoSList = new ArrayList<Integer>();
+            List<Integer> mqttQoSList = new ArrayList<>();
             topicSubscriptions.forEach(topicSubscription -> {
                 String topicFilter = topicSubscription.topicName();
                 MqttQoS mqttQoS = topicSubscription.qualityOfService();
