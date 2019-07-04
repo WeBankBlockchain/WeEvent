@@ -4,6 +4,8 @@ package com.webank.weevent.broker.fisco.web3sdk;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,7 +43,11 @@ import org.bcos.web3j.protocol.core.methods.response.EthBlockNumber;
 import org.bcos.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.bcos.web3j.tx.Contract;
+import org.bcos.channel.dto.ChannelRequest;
+import org.bcos.channel.dto.ChannelResponse;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
+import static java.lang.Boolean.TRUE;
 
 /**
  * Wrapper of Web3SDK 1.x function.
@@ -54,9 +60,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class Web3SDKWrapper {
     /**
      * init web3j handler
-     *
-     * @return Web3j
      */
+    public static Service service;
+
     public static Web3j initWeb3j(FiscoConfig fiscoConfig) throws BrokerException {
         // init web3j with given group id
         try {
@@ -70,6 +76,7 @@ public class Web3SDKWrapper {
             service.setConnectSeconds(web3sdkTimeout);
             // reconnect idle time 100ms
             service.setConnectSeconds(100);
+            Web3SDKWrapper.service = service;
 
             // connect key and string
             ChannelConnections channelConnections = new ChannelConnections();
@@ -112,6 +119,22 @@ public class Web3SDKWrapper {
             log.error("init web3sdk failed", e);
             throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
         }
+    }
+
+
+    public static void Channel2Server(Long blockNumber) {
+        ChannelRequest request = new ChannelRequest();
+        // topic for the amop
+        request.setToTopic("amop-message-id");
+        request.setMessageID(Web3SDKWrapper.service.newSeq());
+        request.setTimeout(5000);
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        request.setContent(blockNumber.toString());
+        log.info(df.format(LocalDateTime.now()), " request seq: {}, Content:{}", String.valueOf(request.getMessageID()), request.getContent());
+        // send message
+        ChannelResponse response = service.sendChannelMessage(request);
+        log.info("time:{},response seq: {}, ErrorCode:{}, Content:{}", df.format(LocalDateTime.now()), String.valueOf(response.getMessageID()), response.getErrorCode(), response.getContent());
     }
 
     /**

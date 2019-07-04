@@ -26,6 +26,8 @@ import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.fisco.bcos.channel.client.Service;
+
 import org.fisco.bcos.channel.client.TransactionSucCallback;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
@@ -58,6 +60,8 @@ public class FiscoBcos2 {
 
     // topic list
     private Map<String, Topic> topicMap = new ConcurrentHashMap<>();
+
+    private Service service;
 
     public FiscoBcos2(FiscoConfig fiscoConfig) {
         this.fiscoConfig = fiscoConfig;
@@ -268,6 +272,9 @@ public class FiscoBcos2 {
                 sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, event.get(0).eventBlockNumer.intValue(), event.get(0).eventSeq.intValue()));
                 sendResult.setTopic(topicName);
                 sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+
+                // send the client message to server
+                Web3SDK2Wrapper.Channel2Server(this.getBlockHeight(), this.groupId);
                 return sendResult;
             } else {
                 return sendResult;

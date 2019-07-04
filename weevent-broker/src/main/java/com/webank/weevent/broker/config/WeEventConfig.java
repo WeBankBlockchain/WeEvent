@@ -70,22 +70,22 @@ public class WeEventConfig {
     @Value("${stomp.heartbeats:30}")
     private Integer stompHeartbeats;
 
-    @Value("${mqtt.broker.port:8083}")
+    @Value("${mqtt.brokerserver.port:8083}")
     private Integer brokerServerPort;
 
-    @Value("${mqtt.broker.sobacklog:511}")
+    @Value("${mqtt.brokerserver.sobacklog:511}")
     private Integer soBackLog;
 
-    @Value("${mqtt.broker.sokeepalive:true}")
+    @Value("${mqtt.brokerserver.sokeepalive:true}")
     private Boolean soKeepAlive;
 
-    @Value("${mqtt.broker.keepalive:60}")
+    @Value("${mqtt.brokerserver.keepalive:60}")
     private Integer keepAlive;
 
-    @Value("${mqtt.websocket.path:/weevent/mqtt}")
+    @Value("${mqtt.websocketserver.path:/weevent/mqtt}")
     private String webSocketServerPath;
 
-    @Value("${mqtt.websocket.port:8084}")
+    @Value("${mqtt.websocketserver.port:8084}")
     private Integer webSocketPort;
 
     @Value("${mqtt.user.login:}")
