@@ -1,7 +1,5 @@
 package com.webank.weevent.governance.properties;
 
-import java.math.BigInteger;
-
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
