@@ -233,7 +233,7 @@ public class Web3SDK2Wrapper {
         request.setTimeout(5000);
 
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        request.setContent(groupId+","+blockNumber);
+        request.setContent(groupId + "," + blockNumber);
 
         log.info(df.format(LocalDateTime.now()), " request seq: {}, Content:{}", String.valueOf(request.getMessageID()), request.getContent());
         // send message

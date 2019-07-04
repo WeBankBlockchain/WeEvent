@@ -64,9 +64,8 @@ import static java.lang.Boolean.TRUE;
 public class Web3SDKWrapper {
     /**
      * init web3j handler
-     *
-     * */
-     public static Service service;
+     */
+    public static Service service;
 
     public static Web3j initWeb3j(FiscoConfig fiscoConfig) throws BrokerException {
         // init web3j with given group id
