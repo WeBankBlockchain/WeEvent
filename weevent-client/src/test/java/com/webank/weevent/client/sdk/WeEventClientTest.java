@@ -45,16 +45,12 @@ public class WeEventClientTest {
     @Before
     public void before() throws Exception {
         weEventClient = IWeEventClient.build("http://localhost:8081/weevent");
-<<<<<<< HEAD
-         weEventClient.open(topicName);
-=======
         weEventClient.open(topicName);
->>>>>>> upstream/master
     }
 
     @After
     public void after() throws Exception {
-       // weEventClient.close(topicName);
+        // weEventClient.close(topicName);
     }
 
 
@@ -102,11 +98,7 @@ public class WeEventClientTest {
         log.info("===================={}", this.testName.getMethodName());
         // create subscriber
         String groupId = "1";//if not set default 1
-<<<<<<< HEAD
-        this.weEventClient.subscribe(this.topicName,WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
-=======
-        String subscribeId = this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
->>>>>>> upstream/master
+        this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
                 System.out.println("onEvent:" + event.toString());
@@ -118,6 +110,7 @@ public class WeEventClientTest {
                 e.printStackTrace();
             }
         });
+
         sleep(1000000);
     }
 

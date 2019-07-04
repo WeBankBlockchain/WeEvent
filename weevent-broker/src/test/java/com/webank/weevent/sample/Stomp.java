@@ -70,20 +70,12 @@ public class Stomp {
                 // auto subscribe when connected
                 log.info("subscribe topic, {}", topic);
                 StompHeaders header = new StompHeaders();
-<<<<<<< HEAD
                 header.setDestination(topic);
                 header.set("eventId", "2cf24dba-59-1124");
                 header.set("groupId", "1");
                 // extension params
                 header.set("weevent-format", "json");
 
-=======
-                header.set("eventId","2cf24dba-59-1124");
-                header.set("groupId","1");
-                // extension params
-                header.set("weevent-format","json");
-                header.setDestination(topic);
->>>>>>> upstream/master
                 StompSession.Subscription subscription = session.subscribe(header, new StompFrameHandler() {
                     @Override
                     public Type getPayloadType(StompHeaders headers) {
@@ -175,19 +167,12 @@ public class Stomp {
                 session.setAutoReceipt(true);
                 // auto subscribe when connected
                 StompHeaders header = new StompHeaders();
-<<<<<<< HEAD
                 header.setDestination(topic);
                 header.set("eventId", "2cf24dba-59-1124");
                 header.set("groupId", "1");
                 // extension params
                 header.set("weevent-format", "json");
-=======
-                header.set("eventId","2cf24dba-59-1124");
-                header.set("groupId","1");
-                // extension params
-                header.set("weevent-format","json");
-                header.setDestination(topic);
->>>>>>> upstream/master
+
                 StompSession.Subscription subscription = session.subscribe(header, new StompFrameHandler() {
                     @Override
                     public Type getPayloadType(StompHeaders headers) {
@@ -206,11 +191,6 @@ public class Stomp {
                     Thread.sleep(5000L);
                 } catch (InterruptedException e) {
                 }
-<<<<<<< HEAD
-=======
-                StompHeaders header = new StompHeaders();
-                header.setDestination(topic);
->>>>>>> upstream/master
                 log.info("send event to topic, {}", topic);
                 // extension params
                 for (int i = 0; i < 10; i++) {

@@ -8,7 +8,6 @@ function setConnected(connected) {
     $("#greetings").html("");
 }
 
-
 function showGreeting(type, tt, message) {
     $("#greetings").append("<tr><td>" + type + "</td><td>" + tt + "</td><td>" + message + "</td></tr>");
 }
