@@ -1832,7 +1832,7 @@
                             _this.debug('<<< PONG');
                         });
                     this._webSocket.onmessage = function (evt) {
-                        if(evt.data.indexOf("SUBSCRIBE")>-1){
+                        if (evt.data.indexOf("SUBSCRIBE") > -1) {
                             _this.debug('Received data');
                             _this.debug(evt.data);
                         }

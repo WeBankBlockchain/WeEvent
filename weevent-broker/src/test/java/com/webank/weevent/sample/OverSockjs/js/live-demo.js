@@ -35,7 +35,7 @@ function connect() {
         console.log('Connected: ' + frame);
         showGreeting("connect", "", "");
     });
-   // $("#connect").setD
+    // $("#connect").setD
 
 }
 
