@@ -153,7 +153,7 @@ public interface IWeEventClient {
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
-    String subscribe(String topic, String groupId, String offset, String contnueSubScriptionId, WeEventClient.EventListener listener) throws BrokerException;
+    String subscribe(String topic, String groupId, String offset,String contnueSubScriptionId, WeEventClient.EventListener listener) throws BrokerException;
 
     /**
      * Publish an event to topic.
