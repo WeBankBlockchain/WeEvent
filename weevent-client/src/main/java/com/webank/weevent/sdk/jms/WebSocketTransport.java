@@ -32,6 +32,7 @@ import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.util.LinkedMultiValueMap;
 
+
 /**
  * stomp transport over web socket.
  *
@@ -65,12 +66,13 @@ public class WebSocketTransport extends WebSocketClient {
     // (headerId in stomp <-> asyncSeq in biz )
     private Map<String, Long> sequence2Id;
 
-    //(subscription <-> WeEvent topic)
-    private Map<String, WeEventTopic> subscription2EventCache;
 
-    private Pair<String, String> account;
+    //(subscription <-> weevent topic)
+    public Map<String, WeEventTopic> subscription2EventCache;
 
-    private boolean connectFlag = false;
+    public Pair<String, String> account;
+
+    public boolean connectFlag = false;
 
     class ResponseFuture implements Future<Message> {
         private Long key;
@@ -171,7 +173,6 @@ public class WebSocketTransport extends WebSocketClient {
         String req = stompCommand.encodeConnect(userName, password);
         sequence2Id.put(Long.toString(0L), 0L);
         Message stompResponse = this.stompRequest(req, 0L);
-
         this.account = new Pair<>(userName, password);
 
         // initialize connection context
@@ -236,7 +237,23 @@ public class WebSocketTransport extends WebSocketClient {
             }
 
         }
+        // cache the subscribption id and the WeEventTopic,the subscription2EventCache which can use for reconnect
+        topic.setContinueSubscriptionId(stompCommand.getSubscriptionId(stompResponse));
+        this.subscription2EventCache.put(stompCommand.getSubscriptionId(stompResponse), topic);
 
+        LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) stompResponse.getHeaders().get("nativeHeaders"));
+
+        if (nativeHeaders != null) {
+            // send command receipt Id
+            Object subscriptionId = nativeHeaders.get("subscription-id");
+            String subscriptionIdStr = null;
+            if (subscriptionId != null) {
+                subscriptionIdStr = ((List) subscriptionId).get(0).toString();
+                // map the receipt id and the subscription id
+                this.receiptId2SubscriptionId.put(String.valueOf(asyncSeq), subscriptionIdStr);
+                this.subscriptionId2ReceiptId.put(subscriptionIdStr, String.valueOf(asyncSeq));
+            }
+        }
         return stompCommand.getSubscriptionId(stompResponse);
     }
 
@@ -296,10 +313,11 @@ public class WebSocketTransport extends WebSocketClient {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(stompMsg);
         StompCommand command = accessor.getCommand();
         String cmd = command.name();
+        ;
 
         log.debug("stomp command from server: {}", cmd);
+        // connect response
         switch (cmd) {
-            // connect response
             case "CONNECTED":
                 // connect command always 0
                 futures.get(0L).setResponse(stompMsg);
@@ -445,45 +463,46 @@ public class WebSocketTransport extends WebSocketClient {
         }
         return id;
     }
-
-    class WSThread extends Thread {
-        private WebSocketTransport webSocketTransport;
-
-        public WSThread(WebSocketTransport webSocketTransport) {
-            this.webSocketTransport = webSocketTransport;
-        }
-
-        public void run() {
-            log.info("auto redo thread enter");
-
-            this.webSocketTransport.connectFlag = true;
-            try {
-                // check the websocket
-                while (!this.webSocketTransport.reconnectBlocking()) {
-                    Thread.sleep(3000);
-                }
-                // check the stomp connect,and use cache login and password
-                while (!this.webSocketTransport.stompConnect(this.webSocketTransport.account.getKey(),
-                        this.webSocketTransport.account.getValue())) {
-                    Thread.sleep(3000);
-                }
-            } catch (InterruptedException | JMSException e) {
-                log.error("auto reconnect failed", e);
-            }
-
-            for (Map.Entry<String, WeEventTopic> subscription : this.webSocketTransport.subscription2EventCache.entrySet()) {
-                try {
-                    log.info("subscription cache:{}", subscription.toString());
-                    this.webSocketTransport.stompSubscribe(subscription.getValue());
-                } catch (JMSException e) {
-                    log.error("auto resubscribe failed", e);
-                }
-            }
-
-            this.webSocketTransport.connectFlag = false;
-
-            log.info("auto redo thread exit");
-        }
-    }
 }
 
+@Slf4j
+class WSThread extends Thread {
+    private WebSocketTransport webSocketTransport;
+
+
+    public WSThread(WebSocketTransport webSocketTransport) {
+        this.webSocketTransport = webSocketTransport;
+    }
+
+    public void run() {
+        log.info("auto redo thread enter");
+
+        this.webSocketTransport.connectFlag = true;
+        try {
+            // check the websocket
+            while (!this.webSocketTransport.reconnectBlocking()) {
+                Thread.sleep(3000);
+            }
+            // check the stomp connect,and use cache login and password
+            while (!this.webSocketTransport.stompConnect(this.webSocketTransport.account.getKey(),
+                    this.webSocketTransport.account.getValue())) {
+                Thread.sleep(3000);
+            }
+        } catch (InterruptedException | JMSException e) {
+            log.error("auto reconnect failed", e);
+        }
+
+        for (Map.Entry<String, WeEventTopic> subscription : this.webSocketTransport.subscription2EventCache.entrySet()) {
+            try {
+                log.info("subscription cache:{}", subscription.toString());
+                this.webSocketTransport.stompSubscribe(subscription.getValue());
+            } catch (JMSException e) {
+                log.error("auto resubscribe failed", e);
+            }
+        }
+
+        this.webSocketTransport.connectFlag = false;
+
+        log.info("auto redo thread exit");
+    }
+}
