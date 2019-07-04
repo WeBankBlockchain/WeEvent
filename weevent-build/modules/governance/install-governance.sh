@@ -14,7 +14,7 @@ function governance_setup() {
         echo "set server_port failed"
         exit 1
     else
-       eval sed -i "s/8082/${server_port}/" $out_path/conf/application-prod.yml
+       eval sed -i "s/port:.*$/'port: ${server_port}'/" $out_path/conf/application-prod.yml
     fi
     echo "set server_port success"
  
@@ -54,16 +54,7 @@ function governance_setup() {
     fi
     echo "set mysql_pwd success"
        
-    if [[ -z $broker_port ]];then
-        echo "broker_port is empty"
-        echo "set broker_port failed"
-        exit 1
-    else
-       eval sed -i "s/8081/${broker_port}/" $out_path/conf/application-prod.yml
-    fi
-    echo "set broker_port success"
-
-    
+     
     # init db,create datebase and tables
     cd $out_path
     ./init-governance.sh
@@ -86,19 +77,15 @@ installPWD=$(dirname $(dirname `pwd`))
 if [ $# -lt 2 ]; then 
     echo "Usage:"
     echo "    $0 --out_path /data/app/weevent-install/governance "
-    echo "    --broker_port  --mysql_port  --mysql_user  --mysql_pwd  --influxdb_ip --influxdb_port"
+    echo "      --server_port --mysql_ip --mysql_port  --mysql_user  --mysql_pwd  "
     exit 1
 fi
 
-ssl=""
 server_port=""
 mysql_ip=""
 mysql_port=""
 mysql_user=""
 mysql_pwd=""
-broker_port=""
-influxdb_ip=""
-influxdb_port=""
 out_path=""
 current_path=`pwd`
 echo "current path $current_path"
@@ -112,16 +99,10 @@ while [ $# -ge 2 ] ; do
         --mysql_user) para="$1 = $2;";mysql_user="$2";shift 2;;
         --mysql_pwd) para="$1 = $2;";mysql_pwd="$2";shift 2;;
         --broker_port) para="$1 = $2;";broker_port="$2";shift 2;;
-        --influxdb_ip) para="$1 = $2;";influxdb_ip="$2";shift 2;;
-        --influxdb_port) para="$1 = $2;";influxdb_port="$2";shift 2;;        
-        --grafana_enable) para="$1 = $2;";grafana_enable="$2";shift 2;;
-        --grafana_ip) para="$1 = $2;";grafana_ip="$2";shift 2;;
-        --grafana_port) para="$1 = $2;";grafana_port="$2";shift 2;;
         --bee_ip) para="$1 = $2;";bee_ip="$2";shift 2;;
-        --bee_port) para="$1 = $2;";bee_port="$2";shift 2;;		
+        --bee_port) para="$1 = $2;";bee_port="$2";shift 2;;     
         *) echo "unknown parameter $1." ; exit 1 ; break;;
     esac
 done
 
 governance_setup
-
