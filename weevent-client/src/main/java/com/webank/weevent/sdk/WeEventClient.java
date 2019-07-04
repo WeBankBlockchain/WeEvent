@@ -45,10 +45,13 @@ import org.apache.commons.lang3.StringUtils;
 @Slf4j
 public class WeEventClient implements IWeEventClient {
     private final static String defaultJsonRpcUrl = "http://localhost:8080/weevent/jsonrpc";
+    // json rpc proxy
     private IBrokerRpc brokerRpc;
 
     // default STOMP url, ws://localhost:8080/weevent/stomp
     private static WeEventConnectionFactory connectionFactory;
+
+    // stomp connection
     private TopicConnection connection;
     // (subscriptionId <-> TopicSession)
     private Map<String, TopicSession> sessionMap;

@@ -81,7 +81,6 @@ public class Stomp {
                     public Type getPayloadType(StompHeaders headers) {
                         return String.class;
                     }
-
                     @Override
                     public void handleFrame(StompHeaders headers, Object payload) {
                         log.info("subscribe handleFrame, header: {} payload: {}", headers, payload);
@@ -173,7 +172,6 @@ public class Stomp {
                 header.set("groupId", "1");
                 // extension params
                 header.set("weevent-format", "json");
-
                 StompSession.Subscription subscription = session.subscribe(header, new StompFrameHandler() {
                     @Override
                     public Type getPayloadType(StompHeaders headers) {

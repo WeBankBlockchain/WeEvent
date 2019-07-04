@@ -17,6 +17,7 @@ import io.netty.handler.codec.mqtt.MqttUnsubscribeMessage;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.AttributeKey;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *@ClassName BrokerHandler
@@ -25,6 +26,7 @@ import io.netty.util.AttributeKey;
  *@Date 2019/5/20 14:38
  *@Version 1.0
  **/
+@Slf4j
 public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
     private ProtocolProcess protocolProcess;
 
@@ -34,6 +36,7 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, MqttMessage msg) throws Exception {
+        log.info("mqttMessage:{}", msg.toString());
         switch (msg.fixedHeader().messageType()) {
             case CONNECT:
                 protocolProcess.connect().processConnect(ctx.channel(), (MqttConnectMessage) msg);

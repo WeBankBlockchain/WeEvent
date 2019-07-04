@@ -1,8 +1,18 @@
 #!/bin/bash
-#
-# generate weevent tar package from github project
-#
+# generate WeEvent-x.x.x.tar.gz package from github project.
+# depend internet online and tools as followings:
+# 1. git
+# 2. gradle 4.10
+# 3. java 1.8
+# 4. nodejs 10.16
 ################################################################################
+
+function usage(){
+    echo "Usage:"
+    echo "    package master: ./package.sh --version 1.0.0"
+    echo "    package tag: ./package.sh --tag v1.0.0 --version 1.0.0"
+    echo "    package local: ./package.sh --tag local --version 1.0.0"
+}
 
 version=""
 tag="master"
@@ -18,12 +28,6 @@ while [ $# -ge 2 ] ; do
     *) echo "unknown parameter $1." ; exit 1 ; break;;
     esac
 done
-
-function usage(){
-    echo "Usage:"
-    echo "    package master: ./package.sh --version 1.0.0"
-    echo "    package tag: ./package.sh --tag v1.0.0 --version 1.0.0"
-}
 
 function yellow_echo(){
     local what=$*
@@ -60,15 +64,26 @@ function set_permission(){
     find -name "*.properties" -exec dos2unix {} \;
 }
 
-#gradle build broker, governance, client
+# build broker, governance, client, web
 function build_weevent(){
     cd ${top_path}
 
-    #switch tag
-    git checkout ${tag}
-    execute_result "git checkout ${tag}"
+    if [ "$tag" != "local" ];then
+        yellow_echo "package github[${tag}]"
 
-    #gradle build
+        # switch tag
+        git checkout ${tag}
+        execute_result "git checkout ${tag}"
+    else
+        yellow_echo "package local path"
+    fi
+
+    # node.js build html and css
+    cd ${top_path}/weevent-governance/web
+    ./build-web.sh
+
+    # gradle build
+    cd ${top_path}
     gradle clean build -x test
     execute_result "build weevent"
 }
@@ -92,7 +107,7 @@ function copy_install_file(){
     cp -r ./modules/nginx/conf ${out_path}/modules/nginx
 }
 
-# switch to prod,remove dev properties
+# switch to prod.properties, remove dev.properties
 function switch_to_prod(){
     cd ${current_path}
 
@@ -157,32 +172,30 @@ function package(){
 
     yellow_echo "begin to package weevent-${version}"
 
-    yellow_echo "build weevent [${tag}]"
-    #generate jar
+    # generate jar and web
     build_weevent
 
-    #copy file from build path
+    # copy file from build path
     yellow_echo "prepare install file"
     copy_install_file
     switch_to_prod
     set_permission
 
-    #package weevent
+    # tar weevent
     yellow_echo "generate weevent-${version}.tar.gz"
     cd ${current_path}
     tar -czpvf weevent-${version}.tar.gz `basename ${out_path}`
 
-    #package module
-    #tar broker
+    # tar broker module
     tar_broker weevent-broker-${version}.tar.gz
 
-    #tar governance
+    # tar governance module
     tar_governance weevent-governance-${version}.tar.gz
 
-    #tar nginx
+    # tar nginx module
     tar_nginx weevent-nginx-${version}.tar.gz
 
-    #remove template
+    # remove temporary path
     rm -rf ${out_path}
 }
 
@@ -192,9 +205,11 @@ function main(){
         exit 1
     fi
 
+    # package in current path
     out_path=${current_path}/weevent-${version}
     package
 
+    # reset to original path
     cd ${current_path}
     yellow_echo "package success"
 }

@@ -2,6 +2,7 @@ var stompClient = null;
 var topic = null;
 var url = "http://localhost:8080/";
 
+
 function setConnected(connected) {
     $("#connect").prop("disabled", connected);
     $("#greetings").html("");

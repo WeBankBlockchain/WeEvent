@@ -32,6 +32,22 @@ public class SendResult {
         ERROR,
     }
 
+
+    /**
+     * Result status.
+     */
+    private SendResultStatus status;
+
+    /**
+     * Topic name.
+     */
+    private String topic;
+
+    /**
+     * Event ID.
+     */
+    private String eventId;
+
     /**
      * Default construction needed by jackson marshall.
      */

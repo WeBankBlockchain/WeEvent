@@ -9,8 +9,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -28,9 +26,7 @@ import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
-import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.bcos.channel.client.Service;
 import org.bcos.channel.handler.ChannelConnections;
 import org.bcos.web3j.abi.datatypes.Address;
@@ -93,9 +89,9 @@ public class Web3SDKWrapper {
                 nodeList.set(i, fiscoConfig.getOrgId() + "@" + nodeList.get(i));
             }
             channelConnections.setConnectionsStr(nodeList);
-            service.setAllChannelConnections(new ConcurrentHashMap<String, ChannelConnections>() {{
-                put(fiscoConfig.getOrgId(), channelConnections);
-            }});
+            ConcurrentHashMap<String, ChannelConnections> keyID2connections = new ConcurrentHashMap<>();
+            keyID2connections.put(fiscoConfig.getOrgId(), channelConnections);
+            service.setAllChannelConnections(keyID2connections);
 
             // thread pool
             ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
@@ -299,17 +295,11 @@ public class Web3SDKWrapper {
                 for (Topic.LogWeEventEventResponse logEvent : logWeEventEvents) {
                     String topicName = logEvent.topicName.toString();
 
-                    Map<String, String> extensions = null;
-                    try {
-                        if (StringUtils.isBlank(logEvent.extensions.toString())) {
-                            extensions = (Map<String, String>) JSON.parse(logEvent.extensions.toString());
-                        }
-                    } catch (Exception e) {
-                        log.error("parse extensions failed");
-                    }
-
-                    WeEvent event = new WeEvent(topicName, logEvent.eventContent.getValue().getBytes(StandardCharsets.UTF_8), extensions);
+                    WeEvent event = new WeEvent(topicName,
+                            logEvent.eventContent.getValue().getBytes(StandardCharsets.UTF_8),
+                            DataTypeUtils.json2Map(logEvent.extensions.toString()));
                     event.setEventId(DataTypeUtils.encodeEventId(topicName, uint256ToInt(logEvent.eventBlockNumer), uint256ToInt(logEvent.eventSeq)));
+
                     log.debug("get a event from fisco-bcos: {}", event);
                     events.add(event);
                 }

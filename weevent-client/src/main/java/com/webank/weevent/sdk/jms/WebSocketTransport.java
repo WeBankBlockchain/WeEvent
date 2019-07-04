@@ -32,8 +32,6 @@ import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.util.LinkedMultiValueMap;
 
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
 
 /**
  * stomp transport over web socket.
@@ -62,16 +60,17 @@ public class WebSocketTransport extends WebSocketClient {
     // (receiptId in stomp <-> subscriptionId in biz)
     private Map<String, String> subscriptionId2ReceiptId;
 
-    // (receiptId,subcriptionId)
+    // (receiptId <-> subscriptionId)
     private Map<String, String> receiptId2SubscriptionId;
 
     // (headerId in stomp <-> asyncSeq in biz )
     private Map<String, Long> sequence2Id;
 
+
     //(subscription <-> weevent topic)
     public Map<String, WeEventTopic> subscription2EventCache;
 
-    public Pair<String, String> userInfo;
+    public Pair<String, String> account;
 
     public boolean connectFlag = false;
 
@@ -174,7 +173,7 @@ public class WebSocketTransport extends WebSocketClient {
         String req = stompCommand.encodeConnect(userName, password);
         sequence2Id.put(Long.toString(0L), 0L);
         Message stompResponse = this.stompRequest(req, 0L);
-        this.userInfo = new Pair<>(userName, password);
+        this.account = new Pair<>(userName, password);
 
         // initialize connection context
         this.cleanup();
@@ -218,6 +217,25 @@ public class WebSocketTransport extends WebSocketClient {
         if (stompCommand.isError(stompResponse)) {
             log.info("stomp request is fail");
             return "";
+        } else {
+            // cache the subscribption id and the WeEventTopic,the subscription2EventCache which can use for reconnect
+            topic.setContinueSubscriptionId(stompCommand.getSubscriptionId(stompResponse));
+            this.subscription2EventCache.put(stompCommand.getSubscriptionId(stompResponse), topic);
+
+            LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) stompResponse.getHeaders().get("nativeHeaders"));
+
+            if (nativeHeaders != null) {
+                // send command receipt Id
+                Object subscriptionId = nativeHeaders.get("subscription-id");
+                String subscriptionIdStr = null;
+                if (subscriptionId != null) {
+                    subscriptionIdStr = ((List) subscriptionId).get(0).toString();
+                    // map the receipt id and the subscription id
+                    this.receiptId2SubscriptionId.put(String.valueOf(asyncSeq), subscriptionIdStr);
+                    this.subscriptionId2ReceiptId.put(subscriptionIdStr, String.valueOf(asyncSeq));
+                }
+            }
+
         }
         // cache the subscribption id and the WeEventTopic,the subscription2EventCache which can use for reconnect
         topic.setContinueSubscriptionId(stompCommand.getSubscriptionId(stompResponse));
@@ -304,6 +322,7 @@ public class WebSocketTransport extends WebSocketClient {
                 // connect command always 0
                 futures.get(0L).setResponse(stompMsg);
                 break;
+
             // disconnect/send/subscribe/unsubscribe response
             case "RECEIPT":
                 handleReceiptFrame(stompMsg);
@@ -316,9 +335,9 @@ public class WebSocketTransport extends WebSocketClient {
                     log.error(e.toString());
                 }
                 break;
+
             case "MESSAGE":
                 handleMessageFrame(stompMsg);
-
                 break;
 
             case "HEARTBEAT":
@@ -450,12 +469,14 @@ public class WebSocketTransport extends WebSocketClient {
 class WSThread extends Thread {
     private WebSocketTransport webSocketTransport;
 
+
     public WSThread(WebSocketTransport webSocketTransport) {
         this.webSocketTransport = webSocketTransport;
     }
 
     public void run() {
-        log.info("thread running");
+        log.info("auto redo thread enter");
+
         this.webSocketTransport.connectFlag = true;
         try {
             // check the websocket
@@ -463,21 +484,25 @@ class WSThread extends Thread {
                 Thread.sleep(3000);
             }
             // check the stomp connect,and use cache login and password
-            while (!this.webSocketTransport.stompConnect(this.webSocketTransport.userInfo.getKey(), this.webSocketTransport.userInfo.getValue())) {
+            while (!this.webSocketTransport.stompConnect(this.webSocketTransport.account.getKey(),
+                    this.webSocketTransport.account.getValue())) {
                 Thread.sleep(3000);
             }
-
         } catch (InterruptedException | JMSException e) {
-            e.printStackTrace();
+            log.error("auto reconnect failed", e);
         }
+
         for (Map.Entry<String, WeEventTopic> subscription : this.webSocketTransport.subscription2EventCache.entrySet()) {
             try {
                 log.info("subscription cache:{}", subscription.toString());
                 this.webSocketTransport.stompSubscribe(subscription.getValue());
             } catch (JMSException e) {
-                e.printStackTrace();
+                log.error("auto resubscribe failed", e);
             }
         }
+
         this.webSocketTransport.connectFlag = false;
+
+        log.info("auto redo thread exit");
     }
 }
