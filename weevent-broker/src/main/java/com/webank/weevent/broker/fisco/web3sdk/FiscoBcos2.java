@@ -3,7 +3,6 @@ package com.webank.weevent.broker.fisco.web3sdk;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,16 +24,14 @@ import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.WeEvent;
 
-import jnr.ffi.Struct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.bcos.web3j.abi.datatypes.DynamicArray;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.channel.client.Service;
+
 import org.fisco.bcos.channel.client.TransactionSucCallback;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.fisco.bcos.web3j.tuples.generated.Tuple2;
 import org.fisco.bcos.web3j.tuples.generated.Tuple3;
 import org.fisco.bcos.web3j.tx.Contract;
 
@@ -63,6 +60,8 @@ public class FiscoBcos2 {
 
     // topic list
     private Map<String, Topic> topicMap = new ConcurrentHashMap<>();
+
+    private Service service;
 
     public FiscoBcos2(FiscoConfig fiscoConfig) {
         this.fiscoConfig = fiscoConfig;
@@ -196,7 +195,7 @@ public class FiscoBcos2 {
             List<byte[]> topicNames2List = result.getValue3();
             for (int i = 0; i < topicNames1List.size(); i++) {
                 String topicName = new String(topicNames1List.get(i), StandardCharsets.UTF_8) + new String(topicNames2List.get(i), StandardCharsets.UTF_8);
-                if (topicName == null || topicName.isEmpty()) {
+                if (topicName.isEmpty()) {
                     log.error("detect topic name is empty, {}", topicName);
                     continue;
                 }
@@ -223,18 +222,18 @@ public class FiscoBcos2 {
                 throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
             }
 
-            String senderAddress = topic.getValue2();
-            Long createdTimestamp = topic.getValue3().longValue();
-            //get topic.sol contract info
-            Topic topicData = getTopic(topicName);
             TopicInfo topicInfo = new TopicInfo();
-
             topicInfo.setTopicName(topicName);
             topicInfo.setTopicAddress(topicAddress);
-            topicInfo.setCreatedTimestamp(createdTimestamp);
-            topicInfo.setSenderAddress(senderAddress);
-            topicInfo.setBlockNumber(topicData.getBlockNumber().sendAsync().get().longValue());
-            topicInfo.setSequenceNumber(topicData.getSequenceNumber().sendAsync().get().longValue());
+            topicInfo.setCreatedTimestamp(topic.getValue3().longValue());
+            topicInfo.setSenderAddress(topic.getValue2());
+
+            //get topic.sol contract info
+            Topic topicData = getTopic(topicName);
+            if (topicData != null) {
+                topicInfo.setBlockNumber(topicData.getBlockNumber().sendAsync().get().longValue());
+                topicInfo.setSequenceNumber(topicData.getSequenceNumber().sendAsync().get().longValue());
+            }
             return topicInfo;
         } catch (InterruptedException | ExecutionException e) {
             log.error("get topic info failed due to transaction execution error. ", e);
@@ -273,6 +272,9 @@ public class FiscoBcos2 {
                 sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, event.get(0).eventBlockNumer.intValue(), event.get(0).eventSeq.intValue()));
                 sendResult.setTopic(topicName);
                 sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+
+                // send the client message to server
+                Web3SDK2Wrapper.Channel2Server(this.getBlockHeight(), this.groupId);
                 return sendResult;
             } else {
                 return sendResult;

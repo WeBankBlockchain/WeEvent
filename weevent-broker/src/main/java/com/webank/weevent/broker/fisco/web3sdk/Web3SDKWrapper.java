@@ -4,10 +4,11 @@ package com.webank.weevent.broker.fisco.web3sdk;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -25,9 +26,7 @@ import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
-import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.bcos.channel.client.Service;
 import org.bcos.channel.handler.ChannelConnections;
 import org.bcos.web3j.abi.datatypes.Address;
@@ -44,7 +43,11 @@ import org.bcos.web3j.protocol.core.methods.response.EthBlockNumber;
 import org.bcos.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.bcos.web3j.tx.Contract;
+import org.bcos.channel.dto.ChannelRequest;
+import org.bcos.channel.dto.ChannelResponse;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
+import static java.lang.Boolean.TRUE;
 
 /**
  * Wrapper of Web3SDK 1.x function.
@@ -57,9 +60,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class Web3SDKWrapper {
     /**
      * init web3j handler
-     *
-     * @return Web3j
      */
+    public static Service service;
+
     public static Web3j initWeb3j(FiscoConfig fiscoConfig) throws BrokerException {
         // init web3j with given group id
         try {
@@ -73,6 +76,7 @@ public class Web3SDKWrapper {
             service.setConnectSeconds(web3sdkTimeout);
             // reconnect idle time 100ms
             service.setConnectSeconds(100);
+            Web3SDKWrapper.service = service;
 
             // connect key and string
             ChannelConnections channelConnections = new ChannelConnections();
@@ -85,9 +89,9 @@ public class Web3SDKWrapper {
                 nodeList.set(i, fiscoConfig.getOrgId() + "@" + nodeList.get(i));
             }
             channelConnections.setConnectionsStr(nodeList);
-            service.setAllChannelConnections(new ConcurrentHashMap<String, ChannelConnections>() {{
-                put(fiscoConfig.getOrgId(), channelConnections);
-            }});
+            ConcurrentHashMap<String, ChannelConnections> keyID2connections = new ConcurrentHashMap<>();
+            keyID2connections.put(fiscoConfig.getOrgId(), channelConnections);
+            service.setAllChannelConnections(keyID2connections);
 
             // thread pool
             ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
@@ -115,6 +119,22 @@ public class Web3SDKWrapper {
             log.error("init web3sdk failed", e);
             throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
         }
+    }
+
+
+    public static void Channel2Server(Long blockNumber) {
+        ChannelRequest request = new ChannelRequest();
+        // topic for the amop
+        request.setToTopic("amop-message-id");
+        request.setMessageID(Web3SDKWrapper.service.newSeq());
+        request.setTimeout(5000);
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        request.setContent(blockNumber.toString());
+        log.info(df.format(LocalDateTime.now()), " request seq: {}, Content:{}", String.valueOf(request.getMessageID()), request.getContent());
+        // send message
+        ChannelResponse response = service.sendChannelMessage(request);
+        log.info("time:{},response seq: {}, ErrorCode:{}, Content:{}", df.format(LocalDateTime.now()), String.valueOf(response.getMessageID()), response.getErrorCode(), response.getContent());
     }
 
     /**
@@ -275,17 +295,11 @@ public class Web3SDKWrapper {
                 for (Topic.LogWeEventEventResponse logEvent : logWeEventEvents) {
                     String topicName = logEvent.topicName.toString();
 
-                    Map<String, String> extensions = null;
-                    try {
-                        if (StringUtils.isBlank(logEvent.extensions.toString())) {
-                            extensions = (Map<String, String>) JSON.parse(logEvent.extensions.toString());
-                        }
-                    } catch (Exception e) {
-                        log.error("parse extensions failed");
-                    }
-
-                    WeEvent event = new WeEvent(topicName, logEvent.eventContent.getValue().getBytes(StandardCharsets.UTF_8), extensions);
+                    WeEvent event = new WeEvent(topicName,
+                            logEvent.eventContent.getValue().getBytes(StandardCharsets.UTF_8),
+                            DataTypeUtils.json2Map(logEvent.extensions.toString()));
                     event.setEventId(DataTypeUtils.encodeEventId(topicName, uint256ToInt(logEvent.eventBlockNumer), uint256ToInt(logEvent.eventSeq)));
+
                     log.debug("get a event from fisco-bcos: {}", event);
                     events.add(event);
                 }

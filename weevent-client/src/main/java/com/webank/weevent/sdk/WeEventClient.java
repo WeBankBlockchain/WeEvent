@@ -44,9 +44,17 @@ import org.apache.commons.lang3.StringUtils;
  */
 @Slf4j
 public class WeEventClient implements IWeEventClient {
-    public static void main(String[] args) {
+    private final static String defaultJsonRpcUrl = "http://localhost:8080/weevent/jsonrpc";
+    // json rpc proxy
+    private IBrokerRpc brokerRpc;
 
-    }
+    // default STOMP url, ws://localhost:8080/weevent/stomp
+    private static WeEventConnectionFactory connectionFactory;
+
+    // stomp connection
+    private TopicConnection connection;
+    // (subscriptionId <-> TopicSession)
+    private Map<String, TopicSession> sessionMap;
 
     /**
      * Interface for notify callback
@@ -66,16 +74,6 @@ public class WeEventClient implements IWeEventClient {
          */
         void onException(Throwable e);
     }
-
-    private final static String defaultJsonRpcUrl = "http://localhost:8080/weevent/jsonrpc";
-    private IBrokerRpc brokerRpc;
-
-    // default STOMP url, ws://localhost:8080/weevent/stomp
-    private static WeEventConnectionFactory connectionFactory;
-    private TopicConnection connection;
-    // (subscriptionId <-> TopicSession)
-    private Map<String, TopicSession> sessionMap;
-
 
     /**
      * Get the client handler of weevent's broker with default url, http://localhost:8080/weevent.
@@ -102,7 +100,7 @@ public class WeEventClient implements IWeEventClient {
     public WeEventClient(String brokerUrl, String userName, String password) throws BrokerException {
         validateParam(brokerUrl);
         validateUser(userName, password);
-        buildRpc(brokerUrl+ "/jsonrpc");
+        buildRpc(brokerUrl + "/jsonrpc");
         buildJms(getStompUrl(brokerUrl), userName, password);
     }
 
@@ -273,7 +271,8 @@ public class WeEventClient implements IWeEventClient {
             throw jms2BrokerException(e);
         }
     }
-    public String subscribe(String topic, String groupId, String offset,String continueSubacriptionId, EventListener listener) throws BrokerException {
+
+    public String subscribe(String topic, String groupId, String offset, String continueSubacriptionId, EventListener listener) throws BrokerException {
         try {
             validateParam(topic);
             validateParam(groupId);
@@ -469,7 +468,7 @@ public class WeEventClient implements IWeEventClient {
      * @throws BrokerException if the param is empty ,throw the exception
      */
     private static void validateArrayParam(byte[] param) throws BrokerException {
-        if (param.length == 0) {
+        if (param == null || param.length == 0) {
             throw new BrokerException(ErrorCode.PARAM_ISEMPTY);
         }
     }

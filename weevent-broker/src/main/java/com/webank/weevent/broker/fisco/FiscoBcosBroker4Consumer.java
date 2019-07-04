@@ -19,12 +19,14 @@ import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.fisco.util.StoppableTask;
 import com.webank.weevent.broker.fisco.util.WeEventUtils;
+import com.webank.weevent.broker.fisco.web3sdk.Web3SDK2Wrapper;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -126,6 +128,26 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         }
 
         return topicEventsList;
+    }
+
+    /**
+     * use for fisco-bcos 2.0.* version
+     *
+     * @param blockNumber
+     * @param groupId
+     */
+    public static void onNotify(Long blockNumber, Long groupId) {
+        // the state change
+    }
+
+    /**
+     * use for fisco-bcos 1.3.* version
+     *
+     * @param blockNumber
+     */
+    public static void onNotify(Long blockNumber) {
+        // the state change
+
     }
 
     @Override

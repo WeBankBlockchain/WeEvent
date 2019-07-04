@@ -5,7 +5,7 @@ import java.util.Map;
 
 public interface IWeEventClient {
     /**
-     * Get the client handler of weevent's broker with default url, http://localhost:8080/weevent.
+     * Get the client handler of WeEvent's broker with default url, http://localhost:8080/weevent.
      *
      * @throws BrokerException broker exception
      */
@@ -14,9 +14,9 @@ public interface IWeEventClient {
     }
 
     /**
-     * Get the client handler of weevent's broker with custom url.
+     * Get the client handler of WeEvent's broker with custom url.
      *
-     * @param brokerUrl weevent's broker url, like http://localhost:8080/weevent
+     * @param brokerUrl WeEvent's broker url, like http://localhost:8080/weevent
      * @throws BrokerException broker exception
      */
     static IWeEventClient build(String brokerUrl) throws BrokerException {
@@ -24,9 +24,9 @@ public interface IWeEventClient {
     }
 
     /**
-     * Get the client handler of weevent's broker custom url and account authorization.
+     * Get the client handler of WeEvent's broker custom url and account authorization.
      *
-     * @param brokerUrl weevent's broker url, like http://localhost:8080/weevent
+     * @param brokerUrl WeEvent's broker url, like http://localhost:8080/weevent
      * @param userName account name
      * @param password password
      * @throws BrokerException broker exception
@@ -96,7 +96,7 @@ public interface IWeEventClient {
     boolean exist(String topic) throws BrokerException;
 
     /**
-     * List all topics in weevent's broker.
+     * List all topics in WeEvent's broker.
      *
      * @param pageIndex page index, from 0
      * @param pageSize page size, [10, 100)
@@ -118,7 +118,7 @@ public interface IWeEventClient {
      * Get an event information.
      *
      * @param eventId event id
-     * @return weevent
+     * @return WeEvent
      * @throws BrokerException broker exception
      */
     WeEvent getEvent(String eventId) throws BrokerException;
@@ -196,7 +196,7 @@ public interface IWeEventClient {
     boolean open(String topic, String groupId) throws BrokerException;
 
     /**
-     * List all topics in weevent's broker.
+     * List all topics in WeEvent's broker.
      *
      * @param pageIndex page index, from 0
      * @param pageSize page size, [10, 100)
@@ -218,7 +218,7 @@ public interface IWeEventClient {
      * Get an event information.
      *
      * @param eventId event id
-     * @return weevent
+     * @return WeEvent
      * @throws BrokerException broker exception
      */
     WeEvent getEvent(String eventId, String groupId) throws BrokerException;

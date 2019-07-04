@@ -45,12 +45,12 @@ public class WeEventClientTest {
     @Before
     public void before() throws Exception {
         weEventClient = IWeEventClient.build("http://localhost:8081/weevent");
-        weEventClient.open(topicName);
+         weEventClient.open(topicName);
     }
 
     @After
     public void after() throws Exception {
-        weEventClient.close(topicName);
+       // weEventClient.close(topicName);
     }
 
 
@@ -66,14 +66,39 @@ public class WeEventClientTest {
 
 
     /**
-     * Method: subscribe(String topic, String offset, IConsumer.ConsumerListener listener)
+     * Method: subscribe error eventId
      */
+    @Test
+    public void testSubscribeWithGroupId() throws Exception {
+        log.info("===================={}", this.testName.getMethodName());
+        // create subscriber
+        String groupId = "1";//if not set default 1
+        try {
+            String subscribeId = this.weEventClient.subscribe(this.topicName, groupId, "sfsafsfsfd", new WeEventClient.EventListener() {
+                @Override
+                public void onEvent(WeEvent event) {
+                    System.out.println("onEvent:" + event.toString());
+                    log.info("onEvent:" + event.toString());
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (BrokerException e) {
+            log.info("subscribeId:{}", e.getMessage());
+        }
+
+        sleep(1000000);
+    }
+
     @Test
     public void testSubscribe() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
         // create subscriber
         String groupId = "1";//if not set default 1
-        this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
+        this.weEventClient.subscribe(this.topicName,WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
                 System.out.println("onEvent:" + event.toString());

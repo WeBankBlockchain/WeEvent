@@ -1,5 +1,5 @@
 server:
-  port: 8082
+  port: 8099
 spring:
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/governance?useUnicode=true&characterEncoding=utf-8&useSSL=false
@@ -17,7 +17,6 @@ spring:
     host: smtp.163.com
     username: mailusername@163.com
     password: mailpwd
-    from: mailusername@163.com
   pid:
     fail-on-write-error: true
     file: ./logs/governance.pid
@@ -29,7 +28,7 @@ http:
     connection-timeout: 3000
     socket-timeout: 5000
 https: 
-  read-timeout: 5000
-  connect-timeout: 15000       
+  read-timeout: 3000
+  connect-timeout: 3000       
 logging:
   config: classpath:log4j2.xml

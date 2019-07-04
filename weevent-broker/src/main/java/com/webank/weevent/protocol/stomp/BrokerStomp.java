@@ -109,10 +109,8 @@ public class BrokerStomp extends TextWebSocketHandler {
 
         }
         // for  MESSAGE frame
-        if (simpMessageType != null) {
-            if (simpMessageType.toString().equals("HEARTBEAT")) {
-                frameType = "HEARTBEAT";
-            }
+        if ((simpMessageType != null) && (simpMessageType.toString().equals("HEARTBEAT"))) {
+            frameType = "HEARTBEAT";
         }
         // only one topic
         switch (frameType) {
@@ -279,21 +277,18 @@ public class BrokerStomp extends TextWebSocketHandler {
         String simpDestination = getSimpDestination(msg);
         String headerIdStr = getHeadersValue(accessor, "id", msg);
 
-        boolean result = false;
         try {
-            result = handleUnSubscribe(session, headerIdStr);
+            handleUnSubscribe(session, headerIdStr);
+            accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
+            // package the return frame
+            accessor.setDestination(simpDestination);
+            // a unique identifier for that message and a subscription header matching the identifier of the subscription that is receiving the message.
+            accessor.setReceiptId(headerIdStr);
+            accessor.setNativeHeader("receipt-id", headerIdStr);
+            sendSimpleMessage(session, accessor);
         } catch (BrokerException e) {
             handleErrorMessage(session, e, headerIdStr);
         }
-        if (result) {
-            accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
-        }
-        // package the return frame
-        accessor.setDestination(simpDestination);
-        // a unique identifier for that message and a subscription header matching the identifier of the subscription that is receiving the message.
-        accessor.setReceiptId(headerIdStr);
-        accessor.setNativeHeader("receipt-id", headerIdStr);
-        sendSimpleMessage(session, accessor);
     }
 
     private void handleDefaultMessage(Message<byte[]> msg, WebSocketSession session) {
