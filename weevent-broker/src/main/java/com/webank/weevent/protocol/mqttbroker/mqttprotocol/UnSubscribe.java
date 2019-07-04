@@ -16,6 +16,7 @@ import io.netty.handler.codec.mqtt.MqttUnsubAckMessage;
 import io.netty.handler.codec.mqtt.MqttUnsubscribeMessage;
 import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author websterchen
@@ -34,16 +35,18 @@ public class UnSubscribe {
 
     public void processUnSubscribe(Channel channel, MqttUnsubscribeMessage msg) {
         List<String> topicFilters = msg.payload().topics();
-        String clinetId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
+        String clientId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
         topicFilters.forEach(topicFilter -> {
             try {
-                iConsumer.unSubscribe(iSubscribeStore.get(topicFilter, clinetId).getSubscriptionId());
+                if (!StringUtils.isBlank(iSubscribeStore.get(topicFilter, clientId).getSubscriptionId())) {
+                    iConsumer.unSubscribe(iSubscribeStore.get(topicFilter, clientId).getSubscriptionId());
+                }
             } catch (BrokerException e) {
-                log.error("UNSUBSCRIBE error - subscriptionId: {}", iSubscribeStore.get(topicFilter, clinetId).getSubscriptionId());
+                log.error("UNSUBSCRIBE error - subscriptionId: {}", iSubscribeStore.get(topicFilter, clientId).getSubscriptionId());
             }
 
-            iSubscribeStore.remove(topicFilter, clinetId);
-            log.debug("UNSUBSCRIBE - clientId: {}, topicFilter: {}", clinetId, topicFilter);
+            iSubscribeStore.remove(topicFilter, clientId);
+            log.debug("UNSUBSCRIBE - clientId: {}, topicFilter: {}", clientId, topicFilter);
         });
         MqttUnsubAckMessage unsubAckMessage = (MqttUnsubAckMessage) MqttMessageFactory.newMessage(
                 new MqttFixedHeader(MqttMessageType.UNSUBACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
