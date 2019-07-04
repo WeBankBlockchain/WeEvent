@@ -59,10 +59,10 @@ function set_global_param(){
     governance_enable=$(properties_get  "governance.enable")
     governance_port=$(properties_get "governance.port")
 
-    mysql_ip=$(properties_get "governance.mysql_ip")
-    mysql_port=$(properties_get  "governance.mysql_port")
-    mysql_user=$(properties_get "governance.mysql_user")
-    mysql_password=$(properties_get "governance.mysql_password")
+    mysql_ip=$(properties_get "governance.mysql.ip")
+    mysql_port=$(properties_get  "governance.mysql.port")
+    mysql_user=$(properties_get "governance.mysql.user")
+    mysql_password=$(properties_get "governance.mysql.password")
 }
 
 function check_port(){
