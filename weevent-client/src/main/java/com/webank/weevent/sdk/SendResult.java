@@ -32,6 +32,22 @@ public class SendResult {
         ERROR,
     }
 
+
+    /**
+     * Result status.
+     */
+    private SendResultStatus status;
+
+    /**
+     * Topic name.
+     */
+    private String topic;
+
+    /**
+     * Event ID.
+     */
+    private String eventId;
+
     /**
      * Default construction needed by jackson marshall.
      */
@@ -47,6 +63,9 @@ public class SendResult {
         this.topic = topic;
         this.eventId = eventId;
     }
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> upstream/master
 }
