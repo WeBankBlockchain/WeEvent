@@ -1,7 +1,7 @@
 var stompClient = null;
 var topic = null;
 //var url = window.location.origin+"/weevent/sockjs";
-var url = "http://10.107.96.107:7680/weevent/sockjs";
+var url = "http://localhost:8080/weevent/sockjs";
 
 function setConnected(connected) {
     //$("#connect").prop("disabled", connected);
@@ -124,7 +124,7 @@ function createTopic() {
     topic = $("#topic").val();
     message = $("#message").val();
     console.log('open....');
-    var baseUrl = 'http://10.107.96.107:7680/weevent/rest/open?topic=' + topic;
+    var baseUrl = 'http://localhost:8080/weevent/rest/open?topic=' + topic;
     fetch(baseUrl, {
         method: 'POST',
         headers: {
