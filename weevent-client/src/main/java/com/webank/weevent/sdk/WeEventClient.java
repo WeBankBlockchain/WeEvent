@@ -53,10 +53,7 @@ public class WeEventClient implements IWeEventClient {
 
     // stomp connection
     private TopicConnection connection;
-<<<<<<< HEAD
-=======
 
->>>>>>> upstream/master
     // (subscriptionId <-> TopicSession)
     private Map<String, TopicSession> sessionMap;
 
@@ -472,11 +469,7 @@ public class WeEventClient implements IWeEventClient {
      * @throws BrokerException if the param is empty ,throw the exception
      */
     private static void validateArrayParam(byte[] param) throws BrokerException {
-<<<<<<< HEAD
         if (param == null || param.length == 0) {
-=======
-        if (param.length == 0) {
->>>>>>> upstream/master
             throw new BrokerException(ErrorCode.PARAM_ISEMPTY);
         }
     }
