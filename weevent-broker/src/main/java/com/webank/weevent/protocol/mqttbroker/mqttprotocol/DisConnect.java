@@ -1,7 +1,6 @@
 package com.webank.weevent.protocol.mqttbroker.mqttprotocol;
 
 import java.util.List;
-import java.util.Map;
 
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.protocol.mqttbroker.store.ISessionStore;
@@ -28,6 +27,7 @@ public class DisConnect {
     public DisConnect(ISubscribeStore iSubscribeStore, ISessionStore iSessionStore, IConsumer iConsumer) {
         this.iSubscribeStore = iSubscribeStore;
         this.iSessionStore = iSessionStore;
+        this.iConsumer = iConsumer;
     }
 
     public void processDisConnect(Channel channel, MqttMessage msg) {
@@ -35,13 +35,14 @@ public class DisConnect {
         List<SubscribeStore> subscribeStores = iSubscribeStore.searchByClientId(clientId);
         subscribeStores.forEach(subscribeStore -> {
             try {
-                iConsumer.unSubscribe(subscribeStore.getSubscriptionId());
+                this.iConsumer.unSubscribe(subscribeStore.getSubscriptionId());
             } catch (BrokerException e) {
                 log.error("unSubscribe Exception:{}", e.getMessage());
             }
         });
-        iSubscribeStore.removeForClient(clientId);
-        iSessionStore.remove(clientId);
+
+        this.iSubscribeStore.removeForClient(clientId);
+        this.iSessionStore.remove(clientId);
         channel.close();
     }
 }
