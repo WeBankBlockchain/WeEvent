@@ -138,7 +138,10 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         ParamCheckUtils.validateGroupId(groupId);
         ParamCheckUtils.validateOffset(offset);
         if (!offset.equals(WeEvent.OFFSET_FIRST) && !offset.equals(WeEvent.OFFSET_LAST)) {
-            ParamCheckUtils.validateEventId("", offset, fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId)));
+            // do not validate topic name if more then one topic
+            ParamCheckUtils.validateEventId(topics.length > 1 ? "" : topics[0],
+                    offset,
+                    fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId)));
         }
         ParamCheckUtils.validateListenerNotNull(listener);
 
@@ -156,18 +159,24 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
     @Override
     public String subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener) throws BrokerException {
-        if (ParamCheckUtils.isTopicPattern(topic)) {
-            ParamCheckUtils.validateTopicPattern(topic);
-        } else {
-            ParamCheckUtils.validateTopicName(topic);
-        }
-
         ParamCheckUtils.validateGroupId(groupId);
         ParamCheckUtils.validateOffset(offset);
-        if (!offset.equals(WeEvent.OFFSET_FIRST) && !offset.equals(WeEvent.OFFSET_LAST)) {
-            ParamCheckUtils.validateEventId(topic, offset, fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId)));
-        }
         ParamCheckUtils.validateListenerNotNull(listener);
+
+        // topic name may be a pattern
+        if (ParamCheckUtils.isTopicPattern(topic)) {
+            ParamCheckUtils.validateTopicPattern(topic);
+            if (!offset.equals(WeEvent.OFFSET_FIRST) && !offset.equals(WeEvent.OFFSET_LAST)) {
+                // not a topic name
+                ParamCheckUtils.validateEventId("", offset, fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId)));
+            }
+        } else {
+            ParamCheckUtils.validateTopicName(topic);
+            if (!offset.equals(WeEvent.OFFSET_FIRST) && !offset.equals(WeEvent.OFFSET_LAST)) {
+                ParamCheckUtils.validateEventId(topic, offset, fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId)));
+            }
+        }
+
 
         log.info("subscribe topic: {} offset: {}", topic, offset);
         return subscribeTopic(topic, Long.valueOf(groupId), offset, interfaceType, listener);
@@ -175,18 +184,24 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
     @Override
     public String subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener) throws BrokerException {
+        ParamCheckUtils.validateGroupId(groupId);
+        ParamCheckUtils.validateOffset(offset);
+        ParamCheckUtils.validateSubscriptionId(subscriptionId);
+        ParamCheckUtils.validateListenerNotNull(listener);
+
         if (ParamCheckUtils.isTopicPattern(topic)) {
             ParamCheckUtils.validateTopicPattern(topic);
+            if (!offset.equals(WeEvent.OFFSET_FIRST) && !offset.equals(WeEvent.OFFSET_LAST)) {
+                // not a topic name
+                ParamCheckUtils.validateEventId("", offset, fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId)));
+            }
         } else {
             ParamCheckUtils.validateTopicName(topic);
+            if (!offset.equals(WeEvent.OFFSET_FIRST) && !offset.equals(WeEvent.OFFSET_LAST)) {
+                ParamCheckUtils.validateEventId(topic, offset, fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId)));
+            }
         }
-        ParamCheckUtils.validateOffset(offset);
-        ParamCheckUtils.validateListenerNotNull(listener);
-        ParamCheckUtils.validateSubscriptionId(subscriptionId);
-        ParamCheckUtils.validateGroupId(groupId);
-        if (!offset.equals(WeEvent.OFFSET_FIRST) && !offset.equals(WeEvent.OFFSET_LAST)) {
-            ParamCheckUtils.validateEventId(topic, offset, fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId)));
-        }
+
 
         log.info("subscribe topic: {} offset: {} subscriptionId:{}", topic, offset, subscriptionId);
         return subscribeTopic(topic, Long.valueOf(groupId), offset, subscriptionId, interfaceType, listener);
