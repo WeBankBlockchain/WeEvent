@@ -12,8 +12,8 @@ import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.fisco.util.SerializeUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
-import com.webank.weevent.protocol.rest.SubscriptionWeEvent;
 import com.webank.weevent.protocol.jsonrpc.IBrokerRpcCallback;
+import com.webank.weevent.protocol.rest.SubscriptionWeEvent;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
@@ -145,7 +145,7 @@ public class CGISubscription {
 
     private IBrokerRpc getJsonRpcProxy() {
         try {
-            boolean https = BrokerApplication.environment.getProperty("server.ssl.enabled").equals("true");
+            boolean https = "true".equals(BrokerApplication.environment.getProperty("server.ssl.enabled"));
             String contextPath = BrokerApplication.environment.getProperty("server.servlet.context-path");
             String url = (https ? "https://" : "http://") + this.masterJob.getMasterAddress() + contextPath + "/jsonrpc";
 
@@ -299,7 +299,7 @@ public class CGISubscription {
         String subId;
         if (StringUtils.isBlank(subscriptionId)) {
             log.info("new subscribe, topic: {}", topic);
-            subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST,  WeEventConstants.RESTFULTYPE, listener);
+            subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, WeEventConstants.RESTFULTYPE, listener);
         } else {
             log.info("subscribe again, subscriptionId: {}", subscriptionId);
             subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, subscriptionId, WeEventConstants.RESTFULTYPE, listener);
