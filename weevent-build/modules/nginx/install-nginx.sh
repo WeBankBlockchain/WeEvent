@@ -3,7 +3,11 @@
 function nginx_setup() { 
     echo "install nginx into $nginx_path"
     mkdir -p $nginx_path
-    
+
+    if [[ ! -d $top_path/build ]];then
+        mkdir -p $top_path/build
+    fi
+
     tar -zxf $top_path/third-packages/nginx-1.14.2.tar.gz -C $top_path/build/
     if [ $? -ne 0 ]; then
         echo "decompress nginx-1.14.2.tar.gz failed, skip"
@@ -18,7 +22,7 @@ function nginx_setup() {
 
     echo "build & install pcre" 
     cd $top_path/build/pcre-8.20
-    ./configure --prefix=$current_path/../third-packages --with-http_ssl_module
+    ./configure --prefix=$current_path/../third-packages
     make
     make install
     if [ $? -ne 0 ]; then
@@ -28,7 +32,7 @@ function nginx_setup() {
            
     echo "build & install nginx"
     cd ../nginx-1.14.2
-    ./configure --prefix=$nginx_path --with-http_ssl_module --with-pcre=../pcre-8.20
+    ./configure --with-http_ssl_module --with-stream --with-stream_ssl_module --prefix=$nginx_path --with-pcre=../pcre-8.20
     make
     make install
     if [ $? -ne 0 ]; then
@@ -55,12 +59,12 @@ function nginx_setup() {
     if [[ -n $broker_port ]]; then
         broker_url="localhost:$broker_port"
         echo "set broker_url: $broker_url"
-        sed -i "s/localhost:8081/$broker_url/g" $nginx_path/conf/conf.d/rs.conf
+        sed -i "s/localhost:8090/$broker_url/g" $nginx_path/conf/conf.d/http_rs.conf
     fi
     if  [[ -n $governance_port ]]; then
         governance_url="localhost:$governance_port"
         echo "set governance_url: $governance_url"
-        sed -i "s/localhost:8082/$governance_url/g" $nginx_path/conf/conf.d/rs.conf
+        sed -i "s/localhost:8099/$governance_url/g" $nginx_path/conf/conf.d/http_rs.conf
     fi
     
     cp nginx.sh $nginx_path

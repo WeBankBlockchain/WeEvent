@@ -34,42 +34,35 @@ function error_message(){
     exit 1
 }
 
-function ini_get(){
-    local file="config.ini"
-    local section=$1
-    local param=$2
-    local no_exit=$3
-    local value=$($installPWD/build/crudini-0.9/crudini --get $file $section $param 2> /dev/null)
-    if [ $? -ne 0 ];then
-        if [ "${no_exit}" = "true" ];then
-            #{ echo >&2 "ERROR - ini config get failed, section is $section param is $param."; exit 1; }
-            echo "no_exit"
-        else
-            echo "error_message"
-            error_message "ERROR - ini config get failed, section is $section param is $param."
-        fi
+function properties_get(){
+    local file="config.properties"
+    local param=$1
+    value=`grep -v '#' ${file} | grep ${param} | cut -d'=' -f2 | sed 's/\r//' | awk '$1=$1'`
+    if [[ -z "$value" ]]; then
+        echo "error_message"
+        error_message "ERROR config.properties get  param $param failed."
+        exit 1
     fi
-
-    echo "$value"
+    echo $value
 }
 
 function set_global_param(){
-    block_chain_version=$(ini_get "fisco-bcos" "version")
-    block_chain_channel=$(ini_get "fisco-bcos" "channel")
-    block_chain_node_path=$(ini_get  "fisco-bcos" "node_path")
+    block_chain_version=$(properties_get "fisco-bcos.version")
+    block_chain_channel=$(properties_get "fisco-bcos.channel")
+    block_chain_node_path=$(properties_get  "fisco-bcos.node_path")
     block_chain_node_path=`realpath $block_chain_node_path`
 
-    nginx_port=$(ini_get "nginx" "port")
+    nginx_port=$(properties_get "nginx.port")
     
-    broker_port=$(ini_get  "broker" "port")
+    broker_port=$(properties_get "broker.port")
     
-    governance_enable=$(ini_get  "governance" "enable")
-    governance_port=$(ini_get "governance" "port")
+    governance_enable=$(properties_get  "governance.enable")
+    governance_port=$(properties_get "governance.port")
 
-    mysql_ip=$(ini_get "governance" "mysql_ip")
-    mysql_port=$(ini_get  "governance" "mysql_port")
-    mysql_user=$(ini_get "governance" "mysql_user")
-    mysql_password=$(ini_get "governance" "mysql_password")
+    mysql_ip=$(properties_get "governance.mysql.ip")
+    mysql_port=$(properties_get  "governance.mysql.port")
+    mysql_user=$(properties_get "governance.mysql.user")
+    mysql_password=$(properties_get "governance.mysql.password")
 }
 
 function check_port(){
@@ -84,7 +77,7 @@ function check_port(){
 }
 
 function check_param(){
-    if [ -d $block_chain_node_path ]; then
+    if [[ -d $block_chain_node_path ]]; then
         check_port $broker_port
         check_port $nginx_port
         echo "param ok"
@@ -122,20 +115,6 @@ function install_module(){
     fi
 }
 
-function install_crudini(){
-    yellow_echo "install crudini"
-
-    mkdir -p $installPWD/build/
-    tar -zxf $installPWD/third-packages/crudini-0.9.tar.gz -C $installPWD/build/  
-       
-    $installPWD/build/crudini-0.9/crudini --version
-    sleep 1
-    if [ $? -ne 0 ];then
-        echo "install crudini failed, skip"
-        exit 1
-    fi
-}
-
 function update_check_server(){
     sed -i "s/8080\/weevent/$broker_port\/weevent/" check-service.sh
     sed -i "s/8082\/weevent-governance/$governance_port\/weevent-governance/" check-service.sh
@@ -156,9 +135,6 @@ function main(){
         exit 1
     fi
     out_path=`realpath $2`
-
-    #crudini
-    install_crudini
 
     # set the params
     set_global_param
