@@ -202,7 +202,6 @@ public class BrokerStomp extends TextWebSocketHandler {
                 if (nativeHeaders.containsKey(WeEventConstants.EVENT_GROUP_ID)) {
                     groupId = nativeHeaders.get(WeEventConstants.EVENT_GROUP_ID).get(0).toString();
                     ParamCheckUtils.validateGroupId(groupId);
-
                 }
             } catch (BrokerException e) {
                 log.error(e.toString());
@@ -238,13 +237,20 @@ public class BrokerStomp extends TextWebSocketHandler {
         if (nativeHeaders != null) {
             // subscribe command id
             headerIdStr = getHeadersValue(accessor, "id", msg);
-            // eventid
-            subEventId = getHeadersValue(accessor, WeEventConstants.EXTENSIONS_EVENT_ID, msg);
             //subscription
             continueSubscriptionIdStr = getHeadersValue(accessor, WeEventConstants.EXTENSIONS_SUBSCRIPTION_ID, msg);
+
+            subEventId = getHeadersValue(accessor, WeEventConstants.EXTENSIONS_EVENT_ID, msg);
+
+            //groupId = getHeadersValue(accessor,WeEventConstants.EVENT_GROUP_ID,msg);
         }
 
         try {
+            if (nativeHeaders.containsKey(WeEventConstants.EVENT_GROUP_ID)) {
+                groupId = nativeHeaders.get(WeEventConstants.EVENT_GROUP_ID).get(0).toString();
+                ParamCheckUtils.validateGroupId(groupId);
+            }
+
             String subscriptionId;
             // check if there hasn't the event, need use the last id
             if (null == subEventId || "".equals(subEventId)) {
@@ -263,6 +269,7 @@ public class BrokerStomp extends TextWebSocketHandler {
             accessor.setNativeHeader("receipt-id", headerIdStr);
             sendSimpleMessage(session, accessor);
         } catch (BrokerException e) {
+            log.info(e.toString());
             handleErrorMessage(session, e, headerIdStr);
         }
     }
@@ -445,7 +452,7 @@ public class BrokerStomp extends TextWebSocketHandler {
      * @throws BrokerException Exception
      */
     private String handleSubscribe(WebSocketSession session, String simpDestination, String groupId, String headerIdStr, String subEventId, String continueSubscriptionId) throws BrokerException {
-        log.info("destination: {} header subscribe id: {}", simpDestination, headerIdStr);
+        log.info("destination: {} header subscribe id: {} group id: {}", simpDestination, headerIdStr, groupId);
 
         String[] curTopicList;
         if (simpDestination.contains(",")) {

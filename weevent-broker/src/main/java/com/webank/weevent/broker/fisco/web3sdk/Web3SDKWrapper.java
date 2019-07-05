@@ -47,8 +47,6 @@ import org.bcos.channel.dto.ChannelRequest;
 import org.bcos.channel.dto.ChannelResponse;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import static java.lang.Boolean.TRUE;
-
 /**
  * Wrapper of Web3SDK 1.x function.
  * This class can run without spring's ApplicationContext.
@@ -105,6 +103,16 @@ public class Web3SDKWrapper {
             service.setThreadPool(pool);
             service.run();
 
+            // topic for the amop
+            String topic = WeEventConstants.BLOCK_EVENT;
+            // set topic , support multi topic
+            List<String> topics = new ArrayList<>();
+            topics.add(topic);
+            service.setTopics(topics);
+
+            PushCallback2 cb = new PushCallback2();
+            service.setPushCallback(cb);
+
             ChannelEthereumService channelEthereumService = new ChannelEthereumService();
             channelEthereumService.setChannelService(service);
             channelEthereumService.setTimeout(web3sdkTimeout);
@@ -125,7 +133,7 @@ public class Web3SDKWrapper {
     public static void Channel2Server(Long blockNumber) {
         ChannelRequest request = new ChannelRequest();
         // topic for the amop
-        request.setToTopic("amop-message-id");
+        request.setToTopic(WeEventConstants.BLOCK_EVENT);
         request.setMessageID(Web3SDKWrapper.service.newSeq());
         request.setTimeout(5000);
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

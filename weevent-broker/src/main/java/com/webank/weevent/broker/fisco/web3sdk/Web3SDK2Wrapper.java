@@ -26,6 +26,7 @@ import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.dto.ChannelRequest;
@@ -47,6 +48,7 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tx.Contract;
 import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
 
 /**
  * Wrapper of Web3SDK 2.x function.
@@ -133,7 +135,7 @@ public class Web3SDK2Wrapper {
             service.run();
 
             // topic for the amop
-            String topic = "amop-message-id2";
+            String topic = WeEventConstants.BLOCK_EVENT;
             // set topic , support multi topic
             Set<String> topics = new HashSet<>();
             topics.add(topic);
@@ -218,17 +220,18 @@ public class Web3SDK2Wrapper {
         }
     }
 
-    public static void Channel2Server(Long blockNumber, Long groupId) {
+    public static void Channel2Server() {
         ChannelRequest request = new ChannelRequest();
-        request.setFromOrg("fisco2");
-        request.setToTopic("amop-message-id");
-        request.setToOrg("fisco");
+        request.setToTopic(WeEventConstants.BLOCK_EVENT);
 
         request.setMessageID(Web3SDK2Wrapper.service.newSeq());
         request.setTimeout(5000);
+        JSONObject content = new JSONObject();
+        content.put("blockNumber", service.getNumber());
+        content.put("groupId", service.getGroupId());
+        request.setContent(content.toString());
 
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        request.setContent(groupId + "," + blockNumber);
 
         log.info(df.format(LocalDateTime.now()), " request seq: {}, Content:{}", String.valueOf(request.getMessageID()), request.getContent());
         // send message

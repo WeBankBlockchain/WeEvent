@@ -43,14 +43,8 @@ public class AdminRest extends RestHA {
         Map<String, Object> nodesInfo = new HashMap<>();
         if (this.masterJob.getClient() == null) {
             String port = BrokerApplication.weEventConfig.getServerPort();
-            url = "http://localhost:" + port + "/weevent/admin/innerListSubscription";
             String ip = "localhost:" + port;
-            log.info("url:{}", url);
-            SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-            RestTemplate rest = new RestTemplate(requestFactory);
-            ResponseEntity<String> rsp = rest.getForEntity(url, String.class);
-            log.debug("innerListSubscription:{}", JSON.parse(rsp.getBody()));
-            nodesInfo.put(new String(ip), JSON.parse(rsp.getBody()));
+            nodesInfo.put(new String(ip), this.consumer.listSubscription());
         } else {
             try {
                 List<String> ipList = this.masterJob.getClient().getChildren().forPath(BrokerApplication.weEventConfig.getZookeeperPath() + "/nodes");

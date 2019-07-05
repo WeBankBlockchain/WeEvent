@@ -274,7 +274,7 @@ public class FiscoBcos2 {
                 sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
 
                 // send the client message to server
-                Web3SDK2Wrapper.Channel2Server(this.getBlockHeight(), this.groupId);
+                Web3SDK2Wrapper.Channel2Server();
                 return sendResult;
             } else {
                 return sendResult;
