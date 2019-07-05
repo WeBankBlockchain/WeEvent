@@ -48,8 +48,6 @@ import org.fisco.bcos.web3j.tx.Contract;
 import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import static java.lang.Boolean.TRUE;
-
 /**
  * Wrapper of Web3SDK 2.x function.
  * This class can run without spring's ApplicationContext.
