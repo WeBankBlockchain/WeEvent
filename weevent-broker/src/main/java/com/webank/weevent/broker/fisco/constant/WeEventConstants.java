@@ -161,4 +161,6 @@ public class WeEventConstants {
      */
     public static final String STOMPTYPE = "stomp";
 
+    public static final String BLOCK_EVENT = "block-event";
+
 }
