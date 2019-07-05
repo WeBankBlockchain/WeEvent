@@ -1,10 +1,10 @@
 var stompClient = null;
 var topic = null;
 //var url = window.location.origin+"/weevent/sockjs";
-var url = "http://127.0.0.1:8080/weevent/sockjs";
+var url = "http://localhost:8080/weevent/sockjs";
 
 function setConnected(connected) {
-    $("#connect").prop("disabled", connected);
+    //$("#connect").prop("disabled", connected);
     $("#greetings").html("");
 }
 
@@ -15,36 +15,36 @@ function showGreeting(type, tt, message) {
 
 
 function showGreeting(message) {
-    if((message!="Received data")&&message.indexOf("SUBSCRIBE")>-1){
-        if(message.indexOf(">>>")>-1){
+    if ((message != "Received data") && message.indexOf("SUBSCRIBE") > -1) {
+        if (message.indexOf(">>>") > -1) {
 
-            var text = "<tr style='background-color:#666;color: #fff;'><td>" + message+ "</td></tr>"
+            var text = "<tr style='background-color:#666;color: #fff;'><td>" + message + "</td></tr>"
             $("#greetings").prepend(text);
         }
-        else{
-            if(message.indexOf("<<<")>-1){
+        else {
+            if (message.indexOf("<<<") > -1) {
                 var text = "<tr><td>" + message + "</td></tr>"
                 $("#greetings").prepend(text);
-            }else{
+            } else {
                 // message
                 //if(message.replace(/[\r\n]/g,"").split("SUBSCRIBEversion:1.1")[1]!="message "){
-                    if(message.replace(/[\r\n]/g,"").indexOf("SUBSCRIBEversion:1.1")!=-1){
-                        var text = "<tr style='background-color: #9b7c5e;color: #fff;'><td>" + message.replace(/[\r\n]/g,"").split("SUBSCRIBEversion:1.1")[1] + "</td></tr>"
-                        $("#greetings").prepend(text);
-                    }
+                if (message.replace(/[\r\n]/g, "").indexOf("SUBSCRIBEversion:1.1") != -1) {
+                    var text = "<tr style='background-color: #9b7c5e;color: #fff;'><td>" + message.replace(/[\r\n]/g, "").split("SUBSCRIBEversion:1.1")[1] + "</td></tr>"
+                    $("#greetings").prepend(text);
+                }
                 //}
 
 
             }
         }
-     //   add();
-    }else{
-        if((message!="Received data")&&message.indexOf(">>>")!=-1){
+        //   add();
+    } else {
+        if ((message != "Received data") && message.indexOf(">>>") != -1) {
             $("#CreateTopicPannel").prepend("<tr><td>--------------------------</td></tr>");
             $("#CreateTopicPannel").prepend("<tr><td>" + message + "</td></tr>");
         }
-        else{
-            if(message!="Received data"){
+        else {
+            if (message != "Received data") {
                 $("#CreateTopicPannel").prepend("<tr><td>" + message + "</td></tr>");
             }
         }
@@ -62,7 +62,7 @@ function connect() {
     var passcode = "123456"
     stompClient.connect(login, passcode, function (frame) {
         setConnected(true);
-       // console.log('Connected: ' + frame);
+        // console.log('Connected: ' + frame);
 
 
     });
@@ -92,12 +92,12 @@ function subscribeTopic() {
         //console.log('stompClient.connected...');
         stompClient.subscribe(subscribeTopicContent, function (message) {
             if (message.body) {
-          //      console.log('stompClient.connected subscribe...');
+                //      console.log('stompClient.connected subscribe...');
                 console.log("got message with body " + message.body)
 
             } else {
-               // console.log('stompClient.connected subscribe  ot empty message...');
-               // showGreeting("[subscribe]", subscribeTopicContent, "");
+                // console.log('stompClient.connected subscribe  ot empty message...');
+                // showGreeting("[subscribe]", subscribeTopicContent, "");
             }
         }, {id: window.uuid, destination: subscribeTopicContent});
     } else {
@@ -120,11 +120,11 @@ function get_uuid() {
     return uuid;
 }
 
-function createTopic(){
+function createTopic() {
     topic = $("#topic").val();
     message = $("#message").val();
     console.log('open....');
-    var baseUrl = window.location.origin + '/weevent/rest/open?topic='+topic;
+    var baseUrl = 'http://localhost:8080/weevent/rest/open?topic=' + topic;
     fetch(baseUrl, {
         method: 'POST',
         headers: {
@@ -154,7 +154,7 @@ function createTopic(){
 // }
 
 
-function playVoice(){
+function playVoice() {
 
 }
 
@@ -162,10 +162,9 @@ function playVoice(){
 // main
 $(function () {
     // if not connected, it would be hide
-    console.log = (function(oriLogFunc){
-        return function(str)
-        {
-            oriLogFunc.call(console,"----:"+str);
+    console.log = (function (oriLogFunc) {
+        return function (str) {
+            oriLogFunc.call(console, "----:" + str);
             showGreeting(str);
         }
     })(console.log);
@@ -188,6 +187,6 @@ $(function () {
         subscribeTopic();
     });
 
-   connect();
+    connect();
 });
 // stompClient.connected =true
