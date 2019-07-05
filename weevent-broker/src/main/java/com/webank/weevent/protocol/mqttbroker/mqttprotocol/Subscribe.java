@@ -50,60 +50,42 @@ public class Subscribe {
 
     public void processSubscribe(Channel channel, MqttSubscribeMessage msg) {
         List<MqttTopicSubscription> topicSubscriptions = msg.payload().topicSubscriptions();
-        if (this.validTopicFilter(topicSubscriptions)) {
-            String clientId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
-            List<Integer> mqttQoSList = new ArrayList<>();
-            topicSubscriptions.forEach(topicSubscription -> {
-                String topicFilter = topicSubscription.topicName();
-                MqttQoS mqttQoS = topicSubscription.qualityOfService();
-                String subscriptionId = "";
-                try {
-                    subscriptionId = this.iConsumer.subscribe(topicFilter, WeEventConstants.DEFAULT_GROUP_ID, WeEvent.OFFSET_LAST, WeEventConstants.MQTTTYPE, new IConsumer.ConsumerListener() {
-                        @Override
-                        public void onEvent(String subscriptionId, WeEvent event) {
-                            log.info("consumer onEvent, subscriptionId: {} event: {}", subscriptionId, event);
-                            // send to subscribe
-                            sendPublishMessage(topicFilter, mqttQoS, JSON.toJSON(event).toString().getBytes(), false, false);
-                        }
 
-                        @Override
-                        public void onException(Throwable e) {
-                            log.error("consumer onException", e);
-                        }
-                    });
-                } catch (BrokerException e) {
-                    log.error("subscribe exception:{}", e.getMessage());
-                }
-                SubscribeStore subscribeStore = new SubscribeStore(clientId, subscriptionId, topicFilter, mqttQoS.value());
-                iSubscribeStore.put(topicFilter, subscribeStore);
-                mqttQoSList.add(mqttQoS.value());
-                log.debug("SUBSCRIBE - clientId: {}, topFilter: {}, QoS: {}", clientId, topicFilter, mqttQoS.value());
-            });
-            MqttSubAckMessage subAckMessage = (MqttSubAckMessage) MqttMessageFactory.newMessage(
-                    new MqttFixedHeader(MqttMessageType.SUBACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
-                    MqttMessageIdVariableHeader.from(msg.variableHeader().messageId()),
-                    new MqttSubAckPayload(mqttQoSList));
-            channel.writeAndFlush(subAckMessage);
-        } else {
-            channel.close();
-        }
-    }
+        String clientId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
+        List<Integer> mqttQoSList = new ArrayList<>();
 
-    private boolean validTopicFilter(List<MqttTopicSubscription> topicSubscriptions) {
-        /*for (MqttTopicSubscription topicSubscription : topicSubscriptions) {
+        topicSubscriptions.forEach(topicSubscription -> {
             String topicFilter = topicSubscription.topicName();
-            //valid topic fileter
-            if (StrUtil.startWith(topicFilter, '#') || StrUtil.startWith(topicFilter, '+') || StrUtil.endWith(topicFilter, '/') || !StrUtil.contains(topicFilter, '/'))
-                return false;
-            if (StrUtil.contains(topicFilter, '#')) {
-                if (!StrUtil.endWith(topicFilter, "/#")) return false;
-                if (StrUtil.count(topicFilter, '#') > 1) return false;
+            MqttQoS mqttQoS = topicSubscription.qualityOfService();
+            String subscriptionId = "";
+            try {
+                subscriptionId = this.iConsumer.subscribe(topicFilter, WeEventConstants.DEFAULT_GROUP_ID, WeEvent.OFFSET_LAST, WeEventConstants.MQTTTYPE, new IConsumer.ConsumerListener() {
+                    @Override
+                    public void onEvent(String subscriptionId, WeEvent event) {
+                        log.info("consumer onEvent, subscriptionId: {} event: {}", subscriptionId, event);
+                        // send to subscribe
+                        sendPublishMessage(topicFilter, mqttQoS, JSON.toJSON(event).toString().getBytes(), false, false);
+                    }
+
+                    @Override
+                    public void onException(Throwable e) {
+                        log.error("consumer onException", e);
+                    }
+                });
+            } catch (BrokerException e) {
+                log.error("subscribe exception:{}", e.getMessage());
             }
-            if (StrUtil.contains(topicFilter, '+')) {
-                if (StrUtil.count(topicFilter, '+') != StrUtil.count(topicFilter, "/+")) return false;
-            }
-        }*/
-        return true;
+            SubscribeStore subscribeStore = new SubscribeStore(clientId, subscriptionId, topicFilter, mqttQoS.value());
+            iSubscribeStore.put(topicFilter, subscribeStore);
+            mqttQoSList.add(mqttQoS.value());
+            log.debug("SUBSCRIBE - clientId: {}, topFilter: {}, QoS: {}", clientId, topicFilter, mqttQoS.value());
+        });
+
+        MqttSubAckMessage subAckMessage = (MqttSubAckMessage) MqttMessageFactory.newMessage(
+                new MqttFixedHeader(MqttMessageType.SUBACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
+                MqttMessageIdVariableHeader.from(msg.variableHeader().messageId()),
+                new MqttSubAckPayload(mqttQoSList));
+        channel.writeAndFlush(subAckMessage);
     }
 
     private void sendPublishMessage(String topic, MqttQoS mqttQoS, byte[] messageBytes, boolean retain, boolean dup) {
@@ -119,6 +101,7 @@ public class Subscribe {
                     log.debug("PUBLISH - clientId: {}, topic: {}, Qos: {}", subscribeStore.getClientId(), topic, respQoS.value());
                     iSessionStore.get(subscribeStore.getClientId()).getChannel().writeAndFlush(publishMessage);
                 }
+
                 if (respQoS == MqttQoS.AT_LEAST_ONCE) {
                     int messageId = iMessageIdStore.getNextMessageId();
                     MqttPublishMessage publishMessage = (MqttPublishMessage) MqttMessageFactory.newMessage(
@@ -127,6 +110,7 @@ public class Subscribe {
                     log.debug("PUBLISH AT_LEAST_ONCE- clientId: {}, topic: {}, Qos: {}, messageId: {}", subscribeStore.getClientId(), topic, respQoS.value(), messageId);
                     iSessionStore.get(subscribeStore.getClientId()).getChannel().writeAndFlush(publishMessage);
                 }
+
                 if (respQoS == MqttQoS.EXACTLY_ONCE) {
                     int messageId = iMessageIdStore.getNextMessageId();
                     MqttPublishMessage publishMessage = (MqttPublishMessage) MqttMessageFactory.newMessage(
