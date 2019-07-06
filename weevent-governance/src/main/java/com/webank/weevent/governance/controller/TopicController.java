@@ -1,13 +1,14 @@
 package com.webank.weevent.governance.controller;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.webank.weevent.governance.entity.TopicCreaterDto;
 import com.webank.weevent.governance.entity.TopicPage;
 import com.webank.weevent.governance.entity.TopicPageDto;
 import com.webank.weevent.governance.exception.GovernanceException;
+import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.service.TopicService;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -56,7 +57,7 @@ public class TopicController {
     }
 
     @RequestMapping(value = "/openTopic")
-    public Boolean open(@RequestBody TopicCreaterDto topicCreaterDto, HttpServletRequest request,
+    public GovernanceResult open(@RequestBody TopicCreaterDto topicCreaterDto, HttpServletRequest request,
             HttpServletResponse response) throws GovernanceException {
         log.info("creater: " + topicCreaterDto.getCreater() + " open: " + topicCreaterDto.getTopic());
         return topicService.open(topicCreaterDto.getBrokerId(), topicCreaterDto.getTopic(),
