@@ -1,29 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="info">
-	<Properties>
-		<Property name="logPath">./logs/</Property>
-	</Properties>
-	<Appenders>
-		<Console name="console" target="SYSTEM_OUT">
-			<PatternLayout
-				pattern="%-d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%t] [%F:%L %M] %m%n" />
-		</Console>
+    <Properties>
+        <Property name="logPath">./logs/</Property>
+    </Properties>
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%-d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%t] [%F:%L %M] %m%n"/>
+        </Console>
 
-		<RollingRandomAccessFile name="fileAppender"
-			fileName="${logPath}event-client.log" filePattern="${logPath}event-client.log.%d{yyyy-MM-dd}.%i.log.gz">
-			<PatternLayout
-				pattern="%-d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%t] [%F:%L %M] %m%n" />
-			<Policies>
-				<TimeBasedTriggeringPolicy />
-				<SizeBasedTriggeringPolicy size="100 MB" />
-			</Policies>
-			<DefaultRolloverStrategy max="24" />
-		</RollingRandomAccessFile>
-	</Appenders>
+        <RollingRandomAccessFile name="fileAppender"
+                                 fileName="${logPath}event-client.log"
+                                 filePattern="${logPath}event-client.log.%d{yyyy-MM-dd}.%i.log.gz">
+            <PatternLayout pattern="%-d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%t] [%F:%L %M] %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="24"/>
+        </RollingRandomAccessFile>
+    </Appenders>
 
-	<Loggers>
-		<root level="debug" includeLocation="true">
-			<appender-ref ref="console" />
-		</root>
-	</Loggers>
+    <Loggers>
+        <root level="info" includeLocation="true">
+            <appender-ref ref="fileAppender"/>
+        </root>
+    </Loggers>
 </Configuration>
