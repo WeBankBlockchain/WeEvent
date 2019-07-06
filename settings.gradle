@@ -1,3 +1,5 @@
-include 'weevent-client'
-include 'weevent-broker'
-include 'weevent-governance'
+rootProject.name = "WeEvent"
+// submodules
+include "weevent-client"
+include "weevent-broker"
+include "weevent-governance"
