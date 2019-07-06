@@ -48,6 +48,8 @@ dependencies {
 
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    // JMS sample
+    testImplementation("javax.jms:jms:1.1")
 }
 
 bootJar {
