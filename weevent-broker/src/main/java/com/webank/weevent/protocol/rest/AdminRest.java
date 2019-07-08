@@ -43,7 +43,7 @@ public class AdminRest extends RestHA {
         Map<String, Object> nodesInfo = new HashMap<>();
         if (this.masterJob.getClient() == null) {
             String port = BrokerApplication.weEventConfig.getServerPort();
-            String ip = "localhost:" + port;
+            String ip = "127.0.0.1:" + port;
             nodesInfo.put(new String(ip), this.consumer.listSubscription());
         } else {
             try {
@@ -64,7 +64,7 @@ public class AdminRest extends RestHA {
                     nodesInfo.put(new String(ip), JSON.parse(rsp.getBody()));
                 }
             } catch (Exception e) {
-                System.out.println(e);
+                log.error(e.toString());
             }
         }
 
