@@ -45,38 +45,19 @@ public class InitialDb {
         String dbName = goalUrl.substring(first + 1, end);
         // get mysql default url like jdbc:mysql://127.0.0.1:3306
         String defaultUrl = goalUrl.substring(0, first);
+        Class.forName(driverName);
 
-        Connection conn = null;
-        Statement stat = null;
-        try {
-            Class.forName(driverName);
-            conn = DriverManager.getConnection(defaultUrl, user, password);
-            stat = conn.createStatement();
-
+        try (Connection conn = DriverManager.getConnection(defaultUrl, user, password);
+                Statement stat = conn.createStatement()) {
             // create database
             stat.executeUpdate("create database if not exists " + dbName);
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
+            log.error(e.getMessage());
             throw e;
-        } finally {
-            try {
-                if (stat != null) {
-                    stat.close();
-                }
-            } catch (Exception e) {
-                log.error(e.getMessage());
-            }
-            try {
-                if (conn != null) {
-                    stat.close();
-                }
-            } catch (Exception e) {
-                log.error(e.getMessage());
-            }
         }
 
-        try {
-            conn = DriverManager.getConnection(goalUrl, user, password);
-            stat = conn.createStatement();
+        try (Connection conn = DriverManager.getConnection(goalUrl, user, password);
+                Statement stat = conn.createStatement()) {
             // create table t_account
             stat.executeUpdate("create table if not exists t_account(\n"
                     + "id int(11) not null auto_increment primary key,\n" + "email varchar(256) not null,\n"
@@ -96,22 +77,8 @@ public class InitialDb {
                     + "last_update timestamp NOT NULL , \n" + "foreign key(broker_id) references t_broker(id),\n"
                     + "primary key id_topic (broker_id,topic_name)\n" + ")engine =Innodb default charset=utf8;");
         } catch (SQLException e) {
+            log.error(e.getMessage());
             throw e;
-        } finally {
-            try {
-                if (stat != null) {
-                    stat.close();
-                }
-            } catch (Exception e) {
-                log.error(e.getMessage());
-            }
-            try {
-                if (conn != null) {
-                    stat.close();
-                }
-            } catch (Exception e) {
-                log.error(e.getMessage());
-            }
         }
     }
 }

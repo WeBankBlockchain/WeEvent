@@ -94,6 +94,7 @@ public class Stomp {
                     Thread.sleep(5000L);
                 } catch (InterruptedException e) {
                     log.info("interruptef:{}", e);
+                    Thread.currentThread().interrupt();
                 }
 
                 log.info("send event to topic, {}", topic);
@@ -189,6 +190,8 @@ public class Stomp {
                 try {
                     Thread.sleep(5000L);
                 } catch (InterruptedException e) {
+                    log.info(e.toString());
+                    Thread.currentThread().interrupt();
                 }
                 log.info("send event to topic, {}", topic);
                 // extension params
