@@ -1,11 +1,13 @@
 package com.webank.weevent.broker.fisco.contract.v2;
 
 import io.reactivex.Flowable;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import org.fisco.bcos.channel.client.TransactionSucCallback;
 import org.fisco.bcos.web3j.abi.EventEncoder;
 import org.fisco.bcos.web3j.abi.TypeReference;
@@ -46,8 +48,13 @@ public class Topic extends Contract {
 
     public static final String FUNC_PUBLISHWEEVENT = "publishWeEvent";
 
-    public static final Event LOGWEEVENT_EVENT = new Event("LogWeEvent", 
-            Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}, new TypeReference<Uint256>() {}, new TypeReference<Uint256>() {}, new TypeReference<Utf8String>() {}, new TypeReference<Utf8String>() {}));
+    public static final Event LOGWEEVENT_EVENT = new Event("LogWeEvent",
+            Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {
+            }, new TypeReference<Uint256>() {
+            }, new TypeReference<Uint256>() {
+            }, new TypeReference<Utf8String>() {
+            }, new TypeReference<Utf8String>() {
+            }));
     ;
 
     @Deprecated
@@ -69,45 +76,47 @@ public class Topic extends Contract {
     }
 
     public RemoteCall<BigInteger> getSequenceNumber() {
-        final Function function = new Function(FUNC_GETSEQUENCENUMBER, 
-                Arrays.<Type>asList(), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+        final Function function = new Function(FUNC_GETSEQUENCENUMBER,
+                Arrays.<Type>asList(),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {
+                }));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
     public RemoteCall<BigInteger> getBlockNumber() {
-        final Function function = new Function(FUNC_GETBLOCKNUMBER, 
-                Arrays.<Type>asList(), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+        final Function function = new Function(FUNC_GETBLOCKNUMBER,
+                Arrays.<Type>asList(),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {
+                }));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
     public RemoteCall<TransactionReceipt> publishWeEvent(String topicName, String eventContent, String extensions) {
         final Function function = new Function(
-                FUNC_PUBLISHWEEVENT, 
+                FUNC_PUBLISHWEEVENT,
                 Arrays.<Type>asList(new Utf8String(topicName),
-                new Utf8String(eventContent),
-                new Utf8String(extensions)),
+                        new Utf8String(eventContent),
+                        new Utf8String(extensions)),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
 
     public void publishWeEvent(String topicName, String eventContent, String extensions, TransactionSucCallback callback) {
         final Function function = new Function(
-                FUNC_PUBLISHWEEVENT, 
+                FUNC_PUBLISHWEEVENT,
                 Arrays.<Type>asList(new Utf8String(topicName),
-                new Utf8String(eventContent),
-                new Utf8String(extensions)),
+                        new Utf8String(eventContent),
+                        new Utf8String(extensions)),
                 Collections.<TypeReference<?>>emptyList());
         asyncExecuteTransaction(function, callback);
     }
 
     public String publishWeEventSeq(String topicName, String eventContent, String extensions) {
         final Function function = new Function(
-                FUNC_PUBLISHWEEVENT, 
+                FUNC_PUBLISHWEEVENT,
                 Arrays.<Type>asList(new Utf8String(topicName),
-                new Utf8String(eventContent),
-                new Utf8String(extensions)),
+                        new Utf8String(eventContent),
+                        new Utf8String(extensions)),
                 Collections.<TypeReference<?>>emptyList());
         return createTransactionSeq(function);
     }
