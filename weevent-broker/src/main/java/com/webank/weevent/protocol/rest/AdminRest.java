@@ -39,34 +39,36 @@ public class AdminRest extends RestHA {
 
     @RequestMapping(path = "/listSubscription")
     public Map<String, Object> listSubscription() throws BrokerException {
+        String url = "";
+        Map<String, Object> nodesInfo = new HashMap<>();
         if (this.masterJob.getClient() == null) {
-            log.error("no broker.zookeeper.ip configuration, skip it");
-            throw new BrokerException(ErrorCode.CGI_SUBSCRIPTION_NO_ZOOKEEPER);
+            String port = BrokerApplication.weEventConfig.getServerPort();
+            String ip = "localhost:" + port;
+            nodesInfo.put(new String(ip), this.consumer.listSubscription());
+        } else {
+            try {
+                List<String> ipList = this.masterJob.getClient().getChildren().forPath(BrokerApplication.weEventConfig.getZookeeperPath() + "/nodes");
+                log.info("zookeeper ip List:{}", ipList);
+                for (String nodeip : ipList) {
+                    byte[] ip = this.masterJob.getZookeeperNode(BrokerApplication.weEventConfig.getZookeeperPath() + "/nodes" + "/" + nodeip);
+                    SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+                    RestTemplate rest = new RestTemplate(requestFactory);
+                    if (BrokerApplication.weEventConfig.getSslEnable().equals("true")) {
+                        url = "https://" + new String(ip) + "/weevent/admin/innerListSubscription";
+                    } else {
+                        url = "http://" + new String(ip) + "/weevent/admin/innerListSubscription";
+                    }
+                    log.info("url:{}", url);
+                    ResponseEntity<String> rsp = rest.getForEntity(url, String.class);
+                    log.debug("innerListSubscription:{}", JSON.parse(rsp.getBody()));
+                    nodesInfo.put(new String(ip), JSON.parse(rsp.getBody()));
+                }
+            } catch (Exception e) {
+                System.out.println(e);
+            }
         }
 
-        Map<String, Object> nodesInfo = new HashMap<>();
-        try {
-            List<String> ipList = this.masterJob.getClient().getChildren().forPath(BrokerApplication.weEventConfig.getZookeeperPath() + "/nodes");
-            log.info("zookeeper ip List:{}", ipList);
-            for (String nodeip : ipList) {
-                byte[] ip = this.masterJob.getZookeeperNode(BrokerApplication.weEventConfig.getZookeeperPath() + "/nodes" + "/" + nodeip);
-                SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-                RestTemplate rest = new RestTemplate(requestFactory);
-                String url = "";
-                if (BrokerApplication.weEventConfig.getSslEnable().equals("true")) {
-                    url = "https://" + new String(ip) + "/weevent/admin/innerListSubscription";
-                } else {
-                    url = "http://" + new String(ip) + "/weevent/admin/innerListSubscription";
-                    //url = "http://127.0.0.1:8081/weevent/admin/innerListSubscription";
-                }
-                log.info("url:{}", url);
-                ResponseEntity<String> rsp = rest.getForEntity(url, String.class);
-                log.debug("innerListSubscription:{}", JSON.parse(rsp.getBody()));
-                nodesInfo.put(new String(ip), JSON.parse(rsp.getBody()));
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-        }
+
         return nodesInfo;
     }
 
