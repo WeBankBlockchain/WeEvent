@@ -109,10 +109,8 @@ public class BrokerStomp extends TextWebSocketHandler {
 
         }
         // for  MESSAGE frame
-        if (simpMessageType != null) {
-            if (simpMessageType.toString().equals("HEARTBEAT")) {
-                frameType = "HEARTBEAT";
-            }
+        if ((simpMessageType != null) && (simpMessageType.toString().equals("HEARTBEAT"))) {
+            frameType = "HEARTBEAT";
         }
         // only one topic
         switch (frameType) {
@@ -197,21 +195,14 @@ public class BrokerStomp extends TextWebSocketHandler {
         if (nativeHeaders != null) {
             // send command receipt Id
             headerReceiptIdStr = getHeadersValue(accessor, "receipt", msg);
-
-            try {
-                //extensions
-                extensions = WeEventUtils.getExtensions(nativeHeaders);
-                if (nativeHeaders.containsKey(WeEventConstants.EVENT_GROUP_ID)) {
-                    groupId = nativeHeaders.get(WeEventConstants.EVENT_GROUP_ID).get(0).toString();
-                    ParamCheckUtils.validateGroupId(groupId);
-
-                }
-            } catch (BrokerException e) {
-                log.error(e.toString());
-            }
         }
 
         try {
+            extensions = WeEventUtils.getExtensions(nativeHeaders);
+            if (nativeHeaders.containsKey(WeEventConstants.EVENT_GROUP_ID)) {
+                groupId = nativeHeaders.get(WeEventConstants.EVENT_GROUP_ID).get(0).toString();
+                ParamCheckUtils.validateGroupId(groupId);
+            }
             handleSend(msg, simpDestination, extensions, groupId);
             command = StompCommand.RECEIPT;
             // package the return frame
@@ -240,13 +231,20 @@ public class BrokerStomp extends TextWebSocketHandler {
         if (nativeHeaders != null) {
             // subscribe command id
             headerIdStr = getHeadersValue(accessor, "id", msg);
-            // eventid
-            subEventId = getHeadersValue(accessor, WeEventConstants.EXTENSIONS_EVENT_ID, msg);
             //subscription
             continueSubscriptionIdStr = getHeadersValue(accessor, WeEventConstants.EXTENSIONS_SUBSCRIPTION_ID, msg);
+
+            subEventId = getHeadersValue(accessor, WeEventConstants.EXTENSIONS_EVENT_ID, msg);
+
+            //groupId = getHeadersValue(accessor,WeEventConstants.EVENT_GROUP_ID,msg);
         }
 
         try {
+            if (nativeHeaders.containsKey(WeEventConstants.EVENT_GROUP_ID)) {
+                groupId = nativeHeaders.get(WeEventConstants.EVENT_GROUP_ID).get(0).toString();
+                ParamCheckUtils.validateGroupId(groupId);
+            }
+
             String subscriptionId;
             // check if there hasn't the event, need use the last id
             if (null == subEventId || "".equals(subEventId)) {
@@ -265,6 +263,7 @@ public class BrokerStomp extends TextWebSocketHandler {
             accessor.setNativeHeader("receipt-id", headerIdStr);
             sendSimpleMessage(session, accessor);
         } catch (BrokerException e) {
+            log.info(e.toString());
             handleErrorMessage(session, e, headerIdStr);
         }
     }
@@ -279,21 +278,18 @@ public class BrokerStomp extends TextWebSocketHandler {
         String simpDestination = getSimpDestination(msg);
         String headerIdStr = getHeadersValue(accessor, "id", msg);
 
-        boolean result = false;
         try {
-            result = handleUnSubscribe(session, headerIdStr);
+            handleUnSubscribe(session, headerIdStr);
+            accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
+            // package the return frame
+            accessor.setDestination(simpDestination);
+            // a unique identifier for that message and a subscription header matching the identifier of the subscription that is receiving the message.
+            accessor.setReceiptId(headerIdStr);
+            accessor.setNativeHeader("receipt-id", headerIdStr);
+            sendSimpleMessage(session, accessor);
         } catch (BrokerException e) {
             handleErrorMessage(session, e, headerIdStr);
         }
-        if (result) {
-            accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
-        }
-        // package the return frame
-        accessor.setDestination(simpDestination);
-        // a unique identifier for that message and a subscription header matching the identifier of the subscription that is receiving the message.
-        accessor.setReceiptId(headerIdStr);
-        accessor.setNativeHeader("receipt-id", headerIdStr);
-        sendSimpleMessage(session, accessor);
     }
 
     private void handleDefaultMessage(Message<byte[]> msg, WebSocketSession session) {
@@ -450,7 +446,7 @@ public class BrokerStomp extends TextWebSocketHandler {
      * @throws BrokerException Exception
      */
     private String handleSubscribe(WebSocketSession session, String simpDestination, String groupId, String headerIdStr, String subEventId, String continueSubscriptionId) throws BrokerException {
-        log.info("destination: {} header subscribe id: {}", simpDestination, headerIdStr);
+        log.info("destination: {} header subscribe id: {} group id: {}", simpDestination, headerIdStr, groupId);
 
         String[] curTopicList;
         if (simpDestination.contains(",")) {
