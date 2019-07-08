@@ -5,12 +5,14 @@ import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.BrokerApplication;
+import com.webank.weevent.broker.fisco.util.SystemInfoUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.SystemUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -43,7 +45,7 @@ public class AdminRest extends RestHA {
         Map<String, Object> nodesInfo = new HashMap<>();
         if (this.masterJob.getClient() == null) {
             String port = BrokerApplication.weEventConfig.getServerPort();
-            String ip = "127.0.0.1:" + port;
+            String ip = SystemInfoUtils.getCurrentIp() +":" + port;
             nodesInfo.put(new String(ip), this.consumer.listSubscription());
         } else {
             try {
