@@ -104,7 +104,7 @@ else
     else
         echo "deploy contract success"
         echo "contract_address:"$contract_address
-        sed -i "s/^.*topic-controller.address.*$/topic-controller.address=1:${contract_address}/g" $out_path/conf/fisco.properties
+        sed -i "/topic-controller.address=1/ctopic-controller.address=1:${contract_address}" $out_path/conf/fisco.properties
     fi
 fi
 
