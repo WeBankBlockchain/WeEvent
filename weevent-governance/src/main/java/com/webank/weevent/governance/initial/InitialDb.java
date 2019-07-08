@@ -45,13 +45,13 @@ public class InitialDb {
         String dbName = goalUrl.substring(first + 1, end);
         // get mysql default url like jdbc:mysql://127.0.0.1:3306
         String defaultUrl = goalUrl.substring(0, first);
+        Class.forName(driverName);
 
         try (Connection conn = DriverManager.getConnection(defaultUrl, user, password);
                 Statement stat = conn.createStatement()) {
-            Class.forName(driverName);
             // create database
             stat.executeUpdate("create database if not exists " + dbName);
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             log.error(e.getMessage());
             throw e;
         }
