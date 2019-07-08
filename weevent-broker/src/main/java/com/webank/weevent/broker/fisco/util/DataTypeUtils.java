@@ -122,7 +122,7 @@ public final class DataTypeUtils {
 
     @SuppressWarnings("unchecked")
     public static Map<String, String> json2Map(String json) {
-        if (!StringUtils.isBlank(json)) {
+        if (StringUtils.isBlank(json)) {
             return null;
         }
 
