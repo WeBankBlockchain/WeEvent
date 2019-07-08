@@ -66,13 +66,12 @@ public class WebSocketTransport extends WebSocketClient {
     // (headerId in stomp <-> asyncSeq in biz )
     private Map<String, Long> sequence2Id;
 
+    //(subscription <-> WeEvent topic)
+    private Map<String, WeEventTopic> subscription2EventCache;
 
-    //(subscription <-> weevent topic)
-    public Map<String, WeEventTopic> subscription2EventCache;
+    private Pair<String, String> account;
 
-    public Pair<String, String> account;
-
-    public boolean connectFlag = false;
+    private boolean connectFlag = false;
 
     class ResponseFuture implements Future<Message> {
         private Long key;
@@ -463,46 +462,45 @@ public class WebSocketTransport extends WebSocketClient {
         }
         return id;
     }
-}
 
-@Slf4j
-class WSThread extends Thread {
-    private WebSocketTransport webSocketTransport;
+    class WSThread extends Thread {
+        private WebSocketTransport webSocketTransport;
 
-
-    public WSThread(WebSocketTransport webSocketTransport) {
-        this.webSocketTransport = webSocketTransport;
-    }
-
-    public void run() {
-        log.info("auto redo thread enter");
-
-        this.webSocketTransport.connectFlag = true;
-        try {
-            // check the websocket
-            while (!this.webSocketTransport.reconnectBlocking()) {
-                Thread.sleep(3000);
-            }
-            // check the stomp connect,and use cache login and password
-            while (!this.webSocketTransport.stompConnect(this.webSocketTransport.account.getKey(),
-                    this.webSocketTransport.account.getValue())) {
-                Thread.sleep(3000);
-            }
-        } catch (InterruptedException | JMSException e) {
-            log.error("auto reconnect failed", e);
+        public WSThread(WebSocketTransport webSocketTransport) {
+            this.webSocketTransport = webSocketTransport;
         }
 
-        for (Map.Entry<String, WeEventTopic> subscription : this.webSocketTransport.subscription2EventCache.entrySet()) {
+        public void run() {
+            log.info("auto redo thread enter");
+
+            this.webSocketTransport.connectFlag = true;
             try {
-                log.info("subscription cache:{}", subscription.toString());
-                this.webSocketTransport.stompSubscribe(subscription.getValue());
-            } catch (JMSException e) {
-                log.error("auto resubscribe failed", e);
+                // check the websocket
+                while (!this.webSocketTransport.reconnectBlocking()) {
+                    Thread.sleep(3000);
+                }
+                // check the stomp connect,and use cache login and password
+                while (!this.webSocketTransport.stompConnect(this.webSocketTransport.account.getKey(),
+                        this.webSocketTransport.account.getValue())) {
+                    Thread.sleep(3000);
+                }
+            } catch (InterruptedException | JMSException e) {
+                log.error("auto reconnect failed", e);
             }
+
+            for (Map.Entry<String, WeEventTopic> subscription : this.webSocketTransport.subscription2EventCache.entrySet()) {
+                try {
+                    log.info("subscription cache:{}", subscription.toString());
+                    this.webSocketTransport.stompSubscribe(subscription.getValue());
+                } catch (JMSException e) {
+                    log.error("auto resubscribe failed", e);
+                }
+            }
+
+            this.webSocketTransport.connectFlag = false;
+
+            log.info("auto redo thread exit");
         }
-
-        this.webSocketTransport.connectFlag = false;
-
-        log.info("auto redo thread exit");
     }
 }
+
