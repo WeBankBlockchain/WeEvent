@@ -1,12 +1,7 @@
 package com.webank.weevent.protocol.mqttbroker;
 
-import java.io.InputStream;
-import java.security.KeyStore;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLEngine;
 
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.protocol.mqttbroker.common.MqttWebSocketCodec;
@@ -14,7 +9,6 @@ import com.webank.weevent.protocol.mqttbroker.handler.BrokerHandler;
 import com.webank.weevent.protocol.mqttbroker.mqttprotocol.ProtocolProcess;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -31,9 +25,6 @@ import io.netty.handler.codec.mqtt.MqttDecoder;
 import io.netty.handler.codec.mqtt.MqttEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import io.netty.handler.ssl.SslContext;
-import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,71 +40,70 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class BrokerServer {
-    private EventLoopGroup bossGroup = null;
-    private EventLoopGroup workerGroup = null;
-    private SslContext sslContext = null;
-    private Channel websocketChannel = null;
-    private Channel mqttChannel = null;
+    private EventLoopGroup bossGroup;
+    private EventLoopGroup workerGroup;
+    private Channel websocketChannel;
+    private Channel mqttChannel;
+
     @Autowired
     private ProtocolProcess protocolProcess;
 
     @PostConstruct
     public void start() throws Exception {
-        bossGroup = new NioEventLoopGroup();
-        workerGroup = new NioEventLoopGroup();
-        if (BrokerApplication.weEventConfig.getSslEnable().equals("true")) {
-            KeyStore keyStore = KeyStore.getInstance("PKCS12");
-            InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("server.p12");
-            keyStore.load(inputStream, BrokerApplication.weEventConfig.getSslPassword().toCharArray());
-            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-            kmf.init(keyStore, BrokerApplication.weEventConfig.getSslPassword().toCharArray());
-            sslContext = SslContextBuilder.forServer(kmf).build();
-            log.info("mqtt protocol must start with ssl");
-        }
-        if (BrokerApplication.weEventConfig.getBrokerServerPort() != null) {
-            mqttServer();
-        }
-        if (BrokerApplication.weEventConfig.getWebSocketPort() != null) {
-            webSocketServer();
+        if (BrokerApplication.weEventConfig.getBrokerServerPort() != null
+                || BrokerApplication.weEventConfig.getWebSocketPort() != null) {
+
+            this.bossGroup = new NioEventLoopGroup();
+            this.workerGroup = new NioEventLoopGroup();
+
+            // tcp
+            if (BrokerApplication.weEventConfig.getBrokerServerPort() != null) {
+                this.mqttChannel = mqttServer();
+            }
+
+            // websocket
+            if (BrokerApplication.weEventConfig.getWebSocketPort() != null) {
+                this.websocketChannel = webSocketServer();
+            }
         }
     }
 
     @PreDestroy
     public void stop() {
-        bossGroup.shutdownGracefully();
-        bossGroup = null;
-        workerGroup.shutdownGracefully();
-        workerGroup = null;
-        if (BrokerApplication.weEventConfig.getBrokerServerPort() != null) {
-            mqttChannel.closeFuture().syncUninterruptibly();
-            mqttChannel = null;
+        if (this.bossGroup != null) {
+            this.bossGroup.shutdownGracefully();
+            this.bossGroup = null;
         }
-        if (BrokerApplication.weEventConfig.getWebSocketPort() != null) {
-            websocketChannel.closeFuture().syncUninterruptibly();
-            websocketChannel = null;
+        if (this.workerGroup != null) {
+            this.workerGroup.shutdownGracefully();
+            this.workerGroup = null;
+        }
+
+        if (this.mqttChannel != null) {
+            this.mqttChannel.closeFuture().syncUninterruptibly();
+            this.mqttChannel = null;
+        }
+        if (this.websocketChannel != null) {
+            this.websocketChannel.closeFuture().syncUninterruptibly();
+            this.websocketChannel = null;
         }
     }
 
-    private SslHandler getSslHandler(SslContext sslContext, ByteBufAllocator byteBufAllocator) {
-        SSLEngine sslEngine = sslContext.newEngine(byteBufAllocator);
-        sslEngine.setUseClientMode(false);
-        sslEngine.setNeedClientAuth(false);
-        return new SslHandler(sslEngine);
-    }
-
-    private void mqttServer() throws Exception {
+    private Channel mqttServer() throws Exception {
         ServerBootstrap serverBootstrap = new ServerBootstrap();
-        serverBootstrap.group(bossGroup, workerGroup)
+        serverBootstrap.group(this.bossGroup, this.workerGroup)
                 .channel(NioServerSocketChannel.class)
                 .handler(new LoggingHandler(LogLevel.DEBUG))
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
                         ChannelPipeline channelPipeline = socketChannel.pipeline();
-                        channelPipeline.addFirst("idle", new IdleStateHandler(0, 0, BrokerApplication.weEventConfig.getKeepAlive()));
-                        if (BrokerApplication.weEventConfig.getSslEnable().equals("true")) {
-                            channelPipeline.addLast("ssl", getSslHandler(sslContext, socketChannel.alloc()));
-                        }
+                        channelPipeline.addFirst("idle", new IdleStateHandler(
+                                0,
+                                0,
+                                BrokerApplication.weEventConfig.getKeepAlive()));
+
+                        //channelPipeline.addLast("ssl", getSslHandler(sslContext, socketChannel.alloc()));
                         channelPipeline.addLast("decoder", new MqttDecoder());
                         channelPipeline.addLast("encoder", MqttEncoder.INSTANCE);
                         channelPipeline.addLast("broker", new BrokerHandler(protocolProcess));
@@ -121,12 +111,12 @@ public class BrokerServer {
                 })
                 .option(ChannelOption.SO_BACKLOG, BrokerApplication.weEventConfig.getSoBackLog())
                 .childOption(ChannelOption.SO_KEEPALIVE, BrokerApplication.weEventConfig.getSoKeepAlive());
-        mqttChannel = serverBootstrap.bind(BrokerApplication.weEventConfig.getBrokerServerPort()).sync().channel();
+        return serverBootstrap.bind(BrokerApplication.weEventConfig.getBrokerServerPort()).sync().channel();
     }
 
-    private void webSocketServer() throws Exception {
+    private Channel webSocketServer() throws Exception {
         ServerBootstrap serverBootstrap = new ServerBootstrap();
-        serverBootstrap.group(bossGroup, workerGroup)
+        serverBootstrap.group(this.bossGroup, this.workerGroup)
                 .channel(NioServerSocketChannel.class)
                 .handler(new LoggingHandler(LogLevel.DEBUG))
                 .childHandler(new ChannelInitializer<SocketChannel>() {
@@ -134,14 +124,18 @@ public class BrokerServer {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
                         ChannelPipeline channelPipeline = socketChannel.pipeline();
-                        channelPipeline.addFirst("idle", new IdleStateHandler(0, 0, BrokerApplication.weEventConfig.getKeepAlive()));
-                        if (BrokerApplication.weEventConfig.getSslEnable().equals("true")) {
-                            channelPipeline.addLast("ssl", getSslHandler(sslContext, socketChannel.alloc()));
-                        }
+                        channelPipeline.addFirst("idle", new IdleStateHandler(0,
+                                0,
+                                BrokerApplication.weEventConfig.getKeepAlive()));
+                        //channelPipeline.addLast("ssl", getSslHandler(sslContext, socketChannel.alloc()));
                         channelPipeline.addLast("http-codec", new HttpServerCodec());
                         channelPipeline.addLast("aggregator", new HttpObjectAggregator(1048576));
                         channelPipeline.addLast("compressor ", new HttpContentCompressor());
-                        channelPipeline.addLast("protocol", new WebSocketServerProtocolHandler(BrokerApplication.weEventConfig.getWebSocketServerPath(), "mqtt,mqttv3.1,mqttv3.1.1", true, 65536));
+                        channelPipeline.addLast("protocol", new WebSocketServerProtocolHandler(
+                                BrokerApplication.weEventConfig.getWebSocketServerPath(),
+                                "mqtt,mqttv3.1,mqttv3.1.1",
+                                true,
+                                65536));
                         channelPipeline.addLast("mqttWebSocket", new MqttWebSocketCodec());
                         channelPipeline.addLast("decoder", new MqttDecoder());
                         channelPipeline.addLast("encoder", MqttEncoder.INSTANCE);
@@ -150,6 +144,7 @@ public class BrokerServer {
                 })
                 .option(ChannelOption.SO_BACKLOG, BrokerApplication.weEventConfig.getSoBackLog())
                 .childOption(ChannelOption.SO_KEEPALIVE, BrokerApplication.weEventConfig.getSoKeepAlive());
-        websocketChannel = serverBootstrap.bind(BrokerApplication.weEventConfig.getWebSocketPort()).sync().channel();
+
+        return serverBootstrap.bind(BrokerApplication.weEventConfig.getWebSocketPort()).sync().channel();
     }
 }

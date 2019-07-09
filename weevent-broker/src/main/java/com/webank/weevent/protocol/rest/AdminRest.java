@@ -8,11 +8,9 @@ import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.util.SystemInfoUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.ErrorCode;
 
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.SystemUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -44,9 +42,8 @@ public class AdminRest extends RestHA {
         String url = "";
         Map<String, Object> nodesInfo = new HashMap<>();
         if (this.masterJob.getClient() == null) {
-            String port = BrokerApplication.weEventConfig.getServerPort();
-            String ip = SystemInfoUtils.getCurrentIp() +":" + port;
-            nodesInfo.put(new String(ip), this.consumer.listSubscription());
+            nodesInfo.put(SystemInfoUtils.getCurrentIp() + ":" + SystemInfoUtils.getCurrentPort(),
+                    this.consumer.listSubscription());
         } else {
             try {
                 List<String> ipList = this.masterJob.getClient().getChildren().forPath(BrokerApplication.weEventConfig.getZookeeperPath() + "/nodes");
@@ -55,12 +52,9 @@ public class AdminRest extends RestHA {
                     byte[] ip = this.masterJob.getZookeeperNode(BrokerApplication.weEventConfig.getZookeeperPath() + "/nodes" + "/" + nodeip);
                     SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
                     RestTemplate rest = new RestTemplate(requestFactory);
-                    if (BrokerApplication.weEventConfig.getSslEnable().equals("true")) {
-                        url = "https://" + new String(ip) + "/weevent/admin/innerListSubscription";
-                    } else {
-                        url = "http://" + new String(ip) + "/weevent/admin/innerListSubscription";
-                    }
+                    url = "http://" + new String(ip) + "/weevent/admin/innerListSubscription";
                     log.info("url:{}", url);
+
                     ResponseEntity<String> rsp = rest.getForEntity(url, String.class);
                     log.debug("innerListSubscription:{}", JSON.parse(rsp.getBody()));
                     nodesInfo.put(new String(ip), JSON.parse(rsp.getBody()));
