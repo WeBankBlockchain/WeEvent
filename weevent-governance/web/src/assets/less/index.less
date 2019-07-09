@@ -75,13 +75,19 @@ html,body,#app{
     position: relative;
 
     .login_logo{
-      width:190px;
+      width:260px;
     }
-
-    .words{
-      font-size: 32px;
-      color:#2e5bff;
-      margin:20px 0 30px;
+    .login_error{
+      height:24px;
+      margin:5px 0;
+      overflow: hidden;
+      p{
+        color:transparent
+      }
+      .show_error{
+        color:#F56C6C;
+        @show-error()
+      }
     }
     .el-form{
       width:85%;
@@ -353,11 +359,15 @@ html,body,#app{
         font-size:16px;
         line-height: 28px;
         color:@gray_text;
-        pre{
+        .pre{
           font-family: 'syyh'; 
           margin-top:0;
           margin-bottom:40px;
         }
+      }
+
+      .small_pre{
+        display: none
       }
 
       .right_cont{
@@ -410,14 +420,17 @@ html,body,#app{
   }
 
   .el-pagination{
-    margin-top:10px;
+    position: absolute;
+    bottom:10px;
   }
 
   .event-table{
     height:95%;
     background:#fff;
     padding:20px;
+    padding-bottom:50px;
     border-radius: 5px;
+    position: relative;
     .refresh{
       margin-top:10px;
       margin-bottom:6px;
@@ -443,8 +456,12 @@ html,body,#app{
 
     .el-table{
       background: transparent;
-      height:89%;
+      height:100%;
+      padding-bottom:55px;
       position: relative;
+      &::before{
+        height:0;
+      }
       .el-table__empty-block{
         background:white;
         height:auto; 
@@ -508,7 +525,6 @@ html,body,#app{
     }
   }
 }
-
 
 .searchBox{
   margin:20px 0;
@@ -641,4 +657,46 @@ html,body,#app{
   color:@black_text !important;
   font-weight: bold !important;
   font-family: 'syyh'
+}
+
+@media screen and (max-width:1700px){
+  .el-main .home-content{
+    .top_cont,.bottom_cont{
+      width:90%;
+    }
+  } 
+}
+
+@media screen and (max-width:1600px){
+  .el-main .home-content{
+    .top_cont,.bottom_cont{
+      width:100%;
+      .right_cont{
+        width:600px;
+      }
+    }
+  } 
+}
+
+@media screen and (max-width:1350px){
+  .el-main .home-content{
+
+    .bottom_cont{
+      flex-direction: column;
+      .big_pre{
+        display: none
+      }
+      .small_pre{
+        display: block;
+        margin-bottom:20px !important;
+        .pre{
+          margin-bottom:20px;
+        }
+      }
+      .right_cont{
+        width:100%;
+      }
+    }
+  }
+   
 }
