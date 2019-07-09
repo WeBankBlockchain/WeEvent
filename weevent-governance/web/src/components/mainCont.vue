@@ -7,11 +7,15 @@
   WeEvent Governance
     </pre>
     <div class='bottom_cont'>
-      <div class='left_cont'>
-        <pre>
+      <div class='left_cont big_pre'>
+        <pre class='pre'>
   WeEvent Governance是WeEvent服务的一部分,
   为用户提供一个事件治理的Web管理端。
   支持区块链信息查看，事件治理、系统监控等。</pre>
+        <p>更多WeEvent信息，请参见<a target='_blank' href="https://github.com/WeBankFinTech/WeEvent">github源码</a></p>
+      </div>
+      <div class='left_cont small_pre'>
+        <p class='pre'>WeEvent Governance是WeEvent服务的一部分,为用户提供一个事件治理的Web管理端。支持区块链信息查看，事件治理、系统监控等。</p>
         <p>更多WeEvent信息，请参见<a target='_blank' href="https://github.com/WeBankFinTech/WeEvent">github源码</a></p>
       </div>
       <div class='right_cont'>
