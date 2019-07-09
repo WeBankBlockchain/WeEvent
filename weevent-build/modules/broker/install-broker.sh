@@ -59,15 +59,15 @@ mkdir -p $out_path
 make_file
 copy_file
 
-sed -i "s/127.0.0.1:8501/$channel_info/g" $out_path/conf/fisco.properties
+sed -i "s/^.*nodes=.*$/nodes=$channel_info/g" $out_path/conf/fisco.properties
 echo "set channel_info success"
 if [[ $version = "1.3" ]];then
     sed -i "/version=2.0/cversion=1.3" $out_path/conf/fisco.properties
-    if [[ -f $block_chain_node_path/data/ca.crt ]] && [[ -f $block_chain_node_path/data/client.keystore ]]; then
+    if [[ -f $block_chain_node_path/web3sdk/conf/ca.crt ]] && [[ -f $block_chain_node_path/web3sdk/conf/client.keystore ]]; then
         rm -rf $out_path/conf/ca.crt
         rm -rf $out_path/conf/client.keystore
-        cp $block_chain_node_path/data/ca.crt $out_path/conf/
-        cp $block_chain_node_path/data/client.keystore $out_path/conf/
+        cp $block_chain_node_path/web3sdk/conf/ca.crt $out_path/conf/
+        cp $block_chain_node_path/web3sdk/conf/client.keystore $out_path/conf/
     else
         echo "ca.crt or client.keystore is not exist."
         exit -1

@@ -52,6 +52,7 @@ public class WebSocketTransportFactory {
             throw WeEventConnectionFactory.exp2JMSException(e);
         } catch (InterruptedException e) {
             log.error("interrupted while connecting");
+            Thread.currentThread().interrupt();
             throw WeEventConnectionFactory.error2JMSException(ErrorCode.URL_CONNECT_FAILED);
         }
     }

@@ -32,6 +32,7 @@ import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.util.LinkedMultiValueMap;
 
+
 /**
  * stomp transport over web socket.
  *
@@ -171,7 +172,6 @@ public class WebSocketTransport extends WebSocketClient {
         String req = stompCommand.encodeConnect(userName, password);
         sequence2Id.put(Long.toString(0L), 0L);
         Message stompResponse = this.stompRequest(req, 0L);
-
         this.account = new Pair<>(userName, password);
 
         // initialize connection context
@@ -236,7 +236,6 @@ public class WebSocketTransport extends WebSocketClient {
             }
 
         }
-
         return stompCommand.getSubscriptionId(stompResponse);
     }
 

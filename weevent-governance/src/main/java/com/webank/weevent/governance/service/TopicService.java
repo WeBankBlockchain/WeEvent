@@ -3,10 +3,10 @@ package com.webank.weevent.governance.service;
 import java.net.URISyntaxException;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.alibaba.fastjson.JSON;
 import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.Broker;
 import com.webank.weevent.governance.entity.Topic;
@@ -14,9 +14,11 @@ import com.webank.weevent.governance.entity.TopicPage;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.TopicInfoMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
+import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.utils.CookiesTools;
 import com.webank.weevent.governance.utils.SpringContextUtil;
 
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -122,8 +124,8 @@ public class TopicService {
         return null;
     }
 
-    @Transactional
-    public Boolean open(Integer brokerId, String topic, String creater, HttpServletRequest request,
+    @Transactional(rollbackFor = Throwable.class)
+    public GovernanceResult open(Integer brokerId, String topic, String creater, HttpServletRequest request,
             HttpServletResponse response) throws GovernanceException {
         HttpServletRequest req = (HttpServletRequest) request;
 
@@ -140,15 +142,26 @@ public class TopicService {
             log.info("url: " + url);
             HttpGet get = getMethod(url, request);
 
+            String mes = null;
             try {
                 CloseableHttpResponse closeResponse = client.execute(get);
-                String mes = EntityUtils.toString(closeResponse.getEntity());
-                return (Boolean) JSON.parse(mes);
+                mes = EntityUtils.toString(closeResponse.getEntity());
             } catch (Exception e) {
                 throw new GovernanceException(ErrorCode.BROKER_CONNECT_ERROR);
             }
+
+            try {
+                Boolean result = (Boolean) JSON.parse(mes);
+                return new GovernanceResult(result);
+            } catch (Exception e) {
+                JSON json = JSON.parseObject(mes);
+                @SuppressWarnings("unchecked")
+                Map<String, Object> result = JSON.toJavaObject(json, Map.class);
+                throw new GovernanceException((Integer) (result.get("code")), result.get("message").toString());
+            }
+
         }
-        return false;
+        return null;
     }
 
     // generate CloseableHttpClient from url
