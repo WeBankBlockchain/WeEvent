@@ -6,6 +6,8 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 
+import com.webank.weevent.BrokerApplication;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -33,5 +35,9 @@ public class SystemInfoUtils {
         }
 
         return "";
+    }
+
+    public static String getCurrentPort() {
+        return BrokerApplication.environment.getProperty("server.port");
     }
 }
