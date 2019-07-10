@@ -61,14 +61,14 @@ public class BrokerServer {
     public void start() throws Exception {
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup();
-        if (BrokerApplication.weEventConfig.getSslEnable().equals("true")) {
+        if ("true".equals(BrokerApplication.weEventConfig.getSslEnable())) {
             KeyStore keyStore = KeyStore.getInstance("PKCS12");
             InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("server.p12");
             keyStore.load(inputStream, BrokerApplication.weEventConfig.getSslPassword().toCharArray());
             KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
             kmf.init(keyStore, BrokerApplication.weEventConfig.getSslPassword().toCharArray());
             sslContext = SslContextBuilder.forServer(kmf).build();
-            log.info("mqtt protocol must start with ssl");
+            log.info("mqtt protocol start with ssl");
         }
         if (BrokerApplication.weEventConfig.getBrokerServerPort() != null) {
             mqttServer();

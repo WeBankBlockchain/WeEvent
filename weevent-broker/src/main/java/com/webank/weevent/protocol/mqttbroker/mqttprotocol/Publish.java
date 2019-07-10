@@ -36,6 +36,7 @@ public class Publish {
     public void processPublish(Channel channel, MqttPublishMessage msg, boolean willmessage) {
         // QoS=0
         if (msg.fixedHeader().qosLevel() == MqttQoS.AT_MOST_ONCE) {
+            log.error("dosn't support QoS=0 close channel");
             channel.close();//blockchain not suppuer QOS=0 colse channel
             return;
         }
@@ -54,6 +55,7 @@ public class Publish {
         }
         // QoS=2
         if (msg.fixedHeader().qosLevel() == MqttQoS.EXACTLY_ONCE) {
+            log.error("dosn't support QoS=2 close channel");
             channel.close();//blockchain not suppuer QOS=2 colse channel
             return;
         }

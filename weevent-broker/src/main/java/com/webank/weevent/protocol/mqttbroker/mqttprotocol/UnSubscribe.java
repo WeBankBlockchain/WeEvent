@@ -34,6 +34,7 @@ public class UnSubscribe {
     }
 
     public void processUnSubscribe(Channel channel, MqttUnsubscribeMessage msg) {
+        log.debug("processUnSubscribe: variableHeader:{} payLoadLen:{}", msg.variableHeader().toString(), msg.payload().toString().length());
         List<String> topicFilters = msg.payload().topics();
         String clientId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
         topicFilters.forEach(topicFilter -> {
