@@ -39,7 +39,7 @@ public class UnSubscribe {
         String clientId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
         topicFilters.forEach(topicFilter -> {
             try {
-                if (!StringUtils.isBlank(iSubscribeStore.get(topicFilter, clientId).getSubscriptionId())) {
+                if (null != iSubscribeStore.get(topicFilter, clientId)) {
                     iConsumer.unSubscribe(iSubscribeStore.get(topicFilter, clientId).getSubscriptionId());
                 }
             } catch (BrokerException e) {
