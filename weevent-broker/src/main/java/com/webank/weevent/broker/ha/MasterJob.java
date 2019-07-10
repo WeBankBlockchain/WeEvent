@@ -262,9 +262,7 @@ public class MasterJob {
         log.info("connect to zookeeper: {}", BrokerApplication.weEventConfig.getZookeeperIp());
         //nodes ip and port config
         String nodesPath = this.zookeeperRootPath + "/nodes";
-        String ip = SystemInfoUtils.getCurrentIp();
-        String port = BrokerApplication.weEventConfig.getServerPort();
-        String nodeName = ip + ":" + port;
+        String nodeName = SystemInfoUtils.getCurrentIp() + ":" + SystemInfoUtils.getCurrentPort();
 
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
         CuratorFramework client = CuratorFrameworkFactory.newClient(
