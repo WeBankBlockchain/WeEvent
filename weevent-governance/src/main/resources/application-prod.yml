@@ -29,6 +29,6 @@ http:
     socket-timeout: 5000
 https: 
   read-timeout: 3000
-  connect-timeout: 3000       
+  connect-timeout: 3000
 logging:
   config: classpath:log4j2.xml
