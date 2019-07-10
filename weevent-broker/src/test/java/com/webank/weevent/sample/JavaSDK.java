@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
+import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
 import com.webank.weevent.sdk.WeEventClient;
 
@@ -17,20 +18,19 @@ import com.webank.weevent.sdk.WeEventClient;
  * @since 2019/04/07
  */
 public class JavaSDK {
-    private final static String topicName = "com.weevent.test";
-    private final static String groupId = "1";
-    private final static Map<String, String> extensions = new HashMap<>();
-
     public static void main(String[] args) {
         System.out.println("This is WeEvent Java SDK sample.");
         try {
             // get client
-            IWeEventClient client = IWeEventClient.build("http://localhost:8080/weevent");
-
+            IWeEventClient client = IWeEventClient.build("http://127.0.0.1:8081/weevent");
+            String topicName = "com.weevent.test";
+            String groupId = "1";
             // ensure topic exist
             client.open(topicName, groupId);
             Map<String, String> extensions = new HashMap<>();
-            extensions.put("weevent-url", "https://github.com/WeBankFinTech/WeEvent");
+            extensions.put("weevent-format", "json");
+            SendResult sendResult = client.publish(topicName, groupId, "{\"hello\":\" wolrd\"}".getBytes(), extensions);
+            System.out.println(sendResult.toString());
             // subscribe topic with groupId
             String subscriptionId = client.subscribe(topicName, groupId, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
                 @Override

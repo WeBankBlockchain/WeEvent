@@ -81,6 +81,7 @@ public class Stomp {
                     public Type getPayloadType(StompHeaders headers) {
                         return String.class;
                     }
+
                     @Override
                     public void handleFrame(StompHeaders headers, Object payload) {
                         log.info("subscribe handleFrame, header: {} payload: {}", headers, payload);
