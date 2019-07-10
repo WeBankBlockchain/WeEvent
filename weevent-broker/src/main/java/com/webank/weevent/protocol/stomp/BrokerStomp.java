@@ -192,14 +192,13 @@ public class BrokerStomp extends TextWebSocketHandler {
         Map<String, String> extensions = new HashMap<>();
         String groupId = WeEventConstants.DEFAULT_GROUP_ID;
 
-        if (nativeHeaders != null) {
-            // send command receipt Id
-            headerReceiptIdStr = getHeadersValue(accessor, "receipt", msg);
-        }
-
         try {
+            if (nativeHeaders != null) {
+                // send command receipt Id
+                headerReceiptIdStr = getHeadersValue(accessor, "receipt", msg);
+            }
             extensions = WeEventUtils.getExtensions(nativeHeaders);
-            if (nativeHeaders.containsKey(WeEventConstants.EVENT_GROUP_ID)) {
+            if (nativeHeaders != null && nativeHeaders.containsKey(WeEventConstants.EVENT_GROUP_ID)) {
                 groupId = nativeHeaders.get(WeEventConstants.EVENT_GROUP_ID).get(0).toString();
                 ParamCheckUtils.validateGroupId(groupId);
             }
@@ -240,7 +239,7 @@ public class BrokerStomp extends TextWebSocketHandler {
         }
 
         try {
-            if (nativeHeaders.containsKey(WeEventConstants.EVENT_GROUP_ID)) {
+            if (nativeHeaders != null && nativeHeaders.containsKey(WeEventConstants.EVENT_GROUP_ID)) {
                 groupId = nativeHeaders.get(WeEventConstants.EVENT_GROUP_ID).get(0).toString();
                 ParamCheckUtils.validateGroupId(groupId);
             }
