@@ -39,6 +39,8 @@ public class WeEventClientGroupIdTest {
 
     public String topicName = "com.webank.weevent";
 
+    public String wildCardTopicName = "com.webank.weevent/#";
+
     public String groupId = "1";
 
     private IWeEventClient weEventClient;
@@ -151,6 +153,29 @@ public class WeEventClientGroupIdTest {
         // create subscriber
         String groupId = "1";//if not set default 1
         String subscriptionId = this.weEventClient.subscribe(this.topicName, groupId, "317e7c4c-8-26", new WeEventClient.EventListener() {
+            @Override
+            public void onEvent(WeEvent event) {
+                log.info(event.toString());
+            }
+
+            @Override
+            public void onException(Throwable e) {
+                e.printStackTrace();
+            }
+        });
+        Thread.sleep(60000);
+    }
+
+
+    /**
+     * Method: subscribe(String topic, groupId, String offset, IConsumer.ConsumerListener listener)
+     */
+    @Test
+    public void testSubscribeWildCard() throws Exception {
+        log.info("===================={}", this.testName.getMethodName());
+        // create subscriber
+        String groupId = "1";//if not set default 1
+        String subscriptionId = this.weEventClient.subscribe(this.wildCardTopicName, "447c022f-10-2508", new WeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
                 log.info(event.toString());

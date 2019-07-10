@@ -36,8 +36,11 @@ import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
  *
  * <p>Generated with web3j version none.
  */
+@SuppressWarnings("unchecked")
 public class Topic extends Contract {
-    private static final String BINARY = "608060405260008055600060015534801561001957600080fd5b506103a6806100296000396000f300608060405260043610610057576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806342af35fd1461005c57806342cbb15c14610087578063a99077f2146100b2575b600080fd5b34801561006857600080fd5b506100716101bf565b6040518082815260200191505060405180910390f35b34801561009357600080fd5b5061009c6101c8565b6040518082815260200191505060405180910390f35b3480156100be57600080fd5b506101a5600480360381019080803590602001908201803590602001908080601f0160208091040260200160405190810160405280939291908181526020018383808284378201915050505050509192919290803590602001908201803590602001908080601f0160208091040260200160405190810160405280939291908181526020018383808284378201915050505050509192919290803590602001908201803590602001908080601f01602080910402602001604051908101604052809392919081815260200183838082843782019150505050505091929192905050506101d2565b604051808215151515815260200191505060405180910390f35b60008054905090565b6000600154905090565b6000436001819055506001600054016000819055507f1c0e3e64fa3c39ea839f697c66d1bc2b3d10be51172d570c18012b860e5a58328460005443868660405180806020018681526020018581526020018060200180602001848103845289818151815260200191508051906020019080838360005b83811015610263578082015181840152602081019050610248565b50505050905090810190601f1680156102905780820380516001836020036101000a031916815260200191505b50848103835286818151815260200191508051906020019080838360005b838110156102c95780820151818401526020810190506102ae565b50505050905090810190601f1680156102f65780820380516001836020036101000a031916815260200191505b50848103825285818151815260200191508051906020019080838360005b8381101561032f578082015181840152602081019050610314565b50505050905090810190601f16801561035c5780820380516001836020036101000a031916815260200191505b509850505050505050505060405180910390a16001905093925050505600a165627a7a7230582017ed0dc95884d01a3b3802a878eea91cd2b1300f5c7b688d39e7e9bf086cf33b0029";
+    public static final String BINARY = "608060405260008055600060015534801561001957600080fd5b506103a6806100296000396000f300608060405260043610610057576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806342af35fd1461005c57806342cbb15c14610087578063a99077f2146100b2575b600080fd5b34801561006857600080fd5b506100716101bf565b6040518082815260200191505060405180910390f35b34801561009357600080fd5b5061009c6101c8565b6040518082815260200191505060405180910390f35b3480156100be57600080fd5b506101a5600480360381019080803590602001908201803590602001908080601f0160208091040260200160405190810160405280939291908181526020018383808284378201915050505050509192919290803590602001908201803590602001908080601f0160208091040260200160405190810160405280939291908181526020018383808284378201915050505050509192919290803590602001908201803590602001908080601f01602080910402602001604051908101604052809392919081815260200183838082843782019150505050505091929192905050506101d2565b604051808215151515815260200191505060405180910390f35b60008054905090565b6000600154905090565b6000436001819055506001600054016000819055507f1c0e3e64fa3c39ea839f697c66d1bc2b3d10be51172d570c18012b860e5a58328460005443868660405180806020018681526020018581526020018060200180602001848103845289818151815260200191508051906020019080838360005b83811015610263578082015181840152602081019050610248565b50505050905090810190601f1680156102905780820380516001836020036101000a031916815260200191505b50848103835286818151815260200191508051906020019080838360005b838110156102c95780820151818401526020810190506102ae565b50505050905090810190601f1680156102f65780820380516001836020036101000a031916815260200191505b50848103825285818151815260200191508051906020019080838360005b8381101561032f578082015181840152602081019050610314565b50505050905090810190601f16801561035c5780820380516001836020036101000a031916815260200191505b509850505050505050505060405180910390a16001905093925050505600a165627a7a72305820bf4d408a57dc6ae3cee287aa28832e6ee7a884181dbef8f229d24c18ad3d84e80029";
+
+    public static final String ABI = "[{\"constant\":true,\"inputs\":[],\"name\":\"getSequenceNumber\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getBlockNumber\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"topicName\",\"type\":\"string\"},{\"name\":\"eventContent\",\"type\":\"string\"},{\"name\":\"extensions\",\"type\":\"string\"}],\"name\":\"publishWeEvent\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"topicName\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"eventSeq\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"eventBlockNumer\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"eventContent\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"extensions\",\"type\":\"string\"}],\"name\":\"LogWeEvent\",\"type\":\"event\"}]";
 
     public static final String FUNC_GETSEQUENCENUMBER = "getSequenceNumber";
 
@@ -91,9 +94,9 @@ public class Topic extends Contract {
     public RemoteCall<TransactionReceipt> publishWeEvent(String topicName, String eventContent, String extensions) {
         final Function function = new Function(
                 FUNC_PUBLISHWEEVENT,
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName),
-                        new org.fisco.bcos.web3j.abi.datatypes.Utf8String(eventContent),
-                        new org.fisco.bcos.web3j.abi.datatypes.Utf8String(extensions)),
+                Arrays.<Type>asList(new Utf8String(topicName),
+                        new Utf8String(eventContent),
+                        new Utf8String(extensions)),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
@@ -101,17 +104,27 @@ public class Topic extends Contract {
     public void publishWeEvent(String topicName, String eventContent, String extensions, TransactionSucCallback callback) {
         final Function function = new Function(
                 FUNC_PUBLISHWEEVENT,
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName),
-                        new org.fisco.bcos.web3j.abi.datatypes.Utf8String(eventContent),
-                        new org.fisco.bcos.web3j.abi.datatypes.Utf8String(extensions)),
+                Arrays.<Type>asList(new Utf8String(topicName),
+                        new Utf8String(eventContent),
+                        new Utf8String(extensions)),
                 Collections.<TypeReference<?>>emptyList());
         asyncExecuteTransaction(function, callback);
     }
 
+    public String publishWeEventSeq(String topicName, String eventContent, String extensions) {
+        final Function function = new Function(
+                FUNC_PUBLISHWEEVENT,
+                Arrays.<Type>asList(new Utf8String(topicName),
+                        new Utf8String(eventContent),
+                        new Utf8String(extensions)),
+                Collections.<TypeReference<?>>emptyList());
+        return createTransactionSeq(function);
+    }
+
     public List<LogWeEventEventResponse> getLogWeEventEvents(TransactionReceipt transactionReceipt) {
-        List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(LOGWEEVENT_EVENT, transactionReceipt);
+        List<EventValuesWithLog> valueList = extractEventParametersWithLog(LOGWEEVENT_EVENT, transactionReceipt);
         ArrayList<LogWeEventEventResponse> responses = new ArrayList<LogWeEventEventResponse>(valueList.size());
-        for (Contract.EventValuesWithLog eventValues : valueList) {
+        for (EventValuesWithLog eventValues : valueList) {
             LogWeEventEventResponse typedResponse = new LogWeEventEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.topicName = (String) eventValues.getNonIndexedValues().get(0).getValue();
@@ -128,7 +141,7 @@ public class Topic extends Contract {
         return web3j.logFlowable(filter).map(new io.reactivex.functions.Function<Log, LogWeEventEventResponse>() {
             @Override
             public LogWeEventEventResponse apply(Log log) {
-                Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(LOGWEEVENT_EVENT, log);
+                EventValuesWithLog eventValues = extractEventParametersWithLog(LOGWEEVENT_EVENT, log);
                 LogWeEventEventResponse typedResponse = new LogWeEventEventResponse();
                 typedResponse.log = log;
                 typedResponse.topicName = (String) eventValues.getNonIndexedValues().get(0).getValue();

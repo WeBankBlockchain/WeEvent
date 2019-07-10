@@ -31,7 +31,7 @@
            <el-form-item label="已发布事件数:">
             <span>{{ props.row.detial.sequenceNumber }}</span>
           </el-form-item><br/>
-           <el-form-item label="发布事件所处块高:">
+           <el-form-item label="最新事件块高:">
             <span>{{ props.row.detial.blockNumber }}</span>
           </el-form-item>
         </el-form>
@@ -92,7 +92,7 @@ export default {
       rules: {
         name: [
           { required: true, message: '名称不能为空', trigger: 'blur' },
-          {min: 1, max: 32, message: '名称长度不能超过 32 个字符', trigger: 'blur'}
+          {min: 1, max: 64, message: '名称长度不能超过 64 个字符', trigger: 'blur'}
         ]
       },
       creater: ''
