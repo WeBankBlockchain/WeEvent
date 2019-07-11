@@ -41,7 +41,7 @@ public class FiscoConfig {
     @Value("${web3sdk.timeout:10000}")
     private Integer web3sdkTimeout;
 
-    @Value("${web3sdk.core-pool-size:100}")
+    @Value("${web3sdk.core-pool-size:10}")
     private Integer web3sdkCorePoolSize;
 
     @Value("${web3sdk.max-pool-size:200}")

@@ -1,11 +1,6 @@
 apply plugin: "org.springframework.boot"
 apply plugin: "io.spring.dependency-management"
 
-configurations {
-    //exclude spring-boot's default logger logback
-    all*.exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
-}
-
 dependencies {
     // spring boot
     implementation("org.springframework.boot:spring-boot-starter-actuator")
