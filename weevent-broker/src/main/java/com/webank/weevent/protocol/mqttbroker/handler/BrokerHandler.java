@@ -109,4 +109,9 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
             super.userEventTriggered(ctx, evt);
         }
     }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        this.protocolProcess.disConnect().processDisConnect(ctx.channel(), null);
+    }
 }
