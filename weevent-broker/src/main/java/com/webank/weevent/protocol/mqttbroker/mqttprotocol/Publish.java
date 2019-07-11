@@ -36,6 +36,7 @@ public class Publish {
     public void processPublish(Channel channel, MqttPublishMessage msg, boolean willmessage) {
         // QoS=0
         if (msg.fixedHeader().qosLevel() == MqttQoS.AT_MOST_ONCE) {
+            log.error("dosn't support QoS=0 close channel");
             channel.close();//blockchain not suppuer QOS=0 colse channel
             return;
         }
@@ -54,6 +55,7 @@ public class Publish {
         }
         // QoS=2
         if (msg.fixedHeader().qosLevel() == MqttQoS.EXACTLY_ONCE) {
+            log.error("dosn't support QoS=2 close channel");
             channel.close();//blockchain not suppuer QOS=2 colse channel
             return;
         }
@@ -62,8 +64,13 @@ public class Publish {
     private SendResult sendMessageToFisco(String topic, byte[] messageBytes, String groupId, Map<String, String> extensions) {
         SendResult sendResult = new SendResult();
         try {
-            this.iproducer.open(topic, groupId);
-            sendResult = this.iproducer.publish(new WeEvent(topic, messageBytes, extensions), groupId);
+            //this.iproducer.open(topic, groupId);
+            if (this.iproducer.exist(topic,groupId)) {
+                sendResult = this.iproducer.publish(new WeEvent(topic, messageBytes, extensions), groupId);
+            }else {
+                sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+                log.error("topic is not exist");
+            }
         } catch (BrokerException e) {
             log.error("publish error:{}", sendResult.toString());
         }
