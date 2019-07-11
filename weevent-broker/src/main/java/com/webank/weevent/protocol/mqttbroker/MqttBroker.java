@@ -39,7 +39,7 @@ import org.springframework.stereotype.Component;
  **/
 @Component
 @Slf4j
-public class BrokerServer {
+public class MqttBroker {
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
     private Channel websocketChannel;
