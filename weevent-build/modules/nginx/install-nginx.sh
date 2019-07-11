@@ -48,8 +48,8 @@ function nginx_setup() {
     cp ./conf/server.* $nginx_path/conf/
     cp ./conf/conf.d/*.conf $nginx_path/conf/conf.d/
 
-    sed -i "s/8080/$nginx_port/g" $nginx_path/conf/conf.d/https.conf
-    sed -i "s/8080/$nginx_port/g" $nginx_path/conf/conf.d/http.conf
+    sed -i "s/443/$nginx_port/g" $nginx_path/conf/conf.d/https.conf
+    sed -i "s/8080/$nginx_port/g" $nginx_path/conf/conf.d/http_quitinstall.conf
 
     if [ "$ssl" = "true" ]; then
         sed -i "s/http.conf/https.conf/g" $nginx_path/conf/nginx.conf
@@ -59,12 +59,12 @@ function nginx_setup() {
     if [[ -n $broker_port ]]; then
         broker_url="localhost:$broker_port"
         echo "set broker_url: $broker_url"
-        sed -i "s/localhost:8090/$broker_url/g" $nginx_path/conf/conf.d/http_rs.conf
+        sed -i "s/localhost:8090/$broker_url/g" $nginx_path/conf/conf.d/http_rs_quitinstall.conf
     fi
     if  [[ -n $governance_port ]]; then
         governance_url="localhost:$governance_port"
         echo "set governance_url: $governance_url"
-        sed -i "s/localhost:8099/$governance_url/g" $nginx_path/conf/conf.d/http_rs.conf
+        sed -i "s/localhost:8099/$governance_url/g" $nginx_path/conf/conf.d/http_rs_quitinstall.conf
     fi
     
     cp nginx.sh $nginx_path
