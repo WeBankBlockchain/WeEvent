@@ -31,7 +31,7 @@ public class DisConnect {
     }
 
     public void processDisConnect(Channel channel, MqttMessage msg) {
-        log.debug("processDisConnect variableHeader:{} payLoadLen", msg.variableHeader().toString(), msg.payload().toString().length());
+        log.debug("processDisConnect");
         String clientId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
         List<SubscribeStore> subscribeStores = iSubscribeStore.searchByClientId(clientId);
         subscribeStores.forEach(subscribeStore -> {
