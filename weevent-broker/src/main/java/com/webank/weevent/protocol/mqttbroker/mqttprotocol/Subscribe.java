@@ -49,6 +49,7 @@ public class Subscribe {
     }
 
     public void processSubscribe(Channel channel, MqttSubscribeMessage msg) {
+        log.debug("processSubscribe variableHeader:{} payLoadLen:{}", msg.variableHeader().toString(), msg.payload().toString().length());
         List<MqttTopicSubscription> topicSubscriptions = msg.payload().topicSubscriptions();
 
         String clientId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
@@ -57,6 +58,11 @@ public class Subscribe {
         topicSubscriptions.forEach(topicSubscription -> {
             String topicFilter = topicSubscription.topicName();
             MqttQoS mqttQoS = topicSubscription.qualityOfService();
+            if (MqttQoS.AT_MOST_ONCE == mqttQoS || MqttQoS.EXACTLY_ONCE == mqttQoS) {
+                channel.close();
+                log.error("subscribe don't support QoS=0 or QoS=2");
+                return;
+            }
             String subscriptionId = "";
             try {
                 subscriptionId = this.iConsumer.subscribe(topicFilter, WeEventConstants.DEFAULT_GROUP_ID, WeEvent.OFFSET_LAST, WeEventConstants.MQTTTYPE, new IConsumer.ConsumerListener() {
@@ -78,7 +84,7 @@ public class Subscribe {
             SubscribeStore subscribeStore = new SubscribeStore(clientId, subscriptionId, topicFilter, mqttQoS.value());
             iSubscribeStore.put(topicFilter, subscribeStore);
             mqttQoSList.add(mqttQoS.value());
-            log.debug("SUBSCRIBE - clientId: {}, topFilter: {}, QoS: {}", clientId, topicFilter, mqttQoS.value());
+            log.debug("SUBSCRIBE - clientId: {}, topFilter: {}, QoS: {} subscriptionId:{}", clientId, topicFilter, mqttQoS.value(), subscriptionId);
         });
 
         MqttSubAckMessage subAckMessage = (MqttSubAckMessage) MqttMessageFactory.newMessage(
