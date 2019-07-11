@@ -19,56 +19,34 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class ISubscribeStoreImpl implements ISubscribeStore {
-    private Map<String, ConcurrentHashMap<String, SubscribeStore>> subscribeNotWildcardCache = new ConcurrentHashMap<>();
-    private Map<String, ConcurrentHashMap<String, SubscribeStore>> subscribeWildcardCache = new ConcurrentHashMap<>();
+    private Map<String, ConcurrentHashMap<String, SubscribeStore>> subscribeCache = new ConcurrentHashMap<>();
 
     @Override
     public void put(String topicFilter, SubscribeStore subscribeStore) {
-        if (StrUtil.contains(topicFilter, '#') || StrUtil.contains(topicFilter, '+')) {
-            ConcurrentHashMap<String, SubscribeStore> map =
-                    subscribeWildcardCache.containsKey(topicFilter) ? subscribeWildcardCache.get(topicFilter) : new ConcurrentHashMap<String, SubscribeStore>();
-            map.put(subscribeStore.getClientId(), subscribeStore);
-            subscribeWildcardCache.put(topicFilter, map);
-        } else {
-            ConcurrentHashMap<String, SubscribeStore> map =
-                    subscribeNotWildcardCache.containsKey(topicFilter) ? subscribeNotWildcardCache.get(topicFilter) : new ConcurrentHashMap<String, SubscribeStore>();
-            map.put(subscribeStore.getClientId(), subscribeStore);
-            subscribeNotWildcardCache.put(topicFilter, map);
-        }
+        ConcurrentHashMap<String, SubscribeStore> map =
+                subscribeCache.containsKey(topicFilter) ? subscribeCache.get(topicFilter) : new ConcurrentHashMap<String, SubscribeStore>();
+        map.put(subscribeStore.getClientId(), subscribeStore);
+        subscribeCache.put(topicFilter, map);
     }
 
     @Override
     public SubscribeStore get(String topicFilter, String clientId) {
-        if (subscribeNotWildcardCache.get(topicFilter).get(clientId).getClientId().isEmpty()) {
-            return subscribeWildcardCache.get(topicFilter).get(clientId);
+        if (0 != subscribeCache.size() && !subscribeCache.get(topicFilter).isEmpty()) {
+            return subscribeCache.get(topicFilter).get(clientId);
         }
-        return subscribeNotWildcardCache.get(topicFilter).get(clientId);
+        return null;
     }
 
     @Override
     public void remove(String topicFilter, String clientId) {
-        if (StrUtil.contains(topicFilter, '#') || StrUtil.contains(topicFilter, '+')) {
-            if (subscribeWildcardCache.containsKey(topicFilter)) {
-                ConcurrentHashMap<String, SubscribeStore> map = subscribeWildcardCache.get(topicFilter);
-                if (map.containsKey(clientId)) {
-                    map.remove(clientId);
-                    if (map.size() > 0) {
-                        subscribeWildcardCache.put(topicFilter, map);
-                    } else {
-                        subscribeWildcardCache.remove(topicFilter);
-                    }
-                }
-            }
-        } else {
-            if (subscribeNotWildcardCache.containsKey(topicFilter)) {
-                ConcurrentHashMap<String, SubscribeStore> map = subscribeNotWildcardCache.get(topicFilter);
-                if (map.containsKey(clientId)) {
-                    map.remove(clientId);
-                    if (map.size() > 0) {
-                        subscribeNotWildcardCache.put(topicFilter, map);
-                    } else {
-                        subscribeNotWildcardCache.remove(topicFilter);
-                    }
+        if (subscribeCache.containsKey(topicFilter)) {
+            ConcurrentHashMap<String, SubscribeStore> map = subscribeCache.get(topicFilter);
+            if (map.containsKey(clientId)) {
+                map.remove(clientId);
+                if (map.size() > 0) {
+                    subscribeCache.put(topicFilter, map);
+                } else {
+                    subscribeCache.remove(topicFilter);
                 }
             }
         }
@@ -76,26 +54,14 @@ public class ISubscribeStoreImpl implements ISubscribeStore {
 
     @Override
     public void removeForClient(String clientId) {
-        for (Map.Entry<String, ConcurrentHashMap<String, SubscribeStore>> entry : subscribeNotWildcardCache.entrySet()) {
+        for (Map.Entry<String, ConcurrentHashMap<String, SubscribeStore>> entry : subscribeCache.entrySet()) {
             ConcurrentHashMap<String, SubscribeStore> map = entry.getValue();
             if (map.containsKey(clientId)) {
                 map.remove(clientId);
                 if (map.size() > 0) {
-                    subscribeNotWildcardCache.put(entry.getKey(), map);
+                    subscribeCache.put(entry.getKey(), map);
                 } else {
-                    subscribeNotWildcardCache.remove(entry.getKey());
-                }
-            }
-        }
-
-        for (Map.Entry<String, ConcurrentHashMap<String, SubscribeStore>> entry : subscribeWildcardCache.entrySet()) {
-            ConcurrentHashMap<String, SubscribeStore> map = entry.getValue();
-            if (map.containsKey(clientId)) {
-                map.remove(clientId);
-                if (map.size() > 0) {
-                    subscribeWildcardCache.put(entry.getKey(), map);
-                } else {
-                    subscribeWildcardCache.remove(entry.getKey());
+                    subscribeCache.remove(entry.getKey());
                 }
             }
         }
@@ -104,38 +70,11 @@ public class ISubscribeStoreImpl implements ISubscribeStore {
     @Override
     public List<SubscribeStore> searchByTopic(String topic) {
         List<SubscribeStore> subscribeStores = new ArrayList<SubscribeStore>();
-        if (subscribeNotWildcardCache.containsKey(topic)) {
-            ConcurrentHashMap<String, SubscribeStore> map = subscribeNotWildcardCache.get(topic);
+        if (subscribeCache.containsKey(topic)) {
+            ConcurrentHashMap<String, SubscribeStore> map = subscribeCache.get(topic);
             Collection<SubscribeStore> collection = map.values();
             List<SubscribeStore> list = new ArrayList<SubscribeStore>(collection);
             subscribeStores.addAll(list);
-        }
-
-        for (Map.Entry<String, ConcurrentHashMap<String, SubscribeStore>> entry : subscribeWildcardCache.entrySet()) {
-            String topicFilter = entry.getKey();
-            if (StrUtil.split(topic, '/').size() >= StrUtil.split(topicFilter, '/').size()) {
-                List<String> splitTopics = StrUtil.split(topic, '/');
-                List<String> spliteTopicFilters = StrUtil.split(topicFilter, '/');
-                String newTopicFilter = "";
-                for (int i = 0; i < spliteTopicFilters.size(); i++) {
-                    String value = spliteTopicFilters.get(i);
-                    if (value.equals("+")) {
-                        newTopicFilter = newTopicFilter + "+/";
-                    } else if (value.equals("#")) {
-                        newTopicFilter = newTopicFilter + "#/";
-                        break;
-                    } else {
-                        newTopicFilter = newTopicFilter + splitTopics.get(i) + "/";
-                    }
-                }
-                newTopicFilter = StrUtil.removeSuffix(newTopicFilter, "/");
-                if (topicFilter.equals(newTopicFilter)) {
-                    ConcurrentHashMap<String, SubscribeStore> map = entry.getValue();
-                    Collection<SubscribeStore> collection = map.values();
-                    List<SubscribeStore> list = new ArrayList<SubscribeStore>(collection);
-                    subscribeStores.addAll(list);
-                }
-            }
         }
         return subscribeStores;
     }
@@ -143,14 +82,7 @@ public class ISubscribeStoreImpl implements ISubscribeStore {
     @Override
     public List<SubscribeStore> searchByClientId(String clientId) {
         List<SubscribeStore> subscribeStores = new ArrayList<SubscribeStore>();
-        for (Map.Entry<String, ConcurrentHashMap<String, SubscribeStore>> entry : subscribeWildcardCache.entrySet()) {
-            ConcurrentHashMap<String, SubscribeStore> map = entry.getValue();
-            if (map.containsKey(clientId)) {
-                subscribeStores.add(map.get(clientId));
-            }
-        }
-
-        for (Map.Entry<String, ConcurrentHashMap<String, SubscribeStore>> entry : subscribeNotWildcardCache.entrySet()) {
+        for (Map.Entry<String, ConcurrentHashMap<String, SubscribeStore>> entry : subscribeCache.entrySet()) {
             ConcurrentHashMap<String, SubscribeStore> map = entry.getValue();
             if (map.containsKey(clientId)) {
                 subscribeStores.add(map.get(clientId));
