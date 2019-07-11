@@ -70,7 +70,7 @@ public class FiscoBcos {
     public void init(String address) throws BrokerException {
         if (this.topicController == null) {
             this.credentials = Web3SDKWrapper.getCredentials(this.fiscoConfig);
-            this.web3j = Web3SDKWrapper.initWeb3j(this.fiscoConfig);
+            this.web3j = Web3SDKWrapper.initWeb3j(this.fiscoConfig, FiscoBcosDelegate.threadPool);
             this.topicController = (TopicController) getContractService(address, TopicController.class);
         }
     }

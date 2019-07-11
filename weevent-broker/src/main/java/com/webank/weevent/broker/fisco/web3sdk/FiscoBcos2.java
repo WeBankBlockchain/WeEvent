@@ -67,7 +67,7 @@ public class FiscoBcos2 {
         if (this.topicController == null) {
             this.groupId = groupId;
             this.credentials = Web3SDK2Wrapper.getCredentials(this.fiscoConfig);
-            this.web3j = Web3SDK2Wrapper.initWeb3j(groupId, this.fiscoConfig);
+            this.web3j = Web3SDK2Wrapper.initWeb3j(groupId, this.fiscoConfig, FiscoBcosDelegate.threadPool);
             this.topicController = (TopicController) getContractService(address, TopicController.class);
         }
     }
