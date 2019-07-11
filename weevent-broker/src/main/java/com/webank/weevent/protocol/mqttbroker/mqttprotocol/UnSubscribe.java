@@ -34,11 +34,12 @@ public class UnSubscribe {
     }
 
     public void processUnSubscribe(Channel channel, MqttUnsubscribeMessage msg) {
+        log.debug("processUnSubscribe: variableHeader:{} payLoadLen:{}", msg.variableHeader().toString(), msg.payload().toString().length());
         List<String> topicFilters = msg.payload().topics();
         String clientId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
         topicFilters.forEach(topicFilter -> {
             try {
-                if (!StringUtils.isBlank(iSubscribeStore.get(topicFilter, clientId).getSubscriptionId())) {
+                if (null != iSubscribeStore.get(topicFilter, clientId)) {
                     iConsumer.unSubscribe(iSubscribeStore.get(topicFilter, clientId).getSubscriptionId());
                 }
             } catch (BrokerException e) {

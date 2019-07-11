@@ -5,6 +5,7 @@ import com.webank.weevent.protocol.mqttbroker.common.dto.SessionStore;
 import com.webank.weevent.protocol.mqttbroker.store.ISessionStore;
 
 import com.webank.weevent.protocol.mqttbroker.store.ISubscribeStore;
+
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttConnAckMessage;
@@ -43,7 +44,9 @@ public class Connect {
     }
 
     public void processConnect(Channel channel, MqttConnectMessage msg) {
+        log.debug("processConnect variableHeader:{} payLoadLen:{}", msg.variableHeader().toString(), msg.payload().toString().length());
         if (msg.decoderResult().isFailure()) {
+            log.error("MqttConnectMessage decoder Error:{}", msg.decoderResult().toString());
             Throwable cause = msg.decoderResult().cause();
             if (cause instanceof MqttUnacceptableProtocolVersionException) {
                 //Unsupported protocol
@@ -67,6 +70,7 @@ public class Connect {
         }
 
         if (StringUtils.isBlank(msg.payload().clientIdentifier())) {
+            log.error("clientId is blank");
             MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
                     new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
                     new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED, false), null);
@@ -79,6 +83,7 @@ public class Connect {
         String username = msg.payload().userName();
         String password = msg.payload().passwordInBytes() == null ? null : new String(msg.payload().passwordInBytes(), CharsetUtil.UTF_8);
         if (!iAuthService.verifyUserName(username, password)) {
+            log.error("verify userName and passWord error");
             MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
                     new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
                     new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD, false), null);
@@ -89,6 +94,7 @@ public class Connect {
 
         //if clientId session exist close it
         if (iSessionStore.containsKey(msg.payload().clientIdentifier())) {
+            log.info("clientId exist close it");
             SessionStore sessionStore = iSessionStore.get(msg.payload().clientIdentifier());
             Channel previous = sessionStore.getChannel();
             iSessionStore.remove(msg.payload().clientIdentifier());
@@ -121,6 +127,6 @@ public class Connect {
                 new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
                 new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_ACCEPTED, sessionPresent), null);
         channel.writeAndFlush(okResp);
-        log.debug("CONNECT - clientId: {}, cleanSession: {}", msg.payload().clientIdentifier(), msg.variableHeader().isCleanSession());
+        log.info("CONNECT - clientId: {}, cleanSession: {}", msg.payload().clientIdentifier(), msg.variableHeader().isCleanSession());
     }
 }
