@@ -19,21 +19,31 @@ public class ISessionStoreImpl implements ISessionStore {
 
     @Override
     public void put(String clientId, SessionStore sessionStore) {
-        sessionCache.put(clientId, sessionStore);
+        if (null != sessionStore) {
+            sessionCache.put(clientId, sessionStore);
+        }
     }
 
     @Override
     public SessionStore get(String clientId) {
-        return sessionCache.get(clientId);
+        if (null != sessionCache) {
+            return sessionCache.get(clientId);
+        }
+        return null;
     }
 
     @Override
     public boolean containsKey(String clientId) {
-        return sessionCache.containsKey(clientId);
+        if (null != sessionCache) {
+            return sessionCache.containsKey(clientId);
+        }
+        return false;
     }
 
     @Override
     public void remove(String clientId) {
-        sessionCache.remove(clientId);
+        if (null != sessionCache) {
+            sessionCache.remove(clientId);
+        }
     }
 }
