@@ -64,8 +64,13 @@ public class Publish {
     private SendResult sendMessageToFisco(String topic, byte[] messageBytes, String groupId, Map<String, String> extensions) {
         SendResult sendResult = new SendResult();
         try {
-            this.iproducer.open(topic, groupId);
-            sendResult = this.iproducer.publish(new WeEvent(topic, messageBytes, extensions), groupId);
+            //this.iproducer.open(topic, groupId);
+            if (this.iproducer.exist(topic,groupId)) {
+                sendResult = this.iproducer.publish(new WeEvent(topic, messageBytes, extensions), groupId);
+            }else {
+                sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+                log.error("topic is not exist");
+            }
         } catch (BrokerException e) {
             log.error("publish error:{}", sendResult.toString());
         }
