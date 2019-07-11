@@ -23,11 +23,12 @@ import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * Detect FISCO-BCOS version from configuration 'fisco.properties' and then proxy all the invoke to the target.
  * Parameter groupId in all interface:
- * a. default 0L in 1.3.x
+ * a. default 1L in 1.3.x
  * b. default 1L in 2.x, meanings first group
  * There is 2 different caches for block data. One is local memory, another is redis.
  * All can be opened/closed by configuration. And is independent to each other.
@@ -42,6 +43,9 @@ public class FiscoBcosDelegate {
 
     // access to version 2.x
     private Map<Long, FiscoBcos2> fiscoBcos2Map;
+
+    // web3sdk thread pool
+    public static ThreadPoolTaskExecutor threadPool;
 
     // block data cached in redis
     private static RedisService redisService;
@@ -76,6 +80,21 @@ public class FiscoBcosDelegate {
         }
     }
 
+    public static ThreadPoolTaskExecutor initThreadPool(FiscoConfig fiscoConfig) {
+        // init thread pool
+        ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
+        pool.setThreadGroupName("web3sdk");
+        pool.setCorePoolSize(fiscoConfig.getWeb3sdkCorePoolSize());
+        pool.setMaxPoolSize(fiscoConfig.getWeb3sdkMaxPoolSize());
+        pool.setQueueCapacity(fiscoConfig.getWeb3sdkQueueSize());
+        pool.setKeepAliveSeconds(fiscoConfig.getWeb3sdkKeepAliveSeconds());
+        pool.setRejectedExecutionHandler(new java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy());
+        pool.initialize();
+
+        log.info("init ThreadPoolTaskExecutor");
+        return pool;
+    }
+
     public void initProxy() throws BrokerException {
         FiscoConfig fiscoConfig = new FiscoConfig();
         if (!fiscoConfig.load()) {
@@ -83,8 +102,13 @@ public class FiscoBcosDelegate {
             throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
         }
 
+        threadPool = initThreadPool(fiscoConfig);
+
         if (fiscoConfig.getVersion().startsWith("1.3")) {
             log.info("Notice: FISCO-BCOS‘s version is 1.x");
+
+            // setting web3sdk.Async thread pool
+            // new org.bcos.web3j.utils.Async(threadPool);
 
             FiscoBcos fiscoBcos = new FiscoBcos(fiscoConfig);
             fiscoBcos.init(fiscoConfig.getTopicControllerAddress());
@@ -92,6 +116,9 @@ public class FiscoBcosDelegate {
             this.fiscoBcos = fiscoBcos;
         } else if (fiscoConfig.getVersion().startsWith("2.")) {
             log.info("Notice: FISCO-BCOS‘s version is 2.x");
+
+            // setting web3sdk.Async thread pool
+            // new org.fisco.bcos.web3j.utils.Async(threadPool);
 
             String[] tokens = fiscoConfig.getTopicControllerAddress().split(";");
             for (String token : tokens) {
@@ -106,6 +133,9 @@ public class FiscoBcosDelegate {
 
                 this.fiscoBcos2Map.put(groupId, fiscoBcos2);
             }
+        } else {
+            log.error("unknown FISCO-BCOS's version");
+            throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
         }
 
         initRedisService();
