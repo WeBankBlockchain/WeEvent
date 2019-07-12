@@ -16,7 +16,6 @@ dependencies {
 
     // mqtt
     implementation("org.springframework.integration:spring-integration-mqtt")
-    implementation("cn.hutool:hutool-core:4.5.11")
 
     // json rpc, https://mvnrepository.com/artifact/com.github.briandilley.jsonrpc4j/jsonrpc4j
     implementation("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.3")
@@ -32,7 +31,7 @@ dependencies {
     implementation("redis.clients:jedis:3.0.0")
 
     // web3sdk 2.0
-    implementation("org.fisco-bcos:web3sdk:2.0.4")
+    implementation("org.fisco-bcos:web3sdk:2.0.5-SNAPSHOT")
     // web3sdk 1.3
     implementation("org.fisco-bcos:web3sdk-weevent:1.2.5") {
         exclude group: "org.slf4j", module: "slf4j-log4j12"
