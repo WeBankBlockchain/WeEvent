@@ -9,7 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.webank.weevent.protocol.mqttbroker.store.ISubscribeStore;
 import com.webank.weevent.protocol.mqttbroker.store.dto.SubscribeStore;
 
-import cn.hutool.core.util.StrUtil;
 import org.springframework.stereotype.Service;
 
 /**
