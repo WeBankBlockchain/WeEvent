@@ -24,9 +24,7 @@ function check_broker(){
 
 function check_governance(){
     echo "check governance service"
-
     governanceExist=`curl -s "http://127.0.0.1:8080/weevent-governance/topic/getTopics?pageIndex=0&pageSize=10"`
-
     if [[ ! -z $governanceExist ]];then
         yellow_echo "governance service is ok"
     else
