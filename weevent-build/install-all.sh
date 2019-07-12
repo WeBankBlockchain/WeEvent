@@ -116,8 +116,7 @@ function install_module(){
 }
 
 function update_check_server(){
-    sed -i "s/8080\/weevent/$broker_port\/weevent/" check-service.sh
-    sed -i "s/8082\/weevent-governance/$governance_port\/weevent-governance/" check-service.sh
+    sed -i "s/8080/$nginx_port/g" check-service.sh
 }
 
 function main(){
