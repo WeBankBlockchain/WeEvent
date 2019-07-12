@@ -91,7 +91,7 @@ function build_weevent(){
 function copy_install_file(){
     cd ${current_path}
 
-    cp ./README.md ./config.properties ./install-all.sh ./start-all.sh ./check-service.sh ./stop-all.sh ./uninstall-all.sh ${out_path}
+    cp ./config.properties ./install-all.sh ./start-all.sh ./check-service.sh ./stop-all.sh ./uninstall-all.sh ${out_path}
     cp -r ./third-packages ${out_path}
 
     mkdir -p ${out_path}/modules/broker
