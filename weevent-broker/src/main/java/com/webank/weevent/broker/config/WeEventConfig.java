@@ -22,9 +22,6 @@ public class WeEventConfig {
     @Value("${ip.check.white-table:}")
     private String ipWhiteTable;
 
-    @Value("${consumer.helper-thread-num:10}")
-    private Integer consumerHelperThreadNum;
-
     @Value("${consumer.idle-time:1000}")
     private Integer consumerIdleTime;
 

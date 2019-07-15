@@ -20,6 +20,7 @@ import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -226,5 +227,19 @@ public class BrokerApplication {
     @Bean
     public static MasterJob getMasterJob() {
         return new MasterJob();
+    }
+
+    // daemon thread pool
+    @Bean(name = "weevent_daemon_task_executor")
+    public static ThreadPoolTaskExecutor getThreadPoolTaskExecutor() {
+        ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
+        pool.setThreadNamePrefix("weevent_daemon_");
+        // run in thread immediately, no blocking queue
+        pool.setQueueCapacity(0);
+        pool.setDaemon(true);
+        pool.initialize();
+
+        log.info("init weevent daemon thread pool");
+        return pool;
     }
 }
