@@ -43,7 +43,7 @@ public enum ErrorCode {
 
     EVENT_ID_IS_BLANK(100300, "eventId is blank"),
 
-    EVENT_ID_EXCEEDS_MAX_LENGTH(100301, "eventId exceeds max length[32 bytes]"),
+    EVENT_ID_EXCEEDS_MAX_LENGTH(100301, "eventId exceeds max length[64 bytes]"),
 
     EVENT_ID_IS_ILLEGAL(100302, "eventId is illegal"),
 
