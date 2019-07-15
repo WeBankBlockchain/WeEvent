@@ -432,9 +432,14 @@ html,body,#app{
     border-radius: 5px;
     position: relative;
     .refresh{
-      margin-top:10px;
-      margin-bottom:6px;
       overflow: hidden;
+      position: absolute;
+      width:100%;
+      padding:20px;
+      top:0;
+      left:0;
+      z-index: 99;
+      background:#fff;
       .update_btn{
         float:right;
         padding:8px 15px;
@@ -457,8 +462,8 @@ html,body,#app{
     .el-table{
       background: transparent;
       height:100%;
-      padding-bottom:55px;
-      position: relative;
+      padding-top:60px;
+      
       &::before{
         height:0;
       }
@@ -467,13 +472,10 @@ html,body,#app{
         height:auto; 
       }
       .el-table__body-wrapper{
-        position: absolute;
-        top:50px;
-        left:0;
-        right:0;
-        bottom:0;
         overflow-x: hidden;
         overflow-y: auto;
+        height:100%;
+        padding-bottom: 50px;
         &::-webkit-scrollbar{
           width:10px;
           height:1px;
