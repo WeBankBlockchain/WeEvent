@@ -1,6 +1,6 @@
 <template>
   <div class="group  event-table">
-    <div class='control_part'>
+    <div class='control_part refresh'>
       <el-input placeholder="请输入交易哈希或块高" v-model.trim='search_name'>
         <template slot='append'>
           <el-button type='primary' icon='el-icon-search' @click='search'></el-button>
@@ -62,7 +62,7 @@
       >
       <template  slot-scope="scope">
         <i class='el-icon-copy-document' style='margin-right:5px;cursor:pointer' v-clipboard:copy='scope.row.transHash' v-clipboard:success='onCopy'></i>
-        <a :title='scope.row.logMsg' style='cursor:pointer' >{{scope.row.transHash}}</a>
+        <a :title='scope.row.logMsg'>{{scope.row.transHash}}</a>
       </template>
       </el-table-column>
       <el-table-column
