@@ -83,12 +83,14 @@ public class FiscoBcosDelegate {
     public static ThreadPoolTaskExecutor initThreadPool(FiscoConfig fiscoConfig) {
         // init thread pool
         ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
-        pool.setThreadGroupName("web3sdk");
+        pool.setThreadNamePrefix("web3sdk_");
         pool.setCorePoolSize(fiscoConfig.getWeb3sdkCorePoolSize());
         pool.setMaxPoolSize(fiscoConfig.getWeb3sdkMaxPoolSize());
         pool.setQueueCapacity(fiscoConfig.getWeb3sdkQueueSize());
         pool.setKeepAliveSeconds(fiscoConfig.getWeb3sdkKeepAliveSeconds());
-        pool.setRejectedExecutionHandler(new java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy());
+        // abort policy
+        pool.setRejectedExecutionHandler(null);
+        pool.setDaemon(true);
         pool.initialize();
 
         log.info("init ThreadPoolTaskExecutor");

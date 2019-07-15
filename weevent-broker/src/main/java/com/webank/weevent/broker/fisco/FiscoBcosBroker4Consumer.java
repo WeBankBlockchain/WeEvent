@@ -27,6 +27,7 @@ import com.webank.weevent.sdk.WeEvent;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * Event broker's consumer implement in FISCO-BCOS.
@@ -49,6 +50,11 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     private Map<Long, MainEventLoop> mainEventLoops = new ConcurrentHashMap<>();
 
     /**
+     * daemon thread pool
+     */
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
+
+    /**
      * Whether the Consumer has started
      */
     private boolean consumerStarted = false;
@@ -61,6 +67,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     public FiscoBcosBroker4Consumer() {
         super();
 
+        this.threadPoolTaskExecutor = (ThreadPoolTaskExecutor) BrokerApplication.applicationContext.getBean("weevent_daemon_task_executor");
         this.idleTime = BrokerApplication.weEventConfig.getConsumerIdleTime();
     }
 
@@ -292,7 +299,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         // load MainEventLoop with configuration
         for (Long groupId : fiscoBcosDelegate.listGroupId()) {
             MainEventLoop mainEventLoop = new MainEventLoop(groupId);
-            mainEventLoop.start();
+            this.threadPoolTaskExecutor.execute(mainEventLoop);
             this.mainEventLoops.put(groupId, mainEventLoop);
         }
 
@@ -398,7 +405,6 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                 log.info("not OFFSET_LAST, need history event loop");
 
                 this.historyEventLoop = new HistoryEventLoop(topics, groupId, offset, this.notifyTask);
-                this.historyEventLoop.setOffset(offset);
             }
         }
 
@@ -441,10 +447,9 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         }
 
         synchronized void doStart() {
-            this.notifyTask.start();
-
+            threadPoolTaskExecutor.execute(this.notifyTask);
             if (this.historyEventLoop != null) {
-                this.historyEventLoop.start();
+                threadPoolTaskExecutor.execute(this.historyEventLoop);
             }
         }
 
@@ -452,26 +457,16 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         synchronized void doStop() {
             stopHistory();
 
-            try {
-                if (this.notifyTask != null) {
-                    this.notifyTask.doExit();
-                    this.notifyTask.join();
-                    this.notifyTask = null;
-                }
-            } catch (InterruptedException e) {
-                log.error("stop notify task failed", e);
+            if (this.notifyTask != null) {
+                this.notifyTask.doExit();
+                this.notifyTask = null;
             }
         }
 
         synchronized void stopHistory() {
-            try {
-                if (this.historyEventLoop != null) {
-                    this.historyEventLoop.doExit();
-                    this.historyEventLoop.join();
-                    this.historyEventLoop = null;
-                }
-            } catch (InterruptedException e) {
-                log.error("stop history task failed", e);
+            if (this.historyEventLoop != null) {
+                this.historyEventLoop.doExit();
+                this.historyEventLoop = null;
             }
         }
 
