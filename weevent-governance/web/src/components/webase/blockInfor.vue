@@ -1,6 +1,6 @@
 <template>
   <div class="group  event-table">
-    <div class='control_part'>
+    <div class='control_part refresh'>
       <el-input placeholder="请输入交易哈希或块高" v-model.trim='search_name'>
         <template slot='append'>
           <el-button type='primary' icon='el-icon-search' @click='search'></el-button>
