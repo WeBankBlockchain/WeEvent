@@ -4,13 +4,13 @@ package com.webank.weevent.protocol.rest;
 import javax.servlet.http.HttpServletRequest;
 
 import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.ErrorCode;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @Data
 class SimpleException {
@@ -34,7 +34,7 @@ class SimpleException {
 @Slf4j
 @ControllerAdvice
 @RestController
-public class GlobalExceptionHandler{
+public class GlobalExceptionHandler {
     @ExceptionHandler(value = BrokerException.class)
     public Object baseErrorHandler(HttpServletRequest req, BrokerException e) {
         log.error("detect BrokerException", e);
@@ -51,7 +51,11 @@ public class GlobalExceptionHandler{
     public Object baseErrorHandler(HttpServletRequest req, Exception e) {
         log.error("detect Exception", e);
 
+        SimpleException simpleException = new SimpleException();
+        simpleException.setCode(ErrorCode.UNKNOWN_ERROR.getCode());
+        simpleException.setMessage(e.getMessage());
+
         log.error("rest api Exception, remote: {} uri: {}", req.getRemoteHost(), req.getRequestURL());
-        return e;
+        return simpleException;
     }
 }
