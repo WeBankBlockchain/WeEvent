@@ -26,8 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.handler.ChannelConnections;
 import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
-import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.fisco.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.protocol.Web3j;
@@ -96,9 +94,9 @@ public class Web3SDK2Wrapper {
             // group info
             service.setOrgID(fiscoConfig.getOrgId());
             service.setGroupId(groupId.intValue());
-            service.setConnectSeconds(web3sdkTimeout);
+            service.setConnectSeconds(web3sdkTimeout / 1000);
             // reconnect idle time 100ms
-            service.setConnectSeconds(100);
+            service.setConnectSleepPerMillis(100);
 
             // connect key and string
             GroupChannelConnectionsConfig connectionsConfig = new GroupChannelConnectionsConfig();
@@ -305,52 +303,14 @@ public class Web3SDK2Wrapper {
             }
 
             return events;
-        } catch (InterruptedException | ExecutionException | TimeoutException | NullPointerException e) { // Web3sdk's rpc return null
+        } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
-            log.error("loop block failed due to InterruptedException|ExecutionException|TimeoutException|NullPointerException", e);
+            log.error("loop block failed due to ExecutionException|TimeoutException|NullPointerException|InterruptedException", e);
             return null;
         } catch (RuntimeException e) {
             log.error("loop block failed due to RuntimeException", e);
             throw new BrokerException("loop block failed due to RuntimeException", e);
         }
-    }
-
-    /**
-     * String to bytes 32.
-     *
-     * @param string the string
-     * @return the bytes 32
-     */
-    public static Bytes32 stringToBytes32(String string) {
-        byte[] byteValue = string.getBytes();
-        byte[] byteValueLen32 = new byte[32];
-        System.arraycopy(byteValue, 0, byteValueLen32, 0, byteValue.length);
-        return new Bytes32(byteValueLen32);
-    }
-
-    /**
-     * Uint 256 to int.
-     *
-     * @param value the value
-     * @return the int
-     */
-    public static int uint256ToInt(Uint256 value) {
-        return value.getValue().intValue();
-    }
-
-
-    /**
-     * Convert a Byte32 data to Java String. IMPORTANT NOTE: Byte to String is not 1:1 mapped. So -
-     * Know your data BEFORE do the actual transform! For example, Deximal Bytes, or ASCII Bytes are
-     * OK to be in Java String, but Encrypted Data, or raw Signature, are NOT OK.
-     *
-     * @param bytes32 the bytes 32
-     * @return String
-     */
-    public static String bytes32ToString(Bytes32 bytes32) {
-        byte[] strs = bytes32.getValue();
-        String str = new String(strs);
-        return str.trim();
     }
 }
 
