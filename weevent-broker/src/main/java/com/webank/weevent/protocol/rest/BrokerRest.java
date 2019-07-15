@@ -43,7 +43,7 @@ public class BrokerRest extends RestHA implements IBrokerRpc {
 
     @RequestMapping(path = "/publish")
     public SendResult publish(@RequestParam Map<String, String> eventData) throws BrokerException {
-        log.info("rest protocol publish interface publishData:{}", JSON.toJSONString(eventData));
+        log.info("rest protocol publish interface publishData: {}", JSON.toJSONString(eventData));
         if (!eventData.containsKey(WeEventConstants.EVENT_TOPIC)
                 || !eventData.containsKey(WeEventConstants.EVENT_CONTENT)) {
             log.error("miss param");
