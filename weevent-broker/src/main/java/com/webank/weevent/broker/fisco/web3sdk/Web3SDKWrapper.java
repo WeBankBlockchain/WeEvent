@@ -57,7 +57,7 @@ public class Web3SDKWrapper {
      *
      * @return Web3j
      */
-    public static Web3j initWeb3j(FiscoConfig fiscoConfig) throws BrokerException {
+    public static Web3j initWeb3j(FiscoConfig fiscoConfig, ThreadPoolTaskExecutor poolTaskExecutor) throws BrokerException {
         // init web3j with given group id
         try {
             log.info("begin to initialize web3sdk");
@@ -67,9 +67,9 @@ public class Web3SDKWrapper {
             Service service = new Service();
             // group info
             service.setOrgID(fiscoConfig.getOrgId());
-            service.setConnectSeconds(web3sdkTimeout);
+            service.setConnectSeconds(web3sdkTimeout / 1000);
             // reconnect idle time 100ms
-            service.setConnectSeconds(100);
+            service.setConnectSleepPerMillis(100);
 
             // connect key and string
             ChannelConnections channelConnections = new ChannelConnections();
@@ -85,17 +85,7 @@ public class Web3SDKWrapper {
             ConcurrentHashMap<String, ChannelConnections> keyID2connections = new ConcurrentHashMap<>();
             keyID2connections.put(fiscoConfig.getOrgId(), channelConnections);
             service.setAllChannelConnections(keyID2connections);
-
-            // thread pool
-            ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
-            pool.setBeanName("web3sdk");
-            pool.setCorePoolSize(fiscoConfig.getWeb3sdkCorePoolSize());
-            pool.setMaxPoolSize(fiscoConfig.getWeb3sdkMaxPoolSize());
-            pool.setQueueCapacity(fiscoConfig.getWeb3sdkQueueSize());
-            pool.setKeepAliveSeconds(fiscoConfig.getWeb3sdkKeepAliveSeconds());
-            pool.setRejectedExecutionHandler(new java.util.concurrent.ThreadPoolExecutor.AbortPolicy());
-            pool.initialize();
-            service.setThreadPool(pool);
+            service.setThreadPool(poolTaskExecutor);
             service.run();
 
             ChannelEthereumService channelEthereumService = new ChannelEthereumService();
@@ -283,9 +273,9 @@ public class Web3SDKWrapper {
             }
 
             return events;
-        } catch (InterruptedException | ExecutionException | TimeoutException | NullPointerException e) { // Web3sdk's rpc return null
+        } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
-            log.error("loop block failed due to InterruptedException|ExecutionException|TimeoutException|NullPointerException", e);
+            log.error("loop block failed due to ExecutionException|TimeoutException|NullPointerException|InterruptedException", e);
             return null;
         } catch (RuntimeException e) {
             log.error("loop block failed due to RuntimeException", e);

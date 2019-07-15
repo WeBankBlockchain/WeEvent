@@ -19,20 +19,8 @@ import org.springframework.stereotype.Component;
 @Component
 @PropertySource(value = "classpath:weevent.properties", encoding = "UTF-8")
 public class WeEventConfig {
-    @Value("${server.port:8081}")
-    private String serverPort;
-
-    @Value("${server.ssl.enabled:false}")
-    private String sslEnable;
-
-    @Value("${server.ssl.key-store-password:}")
-    private String sslPassword;
-
     @Value("${ip.check.white-table:}")
     private String ipWhiteTable;
-
-    @Value("${consumer.helper-thread-num:10}")
-    private Integer consumerHelperThreadNum;
 
     @Value("${consumer.idle-time:1000}")
     private Integer consumerIdleTime;

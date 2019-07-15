@@ -11,7 +11,7 @@ function yellow_echo () {
 function check_broker(){
     echo "check broker service"
 
-    existTopic=`curl -s "http://localhost:8080/weevent/rest/exist?topic=hello"`
+    existTopic=`curl -s "http://127.0.0.1:8080/weevent/rest/exist?topic=hello"`
 
     if [[ ! -z $existTopic ]];then
         yellow_echo "broker service is ok"
@@ -24,9 +24,7 @@ function check_broker(){
 
 function check_governance(){
     echo "check governance service"
-
-    governanceExist=`curl -s "http://localhost:8082/weevent-governance/topic/getTopics?pageIndex=0&pageSize=10"`
-
+    governanceExist=`curl -s "http://127.0.0.1:8080/weevent-governance/topic/getTopics?pageIndex=0&pageSize=10"`
     if [[ ! -z $governanceExist ]];then
         yellow_echo "governance service is ok"
     else

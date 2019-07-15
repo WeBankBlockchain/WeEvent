@@ -11,6 +11,10 @@ buildscript {
     }
 }
 
+List lombok = [
+        "org.projectlombok:lombok:1.16.14"
+]
+
 allprojects {
     group "com.webank.weevent"
     version "1.0.0"
@@ -28,6 +32,7 @@ allprojects {
     repositories {
         maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
         maven { url "https://dl.bintray.com/ethereum/maven/" }
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         mavenLocal()
         mavenCentral()
     }
@@ -54,9 +59,20 @@ allprojects {
         }
     }
 
+    configurations.all {
+        // exclude spring-boot's default logger logback
+        exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
+
+        resolutionStrategy {
+            // fix security bug
+            force "com.alibaba:fastjson:1.2.58"
+        }
+    }
+
     // all project common lib
     dependencies {
-        implementation("org.projectlombok:lombok:1.16.14")
+        compileOnly(lombok)
+        annotationProcessor(lombok)
 
         // apache commons
         implementation("org.apache.commons:commons-lang3:3.6")
@@ -67,6 +83,8 @@ allprojects {
 
         // junit test
         testImplementation("junit:junit:4.12")
+        testCompileOnly(lombok)
+        testAnnotationProcessor(lombok)
     }
 }
 

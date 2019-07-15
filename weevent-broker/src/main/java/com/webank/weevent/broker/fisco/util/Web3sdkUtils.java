@@ -9,6 +9,7 @@ import com.webank.weevent.broker.fisco.web3sdk.Web3SDK2Wrapper;
 import com.webank.weevent.broker.fisco.web3sdk.Web3SDKWrapper;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 
 /**
@@ -40,6 +41,8 @@ public class Web3sdkUtils {
         try {
             FiscoConfig fiscoConfig = new FiscoConfig();
             fiscoConfig.load();
+            ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+            taskExecutor.initialize();
 
             String address = "";
             if (fiscoConfig.getVersion().startsWith("2.")) {
@@ -49,12 +52,12 @@ public class Web3sdkUtils {
                     groupId = Long.valueOf(args[1]);
                 }
                 org.fisco.bcos.web3j.crypto.Credentials credentials = Web3SDK2Wrapper.getCredentials(fiscoConfig);
-                org.fisco.bcos.web3j.protocol.Web3j web3j = Web3SDK2Wrapper.initWeb3j(groupId, fiscoConfig);
+                org.fisco.bcos.web3j.protocol.Web3j web3j = Web3SDK2Wrapper.initWeb3j(groupId, fiscoConfig, taskExecutor);
                 address = Web3SDK2Wrapper.deployTopicControl(web3j, credentials);
             } else if (fiscoConfig.getVersion().startsWith("1.3")) {
                 // 1.x
                 org.bcos.web3j.crypto.Credentials credentials = Web3SDKWrapper.getCredentials(fiscoConfig);
-                org.bcos.web3j.protocol.Web3j web3j = Web3SDKWrapper.initWeb3j(fiscoConfig);
+                org.bcos.web3j.protocol.Web3j web3j = Web3SDKWrapper.initWeb3j(fiscoConfig, taskExecutor);
                 address = Web3SDKWrapper.deployTopicControl(web3j, credentials);
             } else {
                 log.error("unknown FISCO-BCOS version: {}", fiscoConfig.getVersion());
