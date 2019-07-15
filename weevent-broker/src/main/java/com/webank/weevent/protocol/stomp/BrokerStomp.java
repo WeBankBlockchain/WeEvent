@@ -313,7 +313,6 @@ public class BrokerStomp extends TextWebSocketHandler {
         // a unique identifier for that message and a subscription header matching the identifier of the subscription that is receiving the message.
         sendSimpleMessage(session, accessor);
         try {
-            super.handleTransportError(session, new Exception("unknown command"));
             // follow protocol 1.2 to close connection
             clearSession(session);
             session.close();
