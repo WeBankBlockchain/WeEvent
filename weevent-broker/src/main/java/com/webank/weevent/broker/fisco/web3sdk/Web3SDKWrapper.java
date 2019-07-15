@@ -67,9 +67,9 @@ public class Web3SDKWrapper {
             Service service = new Service();
             // group info
             service.setOrgID(fiscoConfig.getOrgId());
-            service.setConnectSeconds(web3sdkTimeout);
+            service.setConnectSeconds(web3sdkTimeout / 1000);
             // reconnect idle time 100ms
-            service.setConnectSeconds(100);
+            service.setConnectSleepPerMillis(100);
 
             // connect key and string
             ChannelConnections channelConnections = new ChannelConnections();
@@ -273,9 +273,9 @@ public class Web3SDKWrapper {
             }
 
             return events;
-        } catch (InterruptedException | ExecutionException | TimeoutException | NullPointerException e) { // Web3sdk's rpc return null
+        } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
-            log.error("loop block failed due to InterruptedException|ExecutionException|TimeoutException|NullPointerException", e);
+            log.error("loop block failed due to ExecutionException|TimeoutException|NullPointerException|InterruptedException", e);
             return null;
         } catch (RuntimeException e) {
             log.error("loop block failed due to RuntimeException", e);

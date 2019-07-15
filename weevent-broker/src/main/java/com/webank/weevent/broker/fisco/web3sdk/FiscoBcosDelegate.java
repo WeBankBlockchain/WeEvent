@@ -107,7 +107,7 @@ public class FiscoBcosDelegate {
         threadPool = initThreadPool(fiscoConfig);
 
         if (fiscoConfig.getVersion().startsWith("1.3")) {
-            log.info("Notice: FISCO-BCOS‘s version is 1.x");
+            log.info("Notice: FISCO-BCOS's version is 1.x");
 
             // set web3sdk.Async thread pool
             new org.bcos.web3j.utils.Async(threadPool);
@@ -117,7 +117,7 @@ public class FiscoBcosDelegate {
 
             this.fiscoBcos = fiscoBcos;
         } else if (fiscoConfig.getVersion().startsWith("2.")) {
-            log.info("Notice: FISCO-BCOS‘s version is 2.x");
+            log.info("Notice: FISCO-BCOS's version is 2.x");
 
             // set web3sdk.Async thread pool
             new org.fisco.bcos.web3j.utils.Async(threadPool);

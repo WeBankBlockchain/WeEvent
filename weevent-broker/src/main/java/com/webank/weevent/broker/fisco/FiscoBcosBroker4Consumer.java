@@ -402,9 +402,10 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
             this.notifyTask = new NotifyTask(this.uuid, listener);
             if (!this.offset.equals(WeEvent.OFFSET_LAST)) {
-                log.info("not OFFSET_LAST, need history event loop");
+                //not OFFSET_LAST
+                log.info("need history event loop, eventId: {}", offset);
 
-                this.historyEventLoop = new HistoryEventLoop(topics, groupId, offset, this.notifyTask);
+                this.historyEventLoop = new HistoryEventLoop(this.uuid, topics, groupId, offset, this.notifyTask);
             }
         }
 
@@ -495,7 +496,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         private Date lastTimeStamp = new Date();
 
         NotifyTask(String subscriptionId, IConsumer.ConsumerListener consumerListener) {
-            super("event-notify");
+            super("event-notify@" + subscriptionId);
 
             this.subscriptionId = subscriptionId;
             this.consumerListener = consumerListener;
@@ -588,8 +589,8 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             this.notifyTask.lastEventSeq = lastEventSeq;
         }
 
-        HistoryEventLoop(String[] topics, Long groupId, String offset, NotifyTask notifyTask) throws BrokerException {
-            super("history-event-loop");
+        HistoryEventLoop(String subscriptionId, String[] topics, Long groupId, String offset, NotifyTask notifyTask) throws BrokerException {
+            super("history-event-loop@" + subscriptionId);
 
             this.topics = topics;
             this.groupId = groupId;
