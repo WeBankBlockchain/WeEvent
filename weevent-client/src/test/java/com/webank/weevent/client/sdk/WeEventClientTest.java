@@ -114,6 +114,27 @@ public class WeEventClientTest {
     }
 
     /**
+     * Method: subscribe(String topic, String offset, IConsumer.ConsumerListener listener)
+     */
+    @Test
+    public void testSubscribeOFFSET_FIRST() throws Exception {
+        log.info("===================={}", this.testName.getMethodName());
+        // create subscriber
+        String subscriptionId = this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_FIRST, new WeEventClient.EventListener() {
+            @Override
+            public void onEvent(WeEvent event) {
+                System.out.println(event.toString());
+            }
+
+            @Override
+            public void onException(Throwable e) {
+                e.printStackTrace();
+            }
+        });
+        Thread.sleep(60000);
+    }
+
+    /**
      * test topic length > 64
      */
     @Test

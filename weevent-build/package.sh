@@ -91,7 +91,7 @@ function build_weevent(){
 function copy_install_file(){
     cd ${current_path}
 
-    cp ./README.md ./config.properties ./install-all.sh ./start-all.sh ./check-service.sh ./stop-all.sh ./uninstall-all.sh ${out_path}
+    cp ./config.properties ./install-all.sh ./start-all.sh ./check-service.sh ./stop-all.sh ./uninstall-all.sh ${out_path}
     cp -r ./third-packages ${out_path}
 
     mkdir -p ${out_path}/modules/broker
@@ -150,20 +150,6 @@ function tar_governance(){
     mv ${target} ${current_path}
 }
 
-function tar_nginx(){
-    local target=$1
-
-    yellow_echo "generate ${target}"
-    cd ${out_path}/modules
-
-    mkdir -p ./nginx/third-packages
-    cp ${current_path}/third-packages/nginx-1.14.2.tar.gz ./nginx/third-packages
-    cp ${current_path}/third-packages/pcre-8.20.tar.gz ./nginx/third-packages
-    cp -r nginx nginx-${version}
-    tar -czpvf ${target} nginx-${version}
-    mv ${target} ${current_path}
-}
-
 # package weevent-$version
 function package(){
     confirm ${out_path}
@@ -191,9 +177,6 @@ function package(){
 
     # tar governance module
     tar_governance weevent-governance-${version}.tar.gz
-
-    # tar nginx module
-    tar_nginx weevent-nginx-${version}.tar.gz
 
     # remove temporary path
     rm -rf ${out_path}

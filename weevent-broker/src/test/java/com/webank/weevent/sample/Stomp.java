@@ -74,7 +74,7 @@ public class Stomp {
                 header.set("eventId", "2cf24dba-59-1124");
                 header.set("groupId", "1");
                 // extension params
-                header.set("weevent-format", "json");
+                header.set("weevent-url", "https://github.com/WeBankFinTech/WeEvent");
 
                 StompSession.Subscription subscription = session.subscribe(header, new StompFrameHandler() {
                     @Override
@@ -173,7 +173,7 @@ public class Stomp {
                 header.set("eventId", "2cf24dba-59-1124");
                 header.set("groupId", "1");
                 // extension params
-                header.set("weevent-format", "json");
+                header.set("weevent-url", "https://github.com/WeBankFinTech/WeEvent");
                 StompSession.Subscription subscription = session.subscribe(header, new StompFrameHandler() {
                     @Override
                     public Type getPayloadType(StompHeaders headers) {

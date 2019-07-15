@@ -28,7 +28,7 @@ public class JavaSDK {
             // ensure topic exist
             client.open(topicName, groupId);
             Map<String, String> extensions = new HashMap<>();
-            extensions.put("weevent-format", "json");
+            extensions.put("weevent-url", "https://github.com/WeBankFinTech/WeEvent");
             SendResult sendResult = client.publish(topicName, groupId, "{\"hello\":\" wolrd\"}".getBytes(), extensions);
             System.out.println(sendResult.toString());
             // subscribe topic with groupId

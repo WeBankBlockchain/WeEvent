@@ -99,25 +99,24 @@ function check_result(){
 function install_module(){
     yellow_echo "install module broker"
     cd $installPWD/modules/broker
-    ./install-broker.sh --out_path $out_path/broker --listen_port $broker_port --block_chain_node_path $block_chain_node_path --channel_info $block_chain_channel --version $block_chain_version
+    ./install-broker.sh --out_path $out_path/broker --listen_port $broker_port --block_chain_node_path $block_chain_node_path --channel_info $block_chain_channel --version $block_chain_version &>> $installPWD/install.log
     check_result "install broker success"
 
     yellow_echo "install module nginx"
     cd $installPWD/modules/nginx
-    ./install-nginx.sh --nginx_path $out_path/nginx --nginx_port $nginx_port --broker_port $broker_port --governance_port $governance_port
+    ./install-nginx.sh --nginx_path $out_path/nginx --nginx_port $nginx_port --broker_port $broker_port --governance_port $governance_port &>> $installPWD/install.log
     check_result "install nginx success"
 
     if [ $governance_enable = "true" ];then
         yellow_echo "install module governance"
         cd $installPWD/modules/governance
-        ./install-governance.sh --out_path $out_path/governance --server_port $governance_port --broker_port $broker_port --mysql_ip $mysql_ip --mysql_port $mysql_port --mysql_user $mysql_user --mysql_pwd $mysql_password
+        ./install-governance.sh --out_path $out_path/governance --server_port $governance_port --broker_port $broker_port --mysql_ip $mysql_ip --mysql_port $mysql_port --mysql_user $mysql_user --mysql_pwd $mysql_password &>> $installPWD/install.log
         check_result "install governance success"
     fi
 }
 
 function update_check_server(){
-    sed -i "s/8080\/weevent/$broker_port\/weevent/" check-service.sh
-    sed -i "s/8082\/weevent-governance/$governance_port\/weevent-governance/" check-service.sh
+    sed -i "s/8080/$nginx_port/g" check-service.sh
 }
 
 function main(){
