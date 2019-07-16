@@ -66,6 +66,8 @@ allprojects {
         resolutionStrategy {
             // fix security bug
             force "com.alibaba:fastjson:1.2.58"
+            // force use netty 4.1
+            force "io.netty:netty-all:4.1.15.Final"
         }
     }
 
