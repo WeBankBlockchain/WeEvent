@@ -20,11 +20,12 @@ dependencies {
     // json rpc, https://mvnrepository.com/artifact/com.github.briandilley.jsonrpc4j/jsonrpc4j
     implementation("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.3")
 
-    // zookeeper
-    implementation("org.apache.zookeeper:zookeeper:3.4.12") {
+    // zookeeper 3.5.5 is first stable version support netty 4.1
+    implementation("org.apache.zookeeper:zookeeper:3.5.5") {
         exclude group: "org.slf4j", module: "slf4j-log4j12"
     }
-    // http://curator.apache.org/
+    // curator prefer zookeeper 3.5
+    // http://curator.apache.org/zk-compatibility.html
     implementation("org.apache.curator:curator-recipes:4.2.0")
 
     // redis
@@ -39,6 +40,7 @@ dependencies {
     // web3sdk 1.3
     implementation("org.fisco-bcos:web3sdk-weevent:1.2.5") {
         exclude group: "org.slf4j", module: "slf4j-log4j12"
+        exclude group: "org.springframework"
     }
 
     // depend project
