@@ -169,6 +169,16 @@ public class ParamCheckUtils {
             throw new BrokerException(ErrorCode.PATTERN_INVALID);
         }
 
+        if (pattern.length() > WeEventConstants.TOPIC_NAME_MAX_LENGTH) {
+            throw new BrokerException(ErrorCode.TOPIC_EXCEED_MAX_LENGTH);
+        }
+
+        for (char x : pattern.toCharArray()) {
+            if (x < 32 || x > 128) {
+                throw new BrokerException(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR);
+            }
+        }
+
         String layer[] = pattern.split(WeEventConstants.LAYER_SEPARATE);
         if (pattern.contains(WeEventConstants.WILD_CARD_ONE_LAYER)) {
             for (String x : layer) {
