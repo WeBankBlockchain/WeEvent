@@ -65,7 +65,7 @@ export default {
     headerBar
   },
   data () {
-     var checkName = (rule, value, callback) => {
+    var checkName = (rule, value, callback) => {
       if (value === '') {
         callback(new Error('请输入用户名'))
       } else {
