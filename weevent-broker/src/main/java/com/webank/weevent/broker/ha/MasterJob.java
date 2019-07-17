@@ -162,10 +162,10 @@ public class MasterJob {
             String subId;
             if (StringUtils.isBlank(subscriptionId)) {
                 log.info("new subscribe, topic: {}", topic);
-                subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, WeEventConstants.JSONRPCTYPE, listener);
+                subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, type, listener);
             } else {
                 log.info("subscribe again, subscriptionId: {}", subscriptionId);
-                subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, subscriptionId, WeEventConstants.JSONRPCTYPE, listener);
+                subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, subscriptionId, type, listener);
             }
             return subId;
         } else {
