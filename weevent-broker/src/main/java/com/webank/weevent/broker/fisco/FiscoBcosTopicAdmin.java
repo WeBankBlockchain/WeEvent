@@ -11,10 +11,7 @@ import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.TopicPage;
 import com.webank.weevent.sdk.WeEvent;
 
-import javafx.application.Application;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.core.ApplicationContext;
-import org.springframework.boot.SpringApplication;
 
 /**
  * Topic level's admin api. The underlying implement is a routing contract in
@@ -33,7 +30,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
             fiscoBcosDelegate.initProxy();
         } catch (BrokerException e) {
             log.error("init fisco-bcos failed", e);
-            System.exit(SpringApplication.exit(BrokerApplication.applicationContext));
+            BrokerApplication.exit();
         }
     }
 
