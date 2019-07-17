@@ -50,8 +50,11 @@ function set_global_param(){
     block_chain_version=$(properties_get "fisco-bcos.version")
     block_chain_channel=$(properties_get "fisco-bcos.channel")
     block_chain_node_path=$(properties_get  "fisco-bcos.node_path")
-    block_chain_node_path=`realpath $block_chain_node_path`
-
+    if [[ "${block_chain_node_path:0:1}" == "~" ]];then
+        block_chain_node_path=`realpath ${HOME}/${block_chain_node_path:1}`
+    else
+        block_chain_node_path=`realpath ${block_chain_node_path}`
+    fi
     nginx_port=$(properties_get "nginx.port")
     
     broker_port=$(properties_get "broker.port")
