@@ -117,14 +117,26 @@ export default{
       let url = '?username=' + this.userName
       API.forget(url).then(res => {
         if (res.status === 200) {
-          this.$message({
-            type: 'success',
-            message: '密码已发送到注册邮箱!'
-          })
+          if (res.data.status === 400) {
+            this.$message({
+              type: 'warning',
+              message: '用户名不存在!'
+            })
+          } else if (res.data.code === 100102) {
+            this.$message({
+              type: 'warning',
+              message: '发送邮件失败'
+            })
+          } else {
+            this.$message({
+              type: 'success',
+              message: '邮件已发送至绑定邮箱'
+            })
+          }
         } else {
           this.$message({
             type: 'warning',
-            message: '操作失败'
+            message: '发送邮件失败'
           })
         }
       })
