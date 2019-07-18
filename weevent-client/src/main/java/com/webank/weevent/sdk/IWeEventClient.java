@@ -2,7 +2,13 @@ package com.webank.weevent.sdk;
 
 import java.util.Map;
 
-
+/**
+ * Interface for RpcJson.
+ * weevent client interface
+ *
+ * @author crisiticmei
+ * @since 2019/07/18
+ */
 public interface IWeEventClient {
     /**
      * Get the client handler of WeEvent's broker with default url, http://localhost:8080/weevent.
@@ -49,7 +55,7 @@ public interface IWeEventClient {
      * Subscribe events from topic.
      *
      * @param topic topic name
-     * @param offset, from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
+     * @param offset from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
      * @param listener callback
      * @return subscription Id
      * @throws BrokerException invalid input param
@@ -137,7 +143,7 @@ public interface IWeEventClient {
      * Subscribe events from topic.
      *
      * @param topic topic name
-     * @param offset, from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
+     * @param offset from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
      * @param listener callback
      * @return subscription Id
      * @throws BrokerException invalid input param
@@ -148,7 +154,7 @@ public interface IWeEventClient {
      * Subscribe events from topic.
      *
      * @param topic topic name
-     * @param offset, from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
+     * @param offset from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
      * @param listener callback
      * @return subscription Id
      * @throws BrokerException invalid input param

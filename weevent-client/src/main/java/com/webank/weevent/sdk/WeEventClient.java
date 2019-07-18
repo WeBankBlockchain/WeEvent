@@ -36,12 +36,6 @@ import com.googlecode.jsonrpc4j.ProxyUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-/**
- * Java Client for WeEvent.
- *
- * @author matthewliu
- * @since 2019/04/07
- */
 @Slf4j
 public class WeEventClient implements IWeEventClient {
     private final static String defaultJsonRpcUrl = "http://localhost:8080/weevent/jsonrpc";
@@ -56,41 +50,17 @@ public class WeEventClient implements IWeEventClient {
     // (subscriptionId <-> TopicSession)
     private Map<String, TopicSession> sessionMap;
 
-    /**
-     * Interface for notify callback
-     */
     public interface EventListener {
-        /**
-         * Called while new event arrived.
-         *
-         * @param event the event
-         */
         void onEvent(WeEvent event);
 
-        /**
-         * Called while raise exception.
-         *
-         * @param e the e
-         */
         void onException(Throwable e);
     }
 
-    /**
-     * Get the client handler of weevent's broker with default url, http://localhost:8080/weevent.
-     *
-     * @throws BrokerException broker exception
-     */
     public WeEventClient() throws BrokerException {
         buildRpc(defaultJsonRpcUrl);
         buildJms(WeEventConnectionFactory.defaultBrokerUrl, "", "");
     }
 
-    /**
-     * Get the client handler of weevent's broker with custom url.
-     *
-     * @param brokerUrl weevent's broker url, like http://localhost:8080/weevent
-     * @throws BrokerException broker exception
-     */
     public WeEventClient(String brokerUrl) throws BrokerException {
         validateParam(brokerUrl);
         buildRpc(brokerUrl + "/jsonrpc");
@@ -150,14 +120,6 @@ public class WeEventClient implements IWeEventClient {
         }
     }
 
-    /**
-     * Unsubscribe an exist subscription subscribed by subscribe interface.
-     * The consumer will no longer receive messages from broker after this.
-     *
-     * @param subscriptionId invalid input
-     * @return success if true
-     * @throws BrokerException broker exception
-     */
     public boolean unSubscribe(String subscriptionId) throws BrokerException {
         validateParam(subscriptionId);
 
@@ -389,12 +351,6 @@ public class WeEventClient implements IWeEventClient {
         }
     }
 
-    /**
-     * Get a handler of IBrokerRpc.
-     *
-     * @param jsonRpcUrl the broker's json rpc url
-     * @throws BrokerException broker exception
-     */
     private void buildRpc(String jsonRpcUrl) throws BrokerException {
         log.info("broker's json rpc url: {}", jsonRpcUrl);
 
@@ -422,14 +378,6 @@ public class WeEventClient implements IWeEventClient {
         this.brokerRpc = ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);
     }
 
-    /**
-     * Get a handler of JMS connection.
-     *
-     * @param stompUrl the broker's stomp url
-     * @param userName account
-     * @param password password
-     * @throws BrokerException broker exception
-     */
     private void buildJms(String stompUrl, String userName, String password) throws BrokerException {
         log.info("broker's stomp url: {}", stompUrl);
 
@@ -447,64 +395,30 @@ public class WeEventClient implements IWeEventClient {
         }
     }
 
-
-    /**
-     * check the param
-     *
-     * @param param param
-     * @throws BrokerException if the param is blank ,throw the exception
-     */
     private static void validateParam(String param) throws BrokerException {
         if (StringUtils.isBlank(param)) {
             throw new BrokerException(ErrorCode.PARAM_ISBLANK);
         }
     }
 
-
-    /**
-     * check the param
-     *
-     * @param param param
-     * @throws BrokerException if the param is empty ,throw the exception
-     */
     private static void validateArrayParam(byte[] param) throws BrokerException {
         if (param == null || param.length == 0) {
             throw new BrokerException(ErrorCode.PARAM_ISEMPTY);
         }
     }
 
-
-    /**
-     * check the param
-     *
-     * @param listener param
-     * @throws BrokerException if the param is null ,throw the exception
-     */
     private static void validateEventListener(EventListener listener) throws BrokerException {
         if (listener == null) {
             throw new BrokerException(ErrorCode.PARAM_ISNULL);
         }
     }
 
-    /**
-     * check the param
-     *
-     * @param extensions extensions param
-     * @throws BrokerException if the param is null ,throw the exception
-     */
     private static void validateExtensions(Map<String, String> extensions) throws BrokerException {
         if (extensions == null) {
             throw new BrokerException(ErrorCode.PARAM_ISNULL);
         }
     }
 
-    /**
-     * check the username and the password
-     *
-     * @param userName stomp username
-     * @param password stomp user password
-     * @throws BrokerException if the username and password is blank
-     */
     private static void validateUser(String userName, String password) throws BrokerException {
         if (StringUtils.isBlank(userName)) {
             throw new BrokerException(ErrorCode.PARAM_ISBLANK);
