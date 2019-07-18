@@ -29,13 +29,7 @@ public class WeEventTopicPublisher implements TopicPublisher {
     public Topic getTopic() throws JMSException {
         return this.topic;
     }
-
-    /**
-     * publish event
-     *
-     * @param message BytesMessage.writeBytes(com.fasterxml.jackson.databind.ObjectMapper.writeValueAsBytes(WeEvent))
-     * @throws JMSException
-     */
+    
     @Override
     public void publish(Message message) throws JMSException {
         if (message instanceof BytesMessage) {
