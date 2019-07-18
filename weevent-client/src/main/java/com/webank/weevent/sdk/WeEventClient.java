@@ -228,7 +228,7 @@ public class WeEventClient implements IWeEventClient {
         }
     }
 
-    public String subscribe(String topic, String groupId, String offset, String continueSubacriptionId, EventListener listener) throws BrokerException {
+    public String subscribe(String topic, String groupId, String offset, String subscriptionId, EventListener listener) throws BrokerException {
         try {
             validateParam(topic);
             validateParam(groupId);
@@ -241,7 +241,7 @@ public class WeEventClient implements IWeEventClient {
             // create subscriber
             ((WeEventTopic) destination).setOffset(offset);
             ((WeEventTopic) destination).setGroupId(groupId);//if not set default 1
-            ((WeEventTopic) destination).setContinueSubscriptionId(continueSubacriptionId);
+            ((WeEventTopic) destination).setContinueSubscriptionId(subscriptionId);
             WeEventTopicSubscriber subscriber = (WeEventTopicSubscriber) session.createSubscriber(destination);
 
             // create listener
