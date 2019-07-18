@@ -5,6 +5,7 @@ conf_path="./conf"
 lib_path="./lib"
 apps_path="./apps"
 installPWD=$(dirname $(dirname `pwd`))
+current_path=`pwd`
 
 while [ $# -ge 2 ] ; do
     case "$1" in
@@ -65,10 +66,9 @@ if [[ $version = "1.3" ]];then
     fi
 
     #deploy contract
-    this_path=`pwd`
     cd $out_path
     ./deploy-topic-control.sh
-    cd $this_path
+    cd $current_path
     contract_address=`cat $out_path/address.txt | awk -F '=' '{print $2}'`
     if [[ -z $contract_address ]];then
         echo "deploy contract error"
@@ -92,10 +92,9 @@ else
     fi
 
     #deploy contract
-    this_path=`pwd`
     cd $out_path
     ./deploy-topic-control.sh 1
-    cd $this_path
+    cd $current_path
     contract_address=`cat $out_path/address.txt | awk -F '=' '{print $2}'`
     if [[ -z $contract_address ]];then
         echo "deploy contract error"
