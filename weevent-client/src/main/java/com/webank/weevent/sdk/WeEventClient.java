@@ -50,12 +50,6 @@ public class WeEventClient implements IWeEventClient {
     // (subscriptionId <-> TopicSession)
     private Map<String, TopicSession> sessionMap;
 
-    public interface EventListener {
-        void onEvent(WeEvent event);
-
-        void onException(Throwable e);
-    }
-
     public WeEventClient() throws BrokerException {
         buildRpc(defaultJsonRpcUrl);
         buildJms(WeEventConnectionFactory.defaultBrokerUrl, "", "");

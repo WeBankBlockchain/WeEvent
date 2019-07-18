@@ -51,6 +51,25 @@ public interface IWeEventClient {
     SendResult publish(String topic, byte[] content) throws BrokerException;
 
     /**
+     * Interface for notify callback
+     */
+    interface EventListener {
+        /**
+         * Called while new event arrived.
+         *
+         * @param event the event
+         */
+        void onEvent(WeEvent event);
+
+        /**
+         * Called while raise exception.
+         *
+         * @param e the e
+         */
+        void onException(Throwable e);
+    }
+
+    /**
      * Subscribe events from topic.
      *
      * @param topic topic name
@@ -59,7 +78,7 @@ public interface IWeEventClient {
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
-    String subscribe(String topic, String offset, WeEventClient.EventListener listener) throws BrokerException;
+    String subscribe(String topic, String offset, EventListener listener) throws BrokerException;
 
     /**
      * Unsubscribe an exist subscription subscribed by subscribe interface.
@@ -147,7 +166,7 @@ public interface IWeEventClient {
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
-    String subscribe(String topic, String groupId, String offset, WeEventClient.EventListener listener) throws BrokerException;
+    String subscribe(String topic, String groupId, String offset, IWeEventClient.EventListener listener) throws BrokerException;
 
     /**
      * Subscribe events from topic.
@@ -158,7 +177,7 @@ public interface IWeEventClient {
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
-    String subscribe(String topic, String groupId, String offset,String contnueSubScriptionId, WeEventClient.EventListener listener) throws BrokerException;
+    String subscribe(String topic, String groupId, String offset, String contnueSubScriptionId, IWeEventClient.EventListener listener) throws BrokerException;
 
     /**
      * Publish an event to topic.
