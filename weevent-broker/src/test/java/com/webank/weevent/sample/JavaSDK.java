@@ -32,7 +32,7 @@ public class JavaSDK {
             SendResult sendResult = client.publish(topicName, groupId, "{\"hello\":\" wolrd\"}".getBytes(), extensions);
             System.out.println(sendResult.toString());
             // subscribe topic with groupId
-            String subscriptionId = client.subscribe(topicName, groupId, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
+            String subscriptionId = client.subscribe(topicName, groupId, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
                 @Override
                 public void onEvent(WeEvent event) {
                     System.out.println("received event: " + event.toString());
