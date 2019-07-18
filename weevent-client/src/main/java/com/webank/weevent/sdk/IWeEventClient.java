@@ -2,11 +2,17 @@ package com.webank.weevent.sdk;
 
 import java.util.Map;
 
-
+/**
+ * Java Client for WeEvent
+ *
+ * @author crisiticmei
+ * @since 2019/07/18
+ */
 public interface IWeEventClient {
     /**
      * Get the client handler of WeEvent's broker with default url, http://localhost:8080/weevent.
      *
+     * @return IWeEventClient WeEventClient struct
      * @throws BrokerException broker exception
      */
     static IWeEventClient build() throws BrokerException {
@@ -17,6 +23,7 @@ public interface IWeEventClient {
      * Get the client handler of WeEvent's broker with custom url.
      *
      * @param brokerUrl WeEvent's broker url, like http://localhost:8080/weevent
+     * @return IWeEventClient WeEventClient struct
      * @throws BrokerException broker exception
      */
     static IWeEventClient build(String brokerUrl) throws BrokerException {
@@ -29,6 +36,7 @@ public interface IWeEventClient {
      * @param brokerUrl WeEvent's broker url, like http://localhost:8080/weevent
      * @param userName account name
      * @param password password
+     * @return IWeEventClient WeEventClient struct
      * @throws BrokerException broker exception
      */
     static IWeEventClient build(String brokerUrl, String userName, String password) throws BrokerException {
@@ -46,15 +54,34 @@ public interface IWeEventClient {
     SendResult publish(String topic, byte[] content) throws BrokerException;
 
     /**
+     * Interface for notify callback
+     */
+    interface EventListener {
+        /**
+         * Called while new event arrived.
+         *
+         * @param event the event
+         */
+        void onEvent(WeEvent event);
+
+        /**
+         * Called while raise exception.
+         *
+         * @param e the e
+         */
+        void onException(Throwable e);
+    }
+
+    /**
      * Subscribe events from topic.
      *
      * @param topic topic name
-     * @param offset, from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
+     * @param offset from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
      * @param listener callback
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
-    String subscribe(String topic, String offset, WeEventClient.EventListener listener) throws BrokerException;
+    String subscribe(String topic, String offset, EventListener listener) throws BrokerException;
 
     /**
      * Unsubscribe an exist subscription subscribed by subscribe interface.
@@ -127,7 +154,9 @@ public interface IWeEventClient {
      * Publish an event to topic.
      *
      * @param topic topic name
+     * @param groupId chain groupId
      * @param content topic data
+     * @param extensions User-defined extensions
      * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
      * @throws BrokerException broker exception
      */
@@ -137,29 +166,33 @@ public interface IWeEventClient {
      * Subscribe events from topic.
      *
      * @param topic topic name
-     * @param offset, from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
+     * @param groupId chain groupId
+     * @param offset from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
      * @param listener callback
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
-    String subscribe(String topic, String groupId, String offset, WeEventClient.EventListener listener) throws BrokerException;
+    String subscribe(String topic, String groupId, String offset, IWeEventClient.EventListener listener) throws BrokerException;
 
     /**
      * Subscribe events from topic.
      *
      * @param topic topic name
-     * @param offset, from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
+     * @param groupId chain groupId
+     * @param offset from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
+     * @param subscriptionId keep last subscribe
      * @param listener callback
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
-    String subscribe(String topic, String groupId, String offset,String contnueSubScriptionId, WeEventClient.EventListener listener) throws BrokerException;
+    String subscribe(String topic, String groupId, String offset, String subscriptionId, IWeEventClient.EventListener listener) throws BrokerException;
 
     /**
      * Publish an event to topic.
      *
      * @param topic topic name
      * @param content topic data
+     * @param extensions User-defined extensions
      * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
      * @throws BrokerException broker exception
      */
@@ -200,6 +233,7 @@ public interface IWeEventClient {
      *
      * @param pageIndex page index, from 0
      * @param pageSize page size, [10, 100)
+     * @param groupId chain group
      * @return topic list
      * @throws BrokerException broker exception
      */
@@ -209,6 +243,7 @@ public interface IWeEventClient {
      * Get a topic information.
      *
      * @param topic topic name
+     * @param groupId chain group
      * @return topic information
      * @throws BrokerException broker exception
      */
@@ -218,6 +253,7 @@ public interface IWeEventClient {
      * Get an event information.
      *
      * @param eventId event id
+     * @param groupId chain group
      * @return WeEvent
      * @throws BrokerException broker exception
      */
