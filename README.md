@@ -4,6 +4,8 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b7cd883f89d740ca9fe71db35b701018)](https://app.codacy.com/app/cristicmf/WeEvent?utm_source=github.com&utm_medium=referral&utm_content=WeBankFinTech/WeEvent&utm_campaign=Badge_Grade_Settings)
 [![CodeFactor](https://www.codefactor.io/repository/github/webankfintech/weevent/badge)](https://www.codefactor.io/repository/github/webankfintech/weevent)
 [![Build Status](https://travis-ci.com/WeBankFinTech/WeEvent.svg?branch=master)](https://travis-ci.com/WeBankFinTech/WeEvent)
+[![Latest release](https://img.shields.io/github/release/WeBankFinTech/WeEvent.svg)](https://github.com/WeBankFinTech/WeEvent/releases/latest)
+
 
 ## 什么是WeEvent？
 WeEvent是一套分布式事件驱动架构，实现了可信、可靠、高效的跨机构、跨平台事件通知机制。
@@ -15,7 +17,7 @@ WeEvent由微众银行自主研发并完全开源，秉承分布式商业模式�
 支持Docker镜像、[快速安装](https://weeventdoc.readthedocs.io/zh_CN/latest/install/quickinstall.html)、[普通安装](https://weeventdoc.readthedocs.io/zh_CN/latest/install/module/index.html)三种安装方式。
 #### Docker镜像安装
 ```
-$ docker run 
+$ docker pull weevent:1.0.0; docker run -d -p8080:8080 weevent:1.0.0 /bin/bash
 ```
 
 #### 快速安装
