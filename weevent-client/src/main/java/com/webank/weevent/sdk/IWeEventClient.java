@@ -3,8 +3,7 @@ package com.webank.weevent.sdk;
 import java.util.Map;
 
 /**
- * Interface for RpcJson.
- * weevent client interface
+ * Java Client for WeEvent
  *
  * @author crisiticmei
  * @since 2019/07/18
