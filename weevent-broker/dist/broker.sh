@@ -85,7 +85,7 @@ monitor(){
         echo "`date`: broker is running(PID=$eventbroker_pid)"
     else
         echo "`date`: broker is not running,restart broker now..."
-        ./broker.sh start
+        start
     fi   
 }
 

@@ -41,15 +41,6 @@ function make_file(){
     mkdir -p $out_path/logs
 }
 
-#deploy contract
-function deploy_contract(){
-    if [ $# -eq 1 ];then
-        java -Xbootclasspath/a:$out_path/conf -cp $out_path/apps/weevent-broker* -Dloader.main=com.webank.weevent.broker.fisco.util.Web3sdkUtils org.springframework.boot.loader.PropertiesLauncher $out_path/conf/address.txt
-    else
-        java -Xbootclasspath/a:$out_path/conf -cp $out_path/apps/weevent-broker* -Dloader.main=com.webank.weevent.broker.fisco.util.Web3sdkUtils org.springframework.boot.loader.PropertiesLauncher $out_path/conf/address.txt $1
-    fi
-}
-
 if [[ -z $channel_info ]];then
     echo "channel_info is empty."
     exit -1
@@ -73,15 +64,19 @@ if [[ $version = "1.3" ]];then
         exit -1
     fi
 
-    deploy_contract
-    contract_address=`cat $out_path/conf/address.txt | awk -F '=' '{print $2}'`
+    #deploy contract
+    this_path=`pwd`
+    cd $out_path
+    ./deploy-topic-control.sh
+    cd $this_path
+    contract_address=`cat $out_path/address.txt | awk -F '=' '{print $2}'`
     if [[ -z $contract_address ]];then
         echo "deploy contract error"
         exit -1
     else
         echo "deploy contract success"
         echo "contract_address:"$contract_address
-        sed -i "/topic-controller.address=0x/ctopic-controller.address=${contract_address}" $out_path/conf/fisco.properties
+        sed -i "s/^.*topic-controller.address=.*$/topic-controller.address=${contract_address}/g" $out_path/conf/fisco.properties
     fi
 else
     if [[ -f $block_chain_node_path/conf/ca.crt ]] && [[ -f $block_chain_node_path/conf/node.crt ]] && [[ -f $block_chain_node_path/conf/node.key ]]; then
@@ -96,15 +91,19 @@ else
         exit -1
     fi
 
-    deploy_contract 1
-    contract_address=`cat $out_path/conf/address.txt | awk -F '=' '{print $2}'`
+    #deploy contract
+    this_path=`pwd`
+    cd $out_path
+    ./deploy-topic-control.sh 1
+    cd $this_path
+    contract_address=`cat $out_path/address.txt | awk -F '=' '{print $2}'`
     if [[ -z $contract_address ]];then
         echo "deploy contract error"
         exit -1
     else
         echo "deploy contract success"
         echo "contract_address:"$contract_address
-        sed -i "/topic-controller.address=1/ctopic-controller.address=1:${contract_address}" $out_path/conf/fisco.properties
+        sed -i "s/^.*topic-controller.address=.*$/topic-controller.address=1:${contract_address}/g" $out_path/conf/fisco.properties
     fi
 fi
 
