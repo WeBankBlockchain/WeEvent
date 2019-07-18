@@ -102,7 +102,7 @@ function check_result(){
 function install_module(){
     yellow_echo "install module broker"
     cd $installPWD/modules/broker
-    ./install-broker.sh --out_path $out_path/broker --listen_port $broker_port --block_chain_node_path $block_chain_node_path --channel_info $block_chain_channel --version $block_chain_version &>> $installPWD/install.log
+    ./install-broker.sh --out_path $out_path/broker --listen_port $broker_port --block_chain_node_path $block_chain_node_path --channel_info $block_chain_channel --version $block_chain_version
     check_result "install broker success"
 
     yellow_echo "install module nginx"
