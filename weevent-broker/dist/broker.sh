@@ -1,4 +1,16 @@
 #!/bin/bash
+source ~/.bashrc
+
+#check javajdk
+function check_javajdk(){
+    java_version=`java -version 2>&1 |awk 'NR==1{ gsub(/"/,""); print $3 }' | awk -F[.] '{print $1$2}'`
+    system_version=`cat /etc/os-release | awk -F'[= "]' '{print $3}' | head -1`
+    if [[ ${java_version} -le 18 && ${system_version} -eq "CentOS" ]];then
+        echo "in CentOS, Open JDK's verison must be 1.9 or greater"
+        exit -1
+    fi
+}
+check_javajdk
 
 pidfile=./logs/broker.pid
 eventbroker_pid=
@@ -85,7 +97,7 @@ monitor(){
         echo "`date`: broker is running(PID=$eventbroker_pid)"
     else
         echo "`date`: broker is not running,restart broker now..."
-        ./broker.sh start
+        start
     fi   
 }
 
