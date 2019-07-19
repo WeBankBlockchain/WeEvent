@@ -21,8 +21,7 @@ function check_broker(){
         echo "broker service is ok"
     else
         echo "broker service is error"
-    fi 
-    
+    fi
 }
 
 check_broker

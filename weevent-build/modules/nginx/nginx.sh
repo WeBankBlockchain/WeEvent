@@ -22,13 +22,12 @@ start(){
     get_current_pid
     if [[ -n "${current_pid}" ]]; then
         echo "nginx already running"
-        exit 1
-    else
-        ${nginxd} -c ${nginx_config}
+        exit 0
     fi
-   
+
+    ${nginxd} -c ${nginx_config}
     sleep 1
-    getcurrent_pid;
+    get_current_pid
     if [[ -z "${current_pid}" ]]; then
         echo "start nginx fail"
         exit 1
@@ -77,7 +76,7 @@ stop(){
 }
 
 monitor(){
-    getcurrent_pid
+    get_current_pid
     if [[ -n "${current_pid}" ]]; then
         echo "`date`: nginx is running(PID=${current_pid})"
     else
