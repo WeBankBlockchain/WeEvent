@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# install weevent service, support FISCO-BCOS 1.3 and 2.0
+# install WeEvent service, support FISCO-BCOS 1.3 and 2.0
 #
 ################################################################################
 
@@ -8,7 +8,7 @@ out_path=""
 block_chain_version=
 block_chain_channel=
 block_chain_node_path=
-broker_port=8081
+broker_port=8090
 
 nginx_port=8080
 
@@ -19,7 +19,7 @@ mysql_port=
 mysql_user=
 mysql_password=
 
-installPWD=$PWD
+current_path=$PWD
 
 function yellow_echo (){
     local what=$*
@@ -43,7 +43,7 @@ function properties_get(){
         error_message "ERROR config.properties get  param $param failed."
         exit 1
     fi
-    echo $value
+    echo ${value}
 }
 
 function set_global_param(){
@@ -51,9 +51,9 @@ function set_global_param(){
     block_chain_channel=$(properties_get "fisco-bcos.channel")
     block_chain_node_path=$(properties_get  "fisco-bcos.node_path")
     if [[ "${block_chain_node_path:0:1}" == "~" ]];then
-        block_chain_node_path=`realpath ${HOME}/${block_chain_node_path:1}`
+        block_chain_node_path=`realpath -m ${HOME}/${block_chain_node_path:1}`
     else
-        block_chain_node_path=`realpath ${block_chain_node_path}`
+        block_chain_node_path=`realpath -m ${block_chain_node_path}`
     fi
     nginx_port=$(properties_get "nginx.port")
     
@@ -70,22 +70,21 @@ function set_global_param(){
 
 function check_port(){
     lsof -i:${1}
-    
-    if [ $? -eq 1 ];then
+    if [[ $? -eq 1 ]];then
         echo "$1 port is okay"
     else 
-        echo "$1 port is use"
+        echo "$1 port is in used"
         exit 1
     fi
 }
 
 function check_param(){
-    if [[ -d $block_chain_node_path ]]; then
-        check_port $broker_port
-        check_port $nginx_port
+    if [[ -d ${block_chain_node_path} ]]; then
+        check_port ${broker_port}
+        check_port ${nginx_port}
         echo "param ok"
     else
-        echo "path not exist, $block_chain_node_path"
+        echo "path not exist, ${block_chain_node_path}"
         exit 1;
     fi
 }
@@ -101,19 +100,19 @@ function check_result(){
 
 function install_module(){
     yellow_echo "install module broker"
-    cd $installPWD/modules/broker
-    ./install-broker.sh --out_path $out_path/broker --listen_port $broker_port --block_chain_node_path $block_chain_node_path --channel_info $block_chain_channel --version $block_chain_version
+    cd ${current_path}/modules/broker
+    ./install-broker.sh --out_path ${out_path}/broker --listen_port ${broker_port} --block_chain_node_path ${block_chain_node_path} --channel_info ${block_chain_channel} --version ${block_chain_version}
     check_result "install broker success"
 
     yellow_echo "install module nginx"
-    cd $installPWD/modules/nginx
-    ./install-nginx.sh --nginx_path $out_path/nginx --nginx_port $nginx_port --broker_port $broker_port --governance_port $governance_port &>> $installPWD/install.log
+    cd ${current_path}/modules/nginx
+    ./install-nginx.sh --nginx_path ${out_path}/nginx --nginx_port ${nginx_port} --broker_port ${broker_port} --governance_port ${governance_port} &>> ${current_path}/install.log
     check_result "install nginx success"
 
-    if [ $governance_enable = "true" ];then
+    if [[ ${governance_enable} = "true" ]];then
         yellow_echo "install module governance"
-        cd $installPWD/modules/governance
-        ./install-governance.sh --out_path $out_path/governance --server_port $governance_port --broker_port $broker_port --mysql_ip $mysql_ip --mysql_port $mysql_port --mysql_user $mysql_user --mysql_pwd $mysql_password &>> $installPWD/install.log
+        cd ${current_path}/modules/governance
+        ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --broker_port ${broker_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} &>> ${current_path}/install.log
         check_result "install governance success"
     fi
 }
@@ -124,15 +123,15 @@ function update_check_server(){
 
 function main(){
     # confirm
-    if [ -d $2 ]; then
+    if [[ -d $2 ]]; then
         read -p "$2 already exist, continue? [Y/N]" cmd_input
-        if [ "Y" != "$cmd_input" ]; then
+        if [[ "Y" != "$cmd_input" ]]; then
             echo "input $cmd_input, install skipped"
             exit 1
         fi
     fi
     mkdir -p $2
-    if [ $? -ne 0 ];then
+    if [[ $? -ne 0 ]];then
         echo "create path $2 fail !!! "
         exit 1
     fi
@@ -150,14 +149,14 @@ function main(){
     # install module
     install_module
 
-    cd $installPWD
-    cp start-all.sh check-service.sh stop-all.sh uninstall-all.sh $out_path
+    cd ${current_path}
+    cp start-all.sh check-service.sh stop-all.sh uninstall-all.sh ${out_path}
 }
 
 # Usage message
-if [ $# -lt 2 ]; then
+if [[ $# -lt 2 ]]; then
     echo "Usage:"
-    echo "    ./install-all.sh -p install_path"
+    echo "    ./install-all.sh -p target_install_path"
     exit 1
 fi
 
