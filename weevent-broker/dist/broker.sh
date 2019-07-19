@@ -30,31 +30,32 @@ start(){
     get_pid
 	if [[ -n "${current_pid}" ]];then
         echo "broker is running, (PID=${current_pid})"
-    else
-        nohup java ${JAVA_OPTS} -Xbootclasspath/a:./conf -jar ./apps/*  >/dev/null 2>&1 &
-        sleep 3
-        broker_pid=$!
-        if [[ -n "${broker_pid}" ]];then
-            echo "start broker success (PID=${broker_pid})"
-           
-            if [[ `crontab -l | grep -w broker | wc -l` -eq 0 ]]; then
-                 crontab -l > cron.backup
-                 echo "* * * * * cd `pwd`; ./broker.sh monitor >> ./logs/monitor.log 2>&1" >> cron.backup
-                 crontab cron.backup
-                 rm cron.backup
-            fi 
+        exit 0
+    fi
 
-            if [[ `crontab -l | grep -w broker | wc -l` -gt 0 ]]; then
-                 echo "add the crontab job success"
-                 exit 0
-            else
-                 echo "add the crontab job fail"
-                 exit 1
-            fi
-        else
-            echo "start broker fail"
-            exit 1
+    nohup java ${JAVA_OPTS} -Xbootclasspath/a:./conf -jar ./apps/*  >/dev/null 2>&1 &
+    sleep 3
+    broker_pid=$!
+    if [[ -n "${broker_pid}" ]];then
+        echo "start broker success (PID=${broker_pid})"
+
+        if [[ `crontab -l | grep -w broker | wc -l` -eq 0 ]]; then
+             crontab -l > cron.backup
+             echo "* * * * * cd `pwd`; ./broker.sh monitor >> ./logs/monitor.log 2>&1" >> cron.backup
+             crontab cron.backup
+             rm cron.backup
         fi
+
+        if [[ `crontab -l | grep -w broker | wc -l` -gt 0 ]]; then
+             echo "add the crontab job success"
+             exit 0
+        else
+             echo "add the crontab job fail"
+             exit 1
+        fi
+    else
+        echo "start broker fail"
+        exit 1
     fi
 }
 
