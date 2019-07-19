@@ -15,7 +15,7 @@ function nginx_setup() {
     fi
 
     echo "build & install nginx"
-    cd ../nginx-1.14.2
+    cd ${top_path}/build/nginx-1.14.2
     ./configure --with-http_ssl_module --with-stream --with-stream_ssl_module --prefix=${nginx_path}; make; make install
     if [[ $? -ne 0 ]]; then
         echo "install nginx failed, skip"
