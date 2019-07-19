@@ -55,11 +55,11 @@ sed -i "s/^.*nodes=.*$/nodes=$channel_info/g" $out_path/conf/fisco.properties
 echo "set channel_info success"
 if [[ $version = "1.3" ]];then
     sed -i "/version=2.0/cversion=1.3" $out_path/conf/fisco.properties
-    if [[ -f $block_chain_node_path/web3sdk/conf/ca.crt ]] && [[ -f $block_chain_node_path/web3sdk/conf/client.keystore ]]; then
+    if [[ -f $block_chain_node_path/ca.crt ]] && [[ -f $block_chain_node_path/client.keystore ]]; then
         rm -rf $out_path/conf/ca.crt
         rm -rf $out_path/conf/client.keystore
-        cp $block_chain_node_path/web3sdk/conf/ca.crt $out_path/conf/
-        cp $block_chain_node_path/web3sdk/conf/client.keystore $out_path/conf/
+        cp $block_chain_node_path/ca.crt $out_path/conf/
+        cp $block_chain_node_path/client.keystore $out_path/conf/
     else
         echo "ca.crt or client.keystore is not exist."
         exit -1
@@ -79,13 +79,13 @@ if [[ $version = "1.3" ]];then
         sed -i "s/^.*topic-controller.address=.*$/topic-controller.address=${contract_address}/g" $out_path/conf/fisco.properties
     fi
 else
-    if [[ -f $block_chain_node_path/conf/ca.crt ]] && [[ -f $block_chain_node_path/conf/node.crt ]] && [[ -f $block_chain_node_path/conf/node.key ]]; then
+    if [[ -f $block_chain_node_path/ca.crt ]] && [[ -f $block_chain_node_path/node.crt ]] && [[ -f $block_chain_node_path/node.key ]]; then
         rm -rf $out_path/conf/v2/ca.crt
         rm -rf $out_path/conf/v2/node.crt
         rm -rf $out_path/conf/v2/node.key
-        cp $block_chain_node_path/conf/ca.crt $out_path/conf/v2/
-        cp $block_chain_node_path/conf/node.crt $out_path/conf/v2/
-        cp $block_chain_node_path/conf/node.key $out_path/conf/v2/
+        cp $block_chain_node_path/ca.crt $out_path/conf/v2/
+        cp $block_chain_node_path/node.crt $out_path/conf/v2/
+        cp $block_chain_node_path/node.key $out_path/conf/v2/
     else
         echo "ca.crt or node.crt or node.key is not exist."
         exit -1
