@@ -44,7 +44,7 @@ function make_file(){
 
 if [[ -z ${channel_info} ]];then
     echo "channel_info is empty."
-    exit -1
+    exit 1
 fi
 
 mkdir -p ${out_path}
@@ -60,7 +60,7 @@ if [[ ${version} = "1.3" ]];then
         cp ${block_chain_node_path}/ca.crt ${block_chain_node_path}/client.keystore ${out_path}/conf/
     else
         echo "ca.crt or client.keystore is not exist."
-        exit -1
+        exit 1
     fi
 
     #deploy contract
@@ -70,7 +70,7 @@ if [[ ${version} = "1.3" ]];then
     contract_address=`cat ${out_path}/address.txt | awk -F '=' '{print $2}'`
     if [[ -z ${contract_address} ]];then
         echo "deploy contract error"
-        exit -1
+        exit 1
     else
         echo "deploy contract success"
         echo "contract_address:"${contract_address}
@@ -82,7 +82,7 @@ else
         cp ${block_chain_node_path}/ca.crt ${block_chain_node_path}/node.crt ${block_chain_node_path}/node.key ${out_path}/conf/v2/
     else
         echo "ca.crt or node.crt or node.key is not exist."
-        exit -1
+        exit 1
     fi
 
     # deploy contract
@@ -92,7 +92,7 @@ else
     contract_address=`cat ${out_path}/address.txt | awk -F '=' '{print $2}'`
     if [[ -z ${contract_address} ]];then
         echo "deploy contract error"
-        exit -1
+        exit 1
     else
         echo "deploy contract success"
         echo "contract_address:"${contract_address}
@@ -104,7 +104,7 @@ if [[ ${listen_port} -gt 0 ]]; then
     sed -i "/server.port=/cserver.port=${listen_port}" ${out_path}/conf/application-prod.properties
 else
     echo "listen_port is err"
-    exit -1
+    exit 1
 fi
 echo "set lister_port success"
 
