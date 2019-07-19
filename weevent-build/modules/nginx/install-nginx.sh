@@ -13,24 +13,10 @@ function nginx_setup() {
         echo "decompress nginx-1.14.2.tar.gz failed, skip"
         exit 1
     fi
-   
-    tar -zxf ${top_path}/third-packages/pcre-8.20.tar.gz -C ${top_path}/build/
-    if [[ $? -ne 0 ]]; then
-        echo "decompress pcre-8.20.tar.gz failed, skip"
-        exit 1
-    fi
 
-    echo "build & install pcre" 
-    cd ${top_path}/build/pcre-8.20
-    ./configure --prefix=${current_path}/../third-packages; make; make install
-    if [[ $? -ne 0 ]]; then
-        echo "install pcre failed, skip"
-        exit 1
-    fi
-           
     echo "build & install nginx"
     cd ../nginx-1.14.2
-    ./configure --with-http_ssl_module --with-stream --with-stream_ssl_module --prefix=${nginx_path} --with-pcre=../pcre-8.20; make; make install
+    ./configure --with-http_ssl_module --with-stream --with-stream_ssl_module --prefix=${nginx_path}; make; make install
     if [[ $? -ne 0 ]]; then
         echo "install nginx failed, skip"
         exit 1
