@@ -100,6 +100,32 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     }
 
     /**
+     * filter event with topic name or pattern
+     *
+     * @param from original event list
+     * @param topics topic name or Pattern list
+     * @return target event list
+     */
+    private static List<WeEvent> filter(List<WeEvent> from, String[] topics) {
+        List<WeEvent> to = new ArrayList<>();
+        for (WeEvent event : from) {
+            for (String topic : topics) {
+                if (ParamCheckUtils.isTopicPattern(topic)) {
+                    if (WeEventUtils.match(event.getTopic(), topic)) {
+                        to.add(event);
+                    }
+                } else {
+                    if (topic.equals(event.getTopic())) {
+                        to.add(event);
+                    }
+                }
+            }
+        }
+
+        return to;
+    }
+
+    /**
      * Idle if net error in loop.
      *
      * @param blockNum the blockNum
@@ -116,23 +142,8 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             }
         }
 
-        // get target event
-        List<WeEvent> topicEventsList = new ArrayList<>();
-        for (WeEvent event : blockEventsList) {
-            for (String topic : topics) {
-                if (ParamCheckUtils.isTopicPattern(topic)) {
-                    if (WeEventUtils.match(event.getTopic(), topic)) {
-                        topicEventsList.add(event);
-                    }
-                } else {
-                    if (topic.equals(event.getTopic())) {
-                        topicEventsList.add(event);
-                    }
-                }
-            }
-        }
-
-        return topicEventsList;
+        // filter target event
+        return filter(blockEventsList, topics);
     }
 
     @Override
@@ -164,13 +175,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         return subscribeTopic(topics, Long.valueOf(groupId), offset, interfaceType, listener);
     }
 
-    @Override
-    public String subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener) throws BrokerException {
-        ParamCheckUtils.validateGroupId(groupId);
-        ParamCheckUtils.validateOffset(offset);
-        ParamCheckUtils.validateListenerNotNull(listener);
-
-        // topic name may be a pattern
+    private static void validateSubscribeTopic(String topic, String groupId, String offset) throws BrokerException {
         if (ParamCheckUtils.isTopicPattern(topic)) {
             ParamCheckUtils.validateTopicPattern(topic);
             if (!offset.equals(WeEvent.OFFSET_FIRST) && !offset.equals(WeEvent.OFFSET_LAST)) {
@@ -183,7 +188,16 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                 ParamCheckUtils.validateEventId(topic, offset, fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId)));
             }
         }
+    }
 
+    @Override
+    public String subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener) throws BrokerException {
+        ParamCheckUtils.validateGroupId(groupId);
+        ParamCheckUtils.validateOffset(offset);
+        ParamCheckUtils.validateListenerNotNull(listener);
+
+        // topic name may be a pattern
+        validateSubscribeTopic(topic, groupId, offset);
 
         log.info("subscribe topic: {} offset: {}", topic, offset);
         return subscribeTopic(topic, Long.valueOf(groupId), offset, interfaceType, listener);
@@ -196,19 +210,8 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         ParamCheckUtils.validateSubscriptionId(subscriptionId);
         ParamCheckUtils.validateListenerNotNull(listener);
 
-        if (ParamCheckUtils.isTopicPattern(topic)) {
-            ParamCheckUtils.validateTopicPattern(topic);
-            if (!offset.equals(WeEvent.OFFSET_FIRST) && !offset.equals(WeEvent.OFFSET_LAST)) {
-                // not a topic name
-                ParamCheckUtils.validateEventId("", offset, fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId)));
-            }
-        } else {
-            ParamCheckUtils.validateTopicName(topic);
-            if (!offset.equals(WeEvent.OFFSET_FIRST) && !offset.equals(WeEvent.OFFSET_LAST)) {
-                ParamCheckUtils.validateEventId(topic, offset, fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId)));
-            }
-        }
-
+        // topic name may be a pattern
+        validateSubscribeTopic(topic, groupId, offset);
 
         log.info("subscribe topic: {} offset: {} subscriptionId:{}", topic, offset, subscriptionId);
         return subscribeTopic(topic, Long.valueOf(groupId), offset, subscriptionId, interfaceType, listener);
@@ -393,7 +396,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                     '}';
         }
 
-        Subscription(String[] topics, Long groupId, String offset, String interfaceType, IConsumer.ConsumerListener listener) throws BrokerException {
+        private Subscription(String[] topics, Long groupId, String offset, String interfaceType, IConsumer.ConsumerListener listener) throws BrokerException {
             this.uuid = UUID.randomUUID().toString();
             this.topics = topics;
             this.groupId = groupId;
@@ -409,45 +412,31 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             }
         }
 
-        Long getNotifyingEventCount() {
+        private Long getNotifyingEventCount() {
             return (long) this.notifyTask.eventQueue.size();
         }
 
-        Long getNotifiedEventCount() {
+        private Long getNotifiedEventCount() {
             return this.notifyTask.notifiedCount;
         }
 
-        Date getNotifyTimeStamp() {
+        private Date getNotifyTimeStamp() {
             return this.notifyTask.lastTimeStamp;
 
         }
 
-        void resetSubscriptionId(String subscriptionId) {
+        private void resetSubscriptionId(String subscriptionId) {
             this.uuid = subscriptionId;
             this.notifyTask.subscriptionId = subscriptionId;
         }
 
-        void dispatch(List<WeEvent> events) {
+        private void dispatch(List<WeEvent> events) {
             // filter the events
-            List<WeEvent> topicEvents = new ArrayList<>();
-            for (WeEvent event : events) {
-                for (String topic : this.topics) {
-                    if (ParamCheckUtils.isTopicPattern(topic)) {
-                        if (WeEventUtils.match(event.getTopic(), topic)) {
-                            topicEvents.add(event);
-                        }
-                    } else {
-                        if (topic.equals(event.getTopic())) {
-                            topicEvents.add(event);
-                        }
-                    }
-                }
-            }
-
+            List<WeEvent> topicEvents = filter(events, this.topics);
             this.notifyTask.push(topicEvents);
         }
 
-        synchronized void doStart() {
+        private synchronized void doStart() {
             threadPoolTaskExecutor.execute(this.notifyTask);
             if (this.historyEventLoop != null) {
                 threadPoolTaskExecutor.execute(this.historyEventLoop);
@@ -455,7 +444,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         }
 
         // can not doStart again after doStop
-        synchronized void doStop() {
+        private synchronized void doStop() {
             stopHistory();
 
             if (this.notifyTask != null) {
@@ -464,14 +453,14 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             }
         }
 
-        synchronized void stopHistory() {
+        private synchronized void stopHistory() {
             if (this.historyEventLoop != null) {
                 this.historyEventLoop.doExit();
                 this.historyEventLoop = null;
             }
         }
 
-        synchronized boolean tryStopHistory(Long mainLastBlock) {
+        private synchronized boolean tryStopHistory(Long mainLastBlock) {
             if (mainLastBlock > 0 && mainLastBlock <= this.historyEventLoop.lastBlock) {
                 log.info("switch history to main event loop, subscription: {}", this.uuid);
 
@@ -495,14 +484,14 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         private Long notifiedCount = 0L;
         private Date lastTimeStamp = new Date();
 
-        NotifyTask(String subscriptionId, IConsumer.ConsumerListener consumerListener) {
+        private NotifyTask(String subscriptionId, IConsumer.ConsumerListener consumerListener) {
             super("event-notify@" + subscriptionId);
 
             this.subscriptionId = subscriptionId;
             this.consumerListener = consumerListener;
         }
 
-        void push(List<WeEvent> events) {
+        private void push(List<WeEvent> events) {
             // Skip event if needed.
             if (this.lastEventSeq > 0) {
                 events.removeIf(node -> (getEventSeq(node.getEventId()) <= this.lastEventSeq));
@@ -569,7 +558,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
         private NotifyTask notifyTask;
 
-        void setOffset(String offset) throws BrokerException {
+        private void setOffset(String offset) throws BrokerException {
             Long lastEventSeq = 0L;
 
             switch (offset) {
@@ -584,12 +573,13 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                 default:
                     this.lastBlock = DataTypeUtils.decodeBlockNumber(offset) - 1;
                     lastEventSeq = DataTypeUtils.decodeSeq(offset);
+                    break;
             }
 
             this.notifyTask.lastEventSeq = lastEventSeq;
         }
 
-        HistoryEventLoop(String subscriptionId, String[] topics, Long groupId, String offset, NotifyTask notifyTask) throws BrokerException {
+        private HistoryEventLoop(String subscriptionId, String[] topics, Long groupId, String offset, NotifyTask notifyTask) throws BrokerException {
             super("history-event-loop@" + subscriptionId);
 
             this.topics = topics;
@@ -652,12 +642,12 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         // subscription in history loop
         private List<String> historySubscriptionIds = new ArrayList<>();
 
-        MainEventLoop(Long groupId) {
+        private MainEventLoop(Long groupId) {
             super("main-event-loop-" + groupId);
             this.groupId = groupId;
         }
 
-        synchronized void doStop() {
+        private synchronized void doStop() {
             // stop main loop first
             this.doExit();
 
@@ -674,7 +664,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             }
         }
 
-        synchronized void addSubscription(Subscription subscription) {
+        private synchronized void addSubscription(Subscription subscription) {
             subscription.doStart();
 
             if (subscription.getHistoryEventLoop() == null) {
@@ -684,7 +674,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             }
         }
 
-        synchronized void removeSubscription(Subscription subscription) {
+        private synchronized void removeSubscription(Subscription subscription) {
             if (subscription.getHistoryEventLoop() == null) {
                 this.mainSubscriptionIds.remove(subscription.getUuid());
             } else {
@@ -694,7 +684,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             subscription.doStop();
         }
 
-        synchronized void mergeHistory() {
+        private synchronized void mergeHistory() {
             List<String> stopped = new ArrayList<>();
             for (String subscriptionId : this.historySubscriptionIds) {
                 if (subscriptions.containsKey(subscriptionId)) {
@@ -712,13 +702,13 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             }
         }
 
-        synchronized void dispatch(List<WeEvent> events) {
+        private synchronized void dispatch(List<WeEvent> events) {
             for (String subscriptionId : this.mainSubscriptionIds) {
                 subscriptions.get(subscriptionId).dispatch(events);
             }
         }
 
-        synchronized void dispatch(Throwable e) {
+        private synchronized void dispatch(Throwable e) {
             for (String subscriptionId : this.mainSubscriptionIds) {
                 subscriptions.get(subscriptionId).getNotifyTask().consumerListener.onException(e);
             }
