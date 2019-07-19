@@ -92,8 +92,9 @@ function check_param(){
 ### check the result and print it
 function check_result(){
     if [[ $? -eq 0 ]];then
-        yellow_echo $1
+        yellow_echo "$1 success"
     else
+        yellow_echo "$1 failed, exit"
         exit 1;
    fi
 }
@@ -102,18 +103,18 @@ function install_module(){
     yellow_echo "install module broker"
     cd ${current_path}/modules/broker
     ./install-broker.sh --out_path ${out_path}/broker --listen_port ${broker_port} --block_chain_node_path ${block_chain_node_path} --channel_info ${block_chain_channel} --version ${block_chain_version}
-    check_result "install broker success"
+    check_result "install broker"
 
     yellow_echo "install module nginx"
     cd ${current_path}/modules/nginx
     ./install-nginx.sh --nginx_path ${out_path}/nginx --nginx_port ${nginx_port} --broker_port ${broker_port} --governance_port ${governance_port} &>> ${current_path}/install.log
-    check_result "install nginx success"
+    check_result "install nginx"
 
     if [[ ${governance_enable} = "true" ]];then
         yellow_echo "install module governance"
         cd ${current_path}/modules/governance
         ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --broker_port ${broker_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} &>> ${current_path}/install.log
-        check_result "install governance success"
+        check_result "install governance"
     fi
 }
 
