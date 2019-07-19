@@ -72,7 +72,7 @@ function build_weevent(){
         yellow_echo "package github[${tag}]"
 
         # switch tag
-        git checkout ${tag}
+        git checkout ${tag}; git pull
         execute_result "git checkout ${tag}"
     else
         yellow_echo "package local path"
