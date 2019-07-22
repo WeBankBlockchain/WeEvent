@@ -1,11 +1,11 @@
 ![image](https://github.com/WeBankFinTech/WeEvent-docs/blob/master/docs/image/weevent-logo.png)
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b7cd883f89d740ca9fe71db35b701018)](https://app.codacy.com/app/cristicmf/WeEvent?utm_source=github.com&utm_medium=referral&utm_content=WeBankFinTech/WeEvent&utm_campaign=Badge_Grade_Settings)
 [![CodeFactor](https://www.codefactor.io/repository/github/webankfintech/weevent/badge)](https://www.codefactor.io/repository/github/webankfintech/weevent)
 [![Build Status](https://travis-ci.com/WeBankFinTech/WeEvent.svg?branch=master)](https://travis-ci.com/WeBankFinTech/WeEvent)
+[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Latest release](https://img.shields.io/github/release/WeBankFinTech/WeEvent.svg)](https://github.com/WeBankFinTech/WeEvent/releases/latest)
-
+[![Maven Central](https://img.shields.io/maven-central/v/com.webank.weevent/weevent-client.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.webank.weevent%22%20AND%20a:%weevent-client%22)
 
 ## 什么是WeEvent？
 WeEvent是一套分布式事件驱动架构，实现了可信、可靠、高效的跨机构、跨平台事件通知机制。
@@ -14,13 +14,13 @@ WeEvent由微众银行自主研发并完全开源，秉承分布式商业模式�
 [WeEvent官网](http://fintech.webank.com/weevent) 。
 
 ## 快速入门
-支持Docker镜像、[快速安装](https://weeventdoc.readthedocs.io/zh_CN/latest/install/quickinstall.html)、[普通安装](https://weeventdoc.readthedocs.io/zh_CN/latest/install/module/index.html)三种安装方式。
+支持Docker镜像、[Bash一键脚本](https://weeventdoc.readthedocs.io/zh_CN/latest/install/quickinstall.html)、[普通安装](https://weeventdoc.readthedocs.io/zh_CN/latest/install/module/index.html)三种安装方式。
 #### Docker镜像安装
 ```
 $ docker pull weevent:1.0.0; docker run -d -p8080:8080 weevent:1.0.0 /bin/bash
 ```
 
-#### 快速安装
+#### Bash一键安装
 下载并且解压安装包，如weevent-1.0.0.tar.gz。在解压目录中执行安装脚本。
 ```
 $ ./install-all.sh -p /usr/local/weevent/
@@ -28,7 +28,7 @@ $ ./install-all.sh -p /usr/local/weevent/
 
 #### 功能体验
 通过浏览器即可体验事件发布等基本功能，如[发布事件](http://localhost:8080/weevent/rest/publish?topic=test&content=helloevent)。
-更多功能，请参见[WeEvent接入样例](https://github.com/WeBankFinTech/WeEvent/tree/master/weevent-broker/src/test/java/com/webank/weevent/sample)。
+更多功能，请参见[WeEvent接入](https://weeventdoc.readthedocs.io/zh_CN/latest/protocal/restful.html)。
 
 ## 项目贡献
 - 开发环境  
