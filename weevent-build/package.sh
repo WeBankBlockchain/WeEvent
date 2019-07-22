@@ -57,11 +57,11 @@ function confirm(){
 # chmod & dos2unix
 function set_permission(){
     cd ${out_path}
-    target="*.ini *.properties *.yml *.xml *.sh"
-    for x in ${target};
-    do
-        find -name ${x} -exec dos2unix {} \;
-    done
+    find -name "*.sh"  -exec dos2unix {} \;
+    find -name "*.ini" -exec dos2unix {} \;
+    find -name "*.properties" -exec dos2unix {} \;
+    find -name "*.yml" -exec dos2unix {} \;
+    find -name "*.xml" -exec dos2unix {} \;
 }
 
 # build broker, governance, client, web
@@ -90,7 +90,7 @@ function build_weevent(){
 
 function copy_install_file(){
     cd ${current_path}
-
+    mkdir -p ${out_path}/bin
     cp ./config.properties ./install-all.sh ${out_path}
     cp ./bin/start-all.sh ./bin/check-service.sh ./bin/stop-all.sh ./bin/uninstall-all.sh ${out_path}/bin
     cp -r ./third-packages ${out_path}
