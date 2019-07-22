@@ -1,79 +1,61 @@
 #!/bin/bash
 
 function nginx_setup() { 
-    echo "install nginx into $nginx_path"
-    mkdir -p $nginx_path
+    echo "install nginx into ${nginx_path}"
+    mkdir -p ${nginx_path}
 
-    if [[ ! -d $top_path/build ]];then
-        mkdir -p $top_path/build
+    if [[ ! -d ${top_path}/build ]];then
+        mkdir -p ${top_path}/build
     fi
 
-    tar -zxf $top_path/third-packages/nginx-1.14.2.tar.gz -C $top_path/build/
-    if [ $? -ne 0 ]; then
+    tar -zxf ${top_path}/third-packages/nginx-1.14.2.tar.gz -C ${top_path}/build/
+    if [[ $? -ne 0 ]]; then
         echo "decompress nginx-1.14.2.tar.gz failed, skip"
         exit 1
     fi
-   
-    tar -zxf $top_path/third-packages/pcre-8.20.tar.gz -C $top_path/build/
-    if [ $? -ne 0 ]; then
-        echo "decompress pcre-8.20.tar.gz failed, skip"
-        exit 1
-    fi
 
-    echo "build & install pcre" 
-    cd $top_path/build/pcre-8.20
-    ./configure --prefix=$current_path/../third-packages
-    make
-    make install
-    if [ $? -ne 0 ]; then
-        echo "install pcre failed, skip"
-        exit 1
-    fi
-           
     echo "build & install nginx"
-    cd ../nginx-1.14.2
-    ./configure --with-http_ssl_module --with-stream --with-stream_ssl_module --prefix=$nginx_path --with-pcre=../pcre-8.20
-    make
-    make install
-    if [ $? -ne 0 ]; then
+    cd ${top_path}/build/nginx-1.14.2
+    ./configure --with-http_ssl_module --with-stream --with-stream_ssl_module --prefix=${nginx_path}; make; make install
+    if [[ $? -ne 0 ]]; then
         echo "install nginx failed, skip"
         exit 1
     fi
-    cd $current_path
+    cd ${current_path}
 
     echo "configure nginx.conf"
-    mkdir -p $nginx_path/nginx_temp
-    mkdir -p $nginx_path/conf/conf.d
-    cp ./conf/nginx.conf $nginx_path/conf/
-    cp ./conf/server.* $nginx_path/conf/
-    cp ./conf/conf.d/*.conf $nginx_path/conf/conf.d/
+    mkdir -p ${nginx_path}/nginx_temp
+    mkdir -p ${nginx_path}/conf/conf.d
+    cp ./conf/nginx.conf ${nginx_path}/conf/
+    cp ./conf/server.* ${nginx_path}/conf/
+    cp ./conf/conf.d/*.conf ${nginx_path}/conf/conf.d/
 
-    sed -i "s/443/$nginx_port/g" $nginx_path/conf/conf.d/https.conf
-    sed -i "s/8080/$nginx_port/g" $nginx_path/conf/conf.d/http_quickinstall.conf
+    sed -i "s/443/$nginx_port/g" ${nginx_path}/conf/conf.d/https.conf
+    sed -i "s/8080/$nginx_port/g" ${nginx_path}/conf/conf.d/http_quickinstall.conf
 
-    if [ "$ssl" = "true" ]; then
-        sed -i "s/http.conf/https.conf/g" $nginx_path/conf/nginx.conf
-        sed -i "s/tcp.conf/tcp_tls.conf/g" $nginx_path/conf/nginx.conf
+    if [[ "$ssl" = "true" ]]; then
+        sed -i "s/http.conf/https.conf/g" ${nginx_path}/conf/nginx.conf
+        sed -i "s/tcp.conf/tcp_tls.conf/g" ${nginx_path}/conf/nginx.conf
     fi
     
-    if [[ -n $broker_port ]]; then
+    if [[ -n ${broker_port} ]]; then
         broker_url="localhost:$broker_port"
         echo "set broker_url: $broker_url"
-        sed -i "s/localhost:8090/$broker_url/g" $nginx_path/conf/conf.d/http_rs_quickinstall.conf
+        sed -i "s/localhost:8090/$broker_url/g" ${nginx_path}/conf/conf.d/http_rs_quickinstall.conf
     fi
-    if  [[ -n $governance_port ]]; then
-        governance_url="localhost:$governance_port"
+    if  [[ -n ${governance_port} ]]; then
+        governance_url="localhost:${governance_port}"
         echo "set governance_url: $governance_url"
-        sed -i "s/localhost:8099/$governance_url/g" $nginx_path/conf/conf.d/http_rs_quickinstall.conf
+        sed -i "s/localhost:8099/$governance_url/g" ${nginx_path}/conf/conf.d/http_rs_quickinstall.conf
     fi
     
-    cp nginx.sh $nginx_path
+    cp nginx.sh ${nginx_path}
 
     echo "nginx module install success"
 }
 
 # usage
-if [ $# -lt 2 ]; then 
+if [[ $# -lt 2 ]]; then
     echo "Usage:"
     echo "    $0 --nginx_path /data/app/weevent/nginx "
     echo "    --broker_port --governance_port"
@@ -90,7 +72,7 @@ current_path=`pwd`
 top_path=$(dirname $(dirname `pwd`))
 
 param="";
-while [ $# -ge 2 ]; do
+while [[ $# -ge 2 ]]; do
     case "$1" in
         --nginx_path) param="$1 = $2;"; nginx_path="$2"; shift 2;;
         --nginx_port) param="$1 = $2;"; nginx_port="$2"; shift 2;;        

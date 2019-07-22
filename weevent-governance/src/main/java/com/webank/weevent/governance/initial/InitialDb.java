@@ -60,20 +60,20 @@ public class InitialDb {
                 Statement stat = conn.createStatement()) {
             // create table t_account
             stat.executeUpdate("create table if not exists t_account(\n"
-                    + "id int(11) not null auto_increment primary key,\n" + "email varchar(256) not null,\n"
-                    + "username varchar(256) not null unique,\n" + "password varchar(256) not null,\n"
+                    + "id int(11) not null auto_increment primary key,\n" + "email varchar(128) not null,\n"
+                    + "username varchar(128) not null unique,\n" + "password varchar(128) not null,\n"
                     + "last_update timestamp not null,\n" + "key index_email (email),\n"
                     + "key index_username (username)\n" + ")engine =Innodb default charset=utf8;");
             // create table t_broker
             stat.executeUpdate("create table if not exists t_broker(\n"
-                    + "id int(11) not null auto_increment primary key,\n" + "name varchar(256) not null,\n"
-                    + "broker_url varchar(256),\n" + "webase_url varchar(256),\n" + "user_id int(11) not null,\n"
+                    + "id int(11) not null auto_increment primary key,\n" + "name varchar(128) not null,\n"
+                    + "broker_url varchar(128),\n" + "webase_url varchar(128),\n" + "user_id int(11) not null,\n"
                     + "last_update timestamp not null,\n" + "foreign key(user_id ) references t_account(id),\n"
                     + "key index_name (name)\n" + ")engine =Innodb default charset=utf8;");
 
             // create table t_topic
-            stat.executeUpdate("create table if not exists t_topic(\n" + "topic_name varchar(256) not null,\n"
-                    + "creater varchar(256),\n" + "broker_id int(11) not null,\n"
+            stat.executeUpdate("create table if not exists t_topic(\n" + "topic_name varchar(128) not null,\n"
+                    + "creater varchar(128),\n" + "broker_id int(11) not null,\n"
                     + "last_update timestamp NOT NULL , \n" + "foreign key(broker_id) references t_broker(id),\n"
                     + "primary key id_topic (broker_id,topic_name)\n" + ")engine =Innodb default charset=utf8;");
         } catch (SQLException e) {
