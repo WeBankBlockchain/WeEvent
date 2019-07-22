@@ -17,15 +17,17 @@ public class Rest {
             RestTemplate rest = new RestTemplate(requestFactory);
 
             // ensure topic exist "com.weevent.test"
-            Boolean result = rest.getForEntity("http://localhost:8080/weevent/rest/open?topic={}",
+            Boolean result = rest.getForEntity("http://localhost:8080/weevent/rest/open?topic={}&groupId={}",
                     Boolean.class,
-                    "com.weevent.test").getBody();
+                    "com.weevent.test",
+                    "1").getBody();
             System.out.println(result);
 
             // publish event to topic "com.weevent.test"
-            SendResult sendResult = rest.getForEntity("http://localhost:8080/weevent/rest/publish?topic={}&content={}",
+            SendResult sendResult = rest.getForEntity("http://localhost:8080/weevent/rest/publish?topic={}&groupId={}&content={}",
                     SendResult.class,
                     "com.weevent.test",
+                    "1",
                     "hello weevent".getBytes(StandardCharsets.UTF_8)).getBody();
 
             System.out.println(sendResult.getStatus());

@@ -47,7 +47,7 @@ function execute_result(){
 function confirm(){
     if [[ -d $1 ]]; then
         read -p "$out_path already exist, continue? [Y/N]" cmd_input
-        if [[ "Y" != "$cmd_input" ]]; then
+        if [[ "Y" != "$cmd_input" && "y" != "$cmd_input" ]]; then
             echo "input $cmd_input, install skipped"
             exit 1
         fi
@@ -57,11 +57,11 @@ function confirm(){
 # chmod & dos2unix
 function set_permission(){
     cd ${out_path}
-
-    find -name "*.sh" -exec chmod +x {} \;
-    find -name "*.sh" -exec dos2unix {} \;
-    find -name "*.ini" -exec dos2unix {} \;
-    find -name "*.properties" -exec dos2unix {} \;
+    target="*.ini *.properties *.yml *.xml *.sh"
+    for x in ${target};
+    do
+        find -name ${x} -exec dos2unix {} \;
+    done
 }
 
 # build broker, governance, client, web
@@ -91,7 +91,7 @@ function build_weevent(){
 function copy_install_file(){
     cd ${current_path}
 
-    cp ./config.properties ./install-all.sh ./start-all.sh ./check-service.sh ./stop-all.sh ./uninstall-all.sh ${out_path}
+    cp ./config.properties ./install-all.sh ./bin/start-all.sh ./bin/check-service.sh ./bin/stop-all.sh ./bin/uninstall-all.sh ${out_path}
     cp -r ./third-packages ${out_path}
 
     mkdir -p ${out_path}/modules/broker

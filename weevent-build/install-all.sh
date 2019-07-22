@@ -78,10 +78,25 @@ function check_port(){
     fi
 }
 
+function check_telnet(){
+    local channel_ip=`echo | awk '{split("'${1}'", array, ":");print array[1]}'`
+    local channel_port=`echo | awk '{split("'${1}'", array, ":");print array[2]}'`
+    ssh ${channel_ip} -p ${channel_port} -o ConnectTimeout=3 2>&1 | grep "Connection refused" &>> ${current_path}/install.log
+    if [[ $? -eq 0 ]];then
+       return 1
+    fi
+    return 0
+}
+
 function check_param(){
     if [[ -d ${block_chain_node_path} ]]; then
         check_port ${broker_port}
         check_port ${nginx_port}
+        check_telnet ${block_chain_channel}
+        if [[ $? -ne 0 ]];then
+            echo "fisco-bcos.channel ${block_chain_channel} Connection Fail"
+            exit 1;
+        fi
         echo "param ok"
     else
         echo "path not exist, ${block_chain_node_path}"
@@ -112,6 +127,11 @@ function install_module(){
 
     if [[ ${governance_enable} = "true" ]];then
         yellow_echo "install module governance"
+        check_telnet ${mysql_ip}:${mysql_port}
+        if [[ $? -ne 0 ]];then
+            echo "governance.mysql ${mysql_ip}:${mysql_port} Connection Fail"
+            exit 1;
+        fi
         cd ${current_path}/modules/governance
         ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --broker_port ${broker_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} &>> ${current_path}/install.log
         check_result "install governance"
@@ -126,7 +146,7 @@ function main(){
     # confirm
     if [[ -d $2 ]]; then
         read -p "$2 already exist, continue? [Y/N]" cmd_input
-        if [[ "Y" != "$cmd_input" ]]; then
+        if [[ "Y" != "$cmd_input" && "y" != "$cmd_input" ]]; then
             echo "input $cmd_input, install skipped"
             exit 1
         fi
@@ -151,7 +171,7 @@ function main(){
     install_module
 
     cd ${current_path}
-    cp start-all.sh check-service.sh stop-all.sh uninstall-all.sh ${out_path}
+    cp ./bin/start-all.sh ./bin/check-service.sh ./bin/stop-all.sh ./bin/uninstall-all.sh ${out_path}
 }
 
 # Usage message

@@ -18,7 +18,7 @@ function main(){
     fi
 
     read -p "really want to uninstall WeEvent?[Y/N]" cmd_input
-    if [[ "Y" != "${cmd_input}" ]]; then
+    if [[ "Y" != "${cmd_input}" && "y" != "$cmd_input" ]]; then
         echo "input ${cmd_input}, exit"
         exit 1
     fi
@@ -35,7 +35,7 @@ function main(){
 
     if [[ -n "${current_broker_pid}" ]] || [[ -n "${current_nginx_pid}" ]];then
         read -p "WeEvent is running, stop it first? [Y/N]" cmd_input
-        if [[ "Y" != "${cmd_input}" ]]; then
+        if [[ "Y" != "${cmd_input}" && "y" != "$cmd_input" ]]; then
             echo "input ${cmd_input}, exit"
             exit 1
         fi
@@ -47,7 +47,6 @@ function main(){
         fi	
     fi
 
-    cd ..
     #uninstall;
     rm -rf ${current_path}
     if [[ $? -ne 0 ]];then

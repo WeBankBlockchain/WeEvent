@@ -24,15 +24,15 @@ public class JsonRPC {
 
         try {
             URL remote = new URL("http://localhost:8080/weevent/jsonrpc");
-            // 创建客户端
+            // init jsonrpc client
             JsonRpcHttpClient client = new JsonRpcHttpClient(remote);
-            // 实例化rpc对象
+            // init IBrokerRpc object
             IBrokerRpc rpc = ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);
 
-            // 确认主题存在
+            // open topic
             rpc.open("com.weevent.test", groupId);
 
-            // 发布事件，主题“com.weevent.test”，事件内容为"hello weevent"
+            // publish event
             extensions.put(WeEventConstants.EXTENSIONS_GROUP_ID, "1");
             SendResult sendResult = rpc.publish("com.weevent.test", groupId, "hello weevent".getBytes(StandardCharsets.UTF_8), extensions);
             System.out.println(sendResult.getStatus());
