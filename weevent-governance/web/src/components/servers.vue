@@ -41,7 +41,7 @@
     <el-dialog :title="title" :visible.sync="showLog">
       <el-form :model="form" :rules="rules" ref='form'>
         <el-form-item label="名称:" prop='name'>
-          <el-input v-model.trim="form.name" autocomplete="off" placeholder="请输入服务名称"></el-input>
+          <el-input v-model.trim="form.name" autocomplete="off" placeholder="请输入服务名称(1-20位字母数字下划线)"></el-input>
         </el-form-item>
         <el-form-item label="Broker服务地址:" prop='brokerUrl'>
           <el-input v-model.trim="form.brokerUrl" autocomplete="off"  placeholder="例如: 'http://127.0.0.1:8080/weevent'"></el-input>
@@ -65,6 +65,18 @@ export default {
     headerBar
   },
   data () {
+    var checkName = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请输入用户名'))
+      } else {
+        let regex = /^[0-9A-Za-z]{1,20}$/
+        if (regex.exec(value)) {
+          callback()
+        } else {
+          callback(new Error('服务名格式错误'))
+        }
+      }
+    }
     return {
       server: [],
       showLog: false,
@@ -78,7 +90,7 @@ export default {
       brokerId: '',
       rules: {
         name: [
-          {required: true, message: '名称不能为空', trigger: 'blur'}
+          {validator: checkName, trigger: 'blur'}
         ],
         brokerUrl: [
           {required: true, message: '服务端口不能为空', trigger: 'blur'}

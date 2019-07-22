@@ -15,7 +15,7 @@
     >
       <el-table-column
         prop='nodeName'
-        label='Topic'
+        label='节点列表'
       ></el-table-column>
       <el-table-column
         prop='blockNumber'
@@ -77,7 +77,7 @@ export default {
     },
     update () {
       this.loading = true
-      this.pageSize = 1
+      this.pageSize = 10
       this.pageIndex = 1
       setTimeout(fun => {
         this.getNode()

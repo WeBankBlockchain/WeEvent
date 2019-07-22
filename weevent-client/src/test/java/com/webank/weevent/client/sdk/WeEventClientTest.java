@@ -2,8 +2,6 @@ package com.webank.weevent.client.sdk;
 
 import java.nio.charset.StandardCharsets;
 
-import javax.net.ssl.SSLContext;
-
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.IWeEventClient;
@@ -11,7 +9,6 @@ import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.TopicPage;
 import com.webank.weevent.sdk.WeEvent;
-import com.webank.weevent.sdk.WeEventClient;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
@@ -74,7 +71,7 @@ public class WeEventClientTest {
         // create subscriber
         String groupId = "1";//if not set default 1
         try {
-            String subscribeId = this.weEventClient.subscribe(this.topicName, groupId, "sfsafsfsfd", new WeEventClient.EventListener() {
+            String subscribeId = this.weEventClient.subscribe(this.topicName, groupId, "sfsafsfsfd", new IWeEventClient.EventListener() {
                 @Override
                 public void onEvent(WeEvent event) {
                     System.out.println("onEvent:" + event.toString());
@@ -98,7 +95,7 @@ public class WeEventClientTest {
         log.info("===================={}", this.testName.getMethodName());
         // create subscriber
         String groupId = "1";//if not set default 1
-        String subscribeId = this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
+        String subscribeId = this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
                 System.out.println("onEvent:" + event.toString());
@@ -136,7 +133,7 @@ public class WeEventClientTest {
         SendResult sendResult = this.weEventClient.publish(topicName, "hello world".getBytes(StandardCharsets.UTF_8));
         System.out.print("sendResult getEventId" + sendResult.getEventId());
         String groupId = "1";//if not set default 1
-        this.weEventClient.subscribe(this.topicName, groupId, sendResult.getEventId(), new WeEventClient.EventListener() {
+        this.weEventClient.subscribe(this.topicName, groupId, sendResult.getEventId(), new IWeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
                 System.out.print(event.toString());
@@ -158,7 +155,7 @@ public class WeEventClientTest {
     public void testUnSubscribe() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
         String groupId = "1";//if not set default 1
-        String subscriptionId = this.weEventClient.subscribe(this.topicName, groupId, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
+        String subscriptionId = this.weEventClient.subscribe(this.topicName, groupId, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
                 log.info(event.toString());
@@ -228,14 +225,5 @@ public class WeEventClientTest {
     @Test(expected = BrokerException.class)
     public void testGetEvent() throws Exception {
         this.weEventClient.getEvent("not exist");
-    }
-
-    /**
-     * Method: getSSLContext()
-     */
-    @Test
-    public void testGetSSLContext() throws Exception {
-        SSLContext sslContext = WeEventClient.getSSLContext();
-        assertTrue(sslContext != null);
     }
 }
