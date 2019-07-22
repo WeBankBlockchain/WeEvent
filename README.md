@@ -28,7 +28,7 @@ $ ./install-all.sh -p /usr/local/weevent/
 
 #### 功能体验
 通过浏览器即可体验事件发布等基本功能，如[发布事件](http://localhost:8080/weevent/rest/publish?topic=test&content=helloevent)。
-更多功能，请参见[WeEvent接入样例](https://github.com/WeBankFinTech/WeEvent/tree/master/weevent-broker/src/test/java/com/webank/weevent/sample)。
+更多功能，请参见[WeEvent接入](https://weeventdoc.readthedocs.io/zh_CN/latest/protocal/restful.html)。
 
 ## 项目贡献
 - 开发环境  
