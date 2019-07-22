@@ -170,8 +170,7 @@ function main(){
     # install module
     install_module
 
-    cd ${current_path}
-    cp ./bin/start-all.sh ./bin/check-service.sh ./bin/stop-all.sh ./bin/uninstall-all.sh ${out_path}
+    cp ${current_path}/bin/start-all.sh ${current_path}/bin/check-service.sh ${current_path}/bin/stop-all.sh ${current_path}/bin/uninstall-all.sh ${out_path}
 }
 
 # Usage message

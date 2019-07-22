@@ -91,21 +91,21 @@ function build_weevent(){
 function copy_install_file(){
     cd ${current_path}
     mkdir -p ${out_path}/bin
-    cp ./config.properties ./install-all.sh ${out_path}
-    cp ./bin/start-all.sh ./bin/check-service.sh ./bin/stop-all.sh ./bin/uninstall-all.sh ${out_path}/bin
-    cp -r ./third-packages ${out_path}
+    cp ${current_path}/config.properties ${current_path}/install-all.sh ${out_path}
+    cp ${current_path}/bin/start-all.sh ${current_path}/bin/check-service.sh ${current_path}/bin/stop-all.sh ${current_path}/bin/uninstall-all.sh ${out_path}/bin
+    cp -r ${current_path}/third-packages ${out_path}
 
     mkdir -p ${out_path}/modules/broker
-    cp ./modules/broker/install-broker.sh ${out_path}/modules/broker
+    cp ${current_path}/modules/broker/install-broker.sh ${out_path}/modules/broker
     cp -r ${top_path}/weevent-broker/dist/* ${out_path}/modules/broker
 
     mkdir -p ${out_path}/modules/governance
-    cp ./modules/governance/install-governance.sh ${out_path}/modules/governance
+    cp ${current_path}/modules/governance/install-governance.sh ${out_path}/modules/governance
     cp -r ${top_path}/weevent-governance/dist/* ${out_path}/modules/governance
 
     mkdir -p ${out_path}/modules/nginx
-    cp ./modules/nginx/install-nginx.sh ./modules/nginx/nginx.sh ${out_path}/modules/nginx
-    cp -r ./modules/nginx/conf ${out_path}/modules/nginx
+    cp ${current_path}/modules/nginx/install-nginx.sh ./modules/nginx/nginx.sh ${out_path}/modules/nginx
+    cp -r ${current_path}/modules/nginx/conf ${out_path}/modules/nginx
 }
 
 # switch to prod.properties, remove dev.properties
