@@ -57,6 +57,7 @@ public class WeEvent implements Serializable {
      *
      * @param topic the topic
      * @param content the content, character utf8
+     * @param extensions User-defined extensions
      */
     public WeEvent(String topic, byte[] content, Map<String, String> extensions) {
         this.topic = topic;

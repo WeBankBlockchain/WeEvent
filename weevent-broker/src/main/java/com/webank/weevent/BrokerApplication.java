@@ -129,6 +129,14 @@ public class BrokerApplication {
         environment = env;
     }
 
+    public static void exit() {
+        if (applicationContext != null) {
+            System.exit(SpringApplication.exit(applicationContext));
+        } else {
+            System.exit(1);
+        }
+    }
+
     public static void main(String[] args) {
         /* Forbid banner.
         SpringApplicationBuilder builder = new SpringApplicationBuilder(BrokerApplication.class);
@@ -174,7 +182,7 @@ public class BrokerApplication {
             return iProducer;
         } catch (BrokerException e) {
             log.error("start producer error");
-            System.exit(SpringApplication.exit(applicationContext));
+            exit();
         }
         return null;
     }
@@ -189,7 +197,7 @@ public class BrokerApplication {
             return iConsumer;
         } catch (BrokerException e) {
             log.error("start consumer error");
-            System.exit(SpringApplication.exit(applicationContext));
+            exit();
         }
         return null;
     }
@@ -216,7 +224,7 @@ public class BrokerApplication {
             }
         } catch (Exception e) {
             log.error("init redis error", e);
-            System.exit(SpringApplication.exit(applicationContext));
+            exit();
         }
         RedisService redisService = new RedisService();
         redisService.setJedisPool(jedisPool);
