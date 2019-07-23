@@ -47,7 +47,7 @@ function execute_result(){
 function confirm(){
     if [[ -d $1 ]]; then
         read -p "$out_path already exist, continue? [Y/N]" cmd_input
-        if [[ "Y" != "$cmd_input" ]]; then
+        if [[ "Y" != "$cmd_input" && "y" != "$cmd_input" ]]; then
             echo "input $cmd_input, install skipped"
             exit 1
         fi
@@ -57,11 +57,12 @@ function confirm(){
 # chmod & dos2unix
 function set_permission(){
     cd ${out_path}
-
-    find -name "*.sh" -exec chmod +x {} \;
-    find -name "*.sh" -exec dos2unix {} \;
+    find -name "*.sh"  -exec dos2unix {} \;
+    find -name "*.sh"  -exec chmod +x {} \;
     find -name "*.ini" -exec dos2unix {} \;
     find -name "*.properties" -exec dos2unix {} \;
+    find -name "*.yml" -exec dos2unix {} \;
+    find -name "*.xml" -exec dos2unix {} \;
 }
 
 # build broker, governance, client, web
@@ -90,21 +91,21 @@ function build_weevent(){
 
 function copy_install_file(){
     cd ${current_path}
-
-    cp ./config.properties ./install-all.sh ./start-all.sh ./check-service.sh ./stop-all.sh ./uninstall-all.sh ${out_path}
-    cp -r ./third-packages ${out_path}
+    cp ${current_path}/config.properties ${current_path}/install-all.sh ${out_path}
+    cp -r ${current_path}/bin ${out_path}
+    cp -r ${current_path}/third-packages ${out_path}
 
     mkdir -p ${out_path}/modules/broker
-    cp ./modules/broker/install-broker.sh ${out_path}/modules/broker
+    cp ${current_path}/modules/broker/install-broker.sh ${out_path}/modules/broker
     cp -r ${top_path}/weevent-broker/dist/* ${out_path}/modules/broker
 
     mkdir -p ${out_path}/modules/governance
-    cp ./modules/governance/install-governance.sh ${out_path}/modules/governance
+    cp ${current_path}/modules/governance/install-governance.sh ${out_path}/modules/governance
     cp -r ${top_path}/weevent-governance/dist/* ${out_path}/modules/governance
 
     mkdir -p ${out_path}/modules/nginx
-    cp ./modules/nginx/install-nginx.sh ./modules/nginx/nginx.sh ${out_path}/modules/nginx
-    cp -r ./modules/nginx/conf ${out_path}/modules/nginx
+    cp ${current_path}/modules/nginx/install-nginx.sh ./modules/nginx/nginx.sh ${out_path}/modules/nginx
+    cp -r ${current_path}/modules/nginx/conf ${out_path}/modules/nginx
 }
 
 # switch to prod.properties, remove dev.properties
