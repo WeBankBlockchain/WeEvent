@@ -79,12 +79,12 @@ function check_port(){
 }
 
 function check_telnet(){
-    local channel_ip=`echo | awk '{split("'${1}'", array, ":");print array[1]}'`
-    local channel_port=`echo | awk '{split("'${1}'", array, ":");print array[2]}'`
-    ssh ${channel_ip} -p ${channel_port} -o ConnectTimeout=3 2>&1 | grep "Connection refused" &>> ${current_path}/install.log
-    if [[ $? -eq 0 ]];then
-       return 1
-    fi
+    #local channel_ip=`echo | awk '{split("'${1}'", array, ":");print array[1]}'`
+    #local channel_port=`echo | awk '{split("'${1}'", array, ":");print array[2]}'`
+    #ssh ${channel_ip} -p ${channel_port} -o ConnectTimeout=3 2>&1 | grep "Connection refused" &>> ${current_path}/install.log
+    #if [[ $? -eq 0 ]];then
+    #   return 1
+    #fi
     return 0
 }
 
@@ -170,7 +170,7 @@ function main(){
     # install module
     install_module
 
-    cp ${current_path}/bin/start-all.sh ${current_path}/bin/check-service.sh ${current_path}/bin/stop-all.sh ${current_path}/bin/uninstall-all.sh ${out_path}
+    cp ${current_path}/bin/* ${out_path}
 }
 
 # Usage message

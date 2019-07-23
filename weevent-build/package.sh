@@ -58,6 +58,7 @@ function confirm(){
 function set_permission(){
     cd ${out_path}
     find -name "*.sh"  -exec dos2unix {} \;
+    find -name "*.sh"  -exec chmod +x {} \;
     find -name "*.ini" -exec dos2unix {} \;
     find -name "*.properties" -exec dos2unix {} \;
     find -name "*.yml" -exec dos2unix {} \;
@@ -90,9 +91,8 @@ function build_weevent(){
 
 function copy_install_file(){
     cd ${current_path}
-    mkdir -p ${out_path}/bin
     cp ${current_path}/config.properties ${current_path}/install-all.sh ${out_path}
-    cp ${current_path}/bin/start-all.sh ${current_path}/bin/check-service.sh ${current_path}/bin/stop-all.sh ${current_path}/bin/uninstall-all.sh ${out_path}/bin
+    cp -r ${current_path}/bin ${out_path}
     cp -r ${current_path}/third-packages ${out_path}
 
     mkdir -p ${out_path}/modules/broker

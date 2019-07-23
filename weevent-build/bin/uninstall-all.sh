@@ -1,6 +1,6 @@
 #!/bin/bash
 current_path=`pwd`
-
+top_path=`dirname ${current_path}`
 broker_pid_file=${current_path}/broker/logs/broker.pid
 nginx_pid_file=${current_path}/nginx/logs/nginx.pid
 
@@ -48,6 +48,7 @@ function main(){
     fi
 
     #uninstall;
+    cd ${top_path}
     rm -rf ${current_path}
     if [[ $? -ne 0 ]];then
         echo "uninstall fail"

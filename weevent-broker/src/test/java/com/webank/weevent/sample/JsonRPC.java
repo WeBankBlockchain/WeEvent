@@ -19,19 +19,15 @@ public class JsonRPC {
     private final static Map<String, String> extensions = new HashMap<>();
 
     public static void main(String[] args) {
-
         System.out.println("This is WeEvent json rpc sample.");
-
         try {
             URL remote = new URL("http://localhost:8080/weevent/jsonrpc");
             // init jsonrpc client
             JsonRpcHttpClient client = new JsonRpcHttpClient(remote);
             // init IBrokerRpc object
             IBrokerRpc rpc = ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);
-
             // open topic
             rpc.open("com.weevent.test", groupId);
-
             // publish event
             extensions.put(WeEventConstants.EXTENSIONS_GROUP_ID, "1");
             SendResult sendResult = rpc.publish("com.weevent.test", groupId, "hello weevent".getBytes(StandardCharsets.UTF_8), extensions);
