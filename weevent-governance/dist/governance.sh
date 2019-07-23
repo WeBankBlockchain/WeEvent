@@ -13,7 +13,7 @@ get_pid(){
 }
 
 start(){
-    get_pid;
+    get_pid
     if [[ -n "${current_pid}" ]];then
         echo "governance is running, (PID=${current_pid})"
         exit 0
@@ -21,8 +21,8 @@ start(){
 
     nohup java ${JAVA_OPTS} -Xbootclasspath/a:./conf:./html -Djava.security.egd=file:/dev/./urandom -jar ./apps/*  >/dev/null 2>&1 &
     sleep 3
-    governance_pid=$!
-    if [[ -n "${governance_pid}" ]];then
+    get_pid
+    if [[ -n "${current_pid}" ]];then
         echo "start governance success (PID=${governance_pid})"
 
         if [[ `crontab -l | grep -w governance | wc -l` -eq 0 ]]; then

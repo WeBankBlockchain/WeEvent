@@ -35,8 +35,8 @@ start(){
 
     nohup java ${JAVA_OPTS} -Xbootclasspath/a:./conf -jar ./apps/*  >/dev/null 2>&1 &
     sleep 3
-    broker_pid=$!
-    if [[ -n "${broker_pid}" ]];then
+    get_pid
+    if [[ -n "${current_pid}" ]];then
         echo "start broker success (PID=${broker_pid})"
 
         if [[ `crontab -l | grep -w broker | wc -l` -eq 0 ]]; then
