@@ -29,7 +29,6 @@ public class JsonRPC {
             // open topic
             rpc.open("com.weevent.test", groupId);
             // publish event
-            extensions.put(WeEventConstants.EXTENSIONS_GROUP_ID, "1");
             SendResult sendResult = rpc.publish("com.weevent.test", groupId, "hello weevent".getBytes(StandardCharsets.UTF_8), extensions);
             System.out.println(sendResult.getStatus());
         } catch (MalformedURLException e) {
