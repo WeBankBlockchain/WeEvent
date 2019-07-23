@@ -13,7 +13,7 @@ function governance_setup() {
         echo "set server_port failed"
         exit 1
     else
-       sed -i "s/port:.*$/'port: ${server_port}'/" ${out_path}/conf/application-prod.yml
+       sed -i "s/port:.*$/port: ${server_port}/" ${out_path}/conf/application-prod.yml
     fi
     echo "set server_port success"
 
