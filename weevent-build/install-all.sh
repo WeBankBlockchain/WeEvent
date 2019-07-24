@@ -87,10 +87,9 @@ function check_telnet(){
         ssh ${channel_ip} -p ${channel_port} -o ConnectTimeout=3 2>&1 | grep "Connection refused" &>> ${current_path}/install.log
         if [[ $? -eq 0 ]];then
             echo "${channel} connection fail"
-            return 1
+            exit 1
         fi
     done
-    return 0
 }
 
 function check_param(){
@@ -98,8 +97,8 @@ function check_param(){
         check_port ${broker_port}
         check_port ${nginx_port}
         check_telnet ${block_chain_channel}
-        if [[ $? -ne 0 ]];then
-            exit 1;
+        if [[ ${governance_enable} = "true" ]];then
+            check_telnet ${mysql_ip}:${mysql_port}
         fi
         echo "param ok"
     else
@@ -131,10 +130,6 @@ function install_module(){
 
     if [[ ${governance_enable} = "true" ]];then
         yellow_echo "install module governance"
-        check_telnet ${mysql_ip}:${mysql_port}
-        if [[ $? -ne 0 ]];then
-            exit 1;
-        fi
         cd ${current_path}/modules/governance
         ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --broker_port ${broker_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} &>> ${current_path}/install.log
         check_result "install governance"
