@@ -79,12 +79,17 @@ function check_port(){
 }
 
 function check_telnet(){
-    #local channel_ip=`echo | awk '{split("'${1}'", array, ":");print array[1]}'`
-    #local channel_port=`echo | awk '{split("'${1}'", array, ":");print array[2]}'`
-    #ssh ${channel_ip} -p ${channel_port} -o ConnectTimeout=3 2>&1 | grep "Connection refused" &>> ${current_path}/install.log
-    #if [[ $? -eq 0 ]];then
-    #   return 1
-    #fi
+    eval $(echo $1 | awk '{split($0, filearray, ";");for(i in filearray) print "arr["i"]="filearray[i]}')
+    for channel in ${arr[*]}
+    do
+        local channel_ip=`echo | awk '{split("'${channel}'", array, ":");print array[1]}'`
+        local channel_port=`echo | awk '{split("'${channel}'", array, ":");print array[2]}'`
+        ssh ${channel_ip} -p ${channel_port} -o ConnectTimeout=3 2>&1 | grep "Connection refused" &>> ${current_path}/install.log
+        if [[ $? -eq 0 ]];then
+            echo "${channel} connection fail"
+            return 1
+        fi
+    done
     return 0
 }
 
@@ -94,7 +99,6 @@ function check_param(){
         check_port ${nginx_port}
         check_telnet ${block_chain_channel}
         if [[ $? -ne 0 ]];then
-            echo "fisco-bcos.channel ${block_chain_channel} Connection Fail"
             exit 1;
         fi
         echo "param ok"
@@ -129,7 +133,6 @@ function install_module(){
         yellow_echo "install module governance"
         check_telnet ${mysql_ip}:${mysql_port}
         if [[ $? -ne 0 ]];then
-            echo "governance.mysql ${mysql_ip}:${mysql_port} Connection Fail"
             exit 1;
         fi
         cd ${current_path}/modules/governance
