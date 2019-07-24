@@ -141,8 +141,8 @@ function install_module(){
     fi
 }
 
-function update_check_server(){
-    sed -i "s/8080/$nginx_port/g" check-service.sh
+function update_server_port(){
+    sed -i "s/8080/$nginx_port/g" ${current_path}/bin/check-service.sh
 }
 
 function main(){
@@ -168,7 +168,7 @@ function main(){
     check_param
 
     # set the check service port
-    update_check_server
+    update_server_port
 
     # install module
     install_module

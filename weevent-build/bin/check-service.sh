@@ -20,18 +20,15 @@ function check_broker(){
     
 }
 
-
 function check_governance(){
     echo "check governance service"
-    existGovernance=`curl -s "http://127.0.0.1:8080/weevent-governance/topic/getTopics?pageIndex=0&pageSize=10"`
-    if [[ "${existGovernance}" == "true" || "${existGovernance}" == "false" ]];then
-        yellow_echo "governance service is ok"
+    curl -s "http://127.0.0.1:8080/weevent-governance/topic/getTopics?pageIndex=0&pageSize=10" | grep 302000 >>/dev/null
+    if [[ $? -eq 0 ]];then
+        echo "governance service is ok"
     else
         echo "governance service is error"
     fi
  }
-
-
 
 check_broker
 if [[ -d "governance" ]]; then

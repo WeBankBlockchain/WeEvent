@@ -15,9 +15,9 @@ function check_governance(){
         echo "get governance port fail"
         exit 1
     fi
-    
-    governanceExist=`curl -s "http://127.0.0.1:${port}/weevent-governance/topic/getTopics?pageIndex=0&pageSize=10"`
-    if [[ "${governanceExist}" == "true" || "${governanceExist}" == "false" ]];then
+
+    curl -s "http://127.0.0.1:${port}/weevent-governance/topic/getTopics?pageIndex=0&pageSize=10" | grep 302000 >>/dev/null
+    if [[ $? -eq 0 ]];then
         echo "governance service is ok"
     else
         echo "governance service is error"
