@@ -32,31 +32,35 @@ start(){
         echo "broker is running, (PID=${current_pid})"
         exit 0
     fi
-
     nohup java ${JAVA_OPTS} -Xbootclasspath/a:./conf -jar ./apps/*  >/dev/null 2>&1 &
-    sleep 3
-    get_pid
-    if [[ -n "${current_pid}" ]];then
-        echo "start broker success (PID=${broker_pid})"
+    i=0
+    while :
+    do
+        sleep 1
+        get_pid
+        if [[ -n "${current_pid}" ]];then
+            echo "start broker success (PID=${broker_pid})"
+            if [[ `crontab -l | grep -w broker | wc -l` -eq 0 ]]; then
+                 crontab -l > cron.backup
+                 echo "* * * * * cd `pwd`; ./broker.sh monitor >> ./logs/monitor.log 2>&1" >> cron.backup
+                 crontab cron.backup
+                 rm cron.backup
+            fi
 
-        if [[ `crontab -l | grep -w broker | wc -l` -eq 0 ]]; then
-             crontab -l > cron.backup
-             echo "* * * * * cd `pwd`; ./broker.sh monitor >> ./logs/monitor.log 2>&1" >> cron.backup
-             crontab cron.backup
-             rm cron.backup
+            if [[ `crontab -l | grep -w broker | wc -l` -gt 0 ]]; then
+                 echo "add the crontab job success"
+                 exit 0
+            else
+                 echo "add the crontab job fail"
+            fi
         fi
 
-        if [[ `crontab -l | grep -w broker | wc -l` -gt 0 ]]; then
-             echo "add the crontab job success"
-             exit 0
-        else
-             echo "add the crontab job fail"
-             exit 1
+        if [[ i -eq 15 ]];then
+            echo "start broker fail"
+            exit 1
         fi
-    else
-        echo "start broker fail"
-        exit 1
-    fi
+        i=$(( $i + 1 ))
+    done
 }
 
 stop(){
