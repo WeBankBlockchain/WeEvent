@@ -4,6 +4,11 @@ source ~/.bashrc >/dev/null 2>&1
 
 #check java jdk, not support openjdk 1.8 in CentOS
 function check_java_jdk(){
+    java -version >>/dev/null
+    if [[ $? -ne 0 ]];then
+        echo "not installed JDK"
+        exit 1
+    fi
     java_version=`java -version 2>&1 |awk 'NR==1{ gsub(/"/,""); print $3 }' | awk -F[.] '{print $1$2}'`
     system_version=`cat /etc/os-release | awk -F'[= "]' '{print $3}' | head -1`
     openjdk=`java -version 2>&1 |awk 'NR==1{ gsub(/"/,""); print $1 }'`
