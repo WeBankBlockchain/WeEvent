@@ -32,19 +32,7 @@ start(){
         get_current_pid
         if [[ -n "${current_pid}" ]]; then
             echo "start nginx success (PID=${current_pid})"
-            if [[ `crontab -l | grep -w nginx | wc -l` -eq 0 ]]; then
-                crontab -l > cron.backup
-                echo "* * * * * cd `pwd`; ./nginx.sh monitor >> ./logs/monitor.log 2>&1" >> cron.backup
-                crontab cron.backup
-                rm cron.backup
-            fi
-
-            if [[ `crontab -l | grep -w nginx | wc -l` -gt 0 ]]; then
-                echo "add the crontab job success"
-                exit 0
-            else
-                echo "add the crontab job fail"
-            fi
+            break
         fi
 
         if [[ i -eq 15 ]]; then
@@ -53,6 +41,21 @@ start(){
         fi
         i=$(( $i + 1 ))
     done
+
+    if [[ `crontab -l | grep -w nginx | wc -l` -eq 0 ]]; then
+        crontab -l > cron.backup
+        echo "* * * * * cd `pwd`; ./nginx.sh monitor >> ./logs/monitor.log 2>&1" >> cron.backup
+        crontab cron.backup
+        rm cron.backup
+    fi
+
+    if [[ `crontab -l | grep -w nginx | wc -l` -gt 0 ]]; then
+        echo "add the crontab job success"
+        exit 0
+    else
+        echo "add the crontab job fail"
+        exit 1
+    fi
 }
 
 stop(){
