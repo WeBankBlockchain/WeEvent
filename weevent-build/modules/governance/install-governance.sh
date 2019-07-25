@@ -49,7 +49,7 @@ function governance_setup() {
         echo "set mysql_pwd failed"
         exit 1
     else
-       sed -i "s/yyyy/${mysql_pwd}/" ${out_path}/conf/application-prod.yml
+       sed -i "s/yyyy/\"${mysql_pwd}\"/" ${out_path}/conf/application-prod.yml
     fi
     echo "set mysql_pwd success"
        
