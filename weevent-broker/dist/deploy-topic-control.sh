@@ -14,7 +14,7 @@ function check_java_jdk(){
     openjdk=`java -version 2>&1 |awk 'NR==1{ gsub(/"/,""); print $1 }'`
     if [[ ${java_version} -le 18 && "${system_version}" == "CentOS" && "${openjdk}" == "openjdk" ]];then
         echo "in CentOS, OpenJDK's version must be 1.9 or greater"
-        exit -1
+        exit 1
     fi
 }
 check_java_jdk
