@@ -79,13 +79,17 @@ function check_port(){
 }
 
 function check_telnet(){
-    #local channel_ip=`echo | awk '{split("'${1}'", array, ":");print array[1]}'`
-    #local channel_port=`echo | awk '{split("'${1}'", array, ":");print array[2]}'`
-    #ssh ${channel_ip} -p ${channel_port} -o ConnectTimeout=3 2>&1 | grep "Connection refused" &>> ${current_path}/install.log
-    #if [[ $? -eq 0 ]];then
-    #   return 1
-    #fi
-    return 0
+    eval $(echo $1 | awk '{split($0, filearray, ";");for(i in filearray) print "arr["i"]="filearray[i]}')
+    for channel in ${arr[*]}
+    do
+        local channel_ip=`echo | awk '{split("'${channel}'", array, ":");print array[1]}'`
+        local channel_port=`echo | awk '{split("'${channel}'", array, ":");print array[2]}'`
+        ssh ${channel_ip} -p ${channel_port} -o ConnectTimeout=3 2>&1 | grep "Connection refused" &>> ${current_path}/install.log
+        if [[ $? -eq 0 ]];then
+            echo "${channel} connection fail"
+            exit 1
+        fi
+    done
 }
 
 function check_param(){
@@ -93,9 +97,8 @@ function check_param(){
         check_port ${broker_port}
         check_port ${nginx_port}
         check_telnet ${block_chain_channel}
-        if [[ $? -ne 0 ]];then
-            echo "fisco-bcos.channel ${block_chain_channel} Connection Fail"
-            exit 1;
+        if [[ ${governance_enable} = "true" ]];then
+            check_telnet ${mysql_ip}:${mysql_port}
         fi
         echo "param ok"
     else
@@ -127,19 +130,14 @@ function install_module(){
 
     if [[ ${governance_enable} = "true" ]];then
         yellow_echo "install module governance"
-        check_telnet ${mysql_ip}:${mysql_port}
-        if [[ $? -ne 0 ]];then
-            echo "governance.mysql ${mysql_ip}:${mysql_port} Connection Fail"
-            exit 1;
-        fi
         cd ${current_path}/modules/governance
         ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --broker_port ${broker_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} &>> ${current_path}/install.log
         check_result "install governance"
     fi
 }
 
-function update_check_server(){
-    sed -i "s/8080/$nginx_port/g" check-service.sh
+function update_server_port(){
+    sed -i "s/8080/$nginx_port/g" ${current_path}/bin/check-service.sh
 }
 
 function main(){
@@ -165,7 +163,7 @@ function main(){
     check_param
 
     # set the check service port
-    update_check_server
+    update_server_port
 
     # install module
     install_module
