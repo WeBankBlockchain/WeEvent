@@ -4,12 +4,17 @@ source ~/.bashrc >/dev/null 2>&1
 
 #check java jdk, not support openjdk 1.8 in CentOS
 function check_java_jdk(){
+    java -version >>/dev/null 2>&1
+    if [[ $? -ne 0 ]];then
+        echo "not installed JDK"
+        exit 1
+    fi
     java_version=`java -version 2>&1 |awk 'NR==1{ gsub(/"/,""); print $3 }' | awk -F[.] '{print $1$2}'`
     system_version=`cat /etc/os-release | awk -F'[= "]' '{print $3}' | head -1`
     openjdk=`java -version 2>&1 |awk 'NR==1{ gsub(/"/,""); print $1 }'`
     if [[ ${java_version} -le 18 && "${system_version}" == "CentOS" && "${openjdk}" == "openjdk" ]];then
         echo "in CentOS, OpenJDK's version must be 1.9 or greater"
-        exit -1
+        exit 1
     fi
 }
 check_java_jdk
@@ -32,30 +37,37 @@ start(){
         echo "broker is running, (PID=${current_pid})"
         exit 0
     fi
-
     nohup java ${JAVA_OPTS} -Xbootclasspath/a:./conf -jar ./apps/*  >/dev/null 2>&1 &
-    sleep 3
-    broker_pid=$!
-    if [[ -n "${broker_pid}" ]];then
-        echo "start broker success (PID=${broker_pid})"
-
-        if [[ `crontab -l | grep -w broker | wc -l` -eq 0 ]]; then
-             crontab -l > cron.backup
-             echo "* * * * * cd `pwd`; ./broker.sh monitor >> ./logs/monitor.log 2>&1" >> cron.backup
-             crontab cron.backup
-             rm cron.backup
+    i=0
+    while :
+    do
+        sleep 1
+        get_pid
+        if [[ -n "${current_pid}" ]];then
+            echo "start broker success (PID=${current_pid})"
+            break
         fi
 
-        if [[ `crontab -l | grep -w broker | wc -l` -gt 0 ]]; then
-             echo "add the crontab job success"
-             exit 0
-        else
-             echo "add the crontab job fail"
-             exit 1
+        if [[ i -eq 15 ]];then
+            echo "start broker fail"
+            exit 1
         fi
+        i=$(( $i + 1 ))
+    done
+
+    if [[ `crontab -l | grep -w broker | wc -l` -eq 0 ]]; then
+         crontab -l > cron.backup
+         echo "* * * * * cd `pwd`; ./broker.sh monitor >> ./logs/monitor.log 2>&1" >> cron.backup
+         crontab cron.backup
+         rm cron.backup
+    fi
+
+    if [[ `crontab -l | grep -w broker | wc -l` -gt 0 ]]; then
+         echo "add the crontab job success"
+         exit 0
     else
-        echo "start broker fail"
-        exit 1
+         echo "add the crontab job fail"
+         exit 1
     fi
 }
 

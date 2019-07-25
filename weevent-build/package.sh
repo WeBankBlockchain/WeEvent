@@ -57,12 +57,8 @@ function confirm(){
 # chmod & dos2unix
 function set_permission(){
     cd ${out_path}
-    find -name "*.sh"  -exec dos2unix {} \;
-    find -name "*.sh"  -exec chmod +x {} \;
-    find -name "*.ini" -exec dos2unix {} \;
-    find -name "*.properties" -exec dos2unix {} \;
-    find -name "*.yml" -exec dos2unix {} \;
-    find -name "*.xml" -exec dos2unix {} \;
+    find -type f -regex  ".*\.\(sh\|ini\|properties\|yml\|xml\)" | xargs dos2unix
+    find -type f -regex ".*\.\(sh\)" | xargs -t -i chmod +x {}
 }
 
 # build broker, governance, client, web
