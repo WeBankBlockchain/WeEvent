@@ -35,6 +35,7 @@ dependencies {
 bootJar {
     destinationDir file("dist/apps")
     archiveName project.name + "-" + version + ".jar"
+
     exclude "**/*.xml"
     exclude "**/*.properties"
 
@@ -46,13 +47,6 @@ bootJar {
         from configurations.runtime
         into "dist/lib"
     }
-    copy {
-        from file(".").listFiles().findAll {
-            File f -> (f.name.endsWith(".sql") || f.name.endsWith(".sh") || f.name.endsWith(".env"))
-        }
-        into "dist"
-    }
-
     copy {
         from file("web/html/")
         into "dist/html"

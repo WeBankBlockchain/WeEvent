@@ -59,6 +59,12 @@ allprojects {
         }
     }
 
+    clean.doLast {
+        file("out/").deleteDir()
+        file("dist/apps/").deleteDir()
+        file("dist/conf/").deleteDir()
+    }
+
     configurations.all {
         // exclude spring-boot's default logger logback
         exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
