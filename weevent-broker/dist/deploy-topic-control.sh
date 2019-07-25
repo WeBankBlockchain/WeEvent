@@ -4,7 +4,7 @@ source ~/.bashrc >/dev/null 2>&1
 
 #check java jdk, not support openjdk 1.8 in CentOS
 function check_java_jdk(){
-    java -version >>/dev/null
+    java -version >>/dev/null 2>&1
     if [[ $? -ne 0 ]];then
         echo "not installed JDK"
         exit 1
