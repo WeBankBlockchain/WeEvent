@@ -13,7 +13,5 @@ do
     cd ${module};
     ./${module}.sh start;
     cd ${current_path}
-        
-    sleep 3
 done
 
