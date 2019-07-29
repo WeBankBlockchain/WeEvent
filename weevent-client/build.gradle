@@ -16,6 +16,7 @@ dependencies {
 jar {
     destinationDir file("dist/apps")
     archiveName project.name + "-" + version + ".jar"
+    
     exclude "**/*.xml"
     exclude "**/*.properties"
 
@@ -28,13 +29,6 @@ jar {
             from configurations.runtime
             into "dist/lib"
         }
-        copy {
-            from file(".").listFiles().findAll {
-                File f -> (f.name.endsWith(".sh") || f.name.endsWith(".env"))
-            }
-            into "dist"
-        }
-
         copy {
             from file("build/libs/")
             into "dist/apps"
