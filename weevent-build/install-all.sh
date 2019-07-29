@@ -78,10 +78,28 @@ function check_port(){
     fi
 }
 
+function check_telnet(){
+    eval $(echo $1 | awk '{split($0, filearray, ";");for(i in filearray) print "arr["i"]="filearray[i]}')
+    for channel in ${arr[*]}
+    do
+        local channel_ip=`echo | awk '{split("'${channel}'", array, ":");print array[1]}'`
+        local channel_port=`echo | awk '{split("'${channel}'", array, ":");print array[2]}'`
+        ssh ${channel_ip} -p ${channel_port} -o ConnectTimeout=3 2>&1 | grep "Connection refused" &>> ${current_path}/install.log
+        if [[ $? -eq 0 ]];then
+            echo "${channel} connection fail"
+            exit 1
+        fi
+    done
+}
+
 function check_param(){
     if [[ -d ${block_chain_node_path} ]]; then
         check_port ${broker_port}
         check_port ${nginx_port}
+        check_telnet ${block_chain_channel}
+        if [[ ${governance_enable} = "true" ]];then
+            check_telnet ${mysql_ip}:${mysql_port}
+        fi
         echo "param ok"
     else
         echo "path not exist, ${block_chain_node_path}"
@@ -118,15 +136,15 @@ function install_module(){
     fi
 }
 
-function update_check_server(){
-    sed -i "s/8080/$nginx_port/g" check-service.sh
+function update_server_port(){
+    sed -i "s/8080/$nginx_port/g" ${current_path}/bin/check-service.sh
 }
 
 function main(){
     # confirm
     if [[ -d $2 ]]; then
         read -p "$2 already exist, continue? [Y/N]" cmd_input
-        if [[ "Y" != "$cmd_input" ]]; then
+        if [[ "Y" != "$cmd_input" && "y" != "$cmd_input" ]]; then
             echo "input $cmd_input, install skipped"
             exit 1
         fi
@@ -145,13 +163,12 @@ function main(){
     check_param
 
     # set the check service port
-    update_check_server
+    update_server_port
 
     # install module
     install_module
 
-    cd ${current_path}
-    cp start-all.sh check-service.sh stop-all.sh uninstall-all.sh ${out_path}
+    cp ${current_path}/bin/* ${out_path}
 }
 
 # Usage message
