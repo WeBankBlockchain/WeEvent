@@ -24,29 +24,37 @@ start(){
         echo "nginx already running"
         exit 0
     fi
-
     ${nginxd} -c ${nginx_config}
-    sleep 1
-    get_current_pid
-    if [[ -z "${current_pid}" ]]; then
-        echo "start nginx fail"
-        exit 1
-    else
-        echo "start nginx success (PID=${current_pid})"
-        if [[ `crontab -l | grep -w nginx | wc -l` -eq 0 ]]; then
-            crontab -l > cron.backup
-            echo "* * * * * cd `pwd`; ./nginx.sh monitor >> ./logs/monitor.log 2>&1" >> cron.backup
-            crontab cron.backup
-            rm cron.backup
+    i=0
+    while :
+    do
+        sleep 1
+        get_current_pid
+        if [[ -n "${current_pid}" ]]; then
+            echo "start nginx success (PID=${current_pid})"
+            break
         fi
 
-        if [[ `crontab -l | grep -w nginx | wc -l` -gt 0 ]]; then
-            echo "add the crontab job success"
-            exit 0
-        else
-            echo "add the crontab job fail"
+        if [[ i -eq 15 ]]; then
+            echo "start nginx fail"
             exit 1
         fi
+        i=$(( $i + 1 ))
+    done
+
+    if [[ `crontab -l | grep -w nginx | wc -l` -eq 0 ]]; then
+        crontab -l > cron.backup
+        echo "* * * * * cd `pwd`; ./nginx.sh monitor >> ./logs/monitor.log 2>&1" >> cron.backup
+        crontab cron.backup
+        rm cron.backup
+    fi
+
+    if [[ `crontab -l | grep -w nginx | wc -l` -gt 0 ]]; then
+        echo "add the crontab job success"
+        exit 0
+    else
+        echo "add the crontab job fail"
+        exit 1
     fi
 }
 

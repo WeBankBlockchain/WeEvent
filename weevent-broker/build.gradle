@@ -55,6 +55,7 @@ dependencies {
 bootJar {
     destinationDir file("dist/apps")
     archiveName project.name + "-" + version + ".jar"
+
     exclude "**/*.xml"
     exclude "**/*.properties"
 
@@ -65,11 +66,5 @@ bootJar {
     copy {
         from configurations.runtime
         into "dist/lib"
-    }
-    copy {
-        from file(".").listFiles().findAll {
-            File f -> (f.name.endsWith(".sh") || f.name.endsWith(".env"))
-        }
-        into "dist"
     }
 }

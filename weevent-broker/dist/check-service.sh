@@ -17,7 +17,7 @@ function check_broker(){
     fi
     
     exist_topic=`curl -s "http://127.0.0.1:$port/weevent/rest/exist?topic=hello"`
-    if [[ ! -z ${exist_topic} ]];then
+    if [[ "${exist_topic}" == "true" || "${exist_topic}" == "false" ]];then
         echo "broker service is ok"
     else
         echo "broker service is error"
