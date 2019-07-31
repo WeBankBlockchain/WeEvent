@@ -5,6 +5,8 @@
 [![Build Status](https://travis-ci.com/WeBankFinTech/WeEvent.svg?branch=master)](https://travis-ci.com/WeBankFinTech/WeEvent)
 [![Latest release](https://img.shields.io/github/release/WeBankFinTech/WeEvent.svg)](https://github.com/WeBankFinTech/WeEvent/releases/latest)
 [![Maven Central](https://img.shields.io/maven-central/v/com.webank.weevent/weevent-client.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.webank.weevent%22%20AND%20a:%weevent-client%22)
+[![Documentation](https://img.shields.io/badge/api-reference-blue.svg)](https://weeventdoc.readthedocs.io/zh_CN/latest/protocal/index.html)
+[![Documentation Status](https://readthedocs.org/projects/weeventdoc/badge/?version=latest)](https://weeventdoc.readthedocs.io/zh_CN/latest)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## 什么是WeEvent？
@@ -39,7 +41,7 @@ git，gradle 4.10，java 1.8，nodejs 10.16，推荐使用IDEA。
 - [项目计划](https://github.com/WeBankFinTech/WeEvent/wiki/Project-RoadMap)  
 - [代码提交](https://github.com/WeBankFinTech/WeEvent/wiki/Project-WorkFlow)  
 
-WeEvent爱贡献者！请阅读我们的贡献[文档](https://github.com/WeBankFinTech/WeEvent/blob/master/CONTRIBUTING.md)，了解如何贡献代码，并提交你的贡献。
+WeEvent爱贡献者！请阅读我们的[贡献文档](https://github.com/WeBankFinTech/WeEvent/blob/master/CONTRIBUTING.md)，了解如何贡献代码，并提交你的贡献。
 
 希望在您的帮助下WeEvent继续前进。
 
