@@ -68,7 +68,7 @@ def export_issues(milestone, output):
                 assignee_str = ""
                 for assignee in v:
                     if assignee and "login" in assignee:
-                        assignee_str = assignee["login"] + ","
+                        assignee_str += assignee["login"] + ","
                 line[k] = assignee_str
             elif k == "milestone":
                 if v and "title" in v:
@@ -79,7 +79,7 @@ def export_issues(milestone, output):
                 label_str = ""
                 for label in v:
                     if v and "name" in label:
-                        label_str = label["name"] + ","
+                        label_str += label["name"] + ","
                 line[k] = label_str
         data.append(line)
 
