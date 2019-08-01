@@ -5,12 +5,13 @@
 
 import requests
 import sys
+import time
 import xlwt
 
 
 def load_all_issues(milestone):
     '''
-    load all issues in milestone
+    load all issues in milestone, except PR
     :param milestone: milestone in project
     :return: True if success, list of issues
     '''
@@ -28,8 +29,11 @@ def load_all_issues(milestone):
             return False, origin_data
         data_once = response.json()
         if data_once:
-            origin_data.extend(data_once)
+            # skip PR, PR has value in key="pull_request"
+            origin_data.extend([x for x in data_once if not ("pull_request" in x and x["pull_request"])])
             page += 1
+            # sleep to avoid anti-spider
+            time.sleep(1)
         else:
             break
 
