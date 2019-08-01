@@ -22,7 +22,7 @@ public class JavaSDK {
         System.out.println("This is WeEvent Java SDK sample.");
         try {
             // get client
-            IWeEventClient client = IWeEventClient.build("http://127.0.0.1:8081/weevent");
+            IWeEventClient client = IWeEventClient.build("http://localhost:8080/weevent");
             String topicName = "com.weevent.test";
             String groupId = "1";
             // ensure topic exist
