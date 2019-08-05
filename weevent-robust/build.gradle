@@ -1,0 +1,79 @@
+apply plugin: "org.springframework.boot"
+apply plugin: "io.spring.dependency-management"
+springBoot {
+    buildInfo()
+}
+buildscript {
+    repositories {
+        maven {
+            //url "http://maven.aliyun.com/nexus/content/groups/public/"
+            url "http://maven.weoa.com/nexus/content/groups/public/"
+        }
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.0.RELEASE")
+    }
+}
+dependencies {
+    implementation project(path: ":weevent-client")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
+    implementation("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.3")
+    implementation("org.springframework.integration:spring-integration-mqtt")
+    implementation("org.springframework.integration:spring-integration-stream")
+    implementation("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.3")
+    implementation("org.jsoup:jsoup:1.9.2")
+    implementation("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.3")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    implementation("org.springframework.boot:spring-boot-starter-log4j2")
+    // avoid "Log4j appears to be running in a Servlet environment, but there's no log4j-web module available."
+    implementation("org.apache.logging.log4j:log4j-web:2.11.2")
+}
+
+dependencies {
+    compile group: 'com.alibaba', name: 'fastjson', version: '1.2.58'
+}
+sourceSets {
+    main {
+        java {
+            srcDirs = ["src/main/java"]
+        }
+        resources {
+            srcDirs = ["src/main/resources"]
+        }
+    }
+    test {
+        java {
+            srcDirs = ["src/test/java"]
+        }
+        resources {
+            srcDirs = ["src/test/resources"]
+        }
+    }
+}
+
+bootJar {
+    destinationDir file('dist/apps')
+    archiveName project.name + '-' + version + '.jar'
+    exclude '**/*.xml'
+    exclude '**/*.properties'
+
+    copy {
+        from file('src/main/resources/')
+        into 'dist/conf'
+    }
+    copy {
+        from file('web/html/')
+        into 'dist/html'
+    }
+    copy {
+        from configurations.runtime
+        into 'dist/lib'
+    }
+    copy {
+        from file('.').listFiles().findAll { File f -> (f.name.endsWith('.sql') || f.name.endsWith('.sh') || f.name.endsWith('.env')) }
+        into 'dist'
+    }
+}

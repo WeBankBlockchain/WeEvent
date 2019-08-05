@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info">
+	<Properties>
+		<Property name="sys.log.name">weevent-robust</Property>
+	</Properties>
+
+	<Appenders>
+		<Console name="console" target="SYSTEM_OUT">
+			<PatternLayout
+				pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%F:%L) - %m%n" />
+		</Console>
+
+		<RollingFile name="fileAppender" fileName="./logs/weevent-robust.log"
+			filePattern="./logs/weevent-robust.log.%d{yyyy-MM-dd}.%i.log.gz">
+			<PatternLayout
+				pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%L) - %m%n" />
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="1024 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="200" />
+			<Filters>
+				<ThresholdFilter level="debug" onMatch="ACCEPT"
+					onMismatch="DENY" />
+			</Filters>
+		</RollingFile>
+
+		<Async name="asyncConsole" bufferSize="512">
+			<AppenderRef ref="console" />
+		</Async>
+		<Async name="asyncFile" bufferSize="512">
+			<AppenderRef ref="fileAppender" />
+		</Async>
+
+	</Appenders>
+
+	<Loggers>
+        <Root level="INFO">
+			<AppenderRef ref="asyncFile" />
+			<AppenderRef ref="console" />
+		</Root>
+	</Loggers>
+</Configuration>
+
