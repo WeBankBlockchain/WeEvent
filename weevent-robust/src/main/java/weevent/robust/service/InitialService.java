@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -15,9 +14,9 @@ import weevent.robust.util.FileUtil;
 import weevent.robust.util.StringUtil;
 
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
 @Slf4j
 @Component
 public class InitialService implements ApplicationRunner{
@@ -30,6 +29,11 @@ public class InitialService implements ApplicationRunner{
     @Value("${weevent.broker.url}")
     private String url;
 
+    @Value("${statistic.file.path}")
+    private String statisticFilePath;
+
+    @Value("subscripId.file.path")
+    private String subscripIdPath;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -39,9 +43,7 @@ public class InitialService implements ApplicationRunner{
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        ClassPathResource resource = new ClassPathResource("statistic/subSubscripId.txt");
-        File subIdFile = resource.getFile();
-
+        File subIdFile = new File(subscripIdPath);
         StringBuffer bufferUrl ;
         StringBuffer callBackBufferUrl;
         // subscribe rest topic,  then callback

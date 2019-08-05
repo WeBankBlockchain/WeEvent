@@ -20,25 +20,23 @@ public class FileUtil implements AutoCloseable {
      * @param file
      * @return
      */
-    public static String readTxt(File file) throws BrokerException {
+    public static String readTxt(File file) throws BrokerException,IOException {
         StringBuffer content = new StringBuffer();
-        if (file.isFile() && file.exists()) {
-            try (InputStreamReader isr = new InputStreamReader(new FileInputStream(file), "utf-8");
-                 BufferedReader br = new BufferedReader(isr))
-             {
+        if(!file.isFile() || !file.exists()){
+            file.createNewFile();
+        }
+        try (InputStreamReader isr = new InputStreamReader(new FileInputStream(file), "utf-8");
+             BufferedReader br = new BufferedReader(isr))
+         {
 
-                String lineTxt;
-                while ((lineTxt = br.readLine()) != null) {
-                    content.append(lineTxt);
-                }
-                br.close();
-                return content.toString();
-            } catch (Exception e) {
-                log.error("File read error!");
-                throw  new BrokerException("file does not exist!");
+            String lineTxt;
+            while ((lineTxt = br.readLine()) != null) {
+                content.append(lineTxt);
             }
-        } else {
-            log.error("file does not exist!");
+            br.close();
+            return content.toString();
+        } catch (Exception e) {
+            log.error("File read error!");
             throw  new BrokerException("file does not exist!");
         }
     }

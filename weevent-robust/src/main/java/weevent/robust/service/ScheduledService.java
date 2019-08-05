@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.stomp.*;
@@ -31,6 +30,7 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -54,6 +54,9 @@ public class ScheduledService{
 
     @Value("${statistic.file.path}")
     private String statisticFilePath;
+
+    @Value("subscripId.file.path")
+    private String subscripIdPath;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -80,9 +83,7 @@ public class ScheduledService{
 
     @PostConstruct
     public void init() throws IOException, InterruptedException, ExecutionException, BrokerException {
-
-        ClassPathResource resource = new ClassPathResource("statistic/subSubscripId.txt");
-        File subIdFile = resource.getFile();
+        File subIdFile = new File(subscripIdPath);
         String subText = FileUtil.readTxt(subIdFile);
         List<String> subIds = getSubIds(subText);
         StringBuffer urlBuffer = StringUtil.getIntegralUrl(StringUtil.HTTP_HEADER,url,"/weevent/rest/unSubscribe?subscriptionId={subscriptionId}");
