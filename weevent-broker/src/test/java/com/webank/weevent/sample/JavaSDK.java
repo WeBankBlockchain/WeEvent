@@ -22,7 +22,7 @@ public class JavaSDK {
         System.out.println("This is WeEvent Java SDK sample.");
         try {
             // get client
-            IWeEventClient client = IWeEventClient.build("http://10.107.105.134:8081/weevent");
+            IWeEventClient client = IWeEventClient.build("http://localhost:8080/weevent");
             String topicName = "com.weevent.test";
             String groupId = "1";
             // ensure topic exist
@@ -32,7 +32,7 @@ public class JavaSDK {
             SendResult sendResult = client.publish(topicName, groupId, "{\"hello\":\" wolrd\"}".getBytes(), extensions);
             System.out.println(sendResult.toString());
             // subscribe topic with groupId
-            String subscriptionId = client.subscribe(topicName, groupId, WeEvent.OFFSET_LAST, new WeEventClient.EventListener() {
+            String subscriptionId = client.subscribe(topicName, groupId, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
                 @Override
                 public void onEvent(WeEvent event) {
                     System.out.println("received event: " + event.toString());

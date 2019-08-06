@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * WeEvent JMS TopicConnectionFactory.
- * Publish&Subscribe is over WebSocket + Stomp.
+ * Publish Subscribe is over WebSocket + Stomp.
  * Warning!
  * TopicConnectionFactory is a beta version currently, DO NOT USE it in product environment.
  * Use spring's websocket-stomp-client instead.

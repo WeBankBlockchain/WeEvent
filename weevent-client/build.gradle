@@ -16,6 +16,7 @@ dependencies {
 jar {
     destinationDir file("dist/apps")
     archiveName project.name + "-" + version + ".jar"
+    
     exclude "**/*.xml"
     exclude "**/*.properties"
 
@@ -29,13 +30,6 @@ jar {
             into "dist/lib"
         }
         copy {
-            from file(".").listFiles().findAll {
-                File f -> (f.name.endsWith(".sh") || f.name.endsWith(".env"))
-            }
-            into "dist"
-        }
-
-        copy {
             from file("build/libs/")
             into "dist/apps"
         }
@@ -48,7 +42,13 @@ task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
 }
 
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
 artifacts {
     archives jar
     archives sourcesJar
+    archives javadocJar
 }

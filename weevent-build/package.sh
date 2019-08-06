@@ -21,7 +21,7 @@ current_path=`pwd`
 top_path=`dirname ${current_path}`
 out_path=""
 
-while [ $# -ge 2 ] ; do
+while [[ $# -ge 2 ]] ; do
     case "$1" in
     --tag) param="$1 = $2;";tag=$2;shift 2;;
     --version) param="$1 = $2;";version="$2";shift 2;;
@@ -37,7 +37,7 @@ function yellow_echo(){
 }
 
 function execute_result(){
-    if [ $? -ne 0 ];then
+    if [[ $? -ne 0 ]];then
         echo "$1 fail"
         exit 1
     fi
@@ -45,9 +45,9 @@ function execute_result(){
 
 # confirm whether to override input path
 function confirm(){
-    if [ -d $1 ]; then
+    if [[ -d $1 ]]; then
         read -p "$out_path already exist, continue? [Y/N]" cmd_input
-        if [ "Y" != "$cmd_input" ]; then
+        if [[ "Y" != "$cmd_input" && "y" != "$cmd_input" ]]; then
             echo "input $cmd_input, install skipped"
             exit 1
         fi
@@ -57,22 +57,19 @@ function confirm(){
 # chmod & dos2unix
 function set_permission(){
     cd ${out_path}
-
-    find -name "*.sh" -exec chmod +x {} \;
-    find -name "*.sh" -exec dos2unix {} \;
-    find -name "*.ini" -exec dos2unix {} \;
-    find -name "*.properties" -exec dos2unix {} \;
+    find -type f -regex  ".*\.\(sh\|ini\|properties\|yml\|xml\)" | xargs dos2unix
+    find -type f -regex ".*\.\(sh\)" | xargs -t -i chmod +x {}
 }
 
 # build broker, governance, client, web
 function build_weevent(){
     cd ${top_path}
 
-    if [ "$tag" != "local" ];then
+    if [[ "$tag" != "local" ]];then
         yellow_echo "package github[${tag}]"
 
         # switch tag
-        git checkout ${tag}
+        git checkout ${tag}; git pull
         execute_result "git checkout ${tag}"
     else
         yellow_echo "package local path"
@@ -90,40 +87,40 @@ function build_weevent(){
 
 function copy_install_file(){
     cd ${current_path}
-
-    cp ./config.properties ./install-all.sh ./start-all.sh ./check-service.sh ./stop-all.sh ./uninstall-all.sh ${out_path}
-    cp -r ./third-packages ${out_path}
+    cp ${current_path}/config.properties ${current_path}/install-all.sh ${out_path}
+    cp -r ${current_path}/bin ${out_path}
+    cp -r ${current_path}/third-packages ${out_path}
 
     mkdir -p ${out_path}/modules/broker
-    cp ./modules/broker/install-broker.sh ${out_path}/modules/broker
+    cp ${current_path}/modules/broker/install-broker.sh ${out_path}/modules/broker
     cp -r ${top_path}/weevent-broker/dist/* ${out_path}/modules/broker
 
     mkdir -p ${out_path}/modules/governance
-    cp ./modules/governance/install-governance.sh ${out_path}/modules/governance
+    cp ${current_path}/modules/governance/install-governance.sh ${out_path}/modules/governance
     cp -r ${top_path}/weevent-governance/dist/* ${out_path}/modules/governance
 
     mkdir -p ${out_path}/modules/nginx
-    cp ./modules/nginx/install-nginx.sh ./modules/nginx/nginx.sh ${out_path}/modules/nginx
-    cp -r ./modules/nginx/conf ${out_path}/modules/nginx
+    cp ${current_path}/modules/nginx/install-nginx.sh ./modules/nginx/nginx.sh ${out_path}/modules/nginx
+    cp -r ${current_path}/modules/nginx/conf ${out_path}/modules/nginx
 }
 
 # switch to prod.properties, remove dev.properties
 function switch_to_prod(){
     cd ${current_path}
 
-    if [ -e ${out_path}/modules/broker/conf/application-dev.properties ]; then
+    if [[ -e ${out_path}/modules/broker/conf/application-dev.properties ]]; then
         rm ${out_path}/modules/broker/conf/application-dev.properties
     fi
 
-    if [ -e ${out_path}/modules/broker/conf/application.properties ]; then
+    if [[ -e ${out_path}/modules/broker/conf/application.properties ]]; then
         sed -i 's/dev/prod/' ${out_path}/modules/broker/conf/application.properties
     fi
 
-    if [ -e ${out_path}/modules/governance/conf/application-dev.yml ]; then
+    if [[ -e ${out_path}/modules/governance/conf/application-dev.yml ]]; then
         rm ${out_path}/modules/governance/conf/application-dev.yml
     fi
 
-    if [ -e ${out_path}/modules/governance/conf/application.yml ]; then
+    if [[ -e ${out_path}/modules/governance/conf/application.yml ]]; then
         sed -i 's/dev/prod/' ${out_path}/modules/governance/conf/application.yml
     fi
 }
@@ -183,7 +180,7 @@ function package(){
 }
 
 function main(){
-    if [ -z "$version" ];then
+    if [[ -z "${version}" ]];then
         usage
         exit 1
     fi
