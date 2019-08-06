@@ -1,6 +1,10 @@
 package weevent.robust.util;
 
-
+/**
+ *  This is a string  tool class
+ * @author puremilkfan
+ *
+ */
 public class StringUtil {
 
     public  final static  String HTTP_HEADER = "http://";
@@ -12,7 +16,7 @@ public class StringUtil {
      */
     public static StringBuffer getIntegralUrl(String...params){
         StringBuffer headBuffer = new StringBuffer();
-        if(params==null || params.length==0){
+        if(params == null || params.length == 0){
             return  headBuffer;
         }
         for(String param:params){

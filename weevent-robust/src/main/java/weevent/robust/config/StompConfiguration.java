@@ -102,15 +102,15 @@ public class StompConfiguration {
         return factory;
     }
     @Bean
-    @ServiceActivator(inputChannel = "mqttOutboundChannel")
-    public MessageHandler mqttOutbound() {
+    @ServiceActivator(inputChannel = "mqttChannel")
+    public MessageHandler mqtt() {
         MqttPahoMessageHandler messageHandler =  new MqttPahoMessageHandler(clientId, mqttClientFactory());
         messageHandler.setAsync(true);
         messageHandler.setDefaultTopic(defaultTopic);
         return messageHandler;
     }
     @Bean
-    public MessageChannel mqttOutboundChannel() {
+    public MessageChannel mqttChannel() {
         return new DirectChannel();
     }
 
