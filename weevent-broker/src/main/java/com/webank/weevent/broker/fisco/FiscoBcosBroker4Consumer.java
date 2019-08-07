@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.dto.SubscriptionInfo;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
+import com.webank.weevent.broker.fisco.util.FIFOCache;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.fisco.util.StoppableTask;
 import com.webank.weevent.broker.fisco.util.WeEventUtils;
@@ -379,9 +380,19 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         private NotifyTask notifyTask;
 
         /**
-         * optional, if offset != WeEvent.OFFSET_LAST then we say it's a history event loop
+         * optional, if offset != WeEvent.OFFSET_LAST then need a event loop to fetch history event
          */
         private HistoryEventLoop historyEventLoop;
+
+        /**
+         * helper to avoid repeat notify if exist HistoryEventLoop
+         */
+        private FIFOCache<String, WeEvent> mergeChannel;
+
+        /**
+         * first block in HistoryEventLoop dispatch
+         */
+        private Long historyBlock;
 
         @Override
         public String toString() {
@@ -429,14 +440,72 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         }
 
         // mainLoop = true meanings dispatch from MainEventLoop
-        private void dispatch(List<WeEvent> events, boolean mainLoop) {
+        private void dispatch(List<WeEvent> events, boolean mainLoop, Long blockHeight) {
             // filter the events
             List<WeEvent> topicEvents = filter(events, this.topics);
             if (topicEvents.isEmpty()) {
                 return;
             }
 
+            // always HistoryEventLoop dispatch first, then MainEventLoop
+            if (!mainLoop) {
+                log.info("dispatch from HistoryEventLoop");
+
+                // have not got offset
+                if (this.mergeChannel == null) {
+                    int offsetIdx = -1;
+                    for (int idx = 0; idx < topicEvents.size(); idx++) {
+                        if (topicEvents.get(idx).getEventId().equals(this.offset)) {
+                            offsetIdx = idx;
+                            break;
+                        }
+                    }
+
+                    if (offsetIdx < 0) {
+                        log.info("event list is empty after filter by offset");
+                        return;
+                    }
+
+                    // got offset
+                    if (offsetIdx > 0) {
+                        log.info("got offset, index: {}", offsetIdx);
+
+                        // get event after offset, exclusive offset itself
+                        topicEvents = topicEvents.subList(offsetIdx + 1, topicEvents.size());
+
+                        // simply calculate cache size, the TPS of WeEvent's publish <<< 8192
+                        this.mergeChannel = new FIFOCache<>(8192 * BrokerApplication.weEventConfig.getConsumerHistoryMergeBlock());
+                        this.historyBlock = blockHeight;
+                    }
+                }
+            } else {
+                log.info("dispatch from MainEventLoop");
+            }
+
+            // need merge in cache
+            if (this.mergeChannel != null) {
+                topicEvents.removeIf((event) -> this.mergeChannel.containsKey(event.getEventId()));
+                for (WeEvent event : topicEvents) {
+                    this.mergeChannel.put(event.getEventId(), event);
+                }
+            }
+
+            if (topicEvents.isEmpty()) {
+                log.info("event list is empty after filter by merge channel");
+                return;
+            }
+
+            // real to notify to remote
             this.notifyTask.push(topicEvents);
+
+            // cleanup merge cache if needed
+            if (mainLoop && blockHeight > this.historyBlock + BrokerApplication.weEventConfig.getConsumerHistoryMergeBlock()) {
+                log.info("cleanup merge cache after {} block", BrokerApplication.weEventConfig.getConsumerHistoryMergeBlock());
+
+                this.mergeChannel.clear();
+                this.mergeChannel = null;
+                this.historyBlock = null;
+            }
         }
 
         private synchronized void doStart() {
@@ -607,7 +676,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
                 // it there is event to notify
                 if (!events.isEmpty()) {
-                    this.subscription.dispatch(events, false);
+                    this.subscription.dispatch(events, false, currentBlock);
                 }
 
                 // next block.
@@ -694,9 +763,9 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             }
         }
 
-        private synchronized void dispatch(List<WeEvent> events) {
+        private synchronized void dispatch(List<WeEvent> events, Long blockHeight) {
             for (String subscriptionId : this.mainSubscriptionIds) {
-                subscriptions.get(subscriptionId).dispatch(events, true);
+                subscriptions.get(subscriptionId).dispatch(events, true, blockHeight);
             }
         }
 
@@ -750,7 +819,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                 }
                 log.debug("fetch done, block: {} event size: {}", currentBlock, events.size());
 
-                this.dispatch(events);
+                this.dispatch(events, currentBlock);
 
                 // next block.
                 this.lastBlock = currentBlock;

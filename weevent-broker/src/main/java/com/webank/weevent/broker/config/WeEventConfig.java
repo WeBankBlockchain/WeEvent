@@ -25,6 +25,9 @@ public class WeEventConfig {
     @Value("${consumer.idle-time:1000}")
     private Integer consumerIdleTime;
 
+    @Value("${consumer.history_merge_block:8}")
+    private Integer consumerHistoryMergeBlock;
+
     @Value("${redis.server.ip:}")
     private String redisServerIp;
 
