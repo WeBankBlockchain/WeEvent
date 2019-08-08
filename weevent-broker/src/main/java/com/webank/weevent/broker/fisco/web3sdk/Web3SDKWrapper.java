@@ -267,7 +267,7 @@ public class Web3SDKWrapper {
                             DataTypeUtils.json2Map(logEvent.extensions.toString()));
                     event.setEventId(DataTypeUtils.encodeEventId(topicName, uint256ToInt(logEvent.eventBlockNumer), uint256ToInt(logEvent.eventSeq)));
 
-                    log.debug("get a event from fisco-bcos: {}", event);
+                    log.debug("get a event from block chain: {}", event);
                     events.add(event);
                 }
             }
