@@ -5,7 +5,6 @@ import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -69,7 +68,7 @@ public class ScheduledService{
     @Autowired
     private MqttGateway mqttGateway;
     
-    static StompSession stompSession;
+    private static StompSession stompSession;
 
     private final static  String format = "yyyy-MM-dd HH";
 
@@ -116,8 +115,7 @@ public class ScheduledService{
             "hello weevent rest");
         log.info("restful send message:" + rsp.getBody());
         if(rsp.getStatusCodeValue() == 200) {
-            String time =  getFormatTime(format,new Date());
-            countTimes(restfulSendMap,time);
+            countTimes(restfulSendMap,StringUtil.getFormatTime(format,new Date()));
         }
     }
 
@@ -130,8 +128,7 @@ public class ScheduledService{
         SendResult publish = brokerRpc.publish(topic, "Hello World !".getBytes());
         log.info("jsonrpc send message:" + publish.getEventId());
         if( publish.getStatus() == SendResult.SendResultStatus.SUCCESS) {
-            String time =  getFormatTime(format,new Date());
-            countTimes(jsonrpcSendMap,time);
+            countTimes(jsonrpcSendMap,StringUtil.getFormatTime(format,new Date()));
         }
     }
 
@@ -142,9 +139,7 @@ public class ScheduledService{
             StompSession.Receiptable receiptable =
                 stompSession.send("com.weevent.stomp", "hello world from websocket");
             log.info("stomp send msg!");
-            //the current system time
-            String time =  getFormatTime(format,new Date());
-            countTimes(stompSendMap,time);
+            countTimes(stompSendMap,StringUtil.getFormatTime(format,new Date()));
         } catch (Exception e) {
           log.error(e.getMessage());
         }
@@ -153,20 +148,17 @@ public class ScheduledService{
     @Async
     @Scheduled(cron = "20 0/1 * * * *")
     public void scheduled4() throws  BrokerException{
-        brokerRpc.open("com.weevent.mqtt");
         // Mqtt sends a message to weevent broker
         mqttGateway.sendToMqtt("hello mqtt", "com.weevent.mqtt");
         log.info("mqtt send msg to broker");
-        //  the current system time
-        String time =  getFormatTime(format,new Date());
-        countTimes(mqttSendMap,time);
+        countTimes(mqttSendMap,StringUtil.getFormatTime(format,new Date()));
     }
 
     @Async
     @Scheduled(cron = "25 0/1 * * * *")
     public void scheduled5() throws  BrokerException {
        // brokerRpc.open("com.weevent.mqtt");
-        //use rest request to send a message from weeventbroker to mqtt
+        //use rest request to send a message from weevent broker to mqtt
         StringBuffer urlBuffer = StringUtil.getIntegralUrl(StringUtil.HTTP_HEADER,url,"/weevent/rest/publish?topic={topic}&content={content}");
         ResponseEntity<String> rsp = restTemplate.getForEntity(
             urlBuffer.toString(),
@@ -175,8 +167,7 @@ public class ScheduledService{
             "hello weevent");
         log.info("send msg to mqtt:" + rsp.getBody());
         if(rsp.getStatusCodeValue() == 200) {
-            String time = getFormatTime(format,new Date());
-            countTimes(brokerSendMap,time);
+            countTimes(brokerSendMap,StringUtil.getFormatTime(format,new Date()));
         }
     }
 
@@ -188,30 +179,38 @@ public class ScheduledService{
         calendar.setTime(date);
         calendar.add(Calendar.HOUR, -1);
         Date lastHour = calendar.getTime();
-        String time = getFormatTime(format,lastHour);
+        String time = StringUtil.getFormatTime(format,lastHour);
         
-        FileUtil.WriteStringToFile(statisticFilePath, "Time is " + getFormatTime(format,date) + ":00:00\n",true);
-        log.info(statisticFilePath, "Time is " + getFormatTime(format,date)+ ":00:00\n");
-        FileUtil.WriteStringToFile(statisticFilePath,
-            "last hour stomp send: "+ stompSendMap.get(time)+", receive:" + statisticMap.get(time) + " events\n",true);
-        log.info("last hour stomp send: "+ stompSendMap.get(time)+" receive:" + statisticMap.get(time) + " events\n");
-        FileUtil.WriteStringToFile(statisticFilePath,
-            "last hour broker send: "+ brokerSendMap.get(time)+"\n",true);
-        log.info("last hour broker send: "+ brokerSendMap.get(time)+" events\n");
-/*        FileUtil.WriteStringToFile(statisticFilePath,
-                "last hour mqtt send: "+ mqttSendMap.get(time)+", restmqtt receive:" + RestListener.RestReceiveMap2.get(time) + " events\n");
-        log.info("last hour mqtt send: "+ mqttSendMap.get(time)+", restmqtt receive:" + RestListener.RestReceiveMap2.get(time) + " events\n");
-        FileUtil.WriteStringToFile(statisticFilePath,
-                "last hour jsonRpc send: "+ jsonrpcSendMap.get(time)+", receive:" + JsonRpcListener.JsonReceiveMap.get(time) + " events\n");
-        log.info("last hour jsonRpc send: "+ jsonrpcSendMap.get(time)+", receive:" + JsonRpcListener.JsonReceiveMap.get(time) + " events\n");*/
+        FileUtil.WriteStringToFile(statisticFilePath, "Time is " + StringUtil.getFormatTime(format,date) + ":00:00\n",true);
+        log.info(statisticFilePath, "Time is " + StringUtil.getFormatTime(format,date)+ ":00:00\n");
 
+        FileUtil.WriteStringToFile(statisticFilePath,
+                "last hour restful send: "+ restfulSendMap.get(time)+", receive:" + restfulSendMap.get(time) +" events\n",true);
+        log.info("last hour restful send: "+ restfulSendMap.get(time)+", receive:" + restfulSendMap.get(time) +" events\n");
+
+        FileUtil.WriteStringToFile(statisticFilePath,
+                "last hour stomp send: "+ stompSendMap.get(time)+", receive:" + stompSendMap.get(time) + " events\n",true);
+        log.info("last hour stomp send: "+ stompSendMap.get(time)+", receive:" + stompSendMap.get(time) + " events\n");
+
+        FileUtil.WriteStringToFile(statisticFilePath,
+            "last hour stomp send: "+ mqttSendMap.get(time)+", receive:" + mqttSendMap.get(time) + " events\n",true);
+        log.info("last hour stomp send: "+ mqttSendMap.get(time)+" receive:" + mqttSendMap.get(time) + " events\n");
+
+        FileUtil.WriteStringToFile(statisticFilePath,
+                "last hour stomp send: "+ jsonrpcSendMap.get(time)+", receive:" + jsonrpcSendMap.get(time) + " events\n",true);
+        log.info("last hour stomp send: "+ jsonrpcSendMap.get(time)+" receive:" + jsonrpcSendMap.get(time) + " events\n");
+
+        FileUtil.WriteStringToFile(statisticFilePath,
+                "last hour stomp send: "+ brokerSendMap.get(time)+", receive:" + brokerSendMap.get(time) + " events\n",true);
+        log.info("last hour stomp send: "+ brokerSendMap.get(time)+" receive:" + brokerSendMap.get(time) + " events\n");
         //remove last hour statistic key - value
         statisticMap.remove(time);
         restfulSendMap.remove(time);
         stompSendMap.remove(time);
-        brokerSendMap.remove(time);
         mqttSendMap.remove(time);
         jsonrpcSendMap.remove(time);
+        brokerSendMap.remove(time);
+
 
     }
 
@@ -227,7 +226,7 @@ public class ScheduledService{
             public void handleFrame(StompHeaders headers, Object payload) {
                 log.info("subscribe handleFrame, header: {} payload: {}", headers, payload);
                 //  the current system time
-                String time =  getFormatTime(format,new Date());
+                String time =  StringUtil.getFormatTime(format,new Date());
                 countTimes(statisticMap,time);
             }
         };
@@ -308,15 +307,6 @@ public class ScheduledService{
         }
     }
 
-    /**
-     *  get formatted time string
-     * @param format
-     * @param date
-     * @return
-     */
-    private static String getFormatTime(String format,Date date){
-        String formatTime = DateFormatUtils.format(date, format);
-        return  formatTime;
-    }
+
 
 }

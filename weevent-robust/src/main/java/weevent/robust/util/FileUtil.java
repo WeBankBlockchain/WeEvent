@@ -9,7 +9,8 @@ import java.io.*;
 /**
  *  This is a file reading tool class
  * @author puremilkfan
- *
+ * @version  since 1.1
+ * @date 2019/8/5
  */
 
 @Slf4j
