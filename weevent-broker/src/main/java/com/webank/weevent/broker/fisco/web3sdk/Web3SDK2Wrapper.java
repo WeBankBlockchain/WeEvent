@@ -297,7 +297,7 @@ public class Web3SDK2Wrapper {
                             logEvent.eventBlockNumer.intValue(),
                             logEvent.eventSeq.intValue()));
 
-                    log.debug("get a event from fisco-bcos: {}", event);
+                    log.debug("get a event from block chain: {}", event);
                     events.add(event);
                 }
             }

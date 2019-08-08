@@ -4,8 +4,7 @@ package com.webank.weevent.broker.fisco.util;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Task can be stopped by exit flag and interrupt().
- * Prefer to exit flag.
+ * Task that can be stopped by exit flag.
  *
  * @author matthewliu
  * @since 2018/11/09
@@ -26,7 +25,8 @@ public abstract class StoppableTask implements Runnable {
         this.exit = true;
     }
 
-    protected abstract void taskOnceLoop() throws InterruptedException;
+    // task's real do loop
+    protected abstract void taskOnceLoop();
 
     @Override
     public void run() {
