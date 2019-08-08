@@ -4,13 +4,13 @@ package weevent.robust.sdk.client;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.googlecode.jsonrpc4j.ProxyUtil;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 
@@ -34,19 +34,20 @@ import java.security.cert.X509Certificate;
  * @author matthewliu
  * @since 2018/11/22
  */
+@Slf4j
 public class JsonRpcClient {
     public static SSLContext getSSLContext() throws NoSuchAlgorithmException, KeyManagementException {
         SSLContext sslContext = SSLContext.getInstance("TLS");
         // impl X509TrustManager interface，not verify certificate
         X509TrustManager x509TrustManager = new X509TrustManager() {
             @Override
-            public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-
+            public void checkClientTrusted(X509Certificate[] x509Certificates, String s){
+                          log.info("x509Certificates");
             }
 
             @Override
-            public void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-
+            public void checkServerTrusted(X509Certificate[] x509Certificates, String s) {
+                           log.info("x509Certificates");
             }
 
             @Override

@@ -51,7 +51,7 @@ public class FileUtil implements AutoCloseable {
      * @param content
      * @param flag
      */
-    public static void WriteStringToFile(String filePath, String content, boolean flag) {
+    public static void writeStringToFile(String filePath, String content, boolean flag) {
         File file = new File(filePath);
         if (!file.exists()) {
             try {
@@ -70,7 +70,7 @@ public class FileUtil implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
-
+    public void close() throws Exception{
+        log.info("resource is close");
     }
 }

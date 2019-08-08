@@ -89,7 +89,7 @@ public class ScheduledService{
             // cancel the original subscription
             restTemplate.getForEntity(urlBuffer.toString(),String.class,subId);
         }
-        FileUtil.WriteStringToFile(subIdFile.getAbsolutePath(),"",false);
+        FileUtil.writeStringToFile(subIdFile.getAbsolutePath(),"",false);
         urlBuffer= StringUtil.getIntegralUrl("ws://",url,"/weevent/stomp");
         ListenableFuture<StompSession> listenableFuture = stompClient.connect(urlBuffer.toString(),getStompSessionHandlerAdapter());
         
@@ -97,8 +97,7 @@ public class ScheduledService{
         
         // stomp subscribe
         stompSession.setAutoReceipt(true);
-        StompSession.Subscription subscription =
-            stompSession.subscribe("com.weevent.stomp", getStompFrameHander());
+        stompSession.subscribe("com.weevent.stomp", getStompFrameHander());
     }
 
 
@@ -136,8 +135,7 @@ public class ScheduledService{
     @Scheduled(cron = "15 0/1 * * * *")
     public void scheduled3(){
         try {
-            StompSession.Receiptable receiptable =
-                stompSession.send("com.weevent.stomp", "hello world from websocket");
+            stompSession.send("com.weevent.stomp", "hello world from websocket");
             log.info("stomp send msg!");
             countTimes(stompSendMap,StringUtil.getFormatTime(format,new Date()));
         } catch (Exception e) {
@@ -181,26 +179,26 @@ public class ScheduledService{
         Date lastHour = calendar.getTime();
         String time = StringUtil.getFormatTime(format,lastHour);
         
-        FileUtil.WriteStringToFile(statisticFilePath, "Time is " + StringUtil.getFormatTime(format,date) + ":00:00\n",true);
+        FileUtil.writeStringToFile(statisticFilePath, "Time is " + StringUtil.getFormatTime(format,date) + ":00:00\n",true);
         log.info(statisticFilePath, "Time is " + StringUtil.getFormatTime(format,date)+ ":00:00\n");
 
-        FileUtil.WriteStringToFile(statisticFilePath,
+        FileUtil.writeStringToFile(statisticFilePath,
                 "last hour restful send: "+ restfulSendMap.get(time)+", receive:" + restfulSendMap.get(time) +" events\n",true);
         log.info("last hour restful send: "+ restfulSendMap.get(time)+", receive:" + restfulSendMap.get(time) +" events\n");
 
-        FileUtil.WriteStringToFile(statisticFilePath,
+        FileUtil.writeStringToFile(statisticFilePath,
                 "last hour stomp send: "+ stompSendMap.get(time)+", receive:" + stompSendMap.get(time) + " events\n",true);
         log.info("last hour stomp send: "+ stompSendMap.get(time)+", receive:" + stompSendMap.get(time) + " events\n");
 
-        FileUtil.WriteStringToFile(statisticFilePath,
+        FileUtil.writeStringToFile(statisticFilePath,
             "last hour stomp send: "+ mqttSendMap.get(time)+", receive:" + mqttSendMap.get(time) + " events\n",true);
         log.info("last hour stomp send: "+ mqttSendMap.get(time)+" receive:" + mqttSendMap.get(time) + " events\n");
 
-        FileUtil.WriteStringToFile(statisticFilePath,
+        FileUtil.writeStringToFile(statisticFilePath,
                 "last hour stomp send: "+ jsonrpcSendMap.get(time)+", receive:" + jsonrpcSendMap.get(time) + " events\n",true);
         log.info("last hour stomp send: "+ jsonrpcSendMap.get(time)+" receive:" + jsonrpcSendMap.get(time) + " events\n");
 
-        FileUtil.WriteStringToFile(statisticFilePath,
+        FileUtil.writeStringToFile(statisticFilePath,
                 "last hour stomp send: "+ brokerSendMap.get(time)+", receive:" + brokerSendMap.get(time) + " events\n",true);
         log.info("last hour stomp send: "+ brokerSendMap.get(time)+" receive:" + brokerSendMap.get(time) + " events\n");
         //remove last hour statistic key - value
@@ -247,8 +245,7 @@ public class ScheduledService{
 
             @Override
             public void handleTransportError(StompSession session, Throwable exception) {
-                if (exception instanceof ConnectionLostException) {
-                    if (!session.isConnected()) {
+                if (exception instanceof ConnectionLostException && !session.isConnected()) {
                         try {
                             Thread.sleep(5000);
                             ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
@@ -267,8 +264,7 @@ public class ScheduledService{
                         } catch (InterruptedException  | ExecutionException e) {
                             log.error(e.getMessage());
                         } 
-                   }
-                
+
                 }
             }
 

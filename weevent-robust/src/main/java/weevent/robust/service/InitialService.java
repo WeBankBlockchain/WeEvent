@@ -21,7 +21,7 @@ import java.util.List;
 public class InitialService implements ApplicationRunner{
 
 
-    final List<String> subIdList = new ArrayList<>();
+    private final List<String> subIdList = new ArrayList<>();
 
     public final static String  SUBSCRIBE_ID = "subscribeId";
 
@@ -69,7 +69,7 @@ public class InitialService implements ApplicationRunner{
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(SUBSCRIBE_ID,subIdList);
         log.info(jsonObject.toJSONString());
-        FileUtil.WriteStringToFile(subIdFile.getAbsolutePath(), jsonObject.toJSONString(),true);
+        FileUtil.writeStringToFile(subIdFile.getAbsolutePath(), jsonObject.toJSONString(),true);
 
     }
 
