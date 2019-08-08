@@ -74,6 +74,12 @@ public class FiscoConfig {
     @Value("${v2.node-key-path:./v2/node.key}")
     private String v2NodeKeyPath;
 
+    @Value("${consumer.idle-time:1000}")
+    private Integer consumerIdleTime;
+
+    @Value("${consumer.history_merge_block:8}")
+    private Integer consumerHistoryMergeBlock;
+
     /**
      * load configuration without spring
      *
