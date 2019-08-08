@@ -1,5 +1,8 @@
 package com.webank.weevent.governance.initial;
 
+import lombok.extern.slf4j.Slf4j;
+import org.yaml.snakeyaml.Yaml;
+
 import java.io.FileInputStream;
 import java.net.URL;
 import java.sql.Connection;
@@ -7,9 +10,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
-
-import org.yaml.snakeyaml.Yaml;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * tool to initdb
@@ -24,7 +24,7 @@ public class InitialDb {
         String driverName = "";
         try {
             Yaml yaml = new Yaml();
-            URL url = InitialDb.class.getClassLoader().getResource("application-prod.yml");
+            URL url = InitialDb.class.getClassLoader().getResource("application-prod.properties");
             if (url != null) {
                 Map map = (Map) yaml.load(new FileInputStream(url.getFile()));
                 Map springMap = (Map) map.get("spring");
