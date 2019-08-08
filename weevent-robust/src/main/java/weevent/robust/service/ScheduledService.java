@@ -259,8 +259,7 @@ public class ScheduledService{
                             stompSession = f.get();
                          // stomp订阅
                             stompSession.setAutoReceipt(true);
-                            StompSession.Subscription subscription =
-                                stompSession.subscribe("com.weevent.stomp", getStompFrameHander());
+                            stompSession.subscribe("com.weevent.stomp", getStompFrameHander());
                         } catch (InterruptedException  | ExecutionException e) {
                             log.error(e.getMessage());
                         } 
