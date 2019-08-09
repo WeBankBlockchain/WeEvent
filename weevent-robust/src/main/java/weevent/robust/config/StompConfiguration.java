@@ -1,7 +1,7 @@
 package weevent.robust.config;
 
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImplExporter;
-import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
+import com.webank.weevent.sdk.IWeEventClient;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,35 +21,31 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
-import weevent.robust.sdk.client.JsonRpcClient;
-
-import java.util.HashMap;
-import java.util.Map;
+import weevent.robust.util.StringUtil;
 
 @Configuration
 @IntegrationComponentScan
 @Slf4j
 public class StompConfiguration {
-    
-    public static Map<String,Integer> mqttReceiveMap = new HashMap<>();
-    
+
+
     @Value("${weevent.broker.url}")
     private String url;
 
     @Value("${mqtt.broker.url}")
     private String hostUrl;
- 
+
     @Value("${mqtt.client.id}")
     private String clientId;
- 
+
     @Value("${mqtt.default.topic}")
     private String defaultTopic;
 
     //connect timeout
     @Value("${mqtt.broker.timeout}")
-    private int completionTimeout ;
-    
-   //jsonrpc4j exporter
+    private int completionTimeout;
+
+    //jsonrpc4j exporter
     @Bean
     public static AutoJsonRpcServiceImplExporter autoJsonRpcServiceImplExporter() {
         //in here you can provide custom HTTP status code providers etc. eg:
@@ -57,18 +53,18 @@ public class StompConfiguration {
         //exporter.setErrorResolver();
         return new AutoJsonRpcServiceImplExporter();
     }
-    
+
     @Bean
-    public IBrokerRpc getBrokerRpc() throws Exception {
-        String jsonurl = "http://"+ url +"/weevent/jsonrpc";
-        return JsonRpcClient.build(jsonurl);
+    public IWeEventClient getBrokerRpc() throws Exception {
+        String jsonurl = StringUtil.getIntegralUrl(StringUtil.HTTP_HEADER,url,"/weevent").toString();
+        return IWeEventClient.build(jsonurl);
     }
-    
+
     @Bean
     public WebSocketStompClient getWebSocketStompClient() {
         ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
         taskScheduler.initialize();
-        
+
         // standard web socket transport
         WebSocketClient webSocketClient = new StandardWebSocketClient();
         WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
@@ -76,47 +72,45 @@ public class StompConfiguration {
         // no difference in the following
         // MappingJackson2MessageConverter
         stompClient.setMessageConverter(new StringMessageConverter());
-        stompClient.setTaskScheduler(taskScheduler); // for heartbeats
-        
+        // for heartbeats
+        stompClient.setTaskScheduler(taskScheduler);
+
         return stompClient;
     }
-    
+
     @Bean
     public RestTemplate restTemplate() {
-            return new RestTemplate();
+        return new RestTemplate();
     }
-    
+
     @Bean
-    public MqttConnectOptions getMqttConnectOptions(){
-        MqttConnectOptions mqttConnectOptions=new MqttConnectOptions();
+    public MqttConnectOptions getMqttConnectOptions() {
+        MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
        /* mqttConnectOptions.setUserName(username);
         mqttConnectOptions.setPassword(password.toCharArray());*/
         mqttConnectOptions.setServerURIs(new String[]{hostUrl});
         mqttConnectOptions.setKeepAliveInterval(2);
         return mqttConnectOptions;
     }
+
     @Bean
     public MqttPahoClientFactory mqttClientFactory() {
         DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory();
         factory.setConnectionOptions(getMqttConnectOptions());
         return factory;
     }
+
     @Bean
     @ServiceActivator(inputChannel = "mqttChannel")
     public MessageHandler mqtt() {
-        MqttPahoMessageHandler messageHandler =  new MqttPahoMessageHandler(clientId, mqttClientFactory());
+        MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler(clientId, mqttClientFactory());
         messageHandler.setAsync(true);
         messageHandler.setDefaultTopic(defaultTopic);
         return messageHandler;
     }
+
     @Bean
     public MessageChannel mqttChannel() {
-        return new DirectChannel();
-    }
-
-  //接收通道
-    @Bean
-    public MessageChannel mqttInputChannel() {
         return new DirectChannel();
     }
 

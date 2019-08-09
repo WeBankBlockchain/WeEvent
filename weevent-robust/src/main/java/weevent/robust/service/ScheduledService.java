@@ -2,8 +2,8 @@ package weevent.robust.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.SendResult;
-import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,17 +34,17 @@ import java.util.concurrent.ExecutionException;
 
 
 /**
- *  This is a timing tool class that monitors whether the borker service is up and running.
+ * This is a timing tool class that monitors whether the borker service is up and running.
+ *
  * @author junyanliu
  * @author puremilkfan
- * @since 1.0
  */
 
 @Slf4j
 @Component
 @EnableScheduling
 @EnableAsync
-public class ScheduledService{
+public class ScheduledService {
 
 
     @Value("${weevent.broker.url}")
@@ -53,24 +53,24 @@ public class ScheduledService{
     @Value("${statistic.file.path}")
     private String statisticFilePath;
 
-    @Value("subscripId.file.path")
+    @Value("${subscripId.file.path}")
     private String subscripIdPath;
 
     @Autowired
     private RestTemplate restTemplate;
 
     @Autowired
-    private IBrokerRpc brokerRpc;
+    private IWeEventClient weEventClient;
 
     @Autowired
     private WebSocketStompClient stompClient;
-    
+
     @Autowired
     private MqttGateway mqttGateway;
-    
+
     private static StompSession stompSession;
 
-    private final static  String format = "yyyy-MM-dd HH";
+    private final static String format = "yyyy-MM-dd HH";
 
     public static Map<String, Integer> statisticMap = new HashMap<>();
     public static Map<String, Integer> restfulSendMap = new HashMap<>();
@@ -84,17 +84,17 @@ public class ScheduledService{
         File subIdFile = new File(subscripIdPath);
         String subText = FileUtil.readTxt(subIdFile);
         List<String> subIds = getSubIds(subText);
-        StringBuffer urlBuffer = StringUtil.getIntegralUrl(StringUtil.HTTP_HEADER,url,"/weevent/rest/unSubscribe?subscriptionId={subscriptionId}");
+        StringBuffer urlBuffer = StringUtil.getIntegralUrl(StringUtil.HTTP_HEADER, url, "/weevent/rest/unSubscribe?subscriptionId={subscriptionId}");
         for (String subId : subIds) {
             // cancel the original subscription
-            restTemplate.getForEntity(urlBuffer.toString(),String.class,subId);
+            restTemplate.getForEntity(urlBuffer.toString(), String.class, subId);
         }
-        FileUtil.writeStringToFile(subIdFile.getAbsolutePath(),"",false);
-        urlBuffer= StringUtil.getIntegralUrl("ws://",url,"/weevent/stomp");
-        ListenableFuture<StompSession> listenableFuture = stompClient.connect(urlBuffer.toString(),getStompSessionHandlerAdapter());
-        
+        FileUtil.writeStringToFile(subIdFile.getAbsolutePath(), "", false);
+        urlBuffer = StringUtil.getIntegralUrl("ws://", url, "/weevent/stomp");
+        ListenableFuture<StompSession> listenableFuture = stompClient.connect(urlBuffer.toString(), getStompSessionHandlerAdapter());
+
         this.stompSession = listenableFuture.get();
-        
+
         // stomp subscribe
         stompSession.setAutoReceipt(true);
         stompSession.subscribe("com.weevent.stomp", getStompFrameHander());
@@ -103,18 +103,18 @@ public class ScheduledService{
 
     @Async
     @Scheduled(cron = "5 0/1 * * * *")
-    public void scheduled() throws  BrokerException{
+    public void scheduled() throws BrokerException {
         // use the rest request to post a message
-        brokerRpc.open("com.weevent.rest");
-        StringBuffer urlBuffer = StringUtil.getIntegralUrl(StringUtil.HTTP_HEADER,url,"/weevent/rest/publish?topic={topic}&content={content}");
+        weEventClient.open("com.weevent.rest");
+        StringBuffer urlBuffer = StringUtil.getIntegralUrl(StringUtil.HTTP_HEADER, url, "/weevent/rest/publish?topic={topic}&content={content}");
         ResponseEntity<String> rsp = restTemplate.getForEntity(
-            urlBuffer.toString(),
-            String.class,
-            "com.weevent.rest",
-            "hello weevent rest");
+                urlBuffer.toString(),
+                String.class,
+                "com.weevent.rest",
+                "hello weevent rest");
         log.info("restful send message:" + rsp.getBody());
-        if(rsp.getStatusCodeValue() == 200) {
-            countTimes(restfulSendMap,StringUtil.getFormatTime(format,new Date()));
+        if (rsp.getStatusCodeValue() == 200) {
+            countTimes(restfulSendMap, StringUtil.getFormatTime(format, new Date()));
         }
     }
 
@@ -123,49 +123,48 @@ public class ScheduledService{
     public void scheduled2() throws BrokerException {
         // use jsonRpc publish topic
         String topic = "com.weevent.jsonrpc";
-        brokerRpc.open(topic);
-        SendResult publish = brokerRpc.publish(topic, "Hello World !".getBytes());
+        weEventClient.open(topic);
+        SendResult publish = weEventClient.publish(topic, "Hello World !".getBytes());
         log.info("jsonrpc send message:" + publish.getEventId());
-        if( publish.getStatus() == SendResult.SendResultStatus.SUCCESS) {
-            countTimes(jsonrpcSendMap,StringUtil.getFormatTime(format,new Date()));
+        if (publish.getStatus() == SendResult.SendResultStatus.SUCCESS) {
+            countTimes(jsonrpcSendMap, StringUtil.getFormatTime(format, new Date()));
         }
     }
 
     @Async
     @Scheduled(cron = "15 0/1 * * * *")
-    public void scheduled3(){
+    public void scheduled3() {
         try {
             stompSession.send("com.weevent.stomp", "hello world from websocket");
             log.info("stomp send msg!");
-            countTimes(stompSendMap,StringUtil.getFormatTime(format,new Date()));
+            countTimes(stompSendMap, StringUtil.getFormatTime(format, new Date()));
         } catch (Exception e) {
-          log.error(e.getMessage());
+            log.error(e.getMessage());
         }
     }
 
     @Async
     @Scheduled(cron = "20 0/1 * * * *")
-    public void scheduled4() throws  BrokerException{
+    public void scheduled4() throws BrokerException {
         // Mqtt sends a message to weevent broker
         mqttGateway.sendToMqtt("hello mqtt", "com.weevent.mqtt");
         log.info("mqtt send msg to broker");
-        countTimes(mqttSendMap,StringUtil.getFormatTime(format,new Date()));
+        countTimes(mqttSendMap, StringUtil.getFormatTime(format, new Date()));
     }
 
     @Async
     @Scheduled(cron = "25 0/1 * * * *")
-    public void scheduled5() throws  BrokerException {
-       // brokerRpc.open("com.weevent.mqtt");
+    public void scheduled5() throws BrokerException {
         //use rest request to send a message from weevent broker to mqtt
-        StringBuffer urlBuffer = StringUtil.getIntegralUrl(StringUtil.HTTP_HEADER,url,"/weevent/rest/publish?topic={topic}&content={content}");
+        StringBuffer urlBuffer = StringUtil.getIntegralUrl(StringUtil.HTTP_HEADER, url, "/weevent/rest/publish?topic={topic}&content={content}");
         ResponseEntity<String> rsp = restTemplate.getForEntity(
-            urlBuffer.toString(),
-            String.class,
-            "com.weevent.mqtt",
-            "hello weevent");
+                urlBuffer.toString(),
+                String.class,
+                "com.weevent.mqtt",
+                "hello weevent");
         log.info("send msg to mqtt:" + rsp.getBody());
-        if(rsp.getStatusCodeValue() == 200) {
-            countTimes(brokerSendMap,StringUtil.getFormatTime(format,new Date()));
+        if (rsp.getStatusCodeValue() == 200) {
+            countTimes(brokerSendMap, StringUtil.getFormatTime(format, new Date()));
         }
     }
 
@@ -177,30 +176,30 @@ public class ScheduledService{
         calendar.setTime(date);
         calendar.add(Calendar.HOUR, -1);
         Date lastHour = calendar.getTime();
-        String time = StringUtil.getFormatTime(format,lastHour);
-        
-        FileUtil.writeStringToFile(statisticFilePath, "Time is " + StringUtil.getFormatTime(format,date) + ":00:00\n",true);
-        log.info(statisticFilePath, "Time is " + StringUtil.getFormatTime(format,date)+ ":00:00\n");
+        String time = StringUtil.getFormatTime(format, lastHour);
+
+        FileUtil.writeStringToFile(statisticFilePath, "Time is " + StringUtil.getFormatTime(format, date) + ":00:00\n", true);
+        log.info(statisticFilePath, "Time is " + StringUtil.getFormatTime(format, date) + ":00:00\n");
 
         FileUtil.writeStringToFile(statisticFilePath,
-                "last hour restful send: "+ restfulSendMap.get(time)+", receive:" + restfulSendMap.get(time) +" events\n",true);
-        log.info("last hour restful send: "+ restfulSendMap.get(time)+", receive:" + restfulSendMap.get(time) +" events\n");
+                "last hour restful send: " + restfulSendMap.get(time) + ", receive:" + restfulSendMap.get(time) + " events\n", true);
+        log.info("last hour restful send: " + restfulSendMap.get(time) + ", receive:" + restfulSendMap.get(time) + " events\n");
 
         FileUtil.writeStringToFile(statisticFilePath,
-                "last hour stomp send: "+ stompSendMap.get(time)+", receive:" + stompSendMap.get(time) + " events\n",true);
-        log.info("last hour stomp send: "+ stompSendMap.get(time)+", receive:" + stompSendMap.get(time) + " events\n");
+                "last hour stomp send: " + stompSendMap.get(time) + ", receive:" + stompSendMap.get(time) + " events\n", true);
+        log.info("last hour stomp send: " + stompSendMap.get(time) + ", receive:" + stompSendMap.get(time) + " events\n");
 
         FileUtil.writeStringToFile(statisticFilePath,
-            "last hour stomp send: "+ mqttSendMap.get(time)+", receive:" + mqttSendMap.get(time) + " events\n",true);
-        log.info("last hour stomp send: "+ mqttSendMap.get(time)+" receive:" + mqttSendMap.get(time) + " events\n");
+                "last hour stomp send: " + mqttSendMap.get(time) + ", receive:" + mqttSendMap.get(time) + " events\n", true);
+        log.info("last hour stomp send: " + mqttSendMap.get(time) + " receive:" + mqttSendMap.get(time) + " events\n");
 
         FileUtil.writeStringToFile(statisticFilePath,
-                "last hour stomp send: "+ jsonrpcSendMap.get(time)+", receive:" + jsonrpcSendMap.get(time) + " events\n",true);
-        log.info("last hour stomp send: "+ jsonrpcSendMap.get(time)+" receive:" + jsonrpcSendMap.get(time) + " events\n");
+                "last hour stomp send: " + jsonrpcSendMap.get(time) + ", receive:" + jsonrpcSendMap.get(time) + " events\n", true);
+        log.info("last hour stomp send: " + jsonrpcSendMap.get(time) + " receive:" + jsonrpcSendMap.get(time) + " events\n");
 
         FileUtil.writeStringToFile(statisticFilePath,
-                "last hour stomp send: "+ brokerSendMap.get(time)+", receive:" + brokerSendMap.get(time) + " events\n",true);
-        log.info("last hour stomp send: "+ brokerSendMap.get(time)+" receive:" + brokerSendMap.get(time) + " events\n");
+                "last hour stomp send: " + brokerSendMap.get(time) + ", receive:" + brokerSendMap.get(time) + " events\n", true);
+        log.info("last hour stomp send: " + brokerSendMap.get(time) + " receive:" + brokerSendMap.get(time) + " events\n");
         //remove last hour statistic key - value
         statisticMap.remove(time);
         restfulSendMap.remove(time);
@@ -213,7 +212,7 @@ public class ScheduledService{
     }
 
     private StompFrameHandler getStompFrameHander() {
-        
+
         return new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
@@ -224,12 +223,12 @@ public class ScheduledService{
             public void handleFrame(StompHeaders headers, Object payload) {
                 log.info("subscribe handleFrame, header: {} payload: {}", headers, payload);
                 //  the current system time
-                String time =  StringUtil.getFormatTime(format,new Date());
-                countTimes(statisticMap,time);
+                String time = StringUtil.getFormatTime(format, new Date());
+                countTimes(statisticMap, time);
             }
         };
     }
-    
+
     private StompSessionHandlerAdapter getStompSessionHandlerAdapter() {
         return new StompSessionHandlerAdapter() {
             @Override
@@ -246,23 +245,23 @@ public class ScheduledService{
             @Override
             public void handleTransportError(StompSession session, Throwable exception) {
                 if (exception instanceof ConnectionLostException && !session.isConnected()) {
-                        try {
-                            Thread.sleep(5000);
-                            ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-                            taskScheduler.initialize();
-                            //new connect--start
-                            WebSocketClient webSocketClient = new StandardWebSocketClient();
-                            WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
-                            stompClient.setMessageConverter(new StringMessageConverter());
-                            stompClient.setTaskScheduler(taskScheduler); // for heartbeats
-                            ListenableFuture<StompSession> f = stompClient.connect("ws://" + url + "/weevent/stomp", this);
-                            stompSession = f.get();
-                         // stomp订阅
-                            stompSession.setAutoReceipt(true);
-                            stompSession.subscribe("com.weevent.stomp", getStompFrameHander());
-                        } catch (InterruptedException  | ExecutionException e) {
-                            log.error(e.getMessage());
-                        } 
+                    try {
+                        Thread.sleep(5000);
+                        ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
+                        taskScheduler.initialize();
+                        //new connect--start
+                        WebSocketClient webSocketClient = new StandardWebSocketClient();
+                        WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
+                        stompClient.setMessageConverter(new StringMessageConverter());
+                        stompClient.setTaskScheduler(taskScheduler); // for heartbeats
+                        ListenableFuture<StompSession> f = stompClient.connect("ws://" + url + "/weevent/stomp", this);
+                        stompSession = f.get();
+                        // stomp订阅
+                        stompSession.setAutoReceipt(true);
+                        stompSession.subscribe("com.weevent.stomp", getStompFrameHander());
+                    } catch (InterruptedException | ExecutionException e) {
+                        log.error(e.getMessage());
+                    }
 
                 }
             }
@@ -275,33 +274,33 @@ public class ScheduledService{
     }
 
     /**
-     *
      * Convert json to List
+     *
      * @param subIdStrs
-     * @return  List<String>
+     * @return List<String>
      */
-    private static List<String> getSubIds(String subIdStrs){
+    private static List<String> getSubIds(String subIdStrs) {
         JSONObject jsonObject = JSONObject.parseObject(subIdStrs);
         List<String> subIds = new ArrayList<>();
-        if(null != jsonObject && jsonObject.containsKey(InitialService.SUBSCRIBE_ID)){
+        if (null != jsonObject && jsonObject.containsKey(InitialService.SUBSCRIBE_ID)) {
             subIds = (List) jsonObject.get(InitialService.SUBSCRIBE_ID);
         }
-        return  subIds;
+        return subIds;
     }
 
     /**
-     *  count times
+     * count times
+     *
      * @param integerMap
      * @param timeKey
      */
-    private void  countTimes(Map<String, Integer> integerMap,String timeKey){
+    private void countTimes(Map<String, Integer> integerMap, String timeKey) {
         if (integerMap.containsKey(timeKey)) {
             integerMap.put(timeKey, (integerMap.get(timeKey) + 1));
         } else {
             integerMap.put(timeKey, 1);
         }
     }
-
 
 
 }

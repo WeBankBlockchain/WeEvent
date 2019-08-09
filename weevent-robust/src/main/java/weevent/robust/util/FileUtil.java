@@ -1,7 +1,7 @@
 package weevent.robust.util;
 
-import com.webank.weevent.sdk.BrokerException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 
@@ -9,7 +9,6 @@ import java.io.*;
 /**
  *  This is a file reading tool class
  * @author puremilkfan
- * @version  since 1.1
  * @date 2019/8/5
  */
 
@@ -17,39 +16,24 @@ import java.io.*;
 public class FileUtil implements AutoCloseable {
 
     /**
-     *  Read the file to get the file content
+     * Read the file to get the file content
      * @param file
-     * @return
+     * @return String
      */
-    public static String readTxt(File file) throws BrokerException,IOException {
-        StringBuffer content = new StringBuffer();
-        if(!file.isFile() || !file.exists()){
+    public static String readTxt(File file) throws IOException {
+        if (!file.isFile() || !file.exists()) {
             file.createNewFile();
         }
-        try (InputStreamReader isr = new InputStreamReader(new FileInputStream(file), "utf-8");
-             BufferedReader br = new BufferedReader(isr))
-         {
-
-            String lineTxt;
-            while ((lineTxt = br.readLine()) != null) {
-                content.append(lineTxt);
-            }
-            br.close();
-            return content.toString();
-        } catch (Exception e) {
-            log.error("File read error!");
-            throw  new BrokerException("file does not exist!");
-        }
+        InputStream inputStream = new FileInputStream(file);
+        String text = IOUtils.toString(inputStream,"utf8");
+        return  text;
     }
 
     /**
-     * filePath is the file path,
-     * content needs to be written,
-     * flag is true for append, false for overwrite
      *
-     * @param filePath
-     * @param content
-     * @param flag
+     * @param filePath is the file path,
+     * @param content  content needs to be written
+     * @param flag is true for append, false for overwrite
      */
     public static void writeStringToFile(String filePath, String content, boolean flag) {
         File file = new File(filePath);
@@ -70,7 +54,7 @@ public class FileUtil implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception{
+    public void close() throws Exception {
         log.info("resource is close");
     }
 }

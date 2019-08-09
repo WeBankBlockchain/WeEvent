@@ -15,7 +15,7 @@ public class StringUtil {
     public  final static  String HTTP_HEADER = "http://";
 
     /**
-     *  Pass in the string in the correct order and return the full url you need
+     *  Pass in the string in the correct order and return the integral url you need
      * @param params
      * @return StringBuffer
      */
