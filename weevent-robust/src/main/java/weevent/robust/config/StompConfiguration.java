@@ -1,7 +1,8 @@
 package weevent.robust.config;
 
-import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImplExporter;
 import com.webank.weevent.sdk.IWeEventClient;
+
+import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImplExporter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,13 +22,14 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
-import weevent.robust.util.StringUtil;
+import weevent.robust.service.ScheduledService;
 
 @Configuration
 @IntegrationComponentScan
 @Slf4j
 public class StompConfiguration {
 
+    private final static String HTTP_HEADER = "http://";
 
     @Value("${weevent.broker.url}")
     private String url;
@@ -35,11 +37,7 @@ public class StompConfiguration {
     @Value("${mqtt.broker.url}")
     private String hostUrl;
 
-    @Value("${mqtt.client.id}")
-    private String clientId;
 
-    @Value("${mqtt.default.topic}")
-    private String defaultTopic;
 
     //connect timeout
     @Value("${mqtt.broker.timeout}")
@@ -56,7 +54,7 @@ public class StompConfiguration {
 
     @Bean
     public IWeEventClient getBrokerRpc() throws Exception {
-        String jsonurl = StringUtil.getIntegralUrl(StringUtil.HTTP_HEADER,url,"/weevent").toString();
+        String jsonurl = ScheduledService.getIntegralUrl(HTTP_HEADER, url, "/weevent").toString();
         return IWeEventClient.build(jsonurl);
     }
 
@@ -86,8 +84,6 @@ public class StompConfiguration {
     @Bean
     public MqttConnectOptions getMqttConnectOptions() {
         MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
-       /* mqttConnectOptions.setUserName(username);
-        mqttConnectOptions.setPassword(password.toCharArray());*/
         mqttConnectOptions.setServerURIs(new String[]{hostUrl});
         mqttConnectOptions.setKeepAliveInterval(2);
         return mqttConnectOptions;
@@ -103,9 +99,9 @@ public class StompConfiguration {
     @Bean
     @ServiceActivator(inputChannel = "mqttChannel")
     public MessageHandler mqtt() {
-        MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler(clientId, mqttClientFactory());
+        MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler("mqttId", mqttClientFactory());
         messageHandler.setAsync(true);
-        messageHandler.setDefaultTopic(defaultTopic);
+        messageHandler.setDefaultTopic("com.weevent.mqtt");
         return messageHandler;
     }
 

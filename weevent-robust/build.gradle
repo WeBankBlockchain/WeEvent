@@ -1,7 +1,6 @@
 apply plugin: "org.springframework.boot"
 apply plugin: "io.spring.dependency-management"
 
-
 dependencies {
     implementation project(path: ":weevent-client")
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -15,11 +14,11 @@ dependencies {
     implementation("org.apache.logging.log4j:log4j-web:2.11.2")
     implementation("com.alibaba:fastjson:1.2.58")
     implementation("commons-io:commons-io:2.4")
-
 }
+
 bootJar {
     destinationDir file("dist/apps")
-    archiveName + project.name + "-" + version + ".jar"
+    archiveName project.name + "-" + version + ".jar"
 
     exclude "**/*.xml"
     exclude "**/*.properties"
