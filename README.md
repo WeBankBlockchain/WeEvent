@@ -8,6 +8,7 @@
 [![Documentation](https://img.shields.io/badge/api-reference-blue.svg)](https://weeventdoc.readthedocs.io/zh_CN/latest/protocal/index.html)
 [![Documentation Status](https://readthedocs.org/projects/weeventdoc/badge/?version=latest)](https://weeventdoc.readthedocs.io/zh_CN/latest)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 ## 什么是WeEvent？
 WeEvent是一套分布式事件驱动架构，实现了可信、可靠、高效的跨机构、跨平台事件通知机制。
 
