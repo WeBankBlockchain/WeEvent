@@ -170,7 +170,7 @@ public class ScheduledService implements AutoCloseable {
     public void mqttPublish() throws BrokerException {
         // Mqtt sends a message to weevent broker
         mqttGateway.sendToMqtt("hello mqtt", "com.weevent.mqtt");
-        log.info("mqtt send m`sg to broker");
+        log.info("mqtt send msg to broker");
         countTimes(mqttSendMap, this.getFormatTime(format, new Date()));
     }
 
