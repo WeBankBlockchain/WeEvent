@@ -43,6 +43,7 @@ start(){
     do
         sleep 1
         get_pid
+        e
         if [[ -n "${current_pid}" ]];then
             echo "start robust success (PID=${current_pid})"
             break
