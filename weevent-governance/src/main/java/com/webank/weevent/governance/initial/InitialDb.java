@@ -8,8 +8,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
 import org.yaml.snakeyaml.Yaml;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * tool to initdb
