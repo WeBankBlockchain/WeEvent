@@ -20,6 +20,13 @@ bootJar {
     destinationDir file("dist/apps")
     archiveName project.name + "-" + version + ".jar"
 
+    exclude "**/*.xml"
+    exclude "**/*.properties"
+
+    copy {
+        from file("src/main/resources/")
+        into "dist/conf"
+    }
     copy {
         from configurations.runtime
         into "dist/lib"
