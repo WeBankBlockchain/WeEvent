@@ -95,37 +95,4 @@ public interface IProducer extends IEventTopic {
      * @throws BrokerException BrokerException
      */
     SendResult publish(WeEvent event, String groupId) throws BrokerException;
-
-    /*
-     * TODO
-     * publishBatch(List<WeEvent> event) is a good idea.
-     */
-
-    /**
-     * Interface used by {@link IProducer#publish(WeEvent, SendCallBack)}
-     */
-    interface SendCallBack {
-        /**
-         * Called while publish is complete.
-         *
-         * @param sendResult the sendResult
-         */
-        void onComplete(SendResult sendResult);
-
-        /**
-         * Called while raise exception in publish.
-         *
-         * @param e the e
-         */
-        void onException(Throwable e);
-    }
-
-    /**
-     * Publish a event in asynchronous way.
-     *
-     * @param event the event
-     * @param callBack the callBack {@link SendCallBack}
-     * @throws BrokerException BrokerException
-     */
-    void publish(WeEvent event, String groupId, SendCallBack callBack) throws BrokerException;
 }
