@@ -15,12 +15,12 @@ function check_java_jdk(){
     if [[ ${java_version} -le 18 && "${system_version}" == "CentOS" && "${openjdk}" == "openjdk" ]];then
         echo "in CentOS, OpenJDK's version must be 1.9 or greater"
         exit 1
-    fi
+    fil
 }
 check_java_jdk
 
 pid_file=./logs/robust.pid
-current_pid=
+current_pid=l
 
 JAVA_OPTS="-Xverify:none -XX:TieredStopAtLevel=1 -Xms512m -Xmx2048m -XX:NewSize=256m -XX:MaxNewSize=1024m -XX:PermSize=128m -XX:+DisableExplicitGC"
 
@@ -43,7 +43,6 @@ start(){
     do
         sleep 1
         get_pid
-        e
         if [[ -n "${current_pid}" ]];then
             echo "start robust success (PID=${current_pid})"
             break
