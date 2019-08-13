@@ -98,7 +98,7 @@ stop(){
 }
 
 monitor(){
-    getTradeProtalPID
+    get_pid
     if [[ -n "${current_pid}" ]]; then
         echo "`date`: broker is running(PID=${current_pid})"
     else
