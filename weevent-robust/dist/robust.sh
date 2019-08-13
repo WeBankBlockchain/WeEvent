@@ -20,7 +20,7 @@ function check_java_jdk(){
 check_java_jdk
 
 pid_file=./logs/robust.pid
-current_pid=l
+current_pid
 
 JAVA_OPTS="-Xverify:none -XX:TieredStopAtLevel=1 -Xms512m -Xmx2048m -XX:NewSize=256m -XX:MaxNewSize=1024m -XX:PermSize=128m -XX:+DisableExplicitGC"
 
