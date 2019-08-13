@@ -97,13 +97,7 @@ public class FiscoBcosDelegate {
         return pool;
     }
 
-    public void initProxy() throws BrokerException {
-        FiscoConfig fiscoConfig = new FiscoConfig();
-        if (!fiscoConfig.load()) {
-            log.error("load FISCO-BCOS configuration failed");
-            throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
-        }
-
+    public void initProxy(FiscoConfig fiscoConfig) throws BrokerException {
         threadPool = initThreadPool(fiscoConfig);
 
         if (fiscoConfig.getVersion().startsWith("1.3")) {
