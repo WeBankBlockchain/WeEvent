@@ -36,7 +36,7 @@ public class WeEvent implements Serializable {
 
     /**
      * event's custom header.
-     * null if not set. all data length <= 1k.
+     * null if not set. all data length in total must be less then 1k.
      */
     private Map<String, String> extensions;
 
