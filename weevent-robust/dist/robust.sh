@@ -3,9 +3,9 @@ echo "source ~/.bashrc to confirm java jdk environment"
 source ~/.bashrc >/dev/null 2>&1
 
 pid_file=./logs/robust.pid
-current_pid
+current_pid=
 
-JAVA_OPTS="-Xverify:none -XX:TieredStopAtLevel=1 -Xms512m -Xmx2048m -XX:NewSize=256m -XX:MaxNewSize=1024m -XX:PermSize=128m -XX:+DisableExplicitGC"
+JAVA_OPTS=
 
 get_pid(){
     if [[ -e ${pid_file} ]]; then

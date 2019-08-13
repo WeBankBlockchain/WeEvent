@@ -361,7 +361,7 @@ public class ScheduledService implements AutoCloseable {
             try {
                 file.createNewFile();
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
         }
         try (OutputStream os = new FileOutputStream(file, flag)) {
@@ -369,7 +369,7 @@ public class ScheduledService implements AutoCloseable {
             os.write(b);
             os.flush();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
     }
 
