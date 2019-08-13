@@ -36,9 +36,10 @@ public class WeEvent implements Serializable {
 
     /**
      * event's custom header.
-	 * null if not set. all data length <= 1k.
+     * null if not set. all data length <= 1k.
      */
     private Map<String, String> extensions;
+
     /**
      * Event id in block chain, it's unique under one topic.
      * It is assigned by system default.
