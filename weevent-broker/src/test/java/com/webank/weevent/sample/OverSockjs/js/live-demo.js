@@ -24,16 +24,23 @@ function connect() {
     url = $("#url").val();
     var socket = new SockJS(url); //'/gs-guide-websocket'
     stompClient = StompJs.Stomp.over(socket);
-    stompClient.connect(login, passcode, function (frame) {
-        // console.log('Connected: ' + frame);
+    if(login||passcode){
+        stompClient.connect(login, passcode, function (frame) {
+            next(frame)
+        });
+    } else {
+        stompClient.connect('', function (frame) {
+            next(frame)
+        });
+    }
+    function next(frame){
         if(frame.command === "CONNECTED"){
             console.log('publish connect'+frame)
             connectBtn(true)
         } else {
             connectBtn(false)
         }
-    });
-    // $("#connect").setD
+    }
 }
 
 // Publish disconnect
@@ -95,16 +102,29 @@ function subscribeConnect() {
     var subscribetopic = $("#url").val();
     var socket = new SockJS(subscribetopic); //'/gs-guide-websocket'
     stompClientSub = StompJs.Stomp.over(socket);
-    stompClientSub.connect(login, passcode, function (frame) {
-        setConnected(true);
-        console.log('subscribe.connected: ' + frame);
-        if(frame.command === "CONNECTED"){
-            subBtn(true)
-        } else {
-            console.log('fail...');
-            subBtn(false)
+    if (login||passcode){
+        stompClientSub.connect(login, passcode, function (e) {
+            next(e)
+        });
+    } else{
+        stompClientSub.connect('', function (e) {
+            next(e)
+        });
+    }
+    
+    function next(frame) {
+        try{
+            console.log('subscribe.connected: ' + frame);
+            if(frame.command === "CONNECTED"){
+                subBtn(true)
+            } else {
+                console.log('DISCONNECTED');
+                subBtn(false)
+            }
+        }catch(e){
+
         }
-    });
+    }   
 }
 
 // Subscribe disconnect

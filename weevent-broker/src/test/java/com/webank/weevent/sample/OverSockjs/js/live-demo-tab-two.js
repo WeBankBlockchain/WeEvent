@@ -1,7 +1,6 @@
 var stompClient = null;
 var topic = null;
 //var url = window.location.origin+"/weevent/sockjs";
-var url = "http://10.107.105.228:8090/weevent/sockjs";
 
 function setConnected(connected) {
     //$("#connect").prop("disabled", connected);
