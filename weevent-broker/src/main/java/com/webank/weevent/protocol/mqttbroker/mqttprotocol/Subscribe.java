@@ -1,7 +1,9 @@
 package com.webank.weevent.protocol.mqttbroker.mqttprotocol;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.plugin.IConsumer;
@@ -55,6 +57,10 @@ public class Subscribe {
         String clientId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
         List<Integer> mqttQoSList = new ArrayList<>();
 
+        // external params
+        Map<IConsumer.SubscribeExt, String> ext = new HashMap<>();
+        ext.put(IConsumer.SubscribeExt.InterfaceType, WeEventConstants.MQTTTYPE);
+
         topicSubscriptions.forEach(topicSubscription -> {
             String topicFilter = topicSubscription.topicName();
             MqttQoS mqttQoS = topicSubscription.qualityOfService();
@@ -65,22 +71,27 @@ public class Subscribe {
             }
             String subscriptionId = "";
             try {
-                subscriptionId = this.iConsumer.subscribe(topicFilter, WeEventConstants.DEFAULT_GROUP_ID, WeEvent.OFFSET_LAST, WeEventConstants.MQTTTYPE, new IConsumer.ConsumerListener() {
-                    @Override
-                    public void onEvent(String subscriptionId, WeEvent event) {
-                        log.info("consumer onEvent, subscriptionId: {} event: {}", subscriptionId, event);
-                        // send to subscribe
-                        sendPublishMessage(topicFilter, mqttQoS, JSON.toJSON(event).toString().getBytes(), false, false);
-                    }
+                subscriptionId = this.iConsumer.subscribe(topicFilter,
+                        WeEventConstants.DEFAULT_GROUP_ID,
+                        WeEvent.OFFSET_LAST,
+                        ext,
+                        new IConsumer.ConsumerListener() {
+                            @Override
+                            public void onEvent(String subscriptionId, WeEvent event) {
+                                log.info("consumer onEvent, subscriptionId: {} event: {}", subscriptionId, event);
+                                // send to subscribe
+                                sendPublishMessage(topicFilter, mqttQoS, JSON.toJSON(event).toString().getBytes(), false, false);
+                            }
 
-                    @Override
-                    public void onException(Throwable e) {
-                        log.error("consumer onException", e);
-                    }
-                });
+                            @Override
+                            public void onException(Throwable e) {
+                                log.error("consumer onException", e);
+                            }
+                        });
             } catch (BrokerException e) {
                 log.error("subscribe exception:{}", e.getMessage());
             }
+
             SubscribeStore subscribeStore = new SubscribeStore(clientId, subscriptionId, topicFilter, mqttQoS.value());
             iSubscribeStore.put(topicFilter, subscribeStore);
             mqttQoSList.add(mqttQoS.value());

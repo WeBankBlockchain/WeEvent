@@ -65,7 +65,6 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
         log.info("===================={}", this.testName.getMethodName());
 
         TopicPage topicPage = this.iProducer.list(1, 10, this.groupId);
-        Assert.assertNotNull(topicPage);
         Assert.assertTrue(topicPage.getTotal() > 0);
     }
 
@@ -635,7 +634,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
             this.iProducer.state(this.topicName, "100");
             Assert.fail();
         } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
+            Assert.assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
         }
     }
 
@@ -659,7 +658,6 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
         log.info("===================={}", this.testName.getMethodName());
 
         TopicPage topicPage = this.iProducer.list(1, 10, this.groupId);
-        Assert.assertNotNull(topicPage);
         Assert.assertTrue(topicPage.getTotal() > 0);
     }
 
@@ -716,7 +714,6 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
         log.info("===================={}", this.testName.getMethodName());
 
         TopicPage topicPage = this.iProducer.list(0, 100, this.groupId);
-        Assert.assertNotNull(topicPage);
         Assert.assertTrue(topicPage.getTotal() > 0);
     }
 

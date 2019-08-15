@@ -263,23 +263,27 @@ public class FiscoBcos {
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
         }
 
+        SendResult sendResult = new SendResult();
         try {
-            SendResult sendResult = new SendResult(SendResult.SendResultStatus.ERROR);
-
             TransactionReceipt transactionReceipt = topic.publishWeEvent(new Utf8String(topicName),
                     new Utf8String(eventContent), new Utf8String(extensions)).get(WeEventConstants.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
             List<Topic.LogWeEventEventResponse> event = Topic.getLogWeEventEvents(transactionReceipt);
             if (CollectionUtils.isNotEmpty(event)) {
+                sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
                 sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, Web3SDKWrapper.uint256ToInt(event.get(0).eventBlockNumer), Web3SDKWrapper.uint256ToInt(event.get(0).eventSeq)));
                 sendResult.setTopic(topicName);
-                sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
                 return sendResult;
             } else {
+                sendResult.setStatus(SendResult.SendResultStatus.ERROR);
                 return sendResult;
             }
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        } catch (InterruptedException | ExecutionException e) {
             log.error("publish event failed due to transaction execution error.", e);
             throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (TimeoutException e) {
+            log.error("publish event failed due to transaction execution timeout.", e);
+            sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
+            return sendResult;
         }
     }
 
