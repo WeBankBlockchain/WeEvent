@@ -52,7 +52,7 @@ public class SubscribeTest extends JUnitTestBase {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         RestTemplate rest = new RestTemplate(requestFactory);
 
-        ResponseEntity<String> rsp = rest.getForEntity("http://localhost:"+ listenPort +"/weevent/rest/subscribe?topic={topic}&subscriptionId={subscriptionId}&url={url}",
+        ResponseEntity<String> rsp = rest.getForEntity("http://localhost:" + listenPort + "/weevent/rest/subscribe?topic={topic}&subscriptionId={subscriptionId}&url={url}",
                 String.class,
                 this.topicName,
                 "",
@@ -95,7 +95,7 @@ public class SubscribeTest extends JUnitTestBase {
 
         try {
             String subscriptionId = rpc.subscribe(this.topicName,
-                    groupId,"",
+                    groupId, "",
                     "http://localhost:" + listenPort + "/weevent/mock/jsonrpc");
             assertTrue(!subscriptionId.isEmpty());
 

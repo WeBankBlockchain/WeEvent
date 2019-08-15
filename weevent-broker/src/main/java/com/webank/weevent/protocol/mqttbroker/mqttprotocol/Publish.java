@@ -36,23 +36,25 @@ public class Publish {
     public void processPublish(Channel channel, MqttPublishMessage msg, boolean willmessage) {
         // QoS=0
         if (msg.fixedHeader().qosLevel() == MqttQoS.AT_MOST_ONCE) {
-            log.error("dosn't support QoS=0 close channel");
+            log.error("doesn't support QoS=0 close channel");
             channel.close();//blockchain not suppuer QOS=0 colse channel
             return;
         }
+
         // QoS=1
         if (msg.fixedHeader().qosLevel() == MqttQoS.AT_LEAST_ONCE) {
             byte[] messageBytes = new byte[msg.payload().readableBytes()];
             msg.payload().getBytes(msg.payload().readerIndex(), messageBytes);
             Map<String, String> extensions = new HashMap<>();
-            if(willmessage == true){
-                extensions.put(WeEventConstants.EXTENSIONS_WILL_MESSAGE,WeEventConstants.EXTENSIONS_WILL_MESSAGE);
+            if (willmessage) {
+                extensions.put(WeEventConstants.EXTENSIONS_WILL_MESSAGE, WeEventConstants.EXTENSIONS_WILL_MESSAGE);
             }
             SendResult sendResult = this.sendMessageToFisco(msg.variableHeader().topicName(), messageBytes, WeEventConstants.DEFAULT_GROUP_ID, extensions);
             if (sendResult.getStatus() == SendResult.SendResultStatus.SUCCESS) {
                 this.sendPubAckMessage(channel, msg.variableHeader().packetId());
             }
         }
+
         // QoS=2
         if (msg.fixedHeader().qosLevel() == MqttQoS.EXACTLY_ONCE) {
             log.error("dosn't support QoS=2 close channel");
@@ -65,9 +67,9 @@ public class Publish {
         SendResult sendResult = new SendResult();
         try {
             //this.iproducer.open(topic, groupId);
-            if (this.iproducer.exist(topic,groupId)) {
+            if (this.iproducer.exist(topic, groupId)) {
                 sendResult = this.iproducer.publish(new WeEvent(topic, messageBytes, extensions), groupId);
-            }else {
+            } else {
                 sendResult.setStatus(SendResult.SendResultStatus.ERROR);
                 log.error("topic is not exist");
             }

@@ -32,7 +32,7 @@ public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IPr
         log.debug("publish {} groupId: {}", event, groupId);
 
         ParamCheckUtils.validateEvent(event);
-        ParamCheckUtils.validateGroupId(groupId);
+        this.validateGroupId(groupId);
 
         // publishEvent support async operator in callback
         SendResult sendResult = fiscoBcosDelegate.publishEvent(event.getTopic(),
