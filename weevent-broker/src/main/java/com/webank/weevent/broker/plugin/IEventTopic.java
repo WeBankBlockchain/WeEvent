@@ -1,5 +1,7 @@
 package com.webank.weevent.broker.plugin;
 
+import java.util.Set;
+
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.TopicPage;
@@ -7,9 +9,6 @@ import com.webank.weevent.sdk.WeEvent;
 
 /**
  * Base interface for topic admin.
- * <p>
- * Always create a topic first use {@link IEventTopic#open(String)}, and then pub/sub event binding on it.
- * <p>
  *
  * @author matthewliu
  * @since 2018/11/02
@@ -70,4 +69,12 @@ public interface IEventTopic {
      * @throws BrokerException BrokerException
      */
     TopicInfo state(String topic, String groupId) throws BrokerException;
+
+    /**
+     * list group id in system
+     *
+     * @return group id
+     * @throws BrokerException BrokerException
+     */
+    Set<String> listGroupId() throws BrokerException;
 }
