@@ -108,6 +108,19 @@ class HttpInterceptorConfig implements WebMvcConfigurer {
 @Slf4j
 @SpringBootApplication
 public class BrokerApplication {
+    public static void main(String[] args) {
+        /* Forbid banner.
+        SpringApplicationBuilder builder = new SpringApplicationBuilder(BrokerApplication.class);
+        builder.bannerMode(Banner.Mode.OFF).run(args);
+        */
+        SpringApplication app = new SpringApplication(BrokerApplication.class);
+        app.addListeners(new ApplicationPidFileWriter());
+        app.run();
+        log.info("read from weevent.properties, {}", weEventConfig);
+        log.info("start broker success");
+        //spring-boot-starter-actuator customize /info with InfoContributor bean
+    }
+    
     public static ApplicationContext applicationContext;
 
     public static WeEventConfig weEventConfig;
@@ -135,19 +148,6 @@ public class BrokerApplication {
         } else {
             System.exit(1);
         }
-    }
-
-    public static void main(String[] args) {
-        /* Forbid banner.
-        SpringApplicationBuilder builder = new SpringApplicationBuilder(BrokerApplication.class);
-        builder.bannerMode(Banner.Mode.OFF).run(args);
-        */
-        SpringApplication app = new SpringApplication(BrokerApplication.class);
-        app.addListeners(new ApplicationPidFileWriter());
-        app.run();
-        log.info("read from weevent.properties, {}", weEventConfig);
-        log.info("start broker success");
-        //spring-boot-starter-actuator customize /info with InfoContributor bean
     }
 
     //support CORS

@@ -15,17 +15,20 @@ import lombok.Data;
  */
 @Data
 public class WeEvent implements Serializable {
+    private static final long serialVersionUID = 2026046567802960173L;
+
     public static final String OFFSET_FIRST = "OFFSET_FIRST";
     public static final String OFFSET_LAST = "OFFSET_LAST";
 
     /**
-     * serialID
+     * custom header is prefixed with "weevent-", and the following key is reserved in WeEvent.
      */
-    private static final long serialVersionUID = 2026046567802960173L;
+    public static final String WeEvent_FORMAT = "weevent-format";
+    public static final String WeEvent_SubscriptionId = "weevent-subscriptionId";
+    public static final String WeEvent_TAG = "weevent-tag";
 
     /**
-     * Binding topic, like "com.webank.mytopicname".
-     * 32 bytes limit.
+     * Binding topic, like "com.weevent.test".
      */
     private String topic;
 
@@ -36,10 +39,11 @@ public class WeEvent implements Serializable {
     private byte[] content;
 
     /**
-     * json format extension data, everything as you like.
-     * 1k limit.
+     * event's custom header.
+     * null if not set. all data length in total must be less then 1k.
      */
     private Map<String, String> extensions;
+
     /**
      * Event id in block chain, it's unique under one topic.
      * It is assigned by system default.
@@ -57,7 +61,18 @@ public class WeEvent implements Serializable {
      *
      * @param topic the topic
      * @param content the content, character utf8
-     * @param extensions User-defined extensions
+     */
+    public WeEvent(String topic, byte[] content) {
+        this.topic = topic;
+        this.content = content;
+    }
+
+    /**
+     * Construction.
+     *
+     * @param topic the topic
+     * @param content the content, character utf8
+     * @param extensions event's custom header
      */
     public WeEvent(String topic, byte[] content, Map<String, String> extensions) {
         this.topic = topic;
@@ -71,7 +86,7 @@ public class WeEvent implements Serializable {
                 "topic='" + topic + '\'' +
                 ", content.length=" + content.length +
                 ", eventID='" + eventId + '\'' +
+                ", extensions=" + extensions +
                 '}';
     }
-
 }

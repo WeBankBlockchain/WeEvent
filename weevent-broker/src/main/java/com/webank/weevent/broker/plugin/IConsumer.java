@@ -22,11 +22,9 @@ import com.webank.weevent.sdk.WeEvent;
  *     consumer.open("my_topic_name");
  *     // start channel
  * 	   consumer.startConsumer();
- *     String subscriptionId = consumer.subscribe("my topic name", WeEvent.OFFSET_LAST, new IConsumer.ConsumerListener() {
- *         public void onEvent(List&lt;WeEvent&gt; events) {
- *             for (WeEvent event : events) {
- *                 System.out.println(event);
- *             }
+ *     String subscriptionId = consumer.subscribe("my_topic_name", WeEvent.OFFSET_LAST, new IConsumer.ConsumerListener() {
+ *         public void onEvent(String subscriptionId, WeEvent event) {
+ *             System.out.println(event);
  *         }
  *         public void onException(Throwable e) {
  *             System.out.println("exception");
@@ -35,7 +33,7 @@ import com.webank.weevent.sdk.WeEvent;
  *     //unSubscribe
  *     consumer.unSubscribe(subscriptionId);
  * 	   // stop channel
- * 	   //consumer.shutdownConsumer();
+ * 	   consumer.shutdownConsumer();
  * } catch (BrokerException e) {
  *     e.printStackTrace();
  * }
@@ -76,6 +74,29 @@ public interface IConsumer extends IEventTopic {
     }
 
     /**
+     * it will start the consumer process so that the consumer is ready to receive the events once it subscribe topic.
+     *
+     * @return success if true
+     * @throws BrokerException invalid input param
+     */
+    boolean startConsumer() throws BrokerException;
+
+    /**
+     * Whether the Consumer has started
+     *
+     * @return boolean true if started already
+     */
+    boolean isStarted();
+
+    /**
+     * Shutdown a consumer channel.
+     * Stop listening and loop thread etc.
+     *
+     * @return boolean true if success
+     */
+    boolean shutdownConsumer();
+
+    /**
      * Interface for callback
      */
     interface ConsumerListener {
@@ -96,45 +117,45 @@ public interface IConsumer extends IEventTopic {
     }
 
     /**
-     * This support multiple topic subscribe
+     * defined key used in the param 'subscribe#ext'
+     */
+    enum SubscribeExt {
+        // persist subscription Id
+        SubscriptionId,
+        // weevent-tag
+        TopicTag,
+        // from which protocol
+        InterfaceType,
+        // remote client ip
+        RemoteIP;
+    }
+
+    /**
+     * This support single topic subscribe
      * from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
      *
-     * @param topics topic list
+     * @param topic topic name
      * @param groupId groupId
      * @param offset offset
-     * @param interfaceType interface type json rpc or restful or stomp
+     * @param ext extension params in this invoke, see SubscribeExt
      * @param listener callback
      * @return subscription Id
      * @throws BrokerException invalid input
      */
-    String subscribe(String[] topics, String groupId, String offset, String interfaceType, ConsumerListener listener) throws BrokerException;
+    String subscribe(String topic, String groupId, String offset, Map<SubscribeExt, String> ext, ConsumerListener listener) throws BrokerException;
 
     /**
-     * This support single topic subscribe
+     * This support multiple topic subscribe
      *
-     * @param topic topic name
+     * @param topics topic list
      * @param groupId groupId
      * @param offset, from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
-     * @param interfaceType interface type jsonrpc or restful or stomp
+     * @param ext extension params in this invoke, see SubscribeExt
      * @param listener callback
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
-    String subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener) throws BrokerException;
-
-    /**
-     * This support single topic subscribe
-     *
-     * @param topic topic name
-     * @param groupId groupId
-     * @param offset, from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
-     * @param subscriptionId Continue the client last time listening
-     * @param interfaceType interface type jsonrpc or restful or stomp
-     * @param listener callback
-     * @return subscription Id
-     * @throws BrokerException invalid input param
-     */
-    String subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener) throws BrokerException;
+    String subscribe(String[] topics, String groupId, String offset, Map<SubscribeExt, String> ext, ConsumerListener listener) throws BrokerException;
 
     /**
      * unsubscribe an exist subscription subscribed by subscribe interface.
@@ -146,30 +167,6 @@ public interface IConsumer extends IEventTopic {
      * @throws BrokerException broker exception
      */
     boolean unSubscribe(String subscriptionId) throws BrokerException;
-
-    /**
-     * Whether the Consumer has started
-     *
-     * @return boolean true if started already
-     */
-    boolean isStarted();
-
-    /**
-     * it will start the consumer process so that the consumer is ready to receive the events once it subscribe topic.
-     *
-     * @return success if true
-     * @throws BrokerException invalid input param
-     */
-    boolean startConsumer() throws BrokerException;
-
-    /**
-     * Shutdown a consumer channel.
-     * <p>
-     * Stop listening and loop thread etc.
-     *
-     * @return boolean true if success
-     */
-    boolean shutdownConsumer();
 
     /**
      * get subscription list

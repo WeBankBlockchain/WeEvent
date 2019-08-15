@@ -34,9 +34,9 @@ import org.springframework.web.socket.sockjs.client.WebSocketTransport;
  */
 @Slf4j
 public class Stomp {
-    private final static String brokerStomp = "ws://localhost:8081/weevent/stomp";
-    private final static String brokerSockjs = "ws://localhost:8081/weevent/sockjs";
-    private final static String topic = "com.webank.test";
+    private final static String brokerStomp = "ws://localhost:8080/weevent/stomp";
+    private final static String brokerSockJS = "ws://localhost:8080/weevent/sockjs";
+    private final static String topic = "com.weevent.test";
 
     private ThreadPoolTaskScheduler taskScheduler;
     private boolean isConnected;
@@ -47,7 +47,7 @@ public class Stomp {
         try {
             Stomp stomp = new Stomp();
             stomp.testOverWebSocket();
-            //stomp.testOverSockjs();
+            //stomp.testOverSockJS();
         } catch (Exception e) {
             log.error("Exception", e);
         }
@@ -60,7 +60,7 @@ public class Stomp {
         this.isConnected = false;
     }
 
-    private StompSessionHandlerAdapter getWebsocketSessionHandlerAdapter() {
+    private StompSessionHandlerAdapter getWebSocketSessionHandlerAdapter() {
         return new StompSessionHandlerAdapter() {
             @Override
             public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
@@ -90,13 +90,6 @@ public class Stomp {
                 log.info("subscribe result, subscription id: {}", subscription.getSubscriptionId());
 
                 // subscription.unsubscribe() when needed
-
-                try {
-                    Thread.sleep(5000L);
-                } catch (InterruptedException e) {
-                    log.info("interruptef:{}", e);
-                    Thread.currentThread().interrupt();
-                }
 
                 log.info("send event to topic, {}", topic);
                 for (int i = 0; i < 10; i++) {
@@ -155,12 +148,12 @@ public class Stomp {
         stompClient.setMessageConverter(new StringMessageConverter());
         stompClient.setTaskScheduler(taskScheduler); // for heartbeats
 
-        stompClient.connect(brokerStomp, getWebsocketSessionHandlerAdapter());
+        stompClient.connect(brokerStomp, getWebSocketSessionHandlerAdapter());
 
         Thread.sleep(100000L);
     }
 
-    private StompSessionHandlerAdapter getSockjsSessionHandlerAdapter() {
+    private StompSessionHandlerAdapter getSockJSSessionHandlerAdapter() {
         return new StompSessionHandlerAdapter() {
             @Override
             public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
@@ -188,14 +181,6 @@ public class Stomp {
                 log.info("subscribe result, subscription id: {}", subscription.getSubscriptionId());
                 // subscription.unsubscribe() when needed
 
-                try {
-                    Thread.sleep(5000L);
-                } catch (InterruptedException e) {
-                    log.info(e.toString());
-                    Thread.currentThread().interrupt();
-                }
-                log.info("send event to topic, {}", topic);
-                // extension params
                 for (int i = 0; i < 10; i++) {
                     StompSession.Receiptable receiptable = session.send(header, "hello world, from sock js:" + i);
                     log.info("send result, receipt id: {}", receiptable.getReceiptId());
@@ -230,7 +215,7 @@ public class Stomp {
                         // StringMessageConverter
                         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
                         stompClient.setTaskScheduler(taskScheduler); // for heartbeats
-                        ListenableFuture<StompSession> f = stompClient.connect(brokerSockjs, this);
+                        ListenableFuture<StompSession> f = stompClient.connect(brokerSockJS, this);
                         f.get();
                         //new connect end
 
@@ -251,7 +236,7 @@ public class Stomp {
         };
     }
 
-    private void testOverSockjs() throws InterruptedException {
+    private void testOverSockJS() throws InterruptedException {
         // sock js transport
         List<Transport> transports = new ArrayList<>(2);
         transports.add(new WebSocketTransport(new StandardWebSocketClient()));
@@ -264,7 +249,7 @@ public class Stomp {
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
         stompClient.setTaskScheduler(taskScheduler); // for heartbeats
 
-        stompClient.connect(brokerSockjs, getSockjsSessionHandlerAdapter());
+        stompClient.connect(brokerSockJS, getSockJSSessionHandlerAdapter());
 
         Thread.sleep(100000L);
     }

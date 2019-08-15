@@ -1,6 +1,6 @@
 var stompClient = null;
 var topic = null;
-var url = "http://localhost:8080/";
+var url = "";
 
 
 function setConnected(connected) {
@@ -16,14 +16,14 @@ function showGreeting(type, tt, message) {
 // 连接
 function connect() {
     // 后台需要写死一个值
-    //url = $("#url").val();
+    url = $("#url").val();
     var socket = new SockJS(url); //'/gs-guide-websocket'
     stompClient = StompJs.Stomp.over(socket);
 
     topic = $("#topic").val();
     message = $("#message").val();
-    var login = "root"
-    var passcode = "123456"
+    var login = ""
+    var passcode = ""
 
     // 连接的同时需要发布一个topic
     stompClient.connect(login, passcode, function (frame) {
@@ -77,10 +77,12 @@ function sendName() {
     message = $("#message").val();
     if (stompClient.connected) {
         // 发布topic,是否只需要考虑使用publish,通过不同类别
+        
         stompClient.publish({
             destination: topic,
             body: message
         });
+        
         showGreeting("send", topic, "");
     } else {
         console.log('fail...');
