@@ -135,6 +135,8 @@ public class CGISubscription {
     private IBrokerRpcCallback getJsonRpcCallback(String url) {
         try {
             JsonRpcHttpClient client = new JsonRpcHttpClient(new URL(url));
+            client.setConnectionTimeoutMillis(BrokerApplication.weEventConfig.getCgi_notify_timeout());
+            client.setReadTimeoutMillis(BrokerApplication.weEventConfig.getCgi_notify_timeout());
             // check url format only, do no check whether it can be accessed
             return ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpcCallback.class, client);
         } catch (MalformedURLException e) {
@@ -151,6 +153,8 @@ public class CGISubscription {
 
             log.info("route to master, url: {}", url);
             JsonRpcHttpClient client = new JsonRpcHttpClient(new URL(url));
+            client.setConnectionTimeoutMillis(BrokerApplication.weEventConfig.getCgi_notify_timeout());
+            client.setReadTimeoutMillis(BrokerApplication.weEventConfig.getCgi_notify_timeout());
             // check url format only, do no check whether it can be accessed
             return ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);
         } catch (MalformedURLException e) {
@@ -267,8 +271,8 @@ public class CGISubscription {
 
     private RestTemplate getRestCallback() {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(BrokerApplication.weEventConfig.getRestful_timeout());
-        requestFactory.setReadTimeout(BrokerApplication.weEventConfig.getRestful_timeout());
+        requestFactory.setConnectTimeout(BrokerApplication.weEventConfig.getCgi_notify_timeout());
+        requestFactory.setReadTimeout(BrokerApplication.weEventConfig.getCgi_notify_timeout());
         return new RestTemplate(requestFactory);
     }
 
@@ -369,8 +373,8 @@ public class CGISubscription {
     private <T> T routeRestMaster(String urlFormat, Class<T> responseType) throws BrokerException {
         try {
             SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-            requestFactory.setConnectTimeout(BrokerApplication.weEventConfig.getRestful_timeout());
-            requestFactory.setReadTimeout(BrokerApplication.weEventConfig.getRestful_timeout());
+            requestFactory.setConnectTimeout(BrokerApplication.weEventConfig.getCgi_notify_timeout());
+            requestFactory.setReadTimeout(BrokerApplication.weEventConfig.getCgi_notify_timeout());
             RestTemplate restTemplate = new RestTemplate(requestFactory);
 
             String masterUrl = String.format(urlFormat, this.masterJob.getMasterAddress());
