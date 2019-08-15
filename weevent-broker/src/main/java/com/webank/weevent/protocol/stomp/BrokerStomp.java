@@ -112,7 +112,7 @@ public class BrokerStomp extends TextWebSocketHandler {
             frameType = "HEARTBEAT";
         }
 
-        if (frameType.equals("HEARTBEAT")) {
+        if ("HEARTBEAT".equals(frameType)) {
             log.debug("HEARTBEAT from client:{}", session.getId());
             return;
         }
@@ -314,35 +314,31 @@ public class BrokerStomp extends TextWebSocketHandler {
     }
 
     private StompCommand checkConnect(Message<byte[]> msg) {
-        StompCommand command = StompCommand.CONNECTED;
-
         String authAccount = BrokerApplication.weEventConfig.getStompLogin();
         String authPassword = BrokerApplication.weEventConfig.getStompPasscode();
+
+        StompCommand command = StompCommand.CONNECTED;
+        if (authAccount.isEmpty() || authPassword.isEmpty()) {
+            return command;
+        }
+
         // check login/password if needed
-        if (!authAccount.isEmpty() && !authPassword.isEmpty()) {
-            try {
-                LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) msg.getHeaders().get("nativeHeaders"));
-                if (nativeHeaders != null) {
-                    String loginName;
-                    String passcode;
-                    Object login = nativeHeaders.get("login");
-                    if (login != null) {
-                        loginName = ((List) login).get(0).toString();
-                        // get the client's passcode
-                        passcode = StompHeaderAccessor.getPasscode(msg.getHeaders());
-                        if (passcode != null && loginName.equals(authAccount) && passcode.equals(authPassword)) {
-                            command = StompCommand.CONNECTED;
-                        } else {
-                            command = StompCommand.ERROR;
-                        }
+        try {
+            LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) msg.getHeaders().get("nativeHeaders"));
+            if (nativeHeaders != null) {
+                Object login = nativeHeaders.get("login");
+                if (login != null) {
+                    String loginName = ((List) login).get(0).toString();
+                    // get the client's passcode
+                    String passcode = StompHeaderAccessor.getPasscode(msg.getHeaders());
+                    if (!authAccount.equals(loginName) || !authPassword.equals(passcode)) {
+                        command = StompCommand.ERROR;
                     }
-
                 }
-
-            } catch (Exception e) {
-                log.error("authorize failed");
-                command = StompCommand.ERROR;
             }
+        } catch (Exception e) {
+            log.error("authorize failed");
+            command = StompCommand.ERROR;
         }
 
         return command;

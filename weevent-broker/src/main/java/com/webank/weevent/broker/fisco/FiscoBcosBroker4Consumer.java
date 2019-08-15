@@ -111,10 +111,9 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                     if (StringUtils.isBlank(tag)) {
                         to.add(event);
                     } else {    // subscription in tag plus
-                        if (event.getExtensions() != null) {
-                            if (tag.equals(event.getExtensions().get(WeEvent.WeEvent_TAG))) {
-                                to.add(event);
-                            }
+                        if (event.getExtensions() != null
+                                && tag.equals(event.getExtensions().get(WeEvent.WeEvent_TAG))) {
+                            to.add(event);
                         }
                     }
                 }
@@ -245,7 +244,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             if (!Arrays.equals(subscription.topics, topics)) {
                 throw new BrokerException(ErrorCode.TOPIC_NOT_MATCH);
             }
-            if (StringUtils.isBlank(tag) && !tag.equals(subscription.getTag())) {
+            if (!subscription.getTag().equals(tag)) {
                 throw new BrokerException(ErrorCode.TOPIC_TAG_NOT_MATCH);
             }
 
@@ -253,10 +252,9 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             if (subscription.getHistoryEventLoop() != null) {
                 subscription.getHistoryEventLoop().setOffset(offset);
             }
-            if (!StringUtils.isBlank(remoteIp)) {
-                subscription.setRemoteIp(remoteIp);
-            }
+
             subscription.setInterfaceType(interfaceType);
+            subscription.setRemoteIp(remoteIp);
 
             return subscription.getUuid();
         }
