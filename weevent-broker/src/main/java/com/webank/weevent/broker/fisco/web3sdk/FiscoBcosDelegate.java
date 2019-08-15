@@ -14,7 +14,6 @@ import com.webank.weevent.broker.fisco.RedisService;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.LRUCache;
-import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.SendResult;
@@ -97,13 +96,7 @@ public class FiscoBcosDelegate {
         return pool;
     }
 
-    public void initProxy() throws BrokerException {
-        FiscoConfig fiscoConfig = new FiscoConfig();
-        if (!fiscoConfig.load()) {
-            log.error("load FISCO-BCOS configuration failed");
-            throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
-        }
-
+    public void initProxy(FiscoConfig fiscoConfig) throws BrokerException {
         threadPool = initThreadPool(fiscoConfig);
 
         if (fiscoConfig.getVersion().startsWith("1.3")) {
@@ -228,16 +221,6 @@ public class FiscoBcosDelegate {
             return this.fiscoBcos.publishEvent(topicName, eventContent, extensions);
         } else {
             return this.fiscoBcos2Map.get(groupId).publishEvent(topicName, eventContent, extensions);
-        }
-    }
-
-    public void publishEvent(String topicName, Long groupId, String eventContent, String extensions, IProducer.SendCallBack callBack) throws BrokerException {
-        checkVersion(groupId);
-
-        if (this.fiscoBcos != null) {
-            this.fiscoBcos.publishEvent(topicName, eventContent, extensions, callBack);
-        } else {
-            this.fiscoBcos2Map.get(groupId).publishEvent(topicName, eventContent, extensions, callBack);
         }
     }
 
