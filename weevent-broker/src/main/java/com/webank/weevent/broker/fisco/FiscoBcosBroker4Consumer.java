@@ -60,7 +60,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     private boolean consumerStarted = false;
 
     /**
-     * @see com.webank.weevent.broker.config.WeEventConfig#consumerIdleTime
+     * idle time if no new block
      */
     private int idleTime;
 
@@ -68,35 +68,19 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         super();
 
         this.threadPoolTaskExecutor = (ThreadPoolTaskExecutor) BrokerApplication.applicationContext.getBean("weevent_daemon_task_executor");
-        this.idleTime = BrokerApplication.weEventConfig.getConsumerIdleTime();
+        this.idleTime = fiscoConfig.getConsumerIdleTime();
     }
 
     /**
-     * Idle caller thread
-     *
-     * @throws InterruptedException InterruptedException
+     * Idle the caller thread some time
      */
-    private void idle() throws InterruptedException {
+    private void idle() {
         // Transaction commit every 1 second.
-        Thread.sleep(this.idleTime);
-    }
-
-    /**
-     * getEventSeq
-     *
-     * @param eventId the eventId
-     * @return Long return 0L if error
-     */
-    private Long getEventSeq(String eventId) {
-        if (eventId != null) {
-            try {
-                return DataTypeUtils.decodeSeq(eventId);
-            } catch (BrokerException e) {
-                log.error("invalid eventId: {}", eventId);
-            }
+        try {
+            Thread.sleep(this.idleTime);
+        } catch (InterruptedException e) {
+            log.warn("got InterruptedException in idle");
         }
-
-        return 0L;
     }
 
     /**
@@ -126,13 +110,15 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     }
 
     /**
-     * Idle if net error in loop.
+     * filter event from one block
      *
-     * @param blockNum the blockNum
-     * @return WeEvent list
+     * @param blockNum block height
+     * @param topics topic list
+     * @param groupId groupId
+     * @return event list
+     * @throws BrokerException the exp
      */
-    private List<WeEvent> loopBlock(Long blockNum, String[] topics, Long groupId)
-            throws BrokerException, InterruptedException {
+    private List<WeEvent> filterBlockEvent(Long blockNum, String[] topics, Long groupId) throws BrokerException {
         // idle until get event
         List<WeEvent> blockEventsList = null;
         while (blockEventsList == null) {
@@ -196,7 +182,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         ParamCheckUtils.validateOffset(offset);
         ParamCheckUtils.validateListenerNotNull(listener);
 
-        // topic name may be a pattern
+        // may be a topic pattern in param topic
         validateSubscribeTopic(topic, groupId, offset);
 
         log.info("subscribe topic: {} offset: {}", topic, offset);
@@ -210,7 +196,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         ParamCheckUtils.validateSubscriptionId(subscriptionId);
         ParamCheckUtils.validateListenerNotNull(listener);
 
-        // topic name may be a pattern
+        // may be a topic pattern  in param topic
         validateSubscribeTopic(topic, groupId, offset);
 
         log.info("subscribe topic: {} offset: {} subscriptionId:{}", topic, offset, subscriptionId);
@@ -348,6 +334,16 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
     /**
      * One topic subscription.
+     * ##### more details #####
+     * Normally, the events published in the future will be notified by MainEventLoop.
+     * If the offset is not WeEvent.OFFSET_LAST, then it need a helper task HistoryEventLoop to fetch history events.
+     * It works like as followings:
+     * HistoryEventLoop(a few data in the same block of offset -> offset -> target events -> current block) ===> MainEventLoop
+     * HistoryEventLoop aim to fetch target event between offset and current block(it will float forward while fetching).
+     * It's notify task will switch into MainEventLoop while arriving at highest block height(=current block height in MainEventLoop).
+     * But the switch action is done by MainEventLoop in another thread, HistoryEventLoop may float forward a few block at the same time.
+     * Because once loop (both in HistoryEventLoop and MainEventLoop) is a long blocking task,
+     * so we use a merge cache to avoid repeat notify, not a strict consistency. Like ideas showed in optimistic lock.
      */
     @Data
     class Subscription {
@@ -373,7 +369,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         private Long groupId;
 
         /**
-         * Event offset.
+         * event offset.
          */
         private String offset;
 
@@ -383,9 +379,19 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         private NotifyTask notifyTask;
 
         /**
-         * optional, if offset != WeEvent.OFFSET_LAST then it's called history
+         * optional, if offset != WeEvent.OFFSET_LAST then need a event loop to fetch history event
          */
         private HistoryEventLoop historyEventLoop;
+
+        /**
+         * helper to avoid repeat notify if exist HistoryEventLoop
+         */
+        private Map<String, WeEvent> mergeCache;
+
+        /**
+         * first block in HistoryEventLoop dispatch
+         */
+        private Long historyBlock;
 
         @Override
         public String toString() {
@@ -393,6 +399,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                     "uuid='" + this.uuid + '\'' +
                     ", topic='" + Arrays.toString(this.topics) + '\'' +
                     ", groupId='" + this.groupId + '\'' +
+                    ", offset='" + this.offset + '\'' +
                     '}';
         }
 
@@ -404,11 +411,12 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             this.interfaceType = interfaceType;
 
             this.notifyTask = new NotifyTask(this.uuid, listener);
-            if (!this.offset.equals(WeEvent.OFFSET_LAST)) {
-                //not OFFSET_LAST
-                log.info("need history event loop, eventId: {}", offset);
 
-                this.historyEventLoop = new HistoryEventLoop(this.uuid, topics, groupId, offset, this.notifyTask);
+            // not OFFSET_LAST, need history help task
+            if (!this.offset.equals(WeEvent.OFFSET_LAST)) {
+                log.info("need history event loop, {}", this);
+
+                this.historyEventLoop = new HistoryEventLoop(this.uuid, topics, groupId, offset, this);
             }
         }
 
@@ -430,9 +438,68 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             this.notifyTask.subscriptionId = subscriptionId;
         }
 
-        private void dispatch(List<WeEvent> events) {
+        // mainLoop = true meanings dispatch from MainEventLoop
+        private void dispatch(List<WeEvent> events, boolean mainLoop, Long blockHeight) {
             // filter the events
             List<WeEvent> topicEvents = filter(events, this.topics);
+            if (topicEvents.isEmpty()) {
+                return;
+            }
+
+            // always HistoryEventLoop dispatch first, then MainEventLoop
+            if (!mainLoop) {
+                log.info("dispatch from HistoryEventLoop");
+
+                // have not got offset
+                if (this.mergeCache == null) {
+                    int offsetIdx = -1;
+                    for (int idx = 0; idx < topicEvents.size(); idx++) {
+                        if (topicEvents.get(idx).getEventId().equals(this.offset)) {
+                            offsetIdx = idx;
+                            break;
+                        }
+                    }
+
+                    // got offset
+                    if (offsetIdx >= 0) {
+                        log.info("got offset at index: {}", offsetIdx);
+
+                        // get event after offset, exclusive offset itself
+                        topicEvents = topicEvents.subList(offsetIdx + 1, topicEvents.size());
+
+                        log.info("HistoryEventLoop initialize merge cache at block: {}", blockHeight);
+                        this.historyBlock = blockHeight;
+                        this.mergeCache = new HashMap<>();
+                    } else {
+                        log.info("event list is empty after filter by offset");
+
+                        return;
+                    }
+                }
+            }
+
+            // need merge in cache
+            if (this.mergeCache != null) {
+                topicEvents.removeIf((event) -> this.mergeCache.containsKey(event.getEventId()));
+                for (WeEvent event : topicEvents) {
+                    this.mergeCache.put(event.getEventId(), event);
+                }
+
+                // cleanup merge cache if needed
+                if (mainLoop && blockHeight > this.historyBlock + fiscoConfig.getConsumerHistoryMergeBlock()) {
+                    log.info("HistoryEventLoop finalize merge cache at block: {}", fiscoConfig.getConsumerHistoryMergeBlock());
+
+                    this.mergeCache.clear();
+                    this.mergeCache = null;
+                }
+            }
+
+            if (topicEvents.isEmpty()) {
+                log.info("event list is empty after filter by merge cache");
+                return;
+            }
+
+            // notify to remote really
             this.notifyTask.push(topicEvents);
         }
 
@@ -445,12 +512,12 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
         // can not doStart again after doStop
         private synchronized void doStop() {
-            stopHistory();
+            this.notifyTask.doExit();
 
-            if (this.notifyTask != null) {
-                this.notifyTask.doExit();
-                this.notifyTask = null;
-            }
+            // wait task exit really
+            idle();
+
+            stopHistory();
         }
 
         private synchronized void stopHistory() {
@@ -462,7 +529,8 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
         private synchronized boolean tryStopHistory(Long mainLastBlock) {
             if (mainLastBlock > 0 && mainLastBlock <= this.historyEventLoop.lastBlock) {
-                log.info("switch history to main event loop, subscription: {}", this.uuid);
+                log.info("switch history to main event loop, {} ---> {}, {}",
+                        this.historyEventLoop.lastBlock, mainLastBlock, this);
 
                 stopHistory();
                 return true;
@@ -473,14 +541,13 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     }
 
     /**
-     * Notify task within unique thread.
+     * Notify task run in unique thread.
      */
     class NotifyTask extends StoppableTask {
         private String subscriptionId;
         private IConsumer.ConsumerListener consumerListener;
 
         private BlockingDeque<WeEvent> eventQueue = new LinkedBlockingDeque<>();
-        private Long lastEventSeq = 0L;
         private Long notifiedCount = 0L;
         private Date lastTimeStamp = new Date();
 
@@ -492,12 +559,8 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         }
 
         private void push(List<WeEvent> events) {
-            // Skip event if needed.
-            if (this.lastEventSeq > 0) {
-                events.removeIf(node -> (getEventSeq(node.getEventId()) <= this.lastEventSeq));
-            }
-
             try {
+                // offer event into queue one by one
                 for (WeEvent event : events) {
                     if (!this.eventQueue.offer(event, idleTime, TimeUnit.MILLISECONDS)) {
                         log.error("push notify failed due to queue is full");
@@ -505,9 +568,6 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                         return;
                     }
                     log.debug("offer notify queue, event: {}", event);
-
-                    // Ordered by event seq.
-                    this.lastEventSeq = getEventSeq(event.getEventId());
                 }
             } catch (InterruptedException e) {
                 log.error("offer notify queue failed", e);
@@ -515,25 +575,21 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         }
 
         @Override
-        protected void taskOnceLoop() throws InterruptedException {
-            if (this.consumerListener != null) {
-                try {
-                    WeEvent event = this.eventQueue.poll(idleTime, TimeUnit.MILLISECONDS);
-                    // Empty queue, try next.
-                    if (event == null) {
-                        return;
-                    }
-                    log.debug("poll from notify queue, event: {}", event);
-
-                    this.consumerListener.onEvent(this.subscriptionId, event);
-
-                    this.notifiedCount++;
-                    this.lastTimeStamp = new Date();
-                } catch (InterruptedException e) {
-                    throw e;
-                } catch (Exception e) {
-                    this.consumerListener.onException(e);
+        protected void taskOnceLoop() {
+            try {
+                WeEvent event = this.eventQueue.poll(idleTime, TimeUnit.MILLISECONDS);
+                // Empty queue, try next.
+                if (event == null) {
+                    return;
                 }
+                log.debug("poll from notify queue, event: {}", event);
+
+                // call back once for a single event
+                this.consumerListener.onEvent(this.subscriptionId, event);
+                this.notifiedCount++;
+                this.lastTimeStamp = new Date();
+            } catch (Exception e) {
+                this.consumerListener.onException(e);
             }
         }
     }
@@ -543,7 +599,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
      */
     class HistoryEventLoop extends StoppableTask {
         /**
-         * Lasted detected block.
+         * Last detected block.
          */
         private Long lastBlock = 0L;
 
@@ -556,44 +612,45 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
         private Long groupId;
 
-        private NotifyTask notifyTask;
+        /**
+         * binding to dispatch event
+         */
+        private Subscription subscription;
 
         private void setOffset(String offset) throws BrokerException {
-            Long lastEventSeq = 0L;
-
             switch (offset) {
                 case WeEvent.OFFSET_FIRST:
                     this.lastBlock = 0L;
                     break;
 
                 case WeEvent.OFFSET_LAST:
-                    this.lastBlock = -1L;
-                    break;
+                    log.warn("assert !WeEvent.OFFSET_LAST in HistoryEventLoop");
+                    throw new BrokerException(ErrorCode.UNKNOWN_ERROR);
 
                 default:
                     this.lastBlock = DataTypeUtils.decodeBlockNumber(offset) - 1;
-                    lastEventSeq = DataTypeUtils.decodeSeq(offset);
                     break;
             }
-
-            this.notifyTask.lastEventSeq = lastEventSeq;
         }
 
-        private HistoryEventLoop(String subscriptionId, String[] topics, Long groupId, String offset, NotifyTask notifyTask) throws BrokerException {
+        private HistoryEventLoop(String subscriptionId, String[] topics, Long groupId, String offset, Subscription subscription) throws BrokerException {
             super("history-event-loop@" + subscriptionId);
 
             this.topics = topics;
             this.groupId = groupId;
-            this.notifyTask = notifyTask;
+            this.subscription = subscription;
 
             this.setOffset(offset);
+            log.info("HistoryEventLoop initialized with last block: {} in group: {}", this.lastBlock, this.groupId);
         }
 
         @Override
-        protected void taskOnceLoop() throws InterruptedException {
+        protected void taskOnceLoop() {
             try {
+                // the block try to deal with in this one loop
                 Long currentBlock = this.lastBlock + 1;
-                // Cache may be expired, refresh it.
+
+                // cache may be expired, refresh it
                 if (currentBlock > this.cachedBlockHeight) {
                     Long blockHeight = fiscoBcosDelegate.getBlockHeight(groupId);
                     if (blockHeight <= 0) {
@@ -603,25 +660,29 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                     }
                     this.cachedBlockHeight = blockHeight;
 
-                    // No new block.
+                    // no new block
                     if (currentBlock > this.cachedBlockHeight) {
-                        log.debug("no new block, idle");
+                        log.debug("no new block in group: {}, idle", this.groupId);
                         idle();
                         return;
                     }
                 }
 
-                // Normal loop one block as following.
-                log.debug("history loop, topics: {} cached block height: {}", Arrays.toString(topics), this.cachedBlockHeight);
-                List<WeEvent> events = loopBlock(currentBlock, topics, groupId);
-                log.debug("history loop done, block: {} event size: {}", currentBlock, events.size());
+                // loop one block, and filter target event with topic
+                log.debug("history event loop in group: {}, topics: {} cached block height: {}", this.groupId, Arrays.toString(topics), this.cachedBlockHeight);
+                List<WeEvent> events = filterBlockEvent(currentBlock, topics, groupId);
+                log.debug("history event loop done, block: {} event size: {}", currentBlock, events.size());
 
-                this.notifyTask.push(events);
+                // it there is event to notify
+                if (!events.isEmpty()) {
+                    this.subscription.dispatch(events, false, currentBlock);
+                }
 
-                // Init for next block.
+                // next block
                 this.lastBlock = currentBlock;
             } catch (BrokerException e) {
-                this.notifyTask.consumerListener.onException(e);
+                log.error("history event loop exception in group: " + this.groupId, e);
+                this.subscription.getNotifyTask().consumerListener.onException(e);
             }
         }
     }
@@ -634,7 +695,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         private Long groupId;
 
         // last well done block
-        private Long lastBlock = 0L;
+        private Long lastBlock;
 
         // subscription in main loop
         private List<String> mainSubscriptionIds = new ArrayList<>();
@@ -642,12 +703,24 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         // subscription in history loop
         private List<String> historySubscriptionIds = new ArrayList<>();
 
-        private MainEventLoop(Long groupId) {
+        private MainEventLoop(Long groupId) throws BrokerException {
             super("main-event-loop-" + groupId);
             this.groupId = groupId;
+
+            // get last block
+            Long blockHeight = fiscoBcosDelegate.getBlockHeight(this.groupId);
+            if (blockHeight <= 0) {
+                throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
+            }
+
+            // init last block
+            this.lastBlock = blockHeight;
+            log.info("MainEventLoop initialized with last block: {} in group: {}", this.lastBlock, this.groupId);
         }
 
         private synchronized void doStop() {
+            log.info("try to stop MainEventLoop in group: {}", this.groupId);
+
             // stop main loop first
             this.doExit();
 
@@ -702,9 +775,9 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             }
         }
 
-        private synchronized void dispatch(List<WeEvent> events) {
+        private synchronized void dispatch(List<WeEvent> events, Long blockHeight) {
             for (String subscriptionId : this.mainSubscriptionIds) {
-                subscriptions.get(subscriptionId).dispatch(events);
+                subscriptions.get(subscriptionId).dispatch(events, true, blockHeight);
             }
         }
 
@@ -715,23 +788,21 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         }
 
         @Override
-        protected void taskOnceLoop() throws InterruptedException {
+        protected void taskOnceLoop() {
             try {
-                // get current block
-                Long currentBlock = fiscoBcosDelegate.getBlockHeight(this.groupId);
-                if (currentBlock <= 0) {
+                // the block try to deal with in this one loop
+                Long currentBlock = this.lastBlock + 1;
+
+                // get block height
+                Long blockHeight = fiscoBcosDelegate.getBlockHeight(this.groupId);
+                if (blockHeight <= 0) {
                     // Don't try too fast if net error.
                     idle();
                     return;
                 }
-
-                // init last block
-                if (this.lastBlock == 0L) {
-                    this.lastBlock = currentBlock;
-                }
-
                 // no new block
-                if (currentBlock <= this.lastBlock) {
+                if (currentBlock > blockHeight) {
+                    log.debug("no new block in group: {}, idle", this.groupId);
                     idle();
                     return;
                 }
@@ -739,30 +810,27 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                 // merge history if needed
                 this.mergeHistory();
 
-                // skip if no subscription
+                // no need to fetch event if no subscription
                 if (this.mainSubscriptionIds.isEmpty()) {
                     idle();
-                    return;
-                }
-
-                // Fetch all event from this block.
-                log.debug("fetch events from block height: {}", currentBlock);
-                List<WeEvent> events = null;
-                while (events == null) {
-                    events = fiscoBcosDelegate.loop(currentBlock, this.groupId);
+                } else {
+                    // fetch all event from block chain in this block
+                    log.debug("fetch events from block height: {} in group: {}", currentBlock, this.groupId);
+                    List<WeEvent> events = fiscoBcosDelegate.loop(currentBlock, this.groupId);
                     // idle until get event information(include empty)
                     if (events == null) {
                         idle();
+                        return;
                     }
+                    log.debug("fetch done, block: {} event size: {}", currentBlock, events.size());
+
+                    this.dispatch(events, currentBlock);
                 }
-                log.debug("fetch done, block: {} event size: {}", currentBlock, events.size());
 
-                this.dispatch(events);
-
-                // next block.
+                // next block
                 this.lastBlock = currentBlock;
             } catch (BrokerException e) {
-                log.error("main event loop exception", e);
+                log.error("main event loop exception in group: " + this.groupId, e);
                 this.dispatch(e);
             }
         }

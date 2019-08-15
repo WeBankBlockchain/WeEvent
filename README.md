@@ -1,7 +1,7 @@
 ![image](https://github.com/WeBankFinTech/WeEvent-docs/blob/master/docs/image/weevent-logo.png)
 
 [![CodeFactor](https://www.codefactor.io/repository/github/webankfintech/weevent/badge)](https://www.codefactor.io/repository/github/webankfintech/weevent)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/b7cd883f89d740ca9fe71db35b701018)](https://app.codacy.com/app/cristicmf/WeEvent?utm_source=github.com&utm_medium=referral&utm_content=WeBankFinTech/WeEvent&utm_campaign=Badge_Grade_Settings)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/1d2141e952d84a47b0a615e51702bf6f)](https://www.codacy.com/app/WeEventAdmin/WeEvent?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=WeBankFinTech/WeEvent&amp;utm_campaign=Badge_Grade)
 [![Build Status](https://travis-ci.com/WeBankFinTech/WeEvent.svg?branch=master)](https://travis-ci.com/WeBankFinTech/WeEvent)
 [![Latest release](https://img.shields.io/github/release/WeBankFinTech/WeEvent.svg)](https://github.com/WeBankFinTech/WeEvent/releases/latest)
 [![Maven Central](https://img.shields.io/maven-central/v/com.webank.weevent/weevent-client.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.webank.weevent%22%20AND%20a:%weevent-client%22)
