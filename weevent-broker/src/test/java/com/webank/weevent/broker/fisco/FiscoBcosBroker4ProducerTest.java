@@ -290,4 +290,17 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
             Assert.assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
         }
     }
+
+    /**
+     * publish with custom header
+     */
+    @Test
+    public void testPublish_Tag() throws Exception {
+        log.info("===================={}", this.testName.getMethodName());
+		
+        Map<String, String> ext = new HashMap<>();
+        ext.put(WeEvent.WeEvent_TAG, "create");
+        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello tag: create".getBytes(), ext), this.groupId);
+        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
+    }
 }

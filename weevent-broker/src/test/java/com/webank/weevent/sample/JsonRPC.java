@@ -6,7 +6,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
@@ -22,7 +21,7 @@ public class JsonRPC {
         System.out.println("This is WeEvent json rpc sample.");
         try {
             URL remote = new URL("http://localhost:8080/weevent/jsonrpc");
-            // init jsonrpc client
+            // init json rpc client
             JsonRpcHttpClient client = new JsonRpcHttpClient(remote);
             // init IBrokerRpc object
             IBrokerRpc rpc = ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);
