@@ -77,8 +77,8 @@ public class MasterJob {
 
     private RestTemplate getRestCallback() {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(BrokerApplication.weEventConfig.getRestful_timeout());
-        requestFactory.setReadTimeout(BrokerApplication.weEventConfig.getRestful_timeout());
+        requestFactory.setConnectTimeout(BrokerApplication.weEventConfig.getCgi_notify_timeout());
+        requestFactory.setReadTimeout(BrokerApplication.weEventConfig.getCgi_notify_timeout());
         return new RestTemplate(requestFactory);
     }
 

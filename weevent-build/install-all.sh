@@ -8,7 +8,7 @@ out_path=""
 block_chain_version=
 block_chain_channel=
 block_chain_node_path=
-broker_port=8090
+broker_port=7000
 
 nginx_port=8080
 
