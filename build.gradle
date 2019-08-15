@@ -60,9 +60,9 @@ allprojects {
     }
 
     clean.doLast {
-        file("out/").deleteDir()
         file("dist/apps/").deleteDir()
         file("dist/conf/").deleteDir()
+        file("dist/lib/").deleteDir()
     }
 
     configurations.all {

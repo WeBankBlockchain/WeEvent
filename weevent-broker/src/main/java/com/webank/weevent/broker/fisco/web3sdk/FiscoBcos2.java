@@ -17,7 +17,6 @@ import com.webank.weevent.broker.fisco.contract.v2.TopicController;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
-import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.SendResult;
@@ -26,7 +25,6 @@ import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.fisco.bcos.channel.client.TransactionSucCallback;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -258,56 +256,29 @@ public class FiscoBcos2 {
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
         }
 
+        SendResult sendResult = new SendResult();
         try {
-            SendResult sendResult = new SendResult(SendResult.SendResultStatus.ERROR);
-
             TransactionReceipt transactionReceipt = topic.publishWeEvent(topicName,
                     eventContent, extensions).sendAsync().get(WeEventConstants.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
             List<Topic.LogWeEventEventResponse> event = Web3SDK2Wrapper.receipt2LogWeEventEventResponse(web3j, credentials, transactionReceipt);
             if (CollectionUtils.isNotEmpty(event)) {
+                sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
                 sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, event.get(0).eventBlockNumer.intValue(), event.get(0).eventSeq.intValue()));
                 sendResult.setTopic(topicName);
-                sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
                 return sendResult;
             } else {
+                sendResult.setStatus(SendResult.SendResultStatus.ERROR);
                 return sendResult;
             }
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        } catch (InterruptedException | ExecutionException e) {
             log.error("publish event failed due to transaction execution error.", e);
             throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (TimeoutException e) {
+            log.error("publish event failed due to transaction execution timeout.", e);
+            sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
+            return sendResult;
         }
     }
-
-    public void publishEvent(String topicName, String eventContent, String extensions, IProducer.SendCallBack callBack) throws BrokerException {
-        Topic topic = getTopic(topicName);
-        if (topic == null) {
-            throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
-        }
-
-        SendResult sendResult = new SendResult(SendResult.SendResultStatus.ERROR);
-        topic.publishWeEvent(topicName, eventContent, extensions,
-                new TransactionSucCallback() {
-                    @Override
-                    public void onResponse(TransactionReceipt transactionReceipt) {
-                        try {
-                            List<Topic.LogWeEventEventResponse> event = Web3SDK2Wrapper.receipt2LogWeEventEventResponse(web3j, credentials, transactionReceipt);
-                            if (CollectionUtils.isNotEmpty(event)) {
-                                sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, event.get(0).eventBlockNumer.intValue(), event.get(0).eventSeq.intValue()));
-                                sendResult.setTopic(topicName);
-                                if (transactionReceipt.getStatus().equals("Receipt timeout")) {
-                                    sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
-                                } else {
-                                    sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
-                                }
-                                callBack.onComplete(sendResult);
-                            }
-                        } catch (Exception e) {
-                            callBack.onException(e);
-                        }
-                    }
-                });
-    }
-
 
     /**
      * getBlockHeight

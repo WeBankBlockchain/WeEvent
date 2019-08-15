@@ -78,40 +78,24 @@ public class WeEventConstants {
     public static final String EXTENSIONS_PREFIX_CHAR = "weevent-";
 
     /**
-     * Extensions groupid.
-     */
-    public static final String EXTENSIONS_GROUP_ID = "groupId";
-
-    /**
      * Extensions default groupid.
      */
     public static final String DEFAULT_GROUP_ID = "1";
 
     /**
-     * Extensions eventid.
-     */
-    public static final String EXTENSIONS_EVENT_ID = "eventId";
-
-    /**
-     * Extensions eventid.
+     * Extensions will message.
      */
     public static final String EXTENSIONS_WILL_MESSAGE = "weevent-willmessage";
-
-    /**
-     * Extensions receivedtopic.
-     */
-    public static final String EXTENSIONS_RECEIVED_TOPIC = "weevent-receivedtopic";
-
-
-    /**
-     * Extensions continue subscription id.
-     */
-    public static final String EXTENSIONS_SUBSCRIPTION_ID = "weevent-subscriptionId";
 
     /**
      * event topic.
      */
     public static final String EVENT_TOPIC = "topic";
+
+    /**
+     * event id.
+     */
+    public static final String EXTENSIONS_EVENT_ID = "eventId";
 
     /**
      * event topic.

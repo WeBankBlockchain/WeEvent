@@ -21,7 +21,7 @@ public class IAuthServiceImpl implements IAuthService {
             return true;
         }
         if (StringUtils.isBlank(userName) || StringUtils.isBlank(password)) {
-            log.error("userName or passcode is isBlank");
+            log.error("userName is isBlank");
             return false;
         }
 
