@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
 import java.util.UUID;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
@@ -103,11 +104,16 @@ public class ParamCheckUtils {
         }
     }
 
-    public static void validateGroupId(String groupId) throws BrokerException {
+    public static void validateGroupId(String groupId, Set<Long> groups) throws BrokerException {
+        Long gid;
         try {
-            Long.parseLong(groupId);
+            gid = Long.parseLong(groupId);
         } catch (Exception e) {
             throw new BrokerException(ErrorCode.EVENT_GROUP_ID_INVALID);
+        }
+
+        if (!groups.contains(gid)) {
+            throw new BrokerException(ErrorCode.WE3SDK_UNKNOWN_GROUP);
         }
     }
 
