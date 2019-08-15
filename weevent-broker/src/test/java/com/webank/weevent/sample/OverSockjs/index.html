@@ -10,8 +10,8 @@
             crossorigin="anonymous"></script>
     <script src="https://www.fisco.com.cn/cdn/weevent/static/js/sockjs.min.js"></script>
     <script src="https://www.fisco.com.cn/cdn/weevent/static/js/stomp.umd.js"></script>
-    <script src="./js/live-demo.js"></script>
     <script src="./js/tool/jq-base64.js"></script>
+    <script src="./js/live-demo.js"></script>
 </head>
 
 <body>
@@ -74,13 +74,13 @@
             </div>
             <div class="field sub-eventId">
                 <span class='filed-title'><i class='dot'>*</i>EventId:</span>
-                <input type="radio" id="last" name="drone" value="last">
+                <input type="radio" id="last" name="drone" value="last" class='input_radio' style='margin-left:0'>
                 <label for="last">fromlast event</label>
                 
-                <input type="radio" id="end" name="drone" value="end" checked>
+                <input type="radio" id="end" name="drone" value="end" checked class='input_radio'>
                 <label for="end">from tail</label>
 
-                <input type="radio" id="start" name="drone" value="start" >
+                <input type="radio" id="start" name="drone" value="start" class='input_radio'>
                 <label for="start">from head</label>
                 <input type="text" name="name" class="input-text checked" placeholder="Last EventId" value='OFFSET_LAST' id="eventId" disabled>
                 <span class="warningbox">EventId 不能为空</span>

@@ -682,6 +682,10 @@ section {
     border-radius: 4px;
 }
 
+.input_radio{
+    margin-left:20px;
+}
+
 @media screen and (max-width:1350px){
     .leftbox,.rightbox{
         float:initial;

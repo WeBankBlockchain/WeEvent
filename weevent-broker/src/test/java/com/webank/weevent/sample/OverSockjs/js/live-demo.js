@@ -8,7 +8,7 @@ var type =1
 
 
 function setConnected(connected) {
-    $("#connect").prop("disabled", connected);
+    // $("#connect").prop("disabled", connected);
     //$("#disconnect").prop("disabled", !connected);
     // if (connected) {
     //     $("#conversation").show();
@@ -25,9 +25,9 @@ function connect() {
     var socket = new SockJS(url); //'/gs-guide-websocket'
     stompClient = StompJs.Stomp.over(socket);
     stompClient.connect(login, passcode, function (frame) {
-        setConnected(true);
         // console.log('Connected: ' + frame);
         if(frame.command === "CONNECTED"){
+            console.log('publish connect'+frame)
             connectBtn(true)
         } else {
             connectBtn(false)
@@ -40,10 +40,11 @@ function connect() {
 function disconnectChannel() {
     if (stompClient.active) {
         stompClient.disconnect(function (e) {
-            connectBtn(false,'断开连接')
+            connectBtn(false)
         }, {receipt: window.uuid})
     } else {
         console.log('it is already disconnect')
+        connectBtn(false)
     }
 }
 
@@ -81,14 +82,11 @@ function sendName() {
             stompClient.publish({
                 destination: topic, headers: newItem, body: message
             });
-            pubMember('send')
         } else {
-            console.log('fail...');
-            pubMember('send fail, client is not connected!', true)
+            console.log('send fail, client is not connected!');
         }
     }catch(e){
-        console.log('fail...');
-        pubMember('send fail, client is not connected!', true)
+        console.log('send fail, client is not connected!');
     }
 }
 
@@ -102,11 +100,9 @@ function subscribeConnect() {
         console.log('subscribe.connected: ' + frame);
         if(frame.command === "CONNECTED"){
             subBtn(true)
-            subMember('CONNECT', true)
         } else {
             console.log('fail...');
             subBtn(false)
-            subMember('CONNECTED FAIL', true)
         }
     });
 }
@@ -117,12 +113,10 @@ function disconnectSubscribe() {
         stompClientSub.disconnect(function (e) {
             subBtn(false)
             unsubscribeTopic()
-            subMember('DISCONNECTED', true)
         }, {receipt: window.uuid})
     } else {
         console.log('it is already disconnect')
         subBtn(false)
-        subMember('it is already disconnected', true)
         unsubscribeTopic()
     }
 }
@@ -139,7 +133,6 @@ function subMultiSubscribeTopic() {
             var multiSubscribeTopicArr = $("#multiSubscribeTopic").val();
             console.log('stompClient.connected...');
             subscribe(true)
-            subMember('SUBSCRIBED', true)
             var groupId = $('#sendBox-group').val()
             var eventId = $('#eventId').val()
             var tag = $('#tag').val()
@@ -150,7 +143,13 @@ function subMultiSubscribeTopic() {
                 eventId:eventId,
             }
             if(tag!=''){
-                data.tag=tag
+                data = {
+                    id: window.uuid,
+                    startposition: false,
+                    groupId:groupId,
+                    eventId:eventId,
+                    'weevent-tag':tag
+                }
             }
             stompClientSub.subscribe(multiSubscribeTopicArr,function (message) {
                 if (message.body) {
@@ -158,16 +157,16 @@ function subMultiSubscribeTopic() {
                     var con = JSON.parse(message.body)
                     var content = $.base64.decode(con.content)
                     con.content = content
-                    subMember(JSON.stringify(con), true)
+                    var time = getTime()
+                    var str = '<p class="infor_list">'+ time +' - <br/>'+ JSON.stringify(con) +'</p>'
+                    $('#sub-message').prepend(str)
                 }
             },data);
         } else {
-            console.log('fail...');
-            subMember('client is not connectd!', true)
+            console.log('send fail...');
         }
     }catch(e){
-        console.log('fail...');
-        subMember('client is not connectd!', true)
+        console.log('send fail...');
     }
 }
 
@@ -175,19 +174,17 @@ function subMultiSubscribeTopic() {
 function unsubscribeTopic() {
     topicValue = $("#multiSubscribeTopic").val();
     if (stompClientSub.active) {
-        subscribe(false,'关闭订阅')
+        subscribe(false)
         stompClientSub.unsubscribe(topicValue, {
             id: window.uuid,
             destination: topicValue,
             body: "unsubscribeTopic"
         })
-        subMember('UNSUBSCRIBED!', true)
     } else {
         console.log('fail...');
         let item = $('#multiSubscribe').css('display')
         if(item == 'none') {
-            subscribe(false,'订阅已取消')
-            subMember('client is already closed', true)
+            subscribe(false)
         }
     }
 }
@@ -233,20 +230,19 @@ function delate_one(e) {
 }
 
 // Publich click connect-btn / change button style 
-function connectBtn(btn, text) {
+function connectBtn(btn) {
+    type = 1
     $('#connect').hide()
     $('#disconnect').hide()
     // 点击publich connect
     if(btn){
         $('#disconnect').show()
-        pubMember("CONNECT", true)
     } else {
         $('#connect').show()
-        pubMember("DISCONNECT", true)
     }
 }
 // Subscribe click connect-btn / change button style 
-function subBtn(btn, text) {
+function subBtn(btn) {
     $('#subscribe').hide()
     $('#dissubscribe').hide()
     if(btn){
@@ -256,7 +252,7 @@ function subBtn(btn, text) {
     }
 }
 // Subscribe click subscribe-btn / change button style
-function subscribe(btn, text) {
+function subscribe(btn) {
     $('#multiSubscribe').hide()
     $('#unsubscribe').hide()
     if(btn){
@@ -285,29 +281,23 @@ function changeEventId(e) {
 }
 
 // Publish click Send-btn 
-function pubMember(message, isClickConnect){
+function getMember(message){
     var time = getTime()
-    if (isClickConnect) {
-        var pubMember = '<p class="infor_list">'+ time +' - <br/>'+ message +'</p>'
-        $('#pub-message').append(pubMember)
-    } else {
-        if (message.indexOf(">>> SEND") > -1 || message.indexOf("<<< ERROR") > -1) {
-            var pubMember = '<p class="infor_list">'+ time +' - <br/>'+ message +'</p>'
-            $('#pub-message').append(pubMember)
-        }
+    if (message.indexOf(">>> SEND") > -1 || message.indexOf("<<< ERROR") > -1 || message.indexOf("<<< CONNECTED")>-1||message.indexOf(">>> DISCONNECT")>-1||message.indexOf("send fail")>-1||message.indexOf(">>> SUBSCRIBE")>-1||message.indexOf(">>> UNSUBSCRIBE")>-1) {
+        var str = '<p class="infor_list">'+ time +'-'+type+' - <br/>'+ message +'</p>'
+        if(type==1) {
+            $('#pub-message').prepend(str)
+        }else{
+            $('#sub-message').prepend(str)
+        }  
     }
 }
 
-function subMember(str, isClickSubscrib) {
+function subMember(str) {
     var time = getTime()
-    if(isClickSubscrib) {
-        var subMember= "<p class='infor_list'>"+time+" -<br/>"+str+"</p>"
-        $('#sub-message').append(subMember)
-    }else{
-        if (str.indexOf(">>> SEND") > -1 || str.indexOf("<<< ERROR") > -1) {
-            var subMember= "<p class='infor_list'>"+time+" -<br/>"+str+"</p>"
-            $('#sub-message').append(subMember)
-        }
+    if (message.indexOf(">>> SEND") > -1 || message.indexOf("<<< ERROR") > -1 || message.indexOf("<<< CONNECTED")>-1||message.indexOf(">>> DISCONNECT")>-1||message.indexOf("send fail")>-1) {
+        var subMember= "<p class='infor_list'>"+time+" -<br/>"+message+"</p>"
+       
     }
 }
 
@@ -331,6 +321,7 @@ function  checkPublishInput () {
     }
 }
 
+// 检查 customer_header 的key 是不是以 'weevent-' 开头定义的
 function checkKey () {
     var index = 0
     $('.publish-part .cus_key').each(function(){
@@ -350,6 +341,7 @@ function checkKey () {
     }
 }
 
+// check subscribe-part input is empty
 function checkSubInput () {
     var index = 0
     $('.subscribe-part .checked').each(function(){
@@ -370,43 +362,48 @@ function checkSubInput () {
 
 $(function () {
     window.uuid = get_uuid();
-    // console.log = (function (oriLogFunc) {
-    //     return function (str) {
-    //         oriLogFunc.call(console, "--:" + str);
-    //         if(type==1) {
-    //             pubMember(str, false)
-    //         }
-    //     }
-    // })(console.log);
+    console.log = (function (oriLogFunc) {
+        return function (str) {
+            oriLogFunc.call(console, "--:" + str);
+            getMember(str)
+        }
+    })(console.log);
 
     $("#connect").click(function (e) {
+        type=1
         e.stopPropagation();
         e.preventDefault();
         connect();
     });
 
     $("#disconnect").click(function () {
+        type=1
         disconnectChannel()
     })
 
     //$( "#disconnect" ).click(function() { disconnect(); });
     $("#send").click(function () {
+        type=1
         sendName();
     });
     $("#subscribe").click(function () {
+        type=2
         subscribeConnect();
     });
 
     $('#dissubscribe').click(function () {
+        type=2
         disconnectSubscribe()
     })
 
     //multiSubscribe
     $("#multiSubscribe").click(function () {
+        type=2
         subMultiSubscribeTopic();
     });
 
     $("#unsubscribe").click(function () {
+        type=2
         unsubscribeTopic()
     })
 
