@@ -15,19 +15,15 @@ import com.webank.weevent.broker.fisco.contract.TopicController;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
-import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.WeEvent;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.channel.client.TransactionSucCallback;
-import org.bcos.channel.dto.EthereumResponse;
 import org.bcos.web3j.abi.datatypes.Address;
 import org.bcos.web3j.abi.datatypes.DynamicArray;
 import org.bcos.web3j.abi.datatypes.Type;
@@ -35,7 +31,6 @@ import org.bcos.web3j.abi.datatypes.Utf8String;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.bcos.web3j.crypto.Credentials;
-import org.bcos.web3j.protocol.ObjectMapperFactory;
 import org.bcos.web3j.protocol.Web3j;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.bcos.web3j.tx.Contract;
@@ -268,57 +263,28 @@ public class FiscoBcos {
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
         }
 
+        SendResult sendResult = new SendResult();
         try {
-            SendResult sendResult = new SendResult(SendResult.SendResultStatus.ERROR);
-
             TransactionReceipt transactionReceipt = topic.publishWeEvent(new Utf8String(topicName),
                     new Utf8String(eventContent), new Utf8String(extensions)).get(WeEventConstants.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
             List<Topic.LogWeEventEventResponse> event = Topic.getLogWeEventEvents(transactionReceipt);
             if (CollectionUtils.isNotEmpty(event)) {
+                sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
                 sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, Web3SDKWrapper.uint256ToInt(event.get(0).eventBlockNumer), Web3SDKWrapper.uint256ToInt(event.get(0).eventSeq)));
                 sendResult.setTopic(topicName);
-                sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
                 return sendResult;
             } else {
+                sendResult.setStatus(SendResult.SendResultStatus.ERROR);
                 return sendResult;
             }
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        } catch (InterruptedException | ExecutionException e) {
             log.error("publish event failed due to transaction execution error.", e);
             throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (TimeoutException e) {
+            log.error("publish event failed due to transaction execution timeout.", e);
+            sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
+            return sendResult;
         }
-    }
-
-    public void publishEvent(String topicName, String eventContent, String extensions, IProducer.SendCallBack callBack) throws BrokerException {
-        Topic topic = getTopic(topicName);
-        if (topic == null) {
-            throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
-        }
-
-        SendResult sendResult = new SendResult(SendResult.SendResultStatus.ERROR);
-        topic.publishWeEvent(new Utf8String(topicName), new Utf8String(eventContent), new Utf8String(extensions),
-                new TransactionSucCallback() {
-                    @Override
-                    public void onResponse(EthereumResponse response) {
-                        ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
-                        try {
-                            TransactionReceipt transactionReceipt = objectMapper.readValue(response.getContent(),
-                                    TransactionReceipt.class);
-                            List<Topic.LogWeEventEventResponse> event = Topic.getLogWeEventEvents(transactionReceipt);
-                            if (CollectionUtils.isNotEmpty(event)) {
-                                sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, Web3SDKWrapper.uint256ToInt(event.get(0).eventBlockNumer), Web3SDKWrapper.uint256ToInt(event.get(0).eventSeq)));
-                                sendResult.setTopic(event.get(0).topicName.toString());
-                                if (response.getErrorCode().equals(WeEventConstants.TIME_OUT)) {
-                                    sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
-                                } else {
-                                    sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
-                                }
-                                callBack.onComplete(sendResult);
-                            }
-                        } catch (Exception e) {
-                            callBack.onException(e);
-                        }
-                    }
-                });
     }
 
     /**

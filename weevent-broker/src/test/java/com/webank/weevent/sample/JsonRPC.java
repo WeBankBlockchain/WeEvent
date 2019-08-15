@@ -6,7 +6,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
@@ -31,9 +30,7 @@ public class JsonRPC {
             // publish event
             SendResult sendResult = rpc.publish("com.weevent.test", groupId, "hello weevent".getBytes(StandardCharsets.UTF_8), extensions);
             System.out.println(sendResult.getStatus());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (BrokerException e) {
+        } catch (MalformedURLException | BrokerException e) {
             e.printStackTrace();
         }
     }

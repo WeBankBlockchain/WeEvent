@@ -1,6 +1,10 @@
 package com.webank.weevent.broker.fisco;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.webank.weevent.BrokerApplication;
+import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
@@ -21,15 +25,25 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class FiscoBcosTopicAdmin implements IEventTopic {
+    // FISCO-BCOS config
+    protected static FiscoConfig fiscoConfig;
+
     // FISCO-BCOS handler
     protected static FiscoBcosDelegate fiscoBcosDelegate;
 
     static {
+        FiscoConfig config = new FiscoConfig();
+        if (!config.load()) {
+            log.error("load FISCO-BCOS configuration failed");
+            BrokerApplication.exit();
+        }
+        fiscoConfig = config;
+
         try {
             fiscoBcosDelegate = new FiscoBcosDelegate();
-            fiscoBcosDelegate.initProxy();
+            fiscoBcosDelegate.initProxy(fiscoConfig);
         } catch (BrokerException e) {
-            log.error("init fisco-bcos failed", e);
+            log.error("init FISCO-BCOS failed", e);
             BrokerApplication.exit();
         }
     }
@@ -37,7 +51,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     @Override
     public boolean open(String topic, String groupId) throws BrokerException {
         ParamCheckUtils.validateTopicName(topic);
-        ParamCheckUtils.validateGroupId(groupId);
+        this.validateGroupId(groupId);
         try {
             boolean result = fiscoBcosDelegate.createTopic(topic, Long.parseLong(groupId));
 
@@ -55,7 +69,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     @Override
     public boolean exist(String topic, String groupId) throws BrokerException {
         ParamCheckUtils.validateTopicName(topic);
-        ParamCheckUtils.validateGroupId(groupId);
+        this.validateGroupId(groupId);
         boolean result = fiscoBcosDelegate.isTopicExist(topic, Long.parseLong(groupId));
 
         log.debug("isTopicExist result: {}", result);
@@ -65,7 +79,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     @Override
     public boolean close(String topic, String groupId) throws BrokerException {
         ParamCheckUtils.validateTopicName(topic);
-        ParamCheckUtils.validateGroupId(groupId);
+        this.validateGroupId(groupId);
         if (exist(topic, groupId)) {
             return true;
         }
@@ -74,7 +88,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     }
 
     /**
-     * Get Blockchain All TopicInfo return 10 date Per page
+     * Get All TopicInfo return 10 date Per page
      *
      * @since 2018/11/05
      */
@@ -88,7 +102,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
         if (pageSize == null || pageSize <= 0 || pageSize > 100) {
             throw new BrokerException(ErrorCode.TOPIC_PAGE_SIZE_INVALID);
         }
-        ParamCheckUtils.validateGroupId(groupId);
+        this.validateGroupId(groupId);
         @SuppressWarnings(value = "unchecked")
         ListPage<String> listPage = fiscoBcosDelegate.listTopicName(pageIndex, pageSize, Long.parseLong(groupId));
 
@@ -108,7 +122,8 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     public TopicInfo state(String topic, String groupId) throws BrokerException {
         // fetch target topic info in block chain
         log.debug("state function input param topic: {}", topic);
-        ParamCheckUtils.validateGroupId(groupId);
+
+        this.validateGroupId(groupId);
         ParamCheckUtils.validateTopicName(topic);
         return fiscoBcosDelegate.getTopicInfo(topic, Long.parseLong(groupId));
     }
@@ -116,7 +131,21 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     @Override
     public WeEvent getEvent(String eventId, String groupId) throws BrokerException {
         log.debug("getEvent function input param eventId: {}", eventId);
-        ParamCheckUtils.validateGroupId(groupId);
+
+        this.validateGroupId(groupId);
         return fiscoBcosDelegate.getEvent(eventId, Long.parseLong(groupId));
+    }
+
+    @Override
+    public Set<String> listGroupId() {
+        Set<String> groupIds = new HashSet<>();
+        for (Long groupId : fiscoBcosDelegate.listGroupId()) {
+            groupIds.add(String.valueOf(groupId));
+        }
+        return groupIds;
+    }
+
+    public void validateGroupId(String groupId) throws BrokerException {
+        ParamCheckUtils.validateGroupId(groupId, fiscoBcosDelegate.listGroupId());
     }
 }
