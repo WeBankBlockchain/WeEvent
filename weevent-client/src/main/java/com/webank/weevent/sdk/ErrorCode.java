@@ -25,9 +25,11 @@ public enum ErrorCode {
 
     TOPIC_PAGE_SIZE_INVALID(100107, "page size should be an integer in(1, 100)"),
 
-    TOPIC_NOT_MATCH(100108, "topic name not match with last"),
+    TOPIC_NOT_MATCH(100108, "topic name not match with last subscribe"),
 
     PATTERN_INVALID(100109, "invalid topic pattern"),
+
+    TOPIC_TAG_NOT_MATCH(100110, "topic tag not match with last subscribe"),
 
     EVENT_CONTENT_IS_BLANK(100200, "event content is blank"),
 
@@ -66,6 +68,8 @@ public enum ErrorCode {
     SUBSCRIPTIONID_NOT_EXIST(100504, "subscribe id is not exist"),
 
     SUBSCRIPTIONID_FORMAT_INVALID(100505, "subscribe id format invalid"),
+
+    TOPIC_TAG_IS_BLANK(100506, "topic's tag is blank"),
 
     MQTT_NO_BROKER_URL(100600, "no mqtt.broker.url configuration, can't support mqtt"),
 

@@ -22,7 +22,7 @@ import com.webank.weevent.sdk.WeEvent;
  *     producer.open("my topic name");
  *     // start channel
  *     producer.startProducer();
- *     // publish 10 events in synchronous
+ *     // publish 10 events
  *     for (int i = 0; i &lt; 10; i++) {
  *         // send event
  *         SendResult sendResult = producer.publish(new WeEvent("my topic name", "hello world.".getBytes()));
