@@ -1,7 +1,6 @@
 var stompClient = null;
 var topic = null;
 //var url = window.location.origin+"/weevent/sockjs";
-var url = "http://localhost:8080/weevent/sockjs";
 
 function setConnected(connected) {
     //$("#connect").prop("disabled", connected);
@@ -33,8 +32,6 @@ function showGreeting(message) {
                     $("#greetings").prepend(text);
                 }
                 //}
-
-
             }
         }
         //   add();
@@ -58,12 +55,11 @@ function connect() {
     stompClient = StompJs.Stomp.over(socket);
     topic = $("#topic").val();
     message = $("#message").val();
-    var login = "root"
-    var passcode = "123456"
+    var login = ""
+    var passcode = ""
     stompClient.connect(login, passcode, function (frame) {
         setConnected(true);
         // console.log('Connected: ' + frame);
-
 
     });
 
