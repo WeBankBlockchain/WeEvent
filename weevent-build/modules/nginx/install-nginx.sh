@@ -41,12 +41,12 @@ function nginx_setup() {
     if [[ -n ${broker_port} ]]; then
         broker_url="localhost:$broker_port"
         echo "set broker_url: $broker_url"
-        sed -i "s/localhost:8090/$broker_url/g" ${nginx_path}/conf/conf.d/http_rs_quickinstall.conf
+        sed -i "s/localhost:7000/$broker_url/g" ${nginx_path}/conf/conf.d/http_rs_quickinstall.conf
     fi
     if  [[ -n ${governance_port} ]]; then
         governance_url="localhost:${governance_port}"
         echo "set governance_url: $governance_url"
-        sed -i "s/localhost:8099/$governance_url/g" ${nginx_path}/conf/conf.d/http_rs_quickinstall.conf
+        sed -i "s/localhost:7009/$governance_url/g" ${nginx_path}/conf/conf.d/http_rs_quickinstall.conf
     fi
     
     cp nginx.sh ${nginx_path}
