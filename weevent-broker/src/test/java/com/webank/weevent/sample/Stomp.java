@@ -60,7 +60,7 @@ public class Stomp {
         this.isConnected = false;
     }
 
-    private StompSessionHandlerAdapter getWebsocketSessionHandlerAdapter() {
+    private StompSessionHandlerAdapter getWebSocketSessionHandlerAdapter() {
         return new StompSessionHandlerAdapter() {
             @Override
             public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
@@ -148,12 +148,12 @@ public class Stomp {
         stompClient.setMessageConverter(new StringMessageConverter());
         stompClient.setTaskScheduler(taskScheduler); // for heartbeats
 
-        stompClient.connect(brokerStomp, getWebsocketSessionHandlerAdapter());
+        stompClient.connect(brokerStomp, getWebSocketSessionHandlerAdapter());
 
         Thread.sleep(100000L);
     }
 
-    private StompSessionHandlerAdapter getSockjsSessionHandlerAdapter() {
+    private StompSessionHandlerAdapter getSockJSSessionHandlerAdapter() {
         return new StompSessionHandlerAdapter() {
             @Override
             public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
@@ -249,7 +249,7 @@ public class Stomp {
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
         stompClient.setTaskScheduler(taskScheduler); // for heartbeats
 
-        stompClient.connect(brokerSockJS, getSockjsSessionHandlerAdapter());
+        stompClient.connect(brokerSockJS, getSockJSSessionHandlerAdapter());
 
         Thread.sleep(100000L);
     }

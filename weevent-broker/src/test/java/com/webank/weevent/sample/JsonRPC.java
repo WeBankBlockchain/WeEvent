@@ -30,9 +30,7 @@ public class JsonRPC {
             // publish event
             SendResult sendResult = rpc.publish("com.weevent.test", groupId, "hello weevent".getBytes(StandardCharsets.UTF_8), extensions);
             System.out.println(sendResult.getStatus());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (BrokerException e) {
+        } catch (MalformedURLException | BrokerException e) {
             e.printStackTrace();
         }
     }
