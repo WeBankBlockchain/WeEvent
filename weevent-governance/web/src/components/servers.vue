@@ -20,7 +20,7 @@
             >
           </el-table-column>
           <el-table-column
-            label="URL地址"
+            label="BrokerURL地址"
             prop='brokerUrl'>
           </el-table-column>
           <el-table-column
