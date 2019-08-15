@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -20,6 +21,7 @@ import javax.annotation.PostConstruct;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.SendResult;
+import com.webank.weevent.sdk.WeEvent;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -42,11 +44,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 import weevent.robust.service.interfaces.MqttGateway;
+import weevent.robust.service.interfaces.MqttSubscribe;
 
 
 /**
@@ -79,16 +83,27 @@ public class ScheduledService implements AutoCloseable {
     private IWeEventClient weEventClient;
 
     @Autowired
-    private WebSocketStompClient stompClient;
-
-    @Autowired
     private MqttGateway mqttGateway;
 
-    private static StompSession stompSession;
+
+    @Autowired
+    private MqttSubscribe mqttSubscribe;
+
+  //  @Autowired
+ //   private MqttBridge mqttBridge;
+
+    private  StompSession stompSession;
+
+
+    @Autowired
+    private WebSocketStompClient socketStompClient;
 
     private final static String format = "yyyy-MM-dd HH";
 
+    public final static String SUBSCRIBE_ID = "subscribeId";
+
     private final static String HTTP_HEADER = "http://";
+
 
 
     public static Map<String, Integer> statisticMap = new HashMap<>();
@@ -98,25 +113,83 @@ public class ScheduledService implements AutoCloseable {
     public static Map<String, Integer> stompSendMap = new HashMap<>();
 
     @PostConstruct
-    public void init() throws IOException, InterruptedException, ExecutionException, BrokerException {
+    public void init() throws IOException, BrokerException,InterruptedException, ExecutionException{
+        final List<String> subIdList = new ArrayList<>();
         File subIdFile = new File(subscripIdPath);
         String subText = this.readTxt(subIdFile);
         List<String> subIds = getSubIds(subText);
-        StringBuffer urlBuffer = this.getIntegralUrl(this.HTTP_HEADER, url, "/weevent/rest/unSubscribe?subscriptionId={subscriptionId}");
+        String callUrl =HTTP_HEADER+url+"/weevent/rest/unSubscribe?subscriptionId={subscriptionId}";
         for (String subId : subIds) {
             // cancel the original subscription
-            restTemplate.getForEntity(urlBuffer.toString(), String.class, subId);
+            restTemplate.getForEntity(callUrl, String.class, subId);
         }
         this.writeStringToFile(subIdFile.getAbsolutePath(), "", false);
-        urlBuffer = this.getIntegralUrl("ws://", url, "/weevent/stomp");
-        ListenableFuture<StompSession> listenableFuture = stompClient.connect(urlBuffer.toString(), getStompSessionHandlerAdapter());
 
-        this.stompSession = listenableFuture.get();
-
+        // subscribe rest topic,  then callback
+        subIdList.add(this.restfulSubscribe());
+        //jsonrpc subscribe
+        subIdList.add(this.jsonRpcSubscribe());
+        //mqtt subscribe
+        this.mqttSubscribe();
+        //subIdList.add(this.mqttSubscribe());
         // stomp subscribe
-        stompSession.setAutoReceipt(true);
-        stompSession.subscribe("com.weevent.stomp", getStompFrameHander());
+        subIdList.add(this.stomSubscribe());
+
+        //Convert 'subIdList' to Json format
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(SUBSCRIBE_ID, subIdList);
+        log.info(jsonObject.toJSONString());
+        ScheduledService.writeStringToFile(subIdFile.getAbsolutePath(), jsonObject.toJSONString(), true);
     }
+
+    private String restfulSubscribe()throws RestClientException {
+        String callUrl = HTTP_HEADER+url+"/weevent/rest/subscribe?topic={topic}&subscriptionId={subscriptionId}&url={url}";
+        String callBackUrl = HTTP_HEADER+url+"/weevent/mock/rest/onEvent";
+        ResponseEntity<String> rsp = restTemplate.getForEntity(callUrl, String.class, "com.weevent.rest", "", callBackUrl);
+        String subId = rsp.getBody();
+        log.info("rest subId: " + subId);
+        return  subId;
+    }
+
+    private String jsonRpcSubscribe() throws  BrokerException{
+        String subId = weEventClient.subscribe("com.weevent.jsonrpc1", WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
+            @Override
+            public void onEvent(WeEvent event) {
+                log.info("jsonRpc subscribe "+event.toString());
+            }
+
+            @Override
+            public void onException(Throwable e) {
+                log.error(e.getMessage());
+            }
+        });
+        log.info("jsonRpc subId: " + subId);
+        return  subId;
+    }
+
+    private void mqttSubscribe()throws BrokerException{
+        String subId = "";
+        mqttSubscribe.subscribeToMqtt("hello mqtt", "com.weevent.mqtt");
+     //   subId = mqttBridge.subscribeTopic("com.weevent.mqtt.test","1");
+        log.info("rest subId: " + subId);
+     //   return subId;
+    }
+
+    private String stomSubscribe()throws InterruptedException, ExecutionException{
+        StompHeaders header = new StompHeaders();
+        header.setDestination("com.weevent.stomp");
+        header.set("eventId","2cf24dba-59-1124");
+        header.set("groupId","1");
+        StompSessionHandlerAdapter stompSessionHandlerAdapter = getStompSessionHandlerAdapter();
+        ListenableFuture<StompSession> connect = socketStompClient.connect("ws://localhost:8090/weevent/stomp", stompSessionHandlerAdapter, header, new Object());
+        StompSession stompSession = connect.get();
+        StompSession.Subscription subscribe = stompSession.subscribe("com.weevent.stomp", stompSessionHandlerAdapter);
+        String subId = subscribe.getSubscriptionId();
+        log.info("jsonRpc subId: " + subId);
+        return  subId;
+    }
+
+
 
 
     @Async
@@ -125,11 +198,11 @@ public class ScheduledService implements AutoCloseable {
         // use the rest request to post a message
         restfulPublic();
         // use jsonRpc publish topic
-        jsonrpcPublish();
+      //  jsonrpcPublish();
         // use stomp publish topic
-        stompPublish();
+     //   stompPublish();
         // use mqtt publish topic
-        mqttPublish();
+     //  mqttPublish();
 
 
     }
@@ -137,12 +210,19 @@ public class ScheduledService implements AutoCloseable {
 
     public void restfulPublic() throws BrokerException {
         // use the rest request to post a message
-        weEventClient.open("com.weevent.rest");
-        StringBuffer urlBuffer = this.getIntegralUrl(this.HTTP_HEADER, url, "/weevent/rest/publish?topic={topic}&content={content}");
+        String callUrl = HTTP_HEADER+this.url+"/weevent/rest/open?topic={topic}&groupId={}";
+        Object result = restTemplate.getForEntity(callUrl,
+            LinkedHashMap.class,
+            "com.weevent.rest.test",
+            "1").getBody();
+
+        log.info("rest open result is " +result);
+
+        callUrl = HTTP_HEADER+this.url+"/weevent/rest/publish?topic={topic}&content={content}";
         ResponseEntity<String> rsp = restTemplate.getForEntity(
-            urlBuffer.toString(),
+            callUrl,
             String.class,
-            "com.weevent.rest",
+            "com.weevent.rest.test",
             "hello weevent rest");
         log.info("restful send message:" + rsp.getBody());
         if (rsp.getStatusCodeValue() == 200) {
@@ -256,16 +336,15 @@ public class ScheduledService implements AutoCloseable {
                         WebSocketClient webSocketClient = new StandardWebSocketClient();
                         WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
                         stompClient.setMessageConverter(new StringMessageConverter());
-                        stompClient.setTaskScheduler(taskScheduler); // for heartbeats
-                        ListenableFuture<StompSession> f = stompClient.connect("ws://" + url + "/weevent/stomp", this);
-                        stompSession = f.get();
-                        // stomp订阅
+                        stompClient.setTaskScheduler(taskScheduler);
+                        ListenableFuture<StompSession> future = stompClient.connect("ws://" + url + "/weevent/stomp", this);
+                        stompSession = future.get();
+                        // stomp subscribe
                         stompSession.setAutoReceipt(true);
-                        stompSession.subscribe("com.weevent.stomp", getStompFrameHander());
+                        StompSession.Subscription subscribe = stompSession.subscribe("com.weevent.stomp", getStompFrameHander());
                     } catch (InterruptedException | ExecutionException e) {
                         log.error(e.getMessage());
                     }
-
                 }
             }
 
@@ -285,8 +364,8 @@ public class ScheduledService implements AutoCloseable {
     private static List<String> getSubIds(String subIdStrs) {
         JSONObject jsonObject = JSONObject.parseObject(subIdStrs);
         List<String> subIds = new ArrayList<>();
-        if (null != jsonObject && jsonObject.containsKey(InitialService.SUBSCRIBE_ID)) {
-            subIds = (List) jsonObject.get(InitialService.SUBSCRIBE_ID);
+        if (null != jsonObject && jsonObject.containsKey(SUBSCRIBE_ID)) {
+            subIds = (List) jsonObject.get(SUBSCRIBE_ID);
         }
         return subIds;
     }
@@ -305,22 +384,6 @@ public class ScheduledService implements AutoCloseable {
         }
     }
 
-    /**
-     * Pass in the string in the correct order and return the integral url you need
-     *
-     * @param params
-     * @return StringBuffer
-     */
-    public static StringBuffer getIntegralUrl(String... params) {
-        StringBuffer headBuffer = new StringBuffer();
-        if (params == null || params.length == 0) {
-            return headBuffer;
-        }
-        for (String param : params) {
-            headBuffer.append(param);
-        }
-        return headBuffer;
-    }
 
 
     /**

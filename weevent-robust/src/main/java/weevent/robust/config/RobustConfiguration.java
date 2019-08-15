@@ -11,9 +11,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.IntegrationComponentScan;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.DirectChannel;
+import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.mqtt.core.DefaultMqttPahoClientFactory;
 import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
+import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
 import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
+import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.converter.StringMessageConverter;
@@ -22,26 +25,26 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
-import weevent.robust.service.ScheduledService;
 
 @Configuration
 @IntegrationComponentScan
 @Slf4j
-public class StompConfiguration {
+public class RobustConfiguration {
 
     private final static String HTTP_HEADER = "http://";
 
     @Value("${weevent.broker.url}")
-    private String url;
+    private  String url;
 
     @Value("${mqtt.broker.url}")
-    private String hostUrl;
+    private  String hostUrl;
 
-
+    @Value("${mqtt.broker.qos}")
+    private int qos;
 
     //connect timeout
     @Value("${mqtt.broker.timeout}")
-    private int completionTimeout;
+    private long completionTimeout;
 
     //jsonrpc4j exporter
     @Bean
@@ -54,7 +57,7 @@ public class StompConfiguration {
 
     @Bean
     public IWeEventClient getBrokerRpc() throws Exception {
-        String jsonurl = ScheduledService.getIntegralUrl(HTTP_HEADER, url, "/weevent").toString();
+        String jsonurl = HTTP_HEADER+url+"/weevent";
         return IWeEventClient.build(jsonurl);
     }
 
@@ -72,7 +75,6 @@ public class StompConfiguration {
         stompClient.setMessageConverter(new StringMessageConverter());
         // for heartbeats
         stompClient.setTaskScheduler(taskScheduler);
-
         return stompClient;
     }
 
@@ -98,7 +100,7 @@ public class StompConfiguration {
 
     @Bean
     @ServiceActivator(inputChannel = "mqttChannel")
-    public MessageHandler mqtt() {
+    public MessageHandler mqtt(){
         MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler("mqttId", mqttClientFactory());
         messageHandler.setAsync(true);
         messageHandler.setDefaultTopic("com.weevent.mqtt");
@@ -108,6 +110,32 @@ public class StompConfiguration {
     @Bean
     public MessageChannel mqttChannel() {
         return new DirectChannel();
+    }
+
+    @Bean
+    public MessageChannel mqttInputChannel() {
+        return new DirectChannel();
+    }
+
+    @Bean
+   // @ConditionalOnProperty({"mqtt.broker.url"})
+    @ServiceActivator(inputChannel = "mqttInputChannel")
+    public  MessageProducer mqttInbound() {
+        String clientId = "weevent-mqtt-" + System.currentTimeMillis();
+        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(clientId, mqttClientFactory());
+        log.info("MqttPahoMessageDrivenChannelAdapter bean instrument, url: {}", hostUrl);
+        // client id can not duplicate
+        log.info("mqtt client id: {}", clientId);
+        adapter.setCompletionTimeout(completionTimeout);
+        adapter.setConverter(new DefaultPahoMessageConverter());
+        adapter.setQos(qos);
+      //  adapter.set
+        //adapter.setOutputChannel((MessageChannel) RobustApplication.applicationContext.getBean("mqttInputChannel"));
+        /* MqttPahoMessageDrivenChannelAdapter will connect and subscribe even when topic list is empty
+         a trick to avoid "Error connecting or subscribing to []"
+          */
+        adapter.addTopic("com.weevent.mqtt");
+        return adapter;
     }
 
 }
