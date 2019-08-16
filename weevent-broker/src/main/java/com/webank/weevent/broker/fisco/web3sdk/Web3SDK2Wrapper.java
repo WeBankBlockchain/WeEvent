@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -23,11 +24,16 @@ import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.handler.ChannelConnections;
 import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.gm.GenCredential;
+import org.fisco.bcos.web3j.precompile.crud.CRUDService;
+import org.fisco.bcos.web3j.precompile.crud.Condition;
+import org.fisco.bcos.web3j.precompile.crud.Table;
+import org.fisco.bcos.web3j.precompile.exception.PrecompileMessageException;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameterNumber;
@@ -35,6 +41,7 @@ import org.fisco.bcos.web3j.protocol.core.RemoteCall;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BcosTransactionReceipt;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BlockNumber;
+import org.fisco.bcos.web3j.protocol.core.methods.response.GroupList;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tx.Contract;
 import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
@@ -127,6 +134,107 @@ public class Web3SDK2Wrapper {
         }
     }
 
+    public static List<String> listGroupId(Web3j web3j) throws BrokerException {
+        try {
+            GroupList groupList = web3j.getGroupList().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+            return groupList.getGroupList();
+        } catch (ExecutionException | TimeoutException | InterruptedException e) {
+            log.error("web3sdk execute failed", e);
+            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
+    }
+
+    public static Table ensureTable(CRUDService crud) {
+        String tableName = FiscoBcosDelegate.WeEventTable;
+
+        try {
+            return crud.desc(tableName);
+        } catch (PrecompileMessageException e) {
+            log.info("not exist table in CRUD, create it: {}", tableName);
+
+            Table table = new Table(tableName, FiscoBcosDelegate.WeEventTableKey, FiscoBcosDelegate.WeEventTableValue);
+            try {
+                int result = crud.createTable(table);
+                if (result == 0) {
+                    log.info("create table in CRUD success, {}", tableName);
+                    return table;
+                }
+
+                log.error("create table in CRUD failed, " + tableName);
+                return null;
+            } catch (Exception e1) {
+                log.error("create table in CRUD failed, " + tableName, e1);
+                return null;
+            }
+        } catch (Exception e) {
+            log.error("ensure table in CRUD failed, " + tableName, e);
+            return null;
+        }
+    }
+
+    /**
+     * get address from CRUD table
+     * https://fisco-bcos-documentation.readthedocs.io/zh_CN/release-2.0/en/docs/sdk/sdk.html?highlight=CRUDService#web3sdk-api
+     *
+     * @param web3j web3j
+     * @param credentials credentials
+     * @return address
+     */
+    public static String getAddress(Web3j web3j, Credentials credentials) throws BrokerException {
+        CRUDService crud = new CRUDService(web3j, credentials);
+        Table table = ensureTable(crud);
+        if (table == null) {
+            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
+
+        try {
+            Condition condition = new Condition();
+            condition.EQ(FiscoBcosDelegate.WeEventTableKey, FiscoBcosDelegate.WeEventTopicControlAddress);
+            List<Map<String, String>> records = crud.select(table, condition);
+            if (records.isEmpty()) {
+                log.info("no record in CRUD table, {}", FiscoBcosDelegate.WeEventTable);
+                return "";
+            }
+            if (records.size() != 1) {
+                log.warn("more then one record in CRUD table, {}", FiscoBcosDelegate.WeEventTable);
+            }
+            return records.get(0).get(FiscoBcosDelegate.WeEventTableValue);
+        } catch (Exception e) {
+            log.error("select from CRUD table failed", e);
+            return "";
+        }
+    }
+
+    public static boolean addAddress(Web3j web3j, Credentials credentials, String address) throws BrokerException {
+        String original = getAddress(web3j, credentials);
+        if (!StringUtils.isBlank(original)) {
+            log.info("topic control address already exist, {}", original);
+            return false;
+        }
+
+        CRUDService crud = new CRUDService(web3j, credentials);
+        Table table = ensureTable(crud);
+        if (table == null) {
+            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
+
+        try {
+            org.fisco.bcos.web3j.precompile.crud.Entry record = new org.fisco.bcos.web3j.precompile.crud.Entry();
+            record.put(FiscoBcosDelegate.WeEventTableKey, address);
+            int result = crud.insert(table, record);
+            if (result == 1) {
+                log.info("add topic control address into CRUD success");
+                return true;
+            }
+
+            log.error("add topic control address into CRUD failed, {}", result);
+            return false;
+        } catch (Exception e) {
+            log.error("add topic control address into CRUD failed", e);
+            return false;
+        }
+    }
+
     /**
      * get account Credentials
      *
@@ -199,7 +307,7 @@ public class Web3SDK2Wrapper {
 
         try {
             RemoteCall<TopicData> f1 = TopicData.deploy(web3j, credentials, gasProvider);
-            TopicData topicData = f1.sendAsync().get(WeEventConstants.DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+            TopicData topicData = f1.sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
 
             log.info("topic data contract address: {}", topicData.getContractAddress());
             if (topicData.getContractAddress().equals(WeEventConstants.ADDRESS_EMPTY)) {
@@ -208,7 +316,7 @@ public class Web3SDK2Wrapper {
             }
 
             RemoteCall<TopicController> f2 = TopicController.deploy(web3j, credentials, gasProvider, topicData.getContractAddress());
-            TopicController topicController = f2.sendAsync().get(WeEventConstants.DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+            TopicController topicController = f2.sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
 
             log.info("topic control contract address: {}", topicController.getContractAddress());
             if (topicController.getContractAddress().equals(WeEventConstants.ADDRESS_EMPTY)) {
@@ -240,7 +348,7 @@ public class Web3SDK2Wrapper {
      */
     public static Long getBlockHeight(Web3j web3j) throws BrokerException {
         try {
-            BlockNumber blockNumber = web3j.getBlockNumber().sendAsync().get(WeEventConstants.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+            BlockNumber blockNumber = web3j.getBlockNumber().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
             // Web3sdk's rpc return null in "get".
             if (blockNumber == null) {
                 return 0L;
@@ -271,7 +379,7 @@ public class Web3SDK2Wrapper {
 
             // "false" to load only tx hash.
             BcosBlock bcosBlock = web3j.getBlockByNumber(new DefaultBlockParameterNumber(blockNum), false)
-                    .sendAsync().get(WeEventConstants.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+                    .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
             List<String> transactionHashList = bcosBlock.getBlock().getTransactions().stream()
                     .map(transactionResult -> (String) transactionResult.get()).collect(Collectors.toList());
             if (transactionHashList.size() <= 0) {
@@ -281,7 +389,7 @@ public class Web3SDK2Wrapper {
 
             for (String transactionHash : transactionHashList) {
                 BcosTransactionReceipt transactionReceipt = web3j.getTransactionReceipt(transactionHash)
-                        .sendAsync().get(WeEventConstants.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+                        .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
                 if (!transactionReceipt.getTransactionReceipt().isPresent()) {
                     log.error(String.format("loop block empty tx receipt, blockNum: %s tx hash: %s", blockNum, transactionHash));
                     return null;

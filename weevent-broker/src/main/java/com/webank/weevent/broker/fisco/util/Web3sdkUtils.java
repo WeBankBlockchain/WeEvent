@@ -1,14 +1,16 @@
 package com.webank.weevent.broker.fisco.util;
 
 
-import java.io.FileWriter;
-import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.web3sdk.Web3SDK2Wrapper;
 import com.webank.weevent.broker.fisco.web3sdk.Web3SDKWrapper;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 
@@ -20,22 +22,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 @Slf4j
 public class Web3sdkUtils {
-    private static void writeAddressToFile(String filePath, String contractName, String contractAddress) {
-        try (FileWriter fileWritter = new FileWriter(filePath, false)) {
-            String content = String.format("%s=%s", contractName, contractAddress);
-            fileWritter.write(content);
-            fileWritter.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     /**
-     * tool to generate system contract, 'TopicController'.
-     *
-     * @param args optional param, save data into file if set.
+     * tool to deploy contract "TopicController", and save address back to block chain.
      * Usage:
-     * java -Xbootclasspath/a:./config -cp weevent-broker-2.0.0.jar -Dloader.main=com.webank.weevent.broker.fisco.util.Web3sdkUtils org.springframework.boot.loader.PropertiesLauncher ./address.txt [1]
+     * java -Xbootclasspath/a:./config -cp weevent-broker-2.0.0.jar -Dloader.main=com.webank.weevent.broker.fisco.util.Web3sdkUtils org.springframework.boot.loader.PropertiesLauncher [1]
      */
     public static void main(String[] args) {
         try {
@@ -44,32 +34,63 @@ public class Web3sdkUtils {
             ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
             taskExecutor.initialize();
 
-            String address = "";
-            if (fiscoConfig.getVersion().startsWith("2.")) {
-                // 2.0x
-                Long groupId = 1L;
-                if (args.length >= 2) {
-                    groupId = Long.valueOf(args[1]);
-                }
+            if (fiscoConfig.getVersion().startsWith("2.")) {    // 2.0x
                 org.fisco.bcos.web3j.crypto.Credentials credentials = Web3SDK2Wrapper.getCredentials(fiscoConfig);
-                org.fisco.bcos.web3j.protocol.Web3j web3j = Web3SDK2Wrapper.initWeb3j(groupId, fiscoConfig, taskExecutor);
-                address = Web3SDK2Wrapper.deployTopicControl(web3j, credentials);
-            } else if (fiscoConfig.getVersion().startsWith("1.3")) {
-                // 1.x
+
+                Map<Long, org.fisco.bcos.web3j.protocol.Web3j> groups = new HashMap<>();
+                // 1 is always exist
+                org.fisco.bcos.web3j.protocol.Web3j web3j = Web3SDK2Wrapper.initWeb3j(1L, fiscoConfig, taskExecutor);
+                groups.put(1L, web3j);
+                List<String> groupIds = Web3SDK2Wrapper.listGroupId(web3j);
+                System.out.println("all group in nodes: {}" + groups.toString());
+                groupIds.remove(1L);
+                for (String groupId : groupIds) {
+                    Long gid = Long.valueOf(groupId);
+                    web3j = Web3SDK2Wrapper.initWeb3j(gid, fiscoConfig, taskExecutor);
+                    groups.put(gid, web3j);
+                }
+
+                // deploy contract for every group
+                for (Map.Entry<Long, org.fisco.bcos.web3j.protocol.Web3j> e : groups.entrySet()) {
+                    // check exist first
+                    String original = Web3SDK2Wrapper.getAddress(e.getValue(), credentials);
+                    if (!StringUtils.isBlank(original)) {
+                        System.out.println("contract[TopicController] already exist, group: " + e.getKey() + " address: " + original);
+                        continue;
+                    }
+
+                    // deploy topic control
+                    String address = Web3SDK2Wrapper.deployTopicControl(web3j, credentials);
+                    System.out.println("deploy contract[TopicController] success, group: " + e.getKey() + " address: " + address);
+
+                    // save topic control address into CRUD
+                    boolean result = Web3SDK2Wrapper.addAddress(web3j, credentials, address);
+                    System.out.println("save contract[TopicController] address into CRUD, group: " + e.getKey() + " result: {}" + result);
+                }
+            } else if (fiscoConfig.getVersion().startsWith("1.3")) {    // 1.x
                 org.bcos.web3j.crypto.Credentials credentials = Web3SDKWrapper.getCredentials(fiscoConfig);
                 org.bcos.web3j.protocol.Web3j web3j = Web3SDKWrapper.initWeb3j(fiscoConfig, taskExecutor);
-                address = Web3SDKWrapper.deployTopicControl(web3j, credentials);
+
+                // check exist first
+                String original = Web3SDKWrapper.getAddress(web3j, credentials, fiscoConfig.getProxyAddress());
+                if (!StringUtils.isBlank(original)) {
+                    System.out.println("contract[TopicController] already exist, address: " + original);
+                    System.exit(1);
+                }
+
+                // deploy topic control
+                String address = Web3SDKWrapper.deployTopicControl(web3j, credentials);
+                System.out.println("deploy contract[TopicController] success, address: " + address);
+
+                // save topic control address into CNS
+                boolean result = Web3SDKWrapper.addAddress(web3j, credentials, fiscoConfig.getProxyAddress(), address);
+                System.out.println("save contract[TopicController] address into CNS, result: " + result);
             } else {
-                log.error("unknown FISCO-BCOS version: {}", fiscoConfig.getVersion());
+                System.out.println("unknown FISCO-BCOS version: " + fiscoConfig.getVersion());
                 System.exit(1);
             }
-
-            System.out.println("deploy contract[TopicController] success, address: " + address);
-            if (args.length >= 1) {
-                writeAddressToFile(args[0], "TopicController", address);
-            }
         } catch (Exception e) {
-            log.error("detect exception", e);
+            e.printStackTrace();
             System.exit(1);
         }
 

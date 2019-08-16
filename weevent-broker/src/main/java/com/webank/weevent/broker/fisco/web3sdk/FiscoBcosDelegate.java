@@ -2,10 +2,8 @@ package com.webank.weevent.broker.fisco.web3sdk;
 
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.BrokerApplication;
@@ -37,11 +35,20 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 @Slf4j
 public class FiscoBcosDelegate {
+    public final static String WeEventTable = "WeEvent";
+    public final static String WeEventTableKey = "key";
+    public final static String WeEventTableValue = "value";
+
+    public final static String WeEventTopicControlAddress = "WeEvent_topic_control_address";
+
     // access to version 1.x
     private FiscoBcos fiscoBcos;
 
     // access to version 2.x
     private Map<Long, FiscoBcos2> fiscoBcos2Map;
+
+    // web3sdk timeout, ms
+    public static Integer timeout;
 
     // web3sdk thread pool
     public static ThreadPoolTaskExecutor threadPool;
@@ -98,6 +105,7 @@ public class FiscoBcosDelegate {
 
     public void initProxy(FiscoConfig fiscoConfig) throws BrokerException {
         threadPool = initThreadPool(fiscoConfig);
+        timeout = fiscoConfig.getWeb3sdkTimeout();
 
         if (fiscoConfig.getVersion().startsWith("1.3")) {
             log.info("Notice: FISCO-BCOS's version is 1.x");
@@ -106,7 +114,7 @@ public class FiscoBcosDelegate {
             new org.bcos.web3j.utils.Async(threadPool);
 
             FiscoBcos fiscoBcos = new FiscoBcos(fiscoConfig);
-            fiscoBcos.init(fiscoConfig.getTopicControllerAddress());
+            fiscoBcos.init();
 
             this.fiscoBcos = fiscoBcos;
         } else if (fiscoConfig.getVersion().startsWith("2.")) {
@@ -115,18 +123,14 @@ public class FiscoBcosDelegate {
             // set web3sdk.Async thread pool
             new org.fisco.bcos.web3j.utils.Async(threadPool);
 
-            String[] tokens = fiscoConfig.getTopicControllerAddress().split(";");
-            for (String token : tokens) {
-                String[] groups = token.split(":");
-                if (groups.length != 2) {
-                    log.error("invalid address format, like 1:0xa;2:0xb");
-                    throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
-                }
-                Long groupId = Long.valueOf(groups[0]);
+            // init all group in nodes
+            List<String> groups = this.listGroupId();
+            log.info("all group in nodes: {}", groups.toString());
+            for (String groupId : groups) {
+                Long gid = Long.valueOf(groupId);
                 FiscoBcos2 fiscoBcos2 = new FiscoBcos2(fiscoConfig);
-                fiscoBcos2.init(groupId, groups[1]);
-
-                this.fiscoBcos2Map.put(groupId, fiscoBcos2);
+                fiscoBcos2.init(gid);
+                this.fiscoBcos2Map.put(gid, fiscoBcos2);
             }
         } else {
             log.error("unknown FISCO-BCOS's version");
@@ -141,13 +145,14 @@ public class FiscoBcosDelegate {
      *
      * @return list of groupId
      */
-    public Set<Long> listGroupId() {
+    public List<String> listGroupId() throws BrokerException {
         if (this.fiscoBcos != null) {
-            Set<Long> list = new HashSet<>();
-            list.add(Long.valueOf(WeEventConstants.DEFAULT_GROUP_ID));
+            List<String> list = new ArrayList<>();
+            list.add(WeEventConstants.DEFAULT_GROUP_ID);
             return list;
         } else {
-            return this.fiscoBcos2Map.keySet();
+            // group 1 is always exist
+            return this.fiscoBcos2Map.get(1L).listGroupId();
         }
     }
 
