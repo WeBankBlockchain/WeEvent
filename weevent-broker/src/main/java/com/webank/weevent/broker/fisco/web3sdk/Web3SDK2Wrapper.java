@@ -206,6 +206,7 @@ public class Web3SDK2Wrapper {
     }
 
     public static boolean addAddress(Web3j web3j, Credentials credentials, String address) throws BrokerException {
+        // check exist manually to avoid duplicate record
         String original = getAddress(web3j, credentials);
         if (!StringUtils.isBlank(original)) {
             log.info("topic control address already exist, {}", original);
@@ -220,7 +221,9 @@ public class Web3SDK2Wrapper {
 
         try {
             org.fisco.bcos.web3j.precompile.crud.Entry record = new org.fisco.bcos.web3j.precompile.crud.Entry();
-            record.put(FiscoBcosDelegate.WeEventTableKey, address);
+            record.put(FiscoBcosDelegate.WeEventTableKey, FiscoBcosDelegate.WeEventTopicControlAddress);
+            record.put(FiscoBcosDelegate.WeEventTableValue, address);
+            // record's key can be duplicate
             int result = crud.insert(table, record);
             if (result == 1) {
                 log.info("add topic control address into CRUD success");
