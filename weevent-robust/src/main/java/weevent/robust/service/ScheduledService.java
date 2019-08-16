@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -30,7 +29,7 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.converter.StringMessageConverter;
+import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
 import org.springframework.messaging.simp.stomp.ConnectionLostException;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
@@ -41,16 +40,12 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.socket.client.WebSocketClient;
-import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 import weevent.robust.service.interfaces.MqttGateway;
-import weevent.robust.service.interfaces.MqttSubscribe;
 
 
 /**
@@ -82,12 +77,13 @@ public class ScheduledService implements AutoCloseable {
     @Autowired
     private IWeEventClient weEventClient;
 
+
+    @Autowired
+    private MqttPahoMessageHandler mqttPahoMessageHandler;
+
+
     @Autowired
     private MqttGateway mqttGateway;
-
-
-    @Autowired
-    private MqttSubscribe mqttSubscribe;
 
   //  @Autowired
  //   private MqttBridge mqttBridge;
@@ -126,20 +122,21 @@ public class ScheduledService implements AutoCloseable {
         this.writeStringToFile(subIdFile.getAbsolutePath(), "", false);
 
         // subscribe rest topic,  then callback
-        subIdList.add(this.restfulSubscribe());
+       // subIdList.add(this.restfulSubscribe());
         //jsonrpc subscribe
-        subIdList.add(this.jsonRpcSubscribe());
+    //    subIdList.add(this.jsonRpcSubscribe());
         //mqtt subscribe
-        this.mqttSubscribe();
+       // mqttPublish();
+      //  this.mqttSubscribe();
         //subIdList.add(this.mqttSubscribe());
         // stomp subscribe
-        subIdList.add(this.stomSubscribe());
+      //  subIdList.add(this.stomSubscribe());
 
         //Convert 'subIdList' to Json format
-        JSONObject jsonObject = new JSONObject();
+      /*  JSONObject jsonObject = new JSONObject();
         jsonObject.put(SUBSCRIBE_ID, subIdList);
         log.info(jsonObject.toJSONString());
-        ScheduledService.writeStringToFile(subIdFile.getAbsolutePath(), jsonObject.toJSONString(), true);
+        ScheduledService.writeStringToFile(subIdFile.getAbsolutePath(), jsonObject.toJSONString(), true);*/
     }
 
     private String restfulSubscribe()throws RestClientException {
@@ -168,8 +165,9 @@ public class ScheduledService implements AutoCloseable {
     }
 
     private void mqttSubscribe()throws BrokerException{
+     //   channelAdapter.start();
         String subId = "";
-        mqttSubscribe.subscribeToMqtt("hello mqtt", "com.weevent.mqtt");
+       //   mq.subscribeToMqtt("hello mqtt", "com.weevent.mqtt");
      //   subId = mqttBridge.subscribeTopic("com.weevent.mqtt.test","1");
         log.info("rest subId: " + subId);
      //   return subId;
@@ -193,16 +191,16 @@ public class ScheduledService implements AutoCloseable {
 
 
     @Async
-    @Scheduled(cron = "5 0/1 * * * *")
+    @Scheduled(cron = "0/5 * * * * ?")
     public void scheduled() throws BrokerException {
         // use the rest request to post a message
-        restfulPublic();
+        //restfulPublic();
         // use jsonRpc publish topic
       //  jsonrpcPublish();
         // use stomp publish topic
      //   stompPublish();
         // use mqtt publish topic
-     //  mqttPublish();
+       mqttPublish();
 
 
     }
@@ -210,9 +208,9 @@ public class ScheduledService implements AutoCloseable {
 
     public void restfulPublic() throws BrokerException {
         // use the rest request to post a message
-        String callUrl = HTTP_HEADER+this.url+"/weevent/rest/open?topic={topic}&groupId={}";
+        String callUrl = HTTP_HEADER+this.url+"/weevent/rest/open?topic={topic}&groupId={groupId}";
         Object result = restTemplate.getForEntity(callUrl,
-            LinkedHashMap.class,
+            Object.class,
             "com.weevent.rest.test",
             "1").getBody();
 
@@ -247,9 +245,10 @@ public class ScheduledService implements AutoCloseable {
         countTimes(stompSendMap, this.getFormatTime(format, new Date()));
     }
 
-    public void mqttPublish() throws BrokerException {
+    public void mqttPublish()   {
         // Mqtt sends a message to weevent broker
         mqttGateway.sendToMqtt("hello mqtt", "com.weevent.mqtt");
+        mqttGateway.subToMqtt("hello mqtt", "com.weevent.mqtt");
         log.info("mqtt send msg to broker");
         countTimes(mqttSendMap, this.getFormatTime(format, new Date()));
     }
@@ -328,7 +327,7 @@ public class ScheduledService implements AutoCloseable {
             @Override
             public void handleTransportError(StompSession session, Throwable exception) {
                 if (exception instanceof ConnectionLostException && !session.isConnected()) {
-                    try {
+       /*             try {
                         Thread.sleep(5000);
                         ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
                         taskScheduler.initialize();
@@ -344,7 +343,7 @@ public class ScheduledService implements AutoCloseable {
                         StompSession.Subscription subscribe = stompSession.subscribe("com.weevent.stomp", getStompFrameHander());
                     } catch (InterruptedException | ExecutionException e) {
                         log.error(e.getMessage());
-                    }
+                    }*/
                 }
             }
 
