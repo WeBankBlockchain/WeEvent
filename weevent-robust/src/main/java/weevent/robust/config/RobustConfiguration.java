@@ -6,6 +6,7 @@ import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImplExporter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.IntegrationComponentScan;
@@ -13,7 +14,9 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.mqtt.core.DefaultMqttPahoClientFactory;
 import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
+import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
 import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
+import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.converter.StringMessageConverter;
@@ -22,6 +25,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
+import weevent.RobustApplication;
 
 @Configuration
 @IntegrationComponentScan
@@ -43,7 +47,7 @@ public class RobustConfiguration {
     @Value("${mqtt.broker.timeout}")
     private long completionTimeout;
 
-    final private String mqttClientId ="4c54c546-fe98-4f69-8617-897749a3eec8";
+    final private String mqttClientId ="mqttId";
 
     //jsonrpc4j exporter
     @Bean
@@ -104,6 +108,7 @@ public class RobustConfiguration {
         MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler(mqttClientId,mqttClientFactory());
         messageHandler.setAsync(true);
         messageHandler.setDefaultTopic("com.weevent.mqtt");
+        messageHandler.setDefaultQos(qos);
         return messageHandler;
     }
 
@@ -112,17 +117,16 @@ public class RobustConfiguration {
         return new DirectChannel();
     }
 
-/*    @Bean
+    @Bean
     public MessageChannel mqttInputChannel() {
         return new DirectChannel();
-    }*/
+    }
 
-/*    @Bean
+    @Bean
     @ConditionalOnProperty({"mqtt.broker.url"})
-   // @ServiceActivator(inputChannel = "mqttInputChannel")
-    public  MqttPahoMessageDrivenChannelAdapter mqttInbound() {
+    public MqttPahoMessageDrivenChannelAdapter mqttInbound() {
         String clientId = "4c54c546-fe98-4f69-8617-897749a3eec8";
-        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(hostUrl+"/weevent/mqtt",mqttClientId,"com.weevent.mqtt");
+        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(mqttClientId,mqttClientFactory(),"com.weevent.mqtt");
         log.info("MqttPahoMessageDrivenChannelAdapter bean instrument, url: {}", hostUrl);
         // client id can not duplicate
         log.info("mqtt client id: {}", clientId);
@@ -130,11 +134,10 @@ public class RobustConfiguration {
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(qos);
         adapter.setOutputChannel((MessageChannel) RobustApplication.applicationContext.getBean("mqttInputChannel"));
-        *//* MqttPahoMessageDrivenChannelAdapter will connect and subscribe even when topic list is empty
+        /* MqttPahoMessageDrivenChannelAdapter will connect and subscribe even when topic list is empty
          a trick to avoid "Error connecting or subscribing to []"
-          *//*
-     //   adapter.addTopic("com.weevent.mqtt");
+          */
         return adapter;
-    }*/
+    }
 
 }
