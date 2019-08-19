@@ -94,7 +94,7 @@ public class Web3sdkUtils {
                 System.out.println(nowTime() + " topic control address in every group:");
                 for (Map.Entry<Long, TopicControlAddress> e : CRUDAddress.entrySet()) {
                     if (e.getValue().getIsNew()) {
-                        System.out.println(e.getKey() + "\t" + e.getValue().getAddress() + "\tnew");
+                        System.out.println(e.getKey() + "\t" + e.getValue().getAddress() + "\t[new]");
                     } else {
                         System.out.println(e.getKey() + "\t" + e.getValue().getAddress());
                     }
