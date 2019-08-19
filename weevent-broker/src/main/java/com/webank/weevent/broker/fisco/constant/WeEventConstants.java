@@ -14,29 +14,14 @@ public class WeEventConstants {
     public static final String ADDRESS_EMPTY = "0x0000000000000000000000000000000000000000";
 
     /**
-     * The Constant CallContract Timeout.
-     */
-    public static final Integer TIME_OUT = 102;
-
-    /**
      * The Constant GAS_LIMIT.
      */
     public static final BigInteger GAS_LIMIT = new BigInteger("9999999999999");
 
     /**
-     * The Constant for default deploy contracts timeout.
+     * The Constant INITIAL_VALUE.
      */
-    public static final Integer DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS = 15;
-
-    /**
-     * The Constant INIIIAL_VALUE.
-     */
-    public static final BigInteger INILITIAL_VALUE = new BigInteger("0");
-
-    /**
-     * The Constant default timeout for getting transaction.
-     */
-    public static final Integer TRANSACTION_RECEIPT_TIMEOUT = 13;
+    public static final BigInteger INITIAL_VALUE = new BigInteger("0");
 
     /**
      * Max length for topic name.
@@ -76,11 +61,6 @@ public class WeEventConstants {
      * Extensions prefix char.
      */
     public static final String EXTENSIONS_PREFIX_CHAR = "weevent-";
-
-    /**
-     * Extensions default groupid.
-     */
-    public static final String DEFAULT_GROUP_ID = "1";
 
     /**
      * Extensions will message.
