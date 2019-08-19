@@ -54,14 +54,14 @@ public class Web3sdkUtils {
                 Map<Long, org.fisco.bcos.web3j.protocol.Web3j> groups = new HashMap<>();
                 // 1 is always exist
                 Long defaultGroup = Long.valueOf(WeEventConstants.DEFAULT_GROUP_ID);
-                org.fisco.bcos.web3j.protocol.Web3j web3j = Web3SDK2Wrapper.initWeb3j(defaultGroup, fiscoConfig, taskExecutor);
-                groups.put(defaultGroup, web3j);
+                org.fisco.bcos.web3j.protocol.Web3j defaultWeb3j = Web3SDK2Wrapper.initWeb3j(defaultGroup, fiscoConfig, taskExecutor);
+                groups.put(defaultGroup, defaultWeb3j);
 
-                List<String> groupIds = Web3SDK2Wrapper.listGroupId(web3j);
+                List<String> groupIds = Web3SDK2Wrapper.listGroupId(defaultWeb3j);
                 groupIds.remove(WeEventConstants.DEFAULT_GROUP_ID);
                 for (String groupId : groupIds) {
                     Long gid = Long.valueOf(groupId);
-                    web3j = Web3SDK2Wrapper.initWeb3j(gid, fiscoConfig, taskExecutor);
+                    org.fisco.bcos.web3j.protocol.Web3j web3j = Web3SDK2Wrapper.initWeb3j(gid, fiscoConfig, taskExecutor);
                     groups.put(gid, web3j);
                 }
                 log.info("all group in nodes: {}", groups.keySet());
@@ -69,8 +69,9 @@ public class Web3sdkUtils {
                 // deploy topic control contract for every group
                 Map<Long, TopicControlAddress> CRUDAddress = new HashMap<>();
                 for (Map.Entry<Long, org.fisco.bcos.web3j.protocol.Web3j> e : groups.entrySet()) {
+                    org.fisco.bcos.web3j.protocol.Web3j web3j = e.getValue();
                     // check exist first
-                    String original = Web3SDK2Wrapper.getAddress(e.getValue(), credentials);
+                    String original = Web3SDK2Wrapper.getAddress(web3j, credentials);
                     if (!StringUtils.isBlank(original)) {
                         log.info("topic control address already exist, group: {} address: {}", e.getKey(), original);
 

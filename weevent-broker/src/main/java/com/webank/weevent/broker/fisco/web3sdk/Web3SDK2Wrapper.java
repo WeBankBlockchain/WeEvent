@@ -204,8 +204,8 @@ public class Web3SDK2Wrapper {
         }
 
         try {
+            table.setKey(WeEventTopicControlAddress);
             Condition condition = table.getCondition();
-            condition.EQ(WeEventTableKey, WeEventTopicControlAddress);
             List<Map<String, String>> records = crud.select(table, condition);
             if (records.isEmpty()) {
                 log.info("no record in CRUD table, {}", WeEventTable);
@@ -239,8 +239,8 @@ public class Web3SDK2Wrapper {
         }
 
         try {
+            table.setKey(WeEventTopicControlAddress);
             org.fisco.bcos.web3j.precompile.crud.Entry record = table.getEntry();
-            record.put(WeEventTableKey, WeEventTopicControlAddress);
             record.put(WeEventTableValue, address);
             // notice: record's key can be duplicate in CRUD
             int result = crud.insert(table, record);
