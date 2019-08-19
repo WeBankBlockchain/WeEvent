@@ -19,8 +19,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Data
 class TopicControlAddress {
-    String address;
-    Boolean isNew;
+    private String address;
+    private Boolean isNew;
 
     TopicControlAddress(String address, Boolean isNew) {
         this.address = address;

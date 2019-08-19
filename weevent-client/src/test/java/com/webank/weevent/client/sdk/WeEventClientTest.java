@@ -12,15 +12,13 @@ import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
 import static java.lang.Thread.sleep;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * WeEventClient Tester.
@@ -35,19 +33,19 @@ public class WeEventClientTest {
     @Rule
     public TestName testName = new TestName();
 
-    public String topicName = "com.webank.weevent";
+    private String topicName = "com.webank.weevent";
 
     private IWeEventClient weEventClient;
 
     @Before
     public void before() throws Exception {
-        weEventClient = IWeEventClient.build("http://localhost:8081/weevent");
-        weEventClient.open(topicName);
+        this.weEventClient = IWeEventClient.build("http://localhost:7000/weevent");
+        this.weEventClient.open(this.topicName);
     }
 
     @After
     public void after() throws Exception {
-        weEventClient.close(topicName);
+        this.weEventClient.close(this.topicName);
     }
 
 
@@ -57,44 +55,14 @@ public class WeEventClientTest {
     @Test
     public void testPublish() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-        SendResult sendResult = this.weEventClient.publish(topicName, "hello world".getBytes(StandardCharsets.UTF_8));
-        assertTrue(sendResult.getStatus() == SendResult.SendResultStatus.SUCCESS);
-    }
-
-
-    /**
-     * Method: subscribe error eventId
-     */
-    @Test
-    public void testSubscribeWithGroupId() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-        // create subscriber
-        String groupId = WeEvent.DEFAULT_GROUP_ID;//if not set default 1
-        try {
-            String subscribeId = this.weEventClient.subscribe(this.topicName, groupId, "sfsafsfsfd", new IWeEventClient.EventListener() {
-                @Override
-                public void onEvent(WeEvent event) {
-                    System.out.println("onEvent:" + event.toString());
-                    log.info("onEvent:" + event.toString());
-                }
-
-                @Override
-                public void onException(Throwable e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (BrokerException e) {
-            log.info("subscribeId:{}", e.getMessage());
-        }
-
-        sleep(1000000);
+        SendResult sendResult = this.weEventClient.publish(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8));
+        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 
     @Test
     public void testSubscribe() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
         // create subscriber
-        String groupId = WeEvent.DEFAULT_GROUP_ID;//if not set default 1
         String subscribeId = this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
@@ -107,6 +75,8 @@ public class WeEventClientTest {
                 e.printStackTrace();
             }
         });
+
+        Assert.assertFalse(subscribeId.isEmpty());
         sleep(1000000);
     }
 
@@ -117,58 +87,11 @@ public class WeEventClientTest {
     public void testOpen_topicOverMaxLen() {
         try {
             String topic = "topiclengthexceeding64-123456789012345678901234567890123456789012";
-            boolean result = weEventClient.open(topic);
-            assertNull(result);
+            this.weEventClient.open(topic);
+            Assert.fail();
         } catch (BrokerException e) {
-            assertEquals(e.getCode(), ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode());
+            Assert.assertEquals(e.getCode(), ErrorCode.TOPIC_EXCEED_MAX_LENGTH.getCode());
         }
-    }
-
-    /**
-     * Method: subscribe(String topic, groupId, String offset, IConsumer.ConsumerListener listener)
-     */
-    @Test
-    public void testSubscribeEventId() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-        SendResult sendResult = this.weEventClient.publish(topicName, "hello world".getBytes(StandardCharsets.UTF_8));
-        System.out.print("sendResult getEventId" + sendResult.getEventId());
-        String groupId = WeEvent.DEFAULT_GROUP_ID;//if not set default 1
-        this.weEventClient.subscribe(this.topicName, groupId, sendResult.getEventId(), new IWeEventClient.EventListener() {
-            @Override
-            public void onEvent(WeEvent event) {
-                System.out.print(event.toString());
-            }
-
-            @Override
-            public void onException(Throwable e) {
-                e.printStackTrace();
-            }
-        });
-        sleep(100000);
-    }
-
-
-    /**
-     * Method: unSubscribe(String subscriptionId)
-     */
-    @Test
-    public void testUnSubscribe() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-        String groupId = WeEvent.DEFAULT_GROUP_ID;//if not set default 1
-        String subscriptionId = this.weEventClient.subscribe(this.topicName, groupId, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
-            @Override
-            public void onEvent(WeEvent event) {
-                log.info(event.toString());
-            }
-
-            @Override
-            public void onException(Throwable e) {
-                e.printStackTrace();
-            }
-        });
-        assertTrue(!subscriptionId.isEmpty());
-        boolean result = this.weEventClient.unSubscribe(subscriptionId);
-        assertTrue(result);
     }
 
     /**
@@ -177,19 +100,17 @@ public class WeEventClientTest {
     @Test
     public void testOpen() throws Exception {
         boolean result = this.weEventClient.open(this.topicName);
-        assertTrue(result);
+        Assert.assertTrue(result);
     }
-
 
     /**
      * Method: close(String topic)
      */
     @Test
     public void testClose() throws Exception {
-        boolean result = weEventClient.close(topicName);
-        assertTrue(result);
+        boolean result = this.weEventClient.close(topicName);
+        Assert.assertTrue(result);
     }
-
 
     /**
      * Method: exist(String topic)
@@ -197,7 +118,7 @@ public class WeEventClientTest {
     @Test
     public void testExist() throws Exception {
         boolean result = this.weEventClient.exist(this.topicName);
-        assertTrue(result);
+        Assert.assertTrue(result);
     }
 
     /**
@@ -206,7 +127,7 @@ public class WeEventClientTest {
     @Test
     public void testList() throws Exception {
         TopicPage list = this.weEventClient.list(0, 10);
-        assertTrue(list.getTotal() > 0);
+        Assert.assertTrue(list.getTotal() > 0);
     }
 
     /**
@@ -215,9 +136,8 @@ public class WeEventClientTest {
     @Test
     public void testState() throws Exception {
         TopicInfo info = this.weEventClient.state(this.topicName);
-        assertTrue(info.getTopicName().equals(this.topicName));
+        Assert.assertEquals(info.getTopicName(), this.topicName);
     }
-
 
     /**
      * Method: getEvent(String eventId)
