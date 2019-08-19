@@ -62,10 +62,18 @@ public class FiscoBcos {
         this.fiscoConfig = fiscoConfig;
     }
 
-    public void init(String address) throws BrokerException {
+    public void init() throws BrokerException {
         if (this.topicController == null) {
             this.credentials = Web3SDKWrapper.getCredentials(this.fiscoConfig);
             this.web3j = Web3SDKWrapper.initWeb3j(this.fiscoConfig, FiscoBcosDelegate.threadPool);
+
+            String address = Web3SDKWrapper.getAddress(this.web3j, this.credentials, this.fiscoConfig.getProxyAddress());
+            if (StringUtils.isBlank(address)) {
+                log.error("no topic control address in CNS, deploy it first");
+                throw new BrokerException(ErrorCode.TOPIC_CONTROLLER_IS_NULL);
+            }
+
+            log.info("topic control address in CNS: {}", address);
             this.topicController = (TopicController) getContractService(address, TopicController.class);
         }
     }
@@ -146,7 +154,7 @@ public class FiscoBcos {
 
             // deploy topic contract
             Topic topic = Topic.deploy(this.web3j, this.credentials, WeEventConstants.GAS_PRICE, WeEventConstants.GAS_LIMIT,
-                    WeEventConstants.INILITIAL_VALUE).get();
+                    WeEventConstants.INITIAL_VALUE).get();
             if (topic.getContractAddress().equals(WeEventConstants.ADDRESS_EMPTY)) {
                 log.error("contract address is empty after Topic.deploy(...)");
                 throw new BrokerException(ErrorCode.DEPLOY_CONTRACT_ERROR);
@@ -154,7 +162,7 @@ public class FiscoBcos {
 
             TransactionReceipt transactionReceipt = this.topicController
                     .addTopicInfo(new Utf8String(topicName), new Address(topic.getContractAddress()))
-                    .get(WeEventConstants.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+                    .get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
             List<TopicController.LogAddTopicNameAddressEventResponse> event = TopicController
                     .getLogAddTopicNameAddressEvents(transactionReceipt);
 
@@ -266,7 +274,7 @@ public class FiscoBcos {
         SendResult sendResult = new SendResult();
         try {
             TransactionReceipt transactionReceipt = topic.publishWeEvent(new Utf8String(topicName),
-                    new Utf8String(eventContent), new Utf8String(extensions)).get(WeEventConstants.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+                    new Utf8String(eventContent), new Utf8String(extensions)).get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
             List<Topic.LogWeEventEventResponse> event = Topic.getLogWeEventEvents(transactionReceipt);
             if (CollectionUtils.isNotEmpty(event)) {
                 sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);

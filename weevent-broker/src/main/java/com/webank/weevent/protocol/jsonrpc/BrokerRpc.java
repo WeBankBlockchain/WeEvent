@@ -69,14 +69,14 @@ public class BrokerRpc implements IBrokerRpc {
                               @JsonRpcParam(value = "content") byte[] content,
                               @JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException {
         log.info("jsonrpc protocol publish interface topic:{} contentLength:{} extensions:{}", topic, content.length, JSON.toJSONString(extensions));
-        return this.producer.publish(new WeEvent(topic, content, extensions), WeEventConstants.DEFAULT_GROUP_ID);
+        return this.producer.publish(new WeEvent(topic, content, extensions), WeEvent.DEFAULT_GROUP_ID);
     }
 
     @Override
     public SendResult publish(@JsonRpcParam(value = "topic") String topic,
                               @JsonRpcParam(value = "content") byte[] content) throws BrokerException {
         log.info("jsonrpc protocol publish interface topic:{} contentLength:{}", topic, content.length);
-        return this.producer.publish(new WeEvent(topic, content, new HashMap<>()), WeEventConstants.DEFAULT_GROUP_ID);
+        return this.producer.publish(new WeEvent(topic, content, new HashMap<>()), WeEvent.DEFAULT_GROUP_ID);
     }
 
     @Override
@@ -97,7 +97,7 @@ public class BrokerRpc implements IBrokerRpc {
     @Override
     public WeEvent getEvent(@JsonRpcParam(value = "eventId") String eventId) throws BrokerException {
         log.info("jsonrpc protocol getEvent interface eventId:{}", eventId);
-        return this.producer.getEvent(eventId, WeEventConstants.DEFAULT_GROUP_ID);
+        return this.producer.getEvent(eventId, WeEvent.DEFAULT_GROUP_ID);
     }
 
     @Override
@@ -114,14 +114,14 @@ public class BrokerRpc implements IBrokerRpc {
                             @JsonRpcParam(value = "subscriptionId") String subscriptionId,
                             @JsonRpcParam(value = "url") String url) throws BrokerException {
         log.info("jsonrpc protocol subscribe interface topic:{} subscriptionId:{} url:{}", topic, subscriptionId, url);
-        return this.masterJob.doSubscribe(WeEventConstants.JSONRPCTYPE, topic, WeEventConstants.DEFAULT_GROUP_ID, subscriptionId, url, "");
+        return this.masterJob.doSubscribe(WeEventConstants.JSONRPCTYPE, topic, WeEvent.DEFAULT_GROUP_ID, subscriptionId, url, "");
     }
 
     @Override
     public String subscribe(@JsonRpcParam(value = "topic") String topic,
                             @JsonRpcParam(value = "url") String url) throws BrokerException {
         log.info("jsonrpc protocol subscribe interface topic:{} url:{}", topic, url);
-        return this.masterJob.doSubscribe(WeEventConstants.JSONRPCTYPE, topic, WeEventConstants.DEFAULT_GROUP_ID, "", url, "");
+        return this.masterJob.doSubscribe(WeEventConstants.JSONRPCTYPE, topic, WeEvent.DEFAULT_GROUP_ID, "", url, "");
     }
 
     @Override
@@ -140,7 +140,7 @@ public class BrokerRpc implements IBrokerRpc {
     @Override
     public boolean open(@JsonRpcParam(value = "topic") String topic) throws BrokerException {
         log.info("jsonrpc protocol open interface topic:{}", topic);
-        return this.producer.open(topic, WeEventConstants.DEFAULT_GROUP_ID);
+        return this.producer.open(topic, WeEvent.DEFAULT_GROUP_ID);
     }
 
     @Override
@@ -153,7 +153,7 @@ public class BrokerRpc implements IBrokerRpc {
     @Override
     public boolean close(@JsonRpcParam(value = "topic") String topic) throws BrokerException {
         log.info("jsonrpc protocol close interface topic:{}", topic);
-        return this.producer.close(topic, WeEventConstants.DEFAULT_GROUP_ID);
+        return this.producer.close(topic, WeEvent.DEFAULT_GROUP_ID);
     }
 
     @Override
@@ -166,7 +166,7 @@ public class BrokerRpc implements IBrokerRpc {
     @Override
     public boolean exist(@JsonRpcParam(value = "topic") String topic) throws BrokerException {
         log.info("jsonrpc protocol exist interface topic:{} groupId", topic);
-        return this.producer.exist(topic, WeEventConstants.DEFAULT_GROUP_ID);
+        return this.producer.exist(topic, WeEvent.DEFAULT_GROUP_ID);
     }
 
     @Override
@@ -181,7 +181,7 @@ public class BrokerRpc implements IBrokerRpc {
     public TopicPage list(@JsonRpcParam(value = "pageIndex") Integer pageIndex,
                           @JsonRpcParam(value = "pageSize") Integer pageSize) throws BrokerException {
         log.info("jsonrpc protocol list interface pageIndex:{} pageSize:{}", pageIndex, pageSize);
-        return this.producer.list(pageIndex, pageSize, WeEventConstants.DEFAULT_GROUP_ID);
+        return this.producer.list(pageIndex, pageSize, WeEvent.DEFAULT_GROUP_ID);
     }
 
     @Override
@@ -194,6 +194,6 @@ public class BrokerRpc implements IBrokerRpc {
     @Override
     public TopicInfo state(@JsonRpcParam(value = "topic") String topic) throws BrokerException {
         log.info("jsonrpc protocol state interface topic:{}", topic);
-        return this.producer.state(topic, WeEventConstants.DEFAULT_GROUP_ID);
+        return this.producer.state(topic, WeEvent.DEFAULT_GROUP_ID);
     }
 }

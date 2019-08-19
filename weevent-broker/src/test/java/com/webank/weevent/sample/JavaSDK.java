@@ -23,7 +23,7 @@ public class JavaSDK {
             // get client
             IWeEventClient client = IWeEventClient.build("http://localhost:8080/weevent");
             String topicName = "com.weevent.test";
-            String groupId = "1";
+            String groupId = WeEvent.DEFAULT_GROUP_ID;
             // ensure topic exist
             client.open(topicName, groupId);
             Map<String, String> extensions = new HashMap<>();

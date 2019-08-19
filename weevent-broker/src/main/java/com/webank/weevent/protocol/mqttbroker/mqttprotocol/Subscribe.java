@@ -72,7 +72,7 @@ public class Subscribe {
             String subscriptionId = "";
             try {
                 subscriptionId = this.iConsumer.subscribe(topicFilter,
-                        WeEventConstants.DEFAULT_GROUP_ID,
+                        WeEvent.DEFAULT_GROUP_ID,
                         WeEvent.OFFSET_LAST,
                         ext,
                         new IConsumer.ConsumerListener() {

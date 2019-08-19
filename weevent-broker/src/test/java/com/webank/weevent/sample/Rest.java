@@ -3,6 +3,7 @@ package com.webank.weevent.sample;
 import java.nio.charset.StandardCharsets;
 
 import com.webank.weevent.sdk.SendResult;
+import com.webank.weevent.sdk.WeEvent;
 
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClientException;
@@ -18,13 +19,13 @@ public class Rest {
             Boolean result = rest.getForEntity("http://localhost:8080/weevent/rest/open?topic={}&groupId={}",
                     Boolean.class,
                     "com.weevent.test",
-                    "1").getBody();
+                    WeEvent.DEFAULT_GROUP_ID).getBody();
             System.out.println(result);
             // publish event to topic "com.weevent.test"
             SendResult sendResult = rest.getForEntity("http://localhost:8080/weevent/rest/publish?topic={}&groupId={}&content={}",
                     SendResult.class,
                     "com.weevent.test",
-                    "1",
+                    WeEvent.DEFAULT_GROUP_ID,
                     "hello weevent".getBytes(StandardCharsets.UTF_8)).getBody();
             System.out.println(sendResult.getStatus());
             System.out.println(sendResult.getEventId());

@@ -17,6 +17,8 @@ import lombok.Data;
 public class WeEvent implements Serializable {
     private static final long serialVersionUID = 2026046567802960173L;
 
+    public static final String DEFAULT_GROUP_ID = "1";
+
     public static final String OFFSET_FIRST = "OFFSET_FIRST";
     public static final String OFFSET_LAST = "OFFSET_LAST";
 
