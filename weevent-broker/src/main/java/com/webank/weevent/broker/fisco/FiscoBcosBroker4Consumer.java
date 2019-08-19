@@ -301,10 +301,11 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         }
 
         // load MainEventLoop with configuration
-        for (Long groupId : fiscoBcosDelegate.listGroupId()) {
-            MainEventLoop mainEventLoop = new MainEventLoop(groupId);
+        for (String groupId : fiscoBcosDelegate.listGroupId()) {
+            Long gid = Long.valueOf(groupId);
+            MainEventLoop mainEventLoop = new MainEventLoop(gid);
             this.threadPoolTaskExecutor.execute(mainEventLoop);
-            this.mainEventLoops.put(groupId, mainEventLoop);
+            this.mainEventLoops.put(gid, mainEventLoop);
         }
 
         this.consumerStarted = true;

@@ -4,8 +4,8 @@ import java.util.Map;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.util.WeEventUtils;
-import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.broker.plugin.IProducer;
+import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.TopicInfo;
@@ -58,7 +58,7 @@ public class BrokerRest extends RestHA implements IBrokerRpc {
         WeEvent event = new WeEvent(eventData.get(WeEventConstants.EVENT_TOPIC), eventData.get(WeEventConstants.EVENT_CONTENT).getBytes(), extensions);
 
         // default group id
-        String groupId = WeEventConstants.DEFAULT_GROUP_ID;
+        String groupId = WeEvent.DEFAULT_GROUP_ID;
         if (eventData.containsKey(WeEventConstants.EVENT_GROUP_ID)) {
             groupId = eventData.get(WeEventConstants.EVENT_GROUP_ID);
             if (StringUtils.isBlank(groupId)) {
@@ -77,7 +77,7 @@ public class BrokerRest extends RestHA implements IBrokerRpc {
         log.info("rest protocol subscribe interface topic:{} url:{}", topic, url);
         checkSupport();
         if (StringUtils.isBlank(groupId)) {
-            groupId = WeEventConstants.DEFAULT_GROUP_ID;
+            groupId = WeEvent.DEFAULT_GROUP_ID;
         }
 
         return this.masterJob.doSubscribe(WeEventConstants.RESTFULTYPE, topic, groupId, subscriptionId, url, getUrlFormat(this.request));
@@ -96,7 +96,7 @@ public class BrokerRest extends RestHA implements IBrokerRpc {
                             @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         log.info("rest protocol getEvent interface eventId:{}", eventId);
         if (StringUtils.isBlank(groupId)) {
-            groupId = WeEventConstants.DEFAULT_GROUP_ID;
+            groupId = WeEvent.DEFAULT_GROUP_ID;
         }
         return this.producer.getEvent(eventId, groupId);
     }
@@ -107,7 +107,7 @@ public class BrokerRest extends RestHA implements IBrokerRpc {
                         @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         log.info("rest protocol open interface topic:{}", topic);
         if (StringUtils.isBlank(groupId)) {
-            groupId = WeEventConstants.DEFAULT_GROUP_ID;
+            groupId = WeEvent.DEFAULT_GROUP_ID;
         }
         return this.producer.open(topic, groupId);
     }
@@ -118,7 +118,7 @@ public class BrokerRest extends RestHA implements IBrokerRpc {
                          @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         log.info("rest protocol close interface topic:{}", topic);
         if (StringUtils.isBlank(groupId)) {
-            groupId = WeEventConstants.DEFAULT_GROUP_ID;
+            groupId = WeEvent.DEFAULT_GROUP_ID;
         }
         return this.producer.close(topic, groupId);
     }
@@ -129,7 +129,7 @@ public class BrokerRest extends RestHA implements IBrokerRpc {
                          @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         log.info("rest protocol exist interface topic:{}", topic);
         if (StringUtils.isBlank(groupId)) {
-            groupId = WeEventConstants.DEFAULT_GROUP_ID;
+            groupId = WeEvent.DEFAULT_GROUP_ID;
         }
         return this.producer.exist(topic, groupId);
     }
@@ -141,7 +141,7 @@ public class BrokerRest extends RestHA implements IBrokerRpc {
                           @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         log.info("rest protocol list interface pageIndex:{} pageSize:{}", pageIndex, pageSize);
         if (StringUtils.isBlank(groupId)) {
-            groupId = WeEventConstants.DEFAULT_GROUP_ID;
+            groupId = WeEvent.DEFAULT_GROUP_ID;
         }
         return this.producer.list(pageIndex, pageSize, groupId);
     }
@@ -152,7 +152,7 @@ public class BrokerRest extends RestHA implements IBrokerRpc {
                            @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         log.info("rest protocol state interface topic:{}", topic);
         if (StringUtils.isBlank(groupId)) {
-            groupId = WeEventConstants.DEFAULT_GROUP_ID;
+            groupId = WeEvent.DEFAULT_GROUP_ID;
         }
         return this.producer.state(topic, groupId);
     }
