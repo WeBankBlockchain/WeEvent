@@ -4,6 +4,8 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.webank.weevent.sdk.WeEvent;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
@@ -72,7 +74,7 @@ public class Stomp {
                 StompHeaders header = new StompHeaders();
                 header.setDestination(topic);
                 header.set("eventId", "2cf24dba-59-1124");
-                header.set("groupId", "1");
+                header.set("groupId", WeEvent.DEFAULT_GROUP_ID);
                 // extension params
                 header.set("weevent-format", "json");
 
@@ -164,7 +166,7 @@ public class Stomp {
                 StompHeaders header = new StompHeaders();
                 header.setDestination(topic);
                 header.set("eventId", "2cf24dba-59-1124");
-                header.set("groupId", "1");
+                header.set("groupId", WeEvent.DEFAULT_GROUP_ID);
                 // extension params
                 header.set("weevent-format", "json");
                 StompSession.Subscription subscription = session.subscribe(header, new StompFrameHandler() {

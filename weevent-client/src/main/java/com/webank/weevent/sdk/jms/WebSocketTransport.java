@@ -184,8 +184,9 @@ public class WebSocketTransport extends WebSocketClient {
     public boolean stompDisconnect() throws JMSException {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         String req = stompCommand.encodeDisConnect();
-        sequence2Id.put(Long.toString(1L), 1L);
-        Message stompResponse = this.stompRequest(req, 1L);
+        Long gid = Long.valueOf(WeEvent.DEFAULT_GROUP_ID);
+        sequence2Id.put(WeEvent.DEFAULT_GROUP_ID, gid);
+        Message stompResponse = this.stompRequest(req, gid);
         return !stompCommand.isError(stompResponse);
     }
 

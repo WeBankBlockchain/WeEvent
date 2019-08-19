@@ -9,6 +9,7 @@ import java.util.Map;
 import com.webank.weevent.JUnitTestBase;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.SendResult;
+import com.webank.weevent.sdk.WeEvent;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
@@ -34,7 +35,7 @@ import static org.junit.Assert.fail;
  */
 @Slf4j
 public class SubscribeTest extends JUnitTestBase {
-    private final static String groupId = "1";
+    private final static String groupId = WeEvent.DEFAULT_GROUP_ID;
     private final static Map<String, String> extensions = new HashMap<>();
 
     @Before
