@@ -38,7 +38,7 @@ public class WeEventClientGroupIdTest {
 
     public String wildCardTopicName = "com.webank.weevent/#";
 
-    public String groupId = "1";
+    public String groupId = WeEvent.DEFAULT_GROUP_ID;
 
     private IWeEventClient weEventClient;
 
@@ -148,7 +148,7 @@ public class WeEventClientGroupIdTest {
     public void testSubscribe_01() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
         // create subscriber
-        String groupId = "1";//if not set default 1
+        String groupId = this.groupId;//if not set default 1
         String subscriptionId = this.weEventClient.subscribe(this.topicName, groupId, "317e7c4c-8-26", new IWeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
@@ -171,7 +171,7 @@ public class WeEventClientGroupIdTest {
     public void testSubscribeWildCard() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
         // create subscriber
-        String groupId = "1";//if not set default 1
+        String groupId = this.groupId;//if not set default 1
         String subscriptionId = this.weEventClient.subscribe(this.wildCardTopicName, "447c022f-10-2508", new IWeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
@@ -192,7 +192,7 @@ public class WeEventClientGroupIdTest {
     @Test
     public void testUnSubscribe() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-        String groupId = "1";//if not set default 1
+        String groupId = this.groupId;//if not set default 1
         String subscriptionId = this.weEventClient.subscribe(this.topicName, groupId, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {

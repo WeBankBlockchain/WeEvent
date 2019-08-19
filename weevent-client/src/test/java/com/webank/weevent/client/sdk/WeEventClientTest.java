@@ -69,7 +69,7 @@ public class WeEventClientTest {
     public void testSubscribeWithGroupId() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
         // create subscriber
-        String groupId = "1";//if not set default 1
+        String groupId = WeEvent.DEFAULT_GROUP_ID;//if not set default 1
         try {
             String subscribeId = this.weEventClient.subscribe(this.topicName, groupId, "sfsafsfsfd", new IWeEventClient.EventListener() {
                 @Override
@@ -94,7 +94,7 @@ public class WeEventClientTest {
     public void testSubscribe() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
         // create subscriber
-        String groupId = "1";//if not set default 1
+        String groupId = WeEvent.DEFAULT_GROUP_ID;//if not set default 1
         String subscribeId = this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
@@ -132,7 +132,7 @@ public class WeEventClientTest {
         log.info("===================={}", this.testName.getMethodName());
         SendResult sendResult = this.weEventClient.publish(topicName, "hello world".getBytes(StandardCharsets.UTF_8));
         System.out.print("sendResult getEventId" + sendResult.getEventId());
-        String groupId = "1";//if not set default 1
+        String groupId = WeEvent.DEFAULT_GROUP_ID;//if not set default 1
         this.weEventClient.subscribe(this.topicName, groupId, sendResult.getEventId(), new IWeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
@@ -154,7 +154,7 @@ public class WeEventClientTest {
     @Test
     public void testUnSubscribe() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-        String groupId = "1";//if not set default 1
+        String groupId = WeEvent.DEFAULT_GROUP_ID;//if not set default 1
         String subscriptionId = this.weEventClient.subscribe(this.topicName, groupId, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
