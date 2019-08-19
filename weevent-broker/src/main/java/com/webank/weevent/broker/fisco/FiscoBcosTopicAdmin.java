@@ -1,7 +1,6 @@
 package com.webank.weevent.broker.fisco;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.config.FiscoConfig;
@@ -137,12 +136,8 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     }
 
     @Override
-    public Set<String> listGroupId() {
-        Set<String> groupIds = new HashSet<>();
-        for (Long groupId : fiscoBcosDelegate.listGroupId()) {
-            groupIds.add(String.valueOf(groupId));
-        }
-        return groupIds;
+    public List<String> listGroupId() throws BrokerException {
+        return fiscoBcosDelegate.listGroupId();
     }
 
     public void validateGroupId(String groupId) throws BrokerException {

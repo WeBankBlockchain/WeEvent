@@ -195,7 +195,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
         Map<String, String> extensions = WeEventUtils.getExtensions(nativeHeaders);
 
-        String groupId = WeEventConstants.DEFAULT_GROUP_ID;
+        String groupId = WeEvent.DEFAULT_GROUP_ID;
         Object eventGroupId = nativeHeaders.get(WeEventConstants.EVENT_GROUP_ID);
         if (nativeHeaders.containsKey(WeEventConstants.EVENT_GROUP_ID) && eventGroupId != null) {
             groupId = ((List) eventGroupId).get(0).toString();
@@ -236,7 +236,7 @@ public class BrokerStomp extends TextWebSocketHandler {
         //subscription
         String continueSubscriptionIdStr = getHeadersValue(WeEvent.WeEvent_SubscriptionId, msg);
 
-        String groupId = WeEventConstants.DEFAULT_GROUP_ID;
+        String groupId = WeEvent.DEFAULT_GROUP_ID;
         if (nativeHeaders.containsKey(WeEventConstants.EVENT_GROUP_ID)) {
             Object eventGroupId = nativeHeaders.get(WeEventConstants.EVENT_GROUP_ID);
             if (eventGroupId != null) {
