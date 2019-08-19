@@ -117,15 +117,24 @@ public class FiscoBcosDelegate {
             // set web3sdk.Async thread pool
             new org.fisco.bcos.web3j.utils.Async(threadPool);
 
-            // init all group in nodes
+            // 1 is always exist
+            Long defaultGId = Long.valueOf(WeEvent.DEFAULT_GROUP_ID);
+            FiscoBcos2 defaultFiscoBcos2 = new FiscoBcos2(fiscoConfig);
+            defaultFiscoBcos2.init(defaultGId);
+            this.fiscoBcos2Map.put(defaultGId, defaultFiscoBcos2);
+            // this call need default group has been initialized
             List<String> groups = this.listGroupId();
-            log.info("all group in nodes: {}", groups.toString());
+
+            // init all group in nodes except default one
+            groups.remove(WeEvent.DEFAULT_GROUP_ID);
             for (String groupId : groups) {
                 Long gid = Long.valueOf(groupId);
                 FiscoBcos2 fiscoBcos2 = new FiscoBcos2(fiscoConfig);
                 fiscoBcos2.init(gid);
                 this.fiscoBcos2Map.put(gid, fiscoBcos2);
             }
+
+            log.info("all group in nodes: {}", this.fiscoBcos2Map.keySet());
         } else {
             log.error("unknown FISCO-BCOS's version");
             throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
@@ -142,17 +151,17 @@ public class FiscoBcosDelegate {
     public List<String> listGroupId() throws BrokerException {
         if (this.fiscoBcos != null) {
             List<String> list = new ArrayList<>();
-            list.add(WeEventConstants.DEFAULT_GROUP_ID);
+            list.add(WeEvent.DEFAULT_GROUP_ID);
             return list;
         } else {
             // group 1 is always exist
-            return this.fiscoBcos2Map.get(1L).listGroupId();
+            return this.fiscoBcos2Map.get(Long.valueOf(WeEvent.DEFAULT_GROUP_ID)).listGroupId();
         }
     }
 
     private void checkVersion(Long groupId) throws BrokerException {
         if (this.fiscoBcos != null) {
-            if (groupId != Long.parseLong(WeEventConstants.DEFAULT_GROUP_ID)) {
+            if (groupId != Long.parseLong(WeEvent.DEFAULT_GROUP_ID)) {
                 throw new BrokerException(ErrorCode.WE3SDK_VERSION_NOT_SUPPORT);
             }
             return;

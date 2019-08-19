@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.broker.config.FiscoConfig;
-import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.web3sdk.Web3SDK2Wrapper;
 import com.webank.weevent.broker.fisco.web3sdk.Web3SDKWrapper;
+import com.webank.weevent.sdk.WeEvent;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -53,12 +53,12 @@ public class Web3sdkUtils {
 
                 Map<Long, org.fisco.bcos.web3j.protocol.Web3j> groups = new HashMap<>();
                 // 1 is always exist
-                Long defaultGroup = Long.valueOf(WeEventConstants.DEFAULT_GROUP_ID);
+                Long defaultGroup = Long.valueOf(WeEvent.DEFAULT_GROUP_ID);
                 org.fisco.bcos.web3j.protocol.Web3j defaultWeb3j = Web3SDK2Wrapper.initWeb3j(defaultGroup, fiscoConfig, taskExecutor);
                 groups.put(defaultGroup, defaultWeb3j);
 
                 List<String> groupIds = Web3SDK2Wrapper.listGroupId(defaultWeb3j);
-                groupIds.remove(WeEventConstants.DEFAULT_GROUP_ID);
+                groupIds.remove(WeEvent.DEFAULT_GROUP_ID);
                 for (String groupId : groupIds) {
                     Long gid = Long.valueOf(groupId);
                     org.fisco.bcos.web3j.protocol.Web3j web3j = Web3SDK2Wrapper.initWeb3j(gid, fiscoConfig, taskExecutor);

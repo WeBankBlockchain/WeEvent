@@ -70,6 +70,7 @@ public class FiscoBcos2 {
                 throw new BrokerException(ErrorCode.TOPIC_CONTROLLER_IS_NULL);
             }
 
+            log.info("load topic control address from CRUD: {}", address);
             this.topicController = (TopicController) getContractService(address, TopicController.class);
         }
     }

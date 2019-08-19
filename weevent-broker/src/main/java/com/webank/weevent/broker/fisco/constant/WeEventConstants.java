@@ -63,11 +63,6 @@ public class WeEventConstants {
     public static final String EXTENSIONS_PREFIX_CHAR = "weevent-";
 
     /**
-     * Extensions default groupid.
-     */
-    public static final String DEFAULT_GROUP_ID = "1";
-
-    /**
      * Extensions will message.
      */
     public static final String EXTENSIONS_WILL_MESSAGE = "weevent-willmessage";
