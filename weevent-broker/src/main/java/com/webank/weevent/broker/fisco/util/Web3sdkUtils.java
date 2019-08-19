@@ -107,7 +107,7 @@ public class Web3sdkUtils {
                 String original = Web3SDKWrapper.getAddress(web3j, credentials, fiscoConfig.getProxyAddress());
                 if (!StringUtils.isBlank(original)) {
                     log.info("topic control address already exist, address: {}", original);
-                    System.out.println("topic control address: " + original);
+                    System.out.println(nowTime() + " topic control address: " + original);
                     System.exit(1);
                 }
 

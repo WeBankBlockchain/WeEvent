@@ -249,7 +249,13 @@ public class Web3SDKWrapper {
 
             ContractAbiMgr abiMgr = (ContractAbiMgr) loadContract(CNSAddress, web3j, credentials, ContractAbiMgr.class);
             Future<Address> f = abiMgr.getAddr(new Utf8String(WeEventTopicControlAddress));
-            return f.get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS).toString();
+            String address = f.get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS).toString();
+            if (StringUtils.isBlank(address) || WeEventConstants.ADDRESS_EMPTY.equals(address)) {
+                return "";
+            }
+
+            log.info("topic control address in CNS: {}", address);
+            return address;
         } catch (ExecutionException | TimeoutException | InterruptedException | NullPointerException e) {
             log.error("load topic control address from CNS failed", e);
             return "";
