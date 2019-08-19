@@ -8,13 +8,14 @@ import java.util.Map;
 
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.SendResult;
+import com.webank.weevent.sdk.WeEvent;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.googlecode.jsonrpc4j.ProxyUtil;
 
 public class JsonRPC {
-    private final static String groupId = "1";
+    private final static String groupId = WeEvent.DEFAULT_GROUP_ID;
     private final static Map<String, String> extensions = new HashMap<>();
 
     public static void main(String[] args) {

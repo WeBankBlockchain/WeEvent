@@ -1,6 +1,6 @@
 package com.webank.weevent.broker.plugin;
 
-import java.util.Set;
+import java.util.List;
 
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.TopicInfo;
@@ -76,5 +76,5 @@ public interface IEventTopic {
      * @return group id
      * @throws BrokerException BrokerException
      */
-    Set<String> listGroupId() throws BrokerException;
+    List<String> listGroupId() throws BrokerException;
 }

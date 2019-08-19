@@ -53,7 +53,7 @@ public class RestfullTest extends JUnitTestBase {
         log.info("===================={}", this.testName.getMethodName());
 
         ResponseEntity<Boolean> rsp = rest.getForEntity(url + "open?topic={topic}&groupId={groupId}", Boolean.class,
-                this.restTopic, "1");
+                this.restTopic, WeEvent.DEFAULT_GROUP_ID);
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody());
     }
@@ -72,7 +72,7 @@ public class RestfullTest extends JUnitTestBase {
         log.info("===================={}", this.testName.getMethodName());
 
         ResponseEntity<Boolean> rsp = rest.getForEntity(url + "close?topic={topic}&groupId={groupId}", Boolean.class,
-                this.restTopic, "1");
+                this.restTopic, WeEvent.DEFAULT_GROUP_ID);
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody());
     }
@@ -91,7 +91,7 @@ public class RestfullTest extends JUnitTestBase {
         log.info("===================={}", this.testName.getMethodName());
 
         ResponseEntity<Boolean> rsp = rest.getForEntity(url + "exist?topic={topic}&groupId={groupId}", Boolean.class,
-                this.restTopic, "1");
+                this.restTopic, WeEvent.DEFAULT_GROUP_ID);
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody());
     }
@@ -111,7 +111,7 @@ public class RestfullTest extends JUnitTestBase {
         log.info("===================={}", this.testName.getMethodName());
 
         ResponseEntity<TopicInfo> rsp = rest.getForEntity(url + "state?topic={topic}&groupId={groupId}",
-                TopicInfo.class, this.restTopic, "1");
+                TopicInfo.class, this.restTopic, WeEvent.DEFAULT_GROUP_ID);
         System.out.println("state, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertEquals(this.restTopic, rsp.getBody().getTopicName());
@@ -133,7 +133,7 @@ public class RestfullTest extends JUnitTestBase {
 
         ResponseEntity<TopicPage> rsp = rest.getForEntity(
                 url + "list?pageIndex={pageIndex}&pageSize={pageSize}&groupId={groupId}", TopicPage.class, "0", "10",
-                "1");
+                WeEvent.DEFAULT_GROUP_ID);
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody().getTotal() > 0);
     }
@@ -155,7 +155,7 @@ public class RestfullTest extends JUnitTestBase {
         log.info("===================={}", this.testName.getMethodName());
 
         ResponseEntity<WeEvent> rsp = rest.getForEntity(url + "getEvent?eventId={eventId}&groupId={groupId}",
-                WeEvent.class, this.eventId, "1");
+                WeEvent.class, this.eventId, WeEvent.DEFAULT_GROUP_ID);
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         WeEvent event = rsp.getBody();
         String returnContent = new String(event.getContent());
@@ -179,7 +179,7 @@ public class RestfullTest extends JUnitTestBase {
 
         ResponseEntity<SendResult> rsp = rest.getForEntity(
                 url + "publish?topic={topic}&content={content}&groupId={groupId}", SendResult.class, this.restTopic,
-                this.content, "1");
+                this.content, WeEvent.DEFAULT_GROUP_ID);
         log.info("subscribe, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody().getEventId().contains("-"));
@@ -243,7 +243,7 @@ public class RestfullTest extends JUnitTestBase {
 
         ResponseEntity<SendResult> rsp = rest.getForEntity(url
                         + "publish?topic={topic}&content={content}&weevent-test1={value1}&weevent-test2={value2}&groupId={groupId}",
-                SendResult.class, this.restTopic, this.content, "test1value", "test2vlaue", "1");
+                SendResult.class, this.restTopic, this.content, "test1value", "test2vlaue", WeEvent.DEFAULT_GROUP_ID);
         log.info("subscribe, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody().getEventId().contains("-"));
@@ -276,7 +276,7 @@ public class RestfullTest extends JUnitTestBase {
         log.info("===================={}", this.testName.getMethodName());
 
         ResponseEntity<String> rsp = rest.getForEntity(url + "subscribe?topic={topic}&url={url}&groupId={groupId}",
-                String.class, this.restTopic, "http://localhost:" + listenPort + "/weevent/mock/rest/onEvent", "1");
+                String.class, this.restTopic, "http://localhost:" + listenPort + "/weevent/mock/rest/onEvent", WeEvent.DEFAULT_GROUP_ID);
         log.info("subId: " + rsp.getBody());
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody().contains("-"));
@@ -287,7 +287,7 @@ public class RestfullTest extends JUnitTestBase {
         log.info("===================={}", this.testName.getMethodName());
 
         ResponseEntity<String> rsp = rest.getForEntity(url + "subscribe?topic={topic}&url={url}&groupId={groupId}",
-                String.class, this.restTopic, "http://localhost:" + 8088 + "/weevent/mock/rest/onEvent", "1");
+                String.class, this.restTopic, "http://localhost:" + 8088 + "/weevent/mock/rest/onEvent", WeEvent.DEFAULT_GROUP_ID);
         log.info("result: " + rsp.getBody());
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody().contains(ErrorCode.URL_CONNECT_FAILED.getCodeDesc()));
@@ -302,7 +302,7 @@ public class RestfullTest extends JUnitTestBase {
         subId = result.getBody();
         ResponseEntity<String> rsp = rest.getForEntity(
                 url + "subscribe?topic={topic}&url={url}&groupId={groupId}&subscriptionId={subscriptionId}",
-                String.class, this.restTopic, "http://localhost:" + 8088 + "/weevent/mock/rest/onEvent", "1", subId);
+                String.class, this.restTopic, "http://localhost:" + 8088 + "/weevent/mock/rest/onEvent", WeEvent.DEFAULT_GROUP_ID, subId);
         log.info("result: " + rsp.getBody());
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody().contains(ErrorCode.URL_CONNECT_FAILED.getCodeDesc()));
