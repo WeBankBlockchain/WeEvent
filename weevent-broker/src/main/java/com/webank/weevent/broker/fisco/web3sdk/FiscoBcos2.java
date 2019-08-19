@@ -43,9 +43,6 @@ public class FiscoBcos2 {
     // config
     private FiscoConfig fiscoConfig;
 
-    // binding group id
-    private Long groupId;
-
     // tx account
     private Credentials credentials;
 
@@ -64,7 +61,6 @@ public class FiscoBcos2 {
 
     public void init(Long groupId) throws BrokerException {
         if (this.topicController == null) {
-            this.groupId = groupId;
             this.credentials = Web3SDK2Wrapper.getCredentials(this.fiscoConfig);
             this.web3j = Web3SDK2Wrapper.initWeb3j(groupId, this.fiscoConfig, FiscoBcosDelegate.threadPool);
 

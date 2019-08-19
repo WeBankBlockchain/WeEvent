@@ -35,12 +35,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 @Slf4j
 public class FiscoBcosDelegate {
-    public final static String WeEventTable = "WeEvent";
-    public final static String WeEventTableKey = "key";
-    public final static String WeEventTableValue = "value";
-
-    public final static String WeEventTopicControlAddress = "WeEvent_topic_control_address";
-
     // access to version 1.x
     private FiscoBcos fiscoBcos;
 
@@ -48,7 +42,7 @@ public class FiscoBcosDelegate {
     private Map<Long, FiscoBcos2> fiscoBcos2Map;
 
     // web3sdk timeout, ms
-    public static Integer timeout;
+    public static Integer timeout = 10000;
 
     // web3sdk thread pool
     public static ThreadPoolTaskExecutor threadPool;

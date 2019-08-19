@@ -37,6 +37,7 @@ import org.fisco.bcos.web3j.precompile.exception.PrecompileMessageException;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameterNumber;
+import org.fisco.bcos.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.fisco.bcos.web3j.protocol.core.RemoteCall;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BcosTransactionReceipt;
@@ -56,6 +57,12 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 @Slf4j
 public class Web3SDK2Wrapper {
+    // topic control address in CRUD
+    public final static String WeEventTable = "WeEvent";
+    public final static String WeEventTableKey = "key";
+    public final static String WeEventTableValue = "value";
+    public final static String WeEventTopicControlAddress = "topic_control_address";
+
     // it's a trick. Topic.getLogWeEventEvents is not static
     private static Topic topic;
 
@@ -144,30 +151,36 @@ public class Web3SDK2Wrapper {
         }
     }
 
+    /**
+     * Table in CRUD, it's a key-value store.
+     * WeEvent -> key, value
+     * https://fisco-bcos-documentation.readthedocs.io/zh_CN/release-2.0/docs/manual/console.html#desc
+     *
+     * @param crud table service
+     * @return opened or exist table
+     */
     public static Table ensureTable(CRUDService crud) {
-        String tableName = FiscoBcosDelegate.WeEventTable;
-
         try {
-            return crud.desc(tableName);
+            return crud.desc(WeEventTable);
         } catch (PrecompileMessageException e) {
-            log.info("not exist table in CRUD, create it: {}", tableName);
+            log.info("not exist table in CRUD, create it: {}", WeEventTable);
 
-            Table table = new Table(tableName, FiscoBcosDelegate.WeEventTableKey, FiscoBcosDelegate.WeEventTableValue);
+            Table table = new Table(WeEventTable, WeEventTableKey, WeEventTableValue);
             try {
                 int result = crud.createTable(table);
                 if (result == 0) {
-                    log.info("create table in CRUD success, {}", tableName);
+                    log.info("create table in CRUD success, {}", WeEventTable);
                     return table;
                 }
 
-                log.error("create table in CRUD failed, " + tableName);
+                log.error("create table in CRUD failed, " + WeEventTable);
                 return null;
             } catch (Exception e1) {
-                log.error("create table in CRUD failed, " + tableName, e1);
+                log.error("create table in CRUD failed, " + WeEventTable, e1);
                 return null;
             }
         } catch (Exception e) {
-            log.error("ensure table in CRUD failed, " + tableName, e);
+            log.error("ensure table in CRUD failed, " + WeEventTable, e);
             return null;
         }
     }
@@ -181,6 +194,9 @@ public class Web3SDK2Wrapper {
      * @return address
      */
     public static String getAddress(Web3j web3j, Credentials credentials) throws BrokerException {
+        String groupId = String.valueOf(((JsonRpc2_0Web3j) web3j).getGroupId());
+        log.info("get topic control address from CRUD, groupId: {}", groupId);
+
         CRUDService crud = new CRUDService(web3j, credentials);
         Table table = ensureTable(crud);
         if (table == null) {
@@ -188,17 +204,17 @@ public class Web3SDK2Wrapper {
         }
 
         try {
-            Condition condition = new Condition();
-            condition.EQ(FiscoBcosDelegate.WeEventTableKey, FiscoBcosDelegate.WeEventTopicControlAddress);
+            Condition condition = table.getCondition();
+            condition.EQ(WeEventTableKey, WeEventTopicControlAddress);
             List<Map<String, String>> records = crud.select(table, condition);
             if (records.isEmpty()) {
-                log.info("no record in CRUD table, {}", FiscoBcosDelegate.WeEventTable);
+                log.info("no record in CRUD table, {}", WeEventTable);
                 return "";
             }
             if (records.size() != 1) {
-                log.warn("more then one record in CRUD table, {}", FiscoBcosDelegate.WeEventTable);
+                log.warn("more then one record in CRUD table, {}", WeEventTable);
             }
-            return records.get(0).get(FiscoBcosDelegate.WeEventTableValue);
+            return records.get(0).get(WeEventTableValue);
         } catch (Exception e) {
             log.error("select from CRUD table failed", e);
             return "";
@@ -206,6 +222,9 @@ public class Web3SDK2Wrapper {
     }
 
     public static boolean addAddress(Web3j web3j, Credentials credentials, String address) throws BrokerException {
+        String groupId = String.valueOf(((JsonRpc2_0Web3j) web3j).getGroupId());
+        log.info("add topic control address into CRUD, groupId: {}", groupId);
+
         // check exist manually to avoid duplicate record
         String original = getAddress(web3j, credentials);
         if (!StringUtils.isBlank(original)) {
@@ -220,10 +239,10 @@ public class Web3SDK2Wrapper {
         }
 
         try {
-            org.fisco.bcos.web3j.precompile.crud.Entry record = new org.fisco.bcos.web3j.precompile.crud.Entry();
-            record.put(FiscoBcosDelegate.WeEventTableKey, FiscoBcosDelegate.WeEventTopicControlAddress);
-            record.put(FiscoBcosDelegate.WeEventTableValue, address);
-            // record's key can be duplicate
+            org.fisco.bcos.web3j.precompile.crud.Entry record = table.getEntry();
+            record.put(WeEventTableKey, WeEventTopicControlAddress);
+            record.put(WeEventTableValue, address);
+            // notice: record's key can be duplicate in CRUD
             int result = crud.insert(table, record);
             if (result == 1) {
                 log.info("add topic control address into CRUD success");

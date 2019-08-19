@@ -57,6 +57,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 @Slf4j
 public class Web3SDKWrapper {
+    // topic control address in CNS
+    public final static String WeEventTopicControlAddress = "WeEvent_topic_control_address";
+
     /**
      * init web3j handler
      *
@@ -245,7 +248,7 @@ public class Web3SDKWrapper {
             }
 
             ContractAbiMgr abiMgr = (ContractAbiMgr) loadContract(CNSAddress, web3j, credentials, ContractAbiMgr.class);
-            Future<Address> f = abiMgr.getAddr(new Utf8String(FiscoBcosDelegate.WeEventTopicControlAddress));
+            Future<Address> f = abiMgr.getAddr(new Utf8String(WeEventTopicControlAddress));
             return f.get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS).toString();
         } catch (ExecutionException | TimeoutException | InterruptedException | NullPointerException e) {
             log.error("load topic control address from CNS failed", e);
@@ -271,7 +274,7 @@ public class Web3SDKWrapper {
         log.info("add topic control address into CNS: {}", address);
         try {
             Future<TransactionReceipt> f = abiMgr.addAbi(
-                    new Utf8String(FiscoBcosDelegate.WeEventTopicControlAddress),
+                    new Utf8String(WeEventTopicControlAddress),
                     new Utf8String("TopicController"), new Utf8String("1.0"),
                     new Utf8String(TopicController.ABI), new Address(address));
             TransactionReceipt transactionReceipt = f.get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
