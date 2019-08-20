@@ -10,7 +10,7 @@ JAVA_OPTS=
 get_pid(){
     if [[ -e ${pid_file} ]]; then
         pid =  "cat ${pid_file}"
-        current_pid="ps aux|grep "robust" | grep "${pid}" | grep -v grep | awk '{print $2}'"
+        current_pid="ps aux|grep "robust" | grep ${pid} | grep -v grep | awk '{print $2}'"
     fi
 }
 
@@ -38,14 +38,14 @@ start(){
         i=$((i + 1 ))
     done
 
-    if [[ `crontab -l | grep -w robust | wc -l` -eq 0 ]]; then
+    if [[ "crontab -l | grep -w robust | wc -l" -eq 0 ]]; then
          crontab -l > cron.backup
-         echo "* * * * * cd `pwd`; ./robust.sh monitor >> ./logs/monitor.log 2>&1" >> cron.backup
+         echo "* * * * * cd ${pwd}; ./robust.sh monitor >> ./logs/monitor.log 2>&1" >> cron.backup
          crontab cron.backup
          rm cron.backup
     fi
 
-    if [[ `crontab -l | grep -w robust | wc -l` -gt 0 ]]; then
+    if [[ "crontab -l | grep -w robust | wc -l" -gt 0 ]]; then
          echo "add the crontab job success"
          exit 0
     else
@@ -61,14 +61,14 @@ stop(){
         eval ${kill_cmd}
         
         echo "stop robust success"
-        if [[ `crontab -l | grep -w robust | wc -l` -gt 0 ]]; then
+        if [[ "crontab -l | grep -w robust | wc -l" -gt 0 ]]; then
             crontab -l>cron.backup
-            sed -i '/robust/d' cron.backup
+            sed -i ""/robust/d" cron.backup
             crontab cron.backup
             rm cron.backup
         fi
 
-        if [[ `crontab -l | grep -w robust | wc -l` -gt 0 ]]; then
+        if [[ "crontab -l | grep -w robust | wc -l" -gt 0 ]]; then
             echo "remove the crontab job fail"
             exit 1
         else
