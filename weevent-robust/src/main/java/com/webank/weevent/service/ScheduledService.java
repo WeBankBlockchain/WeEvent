@@ -1,4 +1,4 @@
-package weevent.robust.service;
+package com.webank.weevent.service;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,6 +20,7 @@ import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
+import com.webank.weevent.service.interfaces.MqttGateway;
 
 import com.alibaba.fastjson.JSONObject;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
@@ -49,7 +50,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
-import weevent.robust.service.interfaces.MqttGateway;
 
 
 /**
@@ -103,7 +103,7 @@ public class ScheduledService implements AutoCloseable {
 
     public final static String MQTT_TOPIC = "com.weevent.mqtt";
 
-    static Map<String, String> topicSubscribeMap = new HashMap<>();
+    private  static Map<String, String> topicSubscribeMap = new HashMap<>();
 
     public static Map<String, Integer> restfulSendMap = new HashMap<>();
     public static Map<String, Integer> jsonrpcSendMap = new HashMap<>();
@@ -172,7 +172,6 @@ public class ScheduledService implements AutoCloseable {
         // extension params
         header.set("weevent-format", "json");
         StompSession session = connect.get();
-        String subscriptionId = "";
         StompSession.Subscription subscribe = session.subscribe(header, new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {

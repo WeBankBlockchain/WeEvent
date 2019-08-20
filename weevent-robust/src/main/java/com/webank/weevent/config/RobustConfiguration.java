@@ -1,5 +1,6 @@
-package weevent.robust.config;
+package com.webank.weevent.config;
 
+import com.webank.weevent.RobustApplication;
 import com.webank.weevent.sdk.IWeEventClient;
 
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImplExporter;
@@ -25,7 +26,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
-import weevent.RobustApplication;
 
 @Configuration
 @IntegrationComponentScan
@@ -47,7 +47,7 @@ public class RobustConfiguration {
 
     private final static String HTTP_HEADER = "http://";
 
-    final String mqttClientId = "mqttId";
+    private  final String mqttClientId = "mqttId";
 
     //jsonrpc4j exporter
     @Bean
