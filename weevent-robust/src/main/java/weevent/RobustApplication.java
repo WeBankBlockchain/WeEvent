@@ -11,7 +11,6 @@ import org.springframework.context.ApplicationContext;
 @SpringBootApplication
 public class RobustApplication {
 
-    @Autowired
     public static ApplicationContext applicationContext;
 
     @Autowired
