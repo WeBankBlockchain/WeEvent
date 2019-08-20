@@ -9,8 +9,8 @@ JAVA_OPTS=
 
 get_pid(){
     if [[ -e ${pid_file} ]]; then
-        pid=`cat ${pid_file}`
-        current_pid=`ps aux|grep "robust" | grep "${pid}" | grep -v grep | awk '{print $2}'`
+        pid =  "cat ${pid_file}"
+        current_pid="ps aux|grep "robust" | grep "${pid}" | grep -v grep | awk '{print $2}'"
     fi
 }
 
@@ -35,7 +35,7 @@ start(){
             echo "start robust fail"
             exit 1
         fi
-        i=$(( $i + 1 ))
+        i=$((i + 1 ))
     done
 
     if [[ `crontab -l | grep -w robust | wc -l` -eq 0 ]]; then
@@ -83,9 +83,9 @@ stop(){
 monitor(){
     get_pid
     if [[ -n "${current_pid}" ]]; then
-        echo "`date`: robust is running(PID=${current_pid})"
+        echo "${date}: robust is running(PID=${current_pid})"
     else
-        echo "`date`: robust is not running, restart robust now..."
+        echo "${date}: robust is not running, restart robust now..."
         start
     fi   
 }
