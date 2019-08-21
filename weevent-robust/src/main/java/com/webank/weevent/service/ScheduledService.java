@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import com.webank.weevent.RobustApplication;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.SendResult;
@@ -75,57 +76,73 @@ public class ScheduledService implements AutoCloseable {
     @Value("${subscripId.file.path:(./logs/subscriptionId.json)}")
     private String subscripIdPath;
 
-    @Autowired
-    private RestTemplate restTemplate;
-
-    @Autowired
-    private IWeEventClient weEventClient;
-
-    @Autowired
-    private MqttGateway mqttGateway;
-
-    private StompSession stompSession;
-
-    @Autowired
-    private WebSocketStompClient socketStompClient;
 
     private final static String format = "yyyy-MM-dd HH";
 
-    public final static String SUBSCRIBE_ID = "subscribeId";
+    private final static String SUBSCRIBE_ID = "subscribeId";
 
     private final static String HTTP_HEADER = "http://";
 
-    public final static String REST_TOPIC = "com.weevent.rest";
+    private final static String REST_TOPIC = "com.weevent.rest";
 
-    public final static String JSON_RPC_TOPIC = "com.weevent.jsonrpc";
+    private final static String JSON_RPC_TOPIC = "com.weevent.jsonrpc";
 
-    public final static String STOMP_TOPIC = "com.weevent.stomp";
+    private final static String STOMP_TOPIC = "com.weevent.stomp";
 
-    public final static String MQTT_TOPIC = "com.weevent.mqtt";
+    private final static String MQTT_TOPIC = "com.weevent.mqtt";
 
-    private  static Map<String, String> topicSubscribeMap = new HashMap<>();
+    private static Map<String, String> topicSubscribeMap = new HashMap<>();
 
-    public static Map<String, Integer> restfulSendMap = new HashMap<>();
-    public static Map<String, Integer> jsonrpcSendMap = new HashMap<>();
-    public static Map<String, Integer> mqttSendMap = new HashMap<>();
-    public static Map<String, Integer> stompSendMap = new HashMap<>();
+    private static Map<String, Integer> restfulSendMap = new HashMap<>();
+    private static Map<String, Integer> jsonrpcSendMap = new HashMap<>();
+    private static Map<String, Integer> mqttSendMap = new HashMap<>();
+    private static Map<String, Integer> stompSendMap = new HashMap<>();
+
+    private StompSession stompSession;
+
+    private MqttGateway mqttGateway;
+
+    private RestTemplate restTemplate;
+
+    private IWeEventClient weEventClient;
+
+    private WebSocketStompClient socketStompClient;
+
+    @Autowired
+    public void setRestTemplate(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    @Autowired
+    public void setWeEventClient(IWeEventClient weEventClient) {
+        this.weEventClient = weEventClient;
+    }
+
+    @Autowired
+    public void setSocketStompClient(WebSocketStompClient socketStompClient) {
+        this.socketStompClient = socketStompClient;
+    }
+
+    public ScheduledService() {
+        this.mqttGateway = RobustApplication.applicationContext.getBean(MqttGateway.class);
+    }
 
     @Async
     @Scheduled(cron = "0/10 * * * * ?")
     public synchronized void scheduled() throws BrokerException, IOException, InterruptedException, ExecutionException {
         File subIdFile = new File(subscripIdPath);
         String subText = this.readTxt(subIdFile);
-        final Map<String, String> topicSubscribeMap = this.getSubIdMap(subText);
-        //restful subscribe
-        this.topicSubscribeMap.put(REST_TOPIC, this.restfulSubscribe(topicSubscribeMap.get(REST_TOPIC)));
-        //jsonRpc subscribe
-        this.topicSubscribeMap.put(JSON_RPC_TOPIC, this.jsonRpcSubscribe(topicSubscribeMap.get(JSON_RPC_TOPIC)));
+        topicSubscribeMap = getSubIdMap(subText);
         //stomp subscribe
         this.stompSubscribe();
+        //restful subscribe
+        topicSubscribeMap.put(REST_TOPIC, this.restfulSubscribe(topicSubscribeMap.get(REST_TOPIC)));
+        //jsonRpc subscribe
+        topicSubscribeMap.put(JSON_RPC_TOPIC, this.jsonRpcSubscribe(topicSubscribeMap.get(JSON_RPC_TOPIC)));
+
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(SUBSCRIBE_ID, topicSubscribeMap);
         this.writeStringToFile(subscripIdPath, jsonObject.toJSONString(), false);
-
         // use the rest request to post a message
         this.restfulPublic();
         // use jsonRpc publish topic
@@ -178,6 +195,7 @@ public class ScheduledService implements AutoCloseable {
                 List<String> subscriptionIds = headers.get("subscription-id");
                 if (subscriptionIds != null && subscriptionIds.size() > 0) {
                     topicSubscribeMap.put(STOMP_TOPIC, subscriptionIds.get(0));
+                    log.info("stomp subId: " + subscriptionIds.get(0));
                 }
                 return this.getClass();
             }
@@ -191,47 +209,47 @@ public class ScheduledService implements AutoCloseable {
     }
 
 
-    public void restfulPublic() throws BrokerException {
+    private void restfulPublic() throws BrokerException {
         // use the rest request to post a message
         boolean result = this.weEventClient.open(REST_TOPIC);
         log.info("rest open result is " + result);
 
         String callUrl = HTTP_HEADER + this.url + "/weevent/rest/publish?topic={topic}&content={content}";
         ResponseEntity<String> rsp = this.restTemplate.getForEntity(
-            callUrl,
-            String.class,
-            REST_TOPIC,
-            "hello weevent restful");
+                callUrl,
+                String.class,
+                REST_TOPIC,
+                "hello weevent restful");
         log.info("restful send message:" + rsp.getBody());
         if (rsp.getStatusCodeValue() == 200) {
-            countTimes(restfulSendMap, this.getFormatTime(format, new Date()));
+            countTimes(restfulSendMap, this.getFormatTime(new Date()));
         }
     }
 
-    public void jsonrpcPublish() throws BrokerException {
+    private void jsonrpcPublish() throws BrokerException {
         // use jsonRpc publish topic
         this.weEventClient.open(JSON_RPC_TOPIC);
         SendResult publish = this.weEventClient.publish(JSON_RPC_TOPIC, "Hello JsonRpc !".getBytes());
         log.info("JsonRpc send message:" + publish.getEventId());
         if (publish.getStatus() == SendResult.SendResultStatus.SUCCESS) {
-            countTimes(jsonrpcSendMap, this.getFormatTime(format, new Date()));
+            countTimes(jsonrpcSendMap, this.getFormatTime(new Date()));
         }
     }
 
-    public void stompPublish() throws BrokerException {
+    private void stompPublish() throws BrokerException {
         this.weEventClient.open(STOMP_TOPIC);
         this.stompSession.send(STOMP_TOPIC, "hello world from websocket");
         log.info("stomp send msg!");
-        countTimes(stompSendMap, this.getFormatTime(format, new Date()));
+        countTimes(stompSendMap, this.getFormatTime(new Date()));
     }
 
-    public void mqttPublish() throws BrokerException {
+    private void mqttPublish() throws BrokerException {
         // Mqtt sends a message to weevent broker
         String data = "hello mqtt";
         this.weEventClient.open(MQTT_TOPIC);
         mqttGateway.sendToMqtt(data, MQTT_TOPIC);
         log.info("mqtt send msg to broker");
-        countTimes(mqttSendMap, this.getFormatTime(format, new Date()));
+        countTimes(mqttSendMap, this.getFormatTime(new Date()));
     }
 
 
@@ -243,25 +261,25 @@ public class ScheduledService implements AutoCloseable {
         calendar.setTime(date);
         calendar.add(Calendar.HOUR, -1);
         Date lastHour = calendar.getTime();
-        String time = this.getFormatTime(format, lastHour);
+        String time = this.getFormatTime(lastHour);
 
         this.writeStringToFile(statisticFilePath, "Time is " + time + ":00:00\n", true);
-        log.info(statisticFilePath, "Time is " + this.getFormatTime(format, date) + ":00:00\n");
+        log.info(statisticFilePath, "Time is " + this.getFormatTime(date) + ":00:00\n");
 
         this.writeStringToFile(statisticFilePath,
-            "last hour restful send: " + restfulSendMap.get(time) + ", receive:" + restfulSendMap.get(time) + " events\n", true);
+                "last hour restful send: " + restfulSendMap.get(time) + ", receive:" + restfulSendMap.get(time) + " events\n", true);
         log.info("last hour restful send: " + restfulSendMap.get(time) + ", receive:" + restfulSendMap.get(time) + " events\n");
 
         this.writeStringToFile(statisticFilePath,
-            "last hour stomp send: " + stompSendMap.get(time) + ", receive:" + stompSendMap.get(time) + " events\n", true);
+                "last hour stomp send: " + stompSendMap.get(time) + ", receive:" + stompSendMap.get(time) + " events\n", true);
         log.info("last hour stomp send: " + stompSendMap.get(time) + ", receive:" + stompSendMap.get(time) + " events\n");
 
         this.writeStringToFile(statisticFilePath,
-            "last hour mqtt send: " + mqttSendMap.get(time) + ", receive:" + mqttSendMap.get(time) + " events\n", true);
+                "last hour mqtt send: " + mqttSendMap.get(time) + ", receive:" + mqttSendMap.get(time) + " events\n", true);
         log.info("last hour mqtt send: " + mqttSendMap.get(time) + " receive:" + mqttSendMap.get(time) + " events\n");
 
         this.writeStringToFile(statisticFilePath,
-            "last hour json rpc send: " + jsonrpcSendMap.get(time) + ", receive:" + jsonrpcSendMap.get(time) + " events\n", true);
+                "last hour json rpc send: " + jsonrpcSendMap.get(time) + ", receive:" + jsonrpcSendMap.get(time) + " events\n", true);
         log.info("last hour json rpc send: " + jsonrpcSendMap.get(time) + " receive:" + jsonrpcSendMap.get(time) + " events\n");
 
         //remove last hour statistic key - value
@@ -285,7 +303,6 @@ public class ScheduledService implements AutoCloseable {
             @Override
             public void handleException(StompSession session, StompCommand command, StompHeaders headers, byte[] payload, Throwable exception) {
                 log.info("connection exception, {} {}", session.getSessionId(), command);
-                log.error("exception, {}", exception);
             }
 
 
@@ -293,7 +310,7 @@ public class ScheduledService implements AutoCloseable {
             public void handleTransportError(StompSession session, Throwable exception) {
                 if (exception instanceof ConnectionLostException && !session.isConnected()) {
                     try {
-                        Thread.sleep(5000);
+                        Thread.sleep(2000);
                         ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
                         taskScheduler.initialize();
                         //new connect--start
@@ -321,24 +338,22 @@ public class ScheduledService implements AutoCloseable {
     /**
      * Convert json to List
      *
-     * @param subIdStrs
+     * @param subIdString json string
      * @return List<String>
      */
-    private static Map<String, String> getSubIdMap(String subIdStrs) {
-        JSONObject jsonObject = JSONObject.parseObject(subIdStrs);
+    @SuppressWarnings("unchecked")
+    private static Map<String, String> getSubIdMap(String subIdString) {
+        JSONObject jsonObject = JSONObject.parseObject(subIdString);
         Map<String, String> map = new HashMap<>();
         if (null != jsonObject && jsonObject.containsKey(SUBSCRIBE_ID)) {
-            map = (Map<String, String>) jsonObject.get(SUBSCRIBE_ID);
+            Object object = jsonObject.get(SUBSCRIBE_ID);
+            if (object != null) {
+                map = (Map<String, String>) object;
+            }
         }
         return map;
     }
 
-    /**
-     * count times
-     *
-     * @param integerMap
-     * @param timeKey
-     */
     private void countTimes(Map<String, Integer> integerMap, String timeKey) {
         if (integerMap.containsKey(timeKey)) {
             integerMap.put(timeKey, (integerMap.get(timeKey) + 1));
@@ -351,28 +366,28 @@ public class ScheduledService implements AutoCloseable {
     /**
      * get formatted time string
      *
-     * @param format
-     * @param date
-     * @return
+     * @param date the time
+     * @return string
      */
-    public static String getFormatTime(String format, Date date) {
-        String formatTime = DateFormatUtils.format(date, format);
-        return formatTime;
+    private String getFormatTime(Date date) {
+        return DateFormatUtils.format(date, format);
     }
 
     /**
      * Read the file to get the file content
      *
-     * @param file
+     * @param file the file
      * @return String
      */
-    public static String readTxt(File file) throws IOException {
+    private String readTxt(File file) throws IOException {
         if (!file.isFile() || !file.exists()) {
-            file.createNewFile();
+            boolean newFile = file.createNewFile();
+            if (newFile) {
+                log.info("createFile success");
+            }
         }
         InputStream inputStream = new FileInputStream(file);
-        String text = IOUtils.toString(inputStream, "utf8");
-        return text;
+        return IOUtils.toString(inputStream, "utf8");
     }
 
     /**
@@ -380,11 +395,14 @@ public class ScheduledService implements AutoCloseable {
      * @param content content needs to be written
      * @param flag is true for append, false for overwrite
      */
-    public static void writeStringToFile(String filePath, String content, boolean flag) {
+    private void writeStringToFile(String filePath, String content, boolean flag) {
         File file = new File(filePath);
         if (!file.exists()) {
             try {
-                file.createNewFile();
+                boolean newFile = file.createNewFile();
+                if (newFile) {
+                    log.info("createFile success");
+                }
             } catch (IOException e) {
                 log.error(e.getMessage());
             }
@@ -398,12 +416,15 @@ public class ScheduledService implements AutoCloseable {
         }
     }
 
-    public void setStompSession(StompSession session) {
+    private void setStompSession(StompSession session) {
         this.stompSession = session;
     }
 
     @Override
-    public void close() throws BrokerException {
+    public void close() {
         log.info("resource is close");
     }
+
 }
+
+
