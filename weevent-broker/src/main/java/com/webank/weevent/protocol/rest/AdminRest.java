@@ -7,7 +7,6 @@ import java.util.Map;
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.util.SystemInfoUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
-import com.webank.weevent.sdk.BrokerException;
 
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
@@ -38,8 +37,7 @@ public class AdminRest extends RestHA {
     }
 
     @RequestMapping(path = "/listSubscription")
-    public Map<String, Object> listSubscription() throws BrokerException {
-        String url = "";
+    public Map<String, Object> listSubscription() {
         Map<String, Object> nodesInfo = new HashMap<>();
         if (this.masterJob.getClient() == null) {
             nodesInfo.put(SystemInfoUtils.getCurrentIp() + ":" + SystemInfoUtils.getCurrentPort(),
@@ -48,11 +46,11 @@ public class AdminRest extends RestHA {
             try {
                 List<String> ipList = this.masterJob.getClient().getChildren().forPath(BrokerApplication.weEventConfig.getZookeeperPath() + "/nodes");
                 log.info("zookeeper ip List:{}", ipList);
-                for (String nodeip : ipList) {
-                    byte[] ip = this.masterJob.getZookeeperNode(BrokerApplication.weEventConfig.getZookeeperPath() + "/nodes" + "/" + nodeip);
+                for (String nodeIP : ipList) {
+                    byte[] ip = this.masterJob.getZookeeperNode(BrokerApplication.weEventConfig.getZookeeperPath() + "/nodes" + "/" + nodeIP);
                     SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
                     RestTemplate rest = new RestTemplate(requestFactory);
-                    url = "http://" + new String(ip) + "/weevent/admin/innerListSubscription";
+                    String url = "http://" + new String(ip) + "/weevent/admin/innerListSubscription";
                     log.info("url:{}", url);
 
                     ResponseEntity<String> rsp = rest.getForEntity(url, String.class);
@@ -69,7 +67,7 @@ public class AdminRest extends RestHA {
     }
 
     @RequestMapping(path = "/innerListSubscription")
-    public Map<String, Object> innerListSubscription() throws BrokerException {
+    public Map<String, Object> innerListSubscription() {
         return this.consumer.listSubscription();
     }
 }
