@@ -2,6 +2,8 @@ package com.webank.weevent.sdk;
 
 import java.util.Map;
 
+import lombok.NonNull;
+
 /**
  * Java Client for WeEvent
  *
@@ -81,7 +83,7 @@ public interface IWeEventClient {
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
-    String subscribe(String topic, String offset, EventListener listener) throws BrokerException;
+    String subscribe(String topic, String offset, @NonNull EventListener listener) throws BrokerException;
 
     /**
      * Unsubscribe an exist subscription subscribed by subscribe interface.
@@ -172,7 +174,7 @@ public interface IWeEventClient {
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
-    String subscribe(String topic, String groupId, String offset, IWeEventClient.EventListener listener) throws BrokerException;
+    String subscribe(String topic, String groupId, String offset, @NonNull EventListener listener) throws BrokerException;
 
     /**
      * Subscribe events from topic.
@@ -185,7 +187,7 @@ public interface IWeEventClient {
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
-    String subscribe(String topic, String groupId, String offset, String subscriptionId, IWeEventClient.EventListener listener) throws BrokerException;
+    String subscribe(String topic, String groupId, String offset, String subscriptionId, @NonNull EventListener listener) throws BrokerException;
 
     /**
      * Publish an event to topic.
