@@ -25,7 +25,6 @@ public class RestfullTest extends JUnitTestBase {
 
     private String url;
     private RestTemplate rest = null;
-    private String subId = "";
     private String eventId = "";
     private String restTopic = "com.weevent.test";
     private String content = "hello restful";
