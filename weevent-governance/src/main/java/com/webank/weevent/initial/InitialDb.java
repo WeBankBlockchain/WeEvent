@@ -1,4 +1,4 @@
-package com.webank.weevent.governance.initial;
+package com.webank.weevent.initial;
 
 import java.io.FileInputStream;
 import java.net.URL;
