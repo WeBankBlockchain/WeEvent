@@ -1,1 +1,1 @@
-FISCO-BCOS 1.3.x plugin.
+FISCO-BCOS plugin.

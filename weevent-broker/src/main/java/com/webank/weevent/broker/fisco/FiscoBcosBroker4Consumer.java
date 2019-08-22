@@ -25,6 +25,7 @@ import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.Data;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -147,56 +148,75 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         return filter(blockEventsList, topics, tag);
     }
 
-    private static void validateSubscribeTopic(String topic, String groupId, String offset) throws BrokerException {
+    private static boolean isEventId(String offset) {
+        return !WeEvent.OFFSET_FIRST.equals(offset) && !WeEvent.OFFSET_LAST.equals(offset);
+    }
+
+    // topic may be a topic pattern
+    @Override
+    public String subscribe(String topic, String groupId, String offset,
+                            @NonNull Map<SubscribeExt, String> ext,
+                            @NonNull ConsumerListener listener) throws BrokerException {
+        this.validateGroupId(groupId);
+        ParamCheckUtils.validateOffset(offset);
+
+        ParamCheckUtils.validateGroupId(groupId, fiscoBcosDelegate.listGroupId());
+
+        // topic pattern
         if (ParamCheckUtils.isTopicPattern(topic)) {
             ParamCheckUtils.validateTopicPattern(topic);
-            if (!WeEvent.OFFSET_FIRST.equals(offset) && !WeEvent.OFFSET_LAST.equals(offset)) {
+            if (isEventId(offset)) {
                 // not a topic name
                 ParamCheckUtils.validateEventId("", offset, fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId)));
             }
-        } else {
+        } else {    // topic name
             ParamCheckUtils.validateTopicName(topic);
-            if (!WeEvent.OFFSET_FIRST.equals(offset) && !WeEvent.OFFSET_LAST.equals(offset)) {
+
+            // check topic exist
+            if (!this.exist(topic, groupId)) {
+                throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
+            }
+
+            if (isEventId(offset)) {
                 ParamCheckUtils.validateEventId(topic, offset, fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId)));
             }
         }
-    }
 
-    @Override
-    public String subscribe(String topic, String groupId, String offset, Map<SubscribeExt, String> ext, ConsumerListener listener) throws BrokerException {
-        this.validateGroupId(groupId);
-        ParamCheckUtils.validateOffset(offset);
-        ParamCheckUtils.validateListenerNotNull(listener);
-
-        // may be a topic pattern in param topic
-        validateSubscribeTopic(topic, groupId, offset);
-
-        log.info("subscribe groupId:{} topic: {} offset: {} ext:{}", groupId, topic, offset, ext);
+        log.info("subscribe groupId: {} topic: {} offset: {} ext: {}", groupId, topic, offset, ext);
         return subscribeTopic(topic, Long.valueOf(groupId), offset, ext, listener);
     }
 
     @Override
-    public String subscribe(String[] topics, String groupId, String offset, Map<SubscribeExt, String> ext, ConsumerListener listener) throws BrokerException {
+    public String subscribe(String[] topics, String groupId, String offset,
+                            @NonNull Map<SubscribeExt, String> ext,
+                            @NonNull ConsumerListener listener) throws BrokerException {
         // check params
         if (topics == null || topics.length == 0) {
             throw new BrokerException(ErrorCode.TOPIC_LIST_IS_NULL);
         }
 
-        ParamCheckUtils.validateGroupId(groupId, fiscoBcosDelegate.listGroupId());
+        this.validateGroupId(groupId);
         ParamCheckUtils.validateOffset(offset);
-        if (!WeEvent.OFFSET_FIRST.equals(offset) && !WeEvent.OFFSET_LAST.equals(offset)) {
-            // do not validate topic name if more then one topic
+
+        ParamCheckUtils.validateGroupId(groupId, fiscoBcosDelegate.listGroupId());
+
+        if (isEventId(offset)) {
+            // do not validate topic name and eventId if more then one topic
             ParamCheckUtils.validateEventId(topics.length > 1 ? "" : topics[0],
                     offset,
                     fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId)));
         }
-        ParamCheckUtils.validateListenerNotNull(listener);
 
         for (String topic : topics) {
             if (ParamCheckUtils.isTopicPattern(topic)) {
                 ParamCheckUtils.validateTopicPattern(topic);
             } else {
                 ParamCheckUtils.validateTopicName(topic);
+
+                // check topic exist
+                if (!this.exist(topic, groupId)) {
+                    throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
+                }
             }
         }
 
@@ -219,11 +239,6 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         if (ext.containsKey(SubscribeExt.RemoteIP)) {
             remoteIp = ext.get(SubscribeExt.RemoteIP);
         }
-        String subscriptionId = "";
-        if (ext.containsKey(SubscribeExt.SubscriptionId)) {
-            subscriptionId = ext.get(SubscribeExt.SubscriptionId);
-            ParamCheckUtils.validateSubscriptionId(subscriptionId);
-        }
         String tag = "";
         if (ext.containsKey(SubscribeExt.TopicTag)) {
             tag = ext.get(SubscribeExt.TopicTag);
@@ -232,31 +247,19 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             }
         }
 
-        // already exist
+        // custom input subscriptionId, support in STOMP
+        String subscriptionId = "";
+        if (ext.containsKey(SubscribeExt.SubscriptionId)) {
+            subscriptionId = ext.get(SubscribeExt.SubscriptionId);
+            ParamCheckUtils.validateSubscriptionId(subscriptionId);
+        }
+
         if (this.subscriptions.containsKey(subscriptionId)) {
             log.info("already exist subscription: {}", subscriptionId);
 
-            Subscription subscription = this.subscriptions.get(subscriptionId);
-            // subscription key information
-            if (!subscription.getGroupId().equals(groupId)) {
-                throw new BrokerException(ErrorCode.TOPIC_NOT_MATCH);
-            }
-            if (!Arrays.equals(subscription.topics, topics)) {
-                throw new BrokerException(ErrorCode.TOPIC_NOT_MATCH);
-            }
-            if (!subscription.getTag().equals(tag)) {
-                throw new BrokerException(ErrorCode.TOPIC_TAG_NOT_MATCH);
-            }
-
-            // may be changed context
-            if (subscription.getHistoryEventLoop() != null) {
-                subscription.getHistoryEventLoop().setOffset(offset);
-            }
-
-            subscription.setInterfaceType(interfaceType);
-            subscription.setRemoteIp(remoteIp);
-
-            return subscription.getUuid();
+            // subscription in MQTT and STOMP is connection orientated, will auto unsubscribe when connection lost.
+            // so it's something wrong when already exist
+            throw new BrokerException(ErrorCode.SUBSCRIPTIONID_ALREADY_EXIST);
         }
 
         // new subscribe
@@ -361,8 +364,8 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
      * Normally, the events published in the future will be notified by MainEventLoop.
      * If the offset is not WeEvent.OFFSET_LAST, then it need a helper task HistoryEventLoop to fetch history events.
      * It works like as followings:
-     * HistoryEventLoop(a few data in the same block of offset -> offset -> target events -> current block) ===> MainEventLoop
-     * HistoryEventLoop aim to fetch target event between offset and current block(it will float forward while fetching).
+     * HistoryEventLoop(deal with events in caller thread if has in the same block of offset -> target history events -> current block) ===> MainEventLoop
+     * HistoryEventLoop aim to fetch target event between offset and current block(current block will float forward while fetching).
      * It's notify task will switch into MainEventLoop while arriving at highest block height(=current block height in MainEventLoop).
      * But the switch action is done by MainEventLoop in another thread, HistoryEventLoop may float forward a few block at the same time.
      * Because once loop (both in HistoryEventLoop and MainEventLoop) is a long blocking task,
@@ -423,7 +426,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         /**
          * first block in HistoryEventLoop dispatch
          */
-        private Long historyBlock;
+        private Long historyBlock = 0L;
 
         @Override
         public String toString() {
@@ -455,6 +458,8 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                 log.info("need history event loop, {}", this);
 
                 this.historyEventLoop = new HistoryEventLoop(this);
+                this.historyBlock = this.historyEventLoop.getLastBlock();
+                this.mergeCache = new HashMap<>();
             }
         }
 
@@ -471,44 +476,30 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
         }
 
-        // mainLoop = true meanings dispatch from MainEventLoop
+        // mainLoop = true meanings dispatch from MainEventLoop, always history first then main loop
         private void dispatch(List<WeEvent> events, boolean mainLoop, Long blockHeight) {
-            // filter the events
-            List<WeEvent> topicEvents = filter(events, this.topics, this.tag);
-            if (topicEvents.isEmpty()) {
+            // skip block before notified history block
+            if (blockHeight <= this.historyBlock) {
                 return;
             }
 
-            // always HistoryEventLoop dispatch first, then MainEventLoop
-            if (!mainLoop) {
+            List<WeEvent> topicEvents;
+            if (mainLoop) {
+                // filter the events if from main loop
+                topicEvents = filter(events, this.topics, this.tag);
+                if (topicEvents.isEmpty()) {
+                    return;
+                }
+            } else {
                 log.info("dispatch from HistoryEventLoop");
 
-                // have not got offset
-                if (this.mergeCache == null) {
-                    int offsetIdx = -1;
-                    for (int idx = 0; idx < topicEvents.size(); idx++) {
-                        if (topicEvents.get(idx).getEventId().equals(this.offset)) {
-                            offsetIdx = idx;
-                            break;
-                        }
-                    }
-
-                    // got offset
-                    if (offsetIdx >= 0) {
-                        log.info("got offset at index: {}", offsetIdx);
-
-                        // get event after offset, exclusive offset itself
-                        topicEvents = topicEvents.subList(offsetIdx + 1, topicEvents.size());
-
-                        log.info("HistoryEventLoop initialize merge cache at block: {}", blockHeight);
-                        this.historyBlock = blockHeight;
-                        this.mergeCache = new HashMap<>();
-                    } else {
-                        log.info("event list is empty after filter by offset");
-
-                        return;
-                    }
+                // record last history block
+                if (blockHeight > this.historyBlock) {
+                    this.historyBlock = blockHeight;
                 }
+
+                // already filter if from history
+                topicEvents = events;
             }
 
             // need merge in cache
@@ -646,8 +637,15 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
          */
         private Subscription subscription;
 
-        private void setOffset(String offset) throws BrokerException {
-            switch (offset) {
+        public Long getLastBlock() {
+            return this.lastBlock;
+        }
+
+        private HistoryEventLoop(Subscription subscription) throws BrokerException {
+            super("history-event-loop@" + subscription.getUuid());
+            this.subscription = subscription;
+
+            switch (this.subscription.getOffset()) {
                 case WeEvent.OFFSET_FIRST:
                     this.lastBlock = 0L;
                     break;
@@ -657,24 +655,60 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                     throw new BrokerException(ErrorCode.UNKNOWN_ERROR);
 
                 default:
-                    this.lastBlock = DataTypeUtils.decodeBlockNumber(offset) - 1;
+                    Long blockNum = DataTypeUtils.decodeBlockNumber(this.subscription.getOffset());
+                    this.dispatchTargetBlock(blockNum, this.subscription.getOffset());
+                    this.lastBlock = blockNum;
                     break;
             }
+
+            log.info("HistoryEventLoop initialized with last block: {}, {}", this.lastBlock, this.subscription);
         }
 
-        private HistoryEventLoop(Subscription subscription) throws BrokerException {
-            super("history-event-loop@" + subscription.getUuid());
+        /**
+         * dispatch the target block where the offset is directly in caller thead.
+         * dispatch in caller thread to make sure offset/eventId is exist.
+         *
+         * @param blockNum block num
+         */
+        private void dispatchTargetBlock(Long blockNum, String offset) throws BrokerException {
+            // fetch event from block chain
+            List<WeEvent> events = filterBlockEvent(blockNum,
+                    this.subscription.getTopics(),
+                    this.subscription.getGroupId(),
+                    this.subscription.getTag());
+            log.info("fetch events from block height: {} topics: {} tag: {} events num: {}",
+                    blockNum,
+                    Arrays.toString(this.subscription.getTopics()),
+                    this.subscription.getTag(),
+                    events.size());
 
-            this.subscription = subscription;
+            int targetIdx = -1;
+            for (int idx = 0; idx < events.size(); idx++) {
+                if (events.get(idx).getEventId().equals(offset)) {
+                    targetIdx = idx;
+                    break;
+                }
+            }
 
-            this.setOffset(subscription.getOffset());
-            log.info("HistoryEventLoop initialized with last block: {}, {}", this.lastBlock, this.subscription);
+            // can not find offset
+            if (targetIdx < 0) {
+                log.error("can not find eventId: {} in block height: {}", offset, blockNum);
+                throw new BrokerException(ErrorCode.EVENT_ID_NOT_EXIST);
+            }
+
+            // get event after offset, exclusive offset itself
+            events = events.subList(targetIdx + 1, events.size());
+
+            // dispatch event after offset
+            if (!events.isEmpty()) {
+                this.subscription.dispatch(events, false, blockNum);
+            }
         }
 
         @Override
         protected void taskOnceLoop() {
             try {
-                // the block try to deal with in this one loop
+                // current block height to deal with in this one loop
                 Long currentBlock = this.lastBlock + 1;
 
                 // cache may be expired, refresh it
@@ -844,9 +878,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                 this.mergeHistory();
 
                 // no need to fetch event if no subscription
-                if (this.mainSubscriptionIds.isEmpty()) {
-                    idle();
-                } else {
+                if (!this.mainSubscriptionIds.isEmpty()) {
                     // fetch all event from block chain in this block
                     log.debug("fetch events from block height: {} in group: {}", currentBlock, this.groupId);
                     List<WeEvent> events = fiscoBcosDelegate.loop(currentBlock, this.groupId);
