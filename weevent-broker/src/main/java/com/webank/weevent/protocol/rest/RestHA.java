@@ -5,8 +5,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.ha.MasterJob;
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.ErrorCode;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,12 +42,5 @@ public class RestHA {
         }
 
         return sb.toString();
-    }
-
-    public void checkSupport() throws BrokerException {
-        if (this.masterJob == null) {
-            log.error("no broker.zookeeper.ip configuration, skip it");
-            throw new BrokerException(ErrorCode.CGI_SUBSCRIPTION_NO_ZOOKEEPER);
-        }
     }
 }
