@@ -8,17 +8,12 @@ import com.webank.weevent.sdk.BrokerException;
 
 public class FabricBroker4Consumer extends FiscoBcosTopicAdmin implements IConsumer {
     @Override
-    public String subscribe(String[] topics, String groupId, String offset, String interfaceType, ConsumerListener listener) throws BrokerException {
+    public String subscribe(String topic, String groupId, String offset, Map<SubscribeExt, String> ext, ConsumerListener listener) throws BrokerException{
         return null;
     }
-
+    
     @Override
-    public String subscribe(String topic, String groupId, String offset, String interfaceType, ConsumerListener listener) throws BrokerException {
-        return null;
-    }
-
-    @Override
-    public String subscribe(String topic, String groupId, String offset, String subscriptionId, String interfaceType, ConsumerListener listener) throws BrokerException {
+    public String subscribe(String[] topics, String groupId, String offset, Map<SubscribeExt, String> ext, ConsumerListener listener) throws BrokerException{
         return null;
     }
 

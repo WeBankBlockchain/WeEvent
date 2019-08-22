@@ -7,13 +7,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
+import org.checkerframework.checker.units.qual.C;
 import org.hyperledger.fabric.protos.ledger.rwset.kvrwset.KvRwset;
 import org.hyperledger.fabric.sdk.BlockInfo;
 import org.hyperledger.fabric.sdk.BlockchainInfo;
@@ -98,9 +98,9 @@ public class FabricSdkUtil {
             }
 
             //set topicName to topicController
-            executeChaincode(client, channel, fabricConfig.getTopicControllerName(), fabricConfig.getTopicControllerVersion(), true, "addTopicContractName", "Topic");
+            executeChaincode(client, channel, chaincodeID, true, "addTopicContractName", "Topic");
             //set topicName from topicController
-            executeChaincode(client, channel, fabricConfig.getTopicControllerName(), fabricConfig.getTopicControllerVersion(), false, "getTopicContractName");
+            executeChaincode(client, channel, chaincodeID, false, "getTopicContractName");
 
             //printChannelInfo(client, channel);
             log.info("Shutdown channel.");
@@ -223,11 +223,11 @@ public class FabricSdkUtil {
         return propResp;
     }
 
-    private static void executeChaincode(HFClient client, Channel channel, String chaincodeName, String chaincodeVersion, boolean invoke, String func, String... args) throws
+    private static void executeChaincode(HFClient client, Channel channel, ChaincodeID chaincodeID, boolean invoke, String func, String... args) throws
             ProposalException, InvalidArgumentException, UnsupportedEncodingException, InterruptedException,
             ExecutionException, TimeoutException {
-        ChaincodeExecuter executer = new ChaincodeExecuter(chaincodeName, chaincodeVersion);
-        executer.executeTransaction(client, channel, invoke, func, args);
+        ChaincodeExecuter executer = new ChaincodeExecuter();
+        executer.executeTransaction(client, channel, chaincodeID, invoke, func, args);
     }
 
     private static void printChannelInfo(HFClient client, Channel channel) throws
