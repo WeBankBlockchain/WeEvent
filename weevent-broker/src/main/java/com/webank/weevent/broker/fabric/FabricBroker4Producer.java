@@ -24,17 +24,7 @@ public class FabricBroker4Producer extends FabricTopicAdmin implements IProducer
     public SendResult publish(WeEvent event, String groupId) throws BrokerException {
         log.debug("publish input param WeEvent: {}", event);
         ParamCheckUtils.validateEvent(event);
-        ParamCheckUtils.validateGroupId(groupId);
 
         return null;
-    }
-
-    @Override
-    public void publish(WeEvent event, String groupId, SendCallBack callBack) throws BrokerException {
-        log.debug("publish input param WeEvent: {}", event);
-        ParamCheckUtils.validateGroupId(groupId);
-        ParamCheckUtils.validateEvent(event);
-        ParamCheckUtils.validateSendCallBackNotNull(callBack);
-        log.debug("publish with callback input param WeEvent: {}", event);
     }
 }

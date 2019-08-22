@@ -1,5 +1,7 @@
 package com.webank.weevent.broker.fabric;
 
+import java.util.List;
+
 import com.webank.weevent.broker.plugin.IEventTopic;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.TopicInfo;
@@ -34,6 +36,11 @@ public class FabricTopicAdmin implements IEventTopic {
 
     @Override
     public TopicInfo state(String topic, String groupId) throws BrokerException {
+        return null;
+    }
+
+    @Override
+    public List<String> listGroupId() throws BrokerException{
         return null;
     }
 }
