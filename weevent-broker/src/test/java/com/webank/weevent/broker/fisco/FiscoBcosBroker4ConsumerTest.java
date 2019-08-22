@@ -1,7 +1,9 @@
 package com.webank.weevent.broker.fisco;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.JUnitTestBase;
@@ -38,20 +40,20 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
     private Map<IConsumer.SubscribeExt, String> ext = new HashMap<>();
 
     class MyConsumerListener implements IConsumer.ConsumerListener {
-        int received = 0;
+        public List<String> notifiedEvents = new ArrayList<>();
 
         @Override
         public void onEvent(String subscriptionId, WeEvent event) {
             log.info("********** {}", event);
 
-            received++;
+            this.notifiedEvents.add(event.getEventId());
         }
 
         @Override
         public void onException(Throwable e) {
-            log.info("********** {}", e);
+            log.error("**********", e);
 
-            received = -10000;
+            this.notifiedEvents.clear();
         }
     }
 
@@ -277,7 +279,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
     /**
      * listener is null
      */
-    @Test
+    @Test(expected = NullPointerException.class)
     public void testSingleSubscribe_listenerIsNull() {
         log.info("===================={}", this.testName.getMethodName());
 
@@ -285,7 +287,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
             this.iConsumer.subscribe(this.topicName, this.groupId, WeEvent.OFFSET_LAST, this.ext, null);
             Assert.fail();
         } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.CONSUMER_LISTENER_IS_NULL.getCode(), e.getCode());
+            Assert.fail();
         }
     }
 
@@ -351,7 +353,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
             this.iConsumer.subscribe(topic2, groupId, WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
             Assert.fail();
         } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.TOPIC_NOT_MATCH.getCode(), e.getCode());
+            Assert.assertEquals(ErrorCode.SUBSCRIPTIONID_ALREADY_EXIST.getCode(), e.getCode());
         }
     }
 
@@ -368,7 +370,9 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
                 this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.groupId).getStatus());
 
         Thread.sleep(this.wait3s);
-        Assert.assertTrue(listener.received > 0);
+
+        Assert.assertFalse(listener.notifiedEvents.isEmpty());
+        Assert.assertFalse(listener.notifiedEvents.contains(this.lastEventId));
     }
 
     @Test
@@ -383,7 +387,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
                 this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.groupId).getStatus());
         Thread.sleep(wait3s * 10);
 
-        Assert.assertTrue(listener.received > 0);
+        Assert.assertFalse(listener.notifiedEvents.isEmpty());
     }
 
     @Test
@@ -399,7 +403,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
                 this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.groupId).getStatus());
         Thread.sleep(wait3s);
 
-        Assert.assertTrue(listener.received > 0);
+        Assert.assertFalse(listener.notifiedEvents.isEmpty());
     }
 
     @Test
@@ -527,7 +531,9 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
         Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
         Thread.sleep(wait3s);
-        Assert.assertTrue(listener.received > 0);
+
+        Assert.assertFalse(listener.notifiedEvents.isEmpty());
+        Assert.assertFalse(listener.notifiedEvents.contains(this.lastEventId));
     }
 
     /**
@@ -750,7 +756,8 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
                 this.iProducer.publish(event, this.groupId).getStatus());
 
         Thread.sleep(this.wait3s);
-        Assert.assertTrue(listener.received > 0);
+
+        Assert.assertFalse(listener.notifiedEvents.isEmpty());
     }
 
     @Test
@@ -773,6 +780,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
                 this.iProducer.publish(event, this.groupId).getStatus());
 
         Thread.sleep(this.wait3s);
-        Assert.assertTrue(listener.received > 0);
+
+        Assert.assertFalse(listener.notifiedEvents.isEmpty());
     }
 }

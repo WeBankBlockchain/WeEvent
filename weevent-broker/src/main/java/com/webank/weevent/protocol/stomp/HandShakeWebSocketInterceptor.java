@@ -3,6 +3,7 @@ package com.webank.weevent.protocol.stomp;
 import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -29,7 +30,7 @@ public class HandShakeWebSocketInterceptor implements HandshakeInterceptor {
         ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
         String ip = servletRequest.getServletRequest().getHeader("X-Forwarded-For");
         log.debug("ServerHttpRequest host: {}", ip);
-        if (ip == null || ip.isEmpty() || ip.equalsIgnoreCase("unknown")) {
+        if (StringUtils.isBlank(ip) || ip.equalsIgnoreCase("unknown")) {
             log.debug("unknown ServerHttpRequest host");
             return servletRequest.getRemoteAddress().getHostString();
         }

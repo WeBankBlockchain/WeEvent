@@ -71,6 +71,8 @@ public enum ErrorCode {
 
     TOPIC_TAG_IS_BLANK(100506, "topic's tag is blank"),
 
+    SUBSCRIPTIONID_ALREADY_EXIST(100507, "subscriptionId is already exist, can not subscribe again"),
+
     MQTT_NO_BROKER_URL(100600, "no mqtt.broker.url configuration, can't support mqtt"),
 
     CGI_SUBSCRIPTION_NO_ZOOKEEPER(100601, "no broker.zookeeper.ip configuration, can't support CGI subscription"),
