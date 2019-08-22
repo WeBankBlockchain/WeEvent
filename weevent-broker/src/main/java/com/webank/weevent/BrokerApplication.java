@@ -12,6 +12,7 @@ import com.webank.weevent.sdk.BrokerException;
 
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImplExporter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -45,7 +46,7 @@ class HttpInterceptor implements HandlerInterceptor {
     private String getIpAddress(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
         log.debug("HttpServletRequest [X-Forwarded-For]: {}", ip);
-        if (ip == null || ip.isEmpty() || ip.equalsIgnoreCase("unknown")) {
+        if (StringUtils.isBlank(ip) || ip.equalsIgnoreCase("unknown")) {
             log.debug("HttpServletRequest [getRemoteAddr]: {}", ip);
             return request.getRemoteAddr();
         }
@@ -120,7 +121,7 @@ public class BrokerApplication {
         log.info("start broker success");
         //spring-boot-starter-actuator customize /info with InfoContributor bean
     }
-    
+
     public static ApplicationContext applicationContext;
 
     public static WeEventConfig weEventConfig;

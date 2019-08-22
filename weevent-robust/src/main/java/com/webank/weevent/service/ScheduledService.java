@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -20,12 +18,9 @@ import com.webank.weevent.RobustApplication;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.SendResult;
-import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 import com.webank.weevent.service.interfaces.MqttGateway;
 
 import com.alibaba.fastjson.JSONObject;
-import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
-import com.googlecode.jsonrpc4j.ProxyUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -46,7 +41,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
@@ -65,8 +59,6 @@ import org.springframework.web.socket.messaging.WebSocketStompClient;
 @EnableScheduling
 @EnableAsync
 public class ScheduledService implements AutoCloseable {
-
-
     @Value("${weevent.broker.url:(127.0.0.1:7090)}")
     private String url;
 
@@ -135,10 +127,6 @@ public class ScheduledService implements AutoCloseable {
         topicSubscribeMap = getSubIdMap(subText);
         //stomp subscribe
         this.stompSubscribe();
-        //restful subscribe
-        topicSubscribeMap.put(REST_TOPIC, this.restfulSubscribe(topicSubscribeMap.get(REST_TOPIC)));
-        //jsonRpc subscribe
-        topicSubscribeMap.put(JSON_RPC_TOPIC, this.jsonRpcSubscribe(topicSubscribeMap.get(JSON_RPC_TOPIC)));
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(SUBSCRIBE_ID, topicSubscribeMap);
@@ -151,31 +139,6 @@ public class ScheduledService implements AutoCloseable {
         this.stompPublish();
         // use mqtt publish topic
         this.mqttPublish();
-    }
-
-    private String restfulSubscribe(String oldSubscribe) throws RestClientException {
-        String callUrl = HTTP_HEADER + url + "/weevent/rest/subscribe?topic={topic}&groupId={groupId}&subscriptionId={subscriptionId}&url={url}";
-        String callBackUrl = HTTP_HEADER + url + "/weevent/mock/rest/onEvent";
-        ResponseEntity<String> rsp = this.restTemplate.getForEntity(callUrl, String.class, REST_TOPIC, "1", oldSubscribe, callBackUrl);
-        String subId = rsp.getBody();
-        log.info("rest subId: " + subId);
-        return subId;
-    }
-
-    private String jsonRpcSubscribe(String oldSubscribe) throws BrokerException, MalformedURLException {
-        String callUrl = HTTP_HEADER + url + "/weevent/jsonrpc";
-        String callBackUrl = HTTP_HEADER + url + "/weevent/mock/jsonrpc/onEvent";
-        URL remote = new URL(callUrl);
-        // init jsonrpc client
-        JsonRpcHttpClient client = new JsonRpcHttpClient(remote);
-        // init IBrokerRpc object
-        IBrokerRpc rpc = ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);
-        // open topic
-        rpc.open(JSON_RPC_TOPIC, "1");
-        // publish event
-        String subscribeId = rpc.subscribe(JSON_RPC_TOPIC, "1", oldSubscribe, callBackUrl);
-        log.info("jsonrpc subId: " + subscribeId);
-        return subscribeId;
     }
 
     private void stompSubscribe() throws InterruptedException, ExecutionException {
@@ -426,5 +389,3 @@ public class ScheduledService implements AutoCloseable {
     }
 
 }
-
-

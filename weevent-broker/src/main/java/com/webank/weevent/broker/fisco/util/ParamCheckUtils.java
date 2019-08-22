@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.UUID;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
-import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
@@ -57,13 +56,7 @@ public class ParamCheckUtils {
             throw new BrokerException(ErrorCode.SUBSCRIPTIONID_FORMAT_INVALID);
         }
     }
-
-    public static void validateListenerNotNull(IConsumer.ConsumerListener listener) throws BrokerException {
-        if (listener == null) {
-            throw new BrokerException(ErrorCode.CONSUMER_LISTENER_IS_NULL);
-        }
-    }
-
+    
     public static void validateEventId(String topicName, String eventId, Long blockHeight) throws BrokerException {
         if (StringUtils.isBlank(eventId)) {
             throw new BrokerException(ErrorCode.EVENT_ID_IS_ILLEGAL);
