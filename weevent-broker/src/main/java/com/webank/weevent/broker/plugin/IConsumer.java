@@ -3,6 +3,8 @@ package com.webank.weevent.broker.plugin;
 
 import java.util.Map;
 
+import com.webank.weevent.BrokerApplication;
+import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.WeEvent;
 
@@ -47,7 +49,10 @@ import com.webank.weevent.sdk.WeEvent;
  */
 public interface IConsumer extends IEventTopic {
     static IConsumer build() {
-        return build("fisco");
+        if (WeEventConstants.FABRIC.equals(BrokerApplication.weEventConfig.getBlockChainType())){
+            return build(WeEventConstants.FABRIC);
+        }
+        return build(WeEventConstants.FISCO);
     }
 
     /**

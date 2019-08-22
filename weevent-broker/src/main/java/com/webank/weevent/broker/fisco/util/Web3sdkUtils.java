@@ -4,7 +4,7 @@ package com.webank.weevent.broker.fisco.util;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import com.webank.weevent.broker.config.FiscoConfig;
+import com.webank.weevent.broker.fisco.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.web3sdk.Web3SDK2Wrapper;
 import com.webank.weevent.broker.fisco.web3sdk.Web3SDKWrapper;
 

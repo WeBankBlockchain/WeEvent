@@ -37,6 +37,9 @@ public class WeEventConfig {
     @Value("${restful.subscribe.callback.timeout:5000}")
     private Integer restful_timeout;
 
+    @Value("${broker.blockchain.type}")
+    private String blockChainType;
+
     @Value("${broker.zookeeper.ip:}")
     private String zookeeperIp;
 

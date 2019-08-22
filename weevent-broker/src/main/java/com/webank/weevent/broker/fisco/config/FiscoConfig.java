@@ -1,4 +1,4 @@
-package com.webank.weevent.broker.config;
+package com.webank.weevent.broker.fisco.config;
 
 import java.io.InputStream;
 import java.lang.reflect.Field;

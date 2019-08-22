@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.BrokerApplication;
-import com.webank.weevent.broker.config.FiscoConfig;
+import com.webank.weevent.broker.fisco.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.RedisService;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.dto.ListPage;

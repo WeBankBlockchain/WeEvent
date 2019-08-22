@@ -161,4 +161,7 @@ public class WeEventConstants {
      */
     public static final String STOMPTYPE = "stomp";
 
+    public static final String FISCO = "fisco";
+
+    public static final String FABRIC = "fabric";
 }

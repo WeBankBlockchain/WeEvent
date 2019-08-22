@@ -42,7 +42,10 @@ dependencies {
         exclude group: "org.slf4j", module: "slf4j-log4j12"
         exclude group: "org.springframework"
     }
-
+    
+    // fabric 1.4.4
+    implementation("org.hyperledger.fabric-sdk-java:fabric-sdk-java:1.4.0")
+    
     // depend project
     implementation project(path: ":weevent-client")
 

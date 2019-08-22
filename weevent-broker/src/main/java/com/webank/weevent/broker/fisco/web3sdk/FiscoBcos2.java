@@ -10,7 +10,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.webank.weevent.broker.config.FiscoConfig;
+import com.webank.weevent.broker.fisco.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.contract.v2.Topic;
 import com.webank.weevent.broker.fisco.contract.v2.TopicController;

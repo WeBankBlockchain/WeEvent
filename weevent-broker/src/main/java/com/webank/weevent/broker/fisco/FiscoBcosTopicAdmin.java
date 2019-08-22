@@ -1,7 +1,7 @@
 package com.webank.weevent.broker.fisco;
 
 import com.webank.weevent.BrokerApplication;
-import com.webank.weevent.broker.config.FiscoConfig;
+import com.webank.weevent.broker.fisco.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
