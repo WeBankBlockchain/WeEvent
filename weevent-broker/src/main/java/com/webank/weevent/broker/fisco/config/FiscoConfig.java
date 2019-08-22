@@ -32,11 +32,11 @@ public class FiscoConfig {
     @Value("${nodes:}")
     private String nodes;
 
+    @Value("${proxy.address:}")
+    private String proxyAddress;
+
     @Value("${account:}")
     private String account;
-
-    @Value("${topic-controller.address:}")
-    private String topicControllerAddress;
 
     @Value("${web3sdk.timeout:10000}")
     private Integer web3sdkTimeout;

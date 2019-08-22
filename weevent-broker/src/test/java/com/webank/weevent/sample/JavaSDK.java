@@ -9,7 +9,6 @@ import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
-import com.webank.weevent.sdk.WeEventClient;
 
 /**
  * Sample of Java SDK.
@@ -24,11 +23,11 @@ public class JavaSDK {
             // get client
             IWeEventClient client = IWeEventClient.build("http://localhost:8080/weevent");
             String topicName = "com.weevent.test";
-            String groupId = "1";
+            String groupId = WeEvent.DEFAULT_GROUP_ID;
             // ensure topic exist
             client.open(topicName, groupId);
             Map<String, String> extensions = new HashMap<>();
-            extensions.put("weevent-format", "json");
+            extensions.put(WeEvent.WeEvent_FORMAT, "json");
             SendResult sendResult = client.publish(topicName, groupId, "{\"hello\":\" wolrd\"}".getBytes(), extensions);
             System.out.println(sendResult.toString());
             // subscribe topic with groupId

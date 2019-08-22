@@ -135,6 +135,8 @@ public class CGISubscription {
     private IBrokerRpcCallback getJsonRpcCallback(String url) {
         try {
             JsonRpcHttpClient client = new JsonRpcHttpClient(new URL(url));
+            client.setConnectionTimeoutMillis(BrokerApplication.weEventConfig.getCgi_notify_timeout());
+            client.setReadTimeoutMillis(BrokerApplication.weEventConfig.getCgi_notify_timeout());
             // check url format only, do no check whether it can be accessed
             return ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpcCallback.class, client);
         } catch (MalformedURLException e) {
@@ -151,6 +153,8 @@ public class CGISubscription {
 
             log.info("route to master, url: {}", url);
             JsonRpcHttpClient client = new JsonRpcHttpClient(new URL(url));
+            client.setConnectionTimeoutMillis(BrokerApplication.weEventConfig.getCgi_notify_timeout());
+            client.setReadTimeoutMillis(BrokerApplication.weEventConfig.getCgi_notify_timeout());
             // check url format only, do no check whether it can be accessed
             return ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);
         } catch (MalformedURLException e) {
@@ -166,32 +170,33 @@ public class CGISubscription {
             throw new BrokerException(ErrorCode.URL_INVALID_FORMAT);
         }
 
-        IConsumer.ConsumerListener listener = new IConsumer.ConsumerListener() {
-            @Override
-            public void onEvent(String subscriptionId, WeEvent event) {
-                try {
-                    callback.onEvent(subscriptionId, event);
-                    log.info("subscribe callback notify, url: {} subscriptionId: {} event: {}",
-                            url, subscriptionId, event);
-                } catch (Exception e) {
-                    log.error(String.format("subscribe callback notify failed, url: %s subscriptionId: %s",
-                            url, subscriptionId), e);
-                }
-            }
-
-            @Override
-            public void onException(Throwable e) {
-                log.error("subscribe failed", e);
-            }
-        };
-        String subId;
-        if (StringUtils.isBlank(subscriptionId)) {
-            log.info("new subscribe, topic: {}", topic);
-            subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, WeEventConstants.JSONRPCTYPE, listener);
-        } else {
+        // external params
+        Map<IConsumer.SubscribeExt, String> ext = new HashMap<>();
+        ext.put(IConsumer.SubscribeExt.InterfaceType, WeEventConstants.JSONRPCTYPE);
+        if (!StringUtils.isBlank(subscriptionId)) {
             log.info("subscribe again, subscriptionId: {}", subscriptionId);
-            subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, subscriptionId, WeEventConstants.JSONRPCTYPE, listener);
+            ext.put(IConsumer.SubscribeExt.SubscriptionId, subscriptionId);
         }
+
+        String subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, ext,
+                new IConsumer.ConsumerListener() {
+                    @Override
+                    public void onEvent(String subscriptionId, WeEvent event) {
+                        try {
+                            callback.onEvent(subscriptionId, event);
+                            log.info("subscribe callback notify, url: {} subscriptionId: {} event: {}",
+                                    url, subscriptionId, event);
+                        } catch (Exception e) {
+                            log.error(String.format("subscribe callback notify failed, url: %s subscriptionId: %s",
+                                    url, subscriptionId), e);
+                        }
+                    }
+
+                    @Override
+                    public void onException(Throwable e) {
+                        log.error("subscribe failed", e);
+                    }
+                });
 
         ZKSubscription zkSubscription = new ZKSubscription();
         zkSubscription.setTopic(topic);
@@ -266,44 +271,45 @@ public class CGISubscription {
 
     private RestTemplate getRestCallback() {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(BrokerApplication.weEventConfig.getRestful_timeout());
-        requestFactory.setReadTimeout(BrokerApplication.weEventConfig.getRestful_timeout());
+        requestFactory.setConnectTimeout(BrokerApplication.weEventConfig.getCgi_notify_timeout());
+        requestFactory.setReadTimeout(BrokerApplication.weEventConfig.getCgi_notify_timeout());
         return new RestTemplate(requestFactory);
     }
 
     private ZKSubscription doRestSubscribe(String topic, String groupId, String subscriptionId, String url) throws BrokerException {
         RestTemplate callback = getRestCallback();
 
-        IConsumer.ConsumerListener listener = new IConsumer.ConsumerListener() {
-            @Override
-            public void onEvent(String subscriptionId, WeEvent event) {
-                try {
-                    SubscriptionWeEvent subscriptionWeEvent = new SubscriptionWeEvent();
-                    subscriptionWeEvent.setSubscriptionId(subscriptionId);
-                    subscriptionWeEvent.setEvent(event);
-                    ResponseEntity<Void> response = callback.postForEntity(url, subscriptionWeEvent, Void.class);
-                    log.info("subscribe callback notify, url: {} subscriptionId: {} event: {} status code: {}",
-                            url, subscriptionId, event, response.getStatusCode());
-                } catch (Exception e) {
-                    log.error(String.format("subscribe callback notify failed, url: %s subscriptionId: %s",
-                            url, subscriptionId), e);
-                }
-            }
-
-            @Override
-            public void onException(Throwable e) {
-                log.error("subscribe notify failed", e);
-            }
-        };
-
-        String subId;
-        if (StringUtils.isBlank(subscriptionId)) {
-            log.info("new subscribe, topic: {}", topic);
-            subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, WeEventConstants.RESTFULTYPE, listener);
-        } else {
+        // external params
+        Map<IConsumer.SubscribeExt, String> ext = new HashMap<>();
+        ext.put(IConsumer.SubscribeExt.InterfaceType, WeEventConstants.RESTFULTYPE);
+        if (!StringUtils.isBlank(subscriptionId)) {
             log.info("subscribe again, subscriptionId: {}", subscriptionId);
-            subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, subscriptionId, WeEventConstants.RESTFULTYPE, listener);
+            ext.put(IConsumer.SubscribeExt.SubscriptionId, subscriptionId);
         }
+
+        String subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, ext,
+                new IConsumer.ConsumerListener() {
+                    @Override
+                    public void onEvent(String subscriptionId, WeEvent event) {
+                        try {
+                            SubscriptionWeEvent subscriptionWeEvent = new SubscriptionWeEvent();
+                            subscriptionWeEvent.setSubscriptionId(subscriptionId);
+                            subscriptionWeEvent.setEvent(event);
+                            ResponseEntity<Void> response = callback.postForEntity(url, subscriptionWeEvent, Void.class);
+                            log.info("subscribe callback notify, url: {} subscriptionId: {} event: {} status code: {}",
+                                    url, subscriptionId, event, response.getStatusCode());
+                        } catch (Exception e) {
+                            log.error(String.format("subscribe callback notify failed, url: %s subscriptionId: %s",
+                                    url, subscriptionId), e);
+                        }
+                    }
+
+                    @Override
+                    public void onException(Throwable e) {
+                        log.error("subscribe notify failed", e);
+                    }
+                });
+
 
         ZKSubscription zkSubscription = new ZKSubscription();
         zkSubscription.setTopic(topic);
@@ -311,6 +317,7 @@ public class CGISubscription {
         zkSubscription.setSubscriptionId(subId);
         zkSubscription.setRestful(true);
         zkSubscription.setCallbackUrl(url);
+
         return zkSubscription;
     }
 
@@ -366,8 +373,8 @@ public class CGISubscription {
     private <T> T routeRestMaster(String urlFormat, Class<T> responseType) throws BrokerException {
         try {
             SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-            requestFactory.setConnectTimeout(BrokerApplication.weEventConfig.getRestful_timeout());
-            requestFactory.setReadTimeout(BrokerApplication.weEventConfig.getRestful_timeout());
+            requestFactory.setConnectTimeout(BrokerApplication.weEventConfig.getCgi_notify_timeout());
+            requestFactory.setReadTimeout(BrokerApplication.weEventConfig.getCgi_notify_timeout());
             RestTemplate restTemplate = new RestTemplate(requestFactory);
 
             String masterUrl = String.format(urlFormat, this.masterJob.getMasterAddress());

@@ -3,6 +3,8 @@ package com.webank.weevent.broker.ha;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
@@ -75,8 +77,8 @@ public class MasterJob {
 
     private RestTemplate getRestCallback() {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(BrokerApplication.weEventConfig.getRestful_timeout());
-        requestFactory.setReadTimeout(BrokerApplication.weEventConfig.getRestful_timeout());
+        requestFactory.setConnectTimeout(BrokerApplication.weEventConfig.getCgi_notify_timeout());
+        requestFactory.setReadTimeout(BrokerApplication.weEventConfig.getCgi_notify_timeout());
         return new RestTemplate(requestFactory);
     }
 
@@ -115,6 +117,15 @@ public class MasterJob {
             log.error("invalid notify url, {}", url);
             throw new BrokerException(ErrorCode.URL_INVALID_FORMAT);
         }
+
+        // external params
+        Map<IConsumer.SubscribeExt, String> ext = new HashMap<>();
+        ext.put(IConsumer.SubscribeExt.InterfaceType, type);
+        if (!StringUtils.isBlank(subscriptionId)) {
+            log.info("subscribe again, subscriptionId: {}", subscriptionId);
+            ext.put(IConsumer.SubscribeExt.SubscriptionId, subscriptionId);
+        }
+
         if (this.cgiSubscription == null) {
             IConsumer.ConsumerListener listener;
             if (type.equals(WeEventConstants.RESTFULTYPE)) {
@@ -159,15 +170,8 @@ public class MasterJob {
                     }
                 };
             }
-            String subId;
-            if (StringUtils.isBlank(subscriptionId)) {
-                log.info("new subscribe, topic: {}", topic);
-                subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, type, listener);
-            } else {
-                log.info("subscribe again, subscriptionId: {}", subscriptionId);
-                subId = this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, subscriptionId, type, listener);
-            }
-            return subId;
+
+            return this.consumer.subscribe(topic, groupId, WeEvent.OFFSET_LAST, ext, listener);
         } else {
             if (type.equals(WeEventConstants.RESTFULTYPE)) {
                 return this.getCgiSubscription().restSubscribe(topic,

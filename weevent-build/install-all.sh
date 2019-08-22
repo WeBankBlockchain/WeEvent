@@ -8,7 +8,7 @@ out_path=""
 block_chain_version=
 block_chain_channel=
 block_chain_node_path=
-broker_port=8090
+broker_port=7000
 
 nginx_port=8080
 
@@ -23,9 +23,7 @@ current_path=$PWD
 
 function yellow_echo (){
     local what=$*
-    if true;then
-        echo -e "\e[1;33m${what} \e[0m"
-    fi
+    echo -e "\e[1;33m${what} \e[0m"
 }
 
 function error_message(){
@@ -103,7 +101,7 @@ function check_param(){
         echo "param ok"
     else
         echo "path not exist, ${block_chain_node_path}"
-        exit 1;
+        exit 1
     fi
 }
 
@@ -113,7 +111,7 @@ function check_result(){
         yellow_echo "$1 success"
     else
         yellow_echo "$1 failed, exit"
-        exit 1;
+        exit 1
    fi
 }
 

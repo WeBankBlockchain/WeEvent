@@ -34,8 +34,8 @@ public class WeEventConfig {
     @Value("${lru.cache.capacity:65536}")
     private Integer maxCapacity;
 
-    @Value("${restful.subscribe.callback.timeout:5000}")
-    private Integer restful_timeout;
+    @Value("${cgi.subscribe.notify.timeout:5000}")
+    private Integer cgi_notify_timeout;
 
     @Value("${broker.blockchain.type}")
     private String blockChainType;
