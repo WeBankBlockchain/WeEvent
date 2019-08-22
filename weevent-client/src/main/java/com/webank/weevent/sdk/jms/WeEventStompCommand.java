@@ -34,7 +34,6 @@ public class WeEventStompCommand {
     private String headerId;
 
     public WeEventStompCommand() {
-
     }
 
     public WeEventStompCommand(WeEvent event) {
@@ -84,7 +83,7 @@ public class WeEventStompCommand {
             accessor.setNativeHeader("groupId", topic.getGroupId());
         }
         if (!StringUtils.isBlank(topic.getContinueSubscriptionId())) {
-            accessor.setNativeHeader("weevent-subscriptionId", topic.getContinueSubscriptionId());
+            accessor.setNativeHeader(WeEvent.WeEvent_SubscriptionId, topic.getContinueSubscriptionId());
         }
         return encodeRaw(accessor);
     }
@@ -97,7 +96,7 @@ public class WeEventStompCommand {
         if (!StringUtils.isBlank(topic.getGroupId())) {
             accessor.setNativeHeader("groupId", topic.getGroupId());
         }
-        accessor.setNativeHeader("weevent-subscriptionId", continueSubscriptionId);
+        accessor.setNativeHeader(WeEvent.WeEvent_SubscriptionId, continueSubscriptionId);
         return encodeRaw(accessor);
     }
 
