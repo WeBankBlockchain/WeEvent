@@ -24,7 +24,7 @@ public class InitialDb {
         String driverName = "";
         try {
             Yaml yaml = new Yaml();
-            URL url = InitialDb.class.getClassLoader().getResource("application-prod.yml");
+            URL url = InitialDb.class.getClassLoader().getResource("application-prod.properties");
             if (url != null) {
                 Map map = (Map) yaml.load(new FileInputStream(url.getFile()));
                 Map springMap = (Map) map.get("spring");
