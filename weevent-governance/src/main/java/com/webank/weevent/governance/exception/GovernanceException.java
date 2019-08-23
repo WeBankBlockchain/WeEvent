@@ -4,7 +4,7 @@ import com.webank.weevent.governance.code.ErrorCode;
 
 public class GovernanceException extends Exception {
 
-    private static final long serialVersionUID = 1L;
+    private final static String WIKIUrl = "https://weeventdoc.readthedocs.io/zh_CN/latest/faq/weevent.html";
 
     /**
      * Error code.
@@ -39,6 +39,8 @@ public class GovernanceException extends Exception {
         sb.append(code);
         sb.append(", Message: ");
         sb.append(message);
+        sb.append("\nFor more information, please visit wiki: ");
+        sb.append(WIKIUrl);
         return sb.toString();
     }
 
