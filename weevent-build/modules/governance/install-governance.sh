@@ -70,7 +70,6 @@ function governance_setup() {
 para=""
 conf_path="./conf"
 apps_path="./apps"
-installPWD=$(dirname $(dirname `pwd`))
 
 # usage
 if [[ $# -lt 2 ]]; then
@@ -86,7 +85,7 @@ mysql_port=""
 mysql_user=""
 mysql_pwd=""
 out_path=""
-current_path=`pwd`
+current_path=$(pwd)
 echo "current path $current_path"
 
 while [[ $# -ge 2 ]] ; do

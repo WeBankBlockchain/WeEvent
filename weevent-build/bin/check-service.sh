@@ -11,7 +11,7 @@ function yellow_echo () {
 function check_broker(){
     echo "check broker service"
 
-    existTopic=`curl -s "http://127.0.0.1:8080/weevent/rest/exist?topic=hello"`
+    existTopic=$(curl -s "http://127.0.0.1:8080/weevent/rest/exist?topic=hello")
     if [[ "${existTopic}" == "true" || "${existTopic}" == "false" ]];then
         yellow_echo "broker service is ok"
     else

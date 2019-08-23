@@ -4,6 +4,7 @@
 #
 ################################################################################
 
+java_home_path=
 out_path=""
 block_chain_version=
 block_chain_channel=
@@ -35,23 +36,24 @@ function error_message(){
 function properties_get(){
     local file="config.properties"
     local param=$1
-    value=`grep -v '#' ${file} | grep ${param} | cut -d'=' -f2 | sed 's/\r//' | awk '$1=$1'`
+    value=$(grep -v '#' ${file} | grep ${param} | cut -d'=' -f2 | sed 's/\r//' | awk '$1=$1')
     if [[ -z "$value" ]]; then
         echo "error_message"
-        error_message "ERROR config.properties get  param $param failed."
+        error_message "ERROR config.properties get param $param failed."
         exit 1
     fi
     echo ${value}
 }
 
 function set_global_param(){
+    java_home_path=$(properties_get "JAVA_HOME")
     block_chain_version=$(properties_get "fisco-bcos.version")
     block_chain_channel=$(properties_get "fisco-bcos.channel")
     block_chain_node_path=$(properties_get  "fisco-bcos.node_path")
     if [[ "${block_chain_node_path:0:1}" == "~" ]];then
-        block_chain_node_path=`realpath -m ${HOME}/${block_chain_node_path:1}`
+        block_chain_node_path=$(realpath -m ${HOME}/${block_chain_node_path:1})
     else
-        block_chain_node_path=`realpath -m ${block_chain_node_path}`
+        block_chain_node_path=$(realpath -m ${block_chain_node_path})
     fi
     nginx_port=$(properties_get "nginx.port")
     
@@ -80,8 +82,8 @@ function check_telnet(){
     eval $(echo $1 | awk '{split($0, filearray, ";");for(i in filearray) print "arr["i"]="filearray[i]}')
     for channel in ${arr[*]}
     do
-        local channel_ip=`echo | awk '{split("'${channel}'", array, ":");print array[1]}'`
-        local channel_port=`echo | awk '{split("'${channel}'", array, ":");print array[2]}'`
+        local channel_ip=$(echo | awk '{split("'${channel}'", array, ":");print array[1]}')
+        local channel_port=$(echo | awk '{split("'${channel}'", array, ":");print array[2]}')
         ssh ${channel_ip} -p ${channel_port} -o ConnectTimeout=3 2>&1 | grep "Connection refused" &>> ${current_path}/install.log
         if [[ $? -eq 0 ]];then
             echo "${channel} connection fail"
@@ -91,6 +93,11 @@ function check_telnet(){
 }
 
 function check_param(){
+    if [[ ! -d ${java_home_path} ]]; then
+        echo "JAVA_HOME path not exist, ${java_home_path}"
+        exit 1;
+    fi
+    
     if [[ -d ${block_chain_node_path} ]]; then
         check_port ${broker_port}
         check_port ${nginx_port}
@@ -134,6 +141,21 @@ function install_module(){
     fi
 }
 
+function config_java_home(){
+    if [[ -e ${current_path}/modules/broker/broker.sh ]];then
+        sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/broker/broker.sh
+    fi   
+    if [[ -e ${current_path}/modules/broker/deploy-topic-control.sh ]];then
+        sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/broker/deploy-topic-control.sh
+    fi
+    if [[ -e ${current_path}/modules/governance/governance.sh ]];then
+        sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/governance/governance.sh
+    fi 
+    if [[ -e ${current_path}/modules/governance/init-governance.sh ]];then
+        sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/governance/init-governance.sh
+    fi   
+}
+
 function update_server_port(){
     sed -i "s/8080/$nginx_port/g" ${current_path}/bin/check-service.sh
 }
@@ -152,7 +174,7 @@ function main(){
         echo "create path $2 fail !!! "
         exit 1
     fi
-    out_path=`realpath $2`
+    out_path=$(realpath $2)
 
     # set the params
     set_global_param
@@ -162,6 +184,9 @@ function main(){
 
     # set the check service port
     update_server_port
+    
+    # set the JAVA_HOME
+    config_java_home
 
     # install module
     install_module
