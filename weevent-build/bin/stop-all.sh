@@ -1,5 +1,5 @@
 #!/bin/bash
-current_path=`pwd`
+current_path=$(pwd)
 
 if [[ -e ${current_path}/install-all.sh ]];then
    echo "Error operation "
@@ -7,7 +7,7 @@ if [[ -e ${current_path}/install-all.sh ]];then
    exit 1
 fi
 
-for module in `ls -l|grep ^d|awk '{print $9}'`;
+for module in $(ls -l|grep ^d|awk '{print $9}');
 do
     # every directory is a single module
     cd ${module};
