@@ -4,8 +4,7 @@ para=""
 conf_path="./conf"
 lib_path="./lib"
 apps_path="./apps"
-installPWD=$(dirname $(dirname `pwd`))
-current_path=`pwd`
+current_path=$(pwd)
 
 while [[ $# -ge 2 ]] ; do
     case "$1" in
