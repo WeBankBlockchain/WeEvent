@@ -1,8 +1,8 @@
 package com.webank.weevent.governance.entity;
 
-import lombok.Data;
-
 import com.webank.weevent.governance.code.RetCode;
+
+import lombok.Data;
 
 /**
  * Entity class of response info.

@@ -1,8 +1,6 @@
-package com.webank.governance;
+package com.webank.weevent.governance;
 
 import java.util.concurrent.TimeUnit;
-
-import com.webank.weevent.governance.GovernanceApplication;
 
 import org.junit.Rule;
 import org.junit.rules.TestName;
