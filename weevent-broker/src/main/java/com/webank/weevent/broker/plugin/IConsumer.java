@@ -8,6 +8,8 @@ import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.WeEvent;
 
+import lombok.NonNull;
+
 /**
  * Base interface for event consumer.
  * <p>
@@ -147,7 +149,9 @@ public interface IConsumer extends IEventTopic {
      * @return subscription Id
      * @throws BrokerException invalid input
      */
-    String subscribe(String topic, String groupId, String offset, Map<SubscribeExt, String> ext, ConsumerListener listener) throws BrokerException;
+    String subscribe(String topic, String groupId, String offset,
+                     @NonNull Map<SubscribeExt, String> ext,
+                     @NonNull ConsumerListener listener) throws BrokerException;
 
     /**
      * This support multiple topic subscribe
@@ -160,7 +164,9 @@ public interface IConsumer extends IEventTopic {
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
-    String subscribe(String[] topics, String groupId, String offset, Map<SubscribeExt, String> ext, ConsumerListener listener) throws BrokerException;
+    String subscribe(String[] topics, String groupId, String offset,
+                     @NonNull Map<SubscribeExt, String> ext,
+                     @NonNull ConsumerListener listener) throws BrokerException;
 
     /**
      * unsubscribe an exist subscription subscribed by subscribe interface.

@@ -33,6 +33,7 @@ import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.googlecode.jsonrpc4j.ProxyUtil;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -50,18 +51,18 @@ public class WeEventClient implements IWeEventClient {
     // (subscriptionId <-> TopicSession)
     private Map<String, TopicSession> sessionMap;
 
-    public WeEventClient() throws BrokerException {
+    WeEventClient() throws BrokerException {
         buildRpc(defaultJsonRpcUrl);
         buildJms(WeEventConnectionFactory.defaultBrokerUrl, "", "");
     }
 
-    public WeEventClient(String brokerUrl) throws BrokerException {
+    WeEventClient(String brokerUrl) throws BrokerException {
         validateParam(brokerUrl);
         buildRpc(brokerUrl + "/jsonrpc");
         buildJms(getStompUrl(brokerUrl), "", "");
     }
 
-    public WeEventClient(String brokerUrl, String userName, String password) throws BrokerException {
+    WeEventClient(String brokerUrl, String userName, String password) throws BrokerException {
         validateParam(brokerUrl);
         validateUser(userName, password);
         buildRpc(brokerUrl + "/jsonrpc");
@@ -74,11 +75,10 @@ public class WeEventClient implements IWeEventClient {
         return this.brokerRpc.publish(topic, content);
     }
 
-    public String subscribe(String topic, String offset, EventListener listener) throws BrokerException {
+    public String subscribe(String topic, String offset, @NonNull EventListener listener) throws BrokerException {
         try {
             validateParam(topic);
             validateParam(offset);
-            validateEventListener(listener);
             TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
             // create topic
             Topic destination = session.createTopic(topic);
@@ -186,12 +186,12 @@ public class WeEventClient implements IWeEventClient {
     }
 
 
-    public String subscribe(String topic, String groupId, String offset, EventListener listener) throws BrokerException {
+    public String subscribe(String topic, String groupId, String offset,
+                            @NonNull EventListener listener) throws BrokerException {
         try {
             validateParam(topic);
             validateParam(groupId);
             validateParam(offset);
-            validateEventListener(listener);
             TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
             // create topic
             Topic destination = session.createTopic(topic);
@@ -228,12 +228,12 @@ public class WeEventClient implements IWeEventClient {
         }
     }
 
-    public String subscribe(String topic, String groupId, String offset, String subscriptionId, EventListener listener) throws BrokerException {
+    public String subscribe(String topic, String groupId, String offset, String subscriptionId,
+                            @NonNull EventListener listener) throws BrokerException {
         try {
             validateParam(topic);
             validateParam(groupId);
             validateParam(offset);
-            validateEventListener(listener);
             TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
             // create topic
             Topic destination = session.createTopic(topic);
@@ -401,12 +401,6 @@ public class WeEventClient implements IWeEventClient {
         }
     }
 
-    private static void validateEventListener(EventListener listener) throws BrokerException {
-        if (listener == null) {
-            throw new BrokerException(ErrorCode.PARAM_ISNULL);
-        }
-    }
-
     private static void validateExtensions(Map<String, String> extensions) throws BrokerException {
         if (extensions == null) {
             throw new BrokerException(ErrorCode.PARAM_ISNULL);
@@ -423,6 +417,6 @@ public class WeEventClient implements IWeEventClient {
     }
 
     private static BrokerException jms2BrokerException(JMSException e) {
-        return new BrokerException(Integer.valueOf(e.getErrorCode()), e.getMessage());
+        return new BrokerException(Integer.parseInt(e.getErrorCode()), e.getMessage());
     }
 }
