@@ -63,7 +63,7 @@ start(){
          rm cron.backup
     fi
 
-    if [[ `crontab -l | grep -w governance | wc -l` -gt 0 ]]; then
+    if [[ $(crontab -l | grep -w ${server_name} | wc -l) -gt 0 ]]; then
          echo "add the crontab job success"
          exit 0
     else
@@ -73,27 +73,27 @@ start(){
 }
 
 stop(){
-    get_pid;
+    get_pid
     kill_cmd="kill -9 ${current_pid}"
     if [[ -n "${current_pid}" ]];then
         eval ${kill_cmd}
-      
-        echo "stop governance success"
-        if [[ `crontab -l | grep -w governance | wc -l` -gt 0 ]]; then
+
+        echo "stop ${server_name} success"
+        if [[ $(crontab -l | grep -w ${server_name} | wc -l) -gt 0 ]]; then
             crontab -l>cron.backup
-            sed -i '/governance/d' cron.backup
+            sed -i '/'${server_name}'/d' cron.backup
             crontab cron.backup
             rm cron.backup
         fi
 
-        if [[ `crontab -l | grep -w governance | wc -l` -gt 0 ]]; then
+        if [[ $(crontab -l | grep -w ${server_name} | wc -l) -gt 0 ]]; then
             echo "remove the crontab job fail"
             exit 1
         else
             echo "remove the crontab job success"
         fi
     else
-        echo "governance is not running"
+        echo "${server_name} is not running"
         exit 1
     fi
 }
@@ -101,18 +101,12 @@ stop(){
 monitor(){
     get_pid
     if [[ -n "${current_pid}" ]]; then
-        echo "`date`: governance is running(PID=${current_pid})"
+        echo "$(date): ${server_name} is running(PID=${current_pid})"
     else
-        echo "`date`: governance is not running,restart governance now"
+        echo "$(date): ${server_name} is not running, restart ${server_name} now"
         start
-    fi   
+    fi
 }
-
-if [[ $# -lt 1 ]]; then
-    echo "Usage:"
-    echo "     governance.sh start|stop"
-    exit 1
-fi
 
 # command list
 case "$1" in
@@ -126,8 +120,7 @@ monitor)
     monitor
     ;;
 *)
-    echo "     illegal param: $1"
     echo "Usage:"
-    echo "     governance.sh start|stop|monitor"
+    echo "    ${server_name}.sh start|stop|monitor"
     ;;
 esac
