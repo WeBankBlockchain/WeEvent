@@ -1,4 +1,4 @@
-package com.webank.weevent.initial;
+package com.webank.weevent.governance.initial;
 
 import java.io.FileInputStream;
 import java.net.URL;
@@ -8,8 +8,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 
-import org.yaml.snakeyaml.Yaml;
 import lombok.extern.slf4j.Slf4j;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  * tool to initdb
