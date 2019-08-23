@@ -116,12 +116,12 @@ function switch_to_prod(){
         sed -i 's/dev/prod/' ${out_path}/modules/broker/conf/application.properties
     fi
 
-    if [[ -e ${out_path}/modules/governance/conf/application-dev.yml ]]; then
-        rm ${out_path}/modules/governance/conf/application-dev.yml
+    if [[ -e ${out_path}/modules/governance/conf/application-dev.properties ]]; then
+        rm ${out_path}/modules/governance/conf/application-dev.properties
     fi
 
-    if [[ -e ${out_path}/modules/governance/conf/application.yml ]]; then
-        sed -i 's/dev/prod/' ${out_path}/modules/governance/conf/application.yml
+    if [[ -e ${out_path}/modules/governance/conf/application.properties ]]; then
+        sed -i 's/dev/prod/' ${out_path}/modules/governance/conf/application.properties
     fi
 }
 
