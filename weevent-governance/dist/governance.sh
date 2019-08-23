@@ -1,44 +1,64 @@
-#!/bin/bash 
+#!/bin/bash
+JAVA_HOME=
+APP_PARAMS="-Xbootclasspath/a:./conf:./html -Djava.security.egd=file:/dev/./urandom -jar ./apps/*"
 
-pid_file=./logs/governance.pid
+if [ -z ${JAVA_HOME} ];then
+   echo "JAVA_HOME is null, please set it first"
+   exit 1
+fi
+
+###############################################################################
+# The following is common logic for start a java application. DO NOT EDIT IT SOLELY.
+###############################################################################
+JAVA_OPTS="-Xverify:none -XX:+DisableExplicitGC"
+
+
+server_name=$(basename $0|awk -F"." '{print $1}')
+pid_file=./logs/${server_name}.pid
 current_pid=
-
-JAVA_OPTS="-Xverify:none -XX:TieredStopAtLevel=1 -Xms512m -Xmx2048m -XX:NewSize=256m -XX:MaxNewSize=1024m -XX:PermSize=128m -XX:+DisableExplicitGC"
+#operating system total physical memory, unit MB.
+max_total_memory=1024
 
 get_pid(){
     if [[ -e ${pid_file} ]]; then
-        pid=`cat ${pid_file}`
-        current_pid=`ps aux|grep "governance" | grep "${pid}" | grep -v grep | awk '{print $2}'`
+        pid=$(cat ${pid_file})
+        current_pid=$(ps aux|grep "${server_name}" | grep "${pid}" | grep -v grep | awk '{print $2}')
     fi
 }
 
 start(){
     get_pid
     if [[ -n "${current_pid}" ]];then
-        echo "governance is running, (PID=${current_pid})"
+        echo "${server_name} is running, (PID=${current_pid})"
         exit 0
     fi
-    nohup java ${JAVA_OPTS} -Xbootclasspath/a:./conf:./html -Djava.security.egd=file:/dev/./urandom -jar ./apps/*  >/dev/null 2>&1 &
+
+    total_memory=$(free -m | grep "Mem" | awk '{ print $2 }')
+    if [ "${total_memory}" -ge "${max_total_memory}" ];then
+        JAVA_OPTS+=" -XX:TieredStopAtLevel=1 -Xms512m -Xmx2048m -XX:NewSize=256m -XX:MaxNewSize=1024m -XX:PermSize=128m"
+    fi
+
+    nohup ${JAVA_HOME}/bin/java ${JAVA_OPTS} ${APP_PARAMS} >/dev/null 2>&1 &
     i=0
     while :
     do
         sleep 1
         get_pid
         if [[ -n "${current_pid}" ]];then
-            echo "start governance success (PID=${current_pid})"
+            echo "start ${server_name} success (PID=${current_pid})"
             break
         fi
 
         if [[ i -eq 15 ]];then
-            echo "start governance fail"
+            echo "start ${server_name} fail"
             exit 1
         fi
         i=$(( $i + 1 ))
     done
 
-    if [[ `crontab -l | grep -w governance | wc -l` -eq 0 ]]; then
+    if [[ $(crontab -l | grep -w ${server_name} | wc -l) -eq 0 ]]; then
          crontab -l > cron.backup
-         echo "* * * * * cd `pwd`; ./governance.sh monitor >> ./logs/monitor.log 2>&1" >> cron.backup
+         echo "* * * * * cd $(pwd); ./${server_name}.sh monitor >> ./logs/monitor.log 2>&1" >> cron.backup
          crontab cron.backup
          rm cron.backup
     fi
