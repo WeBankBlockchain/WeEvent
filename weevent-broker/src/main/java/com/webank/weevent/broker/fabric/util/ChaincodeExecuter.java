@@ -36,26 +36,28 @@ import org.hyperledger.fabric.sdk.exception.ProposalException;
 
 @Slf4j
 public class ChaincodeExecuter {
-    public void executeTransaction(HFClient client, Channel channel, ChaincodeID chaincodeID, boolean invoke, String func, String... args) throws InvalidArgumentException, ProposalException, UnsupportedEncodingException, InterruptedException, ExecutionException, TimeoutException {
+    public String executeTransaction(HFClient client, Channel channel, ChaincodeID chaincodeID, boolean invoke, String func, String... args) throws InvalidArgumentException, ProposalException, UnsupportedEncodingException, InterruptedException, ExecutionException, TimeoutException {
         TransactionProposalRequest transactionProposalRequest = client.newTransactionProposalRequest();
         transactionProposalRequest.setChaincodeID(chaincodeID);
         transactionProposalRequest.setChaincodeLanguage(TransactionRequest.Type.GO_LANG);
 
         transactionProposalRequest.setFcn(func);
         transactionProposalRequest.setArgs(args);
-        transactionProposalRequest.setProposalWaitTime(10000);
-
+        transactionProposalRequest.setProposalWaitTime(120000);
 
         List<ProposalResponse> successful = new LinkedList<ProposalResponse>();
         List<ProposalResponse> failed = new LinkedList<ProposalResponse>();
         // there is no need to retry. If not, you should re-send the transaction proposal.
-        Collection<ProposalResponse> transactionPropResp = channel.sendTransactionProposal(transactionProposalRequest, channel.getPeers());
+        Collection<ProposalResponse> transactionPropResp = channel.sendTransactionProposal(transactionProposalRequest);
+        String payload = "";
+        Boolean result = true;
         for (ProposalResponse response : transactionPropResp) {
             if (response.getStatus() == ProposalResponse.Status.SUCCESS) {
-                String payload = new String(response.getChaincodeActionResponsePayload());
+                payload = new String(response.getChaincodeActionResponsePayload());
                 log.info(String.format("[√] Got success response from peer {} => payload: {}", response.getPeer().getName(), payload));
                 successful.add(response);
             } else {
+                result = false;
                 String status = response.getStatus().toString();
                 String msg = response.getMessage();
                 log.warn(String.format("[×] Got failed response from peer{} => {}: {} ", response.getPeer().getName(), status, msg));
@@ -63,21 +65,12 @@ public class ChaincodeExecuter {
             }
         }
 
-        if (invoke) {
+        if (invoke && result) {
             log.info("Sending transaction to orderers...");
-            // Java sdk tries all orderers to send transaction, so don't worry about one orderer gone.
-            /*channel.sendTransaction(successful).thenApply(transactionEvent -> {
-                logger.info("Orderer response: txid" + transactionEvent.getTransactionID());
-                logger.info("Orderer response: block number: " + transactionEvent.getBlockEvent().getBlockNumber());
-                return null;
-            }).exceptionally(e -> {
-                logger.error("Orderer exception happened: ", e);
-                return null;
-            }).get(waitTime, TimeUnit.SECONDS);*/
-
             CompletableFuture<BlockEvent.TransactionEvent> carfuture = channel.sendTransaction(successful);
             BlockEvent.TransactionEvent transactionEvent = carfuture.get(30, TimeUnit.SECONDS);
             log.debug("Wait event return: " + transactionEvent.getChannelId() + " " + transactionEvent.getTransactionID() + " " + transactionEvent.getType() + " " + transactionEvent.getValidationCode());
         }
+        return payload;
     }
 }

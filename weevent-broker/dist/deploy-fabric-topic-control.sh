@@ -19,6 +19,14 @@ function check_java_jdk(){
 }
 check_java_jdk
 
-java_cmd="java -Xbootclasspath/a:./conf -cp ./apps/* -Dloader.main=com.webank.weevent.broker.fabric.util.FabricSdkUtil org.springframework.boot.loader.PropertiesLauncher"
-channelName=$1
-${java_cmd} ${channelName}
+java_cmd_deploy="java -Xbootclasspath/a:./conf -cp ./apps/* -Dloader.main=com.webank.weevent.broker.fabric.util.FabricDeployContractUtil org.springframework.boot.loader.PropertiesLauncher"
+java_cmd_invoke="java -Xbootclasspath/a:./conf -cp ./apps/* -Dloader.main=com.webank.weevent.broker.fabric.util.FabricUpdateContractUtil org.springframework.boot.loader.PropertiesLauncher"
+cmd=$1
+
+if [[ ${cmd} = "deploy" ]];then
+    ${java_cmd_deploy}
+fi
+
+if [[ ${cmd} = "add" || ${cmd} = "update" ]];then
+    ${java_cmd_invoke} ${cmd}
+fi

@@ -36,7 +36,7 @@ public class FabricUser implements User {
 
     @Override
     public String getName() {
-        return FabricSdkUtil.fabricConfig.getOrgUserName();
+        return FabricDeployContractUtil.fabricConfig.getOrgUserName();
     }
 
     @Override
@@ -56,7 +56,7 @@ public class FabricUser implements User {
 
     @Override
     public String getMspId() {
-        return FabricSdkUtil.fabricConfig.getMspId();
+        return FabricDeployContractUtil.fabricConfig.getMspId();
     }
 
     @Override
@@ -65,7 +65,7 @@ public class FabricUser implements User {
             @Override
             public PrivateKey getKey() {
                 try {
-                    String privateKeyContent = new String(Files.readAllBytes(Paths.get(FabricSdkUtil.fabricConfig.getOrgUserKeyFile())));
+                    String privateKeyContent = new String(Files.readAllBytes(Paths.get(FabricDeployContractUtil.fabricConfig.getOrgUserKeyFile())));
                     privateKeyContent = privateKeyContent.replaceAll("\\n", "").replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "");
                     KeyFactory kf = KeyFactory.getInstance("ECDSA");
                     PKCS8EncodedKeySpec keySpecPKCS8 = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKeyContent));
@@ -82,7 +82,7 @@ public class FabricUser implements User {
             @Override
             public String getCert() {
                 try {
-                    return new String(Files.readAllBytes(Paths.get(FabricSdkUtil.fabricConfig.getOrgUserCertFile())));
+                    return new String(Files.readAllBytes(Paths.get(FabricDeployContractUtil.fabricConfig.getOrgUserCertFile())));
                 } catch (IOException e) {
                     e.printStackTrace();
                     return "";

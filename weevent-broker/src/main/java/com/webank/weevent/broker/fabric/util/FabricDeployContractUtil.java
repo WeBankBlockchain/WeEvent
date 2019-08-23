@@ -6,15 +6,19 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
-import org.checkerframework.checker.units.qual.C;
 import org.hyperledger.fabric.protos.ledger.rwset.kvrwset.KvRwset;
+import org.hyperledger.fabric.sdk.BlockEvent;
 import org.hyperledger.fabric.sdk.BlockInfo;
 import org.hyperledger.fabric.sdk.BlockchainInfo;
 import org.hyperledger.fabric.sdk.ChaincodeID;
@@ -29,7 +33,6 @@ import org.hyperledger.fabric.sdk.ProposalResponse;
 import org.hyperledger.fabric.sdk.SDKUtils;
 import org.hyperledger.fabric.sdk.TransactionRequest;
 import org.hyperledger.fabric.sdk.TxReadWriteSetInfo;
-import org.hyperledger.fabric.sdk.exception.ChaincodeEndorsementPolicyParseException;
 import org.hyperledger.fabric.sdk.exception.CryptoException;
 import org.hyperledger.fabric.sdk.exception.InvalidArgumentException;
 import org.hyperledger.fabric.sdk.exception.ProposalException;
@@ -43,38 +46,38 @@ import com.webank.weevent.broker.fabric.config.FabricConfig;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Slf4j
-public class FabricSdkUtil {
-    protected static FabricConfig fabricConfig = new FabricConfig();
+public class FabricDeployContractUtil {
+    public static FabricConfig fabricConfig = new FabricConfig();
 
     public static void main(String[] args) throws Exception {
         fabricConfig.load();
         try {
             HFClient client = initializeClient();
             Channel channel = initializeChannel(client, fabricConfig.getChannelName());
+            //get Topic chaincodeID
             ChaincodeID chaincodeID = ChaincodeID.newBuilder().setName(fabricConfig.getTopicName()).setVersion(fabricConfig.getTopicVerison()).build();
-            Collection<ProposalResponse> proposalResponses = installProposal(client, channel, chaincodeID, TransactionRequest.Type.GO_LANG, fabricConfig.getTopicVerison(), fabricConfig.getTopicSourceLoc(), fabricConfig.getTopicPath());//install Topic chaincode
+            //install Topic chaincode
+            Collection<ProposalResponse> proposalResponses = installProposal(client, channel, chaincodeID, TransactionRequest.Type.GO_LANG, fabricConfig.getTopicVerison(), fabricConfig.getTopicSourceLoc(), fabricConfig.getTopicPath());
             for (ProposalResponse response : proposalResponses) {
                 if (response.getStatus() == ChaincodeResponse.Status.SUCCESS) {
                     log.debug("Install Topic SUCC Txid={}, peer={}", response.getTransactionID(), response.getPeer().getUrl());
-                    //dumpRWSet(response);
                 } else {
                     log.error("Install Topic FAIL Txid={}, peer={}", response.getMessage(), response.getTransactionID(), response.getPeer().getUrl());
-                    //return;
+                    return;
                 }
             }
-
-            proposalResponses = instantiateProposal(client, channel, chaincodeID, TransactionRequest.Type.GO_LANG);//Instantiate Topic chaincode
-            for (ProposalResponse response : proposalResponses) {
-                if (response.getStatus() == ChaincodeResponse.Status.SUCCESS) {
-                    log.debug("Instantiate Topic SUCC Txid={}, peer={}", response.getTransactionID(), response.getPeer().getUrl());
-                    //dumpRWSet(response);
-                } else {
-                    log.error("Instantiate Topic FAIL errorMsg={} Txid={}, peer={}", response.getMessage(), response.getTransactionID(), response.getPeer().getUrl());
-                    //return;
-                }
+            //instant Topic chaincode
+            BlockEvent.TransactionEvent transactionEvent = instantiateProposal(client, channel, chaincodeID, TransactionRequest.Type.GO_LANG);//Instantiate Topic chaincode
+            if (!"".equals(transactionEvent.getTransactionID())) {
+                log.debug("Instantiate Topic SUCC transactionEvent={}", transactionEvent);
+            } else {
+                log.error("Instantiate Topic FAIL transactionEvent={}", transactionEvent);
+                return;
             }
 
+            //get TopicController chaincodeID
             chaincodeID = ChaincodeID.newBuilder().setName(fabricConfig.getTopicControllerName()).setVersion(fabricConfig.getTopicControllerVersion()).build();
+            //install TopicController chaincode
             proposalResponses = installProposal(client, channel, chaincodeID, TransactionRequest.Type.GO_LANG, fabricConfig.getTopicControllerVersion(), fabricConfig.getTopicControllerSourceLoc(), fabricConfig.getTopicControllerPath());//install TopicController chaincode
             for (ProposalResponse response : proposalResponses) {
                 if (response.getStatus() == ChaincodeResponse.Status.SUCCESS) {
@@ -82,27 +85,18 @@ public class FabricSdkUtil {
                     //dumpRWSet(response);
                 } else {
                     log.error("Install TopicController FAIL errorMsg={} Txid={}, peer={}", response.getMessage(), response.getTransactionID(), response.getPeer().getUrl());
-                    //return;
+                    return;
                 }
             }
 
-            proposalResponses = instantiateProposal(client, channel, chaincodeID, TransactionRequest.Type.GO_LANG);//Instantiate TopicController chaincode
-            for (ProposalResponse response : proposalResponses) {
-                if (response.getStatus() == ChaincodeResponse.Status.SUCCESS) {
-                    log.debug("Instantiate TopicController SUCC Txid={}, peer={}", response.getTransactionID(), response.getPeer().getUrl());
-                    //dumpRWSet(response);
-                } else {
-                    log.error("Instantiate TopicController FAIL errorMsg={} Txid={}, peer={}", response.getMessage(), response.getTransactionID(), response.getPeer().getUrl());
-                    //return;
-                }
+            //instant TopicController chaincode
+            transactionEvent = instantiateProposal(client, channel, chaincodeID, TransactionRequest.Type.GO_LANG);
+            if (!"".equals(transactionEvent.getTransactionID())) {
+                log.debug("Instantiate TopicController SUCC transactionEvent={}", transactionEvent);
+            } else {
+                log.error("Instantiate TopicController FAIL transactionEvent={}", transactionEvent);
+                return;
             }
-
-            //set topicName to topicController
-            executeChaincode(client, channel, chaincodeID, true, "addTopicContractName", "Topic");
-            //set topicName from topicController
-            executeChaincode(client, channel, chaincodeID, false, "getTopicContractName");
-
-            //printChannelInfo(client, channel);
             log.info("Shutdown channel.");
             channel.shutdown(true);
         } catch (Exception e) {
@@ -111,7 +105,7 @@ public class FabricSdkUtil {
     }
 
     // Create HFClient
-    private static HFClient initializeClient() throws CryptoException, InvalidArgumentException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    public static HFClient initializeClient() throws CryptoException, InvalidArgumentException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         HFClient client = HFClient.createNewInstance();
         client.setCryptoSuite(CryptoSuite.Factory.getCryptoSuite());
         client.setUserContext(new FabricUser());
@@ -120,7 +114,7 @@ public class FabricSdkUtil {
 
 
     // Create Channel
-    private static Channel initializeChannel(HFClient client, String channelName) throws InvalidArgumentException, TransactionException {
+    public static Channel initializeChannel(HFClient client, String channelName) throws InvalidArgumentException, TransactionException {
         Properties orderer1Prop = new Properties();
         orderer1Prop.setProperty("pemFile", fabricConfig.getOrdererTlsCaFile());
         orderer1Prop.setProperty("sslProvider", "openSSL");
@@ -174,38 +168,7 @@ public class FabricSdkUtil {
         return ret;
     }
 
-    private static void dumpRWSet(ProposalResponse response) {
-        try {
-            for (TxReadWriteSetInfo.NsRwsetInfo nsRwsetInfo : response.getChaincodeActionResponseReadWriteSetInfo().getNsRwsetInfos()) {
-                String namespace = nsRwsetInfo.getNamespace();
-                KvRwset.KVRWSet rws = nsRwsetInfo.getRwset();
-
-                int rsid = -1;
-                for (KvRwset.KVRead readList : rws.getReadsList()) {
-                    rsid++;
-                    log.debug("Namespace %s read  set[%d]: key[%s]=version[%d:%d]", namespace, rsid, readList.getKey(), readList.getVersion().getBlockNum(), readList.getVersion().getTxNum());
-                }
-
-                rsid = -1;
-                for (KvRwset.KVWrite writeList : rws.getWritesList()) {
-                    rsid++;
-                    String valAsString = printableString(new String(writeList.getValue().toByteArray(), "UTF-8"));
-                    log.debug("Namespace %s write set[%d]: key[%s]=value[%s]", namespace, rsid, writeList.getKey(), valAsString);
-                }
-            }
-        } catch (InvalidArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InvalidProtocolBufferException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
-    private static Collection<ProposalResponse> instantiateProposal(HFClient client, Channel channel, ChaincodeID chaincodeID, TransactionRequest.Type chaincodeLang) throws InvalidArgumentException, ChaincodeEndorsementPolicyParseException, IOException, ProposalException {
+    private static BlockEvent.TransactionEvent instantiateProposal(HFClient client, Channel channel, ChaincodeID chaincodeID, TransactionRequest.Type chaincodeLang) throws InvalidArgumentException, ProposalException, InterruptedException, ExecutionException, TimeoutException {
         InstantiateProposalRequest instantiateProposalRequest = client.newInstantiationProposalRequest();
         instantiateProposalRequest.setProposalWaitTime(120000);//time in milliseconds
         instantiateProposalRequest.setChaincodeID(chaincodeID);
@@ -218,31 +181,36 @@ public class FabricSdkUtil {
         transientMap.put("HyperLedgerFabric", "InstantiateProposalRequest:JavaSDK".getBytes(UTF_8));
         transientMap.put("method", "InstantiateProposalRequest".getBytes(UTF_8));
         instantiateProposalRequest.setTransientMap(transientMap);
-
         Collection<ProposalResponse> propResp = channel.sendInstantiationProposal(instantiateProposalRequest, channel.getPeers());
-        return propResp;
+        BlockEvent.TransactionEvent transactionEvent = sendTransaction(channel, propResp);
+        return transactionEvent;
     }
 
-    private static void executeChaincode(HFClient client, Channel channel, ChaincodeID chaincodeID, boolean invoke, String func, String... args) throws
+    private static BlockEvent.TransactionEvent sendTransaction(Channel channel, Collection<ProposalResponse> propResp) throws InvalidArgumentException, InterruptedException, ExecutionException, TimeoutException {
+        List<ProposalResponse> successful = new LinkedList<ProposalResponse>();
+        List<ProposalResponse> failed = new LinkedList<ProposalResponse>();
+        for (ProposalResponse response : propResp) {
+            if (response.getStatus() == ProposalResponse.Status.SUCCESS) {
+                String payload = new String(response.getChaincodeActionResponsePayload());
+                log.debug(String.format("[√] Got success response from peer {} => payload: {}", response.getPeer().getName(), payload));
+                successful.add(response);
+            } else {
+                String status = response.getStatus().toString();
+                String msg = response.getMessage();
+                log.error(String.format("[×] Got failed response from peer{} => {}: {} ", response.getPeer().getName(), status, msg));
+                failed.add(response);
+            }
+        }
+
+        CompletableFuture<BlockEvent.TransactionEvent> carfuture = channel.sendTransaction(propResp);
+        BlockEvent.TransactionEvent transactionEvent = carfuture.get(30, TimeUnit.SECONDS);
+        return transactionEvent;
+    }
+
+    public static String executeChaincode(HFClient client, Channel channel, ChaincodeID chaincodeID, boolean invoke, String func, String... args) throws
             ProposalException, InvalidArgumentException, UnsupportedEncodingException, InterruptedException,
             ExecutionException, TimeoutException {
         ChaincodeExecuter executer = new ChaincodeExecuter();
-        executer.executeTransaction(client, channel, chaincodeID, invoke, func, args);
-    }
-
-    private static void printChannelInfo(HFClient client, Channel channel) throws
-            ProposalException, InvalidArgumentException, IOException {
-        BlockchainInfo channelInfo = channel.queryBlockchainInfo();
-
-        log.info("Channel height: " + channelInfo.getHeight());
-        for (long current = channelInfo.getHeight() - 1; current > -1; --current) {
-            BlockInfo returnedBlock = channel.queryBlockByNumber(current);
-            final long blockNumber = returnedBlock.getBlockNumber();
-
-            log.info(String.format("Block #%d has previous hash id: %s", blockNumber, Hex.encodeHexString(returnedBlock.getPreviousHash())));
-            log.info(String.format("Block #%d has data hash: %s", blockNumber, Hex.encodeHexString(returnedBlock.getDataHash())));
-            log.info(String.format("Block #%d has calculated block hash is %s",
-                    blockNumber, Hex.encodeHexString(SDKUtils.calculateBlockHash(client, blockNumber, returnedBlock.getPreviousHash(), returnedBlock.getDataHash()))));
-        }
+        return executer.executeTransaction(client, channel, chaincodeID, invoke, func, args);
     }
 }

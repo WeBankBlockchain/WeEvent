@@ -15,6 +15,7 @@ type TopicInfo struct {
 }
 
 var topicContractName string = ""
+var topicContractVersion string = ""
 var topicMap = make(map[string]TopicInfo)
 
 func (t *TopicController) Init(stub shim.ChaincodeStubInterface) pb.Response{
@@ -31,6 +32,8 @@ func (t *TopicController) Invoke(stub shim.ChaincodeStubInterface) pb.Response{
 			return t.updateTopicContractName(stub, args)
 		case "getTopicContractName":
 			return t.getTopicContractName(stub, args)
+		case "getTopicContractVersion":
+		    return t.getTopicContractVersion(stub,args)
 		case "addTopicInfo":
 			return t.addTopicInfo(stub, args)
 		case "getTopicInfo":
@@ -41,8 +44,9 @@ func (t *TopicController) Invoke(stub shim.ChaincodeStubInterface) pb.Response{
 }
 
 func (t *TopicController) addTopicContractName(stub shim.ChaincodeStubInterface,args[] string) pb.Response{
-	if(topicContractName == ""){
+	if(topicContractName == "" && topicContractVersion == ""){
 		topicContractName=args[0]
+		topicContractVersion=args[1]
 		return shim.Success([]byte("setTopicName success"))
 	}
 	return shim.Error("topicContractName exist")
@@ -50,11 +54,16 @@ func (t *TopicController) addTopicContractName(stub shim.ChaincodeStubInterface,
 
 func (t *TopicController) updateTopicContractName(stub shim.ChaincodeStubInterface,args[] string) pb.Response{
 	topicContractName=args[0]
+	topicContractVersion=args[1]
 	return shim.Success([]byte("updateTopicContractName success"))
 }
 
 func (t *TopicController) getTopicContractName(stub shim.ChaincodeStubInterface,args[] string) pb.Response{
 	return shim.Success([]byte(topicContractName))
+}
+
+func (t *TopicController) getTopicContractVersion(stub shim.ChaincodeStubInterface,args[] string) pb.Response{
+	return shim.Success([]byte(topicContractVersion))
 }
 
 func (t *TopicController) addTopicInfo(stub shim.ChaincodeStubInterface,args[] string) pb.Response{

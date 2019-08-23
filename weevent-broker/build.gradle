@@ -44,7 +44,7 @@ dependencies {
     }
     
     // fabric 1.4.4
-    implementation("org.hyperledger.fabric-sdk-java:fabric-sdk-java:1.4.0")
+    implementation("org.hyperledger.fabric-sdk-java:fabric-sdk-java:1.4.4")
     
     // depend project
     implementation project(path: ":weevent-client")
