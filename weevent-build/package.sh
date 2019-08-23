@@ -17,8 +17,8 @@ function usage(){
 version=""
 tag="master"
 
-current_path=`pwd`
-top_path=`dirname ${current_path}`
+current_path=$(pwd)
+top_path=$(dirname ${current_path})
 out_path=""
 
 while [[ $# -ge 2 ]] ; do
@@ -57,7 +57,7 @@ function confirm(){
 # chmod & dos2unix
 function set_permission(){
     cd ${out_path}
-    find -type f -regex  ".*\.\(sh\|ini\|properties\|yml\|xml\)" | xargs dos2unix
+    find -type f -regex  ".*\.\(sh\|ini\|properties\|xml\)" | xargs dos2unix
     find -type f -regex ".*\.\(sh\)" | xargs -t -i chmod +x {}
 }
 
@@ -167,7 +167,7 @@ function package(){
     # tar weevent
     yellow_echo "generate weevent-${version}.tar.gz"
     cd ${current_path}
-    tar -czpvf weevent-${version}.tar.gz `basename ${out_path}`
+    tar -czpvf weevent-${version}.tar.gz $(basename ${out_path})
 
     # tar broker module
     tar_broker weevent-broker-${version}.tar.gz

@@ -1,6 +1,6 @@
 #!/bin/bash
-current_path=`pwd`
-top_path=`dirname ${current_path}`
+current_path=$(pwd)
+top_path=$(dirname ${current_path})
 broker_pid_file=${current_path}/broker/logs/broker.pid
 nginx_pid_file=${current_path}/nginx/logs/nginx.pid
 
@@ -24,13 +24,13 @@ function main(){
     fi
 
     if [[ -e ${broker_pid_file} ]]; then
-        pid=`cat ${broker_pid_file}`
-        current_broker_pid=`ps aux|grep "broker" | grep "${pid}" | grep -v grep | awk '{print $2}'`
+        pid=$(cat ${broker_pid_file})
+        current_broker_pid=$(ps aux|grep "broker" | grep "${pid}" | grep -v grep | awk '{print $2}')
     fi
      
     if [[ -e ${nginx_pid_file} ]]; then
-       pid=`cat ${nginx_pid_file}`
-       current_nginx_pid=`ps aux|grep "nginx" | grep "${pid}" | grep -v grep | awk '{print $2}'`
+       pid=$(cat ${nginx_pid_file})
+       current_nginx_pid=$(ps aux|grep "nginx" | grep "${pid}" | grep -v grep | awk '{print $2}')
     fi
 
     if [[ -n "${current_broker_pid}" ]] || [[ -n "${current_nginx_pid}" ]];then

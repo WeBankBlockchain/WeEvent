@@ -1,5 +1,5 @@
 #!/bin/bash
-current_path=`pwd`
+current_path=$(pwd)
 
 # check broker
 function check_broker(){
@@ -10,13 +10,13 @@ function check_broker(){
         exit 1        
     fi
     
-    port=`cat ${current_path}/conf/application-prod.properties | grep "server.port" | awk -F'=' '{print $2}' | sed s/[[:space:]]//g`
+    port=$(grep "server.port" ${current_path}/conf/application-prod.properties| awk -F'=' '{print $2}' | sed s/[[:space:]]//g)
     if [[ $? -ne 0 ]];then
         echo "get broker port fail"
         exit 1
     fi
     
-    exist_topic=`curl -s "http://127.0.0.1:$port/weevent/rest/exist?topic=hello"`
+    exist_topic=$(curl -s "http://127.0.0.1:$port/weevent/rest/exist?topic=hello")
     if [[ "${exist_topic}" == "true" || "${exist_topic}" == "false" ]];then
         echo "broker service is ok"
     else
