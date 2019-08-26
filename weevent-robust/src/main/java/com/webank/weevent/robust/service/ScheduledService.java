@@ -130,7 +130,7 @@ public class ScheduledService implements AutoCloseable {
         this.mqttGateway = RobustApplication.applicationContext.getBean(MqttGateway.class);
     }
 
-    static Map<String, Integer> getMqttReceiveMap() {
+    public  static Map<String, Integer> getMqttReceiveMap() {
         return mqttReceiveMap;
     }
 
@@ -327,7 +327,7 @@ public class ScheduledService implements AutoCloseable {
         };
     }
 
-    static void countTimes(Map<String, Integer> integerMap, String timeKey) {
+    public static void countTimes(Map<String, Integer> integerMap, String timeKey) {
         if (integerMap.containsKey(timeKey)) {
             integerMap.put(timeKey, (integerMap.get(timeKey) + 1));
         } else {
