@@ -20,7 +20,10 @@ public class MqttBridge implements MessageHandler {
         if (map.get("eventId") != null) {
             String eventId = map.get("eventId").toString();
             log.info("mqtt receive success eventId: {}", eventId);
+            if (!ScheduledService.getMqttReceiveMap().containsKey(eventId)) {
+                ScheduledService.getMqttReceiveMap().put(eventId, 1);
+                ScheduledService.countTimes(ScheduledService.getMqttReceiveMap(), DateFormatUtils.format(new Date(), "yyyy-MM-dd HH"));
+            }
         }
-        ScheduledService.countTimes(ScheduledService.getMqttReceiveMap(), DateFormatUtils.format(new Date(), "yyyy-MM-dd HH"));
     }
 }

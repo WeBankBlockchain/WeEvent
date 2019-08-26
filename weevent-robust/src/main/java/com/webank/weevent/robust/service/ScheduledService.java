@@ -7,19 +7,19 @@ import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.PostConstruct;
 
 import com.webank.weevent.robust.RobustApplication;
+import com.webank.weevent.robust.service.interfaces.MqttGateway;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
-import com.webank.weevent.robust.service.interfaces.MqttGateway;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -84,15 +84,15 @@ public class ScheduledService implements AutoCloseable {
 
     private final static String EVENT_ID = "eventId";
 
-    private static Map<String, String> topicSubscribeMap = new HashMap<>();
+    private static Map<String, String> topicSubscribeMap = new ConcurrentHashMap<>();
 
-    private final static Map<String, Integer> restfulSendMap = new HashMap<>();
-    private final static Map<String, Integer> jsonrpcSendMap = new HashMap<>();
-    private final static Map<String, Integer> mqttSendMap = new HashMap<>();
-    private final static Map<String, Integer> stompSendMap = new HashMap<>();
+    private final static Map<String, Integer> restfulSendMap = new ConcurrentHashMap<>();
+    private final static Map<String, Integer> jsonrpcSendMap = new ConcurrentHashMap<>();
+    private final static Map<String, Integer> mqttSendMap = new ConcurrentHashMap<>();
+    private final static Map<String, Integer> stompSendMap = new ConcurrentHashMap<>();
 
-    private final static Map<String, Integer> mqttReceiveMap = new HashMap<>();
-    private final static Map<String, Integer> stompReceiveMap = new HashMap<>();
+    private final static Map<String, Integer> mqttReceiveMap = new ConcurrentHashMap<>();
+    private final static Map<String, Integer> stompReceiveMap = new ConcurrentHashMap<>();
 
     private StompSession stompSession;
 
@@ -150,7 +150,7 @@ public class ScheduledService implements AutoCloseable {
     }
 
     @Async
-    @Scheduled(cron = "0/10 * * * * ?")
+    @Scheduled(cron = "0/30 * * * * ?")
     public synchronized void scheduled() throws BrokerException {
 
         // use the rest request to post a message
@@ -242,12 +242,12 @@ public class ScheduledService implements AutoCloseable {
 
 
         //remove last hour statistic key - value
-        restfulSendMap.remove(time);
-        stompSendMap.remove(time);
-        mqttSendMap.remove(time);
-        jsonrpcSendMap.remove(time);
-        stompReceiveMap.remove(time);
-        mqttReceiveMap.remove(time);
+        restfulSendMap.clear();
+        stompSendMap.clear();
+        mqttSendMap.clear();
+        jsonrpcSendMap.clear();
+        stompReceiveMap.clear();
+        mqttReceiveMap.clear();
 
     }
 
@@ -328,7 +328,7 @@ public class ScheduledService implements AutoCloseable {
         };
     }
 
-    public static void countTimes(Map<String, Integer> integerMap, String timeKey) {
+    public static synchronized void countTimes(Map<String, Integer> integerMap, String timeKey) {
         if (integerMap.containsKey(timeKey)) {
             integerMap.put(timeKey, (integerMap.get(timeKey) + 1));
         } else {
