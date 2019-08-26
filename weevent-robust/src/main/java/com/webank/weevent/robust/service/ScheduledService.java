@@ -66,7 +66,7 @@ public class ScheduledService implements AutoCloseable {
     @Value("${weevent.broker.url:(127.0.0.1:7090)}")
     private String url;
 
-    @Value("${statistic.file.path:(./logs/countTimes.text)}")
+    @Value("${statistic.file.path:(./logs/countTimes.txt)}")
     private String statisticFilePath;
 
     private final static String FORMAT = "yyyy-MM-dd HH";
@@ -130,12 +130,13 @@ public class ScheduledService implements AutoCloseable {
         this.mqttGateway = RobustApplication.applicationContext.getBean(MqttGateway.class);
     }
 
-    public  static Map<String, Integer> getMqttReceiveMap() {
+    public static Map<String, Integer> getMqttReceiveMap() {
         return mqttReceiveMap;
     }
 
     @PostConstruct
     public void init() throws BrokerException {
+        this.writeStringToFile(statisticFilePath, "", false);
         boolean result = weEventClient.open(REST_TOPIC);
         log.info("rest topic  open result is {}", result);
         result = weEventClient.open(JSON_RPC_TOPIC);
@@ -219,24 +220,24 @@ public class ScheduledService implements AutoCloseable {
         Date lastHour = calendar.getTime();
         String time = this.getFormatTime(lastHour);
 
-        this.writeStringToFile(statisticFilePath, "Time is " + time + ":00:00\n");
+        this.writeStringToFile(statisticFilePath, "Time is " + time + ":00:00\n", true);
         log.info(statisticFilePath, "Time is " + this.getFormatTime(date) + ":00:00\n");
 
         this.writeStringToFile(statisticFilePath,
-                "last hour restful send: " + restfulSendMap.get(time) + " events\n");
+                "last hour restful send: " + restfulSendMap.get(time) + " events\n", true);
         log.info("last hour restful send: " + restfulSendMap.get(time) + " events\n");
 
 
         this.writeStringToFile(statisticFilePath,
-                "last hour json rpc send: " + jsonrpcSendMap.get(time) + " events\n");
+                "last hour json rpc send: " + jsonrpcSendMap.get(time) + " events\n", true);
         log.info("last hour json rpc send: " + jsonrpcSendMap.get(time) + " events\n");
 
         this.writeStringToFile(statisticFilePath,
-                "last hour stomp send: " + stompSendMap.get(time) + ", receive:" + stompReceiveMap.get(time) + " events\n");
+                "last hour stomp send: " + stompSendMap.get(time) + ", receive:" + stompReceiveMap.get(time) + " events\n", true);
         log.info("last hour stomp send: " + stompSendMap.get(time) + ", receive:" + stompReceiveMap.get(time) + " events\n");
 
         this.writeStringToFile(statisticFilePath,
-                "last hour mqtt send: " + mqttSendMap.get(time) + ", receive:" + mqttReceiveMap.get(time) + " events\n");
+                "last hour mqtt send: " + mqttSendMap.get(time) + ", receive:" + mqttReceiveMap.get(time) + " events\n", true);
         log.info("last hour mqtt send: " + mqttSendMap.get(time) + " receive:" + mqttReceiveMap.get(time) + " events\n");
 
 
@@ -349,8 +350,9 @@ public class ScheduledService implements AutoCloseable {
     /**
      * @param filePath is the file path,
      * @param content content needs to be written
+     * @param flag is true for append, false for overwrite
      */
-    private void writeStringToFile(String filePath, String content) {
+    private void writeStringToFile(String filePath, String content, boolean flag) {
         File file = new File(filePath);
         if (!file.exists()) {
             try {
@@ -362,7 +364,7 @@ public class ScheduledService implements AutoCloseable {
                 log.error(e.getMessage());
             }
         }
-        try (OutputStream os = new FileOutputStream(file, true)) {
+        try (OutputStream os = new FileOutputStream(file, flag)) {
             byte[] b = content.getBytes();
             os.write(b);
             os.flush();
