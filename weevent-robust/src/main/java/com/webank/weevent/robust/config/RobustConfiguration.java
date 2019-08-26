@@ -174,7 +174,7 @@ public class RobustConfiguration {
     @Bean
     @ServiceActivator(inputChannel = "mqttInputChannel")
     @ConditionalOnBean(MessageProducer.class)
-    public static MessageHandler MqttBridgeHandler() {
+    public MessageHandler MqttBridgeHandler() {
         return new MqttBridge();
     }
 }
