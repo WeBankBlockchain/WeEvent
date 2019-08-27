@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.RedisService;
+import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.LRUCache;
 import com.webank.weevent.sdk.BrokerException;
@@ -100,7 +101,16 @@ public class FiscoBcosDelegate {
         threadPool = initThreadPool(fiscoConfig);
         timeout = fiscoConfig.getWeb3sdkTimeout();
 
-        if (fiscoConfig.getVersion().startsWith("1.3")) {
+        if (StringUtils.isBlank(fiscoConfig.getVersion())){
+            log.error("the fisco version in fisco.properties is null");
+            throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
+        }
+        if (StringUtils.isBlank(fiscoConfig.getNodes())){
+            log.error("the fisco nodes in fisco.properties is null");
+            throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
+        }
+        
+        if (fiscoConfig.getVersion().startsWith(WeEventConstants.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             log.info("Notice: FISCO-BCOS's version is 1.x");
 
             // set web3sdk.Async thread pool
@@ -110,7 +120,7 @@ public class FiscoBcosDelegate {
             fiscoBcos.init();
 
             this.fiscoBcos = fiscoBcos;
-        } else if (fiscoConfig.getVersion().startsWith("2.")) {
+        } else if (fiscoConfig.getVersion().startsWith(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {
             log.info("Notice: FISCO-BCOS's version is 2.x");
 
             // set web3sdk.Async thread pool
