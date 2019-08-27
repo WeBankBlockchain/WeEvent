@@ -1,4 +1,4 @@
-package com.webank.weevent.robust.service.interfaces;
+package com.webank.weevent.service.interfaces;
 
 import org.springframework.integration.annotation.MessagingGateway;
 import org.springframework.integration.mqtt.support.MqttHeaders;
