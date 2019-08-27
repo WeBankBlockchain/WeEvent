@@ -142,7 +142,7 @@ public class ScheduledService implements AutoCloseable {
     }
 
     private void stompSubscribe() throws InterruptedException, ExecutionException {
-        String callUrl = "ws://" + url + "/com/webank/weevent/stomp";
+        String callUrl = "ws://" + url + "/weevent/stomp";
         StompSessionHandlerAdapter handlerAdapter = this.getStompSessionHandlerAdapter();
         ListenableFuture<StompSession> connect = this.socketStompClient.connect(callUrl, handlerAdapter);
         StompHeaders header = new StompHeaders();
@@ -281,7 +281,7 @@ public class ScheduledService implements AutoCloseable {
                         WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
                         stompClient.setMessageConverter(new StringMessageConverter());
                         stompClient.setTaskScheduler(taskScheduler);
-                        ListenableFuture<StompSession> future = stompClient.connect("ws://" + url + "/com/webank/weevent/stomp", this);
+                        ListenableFuture<StompSession> future = stompClient.connect("ws://" + url + "/weevent/stomp", this);
                         stompSession = future.get();
                         // stomp subscribe
                         stompSession.setAutoReceipt(true);

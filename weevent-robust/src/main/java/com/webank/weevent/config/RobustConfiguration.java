@@ -60,7 +60,7 @@ public class RobustConfiguration {
 
     @Bean
     public IWeEventClient getBrokerRpc() throws Exception {
-        String jsonurl = HTTP_HEADER + url + "/com/webank/weevent";
+        String jsonurl = HTTP_HEADER + url + "/weevent";
         return IWeEventClient.build(jsonurl);
     }
 

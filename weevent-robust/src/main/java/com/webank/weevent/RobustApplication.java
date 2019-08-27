@@ -1,4 +1,4 @@
-package com.webank.weevent.robust;
+package com.webank.weevent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
