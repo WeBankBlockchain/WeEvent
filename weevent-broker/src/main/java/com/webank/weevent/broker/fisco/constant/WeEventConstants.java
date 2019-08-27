@@ -124,5 +124,15 @@ public class WeEventConstants {
      * check the API type,this is use for mqtt
      */
     public static final String STOMPTYPE = "stomp";
+    
+    /**
+     * The prefix of FISCO-BCOS version 1.3.X
+     */
+    public static final String FISCO_BCOS_1_X_VERSION_PREFIX = "1.3";
+    
+    /**
+     * The prefix of FISCO-BCOS version 2.X
+     */
+    public static final String FISCO_BCOS_2_X_VERSION_PREFIX = "2.";
 
 }
