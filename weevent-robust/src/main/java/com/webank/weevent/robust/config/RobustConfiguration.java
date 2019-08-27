@@ -3,9 +3,9 @@ package com.webank.weevent.robust.config;
 import java.net.URL;
 
 import com.webank.weevent.robust.RobustApplication;
+import com.webank.weevent.robust.service.MqttBridge;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
-import com.webank.weevent.robust.service.MqttBridge;
 
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.googlecode.jsonrpc4j.ProxyUtil;
@@ -114,7 +114,7 @@ public class RobustConfiguration {
     public MqttConnectOptions getMqttConnectOptions() {
         MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
         mqttConnectOptions.setServerURIs(new String[]{hostUrl});
-        mqttConnectOptions.setKeepAliveInterval(1);
+        mqttConnectOptions.setKeepAliveInterval(120);
         mqttConnectOptions.setCleanSession(true);
         mqttConnectOptions.setConnectionTimeout(10);
         return mqttConnectOptions;
@@ -132,18 +132,13 @@ public class RobustConfiguration {
     public MessageHandler mqtt() {
         MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler(MQTT_CLIENT_ID, mqttClientFactory());
         messageHandler.setAsync(true);
-        messageHandler.setDefaultTopic("com.weevent.mqtt");
+        messageHandler.setDefaultTopic("com.weevent.mqtt.connect");
         messageHandler.setDefaultQos(qos);
         return messageHandler;
     }
 
     @Bean
     public MessageChannel mqttChannel() {
-        return new DirectChannel();
-    }
-
-    @Bean
-    public MessageChannel mqttOutboundChannel() {
         return new DirectChannel();
     }
 
@@ -157,9 +152,9 @@ public class RobustConfiguration {
     public MessageProducer channelAdapter() {
         log.info("MqttPahoMessageDrivenChannelAdapter bean instrument, url: {}", hostUrl);
         // client id can not duplicate
-        String clientId = "weevent-inbound-" + System.currentTimeMillis();
-        log.info("inbound client id: {}", clientId);
-        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(clientId, mqttClientFactory());
+        String cliendId = MQTT_CLIENT_ID + System.currentTimeMillis();
+        log.info("inbound client id: {}", cliendId);
+        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(cliendId, mqttClientFactory());
         adapter.setCompletionTimeout(completionTimeout);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(qos);
