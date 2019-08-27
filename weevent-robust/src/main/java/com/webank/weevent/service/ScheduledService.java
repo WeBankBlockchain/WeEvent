@@ -177,7 +177,7 @@ public class ScheduledService implements AutoCloseable {
         boolean result = this.weEventClient.open(REST_TOPIC);
         log.info("rest open result is " + result);
 
-        String callUrl = HTTP_HEADER + this.url + "/com/webank/weevent/rest/publish?topic={topic}&content={content}";
+        String callUrl = HTTP_HEADER + this.url + "/weevent/rest/publish?topic={topic}&content={content}";
         ResponseEntity<String> rsp = this.restTemplate.getForEntity(
                 callUrl,
                 String.class,
