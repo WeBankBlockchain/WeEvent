@@ -130,9 +130,14 @@ public class Web3SDK2Wrapper {
             channelEthereumService.setTimeout(web3sdkTimeout);
             Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
 
-            // check connect with getBlockNumber command
-            web3j.getBlockNumber().send().getBlockNumber();
-
+            // check connect with getNodeVersion command
+            String nodeVersion = web3j.getNodeVersion().send().getNodeVersion().getVersion();
+            if (StringUtils.isBlank(nodeVersion) 
+                || !nodeVersion.contains(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {
+                log.error("init web3sdk failed, dismatch fisco version in node: {}", nodeVersion);
+                throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
+            }                  
+            
             log.info("initialize web3sdk success, group id: {}", groupId);
             return web3j;
         } catch (Exception e) {
