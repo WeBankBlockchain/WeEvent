@@ -106,7 +106,7 @@ public class ScheduledService implements AutoCloseable {
 
     private MqttGateway mqttGateway;
 
-    private  Integer countStomp =1;
+    private Integer countStomp = 1;
 
 
     @Autowired
@@ -207,7 +207,7 @@ public class ScheduledService implements AutoCloseable {
 
     private void mqttPublish() {
         // Mqtt sends a message to weevent broker
-        mqttGateway.sendToMqtt("hello mqtt", MQTT_TOPIC);
+        mqttGateway.sendToMqtt(MQTT_TOPIC, "hello mqtt");
         countTimes(mqttSendMap, this.getFormatTime(new Date()));
         log.info("mqtt send msg");
     }
@@ -245,12 +245,12 @@ public class ScheduledService implements AutoCloseable {
 
 
         //remove last hour statistic key - value
-        restfulSendMap.clear();
-        stompSendMap.clear();
-        mqttSendMap.clear();
-        jsonrpcSendMap.clear();
-        stompReceiveMap.clear();
-        mqttReceiveMap.clear();
+        restfulSendMap.remove(time);
+        stompSendMap.remove(time);
+        mqttSendMap.remove(time);
+        jsonrpcSendMap.remove(time);
+        stompReceiveMap.remove(time);
+        mqttReceiveMap.remove(time);
 
     }
 
@@ -290,7 +290,7 @@ public class ScheduledService implements AutoCloseable {
                         if (map.get(EVENT_ID) != null) {
                             String eventId = map.get("eventId").toString();
                             topicSubscribeMap.put(EVENT_ID, eventId);
-                            log.info("stomp subscribe eventId: {},countStomp:{}", eventId,countStomp++);
+                            log.info("stomp  eventId: {},countStomp:{}", eventId, countStomp++);
                         }
                     }
                 });

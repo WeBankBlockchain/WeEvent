@@ -13,7 +13,8 @@ import org.springframework.messaging.MessagingException;
 @Slf4j
 public class MqttBridge implements MessageHandler {
 
-    private  Integer countMqtt =1;
+    private Integer countMqtt = 1;
+
     @Override
     public void handleMessage(Message<?> message) throws MessagingException {
         Object payload = message.getPayload();
@@ -22,7 +23,7 @@ public class MqttBridge implements MessageHandler {
             String eventId = map.get("eventId").toString();
             if (!ScheduledService.getMqttReceiveMap().containsKey(eventId)) {
                 ScheduledService.getMqttReceiveMap().put(eventId, 1);
-                log.info("mqtt receive success eventId: {},countMqtt:{}", eventId,countMqtt++);
+                log.info("mqtt receive success.topic {}, eventId: {},countMqtt:{}", map.get("topic"), eventId, countMqtt++);
                 ScheduledService.countTimes(ScheduledService.getMqttReceiveMap(), DateFormatUtils.format(new Date(), "yyyy-MM-dd HH"));
             }
         }
