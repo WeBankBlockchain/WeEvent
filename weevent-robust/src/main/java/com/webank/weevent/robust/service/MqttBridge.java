@@ -13,15 +13,16 @@ import org.springframework.messaging.MessagingException;
 @Slf4j
 public class MqttBridge implements MessageHandler {
 
+    private  Integer countMqtt =1;
     @Override
     public void handleMessage(Message<?> message) throws MessagingException {
         Object payload = message.getPayload();
         Map map = JSONObject.parseObject(payload.toString(), Map.class);
         if (map.get("eventId") != null) {
             String eventId = map.get("eventId").toString();
-            log.info("mqtt receive success eventId: {}", eventId);
             if (!ScheduledService.getMqttReceiveMap().containsKey(eventId)) {
                 ScheduledService.getMqttReceiveMap().put(eventId, 1);
+                log.info("mqtt receive success eventId: {},countMqtt:{}", eventId,countMqtt++);
                 ScheduledService.countTimes(ScheduledService.getMqttReceiveMap(), DateFormatUtils.format(new Date(), "yyyy-MM-dd HH"));
             }
         }

@@ -106,6 +106,9 @@ public class ScheduledService implements AutoCloseable {
 
     private MqttGateway mqttGateway;
 
+    private  Integer countStomp =1;
+
+
     @Autowired
     public void setRestTemplate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -287,7 +290,7 @@ public class ScheduledService implements AutoCloseable {
                         if (map.get(EVENT_ID) != null) {
                             String eventId = map.get("eventId").toString();
                             topicSubscribeMap.put(EVENT_ID, eventId);
-                            log.info("stomp subscribe eventId: {}", eventId);
+                            log.info("stomp subscribe eventId: {},countStomp:{}", eventId,countStomp++);
                         }
                     }
                 });
