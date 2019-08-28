@@ -9,7 +9,6 @@ import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.service.CEPRuleServiceImpl;
 
 import com.alibaba.fastjson.JSONArray;
-import com.webank.weevent.processor.utils.RetCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +21,6 @@ import static com.webank.weevent.processor.utils.Constants.SUCCESS;
 
 @RestController
 public class CEPRuleController extends BaseController {
-//    private static Logger logger = LoggerFactory.getLogger(ProcessorApplication.class);
 
     @Autowired
     private CEPRuleServiceImpl cepRuleService;
@@ -30,7 +28,6 @@ public class CEPRuleController extends BaseController {
     @RequestMapping("/getCEPRuleById")
     @ResponseBody
     public BaseRspEntity getCEPRuleById(@RequestParam(name = "id") Integer id) {
-        //  需要对参数进行解析
         BaseRspEntity resEntity = new BaseRspEntity(SUCCESS);
         CEPRule cepRule = cepRuleService.selectByPrimaryKey(id);
         resEntity.setData(cepRule);
@@ -48,9 +45,8 @@ public class CEPRuleController extends BaseController {
     @RequestMapping("/getCEPRuleByName")
     @ResponseBody
     public BaseRspEntity getCEPRuleByName(@RequestParam(name = "ruleName") String ruleName) {
-        //  需要对参数进行解析
         BaseRspEntity resEntity = new BaseRspEntity(SUCCESS);
-        if(StringUtils.isBlank(ruleName)||ruleName.isEmpty()){
+        if (StringUtils.isBlank(ruleName) || ruleName.isEmpty()) {
             resEntity.setErrorCode(280001);
             resEntity.setErrorMsg("fail");
             return resEntity;
@@ -90,7 +86,6 @@ public class CEPRuleController extends BaseController {
     @RequestMapping("/updateCEPById")
     @ResponseBody
     public BaseRspEntity updateCEPById(@Valid @RequestBody CEPRule rule) {
-        //  需要对参数进行解析
         BaseRspEntity resEntity = new BaseRspEntity(SUCCESS);
         Integer cepRule = cepRuleService.updateByPrimaryKey(rule);
         resEntity.setData(cepRule);

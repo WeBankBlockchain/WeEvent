@@ -2,7 +2,9 @@ package com.webank.weevent.processor.mapper;
 
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.model.CEPRuleExample;
+
 import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 
 public interface CEPRuleMapper {
@@ -19,7 +21,9 @@ public interface CEPRuleMapper {
     List<CEPRule> selectByExample(CEPRuleExample example);
 
     List<CEPRule> getCEPRuleList(String ruleName);
+
     CEPRule selectByPrimaryKey(Integer id);
+
     CEPRule selectByRuleName(String ruleName);
 
     CEPRule selectByRuleNameTest(String ruleName);

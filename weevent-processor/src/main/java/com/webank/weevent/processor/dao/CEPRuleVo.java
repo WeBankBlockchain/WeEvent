@@ -2,7 +2,6 @@ package com.webank.weevent.processor.dao;
 
 import java.util.ArrayList;
 
-
 import com.webank.weevent.processor.model.CEPRule;
 
 public class CEPRuleVo {

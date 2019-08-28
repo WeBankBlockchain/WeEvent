@@ -4,13 +4,10 @@ package com.webank.weevent.processor.utils;
  * Entity class of response info.
  */
 
-/**
- * 返回类的基类
- */
 public class BaseRspEntity {
-    private int errorCode;//返回码
-    private String errorMsg;//返回信息
-    private Object data;//返回数据
+    private int errorCode;
+    private String errorMsg;
+    private Object data;
 
     public BaseRspEntity(){}
 
