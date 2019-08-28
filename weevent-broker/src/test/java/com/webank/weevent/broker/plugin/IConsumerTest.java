@@ -55,7 +55,7 @@ public class IConsumerTest extends JUnitTestBase {
      * test shutdown Multiple 3 times
      */
     @Test
-    public void testShutdownConsumer_multiple() throws Exception {
+    public void testShutdownConsumerMultiple() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
 
         Assert.assertTrue(this.iConsumer.startConsumer());

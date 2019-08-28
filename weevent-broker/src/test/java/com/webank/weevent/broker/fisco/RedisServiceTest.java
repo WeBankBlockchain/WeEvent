@@ -14,53 +14,65 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
 public class RedisServiceTest extends JUnitTestBase {
-    @Autowired
-    private RedisService redisService;
 
-    private String blockNum = "1";
+    private RedisService redisService;
 
     @Before
     public void before() {
         log.info("===================={}", this.testName.getMethodName());
 
-        List<WeEvent> list = new ArrayList<>();
-        WeEvent event = new WeEvent();
-        event.setTopic(this.topicName);
-        event.setContent("hello".getBytes());
-        event.setEventId("317e7c4c-75-1");
-        list.add(event);
-        redisService.writeEventsToRedis(blockNum, list);
+        super.RedisServiceMockUp();
+        redisService = new RedisService();
     }
 
     @Test
     public void testWriteEventsToRedis() {
         log.info("===================={}", this.testName.getMethodName());
 
-        String blockNum = "3";
+        String blockNum = "100";
         List<WeEvent> list = new ArrayList<>();
         WeEvent event = new WeEvent();
-        event.setTopic("com.weevent.test");
+        event.setTopic(super.topicName);
         event.setContent("write to redis test".getBytes());
         event.setEventId("sdfsff-345-3");
         list.add(event);
         redisService.writeEventsToRedis(blockNum, list);
         Assert.assertTrue(true);
+
+        List<WeEvent> result = redisService.readEventsFromRedis(blockNum);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.get(0).getTopic(), super.topicName);
     }
 
     @Test
     public void testReadEventsFromRedis() {
-        log.info("===================={}", this.testName.getMethodName());
+        log.info("===================={}", super.testName.getMethodName());
 
-        List<WeEvent> result = redisService.readEventsFromRedis(blockNum);
+        List<WeEvent> result = redisService.readEventsFromRedis(super.blockNum);
         Assert.assertNotNull(result);
-        Assert.assertEquals(result.get(0).getTopic(), this.topicName);
+        Assert.assertEquals(result.get(0).getTopic(), super.topicName);
+    }
+
+    @Test
+    public void testReadEventsFromRedisBlockNumNotExist() {
+        log.info("===================={}", super.testName.getMethodName());
+
+        List<WeEvent> result = redisService.readEventsFromRedis("000000");
+        Assert.assertNull(result);
     }
 
     @Test
     public void testIsEventsExistInRedis() {
-        log.info("===================={}", this.testName.getMethodName());
+        log.info("===================={}", super.testName.getMethodName());
 
-        Assert.assertTrue(redisService.isEventsExistInRedis(blockNum));
+        Assert.assertTrue(redisService.isEventsExistInRedis(super.blockNum));
+    }
+
+    @Test
+    public void testIsEventsNotExistInRedis() {
+        log.info("===================={}", super.testName.getMethodName());
+
+        Assert.assertFalse(redisService.isEventsExistInRedis("000000"));
     }
 
 }
