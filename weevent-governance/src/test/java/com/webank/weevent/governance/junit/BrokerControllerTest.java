@@ -1,6 +1,6 @@
-package com.webank.governance.junit;
+package com.webank.weevent.governance.junit;
 
-import com.webank.governance.JUnitTestBase;
+import com.webank.weevent.governance.JUnitTestBase;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 

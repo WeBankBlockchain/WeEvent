@@ -13,7 +13,7 @@ function governance_setup() {
         echo "set server_port failed"
         exit 1
     else
-       sed -i "s/port:.*$/port: ${server_port}/" ${out_path}/conf/application-prod.yml
+       sed -i "s/port:.*$/port: ${server_port}/" ${out_path}/conf/application-prod.properties
     fi
     echo "set server_port success"
 
@@ -22,7 +22,7 @@ function governance_setup() {
         echo "set mysql_ip failed"
         exit 1
     else
-       sed -i "s/127.0.0.1:3306/${mysql_ip}:3306/" ${out_path}/conf/application-prod.yml
+       sed -i "s/127.0.0.1:3306/${mysql_ip}:3306/" ${out_path}/conf/application-prod.properties
     fi
     echo "set mysql_ip success"
      
@@ -31,7 +31,7 @@ function governance_setup() {
         echo "set mysql_port failed"
         exit 1
     else
-       sed -i "s/3306/${mysql_port}/" ${out_path}/conf/application-prod.yml
+       sed -i "s/3306/${mysql_port}/" ${out_path}/conf/application-prod.properties
     fi
     echo "set mysql_port success"
 
@@ -40,7 +40,7 @@ function governance_setup() {
         echo "set mysql_user failed"
         exit 1
     else
-       sed -i "s/xxxx/${mysql_user}/" ${out_path}/conf/application-prod.yml
+       sed -i "s/xxxx/${mysql_user}/" ${out_path}/conf/application-prod.properties
     fi
     echo "set mysql_user success"
   
@@ -49,7 +49,7 @@ function governance_setup() {
         echo "set mysql_pwd failed"
         exit 1
     else
-       sed -i "s/yyyy/\"${mysql_pwd}\"/" ${out_path}/conf/application-prod.yml
+       sed -i "s/yyyy/\"${mysql_pwd}\"/" ${out_path}/conf/application-prod.properties
     fi
     echo "set mysql_pwd success"
        
@@ -70,7 +70,6 @@ function governance_setup() {
 para=""
 conf_path="./conf"
 apps_path="./apps"
-installPWD=$(dirname $(dirname `pwd`))
 
 # usage
 if [[ $# -lt 2 ]]; then
@@ -86,7 +85,7 @@ mysql_port=""
 mysql_user=""
 mysql_pwd=""
 out_path=""
-current_path=`pwd`
+current_path=$(pwd)
 echo "current path $current_path"
 
 while [[ $# -ge 2 ]] ; do

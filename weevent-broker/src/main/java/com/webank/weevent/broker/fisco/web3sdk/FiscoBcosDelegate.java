@@ -2,10 +2,8 @@ package com.webank.weevent.broker.fisco.web3sdk;
 
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.BrokerApplication;
@@ -14,7 +12,6 @@ import com.webank.weevent.broker.fisco.RedisService;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.LRUCache;
-import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.SendResult;
@@ -43,6 +40,9 @@ public class FiscoBcosDelegate {
 
     // access to version 2.x
     private Map<Long, FiscoBcos2> fiscoBcos2Map;
+
+    // web3sdk timeout, ms
+    public static Integer timeout = 10000;
 
     // web3sdk thread pool
     public static ThreadPoolTaskExecutor threadPool;
@@ -99,36 +99,51 @@ public class FiscoBcosDelegate {
 
     public void initProxy(FiscoConfig fiscoConfig) throws BrokerException {
         threadPool = initThreadPool(fiscoConfig);
+        timeout = fiscoConfig.getWeb3sdkTimeout();
 
-        if (fiscoConfig.getVersion().startsWith("1.3")) {
+        if (StringUtils.isBlank(fiscoConfig.getVersion())){
+            log.error("the fisco version in fisco.properties is null");
+            throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
+        }
+        if (StringUtils.isBlank(fiscoConfig.getNodes())){
+            log.error("the fisco nodes in fisco.properties is null");
+            throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
+        }
+        
+        if (fiscoConfig.getVersion().startsWith(WeEventConstants.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             log.info("Notice: FISCO-BCOS's version is 1.x");
 
             // set web3sdk.Async thread pool
             new org.bcos.web3j.utils.Async(threadPool);
 
             FiscoBcos fiscoBcos = new FiscoBcos(fiscoConfig);
-            fiscoBcos.init(fiscoConfig.getTopicControllerAddress());
+            fiscoBcos.init();
 
             this.fiscoBcos = fiscoBcos;
-        } else if (fiscoConfig.getVersion().startsWith("2.")) {
+        } else if (fiscoConfig.getVersion().startsWith(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {
             log.info("Notice: FISCO-BCOS's version is 2.x");
 
             // set web3sdk.Async thread pool
             new org.fisco.bcos.web3j.utils.Async(threadPool);
 
-            String[] tokens = fiscoConfig.getTopicControllerAddress().split(";");
-            for (String token : tokens) {
-                String[] groups = token.split(":");
-                if (groups.length != 2) {
-                    log.error("invalid address format, like 1:0xa;2:0xb");
-                    throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
-                }
-                Long groupId = Long.valueOf(groups[0]);
-                FiscoBcos2 fiscoBcos2 = new FiscoBcos2(fiscoConfig);
-                fiscoBcos2.init(groupId, groups[1]);
+            // 1 is always exist
+            Long defaultGId = Long.valueOf(WeEvent.DEFAULT_GROUP_ID);
+            FiscoBcos2 defaultFiscoBcos2 = new FiscoBcos2(fiscoConfig);
+            defaultFiscoBcos2.init(defaultGId);
+            this.fiscoBcos2Map.put(defaultGId, defaultFiscoBcos2);
+            // this call need default group has been initialized
+            List<String> groups = this.listGroupId();
 
-                this.fiscoBcos2Map.put(groupId, fiscoBcos2);
+            // init all group in nodes except default one
+            groups.remove(WeEvent.DEFAULT_GROUP_ID);
+            for (String groupId : groups) {
+                Long gid = Long.valueOf(groupId);
+                FiscoBcos2 fiscoBcos2 = new FiscoBcos2(fiscoConfig);
+                fiscoBcos2.init(gid);
+                this.fiscoBcos2Map.put(gid, fiscoBcos2);
             }
+
+            log.info("all group in nodes: {}", this.fiscoBcos2Map.keySet());
         } else {
             log.error("unknown FISCO-BCOS's version");
             throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
@@ -142,19 +157,20 @@ public class FiscoBcosDelegate {
      *
      * @return list of groupId
      */
-    public Set<Long> listGroupId() {
+    public List<String> listGroupId() throws BrokerException {
         if (this.fiscoBcos != null) {
-            Set<Long> list = new HashSet<>();
-            list.add(Long.valueOf(WeEventConstants.DEFAULT_GROUP_ID));
+            List<String> list = new ArrayList<>();
+            list.add(WeEvent.DEFAULT_GROUP_ID);
             return list;
         } else {
-            return this.fiscoBcos2Map.keySet();
+            // group 1 is always exist
+            return this.fiscoBcos2Map.get(Long.valueOf(WeEvent.DEFAULT_GROUP_ID)).listGroupId();
         }
     }
 
     private void checkVersion(Long groupId) throws BrokerException {
         if (this.fiscoBcos != null) {
-            if (groupId != Long.parseLong(WeEventConstants.DEFAULT_GROUP_ID)) {
+            if (groupId != Long.parseLong(WeEvent.DEFAULT_GROUP_ID)) {
                 throw new BrokerException(ErrorCode.WE3SDK_VERSION_NOT_SUPPORT);
             }
             return;
@@ -222,16 +238,6 @@ public class FiscoBcosDelegate {
             return this.fiscoBcos.publishEvent(topicName, eventContent, extensions);
         } else {
             return this.fiscoBcos2Map.get(groupId).publishEvent(topicName, eventContent, extensions);
-        }
-    }
-
-    public void publishEvent(String topicName, Long groupId, String eventContent, String extensions, IProducer.SendCallBack callBack) throws BrokerException {
-        checkVersion(groupId);
-
-        if (this.fiscoBcos != null) {
-            this.fiscoBcos.publishEvent(topicName, eventContent, extensions, callBack);
-        } else {
-            this.fiscoBcos2Map.get(groupId).publishEvent(topicName, eventContent, extensions, callBack);
         }
     }
 

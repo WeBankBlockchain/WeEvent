@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 
@@ -26,17 +27,17 @@ public class FiscoConfig {
     @Value("${version:}")
     private String version;
 
-    @Value("${orgid:}")
+    @Value("${orgid:fisco}")
     private String orgId;
 
     @Value("${nodes:}")
     private String nodes;
 
-    @Value("${account:}")
-    private String account;
+    @Value("${proxy.address:}")
+    private String proxyAddress;
 
-    @Value("${topic-controller.address:}")
-    private String topicControllerAddress;
+    @Value("${account:bcec428d5205abe0f0cc8a734083908d9eb8563e31f943d760786edf42ad67dd}")
+    private String account;
 
     @Value("${web3sdk.timeout:10000}")
     private Integer web3sdkTimeout;

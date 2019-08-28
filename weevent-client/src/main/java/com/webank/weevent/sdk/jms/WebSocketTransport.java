@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -110,13 +109,13 @@ public class WebSocketTransport extends WebSocketClient {
         }
 
         @Override
-        public Message get() throws InterruptedException, ExecutionException {
+        public Message get() throws InterruptedException {
             latch.await();
             return this.response;
         }
 
         @Override
-        public Message get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+        public Message get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
             if (latch.await(timeout, unit)) {
                 if (this.response == null) {
                     throw new TimeoutException();
@@ -157,7 +156,7 @@ public class WebSocketTransport extends WebSocketClient {
             ResponseFuture response = new ResponseFuture(asyncSeq);
             this.send(req);
             return response.get(timeout, TimeUnit.SECONDS);
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (InterruptedException e) {
             log.error("stomp command invoke failed", e);
             throw WeEventConnectionFactory.error2JMSException(ErrorCode.SDK_JMS_EXCEPTION_STOMP_EXECUTE);
         } catch (TimeoutException e) {
@@ -184,8 +183,9 @@ public class WebSocketTransport extends WebSocketClient {
     public boolean stompDisconnect() throws JMSException {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         String req = stompCommand.encodeDisConnect();
-        sequence2Id.put(Long.toString(1L), 1L);
-        Message stompResponse = this.stompRequest(req, 1L);
+        Long gid = Long.valueOf(WeEvent.DEFAULT_GROUP_ID);
+        sequence2Id.put(WeEvent.DEFAULT_GROUP_ID, gid);
+        Message stompResponse = this.stompRequest(req, gid);
         return !stompCommand.isError(stompResponse);
     }
 
@@ -217,7 +217,7 @@ public class WebSocketTransport extends WebSocketClient {
             log.info("stomp request is fail");
             return "";
         } else {
-            // cache the subscribption id and the WeEventTopic,the subscription2EventCache which can use for reconnect
+            // cache the subscription id and the WeEventTopic,the subscription2EventCache which can use for reconnect
             topic.setContinueSubscriptionId(stompCommand.getSubscriptionId(stompResponse));
             this.subscription2EventCache.put(stompCommand.getSubscriptionId(stompResponse), topic);
 
@@ -369,7 +369,7 @@ public class WebSocketTransport extends WebSocketClient {
             log.error("jackson decode WeEvent failed", e);
         }
 
-        // update the cache eventid
+        // update the cache eventId
         if (this.subscription2EventCache.containsKey(subscriptionId)) {
             this.subscription2EventCache.get(subscriptionId).setOffset(event.getEventId());
         }
@@ -433,16 +433,16 @@ public class WebSocketTransport extends WebSocketClient {
      * use for get the headers
      *
      * @param accessor StompHeaderAccessor
-     * @param headerskey headers name
+     * @param key headers name
      * @return the headers value
      */
-    private String getHeadersValue(StompHeaderAccessor accessor, String headerskey) {
-        String id = null;
-        Object idObject = accessor.getNativeHeader(headerskey);
+    private String getHeadersValue(StompHeaderAccessor accessor, String key) {
+        Object idObject = accessor.getNativeHeader(key);
         if (idObject != null) {
-            id = ((List) idObject).get(0).toString();
+            return ((List) idObject).get(0).toString();
         }
-        return id;
+		
+        return null;
     }
 
     class WSThread extends Thread {

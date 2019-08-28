@@ -1,0 +1,31 @@
+apply plugin: "org.springframework.boot"
+apply plugin: "io.spring.dependency-management"
+
+dependencies {
+    implementation project(path: ":weevent-client")
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
+    implementation("org.springframework.integration:spring-integration-mqtt")
+    implementation("org.springframework.integration:spring-integration-stream")
+    implementation("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.3")
+    implementation("org.springframework.boot:spring-boot-starter-log4j2")
+    // avoid "Log4j appears to be running in a Servlet environment, but there's no log4j-web module available."
+    implementation("com.alibaba:fastjson:1.2.58")
+    implementation("commons-io:commons-io:2.4")
+}
+
+bootJar {
+    destinationDir file("dist/apps")
+    archiveName project.name + "-" + version + ".jar"
+
+    exclude "**/*.xml"
+    exclude "**/*.properties"
+
+    copy {
+        from file("src/main/resources/")
+        into "dist/conf"
+    }
+    copy {
+        from configurations.runtime
+        into "dist/lib"
+    }
+}

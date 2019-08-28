@@ -4,11 +4,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.UUID;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
-import com.webank.weevent.broker.plugin.IConsumer;
-import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
@@ -57,20 +56,7 @@ public class ParamCheckUtils {
             throw new BrokerException(ErrorCode.SUBSCRIPTIONID_FORMAT_INVALID);
         }
     }
-
-    public static void validateListenerNotNull(IConsumer.ConsumerListener listener) throws BrokerException {
-        if (listener == null) {
-            throw new BrokerException(ErrorCode.CONSUMER_LISTENER_IS_NULL);
-        }
-    }
-
-    public static void validateSendCallBackNotNull(IProducer.SendCallBack callBack) throws BrokerException {
-        if (callBack == null) {
-            throw new BrokerException(ErrorCode.PRODUCER_SEND_CALLBACK_IS_NULL);
-        }
-    }
-
-
+    
     public static void validateEventId(String topicName, String eventId, Long blockHeight) throws BrokerException {
         if (StringUtils.isBlank(eventId)) {
             throw new BrokerException(ErrorCode.EVENT_ID_IS_ILLEGAL);
@@ -101,25 +87,25 @@ public class ParamCheckUtils {
         if (event.getContent() == null) {
             throw new BrokerException(ErrorCode.EVENT_CONTENT_IS_BLANK);
         }
-        if (event.getExtensions() == null) {
-            throw new BrokerException(ErrorCode.EVENT_EXTENSIONS_IS_NUll);
-        }
         validateTopicName(event.getTopic());
         validateEventContent(new String(event.getContent(), StandardCharsets.UTF_8));
-        validateEventExtensions(event.getExtensions().toString());
+
+        if (event.getExtensions() != null) {
+            if (event.getExtensions().toString().length() > WeEventConstants.EVENT_EXTENSIONS_MAX_LENGTH) {
+                throw new BrokerException(ErrorCode.EVENT_EXTENSIONS_EXCEEDS_MAX_LENGTH);
+            }
+        }
     }
 
-    public static void validateGroupId(String groupId) throws BrokerException {
+    public static void validateGroupId(String groupId, List<String> groups) throws BrokerException {
         try {
             Long.parseLong(groupId);
         } catch (Exception e) {
             throw new BrokerException(ErrorCode.EVENT_GROUP_ID_INVALID);
         }
-    }
 
-    public static void validateEventExtensions(String extensions) throws BrokerException {
-        if (extensions.length() > WeEventConstants.EVENT_EXTENSIONS_MAX_LENGTH) {
-            throw new BrokerException(ErrorCode.EVENT_EXTENSIONS_EXCEEDS_MAX_LENGTH);
+        if (!groups.contains(groupId)) {
+            throw new BrokerException(ErrorCode.WE3SDK_UNKNOWN_GROUP);
         }
     }
 
@@ -162,7 +148,6 @@ public class ParamCheckUtils {
      * see WeEventUtils.match
      *
      * @param pattern topic pattern
-     * @return
      */
     public static void validateTopicPattern(String pattern) throws BrokerException {
         if (StringUtils.isBlank(pattern)) {
