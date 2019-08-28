@@ -20,7 +20,7 @@ public interface CEPRuleMapper {
 
     List<CEPRule> selectByExample(CEPRuleExample example);
 
-    List<CEPRule> getCEPRuleList(String ruleName);
+    List<CEPRule> getCEPRuleList(@Param("ruleName") String ruleName);
 
     CEPRule selectByPrimaryKey(Integer id);
 

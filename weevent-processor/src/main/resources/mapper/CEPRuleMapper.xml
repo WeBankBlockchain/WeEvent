@@ -87,6 +87,12 @@
     condition_field, condition_type, to_destination, databaseUrl, created_time, status, 
     error_destination, error_code, error_message, updated_time
   </sql>
+
+    <sql id="Common_Column_List">
+    id, rule_name, from_destination, broker_url, payloay, payload_type, select_field,
+    condition_field, condition_type, to_destination, databaseUrl, created_time, status,
+    error_destination, error_code, error_message
+  </sql>
     <select id="selectByExample" parameterType="com.webank.weevent.processor.model.CEPRuleExample"
             resultMap="BaseResultMap">
         select
@@ -103,8 +109,7 @@
         </if>
     </select>
 
-    <resultMap id="CEPRuleResultMap" type="com.webank.weevent.processor.dao.CEPRuleVo">
-        <collection property="cEPRuleList"  javaType="java.util.ArrayList" ofType="com.webank.weevent.processor.model.CEPRule">
+    <resultMap id="CEPRuleResultMap" type="com.webank.weevent.processor.model.CEPRule">
             <id property="id" column="id" javaType="int" jdbcType="INTEGER"/>
             <result  property="ruleName" column="rule_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
             <result  property="fromDestination" column="from_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
@@ -121,14 +126,18 @@
             <result  property="errorDestination" column="error_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
             <result  property="errorCode" column="error_code" javaType="java.lang.String" jdbcType="VARCHAR"/>
             <result  property="errorMessage" column="error_message" javaType="java.lang.String" jdbcType="VARCHAR"/>
-        </collection>
     </resultMap>
 
     <select id="getCEPRuleList" parameterType="com.webank.weevent.processor.model.CEPRule" resultMap="CEPRuleResultMap">
+
         select
-        <include refid="Base_Column_List"/>
-        from cep_rule
-        where rule_name like '%test%'
+        <include refid="Common_Column_List"/>
+        from cep_rule a
+        <where>
+            <bind name="ruleNamePattern" value=" '%' + ruleName + '%' "/>
+            and rule_name LIKE #{ruleNamePattern}
+        </where>
+
     </select>
 
     <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">

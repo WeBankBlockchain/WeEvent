@@ -1,4 +1,4 @@
-package com.webank.weevent.processor.dao;
+package com.webank.weevent.processor.entity;
 
 import java.util.ArrayList;
 
