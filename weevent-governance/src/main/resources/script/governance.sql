@@ -1,5 +1,5 @@
 
-CREATE TABLE IF NOT EXISTS `t_account` (
+CREATE TABLE `t_account` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
   `email` varchar(256) NOT NULL COMMENT 'email',
   `username` varchar(256) NOT NULL COMMENT 'username',
@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS `t_account` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment 't_account';
 
 
-CREATE TABLE  IF NOT EXISTS  `t_broker` (
+CREATE TABLE   `t_broker` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
   `user_id` int(11) NOT NULL  COMMENT 'user id',
   `name` varchar(256) NOT NULL COMMENT 'name',
@@ -22,7 +22,7 @@ CREATE TABLE  IF NOT EXISTS  `t_broker` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment 't_broker';
 
-CREATE TABLE IF NOT EXISTS  `t_topic` (
+CREATE TABLE  `t_topic` (
   `topic_name` varchar(256) NOT NULL COMMENT 'primary key',
   `creater` varchar(256) DEFAULT NULL COMMENT 'creater',
   `broker_id` int(11) NOT NULL COMMENT 'broker id',
@@ -31,4 +31,4 @@ CREATE TABLE IF NOT EXISTS  `t_topic` (
   PRIMARY KEY (`broker_id`,`topic_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment 't_topic';
 
-INSERT INTO `t_account` VALUES (1, 'admin@xxx.com', 'admin', '$2a$10$4N8PIKjVrccCQGBhHYvWeuFjcEcElGI7znKQi9iTXTveeZ7r4dqSi', '2019-08-27 17:13:15', '0');
+
