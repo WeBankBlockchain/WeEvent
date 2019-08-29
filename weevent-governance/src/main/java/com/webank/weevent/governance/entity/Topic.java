@@ -25,4 +25,7 @@ public class Topic {
     private Long sequenceNumber;
 
     private Long blockNumber;
+
+    private Integer isDelete;
+
 }

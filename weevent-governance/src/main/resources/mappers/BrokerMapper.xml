@@ -2,39 +2,52 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.webank.weevent.governance.mapper.BrokerMapper">
 
-	<select id="getBroker" parameterType="java.lang.Integer"
-		resultType="com.webank.weevent.governance.entity.Broker">
-		select id ,name,broker_url brokerUrl,webase_url webaseUrl,user_id
-		userId,last_update lastUpdate 
-		from t_broker where id=#{id}
-	</select>
+	<resultMap id="BaseResultMap" type="com.webank.weevent.governance.entity.Broker">
+		<id column="id" property="id" />
+		<result column="user_id" property="userId" />
+		<result column="name" property="name" />
+		<result column="last_update" property="lastUpdate" />
+		<result column="broker_url" property="brokerUrl" />
+		<result column="webase_url" property="webaseUrl" />
+		<result column="is_delete" property="isDelete" />
+	</resultMap>
 
-	<select id="getBrokers" resultType="com.webank.weevent.governance.entity.Broker">
-		select id ,name,broker_url brokerUrl,webase_url webaseUrl,
-		user_id userId,last_update lastUpdate 
-		from t_broker where user_id=#{userId}
-	</select>
+	<sql id="Base_Column_List" >
+        id, user_id, name, last_update, broker_url, webase_url, is_delete
+    </sql>
 
-	<insert id="addBroker" parameterType="com.webank.weevent.governance.entity.Broker">
-		insert into
-		t_broker(name,broker_url,webase_url,user_id,last_update)
-		values(#{name},#{brokerUrl},#{webaseUrl},#{userId},#{lastUpdate,
-		jdbcType=TIMESTAMP})
-	</insert>
+	<select id="getBroker" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from t_broker where id=#{id} and is_delete=0
+</select>
 
-	<update id="updateBroker" parameterType="com.webank.weevent.governance.entity.Broker">
-		update t_broker set
-		name=#{name},broker_url=#{brokerUrl},webase_url=#{webaseUrl},last_update=#{lastUpdate,
-		jdbcType=TIMESTAMP} where id=#{id}
-	</update>
+	<select id="getBrokers"  resultMap="BaseResultMap">
+        select
+         <include refid="Base_Column_List" />
+        from t_broker where user_id=#{userId} and is_delete=0
+    </select>
 
-	<delete id="deleteBroker" parameterType="java.lang.Integer">
-		delete from t_broker
-		where id=#{id}
-	</delete>
+    <insert id="addBroker" parameterType="com.webank.weevent.governance.entity.Broker">
+        insert into
+        t_broker(name,broker_url,webase_url,user_id,last_update)
+        values(#{name},#{brokerUrl},#{webaseUrl},#{userId},#{lastUpdate,
+        jdbcType=TIMESTAMP})
+    </insert>
 
-	<select id="count" resultType="java.lang.Integer">
-		select count(1) from t_broker
-	</select>
+    <update id="updateBroker" parameterType="com.webank.weevent.governance.entity.Broker">
+        update t_broker set
+        name=#{name},broker_url=#{brokerUrl},webase_url=#{webaseUrl},last_update=#{lastUpdate,
+        jdbcType=TIMESTAMP} where id=#{id,jdbcType=INTEGER}
+    </update>
+
+    <delete id="deleteBroker" >
+        update  t_broker set is_delete=1
+        where id=#{id}
+    </delete>
+
+    <select id="count" >
+        select count(1) from t_broker and is_delete=0
+    </select>
 
 </mapper>
