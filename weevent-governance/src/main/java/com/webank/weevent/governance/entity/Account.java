@@ -1,6 +1,7 @@
 package com.webank.weevent.governance.entity;
 
 import java.util.Date;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
@@ -30,4 +31,6 @@ public class Account {
     private String oldPassword;
 
     private Date lastUpdate;
+
+    private Integer isDelete;
 }
