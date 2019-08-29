@@ -21,11 +21,8 @@ public class MqttBridge implements MessageHandler {
         Map map = JSONObject.parseObject(payload.toString(), Map.class);
         if (map.get("eventId") != null) {
             String eventId = map.get("eventId").toString();
-            if (!ScheduledService.getMqttReceiveMap().containsKey(eventId)) {
-                ScheduledService.getMqttReceiveMap().put(eventId, 1);
-                log.info("mqtt receive success.topic {}, eventId: {},countMqtt:{}", map.get("topic"), eventId, countMqtt++);
-                ScheduledService.countTimes(ScheduledService.getMqttReceiveMap(), DateFormatUtils.format(new Date(), "yyyy-MM-dd HH"));
+            log.info("mqtt receive success.topic {}, eventId: {},countMqtt:{}", map.get("topic"), eventId, countMqtt++);
+            ScheduledService.countTimes(ScheduledService.getMqttReceiveMap(), DateFormatUtils.format(new Date(), "yyyy-MM-dd HH"));
             }
-        }
     }
 }
