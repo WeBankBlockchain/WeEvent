@@ -29,7 +29,7 @@ public class InitialDb {
         String user = "";
         String password = "";
         String driverName = "";
-        String dbName = "";
+        String dbName;
         try {
             Properties properties = new Properties();
             URL url = InitialDb.class.getClassLoader().getResource("application-prod.properties");
@@ -91,7 +91,7 @@ public class InitialDb {
 
         for (int i = 0; i < sqlArr.length; i++) {
             String sql = sqlArr[i].replaceAll("--.*", "").trim();
-            if (!sql.equals("")) {
+            if (!("").equals(sql)) {
                 sqlList.add(sql);
             }
             resourceAsStream.close();
