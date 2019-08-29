@@ -1,4 +1,3 @@
-
 CREATE TABLE t_account(
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
   `email` varchar(256) NOT NULL COMMENT 'email',
