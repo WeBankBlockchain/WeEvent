@@ -292,7 +292,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
     }
 
     @Test
-    public void testSingleTopicSubscribeLastEventIdCheck_01() throws Exception {
+    public void testSingleTopicSubscribeLastEventIdCheck01() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
 
         String result = this.iConsumer.subscribe(this.topicName, this.groupId, WeEvent.OFFSET_LAST,
@@ -301,7 +301,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
     }
 
     @Test
-    public void testSingleTopicSubscribeLastEventIdCheck_02() {
+    public void testSingleTopicSubscribeLastEventIdCheck02() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -313,7 +313,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
     }
 
     @Test
-    public void testSingleTopicSubscribeLastEventIdCheck_03() {
+    public void testSingleTopicSubscribeLastEventIdCheck03() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {

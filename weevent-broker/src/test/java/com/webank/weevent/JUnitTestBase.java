@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import com.webank.weevent.broker.fisco.RedisService;
 import com.webank.weevent.sdk.WeEvent;
 
-import mockit.Invocation;
 import mockit.Mock;
 import mockit.MockUp;
 import org.junit.Assert;
@@ -52,14 +51,11 @@ public class JUnitTestBase {
     }
 
     @Ignore
-    public void RedisServiceMockUp() {
-        new MockUp<RedisService>() {
-            RedisService redisService;
+    public void redisServiceMockUp() {
+        new MockUp<RedisService>(RedisService.class) {
             Map<String, List<WeEvent>> redisMap = new HashMap<>();
 
-            @Mock
-            public void $init(Invocation invocation) {
-                redisService = invocation.getInvokedInstance();
+            {
                 List<WeEvent> eventList = new ArrayList<>();
                 WeEvent event = new WeEvent();
                 event.setTopic(topicName);

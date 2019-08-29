@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
 public class RedisServiceTest extends JUnitTestBase {
@@ -21,7 +20,7 @@ public class RedisServiceTest extends JUnitTestBase {
     public void before() {
         log.info("===================={}", this.testName.getMethodName());
 
-        super.RedisServiceMockUp();
+        super.redisServiceMockUp();
         redisService = new RedisService();
     }
 
