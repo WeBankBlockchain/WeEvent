@@ -2,23 +2,20 @@ package com.webank.weevent.processor.model;
 
 import java.util.Date;
 
-
-import org.springframework.lang.NonNull;
+import javax.validation.constraints.NotNull;
 
 public class CEPRule {
-
-    private Integer id;
-
-    @NonNull
+    private String id;
+    @NotNull
     private String ruleName;
 
     private String fromDestination;
-    @NonNull
+    @NotNull
     private String brokerUrl;
-    @NonNull
+    @NotNull
     private String payloay;
 
-    private Byte payloadType;
+    private Integer payloadType;
 
     private String selectField;
 
@@ -32,7 +29,7 @@ public class CEPRule {
 
     private Date createdTime;
 
-    private Byte status;
+    private Integer status;
 
     private String errorDestination;
 
@@ -42,7 +39,7 @@ public class CEPRule {
 
     private Date updatedTime;
 
-    public CEPRule(Integer id, String ruleName, String fromDestination, String brokerUrl, String payloay, Byte payloadType, String selectField, String conditionField, Integer conditionType, String toDestination, String databaseurl, Date createdTime, Byte status, String errorDestination, String errorCode, String errorMessage, Date updatedTime) {
+    public CEPRule(String id, String ruleName, String fromDestination, String brokerUrl, String payloay, Integer payloadType, String selectField, String conditionField, Integer conditionType, String toDestination, String databaseurl, Date createdTime, Integer status, String errorDestination, String errorCode, String errorMessage, Date updatedTime) {
         this.id = id;
         this.ruleName = ruleName;
         this.fromDestination = fromDestination;
@@ -66,12 +63,12 @@ public class CEPRule {
         super();
     }
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setId(String id) {
+        this.id = id == null ? null : id.trim();
     }
 
     public String getRuleName() {
@@ -106,11 +103,11 @@ public class CEPRule {
         this.payloay = payloay == null ? null : payloay.trim();
     }
 
-    public Byte getPayloadType() {
+    public Integer getPayloadType() {
         return payloadType;
     }
 
-    public void setPayloadType(Byte payloadType) {
+    public void setPayloadType(Integer payloadType) {
         this.payloadType = payloadType;
     }
 
@@ -162,11 +159,11 @@ public class CEPRule {
         this.createdTime = createdTime;
     }
 
-    public Byte getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(Byte status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 

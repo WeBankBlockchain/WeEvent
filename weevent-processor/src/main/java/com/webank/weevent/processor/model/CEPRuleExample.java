@@ -115,52 +115,62 @@ public class CEPRuleExample {
             return (Criteria) this;
         }
 
-        public Criteria andIdEqualTo(Integer value) {
+        public Criteria andIdEqualTo(String value) {
             addCriterion("id =", value, "id");
             return (Criteria) this;
         }
 
-        public Criteria andIdNotEqualTo(Integer value) {
+        public Criteria andIdNotEqualTo(String value) {
             addCriterion("id <>", value, "id");
             return (Criteria) this;
         }
 
-        public Criteria andIdGreaterThan(Integer value) {
+        public Criteria andIdGreaterThan(String value) {
             addCriterion("id >", value, "id");
             return (Criteria) this;
         }
 
-        public Criteria andIdGreaterThanOrEqualTo(Integer value) {
+        public Criteria andIdGreaterThanOrEqualTo(String value) {
             addCriterion("id >=", value, "id");
             return (Criteria) this;
         }
 
-        public Criteria andIdLessThan(Integer value) {
+        public Criteria andIdLessThan(String value) {
             addCriterion("id <", value, "id");
             return (Criteria) this;
         }
 
-        public Criteria andIdLessThanOrEqualTo(Integer value) {
+        public Criteria andIdLessThanOrEqualTo(String value) {
             addCriterion("id <=", value, "id");
             return (Criteria) this;
         }
 
-        public Criteria andIdIn(List<Integer> values) {
+        public Criteria andIdLike(String value) {
+            addCriterion("id like", value, "id");
+            return (Criteria) this;
+        }
+
+        public Criteria andIdNotLike(String value) {
+            addCriterion("id not like", value, "id");
+            return (Criteria) this;
+        }
+
+        public Criteria andIdIn(List<String> values) {
             addCriterion("id in", values, "id");
             return (Criteria) this;
         }
 
-        public Criteria andIdNotIn(List<Integer> values) {
+        public Criteria andIdNotIn(List<String> values) {
             addCriterion("id not in", values, "id");
             return (Criteria) this;
         }
 
-        public Criteria andIdBetween(Integer value1, Integer value2) {
+        public Criteria andIdBetween(String value1, String value2) {
             addCriterion("id between", value1, value2, "id");
             return (Criteria) this;
         }
 
-        public Criteria andIdNotBetween(Integer value1, Integer value2) {
+        public Criteria andIdNotBetween(String value1, String value2) {
             addCriterion("id not between", value1, value2, "id");
             return (Criteria) this;
         }
@@ -455,52 +465,52 @@ public class CEPRuleExample {
             return (Criteria) this;
         }
 
-        public Criteria andPayloadTypeEqualTo(Byte value) {
+        public Criteria andPayloadTypeEqualTo(Integer value) {
             addCriterion("payload_type =", value, "payloadType");
             return (Criteria) this;
         }
 
-        public Criteria andPayloadTypeNotEqualTo(Byte value) {
+        public Criteria andPayloadTypeNotEqualTo(Integer value) {
             addCriterion("payload_type <>", value, "payloadType");
             return (Criteria) this;
         }
 
-        public Criteria andPayloadTypeGreaterThan(Byte value) {
+        public Criteria andPayloadTypeGreaterThan(Integer value) {
             addCriterion("payload_type >", value, "payloadType");
             return (Criteria) this;
         }
 
-        public Criteria andPayloadTypeGreaterThanOrEqualTo(Byte value) {
+        public Criteria andPayloadTypeGreaterThanOrEqualTo(Integer value) {
             addCriterion("payload_type >=", value, "payloadType");
             return (Criteria) this;
         }
 
-        public Criteria andPayloadTypeLessThan(Byte value) {
+        public Criteria andPayloadTypeLessThan(Integer value) {
             addCriterion("payload_type <", value, "payloadType");
             return (Criteria) this;
         }
 
-        public Criteria andPayloadTypeLessThanOrEqualTo(Byte value) {
+        public Criteria andPayloadTypeLessThanOrEqualTo(Integer value) {
             addCriterion("payload_type <=", value, "payloadType");
             return (Criteria) this;
         }
 
-        public Criteria andPayloadTypeIn(List<Byte> values) {
+        public Criteria andPayloadTypeIn(List<Integer> values) {
             addCriterion("payload_type in", values, "payloadType");
             return (Criteria) this;
         }
 
-        public Criteria andPayloadTypeNotIn(List<Byte> values) {
+        public Criteria andPayloadTypeNotIn(List<Integer> values) {
             addCriterion("payload_type not in", values, "payloadType");
             return (Criteria) this;
         }
 
-        public Criteria andPayloadTypeBetween(Byte value1, Byte value2) {
+        public Criteria andPayloadTypeBetween(Integer value1, Integer value2) {
             addCriterion("payload_type between", value1, value2, "payloadType");
             return (Criteria) this;
         }
 
-        public Criteria andPayloadTypeNotBetween(Byte value1, Byte value2) {
+        public Criteria andPayloadTypeNotBetween(Integer value1, Integer value2) {
             addCriterion("payload_type not between", value1, value2, "payloadType");
             return (Criteria) this;
         }
@@ -915,52 +925,52 @@ public class CEPRuleExample {
             return (Criteria) this;
         }
 
-        public Criteria andStatusEqualTo(Byte value) {
+        public Criteria andStatusEqualTo(Integer value) {
             addCriterion("status =", value, "status");
             return (Criteria) this;
         }
 
-        public Criteria andStatusNotEqualTo(Byte value) {
+        public Criteria andStatusNotEqualTo(Integer value) {
             addCriterion("status <>", value, "status");
             return (Criteria) this;
         }
 
-        public Criteria andStatusGreaterThan(Byte value) {
+        public Criteria andStatusGreaterThan(Integer value) {
             addCriterion("status >", value, "status");
             return (Criteria) this;
         }
 
-        public Criteria andStatusGreaterThanOrEqualTo(Byte value) {
+        public Criteria andStatusGreaterThanOrEqualTo(Integer value) {
             addCriterion("status >=", value, "status");
             return (Criteria) this;
         }
 
-        public Criteria andStatusLessThan(Byte value) {
+        public Criteria andStatusLessThan(Integer value) {
             addCriterion("status <", value, "status");
             return (Criteria) this;
         }
 
-        public Criteria andStatusLessThanOrEqualTo(Byte value) {
+        public Criteria andStatusLessThanOrEqualTo(Integer value) {
             addCriterion("status <=", value, "status");
             return (Criteria) this;
         }
 
-        public Criteria andStatusIn(List<Byte> values) {
+        public Criteria andStatusIn(List<Integer> values) {
             addCriterion("status in", values, "status");
             return (Criteria) this;
         }
 
-        public Criteria andStatusNotIn(List<Byte> values) {
+        public Criteria andStatusNotIn(List<Integer> values) {
             addCriterion("status not in", values, "status");
             return (Criteria) this;
         }
 
-        public Criteria andStatusBetween(Byte value1, Byte value2) {
+        public Criteria andStatusBetween(Integer value1, Integer value2) {
             addCriterion("status between", value1, value2, "status");
             return (Criteria) this;
         }
 
-        public Criteria andStatusNotBetween(Byte value1, Byte value2) {
+        public Criteria andStatusNotBetween(Integer value1, Integer value2) {
             addCriterion("status not between", value1, value2, "status");
             return (Criteria) this;
         }

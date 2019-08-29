@@ -7,8 +7,11 @@ import javax.validation.Valid;
 import com.webank.weevent.processor.utils.BaseRspEntity;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.service.CEPRuleServiceImpl;
+import com.webank.weevent.processor.utils.Constants;
+import com.webank.weevent.processor.utils.RetCode;
 
 import com.alibaba.fastjson.JSONArray;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import static com.webank.weevent.processor.utils.Constants.SUCCESS;
 
+@Slf4j
 @RestController
 public class CEPRuleController extends BaseController {
 
@@ -27,18 +31,11 @@ public class CEPRuleController extends BaseController {
 
     @RequestMapping("/getCEPRuleById")
     @ResponseBody
-    public BaseRspEntity getCEPRuleById(@RequestParam(name = "id") Integer id) {
+    public BaseRspEntity getCEPRuleById(@RequestParam(name = "id") String id) {
         BaseRspEntity resEntity = new BaseRspEntity(SUCCESS);
         CEPRule cepRule = cepRuleService.selectByPrimaryKey(id);
         resEntity.setData(cepRule);
-        resEntity.setErrorCode(0);
-        resEntity.setErrorMsg("success");
-        System.out.println(JSONArray.toJSON(cepRule));
-        if (cepRule == null) {
-            resEntity.setErrorCode(0);
-            resEntity.setErrorMsg("success");
-            System.out.println(JSONArray.toJSON(cepRule));
-        }
+        log.info("cepRule:{}", JSONArray.toJSON(cepRule));
         return resEntity;
     }
 
@@ -51,16 +48,9 @@ public class CEPRuleController extends BaseController {
             resEntity.setErrorMsg("fail");
             return resEntity;
         }
-        CEPRule cepRule = cepRuleService.selectByRuleName(ruleName);
+        List<CEPRule> cepRule = cepRuleService.selectByRuleName(ruleName);
         resEntity.setData(cepRule);
-        resEntity.setErrorCode(0);
-        resEntity.setErrorMsg("success");
-        System.out.println(JSONArray.toJSON(cepRule));
-        if (cepRule == null) {
-            resEntity.setErrorCode(0);
-            resEntity.setErrorMsg("fail");
-            System.out.println(JSONArray.toJSON(cepRule));
-        }
+        log.info("cepRule:{}", JSONArray.toJSON(cepRule));
         return resEntity;
     }
 
@@ -69,17 +59,9 @@ public class CEPRuleController extends BaseController {
     public BaseRspEntity getCEPRuleList(@RequestParam(name = "ruleName") String ruleName) {
         System.out.println("example:" + ruleName.toString());
         BaseRspEntity resEntity = new BaseRspEntity(SUCCESS);
-        //List<cepRule> a= new List();
         List<CEPRule> cepRule = cepRuleService.getCEPRuleList(ruleName);
         resEntity.setData(cepRule);
-        resEntity.setErrorCode(0);
-        resEntity.setErrorMsg("success");
-        System.out.println(JSONArray.toJSON(cepRule));
-        if (cepRule == null) {
-            resEntity.setErrorCode(0);
-            resEntity.setErrorMsg("success");
-            System.out.println(JSONArray.toJSON(cepRule));
-        }
+        log.info("cepRule:{}", JSONArray.toJSON(cepRule));
         return resEntity;
     }
 
@@ -87,33 +69,45 @@ public class CEPRuleController extends BaseController {
     @ResponseBody
     public BaseRspEntity updateCEPById(@Valid @RequestBody CEPRule rule) {
         BaseRspEntity resEntity = new BaseRspEntity(SUCCESS);
-        Integer cepRule = cepRuleService.updateByPrimaryKey(rule);
-        resEntity.setData(cepRule);
-        resEntity.setErrorCode(0);
-        resEntity.setErrorMsg("success");
-        System.out.println(JSONArray.toJSON(cepRule));
-        if (cepRule == null) {
-            resEntity.setErrorCode(0);
-            resEntity.setErrorMsg("success");
-            System.out.println(JSONArray.toJSON(cepRule));
-        }
+        RetCode ret = cepRuleService.updateByPrimaryKeySelective(rule);
+        resEntity.setErrorCode(ret.getErrorCode());
+        resEntity.setErrorMsg(ret.getErrorMsg());
         return resEntity;
     }
 
     @RequestMapping("/insert")
     @ResponseBody
     public BaseRspEntity insert(@Valid @RequestBody CEPRule rule) {
-        //  需要对参数进行解析
         BaseRspEntity resEntity = new BaseRspEntity(SUCCESS);
-        Integer cepRule = cepRuleService.insert(rule);
-        resEntity.setErrorCode(0);
-        resEntity.setErrorMsg("success");
-        System.out.println(JSONArray.toJSON(cepRule));
-        if (cepRule == null) {
-            resEntity.setErrorCode(0);
-            resEntity.setErrorMsg("success");
-            System.out.println(JSONArray.toJSON(cepRule));
+        RetCode ret = cepRuleService.insert(rule);
+        resEntity.setErrorCode(ret.getErrorCode());
+        resEntity.setErrorMsg(ret.getErrorMsg());
+
+        return resEntity;
+    }
+
+    @ResponseBody
+    public BaseRspEntity deleteCEPById(@RequestParam(name = "id") String id) {
+        BaseRspEntity resEntity = new BaseRspEntity(SUCCESS);
+        RetCode cepRule = cepRuleService.setCEPRule(id, Constants.RULE_STATUS_DELETE);
+        if (cepRule.getErrorCode().equals(Constants.SUCCESS_CODE)) {
+            resEntity.setErrorCode(cepRule.getErrorCode());
+            resEntity.setErrorMsg(cepRule.getErrorMsg());
         }
+        log.info("cepRule:{}", JSONArray.toJSON(cepRule));
+        return resEntity;
+    }
+
+    @RequestMapping("/startCEPRule")
+    @ResponseBody
+    public BaseRspEntity startCEPRule(@RequestParam(name = "id") String id) {
+        BaseRspEntity resEntity = new BaseRspEntity(SUCCESS);
+        RetCode cepRule = cepRuleService.setCEPRule(id, Constants.RULE_STATUS_START);
+        if (cepRule.getErrorCode().equals(Constants.SUCCESS_CODE)) {
+            resEntity.setErrorCode(cepRule.getErrorCode());
+            resEntity.setErrorMsg(cepRule.getErrorMsg());
+        }
+        log.info("cepRule:{}", JSONArray.toJSON(cepRule));
         return resEntity;
     }
 }

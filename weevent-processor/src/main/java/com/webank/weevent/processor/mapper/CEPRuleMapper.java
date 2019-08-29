@@ -4,7 +4,6 @@ import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.model.CEPRuleExample;
 
 import java.util.List;
-
 import org.apache.ibatis.annotations.Param;
 
 public interface CEPRuleMapper {
@@ -12,7 +11,7 @@ public interface CEPRuleMapper {
 
     int deleteByExample(CEPRuleExample example);
 
-    int deleteByPrimaryKey(Integer id);
+    int deleteByPrimaryKey(String id);
 
     int insert(CEPRule record);
 
@@ -22,11 +21,11 @@ public interface CEPRuleMapper {
 
     List<CEPRule> getCEPRuleList(@Param("ruleName") String ruleName);
 
-    CEPRule selectByPrimaryKey(Integer id);
+    CEPRule selectByPrimaryKey(String id);
 
-    CEPRule selectByRuleName(String ruleName);
+    List<CEPRule> selectByRuleName(@Param("ruleName") String ruleName);
 
-    CEPRule selectByRuleNameTest(String ruleName);
+    int updateByPrimaryKey(CEPRule record);
 
     int updateByExampleSelective(@Param("record") CEPRule record, @Param("example") CEPRuleExample example);
 
@@ -34,5 +33,5 @@ public interface CEPRuleMapper {
 
     int updateByPrimaryKeySelective(CEPRule record);
 
-    int updateByPrimaryKey(CEPRule record);
+
 }

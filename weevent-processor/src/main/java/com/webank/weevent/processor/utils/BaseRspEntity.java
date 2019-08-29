@@ -1,5 +1,7 @@
 package com.webank.weevent.processor.utils;
 
+import lombok.Value;
+
 /**
  * Entity class of response info.
  */
@@ -7,7 +9,7 @@ package com.webank.weevent.processor.utils;
 public class BaseRspEntity {
     private int errorCode;
     private String errorMsg;
-    private Object data;
+    private Object data ;
 
     public BaseRspEntity(){}
 
