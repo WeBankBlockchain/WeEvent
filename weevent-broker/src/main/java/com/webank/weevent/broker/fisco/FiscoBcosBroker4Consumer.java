@@ -160,8 +160,6 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         this.validateGroupId(groupId);
         ParamCheckUtils.validateOffset(offset);
 
-        ParamCheckUtils.validateGroupId(groupId, fiscoBcosDelegate.listGroupId());
-
         // topic pattern
         if (ParamCheckUtils.isTopicPattern(topic)) {
             ParamCheckUtils.validateTopicPattern(topic);
@@ -612,6 +610,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                 this.consumerListener.onEvent(this.subscriptionId, event);
                 this.notifiedCount++;
                 this.lastTimeStamp = new Date();
+                log.info("notify biz done, subscriptionId: {} eventId: {}", this.subscriptionId, event.getEventId());
             } catch (Exception e) {
                 this.consumerListener.onException(e);
             }
@@ -827,11 +826,10 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         private synchronized void mergeHistory() {
             List<String> stopped = new ArrayList<>();
             for (String subscriptionId : this.historySubscriptionIds) {
-                if (subscriptions.containsKey(subscriptionId)) {
+                if (subscriptions.containsKey(subscriptionId)
+                    && subscriptions.get(subscriptionId).tryStopHistory(this.lastBlock)) {
                     // try to stop history if needed
-                    if (subscriptions.get(subscriptionId).tryStopHistory(this.lastBlock)) {
-                        stopped.add(subscriptionId);
-                    }
+                    stopped.add(subscriptionId);
                 }
             }
 
