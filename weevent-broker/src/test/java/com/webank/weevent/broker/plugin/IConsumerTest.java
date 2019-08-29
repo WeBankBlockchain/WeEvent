@@ -26,6 +26,7 @@ public class IConsumerTest extends JUnitTestBase {
 
     @After
     public void after() {
+        Assert.assertTrue(this.iConsumer.shutdownConsumer());
     }
 
     /**

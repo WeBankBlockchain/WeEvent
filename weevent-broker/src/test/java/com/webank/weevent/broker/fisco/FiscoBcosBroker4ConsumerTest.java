@@ -38,6 +38,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
     private IConsumer iConsumer;
     private String lastEventId = "";
     private Map<IConsumer.SubscribeExt, String> ext = new HashMap<>();
+    private IConsumer.ConsumerListener defaultListener = new MyConsumerListener();
 
     class MyConsumerListener implements IConsumer.ConsumerListener {
         public List<String> notifiedEvents = new ArrayList<>();
@@ -56,8 +57,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
             this.notifiedEvents.clear();
         }
     }
-
-    private IConsumer.ConsumerListener defaultListener = new MyConsumerListener();
 
     @Before
     public void before() throws Exception {

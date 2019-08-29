@@ -40,6 +40,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
 
     @After
     public void after() {
+        Assert.assertTrue(this.iProducer.shutdownProducer());
     }
 
     @Test
@@ -497,7 +498,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
         Assert.assertNotNull(topicInfo);
         Assert.assertFalse(topicInfo.getTopicAddress().isEmpty());
         Assert.assertFalse(topicInfo.getSenderAddress().isEmpty());
-        Assert.assertTrue(!(topicInfo.getCreatedTimestamp() == 0));
+        Assert.assertTrue(topicInfo.getCreatedTimestamp().intValue() != 0);
     }
 
     /**

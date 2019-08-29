@@ -1,4 +1,4 @@
-package com.webank.weevent.ST;
+package com.webank.weevent.st;
 
 import com.webank.weevent.JUnitTestBase;
 import com.webank.weevent.sdk.ErrorCode;

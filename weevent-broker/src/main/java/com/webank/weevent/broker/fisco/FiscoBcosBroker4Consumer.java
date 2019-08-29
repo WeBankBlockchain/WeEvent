@@ -826,11 +826,10 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         private synchronized void mergeHistory() {
             List<String> stopped = new ArrayList<>();
             for (String subscriptionId : this.historySubscriptionIds) {
-                if (subscriptions.containsKey(subscriptionId)) {
+                if (subscriptions.containsKey(subscriptionId)
+                    && subscriptions.get(subscriptionId).tryStopHistory(this.lastBlock)) {
                     // try to stop history if needed
-                    if (subscriptions.get(subscriptionId).tryStopHistory(this.lastBlock)) {
-                        stopped.add(subscriptionId);
-                    }
+                    stopped.add(subscriptionId);
                 }
             }
 

@@ -1,4 +1,4 @@
-package com.webank.weevent.ST;
+package com.webank.weevent.st;
 
 import java.net.URL;
 import java.util.HashMap;
