@@ -9,18 +9,21 @@ import lombok.Value;
 public class BaseRspEntity {
     private int errorCode;
     private String errorMsg;
-    private Object data ;
+    private Object data;
 
-    public BaseRspEntity(){}
+    public BaseRspEntity() {
+    }
 
-    public BaseRspEntity(int errorCode){
+    public BaseRspEntity(int errorCode) {
         this.errorCode = errorCode;
     }
-    public BaseRspEntity(RetCode rsc){
+
+    public BaseRspEntity(RetCode rsc) {
         this.errorCode = rsc.getErrorCode();
         this.errorMsg = rsc.getErrorMsg();
     }
-    public BaseRspEntity(RetCode rsc, Object obj){
+
+    public BaseRspEntity(RetCode rsc, Object obj) {
         this.errorCode = rsc.getErrorCode();
         this.errorMsg = rsc.getErrorMsg();
         this.data = obj;

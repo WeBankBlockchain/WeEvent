@@ -4,6 +4,8 @@ import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.model.CEPRuleExample;
 
 import java.util.List;
+import java.util.Map;
+
 import org.apache.ibatis.annotations.Param;
 
 public interface CEPRuleMapper {
@@ -21,6 +23,8 @@ public interface CEPRuleMapper {
 
     List<CEPRule> getCEPRuleList(@Param("ruleName") String ruleName);
 
+    List<CEPRule> getCEPRuleListByPage(Map<String, Object> data);
+
     CEPRule selectByPrimaryKey(String id);
 
     List<CEPRule> selectByRuleName(@Param("ruleName") String ruleName);
@@ -33,5 +37,6 @@ public interface CEPRuleMapper {
 
     int updateByPrimaryKeySelective(CEPRule record);
 
+    int updateFieldById(CEPRule record);
 
 }

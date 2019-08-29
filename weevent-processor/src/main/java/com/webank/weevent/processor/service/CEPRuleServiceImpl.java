@@ -2,6 +2,7 @@ package com.webank.weevent.processor.service;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,6 +17,7 @@ import com.webank.weevent.sdk.IWeEventClient;
 
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,22 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class CEPRuleServiceImpl implements CEPRuleService {
+
+    @Override
+    public List<CEPRule> getCEPRuleListByPage(int currPage, int pageSize) {
+        Map<String, Object> data = new HashedMap();
+        data.put("currIndex", (currPage - 1) * pageSize);
+        data.put("pageSize", pageSize);
+        return cepRuleMapper.getCEPRuleListByPage(data);
+    }
+
+    @Override
+    public int updateByExampleSelective(CEPRule record, CEPRuleExample example) {
+//        example.isDistinct();
+//        example.setOrderByClause(example.);
+//        cepRuleMapper.updateByExampleSelective(record,example.isDistinct());
+        return 0;
+    }
 
     @Autowired
     CEPRuleMapper cepRuleMapper;
@@ -36,7 +54,6 @@ public class CEPRuleServiceImpl implements CEPRuleService {
     @Override
     public RetCode setCEPRule(String id, int type) {
         CEPRule rule = cepRuleMapper.selectByPrimaryKey(id);
-
         //0-->1-->2
         if (rule.getStatus().equals(Constants.RULE_STATUS_DELETE)) {
             return Constants.ALREADY_DELETE;
@@ -69,9 +86,11 @@ public class CEPRuleServiceImpl implements CEPRuleService {
 
     @Override
     public RetCode updateByPrimaryKey(CEPRule record) {
-
         //check  ruleName、payloay、selectField、conditionField、conditionType、fromDestination、toDestination、databaseUrl
-        checkField(record);
+        RetCode ret = checkField(record);
+        if (!ret.getErrorCode().equals(Constants.RULE_STATUS_START)) {
+            return Constants.FAIL;
+        }
         int count = cepRuleMapper.updateByPrimaryKey(record);
         if (count > 0) {
             return Constants.SUCCESS;
@@ -82,9 +101,12 @@ public class CEPRuleServiceImpl implements CEPRuleService {
 
     @Override
     public RetCode updateByPrimaryKeySelective(CEPRule record) {
-        // check the fields
-
-        int count = cepRuleMapper.updateByPrimaryKeySelective(record);
+        // check the field
+        RetCode ret = checkField(record);
+        if (!ret.getErrorCode().equals(Constants.RULE_STATUS_START)) {
+            return Constants.FAIL;
+        }
+        int count = cepRuleMapper.updateFieldById(record);
         if (count > 0) {
             return Constants.SUCCESS;
         }
@@ -93,8 +115,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
 
     @Override
     public List<CEPRule> getCEPRuleList(String ruleName) {
-        List<CEPRule> CEPRuleList = cepRuleMapper.getCEPRuleList(ruleName);
-        return CEPRuleList;
+        return cepRuleMapper.getCEPRuleList(ruleName);
     }
 
 
@@ -105,7 +126,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
 
         record.setId(getGuid());
         record.setStatus(0); //default the status
-        Integer ret = cepRuleMapper.insert(record);
+        int ret = cepRuleMapper.insert(record);
         if (ret != 1) {
             return Constants.INSERT_RECORD_FAIL;
         }
@@ -113,7 +134,8 @@ public class CEPRuleServiceImpl implements CEPRuleService {
     }
 
     /**
-     *     check  ruleName、payloay、selectField、conditionField、conditionType、fromDestination、toDestination、databaseUrl
+     * check  ruleName、payloay、selectField、conditionField、conditionType、fromDestination、toDestination、databaseUrl
+     *
      * @param record
      * @return
      */
@@ -125,7 +147,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         String payload = record.getPayload();
         if (payload.isEmpty() || StringUtils.isBlank(payload)) {
             return Constants.PAYLOAD_IS_BLANK;
-        }else{
+        } else {
             //check relation between payloay and selectField
         }
         // check payloay
@@ -143,12 +165,12 @@ public class CEPRuleServiceImpl implements CEPRuleService {
             return Constants.TOPIC_ISNOT_EXIST;
         }
         // check broker
-        if(!isHttpUrl(record.getBrokerUrl())){
+        if (!isHttpUrl(record.getBrokerUrl())) {
             log.info("broker url is wrong");
             return Constants.URL_ISNOT_VALID;
         }
         // check the databaseUrl,check is valid (http://...?account=**&password=**)
-        if(!isHttpUrl(record.getDatabaseUrl())){
+        if (!isHttpUrl(record.getDatabaseUrl())) {
             log.info("database url is wrong");
             return Constants.URL_ISNOT_VALID;
         }
@@ -156,7 +178,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         return Constants.SUCCESS;
     }
 
-    private  boolean isHttpUrl(String urls) {
+    private static Boolean isHttpUrl(String urls) {
         boolean isurl = false;
         String regex = "(((https|http)?://)?([a-z0-9]+[.])|(www.))"
                 + "\\w+[.|\\/]([a-z0-9]{0,})?[[.]([a-z0-9]{0,})]+((/[\\S&&[^,;\u4E00-\u9FA5]]+)+)?([.][a-z0-9]{0,}+|/?)";//设置正则表达式
@@ -165,16 +187,17 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         Matcher mat = pat.matcher(urls.trim());
         isurl = mat.matches();
         if (isurl) {
-            isurl = true;
+            return true;
+        } else {
+            return false;
         }
-        return isurl;
     }
 
-    private boolean checkDatabase(String databaseUrl) {
+    private Boolean checkDatabase(String databaseUrl) {
         return false;
     }
 
-    private boolean checkTopic(String topicName) {
+    private Boolean checkTopic(String topicName) {
         try {
             IWeEventClient weEventClient = IWeEventClient.build("http://182.254.159.91:8090/weevent");
             return weEventClient.exist(topicName);
@@ -184,15 +207,13 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         }
     }
 
-    private static boolean isJSON2(String str) {
-        boolean result = false;
+    private boolean isJSON2(String str) {
         try {
-            Object obj = JSON.parse(str);
-            result = true;
+            JSON.parse(str);
+            return true;
         } catch (Exception e) {
-            result = false;
+            return false;
         }
-        return result;
     }
 
     //  generator the id

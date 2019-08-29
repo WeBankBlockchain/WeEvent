@@ -138,6 +138,19 @@
         </where>
     </select>
 
+    <select id="getAllRuleList" parameterType="com.webank.weevent.processor.model.CEPRule" resultMap="CEPRuleResultMap">
+        select
+        <include refid="Common_Column_List"/>
+        from cep_rule
+    </select>
+
+    <select id="getCEPRuleListByPage" parameterType="map" resultMap="CEPRuleResultMap">
+        select
+        <include refid="Common_Column_List"/>
+        from cep_rule limit #{currIndex} , #{pageSize}
+    </select>
+
+
     <select id="selectByRuleName" parameterType="com.webank.weevent.processor.model.CEPRule"
             resultMap="CEPRuleResultMap">
         select
@@ -386,6 +399,54 @@
             <include refid="Update_By_Example_Where_Clause"/>
         </if>
     </update>
+
+    <update id="updateFieldById" parameterType="com.webank.weevent.processor.model.CEPRule">
+        update cep_rule
+        <set>
+            <if test="ruleName != null">
+                rule_name = #{ruleName,jdbcType=VARCHAR},
+            </if>
+            <if test="fromDestination != null">
+                from_destination = #{fromDestination,jdbcType=VARCHAR},
+            </if>
+            <if test="brokerUrl != null">
+                broker_url = #{brokerUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="payload != null">
+                payload = #{payload,jdbcType=VARCHAR},
+            </if>
+            <if test="selectField != null">
+                select_field = #{selectField,jdbcType=VARCHAR},
+            </if>
+            <if test="conditionField != null">
+                condition_field = #{conditionField,jdbcType=VARCHAR},
+            </if>
+            <if test="conditionType != null">
+                condition_type = #{conditionType,jdbcType=INTEGER},
+            </if>
+            <if test="toDestination != null">
+                to_destination = #{toDestination,jdbcType=VARCHAR},
+            </if>
+            <if test="databaseUrl != null">
+                database_url = #{databaseUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="errorDestination != null">
+                error_destination = #{errorDestination,jdbcType=VARCHAR},
+            </if>
+            <if test="errorCode != null">
+                error_code = #{errorCode,jdbcType=VARCHAR},
+            </if>
+            <if test="errorMessage != null">
+                error_message = #{errorMessage,jdbcType=VARCHAR},
+            </if>
+            <if test="updatedTime != null">
+                updated_time = #{updatedTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+
+
     <update id="updateByPrimaryKeySelective" parameterType="com.webank.weevent.processor.model.CEPRule">
         update cep_rule
         <set>

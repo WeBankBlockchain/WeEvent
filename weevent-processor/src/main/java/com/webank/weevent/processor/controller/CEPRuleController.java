@@ -15,15 +15,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.apache.commons.lang3.StringUtils;
 
-import static com.webank.weevent.processor.utils.Constants.SUCCESS;
-
 @Slf4j
 @RestController
+@RequestMapping("/weevent/processor")
 public class CEPRuleController extends BaseController {
 
     @Autowired
@@ -54,6 +54,20 @@ public class CEPRuleController extends BaseController {
         return resEntity;
     }
 
+    @RequestMapping("/getCEPRuleListByPage")
+    @ResponseBody
+    public BaseRspEntity getCEPRuleListByPage(int currPage, int pageSize) {
+        BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
+        List<CEPRule> cepRule = cepRuleService.getCEPRuleListByPage(currPage, pageSize);
+        resEntity.setData(cepRule);
+        if (cepRule == null) {
+            resEntity.setErrorCode(Constants.SUCCESS_CODE);
+            resEntity.setErrorMsg("fail");
+        }
+        log.info("cepRule:{}", JSONArray.toJSON(cepRule));
+        return resEntity;
+    }
+
     @RequestMapping("/getCEPRuleList")
     @ResponseBody
     public BaseRspEntity getCEPRuleList(@RequestParam(name = "ruleName") String ruleName) {
@@ -65,7 +79,7 @@ public class CEPRuleController extends BaseController {
         return resEntity;
     }
 
-    @RequestMapping("/updateCEPRuleById")
+    @RequestMapping(value = "/updateCEPRuleById", method = RequestMethod.POST)
     @ResponseBody
     public BaseRspEntity updateCEPRuleById(@Valid @RequestBody CEPRule rule) {
         BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
@@ -75,7 +89,7 @@ public class CEPRuleController extends BaseController {
         return resEntity;
     }
 
-    @RequestMapping("/insert")
+    @RequestMapping(value = "/insert", method = RequestMethod.POST)
     @ResponseBody
     public BaseRspEntity insert(@Valid @RequestBody CEPRule rule) {
         BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
@@ -86,7 +100,7 @@ public class CEPRuleController extends BaseController {
         return resEntity;
     }
 
-    @RequestMapping("/deleteCEPRuleById")
+    @RequestMapping(value = "/deleteCEPRuleById", method = RequestMethod.POST)
     @ResponseBody
     public BaseRspEntity deleteCEPRuleById(@RequestParam(name = "id") String id) {
         BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
@@ -99,7 +113,7 @@ public class CEPRuleController extends BaseController {
         return resEntity;
     }
 
-    @RequestMapping("/startCEPRule")
+    @RequestMapping(value = "/startCEPRule", method = RequestMethod.POST)
     @ResponseBody
     public BaseRspEntity startCEPRule(@RequestParam(name = "id") String id) {
         BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
