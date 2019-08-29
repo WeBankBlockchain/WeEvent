@@ -10,4 +10,7 @@ public class TopicCreaterDto {
     private String topic;
 
     private String creater;
+
+    private Integer isDelete;
+
 }
