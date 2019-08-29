@@ -57,7 +57,7 @@ public class IProducerTest extends JUnitTestBase {
      * test shutdownProducer
      */
     @Test
-    public void testShutdownProducer_multiple() {
+    public void testShutdownProducerMultiple() {
         log.info("===================={}", this.testName.getMethodName());
 
         Assert.assertTrue(this.iProducer.shutdownProducer());
