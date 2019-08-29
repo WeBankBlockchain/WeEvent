@@ -2,41 +2,61 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.webank.weevent.governance.mapper.TopicInfoMapper">
 
-	<select id="getCreater" resultType="java.lang.String">
-		select creater
-		from t_topic where 1=1
-		<if test="topicName != null and topicName !=''">
-			AND topic_name = #{topicName}
-		</if>
-		<if test="id != null">
-			AND broker_id = #{id}
-		</if>
-	</select>
+    <resultMap id="BaseResultMap" type="com.webank.weevent.governance.entity.Topic">
+        <id column="topic_name" property="topicName"/>
+        <result column="creater" property="creater"/>
+        <result column="broker_id" property="brokerId"/>
+        <result column="last_update" property="lastUpdate"/>
+        <result column="is_delete" property="isDelete"/>
+    </resultMap>
 
-	<insert id="openBrokeTopic">
-		<selectKey keyProperty="count" resultType="int" order="BEFORE">
-			select count(*) from t_topic where broker_id=#{id} and topic_name =
-			#{topicName}
-		</selectKey>
-		<if test="count > 0">
-			update t_topic
-			<set>
-				<if test="creater != null">
-					creater= #{creater}
-				</if>
-			</set>
-			<where>
-				topic_name = #{topicName} and broker_id=#{id}
-			</where>
-		</if>
-		<if test="count==0">
-			insert into t_topic(broker_id,topic_name,creater) values
-			(#{id},#{topicName},#{creater})
-		</if>
-	</insert>
-	
-	<delete id="deleteTopicInfo" parameterType="java.lang.Integer">
-	   delete from t_topic
+    <sql id="Base_Column_List">
+        topic_name, creater, broker_id, last_update, is_delete
+    </sql>
+
+    <select id="getTopic" resultMap="BaseResultMap"
+            parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from t_topic where id=#{id} and is_delete=0
+    </select>
+
+
+    <select id="getCreater" resultType="java.lang.String">
+        select creater
+        from t_topic where is_delete=0
+        <if test="topicName != null and topicName !=''">
+            AND topic_name = #{topicName}
+        </if>
+        <if test="id != null">
+            AND broker_id = #{id}
+        </if>
+    </select>
+
+    <insert id="openBrokeTopic">
+        <selectKey keyProperty="count" resultType="int" order="BEFORE">
+            select count(*) from t_topic where broker_id=#{id} and topic_name =
+            #{topicName} and is_delete=0
+        </selectKey>
+        <if test="count > 0">
+            update t_topic
+            <set>
+                <if test="creater != null">
+                    creater= #{creater}
+                </if>
+            </set>
+            <where>
+                topic_name = #{topicName} and broker_id=#{id} and is_delete=0
+            </where>
+        </if>
+        <if test="count==0">
+            insert into t_topic(broker_id,topic_name,creater) values
+            (#{id},#{topicName},#{creater})
+        </if>
+    </insert>
+
+    <delete id="deleteTopicInfo" parameterType="java.lang.Integer">
+	   update t_topic set is_delete=1
        where broker_id=#{brokerId}
 	</delete>
 
