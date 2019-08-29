@@ -2,18 +2,16 @@ package com.webank.weevent.processor.model;
 
 import java.util.Date;
 
-import javax.validation.constraints.NotNull;
-
 public class CEPRule {
     private String id;
-    @NotNull
+
     private String ruleName;
 
     private String fromDestination;
-    @NotNull
+
     private String brokerUrl;
-    @NotNull
-    private String payloay;
+
+    private String payload;
 
     private Integer payloadType;
 
@@ -25,7 +23,7 @@ public class CEPRule {
 
     private String toDestination;
 
-    private String databaseurl;
+    private String databaseUrl;
 
     private Date createdTime;
 
@@ -39,18 +37,18 @@ public class CEPRule {
 
     private Date updatedTime;
 
-    public CEPRule(String id, String ruleName, String fromDestination, String brokerUrl, String payloay, Integer payloadType, String selectField, String conditionField, Integer conditionType, String toDestination, String databaseurl, Date createdTime, Integer status, String errorDestination, String errorCode, String errorMessage, Date updatedTime) {
+    public CEPRule(String id, String ruleName, String fromDestination, String brokerUrl, String payload, Integer payloadType, String selectField, String conditionField, Integer conditionType, String toDestination, String databaseUrl, Date createdTime, Integer status, String errorDestination, String errorCode, String errorMessage, Date updatedTime) {
         this.id = id;
         this.ruleName = ruleName;
         this.fromDestination = fromDestination;
         this.brokerUrl = brokerUrl;
-        this.payloay = payloay;
+        this.payload = payload;
         this.payloadType = payloadType;
         this.selectField = selectField;
         this.conditionField = conditionField;
         this.conditionType = conditionType;
         this.toDestination = toDestination;
-        this.databaseurl = databaseurl;
+        this.databaseUrl = databaseUrl;
         this.createdTime = createdTime;
         this.status = status;
         this.errorDestination = errorDestination;
@@ -95,12 +93,12 @@ public class CEPRule {
         this.brokerUrl = brokerUrl == null ? null : brokerUrl.trim();
     }
 
-    public String getPayloay() {
-        return payloay;
+    public String getPayload() {
+        return payload;
     }
 
-    public void setPayloay(String payloay) {
-        this.payloay = payloay == null ? null : payloay.trim();
+    public void setPayload(String payload) {
+        this.payload = payload == null ? null : payload.trim();
     }
 
     public Integer getPayloadType() {
@@ -143,12 +141,12 @@ public class CEPRule {
         this.toDestination = toDestination == null ? null : toDestination.trim();
     }
 
-    public String getDatabaseurl() {
-        return databaseurl;
+    public String getDatabaseUrl() {
+        return databaseUrl;
     }
 
-    public void setDatabaseurl(String databaseurl) {
-        this.databaseurl = databaseurl == null ? null : databaseurl.trim();
+    public void setDatabaseUrl(String databaseUrl) {
+        this.databaseUrl = databaseUrl == null ? null : databaseUrl.trim();
     }
 
     public Date getCreatedTime() {

@@ -385,73 +385,73 @@ public class CEPRuleExample {
             return (Criteria) this;
         }
 
-        public Criteria andPayloayIsNull() {
-            addCriterion("payloay is null");
+        public Criteria andPayloadIsNull() {
+            addCriterion("payload is null");
             return (Criteria) this;
         }
 
-        public Criteria andPayloayIsNotNull() {
-            addCriterion("payloay is not null");
+        public Criteria andPayloadIsNotNull() {
+            addCriterion("payload is not null");
             return (Criteria) this;
         }
 
-        public Criteria andPayloayEqualTo(String value) {
-            addCriterion("payloay =", value, "payloay");
+        public Criteria andPayloadEqualTo(String value) {
+            addCriterion("payload =", value, "payload");
             return (Criteria) this;
         }
 
-        public Criteria andPayloayNotEqualTo(String value) {
-            addCriterion("payloay <>", value, "payloay");
+        public Criteria andPayloadNotEqualTo(String value) {
+            addCriterion("payload <>", value, "payload");
             return (Criteria) this;
         }
 
-        public Criteria andPayloayGreaterThan(String value) {
-            addCriterion("payloay >", value, "payloay");
+        public Criteria andPayloadGreaterThan(String value) {
+            addCriterion("payload >", value, "payload");
             return (Criteria) this;
         }
 
-        public Criteria andPayloayGreaterThanOrEqualTo(String value) {
-            addCriterion("payloay >=", value, "payloay");
+        public Criteria andPayloadGreaterThanOrEqualTo(String value) {
+            addCriterion("payload >=", value, "payload");
             return (Criteria) this;
         }
 
-        public Criteria andPayloayLessThan(String value) {
-            addCriterion("payloay <", value, "payloay");
+        public Criteria andPayloadLessThan(String value) {
+            addCriterion("payload <", value, "payload");
             return (Criteria) this;
         }
 
-        public Criteria andPayloayLessThanOrEqualTo(String value) {
-            addCriterion("payloay <=", value, "payloay");
+        public Criteria andPayloadLessThanOrEqualTo(String value) {
+            addCriterion("payload <=", value, "payload");
             return (Criteria) this;
         }
 
-        public Criteria andPayloayLike(String value) {
-            addCriterion("payloay like", value, "payloay");
+        public Criteria andPayloadLike(String value) {
+            addCriterion("payload like", value, "payload");
             return (Criteria) this;
         }
 
-        public Criteria andPayloayNotLike(String value) {
-            addCriterion("payloay not like", value, "payloay");
+        public Criteria andPayloadNotLike(String value) {
+            addCriterion("payload not like", value, "payload");
             return (Criteria) this;
         }
 
-        public Criteria andPayloayIn(List<String> values) {
-            addCriterion("payloay in", values, "payloay");
+        public Criteria andPayloadIn(List<String> values) {
+            addCriterion("payload in", values, "payload");
             return (Criteria) this;
         }
 
-        public Criteria andPayloayNotIn(List<String> values) {
-            addCriterion("payloay not in", values, "payloay");
+        public Criteria andPayloadNotIn(List<String> values) {
+            addCriterion("payload not in", values, "payload");
             return (Criteria) this;
         }
 
-        public Criteria andPayloayBetween(String value1, String value2) {
-            addCriterion("payloay between", value1, value2, "payloay");
+        public Criteria andPayloadBetween(String value1, String value2) {
+            addCriterion("payload between", value1, value2, "payload");
             return (Criteria) this;
         }
 
-        public Criteria andPayloayNotBetween(String value1, String value2) {
-            addCriterion("payloay not between", value1, value2, "payloay");
+        public Criteria andPayloadNotBetween(String value1, String value2) {
+            addCriterion("payload not between", value1, value2, "payload");
             return (Criteria) this;
         }
 
@@ -785,73 +785,73 @@ public class CEPRuleExample {
             return (Criteria) this;
         }
 
-        public Criteria andDatabaseurlIsNull() {
-            addCriterion("databaseUrl is null");
+        public Criteria andDatabaseUrlIsNull() {
+            addCriterion("database_url is null");
             return (Criteria) this;
         }
 
-        public Criteria andDatabaseurlIsNotNull() {
-            addCriterion("databaseUrl is not null");
+        public Criteria andDatabaseUrlIsNotNull() {
+            addCriterion("database_url is not null");
             return (Criteria) this;
         }
 
-        public Criteria andDatabaseurlEqualTo(String value) {
-            addCriterion("databaseUrl =", value, "databaseurl");
+        public Criteria andDatabaseUrlEqualTo(String value) {
+            addCriterion("database_url =", value, "databaseUrl");
             return (Criteria) this;
         }
 
-        public Criteria andDatabaseurlNotEqualTo(String value) {
-            addCriterion("databaseUrl <>", value, "databaseurl");
+        public Criteria andDatabaseUrlNotEqualTo(String value) {
+            addCriterion("database_url <>", value, "databaseUrl");
             return (Criteria) this;
         }
 
-        public Criteria andDatabaseurlGreaterThan(String value) {
-            addCriterion("databaseUrl >", value, "databaseurl");
+        public Criteria andDatabaseUrlGreaterThan(String value) {
+            addCriterion("database_url >", value, "databaseUrl");
             return (Criteria) this;
         }
 
-        public Criteria andDatabaseurlGreaterThanOrEqualTo(String value) {
-            addCriterion("databaseUrl >=", value, "databaseurl");
+        public Criteria andDatabaseUrlGreaterThanOrEqualTo(String value) {
+            addCriterion("database_url >=", value, "databaseUrl");
             return (Criteria) this;
         }
 
-        public Criteria andDatabaseurlLessThan(String value) {
-            addCriterion("databaseUrl <", value, "databaseurl");
+        public Criteria andDatabaseUrlLessThan(String value) {
+            addCriterion("database_url <", value, "databaseUrl");
             return (Criteria) this;
         }
 
-        public Criteria andDatabaseurlLessThanOrEqualTo(String value) {
-            addCriterion("databaseUrl <=", value, "databaseurl");
+        public Criteria andDatabaseUrlLessThanOrEqualTo(String value) {
+            addCriterion("database_url <=", value, "databaseUrl");
             return (Criteria) this;
         }
 
-        public Criteria andDatabaseurlLike(String value) {
-            addCriterion("databaseUrl like", value, "databaseurl");
+        public Criteria andDatabaseUrlLike(String value) {
+            addCriterion("database_url like", value, "databaseUrl");
             return (Criteria) this;
         }
 
-        public Criteria andDatabaseurlNotLike(String value) {
-            addCriterion("databaseUrl not like", value, "databaseurl");
+        public Criteria andDatabaseUrlNotLike(String value) {
+            addCriterion("database_url not like", value, "databaseUrl");
             return (Criteria) this;
         }
 
-        public Criteria andDatabaseurlIn(List<String> values) {
-            addCriterion("databaseUrl in", values, "databaseurl");
+        public Criteria andDatabaseUrlIn(List<String> values) {
+            addCriterion("database_url in", values, "databaseUrl");
             return (Criteria) this;
         }
 
-        public Criteria andDatabaseurlNotIn(List<String> values) {
-            addCriterion("databaseUrl not in", values, "databaseurl");
+        public Criteria andDatabaseUrlNotIn(List<String> values) {
+            addCriterion("database_url not in", values, "databaseUrl");
             return (Criteria) this;
         }
 
-        public Criteria andDatabaseurlBetween(String value1, String value2) {
-            addCriterion("databaseUrl between", value1, value2, "databaseurl");
+        public Criteria andDatabaseUrlBetween(String value1, String value2) {
+            addCriterion("database_url between", value1, value2, "databaseUrl");
             return (Criteria) this;
         }
 
-        public Criteria andDatabaseurlNotBetween(String value1, String value2) {
-            addCriterion("databaseUrl not between", value1, value2, "databaseurl");
+        public Criteria andDatabaseUrlNotBetween(String value1, String value2) {
+            addCriterion("database_url not between", value1, value2, "databaseUrl");
             return (Criteria) this;
         }
 

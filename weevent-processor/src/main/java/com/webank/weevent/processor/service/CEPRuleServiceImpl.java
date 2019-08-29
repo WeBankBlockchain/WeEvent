@@ -2,6 +2,9 @@ package com.webank.weevent.processor.service;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 import com.webank.weevent.processor.mapper.CEPRuleMapper;
 import com.webank.weevent.processor.model.CEPRule;
@@ -21,6 +24,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class CEPRuleServiceImpl implements CEPRuleService {
 
+    @Autowired
+    CEPRuleMapper cepRuleMapper;
+
+
     @Override
     public int getCountByCondition(CEPRuleExample cEPRuleExample) {
         return new Long(cepRuleMapper.countByExample(cEPRuleExample)).intValue();
@@ -29,16 +36,24 @@ public class CEPRuleServiceImpl implements CEPRuleService {
     @Override
     public RetCode setCEPRule(String id, int type) {
         CEPRule rule = cepRuleMapper.selectByPrimaryKey(id);
+
+        //0-->1-->2
+        if (rule.getStatus().equals(Constants.RULE_STATUS_DELETE)) {
+            return Constants.ALREADY_DELETE;
+        }
+
         if (type == Constants.RULE_STATUS_START) {
             rule.setStatus(Constants.RULE_STATUS_START);// 1 is represent start status
-        }else{
+        }
+
+        if (type == Constants.RULE_STATUS_DELETE) {
             rule.setStatus(Constants.RULE_STATUS_DELETE);// 2 is represent delete status
         }
         int ret = cepRuleMapper.updateByPrimaryKeySelective(rule);
         if (ret != Constants.SUCCESS_CODE) {
-            return RetCode.mark(Constants.FAIL_CODE, "delete fail");
+            return Constants.FAIL;
         }
-        return RetCode.mark(Constants.SUCCESS_CODE, "success");
+        return Constants.SUCCESS;
     }
 
     @Override
@@ -54,21 +69,26 @@ public class CEPRuleServiceImpl implements CEPRuleService {
 
     @Override
     public RetCode updateByPrimaryKey(CEPRule record) {
+
+        //check  ruleName、payloay、selectField、conditionField、conditionType、fromDestination、toDestination、databaseUrl
+        checkField(record);
         int count = cepRuleMapper.updateByPrimaryKey(record);
         if (count > 0) {
-            return RetCode.mark(Constants.SUCCESS_CODE,Constants.MESSAGE_SUCCESS);
+            return Constants.SUCCESS;
         }
-        return RetCode.mark(Constants.FAIL_CODE,Constants.MESSAGE_FAIL);
+        return Constants.FAIL;
     }
 
 
     @Override
     public RetCode updateByPrimaryKeySelective(CEPRule record) {
+        // check the fields
+
         int count = cepRuleMapper.updateByPrimaryKeySelective(record);
         if (count > 0) {
-            return RetCode.mark(Constants.SUCCESS_CODE,Constants.MESSAGE_SUCCESS);
+            return Constants.SUCCESS;
         }
-        return RetCode.mark(Constants.FAIL_CODE,Constants.MESSAGE_FAIL);
+        return Constants.FAIL;
     }
 
     @Override
@@ -78,51 +98,81 @@ public class CEPRuleServiceImpl implements CEPRuleService {
     }
 
 
-    @Autowired
-    CEPRuleMapper cepRuleMapper;
-
-    public CEPRuleMapper getCepRuleMapper() {
-        return cepRuleMapper;
-    }
-
-    public void setCepRuleMapper(CEPRuleMapper cepRuleMapper) {
-        this.cepRuleMapper = cepRuleMapper;
-    }
-
     @Override
     public RetCode insert(CEPRule record) {
-        // checkPayload
-        if (StringUtils.isBlank(record.getRuleName()) || record.getRuleName().isEmpty()) {
-            return RetCode.mark(280001, "rule name is blank");
-        }
-        String payload = record.getPayloay();
-        if (payload.isEmpty() || StringUtils.isBlank(payload)) {
-            return RetCode.mark(280002, "payload  is blank");
-        }
-        // check payloay
-        boolean isRight = isJSON2(record.getPayloay());
-        if (!isRight) {
-            return RetCode.mark(270007, "payload is not a json");
-        }
-        // check topic
-        if (!checkTopic(record.getFromDestination())) {
-            log.info("the topic is not exist");
-            return RetCode.mark(270006, "the topic is not exist");
-        }
-        // check the broker
-
-        // check the database
-
+        // check all the field
+        checkField(record);
 
         record.setId(getGuid());
         record.setStatus(0); //default the status
         Integer ret = cepRuleMapper.insert(record);
         if (ret != 1) {
-            return RetCode.mark(270005, "insert fail");
+            return Constants.INSERT_RECORD_FAIL;
         }
-        return RetCode.mark(0, "success");
+        return Constants.SUCCESS;
     }
 
+    /**
+     *     check  ruleName、payloay、selectField、conditionField、conditionType、fromDestination、toDestination、databaseUrl
+     * @param record
+     * @return
+     */
+    private RetCode checkField(CEPRule record) {
+        // checkPayload
+        if (StringUtils.isBlank(record.getRuleName()) || record.getRuleName().isEmpty()) {
+            return Constants.RULENAME_IS_BLANK;
+        }
+        String payload = record.getPayload();
+        if (payload.isEmpty() || StringUtils.isBlank(payload)) {
+            return Constants.PAYLOAD_IS_BLANK;
+        }else{
+            //check relation between payloay and selectField
+        }
+        // check payloay
+        boolean isRight = isJSON2(record.getPayload());
+        if (!isRight) {
+            return Constants.PAYLOAD_ISNOT_JSON;
+        }
+        // check topic and check the broker
+        if (!checkTopic(record.getFromDestination())) {
+            log.info("the topic is not exist");
+            return Constants.TOPIC_ISNOT_EXIST;
+        }
+        if (!checkTopic(record.getToDestination())) {
+            log.info("the topic is not exist");
+            return Constants.TOPIC_ISNOT_EXIST;
+        }
+        // check broker
+        if(!isHttpUrl(record.getBrokerUrl())){
+            log.info("broker url is wrong");
+            return Constants.URL_ISNOT_VALID;
+        }
+        // check the databaseUrl,check is valid (http://...?account=**&password=**)
+        if(!isHttpUrl(record.getDatabaseUrl())){
+            log.info("database url is wrong");
+            return Constants.URL_ISNOT_VALID;
+        }
+
+        return Constants.SUCCESS;
+    }
+
+    private  boolean isHttpUrl(String urls) {
+        boolean isurl = false;
+        String regex = "(((https|http)?://)?([a-z0-9]+[.])|(www.))"
+                + "\\w+[.|\\/]([a-z0-9]{0,})?[[.]([a-z0-9]{0,})]+((/[\\S&&[^,;\u4E00-\u9FA5]]+)+)?([.][a-z0-9]{0,}+|/?)";//设置正则表达式
+
+        Pattern pat = Pattern.compile(regex.trim());
+        Matcher mat = pat.matcher(urls.trim());
+        isurl = mat.matches();
+        if (isurl) {
+            isurl = true;
+        }
+        return isurl;
+    }
+
+    private boolean checkDatabase(String databaseUrl) {
+        return false;
+    }
 
     private boolean checkTopic(String topicName) {
         try {

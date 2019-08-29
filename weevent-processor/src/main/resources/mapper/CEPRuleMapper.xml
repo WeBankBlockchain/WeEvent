@@ -7,13 +7,13 @@
             <arg column="rule_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
             <arg column="from_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
             <arg column="broker_url" javaType="java.lang.String" jdbcType="VARCHAR"/>
-            <arg column="payloay" javaType="java.lang.String" jdbcType="VARCHAR"/>
+            <arg column="payload" javaType="java.lang.String" jdbcType="VARCHAR"/>
             <arg column="payload_type" javaType="java.lang.Integer" jdbcType="INTEGER"/>
             <arg column="select_field" javaType="java.lang.String" jdbcType="VARCHAR"/>
             <arg column="condition_field" javaType="java.lang.String" jdbcType="VARCHAR"/>
             <arg column="condition_type" javaType="java.lang.Integer" jdbcType="INTEGER"/>
             <arg column="to_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
-            <arg column="databaseUrl" javaType="java.lang.String" jdbcType="VARCHAR"/>
+            <arg column="database_url" javaType="java.lang.String" jdbcType="VARCHAR"/>
             <arg column="created_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
             <arg column="status" javaType="java.lang.Integer" jdbcType="INTEGER"/>
             <arg column="error_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
@@ -83,14 +83,14 @@
         </where>
     </sql>
     <sql id="Base_Column_List">
-    id, rule_name, from_destination, broker_url, payloay, payload_type, select_field, 
-    condition_field, condition_type, to_destination, databaseUrl, created_time, status, 
+    id, rule_name, from_destination, broker_url, payload, payload_type, select_field,
+    condition_field, condition_type, to_destination, database_url, created_time, status,
     error_destination, error_code, error_message, updated_time
   </sql>
 
     <sql id="Common_Column_List">
-    id, rule_name, from_destination, broker_url, payloay, payload_type, select_field,
-    condition_field, condition_type, to_destination, databaseUrl, created_time, status,
+    id, rule_name, from_destination, broker_url, payload, payload_type, select_field,
+    condition_field, condition_type, to_destination, database_url, created_time, status,
     error_destination, error_code, error_message
   </sql>
     <select id="selectByExample" parameterType="com.webank.weevent.processor.model.CEPRuleExample"
@@ -114,13 +114,13 @@
         <result property="ruleName" column="rule_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
         <result property="fromDestination" column="from_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
         <result property="brokerUrl" column="broker_url" javaType="java.lang.String" jdbcType="VARCHAR"/>
-        <result property="payloay" column="payloay" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="payload" column="payload" javaType="java.lang.String" jdbcType="VARCHAR"/>
         <result property="payloadType" column="payload_type" javaType="java.lang.Integer" jdbcType="INTEGER"/>
         <result property="selectField" column="select_field" javaType="java.lang.String" jdbcType="VARCHAR"/>
         <result property="conditionField" column="condition_field" javaType="java.lang.String" jdbcType="VARCHAR"/>
         <result property="conditionType" column="condition_type" javaType="java.lang.Integer" jdbcType="INTEGER"/>
         <result property="toDestination" column="to_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
-        <result property="databaseurl" column="databaseUrl" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="databaseUrl" column="database_url" javaType="java.lang.String" jdbcType="VARCHAR"/>
         <result property="createdTime" column="created_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
         <result property="status" column="status" javaType="java.lang.Integer" jdbcType="INTEGER"/>
         <result property="errorDestination" column="error_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
@@ -172,15 +172,15 @@
     </delete>
     <insert id="insert" parameterType="com.webank.weevent.processor.model.CEPRule">
     insert into cep_rule (id, rule_name, from_destination, 
-      broker_url, payloay, payload_type, 
+      broker_url, payload, payload_type,
       select_field, condition_field, condition_type, 
-      to_destination, databaseUrl, created_time, 
+      to_destination, database_url, created_time,
       status, error_destination, error_code, 
       error_message, updated_time)
     values (#{id,jdbcType=VARCHAR}, #{ruleName,jdbcType=VARCHAR}, #{fromDestination,jdbcType=VARCHAR},
-      #{brokerUrl,jdbcType=VARCHAR}, #{payloay,jdbcType=VARCHAR}, #{payloadType,jdbcType=INTEGER},
+      #{brokerUrl,jdbcType=VARCHAR}, #{payload,jdbcType=VARCHAR}, #{payloadType,jdbcType=INTEGER},
       #{selectField,jdbcType=VARCHAR}, #{conditionField,jdbcType=VARCHAR}, #{conditionType,jdbcType=INTEGER}, 
-      #{toDestination,jdbcType=VARCHAR}, #{databaseurl,jdbcType=VARCHAR}, #{createdTime,jdbcType=TIMESTAMP}, 
+      #{toDestination,jdbcType=VARCHAR}, #{databaseUrl,jdbcType=VARCHAR}, #{createdTime,jdbcType=TIMESTAMP},
       #{status,jdbcType=INTEGER}, #{errorDestination,jdbcType=VARCHAR}, #{errorCode,jdbcType=VARCHAR},
       #{errorMessage,jdbcType=VARCHAR}, #{updatedTime,jdbcType=TIMESTAMP})
   </insert>
@@ -200,8 +200,8 @@
             <if test="brokerUrl != null">
                 broker_url,
             </if>
-            <if test="payloay != null">
-                payloay,
+            <if test="payload != null">
+                payload,
             </if>
             <if test="payloadType != null">
                 payload_type,
@@ -218,8 +218,8 @@
             <if test="toDestination != null">
                 to_destination,
             </if>
-            <if test="databaseurl != null">
-                databaseUrl,
+            <if test="databaseUrl != null">
+                database_url,
             </if>
             <if test="createdTime != null">
                 created_time,
@@ -253,8 +253,8 @@
             <if test="brokerUrl != null">
                 #{brokerUrl,jdbcType=VARCHAR},
             </if>
-            <if test="payloay != null">
-                #{payloay,jdbcType=VARCHAR},
+            <if test="payload != null">
+                #{payload,jdbcType=VARCHAR},
             </if>
             <if test="payloadType != null">
                 #{payloadType,jdbcType=INTEGER},
@@ -271,8 +271,8 @@
             <if test="toDestination != null">
                 #{toDestination,jdbcType=VARCHAR},
             </if>
-            <if test="databaseurl != null">
-                #{databaseurl,jdbcType=VARCHAR},
+            <if test="databaseUrl != null">
+                #{databaseUrl,jdbcType=VARCHAR},
             </if>
             <if test="createdTime != null">
                 #{createdTime,jdbcType=TIMESTAMP},
@@ -318,8 +318,8 @@
             <if test="record.brokerUrl != null">
                 broker_url = #{record.brokerUrl,jdbcType=VARCHAR},
             </if>
-            <if test="record.payloay != null">
-                payloay = #{record.payloay,jdbcType=VARCHAR},
+            <if test="record.payload != null">
+                payload = #{record.payload,jdbcType=VARCHAR},
             </if>
             <if test="record.payloadType != null">
                 payload_type = #{record.payloadType,jdbcType=INTEGER},
@@ -336,8 +336,8 @@
             <if test="record.toDestination != null">
                 to_destination = #{record.toDestination,jdbcType=VARCHAR},
             </if>
-            <if test="record.databaseurl != null">
-                databaseUrl = #{record.databaseurl,jdbcType=VARCHAR},
+            <if test="record.databaseUrl != null">
+                database_url = #{record.databaseUrl,jdbcType=VARCHAR},
             </if>
             <if test="record.createdTime != null">
                 created_time = #{record.createdTime,jdbcType=TIMESTAMP},
@@ -369,13 +369,13 @@
         rule_name = #{record.ruleName,jdbcType=VARCHAR},
         from_destination = #{record.fromDestination,jdbcType=VARCHAR},
         broker_url = #{record.brokerUrl,jdbcType=VARCHAR},
-        payloay = #{record.payloay,jdbcType=VARCHAR},
+        payload = #{record.payload,jdbcType=VARCHAR},
         payload_type = #{record.payloadType,jdbcType=INTEGER},
         select_field = #{record.selectField,jdbcType=VARCHAR},
         condition_field = #{record.conditionField,jdbcType=VARCHAR},
         condition_type = #{record.conditionType,jdbcType=INTEGER},
         to_destination = #{record.toDestination,jdbcType=VARCHAR},
-        databaseUrl = #{record.databaseurl,jdbcType=VARCHAR},
+        database_url = #{record.databaseUrl,jdbcType=VARCHAR},
         created_time = #{record.createdTime,jdbcType=TIMESTAMP},
         status = #{record.status,jdbcType=INTEGER},
         error_destination = #{record.errorDestination,jdbcType=VARCHAR},
@@ -398,8 +398,8 @@
             <if test="brokerUrl != null">
                 broker_url = #{brokerUrl,jdbcType=VARCHAR},
             </if>
-            <if test="payloay != null">
-                payloay = #{payloay,jdbcType=VARCHAR},
+            <if test="payload != null">
+                payload = #{payload,jdbcType=VARCHAR},
             </if>
             <if test="payloadType != null">
                 payload_type = #{payloadType,jdbcType=INTEGER},
@@ -416,8 +416,8 @@
             <if test="toDestination != null">
                 to_destination = #{toDestination,jdbcType=VARCHAR},
             </if>
-            <if test="databaseurl != null">
-                databaseUrl = #{databaseurl,jdbcType=VARCHAR},
+            <if test="databaseUrl != null">
+                database_url = #{databaseUrl,jdbcType=VARCHAR},
             </if>
             <if test="createdTime != null">
                 created_time = #{createdTime,jdbcType=TIMESTAMP},
@@ -445,13 +445,13 @@
     set rule_name = #{ruleName,jdbcType=VARCHAR},
       from_destination = #{fromDestination,jdbcType=VARCHAR},
       broker_url = #{brokerUrl,jdbcType=VARCHAR},
-      payloay = #{payloay,jdbcType=VARCHAR},
+      payload = #{payload,jdbcType=VARCHAR},
       payload_type = #{payloadType,jdbcType=INTEGER},
       select_field = #{selectField,jdbcType=VARCHAR},
       condition_field = #{conditionField,jdbcType=VARCHAR},
       condition_type = #{conditionType,jdbcType=INTEGER},
       to_destination = #{toDestination,jdbcType=VARCHAR},
-      databaseUrl = #{databaseurl,jdbcType=VARCHAR},
+      database_url = #{databaseUrl,jdbcType=VARCHAR},
       created_time = #{createdTime,jdbcType=TIMESTAMP},
       status = #{status,jdbcType=INTEGER},
       error_destination = #{errorDestination,jdbcType=VARCHAR},
