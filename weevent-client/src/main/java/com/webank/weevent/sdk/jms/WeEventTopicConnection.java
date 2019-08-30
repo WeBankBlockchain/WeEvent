@@ -77,8 +77,6 @@ public class WeEventTopicConnection implements TopicConnection, CommandDispatche
     }
 
     public void publish(WeEventTopic topic, BytesMessage bytesMessage) throws JMSException {
-        checkConnected();
-
         this.transport.stompSend(topic, bytesMessage);
     }
 
