@@ -15,13 +15,19 @@ import lombok.Data;
  */
 @Data
 public class WeEvent implements Serializable {
+    private static final long serialVersionUID = 2026046567802960173L;
+
+    public static final String DEFAULT_GROUP_ID = "1";
+
     public static final String OFFSET_FIRST = "OFFSET_FIRST";
     public static final String OFFSET_LAST = "OFFSET_LAST";
 
     /**
-     * serialID
+     * custom header is prefixed with "weevent-", and the following key is reserved in WeEvent.
      */
-    private static final long serialVersionUID = 2026046567802960173L;
+    public static final String WeEvent_FORMAT = "weevent-format";
+    public static final String WeEvent_SubscriptionId = "weevent-subscriptionId";
+    public static final String WeEvent_TAG = "weevent-tag";
 
     /**
      * Binding topic, like "com.weevent.test".
@@ -82,6 +88,7 @@ public class WeEvent implements Serializable {
                 "topic='" + topic + '\'' +
                 ", content.length=" + content.length +
                 ", eventID='" + eventId + '\'' +
+                ", extensions=" + extensions +
                 '}';
     }
 }

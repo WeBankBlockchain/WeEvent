@@ -4,8 +4,7 @@ para=""
 conf_path="./conf"
 lib_path="./lib"
 apps_path="./apps"
-installPWD=$(dirname $(dirname `pwd`))
-current_path=`pwd`
+current_path=$(pwd)
 
 while [[ $# -ge 2 ]] ; do
     case "$1" in
@@ -62,20 +61,6 @@ if [[ ${version} = "1.3" ]];then
         echo "ca.crt or client.keystore is not exist."
         exit 1
     fi
-
-    #deploy contract
-    cd ${out_path}
-    ./deploy-topic-control.sh
-    cd ${current_path}
-    contract_address=`cat ${out_path}/address.txt | awk -F '=' '{print $2}'`
-    if [[ -z ${contract_address} ]];then
-        echo "deploy contract error"
-        exit 1
-    else
-        echo "deploy contract success"
-        echo "contract_address:"${contract_address}
-        sed -i "s/^.*topic-controller.address=.*$/topic-controller.address=${contract_address}/g" ${out_path}/conf/fisco.properties
-    fi
 else
     if [[ -f ${block_chain_node_path}/ca.crt ]] && [[ -f ${block_chain_node_path}/node.crt ]] && [[ -f ${block_chain_node_path}/node.key ]]; then
         rm -rf ${out_path}/conf/v2/ca.crt ${out_path}/conf/v2/node.crt ${out_path}/conf/v2/node.key
@@ -84,21 +69,18 @@ else
         echo "ca.crt or node.crt or node.key is not exist."
         exit 1
     fi
-
-    # deploy contract
-    cd ${out_path}
-    ./deploy-topic-control.sh 1
-    cd ${current_path}
-    contract_address=`cat ${out_path}/address.txt | awk -F '=' '{print $2}'`
-    if [[ -z ${contract_address} ]];then
-        echo "deploy contract error"
-        exit 1
-    else
-        echo "deploy contract success"
-        echo "contract_address:"${contract_address}
-        sed -i "s/^.*topic-controller.address=.*$/topic-controller.address=1:${contract_address}/g" ${out_path}/conf/fisco.properties
-    fi
 fi
+
+#deploy contract
+cd ${out_path}
+./deploy-topic-control.sh
+if [[ $? -eq 0 ]];then
+    echo "deploy topic control contract success"
+else
+    echo "deploy topic control contract failed"
+    exit 1
+fi
+cd ${current_path}
 
 if [[ ${listen_port} -gt 0 ]]; then
     sed -i "/server.port=/cserver.port=${listen_port}" ${out_path}/conf/application-prod.properties

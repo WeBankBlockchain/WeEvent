@@ -3,11 +3,8 @@ package com.webank.weevent.protocol.jsonrpc;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.webank.weevent.broker.fisco.constant.WeEventConstants;
-import com.webank.weevent.broker.ha.MasterJob;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.TopicPage;
@@ -33,8 +30,6 @@ import org.springframework.stereotype.Component;
 public class BrokerRpc implements IBrokerRpc {
     private IProducer producer;
 
-    private MasterJob masterJob;
-
     public BrokerRpc() {
     }
 
@@ -43,24 +38,13 @@ public class BrokerRpc implements IBrokerRpc {
         this.producer = producer;
     }
 
-    @Autowired(required = false)
-    public void setMasterJob(MasterJob masterJob) {
-        this.masterJob = masterJob;
-    }
-
-    private void checkSupport() throws BrokerException {
-        if (this.masterJob == null) {
-            log.error("no broker.zookeeper.ip configuration, skip it");
-            throw new BrokerException(ErrorCode.CGI_SUBSCRIPTION_NO_ZOOKEEPER);
-        }
-    }
-
     @Override
     public SendResult publish(@JsonRpcParam(value = "topic") String topic,
                               @JsonRpcParam(value = "groupId") String groupId,
                               @JsonRpcParam(value = "content") byte[] content,
                               @JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException {
-        log.info("jsonrpc protocol publish interface topic:{} groupId:{} contentLength:{} extensions:{}", topic, groupId, content.length, JSON.toJSONString(extensions));
+        log.info("topic:{} groupId:{} content.length:{} extensions:{}", topic, groupId, content.length, JSON.toJSONString(extensions));
+
         return this.producer.publish(new WeEvent(topic, content, extensions), groupId);
     }
 
@@ -68,132 +52,117 @@ public class BrokerRpc implements IBrokerRpc {
     public SendResult publish(@JsonRpcParam(value = "topic") String topic,
                               @JsonRpcParam(value = "content") byte[] content,
                               @JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException {
-        log.info("jsonrpc protocol publish interface topic:{} contentLength:{} extensions:{}", topic, content.length, JSON.toJSONString(extensions));
-        return this.producer.publish(new WeEvent(topic, content, extensions), WeEventConstants.DEFAULT_GROUP_ID);
+        log.info("topic:{} contentLength:{} extensions:{}", topic, content.length, JSON.toJSONString(extensions));
+
+        return this.producer.publish(new WeEvent(topic, content, extensions), WeEvent.DEFAULT_GROUP_ID);
     }
 
     @Override
     public SendResult publish(@JsonRpcParam(value = "topic") String topic,
                               @JsonRpcParam(value = "content") byte[] content) throws BrokerException {
-        log.info("jsonrpc protocol publish interface topic:{} contentLength:{}", topic, content.length);
-        return this.producer.publish(new WeEvent(topic, content, new HashMap<>()), WeEventConstants.DEFAULT_GROUP_ID);
+        log.info("topic:{} content.length:{}", topic, content.length);
+
+        return this.producer.publish(new WeEvent(topic, content, new HashMap<>()), WeEvent.DEFAULT_GROUP_ID);
     }
 
     @Override
     public SendResult publish(@JsonRpcParam(value = "topic") String topic,
                               @JsonRpcParam(value = "groupId") String groupId,
                               @JsonRpcParam(value = "content") byte[] content) throws BrokerException {
-        log.info("jsonrpc protocol publish interface topic:{} groupId:{} contentLength:{}", topic, groupId, content.length);
+        log.info("topic:{} groupId:{} content.length:{}", topic, groupId, content.length);
+
         return this.producer.publish(new WeEvent(topic, content, new HashMap<>()), groupId);
     }
 
     @Override
     public WeEvent getEvent(@JsonRpcParam(value = "eventId") String eventId,
                             @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
-        log.info("jsonrpc protocol getEvent interface eventId:{} groupId:{}", eventId, groupId);
+        log.info("eventId:{} groupId:{}", eventId, groupId);
+
         return this.producer.getEvent(eventId, groupId);
     }
 
     @Override
     public WeEvent getEvent(@JsonRpcParam(value = "eventId") String eventId) throws BrokerException {
-        log.info("jsonrpc protocol getEvent interface eventId:{}", eventId);
-        return this.producer.getEvent(eventId, WeEventConstants.DEFAULT_GROUP_ID);
-    }
+        log.info("eventId:{}", eventId);
 
-    @Override
-    public String subscribe(@JsonRpcParam(value = "topic") String topic,
-                            @JsonRpcParam(value = "groupId") String groupId,
-                            @JsonRpcParam(value = "subscriptionId") String subscriptionId,
-                            @JsonRpcParam(value = "url") String url) throws BrokerException {
-        log.info("jsonrpc protocol subscribe interface topic:{} groupId:{} subscriptionId:{} url:{}", topic, groupId, subscriptionId, url);
-        return this.masterJob.doSubscribe(WeEventConstants.JSONRPCTYPE, topic, groupId, subscriptionId, url, "");
-    }
-
-    @Override
-    public String subscribe(@JsonRpcParam(value = "topic") String topic,
-                            @JsonRpcParam(value = "subscriptionId") String subscriptionId,
-                            @JsonRpcParam(value = "url") String url) throws BrokerException {
-        log.info("jsonrpc protocol subscribe interface topic:{} subscriptionId:{} url:{}", topic, subscriptionId, url);
-        return this.masterJob.doSubscribe(WeEventConstants.JSONRPCTYPE, topic, WeEventConstants.DEFAULT_GROUP_ID, subscriptionId, url, "");
-    }
-
-    @Override
-    public String subscribe(@JsonRpcParam(value = "topic") String topic,
-                            @JsonRpcParam(value = "url") String url) throws BrokerException {
-        log.info("jsonrpc protocol subscribe interface topic:{} url:{}", topic, url);
-        return this.masterJob.doSubscribe(WeEventConstants.JSONRPCTYPE, topic, WeEventConstants.DEFAULT_GROUP_ID, "", url, "");
-    }
-
-    @Override
-    public boolean unSubscribe(@JsonRpcParam(value = "subscriptionId") String subscriptionId) throws BrokerException {
-        log.info("jsonrpc protocol unSubscribe interface subscriptionId:{}", subscriptionId);
-        return this.masterJob.doUnsubscribe(WeEventConstants.JSONRPCTYPE, subscriptionId, "");
+        return this.producer.getEvent(eventId, WeEvent.DEFAULT_GROUP_ID);
     }
 
     @Override
     public boolean open(@JsonRpcParam(value = "topic") String topic,
                         @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
-        log.info("jsonrpc protocol open interface topic:{} groupId:{}", topic, groupId);
+        log.info("topic:{} groupId:{}", topic, groupId);
+
         return this.producer.open(topic, groupId);
     }
 
     @Override
     public boolean open(@JsonRpcParam(value = "topic") String topic) throws BrokerException {
-        log.info("jsonrpc protocol open interface topic:{}", topic);
-        return this.producer.open(topic, WeEventConstants.DEFAULT_GROUP_ID);
+        log.info("topic:{}", topic);
+
+        return this.producer.open(topic, WeEvent.DEFAULT_GROUP_ID);
     }
 
     @Override
     public boolean close(@JsonRpcParam(value = "topic") String topic,
                          @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
-        log.info("jsonrpc protocol close interface topic:{} groupId:{}", topic, groupId);
+        log.info("topic:{} groupId:{}", topic, groupId);
+
         return this.producer.close(topic, groupId);
     }
 
     @Override
     public boolean close(@JsonRpcParam(value = "topic") String topic) throws BrokerException {
-        log.info("jsonrpc protocol close interface topic:{}", topic);
-        return this.producer.close(topic, WeEventConstants.DEFAULT_GROUP_ID);
+        log.info("topic:{}", topic);
+
+        return this.producer.close(topic, WeEvent.DEFAULT_GROUP_ID);
     }
 
     @Override
     public boolean exist(@JsonRpcParam(value = "topic") String topic,
                          @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
-        log.info("jsonrpc protocol exist interface topic:{} groupId:{}", topic, groupId);
+        log.info("topic:{} groupId:{}", topic, groupId);
+
         return this.producer.exist(topic, groupId);
     }
 
     @Override
     public boolean exist(@JsonRpcParam(value = "topic") String topic) throws BrokerException {
-        log.info("jsonrpc protocol exist interface topic:{} groupId", topic);
-        return this.producer.exist(topic, WeEventConstants.DEFAULT_GROUP_ID);
+        log.info("topic:{} groupId", topic);
+
+        return this.producer.exist(topic, WeEvent.DEFAULT_GROUP_ID);
     }
 
     @Override
     public TopicPage list(@JsonRpcParam(value = "pageIndex") Integer pageIndex,
                           @JsonRpcParam(value = "pageSize") Integer pageSize,
                           @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
-        log.info("jsonrpc protocol list interface pageIndex:{} pageSize:{} groupId:{}", pageIndex, pageSize, groupId);
+        log.info("pageIndex:{} pageSize:{} groupId:{}", pageIndex, pageSize, groupId);
+
         return this.producer.list(pageIndex, pageSize, groupId);
     }
 
     @Override
     public TopicPage list(@JsonRpcParam(value = "pageIndex") Integer pageIndex,
                           @JsonRpcParam(value = "pageSize") Integer pageSize) throws BrokerException {
-        log.info("jsonrpc protocol list interface pageIndex:{} pageSize:{}", pageIndex, pageSize);
-        return this.producer.list(pageIndex, pageSize, WeEventConstants.DEFAULT_GROUP_ID);
+        log.info("pageIndex:{} pageSize:{}", pageIndex, pageSize);
+
+        return this.producer.list(pageIndex, pageSize, WeEvent.DEFAULT_GROUP_ID);
     }
 
     @Override
     public TopicInfo state(@JsonRpcParam(value = "topic") String topic,
                            @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
-        log.info("jsonrpc protocol state interface topic:{} groupId:{}", topic, groupId);
+        log.info("topic:{} groupId:{}", topic, groupId);
+
         return this.producer.state(topic, groupId);
     }
 
     @Override
     public TopicInfo state(@JsonRpcParam(value = "topic") String topic) throws BrokerException {
-        log.info("jsonrpc protocol state interface topic:{}", topic);
-        return this.producer.state(topic, WeEventConstants.DEFAULT_GROUP_ID);
+        log.info("topic:{}", topic);
+
+        return this.producer.state(topic, WeEvent.DEFAULT_GROUP_ID);
     }
 }

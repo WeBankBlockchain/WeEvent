@@ -25,10 +25,15 @@ import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.bcos.channel.client.Service;
 import org.bcos.channel.handler.ChannelConnections;
+import org.bcos.contract.source.ContractAbiMgr;
+import org.bcos.contract.source.SystemProxy;
 import org.bcos.web3j.abi.datatypes.Address;
 import org.bcos.web3j.abi.datatypes.DynamicArray;
+import org.bcos.web3j.abi.datatypes.Type;
+import org.bcos.web3j.abi.datatypes.Utf8String;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.bcos.web3j.crypto.Credentials;
@@ -52,6 +57,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 @Slf4j
 public class Web3SDKWrapper {
+    // topic control address in CNS
+    public final static String WeEventTopicControlAddress = "WeEvent_topic_control_address";
+
     /**
      * init web3j handler
      *
@@ -91,10 +99,16 @@ public class Web3SDKWrapper {
             ChannelEthereumService channelEthereumService = new ChannelEthereumService();
             channelEthereumService.setChannelService(service);
             channelEthereumService.setTimeout(web3sdkTimeout);
-            Web3j web3j = Web3j.build(channelEthereumService);
-
-            // check connect with getBlockNumber command
-            web3j.ethBlockNumber().sendAsync().get(WeEventConstants.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+            Web3j web3j = Web3j.build(channelEthereumService);           
+            
+            // check connect with Web3ClientVersion command
+            String nodeVersion = web3j.web3ClientVersion().sendAsync()
+                .get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS).getWeb3ClientVersion();
+            if (StringUtils.isBlank(nodeVersion) 
+                || !nodeVersion.contains(WeEventConstants.FISCO_BCOS_1_X_VERSION_PREFIX)) {
+                log.error("init web3sdk failed, dismatch fisco version in node: {}", nodeVersion);
+                throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
+            } 
 
             log.info("initialize web3sdk success");
             return web3j;
@@ -176,8 +190,8 @@ public class Web3SDKWrapper {
 
         try {
             Future<TopicData> f1 = TopicData.deploy(web3j, credentials, WeEventConstants.GAS_PRICE,
-                    WeEventConstants.GAS_LIMIT, WeEventConstants.INILITIAL_VALUE);
-            TopicData topicData = f1.get(WeEventConstants.DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+                    WeEventConstants.GAS_LIMIT, WeEventConstants.INITIAL_VALUE);
+            TopicData topicData = f1.get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
 
             log.info("topic data contract address: {}", topicData.getContractAddress());
             if (topicData.getContractAddress().equals(WeEventConstants.ADDRESS_EMPTY)) {
@@ -186,8 +200,8 @@ public class Web3SDKWrapper {
             }
 
             Future<TopicController> f2 = TopicController.deploy(web3j, credentials, WeEventConstants.GAS_PRICE,
-                    WeEventConstants.GAS_LIMIT, WeEventConstants.INILITIAL_VALUE, new Address(topicData.getContractAddress()));
-            TopicController topicController = f2.get(WeEventConstants.DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+                    WeEventConstants.GAS_LIMIT, WeEventConstants.INITIAL_VALUE, new Address(topicData.getContractAddress()));
+            TopicController topicController = f2.get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
 
             log.info("topic control contract address: {}", topicController.getContractAddress());
             if (topicController.getContractAddress().equals(WeEventConstants.ADDRESS_EMPTY)) {
@@ -204,13 +218,98 @@ public class Web3SDKWrapper {
     }
 
     /**
+     * get ContractAbiMgr address from system proxy
+     *
+     * @return address
+     */
+    public static String getContractAbiMgr(Web3j web3j, Credentials credentials, String proxyAddress) {
+        try {
+            SystemProxy systemProxy = (SystemProxy) loadContract(proxyAddress, web3j, credentials, SystemProxy.class);
+            if (systemProxy == null) {
+                log.error("load system proxy contract failed, address: {}", proxyAddress);
+                return "";
+            }
+
+            Future<List<Type>> f = systemProxy.getRoute(new Utf8String("ContractAbiMgr"));
+            List<Type> route = f.get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+            return route.get(0).toString();
+        } catch (ExecutionException | TimeoutException | InterruptedException e) {
+            log.error("get ContractAbiMgr address failed", e);
+            return "";
+        }
+    }
+
+    /**
+     * get address from CNS.
+     * https://fisco-bcos-documentation.readthedocs.io/zh_CN/release-1.3/docs/features/CNS/README.html
+     *
+     * @return address
+     */
+    public static String getAddress(Web3j web3j, Credentials credentials, String proxyAddress) {
+        try {
+            String CNSAddress = getContractAbiMgr(web3j, credentials, proxyAddress);
+            log.info("CNS address in system proxy: {}", CNSAddress);
+            if (StringUtils.isBlank(CNSAddress)) {
+                return "";
+            }
+
+            ContractAbiMgr abiMgr = (ContractAbiMgr) loadContract(CNSAddress, web3j, credentials, ContractAbiMgr.class);
+            Future<Address> f = abiMgr.getAddr(new Utf8String(WeEventTopicControlAddress));
+            String address = f.get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS).toString();
+            if (StringUtils.isBlank(address) || WeEventConstants.ADDRESS_EMPTY.equals(address)) {
+                return "";
+            }
+
+            log.info("topic control address in CNS: {}", address);
+            return address;
+        } catch (ExecutionException | TimeoutException | InterruptedException | NullPointerException e) {
+            log.error("load topic control address from CNS failed", e);
+            return "";
+        }
+    }
+
+    /**
+     * add address in CNS, failed if add again
+     *
+     * @param proxyAddress system proxy address
+     * @param address address
+     * @return boolean true if success
+     */
+    public static boolean addAddress(Web3j web3j, Credentials credentials, String proxyAddress, String address) throws BrokerException {
+        String CNSAddress = getContractAbiMgr(web3j, credentials, proxyAddress);
+        log.info("CNS address in system proxy: {}", CNSAddress);
+        if (StringUtils.isBlank(CNSAddress)) {
+            return false;
+        }
+
+        ContractAbiMgr abiMgr = (ContractAbiMgr) loadContract(CNSAddress, web3j, credentials, ContractAbiMgr.class);
+        log.info("add topic control address into CNS: {}", address);
+        try {
+            Future<TransactionReceipt> f = abiMgr.addAbi(
+                    new Utf8String(WeEventTopicControlAddress),
+                    new Utf8String("TopicController"), new Utf8String("1.0"),
+                    new Utf8String(TopicController.ABI), new Address(address));
+            TransactionReceipt transactionReceipt = f.get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+            List<ContractAbiMgr.AddAbiEventResponse> resp = ContractAbiMgr.getAddAbiEvents(transactionReceipt);
+            if (resp.isEmpty()) {
+                log.error("add topic control address into CNS failed");
+                throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+            }
+            return true;
+        } catch (ExecutionException | TimeoutException | InterruptedException | NullPointerException e) {
+            log.error("add topic control address into CNS failed", e);
+            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
+    }
+
+    /**
      * getBlockHeight
      *
      * @return 0L if net error
      */
     public static Long getBlockHeight(Web3j web3j) throws BrokerException {
         try {
-            EthBlockNumber blockNumber = web3j.ethBlockNumber().sendAsync().get(WeEventConstants.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+            EthBlockNumber blockNumber = web3j.ethBlockNumber().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
             // Web3sdk's rpc return null in "get".
             if (blockNumber == null) {
                 return 0L;
@@ -241,7 +340,7 @@ public class Web3SDKWrapper {
 
             // "false" to load only tx hash.
             EthBlock ethBlock = web3j.ethGetBlockByNumber(new DefaultBlockParameterNumber(blockNum), false)
-                    .sendAsync().get(WeEventConstants.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+                    .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
             List<String> transactionHashList = ethBlock.getBlock().getTransactions().stream()
                     .map(transactionResult -> (String) transactionResult.get()).collect(Collectors.toList());
             if (transactionHashList.size() <= 0) {
@@ -251,7 +350,7 @@ public class Web3SDKWrapper {
 
             for (String transactionHash : transactionHashList) {
                 EthGetTransactionReceipt transactionReceipt = web3j.ethGetTransactionReceipt(transactionHash)
-                        .sendAsync().get(WeEventConstants.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+                        .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
                 if (!transactionReceipt.getTransactionReceipt().isPresent()) {
                     log.error(String.format("loop block empty tx receipt, blockNum: %s tx hash: %s", blockNum, transactionHash));
                     return null;

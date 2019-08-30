@@ -40,6 +40,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
 
     @After
     public void after() {
+        Assert.assertTrue(this.iProducer.shutdownProducer());
     }
 
     @Test
@@ -65,7 +66,6 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
         log.info("===================={}", this.testName.getMethodName());
 
         TopicPage topicPage = this.iProducer.list(1, 10, this.groupId);
-        Assert.assertNotNull(topicPage);
         Assert.assertTrue(topicPage.getTotal() > 0);
     }
 
@@ -73,7 +73,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * open topic exist
      */
     @Test
-    public void testOpen_topicExist() throws Exception {
+    public void testOpenTopicExist() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
 
         boolean result = this.iProducer.open(this.topicName, this.groupId);
@@ -84,7 +84,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic not exist
      */
     @Test
-    public void testOpen_topicNotExist() throws Exception {
+    public void testOpenTopicNotExist() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
 
         String topicStr = "testtopic" + System.currentTimeMillis();
@@ -96,7 +96,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic length > 64
      */
     @Test
-    public void testOpen_topicOverMaxLen() {
+    public void testOpenTopicOverMaxLen() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -112,7 +112,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic length = 64
      */
     @Test
-    public void testOpen_topicLenEqual64() throws Exception {
+    public void testOpenTopicLenEqual64() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
 
         String topicStr = "topiclengthequal64zxcvbnmlkjhgfdsaqwertyuioplokiuj-" + System.currentTimeMillis();
@@ -124,7 +124,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic is null
      */
     @Test
-    public void testOpen_topicIsNull() {
+    public void testOpenTopicIsNull() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -139,7 +139,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic is blank " "
      */
     @Test
-    public void testOpen_topicIsBlank() {
+    public void testOpenTopicIsBlank() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -154,7 +154,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic contain special char
      */
     @Test
-    public void testOpen_topicContainSpecialChar() {
+    public void testOpenTopicContainSpecialChar() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -171,7 +171,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic contain Chinese char
      */
     @Test
-    public void testOpen_topicContainChiChar() {
+    public void testOpenTopicContainChiChar() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -186,7 +186,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * groupId is null
      */
     @Test
-    public void testOpen_groupIdIsNull() {
+    public void testOpenGroupIdIsNull() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -201,7 +201,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * groupId is not a number
      */
     @Test
-    public void testOpen_groupIdIsNotNum() {
+    public void testOpenGroupIdIsNotNum() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -216,7 +216,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * groupId is not exist
      */
     @Test
-    public void testOpen_groupIdIsNotExist() {
+    public void testOpenGroupIdIsNotExist() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -231,7 +231,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic exist
      */
     @Test
-    public void testClose_topicExist() throws Exception {
+    public void testCloseTopicExist() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
 
         Assert.assertTrue(this.iProducer.close(this.topicName, this.groupId));
@@ -241,7 +241,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic is null
      */
     @Test
-    public void testClose_topicIsNull() {
+    public void testCloseTopicIsNull() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -256,7 +256,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic is blank " "
      */
     @Test
-    public void testClose_topicIsBlank() {
+    public void testCloseTopicIsBlank() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -271,7 +271,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic length > 64
      */
     @Test
-    public void testClose_topicOverMaxLen() {
+    public void testCloseTopicOverMaxLen() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -287,7 +287,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic contain special char
      */
     @Test
-    public void testClose_topicContainSpecialChar() {
+    public void testCloseTopicContainSpecialChar() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -304,7 +304,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic contain Chinese char
      */
     @Test
-    public void testClose_topicContainChiChar() {
+    public void testCloseTopicContainChiChar() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -319,7 +319,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * groupId is null
      */
     @Test
-    public void testClose_groupIdIsNull() {
+    public void testCloseGroupIdIsNull() {
         try {
             this.iProducer.close(this.topicName, null);
             Assert.fail();
@@ -332,7 +332,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * groupId is not a number
      */
     @Test
-    public void testClose_groupIdIsNotNum() {
+    public void testCloseGroupIdIsNotNum() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -347,7 +347,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * groupId not exist
      */
     @Test
-    public void testClose_groupIdNotExist() {
+    public void testCloseGroupIdNotExist() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -362,7 +362,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic exist
      */
     @Test
-    public void testExist_topicExist() throws Exception {
+    public void testExistTopicExist() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
 
         boolean result = this.iProducer.exist(this.topicName, this.groupId);
@@ -373,7 +373,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic not exist
      */
     @Test
-    public void testExist_topicNotExist() throws Exception {
+    public void testExistTopicNotExist() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
 
         String falseTopic = "sdlkufhdsighfskhdsf";
@@ -384,7 +384,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic is null
      */
     @Test
-    public void testExist_topicIsNull() {
+    public void testExistTopicIsNull() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -399,7 +399,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic length > 64
      */
     @Test
-    public void testExist_topicOverMaxlen() {
+    public void testExistTopicOverMaxlen() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -415,7 +415,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic is blank " "
      */
     @Test
-    public void testExist_topicIsBlank() {
+    public void testExistTopicIsBlank() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -431,7 +431,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic contain Chinese char
      */
     @Test
-    public void testExist_topicContainChiChar() {
+    public void testExistTopicContainChiChar() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -446,7 +446,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * groupId is null
      */
     @Test
-    public void testExist_groupIdIsNull() {
+    public void testExistGroupIdIsNull() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -461,7 +461,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * groupId is not a number
      */
     @Test
-    public void testExist_groupIdIsNotNum() {
+    public void testExistGroupIdIsNotNum() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -476,7 +476,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * groupId not exist
      */
     @Test
-    public void testExist_groupIdNotExist() {
+    public void testExistGroupIdNotExist() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -491,21 +491,21 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic exist
      */
     @Test
-    public void testState_topicExist() throws Exception {
+    public void testStateTopicExist() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
 
         TopicInfo topicInfo = this.iProducer.state(this.topicName, this.groupId);
         Assert.assertNotNull(topicInfo);
         Assert.assertFalse(topicInfo.getTopicAddress().isEmpty());
         Assert.assertFalse(topicInfo.getSenderAddress().isEmpty());
-        Assert.assertTrue(!(topicInfo.getCreatedTimestamp() == 0));
+        Assert.assertTrue(topicInfo.getCreatedTimestamp().intValue() != 0);
     }
 
     /**
      * topic length > 64s
      */
     @Test
-    public void testState_topicOverMaxLen() {
+    public void testStateTopicOverMaxLen() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -520,7 +520,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic not exist
      */
     @Test
-    public void testState_topicNotExist() {
+    public void testStateTopicNotExist() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -536,7 +536,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic is null
      */
     @Test
-    public void testState_topicIsNull() {
+    public void testStateTopicIsNull() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -551,7 +551,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic is blank
      */
     @Test
-    public void testState_topicIsBlank() {
+    public void testStateTopicIsBlank() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -566,7 +566,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic contain special char
      */
     @Test
-    public void testState_topicContainSpecialChar() {
+    public void testStateTopicContainSpecialChar() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -583,7 +583,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * topic contain Chinese character
      */
     @Test
-    public void testState_topicContainChiChar() {
+    public void testStateTopicContainChiChar() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -598,7 +598,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * groupId is null
      */
     @Test
-    public void testState_groupIdIsNull() {
+    public void testStateGroupIdIsNull() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -613,7 +613,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * groupId is not a number
      */
     @Test
-    public void testState_groupIdIsNotNum() {
+    public void testStateGroupIdIsNotNum() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -628,14 +628,14 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * groupId not exist
      */
     @Test
-    public void testState_groupIdNotExist() {
+    public void testStateGroupIdNotExist() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
             this.iProducer.state(this.topicName, "100");
             Assert.fail();
         } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
+            Assert.assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
         }
     }
 
@@ -659,7 +659,6 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
         log.info("===================={}", this.testName.getMethodName());
 
         TopicPage topicPage = this.iProducer.list(1, 10, this.groupId);
-        Assert.assertNotNull(topicPage);
         Assert.assertTrue(topicPage.getTotal() > 0);
     }
 
@@ -716,7 +715,6 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
         log.info("===================={}", this.testName.getMethodName());
 
         TopicPage topicPage = this.iProducer.list(0, 100, this.groupId);
-        Assert.assertNotNull(topicPage);
         Assert.assertTrue(topicPage.getTotal() > 0);
     }
 
@@ -782,7 +780,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * list test ,groupId is null
      */
     @Test
-    public void testList_groupIdIsNull() {
+    public void testListGroupIdIsNull() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -797,7 +795,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * list test ,groupId is not number
      */
     @Test
-    public void testList_groupIdIsNotNum() {
+    public void testListGroupIdIsNotNum() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -812,7 +810,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * groupId not Exist
      */
     @Test
-    public void testList_groupIdNotExist() {
+    public void testListGroupIdNotExist() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -827,7 +825,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * test get Event : eventId is exist
      */
     @Test
-    public void testGetEvent_eventIdExist() throws Exception {
+    public void testGetEventEventIdExist() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
 
         WeEvent weEvent = this.iProducer.getEvent(this.eventId, this.groupId);
@@ -838,7 +836,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * test get Event : eventId is illegal1
      */
     @Test
-    public void testGetEvent_eventIdIsIllegal() {
+    public void testGetEventEventIdIsIllegal() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -853,7 +851,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * test get Event : eventId is legal but not exists & eventId > blockNumber
      */
     @Test
-    public void testGetEvent_eventIdHeightGtBlock() {
+    public void testGetEventEventIdHeightGtBlock() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -868,7 +866,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * test get Event : eventId is legal but not exists
      */
     @Test
-    public void testGetEvent_eventIdLegalNotExist() {
+    public void testGetEventEventIdLegalNotExist() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -883,7 +881,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * test get Event : eventId is null
      */
     @Test
-    public void testGetEvent_eventIdIsNull() {
+    public void testGetEventEventIdIsNull() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -898,7 +896,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * test get Event : eventId is blank
      */
     @Test
-    public void testGetEvent_eventIdIsBlank() {
+    public void testGetEventEventIdIsBlank() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -913,7 +911,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * test get Event : eventId length > 64
      */
     @Test
-    public void testGetEvent_eventIdOverMaxLen() {
+    public void testGetEventEventIdOverMaxLen() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -929,7 +927,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * get event test,groupId is null
      */
     @Test
-    public void testGetEvent_groupIdIsNull() {
+    public void testGetEventGroupIdIsNull() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -944,7 +942,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * get event test ,groupId is not number
      */
     @Test
-    public void testGetEvent_groupIdIsNotNum() {
+    public void testGetEventGroupIdIsNotNum() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -959,7 +957,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * get event test ,groupId is not Exist
      */
     @Test
-    public void testGetEvent_groupIdIsNotExist() {
+    public void testGetEventGroupIdIsNotExist() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {

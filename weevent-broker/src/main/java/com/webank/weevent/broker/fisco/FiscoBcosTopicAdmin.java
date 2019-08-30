@@ -1,5 +1,7 @@
 package com.webank.weevent.broker.fisco;
 
+import java.util.List;
+
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.dto.ListPage;
@@ -48,7 +50,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     @Override
     public boolean open(String topic, String groupId) throws BrokerException {
         ParamCheckUtils.validateTopicName(topic);
-        ParamCheckUtils.validateGroupId(groupId);
+        this.validateGroupId(groupId);
         try {
             boolean result = fiscoBcosDelegate.createTopic(topic, Long.parseLong(groupId));
 
@@ -66,7 +68,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     @Override
     public boolean exist(String topic, String groupId) throws BrokerException {
         ParamCheckUtils.validateTopicName(topic);
-        ParamCheckUtils.validateGroupId(groupId);
+        this.validateGroupId(groupId);
         boolean result = fiscoBcosDelegate.isTopicExist(topic, Long.parseLong(groupId));
 
         log.debug("isTopicExist result: {}", result);
@@ -76,7 +78,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     @Override
     public boolean close(String topic, String groupId) throws BrokerException {
         ParamCheckUtils.validateTopicName(topic);
-        ParamCheckUtils.validateGroupId(groupId);
+        this.validateGroupId(groupId);
         if (exist(topic, groupId)) {
             return true;
         }
@@ -85,7 +87,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     }
 
     /**
-     * Get Blockchain All TopicInfo return 10 date Per page
+     * Get All TopicInfo return 10 date Per page
      *
      * @since 2018/11/05
      */
@@ -99,7 +101,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
         if (pageSize == null || pageSize <= 0 || pageSize > 100) {
             throw new BrokerException(ErrorCode.TOPIC_PAGE_SIZE_INVALID);
         }
-        ParamCheckUtils.validateGroupId(groupId);
+        this.validateGroupId(groupId);
         @SuppressWarnings(value = "unchecked")
         ListPage<String> listPage = fiscoBcosDelegate.listTopicName(pageIndex, pageSize, Long.parseLong(groupId));
 
@@ -119,7 +121,8 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     public TopicInfo state(String topic, String groupId) throws BrokerException {
         // fetch target topic info in block chain
         log.debug("state function input param topic: {}", topic);
-        ParamCheckUtils.validateGroupId(groupId);
+
+        this.validateGroupId(groupId);
         ParamCheckUtils.validateTopicName(topic);
         return fiscoBcosDelegate.getTopicInfo(topic, Long.parseLong(groupId));
     }
@@ -127,7 +130,17 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     @Override
     public WeEvent getEvent(String eventId, String groupId) throws BrokerException {
         log.debug("getEvent function input param eventId: {}", eventId);
-        ParamCheckUtils.validateGroupId(groupId);
+
+        this.validateGroupId(groupId);
         return fiscoBcosDelegate.getEvent(eventId, Long.parseLong(groupId));
+    }
+
+    @Override
+    public List<String> listGroupId() throws BrokerException {
+        return fiscoBcosDelegate.listGroupId();
+    }
+
+    public void validateGroupId(String groupId) throws BrokerException {
+        ParamCheckUtils.validateGroupId(groupId, fiscoBcosDelegate.listGroupId());
     }
 }

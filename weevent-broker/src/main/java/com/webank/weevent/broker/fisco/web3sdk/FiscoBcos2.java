@@ -25,6 +25,7 @@ import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -42,9 +43,6 @@ public class FiscoBcos2 {
     // config
     private FiscoConfig fiscoConfig;
 
-    // binding group id
-    private Long groupId;
-
     // tx account
     private Credentials credentials;
 
@@ -61,13 +59,24 @@ public class FiscoBcos2 {
         this.fiscoConfig = fiscoConfig;
     }
 
-    public void init(Long groupId, String address) throws BrokerException {
+    public void init(Long groupId) throws BrokerException {
         if (this.topicController == null) {
-            this.groupId = groupId;
             this.credentials = Web3SDK2Wrapper.getCredentials(this.fiscoConfig);
             this.web3j = Web3SDK2Wrapper.initWeb3j(groupId, this.fiscoConfig, FiscoBcosDelegate.threadPool);
+
+            String address = Web3SDK2Wrapper.getAddress(this.web3j, this.credentials);
+            if (StringUtils.isBlank(address)) {
+                log.error("no topic control address in CRUD, deploy it first");
+                throw new BrokerException(ErrorCode.TOPIC_CONTROLLER_IS_NULL);
+            }
+
+            log.info("load topic control address from CRUD: {}", address);
             this.topicController = (TopicController) getContractService(address, TopicController.class);
         }
+    }
+
+    public List<String> listGroupId() throws BrokerException {
+        return Web3SDK2Wrapper.listGroupId(this.web3j);
     }
 
     /**
@@ -152,7 +161,7 @@ public class FiscoBcos2 {
 
             TransactionReceipt transactionReceipt = topicController
                     .addTopicInfo(topicName, topic.getContractAddress())
-                    .sendAsync().get(WeEventConstants.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+                    .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
             List<TopicController.LogAddTopicNameAddressEventResponse> event = topicController
                     .getLogAddTopicNameAddressEvents(transactionReceipt);
 
@@ -256,23 +265,27 @@ public class FiscoBcos2 {
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
         }
 
+        SendResult sendResult = new SendResult();
         try {
-            SendResult sendResult = new SendResult(SendResult.SendResultStatus.ERROR);
-
             TransactionReceipt transactionReceipt = topic.publishWeEvent(topicName,
-                    eventContent, extensions).sendAsync().get(WeEventConstants.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+                    eventContent, extensions).sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
             List<Topic.LogWeEventEventResponse> event = Web3SDK2Wrapper.receipt2LogWeEventEventResponse(web3j, credentials, transactionReceipt);
             if (CollectionUtils.isNotEmpty(event)) {
+                sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
                 sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, event.get(0).eventBlockNumer.intValue(), event.get(0).eventSeq.intValue()));
                 sendResult.setTopic(topicName);
-                sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
                 return sendResult;
             } else {
+                sendResult.setStatus(SendResult.SendResultStatus.ERROR);
                 return sendResult;
             }
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        } catch (InterruptedException | ExecutionException e) {
             log.error("publish event failed due to transaction execution error.", e);
             throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (TimeoutException e) {
+            log.error("publish event failed due to transaction execution timeout.", e);
+            sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
+            return sendResult;
         }
     }
 

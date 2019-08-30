@@ -70,7 +70,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      * topic is exist and content is Chinese
      */
     @Test
-    public void testPublish_topicExists() throws Exception {
+    public void testPublishTopicExists() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
 
         SendResult dto = this.iProducer.publish(new WeEvent(this.topicName, "中文消息.".getBytes()), this.groupId);
@@ -81,7 +81,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      * test extensions is null
      */
     @Test
-    public void testPublish_extIsNull() {
+    public void testPublishExtIsNull() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -96,7 +96,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      * extensions contain multiple key,value
      */
     @Test
-    public void testPublish_extContainMulKeyValue() throws Exception {
+    public void testPublishExtContainMulKeyValue() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
 
         Map<String, String> ext = new HashMap<>();
@@ -111,7 +111,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      * extensions contain one key,value
      */
     @Test
-    public void testPublish_extContainOneKeyValue() throws Exception {
+    public void testPublishExtContainOneKeyValue() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
 
         Map<String, String> ext = new HashMap<>();
@@ -124,7 +124,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      * topic is not exists
      */
     @Test
-    public void testPublish_topicNotExist() {
+    public void testPublishTopicNotExist() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -140,7 +140,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      * topic is blank
      */
     @Test
-    public void testPublish_topicIsBlank() {
+    public void testPublishTopicIsBlank() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -155,7 +155,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      * topic is null
      */
     @Test
-    public void testPublish_topicIsNull() {
+    public void testPublishTopicIsNull() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -170,7 +170,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      * topic length > 64
      */
     @Test
-    public void testPublish_topicOverMaxLen() {
+    public void testPublishTopicOverMaxLen() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -186,7 +186,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      * topic is exits and content is null
      */
     @Test
-    public void testPublish_contentIsNull() {
+    public void testPublishContentIsNull() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -201,7 +201,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      * topic is exits and content is blank
      */
     @Test
-    public void testPublish_contentIsBlank() {
+    public void testPublishContentIsBlank() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -217,7 +217,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      * groupId is null
      */
     @Test
-    public void testPublish_groupIdIsNull() {
+    public void testPublishGroupIdIsNull() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -232,7 +232,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      * groupId is not exist
      */
     @Test
-    public void testPublish_groupIdIsNotExist() {
+    public void testPublishGroupIdIsNotExist() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -247,7 +247,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      * groupId is not number
      */
     @Test
-    public void testPublish_groupIdIsNotNum() {
+    public void testPublishGroupIdIsNotNum() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -262,7 +262,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      * topic contain special character without in [32,128]
      */
     @Test
-    public void testPublish_topicContainSpecialChar() {
+    public void testPublishTopicContainSpecialChar() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -280,7 +280,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      * topic is Chinese character
      */
     @Test
-    public void testPublish_topicContainChineseChar() {
+    public void testPublishTopicContainChineseChar() {
         log.info("===================={}", this.testName.getMethodName());
 
         try {
@@ -289,5 +289,18 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
         } catch (BrokerException e) {
             Assert.assertEquals(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode(), e.getCode());
         }
+    }
+
+    /**
+     * publish with custom header
+     */
+    @Test
+    public void testPublishTag() throws Exception {
+        log.info("===================={}", this.testName.getMethodName());
+		
+        Map<String, String> ext = new HashMap<>();
+        ext.put(WeEvent.WeEvent_TAG, "create");
+        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello tag: create".getBytes(), ext), this.groupId);
+        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 }
