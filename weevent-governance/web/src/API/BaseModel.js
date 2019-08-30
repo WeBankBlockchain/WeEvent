@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Message } from 'element-ui'
+import {Message} from 'element-ui'
 import qs from 'qs'
 import store from '../store'
 const con = require('../../config/config.js')
