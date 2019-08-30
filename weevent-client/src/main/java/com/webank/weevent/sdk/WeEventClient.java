@@ -8,6 +8,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -72,26 +73,6 @@ public class WeEventClient implements IWeEventClient {
         buildJms(getStompUrl(brokerUrl), userName, password);
     }
 
-    public SendResult publish(String topic, byte[] content) throws BrokerException {
-        SendResult sendResult = new SendResult();
-        try{
-            TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-            // create topic
-            Topic sessionTopic = session.createTopic(topic);
-            WeEventTopicPublisher publisher = (WeEventTopicPublisher)session.createPublisher(sessionTopic);
-            WeEventBytesMessage bytesMessage = new WeEventBytesMessage();
-            bytesMessage.setByteProperty("weevent-stomp",content[0]);
-            publisher.publish(bytesMessage);
-            sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
-            sendResult.setTopic(topic);
-        }catch (JMSException e){
-           log.error("publish fail,error message: {}",e.getMessage());
-            sendResult.setStatus(SendResult.SendResultStatus.ERROR);
-            sendResult.setTopic(topic);
-        }
-        return  sendResult;
-
-    }
 
     public String subscribe(String topic, String offset, @NonNull EventListener listener) throws BrokerException {
         try {
@@ -182,20 +163,45 @@ public class WeEventClient implements IWeEventClient {
         return this.brokerRpc.getEvent(eventId);
     }
 
-    public SendResult publish(String topic, String groupId, byte[] content, Map<String, String> extensions) throws BrokerException {
-        validateParam(topic);
-        validateParam(groupId);
-        validateArrayParam(content);
-        validateExtensions(extensions);
-        return this.brokerRpc.publish(topic, groupId, content, extensions);
+    public SendResult publish(String topic, byte[] content) throws BrokerException {
+        return this.publish(topic, content, null);
     }
 
     public SendResult publish(String topic, byte[] content, Map<String, String> extensions) throws BrokerException {
-        validateParam(topic);
-        validateArrayParam(content);
-        validateExtensions(extensions);
+        return this.publish(topic, WeEvent.DEFAULT_GROUP_ID, content, extensions);
+    }
 
-        return this.brokerRpc.publish(topic, content, extensions);
+    public SendResult publish(String topic, String groupId, byte[] content, Map<String, String> extensions) throws BrokerException {
+        extensions = new HashMap<>();
+        extensions.put(WeEvent.WeEvent_TAG, "1");
+        validateParam(topic);
+        validateParam(groupId);
+        validateArrayParam(content);
+        SendResult sendResult = new SendResult();
+        try {
+            TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+            // create topic
+            WeEventTopic weEventTopic = (WeEventTopic) session.createTopic(topic);
+            weEventTopic.setGroupId(groupId);
+            //create bytesMessage
+            WeEventBytesMessage bytesMessage = new WeEventBytesMessage();
+            //publish message
+            WeEvent weEvent = new WeEvent();
+            weEvent.setExtensions(extensions);
+            weEvent.setContent(content);
+            bytesMessage.writeObject(weEvent);
+            //create publisher
+            WeEventTopicPublisher publisher = (WeEventTopicPublisher) session.createPublisher(weEventTopic);
+            publisher.publish(bytesMessage);
+
+            sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+            sendResult.setTopic(topic);
+        } catch (JMSException e) {
+            log.error("publish fail,error message: {}", e.getMessage());
+            sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+            sendResult.setTopic(topic);
+        }
+        return sendResult;
     }
 
     public boolean close(String topic, String groupId) throws BrokerException {
@@ -231,6 +237,7 @@ public class WeEventClient implements IWeEventClient {
                             bytesMessage.readBytes(body);
                             WeEvent event = mapper.readValue(body, WeEvent.class);
                             listener.onEvent(event);
+                            log.info("event :{}", event.toString());
                         } catch (IOException | JMSException e) {
                             log.error("onMessage exception", e);
                             listener.onException(e);
