@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.broker.fisco.config.FiscoConfig;
+import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.web3sdk.Web3SDK2Wrapper;
 import com.webank.weevent.broker.fisco.web3sdk.Web3SDKWrapper;
 import com.webank.weevent.sdk.WeEvent;
@@ -47,8 +48,13 @@ public class Web3sdkUtils {
             fiscoConfig.load();
             ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
             taskExecutor.initialize();
+            
+            if (StringUtils.isBlank(fiscoConfig.getVersion())) {
+                log.error("the fisco version in fisco.properties is null");
+                System.exit(1);
+            }
 
-            if (fiscoConfig.getVersion().startsWith("2.")) {    // 2.0x
+            if (fiscoConfig.getVersion().startsWith(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {    // 2.0x
                 org.fisco.bcos.web3j.crypto.Credentials credentials = Web3SDK2Wrapper.getCredentials(fiscoConfig);
 
                 Map<Long, org.fisco.bcos.web3j.protocol.Web3j> groups = new HashMap<>();
@@ -99,7 +105,7 @@ public class Web3sdkUtils {
                         System.out.println(e.getKey() + "\t" + e.getValue().getAddress());
                     }
                 }
-            } else if (fiscoConfig.getVersion().startsWith("1.3")) {    // 1.x
+            } else if (fiscoConfig.getVersion().startsWith(WeEventConstants.FISCO_BCOS_1_X_VERSION_PREFIX)) {    // 1.x
                 org.bcos.web3j.crypto.Credentials credentials = Web3SDKWrapper.getCredentials(fiscoConfig);
                 org.bcos.web3j.protocol.Web3j web3j = Web3SDKWrapper.initWeb3j(fiscoConfig, taskExecutor);
 

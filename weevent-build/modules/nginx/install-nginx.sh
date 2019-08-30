@@ -68,8 +68,8 @@ nginx_port=
 ssl=
 broker_port=
 governance_port=
-current_path=`pwd`
-top_path=$(dirname $(dirname `pwd`))
+current_path=$(pwd)
+top_path=$(dirname $(dirname $(pwd)))
 
 param="";
 while [[ $# -ge 2 ]]; do
