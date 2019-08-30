@@ -2,7 +2,6 @@
   <div class='registered'>
     <div class='registered_part'>
       <img src="../assets/image/login.png" alt="">
-      <p style='margin:5px 0 30px'>区块链应用平台</p>
       <el-form :model="ruleForm2" status-icon :rules="rules2" ref="ruleForm2" class="demo-ruleForm" >
         <el-form-item label="用户名">
           <el-input v-model.trim="ruleForm2.name" disabled></el-input>
