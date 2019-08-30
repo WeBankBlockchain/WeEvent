@@ -8,7 +8,6 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -172,8 +171,6 @@ public class WeEventClient implements IWeEventClient {
     }
 
     public SendResult publish(String topic, String groupId, byte[] content, Map<String, String> extensions) throws BrokerException {
-        extensions = new HashMap<>();
-        extensions.put(WeEvent.WeEvent_TAG, "1");
         validateParam(topic);
         validateParam(groupId);
         validateArrayParam(content);
@@ -237,7 +234,7 @@ public class WeEventClient implements IWeEventClient {
                             bytesMessage.readBytes(body);
                             WeEvent event = mapper.readValue(body, WeEvent.class);
                             listener.onEvent(event);
-                            log.info("event :{}", event.toString());
+                            log.info("event :{}", event);
                         } catch (IOException | JMSException e) {
                             log.error("onMessage exception", e);
                             listener.onException(e);
