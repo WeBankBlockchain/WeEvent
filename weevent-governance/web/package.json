@@ -13,6 +13,7 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "babel-polyfill": "^6.26.0",
     "ecstatic": "^4.1.2",
     "element-ui": "^2.8.2",
     "highcharts": "^7.1.1",
