@@ -115,7 +115,9 @@ public class WeEventStompCommand {
         accessor.setContentType(new MimeType("application", "json", StandardCharsets.UTF_8));
         accessor.setContentLength(payload.length);
         accessor.setNativeHeader("receipt", Long.toString(id));
-
+        if (!StringUtils.isBlank(topic.getGroupId())) {
+            accessor.setNativeHeader("groupId", topic.getGroupId());
+        }
         return encodeRaw(accessor, payload);
     }
 
