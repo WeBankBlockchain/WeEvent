@@ -19,7 +19,7 @@
 <script>
 import headerBar from '../components/headerBar'
 import sideBar from '../components/sideBar'
-export default{
+export default {
   components: {
     headerBar,
     sideBar
