@@ -1,5 +1,4 @@
-package com.webank.weevent.broker.fisco.util;
-
+package com.webank.weevent.broker.task;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,6 +17,17 @@ public abstract class StoppableTask implements Runnable {
 
     public StoppableTask(String name) {
         this.name = name;
+    }
+
+    /**
+     * Idle the caller thread some time
+     */
+    public static void idle(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            log.warn("got InterruptedException in idle");
+        }
     }
 
     public void doExit() {
