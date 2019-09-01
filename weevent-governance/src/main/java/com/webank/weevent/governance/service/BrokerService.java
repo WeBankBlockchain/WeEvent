@@ -27,6 +27,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * BrokerService
@@ -34,6 +35,7 @@ import org.springframework.stereotype.Service;
  * @since 2019/04/28
  */
 @Service
+@Transactional(rollbackFor = Throwable.class)
 @Slf4j
 public class BrokerService {
 
@@ -81,6 +83,7 @@ public class BrokerService {
         if (permissionList.size() > 0) {
             permissionMapper.batchInsert(permissionList);
         }
+
         return GovernanceResult.ok(true);
     }
 
