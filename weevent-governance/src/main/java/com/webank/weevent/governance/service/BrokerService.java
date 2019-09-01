@@ -1,15 +1,20 @@
 package com.webank.weevent.governance.service;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.Broker;
+import com.webank.weevent.governance.entity.Permission;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.BrokerMapper;
+import com.webank.weevent.governance.mapper.PermissionMapper;
 import com.webank.weevent.governance.mapper.TopicInfoMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.result.GovernanceResult;
@@ -24,11 +29,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * 
  * BrokerService
- * 
- * @since 2019/04/28
  *
+ * @since 2019/04/28
  */
 @Service
 @Slf4j
@@ -41,11 +44,17 @@ public class BrokerService {
     private TopicInfoMapper topicInfoMapper;
 
     @Autowired
+    private PermissionMapper permissionMapper;
+
+    private final static String brokerListUrl = "/rest/list?pageIndex=0&pageSize=10";
+
+    private final static String weBaseNodeUrl = "/node/nodeInfo/1";
+
+    @Autowired
     private CookiesTools cookiesTools;
 
     public List<Broker> getBrokers(HttpServletRequest request) {
-        HttpServletRequest req = (HttpServletRequest) request;
-        String accountId = cookiesTools.getCookieValueByName(req, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
+        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
         return brokerMapper.getBrokers(Integer.parseInt(accountId));
     }
 
@@ -55,49 +64,59 @@ public class BrokerService {
 
     public GovernanceResult addBroker(Broker broker, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
-        HttpServletRequest req = (HttpServletRequest) request;
-
-        String accountId = cookiesTools.getCookieValueByName(req, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-        if (!accountId.equals(broker.getUserId().toString())) {
+        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
+        if (accountId == null || !accountId.equals(broker.getUserId().toString())) {
             throw new GovernanceException(ErrorCode.ACCESS_DENIED);
         }
-
-        // get brokerUrl
+        //checkBrokerUrl
         String brokerUrl = broker.getBrokerUrl();
-        // get httpclient
-        CloseableHttpClient client = generateHttpClient(brokerUrl);
-        // get one of broker urls
-        brokerUrl = brokerUrl + "/rest/list?pageIndex=0&pageSize=10";
-        HttpGet get = getMethod(brokerUrl, request);
-        try {
-            client.execute(get);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            throw new GovernanceException(ErrorCode.BROKER_CONNECT_ERROR);
-        }
-
-        // get webaseUrl
+        checkUrl(brokerUrl, brokerListUrl, request);
+        //checkWeBaseUrl
         String webaseUrl = broker.getWebaseUrl();
-        // get restTemplate
-        client = generateHttpClient(webaseUrl);
-        get = getMethod(webaseUrl, request);
+        checkUrl(webaseUrl, weBaseNodeUrl, request);
+        broker.setLastUpdate(new Date());
+        brokerMapper.addBroker(broker);
+        //create permissionList
+        List<Permission> permissionList = createPerMissionList(broker);
+        if (permissionList.size() > 0) {
+            permissionMapper.batchInsert(permissionList);
+        }
+        return GovernanceResult.ok(true);
+    }
+
+    private List<Permission> createPerMissionList(Broker broker) {
+        List<Permission> permissionList = new ArrayList<>();
+        List<Integer> userIdList = broker.getUserIdList();
+        if (!userIdList.isEmpty()) {
+            userIdList.forEach(userId -> {
+                Permission permission = new Permission();
+                permissionList.add(permission);
+                permission.setUserId(userId);
+                permission.setBrokerId(broker.getId());
+            });
+        }
+        return permissionList;
+    }
+
+    private void checkUrl(String url, String afterUrl, HttpServletRequest request) throws GovernanceException {
+        // get httpclient
+        CloseableHttpClient client = generateHttpClient(url);
         // get one of broker urls
-        webaseUrl = webaseUrl + "/node/nodeInfo/1";
+        url = url + afterUrl;
+        HttpGet get = getMethod(url, request);
         try {
             client.execute(get);
         } catch (Exception e) {
-            throw new GovernanceException(ErrorCode.WEBASE_CONNECT_ERROR);
+            log.error("url {}, connect fail,error:{}", url, e.getMessage());
+            throw new GovernanceException("url " + url + " connect fail", e);
         }
-
-        brokerMapper.addBroker(broker);
-
-        return GovernanceResult.ok(true);
     }
 
     public GovernanceResult deleteBroker(Broker broker, HttpServletRequest request) throws GovernanceException {
         authCheck(broker, request);
         topicInfoMapper.deleteTopicInfo(broker.getId());
         brokerMapper.deleteBroker(broker.getId());
+        permissionMapper.deletePermission(broker.getId());
         return GovernanceResult.ok(true);
     }
 
@@ -105,40 +124,25 @@ public class BrokerService {
             throws GovernanceException {
         authCheck(broker, request);
 
-        // get brokerUrl
+        //checkBrokerUrl
         String brokerUrl = broker.getBrokerUrl();
-        // get httpclient
-        CloseableHttpClient client = generateHttpClient(brokerUrl);
-        // get one of broker urls
-        brokerUrl = brokerUrl + "/rest/list?pageIndex=0&pageSize=10";
-        HttpGet get = getMethod(brokerUrl, request);
-        try {
-            client.execute(get);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            throw new GovernanceException(ErrorCode.BROKER_CONNECT_ERROR);
-        }
-
-        // get webaseUrl
+        checkUrl(brokerUrl, brokerListUrl, request);
+        //checkWeBaseUrl
         String webaseUrl = broker.getWebaseUrl();
-        // get restTemplate
-        client = generateHttpClient(webaseUrl);
-        get = getMethod(webaseUrl, request);
-        // get one of broker urls
-        webaseUrl = webaseUrl + "/node/nodeInfo/1";
-        try {
-            client.execute(get);
-        } catch (Exception e) {
-            throw new GovernanceException(ErrorCode.WEBASE_CONNECT_ERROR);
-        }
-
+        checkUrl(webaseUrl, weBaseNodeUrl, request);
         brokerMapper.updateBroker(broker);
+        //delete old permission
+        permissionMapper.deletePermission(broker.getId());
+        //create new permission
+        List<Permission> perMissionList = createPerMissionList(broker);
+        if (perMissionList.size() > 0) {
+            permissionMapper.batchInsert(perMissionList);
+        }
         return GovernanceResult.ok(true);
     }
 
     private void authCheck(Broker broker, HttpServletRequest request) throws GovernanceException {
-        HttpServletRequest req = (HttpServletRequest) request;
-        String accountId = cookiesTools.getCookieValueByName(req, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
+        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
         Broker oldBroker = brokerMapper.getBroker(broker.getId());
         if (!accountId.equals(oldBroker.getUserId().toString())) {
             throw new GovernanceException(ErrorCode.ACCESS_DENIED);

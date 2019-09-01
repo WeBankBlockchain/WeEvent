@@ -1,6 +1,7 @@
 package com.webank.weevent.governance.entity;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.validation.constraints.Min;
 
@@ -33,5 +34,7 @@ public class Broker {
     private Date lastUpdate;
 
     private Integer isDelete;
+
+    private List<Integer> userIdList;
 
 }

@@ -23,22 +23,24 @@
 </select>
 
 	<select id="getBrokers"  resultMap="BaseResultMap">
-        select
+        select distinct
          <include refid="Base_Column_List" />
-        from t_broker where user_id=#{userId} and is_delete=0
+        from t_broker where user_id=#{userId}
+        or id in
+        (select distinct ps.broker_id from t_permission ps where ps.user_id = #{userId})
+        and is_delete=0
     </select>
 
-    <insert id="addBroker" parameterType="com.webank.weevent.governance.entity.Broker">
+    <insert id="addBroker" parameterType="com.webank.weevent.governance.entity.Broker"
+            useGeneratedKeys="true" keyProperty="id">
         insert into
-        t_broker(name,broker_url,webase_url,user_id,last_update)
-        values(#{name},#{brokerUrl},#{webaseUrl},#{userId},#{lastUpdate,
-        jdbcType=TIMESTAMP})
+        t_broker(name,broker_url,webase_url,user_id)
+        values(#{name},#{brokerUrl},#{webaseUrl},#{userId})
     </insert>
 
     <update id="updateBroker" parameterType="com.webank.weevent.governance.entity.Broker">
         update t_broker set
-        name=#{name},broker_url=#{brokerUrl},webase_url=#{webaseUrl},last_update=#{lastUpdate,
-        jdbcType=TIMESTAMP} where id=#{id,jdbcType=INTEGER}
+        name=#{name},broker_url=#{brokerUrl},webase_url=#{webaseUrl} where id=#{id,jdbcType=INTEGER}
     </update>
 
     <delete id="deleteBroker" >

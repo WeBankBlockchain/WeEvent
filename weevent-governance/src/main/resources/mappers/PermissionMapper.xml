@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.webank.weevent.governance.mapper.PermissionMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.webank.weevent.governance.entity.Permission">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="create_date" property="createDate"/>
+        <result column="broker_id" property="brokerId"/>
+        <result column="last_update" property="lastUpdate"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, user_id, create_date,broker_id, last_update
+    </sql>
+    <select id="permissionList" resultMap="BaseResultMap"
+            parameterType="com.webank.weevent.governance.entity.Permission">
+        select
+        <include refid="Base_Column_List"/>
+        from t_permission
+        where 1=1
+        <if test="userId != null">
+            and user_id = #{userId,jdbcType=INTEGER}
+        </if>
+        <if test="createDate != null">
+            and create_date = #{createDate,jdbcType=TIMESTAMP}
+        </if>
+        <if test="lastUpdate != null">
+            and last_update = #{lastUpdate,jdbcType=TIMESTAMP}
+        </if>
+        <if test="brokerId != null">
+            and broker_id = #{brokerId,jdbcType=INTEGER}
+        </if>
+        <if test="userId != null">
+            and user_id = #{userId,jdbcType=INTEGER}
+        </if>
+    </select>
+
+    <delete id="batchDelete" parameterType="com.webank.weevent.governance.entity.Permission">
+        delete from t_permission
+        where id in
+        <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+            id=#{item}
+        </foreach>
+    </delete>
+
+    <delete id="deletePermission" parameterType="java.lang.Integer">
+	   delete from  t_permission
+       where broker_id = #{brokerId}
+	</delete>
+
+    <update id="updatePermission" parameterType="com.webank.weevent.governance.entity.Permission">
+        update t_permission set
+            user_id=#{userId},
+            broker_id=#{brokerId},
+            webase_url=#{webaseUrl},
+            last_update=#{lastUpdate,
+            jdbcType=TIMESTAMP}
+        where id=#{id,jdbcType=INTEGER}
+    </update>
+
+    <update id="batchUpdate" parameterType="com.webank.weevent.governance.entity.Permission">
+        update t_permission set
+                user_id=#{userId},
+                broker_id=#{brokerId},
+                webase_url=#{webaseUrl},
+                last_update=#{lastUpdate,
+                jdbcType=TIMESTAMP}
+        where id=#{id,jdbcType=INTEGER}
+    </update>
+
+    <insert id="batchInsert">
+        INSERT INTO t_permission(`user_id`,`broker_id`)
+        VALUES
+        <foreach collection="permissionList" item="permission" separator=",">
+            (#{permission.userId},#{permission.brokerId})
+        </foreach>
+
+    </insert>
+
+</mapper>
