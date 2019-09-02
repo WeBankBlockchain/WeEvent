@@ -77,8 +77,8 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         ParamCheckUtils.validateOffset(offset);
 
         // topic pattern
-        if (ParamCheckUtils.isTopicPattern(topic)) {
-            ParamCheckUtils.validateTopicPattern(topic);
+        if (Subscription.isTopicPattern(topic)) {
+            Subscription.validateTopicPattern(topic);
             if (isEventId(offset)) {
                 // not a topic name
                 ParamCheckUtils.validateEventId("", offset, fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId)));
@@ -122,8 +122,8 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         }
 
         for (String topic : topics) {
-            if (ParamCheckUtils.isTopicPattern(topic)) {
-                ParamCheckUtils.validateTopicPattern(topic);
+            if (Subscription.isTopicPattern(topic)) {
+                Subscription.validateTopicPattern(topic);
             } else {
                 ParamCheckUtils.validateTopicName(topic);
 
