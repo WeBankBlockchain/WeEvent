@@ -20,7 +20,7 @@
             >
           </el-table-column>
           <el-table-column
-            label="URL地址"
+            label="BrokerURL地址"
             prop='brokerUrl'>
           </el-table-column>
           <el-table-column
@@ -43,10 +43,10 @@
         <el-form-item label="名称:" prop='name'>
           <el-input v-model.trim="form.name" autocomplete="off" placeholder="请输入服务名称(1-20位字母数字下划线)"></el-input>
         </el-form-item>
-        <el-form-item label="Broker服务地址:" prop='brokerUrl'>
+        <el-form-item label="BrokerURL地址:" prop='brokerUrl'>
           <el-input v-model.trim="form.brokerUrl" autocomplete="off"  placeholder="例如: 'http://127.0.0.1:8080/weevent'"></el-input>
         </el-form-item>
-         <el-form-item label="Webase服务地址:" prop='webaseUrl'>
+         <el-form-item label="WebaseURL地址:" prop='webaseUrl'>
           <el-input v-model.trim="form.webaseUrl" autocomplete="off"  placeholder="例如: 'http://127.0.0.1:8080/webase'"></el-input>
         </el-form-item>
       </el-form>
@@ -90,13 +90,13 @@ export default {
       brokerId: '',
       rules: {
         name: [
-          {validator: checkName, trigger: 'blur'}
+          { validator: checkName, trigger: 'blur' }
         ],
         brokerUrl: [
-          {required: true, message: '服务端口不能为空', trigger: 'blur'}
+          { required: true, message: '服务端口不能为空', trigger: 'blur' }
         ],
         webaseUrl: [
-          {required: true, message: '服务端口不能为空', trigger: 'blur'}
+          { required: true, message: '服务端口不能为空', trigger: 'blur' }
         ]
       }
     }

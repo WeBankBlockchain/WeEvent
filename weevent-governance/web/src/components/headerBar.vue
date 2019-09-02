@@ -32,7 +32,7 @@
 </template>
 <script>
 import API from '../API/resource.js'
-export default{
+export default {
   props: {
     noServer: Boolean
   },
@@ -65,7 +65,7 @@ export default{
     selectItem (e) {
       switch (e) {
         case 'setting':
-          this.$router.push({path: './registered', query: { reset: 0 }})
+          this.$router.push({ path: './registered', query: { reset: 0 } })
           break
         case 'loginOut':
           API.loginOut('').then(res => {
