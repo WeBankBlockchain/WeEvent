@@ -23,7 +23,7 @@
   </el-menu>
 </template>
 <script>
-export default{
+export default {
   props: {
     contraction: Boolean
   },
