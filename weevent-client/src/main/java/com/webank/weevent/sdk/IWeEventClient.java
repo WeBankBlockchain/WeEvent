@@ -150,6 +150,16 @@ public interface IWeEventClient {
      */
     SendResult publish(WeEvent weEvent, String groupId) throws BrokerException;
 
+
+    /**
+     * Publish an event to topic.
+     *
+     * @param weEvent WeEvent
+     * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
+     * @throws BrokerException broker exception
+     */
+    SendResult publish(WeEvent weEvent) throws BrokerException;
+
     /**
      * Subscribe events from topic.
      *
