@@ -57,7 +57,11 @@ public class WeEventClientGroupIdTest {
     public void testPublishGroupId() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
         // test groupId
-        SendResult sendResult = this.weEventClient.publish(this.topicName, this.groupId, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
+        WeEvent weEvent = new WeEvent();
+        weEvent.setTopic(this.topicName);
+        weEvent.setContent("hello world".getBytes(StandardCharsets.UTF_8));
+        weEvent.setExtensions(this.extensions);
+        SendResult sendResult = this.weEventClient.publish(weEvent, this.groupId);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 
@@ -68,7 +72,11 @@ public class WeEventClientGroupIdTest {
     @Test
     public void testPublish() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-        SendResult sendResult = this.weEventClient.publish(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
+        WeEvent weEvent = new WeEvent();
+        weEvent.setTopic(this.topicName);
+        weEvent.setContent("hello world".getBytes(StandardCharsets.UTF_8));
+        weEvent.setExtensions(this.extensions);
+        SendResult sendResult = this.weEventClient.publish(weEvent, null);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 
@@ -78,15 +86,18 @@ public class WeEventClientGroupIdTest {
     @Test(expected = BrokerException.class)
     public void testPublish_001() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-
-        this.weEventClient.publish(this.topicName, this.groupId, null, null);
+        WeEvent weEvent = new WeEvent();
+        weEvent.setTopic(this.topicName);
+        this.weEventClient.publish(weEvent, this.groupId);
     }
 
     @Test(expected = BrokerException.class)
     public void testPublish_002() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-
-        this.weEventClient.publish(null, this.groupId, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
+        WeEvent weEvent = new WeEvent();
+        weEvent.setContent("hello world".getBytes(StandardCharsets.UTF_8));
+        weEvent.setExtensions(this.extensions);
+        this.weEventClient.publish(weEvent, this.groupId);
     }
 
 
@@ -94,14 +105,11 @@ public class WeEventClientGroupIdTest {
     public void testPublish_004() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
         // test groupId
-        this.weEventClient.publish(this.topicName, this.groupId, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
-    }
-
-    @Test(expected = BrokerException.class)
-    public void testPublish_005() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-        // test groupId
-        this.weEventClient.publish(this.topicName, this.groupId, "hello world".getBytes(StandardCharsets.UTF_8), null);
+        WeEvent weEvent = new WeEvent();
+        weEvent.setTopic(this.topicName);
+        weEvent.setContent("hello world".getBytes(StandardCharsets.UTF_8));
+        weEvent.setExtensions(this.extensions);
+        this.weEventClient.publish(weEvent, this.groupId);
     }
 
 
@@ -111,8 +119,9 @@ public class WeEventClientGroupIdTest {
     @Test(expected = BrokerException.class)
     public void testPublish_003() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-
-        this.weEventClient.publish("111111111111111111111111111111111111111111111111111111", null, null, this.extensions);
+        WeEvent weEvent = new WeEvent();
+        weEvent.setTopic(this.topicName);
+        this.weEventClient.publish(weEvent,null);
     }
 
 
