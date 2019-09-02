@@ -1,7 +1,5 @@
 package com.webank.weevent.sdk;
 
-import java.util.Map;
-
 import lombok.NonNull;
 
 /**
@@ -44,16 +42,6 @@ public interface IWeEventClient {
     static IWeEventClient build(String brokerUrl, String userName, String password) throws BrokerException {
         return new WeEventClient(brokerUrl, userName, password);
     }
-
-    /**
-     * Publish an event to topic.
-     *
-     * @param topic topic name
-     * @param content topic data
-     * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
-     * @throws BrokerException broker exception
-     */
-    SendResult publish(String topic, byte[] content) throws BrokerException;
 
     /**
      * Interface for notify callback
@@ -155,14 +143,12 @@ public interface IWeEventClient {
     /**
      * Publish an event to topic.
      *
-     * @param topic topic name
+     * @param weEvent WeEvent
      * @param groupId chain groupId
-     * @param content topic data
-     * @param extensions User-defined extensions
      * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
      * @throws BrokerException broker exception
      */
-    SendResult publish(String topic, String groupId, byte[] content, Map<String, String> extensions) throws BrokerException;
+    SendResult publish(WeEvent weEvent, String groupId) throws BrokerException;
 
     /**
      * Subscribe events from topic.
@@ -189,16 +175,6 @@ public interface IWeEventClient {
      */
     String subscribe(String topic, String groupId, String offset, String subscriptionId, @NonNull EventListener listener) throws BrokerException;
 
-    /**
-     * Publish an event to topic.
-     *
-     * @param topic topic name
-     * @param content topic data
-     * @param extensions User-defined extensions
-     * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
-     * @throws BrokerException broker exception
-     */
-    SendResult publish(String topic, byte[] content, Map<String, String> extensions) throws BrokerException;
 
     /**
      * Close a topic.

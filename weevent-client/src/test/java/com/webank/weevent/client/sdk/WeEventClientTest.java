@@ -55,7 +55,10 @@ public class WeEventClientTest {
     @Test
     public void testPublish() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-        SendResult sendResult = this.weEventClient.publish(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8));
+        WeEvent weEvent = new WeEvent();
+        weEvent.setTopic(this.topicName);
+        weEvent.setContent("hello world".getBytes(StandardCharsets.UTF_8));
+        SendResult sendResult = this.weEventClient.publish(weEvent,null);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 
