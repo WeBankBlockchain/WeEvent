@@ -203,14 +203,15 @@ public class BrokerStomp extends TextWebSocketHandler {
 
         try {
             String simpDestination = getSimpDestination(msg);
-            handleSend(msg, simpDestination, extensions, groupId);
+            SendResult sendResult = handleSend(msg, simpDestination, extensions, groupId);
 
             // package the return frame
             StompCommand command = StompCommand.RECEIPT;
             StompHeaderAccessor accessor = StompHeaderAccessor.create(command);
             accessor.setDestination(simpDestination);
             accessor.setReceiptId(headerReceiptIdStr);
-            accessor.setNativeHeader("receipt-id", headerReceiptIdStr);
+           // accessor.setNativeHeader("receipt-id", headerReceiptIdStr);
+            accessor.setNativeHeader(WeEventConstants.EXTENSIONS_EVENT_ID, sendResult.getEventId());
             sendSimpleMessage(session, accessor);
         } catch (BrokerException e) {
             handleErrorMessage(session, e, headerReceiptIdStr);
@@ -425,7 +426,7 @@ public class BrokerStomp extends TextWebSocketHandler {
      * @param msg message
      * @param simpDestination topic name
      */
-    private void handleSend(Message<byte[]> msg,
+    private SendResult handleSend(Message<byte[]> msg,
                             String simpDestination,
                             Map<String, String> extensions,
                             String groupId) throws BrokerException {
@@ -438,6 +439,7 @@ public class BrokerStomp extends TextWebSocketHandler {
         if (sendResult.getStatus() != SendResult.SendResultStatus.SUCCESS) {
             log.error("producer publish failed");
         }
+        return  sendResult;
     }
 
     /**
