@@ -45,9 +45,9 @@ public class SubscriptionInfo {
     private String remoteIp;
 
     /**
-     * subscribe TimeStamp.
+     * subscribe topic TimeStamp.
      */
-    private String subscribeTimeStamp;
+    private String createTimeStamp;
 
     /**
      * binding groupId.

@@ -77,8 +77,8 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         ParamCheckUtils.validateOffset(offset);
 
         // topic pattern
-        if (ParamCheckUtils.isTopicPattern(topic)) {
-            ParamCheckUtils.validateTopicPattern(topic);
+        if (Subscription.isTopicPattern(topic)) {
+            Subscription.validateTopicPattern(topic);
             if (isEventId(offset)) {
                 // not a topic name
                 ParamCheckUtils.validateEventId("", offset, fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId)));
@@ -120,8 +120,8 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         }
 
         for (String topic : topics) {
-            if (ParamCheckUtils.isTopicPattern(topic)) {
-                ParamCheckUtils.validateTopicPattern(topic);
+            if (Subscription.isTopicPattern(topic)) {
+                Subscription.validateTopicPattern(topic);
             } else {
                 ParamCheckUtils.validateTopicName(topic);
 
@@ -263,7 +263,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             subscriptionInfo.setNotifyingEventCount(subscription.getNotifyingEventCount().toString());
             subscriptionInfo.setNotifyTimeStamp(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(subscription.getNotifyTimeStamp()));
             subscriptionInfo.setRemoteIp(subscription.getRemoteIp());
-            subscriptionInfo.setSubscribeTimeStamp(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(subscription.getSubscribeTimeStamp()));
+            subscriptionInfo.setCreateTimeStamp(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(subscription.getCreateTimeStamp()));
             subscriptionInfo.setGroupId(subscription.getGroupId());
 
             // Arrays.toString will append plus "[]"
