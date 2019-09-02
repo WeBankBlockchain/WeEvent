@@ -179,7 +179,6 @@ public class WeEventClient implements IWeEventClient {
     }
 
     public SendResult publish(WeEvent weEvent, String groupId) throws BrokerException {
-        validateObject(weEvent);
         validateParam(weEvent.getTopic());
         validateParam(groupId);
         validateArrayParam(weEvent.getContent());
@@ -200,11 +199,11 @@ public class WeEventClient implements IWeEventClient {
             bytesMessage.readBytes(body);
             ObjectMapper mapper = new ObjectMapper();
             WeEvent event = mapper.readValue(body, WeEvent.class);
-            log.info("topic [{}] publish success. weevent:{}", weEvent.getTopic(), event);
+            log.info("topic [{}] publish success. weevent:{}", weEvent.getTopic(), this.getEvent(event.getEventId(),groupId));
             //return
             sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
             sendResult.setEventId(event.getEventId());
-            sendResult.setTopic(weEvent.getTopic());
+            sendResult.setTopic(event.getTopic());
         } catch (Exception e) {
             log.error("publish fail,error message: {}", e.getMessage());
             sendResult.setStatus(SendResult.SendResultStatus.ERROR);
@@ -439,12 +438,6 @@ public class WeEventClient implements IWeEventClient {
     private static void validateArrayParam(byte[] param) throws BrokerException {
         if (param == null || param.length == 0) {
             throw new BrokerException(ErrorCode.PARAM_ISEMPTY);
-        }
-    }
-
-    private static void validateExtensions(Map<String, String> extensions) throws BrokerException {
-        if (extensions == null) {
-            throw new BrokerException(ErrorCode.PARAM_ISNULL);
         }
     }
 
