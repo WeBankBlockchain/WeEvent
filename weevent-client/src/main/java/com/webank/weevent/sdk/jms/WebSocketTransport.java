@@ -189,12 +189,21 @@ public class WebSocketTransport extends WebSocketClient {
         return !stompCommand.isError(stompResponse);
     }
 
-    // return eventId
+    // return receipt-id
     public String stompSend(WeEventTopic topic, BytesMessage bytesMessage) throws JMSException {
         Long asyncSeq = (this.sequence.incrementAndGet());
         WeEventStompCommand stompCommand = new WeEventStompCommand();
+        //read byte
         byte[] body = new byte[(int) bytesMessage.getBodyLength()];
         bytesMessage.readBytes(body);
+        ObjectMapper mapper = new ObjectMapper();
+        WeEvent weEvent;
+        try {
+            weEvent = mapper.readValue(body, WeEvent.class);
+        } catch (IOException e) {
+            log.error("read byte fail,error:{}", e.getMessage());
+            return "";
+        }
         //header id equal asyncSeq
         String req = stompCommand.encodeSend(topic, body, asyncSeq);
         sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
@@ -203,7 +212,14 @@ public class WebSocketTransport extends WebSocketClient {
             log.info("stomp request is fail");
             return "";
         }
-        return stompCommand.getReceipt(stompResponse);
+        //handler stompResponse
+        LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) stompResponse.getHeaders().get("nativeHeaders"));
+        if (nativeHeaders == null) {
+            return "";
+        }
+        weEvent.setEventId(nativeHeaders.get("eventId") == null ? null : nativeHeaders.get("eventId").get(0).toString());
+        bytesMessage.writeObject(weEvent);
+        return nativeHeaders.get("receipt-id") == null ? null : nativeHeaders.get("receipt-id").get(0).toString();
     }
 
     // return subscriptionId
@@ -441,7 +457,7 @@ public class WebSocketTransport extends WebSocketClient {
         if (idObject != null) {
             return ((List) idObject).get(0).toString();
         }
-		
+
         return null;
     }
 

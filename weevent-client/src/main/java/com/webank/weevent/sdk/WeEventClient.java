@@ -171,32 +171,45 @@ public class WeEventClient implements IWeEventClient {
     }
 
     public SendResult publish(String topic, String groupId, byte[] content, Map<String, String> extensions) throws BrokerException {
-        validateParam(topic);
+        WeEvent weEvent = new WeEvent();
+        weEvent.setTopic(topic);
+        weEvent.setContent(content);
+        weEvent.setExtensions(extensions);
+        return this.publish(weEvent, groupId);
+    }
+
+    public SendResult publish(WeEvent weEvent, String groupId) throws BrokerException {
+        validateObject(weEvent);
+        validateParam(weEvent.getTopic());
         validateParam(groupId);
-        validateArrayParam(content);
+        validateArrayParam(weEvent.getContent());
         SendResult sendResult = new SendResult();
         try {
             TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
             // create topic
-            WeEventTopic weEventTopic = (WeEventTopic) session.createTopic(topic);
+            WeEventTopic weEventTopic = (WeEventTopic) session.createTopic(weEvent.getTopic());
             weEventTopic.setGroupId(groupId);
             //create bytesMessage
             WeEventBytesMessage bytesMessage = new WeEventBytesMessage();
-            //publish message
-            WeEvent weEvent = new WeEvent();
-            weEvent.setExtensions(extensions);
-            weEvent.setContent(content);
             bytesMessage.writeObject(weEvent);
-            //create publisher
+            //publish
             WeEventTopicPublisher publisher = (WeEventTopicPublisher) session.createPublisher(weEventTopic);
             publisher.publish(bytesMessage);
-
+            //get WeEvent
+            byte[] body = new byte[(int) bytesMessage.getBodyLength()];
+            bytesMessage.readBytes(body);
+            ObjectMapper mapper = new ObjectMapper();
+            WeEvent event = mapper.readValue(body, WeEvent.class);
+            log.info("topic [{}] publish success. weevent:{}", weEvent.getTopic(), event);
+            //return
             sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
-            sendResult.setTopic(topic);
-        } catch (JMSException e) {
+            sendResult.setEventId(event.getEventId());
+            sendResult.setTopic(weEvent.getTopic());
+        } catch (Exception e) {
             log.error("publish fail,error message: {}", e.getMessage());
             sendResult.setStatus(SendResult.SendResultStatus.ERROR);
-            sendResult.setTopic(topic);
+            sendResult.setTopic(weEvent.getTopic());
+            throw new BrokerException("publish fail,error message", e);
         }
         return sendResult;
     }
@@ -408,6 +421,12 @@ public class WeEventClient implements IWeEventClient {
         } catch (JMSException e) {
             log.error("init jms connection factory failed", e);
             throw jms2BrokerException(e);
+        }
+    }
+
+    private static void validateObject(Object object) throws BrokerException {
+        if (object == null) {
+            throw new BrokerException(ErrorCode.PARAM_ISEMPTY);
         }
     }
 

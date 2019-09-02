@@ -24,19 +24,18 @@ public class WeEventTopicPublisher implements TopicPublisher {
     }
 
     // TopicPublisher override methods
-
     @Override
     public Topic getTopic() throws JMSException {
         return this.topic;
     }
-    
+
     @Override
     public void publish(Message message) throws JMSException {
         if (message instanceof BytesMessage) {
             this.topicSession.publish(this.topic, (BytesMessage) message);
+        } else {
+            throw new JMSException(WeEventConnectionFactory.NotSupportTips);
         }
-
-        throw new JMSException(WeEventConnectionFactory.NotSupportTips);
     }
 
     @Override
