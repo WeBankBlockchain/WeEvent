@@ -162,12 +162,15 @@ public class WeEventClient implements IWeEventClient {
         return this.brokerRpc.getEvent(eventId);
     }
 
+    @Override
+    public SendResult publish(WeEvent weEvent) throws BrokerException {
+        return this.publish(weEvent,WeEvent.DEFAULT_GROUP_ID);
+    }
 
     public SendResult publish(WeEvent weEvent, String groupId) throws BrokerException {
+        validateObject(weEvent);
         validateParam(weEvent.getTopic());
-        if (groupId == null) {
-            groupId = WeEvent.DEFAULT_GROUP_ID;
-        }
+        validateParam(groupId);
         validateArrayParam(weEvent.getContent());
         SendResult sendResult = new SendResult();
         try {

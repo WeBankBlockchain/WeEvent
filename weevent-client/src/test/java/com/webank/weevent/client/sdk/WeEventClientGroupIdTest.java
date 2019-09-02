@@ -51,7 +51,7 @@ public class WeEventClientGroupIdTest {
     }
 
     /**
-     * Method: publish(String topic, String groupId, byte[] content, Map<String, String> extensions)
+     * Method: publish(WeEvent weEvent, String groupId)
      */
     @Test
     public void testPublishGroupId() throws Exception {
@@ -61,13 +61,19 @@ public class WeEventClientGroupIdTest {
         weEvent.setTopic(this.topicName);
         weEvent.setContent("hello world".getBytes(StandardCharsets.UTF_8));
         weEvent.setExtensions(this.extensions);
+
         SendResult sendResult = this.weEventClient.publish(weEvent, this.groupId);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
+
+        WeEvent event = this.weEventClient.getEvent(sendResult.getEventId());
+        Assert.assertNotNull(event);
+        Assert.assertEquals(this.topicName,event.getTopic());
+
     }
 
 
     /**
-     * Method: publish(String topic, byte[] content, Map<String, String> extensions)
+     * Method: publish(WeEvent weEvent)
      */
     @Test
     public void testPublish() throws Exception {
@@ -76,12 +82,17 @@ public class WeEventClientGroupIdTest {
         weEvent.setTopic(this.topicName);
         weEvent.setContent("hello world".getBytes(StandardCharsets.UTF_8));
         weEvent.setExtensions(this.extensions);
-        SendResult sendResult = this.weEventClient.publish(weEvent, null);
+
+        SendResult sendResult = this.weEventClient.publish(weEvent);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
+
+        WeEvent event = this.weEventClient.getEvent(sendResult.getEventId());
+        Assert.assertNotNull(event);
+        Assert.assertEquals(this.topicName,event.getTopic());
     }
 
     /**
-     * Method: publish(String topic, String groupId, byte[] content, Map<String, String> extensions)
+     * Method: publish(WeEvent weEvent, String groupId)
      */
     @Test(expected = BrokerException.class)
     public void testPublish_001() throws Exception {
@@ -114,14 +125,15 @@ public class WeEventClientGroupIdTest {
 
 
     /**
-     * Method: publish(String topic, byte[] content)
+     * Method: publish(WeEvent weEvent)
      */
     @Test(expected = BrokerException.class)
     public void testPublish_003() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
         WeEvent weEvent = new WeEvent();
-        weEvent.setTopic(this.topicName);
-        this.weEventClient.publish(weEvent,null);
+        weEvent.setTopic("this topic is not exist");
+        weEvent.setExtensions(extensions);
+        this.weEventClient.publish(weEvent);
     }
 
 
