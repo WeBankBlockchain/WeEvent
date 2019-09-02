@@ -162,25 +162,12 @@ public class WeEventClient implements IWeEventClient {
         return this.brokerRpc.getEvent(eventId);
     }
 
-    public SendResult publish(String topic, byte[] content) throws BrokerException {
-        return this.publish(topic, content, null);
-    }
-
-    public SendResult publish(String topic, byte[] content, Map<String, String> extensions) throws BrokerException {
-        return this.publish(topic, WeEvent.DEFAULT_GROUP_ID, content, extensions);
-    }
-
-    public SendResult publish(String topic, String groupId, byte[] content, Map<String, String> extensions) throws BrokerException {
-        WeEvent weEvent = new WeEvent();
-        weEvent.setTopic(topic);
-        weEvent.setContent(content);
-        weEvent.setExtensions(extensions);
-        return this.publish(weEvent, groupId);
-    }
 
     public SendResult publish(WeEvent weEvent, String groupId) throws BrokerException {
         validateParam(weEvent.getTopic());
-        validateParam(groupId);
+        if (groupId == null) {
+            groupId = WeEvent.DEFAULT_GROUP_ID;
+        }
         validateArrayParam(weEvent.getContent());
         SendResult sendResult = new SendResult();
         try {
@@ -199,7 +186,7 @@ public class WeEventClient implements IWeEventClient {
             bytesMessage.readBytes(body);
             ObjectMapper mapper = new ObjectMapper();
             WeEvent event = mapper.readValue(body, WeEvent.class);
-            log.info("topic [{}] publish success. weevent:{}", weEvent.getTopic(), this.getEvent(event.getEventId(),groupId));
+            log.info("topic [{}] publish success. weevent:{}", weEvent.getTopic(), this.getEvent(event.getEventId(), groupId));
             //return
             sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
             sendResult.setEventId(event.getEventId());
