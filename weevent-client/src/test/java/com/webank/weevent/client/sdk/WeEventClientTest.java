@@ -58,8 +58,11 @@ public class WeEventClientTest {
         WeEvent weEvent = new WeEvent();
         weEvent.setTopic(this.topicName);
         weEvent.setContent("hello world".getBytes(StandardCharsets.UTF_8));
-        SendResult sendResult = this.weEventClient.publish(weEvent,null);
+        SendResult sendResult = this.weEventClient.publish(weEvent);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
+        WeEvent event = this.weEventClient.getEvent(sendResult.getEventId());
+        Assert.assertNotNull(event);
+        Assert.assertEquals(this.topicName,event.getTopic());
     }
 
     @Test
