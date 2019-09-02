@@ -40,7 +40,7 @@
 </template>
 <script>
 import API from '../API/resource'
-export default{
+export default {
   data () {
     var checkName = (rule, value, callback) => {
       if (value === '') {
