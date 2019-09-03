@@ -1,6 +1,6 @@
 package com.webank.weevent.governance.entity;
 
-import java.util.Date;
+import com.webank.weevent.governance.entity.base.BaseEntity;
 
 import lombok.Data;
 import lombok.ToString;
@@ -12,19 +12,10 @@ import lombok.ToString;
  */
 @Data
 @ToString
-public class Permission {
-
-    /**
-     * primary key
-     */
-    private Integer id;
+public class PermissionEntity extends BaseEntity {
 
     private Integer userId;
 
-    private Date createDate;
-
     private Integer brokerId;
-
-    private Date lastUpdate;
 
 }

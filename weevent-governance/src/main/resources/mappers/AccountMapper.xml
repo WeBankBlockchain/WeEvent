@@ -2,13 +2,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.webank.weevent.governance.mapper.AccountMapper">
 
-	<resultMap id="BaseResultMap" type="com.webank.weevent.governance.entity.Account">
+	<resultMap id="BaseResultMap" type="com.webank.weevent.governance.entity.AccountEntity">
 		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="create_date" property="createDate" jdbcType="TIMESTAMP"/>
+		<result column="last_update" property="lastUpdate" jdbcType="TIMESTAMP" />
+		<result column="is_delete" property="isDelete"  jdbcType="INTEGER" />
 		<result column="username" property="username" jdbcType="VARCHAR" />
 		<result column="password" property="password" jdbcType="VARCHAR" />
 		<result column="email" property="email" jdbcType="VARCHAR" />
-		<result column="last_update" property="lastUpdate" jdbcType="TIMESTAMP" />
-		<result column="is_delete" property="isDelete"  jdbcType="INTEGER" />
 	</resultMap>
 	<sql id="Example_Where_Clause">
 		<where>
@@ -74,7 +75,7 @@
 		</where>
 	</sql>
 	<sql id="Base_Column_List">
-		id, username, password, email, last_update,is_delete
+		id,create_date, last_update,is_delete, username, password, email
 	</sql>
 	<select id="selectByExample" resultMap="BaseResultMap"
 		parameterType="com.webank.weevent.governance.entity.AccountExample">
@@ -108,14 +109,15 @@
 			<include refid="Example_Where_Clause" />
 		</if>
 	</delete>
-	<insert id="insert" parameterType="com.webank.weevent.governance.entity.Account">
-		insert into t_account (id, username, password,
-		email, last_update)
-		values (#{id,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR},
+	<insert id="insert" parameterType="com.webank.weevent.governance.entity.AccountEntity">
+		insert into
+		t_account (id, username, password,email)
+		values
+		(#{id,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR},
 		#{password,jdbcType=VARCHAR},
-		#{email,jdbcType=VARCHAR},#{lastUpdate,jdbcType=TIMESTAMP})
+		#{email,jdbcType=VARCHAR})
 	</insert>
-	<insert id="insertSelective" parameterType="com.webank.weevent.governance.entity.Account">
+	<insert id="insertSelective" parameterType="com.webank.weevent.governance.entity.AccountEntity">
 		insert into t_account
 		<trim prefix="(" suffix=")" suffixOverrides=",">
 			<if test="id != null">
@@ -133,6 +135,9 @@
 			<if test="lastUpdate != null">
 				last_update,
 			</if>
+			<if test="createDate != null">
+				create_date,
+			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides=",">
 			<if test="id != null">
@@ -149,6 +154,9 @@
 			</if>
 			<if test="lastUpdate != null">
 				#{lastUpdate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="createDate != null">
+				#{createDate,jdbcType=TIMESTAMP},
 			</if>
 		</trim>
 	</insert>
@@ -187,36 +195,32 @@
 		set id = #{record.id,jdbcType=INTEGER},
 		username = #{record.username,jdbcType=VARCHAR},
 		password = #{record.password,jdbcType=VARCHAR},
-		email = #{record.email,jdbcType=VARCHAR},
-		last_update = #{record.lastUpdate,jdbcType=TIMESTAMP}
+		email = #{record.email,jdbcType=VARCHAR}
 		<if test="_parameter != null">
 			<include refid="Update_By_Example_Where_Clause" />
 		</if>
 	</update>
-	<update id="updateByPrimaryKeySelective" parameterType="com.webank.weevent.governance.entity.Account">
+	<update id="updateByPrimaryKeySelective" parameterType="com.webank.weevent.governance.entity.AccountEntity">
 		update t_account
 		<set>
+			last_update = now()
 			<if test="username != null">
-				username = #{username,jdbcType=VARCHAR},
+				,username = #{username,jdbcType=VARCHAR}
 			</if>
 			<if test="password != null">
-				password = #{password,jdbcType=VARCHAR},
+				,password = #{password,jdbcType=VARCHAR},
 			</if>
 			<if test="email != null">
-				email = #{email,jdbcType=VARCHAR},
-			</if>
-			<if test="updated != null">
-				last_update = #{lastUpdate,jdbcType=TIMESTAMP},
+				,email = #{email,jdbcType=VARCHAR}
 			</if>
 		</set>
 		where id = #{id,jdbcType=INTEGER}
 	</update>
-	<update id="updateByPrimaryKey" parameterType="com.webank.weevent.governance.entity.Account">
+	<update id="updateByPrimaryKey" parameterType="com.webank.weevent.governance.entity.AccountEntity">
 		update t_account
 		set username = #{username,jdbcType=VARCHAR},
 		password = #{password,jdbcType=VARCHAR},
-		email = #{email,jdbcType=VARCHAR},
-		last_update = #{lastUpdate,jdbcType=TIMESTAMP}
+		email = #{email,jdbcType=VARCHAR}
 		where id = #{id,jdbcType=INTEGER}
 	</update>
 

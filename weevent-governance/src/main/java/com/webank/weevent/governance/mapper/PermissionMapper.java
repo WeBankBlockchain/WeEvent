@@ -2,7 +2,7 @@ package com.webank.weevent.governance.mapper;
 
 import java.util.List;
 
-import com.webank.weevent.governance.entity.Permission;
+import com.webank.weevent.governance.entity.PermissionEntity;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -15,16 +15,16 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface PermissionMapper{
 
-    List<Permission> permissionList(@Param("permission") Permission permission);
+    List<PermissionEntity> permissionList(@Param("permissionEntity") PermissionEntity permissionEntity);
 
-    void batchDelete(@Param("permission")Permission permission);
+    void batchDelete(@Param("permissionEntity") PermissionEntity permissionEntity);
 
-    void batchInsert(@Param("permissionList")List<Permission> permissionList);
+    void batchInsert(@Param("permissionEntityList")List<PermissionEntity> permissionEntityList);
 
 
     void deletePermission(@Param("brokerId") Integer brokerId);
 
-    void updatePermission(@Param("permission") Permission permission);
+    void updatePermission(@Param("permissionEntity") PermissionEntity permissionEntity);
 
 
 

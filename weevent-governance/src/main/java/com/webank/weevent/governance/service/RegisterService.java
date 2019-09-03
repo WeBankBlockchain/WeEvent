@@ -5,7 +5,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import com.webank.weevent.governance.code.ErrorCode;
-import com.webank.weevent.governance.entity.Account;
+import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.entity.AccountExample;
 import com.webank.weevent.governance.entity.AccountExample.Criteria;
 import com.webank.weevent.governance.exception.GovernanceException;
@@ -49,14 +49,14 @@ public class RegisterService {
     public void init() {
         try {
             // check database contain admin
-            Account account = accountService.queryByUsername("admin");
-            if (account == null) {
-                account = new Account();
-                account.setUsername("admin");
-                account.setPassword(passwordEncoder.encode("123456"));
-                account.setLastUpdate(new Date());
-                account.setEmail("admin@xxx.com");
-                accountMapper.insert(account);
+            AccountEntity accountEntity = accountService.queryByUsername("admin");
+            if (accountEntity == null) {
+                accountEntity = new AccountEntity();
+                accountEntity.setUsername("admin");
+                accountEntity.setPassword(passwordEncoder.encode("123456"));
+                accountEntity.setLastUpdate(new Date());
+                accountEntity.setEmail("admin@xxx.com");
+                accountMapper.insert(accountEntity);
             }
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -75,7 +75,7 @@ public class RegisterService {
             return GovernanceResult.build(400, "data type error");
         }
         // excute select
-        List<Account> list = accountMapper.selectByExample(example);
+        List<AccountEntity> list = accountMapper.selectByExample(example);
         // is list contain data
         if (list != null && list.size() > 0) {
             // if list contain data return false
@@ -85,7 +85,7 @@ public class RegisterService {
         return GovernanceResult.ok(true);
     }
 
-    public GovernanceResult register(Account user) {
+    public GovernanceResult register(AccountEntity user) {
         // data criteral
         if (StringUtils.isBlank(user.getUsername()) || StringUtils.isBlank(user.getPassword())
                 || StringUtils.isBlank(user.getEmail())) {
@@ -111,7 +111,7 @@ public class RegisterService {
         return GovernanceResult.ok();
     }
 
-    public GovernanceResult updatePassword(Account user) {
+    public GovernanceResult updatePassword(AccountEntity user) {
         // data criteral
         if (StringUtils.isBlank(user.getPassword()) || StringUtils.isBlank(user.getOldPassword())) {
             return GovernanceResult.build(400, "password is blank，update fail");
@@ -123,7 +123,7 @@ public class RegisterService {
         // check oldPassword is correct
         String oldPassword = user.getOldPassword();
 
-        Account storeUser = accountService.queryByUsername(user.getUsername());
+        AccountEntity storeUser = accountService.queryByUsername(user.getUsername());
         if (!passwordEncoder.matches(oldPassword, storeUser.getPassword())) {
             return GovernanceResult.build(400, "old password is incorrect");
         }
@@ -143,7 +143,7 @@ public class RegisterService {
             return GovernanceResult.build(400, "username not exists");
         }
         // get user by username
-        Account user = accountService.queryByUsername(username);
+        AccountEntity user = accountService.queryByUsername(username);
 
         String content = "reset url is : " + emailSendUrl;
         try {
@@ -156,17 +156,17 @@ public class RegisterService {
 
     public GovernanceResult getUserId(String username) {
         // get user by username
-        Account user = accountService.queryByUsername(username);
+        AccountEntity user = accountService.queryByUsername(username);
         Integer userId = user.getId();
         return GovernanceResult.ok(userId);
     }
 
-    public GovernanceResult resetPassword(Account user) {
+    public GovernanceResult resetPassword(AccountEntity user) {
         if (user.getPassword().length() < 6) {
             return GovernanceResult.build(400, "password is too short");
         }
 
-        Account storeUser = accountService.queryByUsername(user.getUsername());
+        AccountEntity storeUser = accountService.queryByUsername(user.getUsername());
 
         String password = passwordEncoder.encode(user.getPassword());
         storeUser.setPassword(password);

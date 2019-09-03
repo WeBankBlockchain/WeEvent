@@ -2,15 +2,19 @@ package com.webank.weevent.governance.entity;
 
 import java.util.Date;
 
+import com.webank.weevent.governance.entity.base.BaseEntity;
+
 import lombok.Data;
 
 /**
- * Topic class
+ * TopicEntity class
  *
  * @since 2019/02/11
  */
 @Data
-public class Topic {
+public class TopicEntity extends BaseEntity {
+
+    private Integer isDelete;
 
     private String topicName;
 
@@ -26,6 +30,6 @@ public class Topic {
 
     private Long blockNumber;
 
-    private Integer isDelete;
+    private String description;
 
 }

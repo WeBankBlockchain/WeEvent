@@ -8,8 +8,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.code.ErrorCode;
-import com.webank.weevent.governance.entity.Broker;
-import com.webank.weevent.governance.entity.Topic;
+import com.webank.weevent.governance.entity.BrokerEntity;
+import com.webank.weevent.governance.entity.TopicEntity;
 import com.webank.weevent.governance.entity.TopicPage;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.TopicInfoMapper;
@@ -53,13 +53,13 @@ public class TopicService {
         HttpServletRequest req = (HttpServletRequest) request;
 
         String accountId = cookiesTools.getCookieValueByName(req, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-        Broker broker = brokerService.getBroker(brokerId);
-        if (broker != null) {
-            if (!accountId.equals(broker.getUserId().toString())) {
+        BrokerEntity brokerEntity = brokerService.getBroker(brokerId);
+        if (brokerEntity != null) {
+            if (!accountId.equals(brokerEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
-            CloseableHttpClient client = generateHttpClient(broker.getBrokerUrl());
-            String url = broker.getBrokerUrl() + "/rest/close?topic=" + topic;
+            CloseableHttpClient client = generateHttpClient(brokerEntity.getBrokerUrl());
+            String url = brokerEntity.getBrokerUrl() + "/rest/close?topic=" + topic;
             log.info("url: " + url);
             HttpGet get = getMethod(url, request);
 
@@ -79,16 +79,16 @@ public class TopicService {
         HttpServletRequest req = (HttpServletRequest) request;
 
         String accountId = cookiesTools.getCookieValueByName(req, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-        Broker broker = brokerService.getBroker(brokerId);
-        if (!accountId.equals(broker.getUserId().toString())) {
+        BrokerEntity brokerEntity = brokerService.getBroker(brokerId);
+        if (!accountId.equals(brokerEntity.getUserId().toString())) {
             throw new GovernanceException(ErrorCode.ACCESS_DENIED);
         }
 
-        if (broker != null) {
+        if (brokerEntity != null) {
 
-            CloseableHttpClient client = generateHttpClient(broker.getBrokerUrl());
+            CloseableHttpClient client = generateHttpClient(brokerEntity.getBrokerUrl());
             // get eventbroker url
-            String url = broker.getBrokerUrl() + "/rest/list";
+            String url = brokerEntity.getBrokerUrl() + "/rest/list";
             url = url + "?pageIndex=" + pageIndex + "&pageSize=" + pageSize;
 
             log.info("url: " + url);
@@ -102,19 +102,19 @@ public class TopicService {
                 TopicPage result = JSON.toJavaObject(json, TopicPage.class);
 
                 if (result != null) {
-                    List<Topic> topicList = null;
+                    List<TopicEntity> topicEntityList = null;
 
-                    topicList = result.getTopicInfoList();
+                    topicEntityList = result.getTopicEntityInfoList();
                     // get creater from database
-                    if (topicList.size() > 0) {
-                        for (int i = 0; i < topicList.size(); i++) {
-                            String creater = topicInfoMapper.getCreater(brokerId, topicList.get(i).getTopicName());
+                    if (topicEntityList.size() > 0) {
+                        for (int i = 0; i < topicEntityList.size(); i++) {
+                            String creater = topicInfoMapper.getCreater(brokerId, topicEntityList.get(i).getTopicName());
                             if (!StringUtils.isEmpty(creater)) {
-                                topicList.get(i).setCreater(creater);
+                                topicEntityList.get(i).setCreater(creater);
                             }
                         }
                     }
-                    result.setTopicInfoList(topicList);
+                    result.setTopicEntityInfoList(topicEntityList);
                     return result;
                 }
             } catch (Exception e) {
@@ -130,15 +130,15 @@ public class TopicService {
         HttpServletRequest req = (HttpServletRequest) request;
 
         String accountId = cookiesTools.getCookieValueByName(req, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-        Broker broker = brokerService.getBroker(brokerId);
-        if (broker != null) {
-            if (!accountId.equals(broker.getUserId().toString())) {
+        BrokerEntity brokerEntity = brokerService.getBroker(brokerId);
+        if (brokerEntity != null) {
+            if (!accountId.equals(brokerEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
             topicInfoMapper.openBrokeTopic(brokerId, topic, creater);
 
-            CloseableHttpClient client = generateHttpClient(broker.getBrokerUrl());
-            String url = broker.getBrokerUrl() + "/rest/open?topic=" + topic;
+            CloseableHttpClient client = generateHttpClient(brokerEntity.getBrokerUrl());
+            String url = brokerEntity.getBrokerUrl() + "/rest/open?topic=" + topic;
             log.info("url: " + url);
             HttpGet get = getMethod(url, request);
 

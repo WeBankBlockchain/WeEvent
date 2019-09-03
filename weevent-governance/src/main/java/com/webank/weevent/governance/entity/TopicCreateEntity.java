@@ -3,7 +3,7 @@ package com.webank.weevent.governance.entity;
 import lombok.Data;
 
 @Data
-public class TopicCreaterDto {
+public class TopicCreateEntity {
 
     private Integer brokerId;
 
@@ -12,5 +12,7 @@ public class TopicCreaterDto {
     private String creater;
 
     private Integer isDelete;
+
+    private String description;
 
 }

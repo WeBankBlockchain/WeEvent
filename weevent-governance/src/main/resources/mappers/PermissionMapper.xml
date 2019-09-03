@@ -3,20 +3,20 @@
 <mapper namespace="com.webank.weevent.governance.mapper.PermissionMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.webank.weevent.governance.entity.Permission">
-        <id column="id" property="id"/>
-        <result column="user_id" property="userId"/>
-        <result column="create_date" property="createDate"/>
-        <result column="broker_id" property="brokerId"/>
-        <result column="last_update" property="lastUpdate"/>
+    <resultMap id="BaseResultMap" type="com.webank.weevent.governance.entity.PermissionEntity">
+        <result column="id" property="id" jdbcType="INTEGER" />
+        <result column="create_date" property="createDate" jdbcType="TIMESTAMP"/>
+        <result column="last_update" property="lastUpdate" jdbcType="TIMESTAMP" />
+        <result column="user_id" property="userId" jdbcType="INTEGER"/>
+        <result column="broker_id" property="brokerId" jdbcType="INTEGER"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, user_id, create_date,broker_id, last_update
+        id,create_date,last_update,user_id,broker_id
     </sql>
-    <select id="permissionList" resultMap="BaseResultMap"
-            parameterType="com.webank.weevent.governance.entity.Permission">
+    <select id="permissionEntityList" resultMap="BaseResultMap"
+            parameterType="com.webank.weevent.governance.entity.PermissionEntity">
         select
         <include refid="Base_Column_List"/>
         from t_permission
@@ -38,11 +38,11 @@
         </if>
     </select>
 
-    <delete id="batchDelete" parameterType="com.webank.weevent.governance.entity.Permission">
+    <delete id="batchDelete" parameterType="com.webank.weevent.governance.entity.PermissionEntity">
         delete from t_permission
         where id in
-        <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
-            id=#{item}
+        <foreach collection="permissionEntity.userIdList" item="item" index="index" separator="," open="(" close=")">
+            #{item}
         </foreach>
     </delete>
 
@@ -51,7 +51,7 @@
        where broker_id = #{brokerId}
 	</delete>
 
-    <update id="updatePermission" parameterType="com.webank.weevent.governance.entity.Permission">
+    <update id="updatePermission" parameterType="com.webank.weevent.governance.entity.PermissionEntity">
         update t_permission set
             user_id=#{userId},
             broker_id=#{brokerId},
@@ -61,7 +61,7 @@
         where id=#{id,jdbcType=INTEGER}
     </update>
 
-    <update id="batchUpdate" parameterType="com.webank.weevent.governance.entity.Permission">
+    <update id="batchUpdate" parameterType="com.webank.weevent.governance.entity.PermissionEntity">
         update t_permission set
                 user_id=#{userId},
                 broker_id=#{brokerId},
@@ -74,8 +74,8 @@
     <insert id="batchInsert">
         INSERT INTO t_permission(`user_id`,`broker_id`)
         VALUES
-        <foreach collection="permissionList" item="permission" separator=",">
-            (#{permission.userId},#{permission.brokerId})
+        <foreach collection="permissionEntityList" item="permissionEntity" separator=",">
+            (#{permissionEntity.userId},#{permissionEntity.brokerId})
         </foreach>
 
     </insert>

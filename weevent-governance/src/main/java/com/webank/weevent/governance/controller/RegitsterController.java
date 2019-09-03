@@ -5,7 +5,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.webank.weevent.governance.code.ConstantCode;
-import com.webank.weevent.governance.entity.Account;
+import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.entity.BaseResponse;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.result.GovernanceResult;
@@ -37,19 +37,19 @@ public class RegitsterController {
     }
 
     @PostMapping(value = "/register")
-    public GovernanceResult register(@Valid @RequestBody Account user, BindingResult result) {
+    public GovernanceResult register(@Valid @RequestBody AccountEntity user, BindingResult result) {
         GovernanceResult governanceResult = registerService.register(user);
         return governanceResult;
     }
 
     @PostMapping(value = "/update")
-    public GovernanceResult updatePassword(@RequestBody Account user) {
+    public GovernanceResult updatePassword(@RequestBody AccountEntity user) {
         GovernanceResult governanceResult = registerService.updatePassword(user);
         return governanceResult;
     }
 
     @PostMapping(value = "/reset")
-    public GovernanceResult resetPassword(@RequestBody Account user) {
+    public GovernanceResult resetPassword(@RequestBody AccountEntity user) {
         GovernanceResult governanceResult = registerService.resetPassword(user);
         return governanceResult;
     }

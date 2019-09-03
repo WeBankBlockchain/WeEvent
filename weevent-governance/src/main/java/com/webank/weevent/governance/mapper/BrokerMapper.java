@@ -2,27 +2,27 @@ package com.webank.weevent.governance.mapper;
 
 import java.util.List;
 
-import com.webank.weevent.governance.entity.Broker;
+import com.webank.weevent.governance.entity.BrokerEntity;
 
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface BrokerMapper {
 
-    // get Broker by id
-    Broker getBroker(Integer id);
+    // get BrokerEntity by id
+    BrokerEntity getBroker(Integer id);
 
     // get Brokers
-    List<Broker> getBrokers(Integer userId);
+    List<BrokerEntity> getBrokers(Integer userId);
 
-    // add Broker
-    Boolean addBroker(Broker broker);
+    // add BrokerEntity
+    Boolean addBroker(BrokerEntity brokerEntity);
 
-    // delete Broker
+    // delete BrokerEntity
     Boolean deleteBroker(Integer id);
 
-    // update Broker
-    Boolean updateBroker(Broker broker);
+    // update BrokerEntity
+    Boolean updateBroker(BrokerEntity brokerEntity);
 
     Integer count();
 

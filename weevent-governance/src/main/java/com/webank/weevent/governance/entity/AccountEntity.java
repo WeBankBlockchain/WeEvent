@@ -1,9 +1,9 @@
 package com.webank.weevent.governance.entity;
 
-import java.util.Date;
-
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+
+import com.webank.weevent.governance.entity.base.BaseEntity;
 
 import lombok.Data;
 import lombok.ToString;
@@ -15,9 +15,8 @@ import lombok.ToString;
  */
 @Data
 @ToString
-public class Account {
+public class AccountEntity extends BaseEntity {
 
-    private Integer id;
 
     @NotBlank
     private String username;
@@ -30,7 +29,8 @@ public class Account {
 
     private String oldPassword;
 
-    private Date lastUpdate;
-
     private Integer isDelete;
+
+
+
 }

@@ -2,7 +2,7 @@ package com.webank.weevent.governance.mapper;
 
 import java.util.List;
 
-import com.webank.weevent.governance.entity.Account;
+import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.entity.AccountExample;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -17,19 +17,19 @@ public interface AccountMapper {
 
     int deleteByPrimaryKey(Long id);
 
-    int insert(Account record);
+    int insert(AccountEntity record);
 
-    int insertSelective(Account record);
+    int insertSelective(AccountEntity record);
 
-    List<Account> selectByExample(AccountExample example);
+    List<AccountEntity> selectByExample(AccountExample example);
 
-    Account selectByPrimaryKey(Integer id);
+    AccountEntity selectByPrimaryKey(Integer id);
 
-    int updateByExampleSelective(@Param("record") Account record, @Param("example") AccountExample example);
+    int updateByExampleSelective(@Param("record") AccountEntity record, @Param("example") AccountExample example);
 
-    int updateByExample(@Param("record") Account record, @Param("example") AccountExample example);
+    int updateByExample(@Param("record") AccountEntity record, @Param("example") AccountExample example);
 
-    int updateByPrimaryKeySelective(Account record);
+    int updateByPrimaryKeySelective(AccountEntity record);
 
-    int updateByPrimaryKey(Account record);
+    int updateByPrimaryKey(AccountEntity record);
 }

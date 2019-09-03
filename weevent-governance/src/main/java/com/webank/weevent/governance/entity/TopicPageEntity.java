@@ -3,7 +3,7 @@ package com.webank.weevent.governance.entity;
 import lombok.Data;
 
 @Data
-public class TopicPageDto {
+public class TopicPageEntity {
 
     private Integer brokerId;
 

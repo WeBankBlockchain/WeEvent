@@ -3,9 +3,9 @@ package com.webank.weevent.governance.controller;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.weevent.governance.entity.TopicCreaterDto;
+import com.webank.weevent.governance.entity.TopicCreateEntity;
 import com.webank.weevent.governance.entity.TopicPage;
-import com.webank.weevent.governance.entity.TopicPageDto;
+import com.webank.weevent.governance.entity.TopicPageEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.service.TopicService;
@@ -48,19 +48,19 @@ public class TopicController {
     }
 
     @RequestMapping(value = "/list")
-    public TopicPage getTopics(@RequestBody TopicPageDto topicPageDto, HttpServletRequest request,
-            HttpServletResponse response) throws GovernanceException {
+    public TopicPage getTopics(@RequestBody TopicPageEntity topicPageEntity, HttpServletRequest request,
+                               HttpServletResponse response) throws GovernanceException {
 
-        log.info("pageIndex: " + topicPageDto.getPageIndex() + " pageSize: " + topicPageDto.getPageSize());
-        return topicService.getTopics(topicPageDto.getBrokerId(), topicPageDto.getPageIndex(),
-                topicPageDto.getPageSize(), request, response);
+        log.info("pageIndex: " + topicPageEntity.getPageIndex() + " pageSize: " + topicPageEntity.getPageSize());
+        return topicService.getTopics(topicPageEntity.getBrokerId(), topicPageEntity.getPageIndex(),
+                topicPageEntity.getPageSize(), request, response);
     }
 
     @RequestMapping(value = "/openTopic")
-    public GovernanceResult open(@RequestBody TopicCreaterDto topicCreaterDto, HttpServletRequest request,
-            HttpServletResponse response) throws GovernanceException {
-        log.info("creater: " + topicCreaterDto.getCreater() + " open: " + topicCreaterDto.getTopic());
-        return topicService.open(topicCreaterDto.getBrokerId(), topicCreaterDto.getTopic(),
-                topicCreaterDto.getCreater(), request, response);
+    public GovernanceResult open(@RequestBody TopicCreateEntity topicCreateEntity, HttpServletRequest request,
+                                 HttpServletResponse response) throws GovernanceException {
+        log.info("creater: " + topicCreateEntity.getCreater() + " open: " + topicCreateEntity.getTopic());
+        return topicService.open(topicCreateEntity.getBrokerId(), topicCreateEntity.getTopic(),
+                topicCreateEntity.getCreater(), request, response);
     }
 }

@@ -2,18 +2,19 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.webank.weevent.governance.mapper.BrokerMapper">
 
-	<resultMap id="BaseResultMap" type="com.webank.weevent.governance.entity.Broker">
-		<id column="id" property="id" />
-		<result column="user_id" property="userId" />
-		<result column="name" property="name" />
-		<result column="last_update" property="lastUpdate" />
-		<result column="broker_url" property="brokerUrl" />
-		<result column="webase_url" property="webaseUrl" />
-		<result column="is_delete" property="isDelete" />
+	<resultMap id="BaseResultMap" type="com.webank.weevent.governance.entity.BrokerEntity">
+        <result column="id" property="id" jdbcType="INTEGER" />
+        <result column="create_date" property="createDate" jdbcType="TIMESTAMP"/>
+        <result column="last_update" property="lastUpdate" jdbcType="TIMESTAMP" />
+        <result column="is_delete" property="isDelete"  jdbcType="INTEGER" />
+		<result column="user_id" property="userId" jdbcType="INTEGER"  />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="broker_url" property="brokerUrl" jdbcType="VARCHAR"/>
+		<result column="webase_url" property="webaseUrl" jdbcType="VARCHAR" />
 	</resultMap>
 
 	<sql id="Base_Column_List" >
-        id, user_id, name, last_update, broker_url, webase_url, is_delete
+        id,create_date,last_update,is_delete, user_id, name, broker_url, webase_url
     </sql>
 
 	<select id="getBroker" resultMap="BaseResultMap">
@@ -31,14 +32,14 @@
         and is_delete=0
     </select>
 
-    <insert id="addBroker" parameterType="com.webank.weevent.governance.entity.Broker"
+    <insert id="addBroker" parameterType="com.webank.weevent.governance.entity.BrokerEntity"
             useGeneratedKeys="true" keyProperty="id">
         insert into
         t_broker(name,broker_url,webase_url,user_id)
         values(#{name},#{brokerUrl},#{webaseUrl},#{userId})
     </insert>
 
-    <update id="updateBroker" parameterType="com.webank.weevent.governance.entity.Broker">
+    <update id="updateBroker" parameterType="com.webank.weevent.governance.entity.BrokerEntity">
         update t_broker set
         name=#{name},broker_url=#{brokerUrl},webase_url=#{webaseUrl} where id=#{id,jdbcType=INTEGER}
     </update>
