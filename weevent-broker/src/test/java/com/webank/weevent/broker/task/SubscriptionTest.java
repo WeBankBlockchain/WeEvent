@@ -12,9 +12,7 @@ import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -29,14 +27,6 @@ public class SubscriptionTest extends JUnitTestBase {
     private final static String patternTopic = "com/weevent/test";
     private final static String tag = "tag_name";
     private final static byte[] content = "hello world".getBytes(StandardCharsets.UTF_8);
-
-    @Before
-    public void before() {
-    }
-
-    @After
-    public void after() {
-    }
 
     /**
      * test isTopicPattern

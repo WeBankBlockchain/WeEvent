@@ -107,6 +107,11 @@ public class Subscription {
      */
     private Long historyBlock = 0L;
 
+    /**
+     * subscribe topic TimeStamp.
+     */
+    private Date createTimeStamp = new Date();
+
     @Override
     public String toString() {
         return "Subscription{" +
