@@ -13,6 +13,7 @@ import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -29,10 +30,10 @@ public class NotifyTask extends StoppableTask {
 
     private int idleTime;
     private BlockingDeque<WeEvent> eventQueue;
-    private Long notifiedCount = 0L;
+    private long notifiedCount = 0;
     private Date lastTimeStamp;
 
-    public NotifyTask(String subscriptionId, int idleTime, IConsumer.ConsumerListener consumerListener) {
+    public NotifyTask(String subscriptionId, int idleTime, @NonNull IConsumer.ConsumerListener consumerListener) {
         super("event-notify@" + subscriptionId);
 
         this.subscriptionId = subscriptionId;
