@@ -27,13 +27,13 @@ public class ParamCheckUtils {
         if (topic.length() > WeEventConstants.TOPIC_NAME_MAX_LENGTH) {
             throw new BrokerException(ErrorCode.TOPIC_EXCEED_MAX_LENGTH);
         }
-        if (topic.endsWith(WeEventConstants.LAYER_SEPARATE)) {
+        if (topic.endsWith(WeEvent.LAYER_SEPARATE)) {
             throw new BrokerException(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR);
         }
         for (char x : topic.toCharArray()) {
             if (x < 32 || x > 128
-                    || x == WeEventConstants.WILD_CARD_ONE_LAYER.charAt(0)
-                    || x == WeEventConstants.WILD_CARD_ALL_LAYER.charAt(0)) {
+                    || x == WeEvent.WILD_CARD_ONE_LAYER.charAt(0)
+                    || x == WeEvent.WILD_CARD_ALL_LAYER.charAt(0)) {
                 throw new BrokerException(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR);
             }
         }
@@ -134,61 +134,6 @@ public class ParamCheckUtils {
             throw new BrokerException(ErrorCode.URL_INVALID_FORMAT);
         } catch (IOException e) {
             throw new BrokerException(ErrorCode.URL_CONNECT_FAILED);
-        }
-    }
-
-    /**
-     * see WeEventUtils.match
-     *
-     * @param pattern topic pattern
-     * @return true if yes
-     */
-    public static boolean isTopicPattern(String pattern) {
-        if (StringUtils.isBlank(pattern)) {
-            return false;
-        }
-        return pattern.contains("" + WeEventConstants.WILD_CARD_ALL_LAYER) || pattern.contains("" + WeEventConstants.WILD_CARD_ONE_LAYER);
-    }
-
-    /**
-     * see WeEventUtils.match
-     *
-     * @param pattern topic pattern
-     */
-    public static void validateTopicPattern(String pattern) throws BrokerException {
-        if (StringUtils.isBlank(pattern)) {
-            throw new BrokerException(ErrorCode.PATTERN_INVALID);
-        }
-
-        if (pattern.length() > WeEventConstants.TOPIC_NAME_MAX_LENGTH) {
-            throw new BrokerException(ErrorCode.TOPIC_EXCEED_MAX_LENGTH);
-        }
-
-        for (char x : pattern.toCharArray()) {
-            if (x < 32 || x > 128) {
-                throw new BrokerException(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR);
-            }
-        }
-
-        String layer[] = pattern.split(WeEventConstants.LAYER_SEPARATE);
-        if (pattern.contains(WeEventConstants.WILD_CARD_ONE_LAYER)) {
-            for (String x : layer) {
-                if (x.contains(WeEventConstants.WILD_CARD_ONE_LAYER) && !x.equals(WeEventConstants.WILD_CARD_ONE_LAYER)) {
-                    throw new BrokerException(ErrorCode.PATTERN_INVALID);
-                }
-            }
-        } else if (pattern.contains(WeEventConstants.WILD_CARD_ALL_LAYER)) {
-            // only one '#'
-            if (StringUtils.countMatches(pattern, WeEventConstants.WILD_CARD_ALL_LAYER) != 1) {
-                throw new BrokerException(ErrorCode.PATTERN_INVALID);
-            }
-
-            // '#' must be at last position
-            if (!layer[layer.length - 1].equals(WeEventConstants.WILD_CARD_ALL_LAYER)) {
-                throw new BrokerException(ErrorCode.PATTERN_INVALID);
-            }
-        } else {
-            throw new BrokerException(ErrorCode.PATTERN_INVALID);
         }
     }
 }

@@ -26,6 +26,17 @@ public class WeEvent implements Serializable {
     public static final String OFFSET_LAST = "OFFSET_LAST";
 
     /**
+     * wildcard pattern support, see MQTT specification.
+     * http://public.dhe.ibm.com/software/dw/webservices/ws-mqtt/mqtt-v3r1.html
+     */
+    // character to split layer.
+    public static final String LAYER_SEPARATE = "/";
+    // wildcard character for one layer.
+    public static final String WILD_CARD_ONE_LAYER = "+";
+    // wildcard for one layer.
+    public static final String WILD_CARD_ALL_LAYER = "#";
+
+    /**
      * custom header is prefixed with "weevent-", and the following key is reserved in WeEvent.
      */
     public static final String WeEvent_FORMAT = "weevent-format";
