@@ -96,7 +96,6 @@ public class WeEventClient implements IWeEventClient {
                             bytesMessage.readBytes(body);
                             WeEvent event = mapper.readValue(body, WeEvent.class);
                             listener.onEvent(event);
-                            log.info("event :{}", event);
                         } catch (IOException | JMSException e) {
                             log.error("onMessage exception", e);
                             listener.onException(e);
@@ -165,14 +164,13 @@ public class WeEventClient implements IWeEventClient {
 
     @Override
     public SendResult publish(WeEvent weEvent) throws BrokerException {
-        return this.publish(weEvent,WeEvent.DEFAULT_GROUP_ID);
+        validateWeEvent(weEvent);
+        return this.publish(weEvent, WeEvent.DEFAULT_GROUP_ID);
     }
 
     public SendResult publish(WeEvent weEvent, String groupId) throws BrokerException {
-        validateObject(weEvent);
-        validateParam(weEvent.getTopic());
+        validateWeEvent(weEvent);
         validateParam(groupId);
-        validateArrayParam(weEvent.getContent());
         SendResult sendResult = new SendResult();
         try {
             TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -190,7 +188,6 @@ public class WeEventClient implements IWeEventClient {
             bytesMessage.readBytes(body);
             ObjectMapper mapper = new ObjectMapper();
             WeEvent event = mapper.readValue(body, WeEvent.class);
-            log.info("topic [{}] publish success. weevent:{}", weEvent.getTopic(), this.getEvent(event.getEventId(), groupId));
             //return
             sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
             sendResult.setEventId(event.getEventId());
@@ -203,6 +200,7 @@ public class WeEventClient implements IWeEventClient {
         }
         return sendResult;
     }
+
 
     public boolean close(String topic, String groupId) throws BrokerException {
         validateParam(topic);
@@ -237,7 +235,6 @@ public class WeEventClient implements IWeEventClient {
                             bytesMessage.readBytes(body);
                             WeEvent event = mapper.readValue(body, WeEvent.class);
                             listener.onEvent(event);
-                            log.info("event :{}", event);
                         } catch (IOException | JMSException e) {
                             log.error("onMessage exception", e);
                             listener.onException(e);
@@ -281,7 +278,6 @@ public class WeEventClient implements IWeEventClient {
                             bytesMessage.readBytes(body);
                             WeEvent event = mapper.readValue(body, WeEvent.class);
                             listener.onEvent(event);
-                            log.info("event :{}", event);
                         } catch (IOException | JMSException e) {
                             log.error("onMessage exception", e);
                             listener.onException(e);
@@ -415,9 +411,18 @@ public class WeEventClient implements IWeEventClient {
         }
     }
 
-    private static void validateObject(Object object) throws BrokerException {
-        if (object == null) {
+    private static void validateWeEvent(WeEvent weEvent) throws BrokerException {
+        if (weEvent == null) {
             throw new BrokerException(ErrorCode.PARAM_ISEMPTY);
+        }
+        validateParam(weEvent.getTopic());
+        validateArrayParam(weEvent.getContent());
+        validateExtensions(weEvent.getExtensions());
+    }
+
+    private static void validateExtensions(Map<String, String> extensions) throws BrokerException {
+        if (extensions == null) {
+            throw new BrokerException(ErrorCode.PARAM_ISNULL);
         }
     }
 

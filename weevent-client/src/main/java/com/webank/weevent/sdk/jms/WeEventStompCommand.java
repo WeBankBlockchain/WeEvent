@@ -109,7 +109,7 @@ public class WeEventStompCommand {
     }
 
     // payload is WeEvent
-    public String encodeSend(WeEventTopic topic, byte[] payload, Long id) throws JMSException {
+    public String encodeSend(WeEventTopic topic, byte[] payload, Long id, WeEvent weEvent) throws JMSException {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SEND);
         accessor.setDestination(topic.getTopicName());
         accessor.setContentType(new MimeType("application", "json", StandardCharsets.UTF_8));
@@ -117,6 +117,11 @@ public class WeEventStompCommand {
         accessor.setNativeHeader("receipt", Long.toString(id));
         if (!StringUtils.isBlank(topic.getGroupId())) {
             accessor.setNativeHeader("groupId", topic.getGroupId());
+        }
+        if (weEvent.getExtensions() != null && weEvent.getExtensions().size() > 0) {
+            weEvent.getExtensions().forEach((k, v) -> {
+                    accessor.setNativeHeader(k, v);
+            });
         }
         return encodeRaw(accessor, payload);
     }
