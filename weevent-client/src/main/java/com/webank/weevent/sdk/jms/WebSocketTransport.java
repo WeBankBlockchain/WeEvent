@@ -205,7 +205,7 @@ public class WebSocketTransport extends WebSocketClient {
             return "";
         }
         //header id equal asyncSeq
-        String req = stompCommand.encodeSend(topic, body, asyncSeq);
+        String req = stompCommand.encodeSend(topic, body, asyncSeq,weEvent);
         sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
         Message stompResponse = this.stompRequest(req, asyncSeq);
         if (stompCommand.isError(stompResponse)) {
@@ -276,7 +276,7 @@ public class WebSocketTransport extends WebSocketClient {
     public WebSocketTransport(URI server) {
         super(server, new Draft_6455());
 
-        this.connected = false;
+        this.connected = true;
         this.sequence = new AtomicLong(0);
         this.futures = new ConcurrentHashMap<>();
         this.receiptId2SubscriptionId = new ConcurrentHashMap<>();
