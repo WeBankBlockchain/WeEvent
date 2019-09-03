@@ -28,10 +28,7 @@ public class JavaSDK {
             client.open(topicName, groupId);
             Map<String, String> extensions = new HashMap<>();
             extensions.put(WeEvent.WeEvent_FORMAT, "json");
-            WeEvent weEvent = new WeEvent();
-            weEvent.setTopic(topicName);
-            weEvent.setContent("{\"hello\":\" wolrd\"}".getBytes());
-            weEvent.setExtensions(extensions);
+            WeEvent weEvent = new WeEvent(topicName,"{\"hello\":\" wolrd\"}".getBytes(),extensions);
             SendResult sendResult = client.publish(weEvent, groupId);
             System.out.println(sendResult.toString());
             // subscribe topic with groupId
