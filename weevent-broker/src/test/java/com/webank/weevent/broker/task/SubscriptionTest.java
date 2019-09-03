@@ -30,14 +30,6 @@ public class SubscriptionTest extends JUnitTestBase {
     private final static String tag = "tag_name";
     private final static byte[] content = "hello world".getBytes(StandardCharsets.UTF_8);
 
-    @Before
-    public void before() {
-    }
-
-    @After
-    public void after() {
-    }
-
     /**
      * test isTopicPattern
      */
