@@ -96,6 +96,7 @@ public class WeEventClient implements IWeEventClient {
                             bytesMessage.readBytes(body);
                             WeEvent event = mapper.readValue(body, WeEvent.class);
                             listener.onEvent(event);
+                            log.info("event :{}", event);
                         } catch (IOException | JMSException e) {
                             log.error("onMessage exception", e);
                             listener.onException(e);
@@ -280,6 +281,7 @@ public class WeEventClient implements IWeEventClient {
                             bytesMessage.readBytes(body);
                             WeEvent event = mapper.readValue(body, WeEvent.class);
                             listener.onEvent(event);
+                            log.info("event :{}", event);
                         } catch (IOException | JMSException e) {
                             log.error("onMessage exception", e);
                             listener.onException(e);
