@@ -5,7 +5,7 @@ import java.util.List;
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.dto.ListPage;
-import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
+import com.webank.weevent.broker.util.ParamCheckUtils;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.plugin.IEventTopic;
 import com.webank.weevent.sdk.BrokerException;

@@ -1,13 +1,20 @@
 package com.webank.weevent.broker.fabric;
 
-import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
+import java.nio.charset.StandardCharsets;
+
+import com.webank.weevent.broker.util.ParamCheckUtils;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
 
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
-
+/**
+ * @author websterchen
+ * @version v1.1
+ * @since 2019/8/10
+ */
 @Slf4j
 public class FabricBroker4Producer extends FabricTopicAdmin implements IProducer {
     @Override
@@ -24,7 +31,10 @@ public class FabricBroker4Producer extends FabricTopicAdmin implements IProducer
     public SendResult publish(WeEvent event, String groupId) throws BrokerException {
         log.debug("publish input param WeEvent: {}", event);
         ParamCheckUtils.validateEvent(event);
-
-        return null;
+        SendResult sendResult = fabricDelegate.publishEvent(event.getTopic(),
+                groupId,
+                new String(event.getContent(), StandardCharsets.UTF_8),
+                JSON.toJSONString(event.getExtensions()));
+        return sendResult;
     }
 }

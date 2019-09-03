@@ -1,4 +1,4 @@
-package com.webank.weevent.broker.fisco.util;
+package com.webank.weevent.broker.util;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -7,7 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
-import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;

@@ -1,10 +1,9 @@
 package com.webank.weevent.broker.plugin;
 
-
 import java.util.Map;
 
 import com.webank.weevent.BrokerApplication;
-import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.util.WeEventConstants;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.WeEvent;
 
@@ -48,30 +47,24 @@ import lombok.NonNull;
  * @since 2018/11/02
  */
 public interface IConsumer extends IEventTopic {
-    static IConsumer build() {
-        if (WeEventConstants.FABRIC.equals(BrokerApplication.weEventConfig.getBlockChainType())){
-            return build(WeEventConstants.FABRIC);
-        }
-        return build(WeEventConstants.FISCO);
-    }
-
     /**
      * Factory method, build a IConsumer run in agent model.
      * <p>
      * Please setup a event agent first with tools @see.
      *
-     * @param blockChain "fisco" or "fabric"
      * @return IConsumer handler
      */
-    static IConsumer build(String blockChain) {
+    static IConsumer build() {
+        String blockChain = BrokerApplication.weEventConfig.getBlockChainType();
         // Use reflect to decouple block chain implement.
         try {
             switch (blockChain) {
                 case "fisco":
                     Class<?> fisco = Class.forName("com.webank.weevent.broker.fisco.FiscoBcosBroker4Consumer");
                     return (IConsumer) fisco.newInstance();
-
                 case "fabric":
+                    Class<?> fabric = Class.forName("com.webank.weevent.broker.fabric.FabricBroker4Consumer");
+                    return (IConsumer) fabric.newInstance();
                 default:
                     return null;
             }

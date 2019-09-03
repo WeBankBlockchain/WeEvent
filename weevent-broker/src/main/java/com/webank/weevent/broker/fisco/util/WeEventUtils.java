@@ -3,7 +3,8 @@ package com.webank.weevent.broker.fisco.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.constant.FiscoBcosConstants;
+import com.webank.weevent.broker.util.WeEventConstants;
 
 import lombok.extern.slf4j.Slf4j;
 

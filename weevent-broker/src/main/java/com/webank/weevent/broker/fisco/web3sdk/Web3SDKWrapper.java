@@ -15,11 +15,12 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import com.webank.weevent.broker.fisco.config.FiscoConfig;
-import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.constant.FiscoBcosConstants;
 import com.webank.weevent.broker.fisco.contract.Topic;
 import com.webank.weevent.broker.fisco.contract.TopicController;
 import com.webank.weevent.broker.fisco.contract.TopicData;
-import com.webank.weevent.broker.fisco.util.DataTypeUtils;
+import com.webank.weevent.broker.util.DataTypeUtils;
+import com.webank.weevent.broker.util.WeEventConstants;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
@@ -161,8 +162,8 @@ public class Web3SDKWrapper {
                     contractAddress,
                     web3j,
                     credentials,
-                    WeEventConstants.GAS_PRICE,
-                    WeEventConstants.GAS_LIMIT);
+                    FiscoBcosConstants.GAS_PRICE,
+                    FiscoBcosConstants.GAS_LIMIT);
 
             if (contract == null) {
                 log.info("load contract failed, {}", cls.getSimpleName());
@@ -189,22 +190,22 @@ public class Web3SDKWrapper {
         log.info("begin deploy topic control");
 
         try {
-            Future<TopicData> f1 = TopicData.deploy(web3j, credentials, WeEventConstants.GAS_PRICE,
-                    WeEventConstants.GAS_LIMIT, WeEventConstants.INITIAL_VALUE);
+            Future<TopicData> f1 = TopicData.deploy(web3j, credentials, FiscoBcosConstants.GAS_PRICE,
+                    FiscoBcosConstants.GAS_LIMIT, FiscoBcosConstants.INITIAL_VALUE);
             TopicData topicData = f1.get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
 
             log.info("topic data contract address: {}", topicData.getContractAddress());
-            if (topicData.getContractAddress().equals(WeEventConstants.ADDRESS_EMPTY)) {
+            if (topicData.getContractAddress().equals(FiscoBcosConstants.ADDRESS_EMPTY)) {
                 log.error("contract address is empty after TopicData.deploy(...)");
                 throw new BrokerException(ErrorCode.DEPLOY_CONTRACT_ERROR);
             }
 
-            Future<TopicController> f2 = TopicController.deploy(web3j, credentials, WeEventConstants.GAS_PRICE,
-                    WeEventConstants.GAS_LIMIT, WeEventConstants.INITIAL_VALUE, new Address(topicData.getContractAddress()));
+            Future<TopicController> f2 = TopicController.deploy(web3j, credentials, FiscoBcosConstants.GAS_PRICE,
+                    FiscoBcosConstants.GAS_LIMIT, FiscoBcosConstants.INITIAL_VALUE, new Address(topicData.getContractAddress()));
             TopicController topicController = f2.get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
 
             log.info("topic control contract address: {}", topicController.getContractAddress());
-            if (topicController.getContractAddress().equals(WeEventConstants.ADDRESS_EMPTY)) {
+            if (topicController.getContractAddress().equals(FiscoBcosConstants.ADDRESS_EMPTY)) {
                 log.error("contract address is empty after TopicController.deploy(...)");
                 throw new BrokerException(ErrorCode.DEPLOY_CONTRACT_ERROR);
             }
@@ -256,7 +257,7 @@ public class Web3SDKWrapper {
             ContractAbiMgr abiMgr = (ContractAbiMgr) loadContract(CNSAddress, web3j, credentials, ContractAbiMgr.class);
             Future<Address> f = abiMgr.getAddr(new Utf8String(WeEventTopicControlAddress));
             String address = f.get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS).toString();
-            if (StringUtils.isBlank(address) || WeEventConstants.ADDRESS_EMPTY.equals(address)) {
+            if (StringUtils.isBlank(address) || FiscoBcosConstants.ADDRESS_EMPTY.equals(address)) {
                 return "";
             }
 

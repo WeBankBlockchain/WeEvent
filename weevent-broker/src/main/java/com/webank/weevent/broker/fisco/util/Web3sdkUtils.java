@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.broker.fisco.config.FiscoConfig;
-import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.web3sdk.Web3SDK2Wrapper;
 import com.webank.weevent.broker.fisco.web3sdk.Web3SDKWrapper;
+import com.webank.weevent.broker.util.WeEventConstants;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.Data;
@@ -48,7 +48,7 @@ public class Web3sdkUtils {
             fiscoConfig.load();
             ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
             taskExecutor.initialize();
-            
+
             if (StringUtils.isBlank(fiscoConfig.getVersion())) {
                 log.error("the fisco version in fisco.properties is null");
                 System.exit(1);

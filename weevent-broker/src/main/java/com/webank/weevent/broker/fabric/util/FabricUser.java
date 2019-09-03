@@ -25,18 +25,31 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.spec.PKCS8EncodedKeySpec;
 
+import com.webank.weevent.broker.fabric.config.FabricConfig;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.hyperledger.fabric.sdk.Enrollment;
 import org.hyperledger.fabric.sdk.User;
 
+/**
+ * @author websterchen
+ * @version v1.1
+ * @since 2019/8/7
+ */
 public class FabricUser implements User {
+    private FabricConfig fabricConfig;
+
     static {
         Security.addProvider(new BouncyCastleProvider());
     }
 
+    public FabricUser(FabricConfig fabricConfig) {
+        this.fabricConfig = fabricConfig;
+    }
+
     @Override
     public String getName() {
-        return FabricDeployContractUtil.fabricConfig.getOrgUserName();
+        return this.fabricConfig.getOrgUserName();
     }
 
     @Override
@@ -56,7 +69,7 @@ public class FabricUser implements User {
 
     @Override
     public String getMspId() {
-        return FabricDeployContractUtil.fabricConfig.getMspId();
+        return this.fabricConfig.getMspId();
     }
 
     @Override
@@ -65,7 +78,7 @@ public class FabricUser implements User {
             @Override
             public PrivateKey getKey() {
                 try {
-                    String privateKeyContent = new String(Files.readAllBytes(Paths.get(FabricDeployContractUtil.fabricConfig.getOrgUserKeyFile())));
+                    String privateKeyContent = new String(Files.readAllBytes(Paths.get(fabricConfig.getOrgUserKeyFile())));
                     privateKeyContent = privateKeyContent.replaceAll("\\n", "").replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "");
                     KeyFactory kf = KeyFactory.getInstance("ECDSA");
                     PKCS8EncodedKeySpec keySpecPKCS8 = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKeyContent));
@@ -82,7 +95,7 @@ public class FabricUser implements User {
             @Override
             public String getCert() {
                 try {
-                    return new String(Files.readAllBytes(Paths.get(FabricDeployContractUtil.fabricConfig.getOrgUserCertFile())));
+                    return new String(Files.readAllBytes(Paths.get(fabricConfig.getOrgUserCertFile())));
                 } catch (IOException e) {
                     e.printStackTrace();
                     return "";

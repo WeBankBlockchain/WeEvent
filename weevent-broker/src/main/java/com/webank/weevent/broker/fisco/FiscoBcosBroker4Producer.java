@@ -2,7 +2,7 @@ package com.webank.weevent.broker.fisco;
 
 import java.nio.charset.StandardCharsets;
 
-import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
+import com.webank.weevent.broker.util.ParamCheckUtils;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.SendResult;

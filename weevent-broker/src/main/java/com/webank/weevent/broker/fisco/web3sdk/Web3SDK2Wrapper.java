@@ -14,11 +14,12 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import com.webank.weevent.broker.fisco.config.FiscoConfig;
-import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.constant.FiscoBcosConstants;
 import com.webank.weevent.broker.fisco.contract.v2.Topic;
 import com.webank.weevent.broker.fisco.contract.v2.TopicController;
 import com.webank.weevent.broker.fisco.contract.v2.TopicData;
-import com.webank.weevent.broker.fisco.util.DataTypeUtils;
+import com.webank.weevent.broker.util.DataTypeUtils;
+import com.webank.weevent.broker.util.WeEventConstants;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
@@ -70,24 +71,24 @@ public class Web3SDK2Wrapper {
     public static final ContractGasProvider gasProvider = new ContractGasProvider() {
         @Override
         public BigInteger getGasPrice(String contractFunc) {
-            return WeEventConstants.GAS_PRICE;
+            return FiscoBcosConstants.GAS_PRICE;
         }
 
         @Override
         @Deprecated
         public BigInteger getGasPrice() {
-            return WeEventConstants.GAS_PRICE;
+            return FiscoBcosConstants.GAS_PRICE;
         }
 
         @Override
         public BigInteger getGasLimit(String contractFunc) {
-            return WeEventConstants.GAS_LIMIT;
+            return FiscoBcosConstants.GAS_LIMIT;
         }
 
         @Override
         @Deprecated
         public BigInteger getGasLimit() {
-            return WeEventConstants.GAS_LIMIT;
+            return FiscoBcosConstants.GAS_LIMIT;
         }
     };
 
@@ -132,12 +133,12 @@ public class Web3SDK2Wrapper {
 
             // check connect with getNodeVersion command
             String nodeVersion = web3j.getNodeVersion().send().getNodeVersion().getVersion();
-            if (StringUtils.isBlank(nodeVersion) 
-                || !nodeVersion.contains(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {
+            if (StringUtils.isBlank(nodeVersion)
+                    || !nodeVersion.contains(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {
                 log.error("init web3sdk failed, dismatch fisco version in node: {}", nodeVersion);
                 throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
-            }                  
-            
+            }
+
             log.info("initialize web3sdk success, group id: {}", groupId);
             return web3j;
         } catch (Exception e) {
@@ -305,8 +306,8 @@ public class Web3SDK2Wrapper {
                     contractAddress,
                     web3j,
                     credentials,
-                    WeEventConstants.GAS_PRICE,
-                    WeEventConstants.GAS_LIMIT);
+                    FiscoBcosConstants.GAS_PRICE,
+                    FiscoBcosConstants.GAS_LIMIT);
 
             if (contract == null) {
                 log.info("load contract failed, {}", cls.getSimpleName());
@@ -337,7 +338,7 @@ public class Web3SDK2Wrapper {
             TopicData topicData = f1.sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
 
             log.info("topic data contract address: {}", topicData.getContractAddress());
-            if (topicData.getContractAddress().equals(WeEventConstants.ADDRESS_EMPTY)) {
+            if (topicData.getContractAddress().equals(FiscoBcosConstants.ADDRESS_EMPTY)) {
                 log.error("contract address is empty after TopicData.deploy(...)");
                 throw new BrokerException(ErrorCode.DEPLOY_CONTRACT_ERROR);
             }
@@ -346,7 +347,7 @@ public class Web3SDK2Wrapper {
             TopicController topicController = f2.sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
 
             log.info("topic control contract address: {}", topicController.getContractAddress());
-            if (topicController.getContractAddress().equals(WeEventConstants.ADDRESS_EMPTY)) {
+            if (topicController.getContractAddress().equals(FiscoBcosConstants.ADDRESS_EMPTY)) {
                 log.error("contract address is empty after TopicController.deploy(...)");
                 throw new BrokerException(ErrorCode.DEPLOY_CONTRACT_ERROR);
             }

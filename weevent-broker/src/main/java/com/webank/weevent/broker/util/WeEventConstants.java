@@ -1,28 +1,11 @@
-package com.webank.weevent.broker.fisco.constant;
+package com.webank.weevent.broker.util;
 
-import java.math.BigInteger;
-
+/**
+ * @author websterchen
+ * @version v1.1
+ * @since 2019/9/3
+ */
 public class WeEventConstants {
-    /**
-     * The Constant GAS_PRICE.
-     */
-    public static final BigInteger GAS_PRICE = new BigInteger("99999999999");
-
-    /**
-     * The Constant Address Empty.
-     */
-    public static final String ADDRESS_EMPTY = "0x0000000000000000000000000000000000000000";
-
-    /**
-     * The Constant GAS_LIMIT.
-     */
-    public static final BigInteger GAS_LIMIT = new BigInteger("9999999999999");
-
-    /**
-     * The Constant INITIAL_VALUE.
-     */
-    public static final BigInteger INITIAL_VALUE = new BigInteger("0");
-
     /**
      * Max length for topic name.
      */
@@ -106,12 +89,12 @@ public class WeEventConstants {
      * check the API type,this is use for mqtt
      */
     public static final String STOMPTYPE = "stomp";
-    
+
     /**
      * The prefix of FISCO-BCOS version 1.3.X
      */
     public static final String FISCO_BCOS_1_X_VERSION_PREFIX = "1.3";
-    
+
     /**
      * The prefix of FISCO-BCOS version 2.X
      */

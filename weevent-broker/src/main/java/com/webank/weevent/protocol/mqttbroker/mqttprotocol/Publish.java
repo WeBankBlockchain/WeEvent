@@ -3,8 +3,8 @@ package com.webank.weevent.protocol.mqttbroker.mqttprotocol;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.plugin.IProducer;
+import com.webank.weevent.broker.util.WeEventConstants;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;

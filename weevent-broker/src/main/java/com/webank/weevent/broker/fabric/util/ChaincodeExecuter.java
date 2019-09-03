@@ -33,7 +33,11 @@ import org.hyperledger.fabric.sdk.TransactionProposalRequest;
 import org.hyperledger.fabric.sdk.TransactionRequest;
 import org.hyperledger.fabric.sdk.exception.InvalidArgumentException;
 import org.hyperledger.fabric.sdk.exception.ProposalException;
-
+/**
+ * @author websterchen
+ * @version v1.1
+ * @since 2019/8/6
+ */
 @Slf4j
 public class ChaincodeExecuter {
     public String executeTransaction(HFClient client, Channel channel, ChaincodeID chaincodeID, boolean invoke, String func, String... args) throws InvalidArgumentException, ProposalException, UnsupportedEncodingException, InterruptedException, ExecutionException, TimeoutException {

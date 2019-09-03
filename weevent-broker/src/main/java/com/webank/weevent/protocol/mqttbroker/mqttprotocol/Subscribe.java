@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.BrokerApplication;
-import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.plugin.IConsumer;
+import com.webank.weevent.broker.util.WeEventConstants;
 import com.webank.weevent.protocol.mqttbroker.store.IMessageIdStore;
 import com.webank.weevent.protocol.mqttbroker.store.ISessionStore;
 import com.webank.weevent.protocol.mqttbroker.store.ISubscribeStore;
@@ -62,7 +62,7 @@ public class Subscribe {
         // external params
         Map<IConsumer.SubscribeExt, String> ext = new HashMap<>();
         ext.put(IConsumer.SubscribeExt.InterfaceType, WeEventConstants.MQTTTYPE);
-        InetSocketAddress socketAddress = (InetSocketAddress)channel.remoteAddress();
+        InetSocketAddress socketAddress = (InetSocketAddress) channel.remoteAddress();
         ext.put(IConsumer.SubscribeExt.RemoteIP, socketAddress.getAddress().getHostAddress());
 
         topicSubscriptions.forEach(topicSubscription -> {

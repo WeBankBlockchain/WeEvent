@@ -10,7 +10,11 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-
+/**
+ * @author websterchen
+ * @version v1.1
+ * @since 2019/8/9
+ */
 @Slf4j
 @Data
 @PropertySource(value = "classpath:fabric.properties", encoding = "UTF-8")
@@ -68,6 +72,18 @@ public class FabricConfig {
 
     @Value("${chaincode.topic-controller.path:}")
     private String topicControllerPath;
+
+    @Value("${chaincode.proposal.timeout:12000}")
+    private Long proposalTimeout;
+
+    @Value("${chaincode.transaction.timeout:30000}")
+    private Long transactionTimeout;
+
+    @Value("${consumer.idle-time:1000}")
+    private Integer consumerIdleTime;
+
+    @Value("${consumer.history_merge_block:8}")
+    private Integer consumerHistoryMergeBlock;
 
     /**
      * load configuration without spring
@@ -127,7 +143,7 @@ public class FabricConfig {
             return false;
         }
 
-        log.info("read from fisco.properties: {}", this);
+        log.info("read from fabric.properties: {}", this);
         return true;
     }
 }
