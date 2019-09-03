@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
-import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
-import com.webank.weevent.broker.fisco.util.WeEventUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.Getter;
@@ -107,6 +107,11 @@ public class Subscription {
      */
     private Long historyBlock = 0L;
 
+    /**
+     * subscribe topic TimeStamp.
+     */
+    private Date createTimeStamp = new Date();
+
     @Override
     public String toString() {
         return "Subscription{" +
@@ -137,7 +142,7 @@ public class Subscription {
             log.info("need history event loop, {}", this);
 
             Long lastBlock;
-            if (WeEvent.OFFSET_LAST.equals(this.offset)) {
+            if (WeEvent.OFFSET_FIRST.equals(this.offset)) {
                 lastBlock = 0L;
             } else {
                 lastBlock = DataTypeUtils.decodeBlockNumber(offset);
@@ -261,8 +266,8 @@ public class Subscription {
             for (String topic : topics) {
                 boolean topic_target = false;
                 // subscription in pattern
-                if (ParamCheckUtils.isTopicPattern(topic)) {
-                    if (WeEventUtils.match(event.getTopic(), topic)) {
+                if (isTopicPattern(topic)) {
+                    if (patternMatch(event.getTopic(), topic)) {
                         topic_target = true;
                     }
                 } else { // subscription in normal topic
@@ -286,5 +291,115 @@ public class Subscription {
         }
 
         return to;
+    }
+
+    /**
+     * see match
+     *
+     * @param pattern topic pattern
+     * @return true if yes
+     */
+    public static boolean isTopicPattern(String pattern) {
+        if (StringUtils.isBlank(pattern)) {
+            return false;
+        }
+        return pattern.contains("" + WeEvent.WILD_CARD_ALL_LAYER) || pattern.contains("" + WeEvent.WILD_CARD_ONE_LAYER);
+    }
+
+    /**
+     * see match
+     *
+     * @param pattern topic pattern
+     */
+    public static void validateTopicPattern(String pattern) throws BrokerException {
+        if (StringUtils.isBlank(pattern)) {
+            throw new BrokerException(ErrorCode.PATTERN_INVALID);
+        }
+
+        if (pattern.length() > WeEventConstants.TOPIC_NAME_MAX_LENGTH) {
+            throw new BrokerException(ErrorCode.TOPIC_EXCEED_MAX_LENGTH);
+        }
+
+        for (char x : pattern.toCharArray()) {
+            if (x < 32 || x > 128) {
+                throw new BrokerException(ErrorCode.TOPIC_CONTAIN_INVALID_CHAR);
+            }
+        }
+
+        String[] layer = pattern.split(WeEvent.LAYER_SEPARATE);
+        if (pattern.contains(WeEvent.WILD_CARD_ONE_LAYER)) {
+            for (String x : layer) {
+                if (x.contains(WeEvent.WILD_CARD_ONE_LAYER) && !x.equals(WeEvent.WILD_CARD_ONE_LAYER)) {
+                    throw new BrokerException(ErrorCode.PATTERN_INVALID);
+                }
+            }
+        } else if (pattern.contains(WeEvent.WILD_CARD_ALL_LAYER)) {
+            // only one '#'
+            if (StringUtils.countMatches(pattern, WeEvent.WILD_CARD_ALL_LAYER) != 1) {
+                throw new BrokerException(ErrorCode.PATTERN_INVALID);
+            }
+
+            // '#' must be at last position
+            if (!layer[layer.length - 1].equals(WeEvent.WILD_CARD_ALL_LAYER)) {
+                throw new BrokerException(ErrorCode.PATTERN_INVALID);
+            }
+        } else {
+            throw new BrokerException(ErrorCode.PATTERN_INVALID);
+        }
+    }
+
+    /**
+     * check is topic name matched the input pattern.
+     * see MQTT specification http://public.dhe.ibm.com/software/dw/webservices/ws-mqtt/mqtt-v3r1.html.
+     * notice:
+     * "com/webank/weevent/" is invalid
+     * "com/webank/weevent" is different from "/com.webank/weevent"
+     *
+     * @param topic topic name
+     * @param pattern mqtt pattern with wildcard
+     * @return true if match
+     */
+    private static boolean patternMatch(String topic, String pattern) {
+        String[] topicLayer = topic.split(WeEvent.LAYER_SEPARATE);
+        String[] patternLayer = pattern.split(WeEvent.LAYER_SEPARATE);
+
+        // '+' means 1 layer
+        if (pattern.contains(WeEvent.WILD_CARD_ONE_LAYER)) {
+            // layer must be same
+            if (topicLayer.length != patternLayer.length) {
+                return false;
+            }
+
+            for (int idx = 0; idx < patternLayer.length; idx++) {
+                // the layer except '+' must be match
+                if (!patternLayer[idx].equals(WeEvent.WILD_CARD_ONE_LAYER)
+                        && !patternLayer[idx].equals(topicLayer[idx])) {
+                    return false;
+                }
+            }
+            return true;
+        } else if (pattern.contains(WeEvent.WILD_CARD_ALL_LAYER)) {    // '#' means 0 or n layer
+            if (!patternLayer[patternLayer.length - 1].equals(WeEvent.WILD_CARD_ALL_LAYER)) {
+                log.error("'#' must be in last layer");
+                return false;
+            }
+
+            // pattern layer must be less then topic
+            if (patternLayer.length > topicLayer.length) {
+                return false;
+            }
+
+            // skip last layer '#'
+            for (int idx = 0; idx < patternLayer.length - 1; idx++) {
+                // the layer before '#' must be match
+                if (!patternLayer[idx].equals(topicLayer[idx])) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            log.error("no wildcard character in pattern");
+            return false;
+        }
     }
 }
