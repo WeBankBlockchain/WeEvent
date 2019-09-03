@@ -1,5 +1,6 @@
 package com.webank.weevent.protocol.mqttbroker.mqttprotocol;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,6 +61,8 @@ public class Subscribe {
         // external params
         Map<IConsumer.SubscribeExt, String> ext = new HashMap<>();
         ext.put(IConsumer.SubscribeExt.InterfaceType, WeEventConstants.MQTTTYPE);
+        InetSocketAddress socketAddress = (InetSocketAddress)channel.remoteAddress();
+        ext.put(IConsumer.SubscribeExt.RemoteIP, socketAddress.getAddress().getHostAddress());
 
         topicSubscriptions.forEach(topicSubscription -> {
             String topicFilter = topicSubscription.topicName();
