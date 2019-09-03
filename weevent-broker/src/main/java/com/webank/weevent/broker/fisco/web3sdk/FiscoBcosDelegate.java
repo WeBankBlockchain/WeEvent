@@ -53,6 +53,9 @@ public class FiscoBcosDelegate {
     // block data cached in local memory
     private static LRUCache<String, List<WeEvent>> blockCache;
 
+    // groupId list for version 2.x
+    private List<String> groupIdList;
+
     public FiscoBcosDelegate() {
         this.fiscoBcos2Map = new ConcurrentHashMap<>();
     }
@@ -132,7 +135,8 @@ public class FiscoBcosDelegate {
             defaultFiscoBcos2.init(defaultGId);
             this.fiscoBcos2Map.put(defaultGId, defaultFiscoBcos2);
             // this call need default group has been initialized
-            List<String> groups = this.listGroupId();
+            List<String> groups = this.fiscoBcos2Map.get(Long.valueOf(WeEvent.DEFAULT_GROUP_ID)).listGroupId();
+            this.groupIdList = new ArrayList<>(groups);
 
             // init all group in nodes except default one
             groups.remove(WeEvent.DEFAULT_GROUP_ID);
@@ -163,8 +167,7 @@ public class FiscoBcosDelegate {
             list.add(WeEvent.DEFAULT_GROUP_ID);
             return list;
         } else {
-            // group 1 is always exist
-            return this.fiscoBcos2Map.get(Long.valueOf(WeEvent.DEFAULT_GROUP_ID)).listGroupId();
+            return this.groupIdList;
         }
     }
 
