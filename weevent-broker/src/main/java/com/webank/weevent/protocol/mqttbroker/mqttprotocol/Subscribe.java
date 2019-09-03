@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.protocol.mqttbroker.store.IMessageIdStore;
@@ -71,8 +72,12 @@ public class Subscribe {
             }
             String subscriptionId = "";
             try {
+                String defaultGroup = WeEvent.DEFAULT_GROUP_ID;
+                if ("fabric".equals(BrokerApplication.weEventConfig.getBlockChainType())) {
+                    defaultGroup = WeEvent.DEFAULT_CHANNEL_NAME;
+                }
                 subscriptionId = this.iConsumer.subscribe(topicFilter,
-                        WeEvent.DEFAULT_GROUP_ID,
+                        defaultGroup,
                         WeEvent.OFFSET_LAST,
                         ext,
                         new IConsumer.ConsumerListener() {

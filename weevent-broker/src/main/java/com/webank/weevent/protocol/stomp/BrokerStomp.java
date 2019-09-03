@@ -196,6 +196,9 @@ public class BrokerStomp extends TextWebSocketHandler {
         Map<String, String> extensions = WeEventUtils.getExtensions(nativeHeaders);
 
         String groupId = WeEvent.DEFAULT_GROUP_ID;
+        if ("fabric".equals(BrokerApplication.weEventConfig.getBlockChainType())) {
+            groupId = WeEvent.DEFAULT_CHANNEL_NAME;
+        }
         Object eventGroupId = nativeHeaders.get(WeEventConstants.EVENT_GROUP_ID);
         if (nativeHeaders.containsKey(WeEventConstants.EVENT_GROUP_ID) && eventGroupId != null) {
             groupId = ((List) eventGroupId).get(0).toString();

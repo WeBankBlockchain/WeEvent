@@ -56,7 +56,7 @@ public class ParamCheckUtils {
             throw new BrokerException(ErrorCode.SUBSCRIPTIONID_FORMAT_INVALID);
         }
     }
-    
+
     public static void validateEventId(String topicName, String eventId, Long blockHeight) throws BrokerException {
         if (StringUtils.isBlank(eventId)) {
             throw new BrokerException(ErrorCode.EVENT_ID_IS_ILLEGAL);
@@ -106,6 +106,12 @@ public class ParamCheckUtils {
 
         if (!groups.contains(groupId)) {
             throw new BrokerException(ErrorCode.WE3SDK_UNKNOWN_GROUP);
+        }
+    }
+
+    public static void validateChannelName(String channelName, List<String> channelNames) throws BrokerException {
+        if (!channelNames.contains(channelName)) {
+            throw new BrokerException(ErrorCode.FABRICSDK_UNKNOWN_CHANNEL);
         }
     }
 
