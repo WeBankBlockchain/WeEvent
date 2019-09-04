@@ -45,7 +45,7 @@ public class WeEventClientGroupIdTest {
     @Before
     public void before() throws Exception {
         this.extensions.put("weevent-url", "https://github.com/WeBankFinTech/WeEvent");
-        this.weEventClient = IWeEventClient.build("http://localhost:8080/weevent");
+        this.weEventClient = IWeEventClient.build("http://localhost:7000/weevent");
         this.weEventClient.open(this.topicName);
     }
 
@@ -153,11 +153,20 @@ public class WeEventClientGroupIdTest {
     public void testPublish_004() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
         // test groupId
-        WeEvent weEvent = new WeEvent();
-        weEvent.setTopic(this.topicName);
-        weEvent.setContent("hello world".getBytes(StandardCharsets.UTF_8));
-        weEvent.setExtensions(this.extensions);
+        WeEvent weEvent = new WeEvent("this topic is not exist", "hello world".getBytes(StandardCharsets.UTF_8), extensions);
         this.weEventClient.publish(weEvent, null);
+    }
+
+    /**
+     * test  extensions
+     */
+    @Test(expected = BrokerException.class)
+    public void testPublish_005() throws Exception {
+        log.info("===================={}", this.testName.getMethodName());
+        // test extensions
+        this.extensions = new HashMap<>();
+        WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), extensions);
+        this.weEventClient.publish(weEvent, this.groupId);
     }
 
 
