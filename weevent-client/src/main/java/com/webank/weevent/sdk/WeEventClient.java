@@ -10,7 +10,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
 
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
@@ -165,7 +164,6 @@ public class WeEventClient implements IWeEventClient {
 
     @Override
     public SendResult publish(WeEvent weEvent) throws BrokerException {
-        validateWeEvent(weEvent);
         return this.publish(weEvent, WeEvent.DEFAULT_GROUP_ID);
     }
 
@@ -184,15 +182,10 @@ public class WeEventClient implements IWeEventClient {
             //publish
             WeEventTopicPublisher publisher = (WeEventTopicPublisher) session.createPublisher(weEventTopic);
             publisher.publish(bytesMessage);
-            //get WeEvent
-            byte[] body = new byte[(int) bytesMessage.getBodyLength()];
-            bytesMessage.readBytes(body);
-            ObjectMapper mapper = new ObjectMapper();
-            WeEvent event = mapper.readValue(body, WeEvent.class);
             //return
             sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
-            sendResult.setEventId(event.getEventId());
-            sendResult.setTopic(event.getTopic());
+            sendResult.setEventId(bytesMessage.getJMSMessageID());
+            sendResult.setTopic(weEvent.getTopic());
         } catch (Exception e) {
             log.error("publish fail,error message: {}", e.getMessage());
             sendResult.setStatus(SendResult.SendResultStatus.ERROR);
@@ -413,9 +406,6 @@ public class WeEventClient implements IWeEventClient {
     }
 
     private static void validateWeEvent(WeEvent weEvent) throws BrokerException {
-        if (weEvent == null) {
-            throw new BrokerException(ErrorCode.PARAM_ISEMPTY);
-        }
         validateParam(weEvent.getTopic());
         validateArrayParam(weEvent.getContent());
         validateExtensions(weEvent.getExtensions());
@@ -426,9 +416,6 @@ public class WeEventClient implements IWeEventClient {
         if (extensions != null) {
             if (extensions.size() == 0) {
                 throw new BrokerException(ErrorCode.PARAM_ISNULL);
-            }
-            if (!(extensions instanceof Map)) {
-                throw new BrokerException(ErrorCode.PARAM_IS_NOT_MAP);
             }
         }
 
@@ -444,18 +431,6 @@ public class WeEventClient implements IWeEventClient {
         if (StringUtils.isBlank(groupId)) {
             throw new BrokerException(ErrorCode.EVENT_GROUP_ID_INVALID);
         }
-        Pattern pattern = Pattern.compile("[0-9]*");
-        boolean matches = pattern.matcher(groupId).matches();
-        if (!matches) {
-            throw new BrokerException(ErrorCode.EVENT_GROUP_ID_INVALID);
-        }
-        if (matches) {
-            Integer integer = Integer.valueOf(groupId);
-            if (integer <= 0) {
-                throw new BrokerException(ErrorCode.EVENT_GROUP_ID_INVALID);
-            }
-        }
-
     }
 
     private static void validateArrayParam(byte[] param) throws BrokerException {
