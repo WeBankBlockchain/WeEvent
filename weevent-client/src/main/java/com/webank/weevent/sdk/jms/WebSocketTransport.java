@@ -217,8 +217,7 @@ public class WebSocketTransport extends WebSocketClient {
         if (nativeHeaders == null) {
             return "";
         }
-        weEvent.setEventId(nativeHeaders.get("eventId") == null ? null : nativeHeaders.get("eventId").get(0).toString());
-        bytesMessage.writeObject(weEvent);
+        bytesMessage.setJMSMessageID(nativeHeaders.get("eventId") == null ? null : nativeHeaders.get("eventId").get(0).toString());
         return nativeHeaders.get("receipt-id") == null ? null : nativeHeaders.get("receipt-id").get(0).toString();
     }
 

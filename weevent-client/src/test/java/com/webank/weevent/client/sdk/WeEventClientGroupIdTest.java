@@ -170,28 +170,6 @@ public class WeEventClientGroupIdTest {
     }
 
     /**
-     * test invalid groupId
-     */
-    @Test(expected = BrokerException.class)
-    public void testPublish_006() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-        // test invalid groupId
-        WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), extensions);
-        this.weEventClient.publish(weEvent, "abc");
-    }
-
-    /**
-     * test invalid groupId
-     */
-    @Test(expected = BrokerException.class)
-    public void testPublish_007() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-        // test invalid groupId
-        WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), extensions);
-        this.weEventClient.publish(weEvent, "0");
-    }
-
-    /**
      * Method: subscribe(String topic, String offset, IConsumer.ConsumerListener listener)
      */
     @Test

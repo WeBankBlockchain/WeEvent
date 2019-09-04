@@ -184,7 +184,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
     @SuppressWarnings("unchecked")
     private void handleSendMessage(Message<byte[]> msg, WebSocketSession session) {
-        LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) msg.getHeaders().get("nativeHeaders"));
+        LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap<String, List<String>>) msg.getHeaders().get("nativeHeaders"));
         if (nativeHeaders == null) {
             log.error("assert nativeHeaders != null");
             return;
@@ -193,7 +193,7 @@ public class BrokerStomp extends TextWebSocketHandler {
         // send command receipt Id
         String headerReceiptIdStr = getHeadersValue("receipt", msg);
 
-        Map<String, String> extensions = WeEventUtils.getExtensions(nativeHeaders);
+        Map<String, String> extensions = WeEventUtils.getExten(nativeHeaders);
 
         String groupId = WeEvent.DEFAULT_GROUP_ID;
         Object eventGroupId = nativeHeaders.get(WeEventConstants.EVENT_GROUP_ID);
