@@ -135,7 +135,7 @@ public class FiscoBcosDelegate {
             defaultFiscoBcos2.init(defaultGId);
             this.fiscoBcos2Map.put(defaultGId, defaultFiscoBcos2);
             // this call need default group has been initialized
-            List<String> groups = new ArrayList<>(this.listGroupId());
+            List<String> groups = this.listGroupId();
 
             // init all group in nodes except default one
             groups.remove(WeEvent.DEFAULT_GROUP_ID);
@@ -161,17 +161,15 @@ public class FiscoBcosDelegate {
      * @return list of groupId
      */
     public List<String> listGroupId() throws BrokerException {
-        if (this.fiscoBcos != null) {
-            if (groupIdList.isEmpty()){
-                groupIdList.add(WeEvent.DEFAULT_GROUP_ID);
-            }
-        } else {
-            if (groupIdList.isEmpty()){
+        if (this.groupIdList.isEmpty()){
+            if (this.fiscoBcos != null) {
+                this.groupIdList.add(WeEvent.DEFAULT_GROUP_ID);
+            } else {
                 // group 1 is always exist
-                groupIdList = this.fiscoBcos2Map.get(Long.valueOf(WeEvent.DEFAULT_GROUP_ID)).listGroupId();
+                this.groupIdList = this.fiscoBcos2Map.get(Long.valueOf(WeEvent.DEFAULT_GROUP_ID)).listGroupId();
             }
         }
-        return groupIdList;
+        return new ArrayList<>(this.groupIdList);
     }
 
     private void checkVersion(Long groupId) throws BrokerException {
