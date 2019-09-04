@@ -61,15 +61,21 @@ public class BrokerControllerTest extends JUnitTestBase {
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         Assert.assertNotNull(mvcResult.getModelAndView());
         Assert.assertNotNull(mvcResult.getModelAndView().getModel());
-        Assert.assertEquals(mvcResult.getModelAndView().getModel().get("id").toString(),"2");
+        Assert.assertEquals(mvcResult.getModelAndView().getModel().get("id").toString(), "2");
     }
 
     @Test
     public void testGetBrokers() throws Exception {
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.get("/broker/list?userId=4").contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andReturn().getResponse();
-        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Assert.assertEquals(response.getContentLength(), 1);
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/broker/list?userId=1").contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andReturn();
+        MockHttpServletResponse response = mvcResult.getResponse();
 
+        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        /*String content = response.getContentAsString();
+        List<Object> list = Arrays.asList(content);
+        List<BrokerEntity> brokerEntities = (List<BrokerEntity> )list;
+        Assert.assertNotNull(mvcResult.getModelAndView());
+        Assert.assertNotNull(mvcResult.getModelAndView().getModel());
+        Assert.assertEquals(mvcResult.getModelAndView().getModel().get("userId").toString(),"1");*/
     }
 }

@@ -29,46 +29,41 @@ public class RegisterControllerTest extends JUnitTestBase {
 
     @Test
     public void testGetUserId() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/user/getUserId?username=zjy142214").contentType(MediaType.APPLICATION_JSON_UTF8)).andReturn();
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/user/getUserId?username=zjy05").contentType(MediaType.APPLICATION_JSON_UTF8)).andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Assert.assertNotNull(mvcResult.getModelAndView());
-        Assert.assertNotNull(mvcResult.getModelAndView().getModel());
-        Assert.assertEquals(mvcResult.getModelAndView().getModel().get("data").toString(),"4");
+        Assert.assertTrue(response.getContentAsString().contains("200"));
 
     }
 
     @Test
     public void testForgetPassword() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/user/forget?username=zjy142214").contentType(MediaType.APPLICATION_JSON_UTF8))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/user/forget?username=zjy05").contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Assert.assertNotNull(mvcResult.getModelAndView());
-        Assert.assertNotNull(mvcResult.getModelAndView().getModel());
-        Assert.assertEquals(mvcResult.getModelAndView().getModel().get("status").toString(),"200");
+        Assert.assertTrue(response.getContentAsString().contains("200"));
 
     }
 
     @Test
     public void testUpdatePassword() throws Exception {
-        String content = "{\"username\":\"zjy03\",\"oldPassword\":\"111111\",\"password\":\"123456\"}";
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put("/user/update").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
+        String content = "{\"username\":\"zjy05\",\"oldPassword\":\"12345226\",\"password\":\"1232245226\"}";
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/user/update").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Assert.assertNotNull(mvcResult.getModelAndView());
-        Assert.assertNotNull(mvcResult.getModelAndView().getModel());
-        Assert.assertEquals(mvcResult.getModelAndView().getModel().get("status").toString(),"400");
+        Assert.assertTrue(response.getContentAsString().contains("200"));
 
     }
 
     @Test
     public void testRegister() throws Exception {
-        String content = "{\"username\":\"zjy03\",\"email\":\"zjyxxx@sohu.com\",\"password\":\"123456\"}";
+        String content = "{\"username\":\"zjy05\",\"email\":\"zjyxxx@sohu.com\",\"password\":\"123456\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/user/register").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
-               .andReturn().getResponse();
+                .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        Assert.assertTrue(response.getContentAsString().contains("200"));
 
     }
 

@@ -10,14 +10,13 @@ import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.service.TopicService;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import lombok.extern.slf4j.Slf4j;
 
 @CrossOrigin
 @RestController
@@ -28,20 +27,9 @@ public class TopicController {
     @Autowired
     TopicService topicService;
 
-    /**
-     * just for test...
-     * 
-     * @return
-     */
-    @RequestMapping(value = "/hello", method = RequestMethod.GET)
-    public String hello() {
-        log.info("Hello World test...");
-        return "Hello World!";
-    }
-
     @RequestMapping(value = "/close")
     public Boolean close(@RequestParam("brokerId") Integer brokerId, @RequestParam String topic,
-            HttpServletRequest request, HttpServletResponse response) throws GovernanceException {
+                         HttpServletRequest request, HttpServletResponse response) throws GovernanceException {
         log.info("brokerId:" + brokerId + "close: " + topic);
         return topicService.close(brokerId, topic, request, response);
 

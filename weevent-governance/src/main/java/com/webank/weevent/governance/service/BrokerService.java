@@ -56,8 +56,8 @@ public class BrokerService {
     private CookiesTools cookiesTools;
 
     public List<BrokerEntity> getBrokers(HttpServletRequest request) {
-        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-        return brokerMapper.getBrokers(Integer.parseInt(accountId));
+     //   String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
+        return brokerMapper.getBrokers(Integer.parseInt("1"));
     }
 
     public BrokerEntity getBroker(Integer id) {

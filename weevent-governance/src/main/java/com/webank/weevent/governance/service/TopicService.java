@@ -4,6 +4,7 @@ import java.net.URISyntaxException;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -32,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * topic service
- * 
+ *
  * @since 2018/12/18
  */
 @Service
@@ -50,9 +51,7 @@ public class TopicService {
 
     public Boolean close(Integer brokerId, String topic, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
-        HttpServletRequest req = (HttpServletRequest) request;
-
-        String accountId = cookiesTools.getCookieValueByName(req, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
+        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
         BrokerEntity brokerEntity = brokerService.getBroker(brokerId);
         if (brokerEntity != null) {
             if (!accountId.equals(brokerEntity.getUserId().toString())) {
@@ -75,10 +74,8 @@ public class TopicService {
     }
 
     public TopicPage getTopics(Integer brokerId, Integer pageIndex, Integer pageSize, HttpServletRequest request,
-            HttpServletResponse response) throws GovernanceException {
-        HttpServletRequest req = (HttpServletRequest) request;
-
-        String accountId = cookiesTools.getCookieValueByName(req, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
+                               HttpServletResponse response) throws GovernanceException {
+        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
         BrokerEntity brokerEntity = brokerService.getBroker(brokerId);
         if (!accountId.equals(brokerEntity.getUserId().toString())) {
             throw new GovernanceException(ErrorCode.ACCESS_DENIED);
@@ -87,7 +84,7 @@ public class TopicService {
         if (brokerEntity != null) {
 
             CloseableHttpClient client = generateHttpClient(brokerEntity.getBrokerUrl());
-            // get eventbroker url
+            // get event broker url
             String url = brokerEntity.getBrokerUrl() + "/rest/list";
             url = url + "?pageIndex=" + pageIndex + "&pageSize=" + pageSize;
 
@@ -105,7 +102,7 @@ public class TopicService {
                     List<TopicEntity> topicEntityList = null;
 
                     topicEntityList = result.getTopicEntityInfoList();
-                    // get creater from database
+                    // get creator from database
                     if (topicEntityList.size() > 0) {
                         for (int i = 0; i < topicEntityList.size(); i++) {
                             String creater = topicInfoMapper.getCreater(brokerId, topicEntityList.get(i).getTopicName());
@@ -126,10 +123,8 @@ public class TopicService {
 
     @Transactional(rollbackFor = Throwable.class)
     public GovernanceResult open(Integer brokerId, String topic, String creater, HttpServletRequest request,
-            HttpServletResponse response) throws GovernanceException {
-        HttpServletRequest req = (HttpServletRequest) request;
-
-        String accountId = cookiesTools.getCookieValueByName(req, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
+                                 HttpServletResponse response) throws GovernanceException {
+        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
         BrokerEntity brokerEntity = brokerService.getBroker(brokerId);
         if (brokerEntity != null) {
             if (!accountId.equals(brokerEntity.getUserId().toString())) {

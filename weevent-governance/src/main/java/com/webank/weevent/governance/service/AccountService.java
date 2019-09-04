@@ -3,8 +3,6 @@ package com.webank.weevent.governance.service;
 import java.util.List;
 
 import com.webank.weevent.governance.entity.AccountEntity;
-import com.webank.weevent.governance.entity.AccountExample;
-import com.webank.weevent.governance.entity.AccountExample.Criteria;
 import com.webank.weevent.governance.mapper.AccountMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +15,10 @@ public class AccountService {
     private AccountMapper userMapper;
 
     public AccountEntity queryByUsername(String username) {
-        AccountExample example = new AccountExample();
-        Criteria criteria = example.createCriteria();
-        criteria.andUsernameEqualTo(username);
+        AccountEntity accountEntity = new AccountEntity();
+        accountEntity.setUsername(username);
         // execute select
-        List<AccountEntity> list = userMapper.selectByExample(example);
+        List<AccountEntity> list = userMapper.accountList(accountEntity);
         if (list.size() > 0) {
             // get user info
             AccountEntity user = list.get(0);
@@ -31,11 +28,10 @@ public class AccountService {
     }
 
     public AccountEntity queryById(Integer id) {
-        AccountExample example = new AccountExample();
-        Criteria criteria = example.createCriteria();
-        criteria.andIdEqualTo(id);
+        AccountEntity accountEntity = new AccountEntity();
+        accountEntity.setId(id);
         // execute select
-        List<AccountEntity> list = userMapper.selectByExample(example);
+        List<AccountEntity> list = userMapper.accountList(accountEntity);
         // get user info
         AccountEntity user = list.get(0);
         return user;

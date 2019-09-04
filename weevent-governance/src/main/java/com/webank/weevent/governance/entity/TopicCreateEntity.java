@@ -1,9 +1,11 @@
 package com.webank.weevent.governance.entity;
 
+import com.webank.weevent.governance.entity.base.BaseEntity;
+
 import lombok.Data;
 
 @Data
-public class TopicCreateEntity {
+public class TopicCreateEntity extends BaseEntity {
 
     private Integer brokerId;
 

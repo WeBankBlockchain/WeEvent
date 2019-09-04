@@ -2,12 +2,11 @@ package com.webank.weevent.governance.service;
 
 import java.util.Date;
 import java.util.List;
+
 import javax.annotation.PostConstruct;
 
 import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.AccountEntity;
-import com.webank.weevent.governance.entity.AccountExample;
-import com.webank.weevent.governance.entity.AccountExample.Criteria;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.AccountMapper;
 import com.webank.weevent.governance.result.GovernanceResult;
@@ -56,7 +55,7 @@ public class RegisterService {
                 accountEntity.setPassword(passwordEncoder.encode("123456"));
                 accountEntity.setLastUpdate(new Date());
                 accountEntity.setEmail("admin@xxx.com");
-                accountMapper.insert(accountEntity);
+                accountMapper.insertAccount(accountEntity);
             }
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -66,16 +65,15 @@ public class RegisterService {
 
     public GovernanceResult checkData(String param, int type) {
         // according type generate select condition
-        AccountExample example = new AccountExample();
-        Criteria criteria = example.createCriteria();
+        AccountEntity accountEntity = new AccountEntity();
         // 1：username
         if (type == 1) {
-            criteria.andUsernameEqualTo(param);
+            accountEntity.setUsername(param);
         } else {
             return GovernanceResult.build(400, "data type error");
         }
         // excute select
-        List<AccountEntity> list = accountMapper.selectByExample(example);
+        List<AccountEntity> list = accountMapper.accountList(accountEntity);
         // is list contain data
         if (list != null && list.size() > 0) {
             // if list contain data return false
@@ -106,7 +104,7 @@ public class RegisterService {
         String storePassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(storePassword);
         // insert user into database
-        accountMapper.insert(user);
+        accountMapper.insertAccount(user);
         // return true
         return GovernanceResult.ok();
     }
@@ -132,7 +130,7 @@ public class RegisterService {
         storeUser.setPassword(password);
         storeUser.setLastUpdate(new Date());
 
-        accountMapper.updateByPrimaryKey(storeUser);
+        accountMapper.updateAccount(storeUser);
         return GovernanceResult.ok();
     }
 
@@ -172,7 +170,7 @@ public class RegisterService {
         storeUser.setPassword(password);
         storeUser.setLastUpdate(new Date());
 
-        accountMapper.updateByPrimaryKey(storeUser);
+        accountMapper.updateAccount(storeUser);
         return GovernanceResult.ok(true);
     }
 
