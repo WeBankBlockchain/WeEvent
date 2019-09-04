@@ -44,7 +44,7 @@ public class WeEventClientTest {
     @Before
     public void before() throws Exception {
         this.extensions.put("weevent-url", "https://github.com/WeBankFinTech/WeEvent");
-        this.weEventClient = IWeEventClient.build("http://localhost:7000/weevent");
+        this.weEventClient = IWeEventClient.build("http://localhost:8080/weevent");
         this.weEventClient.open(this.topicName);
     }
 
