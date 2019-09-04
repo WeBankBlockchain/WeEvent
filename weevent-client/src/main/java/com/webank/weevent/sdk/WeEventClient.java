@@ -10,6 +10,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
@@ -170,7 +171,7 @@ public class WeEventClient implements IWeEventClient {
 
     public SendResult publish(WeEvent weEvent, String groupId) throws BrokerException {
         validateWeEvent(weEvent);
-        validateParam(groupId);
+        validateGroupId(groupId);
         SendResult sendResult = new SendResult();
         try {
             TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -437,6 +438,24 @@ public class WeEventClient implements IWeEventClient {
         if (StringUtils.isBlank(param)) {
             throw new BrokerException(ErrorCode.PARAM_ISBLANK);
         }
+    }
+
+    private static void validateGroupId(String groupId) throws BrokerException {
+        if (StringUtils.isBlank(groupId)) {
+            throw new BrokerException(ErrorCode.EVENT_GROUP_ID_INVALID);
+        }
+        Pattern pattern = Pattern.compile("[0-9]*");
+        boolean matches = pattern.matcher(groupId).matches();
+        if (!matches) {
+            throw new BrokerException(ErrorCode.EVENT_GROUP_ID_INVALID);
+        }
+        if (matches) {
+            Integer integer = Integer.valueOf(groupId);
+            if (integer <= 0) {
+                throw new BrokerException(ErrorCode.EVENT_GROUP_ID_INVALID);
+            }
+        }
+
     }
 
     private static void validateArrayParam(byte[] param) throws BrokerException {
