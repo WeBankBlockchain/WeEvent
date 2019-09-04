@@ -103,6 +103,8 @@ public enum ErrorCode {
 
     PARAM_ISNULL(101014, "the input param is null"),
 
+    PARAM_IS_NOT_MAP(101015, "the input param class is not Map"),
+
     //server error(200000, 300000)
     TOPIC_CONTROLLER_IS_NULL(200100, "get topic control address from CNS failed, deploy it first"),
 
