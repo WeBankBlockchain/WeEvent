@@ -45,7 +45,7 @@ public class WeEventClientGroupIdTest {
     @Before
     public void before() throws Exception {
         this.extensions.put("weevent-url", "https://github.com/WeBankFinTech/WeEvent");
-        this.weEventClient = IWeEventClient.build("http://localhost:7000/weevent");
+        this.weEventClient = IWeEventClient.build("http://localhost:8080/weevent");
         this.weEventClient.open(this.topicName);
     }
 
@@ -101,7 +101,7 @@ public class WeEventClientGroupIdTest {
     @Test
     public void testPublishExtensions() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-        // test eventId
+        // test extensions
         this.extensions.put(WeEvent.WeEvent_FORMAT,"json");
         this.extensions.put(WeEvent.WeEvent_TAG,tag);
         WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
@@ -158,19 +158,6 @@ public class WeEventClientGroupIdTest {
         weEvent.setContent("hello world".getBytes(StandardCharsets.UTF_8));
         weEvent.setExtensions(this.extensions);
         this.weEventClient.publish(weEvent, null);
-    }
-
-    /**
-     * test empty extensions
-     */
-    @Test(expected = BrokerException.class)
-    public void testPublish_005() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-        // test groupId
-        WeEvent weEvent = new WeEvent();
-        weEvent.setTopic(this.topicName);
-        weEvent.setContent("hello world".getBytes(StandardCharsets.UTF_8));
-        this.weEventClient.publish(weEvent, this.groupId);
     }
 
 

@@ -417,13 +417,6 @@ public class WeEventClient implements IWeEventClient {
         }
         validateParam(weEvent.getTopic());
         validateArrayParam(weEvent.getContent());
-        validateExtensions(weEvent.getExtensions());
-    }
-
-    private static void validateExtensions(Map<String, String> extensions) throws BrokerException {
-        if (extensions == null) {
-            throw new BrokerException(ErrorCode.PARAM_ISNULL);
-        }
     }
 
     private static void validateParam(String param) throws BrokerException {
