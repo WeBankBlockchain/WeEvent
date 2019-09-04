@@ -45,7 +45,7 @@ public class WeEventClientGroupIdTest {
     @Before
     public void before() throws Exception {
         this.extensions.put("weevent-url", "https://github.com/WeBankFinTech/WeEvent");
-        this.weEventClient = IWeEventClient.build("http://localhost:7000/weevent");
+        this.weEventClient = IWeEventClient.build("http://localhost:8080/weevent");
         this.weEventClient.open(this.topicName);
     }
 
@@ -102,8 +102,8 @@ public class WeEventClientGroupIdTest {
     public void testPublishExtensions() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
         // test extensions
-        this.extensions.put(WeEvent.WeEvent_FORMAT,"json");
-        this.extensions.put(WeEvent.WeEvent_TAG,tag);
+        this.extensions.put(WeEvent.WeEvent_FORMAT, "json");
+        this.extensions.put(WeEvent.WeEvent_TAG, tag);
         WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
         SendResult sendResult = this.weEventClient.publish(weEvent, this.groupId);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
@@ -169,6 +169,27 @@ public class WeEventClientGroupIdTest {
         this.weEventClient.publish(weEvent, this.groupId);
     }
 
+    /**
+     * test invalid groupId
+     */
+    @Test(expected = BrokerException.class)
+    public void testPublish_006() throws Exception {
+        log.info("===================={}", this.testName.getMethodName());
+        // test invalid groupId
+        WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), extensions);
+        this.weEventClient.publish(weEvent, "abc");
+    }
+
+    /**
+     * test invalid groupId
+     */
+    @Test(expected = BrokerException.class)
+    public void testPublish_007() throws Exception {
+        log.info("===================={}", this.testName.getMethodName());
+        // test invalid groupId
+        WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), extensions);
+        this.weEventClient.publish(weEvent, "0");
+    }
 
     /**
      * Method: subscribe(String topic, String offset, IConsumer.ConsumerListener listener)
