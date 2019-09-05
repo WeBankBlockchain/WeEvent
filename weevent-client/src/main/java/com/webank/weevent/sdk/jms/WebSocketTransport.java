@@ -177,7 +177,8 @@ public class WebSocketTransport extends WebSocketClient {
         this.cleanup();
         this.receiptId2SubscriptionId.clear();
         this.subscriptionId2ReceiptId.clear();
-        return !stompCommand.isError(stompResponse);
+        this.connected = !stompCommand.isError(stompResponse);
+        return connected;
     }
 
     public boolean stompDisconnect() throws JMSException {
@@ -186,7 +187,8 @@ public class WebSocketTransport extends WebSocketClient {
         Long gid = Long.valueOf(WeEvent.DEFAULT_GROUP_ID);
         sequence2Id.put(WeEvent.DEFAULT_GROUP_ID, gid);
         Message stompResponse = this.stompRequest(req, gid);
-        return !stompCommand.isError(stompResponse);
+        this.connected = !stompCommand.isError(stompResponse);
+        return connected;
     }
 
     // return receipt-id
@@ -217,8 +219,8 @@ public class WebSocketTransport extends WebSocketClient {
         if (nativeHeaders == null) {
             return "";
         }
-        bytesMessage.setJMSMessageID(nativeHeaders.get("eventId") == null ? null : nativeHeaders.get("eventId").get(0).toString());
-        return nativeHeaders.get("receipt-id") == null ? null : nativeHeaders.get("receipt-id").get(0).toString();
+        bytesMessage.setJMSMessageID(nativeHeaders.get("eventId") == null ? "" : nativeHeaders.get("eventId").get(0).toString());
+        return nativeHeaders.get("receipt-id") == null ? "" : nativeHeaders.get("receipt-id").get(0).toString();
     }
 
     // return subscriptionId
@@ -275,7 +277,7 @@ public class WebSocketTransport extends WebSocketClient {
     public WebSocketTransport(URI server) {
         super(server, new Draft_6455());
 
-        this.connected = true;
+        this.connected = false;
         this.sequence = new AtomicLong(0);
         this.futures = new ConcurrentHashMap<>();
         this.receiptId2SubscriptionId = new ConcurrentHashMap<>();
