@@ -128,6 +128,7 @@ export default {
       })
     },
     refresh () {
+      // 刷新操作前清楚 sessionStorage 避免下次操作再次显示查询的结果
       sessionStorage.removeItem('topic')
       this.loading = true
       setTimeout(fun => {
@@ -222,7 +223,8 @@ export default {
     }
   },
   mounted () {
-    // 如果参数存在则代表是通过点击订阅列表产看的详情
+    // 根据 sessionStorage 判断 是否是进行 详情的查询
+    // sessionStorage 来源于订阅列表的点击
     if (sessionStorage.getItem('topic')) {
       var vm = this
       vm.tableData = []
@@ -262,6 +264,7 @@ export default {
     }
   },
   destroyed () {
+     // 页面注销清楚 sessionStorage 避免下次进入时 出现详情的结果
     sessionStorage.removeItem('topic')
   }
 }
