@@ -20,7 +20,7 @@ public class WeEventUtils {
         return extensions;
     }
 
-    public static Map<String, String> getExtension(Map<String, List<String>> eventData) {
+    public static Map<String, String> getExtend(Map<String, List<String>> eventData) {
         Map<String, String> extensions = new HashMap<>();
         for (Map.Entry<String, List<String>> extension : eventData.entrySet()) {
             if (extension.getKey().startsWith(WeEventConstants.EXTENSIONS_PREFIX_CHAR)) {
