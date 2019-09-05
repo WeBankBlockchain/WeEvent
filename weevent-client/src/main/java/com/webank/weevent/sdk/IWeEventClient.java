@@ -143,7 +143,7 @@ public interface IWeEventClient {
     /**
      * Publish an event to topic.
      *
-     * @param weEvent WeEvent(String topic, byte[] content, Map<String, String> extensions)
+     * @param weEvent WeEvent(String topic, byte[] content, Map extensions)
      * @param groupId chain groupId
      * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
      * @throws BrokerException broker exception
@@ -154,7 +154,7 @@ public interface IWeEventClient {
     /**
      * Publish an event to topic.
      *
-     * @param weEvent WeEvent(String topic, byte[] content, Map<String, String> extensions)
+     * @param weEvent WeEvent(String topic, byte[] content, Map extensions)
      * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
      * @throws BrokerException broker exception
      */
