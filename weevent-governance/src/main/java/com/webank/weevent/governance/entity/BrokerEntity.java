@@ -34,6 +34,11 @@ public class BrokerEntity extends BaseEntity {
 
     private Integer isDelete;
 
+    /**
+     * 1 means creator, 2 means is authorized
+     */
+    private String isCreator;
+
 
 
 }

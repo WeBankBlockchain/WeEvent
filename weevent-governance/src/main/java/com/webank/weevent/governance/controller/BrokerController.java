@@ -38,7 +38,6 @@ public class BrokerController {
     @GetMapping("/list")
     public List<BrokerEntity> getAllBrokers(HttpServletRequest request) {
         log.info("get all brokers ");
-
         return brokerService.getBrokers(request);
     }
 
@@ -67,6 +66,6 @@ public class BrokerController {
     @PostMapping("/delete")
     public GovernanceResult deleteBroker(@RequestBody BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
         log.info("delete  brokerEntity service ,id: " + brokerEntity.getId());
-        return brokerService.deleteBroker(brokerEntity,request);
+        return brokerService.deleteBroker(brokerEntity, request);
     }
 }

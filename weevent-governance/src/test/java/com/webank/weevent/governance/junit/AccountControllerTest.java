@@ -15,7 +15,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-public class RegisterControllerTest extends JUnitTestBase {
+public class AccountControllerTest extends JUnitTestBase {
 
     @Autowired
     private WebApplicationContext wac;
@@ -66,5 +66,18 @@ public class RegisterControllerTest extends JUnitTestBase {
         Assert.assertTrue(response.getContentAsString().contains("200"));
 
     }
+
+
+    @Test
+    public void testAccountList() throws Exception {
+        String content = "{\"brokerId\":\"1\"}";
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/user/accountList").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
+                .andReturn();
+        MockHttpServletResponse response = mvcResult.getResponse();
+        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        Assert.assertTrue(response.getContentAsString().contains("200"));
+
+    }
+
 
 }

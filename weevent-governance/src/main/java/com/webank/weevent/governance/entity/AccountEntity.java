@@ -1,5 +1,7 @@
 package com.webank.weevent.governance.entity;
 
+import java.util.List;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
@@ -30,6 +32,10 @@ public class AccountEntity extends BaseEntity {
     private String oldPassword;
 
     private Integer isDelete;
+
+    List<Integer>  permissionIdList;
+
+    private Integer brokerId;
 
 
 

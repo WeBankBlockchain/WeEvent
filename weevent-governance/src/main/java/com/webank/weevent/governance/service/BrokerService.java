@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.entity.PermissionEntity;
+import com.webank.weevent.governance.enums.IsCreatorEnum;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.BrokerMapper;
 import com.webank.weevent.governance.mapper.PermissionMapper;
@@ -56,8 +57,17 @@ public class BrokerService {
     private CookiesTools cookiesTools;
 
     public List<BrokerEntity> getBrokers(HttpServletRequest request) {
-     //   String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-        return brokerMapper.getBrokers(Integer.parseInt("1"));
+        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
+        List<BrokerEntity> brokerEntityList = brokerMapper.getBrokers(Integer.parseInt(accountId));
+        //Set the identity of the creation and authorization
+        brokerEntityList.forEach(brokerEntity -> {
+            if (accountId.equals(brokerEntity.getUserId())) {
+                brokerEntity.setIsCreator(IsCreatorEnum.CREATOR.getCode());
+            } else {
+                brokerEntity.setIsCreator(IsCreatorEnum.AUTHORIZED.getCode());
+            }
+        });
+        return brokerEntityList;
     }
 
     public BrokerEntity getBroker(Integer id) {
