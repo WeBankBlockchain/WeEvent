@@ -120,7 +120,6 @@ export {
   getAge,
   getAstro,
   dateBeforeAfter,
-  convertIntToStr,
   convertStrToInt,
   getDate,
   getDateDetial,
