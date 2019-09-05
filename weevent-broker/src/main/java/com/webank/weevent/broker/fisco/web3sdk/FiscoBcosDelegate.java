@@ -53,6 +53,9 @@ public class FiscoBcosDelegate {
     // block data cached in local memory
     private static LRUCache<String, List<WeEvent>> blockCache;
 
+    // groupId list
+    private List<String> groupIdList = new ArrayList<>();
+
     public FiscoBcosDelegate() {
         this.fiscoBcos2Map = new ConcurrentHashMap<>();
     }
@@ -158,14 +161,15 @@ public class FiscoBcosDelegate {
      * @return list of groupId
      */
     public List<String> listGroupId() throws BrokerException {
-        if (this.fiscoBcos != null) {
-            List<String> list = new ArrayList<>();
-            list.add(WeEvent.DEFAULT_GROUP_ID);
-            return list;
-        } else {
-            // group 1 is always exist
-            return this.fiscoBcos2Map.get(Long.valueOf(WeEvent.DEFAULT_GROUP_ID)).listGroupId();
+        if (this.groupIdList.isEmpty()){
+            if (this.fiscoBcos != null) {
+                this.groupIdList.add(WeEvent.DEFAULT_GROUP_ID);
+            } else {
+                // group 1 is always exist
+                this.groupIdList = this.fiscoBcos2Map.get(Long.valueOf(WeEvent.DEFAULT_GROUP_ID)).listGroupId();
+            }
         }
+        return new ArrayList<>(this.groupIdList);
     }
 
     private void checkVersion(Long groupId) throws BrokerException {
