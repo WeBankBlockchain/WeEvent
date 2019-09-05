@@ -27,7 +27,7 @@ module.exports = {
     //     changeOrigin:true,
     //     pathRewrite:{
     //       // '^/api': ''
-    //       '^/api': 'weevent-governance'
+    //       '^/api': '/weevent-governance'
     //     }
     //   }
     // },
