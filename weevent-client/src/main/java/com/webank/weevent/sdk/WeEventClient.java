@@ -190,7 +190,6 @@ public class WeEventClient implements IWeEventClient {
             log.error("publish fail,error message: {}", e.getMessage());
             sendResult.setStatus(SendResult.SendResultStatus.ERROR);
             sendResult.setTopic(weEvent.getTopic());
-            throw new BrokerException("publish fail,error message", e);
         }
         return sendResult;
     }
