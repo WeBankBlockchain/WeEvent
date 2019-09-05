@@ -41,6 +41,10 @@
     "method": "get",
     "url": "weevent-governance/weevent/rest/state"
   },
+  "topicInfo": {
+    "method": "get",
+    "url": "weevent-governance/topic/topicInfo"
+  },
   "checkExsit": {
     "method": "get",
     "url": "weevent-governance/user/check"
