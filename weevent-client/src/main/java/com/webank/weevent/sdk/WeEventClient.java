@@ -413,10 +413,8 @@ public class WeEventClient implements IWeEventClient {
     }
 
     private static void validateExtensions(Map<String, String> extensions) throws BrokerException {
-        if (extensions != null) {
-            if (extensions.size() == 0) {
-                throw new BrokerException(ErrorCode.PARAM_ISNULL);
-            }
+        if (extensions != null && extensions.size() == 0) {
+            throw new BrokerException(ErrorCode.PARAM_ISNULL);
         }
 
     }
