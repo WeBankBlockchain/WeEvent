@@ -1,5 +1,6 @@
 package com.webank.weevent.protocol.rest;
 
+import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
@@ -139,5 +140,12 @@ public class BrokerRest implements IBrokerRpc {
             groupId = WeEvent.DEFAULT_GROUP_ID;
         }
         return this.producer.state(topic, groupId);
+    }
+
+    @Override
+    @RequestMapping(path = "/listGroup")
+    public List<String> listGroup() throws BrokerException {
+
+        return this.producer.listGroupId();
     }
 }

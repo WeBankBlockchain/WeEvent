@@ -3,6 +3,7 @@ package com.webank.weevent.governance.controller;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.webank.weevent.governance.entity.Topic;
 import com.webank.weevent.governance.entity.TopicCreaterDto;
 import com.webank.weevent.governance.entity.TopicPage;
 import com.webank.weevent.governance.entity.TopicPageDto;
@@ -10,6 +11,7 @@ import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.service.TopicService;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import lombok.extern.slf4j.Slf4j;
 
 @CrossOrigin
 @RestController
@@ -62,5 +63,15 @@ public class TopicController {
         log.info("creater: " + topicCreaterDto.getCreater() + " open: " + topicCreaterDto.getTopic());
         return topicService.open(topicCreaterDto.getBrokerId(), topicCreaterDto.getTopic(),
                 topicCreaterDto.getCreater(), request, response);
+    }
+
+    @RequestMapping(value = "/topicInfo")
+    public Topic getTopicInfo(@RequestParam(name = "brokerId") Integer brokerId,
+                              @RequestParam(name = "topic") String topic,
+                              @RequestParam(name = "groupId", required = false) String groupId,
+                              HttpServletRequest request) throws GovernanceException {
+
+        log.info("brokerId: {}, topicName: {}, groupId: {}", brokerId, topic, groupId);
+        return topicService.getTopicInfo(brokerId, topic, groupId, request);
     }
 }

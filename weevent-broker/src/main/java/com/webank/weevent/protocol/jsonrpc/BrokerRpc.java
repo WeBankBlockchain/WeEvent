@@ -1,6 +1,7 @@
 package com.webank.weevent.protocol.jsonrpc;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.broker.plugin.IProducer;
@@ -165,4 +166,10 @@ public class BrokerRpc implements IBrokerRpc {
 
         return this.producer.state(topic, WeEvent.DEFAULT_GROUP_ID);
     }
+
+    @Override
+    public List<String> listGroup() throws BrokerException {
+        return this.producer.listGroupId();
+    }
+
 }

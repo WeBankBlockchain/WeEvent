@@ -252,29 +252,37 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     }
 
     @Override
-    public synchronized Map<String, Object> listSubscription() {
+    public synchronized Map<String, Object> listSubscription(String groupId) throws BrokerException {
+        if (StringUtils.isBlank(groupId)){
+            groupId = WeEvent.DEFAULT_GROUP_ID;
+        }
+        this.validateGroupId(groupId);
         Map<String, Object> subscribeIdList = new HashMap<>();
         for (Map.Entry<String, Subscription> entry : this.subscriptions.entrySet()) {
             Subscription subscription = entry.getValue();
             SubscriptionInfo subscriptionInfo = new SubscriptionInfo();
 
-            subscriptionInfo.setInterfaceType(subscription.getInterfaceType());
-            subscriptionInfo.setNotifiedEventCount(subscription.getNotifiedEventCount().toString());
-            subscriptionInfo.setNotifyingEventCount(subscription.getNotifyingEventCount().toString());
-            subscriptionInfo.setNotifyTimeStamp(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(subscription.getNotifyTimeStamp()));
-            subscriptionInfo.setRemoteIp(subscription.getRemoteIp());
-            subscriptionInfo.setCreateTimeStamp(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(subscription.getCreateTimeStamp()));
-            subscriptionInfo.setGroupId(subscription.getGroupId());
+            if (groupId.equals(subscription.getGroupId())){
+                subscriptionInfo.setInterfaceType(subscription.getInterfaceType());
+                subscriptionInfo.setNotifiedEventCount(subscription.getNotifiedEventCount().toString());
+                subscriptionInfo.setNotifyingEventCount(subscription.getNotifyingEventCount().toString());
+                subscriptionInfo.setNotifyTimeStamp(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                        .format(subscription.getNotifyTimeStamp()));
+                subscriptionInfo.setRemoteIp(subscription.getRemoteIp());
+                subscriptionInfo.setCreateTimeStamp(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                        .format(subscription.getCreateTimeStamp()));
+                subscriptionInfo.setGroupId(subscription.getGroupId());
 
-            // Arrays.toString will append plus "[]"
-            if (subscription.getTopics().length == 1) {
-                subscriptionInfo.setTopicName(subscription.getTopics()[0]);
-            } else {
-                subscriptionInfo.setTopicName(Arrays.toString(subscription.getTopics()));
+                // Arrays.toString will append plus "[]"
+                if (subscription.getTopics().length == 1) {
+                    subscriptionInfo.setTopicName(subscription.getTopics()[0]);
+                } else {
+                    subscriptionInfo.setTopicName(Arrays.toString(subscription.getTopics()));
+                }
+
+                subscriptionInfo.setSubscribeId(subscription.getUuid());
+                subscribeIdList.put(subscription.getUuid(), subscriptionInfo);
             }
-
-            subscriptionInfo.setSubscribeId(subscription.getUuid());
-            subscribeIdList.put(subscription.getUuid(), subscriptionInfo);
         }
 
         log.debug("subscriptions: {}", this.subscriptions.toString());

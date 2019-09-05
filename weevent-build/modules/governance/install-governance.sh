@@ -13,7 +13,7 @@ function governance_setup() {
         echo "set server_port failed"
         exit 1
     else
-       sed -i "s/port:.*$/port: ${server_port}/" ${out_path}/conf/application-prod.properties
+       sed -i "/server.port*/cserver.port=${server_port}" ${out_path}/conf/application-prod.properties
     fi
     echo "set server_port success"
 
@@ -49,7 +49,7 @@ function governance_setup() {
         echo "set mysql_pwd failed"
         exit 1
     else
-       sed -i "s/yyyy/\"${mysql_pwd}\"/" ${out_path}/conf/application-prod.properties
+       sed -i "s/yyyy/${mysql_pwd}/" ${out_path}/conf/application-prod.properties
     fi
     echo "set mysql_pwd success"
        

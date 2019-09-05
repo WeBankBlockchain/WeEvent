@@ -83,7 +83,6 @@ public class TopicService {
         if (!accountId.equals(broker.getUserId().toString())) {
             throw new GovernanceException(ErrorCode.ACCESS_DENIED);
         }
-
         if (broker != null) {
 
             CloseableHttpClient client = generateHttpClient(broker.getBrokerUrl());
@@ -120,6 +119,47 @@ public class TopicService {
             } catch (Exception e) {
                 throw new GovernanceException(ErrorCode.BROKER_CONNECT_ERROR);
             }
+        }
+
+        return null;
+    }
+
+    public Topic getTopicInfo(Integer brokerId, String topic, String groupId, HttpServletRequest request) throws GovernanceException {
+
+        String accountId = this.cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
+        Broker broker = this.brokerService.getBroker(brokerId);
+        if (StringUtils.isBlank(accountId) || broker == null || !accountId.equals(String.valueOf(broker.getUserId()))){
+            log.error("get topicInfo failed, brokerId:{}, topic:{}, groupId:{}.", brokerId, topic, groupId);
+            throw new GovernanceException(ErrorCode.ACCESS_DENIED);
+        }
+
+        CloseableHttpClient client = generateHttpClient(broker.getBrokerUrl());
+        // get eventbroker url
+        String url = new StringBuffer(broker.getBrokerUrl()).append("/rest/state").append("?topic=")
+                .append(topic).toString();
+        if (!StringUtils.isBlank(groupId)){
+            url = new StringBuffer(url).append("&groupId=").append(groupId).toString();
+        }
+
+        log.info("getTopicInfo url: " + url);
+        HttpGet get = getMethod(url, request);
+
+        try {
+            CloseableHttpResponse closeResponse = client.execute(get);
+            String mes = EntityUtils.toString(closeResponse.getEntity());
+            log.info("getTopicInfo result json: " + mes);
+            JSON json = JSON.parseObject(mes);
+            Topic result = JSON.toJavaObject(json, Topic.class);
+
+            if (result != null) {
+                // get creator from database
+                String creator = this.topicInfoMapper.getCreater(brokerId, topic);
+                result.setCreater(creator);
+                return result;
+            }
+        } catch (Exception e) {
+            log.error("get topicInfo failed, e:{}", e);
+            throw new GovernanceException(ErrorCode.BROKER_CONNECT_ERROR);
         }
         return null;
     }
