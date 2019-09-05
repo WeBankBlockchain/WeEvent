@@ -1,5 +1,6 @@
 package com.webank.weevent.broker.task;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class NotifyTaskTest extends JUnitTestBase {
     private String subscriptionId = "abc";
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
     private final long wait3s = 3000;
+    private WeEvent event = new WeEvent(topicName, "hello wrold".getBytes(StandardCharsets.UTF_8));
 
     static class MyListener implements IConsumer.ConsumerListener {
         public long received = 0;
@@ -43,8 +45,6 @@ public class NotifyTaskTest extends JUnitTestBase {
         }
     }
 
-    ;
-
     @Before
     public void before() {
         this.threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
@@ -57,7 +57,7 @@ public class NotifyTaskTest extends JUnitTestBase {
     }
 
     /**
-     * Method: push(List<WeEvent> events)
+     * push normal
      */
     @Test
     public void testPush() throws Exception {
@@ -68,7 +68,8 @@ public class NotifyTaskTest extends JUnitTestBase {
         this.threadPoolTaskExecutor.execute(notifyTask);
 
         List<WeEvent> data = new ArrayList<>();
-        data.add(new WeEvent());
+        this.event.setEventId("a");
+        data.add(this.event);
 
         notifyTask.push(data);
         Thread.sleep(wait3s);
@@ -79,7 +80,7 @@ public class NotifyTaskTest extends JUnitTestBase {
     }
 
     /**
-     * Method: push(List<WeEvent> events)
+     * push 2 event in one list
      */
     @Test
     public void testPush2() throws Exception {
@@ -90,8 +91,10 @@ public class NotifyTaskTest extends JUnitTestBase {
         this.threadPoolTaskExecutor.execute(notifyTask);
 
         List<WeEvent> data = new ArrayList<>();
-        data.add(new WeEvent());
-        data.add(new WeEvent());
+        this.event.setEventId("a");
+        data.add(this.event);
+        this.event.setEventId("b");
+        data.add(this.event);
 
         notifyTask.push(data);
         Thread.sleep(wait3s);
@@ -102,7 +105,7 @@ public class NotifyTaskTest extends JUnitTestBase {
     }
 
     /**
-     * Method: push(List<WeEvent> events)
+     * push again
      */
     @Test
     public void testPush3() throws Exception {
@@ -112,15 +115,52 @@ public class NotifyTaskTest extends JUnitTestBase {
         NotifyTask notifyTask = new NotifyTask(this.subscriptionId, 1000, listener);
         this.threadPoolTaskExecutor.execute(notifyTask);
 
-        List<WeEvent> data = new ArrayList<>();
-        data.add(new WeEvent());
-        data.add(new WeEvent());
-        notifyTask.push(data);
-        notifyTask.push(data);
-        notifyTask.push(data);
+        List<WeEvent> data1 = new ArrayList<>();
+        this.event.setEventId("a");
+        data1.add(this.event);
+        this.event.setEventId("b");
+        data1.add(this.event);
+        notifyTask.push(data1);
+
+        List<WeEvent> data2 = new ArrayList<>();
+        this.event.setEventId("c");
+        data2.add(this.event);
+        notifyTask.push(data2);
+
         Thread.sleep(wait3s);
 
-        Assert.assertEquals(listener.received, 6);
+        Assert.assertEquals(listener.received, 3);
+        Assert.assertEquals(subscriptionId, listener.subscriptionId);
+        Assert.assertEquals(notifyTask.getNotifiedCount(), listener.received);
+    }
+
+    /**
+     * push merged
+     */
+    public void testPush4() throws Exception {
+        log.info("===================={}", this.testName.getMethodName());
+
+        MyListener listener = new MyListener();
+        NotifyTask notifyTask = new NotifyTask(this.subscriptionId, 1000, listener);
+        this.threadPoolTaskExecutor.execute(notifyTask);
+
+        List<WeEvent> data1 = new ArrayList<>();
+        this.event.setEventId("a");
+        data1.add(this.event);
+        this.event.setEventId("b");
+        data1.add(this.event);
+        notifyTask.push(data1);
+
+        List<WeEvent> data2 = new ArrayList<>();
+        this.event.setEventId("a");
+        data2.add(this.event);
+        this.event.setEventId("b");
+        data2.add(this.event);
+        notifyTask.push(data2);
+
+        Thread.sleep(wait3s);
+
+        Assert.assertEquals(listener.received, 2);
         Assert.assertEquals(subscriptionId, listener.subscriptionId);
         Assert.assertEquals(notifyTask.getNotifiedCount(), listener.received);
     }

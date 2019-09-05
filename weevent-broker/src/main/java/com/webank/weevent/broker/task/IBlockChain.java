@@ -29,6 +29,14 @@ public interface IBlockChain {
     Long getBlockHeight(String groupId) throws BrokerException;
 
     /**
+     * if this block chain support new block event notify
+     * see FiscoBcosDelegate.IBlockEventListener
+     *
+     * @return true if support
+     */
+    boolean hasBlockEventNotify();
+
+    /**
      * get data from block chain and it's cache
      *
      * @param blockNum block height

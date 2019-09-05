@@ -18,6 +18,7 @@ import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.WeEvent;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -35,16 +36,27 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 @Slf4j
 public class FiscoBcosDelegate {
+    /**
+     * notify from web3sdk2.x when new block mined
+     */
+    public interface IBlockEventListener {
+        /**
+         * @param groupId group id
+         * @param blockHeight new block height
+         */
+        void onEvent(Long groupId, Long blockHeight);
+    }
+
     // access to version 1.x
     private FiscoBcos fiscoBcos;
 
     // access to version 2.x
-    private Map<Long, FiscoBcos2> fiscoBcos2Map;
+    private Map<Long, FiscoBcos2> fiscoBcos2Map = new ConcurrentHashMap<>();
 
     // web3sdk timeout, ms
     public static Integer timeout = 10000;
 
-    // web3sdk thread pool
+    // thread pool used in web3sdk
     public static ThreadPoolTaskExecutor threadPool;
 
     // block data cached in redis
@@ -52,10 +64,6 @@ public class FiscoBcosDelegate {
 
     // block data cached in local memory
     private static LRUCache<String, List<WeEvent>> blockCache;
-
-    public FiscoBcosDelegate() {
-        this.fiscoBcos2Map = new ConcurrentHashMap<>();
-    }
 
     private void initRedisService() {
         if (redisService == null) {
@@ -101,15 +109,15 @@ public class FiscoBcosDelegate {
         threadPool = initThreadPool(fiscoConfig);
         timeout = fiscoConfig.getWeb3sdkTimeout();
 
-        if (StringUtils.isBlank(fiscoConfig.getVersion())){
+        if (StringUtils.isBlank(fiscoConfig.getVersion())) {
             log.error("the fisco version in fisco.properties is null");
             throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
         }
-        if (StringUtils.isBlank(fiscoConfig.getNodes())){
+        if (StringUtils.isBlank(fiscoConfig.getNodes())) {
             log.error("the fisco nodes in fisco.properties is null");
             throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
         }
-        
+
         if (fiscoConfig.getVersion().startsWith(WeEventConstants.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             log.info("Notice: FISCO-BCOS's version is 1.x");
 
@@ -150,6 +158,24 @@ public class FiscoBcosDelegate {
         }
 
         initRedisService();
+    }
+
+    public boolean supportBlockEventNotify() {
+        // 2.0 support notify
+        return !this.fiscoBcos2Map.isEmpty();
+    }
+
+    /**
+     * web3sdk will notify when new block mined in every group.
+     *
+     * @param listener listener
+     */
+    public void setListener(@NonNull IBlockEventListener listener) {
+        log.info("set IBlockEventListener for every group for FISCO-BCOS 2.x");
+
+        for (Map.Entry<Long, FiscoBcos2> entry : fiscoBcos2Map.entrySet()) {
+            entry.getValue().setListener(listener);
+        }
     }
 
     /**

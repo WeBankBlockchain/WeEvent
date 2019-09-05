@@ -35,6 +35,7 @@ import org.fisco.bcos.web3j.precompile.crud.Condition;
 import org.fisco.bcos.web3j.precompile.crud.Table;
 import org.fisco.bcos.web3j.precompile.exception.PrecompileMessageException;
 import org.fisco.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.web3j.protocol.Web3jService;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameterNumber;
 import org.fisco.bcos.web3j.protocol.core.JsonRpc2_0Web3j;
@@ -132,18 +133,25 @@ public class Web3SDK2Wrapper {
 
             // check connect with getNodeVersion command
             String nodeVersion = web3j.getNodeVersion().send().getNodeVersion().getVersion();
-            if (StringUtils.isBlank(nodeVersion) 
-                || !nodeVersion.contains(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {
+            if (StringUtils.isBlank(nodeVersion)
+                    || !nodeVersion.contains(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {
                 log.error("init web3sdk failed, dismatch fisco version in node: {}", nodeVersion);
                 throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
-            }                  
-            
+            }
+
             log.info("initialize web3sdk success, group id: {}", groupId);
             return web3j;
         } catch (Exception e) {
             log.error("init web3sdk failed, group id: " + groupId, e);
             throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
         }
+    }
+
+    public static void setBlockNotifyCallBack(Web3j web3j, FiscoBcosDelegate.IBlockEventListener listener) {
+        Web3jService web3jService = ((JsonRpc2_0Web3j) web3j).web3jService();
+        ((ChannelEthereumService) web3jService).getChannelService().setBlockNotifyCallBack(
+                (int groupID, BigInteger blockNumber) -> listener.onEvent((long) groupID, blockNumber.longValue())
+        );
     }
 
     public static List<String> listGroupId(Web3j web3j) throws BrokerException {
