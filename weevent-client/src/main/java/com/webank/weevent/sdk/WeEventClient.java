@@ -169,7 +169,7 @@ public class WeEventClient implements IWeEventClient {
 
     public SendResult publish(WeEvent weEvent, String groupId) throws BrokerException {
         validateWeEvent(weEvent);
-        validateGroupId(groupId);
+        validateParam(groupId);
         SendResult sendResult = new SendResult();
         try {
             TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -413,7 +413,7 @@ public class WeEventClient implements IWeEventClient {
     }
 
     private static void validateExtensions(Map<String, String> extensions) throws BrokerException {
-        if (extensions != null && extensions.size() == 0) {
+        if (extensions == null || extensions.isEmpty()) {
             throw new BrokerException(ErrorCode.PARAM_ISNULL);
         }
 
@@ -425,11 +425,6 @@ public class WeEventClient implements IWeEventClient {
         }
     }
 
-    private static void validateGroupId(String groupId) throws BrokerException {
-        if (StringUtils.isBlank(groupId)) {
-            throw new BrokerException(ErrorCode.EVENT_GROUP_ID_INVALID);
-        }
-    }
 
     private static void validateArrayParam(byte[] param) throws BrokerException {
         if (param == null || param.length == 0) {
