@@ -193,7 +193,7 @@ public class BrokerStomp extends TextWebSocketHandler {
         // send command receipt Id
         String headerReceiptIdStr = getHeadersValue("receipt", msg);
 
-        Map<String, String> extensions = WeEventUtils.getExten(nativeHeaders);
+        Map<String, String> extensions = WeEventUtils.getExtension(nativeHeaders);
 
         String groupId = WeEvent.DEFAULT_GROUP_ID;
         Object eventGroupId = nativeHeaders.get(WeEventConstants.EVENT_GROUP_ID);
