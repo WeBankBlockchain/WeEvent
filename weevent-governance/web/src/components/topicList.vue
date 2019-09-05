@@ -128,6 +128,8 @@ export default {
       })
     },
     refresh () {
+      // 刷新操作前清楚 sessionStorage 避免下次操作再次显示查询的结果
+      sessionStorage.removeItem('topic')
       this.loading = true
       setTimeout(fun => {
         this.getLsitData()
@@ -221,7 +223,29 @@ export default {
     }
   },
   mounted () {
-    this.getLsitData()
+    // 根据 sessionStorage 判断 是否是进行 详情的查询
+    // sessionStorage 来源于订阅列表的点击
+    if (sessionStorage.getItem('topic')) {
+      var vm = this
+      vm.tableData = []
+      if (sessionStorage.getItem('topic') !== '—') {
+        let url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + sessionStorage.getItem('topic')
+        API.topicInfo(url).then(res => {
+          let time = getDateDetial(res.data.createdTimestamp)
+          res.data.createdTimestamp = time
+          let item = {
+            topicName: res.data.topicName,
+            creater: '——',
+            createdTimestamp: time,
+            detial: {}
+          }
+          vm.tableData.push(item)
+          vm.total = 1
+        })
+      }
+    } else {
+      this.getLsitData()
+    }
   },
   computed: {
     brokerId () {
@@ -238,6 +262,10 @@ export default {
     brokerId () {
       this.refresh()
     }
+  },
+  destroyed () {
+     // 页面注销清楚 sessionStorage 避免下次进入时 出现详情的结果
+    sessionStorage.removeItem('topic')
   }
 }
 
