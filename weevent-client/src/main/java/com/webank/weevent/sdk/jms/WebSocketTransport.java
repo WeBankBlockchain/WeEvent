@@ -187,8 +187,11 @@ public class WebSocketTransport extends WebSocketClient {
         Long gid = Long.valueOf(WeEvent.DEFAULT_GROUP_ID);
         sequence2Id.put(WeEvent.DEFAULT_GROUP_ID, gid);
         Message stompResponse = this.stompRequest(req, gid);
-        this.connected = !stompCommand.isError(stompResponse);
-        return connected;
+        boolean flag = stompCommand.isError(stompResponse);
+        if (flag) {
+            this.connected = false;
+        }
+        return flag;
     }
 
     // return receipt-id
@@ -207,7 +210,7 @@ public class WebSocketTransport extends WebSocketClient {
             return "";
         }
         //header id equal asyncSeq
-        String req = stompCommand.encodeSend(topic, body, asyncSeq,weEvent);
+        String req = stompCommand.encodeSend(topic, body, asyncSeq, weEvent);
         sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
         Message stompResponse = this.stompRequest(req, asyncSeq);
         if (stompCommand.isError(stompResponse)) {
