@@ -476,6 +476,8 @@ public class BrokerStomp extends TextWebSocketHandler {
         // external params
         Map<IConsumer.SubscribeExt, String> ext = new HashMap<>();
         ext.put(IConsumer.SubscribeExt.InterfaceType, WeEventConstants.STOMPTYPE);
+        String remoteIp = session.getRemoteAddress().getAddress().getHostAddress();
+        ext.put(IConsumer.SubscribeExt.RemoteIP, remoteIp);
         if (!StringUtils.isBlank(continueSubscriptionId)) {
             log.info("continueSubscriptionId:{}", continueSubscriptionId);
             ext.put(IConsumer.SubscribeExt.SubscriptionId, continueSubscriptionId);
