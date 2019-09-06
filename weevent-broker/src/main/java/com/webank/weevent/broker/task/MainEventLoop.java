@@ -49,7 +49,7 @@ public class MainEventLoop extends StoppableTask {
     private BlockingDeque<Long> blockNotifyQueue;
 
     // last notified timestamp
-    private long lastNotifiedTimeStamp = 0;
+    private long lastNotifiedTimeStamp;
 
     // faked notify task
     private StoppableTask fakedNotify;
@@ -86,6 +86,7 @@ public class MainEventLoop extends StoppableTask {
 
         // init last block
         this.lastBlock = blockHeight;
+        this.lastNotifiedTimeStamp = System.currentTimeMillis();
         log.info("MainEventLoop initialized with last block: {} in group: {}", this.lastBlock, this.groupId);
     }
 
@@ -277,14 +278,14 @@ public class MainEventLoop extends StoppableTask {
         // no need to fetch event if no subscription
         if (!this.mainSubscriptionIds.isEmpty()) {
             // fetch all event from block chain in this block
-            log.info("fetch events from block height: {} in group: {}", currentBlock, this.groupId);
             List<WeEvent> events = this.blockChain.loop(currentBlock, this.groupId);
             // idle until get event information(include empty)
             if (events == null) {
+                log.error("fetch events from block failed, block height: {}", currentBlock);
                 StoppableTask.idle(this.blockChain.getIdleTime());
                 return;
             }
-            log.info("fetch done, block: {} event size: {}", currentBlock, events.size());
+            log.info("fetch events done, block: {} group: {} event size: {}", currentBlock, this.groupId, events.size());
 
             this.dispatch(events, currentBlock);
         }

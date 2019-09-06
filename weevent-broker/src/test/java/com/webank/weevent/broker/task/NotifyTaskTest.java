@@ -119,7 +119,7 @@ public class NotifyTaskTest extends JUnitTestBase {
 
         List<WeEvent> data1 = new ArrayList<>();
         data1.add(this.newEvent("a"));
-        data1.add(this.newEvent("a"));
+        data1.add(this.newEvent("b"));
         notifyTask.push(data1);
 
         List<WeEvent> data2 = new ArrayList<>();
