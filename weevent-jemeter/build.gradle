@@ -6,6 +6,8 @@ sourceCompatibility = '1.8'
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
+    implementation("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.3")
     implementation project(path: ":weevent-client")
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
     // https://mvnrepository.com/artifact/org.apache.jmeter/ApacheJMeter_java

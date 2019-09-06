@@ -22,14 +22,12 @@ public class WeEventConsumer extends AbstractJavaSamplerClient {
     private String topic;
     @Autowired
     private static IWeEventClient weEventClient;
-    private String buffer;
 
 
     // 每个压测线程启动时跑一次
     @Override
     public void setupTest(JavaSamplerContext context) {
         super.setupTest(context);
-
         try {
             this.topic = context.getParameter("topic");
             boolean result = this.weEventClient.open(this.topic);
