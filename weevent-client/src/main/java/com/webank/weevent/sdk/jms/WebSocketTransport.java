@@ -177,7 +177,8 @@ public class WebSocketTransport extends WebSocketClient {
         this.cleanup();
         this.receiptId2SubscriptionId.clear();
         this.subscriptionId2ReceiptId.clear();
-        return !stompCommand.isError(stompResponse);
+        this.connected = !stompCommand.isError(stompResponse);
+        return connected;
     }
 
     public boolean stompDisconnect() throws JMSException {
@@ -186,24 +187,43 @@ public class WebSocketTransport extends WebSocketClient {
         Long gid = Long.valueOf(WeEvent.DEFAULT_GROUP_ID);
         sequence2Id.put(WeEvent.DEFAULT_GROUP_ID, gid);
         Message stompResponse = this.stompRequest(req, gid);
-        return !stompCommand.isError(stompResponse);
+        boolean flag = stompCommand.isError(stompResponse);
+        if (flag) {
+            this.connected = false;
+        }
+        return flag;
     }
 
-    // return eventId
+    // return receipt-id
     public String stompSend(WeEventTopic topic, BytesMessage bytesMessage) throws JMSException {
         Long asyncSeq = (this.sequence.incrementAndGet());
         WeEventStompCommand stompCommand = new WeEventStompCommand();
+        //read byte
         byte[] body = new byte[(int) bytesMessage.getBodyLength()];
         bytesMessage.readBytes(body);
+        ObjectMapper mapper = new ObjectMapper();
+        WeEvent weEvent;
+        try {
+            weEvent = mapper.readValue(body, WeEvent.class);
+        } catch (IOException e) {
+            log.error("read byte fail,error:{}", e.getMessage());
+            return "";
+        }
         //header id equal asyncSeq
-        String req = stompCommand.encodeSend(topic, body, asyncSeq);
+        String req = stompCommand.encodeSend(topic, body, asyncSeq, weEvent);
         sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
         Message stompResponse = this.stompRequest(req, asyncSeq);
         if (stompCommand.isError(stompResponse)) {
             log.info("stomp request is fail");
             return "";
         }
-        return stompCommand.getReceipt(stompResponse);
+        //handler stompResponse
+        LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) stompResponse.getHeaders().get("nativeHeaders"));
+        if (nativeHeaders == null) {
+            return "";
+        }
+        bytesMessage.setJMSMessageID(nativeHeaders.get("eventId") == null ? "" : nativeHeaders.get("eventId").get(0).toString());
+        return nativeHeaders.get("receipt-id") == null ? "" : nativeHeaders.get("receipt-id").get(0).toString();
     }
 
     // return subscriptionId
@@ -441,7 +461,7 @@ public class WebSocketTransport extends WebSocketClient {
         if (idObject != null) {
             return ((List) idObject).get(0).toString();
         }
-		
+
         return null;
     }
 
