@@ -26,7 +26,7 @@ public class HistoryEventLoop extends StoppableTask {
     /**
      * Last detected block.
      */
-    private Long lastBlock = 0L;
+    private Long lastBlock;
 
     /**
      * Cached value for highest block height.
