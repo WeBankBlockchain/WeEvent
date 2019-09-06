@@ -7,6 +7,14 @@
     </el-breadcrumb>
   </div>
   <div class='right_part'>
+    <span class='server_title' v-show='!noServer'>群组信息:</span>
+    <el-dropdown trigger="click" @command='selectGroup'  v-show='!noServer'>
+      <span>{{groupId}} <i class="el-icon-arrow-down el-icon-caret-bottom"></i></span>
+      <el-dropdown-menu slot="dropdown">
+        <el-dropdown-item v-for='(item, index) in groupList' :key='index' :command='item'>{{item}}</el-dropdown-item>
+      </el-dropdown-menu>
+    </el-dropdown>
+    <span class='line'  v-show='!noServer'></span>
     <span class='server_title' v-show='!noServer'>当前服务:</span>
     <el-dropdown trigger="click" @command='selecServers'  v-show='!noServer'>
       <span>{{server}} <i class="el-icon-arrow-down el-icon-caret-bottom"></i></span>
@@ -42,16 +50,12 @@ export default {
       userName: localStorage.getItem('user'),
       server: '',
       servers: [],
-      group: []
-    }
-  },
-  watch: {
-    aa (nVal) {
-      console.log(nVal)
+      groupList: []
     }
   },
   mounted () {
     this.getServer()
+    this.listGroup()
   },
   methods: {
     home () {
@@ -89,6 +93,10 @@ export default {
         localStorage.setItem('brokerId', this.servers[e].id)
       }
     },
+    selectGroup (e) {
+      this.$store.commit('set_groupId', e)
+      localStorage.setItem('groupId', e)
+    },
     getServer () {
       let brokerId = localStorage.getItem('brokerId')
       let url = '?userId=' + localStorage.getItem('userId')
@@ -112,8 +120,6 @@ export default {
               vm.$store.commit('set_id', id)
               localStorage.setItem('brokerId', id)
             }
-            // 按后台要求 在未实现多群组之前 groupId 为定值1
-            localStorage.setItem('groupId', 1)
           } else {
             vm.$message({
               type: 'warning',
@@ -123,11 +129,29 @@ export default {
           }
         }
       })
+    },
+    listGroup () {
+      API.listGroup('?brokerId=' + localStorage.getItem('brokerId')).then(res => {
+        this.groupList = [].concat(res.data)
+        this.$store.commit('set_groupId', res.data[0])
+        localStorage.setItem('groupId', res.data[0])
+      })
     }
   },
   computed: {
     menu () {
       return this.$store.state.menu
+    },
+    brokerId () {
+      return this.$store.state.brokerId
+    },
+    groupId () {
+      return this.$store.state.groupId
+    }
+  },
+  watch: {
+    brokerId (nVal) {
+      this.listGroup()
     }
   }
 }
