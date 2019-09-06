@@ -28,7 +28,8 @@ public class JavaSDK {
             client.open(topicName, groupId);
             Map<String, String> extensions = new HashMap<>();
             extensions.put(WeEvent.WeEvent_FORMAT, "json");
-            SendResult sendResult = client.publish(topicName, groupId, "{\"hello\":\" wolrd\"}".getBytes(), extensions);
+            WeEvent weEvent = new WeEvent(topicName,"{\"hello\":\" wolrd\"}".getBytes(),extensions);
+            SendResult sendResult = client.publish(weEvent, groupId);
             System.out.println(sendResult.toString());
             // subscribe topic with groupId
             String subscriptionId = client.subscribe(topicName, groupId, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
@@ -45,7 +46,8 @@ public class JavaSDK {
 
             // publish event
             for (int i = 0; i < 10; i++) {
-                client.publish(topicName, groupId, ("hello weevent: " + i).getBytes(StandardCharsets.UTF_8), extensions);
+                weEvent.setContent(("hello weevent: " + i).getBytes(StandardCharsets.UTF_8));
+                client.publish(weEvent, groupId);
             }
 
             // unSubscribe topic

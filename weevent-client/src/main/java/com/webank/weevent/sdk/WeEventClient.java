@@ -25,8 +25,10 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import com.webank.weevent.sdk.jms.WeEventBytesMessage;
 import com.webank.weevent.sdk.jms.WeEventConnectionFactory;
 import com.webank.weevent.sdk.jms.WeEventTopic;
+import com.webank.weevent.sdk.jms.WeEventTopicPublisher;
 import com.webank.weevent.sdk.jms.WeEventTopicSubscriber;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 
@@ -39,7 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 public class WeEventClient implements IWeEventClient {
-    private final static String defaultJsonRpcUrl = "http://localhost:8080/weevent/jsonrpc";
+    private final static String defaultJsonRpcUrl = "http://127.0.0.1:8080/weevent/jsonrpc";
     // json rpc proxy
     private IBrokerRpc brokerRpc;
 
@@ -50,6 +52,7 @@ public class WeEventClient implements IWeEventClient {
     private TopicConnection connection;
     // (subscriptionId <-> TopicSession)
     private Map<String, TopicSession> sessionMap;
+
 
     WeEventClient() throws BrokerException {
         buildRpc(defaultJsonRpcUrl);
@@ -69,11 +72,6 @@ public class WeEventClient implements IWeEventClient {
         buildJms(getStompUrl(brokerUrl), userName, password);
     }
 
-    public SendResult publish(String topic, byte[] content) throws BrokerException {
-        validateParam(topic);
-        validateArrayParam(content);
-        return this.brokerRpc.publish(topic, content);
-    }
 
     public String subscribe(String topic, String offset, @NonNull EventListener listener) throws BrokerException {
         try {
@@ -164,20 +162,38 @@ public class WeEventClient implements IWeEventClient {
         return this.brokerRpc.getEvent(eventId);
     }
 
-    public SendResult publish(String topic, String groupId, byte[] content, Map<String, String> extensions) throws BrokerException {
-        validateParam(topic);
-        validateParam(groupId);
-        validateArrayParam(content);
-        validateExtensions(extensions);
-        return this.brokerRpc.publish(topic, groupId, content, extensions);
+    @Override
+    public SendResult publish(WeEvent weEvent) throws BrokerException {
+        return this.publish(weEvent, WeEvent.DEFAULT_GROUP_ID);
     }
 
-    public SendResult publish(String topic, byte[] content, Map<String, String> extensions) throws BrokerException {
-        validateParam(topic);
-        validateArrayParam(content);
-        validateExtensions(extensions);
-        return this.brokerRpc.publish(topic, content, extensions);
+    public SendResult publish(WeEvent weEvent, String groupId) throws BrokerException {
+        validateWeEvent(weEvent);
+        validateParam(groupId);
+        SendResult sendResult = new SendResult();
+        try {
+            TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+            // create topic
+            WeEventTopic weEventTopic = (WeEventTopic) session.createTopic(weEvent.getTopic());
+            weEventTopic.setGroupId(groupId);
+            //create bytesMessage
+            WeEventBytesMessage bytesMessage = new WeEventBytesMessage();
+            bytesMessage.writeObject(weEvent);
+            //publish
+            WeEventTopicPublisher publisher = (WeEventTopicPublisher) session.createPublisher(weEventTopic);
+            publisher.publish(bytesMessage);
+            //return
+            sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+            sendResult.setEventId(bytesMessage.getJMSMessageID());
+            sendResult.setTopic(weEvent.getTopic());
+        } catch (Exception e) {
+            log.error("publish fail,error message: {}", e.getMessage());
+            sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+            sendResult.setTopic(weEvent.getTopic());
+        }
+        return sendResult;
     }
+
 
     public boolean close(String topic, String groupId) throws BrokerException {
         validateParam(topic);
@@ -380,7 +396,6 @@ public class WeEventClient implements IWeEventClient {
                 connectionFactory = new WeEventConnectionFactory(userName, password, stompUrl);
             }
             this.sessionMap = new ConcurrentHashMap<>();
-
             this.connection = connectionFactory.createTopicConnection();
             this.connection.start();
         } catch (JMSException e) {
@@ -389,21 +404,30 @@ public class WeEventClient implements IWeEventClient {
         }
     }
 
+    private static void validateWeEvent(WeEvent weEvent) throws BrokerException {
+        validateParam(weEvent.getTopic());
+        validateArrayParam(weEvent.getContent());
+        validateExtensions(weEvent.getExtensions());
+
+    }
+
+    private static void validateExtensions(Map<String, String> extensions) throws BrokerException {
+        if (extensions == null || extensions.isEmpty()) {
+            throw new BrokerException(ErrorCode.PARAM_ISNULL);
+        }
+
+    }
+
     private static void validateParam(String param) throws BrokerException {
         if (StringUtils.isBlank(param)) {
             throw new BrokerException(ErrorCode.PARAM_ISBLANK);
         }
     }
 
+
     private static void validateArrayParam(byte[] param) throws BrokerException {
         if (param == null || param.length == 0) {
             throw new BrokerException(ErrorCode.PARAM_ISEMPTY);
-        }
-    }
-
-    private static void validateExtensions(Map<String, String> extensions) throws BrokerException {
-        if (extensions == null) {
-            throw new BrokerException(ErrorCode.PARAM_ISNULL);
         }
     }
 
@@ -419,4 +443,5 @@ public class WeEventClient implements IWeEventClient {
     private static BrokerException jms2BrokerException(JMSException e) {
         return new BrokerException(Integer.parseInt(e.getErrorCode()), e.getMessage());
     }
+
 }
