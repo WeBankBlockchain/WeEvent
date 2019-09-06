@@ -31,9 +31,6 @@ import org.springframework.stereotype.Component;
 public class BrokerRpc implements IBrokerRpc {
     private IProducer producer;
 
-    public BrokerRpc() {
-    }
-
     @Autowired
     public void setProducer(IProducer producer) {
         this.producer = producer;

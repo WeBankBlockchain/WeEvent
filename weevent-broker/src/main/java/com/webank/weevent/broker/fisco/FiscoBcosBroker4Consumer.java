@@ -253,9 +253,6 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
     @Override
     public synchronized Map<String, Object> listSubscription(String groupId) throws BrokerException {
-        if (StringUtils.isBlank(groupId)){
-            groupId = WeEvent.DEFAULT_GROUP_ID;
-        }
         this.validateGroupId(groupId);
         Map<String, Object> subscribeIdList = new HashMap<>();
         for (Map.Entry<String, Subscription> entry : this.subscriptions.entrySet()) {

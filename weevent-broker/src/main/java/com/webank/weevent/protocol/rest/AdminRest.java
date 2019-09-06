@@ -8,6 +8,7 @@ import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.util.SystemInfoUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.WeEvent;
 
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
@@ -36,11 +37,12 @@ public class AdminRest extends RestHA {
         this.consumer = consumer;
     }
 
-    public AdminRest() {
-    }
-
     @RequestMapping(path = "/listSubscription")
-    public Map<String, Object> listSubscription(@RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+    public Map<String, Object> listSubscription(@RequestParam(name = "groupId", required = false) String groupIdStr) throws BrokerException {
+        String groupId = groupIdStr;
+        if (StringUtils.isBlank(groupId)){
+            groupId = WeEvent.DEFAULT_GROUP_ID;
+        }
         Map<String, Object> nodesInfo = new HashMap<>();
         if (this.masterJob.getClient() == null) {
             nodesInfo.put(SystemInfoUtils.getCurrentIp() + ":" + SystemInfoUtils.getCurrentPort(),
@@ -53,10 +55,8 @@ public class AdminRest extends RestHA {
                     byte[] ip = this.masterJob.getZookeeperNode(BrokerApplication.weEventConfig.getZookeeperPath() + "/nodes" + "/" + nodeIP);
                     SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
                     RestTemplate rest = new RestTemplate(requestFactory);
-                    String url = new StringBuffer("http://").append(new String(ip)).append("/weevent/admin/innerListSubscription").toString();
-                    if (!StringUtils.isBlank(groupId)){
-                        url = new StringBuffer(url).append("?groupId=").append(groupId).toString();
-                    }
+                    String url = new StringBuffer("http://").append(new String(ip)).append("/weevent/admin/innerListSubscription")
+                            .append("?groupId=").append(groupId).toString();
                     log.info("url:{}", url);
 
                     ResponseEntity<String> rsp = rest.getForEntity(url, String.class);
@@ -73,7 +73,7 @@ public class AdminRest extends RestHA {
     }
 
     @RequestMapping(path = "/innerListSubscription")
-    public Map<String, Object> innerListSubscription(@RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+    public Map<String, Object> innerListSubscription(@RequestParam(name = "groupId") String groupId) throws BrokerException {
         return this.consumer.listSubscription(groupId);
     }
 

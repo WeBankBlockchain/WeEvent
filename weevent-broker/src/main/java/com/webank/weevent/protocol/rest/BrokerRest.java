@@ -73,9 +73,10 @@ public class BrokerRest implements IBrokerRpc {
     @Override
     @RequestMapping(path = "/getEvent")
     public WeEvent getEvent(@RequestParam(name = "eventId") String eventId,
-                            @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
-        log.info("eventId:{} groupId:{}", eventId, groupId);
+                            @RequestParam(name = "groupId", required = false) String groupIdStr) throws BrokerException {
+        log.info("eventId:{} groupId:{}", eventId, groupIdStr);
 
+        String groupId = groupIdStr;
         if (StringUtils.isBlank(groupId)) {
             groupId = WeEvent.DEFAULT_GROUP_ID;
         }
