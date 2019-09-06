@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.dto.SubscriptionInfo;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
+import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.task.IBlockChain;
 import com.webank.weevent.broker.task.MainEventLoop;
@@ -31,7 +32,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  * @since 2018/11/02
  */
 @Slf4j
-public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements IConsumer, IBlockChain {
+public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements IConsumer, IBlockChain, FiscoBcosDelegate.IBlockEventListener {
     /**
      * Subscription ID <-> Subscription
      */
@@ -62,6 +63,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
         this.threadPoolTaskExecutor = (ThreadPoolTaskExecutor) BrokerApplication.applicationContext.getBean("weevent_daemon_task_executor");
         this.idleTime = fiscoConfig.getConsumerIdleTime();
+        fiscoBcosDelegate.setListener(this);
     }
 
     private static boolean isEventId(String offset) {
@@ -182,7 +184,6 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                 offset,
                 tag,
                 listener);
-        subscription.setIdleTime(this.idleTime);
         subscription.setMergeBlock(fiscoConfig.getConsumerHistoryMergeBlock());
         subscription.setInterfaceType(interfaceType);
         subscription.setRemoteIp(remoteIp);
@@ -287,6 +288,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         return subscribeIdList;
     }
 
+    // methods from IBlockChain
     @Override
     public int getIdleTime() {
         return this.idleTime;
@@ -298,7 +300,20 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     }
 
     @Override
+    public boolean hasBlockEventNotify() {
+        return fiscoBcosDelegate.supportBlockEventNotify();
+    }
+
+    @Override
     public List<WeEvent> loop(Long blockNum, String groupId) throws BrokerException {
         return fiscoBcosDelegate.loop(blockNum, Long.valueOf(groupId));
+    }
+
+    // method from FiscoBcosDelegate.IBlockEventListener
+    @Override
+    public void onEvent(Long groupId, Long blockHeight) {
+        if (this.mainEventLoops.containsKey(groupId)) {
+            this.mainEventLoops.get(groupId).onNewBlock(blockHeight);
+        }
     }
 }
