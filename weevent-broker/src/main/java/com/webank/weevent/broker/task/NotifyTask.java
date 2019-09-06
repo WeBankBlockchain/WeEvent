@@ -2,7 +2,9 @@ package com.webank.weevent.broker.task;
 
 
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
@@ -27,21 +29,36 @@ import lombok.extern.slf4j.Slf4j;
 public class NotifyTask extends StoppableTask {
     private String subscriptionId;
     private IConsumer.ConsumerListener consumerListener;
-
     private int idleTime;
-    private BlockingDeque<WeEvent> eventQueue;
+
+    private BlockingDeque<WeEvent> eventQueue = new LinkedBlockingDeque<>();
     private long notifiedCount = 0;
-    private Date lastTimeStamp;
+    private Date lastTimeStamp = new Date();
+
+    // fixed size FIFO cache
+    static class FixedFIFOCache<K, V> extends LinkedHashMap<K, V> {
+        private int capacity;
+
+        public FixedFIFOCache(int capacity) {
+            super(capacity, 0.8f, false);
+            this.capacity = capacity;
+        }
+
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+            return this.size() > capacity;
+        }
+    }
+    
+    // (eventId <-> timestamp), value is not used yet
+    private Map<String, Long> mergeCache = new FixedFIFOCache<>(1024);
 
     public NotifyTask(String subscriptionId, int idleTime, @NonNull IConsumer.ConsumerListener consumerListener) {
         super("event-notify@" + subscriptionId);
 
         this.subscriptionId = subscriptionId;
         this.consumerListener = consumerListener;
-
         this.idleTime = idleTime;
-        this.eventQueue = new LinkedBlockingDeque<>();
-        this.lastTimeStamp = new Date();
     }
 
     public void push(List<WeEvent> events) {
@@ -64,18 +81,27 @@ public class NotifyTask extends StoppableTask {
     protected void taskOnceLoop() {
         try {
             WeEvent event = this.eventQueue.poll(this.idleTime, TimeUnit.MILLISECONDS);
-            // Empty queue, try next.
+            // empty queue, try next.
             if (event == null) {
                 return;
             }
             log.debug("poll from notify queue, event: {}", event);
 
-            // call back once for a single event
-            this.consumerListener.onEvent(this.subscriptionId, event);
-            this.notifiedCount++;
-            this.lastTimeStamp.setTime(System.currentTimeMillis());
+            // avoid duplicate with FIFO cache
+            if (this.mergeCache.containsKey(event.getEventId())) {
+                log.warn("event to be notify again, skip {}", event.getEventId());
+            } else {
+                // notify a single event once time
+                this.consumerListener.onEvent(this.subscriptionId, event);
+                this.notifiedCount++;
+                long now = System.currentTimeMillis();
+                this.lastTimeStamp.setTime(now);
 
-            log.info("notify biz done, subscriptionId: {} eventId: {}", this.subscriptionId, event.getEventId());
+                // avoid duplicate with FIFO cache
+                this.mergeCache.put(event.getEventId(), now);
+
+                log.info("notify biz done, subscriptionId: {} eventId: {}", this.subscriptionId, event.getEventId());
+            }
         } catch (Exception e) {
             this.consumerListener.onException(e);
         }

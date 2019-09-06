@@ -8,7 +8,6 @@ import java.util.regex.Pattern;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 
@@ -66,13 +65,13 @@ public class FiscoConfig {
     @Value("${v1.key-store-password:123456}")
     private String v1KeyStorePassword;
 
-    @Value("${v2.ca-crt-path:./v2/ca.crt}")
+    @Value("${v2.ca-crt-path:v2/ca.crt}")
     private String v2CaCrtPath;
 
-    @Value("${v2.node-crt-path:./v2/node.crt}")
+    @Value("${v2.node-crt-path:v2/node.crt}")
     private String v2NodeCrtPath;
 
-    @Value("${v2.node-key-path:./v2/node.key}")
+    @Value("${v2.node-key-path:v2/node.key}")
     private String v2NodeKeyPath;
 
     @Value("${consumer.idle-time:1000}")
