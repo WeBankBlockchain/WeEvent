@@ -9,6 +9,7 @@ import com.webank.weevent.sdk.WeEvent;
 /**
  * Block chain interface used by subscribe.
  *
+ * @author matthewliu
  * @since 2019/08/30
  */
 public interface IBlockChain {
@@ -27,6 +28,14 @@ public interface IBlockChain {
      * @throws BrokerException BrokerException
      */
     Long getBlockHeight(String groupId) throws BrokerException;
+
+    /**
+     * if this block chain support new block event notify
+     * see FiscoBcosDelegate.IBlockEventListener
+     *
+     * @return true if support
+     */
+    boolean hasBlockEventNotify();
 
     /**
      * get data from block chain and it's cache
