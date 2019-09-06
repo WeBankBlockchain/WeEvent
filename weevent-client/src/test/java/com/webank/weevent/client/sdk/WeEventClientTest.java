@@ -1,6 +1,8 @@
 package com.webank.weevent.client.sdk;
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
@@ -30,6 +32,8 @@ import static java.lang.Thread.sleep;
 @Slf4j
 public class WeEventClientTest {
 
+    private Map<String, String> extensions = new HashMap<>();
+
     @Rule
     public TestName testName = new TestName();
 
@@ -39,7 +43,8 @@ public class WeEventClientTest {
 
     @Before
     public void before() throws Exception {
-        this.weEventClient = IWeEventClient.build("http://localhost:7000/weevent");
+        this.extensions.put("weevent-url", "https://github.com/WeBankFinTech/WeEvent");
+        this.weEventClient = IWeEventClient.build("http://localhost:8080/weevent");
         this.weEventClient.open(this.topicName);
     }
 
@@ -50,12 +55,13 @@ public class WeEventClientTest {
 
 
     /**
-     * Method: publish(String topic, byte[] content, Map<String, String> extensions)
+     * Method: publish( WeEvent weEvent)
      */
     @Test
     public void testPublish() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-        SendResult sendResult = this.weEventClient.publish(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8));
+        WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
+        SendResult sendResult = this.weEventClient.publish(weEvent);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 
