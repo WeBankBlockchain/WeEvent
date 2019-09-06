@@ -8,7 +8,8 @@ export default new vuex.Store({
     goLogin: false,
     active: '0',
     menu: '首页',
-    brokerId: ''
+    brokerId: '',
+    groupId: ''
   },
   mutations: {
     set_name (state, note) {
@@ -25,6 +26,9 @@ export default new vuex.Store({
     },
     set_id (state, id) {
       state.brokerId = id
+    },
+    set_groupId (state, id) {
+      state.groupId = id
     }
   }
 })
