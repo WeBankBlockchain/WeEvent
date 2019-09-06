@@ -47,6 +47,7 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.GroupList;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tx.Contract;
 import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
@@ -117,9 +118,12 @@ public class Web3SDK2Wrapper {
             GroupChannelConnectionsConfig connectionsConfig = new GroupChannelConnectionsConfig();
             ChannelConnections channelConnections = new ChannelConnections();
             channelConnections.setGroupId(groupId.intValue());
-            channelConnections.setCaCertPath("classpath:" + fiscoConfig.getV2CaCrtPath());
-            channelConnections.setNodeCaPath("classpath:" + fiscoConfig.getV2NodeCrtPath());
-            channelConnections.setNodeKeyPath("classpath:" + fiscoConfig.getV2NodeKeyPath());
+
+            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+            channelConnections.setCaCert(resolver.getResource("classpath:" + fiscoConfig.getV2CaCrtPath()));
+            channelConnections.setSslCert(resolver.getResource("classpath:" + fiscoConfig.getV2NodeCrtPath()));
+            channelConnections.setSslKey(resolver.getResource("classpath:" + fiscoConfig.getV2NodeKeyPath()));
+
             channelConnections.setConnectionsStr(Arrays.asList(fiscoConfig.getNodes().split(";")));
             connectionsConfig.setAllChannelConnections(Arrays.asList(channelConnections));
             service.setAllChannelConnections(connectionsConfig);
@@ -135,7 +139,7 @@ public class Web3SDK2Wrapper {
             String nodeVersion = web3j.getNodeVersion().send().getNodeVersion().getVersion();
             if (StringUtils.isBlank(nodeVersion)
                     || !nodeVersion.contains(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {
-                log.error("init web3sdk failed, dismatch fisco version in node: {}", nodeVersion);
+                log.error("init web3sdk failed, mismatch FISCO-BCOS version in node: {}", nodeVersion);
                 throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
             }
 

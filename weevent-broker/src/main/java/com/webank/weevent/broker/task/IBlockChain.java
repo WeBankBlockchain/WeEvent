@@ -9,6 +9,7 @@ import com.webank.weevent.sdk.WeEvent;
 /**
  * Block chain interface used by subscribe.
  *
+ * @author matthewliu
  * @since 2019/08/30
  */
 public interface IBlockChain {
