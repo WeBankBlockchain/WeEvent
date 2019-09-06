@@ -1,7 +1,5 @@
 package com.webank.weevent.governance.service;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,11 +9,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.AccountEntity;
-import com.webank.weevent.governance.entity.PermissionEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.AccountMapper;
-import com.webank.weevent.governance.mapper.PermissionMapper;
-import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.utils.CookiesTools;
 
@@ -43,8 +38,6 @@ public class AccountService {
     @Autowired
     private ApplicationContext context;
 
-    @Autowired
-    private PermissionMapper permissionMapper;
 
     @Autowired
     private CookiesTools cookiesTools;
@@ -207,22 +200,10 @@ public class AccountService {
 
     public List<AccountEntity> accountEntityList(HttpServletRequest request, AccountEntity accountEntity) throws GovernanceException {
         // execute select
-        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-        List<AccountEntity> list = accountMapper.accountList(new AccountEntity());
-        //f ilter current user
-        list = list.stream().filter(it -> !it.equals(accountId)).collect(Collectors.toList());
-        if (list.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        List<Integer> permissionUserIdList = new ArrayList<>();
-        PermissionEntity permissionEntity = new PermissionEntity();
-        permissionEntity.setBrokerId(accountEntity.getBrokerId());
-        List<PermissionEntity> permissionEntities = permissionMapper.permissionList(permissionEntity);
-        permissionEntities.forEach(it -> {
-            permissionUserIdList.add(it.getUserId());
-        });
-        list.get(0).setPermissionIdList(permissionUserIdList);
+        String accountId ="1"; //cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
+        List<AccountEntity> list = accountMapper.accountList(accountEntity);
+        //filter current user
+        list = list.stream().filter(it -> !it.getId().toString().equals(accountId)).collect(Collectors.toList());
         return list;
     }
 

@@ -16,6 +16,8 @@ public class TopicEntity extends BaseEntity {
 
     private Integer isDelete;
 
+    private Integer BrokerId;
+
     private String topicName;
 
     private String creater;

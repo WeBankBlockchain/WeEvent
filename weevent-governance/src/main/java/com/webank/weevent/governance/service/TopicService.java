@@ -94,14 +94,14 @@ public class TopicService {
             try {
                 CloseableHttpResponse closeResponse = client.execute(get);
                 String mes = EntityUtils.toString(closeResponse.getEntity());
-                log.info("result json: " + mes);
+                log.info("result mes.size: ", mes);
                 JSON json = JSON.parseObject(mes);
                 TopicPage result = JSON.toJavaObject(json, TopicPage.class);
 
                 if (result != null) {
                     List<TopicEntity> topicEntityList = null;
 
-                    topicEntityList = result.getTopicEntityInfoList();
+                    topicEntityList = result.getTopicInfoList();
                     // get creator from database
                     if (topicEntityList.size() > 0) {
                         for (int i = 0; i < topicEntityList.size(); i++) {
@@ -111,7 +111,7 @@ public class TopicService {
                             }
                         }
                     }
-                    result.setTopicEntityInfoList(topicEntityList);
+                    result.setTopicInfoList(topicEntityList);
                     return result;
                 }
             } catch (Exception e) {
@@ -130,7 +130,11 @@ public class TopicService {
             if (!accountId.equals(brokerEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
-            topicInfoMapper.openBrokeTopic(brokerId, topic, creater);
+            TopicEntity topicEntity = new TopicEntity();
+            topicEntity.setBrokerId(brokerId);
+            topicEntity.setTopicName(topic);
+            topicEntity.setCreater(creater);
+            topicInfoMapper.openBrokeTopic(topicEntity);
 
             CloseableHttpClient client = generateHttpClient(brokerEntity.getBrokerUrl());
             String url = brokerEntity.getBrokerUrl() + "/rest/open?topic=" + topic;

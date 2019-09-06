@@ -8,7 +8,6 @@ import javax.validation.constraints.NotBlank;
 import com.webank.weevent.governance.entity.base.BaseEntity;
 
 import lombok.Data;
-import lombok.ToString;
 
 /**
  * User class
@@ -16,7 +15,6 @@ import lombok.ToString;
  * @since 2019/04/28
  */
 @Data
-@ToString
 public class AccountEntity extends BaseEntity {
 
 
@@ -33,10 +31,9 @@ public class AccountEntity extends BaseEntity {
 
     private Integer isDelete;
 
-    List<Integer>  permissionIdList;
+    private List<Integer> permissionIdList;
 
     private Integer brokerId;
-
 
 
 }

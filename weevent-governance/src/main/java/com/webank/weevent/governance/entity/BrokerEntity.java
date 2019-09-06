@@ -7,7 +7,6 @@ import javax.validation.constraints.Min;
 import com.webank.weevent.governance.entity.base.BaseEntity;
 
 import lombok.Data;
-import lombok.ToString;
 import org.hibernate.validator.constraints.URL;
 
 /**
@@ -16,7 +15,6 @@ import org.hibernate.validator.constraints.URL;
  * @since 2019/04/28
  */
 @Data
-@ToString
 public class BrokerEntity extends BaseEntity {
 
     @Min(1)
@@ -38,7 +36,6 @@ public class BrokerEntity extends BaseEntity {
      * 1 means creator, 2 means is authorized
      */
     private String isCreator;
-
 
 
 }

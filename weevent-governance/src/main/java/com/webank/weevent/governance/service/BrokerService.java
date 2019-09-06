@@ -2,7 +2,6 @@ package com.webank.weevent.governance.service;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -61,7 +60,7 @@ public class BrokerService {
         List<BrokerEntity> brokerEntityList = brokerMapper.getBrokers(Integer.parseInt(accountId));
         //Set the identity of the creation and authorization
         brokerEntityList.forEach(brokerEntity -> {
-            if (accountId.equals(brokerEntity.getUserId())) {
+            if (accountId.equals(brokerEntity.getUserId().toString())) {
                 brokerEntity.setIsCreator(IsCreatorEnum.CREATOR.getCode());
             } else {
                 brokerEntity.setIsCreator(IsCreatorEnum.AUTHORIZED.getCode());
@@ -86,7 +85,6 @@ public class BrokerService {
         //checkWeBaseUrl
         String webaseUrl = brokerEntity.getWebaseUrl();
         checkUrl(webaseUrl, weBaseNodeUrl, request);
-        brokerEntity.setLastUpdate(new Date());
         brokerMapper.addBroker(brokerEntity);
         //create permissionEntityList
         List<PermissionEntity> permissionEntityList = createPerMissionList(brokerEntity);
@@ -98,16 +96,18 @@ public class BrokerService {
     }
 
     private List<PermissionEntity> createPerMissionList(BrokerEntity brokerEntity) {
+        log.info("brokerId: {}",brokerEntity.getId());
         List<PermissionEntity> permissionEntityList = new ArrayList<>();
         List<Integer> userIdList = brokerEntity.getUserIdList();
-        if (!userIdList.isEmpty()) {
-            userIdList.forEach(userId -> {
-                PermissionEntity permissionEntity = new PermissionEntity();
-                permissionEntityList.add(permissionEntity);
-                permissionEntity.setUserId(userId);
-                permissionEntity.setBrokerId(brokerEntity.getId());
-            });
+        if (userIdList == null) {
+            return permissionEntityList;
         }
+        userIdList.forEach(userId -> {
+            PermissionEntity permissionEntity = new PermissionEntity();
+            permissionEntityList.add(permissionEntity);
+            permissionEntity.setUserId(userId);
+            permissionEntity.setBrokerId(brokerEntity.getId());
+        });
         return permissionEntityList;
     }
 
@@ -127,7 +127,7 @@ public class BrokerService {
 
     public GovernanceResult deleteBroker(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
         authCheck(brokerEntity, request);
-        topicInfoMapper.deleteTopicInfo(brokerEntity.getId());
+        topicInfoMapper.deleteByBrokerId(brokerEntity.getId());
         brokerMapper.deleteBroker(brokerEntity.getId());
         permissionMapper.deletePermission(brokerEntity.getId());
         return GovernanceResult.ok(true);

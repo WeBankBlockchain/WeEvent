@@ -3,10 +3,10 @@
 <mapper namespace="com.webank.weevent.governance.mapper.TopicInfoMapper">
 
     <resultMap id="BaseResultMap" type="com.webank.weevent.governance.entity.TopicEntity">
-        <result column="id" property="id" jdbcType="INTEGER" />
+        <result column="id" property="id" jdbcType="INTEGER"/>
         <result column="create_date" property="createDate" jdbcType="TIMESTAMP"/>
-        <result column="last_update" property="lastUpdate" jdbcType="TIMESTAMP" />
-        <result column="is_delete" property="isDelete"  jdbcType="INTEGER" />
+        <result column="last_update" property="lastUpdate" jdbcType="TIMESTAMP"/>
+        <result column="is_delete" property="isDelete" jdbcType="INTEGER"/>
         <result column="topic_name" property="topicName" jdbcType="VARCHAR"/>
         <result column="creater" property="creater" jdbcType="VARCHAR"/>
         <result column="broker_id" property="brokerId" jdbcType="INTEGER"/>
@@ -36,37 +36,27 @@
         </if>
     </select>
 
-    <insert id="openBrokeTopic">
-        <selectKey keyProperty="count" resultType="int" order="BEFORE">
-            select count(*) from t_topic where broker_id=#{brokerId} and topic_name =
-            #{topicName} and is_delete=0
-        </selectKey>
-        <if test="count > 0">
-            update t_topic
-            <set>
-                <if test="creater != null">
-                    creater= #{creater}
-                </if>
-                <if test="topicName != null">
-                    topic_name= #{topicName}
-                </if>
-                <if test="topicName != null">
-                    topic_name= #{topicName}
-                </if>
-            </set>
-            <where>
-                topic_name = #{topicName} and broker_id=#{brokerId} and is_delete=0
-            </where>
-        </if>
-        <if test="count==0">
-            insert into t_topic(broker_id,topic_name,creater,description) values
-            (#{id},#{topicName},#{creater},#{description})
-        </if>
+    <insert id="openBrokeTopic" parameterType="com.webank.weevent.governance.entity.TopicEntity">
+            insert into t_topic(broker_id,
+            topic_name,
+            creater,
+            description)
+            values(
+            #{topicEntity.brokerId},
+            #{topicEntity.topicName},
+            #{topicEntity.creater},
+            #{topicEntity.description}
+            )
     </insert>
 
     <delete id="deleteTopicInfo" parameterType="java.lang.Integer">
 	   update t_topic set is_delete=1
        where id=#{id}
+	</delete>
+
+    <delete id="deleteByBrokerId" parameterType="java.lang.Integer">
+	   update t_topic set is_delete=1
+       where broker_id=#{brokerId}
 	</delete>
 
 </mapper>

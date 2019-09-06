@@ -26,10 +26,11 @@
 	<select id="getBrokers"  resultMap="BaseResultMap">
         select distinct
          <include refid="Base_Column_List" />
-        from t_broker where user_id=#{userId}
+        from t_broker where   is_delete=0 and (user_id=#{userId}
         or id in
         (select distinct ps.broker_id from t_permission ps where ps.user_id = #{userId})
-        and is_delete=0
+        )
+
     </select>
 
     <insert id="addBroker" parameterType="com.webank.weevent.governance.entity.BrokerEntity"

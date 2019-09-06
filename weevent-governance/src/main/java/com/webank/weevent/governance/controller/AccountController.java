@@ -81,13 +81,15 @@ public class AccountController {
     }
 
     /**
-     * Query all account except themselves, as well as all authorized account of a current broker data
+     * Query all account except themselves
      */
     @RequestMapping("/accountList")
-    public GovernanceResult accountEntityList(@RequestBody AccountEntity accountEntity, HttpServletRequest request,
+    public GovernanceResult accountEntityList(AccountEntity accountEntity, HttpServletRequest request,
                                               HttpServletResponse response) throws GovernanceException {
         List<AccountEntity> accountEntities = accountService.accountEntityList(request, accountEntity);
         GovernanceResult governanceResult = new GovernanceResult(accountEntities);
         return governanceResult;
     }
+
+
 }

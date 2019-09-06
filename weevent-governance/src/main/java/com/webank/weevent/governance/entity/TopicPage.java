@@ -19,5 +19,5 @@ public class TopicPage {
 
     Integer pageSize;
 
-    List<TopicEntity> topicEntityInfoList = new ArrayList<>();
+    List<TopicEntity> topicInfoList = new ArrayList<>();
 }
