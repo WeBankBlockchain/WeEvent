@@ -257,29 +257,30 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         Map<String, Object> subscribeIdList = new HashMap<>();
         for (Map.Entry<String, Subscription> entry : this.subscriptions.entrySet()) {
             Subscription subscription = entry.getValue();
-            SubscriptionInfo subscriptionInfo = new SubscriptionInfo();
-
-            if (groupId.equals(subscription.getGroupId())){
-                subscriptionInfo.setInterfaceType(subscription.getInterfaceType());
-                subscriptionInfo.setNotifiedEventCount(subscription.getNotifiedEventCount().toString());
-                subscriptionInfo.setNotifyingEventCount(subscription.getNotifyingEventCount().toString());
-                subscriptionInfo.setNotifyTimeStamp(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                        .format(subscription.getNotifyTimeStamp()));
-                subscriptionInfo.setRemoteIp(subscription.getRemoteIp());
-                subscriptionInfo.setCreateTimeStamp(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                        .format(subscription.getCreateTimeStamp()));
-                subscriptionInfo.setGroupId(subscription.getGroupId());
-
-                // Arrays.toString will append plus "[]"
-                if (subscription.getTopics().length == 1) {
-                    subscriptionInfo.setTopicName(subscription.getTopics()[0]);
-                } else {
-                    subscriptionInfo.setTopicName(Arrays.toString(subscription.getTopics()));
-                }
-
-                subscriptionInfo.setSubscribeId(subscription.getUuid());
-                subscribeIdList.put(subscription.getUuid(), subscriptionInfo);
+            if (!groupId.equals(subscription.getGroupId())){
+                continue;
             }
+
+            SubscriptionInfo subscriptionInfo = new SubscriptionInfo();
+            subscriptionInfo.setInterfaceType(subscription.getInterfaceType());
+            subscriptionInfo.setNotifiedEventCount(subscription.getNotifiedEventCount().toString());
+            subscriptionInfo.setNotifyingEventCount(subscription.getNotifyingEventCount().toString());
+            subscriptionInfo.setNotifyTimeStamp(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                    .format(subscription.getNotifyTimeStamp()));
+            subscriptionInfo.setRemoteIp(subscription.getRemoteIp());
+            subscriptionInfo.setCreateTimeStamp(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                    .format(subscription.getCreateTimeStamp()));
+            subscriptionInfo.setGroupId(subscription.getGroupId());
+
+            // Arrays.toString will append plus "[]"
+            if (subscription.getTopics().length == 1) {
+                subscriptionInfo.setTopicName(subscription.getTopics()[0]);
+            } else {
+                subscriptionInfo.setTopicName(Arrays.toString(subscription.getTopics()));
+            }
+
+            subscriptionInfo.setSubscribeId(subscription.getUuid());
+            subscribeIdList.put(subscription.getUuid(), subscriptionInfo);
         }
 
         log.debug("subscriptions: {}", this.subscriptions.toString());
