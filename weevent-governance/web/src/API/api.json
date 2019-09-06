@@ -5,6 +5,10 @@
     "url": "user/login",
     "headers": {"Content-Type": "application/x-www-form-urlencoded"}
   },
+  "listGroup": {
+    "method": "get",
+    "url": "weevent-governance/weevent/rest/listGroup"
+  },
   "loginOut": {
     "method": "get",
     "url": "user/logout"
