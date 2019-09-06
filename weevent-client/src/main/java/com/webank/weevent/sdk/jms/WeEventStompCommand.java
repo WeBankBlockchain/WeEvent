@@ -2,6 +2,7 @@ package com.webank.weevent.sdk.jms;
 
 
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 import javax.jms.JMSException;
 
@@ -118,10 +119,8 @@ public class WeEventStompCommand {
         if (!StringUtils.isBlank(topic.getGroupId())) {
             accessor.setNativeHeader("groupId", topic.getGroupId());
         }
-        if (weEvent.getExtensions() != null && weEvent.getExtensions().size() > 0) {
-            weEvent.getExtensions().forEach((k, v) -> {
-                    accessor.setNativeHeader(k, v);
-            });
+        for (Map.Entry<String, String> entry : weEvent.getExtensions().entrySet()) {
+            accessor.setNativeHeader(entry.getKey(), entry.getValue());
         }
         return encodeRaw(accessor, payload);
     }
