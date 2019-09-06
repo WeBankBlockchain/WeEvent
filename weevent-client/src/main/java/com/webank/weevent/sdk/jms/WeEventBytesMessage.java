@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 public class WeEventBytesMessage implements BytesMessage {
     private byte[] bytes;
 
+    private String eventId;
     // BytesMessage override methods
 
     @Override
@@ -184,12 +185,12 @@ public class WeEventBytesMessage implements BytesMessage {
 
     @Override
     public String getJMSMessageID() throws JMSException {
-        throw new JMSException(WeEventConnectionFactory.NotSupportTips);
+        return this.eventId;
     }
 
     @Override
-    public void setJMSMessageID(String s) throws JMSException {
-        throw new JMSException(WeEventConnectionFactory.NotSupportTips);
+    public void setJMSMessageID(String eventId) throws JMSException {
+        this.eventId = eventId;
     }
 
     @Override
