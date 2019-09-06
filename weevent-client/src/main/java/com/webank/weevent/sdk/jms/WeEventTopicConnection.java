@@ -78,11 +78,11 @@ public class WeEventTopicConnection implements TopicConnection, CommandDispatche
 
     public void publish(WeEventTopic topic, BytesMessage bytesMessage) throws JMSException {
         checkConnected();
-
         this.transport.stompSend(topic, bytesMessage);
     }
 
     public void createSubscriber(WeEventTopicSubscriber subscriber) throws JMSException {
+        checkConnected();
         WeEventTopic topic = (WeEventTopic) subscriber.getTopic();
         String subscriptionId = this.transport.stompSubscribe(topic);
         subscriber.setSubscriptionId(subscriptionId);
@@ -90,6 +90,7 @@ public class WeEventTopicConnection implements TopicConnection, CommandDispatche
     }
 
     public void destroySubscriber(String subscriptionId) throws JMSException {
+        checkConnected();
         if (this.subscribers.containsKey(subscriptionId)) {
             this.transport.stompUnsubscribe(subscriptionId);
             this.subscribers.remove(subscriptionId);

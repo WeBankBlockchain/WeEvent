@@ -36,12 +36,16 @@ public class WeEventClientGroupIdTest {
 
     private String groupId = WeEvent.DEFAULT_GROUP_ID;
 
+    private String tag = "1.1.0";
+
+    private String format = "json";
+
     private IWeEventClient weEventClient;
 
     @Before
     public void before() throws Exception {
         this.extensions.put("weevent-url", "https://github.com/WeBankFinTech/WeEvent");
-        this.weEventClient = IWeEventClient.build("http://localhost:7000/weevent");
+        this.weEventClient = IWeEventClient.build("http://localhost:8080/weevent");
         this.weEventClient.open(this.topicName);
     }
 
@@ -51,70 +55,119 @@ public class WeEventClientGroupIdTest {
     }
 
     /**
-     * Method: publish(String topic, String groupId, byte[] content, Map<String, String> extensions)
+     * Method: publish(WeEvent weEvent, String groupId)
      */
     @Test
     public void testPublishGroupId() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
         // test groupId
-        SendResult sendResult = this.weEventClient.publish(this.topicName, this.groupId, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
+        WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
+        SendResult sendResult = this.weEventClient.publish(weEvent, this.groupId);
+        log.info("sendResult {}", sendResult);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 
 
     /**
-     * Method: publish(String topic, byte[] content, Map<String, String> extensions)
+     * Method: publish(WeEvent weEvent)
      */
     @Test
     public void testPublish() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-        SendResult sendResult = this.weEventClient.publish(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
+        WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
+        SendResult sendResult = this.weEventClient.publish(weEvent);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 
     /**
-     * Method: publish(String topic, String groupId, byte[] content, Map<String, String> extensions)
+     * test eventId
+     */
+    @Test
+    public void testPublishEventId() throws Exception {
+        log.info("===================={}", this.testName.getMethodName());
+        // test eventId
+        WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
+        SendResult sendResult = this.weEventClient.publish(weEvent, this.groupId);
+        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
+
+        WeEvent event = this.weEventClient.getEvent(sendResult.getEventId());
+        Assert.assertNotNull(event);
+        Assert.assertEquals(this.topicName, event.getTopic());
+    }
+
+    /**
+     * test extensions
+     */
+    @Test
+    public void testPublishExtensions() throws Exception {
+        log.info("===================={}", this.testName.getMethodName());
+        // test extensions
+        this.extensions.put(WeEvent.WeEvent_FORMAT, "json");
+        this.extensions.put(WeEvent.WeEvent_TAG, tag);
+        WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
+        SendResult sendResult = this.weEventClient.publish(weEvent, this.groupId);
+        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
+
+        WeEvent event = this.weEventClient.getEvent(sendResult.getEventId());
+        Assert.assertNotNull(event);
+        Assert.assertNotNull(event.getExtensions());
+        Assert.assertEquals(this.tag, event.getExtensions().get(WeEvent.WeEvent_TAG));
+        Assert.assertEquals(this.format, event.getExtensions().get(WeEvent.WeEvent_FORMAT));
+
+    }
+
+    /**
+     * test empty content、extensions
      */
     @Test(expected = BrokerException.class)
     public void testPublish_001() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-
-        this.weEventClient.publish(this.topicName, this.groupId, null, null);
+        WeEvent weEvent = new WeEvent(this.topicName, null, null);
+        this.weEventClient.publish(weEvent, this.groupId);
     }
 
+    /**
+     * test empty topic
+     */
     @Test(expected = BrokerException.class)
     public void testPublish_002() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-
-        this.weEventClient.publish(null, this.groupId, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
+        WeEvent weEvent = new WeEvent(null, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
+        this.weEventClient.publish(weEvent, this.groupId);
     }
-
-
-    @Test(expected = BrokerException.class)
-    public void testPublish_004() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-        // test groupId
-        this.weEventClient.publish(this.topicName, this.groupId, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
-    }
-
-    @Test(expected = BrokerException.class)
-    public void testPublish_005() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-        // test groupId
-        this.weEventClient.publish(this.topicName, this.groupId, "hello world".getBytes(StandardCharsets.UTF_8), null);
-    }
-
 
     /**
-     * Method: publish(String topic, byte[] content)
+     * test empty content
      */
     @Test(expected = BrokerException.class)
     public void testPublish_003() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
-
-        this.weEventClient.publish("111111111111111111111111111111111111111111111111111111", null, null, this.extensions);
+        WeEvent weEvent = new WeEvent("this topic is not exist", null, extensions);
+        this.weEventClient.publish(weEvent);
     }
 
+    /**
+     * test empty groupId
+     */
+    @Test(expected = BrokerException.class)
+    public void testPublish_004() throws Exception {
+        log.info("===================={}", this.testName.getMethodName());
+        // test groupId
+        WeEvent weEvent = new WeEvent("this topic is not exist", "hello world".getBytes(StandardCharsets.UTF_8), extensions);
+        this.weEventClient.publish(weEvent, null);
+    }
+
+    /**
+     * test  extensions
+     */
+    @Test(expected = BrokerException.class)
+    public void testPublish_005() throws Exception {
+        log.info("===================={}", this.testName.getMethodName());
+        // test extensions
+        this.extensions = new HashMap<>();
+        WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), extensions);
+        this.weEventClient.publish(weEvent, this.groupId);
+    }
 
     /**
      * Method: subscribe(String topic, String offset, IConsumer.ConsumerListener listener)
