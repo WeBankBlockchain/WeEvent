@@ -197,6 +197,8 @@ public class MainEventLoop extends StoppableTask {
         // get block height
         Long blockHeight = this.blockChain.getBlockHeight(this.groupId);
         if (blockHeight <= 0) {
+            log.error("get block height failed, retry");
+
             // Don't try too fast if net error.
             StoppableTask.idle(this.blockChain.getIdleTime());
             return;
@@ -213,16 +215,16 @@ public class MainEventLoop extends StoppableTask {
     }
 
     public void onNewBlock(Long blockHeight) {
-        log.info("new block height(blockHeight == 0 means faked notify) from web3sdk, {}", blockHeight);
+        log.debug("new block event from web3sdk, {}(0 meanings faked notify)", blockHeight);
 
         try {
             if (this.blockNotifyQueue.offer(blockHeight, this.blockChain.getIdleTime(), TimeUnit.MILLISECONDS)) {
                 this.lastNotifiedTimeStamp = System.currentTimeMillis();
             } else {
-                log.error("notify block height queue failed due to queue is full");
+                log.error("new block event queue failed due to queue is full");
             }
         } catch (InterruptedException e) {
-            log.error("notify block height queue failed", e);
+            log.error("new block event queue failed", e);
         }
     }
 
@@ -240,11 +242,11 @@ public class MainEventLoop extends StoppableTask {
         try {
             notify = this.blockNotifyQueue.poll(this.blockChain.getIdleTime(), TimeUnit.MILLISECONDS);
             if (notify == null) {
-                log.error("can not find notify(included faked notify)");
+                log.error("can not find new block event notify(included faked)");
                 notify = 0L;
             }
         } catch (Exception e) {
-            log.error("get notify from block height queue failed", e);
+            log.error("get notify from new block event queue failed", e);
             notify = 0L;
         }
 
@@ -253,6 +255,7 @@ public class MainEventLoop extends StoppableTask {
         if (notify == 0L) {
             blockHeight = this.blockChain.getBlockHeight(this.groupId);
             if (blockHeight <= 0) {
+                log.error("get block height failed, retry");
                 // retry if net error.
                 return;
             }
@@ -274,14 +277,14 @@ public class MainEventLoop extends StoppableTask {
         // no need to fetch event if no subscription
         if (!this.mainSubscriptionIds.isEmpty()) {
             // fetch all event from block chain in this block
-            log.debug("fetch events from block height: {} in group: {}", currentBlock, this.groupId);
+            log.info("fetch events from block height: {} in group: {}", currentBlock, this.groupId);
             List<WeEvent> events = this.blockChain.loop(currentBlock, this.groupId);
             // idle until get event information(include empty)
             if (events == null) {
                 StoppableTask.idle(this.blockChain.getIdleTime());
                 return;
             }
-            log.debug("fetch done, block: {} event size: {}", currentBlock, events.size());
+            log.info("fetch done, block: {} event size: {}", currentBlock, events.size());
 
             this.dispatch(events, currentBlock);
         }

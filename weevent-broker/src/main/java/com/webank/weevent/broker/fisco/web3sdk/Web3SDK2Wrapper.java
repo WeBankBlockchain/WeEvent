@@ -116,16 +116,16 @@ public class Web3SDK2Wrapper {
 
             // connect key and string
             GroupChannelConnectionsConfig connectionsConfig = new GroupChannelConnectionsConfig();
+            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+            connectionsConfig.setCaCert(resolver.getResource("classpath:" + fiscoConfig.getV2CaCrtPath()));
+            connectionsConfig.setSslCert(resolver.getResource("classpath:" + fiscoConfig.getV2NodeCrtPath()));
+            connectionsConfig.setSslKey(resolver.getResource("classpath:" + fiscoConfig.getV2NodeKeyPath()));
+
             ChannelConnections channelConnections = new ChannelConnections();
             channelConnections.setGroupId(groupId.intValue());
-
-            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-            channelConnections.setCaCert(resolver.getResource("classpath:" + fiscoConfig.getV2CaCrtPath()));
-            channelConnections.setSslCert(resolver.getResource("classpath:" + fiscoConfig.getV2NodeCrtPath()));
-            channelConnections.setSslKey(resolver.getResource("classpath:" + fiscoConfig.getV2NodeKeyPath()));
-
             channelConnections.setConnectionsStr(Arrays.asList(fiscoConfig.getNodes().split(";")));
             connectionsConfig.setAllChannelConnections(Arrays.asList(channelConnections));
+
             service.setAllChannelConnections(connectionsConfig);
             service.setThreadPool(poolTaskExecutor);
             service.run();

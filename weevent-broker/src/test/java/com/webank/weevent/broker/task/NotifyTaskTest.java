@@ -27,7 +27,6 @@ public class NotifyTaskTest extends JUnitTestBase {
     private String subscriptionId = "abc";
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
     private final long wait3s = 3000;
-    private WeEvent event = new WeEvent(topicName, "hello wrold".getBytes(StandardCharsets.UTF_8));
 
     static class MyListener implements IConsumer.ConsumerListener {
         public long received = 0;
@@ -56,6 +55,12 @@ public class NotifyTaskTest extends JUnitTestBase {
         this.threadPoolTaskExecutor.destroy();
     }
 
+    private WeEvent newEvent(String eventId) {
+        WeEvent event = new WeEvent(topicName, "hello world".getBytes(StandardCharsets.UTF_8));
+        event.setEventId(eventId);
+        return event;
+    }
+
     /**
      * push normal
      */
@@ -68,8 +73,7 @@ public class NotifyTaskTest extends JUnitTestBase {
         this.threadPoolTaskExecutor.execute(notifyTask);
 
         List<WeEvent> data = new ArrayList<>();
-        this.event.setEventId("a");
-        data.add(this.event);
+        data.add(this.newEvent("a"));
 
         notifyTask.push(data);
         Thread.sleep(wait3s);
@@ -91,10 +95,8 @@ public class NotifyTaskTest extends JUnitTestBase {
         this.threadPoolTaskExecutor.execute(notifyTask);
 
         List<WeEvent> data = new ArrayList<>();
-        this.event.setEventId("a");
-        data.add(this.event);
-        this.event.setEventId("b");
-        data.add(this.event);
+        data.add(this.newEvent("a"));
+        data.add(this.newEvent("b"));
 
         notifyTask.push(data);
         Thread.sleep(wait3s);
@@ -116,15 +118,12 @@ public class NotifyTaskTest extends JUnitTestBase {
         this.threadPoolTaskExecutor.execute(notifyTask);
 
         List<WeEvent> data1 = new ArrayList<>();
-        this.event.setEventId("a");
-        data1.add(this.event);
-        this.event.setEventId("b");
-        data1.add(this.event);
+        data1.add(this.newEvent("a"));
+        data1.add(this.newEvent("a"));
         notifyTask.push(data1);
 
         List<WeEvent> data2 = new ArrayList<>();
-        this.event.setEventId("c");
-        data2.add(this.event);
+        data2.add(this.newEvent("c"));
         notifyTask.push(data2);
 
         Thread.sleep(wait3s);
@@ -145,17 +144,13 @@ public class NotifyTaskTest extends JUnitTestBase {
         this.threadPoolTaskExecutor.execute(notifyTask);
 
         List<WeEvent> data1 = new ArrayList<>();
-        this.event.setEventId("a");
-        data1.add(this.event);
-        this.event.setEventId("b");
-        data1.add(this.event);
+        data1.add(this.newEvent("a"));
+        data1.add(this.newEvent("b"));
         notifyTask.push(data1);
 
         List<WeEvent> data2 = new ArrayList<>();
-        this.event.setEventId("a");
-        data2.add(this.event);
-        this.event.setEventId("b");
-        data2.add(this.event);
+        data2.add(this.newEvent("a"));
+        data2.add(this.newEvent("b"));
         notifyTask.push(data2);
 
         Thread.sleep(wait3s);
