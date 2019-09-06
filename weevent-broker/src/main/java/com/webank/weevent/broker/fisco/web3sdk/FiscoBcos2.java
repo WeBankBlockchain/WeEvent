@@ -75,6 +75,10 @@ public class FiscoBcos2 {
         }
     }
 
+    public void setListener(FiscoBcosDelegate.IBlockEventListener listener) {
+        Web3SDK2Wrapper.setBlockNotifyCallBack(this.web3j, listener);
+    }
+
     public List<String> listGroupId() throws BrokerException {
         return Web3SDK2Wrapper.listGroupId(this.web3j);
     }
