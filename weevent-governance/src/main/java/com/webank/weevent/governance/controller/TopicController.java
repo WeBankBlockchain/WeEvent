@@ -51,4 +51,14 @@ public class TopicController {
         return topicService.open(topicCreateEntity.getBrokerId(), topicCreateEntity.getTopic(),
                 topicCreateEntity.getCreater(), request, response);
     }
+
+    @RequestMapping(value = "/topicInfo")
+    public Topic getTopicInfo(@RequestParam(name = "brokerId") Integer brokerId,
+                              @RequestParam(name = "topic") String topic,
+                              @RequestParam(name = "groupId", required = false) String groupId,
+                              HttpServletRequest request) throws GovernanceException {
+
+        log.info("brokerId: {}, topicName: {}, groupId: {}", brokerId, topic, groupId);
+        return topicService.getTopicInfo(brokerId, topic, groupId, request);
+    }
 }
