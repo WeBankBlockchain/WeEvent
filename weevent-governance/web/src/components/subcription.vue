@@ -69,7 +69,7 @@ export default {
       let vm = this
       vm.tableData = []
       vm.loading = true
-      let url = '?brokerId=' + localStorage.getItem('brokerId')
+      let url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId')
       API.subscription(url).then(res => {
         if (res.status === 200) {
           let data = res.data
@@ -151,10 +151,16 @@ export default {
   computed: {
     brokerId () {
       return this.$store.state.brokerId
+    },
+    groupId () {
+      return this.$store.state.groupId
     }
   },
   watch: {
     brokerId () {
+      this.update()
+    },
+    groupId () {
       this.update()
     }
   },
