@@ -13,7 +13,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-		id,create_date, last_update,is_delete, username, password, email
+		id,create_date, last_update, username, password, email
 	</sql>
     <select id="accountList" resultMap="BaseResultMap"
             parameterType="com.webank.weevent.governance.entity.AccountEntity">

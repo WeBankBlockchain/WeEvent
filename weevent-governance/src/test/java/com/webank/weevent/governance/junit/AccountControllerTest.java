@@ -2,6 +2,7 @@ package com.webank.weevent.governance.junit;
 
 import com.webank.weevent.governance.JUnitTestBase;
 
+import com.alibaba.fastjson.JSONObject;
 import org.apache.http.HttpStatus;
 import org.junit.Assert;
 import org.junit.Before;
@@ -32,8 +33,9 @@ public class AccountControllerTest extends JUnitTestBase {
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/user/getUserId?username=zjy05").contentType(MediaType.APPLICATION_JSON_UTF8)).andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Assert.assertTrue(response.getContentAsString().contains("200"));
-
+        JSONObject jsonObject = JSONObject.parseObject(response.getContentAsString());
+        Assert.assertNotNull(jsonObject);
+        Assert.assertEquals(jsonObject.get("status").toString(), "200");
     }
 
     @Test
@@ -42,7 +44,9 @@ public class AccountControllerTest extends JUnitTestBase {
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Assert.assertTrue(response.getContentAsString().contains("200"));
+        JSONObject jsonObject = JSONObject.parseObject(response.getContentAsString());
+        Assert.assertNotNull(jsonObject);
+        Assert.assertEquals(jsonObject.get("status").toString(), "200");
 
     }
 
@@ -53,7 +57,9 @@ public class AccountControllerTest extends JUnitTestBase {
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Assert.assertTrue(response.getContentAsString().contains("200"));
+        JSONObject jsonObject = JSONObject.parseObject(response.getContentAsString());
+        Assert.assertNotNull(jsonObject);
+        Assert.assertEquals(jsonObject.get("status").toString(), "200");
 
     }
 
@@ -63,7 +69,9 @@ public class AccountControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/user/register").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Assert.assertTrue(response.getContentAsString().contains("200"));
+        JSONObject jsonObject = JSONObject.parseObject(response.getContentAsString());
+        Assert.assertNotNull(jsonObject);
+        Assert.assertEquals(jsonObject.get("status").toString(), "200");
 
     }
 

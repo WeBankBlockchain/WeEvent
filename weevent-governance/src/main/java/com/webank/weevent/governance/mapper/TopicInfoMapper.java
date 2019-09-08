@@ -1,5 +1,7 @@
 package com.webank.weevent.governance.mapper;
 
+import java.util.List;
+
 import com.webank.weevent.governance.entity.TopicEntity;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -9,15 +11,12 @@ import org.apache.ibatis.annotations.Param;
 public interface TopicInfoMapper {
 
     // get creater by topicName
-    String getCreaterByName(@Param(value = "topicName") String topicName);
+ //   String getCreaterByName(@Param(value = "topicName") String topicName);
 
-    String getCreater(@Param("brokerId") Integer brokerId, @Param("topicName") String topicName);
+    List<TopicEntity> getCreator(@Param("brokerId") Integer brokerId,@Param("topicNameList") List<String> topicNameList);
 
     // save creater into database
-    Boolean openTopic(@Param(value = "topicName") String topicName, @Param(value = "creater") String creater);
-
-    Boolean openBrokeTopic(@Param("brokerId") Integer brokerId, @Param("topicName") String topicName,
-            @Param("creater") String creater);
+  //  Boolean openTopic(@Param(value = "topicName") String topicName, @Param(value = "creater") String creater);
 
 
     Boolean openBrokeTopic(@Param("topicEntity") TopicEntity topicEntity);

@@ -11,6 +11,7 @@ import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.AccountMapper;
+import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.utils.CookiesTools;
 
@@ -200,10 +201,11 @@ public class AccountService {
 
     public List<AccountEntity> accountEntityList(HttpServletRequest request, AccountEntity accountEntity) throws GovernanceException {
         // execute select
-        String accountId ="1"; //cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
+        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
         List<AccountEntity> list = accountMapper.accountList(accountEntity);
         //filter current user
         list = list.stream().filter(it -> !it.getId().toString().equals(accountId)).collect(Collectors.toList());
+        list.forEach(it -> it.setPassword(null));
         return list;
     }
 

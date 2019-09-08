@@ -14,7 +14,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-       id,create_date, last_update, is_delete , topic_name, creater, broker_id,description
+       id,create_date, last_update , topic_name, creater, broker_id,description
     </sql>
 
     <select id="getTopic" resultMap="BaseResultMap"
@@ -25,11 +25,14 @@
     </select>
 
 
-    <select id="getCreater" resultType="java.lang.String">
-        select creater
+    <select id="getCreator" resultMap="BaseResultMap">
+        select creater,broker_id,topic_name
         from t_topic where is_delete=0
-        <if test="topicName != null and topicName !=''">
-            AND topic_name = #{topicName}
+        <if test="topicNameList != null and topicNameList.size()>0">
+            AND topic_name in
+            <foreach collection="topicNameList" index="topic" open="(" separator="," close=")">
+                #{topic}
+            </foreach>
         </if>
         <if test="brokerId != null">
             AND broker_id = #{brokerId}
@@ -37,16 +40,25 @@
     </select>
 
     <insert id="openBrokeTopic" parameterType="com.webank.weevent.governance.entity.TopicEntity">
-            insert into t_topic(broker_id,
-            topic_name,
-            creater,
-            description)
-            values(
-            #{topicEntity.brokerId},
-            #{topicEntity.topicName},
-            #{topicEntity.creater},
-            #{topicEntity.description}
-            )
+        <selectKey keyProperty="count" resultType="int" order="BEFORE">
+            select count(*) from t_topic where broker_id=#{topicEntity.brokerId} and topic_name =
+            #{topicEntity.topicName} and is_delete=0
+        </selectKey>
+        <if test="count > 0">
+            update t_topic
+            <set>
+                <if test="topicEntity.creater != null">
+                    creater= #{topicEntity.creater}
+                </if>
+            </set>
+            <where>
+                topic_name = #{topicEntity.topicName} and broker_id=#{topicEntity.brokerId} and is_delete=0
+            </where>
+        </if>
+        <if test="count==0">
+            insert into t_topic(broker_id,topic_name,creater,description) values
+            (#{topicEntity.brokerId},#{topicEntity.topicName},#{topicEntity.creater},#{topicEntity.description})
+        </if>
     </insert>
 
     <delete id="deleteTopicInfo" parameterType="java.lang.Integer">

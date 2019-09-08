@@ -30,12 +30,12 @@ public class PermissionControllerTest extends JUnitTestBase {
 
 
     @Test
-    public void testTopicList() throws Exception {
+    public void testPermissionList() throws Exception {
         String content = "{\"brokerId\":\"1\"}";
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/permission/permissionList").contentType(MediaType.APPLICATION_JSON_UTF8).content(content)).andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Assert.assertTrue(response.getContentAsString().contains("200"));
+        Assert.assertTrue(response.getContentAsString().contains("true"));
     }
 
 

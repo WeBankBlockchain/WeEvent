@@ -14,7 +14,7 @@
 	</resultMap>
 
 	<sql id="Base_Column_List" >
-        id,create_date,last_update,is_delete, user_id, name, broker_url, webase_url
+        id,create_date,last_update, user_id, name, broker_url, webase_url
     </sql>
 
 	<select id="getBroker" resultMap="BaseResultMap">
