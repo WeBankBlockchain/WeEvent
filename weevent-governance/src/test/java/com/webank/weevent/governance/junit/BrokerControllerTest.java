@@ -34,7 +34,7 @@ public class BrokerControllerTest extends JUnitTestBase {
 
     @Test
     public void testAddBroker() throws Exception {
-        String content = "{\"name\":\"broker2\",\"brokerUrl\":\"http://192.168.174.128:7000/weevent\",\"webaseUrl\":\"http://127.0.0.1:7000/weevent\",\"userId\":\"1\"}";
+        String content = "{\"name\":\"broker2\",\"brokerUrl\":\"http://127.0.0.1:7000/weevent\",\"webaseUrl\":\"http://127.0.0.1:7000/weevent\",\"userId\":\"1\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
@@ -43,7 +43,7 @@ public class BrokerControllerTest extends JUnitTestBase {
 
     @Test
     public void testUpdateBroker() throws Exception {
-        String content = "{\"id\":\"1\",\"name\":\"broker1\",\"brokerUrl\":\"http://192.168.174.128:7000/weevent\",\"webaseUrl\":\"http://127.0.0.1:8080/webase-node-mgr\",\"userId\":\"1\"}";
+        String content = "{\"id\":\"1\",\"name\":\"broker1\",\"brokerUrl\":\"http://127.0.0.1:7000/weevent\",\"webaseUrl\":\"http://127.0.0.1:8080/webase-node-mgr\",\"userId\":\"1\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.put("/broker").contentType(MediaType.APPLICATION_JSON_UTF8).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
