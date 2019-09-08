@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.entity.TopicCreateEntity;
+import com.webank.weevent.governance.entity.TopicEntity;
 import com.webank.weevent.governance.entity.TopicPage;
 import com.webank.weevent.governance.entity.TopicPageEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
@@ -53,10 +54,10 @@ public class TopicController {
     }
 
     @RequestMapping(value = "/topicInfo")
-    public Topic getTopicInfo(@RequestParam(name = "brokerId") Integer brokerId,
-                              @RequestParam(name = "topic") String topic,
-                              @RequestParam(name = "groupId", required = false) String groupId,
-                              HttpServletRequest request) throws GovernanceException {
+    public TopicEntity getTopicInfo(@RequestParam(name = "brokerId") Integer brokerId,
+                                    @RequestParam(name = "topic") String topic,
+                                    @RequestParam(name = "groupId", required = false) String groupId,
+                                    HttpServletRequest request) throws GovernanceException {
 
         log.info("brokerId: {}, topicName: {}, groupId: {}", brokerId, topic, groupId);
         return topicService.getTopicInfo(brokerId, topic, groupId, request);

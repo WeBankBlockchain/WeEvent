@@ -20,6 +20,8 @@ import com.webank.weevent.governance.utils.CookiesTools;
 import com.webank.weevent.governance.utils.SpringContextUtil;
 
 import com.alibaba.fastjson.JSON;
+import com.sun.corba.se.pept.broker.Broker;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -29,7 +31,6 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * topic service
@@ -122,10 +123,10 @@ public class TopicService {
         return null;
     }
 
-    public Topic getTopicInfo(Integer brokerId, String topic, String groupId, HttpServletRequest request) throws GovernanceException {
+    public TopicEntity getTopicInfo(Integer brokerId, String topic, String groupId, HttpServletRequest request) throws GovernanceException {
 
         String accountId = this.cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-        Broker broker = this.brokerService.getBroker(brokerId);
+        BrokerEntity broker = this.brokerService.getBroker(brokerId);
         if (StringUtils.isBlank(accountId) || broker == null || !accountId.equals(String.valueOf(broker.getUserId()))){
             log.error("get topicInfo failed, brokerId:{}, topic:{}, groupId:{}.", brokerId, topic, groupId);
             throw new GovernanceException(ErrorCode.ACCESS_DENIED);
@@ -147,7 +148,7 @@ public class TopicService {
             String mes = EntityUtils.toString(closeResponse.getEntity());
             log.info("getTopicInfo result json: " + mes);
             JSON json = JSON.parseObject(mes);
-            Topic result = JSON.toJavaObject(json, Topic.class);
+            TopicEntity result = JSON.toJavaObject(json, TopicEntity.class);
 
             if (result != null) {
                 // get creator from database
