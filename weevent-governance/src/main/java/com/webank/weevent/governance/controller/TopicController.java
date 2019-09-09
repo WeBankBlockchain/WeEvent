@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TopicController {
 
     @Autowired
-    TopicService topicService;
+    private TopicService topicService;
 
     @RequestMapping(value = "/close")
     public Boolean close(@RequestParam("brokerId") Integer brokerId, @RequestParam String topic,
