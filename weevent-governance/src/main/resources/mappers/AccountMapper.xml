@@ -47,7 +47,7 @@
 	</update>
 
     <select id="countAccount" parameterType="com.webank.weevent.governance.entity.AccountEntity"
-            resultType="java.lang.Integer">
+            resultType="int">
         select count(*) from t_account
         <if test="id != null">
             and id = #{id}

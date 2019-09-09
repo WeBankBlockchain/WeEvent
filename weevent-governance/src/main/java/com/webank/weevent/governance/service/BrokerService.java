@@ -96,7 +96,7 @@ public class BrokerService {
     }
 
     private List<PermissionEntity> createPerMissionList(BrokerEntity brokerEntity) {
-        log.info("brokerId: {}",brokerEntity.getId());
+        log.info("brokerId: {}", brokerEntity.getId());
         List<PermissionEntity> permissionEntityList = new ArrayList<>();
         List<Integer> userIdList = brokerEntity.getUserIdList();
         if (userIdList == null) {
@@ -113,17 +113,19 @@ public class BrokerService {
 
     private void checkUrl(String url, String afterUrl, HttpServletRequest request) throws GovernanceException {
         // get httpclient
-        CloseableHttpClient client = generateHttpClient(url);
+        String headUrl = url;
+        CloseableHttpClient client = generateHttpClient(headUrl);
         // get one of broker urls
-        url = url + afterUrl;
-        HttpGet get = getMethod(url, request);
+        headUrl = headUrl + afterUrl;
+        HttpGet get = getMethod(headUrl, request);
         try {
             client.execute(get);
         } catch (Exception e) {
-            log.error("url {}, connect fail,error:{}", url, e.getMessage());
-            throw new GovernanceException("url " + url + " connect fail", e);
+            log.error("url {}, connect fail,error:{}", headUrl, e.getMessage());
+            throw new GovernanceException("url " + headUrl + " connect fail", e);
         }
     }
+
     @Transactional(rollbackFor = Throwable.class)
     public GovernanceResult deleteBroker(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
         authCheck(brokerEntity, request);
@@ -132,6 +134,7 @@ public class BrokerService {
         permissionMapper.deletePermission(brokerEntity.getId());
         return GovernanceResult.ok(true);
     }
+
     @Transactional(rollbackFor = Throwable.class)
     public GovernanceResult updateBroker(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {

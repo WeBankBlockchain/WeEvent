@@ -17,13 +17,6 @@
        id,create_date, last_update , topic_name, creater, broker_id,description
     </sql>
 
-    <select id="getTopic" resultMap="BaseResultMap"
-            parameterType="java.lang.Long">
-        select
-        <include refid="Base_Column_List"/>
-        from t_topic where id=#{id} and is_delete=0
-    </select>
-
 
     <select id="getCreator" resultMap="BaseResultMap">
         select creater,broker_id,topic_name

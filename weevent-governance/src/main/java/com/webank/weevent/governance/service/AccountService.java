@@ -18,7 +18,6 @@ import com.webank.weevent.governance.utils.CookiesTools;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -44,7 +43,7 @@ public class AccountService {
     private CookiesTools cookiesTools;
 
     @PostConstruct
-    public void init() {
+    public void init() throws GovernanceException {
         try {
             // check database contain admin
             AccountEntity accountEntity = this.queryByUsername("admin");
@@ -58,7 +57,7 @@ public class AccountService {
             }
         } catch (Exception e) {
             log.error(e.getMessage());
-            System.exit(SpringApplication.exit(context));
+            throw new GovernanceException("init admin account fail,error:{}", e);
         }
     }
 

@@ -9,7 +9,6 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface AccountMapper {
 
-
     int insertAccount(AccountEntity accountEntity);
 
     List<AccountEntity> accountList(AccountEntity accountEntity);
@@ -18,5 +17,6 @@ public interface AccountMapper {
 
     int deleteAccount(Integer id);
 
-    int AccountEntity(AccountEntity accountEntity);
+    int countAccount(AccountEntity accountEntity);
+
 }

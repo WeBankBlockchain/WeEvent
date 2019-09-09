@@ -37,7 +37,7 @@ CREATE TABLE  t_topic (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment 't_topic';
 
 
-CREATE TABLE `t_permission` (
+CREATE TABLE t_permission (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
   `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create date',
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP comment 'update date',
