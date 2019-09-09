@@ -12,11 +12,11 @@ import lombok.Data;
 @Data
 public class TopicPage {
 
-    Integer total;
+    private Integer total;
 
-    Integer pageIndex;
+    private Integer pageIndex;
 
-    Integer pageSize;
+    private Integer pageSize;
 
-    List<TopicEntity> topicInfoList;
+    private List<TopicEntity> topicInfoList;
 }
