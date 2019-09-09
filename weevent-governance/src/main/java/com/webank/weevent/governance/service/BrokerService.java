@@ -35,7 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @since 2019/04/28
  */
 @Service
-@Transactional(rollbackFor = Throwable.class)
 @Slf4j
 public class BrokerService {
 
@@ -73,6 +72,7 @@ public class BrokerService {
         return brokerMapper.getBroker(id);
     }
 
+    @Transactional(rollbackFor = Throwable.class)
     public GovernanceResult addBroker(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
@@ -124,7 +124,7 @@ public class BrokerService {
             throw new GovernanceException("url " + url + " connect fail", e);
         }
     }
-
+    @Transactional(rollbackFor = Throwable.class)
     public GovernanceResult deleteBroker(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
         authCheck(brokerEntity, request);
         topicInfoMapper.deleteByBrokerId(brokerEntity.getId());
@@ -132,7 +132,7 @@ public class BrokerService {
         permissionMapper.deletePermission(brokerEntity.getId());
         return GovernanceResult.ok(true);
     }
-
+    @Transactional(rollbackFor = Throwable.class)
     public GovernanceResult updateBroker(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         authCheck(brokerEntity, request);
