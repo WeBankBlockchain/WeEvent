@@ -1,4 +1,4 @@
-package com.webank.weevent.jemeter.configuration;
+package com.webank.weevent.jmeter.config;
 
 import java.net.URL;
 
@@ -10,14 +10,12 @@ import com.googlecode.jsonrpc4j.ProxyUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
 @Slf4j
 public class JMeterConfiguration {
 
 
-    @Value("${weevent.broker.url:(127.0.0.1:8080)}")
+    @Value("${weevent.broker.url:(127.0.0.1:7000)}")
     private String url;
 
     private final static String HTTP_HEADER = "http://";
