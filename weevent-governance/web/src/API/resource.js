@@ -9,6 +9,9 @@ class ResoruceService extends BaseModel {
   loginOut (data) {
     return this.request(api.loginOut, data)
   }
+  listGroup (data) {
+    return this.request(api.listGroup, data)
+  }
   topicList (data) {
     return this.request(api.topicList, data)
   }
@@ -17,6 +20,9 @@ class ResoruceService extends BaseModel {
   }
   topicState (data) {
     return this.request(api.topicState, data)
+  }
+  topicInfo (data) {
+    return this.request(api.topicInfo, data)
   }
   subscription (data) {
     return this.request(api.subscription, data)

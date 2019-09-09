@@ -35,6 +35,7 @@ import org.fisco.bcos.web3j.precompile.crud.Condition;
 import org.fisco.bcos.web3j.precompile.crud.Table;
 import org.fisco.bcos.web3j.precompile.exception.PrecompileMessageException;
 import org.fisco.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.web3j.protocol.Web3jService;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameterNumber;
 import org.fisco.bcos.web3j.protocol.core.JsonRpc2_0Web3j;
@@ -46,6 +47,7 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.GroupList;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tx.Contract;
 import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
@@ -114,13 +116,16 @@ public class Web3SDK2Wrapper {
 
             // connect key and string
             GroupChannelConnectionsConfig connectionsConfig = new GroupChannelConnectionsConfig();
+            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+            connectionsConfig.setCaCert(resolver.getResource("classpath:" + fiscoConfig.getV2CaCrtPath()));
+            connectionsConfig.setSslCert(resolver.getResource("classpath:" + fiscoConfig.getV2NodeCrtPath()));
+            connectionsConfig.setSslKey(resolver.getResource("classpath:" + fiscoConfig.getV2NodeKeyPath()));
+
             ChannelConnections channelConnections = new ChannelConnections();
             channelConnections.setGroupId(groupId.intValue());
-            channelConnections.setCaCertPath("classpath:" + fiscoConfig.getV2CaCrtPath());
-            channelConnections.setNodeCaPath("classpath:" + fiscoConfig.getV2NodeCrtPath());
-            channelConnections.setNodeKeyPath("classpath:" + fiscoConfig.getV2NodeKeyPath());
             channelConnections.setConnectionsStr(Arrays.asList(fiscoConfig.getNodes().split(";")));
             connectionsConfig.setAllChannelConnections(Arrays.asList(channelConnections));
+
             service.setAllChannelConnections(connectionsConfig);
             service.setThreadPool(poolTaskExecutor);
             service.run();
@@ -130,8 +135,13 @@ public class Web3SDK2Wrapper {
             channelEthereumService.setTimeout(web3sdkTimeout);
             Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
 
-            // check connect with getBlockNumber command
-            web3j.getBlockNumber().send().getBlockNumber();
+            // check connect with getNodeVersion command
+            String nodeVersion = web3j.getNodeVersion().send().getNodeVersion().getVersion();
+            if (StringUtils.isBlank(nodeVersion)
+                    || !nodeVersion.contains(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {
+                log.error("init web3sdk failed, mismatch FISCO-BCOS version in node: {}", nodeVersion);
+                throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
+            }
 
             log.info("initialize web3sdk success, group id: {}", groupId);
             return web3j;
@@ -139,6 +149,13 @@ public class Web3SDK2Wrapper {
             log.error("init web3sdk failed, group id: " + groupId, e);
             throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
         }
+    }
+
+    public static void setBlockNotifyCallBack(Web3j web3j, FiscoBcosDelegate.IBlockEventListener listener) {
+        Web3jService web3jService = ((JsonRpc2_0Web3j) web3j).web3jService();
+        ((ChannelEthereumService) web3jService).getChannelService().setBlockNotifyCallBack(
+                (int groupID, BigInteger blockNumber) -> listener.onEvent((long) groupID, blockNumber.longValue())
+        );
     }
 
     public static List<String> listGroupId(Web3j web3j) throws BrokerException {

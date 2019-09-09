@@ -1,6 +1,6 @@
 package com.webank.weevent.sdk;
 
-import java.util.Map;
+import lombok.NonNull;
 
 /**
  * Java Client for WeEvent
@@ -44,16 +44,6 @@ public interface IWeEventClient {
     }
 
     /**
-     * Publish an event to topic.
-     *
-     * @param topic topic name
-     * @param content topic data
-     * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
-     * @throws BrokerException broker exception
-     */
-    SendResult publish(String topic, byte[] content) throws BrokerException;
-
-    /**
      * Interface for notify callback
      */
     interface EventListener {
@@ -81,7 +71,7 @@ public interface IWeEventClient {
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
-    String subscribe(String topic, String offset, EventListener listener) throws BrokerException;
+    String subscribe(String topic, String offset, @NonNull EventListener listener) throws BrokerException;
 
     /**
      * Unsubscribe an exist subscription subscribed by subscribe interface.
@@ -153,14 +143,22 @@ public interface IWeEventClient {
     /**
      * Publish an event to topic.
      *
-     * @param topic topic name
+     * @param weEvent WeEvent(String topic, byte[] content, Map extensions)
      * @param groupId chain groupId
-     * @param content topic data
-     * @param extensions User-defined extensions
      * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
      * @throws BrokerException broker exception
      */
-    SendResult publish(String topic, String groupId, byte[] content, Map<String, String> extensions) throws BrokerException;
+    SendResult publish(WeEvent weEvent, String groupId) throws BrokerException;
+
+
+    /**
+     * Publish an event to topic.
+     *
+     * @param weEvent WeEvent(String topic, byte[] content, Map extensions)
+     * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
+     * @throws BrokerException broker exception
+     */
+    SendResult publish(WeEvent weEvent) throws BrokerException;
 
     /**
      * Subscribe events from topic.
@@ -172,7 +170,7 @@ public interface IWeEventClient {
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
-    String subscribe(String topic, String groupId, String offset, IWeEventClient.EventListener listener) throws BrokerException;
+    String subscribe(String topic, String groupId, String offset, @NonNull EventListener listener) throws BrokerException;
 
     /**
      * Subscribe events from topic.
@@ -185,18 +183,8 @@ public interface IWeEventClient {
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
-    String subscribe(String topic, String groupId, String offset, String subscriptionId, IWeEventClient.EventListener listener) throws BrokerException;
+    String subscribe(String topic, String groupId, String offset, String subscriptionId, @NonNull EventListener listener) throws BrokerException;
 
-    /**
-     * Publish an event to topic.
-     *
-     * @param topic topic name
-     * @param content topic data
-     * @param extensions User-defined extensions
-     * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
-     * @throws BrokerException broker exception
-     */
-    SendResult publish(String topic, byte[] content, Map<String, String> extensions) throws BrokerException;
 
     /**
      * Close a topic.

@@ -2,6 +2,7 @@ package com.webank.weevent.sdk.jms;
 
 
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 import javax.jms.JMSException;
 
@@ -34,7 +35,6 @@ public class WeEventStompCommand {
     private String headerId;
 
     public WeEventStompCommand() {
-
     }
 
     public WeEventStompCommand(WeEvent event) {
@@ -84,7 +84,7 @@ public class WeEventStompCommand {
             accessor.setNativeHeader("groupId", topic.getGroupId());
         }
         if (!StringUtils.isBlank(topic.getContinueSubscriptionId())) {
-            accessor.setNativeHeader("weevent-subscriptionId", topic.getContinueSubscriptionId());
+            accessor.setNativeHeader(WeEvent.WeEvent_SubscriptionId, topic.getContinueSubscriptionId());
         }
         return encodeRaw(accessor);
     }
@@ -97,7 +97,7 @@ public class WeEventStompCommand {
         if (!StringUtils.isBlank(topic.getGroupId())) {
             accessor.setNativeHeader("groupId", topic.getGroupId());
         }
-        accessor.setNativeHeader("weevent-subscriptionId", continueSubscriptionId);
+        accessor.setNativeHeader(WeEvent.WeEvent_SubscriptionId, continueSubscriptionId);
         return encodeRaw(accessor);
     }
 
@@ -110,13 +110,18 @@ public class WeEventStompCommand {
     }
 
     // payload is WeEvent
-    public String encodeSend(WeEventTopic topic, byte[] payload, Long id) throws JMSException {
+    public String encodeSend(WeEventTopic topic, byte[] payload, Long id, WeEvent weEvent) throws JMSException {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SEND);
         accessor.setDestination(topic.getTopicName());
         accessor.setContentType(new MimeType("application", "json", StandardCharsets.UTF_8));
         accessor.setContentLength(payload.length);
         accessor.setNativeHeader("receipt", Long.toString(id));
-
+        if (!StringUtils.isBlank(topic.getGroupId())) {
+            accessor.setNativeHeader("groupId", topic.getGroupId());
+        }
+        for (Map.Entry<String, String> entry : weEvent.getExtensions().entrySet()) {
+            accessor.setNativeHeader(entry.getKey(), entry.getValue());
+        }
         return encodeRaw(accessor, payload);
     }
 

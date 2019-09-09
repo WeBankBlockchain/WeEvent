@@ -1,5 +1,6 @@
 package com.webank.weevent.sdk.jsonrpc;
 
+import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.sdk.BrokerException;
@@ -45,25 +46,6 @@ public interface IBrokerRpc {
         return null;
     }
 
-    // Interface for consumer.
-    String subscribe(@JsonRpcParam(value = "topic") String topic,
-                     @JsonRpcParam(value = "groupId") String groupId,
-                     @JsonRpcParam(value = "subscriptionId") String subscriptionId,
-                     @JsonRpcParam(value = "url") String url) throws BrokerException;
-
-    default String subscribe(@JsonRpcParam(value = "topic") String topic,
-                             @JsonRpcParam(value = "subscriptionId") String subscriptionId,
-                             @JsonRpcParam(value = "url") String url) throws BrokerException {
-        return null;
-    }
-
-    default String subscribe(@JsonRpcParam(value = "topic") String topic,
-                             @JsonRpcParam(value = "url") String url) throws BrokerException {
-        return null;
-    }
-
-    boolean unSubscribe(@JsonRpcParam(value = "subscriptionId") String subscriptionId) throws BrokerException;
-
     // The following is interface for IEventTopic.
     boolean open(@JsonRpcParam(value = "topic") String topic,
                  @JsonRpcParam(value = "groupId") String groupId) throws BrokerException;
@@ -108,4 +90,7 @@ public interface IBrokerRpc {
     default WeEvent getEvent(@JsonRpcParam(value = "eventId") String eventId) throws BrokerException {
         return null;
     }
+
+    List<String> listGroup() throws BrokerException;
+
 }

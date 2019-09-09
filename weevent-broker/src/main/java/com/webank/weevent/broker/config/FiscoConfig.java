@@ -26,7 +26,7 @@ public class FiscoConfig {
     @Value("${version:}")
     private String version;
 
-    @Value("${orgid:}")
+    @Value("${orgid:fisco}")
     private String orgId;
 
     @Value("${nodes:}")
@@ -35,7 +35,7 @@ public class FiscoConfig {
     @Value("${proxy.address:}")
     private String proxyAddress;
 
-    @Value("${account:}")
+    @Value("${account:bcec428d5205abe0f0cc8a734083908d9eb8563e31f943d760786edf42ad67dd}")
     private String account;
 
     @Value("${web3sdk.timeout:10000}")
@@ -65,13 +65,13 @@ public class FiscoConfig {
     @Value("${v1.key-store-password:123456}")
     private String v1KeyStorePassword;
 
-    @Value("${v2.ca-crt-path:./v2/ca.crt}")
+    @Value("${v2.ca-crt-path:v2/ca.crt}")
     private String v2CaCrtPath;
 
-    @Value("${v2.node-crt-path:./v2/node.crt}")
+    @Value("${v2.node-crt-path:v2/node.crt}")
     private String v2NodeCrtPath;
 
-    @Value("${v2.node-key-path:./v2/node.key}")
+    @Value("${v2.node-key-path:v2/node.key}")
     private String v2NodeKeyPath;
 
     @Value("${consumer.idle-time:1000}")

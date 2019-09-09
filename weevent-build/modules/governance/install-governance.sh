@@ -13,7 +13,7 @@ function governance_setup() {
         echo "set server_port failed"
         exit 1
     else
-       sed -i "s/port:.*$/port: ${server_port}/" ${out_path}/conf/application-prod.properties
+       sed -i "/server.port*/cserver.port=${server_port}" ${out_path}/conf/application-prod.properties
     fi
     echo "set server_port success"
 
@@ -49,7 +49,7 @@ function governance_setup() {
         echo "set mysql_pwd failed"
         exit 1
     else
-       sed -i "s/yyyy/\"${mysql_pwd}\"/" ${out_path}/conf/application-prod.properties
+       sed -i "s/yyyy/${mysql_pwd}/" ${out_path}/conf/application-prod.properties
     fi
     echo "set mysql_pwd success"
        
@@ -68,9 +68,6 @@ function governance_setup() {
 
 #get parameter
 para=""
-conf_path="./conf"
-apps_path="./apps"
-installPWD=$(dirname $(dirname `pwd`))
 
 # usage
 if [[ $# -lt 2 ]]; then
@@ -86,7 +83,7 @@ mysql_port=""
 mysql_user=""
 mysql_pwd=""
 out_path=""
-current_path=`pwd`
+current_path=$(pwd)
 echo "current path $current_path"
 
 while [[ $# -ge 2 ]] ; do
@@ -97,9 +94,6 @@ while [[ $# -ge 2 ]] ; do
         --mysql_port) para="$1 = $2;";mysql_port="$2";shift 2;;
         --mysql_user) para="$1 = $2;";mysql_user="$2";shift 2;;
         --mysql_pwd) para="$1 = $2;";mysql_pwd="$2";shift 2;;
-        --broker_port) para="$1 = $2;";broker_port="$2";shift 2;;
-        --bee_ip) para="$1 = $2;";bee_ip="$2";shift 2;;
-        --bee_port) para="$1 = $2;";bee_port="$2";shift 2;;     
         *) echo "unknown parameter $1." ; exit 1 ; break;;
     esac
 done

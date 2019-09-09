@@ -17,8 +17,8 @@ function usage(){
 version=""
 tag="master"
 
-current_path=`pwd`
-top_path=`dirname ${current_path}`
+current_path=$(pwd)
+top_path=$(dirname ${current_path})
 out_path=""
 
 while [[ $# -ge 2 ]] ; do
@@ -57,7 +57,7 @@ function confirm(){
 # chmod & dos2unix
 function set_permission(){
     cd ${out_path}
-    find -type f -regex  ".*\.\(sh\|ini\|properties\|yml\|xml\)" | xargs dos2unix
+    find -type f -regex  ".*\.\(sh\|ini\|properties\|xml\)" | xargs dos2unix
     find -type f -regex ".*\.\(sh\)" | xargs -t -i chmod +x {}
 }
 
@@ -76,12 +76,16 @@ function build_weevent(){
     fi
 
     # node.js build html and css
+    yellow_echo "build web in node.js"
     cd ${top_path}/weevent-governance/web
     ./build-web.sh
 
-    # gradle build
+    # gradle clean then build
+    yellow_echo "build java in gradle"
     cd ${top_path}
-    gradle clean build -x test
+    ./gradlew clean
+    execute_result "clean weevent"
+    ./gradlew build -x test
     execute_result "build weevent"
 }
 
@@ -108,18 +112,12 @@ function copy_install_file(){
 function switch_to_prod(){
     cd ${current_path}
 
-    if [[ -e ${out_path}/modules/broker/conf/application-dev.properties ]]; then
-        rm ${out_path}/modules/broker/conf/application-dev.properties
-    fi
-
+    rm -rf ${out_path}/modules/broker/conf/application-dev.properties
     if [[ -e ${out_path}/modules/broker/conf/application.properties ]]; then
         sed -i 's/dev/prod/' ${out_path}/modules/broker/conf/application.properties
     fi
 
-    if [[ -e ${out_path}/modules/governance/conf/application-dev.properties ]]; then
-        rm ${out_path}/modules/governance/conf/application-dev.properties
-    fi
-
+    rm -rf ${out_path}/modules/governance/conf/application-dev.properties
     if [[ -e ${out_path}/modules/governance/conf/application.properties ]]; then
         sed -i 's/dev/prod/' ${out_path}/modules/governance/conf/application.properties
     fi
@@ -132,7 +130,12 @@ function tar_broker(){
     cd ${out_path}/modules
 
     cp -r broker broker-${version}
-    tar -czpvf ${target} broker-${version}
+    # no need install shell
+    rm -rf broker-${version}/install-broker.sh
+
+    # do not tar the top dir
+    cd broker-${version}
+    tar -czpvf ${target} *
     mv ${target} ${current_path}
 }
 
@@ -143,7 +146,12 @@ function tar_governance(){
     cd ${out_path}/modules
 
     cp -r governance governance-${version}
-    tar -czpvf ${target} governance-${version}
+    # no need install shell
+    rm -rf governance-${version}/install-governance.sh
+
+    # do not tar the top dir
+    cd governance-${version}
+    tar -czpvf ${target} *
     mv ${target} ${current_path}
 }
 
@@ -167,7 +175,7 @@ function package(){
     # tar weevent
     yellow_echo "generate weevent-${version}.tar.gz"
     cd ${current_path}
-    tar -czpvf weevent-${version}.tar.gz `basename ${out_path}`
+    tar -czpvf weevent-${version}.tar.gz $(basename ${out_path})
 
     # tar broker module
     tar_broker weevent-broker-${version}.tar.gz

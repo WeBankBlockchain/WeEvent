@@ -37,7 +37,7 @@ start(){
     if [ "${total_memory}" -ge "${max_total_memory}" ];then
         JAVA_OPTS+=" -XX:TieredStopAtLevel=1 -Xms512m -Xmx2048m -XX:NewSize=256m -XX:MaxNewSize=1024m -XX:PermSize=128m"
     fi
-
+    
     nohup ${JAVA_HOME}/bin/java ${JAVA_OPTS} ${APP_PARAMS} >/dev/null 2>&1 &
     i=0
     while :
@@ -105,7 +105,7 @@ monitor(){
     else
         echo "$(date): ${server_name} is not running, restart ${server_name} now"
         start
-    fi
+    fi   
 }
 
 # command list

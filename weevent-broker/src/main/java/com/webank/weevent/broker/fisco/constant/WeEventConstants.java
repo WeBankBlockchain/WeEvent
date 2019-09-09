@@ -88,24 +88,6 @@ public class WeEventConstants {
     public static final String EVENT_CONTENT = "content";
 
     /**
-     * wildcard character for one layer.
-     * see MQTT specification.
-     */
-    public static final String WILD_CARD_ONE_LAYER = "+";
-
-    /**
-     * wildcard for one layer.
-     * see MQTT specification.
-     */
-    public static final String WILD_CARD_ALL_LAYER = "#";
-
-    /**
-     * character to split layer.
-     * see MQTT specification.
-     */
-    public static final String LAYER_SEPARATE = "/";
-
-    /**
      * check the API type,this is use for jsonrpc
      */
     public static final String JSONRPCTYPE = "jsonrpc";
@@ -124,5 +106,15 @@ public class WeEventConstants {
      * check the API type,this is use for mqtt
      */
     public static final String STOMPTYPE = "stomp";
+    
+    /**
+     * The prefix of FISCO-BCOS version 1.3.X
+     */
+    public static final String FISCO_BCOS_1_X_VERSION_PREFIX = "1.3";
+    
+    /**
+     * The prefix of FISCO-BCOS version 2.X
+     */
+    public static final String FISCO_BCOS_2_X_VERSION_PREFIX = "2.";
 
 }

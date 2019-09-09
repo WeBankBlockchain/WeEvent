@@ -1,4 +1,4 @@
-package com.webank.weevent.ST;
+package com.webank.weevent.st;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -38,7 +38,7 @@ public class JsonRpcTest extends JUnitTestBase {
     }
 
     @Test
-    public void testOpen_noGroupId() throws BrokerException {
+    public void testOpenNoGroupId() throws BrokerException {
         log.info("===================={}", this.testName.getMethodName());
 
         boolean open = iBrokerRpc.open(this.jsonTopic);
@@ -47,7 +47,7 @@ public class JsonRpcTest extends JUnitTestBase {
     }
 
     @Test
-    public void testOpen_withGroupId() throws BrokerException {
+    public void testOpenWithGroupId() throws BrokerException {
         log.info("===================={}", this.testName.getMethodName());
 
         boolean open = iBrokerRpc.open(this.jsonTopic, this.groupId);
@@ -56,7 +56,7 @@ public class JsonRpcTest extends JUnitTestBase {
     }
 
     @Test
-    public void testClose_noGroupId() throws BrokerException {
+    public void testCloseNoGroupId() throws BrokerException {
         log.info("===================={}", this.testName.getMethodName());
 
         boolean open = iBrokerRpc.close(this.jsonTopic);
@@ -65,7 +65,7 @@ public class JsonRpcTest extends JUnitTestBase {
     }
 
     @Test
-    public void testClose_withGroupId() throws BrokerException {
+    public void testCloseWithGroupId() throws BrokerException {
         log.info("===================={}", this.testName.getMethodName());
 
         boolean open = iBrokerRpc.close(this.jsonTopic, this.groupId);
@@ -74,7 +74,7 @@ public class JsonRpcTest extends JUnitTestBase {
     }
 
     @Test
-    public void testExist_noGroupId() throws BrokerException {
+    public void testExistNoGroupId() throws BrokerException {
         log.info("===================={}", this.testName.getMethodName());
 
         boolean exist = iBrokerRpc.exist(this.jsonTopic);
@@ -83,7 +83,7 @@ public class JsonRpcTest extends JUnitTestBase {
     }
 
     @Test
-    public void testExist_withGroupId() throws BrokerException {
+    public void testExistWithGroupId() throws BrokerException {
         log.info("===================={}", this.testName.getMethodName());
 
         boolean exist = iBrokerRpc.exist(this.jsonTopic, this.groupId);
@@ -92,7 +92,7 @@ public class JsonRpcTest extends JUnitTestBase {
     }
 
     @Test
-    public void testState_noGroupId() throws BrokerException {
+    public void testStateNoGroupId() throws BrokerException {
         log.info("===================={}", this.testName.getMethodName());
 
         TopicInfo state = iBrokerRpc.state(this.jsonTopic);
@@ -101,7 +101,7 @@ public class JsonRpcTest extends JUnitTestBase {
     }
 
     @Test
-    public void testState_withGroupId() throws BrokerException {
+    public void testStateWithGroupId() throws BrokerException {
         log.info("===================={}", this.testName.getMethodName());
 
         TopicInfo state = iBrokerRpc.state(this.jsonTopic, this.groupId);
@@ -110,7 +110,7 @@ public class JsonRpcTest extends JUnitTestBase {
     }
 
     @Test
-    public void testList_noGroupId() throws BrokerException {
+    public void testListNoGroupId() throws BrokerException {
         log.info("===================={}", this.testName.getMethodName());
 
         TopicPage list = iBrokerRpc.list(0, 10);
@@ -119,7 +119,7 @@ public class JsonRpcTest extends JUnitTestBase {
     }
 
     @Test
-    public void testList_withGroupId() throws BrokerException {
+    public void testListWithGroupId() throws BrokerException {
         log.info("===================={}", this.testName.getMethodName());
 
         TopicPage list = iBrokerRpc.list(0, 10, this.groupId);
@@ -128,7 +128,7 @@ public class JsonRpcTest extends JUnitTestBase {
     }
 
     @Test
-    public void testPublish_noGroupIdExt() throws BrokerException {
+    public void testPublishNoGroupIdExt() throws BrokerException {
         log.info("===================={}", this.testName.getMethodName());
 
         SendResult publish = iBrokerRpc.publish(this.jsonTopic, "Hello World!".getBytes());
@@ -137,7 +137,7 @@ public class JsonRpcTest extends JUnitTestBase {
     }
 
     @Test
-    public void testPublish_withGroupIdNoExt() throws BrokerException {
+    public void testPublishWithGroupIdNoExt() throws BrokerException {
         log.info("===================={}", this.testName.getMethodName());
 
         SendResult publish = iBrokerRpc.publish(this.jsonTopic, this.groupId, this.content.getBytes());
@@ -146,7 +146,7 @@ public class JsonRpcTest extends JUnitTestBase {
     }
 
     @Test
-    public void testPublish_noGroupId() throws BrokerException {
+    public void testPublishNoGroupId() throws BrokerException {
         log.info("===================={}", this.testName.getMethodName());
 
         Map<String, String> ext = new HashMap<>();
@@ -158,7 +158,7 @@ public class JsonRpcTest extends JUnitTestBase {
     }
 
     @Test
-    public void testPublish_withGroupId() throws BrokerException {
+    public void testPublishWithGroupId() throws BrokerException {
         log.info("===================={}", this.testName.getMethodName());
 
         Map<String, String> ext = new HashMap<>();
@@ -170,7 +170,7 @@ public class JsonRpcTest extends JUnitTestBase {
     }
 
     @Test
-    public void testPublish_contentEq10K() throws BrokerException {
+    public void testPublishContentEq10K() throws BrokerException {
         log.info("===================={}", this.testName.getMethodName());
 
         String str = get10KStr();
@@ -180,7 +180,7 @@ public class JsonRpcTest extends JUnitTestBase {
     }
 
     @Test
-    public void testPublish_contentGt10K() {
+    public void testPublishContentGt10K() {
         log.info("===================={}", this.testName.getMethodName());
 
         String str = get10KStr() + "s";
@@ -194,7 +194,7 @@ public class JsonRpcTest extends JUnitTestBase {
     }
 
     @Test
-    public void testPublish_extEq1K() throws BrokerException {
+    public void testPublishExtEq1K() throws BrokerException {
         log.info("===================={}", this.testName.getMethodName());
 
         Map<String, String> ext = get1KMap();
@@ -204,7 +204,7 @@ public class JsonRpcTest extends JUnitTestBase {
     }
 
     @Test
-    public void testPublish_extGt1K() {
+    public void testPublishExtGt1K() {
         log.info("===================={}", this.testName.getMethodName());
 
         Map<String, String> ext = get1KMap();
@@ -219,7 +219,7 @@ public class JsonRpcTest extends JUnitTestBase {
     }
 
     @Test
-    public void testGetEvent_noGroupId() throws BrokerException {
+    public void testGetEventNoGroupId() throws BrokerException {
         log.info("===================={}", this.testName.getMethodName());
 
         WeEvent event = iBrokerRpc.getEvent(this.eventId);
@@ -228,123 +228,12 @@ public class JsonRpcTest extends JUnitTestBase {
     }
 
     @Test
-    public void testGetEvent_withGroupId() throws BrokerException {
+    public void testGetEventWithGroupId() throws BrokerException {
         log.info("===================={}", this.testName.getMethodName());
 
         WeEvent event = iBrokerRpc.getEvent(this.eventId, this.groupId);
         log.info("getEvent : " + event);
         Assert.assertEquals(this.content, new String(event.getContent()));
-    }
-
-    @Test
-    public void testSubscribe_containTopicUrl() throws BrokerException {
-        log.info("===================={}", this.testName.getMethodName());
-
-        String subscriptionId = iBrokerRpc.subscribe(this.jsonTopic,
-                "http://localhost:" + listenPort + "/weevent/mock/jsonrpc");
-        Assert.assertNotNull(subscriptionId);
-        Assert.assertTrue(subscriptionId.contains("-"));
-    }
-
-    @Test
-    public void testSubscribe_containTopicErrorUrl() {
-        log.info("===================={}", this.testName.getMethodName());
-
-        try {
-            String subscriptionId = iBrokerRpc.subscribe(this.jsonTopic,
-                    "http://localhost:" + 8089 + "/weevent/mock/jsonrpc");
-            Assert.assertNotNull(subscriptionId);
-        } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.URL_CONNECT_FAILED.getCodeDesc(), e.getMessage());
-        }
-    }
-
-    @Test
-    public void testReSubscribe_containTopicUrl() throws BrokerException {
-        log.info("===================={}", this.testName.getMethodName());
-
-        String subId = iBrokerRpc.subscribe(this.jsonTopic, "http://localhost:" + listenPort + "/weevent/mock/jsonrpc");
-
-        String subscriptionId = iBrokerRpc.subscribe(this.jsonTopic, subId,
-                "http://localhost:" + listenPort + "/weevent/mock/jsonrpc");
-        Assert.assertNotNull(subscriptionId);
-        Assert.assertEquals(subId, subscriptionId);
-    }
-
-    @Test
-    public void testReSubscribe_containTopicErrorUrl() throws BrokerException {
-        log.info("===================={}", this.testName.getMethodName());
-
-        String subId = iBrokerRpc.subscribe(this.jsonTopic, "http://localhost:" + listenPort + "/weevent/mock/jsonrpc");
-
-        try {
-            String subscriptionId = iBrokerRpc.subscribe(this.jsonTopic, subId,
-                    "http://localhost:" + 8089 + "/weevent/mock/jsonrpc");
-            Assert.assertNull(subscriptionId);
-        } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.URL_CONNECT_FAILED.getCodeDesc(), e.getMessage());
-        }
-    }
-
-    @Test
-    public void testReSubscribe_containTopicUrlGroupId() throws BrokerException {
-        log.info("===================={}", this.testName.getMethodName());
-
-        String subId = iBrokerRpc.subscribe(this.jsonTopic, "http://localhost:" + listenPort + "/weevent/mock/jsonrpc");
-
-        String subscriptionId = iBrokerRpc.subscribe(this.jsonTopic, this.groupId, subId,
-                "http://localhost:" + listenPort + "/weevent/mock/jsonrpc");
-        Assert.assertNotNull(subscriptionId);
-        Assert.assertEquals(subId, subscriptionId);
-    }
-
-    @Test
-    public void testReSubscribe_containTopicErrorUrlGroupId() throws BrokerException {
-        log.info("===================={}", this.testName.getMethodName());
-
-        String subId = iBrokerRpc.subscribe(this.jsonTopic, "http://localhost:" + listenPort + "/weevent/mock/jsonrpc");
-
-        try {
-            String subscriptionId = iBrokerRpc.subscribe(this.jsonTopic, this.groupId, subId,
-                    "http://localhost:" + 8089 + "/weevent/mock/jsonrpc");
-            Assert.assertNull(subscriptionId);
-        } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.URL_CONNECT_FAILED.getCodeDesc(), e.getMessage());
-        }
-    }
-
-    @Test
-    public void testUnSubscribe() throws BrokerException {
-        log.info("===================={}", this.testName.getMethodName());
-
-        String subId = iBrokerRpc.subscribe(this.jsonTopic, "http://localhost:" + listenPort + "/weevent/mock/jsonrpc");
-        boolean unSubscribe = iBrokerRpc.unSubscribe(subId);
-        Assert.assertTrue(unSubscribe);
-    }
-
-    @Test
-    public void testSubscribe_andPublish() throws BrokerException, InterruptedException {
-        log.info("===================={}", this.testName.getMethodName());
-
-        String subscriptionId = iBrokerRpc.subscribe(this.jsonTopic,
-                "http://localhost:" + listenPort + "/weevent/mock/jsonrpc");
-        Assert.assertNotNull(subscriptionId);
-        Assert.assertTrue(subscriptionId.contains("-"));
-        iBrokerRpc.publish(this.jsonTopic, "Hello World!".getBytes());
-        Thread.sleep(3000);
-
-    }
-
-    @Test
-    public void testSubscribe_andPublishWildCard() throws BrokerException, InterruptedException {
-        log.info("===================={}", this.testName.getMethodName());
-
-        String subscriptionId = iBrokerRpc.subscribe("com.weevent.test/#",
-                "http://localhost:" + listenPort + "/weevent/mock/jsonrpc");
-        Assert.assertNotNull(subscriptionId);
-        Assert.assertTrue(subscriptionId.contains("-"));
-        iBrokerRpc.publish("com.weevent.test", "Hello World!".getBytes());
-        Thread.sleep(3000);
     }
 
     // get 10K string
