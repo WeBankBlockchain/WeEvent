@@ -28,7 +28,7 @@ public class BrokerControllerTest extends JUnitTestBase {
     private MockMvc mockMvc;
 
     @Before
-    public void setup() {
+    public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
     }
 

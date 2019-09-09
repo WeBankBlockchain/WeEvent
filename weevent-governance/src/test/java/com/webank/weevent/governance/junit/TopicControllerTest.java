@@ -31,7 +31,7 @@ public class TopicControllerTest extends JUnitTestBase {
 
 
     @Before
-    public void setup() {
+    public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
     }
 

@@ -24,7 +24,7 @@ public class PermissionControllerTest extends JUnitTestBase {
 
 
     @Before
-    public void setup() {
+    public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
     }
 
