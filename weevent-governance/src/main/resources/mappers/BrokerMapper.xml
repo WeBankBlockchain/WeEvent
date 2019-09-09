@@ -50,8 +50,9 @@
         where id=#{id}
     </delete>
 
-    <select id="count" resultType="int">
+    <select id="countBroker" resultType="int">
         select count(1) from t_broker and is_delete=0
     </select>
+
 
 </mapper>

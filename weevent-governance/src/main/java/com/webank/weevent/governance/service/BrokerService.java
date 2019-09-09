@@ -47,6 +47,9 @@ public class BrokerService {
     @Autowired
     private PermissionMapper permissionMapper;
 
+    @Autowired
+    private PermissionService permissionService;
+
     private final static String brokerListUrl = "/rest/list?pageIndex=0&pageSize=10";
 
     private final static String weBaseNodeUrl = "/node/nodeInfo/1";
@@ -139,7 +142,6 @@ public class BrokerService {
     public GovernanceResult updateBroker(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         authCheck(brokerEntity, request);
-
         //checkBrokerUrl
         String brokerUrl = brokerEntity.getBrokerUrl();
         checkUrl(brokerUrl, brokerListUrl, request);
@@ -159,8 +161,8 @@ public class BrokerService {
 
     private void authCheck(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
         String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-        BrokerEntity oldBrokerEntity = brokerMapper.getBroker(brokerEntity.getId());
-        if (!accountId.equals(oldBrokerEntity.getUserId().toString())) {
+        Boolean flag = permissionService.verifyPermissions(brokerEntity.getId(), accountId);
+        if (!flag) {
             throw new GovernanceException(ErrorCode.ACCESS_DENIED);
         }
     }

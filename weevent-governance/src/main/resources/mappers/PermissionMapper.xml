@@ -62,7 +62,12 @@
         <foreach collection="permissionEntityList" item="permissionEntity" separator=",">
             (#{permissionEntity.userId},#{permissionEntity.brokerId})
         </foreach>
-
     </insert>
+
+    <select id="findUserIdByBrokerId" resultType="integer">
+        select distinct id as userId from t_broker where id=#{brokerId} and is_delete=0
+        union
+        select distinct user_id as userId from t_permission where broker_id=#{brokerId}
+    </select>
 
 </mapper>

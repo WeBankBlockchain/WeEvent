@@ -24,6 +24,6 @@ public interface BrokerMapper {
     // update BrokerEntity
     Boolean updateBroker(BrokerEntity brokerEntity);
 
-    int count();
+    int countBroker();
 
 }

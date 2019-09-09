@@ -53,6 +53,9 @@ public class TopicService {
     @Autowired
     private CookiesTools cookiesTools;
 
+    @Autowired
+    private PermissionService permissionService;
+
     private final String SPLIT = "-";
 
     private final String HTTPS = "https";
@@ -67,7 +70,8 @@ public class TopicService {
         if (brokerEntity == null) {
             return false;
         }
-        if (!accountId.equals(brokerEntity.getUserId().toString())) {
+        Boolean flag = permissionService.verifyPermissions(brokerId, accountId);
+        if (!flag) {
             throw new GovernanceException(ErrorCode.ACCESS_DENIED);
         }
         CloseableHttpClient client = generateHttpClient(brokerEntity.getBrokerUrl());
@@ -89,7 +93,8 @@ public class TopicService {
                                HttpServletResponse response) throws GovernanceException {
         String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
         BrokerEntity brokerEntity = brokerService.getBroker(brokerId);
-        if (!accountId.equals(brokerEntity.getUserId().toString())) {
+        Boolean flag = permissionService.verifyPermissions(brokerId, accountId);
+        if (!flag) {
             throw new GovernanceException(ErrorCode.ACCESS_DENIED);
         }
         TopicPage result = new TopicPage();
@@ -141,7 +146,9 @@ public class TopicService {
     public TopicEntity getTopicInfo(Integer brokerId, String topic, String groupId, HttpServletRequest request) throws GovernanceException {
         String accountId = this.cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
         BrokerEntity broker = this.brokerService.getBroker(brokerId);
-        if (StringUtils.isBlank(accountId) || broker == null || !accountId.equals(String.valueOf(broker.getUserId()))) {
+
+        Boolean flag = permissionService.verifyPermissions(brokerId, accountId);
+        if (broker == null || !flag) {
             log.error("get topicInfo failed, brokerId:{}, topic:{}, groupId:{}.", brokerId, topic, groupId);
             throw new GovernanceException(ErrorCode.ACCESS_DENIED);
         }
@@ -186,7 +193,8 @@ public class TopicService {
         if (brokerEntity == null) {
             return null;
         }
-        if (!accountId.equals(brokerEntity.getUserId().toString())) {
+        Boolean flag = permissionService.verifyPermissions(brokerId, accountId);
+        if (!flag) {
             throw new GovernanceException(ErrorCode.ACCESS_DENIED);
         }
         TopicEntity topicEntity = new TopicEntity();

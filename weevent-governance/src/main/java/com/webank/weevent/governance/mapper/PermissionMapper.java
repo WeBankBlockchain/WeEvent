@@ -26,6 +26,7 @@ public interface PermissionMapper{
 
     void updatePermission(@Param("permissionEntity") PermissionEntity permissionEntity);
 
+    List<Integer> findUserIdByBrokerId(Integer brokerId);
 
 
 }

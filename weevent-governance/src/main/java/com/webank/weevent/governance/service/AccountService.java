@@ -186,18 +186,6 @@ public class AccountService {
         return null;
     }
 
-    public AccountEntity queryById(Integer id) {
-        AccountEntity accountEntity = new AccountEntity();
-        accountEntity.setId(id);
-        // execute select
-        List<AccountEntity> list = accountMapper.accountList(accountEntity);
-        if (list.isEmpty()) {
-            return null;
-        }
-        // get user info
-        return list.get(0);
-    }
-
     public List<AccountEntity> accountEntityList(HttpServletRequest request, AccountEntity accountEntity) throws GovernanceException {
         // execute select
         String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
@@ -207,5 +195,7 @@ public class AccountService {
         list.forEach(it -> it.setPassword(null));
         return list;
     }
+
+
 
 }
