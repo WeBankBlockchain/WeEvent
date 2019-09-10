@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.code.ConstantCode;
-import com.webank.weevent.governance.entity.Account;
+import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.entity.BaseResponse;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.service.AccountService;
@@ -40,15 +40,15 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         Object obj = authentication.getPrincipal();
         JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(obj));
         String username = jsonObject.getString("username");
-        // response account info
-        Account account = accountService.queryByUsername(username);
+        // response accountEntity info
+        AccountEntity accountEntity = accountService.queryByUsername(username);
         Map<String, Object> rsp = new HashMap<>();
         rsp.put("username", username);
-        rsp.put("userId", account.getId());
+        rsp.put("userId", accountEntity.getId());
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
         baseResponse.setData(rsp);
 
-        Integer userId = account.getId();
+        Integer userId = accountEntity.getId();
         // clear cookie
         cookiesTools.clearAllCookie(request, response);
         // reset session
