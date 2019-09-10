@@ -69,7 +69,7 @@ public final class DataTypeUtils {
         if (tokens[0].length() != WeEventConstants.TOPIC_NAME_ENCODE_LENGTH) {
             throw new BrokerException(ErrorCode.EVENT_ID_IS_ILLEGAL);
         }
-        return DataTypeUtils.StringToLong(tokens[1]);
+        return DataTypeUtils.stringToLong(tokens[1]);
     }
 
     /**
@@ -86,7 +86,7 @@ public final class DataTypeUtils {
         if (tokens[0].length() != WeEventConstants.TOPIC_NAME_ENCODE_LENGTH) {
             throw new BrokerException(ErrorCode.EVENT_ID_IS_ILLEGAL);
         }
-        return DataTypeUtils.StringToLong(tokens[2]);
+        return DataTypeUtils.stringToLong(tokens[2]);
     }
 
     /**
@@ -112,7 +112,7 @@ public final class DataTypeUtils {
      * @param value the value
      * @return java.lang.Long
      */
-    public static Long StringToLong(String value) {
+    public static Long stringToLong(String value) {
         try {
             return Long.valueOf(value);
         } catch (NumberFormatException e) {

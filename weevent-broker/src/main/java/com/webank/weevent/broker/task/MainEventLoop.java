@@ -191,8 +191,7 @@ public class MainEventLoop extends StoppableTask {
         log.info("new block event from web3sdk, {}", blockHeight);
 
         try {
-            if (this.blockNotifyQueue.offer(blockHeight, this.blockChain.getIdleTime(), TimeUnit.MILLISECONDS)) {
-            } else {
+            if (!this.blockNotifyQueue.offer(blockHeight, this.blockChain.getIdleTime(), TimeUnit.MILLISECONDS)) {
                 log.error("new block event queue failed due to queue is full");
             }
         } catch (InterruptedException e) {
@@ -227,7 +226,7 @@ public class MainEventLoop extends StoppableTask {
             log.error("get notify from new block event queue failed", e);
             return;
         }
-        
+
         // retry if no new block
         if (currentBlock > blockHeight) {
             log.debug("no new block in group: {}, idle", this.groupId);
