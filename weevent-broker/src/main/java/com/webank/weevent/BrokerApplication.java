@@ -109,6 +109,12 @@ class HttpInterceptorConfig implements WebMvcConfigurer {
 @Slf4j
 @SpringBootApplication
 public class BrokerApplication {
+    public static ApplicationContext applicationContext;
+
+    public static WeEventConfig weEventConfig;
+
+    public static Environment environment;
+
     public static void main(String[] args) {
         /* Forbid banner.
         SpringApplicationBuilder builder = new SpringApplicationBuilder(BrokerApplication.class);
@@ -121,12 +127,6 @@ public class BrokerApplication {
         log.info("start broker success");
         //spring-boot-starter-actuator customize /info with InfoContributor bean
     }
-
-    public static ApplicationContext applicationContext;
-
-    public static WeEventConfig weEventConfig;
-
-    public static Environment environment;
 
     @Autowired
     public void setContext(ApplicationContext context) {
