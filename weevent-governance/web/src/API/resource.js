@@ -78,6 +78,12 @@ class ResoruceService extends BaseModel {
   reset (data) {
     return this.request(api.reset, data)
   }
+  accountList (data) {
+    return this.request(api.accountList, data)
+  }
+  permissionList (data) {
+    return this.request(api.permissionList, data)
+  }
 }
 
 export default new ResoruceService()

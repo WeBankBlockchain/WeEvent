@@ -5,7 +5,7 @@
   font-family: 'syyh';
   src: url('../font/syyh-normal.ttf')
 }
-html,body,div,p,ul,li{
+html,body,div,p,ul,li,textarea{
   margin:0;
   padding:0;
   box-sizing:border-box;
@@ -651,6 +651,17 @@ html,body,#app{
   }
   .el-dialog{
     width:600px;
+    .el-dialog__body{
+      .el-form{
+        .el-form-item{
+          .el-form-item__content{
+            .el-select{
+              width:100%;
+            }
+          }
+        }
+      }
+    }
   }
 }
 
