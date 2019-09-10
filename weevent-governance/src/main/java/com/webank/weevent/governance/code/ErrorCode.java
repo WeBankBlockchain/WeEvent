@@ -6,7 +6,8 @@ public enum ErrorCode {
     BROKER_CONNECT_ERROR(100100, "broker connect error!"), 
     WEBASE_CONNECT_ERROR(100101, "webase connect error!"), 
     SEND_EMAIL_ERROR(100102, "send email failed"), 
-    ACCESS_DENIED(100103, "access denied"),;
+    ACCESS_DENIED(100103, "access denied"),
+    TEST_URL_FAIL(100104, "test url fail"),;
 
     /**
      * error code
