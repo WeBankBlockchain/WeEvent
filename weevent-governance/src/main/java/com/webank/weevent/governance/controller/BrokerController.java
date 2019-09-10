@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.webank.weevent.governance.entity.Broker;
+import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.service.AccountService;
@@ -36,37 +36,36 @@ public class BrokerController {
 
     // get all broker service
     @GetMapping("/list")
-    public List<Broker> getAllBrokers(HttpServletRequest request) {
+    public List<BrokerEntity> getAllBrokers(HttpServletRequest request) {
         log.info("get all brokers ");
-
         return brokerService.getBrokers(request);
     }
 
     // get broker service by id
     @GetMapping("/{id}")
-    public Broker getBroker(@PathVariable("id") Integer id) {
+    public BrokerEntity getBroker(@PathVariable("id") Integer id) {
         log.info("get  broker service by id = " + id);
         return brokerService.getBroker(id);
     }
 
-    // get broker service by id
+    // get brokerEntity service by id
     @PostMapping("/add")
-    public GovernanceResult addBroker(@Valid @RequestBody Broker broker, HttpServletRequest request,
-            HttpServletResponse response) throws GovernanceException {
-        log.info("add  broker service into db " + broker);
-        return brokerService.addBroker(broker, request, response);
+    public GovernanceResult addBroker(@Valid @RequestBody BrokerEntity brokerEntity, HttpServletRequest request,
+                                      HttpServletResponse response) throws GovernanceException {
+        log.info("add  brokerEntity service into db " + brokerEntity);
+        return brokerService.addBroker(brokerEntity, request, response);
     }
 
     @PostMapping("/update")
-    public GovernanceResult updateBroker(@RequestBody Broker broker, HttpServletRequest request,
-            HttpServletResponse response) throws GovernanceException {
-        log.info("update  broker service ,broker: " + broker);
-        return brokerService.updateBroker(broker, request, response);
+    public GovernanceResult updateBroker(@RequestBody BrokerEntity brokerEntity, HttpServletRequest request,
+                                         HttpServletResponse response) throws GovernanceException {
+        log.info("update  brokerEntity service ,brokerEntity: " + brokerEntity);
+        return brokerService.updateBroker(brokerEntity, request, response);
     }
 
     @PostMapping("/delete")
-    public GovernanceResult deleteBroker(@RequestBody Broker broker, HttpServletRequest request) throws GovernanceException {
-        log.info("delete  broker service ,id: " + broker.getId());
-        return brokerService.deleteBroker(broker,request);
+    public GovernanceResult deleteBroker(@RequestBody BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
+        log.info("delete  brokerEntity service ,id: " + brokerEntity.getId());
+        return brokerService.deleteBroker(brokerEntity, request);
     }
 }
