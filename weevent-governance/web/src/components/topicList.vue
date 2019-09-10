@@ -64,7 +64,10 @@
   <el-dialog title="新增 Topic" :visible.sync="dialogFormVisible" center width='450px' >
     <el-form :model="form" :rules="rules" ref='form'>
       <el-form-item label="名称:" prop='name'>
-        <el-input v-model.trim.trim="form.name" autocomplete="off"></el-input>
+        <el-input v-model.trim="form.name" autocomplete="off"></el-input>
+      </el-form-item>
+      <el-form-item label="详细描述:">
+        <el-input v-model="form.describe" type='textarea' autocomplete="off"></el-input>
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
@@ -87,7 +90,8 @@ export default {
       pageSize: 10,
       total: 0,
       form: {
-        name: ''
+        name: '',
+        describe: ''
       },
       rules: {
         name: [
@@ -180,7 +184,8 @@ export default {
           let data = {
             topic: vm.form.name,
             creater: localStorage.getItem('user'),
-            brokerId: Number(localStorage.getItem('brokerId'))
+            brokerId: Number(localStorage.getItem('brokerId')),
+            description: vm.form.describe
           }
           API.openTopic(data).then(res => {
             if (res.status === 200) {
@@ -254,6 +259,7 @@ export default {
     dialogFormVisible (nVal) {
       if (!nVal) {
         this.form.name = ''
+        this.form.describe = ''
         this.$refs.form.resetFields()
       }
     },
