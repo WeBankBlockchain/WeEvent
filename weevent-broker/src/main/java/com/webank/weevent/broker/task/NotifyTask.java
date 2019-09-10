@@ -35,6 +35,9 @@ public class NotifyTask extends StoppableTask {
     private long notifiedCount = 0;
     private Date lastTimeStamp = new Date();
 
+    // (eventId <-> timestamp), value is not used yet
+    private Map<String, Long> mergeCache = new FixedFIFOCache<>(1024);
+
     // fixed size FIFO cache
     static class FixedFIFOCache<K, V> extends LinkedHashMap<K, V> {
         private int capacity;
@@ -49,9 +52,6 @@ public class NotifyTask extends StoppableTask {
             return this.size() > capacity;
         }
     }
-    
-    // (eventId <-> timestamp), value is not used yet
-    private Map<String, Long> mergeCache = new FixedFIFOCache<>(1024);
 
     public NotifyTask(String subscriptionId, int idleTime, @NonNull IConsumer.ConsumerListener consumerListener) {
         super("event-notify@" + subscriptionId);
