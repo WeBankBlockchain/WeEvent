@@ -17,7 +17,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.weevent.governance.entity.Broker;
+import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.service.BrokerService;
 import com.webank.weevent.governance.utils.SpringContextUtil;
 
@@ -55,8 +55,8 @@ public class ForwardWebaseFilter implements Filter {
         String subStrUrl = originUrl.substring(originUrl.indexOf("/webase-node-mgr/") + "/webase-node-mgr".length());
 
         Integer id = Integer.parseInt(idStr);
-        Broker broker = brokerService.getBroker(id);
-        String webaseUrl = broker.getWebaseUrl();
+        BrokerEntity brokerEntity = brokerService.getBroker(id);
+        String webaseUrl = brokerEntity.getWebaseUrl();
         // get complete url of webase
         String newUrl = webaseUrl + subStrUrl;
         // get client according url
