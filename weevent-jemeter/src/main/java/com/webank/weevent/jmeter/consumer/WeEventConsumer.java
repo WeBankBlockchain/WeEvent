@@ -14,7 +14,7 @@ public class WeEventConsumer extends AbstractJavaSamplerClient {
     private static IWeEventClient weEventClient;
 
 
-    // 每个压测线程启动时跑一次
+    // 每 个压测线程启动时跑一次
     @Override
     public void setupTest(JavaSamplerContext context) {
         super.setupTest(context);

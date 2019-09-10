@@ -1,3 +1,4 @@
+/*
 package com.webank.weevent.jmeter.config;
 
 import java.net.URL;
@@ -38,3 +39,4 @@ public class JMeterConfiguration {
 }
 
 
+*/

@@ -1,22 +1,26 @@
+/*
 package com.webank.weevent.jmeter.producer;
 
 
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
-import com.webank.weevent.sdk.SendResult;
-import com.webank.weevent.sdk.WeEvent;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
+import org.slf4j.Logger;
 
+*/
 /**
  * WeEvent publish performance.
  *
  * @author puremilkfan
  * @since 2018/11/27
- */
+ *//*
+
+@Slf4j
 public class WeEventProducer extends AbstractJavaSamplerClient {
     private String topic;
     private String buffer;
@@ -40,7 +44,7 @@ public class WeEventProducer extends AbstractJavaSamplerClient {
             this.buffer = sb.toString();
 
             boolean result = this.weEventClient.open(this.topic);
-            getNewLogger().info("open topic result: {}", result);
+            getNewLogger().info("open topic result: {}", false);
         } catch (BrokerException e) {
             getNewLogger().error("open ClientException", e);
         }
@@ -49,7 +53,8 @@ public class WeEventProducer extends AbstractJavaSamplerClient {
     // 每次runTest运行完执行
     @Override
     public void teardownTest(JavaSamplerContext context) {
-        super.teardownTest(context);
+        getNewLogger().debug(getClass().getName() + ": teardownTest");
+
     }
 
     // Jmeter GUI参数
@@ -68,10 +73,12 @@ public class WeEventProducer extends AbstractJavaSamplerClient {
         result.setSampleLabel("publish");
         try {
             result.sampleStart();
-            SendResult sendResult = this.weEventClient.publish(new WeEvent(this.topic, this.buffer.getBytes()));
+         */
+/*   SendResult sendResult = this.weEventClient.publish(new WeEvent(this.topic, this.buffer.getBytes()));
             result.sampleEnd();
             result.setSuccessful(sendResult.getStatus() == SendResult.SendResultStatus.SUCCESS && sendResult.getEventId().length() > 0);
-            result.setResponseMessage(sendResult.getEventId());
+            result.setResponseMessage(sendResult.getEventId());*//*
+
         } catch (Exception e) {
             getNewLogger().error("publish Exception", e);
             result.sampleEnd();
@@ -80,4 +87,18 @@ public class WeEventProducer extends AbstractJavaSamplerClient {
         }
         return result;
     }
+
+    public WeEventProducer() {
+        super();
+    }
+
+    public static void main(String[] args) {
+        System.out.printf("32wdfdsf");
+    }
+
+    @Override
+    protected Logger getNewLogger() {
+        return super.getNewLogger();
+    }
 }
+*/
