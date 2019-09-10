@@ -49,7 +49,6 @@ public class BrokerStomp extends TextWebSocketHandler {
     // session id <-> [header subscription id in stomp <-> (subscription id in consumer, topic)]
     private static Map<String, Map<String, Pair<String, String>>> sessionContext;
 
-
     @Autowired
     public void setProducer(IProducer producer) {
         this.iproducer = producer;
@@ -62,10 +61,6 @@ public class BrokerStomp extends TextWebSocketHandler {
 
     static {
         sessionContext = new HashMap<>();
-    }
-
-    public BrokerStomp() {
-        super();
     }
 
     @Override
@@ -142,6 +137,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
             default:
                 handleDefaultMessage(msg, session);
+                break;
         }
     }
 
