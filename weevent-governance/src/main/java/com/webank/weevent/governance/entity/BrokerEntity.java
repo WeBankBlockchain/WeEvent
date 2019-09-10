@@ -1,23 +1,21 @@
 package com.webank.weevent.governance.entity;
 
-import java.util.Date;
+import java.util.List;
 
 import javax.validation.constraints.Min;
 
+import com.webank.weevent.governance.entity.base.BaseEntity;
+
 import lombok.Data;
-import lombok.ToString;
 import org.hibernate.validator.constraints.URL;
 
 /**
- * Broker class
+ * BrokerEntity class
  *
  * @since 2019/04/28
  */
 @Data
-@ToString
-public class Broker {
-
-    private Integer id;
+public class BrokerEntity extends BaseEntity {
 
     @Min(1)
     private Integer userId;
@@ -30,8 +28,14 @@ public class Broker {
     @URL
     private String webaseUrl;
 
-    private Date lastUpdate;
+    private List<Integer> userIdList;
 
     private Integer isDelete;
+
+    /**
+     * 1 means creator, 2 means is authorized
+     */
+    private String isCreator;
+
 
 }

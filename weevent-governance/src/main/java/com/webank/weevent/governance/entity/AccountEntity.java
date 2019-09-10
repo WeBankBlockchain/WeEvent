@@ -1,12 +1,13 @@
 package com.webank.weevent.governance.entity;
 
-import java.util.Date;
+import java.util.List;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
+import com.webank.weevent.governance.entity.base.BaseEntity;
+
 import lombok.Data;
-import lombok.ToString;
 
 /**
  * User class
@@ -14,10 +15,8 @@ import lombok.ToString;
  * @since 2019/04/28
  */
 @Data
-@ToString
-public class Account {
+public class AccountEntity extends BaseEntity {
 
-    private Integer id;
 
     @NotBlank
     private String username;
@@ -30,7 +29,11 @@ public class Account {
 
     private String oldPassword;
 
-    private Date lastUpdate;
-
     private Integer isDelete;
+
+    private List<Integer> permissionIdList;
+
+    private Integer brokerId;
+
+
 }
