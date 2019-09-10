@@ -36,17 +36,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 @Slf4j
 public class FiscoBcosDelegate {
-    /**
-     * notify from web3sdk2.x when new block mined
-     */
-    public interface IBlockEventListener {
-        /**
-         * @param groupId group id
-         * @param blockHeight new block height
-         */
-        void onEvent(Long groupId, Long blockHeight);
-    }
-
     // access to version 1.x
     private FiscoBcos fiscoBcos;
 
@@ -68,6 +57,16 @@ public class FiscoBcosDelegate {
     // groupId list
     private List<String> groupIdList = new ArrayList<>();
 
+    /**
+     * notify from web3sdk2.x when new block mined
+     */
+    public interface IBlockEventListener {
+        /**
+         * @param groupId group id
+         * @param blockHeight new block height
+         */
+        void onEvent(Long groupId, Long blockHeight);
+    }
 
     private void initRedisService() {
         if (redisService == null) {
@@ -188,7 +187,7 @@ public class FiscoBcosDelegate {
      * @return list of groupId
      */
     public List<String> listGroupId() throws BrokerException {
-        if (this.groupIdList.isEmpty()){
+        if (this.groupIdList.isEmpty()) {
             if (this.fiscoBcos != null) {
                 this.groupIdList.add(WeEvent.DEFAULT_GROUP_ID);
             } else {

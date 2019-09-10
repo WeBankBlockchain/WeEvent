@@ -90,10 +90,9 @@ public class ParamCheckUtils {
         validateTopicName(event.getTopic());
         validateEventContent(new String(event.getContent(), StandardCharsets.UTF_8));
 
-        if (event.getExtensions() != null) {
-            if (event.getExtensions().toString().length() > WeEventConstants.EVENT_EXTENSIONS_MAX_LENGTH) {
-                throw new BrokerException(ErrorCode.EVENT_EXTENSIONS_EXCEEDS_MAX_LENGTH);
-            }
+        if (event.getExtensions() != null
+                && event.getExtensions().toString().length() > WeEventConstants.EVENT_EXTENSIONS_MAX_LENGTH) {
+            throw new BrokerException(ErrorCode.EVENT_EXTENSIONS_EXCEEDS_MAX_LENGTH);
         }
     }
 
