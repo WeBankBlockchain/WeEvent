@@ -48,12 +48,6 @@ public class MainEventLoop extends StoppableTask {
     // new block notified
     private BlockingDeque<Long> blockNotifyQueue;
 
-    // last notified timestamp
-    private long lastNotifiedTimeStamp;
-
-    // faked notify task
-    private StoppableTask fakedNotify;
-
     public MainEventLoop(ThreadPoolTaskExecutor threadPoolTaskExecutor, IBlockChain blockChain, String groupId) throws BrokerException {
         super("main-event-loop-" + groupId);
         this.threadPoolTaskExecutor = threadPoolTaskExecutor;
@@ -69,41 +63,19 @@ public class MainEventLoop extends StoppableTask {
         // may be in notify strategy
         if (blockChain.hasBlockEventNotify()) {
             this.blockNotifyQueue = new LinkedBlockingDeque<>();
-
-            // try to fail over block chain's notify fault with faked(very very few, and scarce)
-            this.fakedNotify = new StoppableTask("faked-notify-" + groupId) {
-                @Override
-                protected void taskOnceLoop() {
-                    StoppableTask.idle(blockChain.getIdleTime());
-
-                    // need a faked notify
-                    if (lastNotifiedTimeStamp + blockChain.getIdleTime() < System.currentTimeMillis()) {
-                        onNewBlock(0L);
-                    }
-                }
-            };
         }
 
         // init last block
         this.lastBlock = blockHeight;
-        this.lastNotifiedTimeStamp = System.currentTimeMillis();
         log.info("MainEventLoop initialized with last block: {} in group: {}", this.lastBlock, this.groupId);
     }
 
     public synchronized void doStart() {
         this.threadPoolTaskExecutor.execute(this);
-
-        if (this.fakedNotify != null) {
-            this.threadPoolTaskExecutor.execute(this.fakedNotify);
-        }
     }
 
     public synchronized void doStop() {
         log.info("try to stop MainEventLoop in group: {}", this.groupId);
-
-        if (this.fakedNotify != null) {
-            this.fakedNotify.doExit();
-        }
 
         // stop main loop first
         this.doExit();
@@ -216,12 +188,10 @@ public class MainEventLoop extends StoppableTask {
     }
 
     public void onNewBlock(Long blockHeight) {
-        log.debug("new block event from web3sdk, {}(0 meanings faked notify)", blockHeight);
+        log.info("new block event from web3sdk, {}", blockHeight);
 
         try {
-            if (this.blockNotifyQueue.offer(blockHeight, this.blockChain.getIdleTime(), TimeUnit.MILLISECONDS)) {
-                this.lastNotifiedTimeStamp = System.currentTimeMillis();
-            } else {
+            if (!this.blockNotifyQueue.offer(blockHeight, this.blockChain.getIdleTime(), TimeUnit.MILLISECONDS)) {
                 log.error("new block event queue failed due to queue is full");
             }
         } catch (InterruptedException e) {
@@ -239,27 +209,22 @@ public class MainEventLoop extends StoppableTask {
         Long currentBlock = this.lastBlock + 1;
 
         // get block height
-        Long notify;
+        Long blockHeight;
         try {
-            notify = this.blockNotifyQueue.poll(this.blockChain.getIdleTime(), TimeUnit.MILLISECONDS);
-            if (notify == null) {
-                log.error("can not find new block event notify(included faked)");
-                notify = 0L;
+            blockHeight = this.blockNotifyQueue.poll(this.blockChain.getIdleTime(), TimeUnit.MILLISECONDS);
+            if (blockHeight == null) {
+                log.debug("can not find new block event notify within idle time");
+
+                blockHeight = this.blockChain.getBlockHeight(this.groupId);
+                if (blockHeight <= 0) {
+                    log.error("get block height failed, retry");
+                    // retry if net error.
+                    return;
+                }
             }
         } catch (Exception e) {
             log.error("get notify from new block event queue failed", e);
-            notify = 0L;
-        }
-
-        Long blockHeight = notify;
-        // fail over block chain's notify fault
-        if (notify == 0L) {
-            blockHeight = this.blockChain.getBlockHeight(this.groupId);
-            if (blockHeight <= 0) {
-                log.error("get block height failed, retry");
-                // retry if net error.
-                return;
-            }
+            return;
         }
 
         // retry if no new block

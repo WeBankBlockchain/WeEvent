@@ -55,7 +55,6 @@ export default {
   },
   mounted () {
     this.getServer()
-    this.listGroup()
   },
   methods: {
     home () {
@@ -120,6 +119,7 @@ export default {
               vm.$store.commit('set_id', id)
               localStorage.setItem('brokerId', id)
             }
+            vm.listGroup()
           } else {
             vm.$message({
               type: 'warning',
@@ -132,9 +132,13 @@ export default {
     },
     listGroup () {
       API.listGroup('?brokerId=' + localStorage.getItem('brokerId')).then(res => {
-        this.groupList = [].concat(res.data)
-        this.$store.commit('set_groupId', res.data[0])
-        localStorage.setItem('groupId', res.data[0])
+        // if groupId is not existed so set it
+        // else use existed groupId
+        if (!localStorage.getItem('grouId')) {
+          this.groupList = [].concat(res.data)
+          this.$store.commit('set_groupId', res.data[0])
+          localStorage.setItem('groupId', res.data[0])
+        }
       })
     }
   },
