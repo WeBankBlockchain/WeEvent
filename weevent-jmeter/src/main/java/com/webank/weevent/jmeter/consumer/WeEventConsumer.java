@@ -99,13 +99,5 @@ public class WeEventConsumer extends AbstractJavaSamplerClient {
     protected Logger getNewLogger() {
         return super.getNewLogger();
     }
-
-    public static void main(String[] args) {
-
-    }
-
-    public WeEventConsumer() {
-        super();
-    }
 }
 

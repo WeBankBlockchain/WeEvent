@@ -113,11 +113,6 @@ public class WeEventProducer extends AbstractJavaSamplerClient {
         return result;
     }
 
-    public WeEventProducer() {
-        super();
-    }
-
-
     @Override
     protected Logger getNewLogger() {
         return super.getNewLogger();
