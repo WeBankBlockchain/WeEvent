@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.BrokerApplication;
+import com.webank.weevent.broker.config.BuildInfo;
 import com.webank.weevent.broker.fisco.util.SystemInfoUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.sdk.BrokerException;
@@ -31,16 +32,22 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 public class AdminRest extends RestHA {
     private IConsumer consumer;
+    private BuildInfo buildInfo;
 
     @Autowired
     public void setConsumer(IConsumer consumer) {
         this.consumer = consumer;
     }
 
+    @Autowired
+    public void setConsumer(BuildInfo buildInfo) {
+        this.buildInfo = buildInfo;
+    }
+
     @RequestMapping(path = "/listSubscription")
     public Map<String, Object> listSubscription(@RequestParam(name = "groupId", required = false) String groupIdStr) throws BrokerException {
         String groupId = groupIdStr;
-        if (StringUtils.isBlank(groupId)){
+        if (StringUtils.isBlank(groupId)) {
             groupId = WeEvent.DEFAULT_GROUP_ID;
         }
         Map<String, Object> nodesInfo = new HashMap<>();
@@ -77,4 +84,8 @@ public class AdminRest extends RestHA {
         return this.consumer.listSubscription(groupId);
     }
 
+    @RequestMapping(path = "/buildInfo")
+    public BuildInfo buildInfo() {
+        return this.buildInfo;
+    }
 }

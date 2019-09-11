@@ -192,4 +192,19 @@ public class BrokerService {
         }
         return null;
     }
+
+    public ErrorCode checkBrokerServer(BrokerEntity brokerEntity, HttpServletRequest request) {
+        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
+        if (accountId == null || !accountId.equals(brokerEntity.getUserId().toString())) {
+            return ErrorCode.ACCESS_DENIED;
+        }
+        String brokerUrl = brokerEntity.getBrokerUrl();
+        try {
+            checkUrl(brokerUrl, brokerListUrl, request);
+        } catch (GovernanceException e){
+            return ErrorCode.BROKER_CONNECT_ERROR;
+        }
+        return ErrorCode.SUCCESS;
+    }
+
 }
