@@ -9,8 +9,8 @@ package com.webank.weevent.jmeter.producer;
  * @since 2019/09/11
  */
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
@@ -33,10 +33,10 @@ import org.slf4j.Logger;
 
 public class WeEventProducer extends AbstractJavaSamplerClient {
     private String topic = "com.webank.weevent.jmeter";
-    private String content = "this is jmeter test!";
+    private int size = 1;
     private String format = "json";
 
-    private Map<String, String> extensions = new ConcurrentHashMap<>();
+    private Map<String, String> extensions = new HashMap<>();
 
     private String groupId = WeEvent.DEFAULT_GROUP_ID;
 
@@ -44,26 +44,30 @@ public class WeEventProducer extends AbstractJavaSamplerClient {
 
     private WeEvent weEvent;
 
-    private final String http = "http://";
 
-    private static String defaultUrl = "127.0.0.1:7000";
+    private String defaultUrl = "http://127.0.0.1:8080/weevent";
 
-    // 每个压测线程启动时跑一次
+    // Run every time the pressure thread starts
     @Override
     public void setupTest(JavaSamplerContext context) {
         getNewLogger().info("this is producer setupTest");
         super.setupTest(context);
         try {
             this.defaultUrl = context.getParameter("url") == null ? this.defaultUrl : context.getParameter("url");
-            this.weEventClient = IWeEventClient.build(http + defaultUrl + "/weevent");
+            this.weEventClient = IWeEventClient.build(defaultUrl);
             getNewLogger().info("weEventClient:{}", this.weEventClient);
-
+            this.size = context.getIntParameter("size") <= 0 ? this.size : context.getIntParameter("size");
             this.topic = context.getParameter("topic") == null ? this.topic : context.getParameter("topic");
-            this.content = context.getParameter("content") == null ? this.content : context.getParameter("content");
             this.format = context.getParameter("format") == null ? this.format : context.getParameter("format");
             this.groupId = context.getParameter("groupId") == null ? WeEvent.DEFAULT_GROUP_ID : context.getParameter("groupId");
             extensions.put(WeEvent.WeEvent_FORMAT, format);
-            weEvent = new WeEvent(this.topic, this.content.getBytes(), this.extensions);
+
+            StringBuffer buffer = new StringBuffer();
+            for (int i = 0; i < size; i++) {
+                buffer.append("a");
+            }
+
+            weEvent = new WeEvent(this.topic, buffer.toString().getBytes(), this.extensions);
             getNewLogger().info("weEvent:{}", weEvent);
 
             boolean result = this.weEventClient.open(this.topic);
@@ -73,25 +77,25 @@ public class WeEventProducer extends AbstractJavaSamplerClient {
         }
     }
 
-    // 每次runTest运行完执行
+    // Execute every runTest run
     @Override
     public void teardownTest(JavaSamplerContext context) {
         getNewLogger().debug(getClass().getName() + ": teardownTest");
 
     }
 
-    // JMeter GUI params
+    // JMeter GUI parameters
     @Override
     public Arguments getDefaultParameters() {
         Arguments arguments = new Arguments();
         arguments.addArgument("topic", this.topic);
-        arguments.addArgument("content", this.content);
+        arguments.addArgument("size", String.valueOf(this.size));
         arguments.addArgument("format", this.format);
         arguments.addArgument("url", this.defaultUrl);
         return arguments;
     }
 
-    // Jmeter跑一次runTest算一个事物，会重复跑
+    // Jmeter runs once runTest to calculate a thing, it will run repeatedly
     @Override
     public SampleResult runTest(JavaSamplerContext context) {
         SampleResult result = new SampleResult();

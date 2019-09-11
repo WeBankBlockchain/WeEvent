@@ -25,11 +25,9 @@ public class WeEventConsumer extends AbstractJavaSamplerClient {
 
     private IWeEventClient weEventClient;
 
-    private final String http = "http://";
+    private String defaultUrl = "http://127.0.0.1:8080/weevent";
 
-    private String defaultUrl = "127.0.0.1:7000";
-
-    // 每个压测线程启动时跑一次
+    // Run every time the pressure thread starts
     @Override
     public void setupTest(JavaSamplerContext context) {
         super.setupTest(context);
@@ -37,7 +35,7 @@ public class WeEventConsumer extends AbstractJavaSamplerClient {
         super.setupTest(context);
         try {
             this.defaultUrl = context.getParameter("url") == null ? this.defaultUrl : context.getParameter("url");
-            this.weEventClient = IWeEventClient.build(http + defaultUrl + "/weevent");
+            this.weEventClient = IWeEventClient.build(defaultUrl);
             getNewLogger().info("weEventClient:{}", this.weEventClient);
 
             this.topic = context.getParameter("topic") == null ? this.topic : context.getParameter("topic");
@@ -49,13 +47,13 @@ public class WeEventConsumer extends AbstractJavaSamplerClient {
         }
     }
 
-    // 每次runTest运行完执行
+    // Execute every runTest run
     @Override
     public void teardownTest(JavaSamplerContext context) {
         super.teardownTest(context);
     }
 
-    // Jmeter GUI参数
+    // JMeter GUI parameters
     @Override
     public Arguments getDefaultParameters() {
         Arguments arguments = new Arguments();
@@ -65,7 +63,7 @@ public class WeEventConsumer extends AbstractJavaSamplerClient {
         return arguments;
     }
 
-    // Jmeter跑一次runTest算一个事物，会重复跑
+    // Jmeter runs once runTest to calculate a thing, it will run repeatedly
     @Override
     public SampleResult runTest(JavaSamplerContext context) {
         SampleResult result = new SampleResult();
