@@ -17,7 +17,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.weevent.governance.entity.Broker;
+import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.service.BrokerService;
 import com.webank.weevent.governance.utils.SpringContextUtil;
 
@@ -57,13 +57,13 @@ public class ForwardBrokerFilter implements Filter {
         HttpServletResponse res = (HttpServletResponse) response;
         String idStr = request.getParameter("brokerId");
         String originUrl = req.getRequestURI();
-        // get tail of broker url
+        // get tail of brokerEntity url
         String subStrUrl = originUrl.substring(originUrl.indexOf("/weevent/") + "/weevent".length());
 
         Integer id = Integer.parseInt(idStr);
-        Broker broker = brokerService.getBroker(id);
-        String brokerUrl = broker.getBrokerUrl();
-        // get complete forward broker url
+        BrokerEntity brokerEntity = brokerService.getBroker(id);
+        String brokerUrl = brokerEntity.getBrokerUrl();
+        // get complete forward brokerEntity url
         String newUrl = brokerUrl + subStrUrl;
 
         // get client according url
