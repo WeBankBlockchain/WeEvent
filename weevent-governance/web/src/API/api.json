@@ -7,7 +7,7 @@
   },
   "getVersion": {
     "method": "get",
-    "url": "weevent-governance/weevent/admin/buildInfo"
+    "url": "weevent-governance/weevent/admin/getVersion"
   },
   "listGroup": {
     "method": "get",
