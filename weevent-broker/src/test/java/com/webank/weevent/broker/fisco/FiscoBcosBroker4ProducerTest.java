@@ -29,6 +29,10 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
 
     @Before
     public void before() throws Exception {
+        log.info("=============================={}.{}==============================",
+                this.getClass().getSimpleName(),
+                this.testName.getMethodName());
+
         this.iProducer = IProducer.build();
         Assert.assertNotNull(this.iProducer);
         this.iProducer.startProducer();
@@ -40,8 +44,6 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testStartProducer() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         Assert.assertTrue(this.iProducer.startProducer());
     }
 
@@ -50,8 +52,6 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testShutdownProducer() {
-        log.info("===================={}", this.testName.getMethodName());
-
         Assert.assertTrue(this.iProducer.shutdownProducer());
     }
 
@@ -60,8 +60,6 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishEvent() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.groupId);
         Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
     }
@@ -71,8 +69,6 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishTopicExists() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         SendResult dto = this.iProducer.publish(new WeEvent(this.topicName, "中文消息.".getBytes()), this.groupId);
         Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, dto.getStatus());
     }
@@ -82,8 +78,6 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishExtIsNull() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), null), this.groupId);
             Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
@@ -97,8 +91,6 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishExtContainMulKeyValue() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         Map<String, String> ext = new HashMap<>();
         ext.put("test1", "test value");
         ext.put("test2", "test value2");
@@ -112,8 +104,6 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishExtContainOneKeyValue() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         Map<String, String> ext = new HashMap<>();
         ext.put("test1", "test value");
         SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), ext), this.groupId);
@@ -125,8 +115,6 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishTopicNotExist() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             String topicNotExists = "fsgdsggdgerer";
             this.iProducer.publish(new WeEvent(topicNotExists, "中文消息.".getBytes()), this.groupId);
@@ -141,8 +129,6 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishTopicIsBlank() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.iProducer.publish(new WeEvent(" ", "中文消息.".getBytes()), this.groupId);
             Assert.fail();
@@ -156,8 +142,6 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishTopicIsNull() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.iProducer.publish(new WeEvent(null, "中文消息.".getBytes()), this.groupId);
             Assert.fail();
@@ -171,8 +155,6 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishTopicOverMaxLen() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             String topicNotExists = "fsgdsggdgererqwertyuioplkjhgfdsazxqazwsxedcrfvtgbyhnujmikolppoiuyt";
             this.iProducer.publish(new WeEvent(topicNotExists, "中文消息.".getBytes()), this.groupId);
@@ -187,8 +169,6 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishContentIsNull() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.iProducer.publish(new WeEvent(this.topicName, null), this.groupId);
             Assert.fail();
@@ -202,8 +182,6 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishContentIsBlank() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             byte[] bytes = "".getBytes();
             this.iProducer.publish(new WeEvent(this.topicName, bytes), this.groupId);
@@ -218,8 +196,6 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishGroupIdIsNull() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes()), null);
             Assert.fail();
@@ -233,8 +209,6 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishGroupIdIsNotExist() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes()), "4");
             Assert.fail();
@@ -248,8 +222,6 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishGroupIdIsNotNum() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes()), "sfsdf");
             Assert.fail();
@@ -263,8 +235,6 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishTopicContainSpecialChar() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             char[] charStr = {69, 72, 31};
             String illegalTopic = new String(charStr);
@@ -281,8 +251,6 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishTopicContainChineseChar() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             byte[] bytes = "".getBytes();
             this.iProducer.publish(new WeEvent("中国", bytes), this.groupId);
@@ -296,8 +264,6 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishTag() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-		
         Map<String, String> ext = new HashMap<>();
         ext.put(WeEvent.WeEvent_TAG, "create");
         SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello tag: create".getBytes(), ext), this.groupId);

@@ -8,6 +8,7 @@ import com.webank.weevent.governance.entity.TopicPage;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.http.HttpStatus;
 import org.junit.Assert;
@@ -22,6 +23,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+@Slf4j
 public class TopicControllerTest extends JUnitTestBase {
 
     @Autowired
@@ -29,10 +31,16 @@ public class TopicControllerTest extends JUnitTestBase {
 
     private MockMvc mockMvc;
 
-
     @Before
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+    }
+
+    @Before
+    public void before() {
+        log.info("=============================={}.{}==============================",
+                this.getClass().getSimpleName(),
+                this.testName.getMethodName());
     }
 
     @Test
