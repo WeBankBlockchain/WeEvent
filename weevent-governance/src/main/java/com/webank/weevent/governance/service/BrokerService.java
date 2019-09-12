@@ -21,10 +21,13 @@ import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.utils.CookiesTools;
 import com.webank.weevent.governance.utils.SpringContextUtil;
 
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,9 +53,11 @@ public class BrokerService {
     @Autowired
     private PermissionService permissionService;
 
-    private final static String brokerListUrl = "/rest/list?pageIndex=0&pageSize=10";
+    private final static String brokerListUrl = "/admin/buildInfo";
 
     private final static String weBaseNodeUrl = "/node/nodeInfo/1";
+
+    private final static String HTTPGET_SUCCESS_CODE = "0";
 
     @Autowired
     private CookiesTools cookiesTools;
@@ -121,11 +126,20 @@ public class BrokerService {
         // get one of broker urls
         headUrl = headUrl + afterUrl;
         HttpGet get = getMethod(headUrl, request);
+        JSONObject jsonObject;
+
         try {
-            client.execute(get);
+            CloseableHttpResponse response = client.execute(get);
+            String responseResult = EntityUtils.toString(response.getEntity());
+            jsonObject = JSONObject.parseObject(responseResult);
         } catch (Exception e) {
             log.error("url {}, connect fail,error:{}", headUrl, e.getMessage());
             throw new GovernanceException("url " + headUrl + " connect fail", e);
+        }
+
+        if (!this.HTTPGET_SUCCESS_CODE.equals(String.valueOf(jsonObject.get("code")))){
+            log.error("url {}, connect fail.", headUrl);
+            throw new GovernanceException("url " + headUrl + " connect fail");
         }
     }
 
@@ -199,6 +213,7 @@ public class BrokerService {
             return ErrorCode.ACCESS_DENIED;
         }
         String brokerUrl = brokerEntity.getBrokerUrl();
+        log.info("checkBrokerServer brokerUrl:{}", brokerUrl);
         try {
             checkUrl(brokerUrl, brokerListUrl, request);
         } catch (GovernanceException e){

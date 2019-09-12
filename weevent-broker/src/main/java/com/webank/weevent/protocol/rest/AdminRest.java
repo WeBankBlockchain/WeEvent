@@ -9,6 +9,7 @@ import com.webank.weevent.broker.config.BuildInfo;
 import com.webank.weevent.broker.fisco.util.SystemInfoUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
 import com.alibaba.fastjson.JSON;
@@ -85,7 +86,10 @@ public class AdminRest extends RestHA {
     }
 
     @RequestMapping(path = "/buildInfo")
-    public BuildInfo buildInfo() {
-        return this.buildInfo;
+    public ResponseData<BuildInfo> buildInfo() {
+        ResponseData<BuildInfo> responseData = new ResponseData<>();
+        responseData.setErrorCode(ErrorCode.SUCCESS);
+        responseData.setResult(this.buildInfo);
+        return responseData;
     }
 }
