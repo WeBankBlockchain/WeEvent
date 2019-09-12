@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.result.GovernanceResult;
@@ -67,5 +68,11 @@ public class BrokerController {
     public GovernanceResult deleteBroker(@RequestBody BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
         log.info("delete  brokerEntity service ,id: " + brokerEntity.getId());
         return brokerService.deleteBroker(brokerEntity, request);
+    }
+
+    @PostMapping("/checkServer")
+    public ErrorCode checkServerByUrl(@RequestBody BrokerEntity brokerEntity, HttpServletRequest request) {
+        log.info("checkServer  brokerEntity, id: " + brokerEntity.getId());
+        return brokerService.checkServerByUrl(brokerEntity, request);
     }
 }
