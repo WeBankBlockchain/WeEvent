@@ -9,6 +9,7 @@ package com.webank.weevent.jmeter.producer;
  * @since 2019/09/11
  */
 
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -107,7 +108,9 @@ public class WeEventProducer extends AbstractJavaSamplerClient {
             result.sampleEnd();
             result.setSuccessful(sendResult.getStatus() == SendResult.SendResultStatus.SUCCESS && sendResult.getEventId().length() > 0);
             result.setResponseMessage(sendResult.getEventId());
-
+            result.setResponseHeaders(sendResult.getStatus().toString());
+            result.setResponseData(sendResult.toString(), Charset.defaultCharset().name());
+            getNewLogger().info("sendResult:{}", sendResult);
         } catch (Exception e) {
             getNewLogger().error("publish exception", e);
             result.sampleEnd();

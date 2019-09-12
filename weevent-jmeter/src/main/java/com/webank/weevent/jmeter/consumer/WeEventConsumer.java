@@ -1,6 +1,8 @@
 package com.webank.weevent.jmeter.consumer;
 
 
+import java.nio.charset.Charset;
+
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.WeEvent;
@@ -73,7 +75,7 @@ public class WeEventConsumer extends AbstractJavaSamplerClient {
             String subscribeId = this.weEventClient.subscribe(this.topic, this.groupId, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
                 @Override
                 public void onEvent(WeEvent event) {
-                    getNewLogger().info("event,{}", event);
+                    getNewLogger().info("eventId,{}", event.getEventId());
                 }
 
                 @Override
@@ -83,6 +85,9 @@ public class WeEventConsumer extends AbstractJavaSamplerClient {
             });
             result.setSuccessful(true);
             result.setResponseMessage(subscribeId);
+            result.setResponseData(subscribeId, Charset.defaultCharset().name());
+            result.setResponseHeaders("true");
+
             result.sampleEnd();
         } catch (Exception e) {
             getNewLogger().error("subscribe exception", e);
