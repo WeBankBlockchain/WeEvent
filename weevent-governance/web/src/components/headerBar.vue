@@ -7,6 +7,40 @@
     </el-breadcrumb>
   </div>
   <div class='right_part'>
+    <el-popover
+      placement="bottom"
+      title="WeEvent版本信息"
+      width="250"
+      trigger="click"
+       v-show='!noServer'
+      >
+      <div id='version'>
+        <p class='version_infor'>
+          <span class='version_title'>
+            Branch:
+          </span>
+          <span class='version_content'>
+            {{version.gitBranch}}
+          </span>
+        </p>
+        <p class='version_infor'>
+          <span class='version_title'>
+            CommitHash:
+          </span>
+          <span class='version_content'>
+            {{version.gitCommitHash}}
+          </span>
+        </p>
+        <p class='version_infor'>
+          <span class='version_title'>
+            最后更新:
+          </span>
+          <span class='version_content'>{{version.buildTimeStamp}}</span>
+        </p>
+      </div>
+      <el-button slot="reference">版本: {{version.weEventVersion}}</el-button>
+    </el-popover>
+    <span class='line'  v-show='!noServer'></span>
     <span class='server_title' v-show='!noServer'>群组信息:</span>
     <el-dropdown trigger="click" @command='selectGroup'  v-show='!noServer'>
       <span>{{groupId}} <i class="el-icon-arrow-down el-icon-caret-bottom"></i></span>
@@ -50,7 +84,13 @@ export default {
       userName: localStorage.getItem('user'),
       server: '',
       servers: [],
-      groupList: []
+      groupList: [],
+      version: {
+        buildTimeStamp: '',
+        gitBranch: '',
+        gitCommitHash: '',
+        weEventVersion: ''
+      }
     }
   },
   mounted () {
@@ -120,6 +160,7 @@ export default {
               localStorage.setItem('brokerId', id)
             }
             vm.listGroup()
+            vm.getVersion()
           } else {
             vm.$message({
               type: 'warning',
@@ -138,6 +179,14 @@ export default {
           this.groupList = [].concat(res.data)
           this.$store.commit('set_groupId', res.data[0])
           localStorage.setItem('groupId', res.data[0])
+        }
+      })
+    },
+    getVersion () {
+      let url = '?brokerId=' + localStorage.getItem('brokerId')
+      API.getVersion(url).then(res => {
+        if (res.data.code === 0) {
+          this.version = Object.assign({}, res.data.result)
         }
       })
     }
