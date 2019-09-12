@@ -85,8 +85,8 @@ public class AdminRest extends RestHA {
         return this.consumer.listSubscription(groupId);
     }
 
-    @RequestMapping(path = "/buildInfo")
-    public ResponseData<BuildInfo> buildInfo() {
+    @RequestMapping(path = "/getVersion")
+    public ResponseData<BuildInfo> getVersion() {
         ResponseData<BuildInfo> responseData = new ResponseData<>();
         responseData.setErrorCode(ErrorCode.SUCCESS);
         responseData.setResult(this.buildInfo);

@@ -71,8 +71,8 @@ public class BrokerController {
     }
 
     @PostMapping("/checkServer")
-    public ErrorCode checkBrokerServer(@RequestBody BrokerEntity brokerEntity, HttpServletRequest request) {
+    public ErrorCode checkServerByUrl(@RequestBody BrokerEntity brokerEntity, HttpServletRequest request) {
         log.info("checkServer  brokerEntity, id: " + brokerEntity.getId());
-        return brokerService.checkBrokerServer(brokerEntity, request);
+        return brokerService.checkServerByUrl(brokerEntity, request);
     }
 }
