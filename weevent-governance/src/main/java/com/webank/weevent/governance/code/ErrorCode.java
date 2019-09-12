@@ -7,7 +7,8 @@ public enum ErrorCode {
     WEBASE_CONNECT_ERROR(100101, "webase connect error!"), 
     SEND_EMAIL_ERROR(100102, "send email failed"), 
     ACCESS_DENIED(100103, "access denied"),
-    TEST_URL_FAIL(100104, "test url fail"),;
+    TEST_URL_FAIL(100104, "test url fail"),
+    ILLEGAL_INPUT(100105, "illegal input"),;
 
     /**
      * error code
