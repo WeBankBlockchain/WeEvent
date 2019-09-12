@@ -5,6 +5,10 @@
     "url": "user/login",
     "headers": {"Content-Type": "application/x-www-form-urlencoded"}
   },
+  "getVersion": {
+    "method": "get",
+    "url": "weevent-governance/weevent/admin/buildInfo"
+  },
   "listGroup": {
     "method": "get",
     "url": "weevent-governance/weevent/rest/listGroup"
@@ -40,6 +44,10 @@
   "deleteServer": {
     "method": "post",
     "url": "weevent-governance/broker/delete"
+  },
+  "checkBrokerServer": {
+    "method": "post",
+    "url": "weevent-governance/broker/checkServer"
   },
   "topicState": {
     "method": "get",
