@@ -90,6 +90,43 @@ export default {
         }
       }
     }
+    var checkBroker = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('服务端口不能为空'))
+      } else {
+        let data = {
+          'userId': parseInt(localStorage.getItem('userId')),
+          'id': parseInt(localStorage.getItem('brokerId')),
+          'brokerUrl': value
+        }
+        API.checkBrokerServer(data).then(res => {
+          if (res.data === 'SUCCESS') {
+            callback()
+          } else {
+            callback(new Error('服务地址错误,无法连接!'))
+          }
+        })
+      }
+    }
+    var checkWeBase = (rule, value, callback) => {
+      if (value === '') {
+        callback()
+      } else {
+        // let data = {
+        //   'userId': parseInt(localStorage.getItem('userId')),
+        //   'id': parseInt(localStorage.getItem('brokerId')),
+        //   'weBaseUrl': value
+        // }
+        // API.checkBrokerServer(data).then(res => {
+        //   if (res.data === 'SUCCESS') {
+        //     callback()
+        //   } else {
+        //     callback('服务地址错误,服务无法连接')
+        //   }
+        // })
+        callback()
+      }
+    }
     return {
       server: [],
       showLog: false,
@@ -109,10 +146,10 @@ export default {
           { validator: checkName, trigger: 'blur' }
         ],
         brokerUrl: [
-          { required: true, message: '服务端口不能为空', trigger: 'blur' }
+          { validator: checkBroker, trigger: 'blur' }
         ],
         webaseUrl: [
-          { required: true, message: '服务端口不能为空', trigger: 'blur' }
+          { validator: checkWeBase, trigger: 'blur' }
         ]
       }
     }
@@ -165,22 +202,17 @@ export default {
       data.userIdList = [].concat(this.form.userIdList)
       API.addServer(data).then(res => {
         if (res.status === 200) {
-          if (res.data.code === 100100) {
-            this.$message({
-              type: 'warning',
-              message: 'Broker服务地址无法连接'
-            })
-          } else if (res.data.code === 100101) {
-            this.$message({
-              type: 'warning',
-              message: 'Webase服务地址无法连接'
-            })
-          } else if (res.data) {
+          if (res.data.status === 200) {
             this.$message({
               type: 'success',
               message: '新增成功'
             })
             this.getServer()
+          } else {
+            this.$message({
+              type: 'warning',
+              message: '新增失败'
+            })
           }
         } else {
           this.$message({
@@ -209,17 +241,7 @@ export default {
       data.userIdList = [].concat(this.form.userIdList)
       API.updateServer(data).then(res => {
         if (res.status === 200) {
-          if (res.data.code === 100100) {
-            this.$message({
-              type: 'warning',
-              message: 'Broker服务地址无法连接'
-            })
-          } else if (res.data.code === 100101) {
-            this.$message({
-              type: 'warning',
-              message: 'Webase服务地址无法连接'
-            })
-          } else if (res.data.status === 200) {
+          if (res.data.status === 200) {
             this.$message({
               type: 'success',
               message: '编辑成功'
@@ -266,17 +288,26 @@ export default {
       this.isEdit = true
     },
     deleteItem (e) {
-      this.$confirm('确认删除该服务？').then(_ => {
+      var vm = this
+      vm.$confirm('确认删除该服务？').then(_ => {
         let data = {
           'id': e.id
         }
         API.deleteServer(data).then(res => {
           if (res.data.status === 200) {
-            this.$message({
+            vm.$message({
               type: 'success',
               message: '删除成功'
             })
-            this.getServer()
+            vm.getServer()
+            if (e.id === parseInt(localStorage.getItem('brokerId'))) {
+              if (vm.server.length > 0) {
+                let newId = vm.server[0].id
+                localStorage.setItem('brokerId', newId)
+              } else {
+                localStorage.removeItem('brokerId')
+              }
+            }
           } else {
             this.$message({
               type: 'warning',

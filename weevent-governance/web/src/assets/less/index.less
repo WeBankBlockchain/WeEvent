@@ -250,6 +250,12 @@ html,body,#app{
   .right_part{
     display: flex;
     align-items: center;
+    .el-button{
+      border:0;
+      padding:5px;
+      color:#98a7b9;
+      font-weight: bold;
+    }
 
     .back_home{
       width:20px;
@@ -670,6 +676,17 @@ html,body,#app{
   color:@black_text !important;
   font-weight: bold !important;
   font-family: 'syyh'
+}
+
+#version{
+  .version_infor{
+    height:30px;
+    line-height: 30px;
+    .version_title{
+      display: inline-block;
+      width:100px;
+    }
+  }
 }
 
 @media screen and (max-width:1700px){
