@@ -2,6 +2,7 @@ package com.webank.weevent.governance.junit;
 
 import com.webank.weevent.governance.JUnitTestBase;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.junit.Assert;
 import org.junit.Before;
@@ -15,6 +16,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+@Slf4j
 public class PermissionControllerTest extends JUnitTestBase {
 
     @Autowired
@@ -28,6 +30,12 @@ public class PermissionControllerTest extends JUnitTestBase {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
     }
 
+    @Before
+    public void before() {
+        log.info("=============================={}.{}==============================",
+                this.getClass().getSimpleName(),
+                this.testName.getMethodName());
+    }
 
     @Test
     public void testPermissionList() throws Exception {
