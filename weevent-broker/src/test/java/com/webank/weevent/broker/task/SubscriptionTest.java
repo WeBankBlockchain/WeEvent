@@ -13,6 +13,7 @@ import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -27,6 +28,13 @@ public class SubscriptionTest extends JUnitTestBase {
     private final static String patternTopic = "com/weevent/test";
     private final static String tag = "tag_name";
     private final static byte[] content = "hello world".getBytes(StandardCharsets.UTF_8);
+
+    @Before
+    public void before() {
+        log.info("=============================={}.{}==============================",
+                this.getClass().getSimpleName(),
+                this.testName.getMethodName());
+    }
 
     /**
      * test isTopicPattern
@@ -96,8 +104,6 @@ public class SubscriptionTest extends JUnitTestBase {
      */
     @Test
     public void testFilter() {
-        log.info("===================={}", this.testName.getMethodName());
-
         List<WeEvent> from = new ArrayList<>();
         from.add(new WeEvent(topicName, content));
 
@@ -112,8 +118,6 @@ public class SubscriptionTest extends JUnitTestBase {
      */
     @Test
     public void testFilter2() {
-        log.info("===================={}", this.testName.getMethodName());
-
         List<WeEvent> from = new ArrayList<>();
 
         String[] topics = {topicName};
@@ -127,8 +131,6 @@ public class SubscriptionTest extends JUnitTestBase {
      */
     @Test
     public void testFilter3() {
-        log.info("===================={}", this.testName.getMethodName());
-
         List<WeEvent> from = new ArrayList<>();
         from.add(new WeEvent(topicName, content));
 
@@ -143,8 +145,6 @@ public class SubscriptionTest extends JUnitTestBase {
      */
     @Test
     public void testFilter4() {
-        log.info("===================={}", this.testName.getMethodName());
-
         List<WeEvent> from = new ArrayList<>();
         from.add(new WeEvent(topicName, content));
         from.add(new WeEvent(topicName, content));
@@ -160,8 +160,6 @@ public class SubscriptionTest extends JUnitTestBase {
      */
     @Test
     public void testFilter5() {
-        log.info("===================={}", this.testName.getMethodName());
-
         List<WeEvent> from = new ArrayList<>();
         from.add(new WeEvent(topicName, content));
         from.add(new WeEvent(topicName, content));
@@ -177,8 +175,6 @@ public class SubscriptionTest extends JUnitTestBase {
      */
     @Test
     public void testFilterTag() {
-        log.info("===================={}", this.testName.getMethodName());
-
         Map<String, String> ext = new HashMap<>();
         ext.put(WeEvent.WeEvent_TAG, tag);
 
@@ -196,8 +192,6 @@ public class SubscriptionTest extends JUnitTestBase {
      */
     @Test
     public void testFilterTag2() {
-        log.info("===================={}", this.testName.getMethodName());
-
         Map<String, String> ext = new HashMap<>();
         ext.put(WeEvent.WeEvent_TAG, tag);
 
@@ -215,8 +209,6 @@ public class SubscriptionTest extends JUnitTestBase {
      */
     @Test
     public void testFilterTag3() {
-        log.info("===================={}", this.testName.getMethodName());
-
         Map<String, String> ext = new HashMap<>();
         ext.put(WeEvent.WeEvent_TAG, tag);
 
@@ -234,8 +226,6 @@ public class SubscriptionTest extends JUnitTestBase {
      */
     @Test
     public void testFilterTag4() {
-        log.info("===================={}", this.testName.getMethodName());
-
         Map<String, String> ext = new HashMap<>();
         ext.put(WeEvent.WeEvent_TAG, tag);
 
@@ -254,8 +244,6 @@ public class SubscriptionTest extends JUnitTestBase {
      */
     @Test
     public void testFilterTag5() {
-        log.info("===================={}", this.testName.getMethodName());
-
         Map<String, String> ext = new HashMap<>();
         ext.put(WeEvent.WeEvent_TAG, tag);
 
@@ -274,8 +262,6 @@ public class SubscriptionTest extends JUnitTestBase {
      */
     @Test
     public void testFilterPatternSharp() {
-        log.info("===================={}", this.testName.getMethodName());
-
         List<WeEvent> from = new ArrayList<>();
         from.add(new WeEvent(patternTopic, content));
 
@@ -290,8 +276,6 @@ public class SubscriptionTest extends JUnitTestBase {
      */
     @Test
     public void testFilterPatternSharp2() {
-        log.info("===================={}", this.testName.getMethodName());
-
         List<WeEvent> from = new ArrayList<>();
         from.add(new WeEvent(patternTopic, content));
 
@@ -306,8 +290,6 @@ public class SubscriptionTest extends JUnitTestBase {
      */
     @Test
     public void testFilterPatternSharp3() {
-        log.info("===================={}", this.testName.getMethodName());
-
         List<WeEvent> from = new ArrayList<>();
         from.add(new WeEvent(patternTopic, content));
 
@@ -322,8 +304,6 @@ public class SubscriptionTest extends JUnitTestBase {
      */
     @Test
     public void testFilterPatternSharp4() {
-        log.info("===================={}", this.testName.getMethodName());
-
         List<WeEvent> from = new ArrayList<>();
         from.add(new WeEvent(patternTopic, content));
 
@@ -338,8 +318,6 @@ public class SubscriptionTest extends JUnitTestBase {
      */
     @Test
     public void testFilterPatternSharp5() {
-        log.info("===================={}", this.testName.getMethodName());
-
         List<WeEvent> from = new ArrayList<>();
         from.add(new WeEvent(patternTopic, content));
 
@@ -354,7 +332,6 @@ public class SubscriptionTest extends JUnitTestBase {
      */
     @Test
     public void testFilterPatternSharp6() {
-        log.info("===================={}", this.testName.getMethodName());
         Map<String, String> ext = new HashMap<>();
         ext.put(WeEvent.WeEvent_TAG, tag);
 
@@ -372,7 +349,6 @@ public class SubscriptionTest extends JUnitTestBase {
      */
     @Test
     public void testFilterPatternSharp7() {
-        log.info("===================={}", this.testName.getMethodName());
         Map<String, String> ext = new HashMap<>();
         ext.put(WeEvent.WeEvent_TAG, tag);
 
@@ -390,8 +366,6 @@ public class SubscriptionTest extends JUnitTestBase {
      */
     @Test
     public void testFilterPatternSingle() {
-        log.info("===================={}", this.testName.getMethodName());
-
         List<WeEvent> from = new ArrayList<>();
         from.add(new WeEvent(patternTopic, content));
 
@@ -406,8 +380,6 @@ public class SubscriptionTest extends JUnitTestBase {
      */
     @Test
     public void testFilterPatternSingle1() {
-        log.info("===================={}", this.testName.getMethodName());
-
         List<WeEvent> from = new ArrayList<>();
         from.add(new WeEvent(patternTopic, content));
 
@@ -422,8 +394,6 @@ public class SubscriptionTest extends JUnitTestBase {
      */
     @Test
     public void testFilterPatternSingle2() {
-        log.info("===================={}", this.testName.getMethodName());
-
         List<WeEvent> from = new ArrayList<>();
         from.add(new WeEvent(patternTopic, content));
 
@@ -438,8 +408,6 @@ public class SubscriptionTest extends JUnitTestBase {
      */
     @Test
     public void testFilterPatternSingle3() {
-        log.info("===================={}", this.testName.getMethodName());
-
         List<WeEvent> from = new ArrayList<>();
         from.add(new WeEvent(patternTopic, content));
 
@@ -454,8 +422,6 @@ public class SubscriptionTest extends JUnitTestBase {
      */
     @Test
     public void testFilterComplex() {
-        log.info("===================={}", this.testName.getMethodName());
-
         List<WeEvent> from = new ArrayList<>();
         from.add(new WeEvent(patternTopic, content));
         from.add(new WeEvent(patternTopic, content));
@@ -471,8 +437,6 @@ public class SubscriptionTest extends JUnitTestBase {
      */
     @Test
     public void testFilterComplex2() {
-        log.info("===================={}", this.testName.getMethodName());
-
         Map<String, String> ext = new HashMap<>();
         ext.put(WeEvent.WeEvent_TAG, tag);
 

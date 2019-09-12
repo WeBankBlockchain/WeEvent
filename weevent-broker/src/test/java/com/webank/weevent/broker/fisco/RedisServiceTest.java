@@ -27,7 +27,9 @@ public class RedisServiceTest extends JUnitTestBase {
 
     @Before
     public void before() {
-        log.info("===================={}", this.testName.getMethodName());
+        log.info("=============================={}.{}==============================",
+                this.getClass().getSimpleName(),
+                this.testName.getMethodName());
 
         List<WeEvent> eventList = new ArrayList<>();
         WeEvent event = new WeEvent();
@@ -43,8 +45,6 @@ public class RedisServiceTest extends JUnitTestBase {
 
     @Test
     public void testWriteEventsToRedis() {
-        log.info("===================={}", this.testName.getMethodName());
-
         String blockNum = "100";
         List<WeEvent> list = new ArrayList<>();
         WeEvent event = new WeEvent();
@@ -62,8 +62,6 @@ public class RedisServiceTest extends JUnitTestBase {
 
     @Test
     public void testReadEventsFromRedis() {
-        log.info("===================={}", super.testName.getMethodName());
-
         List<WeEvent> result = redisService.readEventsFromRedis(this.blockNum);
         Assert.assertNotNull(result);
         Assert.assertEquals(result.get(0).getTopic(), super.topicName);
@@ -71,23 +69,17 @@ public class RedisServiceTest extends JUnitTestBase {
 
     @Test
     public void testReadEventsFromRedisBlockNumNotExist() {
-        log.info("===================={}", super.testName.getMethodName());
-
         List<WeEvent> result = redisService.readEventsFromRedis("000000");
         Assert.assertNull(result);
     }
 
     @Test
     public void testIsEventsExistInRedis() {
-        log.info("===================={}", super.testName.getMethodName());
-
         Assert.assertTrue(redisService.isEventsExistInRedis(this.blockNum));
     }
 
     @Test
     public void testIsEventsNotExistInRedis() {
-        log.info("===================={}", super.testName.getMethodName());
-
         Assert.assertFalse(redisService.isEventsExistInRedis("000000"));
     }
 
@@ -110,5 +102,4 @@ public class RedisServiceTest extends JUnitTestBase {
             }
         };
     }
-
 }
