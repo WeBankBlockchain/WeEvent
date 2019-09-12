@@ -23,6 +23,10 @@ public class IProducerTest extends JUnitTestBase {
 
     @Before
     public void before() throws Exception {
+        log.info("=============================={}.{}==============================",
+                this.getClass().getSimpleName(),
+                this.testName.getMethodName());
+
         this.iProducer = IProducer.build();
         Assert.assertNotNull(this.iProducer);
         Assert.assertTrue(this.iProducer.open(this.topicName, this.groupId));
@@ -38,8 +42,6 @@ public class IProducerTest extends JUnitTestBase {
      */
     @Test
     public void testStartProducer() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         Assert.assertTrue(this.iProducer.startProducer());
     }
 
@@ -48,8 +50,6 @@ public class IProducerTest extends JUnitTestBase {
      */
     @Test
     public void testShutdownProducer() {
-        log.info("===================={}", this.testName.getMethodName());
-
         Assert.assertTrue(this.iProducer.shutdownProducer());
     }
 
@@ -58,8 +58,6 @@ public class IProducerTest extends JUnitTestBase {
      */
     @Test
     public void testShutdownProducerMultiple() {
-        log.info("===================={}", this.testName.getMethodName());
-
         Assert.assertTrue(this.iProducer.shutdownProducer());
         Assert.assertTrue(this.iProducer.shutdownProducer());
     }
@@ -68,8 +66,6 @@ public class IProducerTest extends JUnitTestBase {
      * test publish
      */
     public void testPublish() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         SendResult result = this.iProducer.publish(new WeEvent(this.topicName, "hello world".getBytes()), this.groupId);
         Assert.assertEquals(result.getStatus(), SendResult.SendResultStatus.SUCCESS);
         Assert.assertFalse(result.getEventId().isEmpty());
