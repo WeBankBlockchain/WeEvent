@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 public class WeEventConsumer extends AbstractJavaSamplerClient {
     private String topic = "com.webank.weevent.jmeter";
 
-    private String groupId = WeEvent.DEFAULT_GROUP_ID;
+    private String groupId;
 
     private IWeEventClient weEventClient;
 
