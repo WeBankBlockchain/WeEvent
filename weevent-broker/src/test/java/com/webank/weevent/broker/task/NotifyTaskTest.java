@@ -46,6 +46,10 @@ public class NotifyTaskTest extends JUnitTestBase {
 
     @Before
     public void before() {
+        log.info("=============================={}.{}==============================",
+                this.getClass().getSimpleName(),
+                this.testName.getMethodName());
+
         this.threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
         this.threadPoolTaskExecutor.initialize();
     }
@@ -66,8 +70,6 @@ public class NotifyTaskTest extends JUnitTestBase {
      */
     @Test
     public void testPush() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         MyListener listener = new MyListener();
         NotifyTask notifyTask = new NotifyTask(this.subscriptionId, 1000, listener);
         this.threadPoolTaskExecutor.execute(notifyTask);
@@ -88,8 +90,6 @@ public class NotifyTaskTest extends JUnitTestBase {
      */
     @Test
     public void testPush2() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         MyListener listener = new MyListener();
         NotifyTask notifyTask = new NotifyTask(this.subscriptionId, 1000, listener);
         this.threadPoolTaskExecutor.execute(notifyTask);
@@ -111,8 +111,6 @@ public class NotifyTaskTest extends JUnitTestBase {
      */
     @Test
     public void testPush3() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         MyListener listener = new MyListener();
         NotifyTask notifyTask = new NotifyTask(this.subscriptionId, 1000, listener);
         this.threadPoolTaskExecutor.execute(notifyTask);
@@ -137,8 +135,6 @@ public class NotifyTaskTest extends JUnitTestBase {
      * push merged
      */
     public void testPush4() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         MyListener listener = new MyListener();
         NotifyTask notifyTask = new NotifyTask(this.subscriptionId, 1000, listener);
         this.threadPoolTaskExecutor.execute(notifyTask);
