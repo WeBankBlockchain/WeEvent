@@ -39,7 +39,7 @@ public class WeEventProducer extends AbstractJavaSamplerClient {
 
     private Map<String, String> extensions = new HashMap<>();
 
-    private String groupId;
+    private String groupId = WeEvent.DEFAULT_GROUP_ID;
 
     private IWeEventClient weEventClient;
 
@@ -91,6 +91,7 @@ public class WeEventProducer extends AbstractJavaSamplerClient {
         Arguments arguments = new Arguments();
         arguments.addArgument("topic", this.topic);
         arguments.addArgument("size", String.valueOf(this.size));
+        arguments.addArgument("groupId", this.groupId);
         arguments.addArgument("format", this.format);
         arguments.addArgument("url", this.defaultUrl);
         return arguments;
