@@ -9,6 +9,12 @@ class ResoruceService extends BaseModel {
   loginOut (data) {
     return this.request(api.loginOut, data)
   }
+  listGroup (data) {
+    return this.request(api.listGroup, data)
+  }
+  getVersion (data) {
+    return this.request(api.getVersion, data)
+  }
   topicList (data) {
     return this.request(api.topicList, data)
   }
@@ -17,6 +23,9 @@ class ResoruceService extends BaseModel {
   }
   topicState (data) {
     return this.request(api.topicState, data)
+  }
+  topicInfo (data) {
+    return this.request(api.topicInfo, data)
   }
   subscription (data) {
     return this.request(api.subscription, data)
@@ -71,6 +80,15 @@ class ResoruceService extends BaseModel {
   }
   reset (data) {
     return this.request(api.reset, data)
+  }
+  accountList (data) {
+    return this.request(api.accountList, data)
+  }
+  permissionList (data) {
+    return this.request(api.permissionList, data)
+  }
+  checkBrokerServer (data) {
+    return this.request(api.checkBrokerServer, data)
   }
 }
 

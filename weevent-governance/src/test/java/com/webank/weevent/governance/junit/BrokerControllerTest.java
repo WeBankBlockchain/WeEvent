@@ -1,18 +1,27 @@
 package com.webank.weevent.governance.junit;
 
-import com.webank.weevent.governance.JUnitTestBase;
 
+import java.util.List;
+
+import com.webank.weevent.governance.JUnitTestBase;
+import com.webank.weevent.governance.entity.BrokerEntity;
+
+import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpStatus;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
+@Slf4j
 public class BrokerControllerTest extends JUnitTestBase {
 
     @Autowired
@@ -21,44 +30,65 @@ public class BrokerControllerTest extends JUnitTestBase {
     private MockMvc mockMvc;
 
     @Before
-    public void setup() {
+    public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+    }
+
+    @Before
+    public void before() {
+        log.info("=============================={}.{}==============================",
+                this.getClass().getSimpleName(),
+                this.testName.getMethodName());
     }
 
     @Test
     public void testAddBroker() throws Exception {
-        String content = "{\"name\":\"broker2\",\"brokerUrl\":\"http://127.0.0.1:8080/weevent\",\"webaseUrl\":\"http://127.0.0.1:8080/webase-node-mgr\",\"userId\":\"4\"}";
-        mockMvc.perform(post("/broker").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
-                .andExpect(status().isOk()).andExpect(jsonPath("$").value(true));
-
+        String content = "{\"name\":\"broker2\",\"brokerUrl\":\"http://127.0.0.1:7000/weevent\",\"webaseUrl\":\"http://127.0.0.1:7000/weevent\",\"userId\":\"1\"}";
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
+                .andReturn().getResponse();
+        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        Assert.assertTrue(response.getContentAsString().contains("true"));
     }
 
     @Test
     public void testUpdateBroker() throws Exception {
-        String content = "{\"id\":\"2\",\"name\":\"broker1\",\"brokerUrl\":\"http://127.0.0.1:8080\",\"webaseUrl\":\"http://127.0.0.1:8080/webase-node-mgr\",\"userId\":\"4\"}";
-        mockMvc.perform(put("/broker").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
-                .andExpect(status().isOk()).andExpect(jsonPath("$").value(true));
+        String content = "{\"id\":\"1\",\"name\":\"broker1\",\"brokerUrl\":\"http://127.0.0.1:7000/weevent\",\"webaseUrl\":\"http://127.0.0.1:8080/webase-node-mgr\",\"userId\":\"1\"}";
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.put("/broker").contentType(MediaType.APPLICATION_JSON_UTF8).content(content)).andReturn().getResponse();
+
+        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        Assert.assertTrue(response.getContentAsString().contains("true"));
 
     }
 
     @Test
     public void testDeleteBroker() throws Exception {
-        mockMvc.perform(delete("/broker/3").contentType(MediaType.APPLICATION_JSON_UTF8)).andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(true));
-
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.delete("/broker/3").contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andReturn().getResponse();
+        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        Assert.assertTrue(response.getContentAsString().contains("true"));
     }
 
     @Test
     public void testGetBroker() throws Exception {
-        mockMvc.perform(get("/broker/2").contentType(MediaType.APPLICATION_JSON_UTF8)).andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(2));
-
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/broker/1").contentType(MediaType.APPLICATION_JSON_UTF8)).andReturn();
+        MockHttpServletResponse response = mvcResult.getResponse();
+        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        String contentAsString = response.getContentAsString();
+        Assert.assertNotNull(contentAsString);
+        JSONObject jsonObject = JSONObject.parseObject(contentAsString);
+        Assert.assertEquals(jsonObject.get("id").toString(), "1");
     }
 
     @Test
     public void testGetBrokers() throws Exception {
-        mockMvc.perform(get("/broker/list?userId=4").contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(1));
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/broker/list?userId=1").contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andReturn();
+        MockHttpServletResponse response = mvcResult.getResponse();
 
+        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        String contentAsString = response.getContentAsString();
+        Assert.assertNotNull(contentAsString);
+        List<BrokerEntity> brokerEntities = JSONObject.parseArray(contentAsString, BrokerEntity.class);
+        Assert.assertEquals(brokerEntities.get(0).getUserId().toString(), "1");
     }
 }

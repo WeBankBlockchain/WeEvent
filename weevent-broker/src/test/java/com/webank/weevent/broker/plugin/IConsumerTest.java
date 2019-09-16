@@ -21,11 +21,16 @@ public class IConsumerTest extends JUnitTestBase {
 
     @Before
     public void before() {
+        log.info("=============================={}.{}==============================",
+                this.getClass().getSimpleName(),
+                this.testName.getMethodName());
+
         this.iConsumer = IConsumer.build();
     }
 
     @After
     public void after() {
+        Assert.assertTrue(this.iConsumer.shutdownConsumer());
     }
 
     /**
@@ -33,8 +38,6 @@ public class IConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testStartConsumer() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         Assert.assertTrue(this.iConsumer.startConsumer());
         Assert.assertTrue(this.iConsumer.isStarted());
     }
@@ -44,8 +47,6 @@ public class IConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testShutdownConsumer() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         Assert.assertTrue(this.iConsumer.startConsumer());
         Assert.assertTrue(this.iConsumer.isStarted());
         Assert.assertTrue(this.iConsumer.shutdownConsumer());
@@ -55,9 +56,7 @@ public class IConsumerTest extends JUnitTestBase {
      * test shutdown Multiple 3 times
      */
     @Test
-    public void testShutdownConsumer_multiple() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
+    public void testShutdownConsumerMultiple() throws Exception {
         Assert.assertTrue(this.iConsumer.startConsumer());
         Assert.assertTrue(this.iConsumer.isStarted());
         Assert.assertTrue(this.iConsumer.shutdownConsumer());

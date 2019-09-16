@@ -14,6 +14,7 @@ public class Constants {
     public static RetCode INSERT_RECORD_FAIL = RetCode.mark(270005, "insert fail");
     public static RetCode TOPIC_ISNOT_EXIST = RetCode.mark(270006, "the topic is not exist");
     public static RetCode PAYLOAD_ISNOT_JSON = RetCode.mark(270007, "payload is not a json");
+    public static RetCode CONDITIONTYPE_ISNOT_VALID = RetCode.mark(270007, "condition type is not valid");
 
 
     public static final Integer RULE_STATUS_START = 1;

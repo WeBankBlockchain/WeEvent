@@ -8,7 +8,6 @@ import java.util.regex.Pattern;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 
@@ -24,6 +23,8 @@ import org.springframework.context.annotation.PropertySource;
 @Data
 @PropertySource(value = "classpath:fisco.properties", encoding = "UTF-8")
 public class FiscoConfig {
+    public final static String propertiesFileKey = "block-chain-properties";
+
     @Value("${version:}")
     private String version;
 
@@ -66,13 +67,13 @@ public class FiscoConfig {
     @Value("${v1.key-store-password:123456}")
     private String v1KeyStorePassword;
 
-    @Value("${v2.ca-crt-path:./v2/ca.crt}")
+    @Value("${v2.ca-crt-path:v2/ca.crt}")
     private String v2CaCrtPath;
 
-    @Value("${v2.node-crt-path:./v2/node.crt}")
+    @Value("${v2.node-crt-path:v2/node.crt}")
     private String v2NodeCrtPath;
 
-    @Value("${v2.node-key-path:./v2/node.key}")
+    @Value("${v2.node-key-path:v2/node.key}")
     private String v2NodeKeyPath;
 
     @Value("${consumer.idle-time:1000}")
@@ -92,17 +93,27 @@ public class FiscoConfig {
             return false;
         }
 
-        PropertySource propertySource = FiscoConfig.class.getAnnotation(PropertySource.class);
-        String[] files = propertySource.value();
-        if (!files[0].startsWith("classpath:")) {
-            log.error("configuration file must be in classpath");
-            return false;
+        // custom properties from junit test
+        String file;
+        if (System.getProperties().containsKey(propertiesFileKey)) {
+            log.info("get source file from System.getProperties[{}]", propertiesFileKey);
+
+            file = System.getProperty(propertiesFileKey);
+        } else {
+            log.info("get source file from @PropertySource");
+
+            PropertySource propertySource = FiscoConfig.class.getAnnotation(PropertySource.class);
+            String[] files = propertySource.value();
+            if (!files[0].startsWith("classpath:")) {
+                log.error("configuration file must be in classpath");
+                return false;
+            }
+            file = files[0];
         }
-        log.info("load properties from file: {}", files[0]);
+        log.info("load properties from file: {}", file);
 
         // be careful the path
-        String file = "/" + files[0].replace("classpath:", "");
-        try (InputStream inputStream = FiscoConfig.class.getResourceAsStream(file)) {
+        try (InputStream inputStream = FiscoConfig.class.getResourceAsStream("/" + file.replace("classpath:", ""))) {
             Properties properties = new Properties();
             properties.load(inputStream);
 

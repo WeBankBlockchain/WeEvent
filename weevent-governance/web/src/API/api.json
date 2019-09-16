@@ -5,6 +5,14 @@
     "url": "user/login",
     "headers": {"Content-Type": "application/x-www-form-urlencoded"}
   },
+  "getVersion": {
+    "method": "get",
+    "url": "weevent-governance/weevent/admin/getVersion"
+  },
+  "listGroup": {
+    "method": "get",
+    "url": "weevent-governance/weevent/rest/listGroup"
+  },
   "loginOut": {
     "method": "get",
     "url": "user/logout"
@@ -37,9 +45,17 @@
     "method": "post",
     "url": "weevent-governance/broker/delete"
   },
+  "checkBrokerServer": {
+    "method": "post",
+    "url": "weevent-governance/broker/checkServer"
+  },
   "topicState": {
     "method": "get",
     "url": "weevent-governance/weevent/rest/state"
+  },
+  "topicInfo": {
+    "method": "get",
+    "url": "weevent-governance/topic/topicInfo"
   },
   "checkExsit": {
     "method": "get",
@@ -60,5 +76,13 @@
   "reset": {
     "method": "post",
     "url": "weevent-governance/user/reset"
+  },
+  "accountList": {
+    "method": "get",
+    "url": "weevent-governance/user/accountList"
+  },
+  "permissionList": {
+    "method": "post",
+    "url": "weevent-governance/permission/permissionList"
   }
 }

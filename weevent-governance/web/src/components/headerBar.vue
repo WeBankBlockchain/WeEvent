@@ -7,6 +7,48 @@
     </el-breadcrumb>
   </div>
   <div class='right_part'>
+    <el-popover
+      placement="bottom"
+      title="WeEvent版本信息"
+      width="250"
+      trigger="click"
+       v-show='!noServer'
+      >
+      <div id='version'>
+        <p class='version_infor'>
+          <span class='version_title'>
+            Branch:
+          </span>
+          <span class='version_content'>
+            {{version.gitBranch}}
+          </span>
+        </p>
+        <p class='version_infor'>
+          <span class='version_title'>
+            CommitHash:
+          </span>
+          <span class='version_content'>
+            {{version.gitCommitHash}}
+          </span>
+        </p>
+        <p class='version_infor'>
+          <span class='version_title'>
+            最后更新:
+          </span>
+          <span class='version_content'>{{version.buildTimeStamp}}</span>
+        </p>
+      </div>
+      <el-button slot="reference">版本: {{version.weEventVersion}}</el-button>
+    </el-popover>
+    <span class='line'  v-show='!noServer'></span>
+    <span class='server_title' v-show='!noServer'>群组信息:</span>
+    <el-dropdown trigger="click" @command='selectGroup'  v-show='!noServer'>
+      <span>{{groupId}} <i class="el-icon-arrow-down el-icon-caret-bottom"></i></span>
+      <el-dropdown-menu slot="dropdown">
+        <el-dropdown-item v-for='(item, index) in groupList' :key='index' :command='item'>{{item}}</el-dropdown-item>
+      </el-dropdown-menu>
+    </el-dropdown>
+    <span class='line'  v-show='!noServer'></span>
     <span class='server_title' v-show='!noServer'>当前服务:</span>
     <el-dropdown trigger="click" @command='selecServers'  v-show='!noServer'>
       <span>{{server}} <i class="el-icon-arrow-down el-icon-caret-bottom"></i></span>
@@ -32,7 +74,7 @@
 </template>
 <script>
 import API from '../API/resource.js'
-export default{
+export default {
   props: {
     noServer: Boolean
   },
@@ -42,12 +84,13 @@ export default{
       userName: localStorage.getItem('user'),
       server: '',
       servers: [],
-      group: []
-    }
-  },
-  watch: {
-    aa (nVal) {
-      console.log(nVal)
+      groupList: [],
+      version: {
+        buildTimeStamp: '',
+        gitBranch: '',
+        gitCommitHash: '',
+        weEventVersion: ''
+      }
     }
   },
   mounted () {
@@ -65,7 +108,7 @@ export default{
     selectItem (e) {
       switch (e) {
         case 'setting':
-          this.$router.push({path: './registered', query: { reset: 0 }})
+          this.$router.push({ path: './registered', query: { reset: 0 } })
           break
         case 'loginOut':
           API.loginOut('').then(res => {
@@ -88,6 +131,10 @@ export default{
         this.$store.commit('set_id', this.servers[e].id)
         localStorage.setItem('brokerId', this.servers[e].id)
       }
+    },
+    selectGroup (e) {
+      this.$store.commit('set_groupId', e)
+      localStorage.setItem('groupId', e)
     },
     getServer () {
       let brokerId = localStorage.getItem('brokerId')
@@ -112,8 +159,8 @@ export default{
               vm.$store.commit('set_id', id)
               localStorage.setItem('brokerId', id)
             }
-            // 按后台要求 在未实现多群组之前 groupId 为定值1
-            localStorage.setItem('groupId', 1)
+            vm.listGroup()
+            vm.getVersion()
           } else {
             vm.$message({
               type: 'warning',
@@ -123,11 +170,41 @@ export default{
           }
         }
       })
+    },
+    listGroup () {
+      API.listGroup('?brokerId=' + localStorage.getItem('brokerId')).then(res => {
+        // if groupId is not existed so set it
+        // else use existed groupId
+        if (!localStorage.getItem('grouId')) {
+          this.groupList = [].concat(res.data)
+          this.$store.commit('set_groupId', res.data[0])
+          localStorage.setItem('groupId', res.data[0])
+        }
+      })
+    },
+    getVersion () {
+      let url = '?brokerId=' + localStorage.getItem('brokerId')
+      API.getVersion(url).then(res => {
+        if (res.data.code === 0) {
+          this.version = Object.assign({}, res.data.result)
+        }
+      })
     }
   },
   computed: {
     menu () {
       return this.$store.state.menu
+    },
+    brokerId () {
+      return this.$store.state.brokerId
+    },
+    groupId () {
+      return this.$store.state.groupId
+    }
+  },
+  watch: {
+    brokerId (nVal) {
+      this.listGroup()
     }
   }
 }

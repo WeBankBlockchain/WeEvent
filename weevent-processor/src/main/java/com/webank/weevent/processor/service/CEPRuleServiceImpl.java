@@ -1,5 +1,8 @@
 package com.webank.weevent.processor.service;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +15,7 @@ import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.model.CEPRuleExample;
 import com.webank.weevent.processor.utils.Constants;
 import com.webank.weevent.processor.utils.RetCode;
+import com.webank.weevent.processor.utils.Util;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 
@@ -122,8 +126,9 @@ public class CEPRuleServiceImpl implements CEPRuleService {
     @Override
     public RetCode insert(CEPRule record) {
         // check all the field
-        checkField(record);
-
+        if (!checkField(record).getErrorMsg().equals("success")) {
+            return checkField(record);
+        }
         record.setId(getGuid());
         record.setStatus(0); //default the status
         int ret = cepRuleMapper.insert(record);
@@ -141,6 +146,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
      */
     private RetCode checkField(CEPRule record) {
         // checkPayload
+        try {
         if (StringUtils.isBlank(record.getRuleName()) || record.getRuleName().isEmpty()) {
             return Constants.RULENAME_IS_BLANK;
         }
@@ -149,32 +155,39 @@ public class CEPRuleServiceImpl implements CEPRuleService {
             return Constants.PAYLOAD_IS_BLANK;
         } else {
             //check relation between payloay and selectField
+            if (!Util.isJSONValid(payload)) {
+                return Constants.PAYLOAD_ISNOT_JSON;
+            }
         }
-        // check payloay
-        boolean isRight = isJSON2(record.getPayload());
-        if (!isRight) {
-            return Constants.PAYLOAD_ISNOT_JSON;
-        }
-        // check topic and check the broker
-        if (!checkTopic(record.getFromDestination())) {
-            log.info("the topic is not exist");
-            return Constants.TOPIC_ISNOT_EXIST;
-        }
-        if (!checkTopic(record.getToDestination())) {
-            log.info("the topic is not exist");
-            return Constants.TOPIC_ISNOT_EXIST;
-        }
-        // check broker
-        if (!isHttpUrl(record.getBrokerUrl())) {
-            log.info("broker url is wrong");
-            return Constants.URL_ISNOT_VALID;
-        }
-        // check the databaseUrl,check is valid (http://...?account=**&password=**)
-        if (!isHttpUrl(record.getDatabaseUrl())) {
-            log.info("database url is wrong");
-            return Constants.URL_ISNOT_VALID;
+        if (record.getConditionType() != 1 && record.getConditionType() != 2) {
+            return Constants.CONDITIONTYPE_ISNOT_VALID;
+        } else {
+            if (record.getConditionType() == 1) {
+                if (!checkTopic(record.getToDestination(), record.getBrokerUrl())) {
+                    log.info("the topic is not exist");
+                    return Constants.TOPIC_ISNOT_EXIST;
+                }
+            }
+            // check the databaseUrl,check is valid (http://...?account=**&password=**)
+            if (record.getConditionType() == 2) {
+                if (!checkDatabase(record.getDatabaseUrl())) {
+                    log.info("database url is wrong");
+                    return Constants.URL_ISNOT_VALID;
+                }
+            }
+
         }
 
+
+        // check topic and check the broker
+        if (!checkTopic(record.getFromDestination(), record.getBrokerUrl())) {
+            log.info("the topic is not exist");
+            return Constants.TOPIC_ISNOT_EXIST;
+        }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
         return Constants.SUCCESS;
     }
 
@@ -193,13 +206,25 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         }
     }
 
-    private Boolean checkDatabase(String databaseUrl) {
-        return false;
+
+    private Boolean checkDatabase(String databaseUrl) throws SQLException{
+        boolean connectUrl = false;
+        try {
+            Connection connecttion = Util.getConnection(databaseUrl);
+            if (connecttion != null) {
+                connectUrl = true;
+                connecttion.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return connectUrl;
     }
 
-    private Boolean checkTopic(String topicName) {
+    private Boolean checkTopic(String topicName, String brokerUrl) {
         try {
-            IWeEventClient weEventClient = IWeEventClient.build("http://182.254.159.91:8090/weevent");
+            IWeEventClient weEventClient = IWeEventClient.build(brokerUrl);
             return weEventClient.exist(topicName);
         } catch (BrokerException e) {
             e.printStackTrace();
@@ -207,14 +232,6 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         }
     }
 
-    private boolean isJSON2(String str) {
-        try {
-            JSON.parse(str);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
 
     //  generator the id
     private volatile int guid = 100;

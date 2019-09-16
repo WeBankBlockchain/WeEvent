@@ -18,6 +18,7 @@ import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.WeEvent;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -39,12 +40,12 @@ public class FiscoBcosDelegate {
     private FiscoBcos fiscoBcos;
 
     // access to version 2.x
-    private Map<Long, FiscoBcos2> fiscoBcos2Map;
+    private Map<Long, FiscoBcos2> fiscoBcos2Map = new ConcurrentHashMap<>();
 
     // web3sdk timeout, ms
     public static Integer timeout = 10000;
 
-    // web3sdk thread pool
+    // thread pool used in web3sdk
     public static ThreadPoolTaskExecutor threadPool;
 
     // block data cached in redis
@@ -53,8 +54,18 @@ public class FiscoBcosDelegate {
     // block data cached in local memory
     private static LRUCache<String, List<WeEvent>> blockCache;
 
-    public FiscoBcosDelegate() {
-        this.fiscoBcos2Map = new ConcurrentHashMap<>();
+    // groupId list
+    private List<String> groupIdList = new ArrayList<>();
+
+    /**
+     * notify from web3sdk2.x when new block mined
+     */
+    public interface IBlockEventListener {
+        /**
+         * @param groupId group id
+         * @param blockHeight new block height
+         */
+        void onEvent(Long groupId, Long blockHeight);
     }
 
     private void initRedisService() {
@@ -101,15 +112,15 @@ public class FiscoBcosDelegate {
         threadPool = initThreadPool(fiscoConfig);
         timeout = fiscoConfig.getWeb3sdkTimeout();
 
-        if (StringUtils.isBlank(fiscoConfig.getVersion())){
+        if (StringUtils.isBlank(fiscoConfig.getVersion())) {
             log.error("the fisco version in fisco.properties is null");
             throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
         }
-        if (StringUtils.isBlank(fiscoConfig.getNodes())){
+        if (StringUtils.isBlank(fiscoConfig.getNodes())) {
             log.error("the fisco nodes in fisco.properties is null");
             throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
         }
-        
+
         if (fiscoConfig.getVersion().startsWith(WeEventConstants.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             log.info("Notice: FISCO-BCOS's version is 1.x");
 
@@ -152,20 +163,39 @@ public class FiscoBcosDelegate {
         initRedisService();
     }
 
+    public boolean supportBlockEventNotify() {
+        // 2.0 support notify
+        return !this.fiscoBcos2Map.isEmpty();
+    }
+
+    /**
+     * web3sdk will notify when new block mined in every group.
+     *
+     * @param listener listener
+     */
+    public void setListener(@NonNull IBlockEventListener listener) {
+        log.info("set IBlockEventListener for every group for FISCO-BCOS 2.x");
+
+        for (Map.Entry<Long, FiscoBcos2> entry : fiscoBcos2Map.entrySet()) {
+            entry.getValue().setListener(listener);
+        }
+    }
+
     /**
      * list all group id
      *
      * @return list of groupId
      */
     public List<String> listGroupId() throws BrokerException {
-        if (this.fiscoBcos != null) {
-            List<String> list = new ArrayList<>();
-            list.add(WeEvent.DEFAULT_GROUP_ID);
-            return list;
-        } else {
-            // group 1 is always exist
-            return this.fiscoBcos2Map.get(Long.valueOf(WeEvent.DEFAULT_GROUP_ID)).listGroupId();
+        if (this.groupIdList.isEmpty()) {
+            if (this.fiscoBcos != null) {
+                this.groupIdList.add(WeEvent.DEFAULT_GROUP_ID);
+            } else {
+                // group 1 is always exist
+                this.groupIdList = this.fiscoBcos2Map.get(Long.valueOf(WeEvent.DEFAULT_GROUP_ID)).listGroupId();
+            }
         }
+        return new ArrayList<>(this.groupIdList);
     }
 
     private void checkVersion(Long groupId) throws BrokerException {
@@ -259,6 +289,36 @@ public class FiscoBcosDelegate {
         }
     }
 
+    private List<WeEvent> getFromCache(String key) {
+        try {
+            if (blockCache != null && blockCache.containsKey(key)) {
+                return blockCache.get(key);
+            }
+            if (redisService != null && redisService.isEventsExistInRedis(key)) {
+                return redisService.readEventsFromRedis(key);
+            }
+        } catch (Exception e) {
+            log.error("Exception happened while read events from redis server", e);
+        }
+
+        return null;
+    }
+
+    private void setCache(String key, List<WeEvent> events) {
+        try {
+            if (events != null) {
+                if (blockCache != null) {
+                    blockCache.putIfAbsent(key, events);
+                }
+                if (redisService != null) {
+                    redisService.writeEventsToRedis(key, events);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Exception happened while write events to redis server", e);
+        }
+    }
+
     /**
      * get data from block chain and it's cache
      *
@@ -277,19 +337,10 @@ public class FiscoBcosDelegate {
 
         // try to get data from local cache and redis
         String key = getRedisKey(blockNum, groupId);
-        try {
-            if (blockCache != null && blockCache.containsKey(key)) {
-                return blockCache.get(key);
-            }
-            if (redisService != null && redisService.isEventsExistInRedis(key)) {
-                events = redisService.readEventsFromRedis(key);
-                // redis data may be dirty
-                if (events != null && !events.isEmpty()) {
-                    return events;
-                }
-            }
-        } catch (Exception e) {
-            log.error("Exception happened while read events from redis server", e);
+        events = getFromCache(key);
+        // redis data may be dirty
+        if (events != null) {
+            return events;
         }
 
         // from block chain
@@ -300,18 +351,7 @@ public class FiscoBcosDelegate {
         }
 
         //write events list to redis server
-        try {
-            if (events != null && !events.isEmpty()) {
-                if (blockCache != null) {
-                    blockCache.putIfAbsent(key, events);
-                }
-                if (redisService != null) {
-                    redisService.writeEventsToRedis(key, events);
-                }
-            }
-        } catch (Exception e) {
-            log.error("Exception happened while write events to redis server", e);
-        }
+        setCache(key, events);
 
         return events;
     }

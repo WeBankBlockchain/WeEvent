@@ -13,6 +13,7 @@
     element-loading-spinner='el-icon-loading'
     element-loading-text='数据加载中...'
     element-loading-background='rgba(256,256,256,0.8)'
+    @row-click='checkDetial'
     style="width: 100%">
     <el-table-column
       label="机器地址"
@@ -25,8 +26,12 @@
     </el-table-column>
     <el-table-column
       label="订阅ID"
-      width='400'
+      width='350'
       prop='subscribeId'>
+    </el-table-column>
+    <el-table-column
+      label="订阅来源Ip"
+      prop="remoteIp">
     </el-table-column>
     <el-table-column
       label="订阅方式"
@@ -39,6 +44,10 @@
     <el-table-column
       label="待通知事件"
       prop="notifyingEventCount">
+    </el-table-column>
+     <el-table-column
+      label="订阅时间"
+      prop="createTimeStamp">
     </el-table-column>
   </el-table>
  </div>
@@ -60,7 +69,7 @@ export default {
       let vm = this
       vm.tableData = []
       vm.loading = true
-      let url = '?brokerId=' + localStorage.getItem('brokerId')
+      let url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId')
       API.subscription(url).then(res => {
         if (res.status === 200) {
           let data = res.data
@@ -84,7 +93,9 @@ export default {
                 'subscribeId': '—',
                 'topicName': '—',
                 'notifiedEventCount': '—',
-                'childs': 0
+                'childs': 0,
+                'remoteIp': '—',
+                'createTimeStamp': '—'
               }
               list.push(item)
             }
@@ -129,15 +140,27 @@ export default {
       setTimeout(fun => {
         this.subscription()
       }, 1000)
+    },
+    checkDetial (e) {
+      this.$store.commit('set_active', '2')
+      this.$emit('selecChange', '2')
+      sessionStorage.setItem('topic', e.topicName)
+      this.$router.push('./topicList')
     }
   },
   computed: {
     brokerId () {
       return this.$store.state.brokerId
+    },
+    groupId () {
+      return this.$store.state.groupId
     }
   },
   watch: {
     brokerId () {
+      this.update()
+    },
+    groupId () {
       this.update()
     }
   },

@@ -75,6 +75,10 @@ public class FiscoBcos2 {
         }
     }
 
+    public void setListener(FiscoBcosDelegate.IBlockEventListener listener) {
+        Web3SDK2Wrapper.setBlockNotifyCallBack(this.web3j, listener);
+    }
+
     public List<String> listGroupId() throws BrokerException {
         return Web3SDK2Wrapper.listGroupId(this.web3j);
     }
@@ -165,11 +169,10 @@ public class FiscoBcos2 {
             List<TopicController.LogAddTopicNameAddressEventResponse> event = topicController
                     .getLogAddTopicNameAddressEvents(transactionReceipt);
 
-            if (CollectionUtils.isNotEmpty(event)) {
-                if (event.get(0).retCode.intValue() == ErrorCode.TOPIC_ALREADY_EXIST.getCode()) {
-                    log.info("topic name already exist, {}", topicName);
-                    throw new BrokerException(ErrorCode.TOPIC_ALREADY_EXIST);
-                }
+            if (CollectionUtils.isNotEmpty(event)
+                    && event.get(0).retCode.intValue() == ErrorCode.TOPIC_ALREADY_EXIST.getCode()) {
+                log.info("topic name already exist, {}", topicName);
+                throw new BrokerException(ErrorCode.TOPIC_ALREADY_EXIST);
             }
 
             return true;

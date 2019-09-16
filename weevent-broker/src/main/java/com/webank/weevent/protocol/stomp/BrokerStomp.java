@@ -49,7 +49,6 @@ public class BrokerStomp extends TextWebSocketHandler {
     // session id <-> [header subscription id in stomp <-> (subscription id in consumer, topic)]
     private static Map<String, Map<String, Pair<String, String>>> sessionContext;
 
-
     @Autowired
     public void setProducer(IProducer producer) {
         this.iproducer = producer;
@@ -62,10 +61,6 @@ public class BrokerStomp extends TextWebSocketHandler {
 
     static {
         sessionContext = new HashMap<>();
-    }
-
-    public BrokerStomp() {
-        super();
     }
 
     @Override
@@ -142,6 +137,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
             default:
                 handleDefaultMessage(msg, session);
+                break;
         }
     }
 
@@ -184,7 +180,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
     @SuppressWarnings("unchecked")
     private void handleSendMessage(Message<byte[]> msg, WebSocketSession session) {
-        LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) msg.getHeaders().get("nativeHeaders"));
+        LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap<String, List<String>>) msg.getHeaders().get("nativeHeaders"));
         if (nativeHeaders == null) {
             log.error("assert nativeHeaders != null");
             return;
@@ -193,7 +189,7 @@ public class BrokerStomp extends TextWebSocketHandler {
         // send command receipt Id
         String headerReceiptIdStr = getHeadersValue("receipt", msg);
 
-        Map<String, String> extensions = WeEventUtils.getExtensions(nativeHeaders);
+        Map<String, String> extensions = WeEventUtils.getExtend(nativeHeaders);
 
         String groupId = WeEvent.DEFAULT_GROUP_ID;
         Object eventGroupId = nativeHeaders.get(WeEventConstants.EVENT_GROUP_ID);
@@ -203,7 +199,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
         try {
             String simpDestination = getSimpDestination(msg);
-            handleSend(msg, simpDestination, extensions, groupId);
+            SendResult sendResult = handleSend(msg, simpDestination, extensions, groupId);
 
             // package the return frame
             StompCommand command = StompCommand.RECEIPT;
@@ -211,6 +207,7 @@ public class BrokerStomp extends TextWebSocketHandler {
             accessor.setDestination(simpDestination);
             accessor.setReceiptId(headerReceiptIdStr);
             accessor.setNativeHeader("receipt-id", headerReceiptIdStr);
+            accessor.setNativeHeader(WeEventConstants.EXTENSIONS_EVENT_ID, sendResult.getEventId());
             sendSimpleMessage(session, accessor);
         } catch (BrokerException e) {
             handleErrorMessage(session, e, headerReceiptIdStr);
@@ -425,10 +422,10 @@ public class BrokerStomp extends TextWebSocketHandler {
      * @param msg message
      * @param simpDestination topic name
      */
-    private void handleSend(Message<byte[]> msg,
-                            String simpDestination,
-                            Map<String, String> extensions,
-                            String groupId) throws BrokerException {
+    private SendResult handleSend(Message<byte[]> msg,
+                                  String simpDestination,
+                                  Map<String, String> extensions,
+                                  String groupId) throws BrokerException {
         if (!this.iproducer.startProducer()) {
             log.error("producer start failed");
         }
@@ -438,6 +435,7 @@ public class BrokerStomp extends TextWebSocketHandler {
         if (sendResult.getStatus() != SendResult.SendResultStatus.SUCCESS) {
             log.error("producer publish failed");
         }
+        return sendResult;
     }
 
     /**
@@ -476,6 +474,8 @@ public class BrokerStomp extends TextWebSocketHandler {
         // external params
         Map<IConsumer.SubscribeExt, String> ext = new HashMap<>();
         ext.put(IConsumer.SubscribeExt.InterfaceType, WeEventConstants.STOMPTYPE);
+        String remoteIp = session.getRemoteAddress().getAddress().getHostAddress();
+        ext.put(IConsumer.SubscribeExt.RemoteIP, remoteIp);
         if (!StringUtils.isBlank(continueSubscriptionId)) {
             log.info("continueSubscriptionId:{}", continueSubscriptionId);
             ext.put(IConsumer.SubscribeExt.SubscriptionId, continueSubscriptionId);

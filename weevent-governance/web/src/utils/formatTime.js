@@ -48,23 +48,6 @@ const convertStrToInt = (duration) => {
  * @param  {[type]} timestamp [description]
  * @return {[type]}           [description]
  */
-const convertIntToStr = (duration) => {
-  let formatTime = '00:00'
-  if (duration < 60) {
-    formatTime = duration < 10 ? ('00:0' + duration) : '00:' + duration
-  } else {
-    if (duration % 60 === 0) {
-      formatTime = duration / 60 < 10 ? '0' + (duration / 60) + ':00' : duration / 60 + ':00'
-    } else {
-      var min = parseInt(duration / 60)
-      var s = duration - min * 60
-      min = min < 10 ? '0' + min : min
-      s = s < 10 ? '0' + s : s
-      formatTime = min + ':' + s
-    }
-  }
-  return formatTime
-}
 /**
 * @function dateFormat 时间格式化
 * @param  {timestamp} timestamp {时间戳}
@@ -137,7 +120,6 @@ export {
   getAge,
   getAstro,
   dateBeforeAfter,
-  convertIntToStr,
   convertStrToInt,
   getDate,
   getDateDetial,
