@@ -38,7 +38,6 @@ public class CommonService {
 
     private static final String HTTPS = "https";
     private static final String HTTPS_CLIENT = "httpsClient";
-
     private static final String HTTP_CLIENT = "httpClient";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String METHOD_TYPE = "GET";
@@ -81,49 +80,15 @@ public class CommonService {
     private HttpPost postMethod(String uri, HttpServletRequest request) {
         StringEntity entity;
         if (request.getContentType().contains(FORMAT_TYPE)) {
-            entity = jsonData(request);
-        } else {
             entity = ResourceReadUtil.jsonData(request);
+        } else {
+            entity = this.formData(request);
         }
         HttpPost httpPost = new HttpPost(uri);
         httpPost.setHeader(CONTENT_TYPE, request.getHeader(CONTENT_TYPE));
         httpPost.setEntity(entity);
         return httpPost;
     }
-
-    private StringEntity jsonData(HttpServletRequest request) {
-        InputStreamReader is = null;
-        BufferedReader reader = null;
-        try {
-            is = new InputStreamReader(request.getInputStream(), request.getCharacterEncoding());
-            reader = new BufferedReader(is);
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-            }
-            return new StringEntity(sb.toString(), request.getCharacterEncoding());
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        } finally {
-            try {
-                if (reader != null) {
-                    reader.close();
-                }
-            } catch (IOException e) {
-                log.error(e.getMessage());
-            }
-            try {
-                if (is != null) {
-                    is.close();
-                }
-            } catch (IOException e) {
-                log.error(e.getMessage());
-            }
-        }
-        return null;
-    }
-
 
     private UrlEncodedFormEntity formData(HttpServletRequest request) {
         UrlEncodedFormEntity urlEncodedFormEntity = null;
