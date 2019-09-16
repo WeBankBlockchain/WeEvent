@@ -1,5 +1,7 @@
 package com.webank.weevent.protocol.rest;
 
+import java.math.BigInteger;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +20,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -92,4 +96,70 @@ public class AdminRest extends RestHA {
         responseData.setResult(this.buildInfo);
         return responseData;
     }
+
+    /**
+     * get general
+     */
+    @GetMapping("/general/{groupId}")
+    public ResponseData getGroupGeneral(@PathVariable("groupId") Integer groupId) {
+        ResponseData responseData = new ResponseData();
+        //todo
+        Instant startTime = Instant.now();
+        BaseResponse baseResponse = new BaseResponse();
+        log.info("start getGroupGeneral startTime:{} groupId:{}", startTime.toEpochMilli(),
+                groupId);
+
+        return responseData;
+    }
+
+
+    /**
+     * query the number of transactions in the last week
+     */
+    @GetMapping("/transDaily/{groupId}")
+    public ResponseData getTransDaily(@PathVariable("groupId") Integer groupId)
+            throws Exception {
+        ResponseData responseData = new ResponseData();
+        //todo  查询的是weBase的数据库，如何转换为查询fisco的的数据
+        return responseData;
+    }
+    /**
+     * query transaction list.
+     */
+    @GetMapping(value = "/transList/{groupId}/{pageNumber}/{pageSize}")
+    public ResponseData queryTransList(@PathVariable("groupId") Integer groupId,
+                                       @PathVariable("pageNumber") Integer pageNumber,
+                                       @PathVariable("pageSize") Integer pageSize,
+                                       @RequestParam(value = "transactionHash", required = false) String transHash,
+                                       @RequestParam(value = "blockNumber", required = false) BigInteger blockNumber)
+            throws Exception {
+        return null;
+    }
+
+
+    /**
+     * query block list.
+     */
+    @GetMapping(value = "/blockList/{groupId}/{pageNumber}/{pageSize}")
+    public ResponseData queryBlockList(@PathVariable("groupId") Integer groupId,
+                                       @PathVariable("pageNumber") Integer pageNumber,
+                                       @PathVariable("pageSize") Integer pageSize,
+                                       @RequestParam(value = "pkHash", required = false) String pkHash,
+                                       @RequestParam(value = "blockNumber", required = false) BigInteger blockNumber)
+            throws Exception {
+        return null;
+    }
+
+    /**
+     * qurey node info list.
+     */
+    @GetMapping(value = "/nodeList/{groupId}/{pageNumber}/{pageSize}")
+    public ResponseData queryNodeList(@PathVariable("groupId") Integer groupId,
+                                      @PathVariable("pageNumber") Integer pageNumber,
+                                      @PathVariable("pageSize") Integer pageSize,
+                                      @RequestParam(value = "nodeName", required = false) String nodeName)
+            throws Exception {
+        return null;
+    }
+
 }
