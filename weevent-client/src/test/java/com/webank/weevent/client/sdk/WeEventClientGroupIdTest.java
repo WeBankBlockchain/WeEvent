@@ -120,7 +120,7 @@ public class WeEventClientGroupIdTest {
      * test empty content、extensions
      */
     @Test(expected = BrokerException.class)
-    public void testPublish_001() throws Exception {
+    public void testPublish001() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
         WeEvent weEvent = new WeEvent(this.topicName, null, null);
         this.weEventClient.publish(weEvent);
@@ -130,7 +130,7 @@ public class WeEventClientGroupIdTest {
      * test empty topic
      */
     @Test(expected = BrokerException.class)
-    public void testPublish_002() throws Exception {
+    public void testPublish002() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
         WeEvent weEvent = new WeEvent(null, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
         this.weEventClient.publish(weEvent);
@@ -140,7 +140,7 @@ public class WeEventClientGroupIdTest {
      * test empty content
      */
     @Test(expected = BrokerException.class)
-    public void testPublish_003() throws Exception {
+    public void testPublish003() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
         WeEvent weEvent = new WeEvent("this topic is not exist", null, extensions);
         this.weEventClient.publish(weEvent);
@@ -150,7 +150,7 @@ public class WeEventClientGroupIdTest {
      * test  extensions
      */
     @Test(expected = BrokerException.class)
-    public void testPublish_005() throws Exception {
+    public void testPublish005() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
         // test extensions
         this.extensions = new HashMap<>();
@@ -184,7 +184,7 @@ public class WeEventClientGroupIdTest {
      * Method: subscribe(String topic, groupId, String offset, IConsumer.ConsumerListener listener)
      */
     @Test
-    public void testSubscribe_01() throws Exception {
+    public void testSubscribe01() throws Exception {
         log.info("===================={}", this.testName.getMethodName());
         // create subscriber
         String subscriptionId = this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
@@ -312,7 +312,7 @@ public class WeEventClientGroupIdTest {
      * Method: exist(String topic)
      */
     @Test
-    public void testExist_001() throws Exception {
+    public void testExist001() throws Exception {
         boolean result = this.weEventClient.exist("not exist");
         Assert.assertFalse(result);
     }
