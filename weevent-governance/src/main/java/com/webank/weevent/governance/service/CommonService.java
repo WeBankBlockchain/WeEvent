@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class CommonService {
+public class CommonService implements AutoCloseable {
 
     private static final String HTTPS = "https";
     private static final String HTTPS_CLIENT = "httpsClient";
@@ -80,7 +80,7 @@ public class CommonService {
     private HttpPost postMethod(String uri, HttpServletRequest request) {
         StringEntity entity;
         if (request.getContentType().contains(FORMAT_TYPE)) {
-            entity = ResourceReadUtil.jsonData(request);
+            entity = this.jsonData(request);
         } else {
             entity = this.formData(request);
         }
@@ -88,6 +88,21 @@ public class CommonService {
         httpPost.setHeader(CONTENT_TYPE, request.getHeader(CONTENT_TYPE));
         httpPost.setEntity(entity);
         return httpPost;
+    }
+
+    private StringEntity jsonData(HttpServletRequest request) {
+        try (InputStreamReader is = new InputStreamReader(request.getInputStream(), request.getCharacterEncoding());
+             BufferedReader reader = new BufferedReader(is)) {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+            return new StringEntity(sb.toString(), request.getCharacterEncoding());
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+        return null;
     }
 
     private UrlEncodedFormEntity formData(HttpServletRequest request) {
@@ -131,25 +146,8 @@ public class CommonService {
         out.write(mes.getBytes());
     }
 
-    static class ResourceReadUtil implements AutoCloseable {
-        public static StringEntity jsonData(HttpServletRequest request) {
-            try (InputStreamReader is = new InputStreamReader(request.getInputStream(), request.getCharacterEncoding());
-                 BufferedReader reader = new BufferedReader(is)) {
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-                return new StringEntity(sb.toString(), request.getCharacterEncoding());
-            } catch (IOException e) {
-                log.error(e.getMessage());
-            }
-            return null;
-        }
-
-        @Override
-        public void close() throws Exception {
-            log.info("resource is close");
-        }
+    @Override
+    public void close() throws Exception {
+        log.info("resource is close");
     }
 }
