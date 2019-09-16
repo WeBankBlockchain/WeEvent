@@ -55,13 +55,13 @@ public class WeEventProducer extends AbstractJavaSamplerClient {
         super.setupTest(context);
         try {
             this.defaultUrl = context.getParameter("url") == null ? this.defaultUrl : context.getParameter("url");
-            this.weEventClient = IWeEventClient.build(defaultUrl);
             getNewLogger().info("weEventClient:{}", this.weEventClient);
             this.size = context.getIntParameter("size") <= 0 ? this.size : context.getIntParameter("size");
             this.topic = context.getParameter("topic") == null ? this.topic : context.getParameter("topic");
             this.format = context.getParameter("format") == null ? this.format : context.getParameter("format");
             this.groupId = context.getParameter("groupId") == null ? WeEvent.DEFAULT_GROUP_ID : context.getParameter("groupId");
             extensions.put(WeEvent.WeEvent_FORMAT, format);
+            this.weEventClient = IWeEventClient.build(defaultUrl, this.groupId);
 
             StringBuffer buffer = new StringBuffer();
             for (int i = 0; i < size; i++) {
@@ -104,7 +104,7 @@ public class WeEventProducer extends AbstractJavaSamplerClient {
         try {
 
             result.sampleStart();
-            SendResult sendResult = this.weEventClient.publish(this.weEvent, this.groupId);
+            SendResult sendResult = this.weEventClient.publish(this.weEvent);
             result.sampleEnd();
             result.setSuccessful(sendResult.getStatus() == SendResult.SendResultStatus.SUCCESS && sendResult.getEventId().length() > 0);
             result.setResponseMessage(sendResult.getEventId());
