@@ -112,6 +112,7 @@ public class WeEventTopicPublisher implements TopicPublisher {
 
     @Override
     public void close() throws JMSException {
+        throw new JMSException(WeEventConnectionFactory.NotSupportTips);
     }
 
     @Override

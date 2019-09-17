@@ -13,7 +13,6 @@ broker_port=7000
 
 nginx_port=8080
 
-governance=
 governance_port=
 mysql_ip=
 mysql_port=
