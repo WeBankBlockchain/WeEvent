@@ -1,9 +1,14 @@
 package com.webank.weevent.broker.fisco;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.plugin.IProducer;
+import com.webank.weevent.protocol.rest.entity.GroupGeneral;
+import com.webank.weevent.protocol.rest.entity.QueryEntity;
+import com.webank.weevent.protocol.rest.entity.TbBlock;
+import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
@@ -39,5 +44,20 @@ public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IPr
 
         log.info("publish result: {}", sendResult);
         return sendResult;
+    }
+
+    @Override
+    public GroupGeneral getGroupGeneral(String groupId) throws BrokerException {
+        return fiscoBcosDelegate.getGroupGeneral(groupId);
+    }
+
+    @Override
+    public List<TbTransHash> queryTransList(QueryEntity queryEntity) throws BrokerException {
+        return fiscoBcosDelegate.queryTransList(queryEntity);
+    }
+
+    @Override
+    public List<TbBlock> queryBlockList(QueryEntity queryEntity) throws BrokerException {
+        return fiscoBcosDelegate.queryBlockList(queryEntity);
     }
 }

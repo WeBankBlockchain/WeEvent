@@ -10,6 +10,11 @@ import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.config.BuildInfo;
 import com.webank.weevent.broker.fisco.util.SystemInfoUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
+import com.webank.weevent.broker.plugin.IProducer;
+import com.webank.weevent.protocol.rest.entity.GroupGeneral;
+import com.webank.weevent.protocol.rest.entity.QueryEntity;
+import com.webank.weevent.protocol.rest.entity.TbBlock;
+import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
@@ -37,6 +42,7 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 public class AdminRest extends RestHA {
     private IConsumer consumer;
+    private IProducer producer;
     private BuildInfo buildInfo;
 
     @Autowired
@@ -47,6 +53,11 @@ public class AdminRest extends RestHA {
     @Autowired
     public void setConsumer(BuildInfo buildInfo) {
         this.buildInfo = buildInfo;
+    }
+
+    @Autowired
+    public void setProducer(IProducer producer) {
+        this.producer = producer;
     }
 
     @RequestMapping(path = "/listSubscription")
@@ -102,16 +113,16 @@ public class AdminRest extends RestHA {
      * get general
      */
     @RequestMapping(path = "/group/general/{groupId}")
-    public ResponseData getGroupGeneral(@PathVariable("groupId") Integer groupId) {
+    public ResponseData getGroupGeneral(@PathVariable("groupId") Integer groupId) throws BrokerException {
         ResponseData responseData = new ResponseData();
-        //todo
         Instant startTime = Instant.now();
         log.info("start getGroupGeneral startTime:{} groupId:{}", startTime.toEpochMilli(),
                 groupId);
 
-        responseData.setCode(200);
-        responseData.setMessage("success");
-        responseData.setResult("test");
+        GroupGeneral groupGeneral = this.producer.getGroupGeneral(String.valueOf(groupId));
+        responseData.setCode(ErrorCode.SUCCESS.getCode());
+        responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
+        responseData.setResult(groupGeneral);
         return responseData;
     }
 
@@ -125,11 +136,21 @@ public class AdminRest extends RestHA {
                                        @PathVariable("pageSize") Integer pageSize,
                                        @RequestParam(value = "transactionHash", required = false) String transHash,
                                        @RequestParam(value = "blockNumber", required = false) BigInteger blockNumber)
-            throws Exception {
+            throws BrokerException {
+        Instant startTime = Instant.now();
+        log.info(
+                "start queryTransList startTime:{} groupId:{} pageNumber:{} pageSize:{} "
+                        + "pkHash:{} blockNumber:{}",
+                startTime.toEpochMilli(), groupId,
+                pageNumber, pageSize, transHash, blockNumber);
+
         ResponseData responseData = new ResponseData();
-        responseData.setCode(200);
-        responseData.setMessage("success");
-        responseData.setResult("test");
+        QueryEntity queryEntity = new QueryEntity(groupId, pageNumber, pageSize, transHash, blockNumber);
+
+        List<TbTransHash> tbTransHashes = this.producer.queryTransList(queryEntity);
+        responseData.setCode(ErrorCode.SUCCESS.getCode());
+        responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
+        responseData.setResult(tbTransHashes);
         return responseData;
     }
 
@@ -143,11 +164,21 @@ public class AdminRest extends RestHA {
                                        @PathVariable("pageSize") Integer pageSize,
                                        @RequestParam(value = "pkHash", required = false) String pkHash,
                                        @RequestParam(value = "blockNumber", required = false) BigInteger blockNumber)
-            throws Exception {
+            throws BrokerException {
+        Instant startTime = Instant.now();
+        log.info(
+                "start queryBlockList startTime:{} groupId:{} pageNumber:{} pageSize:{} "
+                        + "pkHash:{} blockNumber:{}",
+                startTime.toEpochMilli(), groupId,
+                pageNumber, pageSize, pkHash, blockNumber);
+
         ResponseData responseData = new ResponseData();
-        responseData.setCode(200);
-        responseData.setMessage("success");
-        responseData.setResult("test");
+        QueryEntity queryEntity = new QueryEntity(groupId, pageNumber, pageSize, pkHash, blockNumber);
+
+        List<TbBlock> tbBlocks = this.producer.queryBlockList(queryEntity);
+        responseData.setCode(ErrorCode.SUCCESS.getCode());
+        responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
+        responseData.setResult(tbBlocks.toArray());
         return responseData;
     }
 
@@ -159,9 +190,10 @@ public class AdminRest extends RestHA {
                                       @PathVariable("pageNumber") Integer pageNumber,
                                       @PathVariable("pageSize") Integer pageSize,
                                       @RequestParam(value = "nodeName", required = false) String nodeName)
-            throws Exception {
+            throws BrokerException {
         ResponseData responseData = new ResponseData();
-        responseData.setCode(200);
+        responseData.setCode(ErrorCode.SUCCESS.getCode());
+        responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
         return responseData;
     }
 
@@ -170,9 +202,10 @@ public class AdminRest extends RestHA {
      */
     @GetMapping("/group/transDaily/{groupId}")
     public ResponseData getTransDaily(@PathVariable("groupId") Integer groupId)
-            throws Exception {
+            throws BrokerException {
         ResponseData responseData = new ResponseData();
-        responseData.setCode(200);
+        responseData.setCode(ErrorCode.SUCCESS.getCode());
+        responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
         return responseData;
     }
 

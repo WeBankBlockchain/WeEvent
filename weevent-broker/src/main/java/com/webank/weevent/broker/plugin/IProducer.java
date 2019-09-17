@@ -1,6 +1,12 @@
 package com.webank.weevent.broker.plugin;
 
 
+import java.util.List;
+
+import com.webank.weevent.protocol.rest.entity.GroupGeneral;
+import com.webank.weevent.protocol.rest.entity.QueryEntity;
+import com.webank.weevent.protocol.rest.entity.TbBlock;
+import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
@@ -95,4 +101,10 @@ public interface IProducer extends IEventTopic {
      * @throws BrokerException BrokerException
      */
     SendResult publish(WeEvent event, String groupId) throws BrokerException;
+
+    GroupGeneral getGroupGeneral(String groupId) throws BrokerException;
+
+    List<TbTransHash> queryTransList(QueryEntity queryEntity) throws BrokerException;
+
+    List<TbBlock> queryBlockList(QueryEntity queryEntity) throws BrokerException;
 }

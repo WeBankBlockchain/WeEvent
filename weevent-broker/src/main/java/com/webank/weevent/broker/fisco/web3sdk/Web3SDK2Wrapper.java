@@ -4,6 +4,9 @@ package com.webank.weevent.broker.fisco.web3sdk;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,11 +22,16 @@ import com.webank.weevent.broker.fisco.contract.v2.Topic;
 import com.webank.weevent.broker.fisco.contract.v2.TopicController;
 import com.webank.weevent.broker.fisco.contract.v2.TopicData;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
+import com.webank.weevent.protocol.rest.entity.GroupGeneral;
+import com.webank.weevent.protocol.rest.entity.QueryEntity;
+import com.webank.weevent.protocol.rest.entity.TbBlock;
+import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.handler.ChannelConnections;
@@ -41,9 +49,13 @@ import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameterNumber;
 import org.fisco.bcos.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.fisco.bcos.web3j.protocol.core.RemoteCall;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock;
+import org.fisco.bcos.web3j.protocol.core.methods.response.BcosTransaction;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BcosTransactionReceipt;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BlockNumber;
 import org.fisco.bcos.web3j.protocol.core.methods.response.GroupList;
+import org.fisco.bcos.web3j.protocol.core.methods.response.NodeIDList;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TotalTransactionCount;
+import org.fisco.bcos.web3j.protocol.core.methods.response.Transaction;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tx.Contract;
 import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
@@ -458,6 +470,129 @@ public class Web3SDK2Wrapper {
             log.error("loop block failed due to RuntimeException", e);
             throw new BrokerException("loop block failed due to RuntimeException", e);
         }
+    }
+
+    public static GroupGeneral getGroupGeneral(Web3j web3j) throws BrokerException {
+        // 当前节点个数、区块数量、交易数量
+        GroupGeneral groupGeneral = new GroupGeneral();
+        try {
+            TotalTransactionCount totalTransactionCount = web3j.getTotalTransactionCount()
+                    .sendAsync().get();
+            TotalTransactionCount.TransactionCount transactionCount = totalTransactionCount.getTotalTransactionCount();
+            BigInteger blockNumber = transactionCount.getBlockNumber();
+            BigInteger txSum = transactionCount.getTxSum();
+
+            NodeIDList nodeIDList = web3j.getNodeIDList().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+            List<String> nodeIds = nodeIDList.getNodeIDList();
+
+            groupGeneral.setNodeCount(nodeIds.size());
+            groupGeneral.setLatestBlock(blockNumber);
+            groupGeneral.setTransactionCount(txSum);
+            return groupGeneral;
+        } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
+            // Web3sdk send async will arise InterruptedException
+            log.error("get group general failed due to ExecutionException|TimeoutException|NullPointerException|InterruptedException", e);
+            return null;
+        } catch (RuntimeException e) {
+            log.error("get group general failed due to RuntimeException", e);
+            throw new BrokerException("get group general failed due to RuntimeException", e);
+        }
+    }
+
+    public static List<TbTransHash> queryTransList(Web3j web3j, QueryEntity queryEntity) throws BrokerException {
+        //遍历交易
+        List<TbTransHash> tbTransHashes = new ArrayList<>();
+        String transHash = queryEntity.getPkHash();
+        BigInteger blockNumber = queryEntity.getBlockNumber();
+        try {
+            if (transHash == null && blockNumber == null) {
+                return null;
+            } else if (transHash != null) {
+                BcosTransaction bcosTransaction = web3j.getTransactionByHash(transHash).sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+                Transaction trans = bcosTransaction.getResult();
+                TbTransHash tbTransHash = null;
+                if (trans != null) {
+                    tbTransHash = new TbTransHash(transHash, trans.getFrom(), trans.getTo(),
+                            trans.getBlockNumber(), null);
+                    tbTransHashes.add(tbTransHash);
+                }
+            } else if (blockNumber != null) {
+                BcosBlock bcosBlock = web3j.getBlockByNumber(new DefaultBlockParameterNumber(blockNumber), true).sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+                BcosBlock.Block block = bcosBlock.getBlock();
+                if (block == null || CollectionUtils.isNotEmpty(block.getTransactions())) {
+                    return null;
+                }
+                List<Transaction> transactionHashList = block.getTransactions().stream()
+                        .map(transactionResult -> (Transaction) transactionResult.get()).collect(Collectors.toList());
+                System.out.println(222);
+                transactionHashList.forEach(it -> {
+                    TbTransHash tbTransHash = new TbTransHash(it.getHash(), it.getFrom(), it.getTo(),
+                            blockNumber, null);
+                    tbTransHashes.add(tbTransHash);
+                });
+            }
+            return tbTransHashes;
+        } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
+            // Web3sdk send async will arise InterruptedException
+            log.error("query transaction failed due to ExecutionException|TimeoutException|NullPointerException|InterruptedException", e);
+            return null;
+        } catch (RuntimeException e) {
+            log.error("query transaction failed due to RuntimeException", e);
+            throw new BrokerException("query transaction failed due to RuntimeException", e);
+        }
+    }
+
+    public static List<TbBlock> queryBlockList(Web3j web3j, QueryEntity queryEntity) throws BrokerException {
+        List<TbBlock> tbBlocks = new ArrayList<>();
+        String transHash = queryEntity.getPkHash();
+        BigInteger blockNumber = queryEntity.getBlockNumber();
+        try {
+            if (transHash == null && blockNumber == null) {
+                return null;
+            }
+            BcosBlock.Block block = null;
+            if (transHash != null) {
+                BcosBlock bcosBlock = web3j.getBlockByHash(transHash, true)
+                        .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+                block = bcosBlock.getBlock();
+            } else if (blockNumber != null) {
+                BcosBlock bcosBlock = web3j.getBlockByNumber(new DefaultBlockParameterNumber(blockNumber), true)
+                        .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+                block = bcosBlock.getBlock();
+
+            }
+            if (block == null) {
+                return null;
+            }
+            Instant instant = Instant.ofEpochMilli(block.getTimestamp().longValue());
+            ZoneId zone = ZoneId.systemDefault();
+            LocalDateTime blockTimestamp = LocalDateTime.ofInstant(instant, zone);
+
+            int size = block.getTransactions() == null ? 0 : 1;
+            int sealerIndex = Integer.parseInt(block.getSealer().substring(2), 16);
+            TbBlock tbBlock = new TbBlock(block.getHash(), blockNumber, blockTimestamp,
+                    size, sealerIndex);
+            tbBlocks.add(tbBlock);
+            return tbBlocks;
+        } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
+            // Web3sdk send async will arise InterruptedException
+            log.error("query transaction failed due to ExecutionException|TimeoutException|NullPointerException|InterruptedException", e);
+            return null;
+        } catch (RuntimeException e) {
+            log.error("query transaction failed due to RuntimeException", e);
+            throw new BrokerException("query transaction failed due to RuntimeException", e);
+        }        //3、遍历区块
+    }
+
+    public void queryNode(Web3j web3j, String groupId) {
+        //1、当前节点、pbftview及版本信息
+//        NodeIDList nodeIDList = web3j.getNodeIDList().sendAsync().getNow(new NodeIDList());
+//        Request<?, NodeVersion> nodeVersion = web3j.getNodeVersion();
+//
+//        Request<?, PbftView> pbftView = web3j.getPbftView();
+//
+//        PendingTxSize pendingTxSize = web3j.getPendingTxSize().sendAsync().get();
+//        BigInteger txSize = pendingTxSize.getPendingTxSize();
     }
 }
 
