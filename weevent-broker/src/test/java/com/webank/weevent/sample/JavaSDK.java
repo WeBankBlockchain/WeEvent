@@ -32,6 +32,7 @@ public class JavaSDK {
             WeEvent weEvent = new WeEvent(topicName,"{\"hello\":\" wolrd\"}".getBytes(),extensions);
             SendResult sendResult = client.publish(weEvent);
             System.out.println(sendResult.toString());
+
             // subscribe topic with groupId
             String subscriptionId = client.subscribe(topicName, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
                 @Override
@@ -44,12 +45,6 @@ public class JavaSDK {
 
                 }
             });
-
-            // publish event
-            for (int i = 0; i < 10; i++) {
-                weEvent.setContent(("hello weevent: " + i).getBytes(StandardCharsets.UTF_8));
-                client.publish(weEvent);
-            }
 
             // unSubscribe topic
             client.unSubscribe(subscriptionId);

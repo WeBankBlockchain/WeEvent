@@ -37,11 +37,11 @@ public class WeEventConsumer extends AbstractJavaSamplerClient {
         super.setupTest(context);
         try {
             this.defaultUrl = context.getParameter("url") == null ? this.defaultUrl : context.getParameter("url");
-            getNewLogger().info("weEventClient:{}", this.weEventClient);
 
             this.topic = context.getParameter("topic") == null ? this.topic : context.getParameter("topic");
             this.groupId = context.getParameter("groupId") == null ? WeEvent.DEFAULT_GROUP_ID : context.getParameter("groupId");
             this.weEventClient = IWeEventClient.build(defaultUrl, this.groupId);
+            getNewLogger().info("weEventClient:{}", this.weEventClient);
             boolean result = this.weEventClient.open(this.topic);
             getNewLogger().info("open topic result: {}", result);
         } catch (BrokerException e) {

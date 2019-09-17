@@ -55,13 +55,13 @@ public class WeEventProducer extends AbstractJavaSamplerClient {
         super.setupTest(context);
         try {
             this.defaultUrl = context.getParameter("url") == null ? this.defaultUrl : context.getParameter("url");
-            getNewLogger().info("weEventClient:{}", this.weEventClient);
             this.size = context.getIntParameter("size") <= 0 ? this.size : context.getIntParameter("size");
             this.topic = context.getParameter("topic") == null ? this.topic : context.getParameter("topic");
             this.format = context.getParameter("format") == null ? this.format : context.getParameter("format");
             this.groupId = context.getParameter("groupId") == null ? WeEvent.DEFAULT_GROUP_ID : context.getParameter("groupId");
             extensions.put(WeEvent.WeEvent_FORMAT, format);
             this.weEventClient = IWeEventClient.build(defaultUrl, this.groupId);
+            getNewLogger().info("weEventClient:{}", this.weEventClient);
 
             StringBuffer buffer = new StringBuffer();
             for (int i = 0; i < size; i++) {
