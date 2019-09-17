@@ -105,7 +105,7 @@ public class AdminRest extends RestHA {
         ResponseData<BuildInfo> responseData = new ResponseData<>();
 
         responseData.setErrorCode(ErrorCode.SUCCESS);
-        responseData.setResult(this.buildInfo);
+        responseData.setData(this.buildInfo);
         return responseData;
     }
 
@@ -122,7 +122,7 @@ public class AdminRest extends RestHA {
         GroupGeneral groupGeneral = this.producer.getGroupGeneral(String.valueOf(groupId));
         responseData.setCode(ErrorCode.SUCCESS.getCode());
         responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
-        responseData.setResult(groupGeneral);
+        responseData.setData(groupGeneral);
         return responseData;
     }
 
@@ -150,7 +150,7 @@ public class AdminRest extends RestHA {
         List<TbTransHash> tbTransHashes = this.producer.queryTransList(queryEntity);
         responseData.setCode(ErrorCode.SUCCESS.getCode());
         responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
-        responseData.setResult(tbTransHashes);
+        responseData.setData(tbTransHashes);
         return responseData;
     }
 
@@ -178,7 +178,7 @@ public class AdminRest extends RestHA {
         List<TbBlock> tbBlocks = this.producer.queryBlockList(queryEntity);
         responseData.setCode(ErrorCode.SUCCESS.getCode());
         responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
-        responseData.setResult(tbBlocks.toArray());
+        responseData.setData(tbBlocks.toArray());
         return responseData;
     }
 

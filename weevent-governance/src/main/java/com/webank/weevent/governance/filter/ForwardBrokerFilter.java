@@ -48,7 +48,5 @@ public class ForwardBrokerFilter implements Filter {
         // get client according url
         CloseableHttpResponse closeResponse = commonService.getCloseResponse(req, newUrl);
         commonService.writeResponse(closeResponse,res);
-        return;
-        // chain.doFilter(request, response);
     }
 }

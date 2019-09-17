@@ -499,8 +499,9 @@ public class Web3SDK2Wrapper {
         }
     }
 
+    //遍历交易
     public static List<TbTransHash> queryTransList(Web3j web3j, QueryEntity queryEntity) throws BrokerException {
-        //遍历交易
+
         List<TbTransHash> tbTransHashes = new ArrayList<>();
         String transHash = queryEntity.getPkHash();
         BigInteger blockNumber = queryEntity.getBlockNumber();
@@ -510,21 +511,21 @@ public class Web3SDK2Wrapper {
             } else if (transHash != null) {
                 BcosTransaction bcosTransaction = web3j.getTransactionByHash(transHash).sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
                 Transaction trans = bcosTransaction.getResult();
-                TbTransHash tbTransHash = null;
+                TbTransHash tbTransHash;
                 if (trans != null) {
                     tbTransHash = new TbTransHash(transHash, trans.getFrom(), trans.getTo(),
                             trans.getBlockNumber(), null);
                     tbTransHashes.add(tbTransHash);
                 }
-            } else if (blockNumber != null) {
-                BcosBlock bcosBlock = web3j.getBlockByNumber(new DefaultBlockParameterNumber(blockNumber), true).sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+            } else {
+                BcosBlock bcosBlock = web3j.getBlockByNumber(new DefaultBlockParameterNumber(blockNumber), true)
+                        .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
                 BcosBlock.Block block = bcosBlock.getBlock();
-                if (block == null || CollectionUtils.isNotEmpty(block.getTransactions())) {
+                if (block == null || CollectionUtils.isEmpty(block.getTransactions())) {
                     return null;
                 }
                 List<Transaction> transactionHashList = block.getTransactions().stream()
                         .map(transactionResult -> (Transaction) transactionResult.get()).collect(Collectors.toList());
-                System.out.println(222);
                 transactionHashList.forEach(it -> {
                     TbTransHash tbTransHash = new TbTransHash(it.getHash(), it.getFrom(), it.getTo(),
                             blockNumber, null);
@@ -542,6 +543,7 @@ public class Web3SDK2Wrapper {
         }
     }
 
+    //遍历区块
     public static List<TbBlock> queryBlockList(Web3j web3j, QueryEntity queryEntity) throws BrokerException {
         List<TbBlock> tbBlocks = new ArrayList<>();
         String transHash = queryEntity.getPkHash();
@@ -555,7 +557,7 @@ public class Web3SDK2Wrapper {
                 BcosBlock bcosBlock = web3j.getBlockByHash(transHash, true)
                         .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
                 block = bcosBlock.getBlock();
-            } else if (blockNumber != null) {
+            } else {
                 BcosBlock bcosBlock = web3j.getBlockByNumber(new DefaultBlockParameterNumber(blockNumber), true)
                         .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
                 block = bcosBlock.getBlock();
@@ -570,7 +572,7 @@ public class Web3SDK2Wrapper {
 
             int size = block.getTransactions() == null ? 0 : 1;
             int sealerIndex = Integer.parseInt(block.getSealer().substring(2), 16);
-            TbBlock tbBlock = new TbBlock(block.getHash(), blockNumber, blockTimestamp,
+            TbBlock tbBlock = new TbBlock(block.getHash(), block.getNumber(), blockTimestamp,
                     size, sealerIndex);
             tbBlocks.add(tbBlock);
             return tbBlocks;
@@ -581,7 +583,7 @@ public class Web3SDK2Wrapper {
         } catch (RuntimeException e) {
             log.error("query transaction failed due to RuntimeException", e);
             throw new BrokerException("query transaction failed due to RuntimeException", e);
-        }        //3、遍历区块
+        }
     }
 
     public void queryNode(Web3j web3j, String groupId) {

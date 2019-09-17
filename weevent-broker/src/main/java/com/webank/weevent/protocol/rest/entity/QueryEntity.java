@@ -3,10 +3,12 @@ package com.webank.weevent.protocol.rest.entity;
 import java.math.BigInteger;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 @Data
 @ToString
+@EqualsAndHashCode(callSuper=false)
 public class QueryEntity {
 
     private Integer groupId;

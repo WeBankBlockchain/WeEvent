@@ -14,7 +14,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
-    HttpServletRequest orgRequest = null;
+   private  HttpServletRequest orgRequest = null;
 
     private boolean isIncludeRichText = false;
 
@@ -25,13 +25,13 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     }
 
     @Override
-    public String getParameter(String name) {
-        Boolean flag = ("content".equals(name) || name.endsWith("WithHtml"));
+    public String getParameter(String params) {
+        Boolean flag = ("content".equals(params) || params.endsWith("WithHtml"));
         if (flag && !isIncludeRichText) {
-            return super.getParameter(name);
+            return super.getParameter(params);
         }
-        name = JsoupUtil.clean(name);
-        String value = super.getParameter(name);
+        params = JsoupUtil.clean(params);
+        String value = super.getParameter(params);
         if (StringUtils.isNotBlank(value)) {
             value = JsoupUtil.clean(value);
         }
@@ -39,8 +39,8 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     }
 
     @Override
-    public String[] getParameterValues(String name) {
-        String[] arr = super.getParameterValues(name);
+    public String[] getParameterValues(String params) {
+        String[] arr = super.getParameterValues(params);
         if (arr != null) {
             for (int i = 0; i < arr.length; i++) {
                 arr[i] = JsoupUtil.clean(arr[i]);
@@ -50,9 +50,9 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     }
 
     @Override
-    public String getHeader(String name) {
-        name = JsoupUtil.clean(name);
-        String value = super.getHeader(name);
+    public String getHeader(String header) {
+        header = JsoupUtil.clean(header);
+        String value = super.getHeader(header);
         if (StringUtils.isNotBlank(value)) {
             value = JsoupUtil.clean(value);
         }

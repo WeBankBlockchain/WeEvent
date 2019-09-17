@@ -42,16 +42,15 @@ public class ForwardWebaseFilter implements Filter {
         Integer id = Integer.parseInt(idStr);
         BrokerEntity brokerEntity = brokerService.getBroker(id);
         String webaseUrl = brokerEntity.getWebaseUrl();
-        // get complete url of webase
-        String newUrl = webaseUrl + subStrUrl;
-
+        String newUrl;
+        if (webaseUrl == null || webaseUrl.length() == 0) {
+            newUrl = brokerEntity.getBrokerUrl() + "/admin" + subStrUrl;
+        } else {
+            // get complete url of webase
+            newUrl = webaseUrl + subStrUrl;
+        }
         // get client according url
         CloseableHttpResponse closeResponse = commonService.getCloseResponse(req, newUrl);
-        commonService.writeResponse(closeResponse,res);
-        return;
-        // chain.doFilter(request, response);
+        commonService.writeResponse(closeResponse, res);
     }
-
-
-
 }
