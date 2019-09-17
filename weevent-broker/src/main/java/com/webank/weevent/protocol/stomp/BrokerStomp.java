@@ -3,6 +3,7 @@ package com.webank.weevent.protocol.stomp;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import com.webank.weevent.broker.fisco.util.WeEventUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.DataTypeTools;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
 
@@ -458,10 +460,9 @@ public class BrokerStomp extends TextWebSocketHandler {
         log.info("destination: {} header subscribe id: {} group id: {}", simpDestination, headerIdStr, groupId);
 
         String[] curTopicList;
-        if (simpDestination.contains(",")) {
-            // NOT support
+        if (simpDestination.contains(WeEvent.MULTIPLE_TOPIC_SEPARATOR)) {
             log.info("subscribe topic list");
-            curTopicList = simpDestination.split(",");
+            curTopicList = simpDestination.split(WeEvent.MULTIPLE_TOPIC_SEPARATOR);
         } else {
             curTopicList = new String[]{simpDestination};
         }
@@ -484,8 +485,8 @@ public class BrokerStomp extends TextWebSocketHandler {
             ext.put(IConsumer.SubscribeExt.TopicTag, tag);
         }
 
-        // support only one topic
-        String subscriptionId = this.iconsumer.subscribe(curTopicList[0],
+        // support both single/multiple topic
+        String subscriptionId = this.iconsumer.subscribe(curTopicList,
                 groupId,
                 subEventId,
                 ext,
@@ -507,8 +508,9 @@ public class BrokerStomp extends TextWebSocketHandler {
                 });
 
         log.info("bind context, session id: {} header subscription id: {} consumer subscription id: {} topic: {}",
-                session.getId(), headerIdStr, subscriptionId, curTopicList[0]);
-        sessionContext.get(session.getId()).put(headerIdStr, new Pair<>(subscriptionId, curTopicList[0]));
+                session.getId(), headerIdStr, subscriptionId, Arrays.toString(curTopicList));
+        sessionContext.get(session.getId())
+                .put(headerIdStr, new Pair<>(subscriptionId, DataTypeTools.topicArrayToString(curTopicList)));
 
         log.info("consumer subscribe success, consumer subscriptionId: {}", subscriptionId);
         return subscriptionId;

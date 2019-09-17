@@ -172,9 +172,24 @@ public class WeEventClient implements IWeEventClient {
         return dealSubscribe(topic, offset, null, listener);
     }
 
+    @Override
     public String subscribe(String topic, String offset, String subscriptionId,
                             @NonNull EventListener listener) throws BrokerException {
 
+        return dealSubscribe(topic, offset, subscriptionId, listener);
+    }
+
+    @Override
+    public String subscribe(String[] topics, String offset, @NonNull EventListener listener) throws BrokerException {
+
+        String topic = DataTypeTools.topicArrayToString(topics);
+        return dealSubscribe(topic, offset, null, listener);
+    }
+
+    @Override
+    public String subscribe(String[] topics, String offset, String subscriptionId,
+                            @NonNull EventListener listener) throws BrokerException {
+        String topic = DataTypeTools.topicArrayToString(topics);
         return dealSubscribe(topic, offset, subscriptionId, listener);
     }
 
