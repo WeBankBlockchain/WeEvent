@@ -6,7 +6,7 @@ package com.webank.weevent.sdk;
  * @author v_wbhwliu
  * @since 2019/09/17
  */
-public class DataTypeTools {
+public class DataToolUtils {
 
     public static String topicArrayToString(String[] topics) throws BrokerException {
         // check params
