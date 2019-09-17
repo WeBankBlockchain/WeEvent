@@ -92,6 +92,7 @@ public class AdminRest extends RestHA {
     @RequestMapping(path = "/getVersion")
     public ResponseData<BuildInfo> getVersion() {
         ResponseData<BuildInfo> responseData = new ResponseData<>();
+
         responseData.setErrorCode(ErrorCode.SUCCESS);
         responseData.setResult(this.buildInfo);
         return responseData;
@@ -100,66 +101,79 @@ public class AdminRest extends RestHA {
     /**
      * get general
      */
-    @GetMapping("/general/{groupId}")
+    @RequestMapping(path = "/group/general/{groupId}")
     public ResponseData getGroupGeneral(@PathVariable("groupId") Integer groupId) {
         ResponseData responseData = new ResponseData();
         //todo
         Instant startTime = Instant.now();
-        BaseResponse baseResponse = new BaseResponse();
         log.info("start getGroupGeneral startTime:{} groupId:{}", startTime.toEpochMilli(),
                 groupId);
 
+        responseData.setCode(200);
+        responseData.setMessage("success");
+        responseData.setResult("test");
         return responseData;
     }
 
 
-    /**
-     * query the number of transactions in the last week
-     */
-    @GetMapping("/transDaily/{groupId}")
-    public ResponseData getTransDaily(@PathVariable("groupId") Integer groupId)
-            throws Exception {
-        ResponseData responseData = new ResponseData();
-        //todo  查询的是weBase的数据库，如何转换为查询fisco的的数据
-        return responseData;
-    }
     /**
      * query transaction list.
      */
-    @GetMapping(value = "/transList/{groupId}/{pageNumber}/{pageSize}")
+    @RequestMapping(path = "/transaction/transList/{groupId}/{pageNumber}/{pageSize}")
     public ResponseData queryTransList(@PathVariable("groupId") Integer groupId,
                                        @PathVariable("pageNumber") Integer pageNumber,
                                        @PathVariable("pageSize") Integer pageSize,
                                        @RequestParam(value = "transactionHash", required = false) String transHash,
                                        @RequestParam(value = "blockNumber", required = false) BigInteger blockNumber)
             throws Exception {
-        return null;
+        ResponseData responseData = new ResponseData();
+        responseData.setCode(200);
+        responseData.setMessage("success");
+        responseData.setResult("test");
+        return responseData;
     }
 
 
     /**
      * query block list.
      */
-    @GetMapping(value = "/blockList/{groupId}/{pageNumber}/{pageSize}")
+    @RequestMapping(path = "/block/blockList/{groupId}/{pageNumber}/{pageSize}")
     public ResponseData queryBlockList(@PathVariable("groupId") Integer groupId,
                                        @PathVariable("pageNumber") Integer pageNumber,
                                        @PathVariable("pageSize") Integer pageSize,
                                        @RequestParam(value = "pkHash", required = false) String pkHash,
                                        @RequestParam(value = "blockNumber", required = false) BigInteger blockNumber)
             throws Exception {
-        return null;
+        ResponseData responseData = new ResponseData();
+        responseData.setCode(200);
+        responseData.setMessage("success");
+        responseData.setResult("test");
+        return responseData;
     }
 
     /**
      * qurey node info list.
      */
-    @GetMapping(value = "/nodeList/{groupId}/{pageNumber}/{pageSize}")
+    @RequestMapping(path = "/node/nodeList/{groupId}/{pageNumber}/{pageSize}")
     public ResponseData queryNodeList(@PathVariable("groupId") Integer groupId,
                                       @PathVariable("pageNumber") Integer pageNumber,
                                       @PathVariable("pageSize") Integer pageSize,
                                       @RequestParam(value = "nodeName", required = false) String nodeName)
             throws Exception {
-        return null;
+        ResponseData responseData = new ResponseData();
+        responseData.setCode(200);
+        return responseData;
+    }
+
+    /**
+     * query the number of transactions in the last week
+     */
+    @GetMapping("/group/transDaily/{groupId}")
+    public ResponseData getTransDaily(@PathVariable("groupId") Integer groupId)
+            throws Exception {
+        ResponseData responseData = new ResponseData();
+        responseData.setCode(200);
+        return responseData;
     }
 
 }
