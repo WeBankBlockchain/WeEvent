@@ -8,7 +8,7 @@ import lombok.ToString;
 
 @Data
 @ToString
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(callSuper = false)
 public class QueryEntity {
 
     private Integer groupId;
@@ -16,6 +16,7 @@ public class QueryEntity {
     private Integer pageSize;
     private String pkHash;
     private BigInteger blockNumber;
+    private String nodeName;
 
     public QueryEntity() {
     }

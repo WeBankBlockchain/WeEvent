@@ -9,8 +9,8 @@ import java.util.Map;
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.config.BuildInfo;
 import com.webank.weevent.broker.fisco.util.SystemInfoUtils;
+import com.webank.weevent.broker.plugin.IAdmin;
 import com.webank.weevent.broker.plugin.IConsumer;
-import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
 import com.webank.weevent.protocol.rest.entity.QueryEntity;
 import com.webank.weevent.protocol.rest.entity.TbBlock;
@@ -42,7 +42,7 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 public class AdminRest extends RestHA {
     private IConsumer consumer;
-    private IProducer producer;
+    private IAdmin admin;
     private BuildInfo buildInfo;
 
     @Autowired
@@ -51,13 +51,13 @@ public class AdminRest extends RestHA {
     }
 
     @Autowired
-    public void setConsumer(BuildInfo buildInfo) {
+    public void setBuildInfo(BuildInfo buildInfo) {
         this.buildInfo = buildInfo;
     }
 
     @Autowired
-    public void setProducer(IProducer producer) {
-        this.producer = producer;
+    public void setAdmin(IAdmin admin) {
+        this.admin = admin;
     }
 
     @RequestMapping(path = "/listSubscription")
@@ -103,7 +103,6 @@ public class AdminRest extends RestHA {
     @RequestMapping(path = "/getVersion")
     public ResponseData<BuildInfo> getVersion() {
         ResponseData<BuildInfo> responseData = new ResponseData<>();
-
         responseData.setErrorCode(ErrorCode.SUCCESS);
         responseData.setData(this.buildInfo);
         return responseData;
@@ -119,7 +118,7 @@ public class AdminRest extends RestHA {
         log.info("start getGroupGeneral startTime:{} groupId:{}", startTime.toEpochMilli(),
                 groupId);
 
-        GroupGeneral groupGeneral = this.producer.getGroupGeneral(String.valueOf(groupId));
+        GroupGeneral groupGeneral = this.admin.getGroupGeneral(String.valueOf(groupId));
         responseData.setCode(ErrorCode.SUCCESS.getCode());
         responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
         responseData.setData(groupGeneral);
@@ -147,10 +146,11 @@ public class AdminRest extends RestHA {
         ResponseData responseData = new ResponseData();
         QueryEntity queryEntity = new QueryEntity(groupId, pageNumber, pageSize, transHash, blockNumber);
 
-        List<TbTransHash> tbTransHashes = this.producer.queryTransList(queryEntity);
+        List<TbTransHash> tbTransHashes = this.admin.queryTransList(queryEntity);
         responseData.setCode(ErrorCode.SUCCESS.getCode());
         responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
         responseData.setData(tbTransHashes);
+        responseData.setTotalCount(tbTransHashes == null ? 0 : tbTransHashes.size());
         return responseData;
     }
 
@@ -175,10 +175,11 @@ public class AdminRest extends RestHA {
         ResponseData responseData = new ResponseData();
         QueryEntity queryEntity = new QueryEntity(groupId, pageNumber, pageSize, pkHash, blockNumber);
 
-        List<TbBlock> tbBlocks = this.producer.queryBlockList(queryEntity);
+        List<TbBlock> tbBlocks = this.admin.queryBlockList(queryEntity);
         responseData.setCode(ErrorCode.SUCCESS.getCode());
         responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
         responseData.setData(tbBlocks.toArray());
+        responseData.setTotalCount(tbBlocks == null ? 0 : tbBlocks.size());
         return responseData;
     }
 
@@ -191,9 +192,17 @@ public class AdminRest extends RestHA {
                                       @PathVariable("pageSize") Integer pageSize,
                                       @RequestParam(value = "nodeName", required = false) String nodeName)
             throws BrokerException {
+        Instant startTime = Instant.now();
+        log.info(
+                "start queryNodeList startTime:{} groupId:{}  pageNumber:{} pageSize:{} nodeName:{}",
+                startTime.toEpochMilli(), groupId, pageNumber,
+                pageSize, nodeName);
+        QueryEntity queryEntity = new QueryEntity(groupId, pageNumber, pageSize, null, null);
+        queryEntity.setNodeName(nodeName);
         ResponseData responseData = new ResponseData();
         responseData.setCode(ErrorCode.SUCCESS.getCode());
         responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
+        //List<TbNode> tbNodeList = this.producer.queryNodeList(queryEntity);
         return responseData;
     }
 

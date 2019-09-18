@@ -25,6 +25,7 @@ import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
 import com.webank.weevent.protocol.rest.entity.QueryEntity;
 import com.webank.weevent.protocol.rest.entity.TbBlock;
+import com.webank.weevent.protocol.rest.entity.TbNode;
 import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
@@ -54,6 +55,7 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.BcosTransactionReceip
 import org.fisco.bcos.web3j.protocol.core.methods.response.BlockNumber;
 import org.fisco.bcos.web3j.protocol.core.methods.response.GroupList;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeIDList;
+import org.fisco.bcos.web3j.protocol.core.methods.response.PbftView;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TotalTransactionCount;
 import org.fisco.bcos.web3j.protocol.core.methods.response.Transaction;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -473,7 +475,7 @@ public class Web3SDK2Wrapper {
     }
 
     public static GroupGeneral getGroupGeneral(Web3j web3j) throws BrokerException {
-        // 当前节点个数、区块数量、交易数量
+        // Current number of nodes, number of blocks, number of transactions
         GroupGeneral groupGeneral = new GroupGeneral();
         try {
             TotalTransactionCount totalTransactionCount = web3j.getTotalTransactionCount()
@@ -499,7 +501,7 @@ public class Web3SDK2Wrapper {
         }
     }
 
-    //遍历交易
+    //Traversing transactions
     public static List<TbTransHash> queryTransList(Web3j web3j, QueryEntity queryEntity) throws BrokerException {
 
         List<TbTransHash> tbTransHashes = new ArrayList<>();
@@ -507,7 +509,16 @@ public class Web3SDK2Wrapper {
         BigInteger blockNumber = queryEntity.getBlockNumber();
         try {
             if (transHash == null && blockNumber == null) {
-                return null;
+                BlockNumber number = web3j.getBlockNumber().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+                BcosTransaction bcosTransaction = web3j.getTransactionByBlockNumberAndIndex(new DefaultBlockParameterNumber(number.getBlockNumber()), BigInteger.ZERO)
+                        .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+                Transaction transaction = bcosTransaction.getTransaction().get();
+
+                if (transaction != null) {
+                    TbTransHash tbTransHash = new TbTransHash(transaction.getHash(), transaction.getFrom(), transaction.getTo(),
+                            transaction.getBlockNumber(), null);
+                    tbTransHashes.add(tbTransHash);
+                }
             } else if (transHash != null) {
                 BcosTransaction bcosTransaction = web3j.getTransactionByHash(transHash).sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
                 Transaction trans = bcosTransaction.getResult();
@@ -543,17 +554,20 @@ public class Web3SDK2Wrapper {
         }
     }
 
-    //遍历区块
+    //Traverse block
     public static List<TbBlock> queryBlockList(Web3j web3j, QueryEntity queryEntity) throws BrokerException {
+
         List<TbBlock> tbBlocks = new ArrayList<>();
         String transHash = queryEntity.getPkHash();
         BigInteger blockNumber = queryEntity.getBlockNumber();
         try {
+            BcosBlock.Block block;
             if (transHash == null && blockNumber == null) {
-                return null;
-            }
-            BcosBlock.Block block = null;
-            if (transHash != null) {
+                BlockNumber number = web3j.getBlockNumber().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+                BcosBlock bcosBlock = web3j.getBlockByNumber(new DefaultBlockParameterNumber(number.getBlockNumber()), true)
+                        .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+                block = bcosBlock.getBlock();
+            } else if (transHash != null) {
                 BcosBlock bcosBlock = web3j.getBlockByHash(transHash, true)
                         .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
                 block = bcosBlock.getBlock();
@@ -574,6 +588,7 @@ public class Web3SDK2Wrapper {
             int sealerIndex = Integer.parseInt(block.getSealer().substring(2), 16);
             TbBlock tbBlock = new TbBlock(block.getHash(), block.getNumber(), blockTimestamp,
                     size, sealerIndex);
+            tbBlock.setSealer(block.getSealer());
             tbBlocks.add(tbBlock);
             return tbBlocks;
         } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
@@ -586,15 +601,33 @@ public class Web3SDK2Wrapper {
         }
     }
 
-    public void queryNode(Web3j web3j, String groupId) {
-        //1、当前节点、pbftview及版本信息
-//        NodeIDList nodeIDList = web3j.getNodeIDList().sendAsync().getNow(new NodeIDList());
-//        Request<?, NodeVersion> nodeVersion = web3j.getNodeVersion();
-//
-//        Request<?, PbftView> pbftView = web3j.getPbftView();
-//
-//        PendingTxSize pendingTxSize = web3j.getPendingTxSize().sendAsync().get();
-//        BigInteger txSize = pendingTxSize.getPendingTxSize();
+    public static List<TbNode> queryNodeList(Web3j web3j, QueryEntity queryEntity) throws BrokerException {
+        //1、Current node, pbftview, and blockNumber
+        List<TbNode> tbNodes = new ArrayList<>();
+        try {
+            NodeIDList nodeIDList = web3j.getNodeIDList()
+                    .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+            List<String> nodeIds = nodeIDList.getNodeIDList();
+            if (CollectionUtils.isEmpty(nodeIds)) {
+                return null;
+            }
+            PbftView pbftView = web3j.getPbftView().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+            BlockNumber blockNumber = web3j.getBlockNumber().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+            TbNode tbNode = new TbNode();
+            tbNode.setBlockNumber(blockNumber.getBlockNumber());
+            tbNode.setPbftView(pbftView.getPbftView());
+            tbNode.setNodeId(nodeIds.get(0));
+            tbNode.setNodeName(nodeIds.get(0));
+            tbNodes.add(tbNode);
+            return tbNodes;
+        } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
+            // Web3sdk send async will arise InterruptedException
+            log.error("query node failed due to ExecutionException|TimeoutException|NullPointerException|InterruptedException", e);
+            return null;
+        } catch (RuntimeException e) {
+            log.error("query node failed due to RuntimeException", e);
+            throw new BrokerException("query node failed due to RuntimeException", e);
+        }
     }
 }
 
