@@ -21,8 +21,8 @@ public class BuildInfo {
     @Value("${git.build.version:}")
     private String weEventVersion;
 
-    @Value("${build.timestamp:}")
-    private String buildTimeStamp;
+    @Value("${git.commit.time:}")
+    private String gitCommitTimeStamp;
 
     @Value("${git.branch:}")
     private String gitBranch;
