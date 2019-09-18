@@ -47,7 +47,6 @@ dependencies {
     // depend project
     implementation project(path: ":weevent-client")
 
-
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     // JMS sample
     testImplementation("javax.jms:jms:1.1")
