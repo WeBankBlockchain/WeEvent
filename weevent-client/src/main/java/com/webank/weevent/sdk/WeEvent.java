@@ -32,6 +32,8 @@ public class WeEvent implements Serializable {
     public static final String WILD_CARD_ONE_LAYER = "+";
     // wildcard for one layer.
     public static final String WILD_CARD_ALL_LAYER = "#";
+    // character to split multiple topic
+    public static final String MULTIPLE_TOPIC_SEPARATOR = ",";
 
     /**
      * custom header is prefixed with "weevent-", and the following key is reserved in WeEvent.
