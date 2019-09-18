@@ -47,7 +47,6 @@ dependencies {
     // depend project
     implementation project(path: ":weevent-client")
 
-
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     // JMS sample
     testImplementation("javax.jms:jms:1.1")
@@ -59,25 +58,31 @@ gitProperties {
     dateFormat = "yyyy-MM-dd HH:mm:ss"
     dateFormatTimeZone = "GMT+8"
     gitPropertiesDir = "${project.rootDir}/weevent-broker/src/main/resources"
-    customProperty 'build.timestamp', {
+    customProperty "build.timestamp", {
         new Date().format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("GMT+8"))
     }
+}
+
+processResources {
+    // DO NOT exclude properties for IDEA convenience
+    //exclude { "**/**" }
 }
 
 bootJar {
     destinationDir file("dist/apps")
     archiveName project.name + "-" + version + ".jar"
 
-    exclude "**/*.xml"
-    exclude "**/*.properties"
+    // thin spring boot jar
+    excludes = ["*.jar"]
 
     doLast {
         copy {
             from file("src/main/resources/")
             into "dist/conf"
         }
+
         copy {
-            from configurations.runtime
+            from configurations.runtimeClasspath
             into "dist/lib"
         }
     }
