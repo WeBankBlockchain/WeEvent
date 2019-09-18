@@ -14,7 +14,6 @@ import com.webank.weevent.broker.fisco.util.WeEventUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.DataToolUtils;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
 
@@ -510,7 +509,7 @@ public class BrokerStomp extends TextWebSocketHandler {
         log.info("bind context, session id: {} header subscription id: {} consumer subscription id: {} topic: {}",
                 session.getId(), headerIdStr, subscriptionId, Arrays.toString(curTopicList));
         sessionContext.get(session.getId())
-                .put(headerIdStr, new Pair<>(subscriptionId, DataToolUtils.topicArrayToString(curTopicList)));
+                .put(headerIdStr, new Pair<>(subscriptionId, StringUtils.join(curTopicList,WeEvent.MULTIPLE_TOPIC_SEPARATOR)));
 
         log.info("consumer subscribe success, consumer subscriptionId: {}", subscriptionId);
         return subscriptionId;

@@ -182,14 +182,14 @@ public class WeEventClient implements IWeEventClient {
     @Override
     public String subscribe(String[] topics, String offset, @NonNull EventListener listener) throws BrokerException {
 
-        String topic = DataToolUtils.topicArrayToString(topics);
-        return dealSubscribe(topic, offset, null, listener);
+        String topic = StringUtils.join(topics,WeEvent.MULTIPLE_TOPIC_SEPARATOR);
+        return dealSubscribe(topic, offset, "", listener);
     }
 
     @Override
     public String subscribe(String[] topics, String offset, String subscriptionId,
                             @NonNull EventListener listener) throws BrokerException {
-        String topic = DataToolUtils.topicArrayToString(topics);
+        String topic = StringUtils.join(topics,WeEvent.MULTIPLE_TOPIC_SEPARATOR);
         return dealSubscribe(topic, offset, subscriptionId, listener);
     }
 
