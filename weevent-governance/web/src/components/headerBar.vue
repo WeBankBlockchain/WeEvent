@@ -186,7 +186,7 @@ export default {
       let url = '?brokerId=' + localStorage.getItem('brokerId')
       API.getVersion(url).then(res => {
         if (res.data.code === 0) {
-          this.version = Object.assign({}, res.data.result)
+          this.version = Object.assign({}, res.data.data)
         }
       })
     }
