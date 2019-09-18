@@ -1,9 +1,9 @@
 #!/bin/bash
 JAVA_HOME=
-APP_PARAMS="-Xbootclasspath/a:./conf:./html -Djava.security.egd=file:/dev/./urandom -jar ./apps/*"
+APP_PARAMS="-Xbootclasspath/a:./conf:./html -Djava.security.egd=file:/dev/./urandom -cp ./apps/* -Dloader.path=./lib org.springframework.boot.loader.PropertiesLauncher"
 
-if [ -z ${JAVA_HOME} ];then
-   echo "JAVA_HOME is null, please set it first"
+if [[ -z ${JAVA_HOME} ]];then
+   echo "JAVA_HOME is empty, please set it first"
    exit 1
 fi
 
@@ -34,8 +34,8 @@ start(){
     fi
 
     total_memory=$(free -m | grep "Mem" | awk '{ print $2 }')
-    if [ "${total_memory}" -ge "${max_total_memory}" ];then
-        JAVA_OPTS+=" -XX:TieredStopAtLevel=1 -Xms512m -Xmx2048m -XX:NewSize=256m -XX:MaxNewSize=1024m -XX:PermSize=128m"
+    if [[ "${total_memory}" -ge "${max_total_memory}" ]];then
+        JAVA_OPTS+=" -XX:TieredStopAtLevel=1 -Xms512m -Xmx2048m -XX:NewSize=256m -XX:MaxNewSize=1024m"
     fi
     
     nohup ${JAVA_HOME}/bin/java ${JAVA_OPTS} ${APP_PARAMS} >/dev/null 2>&1 &

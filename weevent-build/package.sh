@@ -125,34 +125,56 @@ function switch_to_prod(){
 
 function tar_broker(){
     local target=$1
-
     yellow_echo "generate ${target}"
-    cd ${out_path}/modules
 
-    cp -r broker broker-${version}
+    cp -r ${out_path}/modules/broker ${current_path}/broker-${version}
     # no need install shell
-    rm -rf broker-${version}/install-broker.sh
+    rm -rf ${current_path}/broker-${version}/install-broker.sh
 
     # do not tar the top dir
-    cd broker-${version}
+    cd ${current_path}/broker-${version}
     tar -czpvf ${target} *
     mv ${target} ${current_path}
+
+    rm -rf ${current_path}/broker-${version}
 }
 
 function tar_governance(){
     local target=$1
-
     yellow_echo "generate ${target}"
-    cd ${out_path}/modules
 
-    cp -r governance governance-${version}
+    cp -r ${out_path}/modules/governance ${current_path}/governance-${version}
     # no need install shell
-    rm -rf governance-${version}/install-governance.sh
+    rm -rf ${current_path}/governance-${version}/install-governance.sh
 
     # do not tar the top dir
-    cd governance-${version}
+    cd ${current_path}/governance-${version}
     tar -czpvf ${target} *
     mv ${target} ${current_path}
+
+    rm -rf ${current_path}/governance-${version}
+}
+
+function tar_weevent(){
+    local target=$1
+    yellow_echo "generate ${target}"
+
+    # thin spring boot jar, merge comm jars into one lib to reduce tar size
+    mkdir -p ${out_path}/modules/lib
+    cp -r ${out_path}/modules/broker/lib/* ${out_path}/modules/lib
+    cp -r ${out_path}/modules/governance/lib/* ${out_path}/modules/lib
+    rm -rf ${out_path}/modules/broker/lib
+    rm -rf ${out_path}/modules/governance/lib
+
+    # change load.path
+    sed -i 's#loader.path=./lib#loader.path=../lib#' ${out_path}/modules/broker/broker.sh
+    sed -i 's#loader.path=./lib#loader.path=../lib#' ${out_path}/modules/broker/deploy-topic-control.sh
+    sed -i 's#loader.path=./lib#loader.path=../lib#' ${out_path}/modules/governance/governance.sh
+    sed -i 's#loader.path=./lib#loader.path=../lib#' ${out_path}/modules/governance/init-governance.sh
+
+    # tar
+    cd ${current_path}
+    tar -czpvf weevent-${version}.tar.gz $(basename ${out_path})
 }
 
 # package weevent-$version
@@ -172,16 +194,14 @@ function package(){
     switch_to_prod
     set_permission
 
-    # tar weevent
-    yellow_echo "generate weevent-${version}.tar.gz"
-    cd ${current_path}
-    tar -czpvf weevent-${version}.tar.gz $(basename ${out_path})
-
     # tar broker module
     tar_broker weevent-broker-${version}.tar.gz
 
     # tar governance module
     tar_governance weevent-governance-${version}.tar.gz
+
+    # tar weevent
+    tar_weevent weevent-${version}.tar.gz
 
     # remove temporary path
     rm -rf ${out_path}
