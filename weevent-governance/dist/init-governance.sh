@@ -1,8 +1,8 @@
 #!/bin/bash
+
 JAVA_HOME=
 
-
-if [ -z ${JAVA_HOME} ];then
+if [[ -z ${JAVA_HOME} ]];then
    echo "JAVA_HOME is null, please set it first"
    exit 1
 fi
