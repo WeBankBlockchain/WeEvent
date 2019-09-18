@@ -2,7 +2,6 @@
 #get parameter
 para=""
 conf_path="./conf"
-lib_path="./lib"
 apps_path="./apps"
 current_path=$(pwd)
 

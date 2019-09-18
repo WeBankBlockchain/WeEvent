@@ -130,7 +130,7 @@ public class WeEventStompCommand {
         if (command == null) {
             return false;
         }
-        return command.equals("ERROR");
+        return "ERROR".equals(command);
     }
 
     public String getReceipt(Message message) {

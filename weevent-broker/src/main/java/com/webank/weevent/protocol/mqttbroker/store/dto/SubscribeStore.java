@@ -1,7 +1,5 @@
 package com.webank.weevent.protocol.mqttbroker.store.dto;
 
-import lombok.Data;
-
 /**
  * @author websterchen
  * @version v1.0
