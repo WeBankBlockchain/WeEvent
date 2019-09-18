@@ -32,19 +32,24 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
+processResources {
+    // DO NOT exclude properties for IDEA convenience
+    //exclude { "**/**" }
+}
+
 bootJar {
     destinationDir file("dist/apps")
     archiveName project.name + "-" + version + ".jar"
 
-    exclude "**/*.xml"
-    exclude "**/*.properties"
+    // thin spring boot jar
+    excludes = ["*.jar"]
 
     copy {
         from file("src/main/resources/")
         into "dist/conf"
     }
     copy {
-        from configurations.runtime
+        from configurations.runtimeClasspath
         into "dist/lib"
     }
     copy {
