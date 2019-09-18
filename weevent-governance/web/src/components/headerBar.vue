@@ -35,7 +35,7 @@
           <span class='version_title'>
             最后更新:
           </span>
-          <span class='version_content'>{{version.buildTimeStamp}}</span>
+          <span class='version_content'>{{version.gitCommitTimeStamp}}</span>
         </p>
       </div>
       <el-button slot="reference">版本: {{version.weEventVersion}}</el-button>
