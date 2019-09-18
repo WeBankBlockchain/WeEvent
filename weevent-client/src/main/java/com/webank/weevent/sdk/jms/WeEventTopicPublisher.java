@@ -8,12 +8,15 @@ import javax.jms.Message;
 import javax.jms.Topic;
 import javax.jms.TopicPublisher;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * WeEvent JMS TopicPublisher.
  *
  * @author matthewliu
  * @since 2019/03/25
  */
+@Slf4j
 public class WeEventTopicPublisher implements TopicPublisher {
     private WeEventTopicSession topicSession;
     private WeEventTopic topic;
@@ -112,6 +115,7 @@ public class WeEventTopicPublisher implements TopicPublisher {
 
     @Override
     public void close() throws JMSException {
+        log.info("close WeEventTopicPublisher.");
     }
 
     @Override
