@@ -73,7 +73,7 @@ public class FiscoBcosBroker4AdminTest extends JUnitTestBase {
      * test blockNumber
      */
     @Test
-    public void queryTransList_blockNumber() throws BrokerException {
+    public void queryTransListBlockNumber() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.groupId);
         queryEntity.setBlockNumber(blockNumber);
@@ -88,7 +88,7 @@ public class FiscoBcosBroker4AdminTest extends JUnitTestBase {
      * test transHash
      */
     @Test
-    public void queryTransList_tranHash() throws BrokerException {
+    public void queryTransListTranHash() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setPkHash(tranHash);
         queryEntity.setGroupId(this.groupId);
@@ -109,7 +109,7 @@ public class FiscoBcosBroker4AdminTest extends JUnitTestBase {
     }
 
     @Test
-    public void queryBlockList_blockNumber() throws BrokerException {
+    public void queryBlockListBlockNumber() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.groupId);
         queryEntity.setBlockNumber(blockNumber);
@@ -121,7 +121,7 @@ public class FiscoBcosBroker4AdminTest extends JUnitTestBase {
 
 
     @Test
-    public void queryBlockList_blockHash() throws BrokerException {
+    public void queryBlockListBlockHash() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.groupId);
         queryEntity.setPkHash(blockHash);
