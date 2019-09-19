@@ -617,7 +617,8 @@ public class Web3SDK2Wrapper {
             tbNode.setBlockNumber(blockNumber.getBlockNumber());
             tbNode.setPbftView(pbftView.getPbftView());
             tbNode.setNodeId(nodeIds.get(0));
-            tbNode.setNodeName(nodeIds.get(0));
+            tbNode.setNodeName(queryEntity.getGroupId()+"_"+nodeIds.get(0).substring(0,nodeIds.get(0).length()-10));
+            tbNode.setNodeActive(1);
             tbNodes.add(tbNode);
             return tbNodes;
         } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null

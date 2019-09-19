@@ -59,6 +59,8 @@ public class BrokerService {
 
     private final static String HTTP_GET_SUCCESS_CODE = "0";
 
+    private final static String weEventVersion = "2";
+
     @Autowired
     private CookiesTools cookiesTools;
 
@@ -85,7 +87,7 @@ public class BrokerService {
             throws GovernanceException {
 
         //check both broker and webase serverUrl
-        ErrorCode errorCode = checkServerBybrokerEntity(brokerEntity, request);
+        ErrorCode errorCode = checkServerByBrokerEntity(brokerEntity, request);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             throw new GovernanceException(errorCode);
         }
@@ -131,7 +133,7 @@ public class BrokerService {
         authCheck(brokerEntity, request);
 
         //check both broker and webase serverUrl
-        ErrorCode errorCode = checkServerBybrokerEntity(brokerEntity, request);
+        ErrorCode errorCode = checkServerByBrokerEntity(brokerEntity, request);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             throw new GovernanceException(errorCode);
         }
@@ -147,8 +149,12 @@ public class BrokerService {
         return GovernanceResult.ok(true);
     }
 
-    private ErrorCode checkServerBybrokerEntity(BrokerEntity brokerEntity, HttpServletRequest request) {
+    private ErrorCode checkServerByBrokerEntity(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
         if (StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
+            return ErrorCode.ILLEGAL_INPUT;
+        }
+        String version = this.getVersion(request, brokerEntity.getBrokerUrl());
+        if (version != null && !version.startsWith(this.weEventVersion) && StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
             return ErrorCode.ILLEGAL_INPUT;
         }
         //checkServerUrl
@@ -163,12 +169,15 @@ public class BrokerService {
         }
     }
 
-    public ErrorCode checkServerByUrl(BrokerEntity brokerEntity, HttpServletRequest request) {
+    public ErrorCode checkServerByUrl(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
         //check broker or webase serverUrl
         if (StringUtils.isBlank(brokerEntity.getBrokerUrl()) && StringUtils.isBlank(brokerEntity.getWebaseUrl())) {
             return ErrorCode.ILLEGAL_INPUT;
         }
-
+        String version = this.getVersion(request, brokerEntity.getBrokerUrl());
+        if (version != null && !version.startsWith(this.weEventVersion) && StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
+            return ErrorCode.ILLEGAL_INPUT;
+        }
         return check(brokerEntity, request);
     }
 
@@ -223,6 +232,19 @@ public class BrokerService {
         if (!this.HTTP_GET_SUCCESS_CODE.equals(String.valueOf(jsonObject.get("code")))) {
             log.error("url {}, connect fail.", headUrl);
             throw new GovernanceException("url " + headUrl + " connect fail");
+        }
+    }
+
+    public String getVersion(HttpServletRequest request, String brokerUrl) throws GovernanceException {
+        String versionUrl = brokerUrl + brokerListUrl;
+        try {
+            CloseableHttpResponse versionResponse = commonService.getCloseResponse(request, versionUrl);
+            String mes = EntityUtils.toString(versionResponse.getEntity());
+            JSONObject jsonObject = JSONObject.parseObject(mes);
+            return jsonObject.get("weEventVersion") == null ? null : jsonObject.get("weEventVersion").toString();
+        } catch (Exception e) {
+            log.error("get version fail,error:{}", e);
+            throw new GovernanceException("get version fail,error:{}");
         }
     }
 }

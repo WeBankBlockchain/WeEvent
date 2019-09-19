@@ -68,7 +68,7 @@ public class BrokerController {
     }
 
     @PostMapping("/checkServer")
-    public ErrorCode checkServerByUrl(@RequestBody BrokerEntity brokerEntity, HttpServletRequest request) {
+    public ErrorCode checkServerByUrl(@RequestBody BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
         log.info("checkServer  brokerEntity, id: " + brokerEntity.getId());
         return brokerService.checkServerByUrl(brokerEntity, request);
     }

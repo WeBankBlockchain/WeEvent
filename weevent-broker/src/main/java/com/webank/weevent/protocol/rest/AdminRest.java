@@ -14,6 +14,7 @@ import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
 import com.webank.weevent.protocol.rest.entity.QueryEntity;
 import com.webank.weevent.protocol.rest.entity.TbBlock;
+import com.webank.weevent.protocol.rest.entity.TbNode;
 import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
@@ -144,7 +145,7 @@ public class AdminRest extends RestHA {
                 pageNumber, pageSize, transHash, blockNumber);
 
         ResponseData responseData = new ResponseData();
-        QueryEntity queryEntity = new QueryEntity(groupId, pageNumber, pageSize, transHash, blockNumber);
+        QueryEntity queryEntity = new QueryEntity(groupId.toString(), pageNumber, pageSize, transHash, blockNumber);
 
         List<TbTransHash> tbTransHashes = this.admin.queryTransList(queryEntity);
         responseData.setCode(ErrorCode.SUCCESS.getCode());
@@ -173,7 +174,7 @@ public class AdminRest extends RestHA {
                 pageNumber, pageSize, pkHash, blockNumber);
 
         ResponseData responseData = new ResponseData();
-        QueryEntity queryEntity = new QueryEntity(groupId, pageNumber, pageSize, pkHash, blockNumber);
+        QueryEntity queryEntity = new QueryEntity(groupId.toString(), pageNumber, pageSize, pkHash, blockNumber);
 
         List<TbBlock> tbBlocks = this.admin.queryBlockList(queryEntity);
         responseData.setCode(ErrorCode.SUCCESS.getCode());
@@ -197,12 +198,14 @@ public class AdminRest extends RestHA {
                 "start queryNodeList startTime:{} groupId:{}  pageNumber:{} pageSize:{} nodeName:{}",
                 startTime.toEpochMilli(), groupId, pageNumber,
                 pageSize, nodeName);
-        QueryEntity queryEntity = new QueryEntity(groupId, pageNumber, pageSize, null, null);
+        QueryEntity queryEntity = new QueryEntity(groupId.toString(), pageNumber, pageSize, null, null);
         queryEntity.setNodeName(nodeName);
         ResponseData responseData = new ResponseData();
         responseData.setCode(ErrorCode.SUCCESS.getCode());
         responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
-        //List<TbNode> tbNodeList = this.producer.queryNodeList(queryEntity);
+        List<TbNode> tbNodeList = this.admin.queryNodeList(queryEntity);
+        responseData.setTotalCount(tbNodeList == null ? 0 : tbNodeList.size());
+        responseData.setData(tbNodeList);
         return responseData;
     }
 

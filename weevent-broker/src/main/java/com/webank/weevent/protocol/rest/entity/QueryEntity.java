@@ -11,7 +11,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = false)
 public class QueryEntity {
 
-    private Integer groupId;
+    private String groupId;
     private Integer pageNumber;
     private Integer pageSize;
     private String pkHash;
@@ -21,7 +21,7 @@ public class QueryEntity {
     public QueryEntity() {
     }
 
-    public QueryEntity(Integer groupId, Integer pageNumber, Integer pageSize, String pkHash, BigInteger blockNumber) {
+    public QueryEntity(String groupId, Integer pageNumber, Integer pageSize, String pkHash, BigInteger blockNumber) {
         this.groupId = groupId;
         this.pageNumber = pageNumber;
         this.pageSize = pageSize;
