@@ -6,7 +6,6 @@ import javax.servlet.http.HttpServletResponse;
 import com.webank.weevent.broker.config.WeEventConfig;
 import com.webank.weevent.broker.fisco.RedisService;
 import com.webank.weevent.broker.ha.MasterJob;
-import com.webank.weevent.broker.plugin.IAdmin;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
@@ -202,13 +201,6 @@ public class BrokerApplication {
             exit();
         }
         return null;
-    }
-
-    //IAdmin
-    @Bean
-    public static IAdmin iAdmin() {
-        IAdmin iAdmin = IAdmin.build();
-        return iAdmin;
     }
 
     //http filter
