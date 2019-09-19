@@ -37,9 +37,6 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
     private QueryEntity queryEntity;
     private String groupId = WeEvent.DEFAULT_GROUP_ID;
     private final BigInteger blockNumber = BigInteger.valueOf(1);
-    private final String blockHash = "0x361557fa0ee3c05e2e9bf629e8e9ba6d590d251ddba819f155cb9afc1c9cf588";
-    private final String tranHash = "0xc74cfecef74e11f5143aa4c760f3f9804c84ee4c820b2b974b611517ae8887af";
-    private final String nodeName = "1_60c08d803ac9b0a6c333ea12b1914ba3f8297c282088b79e987234076fd950ad78a864f04017f217056b95c8188c1ac32096a0f131f29cd607759a";
 
 
     @Before
@@ -879,6 +876,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.groupId);
         List<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
+
         Assert.assertNotNull(tbTransHashes);
         Assert.assertTrue(tbTransHashes.size() > 0);
     }
@@ -893,6 +891,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
         queryEntity.setGroupId(this.groupId);
         queryEntity.setBlockNumber(blockNumber);
         List<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
+
         Assert.assertNotNull(tbTransHashes);
         Assert.assertTrue(tbTransHashes.size() > 0);
         Assert.assertEquals(tbTransHashes.get(0).getBlockNumber().toString(), this.blockNumber.toString());
@@ -905,12 +904,16 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
     @Test
     public void queryTransListTranHash() throws BrokerException {
         this.queryEntity = new QueryEntity();
-        queryEntity.setPkHash(tranHash);
         queryEntity.setGroupId(this.groupId);
+        queryEntity.setBlockNumber(blockNumber);
         List<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
         Assert.assertNotNull(tbTransHashes);
+
+        queryEntity.setBlockNumber(null);
+        queryEntity.setPkHash(tbTransHashes.get(0).getTransHash());
+        tbTransHashes = this.iProducer.queryTransList(queryEntity);
+        Assert.assertNotNull(tbTransHashes);
         Assert.assertTrue(tbTransHashes.size() > 0);
-        Assert.assertEquals(tbTransHashes.get(0).getTransHash(), this.tranHash);
     }
 
     /**
@@ -934,6 +937,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
         queryEntity.setGroupId(this.groupId);
         queryEntity.setBlockNumber(blockNumber);
         List<TbBlock> tbBlocks = this.iProducer.queryBlockList(queryEntity);
+
         Assert.assertNotNull(tbBlocks);
         Assert.assertTrue(tbBlocks.size() > 0);
         Assert.assertEquals(tbBlocks.get(0).getBlockNumber().toString(), this.blockNumber.toString());
@@ -946,11 +950,17 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
     public void queryBlockListBlockHash() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.groupId);
-        queryEntity.setPkHash(blockHash);
+        queryEntity.setBlockNumber(blockNumber);
+
         List<TbBlock> tbBlocks = this.iProducer.queryBlockList(queryEntity);
         Assert.assertNotNull(tbBlocks);
         Assert.assertTrue(tbBlocks.size() > 0);
-        Assert.assertEquals(tbBlocks.get(0).getPkHash(), this.blockHash);
+
+        queryEntity.setBlockNumber(null);
+        queryEntity.setPkHash(tbBlocks.get(0).getPkHash());
+        tbBlocks = this.iProducer.queryBlockList(queryEntity);
+        Assert.assertNotNull(tbBlocks);
+        Assert.assertTrue(tbBlocks.size() > 0);
     }
 
     /**
@@ -963,7 +973,6 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
         List<TbNode> tbNodes = this.iProducer.queryNodeList(queryEntity);
         Assert.assertNotNull(tbNodes);
         Assert.assertTrue(tbNodes.size() > 0);
-        Assert.assertEquals(tbNodes.get(0).getNodeName(), this.nodeName);
     }
 
 
