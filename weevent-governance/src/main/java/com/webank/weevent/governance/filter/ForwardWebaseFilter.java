@@ -53,7 +53,6 @@ public class ForwardWebaseFilter implements Filter {
         String webaseUrl = brokerEntity.getWebaseUrl();
         String newUrl;
         String weEventUrl = mappingWeEventUrl(subStrUrl);
-        newUrl = brokerEntity.getBrokerUrl() + "/admin" + weEventUrl;
         if (webaseUrl == null || webaseUrl.length() == 0) {
             newUrl = brokerEntity.getBrokerUrl() + "/admin" + weEventUrl;
         } else {
