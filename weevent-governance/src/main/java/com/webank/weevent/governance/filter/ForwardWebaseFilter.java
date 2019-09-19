@@ -29,6 +29,15 @@ public class ForwardWebaseFilter implements Filter {
     @Autowired
     private CommonService commonService;
 
+    private static final String transDaily = "/group/transDaily";
+    private static final String general = "/group/general";
+    private static final String transList = "/transaction/transList";
+    private static final String blockList = "/block/blockList";
+    private static final String nodeList = "/node/nodeList";
+    private static final String questionMark = "?";
+    private static final String andSymbol = "&";
+    private static final String layerSeparate = "/";
+
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
@@ -43,8 +52,10 @@ public class ForwardWebaseFilter implements Filter {
         BrokerEntity brokerEntity = brokerService.getBroker(id);
         String webaseUrl = brokerEntity.getWebaseUrl();
         String newUrl;
+        String weEventUrl = mappingWeEventUrl(subStrUrl);
+        newUrl = brokerEntity.getBrokerUrl() + "/admin" + weEventUrl;
         if (webaseUrl == null || webaseUrl.length() == 0) {
-            newUrl = brokerEntity.getBrokerUrl() + "/admin" + subStrUrl;
+            newUrl = brokerEntity.getBrokerUrl() + "/admin" + weEventUrl;
         } else {
             // get complete url of webase
             newUrl = webaseUrl + subStrUrl;
@@ -53,4 +64,55 @@ public class ForwardWebaseFilter implements Filter {
         CloseableHttpResponse closeResponse = commonService.getCloseResponse(req, newUrl);
         commonService.writeResponse(closeResponse, res);
     }
+
+
+    private String mappingWeEventUrl(String subStrUrl) {
+        String weEventUrl = "";
+        if (subStrUrl.contains(this.transDaily)) {
+            weEventUrl = spliceNewUrl(subStrUrl, this.transDaily);
+        } else if (subStrUrl.contains(this.general)) {
+            weEventUrl = spliceNewUrl(subStrUrl, this.general);
+        } else if (subStrUrl.contains(this.transList)) {
+            weEventUrl = spliceNewUrl(subStrUrl, this.transList);
+        } else if (subStrUrl.contains(this.blockList)) {
+            weEventUrl = spliceNewUrl(subStrUrl, this.blockList);
+        } else if (subStrUrl.contains(this.nodeList)) {
+            weEventUrl = spliceNewUrl(subStrUrl, this.nodeList);
+
+        }
+        return weEventUrl;
+    }
+
+    private String spliceNewUrl(String subStrUrl, String key) {
+        if (subStrUrl.contains(this.questionMark)) {
+            String midUrl = subStrUrl.substring(subStrUrl.indexOf(key) + key.length() + 1, subStrUrl.indexOf(this.questionMark));
+            String afterUrl = subStrUrl.substring(subStrUrl.indexOf(this.questionMark) + 1, subStrUrl.length() - 1);
+            if (key.equals(this.transDaily) || key.equals(this.general)) {
+                midUrl = new StringBuffer(this.questionMark).append("groupId=").append(midUrl).append(this.andSymbol).append(afterUrl).toString();
+                return key + midUrl;
+            } else {
+                // if key.equals(this.blockList) || key.equals(this.nodeList) || key.equals(this.transList)
+                String[] split = midUrl.split(this.layerSeparate);
+                midUrl = new StringBuffer(this.questionMark).append("groupId=").append(split[0]).append(this.andSymbol)
+                        .append("pageNumber=").append(split[1]).append(this.andSymbol).append("pageSize=").append(split[2])
+                        .append(this.andSymbol).append(afterUrl).toString();
+                return key + midUrl;
+            }
+        } else {
+            String midUrl = subStrUrl.substring(subStrUrl.indexOf(key) + key.length() + 1);
+            if (key.equals(this.transDaily) || key.equals(this.general)) {
+                midUrl = new StringBuffer(this.questionMark).append("groupId=").append(midUrl).toString();
+                return key + midUrl;
+            } else {
+                // if key.equals(this.blockList) || key.equals(this.nodeList) || key.equals(this.transList)
+                String[] split = midUrl.split(this.layerSeparate);
+                midUrl = new StringBuffer(this.questionMark).append("groupId=").append(split[0]).append(this.andSymbol)
+                        .append("pageNumber=").append(split[1]).append(this.andSymbol).append("pageSize=").append(split[2])
+                        .toString();
+                return key + midUrl;
+            }
+        }
+
+    }
+
 }

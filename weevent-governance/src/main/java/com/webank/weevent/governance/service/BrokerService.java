@@ -155,7 +155,7 @@ public class BrokerService {
         }
         String version = this.getVersion(request, brokerEntity.getBrokerUrl());
         if (version != null && !version.startsWith(this.weEventVersion) && StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
-            return ErrorCode.ILLEGAL_INPUT;
+            return ErrorCode.WEBASE_REQUIRED;
         }
         //checkServerUrl
         return check(brokerEntity, request);
@@ -176,7 +176,7 @@ public class BrokerService {
         }
         String version = this.getVersion(request, brokerEntity.getBrokerUrl());
         if (version != null && !version.startsWith(this.weEventVersion) && StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
-            return ErrorCode.ILLEGAL_INPUT;
+            return ErrorCode.WEBASE_REQUIRED;
         }
         return check(brokerEntity, request);
     }
