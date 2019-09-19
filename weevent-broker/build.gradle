@@ -58,14 +58,6 @@ gitProperties {
     dateFormat = "yyyy-MM-dd HH:mm:ss"
     dateFormatTimeZone = "GMT+8"
     gitPropertiesDir = "${project.rootDir}/weevent-broker/src/main/resources"
-    customProperty "build.timestamp", {
-        new Date().format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("GMT+8"))
-    }
-}
-
-processResources {
-    // DO NOT exclude properties for IDEA convenience
-    //exclude { "**/**" }
 }
 
 bootJar {
@@ -80,7 +72,6 @@ bootJar {
             from file("src/main/resources/")
             into "dist/conf"
         }
-
         copy {
             from configurations.runtimeClasspath
             into "dist/lib"
@@ -88,3 +79,4 @@ bootJar {
     }
 }
 
+bootJar.dependsOn(generateGitProperties)
