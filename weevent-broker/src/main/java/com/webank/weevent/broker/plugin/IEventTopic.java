@@ -2,6 +2,11 @@ package com.webank.weevent.broker.plugin;
 
 import java.util.List;
 
+import com.webank.weevent.protocol.rest.entity.GroupGeneral;
+import com.webank.weevent.protocol.rest.entity.QueryEntity;
+import com.webank.weevent.protocol.rest.entity.TbBlock;
+import com.webank.weevent.protocol.rest.entity.TbNode;
+import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.TopicPage;
@@ -77,4 +82,13 @@ public interface IEventTopic {
      * @throws BrokerException BrokerException
      */
     List<String> listGroupId() throws BrokerException;
+
+    GroupGeneral getGroupGeneral(String groupId) throws BrokerException;
+
+    List<TbTransHash> queryTransList(QueryEntity queryEntity) throws BrokerException;
+
+    List<TbBlock> queryBlockList(QueryEntity queryEntity) throws BrokerException;
+
+    List<TbNode> queryNodeList(QueryEntity queryEntity) throws BrokerException;
+
 }
