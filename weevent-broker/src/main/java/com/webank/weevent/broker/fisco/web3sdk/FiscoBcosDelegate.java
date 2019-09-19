@@ -12,6 +12,11 @@ import com.webank.weevent.broker.fisco.RedisService;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.LRUCache;
+import com.webank.weevent.protocol.rest.entity.GroupGeneral;
+import com.webank.weevent.protocol.rest.entity.QueryEntity;
+import com.webank.weevent.protocol.rest.entity.TbBlock;
+import com.webank.weevent.protocol.rest.entity.TbNode;
+import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.SendResult;
@@ -355,4 +360,37 @@ public class FiscoBcosDelegate {
 
         return events;
     }
+
+    public GroupGeneral getGroupGeneral(String groupId) throws BrokerException {
+        FiscoBcos2 bcos2 = this.fiscoBcos2Map.get(Long.valueOf(groupId));
+        if (bcos2 == null) {
+            return null;
+        }
+        return bcos2.getGroupGeneral(groupId);
+    }
+
+    public List<TbTransHash> queryTransList(QueryEntity queryEntity) throws BrokerException {
+        FiscoBcos2 bcos2 = this.fiscoBcos2Map.get(Long.valueOf(queryEntity.getGroupId()));
+        if (bcos2 == null) {
+            return null;
+        }
+        return bcos2.queryTransList(queryEntity);
+    }
+
+    public List<TbBlock> queryBlockList(QueryEntity queryEntity) throws BrokerException {
+        FiscoBcos2 bcos2 = this.fiscoBcos2Map.get(Long.valueOf(queryEntity.getGroupId()));
+        if (bcos2 == null) {
+            return null;
+        }
+        return bcos2.queryBlockList(queryEntity);
+    }
+
+    public List<TbNode> queryNodeList(QueryEntity queryEntity) throws BrokerException {
+        FiscoBcos2 bcos2 = this.fiscoBcos2Map.get(Long.valueOf(queryEntity.getGroupId()));
+        if (bcos2 == null) {
+            return null;
+        }
+        return bcos2.queryNodeList(queryEntity);
+    }
+
 }
