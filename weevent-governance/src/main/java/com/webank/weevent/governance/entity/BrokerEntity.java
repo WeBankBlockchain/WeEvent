@@ -7,6 +7,7 @@ import javax.validation.constraints.Min;
 import com.webank.weevent.governance.entity.base.BaseEntity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.URL;
 
 /**
@@ -15,6 +16,7 @@ import org.hibernate.validator.constraints.URL;
  * @since 2019/04/28
  */
 @Data
+@EqualsAndHashCode(callSuper=false)
 public class BrokerEntity extends BaseEntity {
 
     @Min(1)
