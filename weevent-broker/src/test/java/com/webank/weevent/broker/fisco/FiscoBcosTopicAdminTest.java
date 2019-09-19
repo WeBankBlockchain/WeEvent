@@ -1,7 +1,15 @@
 package com.webank.weevent.broker.fisco;
 
+import java.math.BigInteger;
+import java.util.List;
+
 import com.webank.weevent.JUnitTestBase;
 import com.webank.weevent.broker.plugin.IProducer;
+import com.webank.weevent.protocol.rest.entity.GroupGeneral;
+import com.webank.weevent.protocol.rest.entity.QueryEntity;
+import com.webank.weevent.protocol.rest.entity.TbBlock;
+import com.webank.weevent.protocol.rest.entity.TbNode;
+import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.SendResult;
@@ -26,6 +34,10 @@ import org.junit.Test;
 public class FiscoBcosTopicAdminTest extends JUnitTestBase {
     private IProducer iProducer;
     private String eventId = "";
+    private QueryEntity queryEntity;
+    private String groupId = WeEvent.DEFAULT_GROUP_ID;
+    private final BigInteger blockNumber = BigInteger.valueOf(1);
+
 
     @Before
     public void before() throws Exception {
@@ -843,4 +855,125 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
             Assert.assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
         }
     }
+
+    /**
+     * test getGroupGeneral
+     */
+    @Test
+    public void testGetGroupGeneral() throws BrokerException {
+        GroupGeneral groupGeneral = this.iProducer.getGroupGeneral(this.groupId);
+        Assert.assertNotNull(groupGeneral);
+        Assert.assertEquals(groupGeneral.getNodeCount(), 0);
+        Assert.assertNotNull(groupGeneral.getLatestBlock());
+        Assert.assertNotNull(groupGeneral.getTransactionCount());
+    }
+
+    /**
+     * test queryTransList
+     */
+    @Test
+    public void queryTransList() throws BrokerException {
+        this.queryEntity = new QueryEntity();
+        queryEntity.setGroupId(this.groupId);
+        List<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
+
+        Assert.assertNotNull(tbTransHashes);
+        Assert.assertTrue(tbTransHashes.size() > 0);
+    }
+
+
+    /**
+     * test queryTransList with blockNumber
+     */
+    @Test
+    public void queryTransListBlockNumber() throws BrokerException {
+        this.queryEntity = new QueryEntity();
+        queryEntity.setGroupId(this.groupId);
+        queryEntity.setBlockNumber(blockNumber);
+        List<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
+
+        Assert.assertNotNull(tbTransHashes);
+        Assert.assertTrue(tbTransHashes.size() > 0);
+        Assert.assertEquals(tbTransHashes.get(0).getBlockNumber().toString(), this.blockNumber.toString());
+    }
+
+
+    /**
+     * test queryTransList with tranHash
+     */
+    @Test
+    public void queryTransListTranHash() throws BrokerException {
+        this.queryEntity = new QueryEntity();
+        queryEntity.setGroupId(this.groupId);
+        queryEntity.setBlockNumber(blockNumber);
+        List<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
+        Assert.assertNotNull(tbTransHashes);
+
+        queryEntity.setBlockNumber(null);
+        queryEntity.setPkHash(tbTransHashes.get(0).getTransHash());
+        tbTransHashes = this.iProducer.queryTransList(queryEntity);
+        Assert.assertNotNull(tbTransHashes);
+        Assert.assertTrue(tbTransHashes.size() > 0);
+    }
+
+    /**
+     * test queryBlockList
+     */
+    @Test
+    public void queryBlockList() throws BrokerException {
+        this.queryEntity = new QueryEntity();
+        queryEntity.setGroupId(this.groupId);
+        List<TbBlock> tbBlocks = this.iProducer.queryBlockList(queryEntity);
+        Assert.assertNotNull(tbBlocks);
+        Assert.assertTrue(tbBlocks.size() > 0);
+    }
+
+    /**
+     * test queryBlockList with blockNumber
+     */
+    @Test
+    public void queryBlockListBlockNumber() throws BrokerException {
+        this.queryEntity = new QueryEntity();
+        queryEntity.setGroupId(this.groupId);
+        queryEntity.setBlockNumber(blockNumber);
+        List<TbBlock> tbBlocks = this.iProducer.queryBlockList(queryEntity);
+
+        Assert.assertNotNull(tbBlocks);
+        Assert.assertTrue(tbBlocks.size() > 0);
+        Assert.assertEquals(tbBlocks.get(0).getBlockNumber().toString(), this.blockNumber.toString());
+    }
+
+    /**
+     * test queryBlockList with blockHash
+     */
+    @Test
+    public void queryBlockListBlockHash() throws BrokerException {
+        this.queryEntity = new QueryEntity();
+        queryEntity.setGroupId(this.groupId);
+        queryEntity.setBlockNumber(blockNumber);
+
+        List<TbBlock> tbBlocks = this.iProducer.queryBlockList(queryEntity);
+        Assert.assertNotNull(tbBlocks);
+        Assert.assertTrue(tbBlocks.size() > 0);
+
+        queryEntity.setBlockNumber(null);
+        queryEntity.setPkHash(tbBlocks.get(0).getPkHash());
+        tbBlocks = this.iProducer.queryBlockList(queryEntity);
+        Assert.assertNotNull(tbBlocks);
+        Assert.assertTrue(tbBlocks.size() > 0);
+    }
+
+    /**
+     * test queryNodeList
+     */
+    @Test
+    public void queryNodeList() throws BrokerException {
+        this.queryEntity = new QueryEntity();
+        queryEntity.setGroupId(this.groupId);
+        List<TbNode> tbNodes = this.iProducer.queryNodeList(queryEntity);
+        Assert.assertNotNull(tbNodes);
+        Assert.assertTrue(tbNodes.size() > 0);
+    }
+
+
 }
