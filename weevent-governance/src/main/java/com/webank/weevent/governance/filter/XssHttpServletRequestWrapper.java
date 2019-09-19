@@ -9,12 +9,12 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * <code>{@link XssHttpServletRequestWrapper}</code>
- * 
+ *
  * @author
  */
 public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
-   private  HttpServletRequest orgRequest = null;
+    private HttpServletRequest orgRequest = null;
 
     private boolean isIncludeRichText = false;
 
@@ -26,12 +26,13 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
     @Override
     public String getParameter(String contentParam) {
-        Boolean flag = ("content".equals(contentParam) || contentParam.endsWith("WithHtml"));
+        String content = contentParam;
+        Boolean flag = ("content".equals(content) || content.endsWith("WithHtml"));
         if (flag && !isIncludeRichText) {
-            return super.getParameter(contentParam);
+            return super.getParameter(content);
         }
-        contentParam = JsoupUtil.clean(contentParam);
-        String value = super.getParameter(contentParam);
+        content = JsoupUtil.clean(content);
+        String value = super.getParameter(content);
         if (StringUtils.isNotBlank(value)) {
             value = JsoupUtil.clean(value);
         }
@@ -51,8 +52,8 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
     @Override
     public String getHeader(String headParameter) {
-        headParameter = JsoupUtil.clean(headParameter);
-        String value = super.getHeader(headParameter);
+        String params = JsoupUtil.clean(headParameter);
+        String value = super.getHeader(params);
         if (StringUtils.isNotBlank(value)) {
             value = JsoupUtil.clean(value);
         }
