@@ -5,6 +5,7 @@ import java.util.Date;
 import com.webank.weevent.governance.entity.base.BaseEntity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * TopicEntity class
@@ -12,6 +13,7 @@ import lombok.Data;
  * @since 2019/02/11
  */
 @Data
+@EqualsAndHashCode(callSuper=false)
 public class TopicEntity extends BaseEntity {
 
     private Integer isDelete;

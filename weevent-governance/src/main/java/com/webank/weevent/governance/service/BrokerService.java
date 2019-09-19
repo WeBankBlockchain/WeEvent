@@ -1,8 +1,6 @@
 package com.webank.weevent.governance.service;
 
-import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,14 +17,12 @@ import com.webank.weevent.governance.mapper.TopicInfoMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.utils.CookiesTools;
-import com.webank.weevent.governance.utils.SpringContextUtil;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,11 +50,16 @@ public class BrokerService {
     @Autowired
     private PermissionService permissionService;
 
+    @Autowired
+    private CommonService commonService;
+
     private final static String brokerListUrl = "/admin/getVersion";
 
     private final static String weBaseNodeUrl = "/node/nodeInfo/1";
 
-    private final static String HTTPGET_SUCCESS_CODE = "0";
+    private final static String HTTP_GET_SUCCESS_CODE = "0";
+
+    private final static String weEventVersion = "2";
 
     @Autowired
     private CookiesTools cookiesTools;
@@ -86,8 +87,8 @@ public class BrokerService {
             throws GovernanceException {
 
         //check both broker and webase serverUrl
-        ErrorCode errorCode = checkServerBybrokerEntity(brokerEntity,request);
-        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()){
+        ErrorCode errorCode = checkServerByBrokerEntity(brokerEntity, request);
+        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             throw new GovernanceException(errorCode);
         }
 
@@ -132,8 +133,8 @@ public class BrokerService {
         authCheck(brokerEntity, request);
 
         //check both broker and webase serverUrl
-        ErrorCode errorCode = checkServerBybrokerEntity(brokerEntity,request);
-        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()){
+        ErrorCode errorCode = checkServerByBrokerEntity(brokerEntity, request);
+        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             throw new GovernanceException(errorCode);
         }
 
@@ -148,12 +149,16 @@ public class BrokerService {
         return GovernanceResult.ok(true);
     }
 
-    private ErrorCode checkServerBybrokerEntity(BrokerEntity brokerEntity, HttpServletRequest request){
-        if (StringUtils.isBlank(brokerEntity.getBrokerUrl())){
+    private ErrorCode checkServerByBrokerEntity(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
+        if (StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
             return ErrorCode.ILLEGAL_INPUT;
         }
+        String version = this.getVersion(request, brokerEntity.getBrokerUrl());
+        if (version != null && !version.startsWith(this.weEventVersion) && StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
+            return ErrorCode.WEBASE_REQUIRED;
+        }
         //checkServerUrl
-        return check(brokerEntity,request);
+        return check(brokerEntity, request);
     }
 
     private void authCheck(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
@@ -164,63 +169,40 @@ public class BrokerService {
         }
     }
 
-    // generate CloseableHttpClient from url
-    private CloseableHttpClient generateHttpClient(String url) {
-        if (url.startsWith("https")) {
-            CloseableHttpClient bean = (CloseableHttpClient) SpringContextUtil.getBean("httpsClient");
-            return bean;
-        } else {
-            CloseableHttpClient bean = (CloseableHttpClient) SpringContextUtil.getBean("httpClient");
-            return bean;
-        }
-    }
-
-    private HttpGet getMethod(String uri, HttpServletRequest request) {
-        try {
-            URIBuilder builder = new URIBuilder(uri);
-            Enumeration<String> enumeration = request.getParameterNames();
-            while (enumeration.hasMoreElements()) {
-                String nex = enumeration.nextElement();
-                builder.setParameter(nex, request.getParameter(nex));
-            }
-            return new HttpGet(builder.build());
-        } catch (URISyntaxException e) {
-            log.error(e.getMessage());
-        }
-        return null;
-    }
-
-    public ErrorCode checkServerByUrl(BrokerEntity brokerEntity, HttpServletRequest request) {
+    public ErrorCode checkServerByUrl(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
         //check broker or webase serverUrl
-        if (StringUtils.isBlank(brokerEntity.getBrokerUrl()) && StringUtils.isBlank(brokerEntity.getWebaseUrl())){
+        if (StringUtils.isBlank(brokerEntity.getBrokerUrl()) && StringUtils.isBlank(brokerEntity.getWebaseUrl())) {
             return ErrorCode.ILLEGAL_INPUT;
         }
-
-        return check(brokerEntity,request);
+        String version = this.getVersion(request, brokerEntity.getBrokerUrl());
+        if (version != null && !version.startsWith(this.weEventVersion) && StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
+            return ErrorCode.WEBASE_REQUIRED;
+        }
+        return check(brokerEntity, request);
     }
 
-    private ErrorCode check(BrokerEntity brokerEntity, HttpServletRequest request){
+    private ErrorCode check(BrokerEntity brokerEntity, HttpServletRequest request) {
         String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
         if (accountId == null || !accountId.equals(brokerEntity.getUserId().toString())) {
             return ErrorCode.ACCESS_DENIED;
         }
 
-        if (!StringUtils.isBlank(brokerEntity.getBrokerUrl())){
+        if (!StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
             String brokerServerUrl = brokerEntity.getBrokerUrl();
             log.info("check Broker server, url:{}", brokerServerUrl);
             try {
                 checkUrl(brokerServerUrl, brokerListUrl, request);
-            } catch (GovernanceException e){
+            } catch (GovernanceException e) {
                 log.error("check Broker server failed. e:{}", e);
                 return ErrorCode.BROKER_CONNECT_ERROR;
             }
         }
-        if (!StringUtils.isBlank(brokerEntity.getWebaseUrl())){
+        if (!StringUtils.isBlank(brokerEntity.getWebaseUrl())) {
             String WebaseServerUrl = brokerEntity.getWebaseUrl();
             log.info("check WeBase server, url:{}", WebaseServerUrl);
             try {
                 checkUrl(WebaseServerUrl, weBaseNodeUrl, request);
-            } catch (GovernanceException e){
+            } catch (GovernanceException e) {
                 log.error("check WeBase server failed. e:{}", e);
                 return ErrorCode.WEBASE_CONNECT_ERROR;
             }
@@ -232,10 +214,10 @@ public class BrokerService {
     private void checkUrl(String url, String afterUrl, HttpServletRequest request) throws GovernanceException {
         // get httpclient
         String headUrl = url;
-        CloseableHttpClient client = generateHttpClient(headUrl);
+        CloseableHttpClient client = commonService.generateHttpClient(headUrl);
         // get one of broker urls
         headUrl = headUrl + afterUrl;
-        HttpGet get = getMethod(headUrl, request);
+        HttpGet get = commonService.getMethod(headUrl, request);
         JSONObject jsonObject;
 
         try {
@@ -247,9 +229,22 @@ public class BrokerService {
             throw new GovernanceException("url " + headUrl + " connect fail", e);
         }
 
-        if (!this.HTTPGET_SUCCESS_CODE.equals(String.valueOf(jsonObject.get("code")))){
+        if (!this.HTTP_GET_SUCCESS_CODE.equals(String.valueOf(jsonObject.get("code")))) {
             log.error("url {}, connect fail.", headUrl);
             throw new GovernanceException("url " + headUrl + " connect fail");
+        }
+    }
+
+    public String getVersion(HttpServletRequest request, String brokerUrl) throws GovernanceException {
+        String versionUrl = brokerUrl + brokerListUrl;
+        try {
+            CloseableHttpResponse versionResponse = commonService.getCloseResponse(request, versionUrl);
+            String mes = EntityUtils.toString(versionResponse.getEntity());
+            JSONObject jsonObject = JSONObject.parseObject(mes);
+            return jsonObject.get("weEventVersion") == null ? null : jsonObject.get("weEventVersion").toString();
+        } catch (Exception e) {
+            log.error("get version fail,error:{}", e);
+            throw new GovernanceException("get version fail,error:{}");
         }
     }
 }

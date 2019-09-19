@@ -8,6 +8,7 @@ import javax.validation.constraints.NotBlank;
 import com.webank.weevent.governance.entity.base.BaseEntity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * User class
@@ -15,6 +16,7 @@ import lombok.Data;
  * @since 2019/04/28
  */
 @Data
+@EqualsAndHashCode(callSuper=false)
 public class AccountEntity extends BaseEntity {
 
 
