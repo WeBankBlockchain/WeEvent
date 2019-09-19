@@ -9,12 +9,12 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * <code>{@link XssHttpServletRequestWrapper}</code>
- * 
+ *
  * @author
  */
 public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
-    HttpServletRequest orgRequest = null;
+    private HttpServletRequest orgRequest = null;
 
     private boolean isIncludeRichText = false;
 
@@ -25,13 +25,14 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     }
 
     @Override
-    public String getParameter(String name) {
-        Boolean flag = ("content".equals(name) || name.endsWith("WithHtml"));
+    public String getParameter(String contentParam) {
+        String content = contentParam;
+        Boolean flag = ("content".equals(content) || content.endsWith("WithHtml"));
         if (flag && !isIncludeRichText) {
-            return super.getParameter(name);
+            return super.getParameter(content);
         }
-        name = JsoupUtil.clean(name);
-        String value = super.getParameter(name);
+        content = JsoupUtil.clean(content);
+        String value = super.getParameter(content);
         if (StringUtils.isNotBlank(value)) {
             value = JsoupUtil.clean(value);
         }
@@ -39,8 +40,8 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     }
 
     @Override
-    public String[] getParameterValues(String name) {
-        String[] arr = super.getParameterValues(name);
+    public String[] getParameterValues(String params) {
+        String[] arr = super.getParameterValues(params);
         if (arr != null) {
             for (int i = 0; i < arr.length; i++) {
                 arr[i] = JsoupUtil.clean(arr[i]);
@@ -50,9 +51,9 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     }
 
     @Override
-    public String getHeader(String name) {
-        name = JsoupUtil.clean(name);
-        String value = super.getHeader(name);
+    public String getHeader(String headParameter) {
+        String params = JsoupUtil.clean(headParameter);
+        String value = super.getHeader(params);
         if (StringUtils.isNotBlank(value)) {
             value = JsoupUtil.clean(value);
         }
