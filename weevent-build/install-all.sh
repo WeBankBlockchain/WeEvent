@@ -187,6 +187,9 @@ function main(){
     # set the JAVA_HOME
     config_java_home
 
+    # copy jar
+    cp -r ${current_path}/modules/lib/ ${out_path}
+
     # install module
     install_module
 
