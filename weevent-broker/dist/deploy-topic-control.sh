@@ -27,5 +27,5 @@ check_java_jdk
 ${JAVA_HOME}/bin/java -Xbootclasspath/a:./conf -cp ./apps/* -Dloader.path=./lib -Dloader.main=com.webank.weevent.broker.fisco.util.Web3sdkUtils org.springframework.boot.loader.PropertiesLauncher
 if [[ $? -ne 0 ]];then
     echo "deploy topic control failed."
-    exit $?
+    exit 1
 fi
