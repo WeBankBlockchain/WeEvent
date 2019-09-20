@@ -1,9 +1,7 @@
 package com.webank.weevent.governance.service;
 
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +18,6 @@ import com.webank.weevent.governance.mapper.TopicInfoMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.utils.CookiesTools;
-import com.webank.weevent.governance.utils.SpringContextUtil;
 
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +25,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,14 +50,12 @@ public class TopicService {
     private CookiesTools cookiesTools;
 
     @Autowired
+    private CommonService commonService;
+
+    @Autowired
     private PermissionService permissionService;
 
     private final String SPLIT = "-";
-
-    private final String HTTPS = "https";
-    private final String HTTPS_CLIENT = "httpsClient";
-
-    private final String HTTP_CLIENT = "httpClient";
 
     public Boolean close(Integer brokerId, String topic, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
@@ -74,10 +68,10 @@ public class TopicService {
         if (!flag) {
             throw new GovernanceException(ErrorCode.ACCESS_DENIED);
         }
-        CloseableHttpClient client = generateHttpClient(brokerEntity.getBrokerUrl());
+        CloseableHttpClient client = commonService.generateHttpClient(brokerEntity.getBrokerUrl());
         String url = new StringBuffer(brokerEntity.getBrokerUrl()).append("/rest/close?topic=").append(topic).toString();
         log.info("url: " + url);
-        HttpGet get = getMethod(url, request);
+        HttpGet get = commonService.getMethod(url, request);
 
         try {
             CloseableHttpResponse closeResponse = client.execute(get);
@@ -104,11 +98,11 @@ public class TopicService {
             return result;
         }
         // get event broker url
-        CloseableHttpClient client = generateHttpClient(brokerEntity.getBrokerUrl());
+        CloseableHttpClient client = commonService.generateHttpClient(brokerEntity.getBrokerUrl());
         String url = new StringBuffer(brokerEntity.getBrokerUrl()).append("/rest/list")
                 .append("?pageIndex=").append(pageIndex).append("&pageSize=").append(pageSize).toString();
         log.info("url: " + url);
-        HttpGet get = getMethod(url, request);
+        HttpGet get = commonService.getMethod(url, request);
         try {
             CloseableHttpResponse closeResponse = client.execute(get);
             String mes = EntityUtils.toString(closeResponse.getEntity());
@@ -153,7 +147,7 @@ public class TopicService {
             throw new GovernanceException(ErrorCode.ACCESS_DENIED);
         }
 
-        CloseableHttpClient client = generateHttpClient(broker.getBrokerUrl());
+        CloseableHttpClient client = commonService.generateHttpClient(broker.getBrokerUrl());
         // get event broker url
         String url = new StringBuffer(broker.getBrokerUrl()).append("/rest/state").append("?topic=")
                 .append(topic).toString();
@@ -162,9 +156,9 @@ public class TopicService {
         }
 
         log.info("getTopicInfo url: " + url);
-        HttpGet get = getMethod(url, request);
 
         try {
+            HttpGet get = commonService.getMethod(url, request);
             CloseableHttpResponse closeResponse = client.execute(get);
             String mes = EntityUtils.toString(closeResponse.getEntity());
             JSON json = JSON.parseObject(mes);
@@ -203,12 +197,12 @@ public class TopicService {
         topicEntity.setCreater(creater);
         topicInfoMapper.openBrokeTopic(topicEntity);
 
-        CloseableHttpClient client = generateHttpClient(brokerEntity.getBrokerUrl());
+        CloseableHttpClient client = commonService.generateHttpClient(brokerEntity.getBrokerUrl());
         String url = new StringBuffer(brokerEntity.getBrokerUrl()).append("/rest/open?topic=").append(topic).toString();
         log.info("url: " + url);
-        HttpGet get = getMethod(url, request);
         String mes;
         try {
+            HttpGet get = commonService.getMethod(url, request);
             CloseableHttpResponse closeResponse = client.execute(get);
             mes = EntityUtils.toString(closeResponse.getEntity());
         } catch (Exception e) {
@@ -224,32 +218,6 @@ public class TopicService {
             @SuppressWarnings("unchecked")
             Map<String, Object> result = JSON.toJavaObject(json, Map.class);
             throw new GovernanceException((Integer) (result.get("code")), result.get("message").toString());
-        }
-    }
-
-    // generate CloseableHttpClient from url
-    private CloseableHttpClient generateHttpClient(String url) {
-        if (url.startsWith(HTTPS)) {
-            CloseableHttpClient bean = (CloseableHttpClient) SpringContextUtil.getBean(HTTPS_CLIENT);
-            return bean;
-        } else {
-            CloseableHttpClient bean = (CloseableHttpClient) SpringContextUtil.getBean(HTTP_CLIENT);
-            return bean;
-        }
-    }
-
-    private HttpGet getMethod(String uri, HttpServletRequest request) throws GovernanceException {
-        try {
-            URIBuilder builder = new URIBuilder(uri);
-            Enumeration<String> enumeration = request.getParameterNames();
-            while (enumeration.hasMoreElements()) {
-                String nex = enumeration.nextElement();
-                builder.setParameter(nex, request.getParameter(nex));
-            }
-            return new HttpGet(builder.build());
-        } catch (URISyntaxException e) {
-            log.error("test url fail,error:{}", e.getMessage());
-            throw new GovernanceException(ErrorCode.TEST_URL_FAIL);
         }
     }
 

@@ -10,7 +10,6 @@ import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.result.GovernanceResult;
-import com.webank.weevent.governance.service.AccountService;
 import com.webank.weevent.governance.service.BrokerService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -30,10 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class BrokerController {
 
     @Autowired
-    BrokerService brokerService;
+    private BrokerService brokerService;
 
-    @Autowired
-    AccountService accountService;
 
     // get all broker service
     @GetMapping("/list")
@@ -71,7 +68,7 @@ public class BrokerController {
     }
 
     @PostMapping("/checkServer")
-    public ErrorCode checkServerByUrl(@RequestBody BrokerEntity brokerEntity, HttpServletRequest request) {
+    public ErrorCode checkServerByUrl(@RequestBody BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
         log.info("checkServer  brokerEntity, id: " + brokerEntity.getId());
         return brokerService.checkServerByUrl(brokerEntity, request);
     }

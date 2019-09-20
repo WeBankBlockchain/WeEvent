@@ -17,7 +17,7 @@ public class ResponseData<T> {
     /**
      * The generic type result object.
      */
-    private T result;
+    private T data;
 
     /**
      * The error code.
@@ -28,6 +28,11 @@ public class ResponseData<T> {
      * The error message.
      */
     private String message;
+
+    /**
+     * The total number of data
+     */
+    private Integer totalCount;
 
     /**
      * set a ErrorCode type errorCode.
