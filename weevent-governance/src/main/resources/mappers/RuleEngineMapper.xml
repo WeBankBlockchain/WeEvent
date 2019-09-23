@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.webank.weevent.governance.mapper.RuleEngineMapper">
+
+    <resultMap id="BaseResultMap" type="com.webank.weevent.governance.entity.RuleEngineEntity">
+        <result column="id" property="id" jdbcType="INTEGER"/>
+        <result column="create_date" property="createDate" jdbcType="TIMESTAMP"/>
+        <result column="last_update" property="lastUpdate" jdbcType="TIMESTAMP"/>
+        <result column="rule_name" property="ruleName" jdbcType="INTEGER"/>
+        <result column="payload_type" property="payloadType" jdbcType="INTEGER"/>
+        <result column="payload" property="payload" jdbcType="VARCHAR"/>
+        <result column="user_id" property="userId" jdbcType="INTEGER"/>
+        <result column="broker_id" property="brokerId" jdbcType="INTEGER"/>
+        <result column="broker_url" property="brokerUrl" jdbcType="VARCHAR"/>
+        <result column="from_destination" property="fromDestination" jdbcType="VARCHAR"/>
+        <result column="to_destination" property="toDestination" jdbcType="VARCHAR"/>
+        <result column="select_field" property="selectField" jdbcType="VARCHAR"/>
+        <result column="condition_field" property="conditionField" jdbcType="VARCHAR"/>
+        <result column="condition_type" property="conditionType" jdbcType="INTEGER"/>
+        <result column="status" property="status" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+         id,create_date,last_update, rule_name,payload_type,payload,broker_id,
+         broker_url, broker_url, from_destination,to_destination,select_field,
+         condition_field,condition_type,status
+    </sql>
+
+    <insert id="addRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into
+        t_rule_engine(rule_name,payload_type,payload,broker_id,
+         broker_url, broker_url, from_destination,to_destination,
+         select_field,condition_field,condition_type,status)
+        values
+        (#{ruleName},#{payloadType},#{brokerId},#{brokerUrl},
+        #{fromDestination},#{toDestination},#{selectField},
+        #{conditionField},#{conditionType},#{status})
+    </insert>
+
+    <select id="getRuleEngines" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from t_rule_engine where id=#{id} and is_delete=0
+    </select>
+
+
+    <update id="updateRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity">
+        update t_rule_engine set
+        name=#{name},broker_url=#{brokerUrl},webase_url=#{webaseUrl} where id=#{id,jdbcType=INTEGER}
+    </update>
+
+    <delete id="deleteRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity">
+        update  t_rule_engine set is_delete=1
+        where id=#{id}
+    </delete>
+
+    <select id="countRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
+            resultType="int">
+        select count(1) from t_rule_engine
+        where 1=1
+        <if test="userId != null">
+            and user_id = #{permissionEntity.userId,jdbcType=INTEGER}
+        </if>
+    </select>
+
+
+</mapper>
