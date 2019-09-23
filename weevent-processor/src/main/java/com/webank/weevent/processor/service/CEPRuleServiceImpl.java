@@ -183,6 +183,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
 
     /**
      * check the database url
+     *
      * @param databaseUrl
      * @return
      * @throws SQLException
@@ -203,6 +204,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
 
     /**
      * check the topic
+     *
      * @param topicName
      * @param brokerUrl
      * @return
@@ -238,6 +240,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
 
     /**
      * check the pattern of url
+     *
      * @param urls
      * @return
      */

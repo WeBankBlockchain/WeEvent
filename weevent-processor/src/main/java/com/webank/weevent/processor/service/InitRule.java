@@ -1,6 +1,5 @@
 package com.webank.weevent.processor.service;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -8,25 +7,12 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-import javax.jms.BytesMessage;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.Session;
-import javax.jms.Topic;
-import javax.jms.TopicConnection;
-import javax.jms.TopicConnectionFactory;
-import javax.jms.TopicSession;
-import javax.jms.TopicSubscriber;
 
 import com.webank.weevent.processor.mapper.CEPRuleMapper;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.WeEvent;
-import com.webank.weevent.sdk.WeEventClient;
-import com.webank.weevent.sdk.jms.WeEventConnectionFactory;
-import com.webank.weevent.sdk.jms.WeEventTopic;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +32,7 @@ public class InitRule {
                         public void onEvent(WeEvent event) {
                             System.out.println("received event: " + event.toString());
                         }
+
                         @Override
                         public void onException(Throwable e) {
 
@@ -54,7 +41,7 @@ public class InitRule {
 
                 }
             } catch (BrokerException e) {
-                log.info("BrokerException{}",e.toString());
+                log.info("BrokerException{}", e.toString());
             }
         }
 
@@ -77,7 +64,6 @@ public class InitRule {
         initMap();
     }
 
-    // 1. 内存中，订阅消息，能够收到消息
     public List<CEPRule> initMap() {
         // get all rule
         dynamicRuleList = cEPRuleMapper.getDynamicCEPRuleList();

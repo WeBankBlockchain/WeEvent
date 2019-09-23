@@ -31,6 +31,7 @@ public class Util {
 
     /**
      * check the database url
+     *
      * @param databaseUrl
      * @return
      */
