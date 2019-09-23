@@ -21,6 +21,8 @@ import javax.jms.TopicSubscriber;
 
 import com.webank.weevent.processor.mapper.CEPRuleMapper;
 import com.webank.weevent.processor.model.CEPRule;
+import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.WeEvent;
 import com.webank.weevent.sdk.WeEventClient;
 import com.webank.weevent.sdk.jms.WeEventConnectionFactory;
@@ -36,39 +38,23 @@ public class InitRule {
         public void run() {
             try {
                 for (int i = 0; i < dynamicRuleList.size(); i++) {
-                    TopicConnectionFactory connectionFactory = new WeEventConnectionFactory(dynamicRuleList.get(i).getBrokerUrl());
-                    TopicConnection connection = connectionFactory.createTopicConnection();
-                    // start connection
-                    connection.start();
-                    // create session
-                    TopicSession session = connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-                    System.out.println("ticket = " + dynamicRuleList.get(i).getBrokerUrl() + "" + dynamicRuleList.get(i).getId());
+                    IWeEventClient client = IWeEventClient.build(dynamicRuleList.get(i).getBrokerUrl());
 
-                    // create topic
-                    Topic topic = session.createTopic(dynamicRuleList.get(i).getToDestination());
-                    // optional, default is OFFSET_LAST
-                    ((WeEventTopic) topic).setOffset(WeEvent.OFFSET_LAST);
-                    ((WeEventTopic) topic).setGroupId("1");//if not set default 1
+                    // subscribe topic
+                    client.subscribe(dynamicRuleList.get(i).getToDestination(), WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
+                        @Override
+                        public void onEvent(WeEvent event) {
+                            System.out.println("received event: " + event.toString());
+                        }
+                        @Override
+                        public void onException(Throwable e) {
 
-                    // create subscriber
-                    TopicSubscriber subscriber = session.createSubscriber(topic);
-
-                    // create listener
-                    subscriber.setMessageListener(new MessageListener() {
-                        public void onMessage(Message message) {
-                            BytesMessage msg = (BytesMessage) message;
-                            try {
-                                byte[] data = new byte[(int) msg.getBodyLength()];
-                                msg.readBytes(data);
-                                System.out.println("received: " + new String(data, StandardCharsets.UTF_8));
-                            } catch (JMSException e) {
-                                log.info("JMSException{}",e.toString());
-                            }
                         }
                     });
+
                 }
-            } catch (JMSException e) {
-                log.info("JMSException{}",e.toString());
+            } catch (BrokerException e) {
+                log.info("BrokerException{}",e.toString());
             }
         }
 

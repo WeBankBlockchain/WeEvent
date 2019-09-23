@@ -20,7 +20,7 @@ public class ProcessorApplication {
     public static void main(String[] args) {
         log.info("start processor success");
         SpringApplication.run(ProcessorApplication.class, args);
-        
+
     }
 
     @Bean
@@ -32,7 +32,6 @@ public class ProcessorApplication {
     public void setProcessorConfig(ProcessorConfig config) {
         processorConfig = config;
     }
-
 
     // daemon thread pool
     @Bean(name = "processor_daemon_task_executor")
