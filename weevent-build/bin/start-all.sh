@@ -10,8 +10,10 @@ fi
 for module in $(ls -l|grep ^d|awk '{print $9}');
 do
     # every directory is a single module
-    cd ${module};
-    ./${module}.sh start;
+    if [[ ${module} != "lib" ]];then
+        cd ${module};
+        ./${module}.sh start;
+    fi
     cd ${current_path}
 done
 
