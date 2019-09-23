@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import com.webank.weevent.processor.service.InitRule;
+import com.webank.weevent.processor.service.LoadRule;
 import com.webank.weevent.processor.utils.BaseRspEntity;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.service.CEPRuleServiceImpl;
@@ -23,11 +25,30 @@ import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 @RestController
-@RequestMapping("/weevent/processor")
 public class CEPRuleController extends BaseController {
 
     @Autowired
     private CEPRuleServiceImpl cepRuleService;
+    @Autowired
+    private InitRule initRule;
+
+    @RequestMapping("/refresh")
+    public BaseRspEntity refresh() {
+        BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
+        List<CEPRule> cepRule = initRule.initMap();
+        resEntity.setData(cepRule);
+        log.info("cepRule:{}", JSONArray.toJSON(cepRule));
+        return resEntity;
+    }
+
+    @RequestMapping("/brokerList")
+    public BaseRspEntity brokerList() {
+        BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
+        List<String> brokerList = initRule.initbrokerListMap();
+        resEntity.setData(brokerList);
+        log.info("cepRule:{}", JSONArray.toJSON(brokerList));
+        return resEntity;
+    }
 
     @RequestMapping("/getCEPRuleById")
     @ResponseBody

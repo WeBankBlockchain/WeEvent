@@ -26,6 +26,4 @@ public interface CEPRuleService {
     RetCode updateByPrimaryKeySelective(CEPRule record);
 
     int getCountByCondition(CEPRuleExample cEPRuleExample);
-
-    int updateByExampleSelective(CEPRule record, CEPRuleExample example);
 }
