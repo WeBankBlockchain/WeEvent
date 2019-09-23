@@ -3,6 +3,7 @@ package com.webank.weevent.protocol.stomp;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +50,6 @@ public class BrokerStomp extends TextWebSocketHandler {
     // session id <-> [header subscription id in stomp <-> (subscription id in consumer, topic)]
     private static Map<String, Map<String, Pair<String, String>>> sessionContext;
 
-
     @Autowired
     public void setProducer(IProducer producer) {
         this.iproducer = producer;
@@ -62,10 +62,6 @@ public class BrokerStomp extends TextWebSocketHandler {
 
     static {
         sessionContext = new HashMap<>();
-    }
-
-    public BrokerStomp() {
-        super();
     }
 
     @Override
@@ -142,6 +138,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
             default:
                 handleDefaultMessage(msg, session);
+                break;
         }
     }
 
@@ -462,10 +459,9 @@ public class BrokerStomp extends TextWebSocketHandler {
         log.info("destination: {} header subscribe id: {} group id: {}", simpDestination, headerIdStr, groupId);
 
         String[] curTopicList;
-        if (simpDestination.contains(",")) {
-            // NOT support
+        if (simpDestination.contains(WeEvent.MULTIPLE_TOPIC_SEPARATOR)) {
             log.info("subscribe topic list");
-            curTopicList = simpDestination.split(",");
+            curTopicList = simpDestination.split(WeEvent.MULTIPLE_TOPIC_SEPARATOR);
         } else {
             curTopicList = new String[]{simpDestination};
         }
@@ -488,8 +484,8 @@ public class BrokerStomp extends TextWebSocketHandler {
             ext.put(IConsumer.SubscribeExt.TopicTag, tag);
         }
 
-        // support only one topic
-        String subscriptionId = this.iconsumer.subscribe(curTopicList[0],
+        // support both single/multiple topic
+        String subscriptionId = this.iconsumer.subscribe(curTopicList,
                 groupId,
                 subEventId,
                 ext,
@@ -511,8 +507,9 @@ public class BrokerStomp extends TextWebSocketHandler {
                 });
 
         log.info("bind context, session id: {} header subscription id: {} consumer subscription id: {} topic: {}",
-                session.getId(), headerIdStr, subscriptionId, curTopicList[0]);
-        sessionContext.get(session.getId()).put(headerIdStr, new Pair<>(subscriptionId, curTopicList[0]));
+                session.getId(), headerIdStr, subscriptionId, Arrays.toString(curTopicList));
+        sessionContext.get(session.getId())
+                .put(headerIdStr, new Pair<>(subscriptionId, StringUtils.join(curTopicList,WeEvent.MULTIPLE_TOPIC_SEPARATOR)));
 
         log.info("consumer subscribe success, consumer subscriptionId: {}", subscriptionId);
         return subscriptionId;

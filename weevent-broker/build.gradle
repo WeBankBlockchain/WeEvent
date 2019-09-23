@@ -1,5 +1,6 @@
 apply plugin: "org.springframework.boot"
 apply plugin: "io.spring.dependency-management"
+apply plugin: "com.gorylenko.gradle-git-properties"
 
 dependencies {
     // spring boot
@@ -46,7 +47,6 @@ dependencies {
     // depend project
     implementation project(path: ":weevent-client")
 
-
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     // JMS sample
     testImplementation("javax.jms:jms:1.1")
@@ -54,19 +54,35 @@ dependencies {
     testImplementation("org.jmockit:jmockit:1.9")
 }
 
+gitProperties {
+    dateFormat = "yyyy-MM-dd HH:mm:ss"
+    dateFormatTimeZone = "GMT+8"
+    gitPropertiesDir = "${project.rootDir}/weevent-broker/src/main/resources"
+}
+
+processResources {
+    // DO NOT exclude properties for IDEA convenience
+    //exclude { "**/**" }
+}
+
 bootJar {
     destinationDir file("dist/apps")
     archiveName project.name + "-" + version + ".jar"
 
-    exclude "**/*.xml"
-    exclude "**/*.properties"
+    // thin spring boot jar
+    excludes = ["*.jar"]
 
-    copy {
-        from file("src/main/resources/")
-        into "dist/conf"
-    }
-    copy {
-        from configurations.runtime
-        into "dist/lib"
+    doLast {
+        copy {
+            from file("src/main/resources/")
+            into "dist/conf"
+        }
+
+        copy {
+            from configurations.runtimeClasspath
+            into "dist/lib"
+        }
     }
 }
+
+bootJar.dependsOn(generateGitProperties)

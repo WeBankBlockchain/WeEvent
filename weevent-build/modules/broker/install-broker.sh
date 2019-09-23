@@ -1,9 +1,6 @@
 #!/bin/bash
 #get parameter
 para=""
-conf_path="./conf"
-lib_path="./lib"
-apps_path="./apps"
 current_path=$(pwd)
 
 while [[ $# -ge 2 ]] ; do
@@ -25,20 +22,9 @@ echo "param channel_info: $channel_info"
 
 #copy file
 function copy_file(){
-    cp ${apps_path}/* ${out_path}/apps/
-    cp -r ${conf_path}/* ${out_path}/conf/
-    cp ${conf_path}/../deploy-topic-control.sh ${out_path}/
-    cp ${conf_path}/../gen-cert-key.sh ${out_path}/
-    cp ${conf_path}/../broker.sh ${out_path}/
-    cp ${conf_path}/../check-service.sh ${out_path}/
-}
-
-#mkdir file
-function make_file(){
-    mkdir -p ${out_path}/conf
-    mkdir -p ${out_path}/apps
-    mkdir -p ${out_path}/lib
-    mkdir -p ${out_path}/logs
+    mkdir -p ${out_path}
+    cp -r ./* ${out_path}/
+    rm -f ${out_path}/install-broker.sh
 }
 
 if [[ -z ${channel_info} ]];then
@@ -46,8 +32,6 @@ if [[ -z ${channel_info} ]];then
     exit 1
 fi
 
-mkdir -p ${out_path}
-make_file
 copy_file
 
 sed -i "s/^.*nodes=.*$/nodes=${channel_info}/g" ${out_path}/conf/fisco.properties

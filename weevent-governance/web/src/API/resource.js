@@ -12,6 +12,9 @@ class ResoruceService extends BaseModel {
   listGroup (data) {
     return this.request(api.listGroup, data)
   }
+  getVersion (data) {
+    return this.request(api.getVersion, data)
+  }
   topicList (data) {
     return this.request(api.topicList, data)
   }
@@ -77,6 +80,15 @@ class ResoruceService extends BaseModel {
   }
   reset (data) {
     return this.request(api.reset, data)
+  }
+  accountList (data) {
+    return this.request(api.accountList, data)
+  }
+  permissionList (data) {
+    return this.request(api.permissionList, data)
+  }
+  checkBrokerServer (data) {
+    return this.request(api.checkBrokerServer, data)
   }
 }
 

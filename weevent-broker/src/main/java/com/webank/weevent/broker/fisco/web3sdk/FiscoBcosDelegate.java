@@ -12,6 +12,11 @@ import com.webank.weevent.broker.fisco.RedisService;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.LRUCache;
+import com.webank.weevent.protocol.rest.entity.GroupGeneral;
+import com.webank.weevent.protocol.rest.entity.QueryEntity;
+import com.webank.weevent.protocol.rest.entity.TbBlock;
+import com.webank.weevent.protocol.rest.entity.TbNode;
+import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.SendResult;
@@ -36,17 +41,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 @Slf4j
 public class FiscoBcosDelegate {
-    /**
-     * notify from web3sdk2.x when new block mined
-     */
-    public interface IBlockEventListener {
-        /**
-         * @param groupId group id
-         * @param blockHeight new block height
-         */
-        void onEvent(Long groupId, Long blockHeight);
-    }
-
     // access to version 1.x
     private FiscoBcos fiscoBcos;
 
@@ -68,6 +62,16 @@ public class FiscoBcosDelegate {
     // groupId list
     private List<String> groupIdList = new ArrayList<>();
 
+    /**
+     * notify from web3sdk2.x when new block mined
+     */
+    public interface IBlockEventListener {
+        /**
+         * @param groupId group id
+         * @param blockHeight new block height
+         */
+        void onEvent(Long groupId, Long blockHeight);
+    }
 
     private void initRedisService() {
         if (redisService == null) {
@@ -188,7 +192,7 @@ public class FiscoBcosDelegate {
      * @return list of groupId
      */
     public List<String> listGroupId() throws BrokerException {
-        if (this.groupIdList.isEmpty()){
+        if (this.groupIdList.isEmpty()) {
             if (this.fiscoBcos != null) {
                 this.groupIdList.add(WeEvent.DEFAULT_GROUP_ID);
             } else {
@@ -290,6 +294,36 @@ public class FiscoBcosDelegate {
         }
     }
 
+    private List<WeEvent> getFromCache(String key) {
+        try {
+            if (blockCache != null && blockCache.containsKey(key)) {
+                return blockCache.get(key);
+            }
+            if (redisService != null && redisService.isEventsExistInRedis(key)) {
+                return redisService.readEventsFromRedis(key);
+            }
+        } catch (Exception e) {
+            log.error("Exception happened while read events from redis server", e);
+        }
+
+        return null;
+    }
+
+    private void setCache(String key, List<WeEvent> events) {
+        try {
+            if (events != null) {
+                if (blockCache != null) {
+                    blockCache.putIfAbsent(key, events);
+                }
+                if (redisService != null) {
+                    redisService.writeEventsToRedis(key, events);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Exception happened while write events to redis server", e);
+        }
+    }
+
     /**
      * get data from block chain and it's cache
      *
@@ -308,19 +342,10 @@ public class FiscoBcosDelegate {
 
         // try to get data from local cache and redis
         String key = getRedisKey(blockNum, groupId);
-        try {
-            if (blockCache != null && blockCache.containsKey(key)) {
-                return blockCache.get(key);
-            }
-            if (redisService != null && redisService.isEventsExistInRedis(key)) {
-                events = redisService.readEventsFromRedis(key);
-                // redis data may be dirty
-                if (events != null && !events.isEmpty()) {
-                    return events;
-                }
-            }
-        } catch (Exception e) {
-            log.error("Exception happened while read events from redis server", e);
+        events = getFromCache(key);
+        // redis data may be dirty
+        if (events != null) {
+            return events;
         }
 
         // from block chain
@@ -331,19 +356,41 @@ public class FiscoBcosDelegate {
         }
 
         //write events list to redis server
-        try {
-            if (events != null && !events.isEmpty()) {
-                if (blockCache != null) {
-                    blockCache.putIfAbsent(key, events);
-                }
-                if (redisService != null) {
-                    redisService.writeEventsToRedis(key, events);
-                }
-            }
-        } catch (Exception e) {
-            log.error("Exception happened while write events to redis server", e);
-        }
+        setCache(key, events);
 
         return events;
     }
+
+    public GroupGeneral getGroupGeneral(String groupId) throws BrokerException {
+        FiscoBcos2 bcos2 = this.fiscoBcos2Map.get(Long.valueOf(groupId));
+        if (bcos2 == null) {
+            return null;
+        }
+        return bcos2.getGroupGeneral(groupId);
+    }
+
+    public List<TbTransHash> queryTransList(QueryEntity queryEntity) throws BrokerException {
+        FiscoBcos2 bcos2 = this.fiscoBcos2Map.get(Long.valueOf(queryEntity.getGroupId()));
+        if (bcos2 == null) {
+            return null;
+        }
+        return bcos2.queryTransList(queryEntity);
+    }
+
+    public List<TbBlock> queryBlockList(QueryEntity queryEntity) throws BrokerException {
+        FiscoBcos2 bcos2 = this.fiscoBcos2Map.get(Long.valueOf(queryEntity.getGroupId()));
+        if (bcos2 == null) {
+            return null;
+        }
+        return bcos2.queryBlockList(queryEntity);
+    }
+
+    public List<TbNode> queryNodeList(QueryEntity queryEntity) throws BrokerException {
+        FiscoBcos2 bcos2 = this.fiscoBcos2Map.get(Long.valueOf(queryEntity.getGroupId()));
+        if (bcos2 == null) {
+            return null;
+        }
+        return bcos2.queryNodeList(queryEntity);
+    }
+
 }

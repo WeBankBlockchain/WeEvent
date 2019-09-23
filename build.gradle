@@ -1,13 +1,19 @@
+println("current gradle version is " + gradle.gradleVersion + ", support version in [4.7, 5.0) prefer 4.10")
+
 buildscript {
     repositories {
         maven {
             url "http://maven.aliyun.com/nexus/content/groups/public/"
+        }
+        maven {
+            url "https://plugins.gradle.org/m2/"
         }
         mavenLocal()
         mavenCentral()
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.0.RELEASE")
+        classpath("gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.1.0")
     }
 }
 

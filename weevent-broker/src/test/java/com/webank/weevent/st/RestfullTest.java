@@ -31,6 +31,10 @@ public class RestfullTest extends JUnitTestBase {
 
     @Before
     public void before() {
+        log.info("=============================={}.{}==============================",
+                this.getClass().getSimpleName(),
+                this.testName.getMethodName());
+
         url = "http://localhost:" + listenPort + "/weevent/rest/";
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         this.rest = new RestTemplate(requestFactory);
@@ -49,8 +53,6 @@ public class RestfullTest extends JUnitTestBase {
 
     @Test
     public void testOpenWithGroupId() {
-        log.info("===================={}", this.testName.getMethodName());
-
         ResponseEntity<Boolean> rsp = rest.getForEntity(url + "open?topic={topic}&groupId={groupId}", Boolean.class,
                 this.restTopic, WeEvent.DEFAULT_GROUP_ID);
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
@@ -59,17 +61,13 @@ public class RestfullTest extends JUnitTestBase {
 
     @Test
     public void testCloseNoGroupId() {
-        log.info("===================={}", this.testName.getMethodName());
-
         ResponseEntity<Boolean> rsp = rest.getForEntity(url + "close?topic={topic}", Boolean.class, this.restTopic);
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody());
     }
 
     @Test
-    public void testCloseCotainGroupId() {
-        log.info("===================={}", this.testName.getMethodName());
-
+    public void testCloseContainGroupId() {
         ResponseEntity<Boolean> rsp = rest.getForEntity(url + "close?topic={topic}&groupId={groupId}", Boolean.class,
                 this.restTopic, WeEvent.DEFAULT_GROUP_ID);
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
@@ -78,17 +76,13 @@ public class RestfullTest extends JUnitTestBase {
 
     @Test
     public void testExistNoGroupId() {
-        log.info("===================={}", this.testName.getMethodName());
-
         ResponseEntity<Boolean> rsp = rest.getForEntity(url + "exist?topic={topic}", Boolean.class, this.restTopic);
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody());
     }
 
     @Test
-    public void testExistCotainGroupId() {
-        log.info("===================={}", this.testName.getMethodName());
-
+    public void testExistContainGroupId() {
         ResponseEntity<Boolean> rsp = rest.getForEntity(url + "exist?topic={topic}&groupId={groupId}", Boolean.class,
                 this.restTopic, WeEvent.DEFAULT_GROUP_ID);
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
@@ -97,8 +91,6 @@ public class RestfullTest extends JUnitTestBase {
 
     @Test
     public void testStateNoGroupId() {
-        log.info("===================={}", this.testName.getMethodName());
-
         ResponseEntity<TopicInfo> rsp = rest.getForEntity(url + "state?topic={topic}", TopicInfo.class, this.restTopic);
         System.out.println("state, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
@@ -107,8 +99,6 @@ public class RestfullTest extends JUnitTestBase {
 
     @Test
     public void testStateWithGroupId() {
-        log.info("===================={}", this.testName.getMethodName());
-
         ResponseEntity<TopicInfo> rsp = rest.getForEntity(url + "state?topic={topic}&groupId={groupId}",
                 TopicInfo.class, this.restTopic, WeEvent.DEFAULT_GROUP_ID);
         System.out.println("state, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
@@ -118,8 +108,6 @@ public class RestfullTest extends JUnitTestBase {
 
     @Test
     public void testListNoGroupId() {
-        log.info("===================={}", this.testName.getMethodName());
-
         ResponseEntity<TopicPage> rsp = rest.getForEntity(url + "list?pageIndex={pageIndex}&pageSize={pageSize}",
                 TopicPage.class, "0", "10");
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
@@ -128,8 +116,6 @@ public class RestfullTest extends JUnitTestBase {
 
     @Test
     public void testListWithGroupId() {
-        log.info("===================={}", this.testName.getMethodName());
-
         ResponseEntity<TopicPage> rsp = rest.getForEntity(
                 url + "list?pageIndex={pageIndex}&pageSize={pageSize}&groupId={groupId}", TopicPage.class, "0", "10",
                 WeEvent.DEFAULT_GROUP_ID);
@@ -139,8 +125,6 @@ public class RestfullTest extends JUnitTestBase {
 
     @Test
     public void testGetEventNoGroupId() {
-        log.info("===================={}", this.testName.getMethodName());
-
         ResponseEntity<WeEvent> rsp = rest.getForEntity(url + "getEvent?eventId={eventId}", WeEvent.class,
                 this.eventId);
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
@@ -151,8 +135,6 @@ public class RestfullTest extends JUnitTestBase {
 
     @Test
     public void testGetEventWithGroupId() {
-        log.info("===================={}", this.testName.getMethodName());
-
         ResponseEntity<WeEvent> rsp = rest.getForEntity(url + "getEvent?eventId={eventId}&groupId={groupId}",
                 WeEvent.class, this.eventId, WeEvent.DEFAULT_GROUP_ID);
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
@@ -163,8 +145,6 @@ public class RestfullTest extends JUnitTestBase {
 
     @Test
     public void testPublishNoGroupId() {
-        log.info("===================={}", this.testName.getMethodName());
-
         ResponseEntity<SendResult> rsp = rest.getForEntity(url + "publish?topic={topic}&content={content}",
                 SendResult.class, this.restTopic, this.content);
         log.info("publish, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
@@ -174,8 +154,6 @@ public class RestfullTest extends JUnitTestBase {
 
     @Test
     public void testPublishContainGroupId() {
-        log.info("===================={}", this.testName.getMethodName());
-
         ResponseEntity<SendResult> rsp = rest.getForEntity(
                 url + "publish?topic={topic}&content={content}&groupId={groupId}", SendResult.class, this.restTopic,
                 this.content, WeEvent.DEFAULT_GROUP_ID);
@@ -186,8 +164,6 @@ public class RestfullTest extends JUnitTestBase {
 
     @Test
     public void testPublishContentIs10K() {
-        log.info("===================={}", this.testName.getMethodName());
-
         MultiValueMap<String, String> eventData = new LinkedMultiValueMap<>();
         eventData.add("topic", this.restTopic);
         eventData.add("content", get10KStr());
@@ -206,8 +182,6 @@ public class RestfullTest extends JUnitTestBase {
 
     @Test
     public void testPublishContentGt10K() {
-        log.info("===================={}", this.testName.getMethodName());
-
         MultiValueMap<String, String> eventData = new LinkedMultiValueMap<>();
         eventData.add("topic", this.restTopic);
         eventData.add("content", get10KStr() + "s");
@@ -226,8 +200,6 @@ public class RestfullTest extends JUnitTestBase {
 
     @Test
     public void testPublishNoGroupIdContainExt() {
-        log.info("===================={}", this.testName.getMethodName());
-
         ResponseEntity<SendResult> rsp = rest.getForEntity(
                 url + "publish?topic={topic}&content={content}&weevent-test1={value1}&weevent-test2={value2}",
                 SendResult.class, this.restTopic, this.content, "test1value", "test2vlaue");
@@ -238,8 +210,6 @@ public class RestfullTest extends JUnitTestBase {
 
     @Test
     public void testPublishContainGroupIdContainExt() {
-        log.info("===================={}", this.testName.getMethodName());
-
         ResponseEntity<SendResult> rsp = rest.getForEntity(url
                         + "publish?topic={topic}&content={content}&weevent-test1={value1}&weevent-test2={value2}&groupId={groupId}",
                 SendResult.class, this.restTopic, this.content, "test1value", "test2vlaue", WeEvent.DEFAULT_GROUP_ID);

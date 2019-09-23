@@ -15,7 +15,7 @@ import org.springframework.web.client.RestTemplate;
 public class ForwardController {
 
     @Autowired
-    RestTemplate restTemplate;
+    private  RestTemplate restTemplate;
 
     @Value("${weevent.url}")
     private String url;
