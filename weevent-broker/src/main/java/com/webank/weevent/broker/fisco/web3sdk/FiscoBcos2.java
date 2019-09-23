@@ -17,6 +17,11 @@ import com.webank.weevent.broker.fisco.contract.v2.TopicController;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
+import com.webank.weevent.protocol.rest.entity.GroupGeneral;
+import com.webank.weevent.protocol.rest.entity.QueryEntity;
+import com.webank.weevent.protocol.rest.entity.TbBlock;
+import com.webank.weevent.protocol.rest.entity.TbNode;
+import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.SendResult;
@@ -309,5 +314,22 @@ public class FiscoBcos2 {
      */
     public List<WeEvent> loop(Long blockNum) throws BrokerException {
         return Web3SDK2Wrapper.loop(this.web3j, this.credentials, blockNum);
+    }
+
+    public GroupGeneral getGroupGeneral(String groupId) throws BrokerException {
+        return Web3SDK2Wrapper.getGroupGeneral(this.web3j);
+    }
+
+    public List<TbTransHash> queryTransList(QueryEntity queryEntity) throws BrokerException {
+        return Web3SDK2Wrapper.queryTransList(this.web3j, queryEntity);
+    }
+
+    public List<TbBlock> queryBlockList(QueryEntity queryEntity) throws BrokerException {
+        return Web3SDK2Wrapper.queryBlockList(this.web3j, queryEntity);
+    }
+
+    public List<TbNode> queryNodeList(QueryEntity queryEntity) throws BrokerException {
+        return Web3SDK2Wrapper.queryNodeList(this.web3j, queryEntity);
+
     }
 }

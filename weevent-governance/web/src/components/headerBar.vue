@@ -35,7 +35,7 @@
           <span class='version_title'>
             最后更新:
           </span>
-          <span class='version_content'>{{version.buildTimeStamp}}</span>
+          <span class='version_content'>{{version.gitCommitTimeStamp}}</span>
         </p>
       </div>
       <el-button slot="reference">版本: {{version.weEventVersion}}</el-button>
@@ -186,7 +186,7 @@ export default {
       let url = '?brokerId=' + localStorage.getItem('brokerId')
       API.getVersion(url).then(res => {
         if (res.data.code === 0) {
-          this.version = Object.assign({}, res.data.result)
+          this.version = Object.assign({}, res.data.data)
         }
       })
     }
