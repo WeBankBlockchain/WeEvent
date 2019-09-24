@@ -3,9 +3,15 @@ package com.webank.weevent.processor.utils;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
+
 
 public class Util {
 
@@ -29,6 +35,7 @@ public class Util {
 
     }
 
+
     /**
      * check the database url
      *
@@ -50,4 +57,24 @@ public class Util {
             return null;
         }
     }
+
+    public static List<String> getKeys(String objJson) {
+        List<String> keys = new ArrayList<>();
+        try {
+            Iterator<String> sIterator = (new org.json.JSONObject(objJson)).keys();
+
+            while (sIterator.hasNext()) {
+                String key = (sIterator.next());
+                keys.add(key);
+                System.out.println("key:.... " + key);
+
+            }
+        } catch (org.json.JSONException e) {
+            e.printStackTrace();
+        }
+        return keys;
+    }
 }
+
+
+
