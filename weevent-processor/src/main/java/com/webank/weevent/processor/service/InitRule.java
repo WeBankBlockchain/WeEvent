@@ -1,10 +1,10 @@
 package com.webank.weevent.processor.service;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
@@ -15,6 +15,7 @@ import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.threads.ThreadPoolExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
@@ -29,7 +30,7 @@ public class InitRule {
 
     //<id--CEPRULR>
     private static Map<String, CEPRule> ruleMap = new HashMap<>();
-    static List<CEPRule> dynamicRuleList;
+    private List<CEPRule> dynamicRuleList;
 
     public List<CEPRule> initMap() {
         // get all rule
@@ -43,33 +44,44 @@ public class InitRule {
     }
 
     private void subscriptionTopic() {
-        InitRuleThread initRule = new InitRuleThread();
-
-        new Thread(initRule).run();
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(5, 10, 200, TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(5));
+        for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
+            InitRuleThread InitRuleThread = new InitRuleThread(entry.getValue());
+            executor.execute(InitRuleThread);
+            log.info("thread pool number:{}，queue waiting number:{}，finish number:" ,executor.getPoolSize(),
+                    executor.getQueue().size() , executor.getCompletedTaskCount());
+        }
+        executor.shutdown();
     }
 
     private class InitRuleThread implements Runnable {
+        private CEPRule rule;
+
         // subscription  all topic
+         InitRuleThread(CEPRule rule) {
+            this.rule = rule;
+        }
+
         public void run() {
             try {
+                // for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
+                log.info("rulr ", this.rule.toString());
+                IWeEventClient client = IWeEventClient.build(this.rule.getBrokerUrl());
 
-                for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
-                    log.info("key  {} value = {} ", entry.getKey(), entry.getValue());
-                    IWeEventClient client = IWeEventClient.build(entry.getValue().getBrokerUrl());
+                // subscribe topic
+                client.subscribe(this.rule.getToDestination(), WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
+                    @Override
+                    public void onEvent(WeEvent event) {
+                        System.out.println("received event: " + event.toString());
+                    }
 
-                    // subscribe topic
-                    client.subscribe(entry.getValue().getToDestination(), WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
-                        @Override
-                        public void onEvent(WeEvent event) {
-                            System.out.println("received event: " + event.toString());
-                        }
+                    @Override
+                    public void onException(Throwable e) {
 
-                        @Override
-                        public void onException(Throwable e) {
-
-                        }
-                    });
-                }
+                    }
+                });
+//                }
             } catch (BrokerException e) {
                 log.info("BrokerException{}", e.toString());
             }
@@ -79,5 +91,5 @@ public class InitRule {
 
 }
 
-// Thread-->线程池
+// 1. Thread-->线程池
 
