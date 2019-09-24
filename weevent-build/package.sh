@@ -78,6 +78,10 @@ function build_weevent(){
     # node.js build html and css
     yellow_echo "build web in node.js"
     cd ${top_path}/weevent-governance/web
+    if [[ -e build-web.sh ]];then
+        chmod +x build-web.sh
+        dos2unix build-web.sh
+    fi
     ./build-web.sh
 
     # gradle clean then build
@@ -161,16 +165,21 @@ function tar_weevent(){
 
     # thin spring boot jar, merge comm jars into one lib to reduce tar size
     mkdir -p ${out_path}/modules/lib
-    cp -r ${out_path}/modules/broker/lib/* ${out_path}/modules/lib
-    cp -r ${out_path}/modules/governance/lib/* ${out_path}/modules/lib
-    rm -rf ${out_path}/modules/broker/lib
-    rm -rf ${out_path}/modules/governance/lib
+    for commonjar in $(ls ${out_path}/modules/broker/lib/);
+    do
+        # copy common jar into modules lib
+        if [[ -e ${out_path}/modules/governance/lib/${commonjar} ]]; then
+            cp ${out_path}/modules/broker/lib/${commonjar} ${out_path}/modules/lib
+            rm ${out_path}/modules/governance/lib/${commonjar}
+            rm ${out_path}/modules/broker/lib/${commonjar}
+        fi
+    done
 
     # change load.path
-    sed -i 's#loader.path=./lib#loader.path=../lib#' ${out_path}/modules/broker/broker.sh
-    sed -i 's#loader.path=./lib#loader.path=../lib#' ${out_path}/modules/broker/deploy-topic-control.sh
-    sed -i 's#loader.path=./lib#loader.path=../lib#' ${out_path}/modules/governance/governance.sh
-    sed -i 's#loader.path=./lib#loader.path=../lib#' ${out_path}/modules/governance/init-governance.sh
+    sed -i 's#loader.path=./lib#loader.path=./lib,../lib#' ${out_path}/modules/broker/broker.sh
+    sed -i 's#loader.path=./lib#loader.path=./lib,../lib#' ${out_path}/modules/broker/deploy-topic-control.sh
+    sed -i 's#loader.path=./lib#loader.path=./lib,../lib#' ${out_path}/modules/governance/governance.sh
+    sed -i 's#loader.path=./lib#loader.path=./lib,../lib#' ${out_path}/modules/governance/init-governance.sh
 
     # tar
     cd ${current_path}
