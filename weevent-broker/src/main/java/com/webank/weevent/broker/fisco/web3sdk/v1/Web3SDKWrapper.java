@@ -1,4 +1,4 @@
-package com.webank.weevent.broker.fisco.web3sdk;
+package com.webank.weevent.broker.fisco.web3sdk.v1;
 
 
 import java.lang.reflect.Method;
@@ -16,10 +16,8 @@ import java.util.stream.Collectors;
 
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
-import com.webank.weevent.broker.fisco.contract.Topic;
-import com.webank.weevent.broker.fisco.contract.TopicController;
-import com.webank.weevent.broker.fisco.contract.TopicData;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
+import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
@@ -51,6 +49,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 /**
  * Wrapper of Web3SDK 1.x function.
  * This class can run without spring's ApplicationContext.
+ * CNS's API in FISCO-BCOS 1.3 DO NOT SUPPORT versioned address, so can not upgrade solidity gracefully.
  *
  * @author matthewliu
  * @since 2019/04/22
@@ -99,16 +98,16 @@ public class Web3SDKWrapper {
             ChannelEthereumService channelEthereumService = new ChannelEthereumService();
             channelEthereumService.setChannelService(service);
             channelEthereumService.setTimeout(web3sdkTimeout);
-            Web3j web3j = Web3j.build(channelEthereumService);           
-            
+            Web3j web3j = Web3j.build(channelEthereumService);
+
             // check connect with Web3ClientVersion command
             String nodeVersion = web3j.web3ClientVersion().sendAsync()
-                .get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS).getWeb3ClientVersion();
-            if (StringUtils.isBlank(nodeVersion) 
-                || !nodeVersion.contains(WeEventConstants.FISCO_BCOS_1_X_VERSION_PREFIX)) {
+                    .get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS).getWeb3ClientVersion();
+            if (StringUtils.isBlank(nodeVersion)
+                    || !nodeVersion.contains(WeEventConstants.FISCO_BCOS_1_X_VERSION_PREFIX)) {
                 log.error("init web3sdk failed, dismatch fisco version in node: {}", nodeVersion);
                 throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
-            } 
+            }
 
             log.info("initialize web3sdk success");
             return web3j;

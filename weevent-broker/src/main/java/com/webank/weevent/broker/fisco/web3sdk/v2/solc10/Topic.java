@@ -1,4 +1,4 @@
-package com.webank.weevent.broker.fisco.contract.v2;
+package com.webank.weevent.broker.fisco.web3sdk.v2.solc10;
 
 import io.reactivex.Flowable;
 

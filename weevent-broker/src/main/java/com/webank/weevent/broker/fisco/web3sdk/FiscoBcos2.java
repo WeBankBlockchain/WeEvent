@@ -12,11 +12,12 @@ import java.util.concurrent.TimeoutException;
 
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
-import com.webank.weevent.broker.fisco.contract.v2.Topic;
-import com.webank.weevent.broker.fisco.contract.v2.TopicController;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
+import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDK2Wrapper;
+import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic;
+import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
 import com.webank.weevent.protocol.rest.entity.QueryEntity;
 import com.webank.weevent.protocol.rest.entity.TbBlock;

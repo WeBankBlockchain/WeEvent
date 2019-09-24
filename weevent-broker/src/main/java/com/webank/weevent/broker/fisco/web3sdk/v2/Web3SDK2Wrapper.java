@@ -1,4 +1,4 @@
-package com.webank.weevent.broker.fisco.web3sdk;
+package com.webank.weevent.broker.fisco.web3sdk.v2;
 
 
 import java.lang.reflect.Method;
@@ -18,10 +18,11 @@ import java.util.stream.Collectors;
 
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
-import com.webank.weevent.broker.fisco.contract.v2.Topic;
-import com.webank.weevent.broker.fisco.contract.v2.TopicController;
-import com.webank.weevent.broker.fisco.contract.v2.TopicData;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
+import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
+import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic;
+import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController;
+import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicData;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
 import com.webank.weevent.protocol.rest.entity.QueryEntity;
 import com.webank.weevent.protocol.rest.entity.TbBlock;
@@ -617,7 +618,7 @@ public class Web3SDK2Wrapper {
             tbNode.setBlockNumber(blockNumber.getBlockNumber());
             tbNode.setPbftView(pbftView.getPbftView());
             tbNode.setNodeId(nodeIds.get(0));
-            tbNode.setNodeName(queryEntity.getGroupId()+"_"+nodeIds.get(0).substring(0,nodeIds.get(0).length()-10));
+            tbNode.setNodeName(queryEntity.getGroupId() + "_" + nodeIds.get(0).substring(0, nodeIds.get(0).length() - 10));
             tbNode.setNodeActive(1);
             tbNodes.add(tbNode);
             return tbNodes;
