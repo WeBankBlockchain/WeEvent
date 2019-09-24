@@ -28,15 +28,15 @@ public class InitRule {
         initMap();
     }
 
-    //<id--CEPRULR>
+    //<id --> cep rule>
     private static Map<String, CEPRule> ruleMap = new HashMap<>();
-    private List<CEPRule> dynamicRuleList;
 
     public List<CEPRule> initMap() {
-        // get all rule
+        List<CEPRule> dynamicRuleList;
+        // get rule detail
         dynamicRuleList = cEPRuleMapper.getDynamicCEPRuleList();
-        for (int i = 0; i < dynamicRuleList.size(); i++) {
-            ruleMap.put(dynamicRuleList.get(i).getId(), dynamicRuleList.get(i));
+        for (CEPRule ruleList : dynamicRuleList) {
+            ruleMap.put(ruleList.getId(), ruleList);
         }
         log.info("rulemap size", ruleMap.size());
         subscriptionTopic();
@@ -49,8 +49,8 @@ public class InitRule {
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
             InitRuleThread InitRuleThread = new InitRuleThread(entry.getValue());
             executor.execute(InitRuleThread);
-            log.info("thread pool number:{}，queue waiting number:{}，finish number:" ,executor.getPoolSize(),
-                    executor.getQueue().size() , executor.getCompletedTaskCount());
+            log.info("thread pool number:{}，queue waiting number:{}，finish number:", executor.getPoolSize(),
+                    executor.getQueue().size(), executor.getCompletedTaskCount());
         }
         executor.shutdown();
     }
@@ -59,14 +59,14 @@ public class InitRule {
         private CEPRule rule;
 
         // subscription  all topic
-         InitRuleThread(CEPRule rule) {
+        InitRuleThread(CEPRule rule) {
             this.rule = rule;
         }
 
         public void run() {
             try {
-                // for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
-                log.info("rulr ", this.rule.toString());
+
+                log.info("rule ", this.rule.toString());
                 IWeEventClient client = IWeEventClient.build(this.rule.getBrokerUrl());
 
                 // subscribe topic
@@ -81,7 +81,6 @@ public class InitRule {
 
                     }
                 });
-//                }
             } catch (BrokerException e) {
                 log.info("BrokerException{}", e.toString());
             }
@@ -90,6 +89,4 @@ public class InitRule {
     }
 
 }
-
-// 1. Thread-->线程池
 
