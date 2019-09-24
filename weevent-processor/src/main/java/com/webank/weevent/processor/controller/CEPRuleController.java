@@ -1,11 +1,11 @@
 package com.webank.weevent.processor.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
 import com.webank.weevent.processor.service.InitRule;
-import com.webank.weevent.processor.service.LoadRule;
 import com.webank.weevent.processor.utils.BaseRspEntity;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.service.CEPRuleServiceImpl;
@@ -38,15 +38,6 @@ public class CEPRuleController extends BaseController {
         List<CEPRule> cepRule = initRule.initMap();
         resEntity.setData(cepRule);
         log.info("cepRule:{}", JSONArray.toJSON(cepRule));
-        return resEntity;
-    }
-
-    @RequestMapping("/brokerList")
-    public BaseRspEntity brokerList() {
-        BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
-        List<String> brokerList = initRule.initbrokerListMap();
-        resEntity.setData(brokerList);
-        log.info("cepRule:{}", JSONArray.toJSON(brokerList));
         return resEntity;
     }
 

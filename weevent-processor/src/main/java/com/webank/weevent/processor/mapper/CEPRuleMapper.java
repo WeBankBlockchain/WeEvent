@@ -23,8 +23,6 @@ public interface CEPRuleMapper {
 
     List<CEPRule> getCEPRuleList(@Param("ruleName") String ruleName);
 
-    List<String> getBrokerUrlList();
-
     List<CEPRule> getDynamicCEPRuleList();
 
     List<CEPRule> getCEPRuleListByPage(Map<String, Integer> data);
