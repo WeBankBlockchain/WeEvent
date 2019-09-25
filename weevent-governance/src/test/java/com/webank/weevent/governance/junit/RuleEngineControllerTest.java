@@ -1,12 +1,12 @@
 package com.webank.weevent.governance.junit;
 
 
-import java.util.List;
-
 import javax.servlet.http.Cookie;
 
 import com.webank.weevent.governance.JUnitTestBase;
-import com.webank.weevent.governance.entity.RuleEngineEntity;
+import com.webank.weevent.governance.code.ErrorCode;
+import com.webank.weevent.governance.properties.ConstantProperties;
+import com.webank.weevent.governance.result.GovernanceResult;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -30,10 +30,13 @@ public class RuleEngineControllerTest extends JUnitTestBase {
     private WebApplicationContext wac;
 
     private MockMvc mockMvc;
+    private Cookie cookie;
+
 
     @Before
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+        this.cookie = new Cookie(ConstantProperties.COOKIE_MGR_ACCOUNT_ID, "1");
     }
 
     @Before
@@ -45,13 +48,9 @@ public class RuleEngineControllerTest extends JUnitTestBase {
 
     @Test
     public void testAddRuleEngine() throws Exception {
-        Cookie cookie = new Cookie("admin", "123456");
-        String content = "{\"ruleName\":\"temperature‐alarm\",\"payloadType\":\"1\"" +
-                ",\"payload\":\"\"temperate\",\"userId\":\"1\"," +
-                "\"brokerId\":\"1\",\"fromDestination\":\"airCondition\",\"toDestination\":\"test\"," +
-                "\"selectField\":\"temperate\",\"conditionField\":\"temperate\",\"conditionType\":\"1\"," +
-                "\"brokerUrl\":\"http://127.0.0.1:8090/weevent?groupId=1\",\"status\":\"0\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/add").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
+        String content = "{\"ruleName\":\"tempera_ture-alarm\",\"payloadType\":\"1\",\"payloadMap\":{\"temperate\":30,\"humidity\":0.5}," +
+                "\"userId\":\"1\",\"brokerId\":\"1\"}";
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/add").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         Assert.assertTrue(response.getContentAsString().contains("true"));
@@ -59,40 +58,49 @@ public class RuleEngineControllerTest extends JUnitTestBase {
 
     @Test
     public void testGetRuleEngines() throws Exception {
-        String content = "{\"ruleName\":\"test\",\"brokerUrl\":\"http://127.0.0.1:7000/weevent\",\"userId\":\"1\"}";
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/ruleEngine/list").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
+        String content = "{\"ruleName\":\"tempera_ture-alarm\",\"userId\":\"1\",\"brokerId\":\"1\"}";
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/list").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content))
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         String contentAsString = response.getContentAsString();
-        Assert.assertNotNull(contentAsString);
-        List<RuleEngineEntity> RuleEngineEntities = JSONObject.parseArray(contentAsString, RuleEngineEntity.class);
-        Assert.assertEquals(RuleEngineEntities.get(0).getUserId().toString(), "1");
+        GovernanceResult governanceResult = JSONObject.parseObject(contentAsString, GovernanceResult.class);
+        Assert.assertEquals(governanceResult.getStatus().intValue(), ErrorCode.SUCCESS.getCode());
     }
 
     @Test
     public void testUpdateRuleEngine() throws Exception {
-        String content = "{\"ruleName\":\"temperature-alarm\",\"payloadType\":\"1\"" +
-                ",\"payload\":\"\"temperate\":30,\"humidity\":0.5\"\",\"userId\":\"1\"," +
-                "\"brokerId\":\"1\",\"fromDestination\":\"airCondition\",\"toDestination\":\"test\"," +
-                "\"selectField\":\"temperate\",\"conditionField\":\"temperate\",\"conditionType\":\"1\"," +
-                "\"brokerUrl\":\"http://127.0.0.1:8090/weevent?groupId=1\",\"status\":\"0\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.put("/ruleEngine/update").contentType(MediaType.APPLICATION_JSON_UTF8).content(content)).andReturn().getResponse();
+        String content = "{\"id\":\"2\",\"ruleName\":\"temperature-alarm\",\"payloadType\":\"1\"," +
+                "\"payloadMap\":{\"temperate\":30,\"humidity\":0.5},\"brokerId\":\"1\"," +
+                "\"fromDestination\":\"airCondition\",\"toDestination\":\"test\"," +
+                "\"selectField\":\"temperate\",\"conditionField\":\"temperate>38\",\"conditionType\":\"1\"," +
+                "\"brokerUrl\":\"http://127.0.0.1:7000/weevent?groupId=1\"}";
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/update").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Assert.assertTrue(response.getContentAsString().contains("true"));
+        GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(), GovernanceResult.class);
+        Assert.assertEquals(governanceResult.getStatus().intValue(), ErrorCode.SUCCESS.getCode());
+    }
 
+    @Test
+    public void testUpdateRuleEngineStatus() throws Exception {
+        String content = "{\"id\":\"2\",\"status\":\"1\",\"userId\":\"1\",\"brokerId\":\"1\"}";
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/updateStatus").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn().getResponse();
+
+        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(), GovernanceResult.class);
+        Assert.assertEquals(governanceResult.getStatus().intValue(), ErrorCode.SUCCESS.getCode());
     }
 
     @Test
     public void testDeleteRuleEngine() throws Exception {
-        String content = "{\"ruleName\":\"test\",\"brokerUrl\":\"http://127.0.0.1:7000/weevent\",\"userId\":\"1\"}";
-
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.delete("/ruleEngine/delete").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
+        String content = "{\"id\":\"1\"}";
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.delete("/ruleEngine/delete").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Assert.assertTrue(response.getContentAsString().contains("true"));
+        GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(), GovernanceResult.class);
+        Assert.assertEquals(governanceResult.getStatus().intValue(), ErrorCode.SUCCESS.getCode());
     }
 
 

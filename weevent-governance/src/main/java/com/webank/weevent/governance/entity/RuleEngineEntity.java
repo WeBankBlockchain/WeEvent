@@ -1,5 +1,8 @@
 package com.webank.weevent.governance.entity;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.webank.weevent.governance.entity.base.BaseEntity;
 
 import lombok.Data;
@@ -21,6 +24,8 @@ public class RuleEngineEntity extends BaseEntity {
     private Integer payloadType;
 
     private String payload;
+
+    private Map<String, Object> payloadMap = new HashMap<>();
 
     private Integer userId;
 
@@ -46,4 +51,14 @@ public class RuleEngineEntity extends BaseEntity {
      * 0 means not started, 1 means running,2 means is deleted
      */
     private Integer status;
+
+    private String databaseUrl;
+
+    private String errorDestination;
+
+    private String errorMessage;
+
+    private Integer pageSize;
+
+    private Integer pageNumber;
 }

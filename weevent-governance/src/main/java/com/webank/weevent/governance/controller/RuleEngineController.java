@@ -6,19 +6,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.webank.weevent.governance.code.ErrorCode;
-import com.webank.weevent.governance.entity.RuleEngineEntity;
 import com.webank.weevent.governance.entity.RuleEngineEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.result.GovernanceResult;
-import com.webank.weevent.governance.service.BrokerService;
 import com.webank.weevent.governance.service.RuleEngineService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,34 +30,42 @@ public class RuleEngineController {
     private RuleEngineService ruleEngineService;
 
 
-    // get all broker service
+    // get all ruleEngine service
     @PostMapping("/list")
-    public GovernanceResult getRuleEngines(HttpServletRequest request, RuleEngineEntity ruleEngineEntity) throws GovernanceException {
-        log.info("get all ruleEngine ");
+    public GovernanceResult getRuleEngines(HttpServletRequest request, @RequestBody RuleEngineEntity ruleEngineEntity) throws GovernanceException {
+        log.info("get all ruleEngine:{}",ruleEngineEntity);
         List<RuleEngineEntity> ruleEngines = ruleEngineService.getRuleEngines(request, ruleEngineEntity);
         return new GovernanceResult(ruleEngines);
     }
 
-    // get RuleEngineEntity service by id
+    // add RuleEngineEntity
     @PostMapping("/add")
-    public GovernanceResult addBroker(@Valid @RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request,
+    public GovernanceResult addRuleEngine(@Valid @RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request,
                                       HttpServletResponse response) throws GovernanceException {
-        log.info("add  ruleEngineEntity service into db " + ruleEngineEntity);
+        log.info("add  ruleEngineEntity service into db :{}",ruleEngineEntity);
         boolean flag = ruleEngineService.addRuleEngine(ruleEngineEntity, request, response);
         return new GovernanceResult(flag);
     }
 
     @PostMapping("/update")
-    public GovernanceResult updateBroker(@RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request,
+    public GovernanceResult updateRuleEngine(@RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request,
                                          HttpServletResponse response) throws GovernanceException {
-        log.info("update  ruleEngineEntity service ,RuleEngineEntity: " + ruleEngineEntity);
+        log.info("update  ruleEngineEntity service ,ruleEngineEntity:{}",ruleEngineEntity);
         boolean flag = ruleEngineService.updateRuleEngine(ruleEngineEntity, request, response);
         return new GovernanceResult(flag);
     }
 
-    @PostMapping("/delete")
+    @PostMapping("/updateStatus")
+    public GovernanceResult updateRuleEngineStatus(@RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request,
+                                         HttpServletResponse response) throws GovernanceException {
+        log.info("update  ruleEngineStatus service ,status:{}",ruleEngineEntity.getStatus());
+        boolean flag = ruleEngineService.updateRuleEngineStatus(ruleEngineEntity, request, response);
+        return new GovernanceResult(flag);
+    }
+
+    @DeleteMapping("/delete")
     public GovernanceResult deleteBroker(@RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request) throws GovernanceException {
-        log.info("delete  ruleEngineEntity service ,id: " + ruleEngineEntity.getId());
+        log.info("delete  ruleEngineEntity service ,id:{}",ruleEngineEntity.getId());
         boolean flag = ruleEngineService.deleteRuleEngine(ruleEngineEntity, request);
         return new GovernanceResult(flag);
 
