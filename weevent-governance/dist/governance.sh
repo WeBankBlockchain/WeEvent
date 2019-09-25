@@ -1,6 +1,6 @@
 #!/bin/bash
 JAVA_HOME=
-APP_PARAMS="-Xbootclasspath/a:./conf:./html -Djava.security.egd=file:/dev/./urandom -cp ./apps/* -Dloader.path=./lib org.springframework.boot.loader.PropertiesLauncher"
+APP_PARAMS="-Xbootclasspath/a:./conf:./html -Djava.security.egd=file:/dev/./urandom -cp ./apps/* -Dloader.path=./lib,../lib org.springframework.boot.loader.PropertiesLauncher"
 
 if [[ -z ${JAVA_HOME} ]];then
    echo "JAVA_HOME is empty, please set it first"
@@ -53,7 +53,7 @@ start(){
             echo "start ${server_name} fail"
             exit 1
         fi
-        i=$(( $i + 1 ))
+        i=$(( i + 1 ))
     done
 
     if [[ $(crontab -l | grep -w ${server_name} | wc -l) -eq 0 ]]; then
