@@ -4,6 +4,8 @@ import	java.util.concurrent.ConcurrentHashMap;
 import com.webank.weevent.processor.mapper.CEPRuleMapper;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.mq.CEPRuleMQ;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
@@ -13,6 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class CEPRuleCache {
     private static Map<String, CEPRule> ruleMap = new ConcurrentHashMap<>();
     private static ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
@@ -24,6 +27,7 @@ public class CEPRuleCache {
     public void init() {
         // get all rule
         List<CEPRule> dynamicRuleList = cEPRuleMapper.getDynamicCEPRuleList();
+        log.info("dynamic rule list {}",dynamicRuleList.size());
         if (!CollectionUtils.isEmpty(dynamicRuleList)) {
             ruleMap = dynamicRuleList.stream()
                     .collect(Collectors.toMap(CEPRule::getId, dynamicRule -> dynamicRule));
@@ -33,6 +37,7 @@ public class CEPRuleCache {
                     Iterator<Map.Entry<String, CEPRule>> iter = ruleMap.entrySet().iterator();
                     while(iter.hasNext()) {
                         Map.Entry<String, CEPRule> entry = iter.next();
+                        log.info("start subscribe all topic...");
                         CEPRuleMQ.subscribeMsg(entry.getValue(), ruleMap);
                     }
                 }

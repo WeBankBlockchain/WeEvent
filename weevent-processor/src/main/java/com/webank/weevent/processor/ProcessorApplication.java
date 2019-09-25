@@ -1,7 +1,7 @@
 package com.webank.weevent.processor;
 
+import com.webank.weevent.processor.cache.CEPRuleCache;
 import com.webank.weevent.processor.config.ProcessorConfig;
-import com.webank.weevent.processor.service.InitRule;
 
 import lombok.extern.slf4j.Slf4j;
 import org.mybatis.spring.annotation.MapperScan;
@@ -24,8 +24,8 @@ public class ProcessorApplication {
     }
 
     @Bean
-    InitRule initRule() {
-        return new InitRule();
+    CEPRuleCache cEPRuleCache() {
+        return new CEPRuleCache();
     }
 
     @Autowired

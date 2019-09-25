@@ -6,34 +6,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
 
 
 public class Util {
-
-    /**
-     * Alibaba fastjson
-     *
-     * @param test
-     * @return
-     */
-    public final static boolean isJSONValid(String test) {
-        try {
-            JSONObject.parseObject(test);
-        } catch (JSONException ex) {
-            try {
-                JSONObject.parseArray(test);
-            } catch (JSONException ex1) {
-                return false;
-            }
-        }
-        return true;
-
-    }
 
 
     /**

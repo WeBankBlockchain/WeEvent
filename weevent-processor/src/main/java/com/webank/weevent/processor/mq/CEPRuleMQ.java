@@ -23,6 +23,7 @@ public class CEPRuleMQ {
             String subscriptionId = client.subscribe(rule.getToDestination(), WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
                 @Override
                 public void onEvent(WeEvent event) {
+                    log.info("on event{}",event.toString());
                     handleOnEvent(event, client, ruleMap);
                 }
 

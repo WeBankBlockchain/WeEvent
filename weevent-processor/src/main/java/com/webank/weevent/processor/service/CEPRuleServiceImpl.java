@@ -19,6 +19,8 @@ import com.webank.weevent.processor.utils.Util;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,7 +129,19 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         }
         return Constants.SUCCESS;
     }
+    public  static boolean isJSONValid(String test) {
+        try {
+            JSONObject.parseObject(test);
+        } catch (JSONException ex) {
+            try {
+                JSONObject.parseArray(test);
+            } catch (JSONException ex1) {
+                return false;
+            }
+        }
+        return true;
 
+    }
     /**
      * check  ruleName、payloay、selectField、conditionField、conditionType、fromDestination、toDestination、databaseUrl
      *
@@ -145,7 +159,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
                 return Constants.PAYLOAD_IS_BLANK;
             } else {
                 //check relation between payloay and selectField
-                if (!Util.isJSONValid(payload)) {
+                if (!isJSONValid(payload)) {
                     return Constants.PAYLOAD_ISNOT_JSON;
                 }
             }
