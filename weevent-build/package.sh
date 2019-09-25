@@ -175,12 +175,6 @@ function tar_weevent(){
         fi
     done
 
-    # change load.path
-    sed -i 's#loader.path=./lib#loader.path=./lib,../lib#' ${out_path}/modules/broker/broker.sh
-    sed -i 's#loader.path=./lib#loader.path=./lib,../lib#' ${out_path}/modules/broker/deploy-topic-control.sh
-    sed -i 's#loader.path=./lib#loader.path=./lib,../lib#' ${out_path}/modules/governance/governance.sh
-    sed -i 's#loader.path=./lib#loader.path=./lib,../lib#' ${out_path}/modules/governance/init-governance.sh
-
     # tar
     cd ${current_path}
     tar -czpvf weevent-${version}.tar.gz $(basename ${out_path})
