@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,7 +33,7 @@ public class TopicController {
     @RequestMapping(value = "/close")
     public Boolean close(@RequestParam("brokerId") Integer brokerId, @RequestParam String topic,
                          HttpServletRequest request, HttpServletResponse response) throws GovernanceException {
-        log.info("brokerId:" + brokerId + "close: " + topic);
+        log.info("close topic,brokerId:" + brokerId + "close: " + topic);
         return topicService.close(brokerId, topic, request, response);
 
     }
@@ -41,14 +42,14 @@ public class TopicController {
     public TopicPage getTopics(@Validated @RequestBody TopicPageEntity topicPageEntity, HttpServletRequest request,
                                HttpServletResponse response) throws GovernanceException {
 
-        log.info("topicPageEntity:{}",topicPageEntity);
+        log.info("get topic list,topicPageEntity:{}", topicPageEntity);
         return topicService.getTopics(topicPageEntity, request, response);
     }
 
     @RequestMapping(value = "/openTopic")
     public GovernanceResult open(@RequestBody TopicCreateEntity topicCreateEntity, HttpServletRequest request,
                                  HttpServletResponse response) throws GovernanceException {
-        log.info("creater: " + topicCreateEntity.getCreater() + " open: " + topicCreateEntity.getTopic());
+        log.info("openTopic,creator: " + topicCreateEntity.getCreater() + " open: " + topicCreateEntity.getTopic());
         return topicService.open(topicCreateEntity.getBrokerId(), topicCreateEntity.getTopic(),
                 topicCreateEntity.getCreater(), request, response);
     }
@@ -59,7 +60,17 @@ public class TopicController {
                                     @RequestParam(name = "groupId", required = false) String groupId,
                                     HttpServletRequest request) throws GovernanceException {
 
-        log.info("brokerId: {}, topicName: {}, groupId: {}", brokerId, topic, groupId);
+        log.info("get topicInfo,brokerId: {}, topicName: {}, groupId: {}", brokerId, topic, groupId);
         return topicService.getTopicInfo(brokerId, topic, groupId, request);
+    }
+
+    @PostMapping(value = "/destinationList")
+    public GovernanceResult destinationList(@Validated @RequestBody TopicPageEntity topicPageEntity, HttpServletRequest request,
+                                            HttpServletResponse response) throws GovernanceException {
+        log.info("get destinationList,topicPageEntity:{}", topicPageEntity);
+        topicPageEntity.setPageIndex(1);
+        topicPageEntity.setPageSize(Integer.MAX_VALUE);
+        TopicPage topics = topicService.getTopics(topicPageEntity, request, response);
+        return new GovernanceResult(topics);
     }
 }

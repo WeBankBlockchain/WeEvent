@@ -89,6 +89,9 @@ public class RuleEngineService {
             if (ruleEngineEntity.getPayloadType() == null || ruleEngineEntity.getPayloadType() == 0) {
                 ruleEngineEntity.setPayloadType(PayloadEnum.JSON.getCode());
             }
+            //todo addCEPRuleById  get cepId
+            Integer cepId=null;
+            ruleEngineEntity.setCepId(cepId);
             return ruleEngineMapper.addRuleEngine(ruleEngineEntity);
         } catch (Exception e) {
             log.error("add ruleEngineEntity fail", e);
@@ -99,6 +102,7 @@ public class RuleEngineService {
     @Transactional(rollbackFor = Throwable.class)
     public boolean deleteRuleEngine(RuleEngineEntity ruleEngineEntity, HttpServletRequest request) throws GovernanceException {
         authCheck(ruleEngineEntity, request);
+       // commonService.getCloseResponse()
         return ruleEngineMapper.deleteRuleEngine(ruleEngineEntity);
     }
 
@@ -117,6 +121,8 @@ public class RuleEngineService {
             }
             //check databaseUrl
             commonService.checkDataBaseUrl(ruleEngineEntity.getDatabaseUrl());
+            //updateCEPRuleById
+          //  commonService.
             return ruleEngineMapper.updateRuleEngine(ruleEngineEntity);
         } catch (Exception e) {
             log.error("update ruleEngine fail", e);
