@@ -1,92 +1,97 @@
-pragma solidity ^0.4.4;
+// FISCO2.0.0 support highest 0.4.25
+pragma solidity ^0.4.25;
+// support string[]
+pragma experimental ABIEncoderV2;
 
-import "./TopicData.sol";
+import "./Topic.sol";
 
 contract TopicController {
+    // contract version 10, 11 and so on
+    uint constant private VERSION = 10;
     uint constant private TOPIC_ALREADY_EXIST = 500100;
 
-    TopicData private _topicData;
+    Topic private topic;
+    mapping (string => TopicInfo) private topicMap;
+    string[] private topicIndex;
 
-    event LogAddTopicNameAddress(
-        uint retCode
-    );
-
-    function TopicController(
-        address topicDataAddress
-    )
-        public
-    {
-        _topicData = TopicData(topicDataAddress);
+    struct TopicInfo {
+        address sender;
+        uint timestamp;
+        uint block;
+    }
+    
+    constructor(address topicAddress) public {
+        topic = Topic(topicAddress);
     }
 
-    function addTopicInfo(
-        string topicName,
-        address topicAddress
-    )
-        public
-        returns (bool)
-    {
-        if (_topicData.isTopicExist(topicName)) {
-            LogAddTopicNameAddress(TOPIC_ALREADY_EXIST);
+    function addTopicInfo(string topicName) public returns (bool) {
+        TopicInfo memory topicInfo = topicMap[topicName];       
+        if (0 != topicInfo.timestamp) {
             return false;
-        } else {
-            _topicData.putTopic(topicName, topicAddress, block.timestamp);
-            return true;
+        }
+        
+        topicInfo.sender = tx.origin;
+        topicInfo.timestamp = block.timestamp;
+        topicInfo.block = block.number;
+        
+        topicMap[topicName] = topicInfo;
+        topicIndex.push(topicName);
+        return true;
+    }
+
+    function getTopicInfo(string topicName) public constant returns (bool exist, address topicSender, uint topicTimestamp, uint topicBlock,
+        uint lastSequence, uint lastBlock, uint lastTimestamp, address lastSender) {
+        TopicInfo memory topicInfo = topicMap[topicName];
+        exist = (0 != topicInfo.timestamp);
+        if (exist) {
+            topicSender = topicInfo.sender;
+            topicTimestamp = topicInfo.timestamp;
+            topicBlock = topicInfo.block;
+            
+            (lastSequence, lastBlock, lastTimestamp, lastSender) = topic.getSnapshot(topicName);        
         }
     }
-
-    function getTopicInfo(
-        string topicName
-    )
-        public
-        constant
-        returns (
-            address topicAddress,
-            address senderAddress,
-            uint createdTimestamp)
-    {
-        (topicAddress, senderAddress, createdTimestamp) = _topicData.getTopic(topicName);
+    
+    function getTopicAddress() public constant returns (address) {
+        return address(topic);
     }
-
-    function getTopicAddress(
-        string topicName
-    )
-        public
-        constant
-        returns (address topicAddress)
-    {
-        topicAddress = _topicData.getTopicAddress(topicName);
-    }
-
+    
     // page index start from 0, pageSize default 10
-    function listTopicName(
-        uint pageIndex,
-        uint pageSize
-    )
-        public
-        constant
-        returns (
-            uint total,
-            bytes32[] topicList1,
-            bytes32[] topicList2)
-    {
+    function listTopicName(uint pageIndex, uint pageSize) public constant returns (uint total, uint size, string[100] topics) {
         if (pageSize <= 0 || pageSize > 100) {
             pageSize = 10;
         }
 
-        uint size = 0;
-        bytes32[100] memory staticTopicList1;
-        bytes32[100] memory staticTopicList2;
-        (total, size, staticTopicList1,staticTopicList2) = _topicData.listTopic(pageIndex, pageSize);
-
-        bytes32[] memory dynamicTopicList1 = new bytes32[](size);
-        bytes32[] memory dynamicTopicList2 = new bytes32[](size);
-        for (uint i = 0; i < size; i++) {
-            dynamicTopicList1[i] = staticTopicList1[i];
-            dynamicTopicList2[i] = staticTopicList2[i];
+        uint idx = pageIndex * pageSize;
+        for (uint i = 0; i < pageSize; i++) {
+            if (idx >= topicIndex.length) {
+                break;
+            }
+            
+            topics[i] = topicIndex[idx];
+            idx = idx + 1;
         }
 
-        topicList1 = dynamicTopicList1;
-        topicList2 = dynamicTopicList2;
+        total = topicIndex.length;
+        size = i;
     }
+    
+    // flush data while upgrade
+    function flushTopicInfo(string[] topicName, address[] topicSender, uint[] topicTimestamp, uint[] topicBlock,
+        uint[] lastSequence, uint[] lastBlock, uint[] lastTimestamp, address[] lastSender) public {
+        for (uint i = 0; i < topicName.length; i++) {
+            string memory oneName = topicName[i];
+            TopicInfo memory topicInfo = topicMap[oneName];
+            if (0 == topicInfo.timestamp) {
+                topicInfo.sender = topicSender[i];
+                topicInfo.timestamp = topicTimestamp[i];
+                topicInfo.block = topicBlock[i];
+                
+                topicMap[oneName] = topicInfo;
+                topicIndex.push(oneName);
+            }            
+        }
+        
+        topic.flushSnapshot(topicName, lastSequence, lastBlock, lastTimestamp, lastSender);
+    }    
 }

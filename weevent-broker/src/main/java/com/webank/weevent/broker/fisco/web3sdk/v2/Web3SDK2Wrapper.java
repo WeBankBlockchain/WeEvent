@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -19,10 +20,8 @@ import java.util.stream.Collectors;
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
+import com.webank.weevent.broker.fisco.web3sdk.FiscoBcos2;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
-import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic;
-import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController;
-import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicData;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
 import com.webank.weevent.protocol.rest.entity.QueryEntity;
 import com.webank.weevent.protocol.rest.entity.TbBlock;
@@ -60,6 +59,8 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.PbftView;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TotalTransactionCount;
 import org.fisco.bcos.web3j.protocol.core.methods.response.Transaction;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.web3j.tuples.generated.Tuple1;
+import org.fisco.bcos.web3j.tuples.generated.Tuple3;
 import org.fisco.bcos.web3j.tx.Contract;
 import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -74,14 +75,15 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 @Slf4j
 public class Web3SDK2Wrapper {
+    public static final List<Long> supportedVersion = Arrays.asList(10L);
+    public static final Long nowVersion = 10L;
+
     // topic control address in CRUD
     public final static String WeEventTable = "WeEvent";
     public final static String WeEventTableKey = "key";
     public final static String WeEventTableValue = "value";
+    public final static String WeEventTableVersion = "version";
     public final static String WeEventTopicControlAddress = "topic_control_address";
-
-    // it's a trick. Topic.getLogWeEventEvents is not static
-    private static Topic topic;
 
     // static gas provider
     public static final ContractGasProvider gasProvider = new ContractGasProvider() {
@@ -197,7 +199,7 @@ public class Web3SDK2Wrapper {
         } catch (PrecompileMessageException e) {
             log.info("not exist table in CRUD, create it: {}", WeEventTable);
 
-            Table table = new Table(WeEventTable, WeEventTableKey, WeEventTableValue);
+            Table table = new Table(WeEventTable, WeEventTableKey, WeEventTableValue + "," + WeEventTableVersion);
             try {
                 int result = crud.createTable(table);
                 if (result == 0) {
@@ -218,14 +220,14 @@ public class Web3SDK2Wrapper {
     }
 
     /**
-     * get address from CRUD table
+     * list all address from CRUD table
      * https://fisco-bcos-documentation.readthedocs.io/zh_CN/release-2.0/en/docs/sdk/sdk.html?highlight=CRUDService#web3sdk-api
      *
      * @param web3j web3j
      * @param credentials credentials
-     * @return address
+     * @return address list
      */
-    public static String getAddress(Web3j web3j, Credentials credentials) throws BrokerException {
+    public static Map<Long, String> listAddress(Web3j web3j, Credentials credentials) throws BrokerException {
         String groupId = String.valueOf(((JsonRpc2_0Web3j) web3j).getGroupId());
         log.info("get topic control address from CRUD, groupId: {}", groupId);
 
@@ -235,32 +237,37 @@ public class Web3SDK2Wrapper {
             throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
         }
 
+        Map<Long, String> addresses = new HashMap<>();
         try {
             table.setKey(WeEventTopicControlAddress);
             Condition condition = table.getCondition();
             List<Map<String, String>> records = crud.select(table, condition);
-            if (records.isEmpty()) {
-                log.info("no record in CRUD table, {}", WeEventTable);
-                return "";
+            log.info("topic control address in CRUD, groupId: {}, {}", groupId, records);
+
+            for (Map<String, String> record : records) {
+                if (!record.containsKey(WeEventTableValue)
+                        && record.containsKey(WeEventTableVersion)) {
+                    addresses.put(Long.valueOf(record.get(WeEventTableVersion)), record.get(WeEventTableValue));
+                } else {
+                    log.error("unknown fields");
+                }
             }
-            if (records.size() != 1) {
-                log.warn("more then one record in CRUD table, {}", WeEventTable);
-            }
-            return records.get(0).get(WeEventTableValue);
+
+            return addresses;
         } catch (Exception e) {
             log.error("select from CRUD table failed", e);
-            return "";
+            return addresses;
         }
     }
 
-    public static boolean addAddress(Web3j web3j, Credentials credentials, String address) throws BrokerException {
+    public static boolean addAddress(Web3j web3j, Credentials credentials, Long version, String address) throws BrokerException {
         String groupId = String.valueOf(((JsonRpc2_0Web3j) web3j).getGroupId());
         log.info("add topic control address into CRUD, groupId: {}", groupId);
 
         // check exist manually to avoid duplicate record
-        String original = getAddress(web3j, credentials);
-        if (!StringUtils.isBlank(original)) {
-            log.info("topic control address already exist, {}", original);
+        Map<Long, String> topicControlAddresses = listAddress(web3j, credentials);
+        if (topicControlAddresses.containsKey(version)) {
+            log.info("already exist in CRUD, {} {}", version, address);
             return false;
         }
 
@@ -274,6 +281,7 @@ public class Web3SDK2Wrapper {
             table.setKey(WeEventTopicControlAddress);
             org.fisco.bcos.web3j.precompile.crud.Entry record = table.getEntry();
             record.put(WeEventTableValue, address);
+            record.put(WeEventTableVersion, String.valueOf(version));
             // notice: record's key can be duplicate in CRUD
             int result = crud.insert(table, record);
             if (result == 1) {
@@ -349,7 +357,7 @@ public class Web3SDK2Wrapper {
     }
 
     /**
-     * deploy topic control into web3j
+     * deploy topic control into web3j in Web3SDK2Wrapper.nowVersion
      *
      * @param web3j web3j handler
      * @param credentials credentials
@@ -360,18 +368,18 @@ public class Web3SDK2Wrapper {
         log.info("begin deploy topic control");
 
         try {
-            RemoteCall<TopicData> f1 = TopicData.deploy(web3j, credentials, gasProvider);
-            TopicData topicData = f1.sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-
-            log.info("topic data contract address: {}", topicData.getContractAddress());
-            if (topicData.getContractAddress().equals(WeEventConstants.ADDRESS_EMPTY)) {
-                log.error("contract address is empty after TopicData.deploy(...)");
+            // deploy Topic.sol in highest version(Web3SDK2Wrapper.nowVersion)
+            RemoteCall<com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic> f1 = com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic.deploy(web3j, credentials, gasProvider);
+            com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic topic = f1.sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+            log.info("topic contract address: {}", topic.getContractAddress());
+            if (topic.getContractAddress().equals(WeEventConstants.ADDRESS_EMPTY)) {
+                log.error("contract address is empty after Topic.deploy(...)");
                 throw new BrokerException(ErrorCode.DEPLOY_CONTRACT_ERROR);
             }
 
-            RemoteCall<TopicController> f2 = TopicController.deploy(web3j, credentials, gasProvider, topicData.getContractAddress());
-            TopicController topicController = f2.sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-
+            // deploy TopicController.sol in nowVersion
+            RemoteCall<com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController> f2 = com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController.deploy(web3j, credentials, gasProvider, topic.getContractAddress());
+            com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController topicController = f2.sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
             log.info("topic control contract address: {}", topicController.getContractAddress());
             if (topicController.getContractAddress().equals(WeEventConstants.ADDRESS_EMPTY)) {
                 log.error("contract address is empty after TopicController.deploy(...)");
@@ -384,14 +392,6 @@ public class Web3SDK2Wrapper {
             log.error("deploy contract failed", e);
             throw new BrokerException("deploy contract failed");
         }
-    }
-
-    public static List<Topic.LogWeEventEventResponse> receipt2LogWeEventEventResponse(Web3j web3j, Credentials credentials, TransactionReceipt receipt) throws BrokerException {
-        if (topic == null) {
-            topic = Topic.load("0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", web3j, credentials, gasProvider);
-        }
-
-        return topic.getLogWeEventEvents(receipt);
     }
 
     /**
@@ -416,13 +416,32 @@ public class Web3SDK2Wrapper {
         }
     }
 
+    private static WeEvent decodeWeEventV10(TransactionReceipt receipt) {
+        // v10 is com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic
+        com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic topic = (com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic)
+                FiscoBcos2.getHistoryTopicContract().get(receipt.getContractAddress());
+
+        Tuple3<String, String, String> input = topic.getPublishWeEventInput(receipt);
+        Tuple1<BigInteger> output = topic.getPublishWeEventOutput(receipt);
+
+        String topicName = input.getValue1();
+        WeEvent event = new WeEvent(topicName,
+                input.getValue2().getBytes(StandardCharsets.UTF_8),
+                DataTypeUtils.json2Map(input.getValue3()));
+        event.setEventId(DataTypeUtils.encodeEventId(topicName,
+                receipt.getBlockNumber().intValue(),
+                output.getValue1().intValue()));
+
+        return event;
+    }
+
     /**
      * Fetch all event in target block.
      *
      * @param blockNum the blockNum
      * @return null if net error
      */
-    public static List<WeEvent> loop(Web3j web3j, Credentials credentials, Long blockNum) throws BrokerException {
+    public static List<WeEvent> loop(Web3j web3j, Long blockNum) throws BrokerException {
         List<WeEvent> events = new ArrayList<>();
         if (blockNum <= 0) {
             return events;
@@ -450,24 +469,32 @@ public class Web3SDK2Wrapper {
                 }
 
                 TransactionReceipt receipt = transactionReceipt.getTransactionReceipt().get();
-                List<Topic.LogWeEventEventResponse> logWeEventEvents = Web3SDK2Wrapper.receipt2LogWeEventEventResponse(web3j, credentials, receipt);
-                for (Topic.LogWeEventEventResponse logEvent : logWeEventEvents) {
-                    WeEvent event = new WeEvent(logEvent.topicName,
-                            logEvent.eventContent.getBytes(StandardCharsets.UTF_8),
-                            DataTypeUtils.json2Map(logEvent.extensions));
-                    event.setEventId(DataTypeUtils.encodeEventId(logEvent.topicName,
-                            logEvent.eventBlockNumer.intValue(),
-                            logEvent.eventSeq.intValue()));
+                if (FiscoBcos2.getHistoryTopicContract().containsKey(receipt.getContractAddress())) {
+                    Long version = FiscoBcos2.getHistoryTopicVersion().get(receipt.getContractAddress());
+                    log.debug("detect event in version: {}", version);
 
-                    log.debug("get a event from block chain: {}", event);
-                    events.add(event);
+                    // support version list
+                    switch (version.intValue()) {
+                        case 10:
+                            WeEvent event = decodeWeEventV10(receipt);
+                            log.debug("get a event from block chain: {}", event);
+                            events.add(event);
+                            break;
+
+                        default:
+                            log.error("unknown WeEvent in version: {}", version);
+                            break;
+                    }
                 }
             }
 
             return events;
-        } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
+        } catch (TimeoutException e) {
+            log.error("loop block failed due to timeout", e);
+            return null;
+        } catch (ExecutionException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
-            log.error("loop block failed due to ExecutionException|TimeoutException|NullPointerException|InterruptedException", e);
+            log.error("loop block failed due to ExecutionException|NullPointerException|InterruptedException", e);
             return null;
         } catch (RuntimeException e) {
             log.error("loop block failed due to RuntimeException", e);

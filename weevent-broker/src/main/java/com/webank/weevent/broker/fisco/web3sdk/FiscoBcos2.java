@@ -2,7 +2,6 @@ package com.webank.weevent.broker.fisco.web3sdk;
 
 
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.webank.weevent.broker.config.FiscoConfig;
-import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
@@ -30,12 +28,13 @@ import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.web3j.tuples.generated.Tuple1;
 import org.fisco.bcos.web3j.tuples.generated.Tuple3;
+import org.fisco.bcos.web3j.tuples.generated.Tuple8;
 import org.fisco.bcos.web3j.tx.Contract;
 
 /**
@@ -55,29 +54,82 @@ public class FiscoBcos2 {
     // real handler
     private Web3j web3j;
 
-    // topic control
+    // topic control contract
     private TopicController topicController;
 
-    // topic list
-    private Map<String, Topic> topicMap = new ConcurrentHashMap<>();
+    // topic contract
+    private Topic topic;
+
+    // topic info list in local memory
+    private Map<String, TopicInfo> topicInfo = new ConcurrentHashMap<>();
+
+    // history topic, (address <-> Contract)
+    private static Map<String, Contract> historyTopicContract = new ConcurrentHashMap<>();
+    // history topic, (address <-> version)
+    private static Map<String, Long> historyTopicVersion = new ConcurrentHashMap<>();
 
     public FiscoBcos2(FiscoConfig fiscoConfig) {
         this.fiscoConfig = fiscoConfig;
     }
 
+    public static Map<String, Contract> getHistoryTopicContract() {
+        return historyTopicContract;
+    }
+
+    public static Map<String, Long> getHistoryTopicVersion() {
+        return historyTopicVersion;
+    }
+
     public void init(Long groupId) throws BrokerException {
+        log.info("WeEvent support solidity version, now: {} support: {}", Web3SDK2Wrapper.nowVersion, Web3SDK2Wrapper.supportedVersion);
+
         if (this.topicController == null) {
             this.credentials = Web3SDK2Wrapper.getCredentials(this.fiscoConfig);
             this.web3j = Web3SDK2Wrapper.initWeb3j(groupId, this.fiscoConfig, FiscoBcosDelegate.threadPool);
 
-            String address = Web3SDK2Wrapper.getAddress(this.web3j, this.credentials);
-            if (StringUtils.isBlank(address)) {
-                log.error("no topic control address in CRUD, deploy it first");
+            Map<Long, String> addresses = Web3SDK2Wrapper.listAddress(this.web3j, this.credentials);
+            if (addresses.isEmpty() || addresses.containsKey(Web3SDK2Wrapper.nowVersion)) {
+                log.error("no topic control[version:{}] address in CRUD, please deploy it first", Web3SDK2Wrapper.nowVersion);
                 throw new BrokerException(ErrorCode.TOPIC_CONTROLLER_IS_NULL);
             }
 
-            log.info("load topic control address from CRUD: {}", address);
-            this.topicController = (TopicController) getContractService(address, TopicController.class);
+            for (Map.Entry<Long, String> controlAddress : addresses.entrySet()) {
+                log.info("detect topic control address from CRUD: {} -> {}", controlAddress.getKey(), controlAddress.getValue());
+
+                // support version list
+                switch (controlAddress.getKey().intValue()) {
+                    case 10:
+                        com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController topicController =
+                                (com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController)
+                                        getContractService(controlAddress.getValue(), com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController.class);
+                        String address = "";
+                        try {
+                            address = topicController.getTopicAddress().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+                        } catch (InterruptedException | ExecutionException e) {
+                            log.error("getTopicAddress failed due to transaction execution error. ", e);
+                            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+                        } catch (TimeoutException e) {
+                            log.error("getTopicAddress failed due to transaction timeout. ", e);
+                            throw new BrokerException(ErrorCode.TRANSACTION_TIMEOUT);
+                        }
+                        com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic topic =
+                                (com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic)
+                                        getContractService(address, com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic.class);
+                        historyTopicContract.put(address, topic);
+                        historyTopicVersion.put(address, controlAddress.getKey());
+
+                        // publish and admin function use the nowVersion
+                        if (controlAddress.getKey().equals(Web3SDK2Wrapper.nowVersion)) {
+                            this.topicController = topicController;
+                            this.topic = topic;
+                        }
+                        break;
+
+                    default:
+                        log.error("unknown version: {}", controlAddress.getKey());
+                        break;
+                }
+            }
         }
     }
 
@@ -102,6 +154,12 @@ public class FiscoBcos2 {
             throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
         }
 
+        if (StringUtils.isBlank(contractAddress)) {
+            String msg = "load contract failed, " + cls.getSimpleName();
+            log.error(msg);
+            throw new BrokerException(ErrorCode.LOAD_CONTRACT_ERROR);
+        }
+
         Contract contract = Web3SDK2Wrapper.loadContract(contractAddress, this.web3j, this.credentials, cls);
         if (contract == null) {
             String msg = "load contract failed, " + cls.getSimpleName();
@@ -112,46 +170,16 @@ public class FiscoBcos2 {
         return contract;
     }
 
-    /**
-     * Topic Handler cache.
-     *
-     * @param topicName the topicName
-     * @return null if not exist
-     * @throws BrokerException BrokerException
-     */
-    private Topic getTopic(String topicName) throws BrokerException {
-        if (this.topicMap.containsKey(topicName)) {
-            return this.topicMap.get(topicName);
-        }
-
-        if (this.topicController == null) {
-            log.error("topicController is null");
-            throw new BrokerException(ErrorCode.TOPIC_CONTROLLER_IS_NULL);
-        }
-
-        try {
-            String topicAddress = this.topicController.getTopicAddress(topicName).sendAsync().get();
-            if (topicAddress == null) {
-                log.error("topic contact address is null, check configuration `fisco.topic-controller.contract-address`");
-                throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
-            }
-
-            //topic is not exist if address is empty
-            if (topicAddress.equals(WeEventConstants.ADDRESS_EMPTY)) {
-                return null;
-            }
-
-            Topic topic = (Topic) getContractService(topicAddress, Topic.class);
-            this.topicMap.put(topicName, topic);
-            return topic;
-        } catch (InterruptedException | ExecutionException e) {
-            log.error("InterruptedException|ExecutionException raise", e);
-            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        }
-    }
-
     public boolean isTopicExist(String topicName) throws BrokerException {
-        return getTopic(topicName) != null;
+        try {
+            getTopicInfo(topicName);
+            return true;
+        } catch (BrokerException e) {
+            if (e.getCode() == ErrorCode.TOPIC_NOT_EXIST.getCode()) {
+                return false;
+            }
+            throw e;
+        }
     }
 
     public boolean createTopic(String topicName) throws BrokerException {
@@ -162,31 +190,25 @@ public class FiscoBcos2 {
                 throw new BrokerException(ErrorCode.TOPIC_ALREADY_EXIST);
             }
 
-            // deploy topic contract
-            Topic topic = Topic.deploy(this.web3j, this.credentials, Web3SDK2Wrapper.gasProvider).sendAsync().get();
-            if (topic.getContractAddress().equals(WeEventConstants.ADDRESS_EMPTY)) {
-                log.error("contract address is empty after Topic.deploy(...)");
-                throw new BrokerException(ErrorCode.DEPLOY_CONTRACT_ERROR);
+            TransactionReceipt transactionReceipt = this.topicController.addTopicInfo(topicName)
+                    .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+            if (!transactionReceipt.isStatusOK()) {
+                log.error("addTopicInfo failed due to transaction execution error");
+                throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
             }
 
-            TransactionReceipt transactionReceipt = topicController
-                    .addTopicInfo(topicName, topic.getContractAddress())
-                    .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-            List<TopicController.LogAddTopicNameAddressEventResponse> event = topicController
-                    .getLogAddTopicNameAddressEvents(transactionReceipt);
-
-            if (CollectionUtils.isNotEmpty(event)
-                    && event.get(0).retCode.intValue() == ErrorCode.TOPIC_ALREADY_EXIST.getCode()) {
+            Boolean result = this.topicController.getAddTopicInfoOutput(transactionReceipt).getValue1();
+            if (!result) {
                 log.info("topic name already exist, {}", topicName);
                 throw new BrokerException(ErrorCode.TOPIC_ALREADY_EXIST);
             }
 
             return true;
         } catch (InterruptedException | ExecutionException e) {
-            log.error("create topic failed due to transaction execution error. ", e);
+            log.error("addTopicInfo failed due to transaction execution error. ", e);
             throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (TimeoutException e) {
-            log.error("create topic failed due to transaction timeout. ", e);
+            log.error("addTopicInfo failed due to transaction timeout. ", e);
             throw new BrokerException(ErrorCode.TRANSACTION_TIMEOUT);
         }
     }
@@ -194,62 +216,60 @@ public class FiscoBcos2 {
     public ListPage listTopicName(Integer pageIndex, Integer pageSize) throws BrokerException {
         try {
             ListPage<String> listPage = new ListPage<>();
-            Tuple3<BigInteger, List<byte[]>, List<byte[]>> result = this.topicController.listTopicName(BigInteger.valueOf(pageIndex),
-                    BigInteger.valueOf(pageSize)).sendAsync().get();
+            Tuple3<BigInteger, BigInteger, List<String>> result = this.topicController.listTopicName(BigInteger.valueOf(pageIndex),
+                    BigInteger.valueOf(pageSize)).sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
             if (result == null) {
                 log.error("TopicController.listTopicName result is empty");
                 throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
             }
             listPage.setPageIndex(pageIndex);
-            listPage.setPageSize(pageSize);
             listPage.setTotal(result.getValue1().intValue());
-            List<byte[]> topicNames1List = result.getValue2();
-            List<byte[]> topicNames2List = result.getValue3();
-            for (int i = 0; i < topicNames1List.size(); i++) {
-                String topicName = new String(topicNames1List.get(i), StandardCharsets.UTF_8) + new String(topicNames2List.get(i), StandardCharsets.UTF_8);
-                if (topicName.isEmpty()) {
-                    log.error("detect topic name is empty, {}", topicName);
-                    continue;
-                }
-                listPage.getPageData().add(topicName.trim());
-            }
+            listPage.setPageSize(result.getValue2().intValue());
+            listPage.setPageData(result.getValue3());
             return listPage;
         } catch (InterruptedException | ExecutionException e) {
-            log.error("list topic name failed due to transaction execution error. ", e);
+            log.error("listTopicName failed due to transaction execution error. ", e);
             throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (TimeoutException e) {
+            log.error("listTopicName failed due to transaction timeout. ", e);
+            throw new BrokerException(ErrorCode.TRANSACTION_TIMEOUT);
         }
     }
 
     public TopicInfo getTopicInfo(String topicName) throws BrokerException {
+        if (this.topicInfo.containsKey(topicName)) {
+            return this.topicInfo.get(topicName);
+        }
+
         try {
-            Tuple3<String, String, BigInteger> topic = this.topicController.getTopicInfo(topicName).sendAsync().get();
+            Tuple8<Boolean, String, BigInteger, BigInteger, BigInteger, BigInteger, BigInteger, String> topic =
+                    this.topicController.getTopicInfo(topicName).sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
             if (topic == null) {
                 log.error("TopicController.getTopicInfo result is empty");
                 throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
             }
 
-            String topicAddress = topic.getValue1();
-            if (WeEventConstants.ADDRESS_EMPTY.equals(topicAddress)) {
-                log.error("TopicController.getTopicInfo address is empty");
+            if (!topic.getValue1()) {
+                log.info("topic not exist, {}", topicName);
                 throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
             }
 
             TopicInfo topicInfo = new TopicInfo();
             topicInfo.setTopicName(topicName);
-            topicInfo.setTopicAddress(topicAddress);
-            topicInfo.setCreatedTimestamp(topic.getValue3().longValue());
             topicInfo.setSenderAddress(topic.getValue2());
+            topicInfo.setCreatedTimestamp(topic.getValue3().longValue());
+            topicInfo.setSequenceNumber(topic.getValue5().longValue());
+            topicInfo.setBlockNumber(topic.getValue6().longValue());
+            topicInfo.setLastPublishTime(topic.getValue7().longValue());
 
-            //get topic.sol contract info
-            Topic topicData = getTopic(topicName);
-            if (topicData != null) {
-                topicInfo.setBlockNumber(topicData.getBlockNumber().sendAsync().get().longValue());
-                topicInfo.setSequenceNumber(topicData.getSequenceNumber().sendAsync().get().longValue());
-            }
+            this.topicInfo.put(topicName, topicInfo);
             return topicInfo;
         } catch (InterruptedException | ExecutionException e) {
-            log.error("get topic info failed due to transaction execution error. ", e);
+            log.error("getTopicInfo failed due to transaction execution error. ", e);
             throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (TimeoutException e) {
+            log.error("getTopicInfo failed due to transaction timeout. ", e);
+            throw new BrokerException(ErrorCode.TRANSACTION_TIMEOUT);
         }
     }
 
@@ -269,30 +289,32 @@ public class FiscoBcos2 {
     }
 
     public SendResult publishEvent(String topicName, String eventContent, String extensions) throws BrokerException {
-        Topic topic = getTopic(topicName);
-        if (topic == null) {
+        if (!isTopicExist(topicName)) {
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
         }
 
         SendResult sendResult = new SendResult();
+        sendResult.setTopic(topicName);
         try {
-            TransactionReceipt transactionReceipt = topic.publishWeEvent(topicName,
+            TransactionReceipt transactionReceipt = this.topic.publishWeEvent(topicName,
                     eventContent, extensions).sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-            List<Topic.LogWeEventEventResponse> event = Web3SDK2Wrapper.receipt2LogWeEventEventResponse(web3j, credentials, transactionReceipt);
-            if (CollectionUtils.isNotEmpty(event)) {
-                sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
-                sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, event.get(0).eventBlockNumer.intValue(), event.get(0).eventSeq.intValue()));
-                sendResult.setTopic(topicName);
-                return sendResult;
-            } else {
+            if (!transactionReceipt.isStatusOK()) {
+                log.error("publishWeEvent failed due to transaction execution error.");
                 sendResult.setStatus(SendResult.SendResultStatus.ERROR);
                 return sendResult;
             }
+
+            Tuple1<BigInteger> result = this.topic.getPublishWeEventOutput(transactionReceipt);
+            sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+            sendResult.setEventId(DataTypeUtils.encodeEventId(topicName,
+                    transactionReceipt.getBlockNumber().intValue(),
+                    result.getValue1().intValue()));
+            return sendResult;
         } catch (InterruptedException | ExecutionException e) {
-            log.error("publish event failed due to transaction execution error.", e);
+            log.error("publishWeEvent failed due to transaction execution error.", e);
             throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (TimeoutException e) {
-            log.error("publish event failed due to transaction execution timeout.", e);
+            log.error("publishWeEvent failed due to transaction execution timeout.", e);
             sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
             return sendResult;
         }
@@ -314,7 +336,7 @@ public class FiscoBcos2 {
      * @return java.lang.Integer null if net error
      */
     public List<WeEvent> loop(Long blockNum) throws BrokerException {
-        return Web3SDK2Wrapper.loop(this.web3j, this.credentials, blockNum);
+        return Web3SDK2Wrapper.loop(this.web3j, blockNum);
     }
 
     public GroupGeneral getGroupGeneral(String groupId) throws BrokerException {

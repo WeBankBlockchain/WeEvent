@@ -40,4 +40,9 @@ public class TopicInfo {
      * block number.
      */
     private Long blockNumber;
+
+    /**
+     * last publish time.
+     */
+    private Long lastPublishTime;
 }
