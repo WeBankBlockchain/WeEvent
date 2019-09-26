@@ -235,16 +235,20 @@ html,body,#app{
   justify-content: space-between;
   .navigation{
     display: flex;
-    .el-breadcrumb{
-      line-height:60px;
-      font-size: 16px;
-      margin-left:86px;
-      .el-breadcrumb__item:first-child{
-        .el-breadcrumb__inner,.el-breadcrumb__separator{
-          color:@gray_title;
-          font-weight: bold;
-        }
+    font-size: 14px;
+    color:@black_text;
+    img{
+      margin-right: 36px;
+    }
+    .el-dropdown{
+      margin-left:14px;
+      i{
+        margin-left:10px; 
       }
+    }
+
+    .server_title{
+      margin-left:36px;
     }
   }
   .right_part{
@@ -253,8 +257,7 @@ html,body,#app{
     .el-button{
       border:0;
       padding:5px;
-      color:#98a7b9;
-      font-weight: bold;
+      color:@black_text;
     }
 
     .back_home{
@@ -262,11 +265,17 @@ html,body,#app{
       margin-right:15px;
       cursor: pointer;
     }
-    .server_title{
-      margin-right:5px;
+    .server_titl{
       font-size: 14px;
-      color:@gray_title
+      color:@black_text;
     }
+    a{
+      font-size: 14px;
+      color:@black_text;
+      text-decoration: none;
+      margin:2px 24px 0 36px;
+    }
+
     .el-dropdown {
       font-size: 14px;
       cursor: pointer;
@@ -291,13 +300,14 @@ html,body,#app{
     background:transparent;
     border-right:0;
     .el-menu-item{
-      color: @gray_text;
+      color: @black_text;
+      font-weight: bold;
       border-left:4px solid transparent;
       font-size: 16px;
       height:60px;
       line-height: 60px;
       i{
-        color: @gray_text;
+        color: @black_text;
       }
       &:hover{
         background:#EAEEFF;  
@@ -307,10 +317,6 @@ html,body,#app{
     .el-menu-item.is-active{
       background:#EAEEFF;
       border-left:4px solid @blue;
-      color: @blue;
-      i{
-        color: @blue;
-      }
     }
   }
 
@@ -322,6 +328,14 @@ html,body,#app{
 .el-main{
   position: relative;
   padding:24px;
+  .el-breadcrumb{
+    line-height:inherit;
+    margin-bottom: 16px;
+    .el-breadcrumb__item:first-child .el-breadcrumb__inner{
+      color:@blue;
+    }
+  }
+
   .home-content{
     height:100%;
     padding:20px;
@@ -446,13 +460,12 @@ html,body,#app{
       left:0;
       z-index: 99;
       background:#fff;
-      .update_btn{
-        float:right;
-        padding:8px 15px;
-        background:@light_blue;
-        border-radius: 3px;
-        &:hover{
-          background:@light_gray;
+
+      .search_part{
+        float: right;
+        display: flex;
+        .el-input{
+          margin-right:10px;
         }
       }
     }
@@ -468,8 +481,8 @@ html,body,#app{
     .el-table{
       background: transparent;
       height:100%;
-      padding-top:60px;
-      
+      padding-top:52px;
+
       &::before{
         height:0;
       }
@@ -496,16 +509,24 @@ html,body,#app{
           background: #ededed;
         }
         .el-table__body{
+          tr:hover{
+            background: #fff;
+          }
           .cell {
             word-break: inherit !important
+          }
+          tbody tr .el-table__expanded-cell{
+            background: @light_gray;
+            &:hover{
+              background: @light_gray;
+            }
           }
         }
 
         tbody tr td .el-form .el-form-item{
-          margin-bottom:5px;
+          margin-bottom:0;
           .el-form-item__label{
             width:140px;
-            font-weight: bold;
           }
           .el-form-item__content{
             color:@gray_text
@@ -527,11 +548,37 @@ html,body,#app{
       }
       .has-gutter tr th{
         background:@light_gray;
-        color:@gray_text;
+        color:@black_text;
         font-size: 14px;
+        font-weight: 100;
       }
     }
   }
+}
+
+.topic .el-table tbody tr td:nth-child(2){
+  color:@blue;
+}
+
+.group  .el-table{
+  padding-top:16px !important;
+  tr td .clee i {
+    color:@blue;
+  }
+}
+
+.block .el-table tr td{
+  &:nth-child(1) {
+    color:@blue
+  }
+  &:last-child span {
+    color:@blue;
+    cursor: pointer;
+  }
+}
+
+.subcription .el-table{
+    padding-top:16px !important;
 }
 
 .searchBox{
@@ -553,11 +600,15 @@ html,body,#app{
 
 .el-submenu__title{
   padding-left:24px !important;
-  color:@gray_text !important;
+  color:@black_text !important;
+  font-weight: bold !important;
+  font-size: 16px;
 }
 
 .el-submenu .el-menu-item{
-  padding-left:60px !important;
+  padding-left:52px !important;
+  color:@black_text !important;
+  font-weight: bold !important;
 }
 
 .setPart{
@@ -671,17 +722,11 @@ html,body,#app{
   }
 }
 
-.highcharts-title{
-  font-size: 14px !important;
-  color:@black_text !important;
-  font-weight: bold !important;
-  font-family: 'syyh'
-}
-
 #version{
   .version_infor{
     height:30px;
     line-height: 30px;
+    font-size: 12px;
     .version_title{
       display: inline-block;
       width:100px;

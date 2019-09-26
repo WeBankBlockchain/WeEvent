@@ -1,13 +1,7 @@
 <template>
-<div class='event-table'>
-  <div class='refresh'>
-    <div class='update_btn' @click='update'>
-      <img src="../assets/image/update.png" alt=""/>
-    </div>
-  </div>
+<div class='event-table subcription'>
   <el-table
     :data="tableData"
-    stripe
     :span-method='spanMethod'
     v-loading='loading'
     element-loading-spinner='el-icon-loading'
@@ -76,7 +70,7 @@ export default {
           let list = []
           for (let key in data) {
             let cont = data[key]
-            // 判断是否是一个空对象
+            // check if it is empty
             let arr = Object.keys(cont)
             if (arr.length) {
               for (let x in cont) {
@@ -142,9 +136,10 @@ export default {
       }, 1000)
     },
     checkDetial (e) {
-      this.$store.commit('set_active', '2')
-      this.$emit('selecChange', '2')
+      this.$store.commit('set_active', '2-1')
+      this.$emit('selecChange', '2-1')
       sessionStorage.setItem('topic', e.topicName)
+      this.$store.commit('set_menu', ['主题管理', '主题列表'])
       this.$router.push('./topicList')
     }
   },

@@ -8,9 +8,9 @@
       <sideBar :contraction='arrow' @selecChange='menuChange'></sideBar>
     </el-aside>
     <el-main>
-      <!-- <div class='select-box' @click='arrow=!arrow'>
-          <i class='arrow-icon' :class='{"arrow-right":!arrow}'></i>
-      </div> -->
+      <el-breadcrumb separator-class="el-icon-arrow-right">
+        <el-breadcrumb-item v-for='(item, index) in menu' :key='index'>{{item}}</el-breadcrumb-item>
+      </el-breadcrumb>
       <router-view></router-view>
     </el-main>
   </el-container>
@@ -35,14 +35,18 @@ export default {
       switch (e) {
         case '1-1':
           this.$store.commit('set_menu', ['区块链信息', '数据概览'])
-          this.$router.push('./overview')
+          this.$router.push('./index')
           break
         case '1-2':
-          this.$store.commit('set_menu', ['区块链信息', '节点管理'])
+          this.$store.commit('set_menu', ['区块链信息', '区块'])
+          this.$router.push('./blockInfor')
+          break
+        case '1-3':
+          this.$store.commit('set_menu', ['区块链信息', '节点列表'])
           this.$router.push('./group')
           break
-        case '2':
-          this.$store.commit('set_menu', ['主题管理'])
+        case '2-1':
+          this.$store.commit('set_menu', ['主题管理', '主题列表'])
           this.$router.push('./topicList')
           break
         case '3':
@@ -68,7 +72,43 @@ export default {
         vm.arrow = true
       }
     }
-    this.$router.push('./index')
+  },
+  created () {
+    let url = this.$route.path
+    switch (url) {
+      case '/':
+        this.$store.commit('set_active', '1-1')
+        this.$store.commit('set_menu', ['区块链信息', '数据概览'])
+        break
+      case '/index':
+        this.$store.commit('set_active', '1-1')
+        this.$store.commit('set_menu', ['区块链信息', '数据概览'])
+        break
+      case '/blockInfor':
+        this.$store.commit('set_active', '1-2')
+        this.$store.commit('set_menu', ['区块链信息', '区块'])
+        break
+      case '/transactionInfor':
+        this.$store.commit('set_active', '1-2')
+        this.$store.commit('set_menu', ['区块链信息', '区块', '交易详情'])
+        break
+      case '/group':
+        this.$store.commit('set_active', '1-3')
+        this.$store.commit('set_menu', ['区块链信息', '节点列表'])
+        break
+      case '/topicList':
+        this.$store.commit('set_active', '2-1')
+        this.$store.commit('set_menu', ['主题管理', '主题列表'])
+        break
+      case '/subcription':
+        this.$store.commit('set_active', '3')
+        break
+    }
+  },
+  computed: {
+    menu () {
+      return this.$store.state.menu
+    }
   }
 }
 </script>
