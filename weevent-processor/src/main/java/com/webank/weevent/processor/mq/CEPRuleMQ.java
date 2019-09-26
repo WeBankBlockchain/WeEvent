@@ -200,8 +200,8 @@ public class CEPRuleMQ {
 
             case "BETWEEN":
                 log.info("BETWEEN:{}", operationStr);
-                log.info("check:start: {},end{}", ((Between) plainSelect.getWhere()).getBetweenExpressionStart().toString(), ((Between) plainSelect.getWhere()).getBetweenExpressionEnd().toString());
-
+                log.info("check:start: {},end: {}", ((Between) plainSelect.getWhere()).getBetweenExpressionStart().toString(), ((Between) plainSelect.getWhere()).getBetweenExpressionEnd().toString());
+                flag = Util.compareNumber(plainSelect, contentKeys, eventContent, "BETWEEN");
                 break;
 
             case "LIKE":

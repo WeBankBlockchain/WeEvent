@@ -1,4 +1,4 @@
-package com.webank.weevent.processor.mq;
+package com.webank.weevent.sample;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -25,11 +25,12 @@ import org.json.JSONObject;
 public class ParsingSQL {
     // paring the condition and hit the message
     public static void main(String[] args) throws Exception {
-        String eventContent = "{temperate:35}";
-        String condition = "temperate=35";
+        String eventContent = "{alexa:10}";
+        String condition = "alexa=10";
         boolean flag = false;
         List<String> contentKeys = Util.getKeys(eventContent);
-        String trigger = "SELECT * FROM table WHERE temperate=35";
+//        String trigger = "SELECT * FROM table WHERE temperate=35";
+        String trigger = "SELECT * FROM Websites WHERE alexa BETWEEN 1 AND 20;";
         CCJSqlParserManager parserManager = new CCJSqlParserManager();
         String operationStr = "OTHER";
         PlainSelect plainSelect = null;
@@ -109,8 +110,21 @@ public class ParsingSQL {
 
             case "BETWEEN":
                 log.info("BETWEEN:{}", operationStr);
-                log.info("check:start: {},end{}", ((Between) plainSelect.getWhere()).getBetweenExpressionStart().toString(), ((Between) plainSelect.getWhere()).getBetweenExpressionEnd().toString());
-
+                log.info("check:start: {},end: {},other:{}", ((Between) plainSelect.getWhere()).getBetweenExpressionStart().toString(), ((Between) plainSelect.getWhere()).getBetweenExpressionEnd().toString(),((Between) plainSelect.getWhere()).getLeftExpression().toString());
+                log.info("check:start: {},end: {}", ((Between) plainSelect.getWhere()).getBetweenExpressionStart().toString(), ((Between) plainSelect.getWhere()).getBetweenExpressionEnd().toString());
+                int leftValue = Integer.valueOf(((Between) plainSelect.getWhere()).getBetweenExpressionStart().toString());
+                int rightValue = Integer.valueOf(((Between) plainSelect.getWhere()).getBetweenExpressionEnd().toString());
+                leftKey = ((Between) plainSelect.getWhere()).getLeftExpression().toString();
+                if ("alexa".equals(leftKey)) {
+                    // compare the value
+                    JSONObject jObj = new JSONObject(eventContent);
+                    String extract = Util.recurseKeys(jObj, "alexa");
+                    if (Integer.valueOf(extract) > leftValue && Integer.valueOf(extract) < rightValue) {
+                        log.info("hit it....");
+                        //flag = true;
+                        break;
+                    }
+                }
                 break;
 
             case "LIKE":
@@ -133,4 +147,3 @@ public class ParsingSQL {
     }
 }
 
-// 1. 根据不同，进行匹配出where,然后获取其中的值

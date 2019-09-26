@@ -20,9 +20,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * @since 2019/02/14
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = BrokerApplication.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class JUnitTestBase {
-    protected String groupId = WeEvent.DEFAULT_GROUP_ID;
+    protected String groupId = "1";
     protected String topicName = "com.weevent.test";
 
     @Value("${server.port}")

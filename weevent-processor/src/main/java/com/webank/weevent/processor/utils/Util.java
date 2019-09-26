@@ -11,6 +11,7 @@ import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jsqlparser.expression.operators.relational.Between;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
@@ -194,6 +195,25 @@ public class Util {
                         }
                     }
 
+                    break;
+                case "BETWEEN":
+                    if (operation.equals("BETWEEN")) {
+                        log.info("check:start: {},end: {}", ((Between) plainSelect.getWhere()).getBetweenExpressionStart().toString(), ((Between) plainSelect.getWhere()).getBetweenExpressionEnd().toString());
+                        int leftValue = Integer.valueOf(((Between) plainSelect.getWhere()).getBetweenExpressionStart().toString());
+                        int rightValue = Integer.valueOf(((Between) plainSelect.getWhere()).getBetweenExpressionEnd().toString());
+                        leftKey = ((Between) plainSelect.getWhere()).getLeftExpression().toString();
+                        if (contentKeys.get(i).equals(leftKey)) {
+                            // compare the value
+                            JSONObject jObj = new JSONObject(eventContent);
+                            String extract = Util.recurseKeys(jObj, contentKeys.get(i));
+                            log.info("extract:{},operation:{},leftKey:{}", extract, operation, leftKey);
+                            if (Integer.valueOf(extract) > leftValue && Integer.valueOf(extract) < rightValue) {
+                                log.info("hit it....");
+                                flag = true;
+                                break;
+                            }
+                        }
+                    }
                     break;
                 default:
                     log.error("default ");
