@@ -17,6 +17,7 @@ public class ConstantProperties {
     public static final String COOKIE_JSESSIONID = "JSESSIONID"; // cookie key---session
     public static final String COOKIE_MGR_ACCOUNT = "GOVERNANCE_MGR_ACCOUNT_C"; // cookie key---account
     public static final String COOKIE_MGR_ACCOUNT_ID = "GOVERNANCE_MGR_ACCOUNT_ID";
+    public static final String COOKIE_GROUP_ID = "GOVERNANCE_GROUP_ID";
     public static final String SESSION_MGR_ACCOUNT = "GOVERNANCE_MGR_ACCOUNT_S"; // session key---account
 
     private Integer maxRequestFail = 3;

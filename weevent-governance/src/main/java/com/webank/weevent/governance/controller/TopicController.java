@@ -13,6 +13,7 @@ import com.webank.weevent.governance.service.TopicService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,12 +38,11 @@ public class TopicController {
     }
 
     @RequestMapping(value = "/list")
-    public TopicPage getTopics(@RequestBody TopicPageEntity topicPageEntity, HttpServletRequest request,
+    public TopicPage getTopics(@Validated @RequestBody TopicPageEntity topicPageEntity, HttpServletRequest request,
                                HttpServletResponse response) throws GovernanceException {
 
-        log.info("pageIndex: " + topicPageEntity.getPageIndex() + " pageSize: " + topicPageEntity.getPageSize());
-        return topicService.getTopics(topicPageEntity.getBrokerId(), topicPageEntity.getPageIndex(),
-                topicPageEntity.getPageSize(), request, response);
+        log.info("topicPageEntity:{}",topicPageEntity);
+        return topicService.getTopics(topicPageEntity, request, response);
     }
 
     @RequestMapping(value = "/openTopic")

@@ -17,6 +17,8 @@ import com.webank.weevent.governance.utils.CookiesTools;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +45,9 @@ public class RuleEngineService {
     @Autowired
     private PermissionService permissionService;
 
-    private final String REGEX = "^[a-z0-9A-Z_-]{1,100}";
+    private final String regex = "^[a-z0-9A-Z_-]{1,100}";
+
+
 
 
     public List<RuleEngineEntity> getRuleEngines(HttpServletRequest request, RuleEngineEntity ruleEngineEntity) throws GovernanceException {
@@ -69,13 +73,13 @@ public class RuleEngineService {
     @Transactional(rollbackFor = Throwable.class)
     public boolean addRuleEngine(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
-        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-        if (accountId == null || !accountId.equals(ruleEngineEntity.getUserId().toString())) {
-            throw new GovernanceException(ErrorCode.ACCESS_DENIED);
-        }
         try {
+            String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
+            if (accountId == null || !accountId.equals(ruleEngineEntity.getUserId().toString())) {
+                throw new GovernanceException(ErrorCode.ACCESS_DENIED);
+            }
             //Verify ruleName English letters, numbers, underscores, hyphens,length
-            boolean flag = this.checkRuleName(ruleEngineEntity.getRuleName(), this.REGEX);
+            boolean flag = this.checkRuleName(ruleEngineEntity.getRuleName(), this.regex);
             if (!flag) {
                 throw new GovernanceException("illegal ruleName format");
             }
@@ -101,23 +105,84 @@ public class RuleEngineService {
     @Transactional(rollbackFor = Throwable.class)
     public boolean updateRuleEngine(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
-        authCheck(ruleEngineEntity, request);
-        RuleEngineEntity rule = new RuleEngineEntity();
-        rule.setId(ruleEngineEntity.getId());
-        String payload = JSONObject.toJSON(ruleEngineEntity.getPayloadMap()).toString();
-        ruleEngineEntity.setPayload(payload);
-        List<RuleEngineEntity> ruleEngines = ruleEngineMapper.getRuleEngines(rule);
-        if (CollectionUtils.isEmpty(ruleEngines)) {
-            throw new GovernanceException("the data no longer exists");
+        try {
+            authCheck(ruleEngineEntity, request);
+            RuleEngineEntity rule = new RuleEngineEntity();
+            rule.setId(ruleEngineEntity.getId());
+            String payload = JSONObject.toJSON(ruleEngineEntity.getPayloadMap()).toString();
+            ruleEngineEntity.setPayload(payload);
+            List<RuleEngineEntity> ruleEngines = ruleEngineMapper.getRuleEngines(rule);
+            if (CollectionUtils.isEmpty(ruleEngines)) {
+                throw new GovernanceException("the data no longer exists");
+            }
+            //check databaseUrl
+            commonService.checkDataBaseUrl(ruleEngineEntity.getDatabaseUrl());
+            return ruleEngineMapper.updateRuleEngine(ruleEngineEntity);
+        } catch (Exception e) {
+            log.error("update ruleEngine fail", e);
+            throw new GovernanceException("update ruleEngine fail", e);
         }
-        return ruleEngineMapper.updateRuleEngine(ruleEngineEntity);
+
     }
+
+
 
     @Transactional(rollbackFor = Throwable.class)
     public boolean updateRuleEngineStatus(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         authCheck(ruleEngineEntity, request);
         return ruleEngineMapper.updateRuleEngineStatus(ruleEngineEntity);
+    }
+
+    @Transactional(rollbackFor = Throwable.class)
+    public boolean startRuleEngine(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response)
+            throws GovernanceException {
+        RuleEngineEntity rule = new RuleEngineEntity();
+        try {
+            //query by id
+            rule.setId(ruleEngineEntity.getId());
+            rule.setStatus(StatusEnum.NOT_STARTED.getCode());
+            List<RuleEngineEntity> ruleEngines = ruleEngineMapper.getRuleEngines(rule);
+            if (CollectionUtils.isEmpty(ruleEngines)) {
+                throw new GovernanceException("the data is not exists");
+            }
+
+            rule = ruleEngines.get(0);
+            String url = new StringBuffer(rule.getBrokerUrl()).append("/processor/getCEPRuleById?").append("id=").append(rule.getId()).toString();
+            CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url);
+            int statusCode = closeResponse.getStatusLine().getStatusCode();
+            if (ErrorCode.SUCCESS.getCode() != statusCode) {
+                log.error(ErrorCode.BROKER_CONNECT_ERROR.getCodeDesc());
+                throw new GovernanceException(ErrorCode.BROKER_CONNECT_ERROR);
+            }
+
+            String mes = EntityUtils.toString(closeResponse.getEntity());
+            JSONObject jsonObject = JSONObject.parseObject(mes);
+            Integer code = Integer.valueOf(jsonObject.get("code").toString());
+            if (100 != code.intValue()) {
+                log.error("broker start ruleEngine fail");
+                throw new GovernanceException("broker start ruleEngine fail");
+            }
+
+            //modify status
+            RuleEngineEntity engineEntity = new RuleEngineEntity();
+            engineEntity.setId(rule.getId());
+            engineEntity.setStatus(StatusEnum.RUNNING.getCode());
+            return ruleEngineMapper.updateRuleEngineStatus(engineEntity);
+        } catch (Exception e) {
+            log.error("start ruleEngine fail", e);
+            throw new GovernanceException("start ruleEngine fail", e);
+        }
+    }
+
+    public RuleEngineEntity getRuleEngineDetail(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response) {
+        RuleEngineEntity rule = new RuleEngineEntity();
+        rule.setId(ruleEngineEntity.getId());
+        List<RuleEngineEntity> ruleEngines = ruleEngineMapper.getRuleEngines(rule);
+        if (CollectionUtils.isEmpty(ruleEngines)) {
+            return null;
+        }
+        return ruleEngines.get(0);
     }
 
     private boolean checkRuleName(String ruleName, String regex) {
@@ -135,5 +200,6 @@ public class RuleEngineService {
             throw new GovernanceException(ErrorCode.ACCESS_DENIED);
         }
     }
+
 
 }

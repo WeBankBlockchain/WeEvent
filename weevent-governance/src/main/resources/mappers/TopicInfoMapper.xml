@@ -10,16 +10,17 @@
         <result column="topic_name" property="topicName" jdbcType="VARCHAR"/>
         <result column="creater" property="creater" jdbcType="VARCHAR"/>
         <result column="broker_id" property="brokerId" jdbcType="INTEGER"/>
+        <result column="group_id" property="groupId" jdbcType="INTEGER"/>
         <result column="description" property="description" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-       id,create_date, last_update , topic_name, creater, broker_id,description
+       id,create_date, last_update , topic_name, creater, broker_id,group_id,description
     </sql>
 
 
     <select id="getCreator" resultMap="BaseResultMap">
-        select creater,broker_id,topic_name
+        select creater,broker_id,group_id,topic_name
         from t_topic where is_delete=0
         <if test="topicNameList != null and topicNameList.size()>0">
             AND topic_name in
@@ -30,12 +31,15 @@
         <if test="brokerId != null">
             AND broker_id = #{brokerId}
         </if>
+        <if test="groupId != null">
+            AND group_id = #{groupId}
+        </if>
     </select>
 
     <insert id="openBrokeTopic" parameterType="com.webank.weevent.governance.entity.TopicEntity">
         <selectKey keyProperty="count" resultType="int" order="BEFORE">
             select count(*) from t_topic where broker_id=#{topicEntity.brokerId} and topic_name =
-            #{topicEntity.topicName} and is_delete=0
+            #{topicEntity.topicName} and topic_name = #{topicEntity.groupId} and is_delete=0
         </selectKey>
         <if test="count > 0">
             update t_topic
@@ -45,12 +49,14 @@
                 </if>
             </set>
             <where>
-                topic_name = #{topicEntity.topicName} and broker_id=#{topicEntity.brokerId} and is_delete=0
+                topic_name = #{topicEntity.topicName} and broker_id=#{topicEntity.brokerId}
+                and group_id = #{topicEntity.groupId} and is_delete=0
             </where>
         </if>
         <if test="count==0">
-            insert into t_topic(broker_id,topic_name,creater,description) values
-            (#{topicEntity.brokerId},#{topicEntity.topicName},#{topicEntity.creater},#{topicEntity.description})
+            insert into t_topic(broker_id,topic_name,group_id,creater,description) values
+            (#{topicEntity.brokerId},#{topicEntity.topicName},#{topicEntity.groupId},
+            #{topicEntity.creater},#{topicEntity.description})
         </if>
     </insert>
 

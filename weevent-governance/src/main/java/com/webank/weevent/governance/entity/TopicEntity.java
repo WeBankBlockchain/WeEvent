@@ -20,6 +20,8 @@ public class TopicEntity extends BaseEntity {
 
     private Integer brokerId;
 
+    private String groupId;
+
     private String topicName;
 
     private String creater;

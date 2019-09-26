@@ -3,7 +3,6 @@ package com.webank.weevent.governance.mapper;
 import java.util.List;
 
 import com.webank.weevent.governance.entity.RuleEngineEntity;
-import com.webank.weevent.governance.exception.GovernanceException;
 
 import org.apache.ibatis.annotations.Mapper;
 
@@ -14,10 +13,10 @@ public interface RuleEngineMapper {
     List<RuleEngineEntity> getRuleEngines(RuleEngineEntity ruleEngineEntity);
 
     // add RuleEngineEntity
-    Boolean addRuleEngine(RuleEngineEntity ruleEngineEntity) throws GovernanceException;
+    Boolean addRuleEngine(RuleEngineEntity ruleEngineEntity);
 
     // delete RuleEngineEntity
-    Boolean deleteRuleEngine(RuleEngineEntity ruleEngineEntity) throws GovernanceException;
+    Boolean deleteRuleEngine(RuleEngineEntity ruleEngineEntity);
 
     // update RuleEngineEntity
     Boolean updateRuleEngine(RuleEngineEntity ruleEngineEntity);

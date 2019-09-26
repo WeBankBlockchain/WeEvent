@@ -33,7 +33,7 @@ public class RuleEngineController {
     // get all ruleEngine service
     @PostMapping("/list")
     public GovernanceResult getRuleEngines(HttpServletRequest request, @RequestBody RuleEngineEntity ruleEngineEntity) throws GovernanceException {
-        log.info("get all ruleEngine:{}",ruleEngineEntity);
+        log.info("get all ruleEngine:{}", ruleEngineEntity);
         List<RuleEngineEntity> ruleEngines = ruleEngineService.getRuleEngines(request, ruleEngineEntity);
         return new GovernanceResult(ruleEngines);
     }
@@ -41,33 +41,48 @@ public class RuleEngineController {
     // add RuleEngineEntity
     @PostMapping("/add")
     public GovernanceResult addRuleEngine(@Valid @RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request,
-                                      HttpServletResponse response) throws GovernanceException {
-        log.info("add  ruleEngineEntity service into db :{}",ruleEngineEntity);
+                                          HttpServletResponse response) throws GovernanceException {
+        log.info("add  ruleEngineEntity service into db :{}", ruleEngineEntity);
         boolean flag = ruleEngineService.addRuleEngine(ruleEngineEntity, request, response);
         return new GovernanceResult(flag);
     }
 
     @PostMapping("/update")
     public GovernanceResult updateRuleEngine(@RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request,
-                                         HttpServletResponse response) throws GovernanceException {
-        log.info("update  ruleEngineEntity service ,ruleEngineEntity:{}",ruleEngineEntity);
+                                             HttpServletResponse response) throws GovernanceException {
+        log.info("update  ruleEngineEntity service ,ruleEngineEntity:{}", ruleEngineEntity);
         boolean flag = ruleEngineService.updateRuleEngine(ruleEngineEntity, request, response);
         return new GovernanceResult(flag);
     }
 
     @PostMapping("/updateStatus")
     public GovernanceResult updateRuleEngineStatus(@RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request,
-                                         HttpServletResponse response) throws GovernanceException {
-        log.info("update  ruleEngineStatus service ,status:{}",ruleEngineEntity.getStatus());
+                                                   HttpServletResponse response) throws GovernanceException {
+        log.info("update  ruleEngineStatus service ,status:{}", ruleEngineEntity.getStatus());
         boolean flag = ruleEngineService.updateRuleEngineStatus(ruleEngineEntity, request, response);
         return new GovernanceResult(flag);
     }
 
     @DeleteMapping("/delete")
     public GovernanceResult deleteBroker(@RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request) throws GovernanceException {
-        log.info("delete  ruleEngineEntity service ,id:{}",ruleEngineEntity.getId());
+        log.info("delete  ruleEngineEntity service ,id:{}", ruleEngineEntity.getId());
         boolean flag = ruleEngineService.deleteRuleEngine(ruleEngineEntity, request);
         return new GovernanceResult(flag);
+    }
 
+    @PostMapping("/start")
+    public GovernanceResult startRuleEngine(@RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request,
+                                            HttpServletResponse response) throws GovernanceException {
+        log.info("update  ruleEngineStatus service ,status:{}", ruleEngineEntity.getStatus());
+        boolean flag = ruleEngineService.startRuleEngine(ruleEngineEntity, request, response);
+        return new GovernanceResult(flag);
+    }
+
+    @PostMapping("/detail")
+    public GovernanceResult getRuleEngineDetail(@RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request,
+                                                HttpServletResponse response) {
+        log.info("get ruleEngineDetail service ,status:{}", ruleEngineEntity.getStatus());
+        RuleEngineEntity ruleEngineDetail = ruleEngineService.getRuleEngineDetail(ruleEngineEntity, request, response);
+        return new GovernanceResult(ruleEngineDetail);
     }
 }

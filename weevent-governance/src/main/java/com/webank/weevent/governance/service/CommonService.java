@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -30,18 +32,24 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.jsoup.helper.StringUtil;
 import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
 public class CommonService implements AutoCloseable {
 
-    private static final String HTTPS = "https";
-    private static final String HTTPS_CLIENT = "httpsClient";
-    private static final String HTTP_CLIENT = "httpClient";
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String METHOD_TYPE = "GET";
-    private static final String FORMAT_TYPE = "json";
+    public static final String HTTPS = "https";
+    public static final String HTTPS_CLIENT = "httpsClient";
+    public static final String HTTP_CLIENT = "httpClient";
+    public static final String CONTENT_TYPE = "Content-Type";
+    public static final String METHOD_TYPE = "GET";
+    public static final String FORMAT_TYPE = "json";
+
+    public static final String QUESTION_MARK = "?";
+    public static final String AND_SYMBOL = "&";
+    public static final String LAYER_SEPARATE = "/";
+    public static final String EQUAL_SIGN = "=";
 
 
     public CloseableHttpResponse getCloseResponse(HttpServletRequest req, String newUrl) throws ServletException {
@@ -144,6 +152,28 @@ public class CommonService implements AutoCloseable {
         res.setHeader(encode.getName(), encode.getValue());
         ServletOutputStream out = res.getOutputStream();
         out.write(mes.getBytes());
+    }
+
+
+    public void checkDataBaseUrl(String dataBaseUrl) throws GovernanceException {
+        if (StringUtil.isBlank(dataBaseUrl)) {
+            return;
+        }
+        String defaultUrl = dataBaseUrl.substring(0, dataBaseUrl.indexOf(this.QUESTION_MARK));
+        String user = dataBaseUrl.substring(dataBaseUrl.indexOf(this.QUESTION_MARK) + 1, dataBaseUrl.indexOf(this.AND_SYMBOL));
+        user = user.split(this.EQUAL_SIGN)[1].replaceAll("\"", "");
+        int first = dataBaseUrl.indexOf(this.AND_SYMBOL);
+        int second = dataBaseUrl.indexOf(this.AND_SYMBOL, first + 1);
+        String password = dataBaseUrl.substring(first, second);
+        password = password.split(this.EQUAL_SIGN)[1].replaceAll("\"", "");
+        try (Connection conn = DriverManager.getConnection(defaultUrl, user, password)) {
+            if (conn != null) {
+                log.info("database connect success,dataBaseUrl:{}", dataBaseUrl);
+            }
+        } catch (Exception e) {
+            log.error("database url is error", e);
+            throw new GovernanceException("database url is error", e);
+        }
     }
 
     @Override

@@ -18,7 +18,7 @@ CREATE TABLE t_broker (
   `is_delete` int(1) NOT NULL DEFAULT  0 COMMENT '0 means not deleted 1 means deleted',
   `user_id` int(11) NOT NULL  COMMENT 'user id',
   `name` varchar(256) NOT NULL COMMENT 'name',
-  `broker_url` varchar(256) DEFAULT NULL COMMENT 'brokerEntity url',
+  `broker_url` varchar(256) DEFAULT NULL COMMENT 'broker url',
   `webase_url` varchar(256) DEFAULT NULL COMMENT 'webase url',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment 't_broker';
@@ -29,11 +29,12 @@ CREATE TABLE  t_topic (
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP comment 'update date',
   `is_delete` int(1) NOT NULL DEFAULT  0 COMMENT '0 means not deleted 1 means deleted',
   `topic_name` varchar(256) NOT NULL COMMENT 'topic name',
-  `creater` varchar(256) DEFAULT NULL COMMENT 'creater',
-  `broker_id` int(11) NOT NULL COMMENT 'brokerEntity id',
+  `creater` varchar(256) DEFAULT NULL COMMENT 'creator',
+  `broker_id` int(11) NOT NULL COMMENT 'broker id',
+  `group_id` varchar(64) DEFAULT NULL COMMENT 'group id',
   `description` varchar(256)  NULL  DEFAULT NULL COMMENT 'description',
    PRIMARY KEY (`id`),
-   UNIQUE KEY `brokerIdTopicName` (`broker_id`,`topic_name`)
+   UNIQUE KEY `brokerIdTopicNameGroupId` (`broker_id`,`topic_name`,`groupId`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment 't_topic';
 
 

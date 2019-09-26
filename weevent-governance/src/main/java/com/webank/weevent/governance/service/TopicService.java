@@ -13,6 +13,7 @@ import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.entity.TopicEntity;
 import com.webank.weevent.governance.entity.TopicPage;
+import com.webank.weevent.governance.entity.TopicPageEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.TopicInfoMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
@@ -60,6 +61,8 @@ public class TopicService {
     public Boolean close(Integer brokerId, String topic, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
+        String groupId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_GROUP_ID);
+        ;
         BrokerEntity brokerEntity = brokerService.getBroker(brokerId);
         if (brokerEntity == null) {
             return false;
@@ -69,7 +72,14 @@ public class TopicService {
             throw new GovernanceException(ErrorCode.ACCESS_DENIED);
         }
         CloseableHttpClient client = commonService.generateHttpClient(brokerEntity.getBrokerUrl());
-        String url = new StringBuffer(brokerEntity.getBrokerUrl()).append("/rest/close?topic=").append(topic).toString();
+        String url;
+        if (groupId == null) {
+            url = new StringBuffer(brokerEntity.getBrokerUrl()).append("/rest/close?topic=").append(topic).toString();
+        } else {
+            url = new StringBuffer(brokerEntity.getBrokerUrl()).append("/rest/close?topic=").append(topic)
+                    .append("&groupId=").append(groupId).toString();
+
+        }
         log.info("url: " + url);
         HttpGet get = commonService.getMethod(url, request);
 
@@ -83,8 +93,12 @@ public class TopicService {
         }
     }
 
-    public TopicPage getTopics(Integer brokerId, Integer pageIndex, Integer pageSize, HttpServletRequest request,
+    public TopicPage getTopics(TopicPageEntity topicPageEntity, HttpServletRequest request,
                                HttpServletResponse response) throws GovernanceException {
+        Integer brokerId = topicPageEntity.getBrokerId();
+        Integer pageIndex = topicPageEntity.getPageIndex();
+        Integer pageSize = topicPageEntity.getPageSize();
+        String groupId = topicPageEntity.getGroupId();
         String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
         BrokerEntity brokerEntity = brokerService.getBroker(brokerId);
         Boolean flag = permissionService.verifyPermissions(brokerId, accountId);
@@ -99,9 +113,17 @@ public class TopicService {
         }
         // get event broker url
         CloseableHttpClient client = commonService.generateHttpClient(brokerEntity.getBrokerUrl());
-        String url = new StringBuffer(brokerEntity.getBrokerUrl()).append("/rest/list")
-                .append("?pageIndex=").append(pageIndex).append("&pageSize=").append(pageSize).toString();
+        String url;
+        if (groupId != null) {
+            url = new StringBuffer(brokerEntity.getBrokerUrl()).append("/rest/list")
+                    .append("?pageIndex=").append(pageIndex).append("&pageSize=").append(pageSize)
+                    .append("groupId=").append(groupId).toString();
+        } else {
+            url = new StringBuffer(brokerEntity.getBrokerUrl()).append("/rest/list")
+                    .append("?pageIndex=").append(pageIndex).append("&pageSize=").append(pageSize).toString();
+        }
         log.info("url: " + url);
+
         HttpGet get = commonService.getMethod(url, request);
         try {
             CloseableHttpResponse closeResponse = client.execute(get);
@@ -117,23 +139,23 @@ public class TopicService {
             topicEntityList.forEach(it -> {
                 topicNameList.add(it.getTopicName());
             });
-            List<TopicEntity> topicEntities = topicInfoMapper.getCreator(brokerId, topicNameList);
+            List<TopicEntity> topicEntities = topicInfoMapper.getCreator(brokerId, groupId, topicNameList);
             if (CollectionUtils.isEmpty(topicEntities)) {
                 return result;
             }
             Map<String, String> creatorMap = new HashMap<>();
             topicEntities.forEach(it -> {
-                creatorMap.put(getKey(brokerId, it.getTopicName()), it.getCreater());
+                creatorMap.put(getKey(brokerId, groupId, it.getTopicName()), it.getCreater());
             });
             // set creator
             topicEntityList.forEach(it -> {
-                it.setCreater(creatorMap.get(getKey(brokerId, it.getTopicName())));
+                it.setCreater(creatorMap.get(getKey(brokerId, groupId, it.getTopicName())));
             });
             result.setTopicInfoList(topicEntityList);
             return result;
         } catch (Exception e) {
             log.error("get topics fail,brokerId :{},error:{}", brokerId, e.getMessage());
-            throw new GovernanceException(ErrorCode.BROKER_CONNECT_ERROR);
+            throw new GovernanceException("get topics fail", e);
         }
     }
 
@@ -166,7 +188,7 @@ public class TopicService {
 
             if (result != null) {
                 // get creator from database
-                List<TopicEntity> creators = this.topicInfoMapper.getCreator(brokerId, new ArrayList<>(Arrays.asList(topic)));
+                List<TopicEntity> creators = this.topicInfoMapper.getCreator(brokerId, groupId, new ArrayList<>(Arrays.asList(topic)));
                 if (CollectionUtils.isNotEmpty(creators)) {
                     result.setCreater(creators.get(0).getCreater());
                 }
@@ -183,6 +205,7 @@ public class TopicService {
     public GovernanceResult open(Integer brokerId, String topic, String creater, HttpServletRequest request,
                                  HttpServletResponse response) throws GovernanceException {
         String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
+        String groupId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_GROUP_ID);
         BrokerEntity brokerEntity = brokerService.getBroker(brokerId);
         if (brokerEntity == null) {
             return null;
@@ -195,10 +218,17 @@ public class TopicService {
         topicEntity.setBrokerId(brokerId);
         topicEntity.setTopicName(topic);
         topicEntity.setCreater(creater);
+        topicEntity.setGroupId(groupId);
         topicInfoMapper.openBrokeTopic(topicEntity);
 
         CloseableHttpClient client = commonService.generateHttpClient(brokerEntity.getBrokerUrl());
-        String url = new StringBuffer(brokerEntity.getBrokerUrl()).append("/rest/open?topic=").append(topic).toString();
+        String url;
+        if (groupId != null) {
+            url = new StringBuffer(brokerEntity.getBrokerUrl()).append("/rest/open?topic=").append(topic)
+                    .append("&groupId=").append(groupId).toString();
+        } else {
+            url = new StringBuffer(brokerEntity.getBrokerUrl()).append("/rest/open?topic=").append(topic).toString();
+        }
         log.info("url: " + url);
         String mes;
         try {
@@ -221,8 +251,8 @@ public class TopicService {
         }
     }
 
-    private String getKey(Integer brokerId, String topicName) {
-        return brokerId + SPLIT + topicName;
+    private String getKey(Integer brokerId, String groupId, String topicName) {
+        return brokerId + SPLIT + topicName + SPLIT + groupId;
     }
 
 }
