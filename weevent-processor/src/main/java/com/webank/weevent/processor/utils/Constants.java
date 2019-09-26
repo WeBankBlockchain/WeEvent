@@ -16,6 +16,16 @@ public class Constants {
     public static RetCode PAYLOAD_ISNOT_JSON = RetCode.mark(270007, "payload is not a json");
     public static RetCode CONDITIONTYPE_ISNOT_VALID = RetCode.mark(270007, "condition type is not valid");
 
+    public static String QUALS_TO="=";
+    public static String NOT_QUALS_TO="<>";
+    public static String MINOR_THAN="<";
+    public static String MINOR_THAN_EQUAL="<=";
+    public static String GREATER_THAN=">";
+    public static String GREATER_THAN_EQUAL=">=";
+    public static String BETWEEN="BETWEEN";
+    public static String LIKE="LIKE";
+    public static String IN="IN";
+
 
     public static final Integer RULE_STATUS_START = 1;
     public static final Integer RULE_STATUS_DELETE = 2;

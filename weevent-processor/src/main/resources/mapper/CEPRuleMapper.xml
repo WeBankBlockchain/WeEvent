@@ -95,7 +95,7 @@
   </sql>
 
     <sql id="Rule_Column_List">
-    id, rule_name, broker_url, payload, select_field,condition_field, condition_type, to_destination, database_url,  status,
+    id, rule_name,from_destination, broker_url, payload, select_field,condition_field, condition_type, to_destination, database_url,  status,
     error_destination, error_code, error_message
   </sql>
 
@@ -137,6 +137,7 @@
     <resultMap id="DynamicRuleResultMap" type="com.webank.weevent.processor.model.CEPRule">
         <id property="id" column="id" javaType="java.lang.String" jdbcType="VARCHAR"/>
         <result property="ruleName" column="rule_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="fromDestination" column="from_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
         <result property="brokerUrl" column="broker_url" javaType="java.lang.String" jdbcType="VARCHAR"/>
         <result property="payload" column="payload" javaType="java.lang.String" jdbcType="VARCHAR"/>
         <result property="selectField" column="select_field" javaType="java.lang.String" jdbcType="VARCHAR"/>

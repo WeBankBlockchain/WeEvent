@@ -1,0 +1,9 @@
+SELECT * FROM tab1 WHERE temperate=35
+
+SELECT * FROM tab1 WHERE temperate<=35
+
+SELECT * FROM tab1 WHERE temperate<35
+
+SELECT * FROM tab1 WHERE temperate>35
+
+SELECT * FROM tab1 WHERE temperate>=35
