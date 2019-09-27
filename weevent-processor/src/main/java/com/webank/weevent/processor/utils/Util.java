@@ -1,5 +1,6 @@
 package com.webank.weevent.processor.utils;
 
+import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -11,14 +12,21 @@ import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
+import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.Between;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.InExpression;
+import net.sf.jsqlparser.expression.operators.relational.ItemsList;
+import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.Select;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -81,10 +89,11 @@ public class Util {
         String leftKey;
         int RightKey;
 
+        // :TODO  关键词转成大写
         for (int i = 0; i < contentKeys.size(); i++) {
             switch (operation) {
                 case "=":
-                    leftKey = (((EqualsTo) plainSelect.getWhere()).getLeftExpression()).toString();
+                    leftKey = (((EqualsTo) plainSelect.getWhere()).getLeftExpression()).toString().toUpperCase();
                     RightKey = Integer.valueOf((((EqualsTo) plainSelect.getWhere()).getRightExpression()).toString());
                     if (contentKeys.get(i).equals(leftKey)) {
                         // compare the value
@@ -101,7 +110,7 @@ public class Util {
                     break;
                 case "!=":
 
-                    leftKey = (((NotEqualsTo) plainSelect.getWhere()).getLeftExpression()).toString();
+                    leftKey = (((NotEqualsTo) plainSelect.getWhere()).getLeftExpression()).toString().toUpperCase();
                     RightKey = Integer.valueOf((((NotEqualsTo) plainSelect.getWhere()).getRightExpression()).toString());
                     if (contentKeys.get(i).equals(leftKey)) {
                         // compare the value
@@ -118,7 +127,7 @@ public class Util {
                     break;
                 case "<>":
 
-                    leftKey = (((NotEqualsTo) plainSelect.getWhere()).getLeftExpression()).toString();
+                    leftKey = (((NotEqualsTo) plainSelect.getWhere()).getLeftExpression()).toString().toUpperCase();
                     RightKey = Integer.valueOf((((NotEqualsTo) plainSelect.getWhere()).getRightExpression()).toString());
                     if (contentKeys.get(i).equals(leftKey)) {
                         // compare the value
@@ -135,7 +144,7 @@ public class Util {
 
                     break;
                 case "<":
-                    leftKey = (((MinorThan) plainSelect.getWhere()).getLeftExpression()).toString();
+                    leftKey = (((MinorThan) plainSelect.getWhere()).getLeftExpression()).toString().toUpperCase();
                     RightKey = Integer.valueOf((((MinorThan) plainSelect.getWhere()).getRightExpression()).toString());
                     if (contentKeys.get(i).equals(leftKey)) {
                         // compare the value
@@ -150,7 +159,7 @@ public class Util {
                     }
                     break;
                 case "<=":
-                    leftKey = (((MinorThanEquals) plainSelect.getWhere()).getLeftExpression()).toString();
+                    leftKey = (((MinorThanEquals) plainSelect.getWhere()).getLeftExpression()).toString().toUpperCase();
                     RightKey = Integer.valueOf((((MinorThanEquals) plainSelect.getWhere()).getRightExpression()).toString());
                     if (contentKeys.get(i).equals(leftKey)) {
                         // compare the value
@@ -166,7 +175,7 @@ public class Util {
 
                     break;
                 case ">":
-                    leftKey = (((GreaterThan) plainSelect.getWhere()).getLeftExpression()).toString();
+                    leftKey = (((GreaterThan) plainSelect.getWhere()).getLeftExpression()).toString().toUpperCase();
                     RightKey = Integer.valueOf((((GreaterThan) plainSelect.getWhere()).getRightExpression()).toString());
                     if (contentKeys.get(i).equals(leftKey)) {
                         // compare the value
@@ -181,7 +190,7 @@ public class Util {
                     }
                     break;
                 case ">=":
-                    leftKey = (((GreaterThanEquals) plainSelect.getWhere()).getLeftExpression()).toString();
+                    leftKey = (((GreaterThanEquals) plainSelect.getWhere()).getLeftExpression()).toString().toUpperCase();
                     RightKey = Integer.valueOf((((GreaterThanEquals) plainSelect.getWhere()).getRightExpression()).toString());
                     if (contentKeys.get(i).equals(leftKey)) {
                         // compare the value
@@ -197,21 +206,64 @@ public class Util {
 
                     break;
                 case "BETWEEN":
-                    if (operation.equals("BETWEEN")) {
-                        log.info("check:start: {},end: {}", ((Between) plainSelect.getWhere()).getBetweenExpressionStart().toString(), ((Between) plainSelect.getWhere()).getBetweenExpressionEnd().toString());
-                        int leftValue = Integer.valueOf(((Between) plainSelect.getWhere()).getBetweenExpressionStart().toString());
-                        int rightValue = Integer.valueOf(((Between) plainSelect.getWhere()).getBetweenExpressionEnd().toString());
-                        leftKey = ((Between) plainSelect.getWhere()).getLeftExpression().toString();
-                        if (contentKeys.get(i).equals(leftKey)) {
-                            // compare the value
-                            JSONObject jObj = new JSONObject(eventContent);
-                            String extract = Util.recurseKeys(jObj, contentKeys.get(i));
-                            log.info("extract:{},operation:{},leftKey:{}", extract, operation, leftKey);
-                            if (Integer.valueOf(extract) > leftValue && Integer.valueOf(extract) < rightValue) {
-                                log.info("hit it....");
-                                flag = true;
-                                break;
-                            }
+                    log.info("check:start: {},end: {}", ((Between) plainSelect.getWhere()).getBetweenExpressionStart().toString(), ((Between) plainSelect.getWhere()).getBetweenExpressionEnd().toString());
+                    int leftValue = Integer.valueOf(((Between) plainSelect.getWhere()).getBetweenExpressionStart().toString());
+                    int rightValue = Integer.valueOf(((Between) plainSelect.getWhere()).getBetweenExpressionEnd().toString());
+                    leftKey = ((Between) plainSelect.getWhere()).getLeftExpression().toString().toUpperCase();
+                    if (contentKeys.get(i).equals(leftKey)) {
+                        // compare the value
+                        JSONObject jObj = new JSONObject(eventContent);
+                        String extract = Util.recurseKeys(jObj, contentKeys.get(i));
+                        log.info("extract:{},operation:{},leftKey:{}", extract, operation, leftKey);
+                        if (Integer.valueOf(extract) > leftValue && Integer.valueOf(extract) < rightValue) {
+                            log.info("hit it....");
+                            flag = true;
+                            break;
+                        }
+                    }
+
+                    break;
+                case "LIKE":
+                    leftKey = (((StringValue) ((LikeExpression) plainSelect.getWhere()).getLeftExpression()).getValue()).toUpperCase();
+                    String rightValueStr = (((StringValue) ((LikeExpression) plainSelect.getWhere()).getRightExpression()).getValue());
+                    if (contentKeys.get(i).equals(leftKey)) {
+                        // compare the value
+                        JSONObject jObj = new JSONObject(eventContent);
+                        String extract = Util.recurseKeys(jObj, contentKeys.get(i));
+                        log.info("extract:{},operation:{},leftKey:{}", extract, operation, leftKey);
+                        if (rightValueStr.contains(extract)) {
+                            log.info("hit it....");
+                            flag = true;
+                            break;
+                        }
+                    }
+                    break;
+
+                case "IN":
+                    final List exprList = new ArrayList();
+                    Expression where = plainSelect.getWhere();
+                    where.accept(new ExpressionVisitorAdapter() {
+
+                        @Override
+                        public void visit(InExpression expr) {
+                            super.visit(expr);
+                            exprList.add(expr.getLeftExpression());
+                            exprList.add(expr.getLeftItemsList());
+                            exprList.add(expr.getRightItemsList());
+                            ItemsList qq = expr.getRightItemsList();
+                        }
+                    });
+                    leftKey = exprList.get(0).toString().toUpperCase();
+                    rightValueStr = exprList.get(2).toString();
+                    if (contentKeys.get(i).equals(leftKey)) {
+                        // compare the value
+                        JSONObject jObj = new JSONObject(eventContent);
+                        String extract = Util.recurseKeys(jObj, contentKeys.get(i));
+                        log.info("extract:{},operation:{},leftKey:{}", extract, operation, leftKey);
+                        if (rightValueStr.contains(extract)) {
+                            log.info("hit it....");
+                            flag = true;
+                            break;
                         }
                     }
                     break;

@@ -207,13 +207,13 @@ public class CEPRuleMQ {
             case "LIKE":
                 log.info("LIKE:{}", operationStr);
                 log.info("check:like: ", ((LikeExpression) plainSelect.getWhere()).toString());
-
+                flag = Util.compareNumber(plainSelect, contentKeys, eventContent, "LIKE");
                 break;
 
             case "IN":
                 log.info("IN:{}", operationStr);
-                log.info("check:like: ", ((InExpression) plainSelect.getWhere()).toString());
-
+                log.info("check:IN: ", ((InExpression) plainSelect.getWhere()).toString());
+                flag = Util.compareNumber(plainSelect, contentKeys, eventContent, "IN");
                 break;
 
             default:

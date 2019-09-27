@@ -1,5 +1,9 @@
 SELECT * FROM tab1 WHERE temperate=35
 
+SELECT * FROM tab1 WHERE temperate<>35
+
+SELECT * FROM tab1 WHERE temperate!=35
+
 SELECT * FROM tab1 WHERE temperate<=35
 
 SELECT * FROM tab1 WHERE temperate<35
@@ -7,3 +11,7 @@ SELECT * FROM tab1 WHERE temperate<35
 SELECT * FROM tab1 WHERE temperate>35
 
 SELECT * FROM tab1 WHERE temperate>=35
+
+SELECT * FROM Websites WHERE alexa BETWEEN 1 AND 20;
+
+SELECT * FROM tab1 WHERE a LIKE 'test'
