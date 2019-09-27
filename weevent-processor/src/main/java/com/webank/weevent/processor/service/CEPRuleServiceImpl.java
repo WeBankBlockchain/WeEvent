@@ -7,9 +7,8 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import com.webank.weevent.processor.cache.CEPRuleCache;
 import com.webank.weevent.processor.mapper.CEPRuleMapper;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.model.CEPRuleExample;
@@ -66,6 +65,12 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         if (ret != Constants.SUCCESS_CODE) {
             return Constants.FAIL;
         }
+
+        try {
+            updateCache(cepRuleMapper.selectByPrimaryKey(id),"setstatus");
+        } catch (BrokerException e) {
+            log.info(e.toString());
+        }
         return Constants.SUCCESS;
     }
 
@@ -96,7 +101,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
 
 
     @Override
-    public RetCode updateByPrimaryKeySelective(CEPRule record) {
+    public RetCode updateByPrimaryKeySelective(CEPRule record){
         // check the field
         RetCode ret = checkField(record);
         if (!ret.getErrorCode().equals(Constants.RULE_STATUS_START)) {
@@ -104,7 +109,14 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         }
         int count = cepRuleMapper.updateFieldById(record);
         if (count > 0) {
-            return Constants.SUCCESS;
+            try {
+                CEPRule rule = cepRuleMapper.selectByPrimaryKey(record.getId());
+                updateCache(rule,"update");
+                return Constants.SUCCESS;
+            }catch (BrokerException e){
+                log.info(e.toString());
+            }
+
         }
         return Constants.FAIL;
     }
@@ -127,10 +139,15 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         if (ret != 1) {
             return "-1";
         }
-
+        try {
+            updateCache(record,"insert");
+        } catch (BrokerException e) {
+            log.info(e.toString());
+        }
         return record.getId();
     }
-    public  static boolean isJSONValid(String test) {
+
+     static boolean isJSONValid(String test) {
         try {
             JSONObject.parseObject(test);
         } catch (JSONException ex) {
@@ -143,10 +160,11 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         return true;
 
     }
+
     /**
      * check  ruleName、payloay、selectField、conditionField、conditionType、fromDestination、toDestination、databaseUrl
      *
-     * @param record
+     * @param record on single record
      * @return
      */
     private RetCode checkField(CEPRule record) {
@@ -199,8 +217,8 @@ public class CEPRuleServiceImpl implements CEPRuleService {
     /**
      * check the database url
      *
-     * @param databaseUrl
-     * @return
+     * @param databaseUrl database url
+     * @return true/false
      * @throws SQLException
      */
     private Boolean checkDatabase(String databaseUrl) throws SQLException {
@@ -220,9 +238,9 @@ public class CEPRuleServiceImpl implements CEPRuleService {
     /**
      * check the topic
      *
-     * @param topicName
-     * @param brokerUrl
-     * @return
+     * @param topicName topic name
+     * @param brokerUrl broker url
+     * @return true false
      */
     private Boolean checkTopic(String topicName, String brokerUrl) {
         try {
@@ -253,25 +271,18 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         return time + info.substring(2, info.length()) + ran;
     }
 
-    /**
-     * check the pattern of url
-     *
-     * @param urls
-     * @return
-     */
-    private static Boolean isHttpUrl(String urls) {
-        boolean isurl = false;
-        String regex = "(((https|http)?://)?([a-z0-9]+[.])|(www.))"
-                + "\\w+[.|\\/]([a-z0-9]{0,})?[[.]([a-z0-9]{0,})]+((/[\\S&&[^,;\u4E00-\u9FA5]]+)+)?([.][a-z0-9]{0,}+|/?)";//设置正则表达式
 
-        Pattern pat = Pattern.compile(regex.trim());
-        Matcher mat = pat.matcher(urls.trim());
-        isurl = mat.matches();
-        if (isurl) {
-            return true;
-        } else {
-            return false;
-        }
+    private void updateCache(CEPRule rule, String handleType) throws BrokerException{
+        // update rule map
+       if(rule.getStatus()!=2){
+           CEPRuleCache.deleteCEPRuleById(rule.getId());
+       }else{
+           if(handleType.equals("insert")){
+               CEPRuleCache.addCEPRule(rule);
+           }if(handleType.equals("update")){
+               CEPRuleCache.updateCEPRule(rule);
+           }
+       }
     }
 
 }

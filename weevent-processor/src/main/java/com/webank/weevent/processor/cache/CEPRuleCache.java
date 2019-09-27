@@ -1,15 +1,18 @@
 package com.webank.weevent.processor.cache;
-import	java.util.concurrent.ConcurrentHashMap;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.processor.mapper.CEPRuleMapper;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.mq.CEPRuleMQ;
+import com.webank.weevent.sdk.BrokerException;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
+
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -27,7 +30,7 @@ public class CEPRuleCache {
     public void init() {
         // get all rule
         List<CEPRule> dynamicRuleList = cEPRuleMapper.getDynamicCEPRuleList();
-        log.info("dynamic rule list {}",dynamicRuleList.size());
+        log.info("dynamic rule list {}", dynamicRuleList.size());
         if (!CollectionUtils.isEmpty(dynamicRuleList)) {
             ruleMap = dynamicRuleList.stream()
                     .collect(Collectors.toMap(CEPRule::getId, dynamicRule -> dynamicRule));
@@ -35,7 +38,7 @@ public class CEPRuleCache {
                 @Override
                 public void run() {
                     Iterator<Map.Entry<String, CEPRule>> iter = ruleMap.entrySet().iterator();
-                    while(iter.hasNext()) {
+                    while (iter.hasNext()) {
                         Map.Entry<String, CEPRule> entry = iter.next();
                         log.info("start subscribe all topic...");
                         CEPRuleMQ.subscribeMsg(entry.getValue(), ruleMap);
@@ -47,15 +50,21 @@ public class CEPRuleCache {
 
     public static void addCEPRule(CEPRule rule) {
         ruleMap.put(rule.getId(), rule);
-        CEPRuleMQ.subscribeMsg(rule, ruleMap); // 订阅消息
+        // add subscription
+        CEPRuleMQ.subscribeMsg(rule, ruleMap);
     }
 
     public static void deleteCEPRuleById(String ruleId) {
-        CEPRuleMQ.unSubscribeMsg(ruleMap.get(ruleId), CEPRuleMQ.subscriptionIdMap.get(ruleId)); // 取消订阅
+        // cancel the subscription
+        CEPRuleMQ.unSubscribeMsg(ruleMap.get(ruleId), CEPRuleMQ.subscriptionIdMap.get(ruleId));
         ruleMap.remove(ruleId);
     }
 
-    public static CEPRule getCEPRule(String ruleId){
+    public static void updateCEPRule(CEPRule rule) throws BrokerException {
+        CEPRuleMQ.updateSubscribeMsg(rule, ruleMap);
+    }
+
+    public static CEPRule getCEPRule(String ruleId) {
         return ruleMap.get(ruleId);
     }
 

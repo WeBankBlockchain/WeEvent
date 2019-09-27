@@ -32,6 +32,17 @@ import org.springframework.util.StringUtils;
 public class CEPRuleMQ {
     public static Map<String, String> subscriptionIdMap = new ConcurrentHashMap<>();
 
+    public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException{
+        // unsubscribe old the topic
+        ruleMap.get(rule.getId()).getToDestination();
+        IWeEventClient client = IWeEventClient.build(rule.getBrokerUrl());
+        client.unSubscribe(subscriptionIdMap.get(rule.getId()));
+        // update the rule map
+        ruleMap.put(rule.getId(),rule);
+        // update subscribe
+        subscribeMsg(rule,ruleMap);
+    }
+
     public static void subscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) {
         try {
             IWeEventClient client = IWeEventClient.build(rule.getBrokerUrl());
@@ -70,6 +81,7 @@ public class CEPRuleMQ {
             log.info("BrokerException{}", e.toString());
         }
     }
+
 
     private static void handleOnEvent(WeEvent event, IWeEventClient client, Map<String, CEPRule> ruleMap) throws JSONException {
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
@@ -125,7 +137,14 @@ public class CEPRuleMQ {
         return tag;
     }
 
-
+    /**
+     * paring where condition ，and get the key and value
+     *
+     * @param eventContent event message
+     * @param condition where condition
+     * @return true false
+     * @throws JSONException
+     */
     private static boolean parsingCondition(String eventContent, String condition) throws JSONException {
         log.info("parsingCondition eventContent {},condition {}", eventContent, condition);
         boolean flag = false;

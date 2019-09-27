@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
@@ -71,6 +73,11 @@ public class Util {
         return keys;
     }
 
+    /**
+     * check valid json string
+     * @param jsonStr json string
+     * @return  true or false
+     */
     public static boolean checkValidJson(String jsonStr) {
         Object object = null;
         try {
@@ -101,7 +108,36 @@ public class Util {
         }
         return false;
     }
+    /**
+     * check the pattern of url
+     *
+     * @param urls
+     * @return true false
+     */
+    private static Boolean isHttpUrl(String urls) {
+        boolean isurl = false;
+        String regex = "(((https|http)?://)?([a-z0-9]+[.])|(www.))"
+                + "\\w+[.|\\/]([a-z0-9]{0,})?[[.]([a-z0-9]{0,})]+((/[\\S&&[^,;\u4E00-\u9FA5]]+)+)?([.][a-z0-9]{0,}+|/?)";//设置正则表达式
 
+        Pattern pat = Pattern.compile(regex.trim());
+        Matcher mat = pat.matcher(urls.trim());
+        isurl = mat.matches();
+        if (isurl) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * compare condition value
+     * @param leftValue Between (left value，right value)
+     * @param rightValue Between (left value，right value)
+     * @param eventContent event message
+     * @param item current item
+     * @return true false
+     * @throws JSONException
+     */
     private static boolean CompareCondition(Integer leftValue,Integer rightValue, String eventContent, String item) throws JSONException {
         JSONObject jObj = new JSONObject(eventContent);
         String extract = Util.recurseKeys(jObj, item);
