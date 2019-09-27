@@ -1,4 +1,4 @@
-package com.webank.weevent.sample;
+package com.webank.weevent.processor.sample;
 
 import java.util.ArrayList;
 import java.util.List;
