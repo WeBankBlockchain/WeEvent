@@ -79,6 +79,7 @@ export default {
       case '/':
         this.$store.commit('set_active', '1-1')
         this.$store.commit('set_menu', ['区块链信息', '数据概览'])
+        this.$router.push('./index')
         break
       case '/index':
         this.$store.commit('set_active', '1-1')

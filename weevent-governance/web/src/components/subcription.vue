@@ -104,7 +104,7 @@ export default {
         window.clearInterval(vm.getData)
       })
     },
-    spanMethod ({row, cloumn, rowIndex, columnIndex}) {
+    spanMethod ({ row, cloumn, rowIndex, columnIndex }) {
       let table = this.tableData
       if (columnIndex === 0) {
         // 先判断是第一行否存在并行 (根据row.childs个数确定该IP下有多少个topic)

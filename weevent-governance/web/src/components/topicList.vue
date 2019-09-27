@@ -101,7 +101,7 @@ export default {
       rules: {
         name: [
           { required: true, message: '名称不能为空', trigger: 'blur' },
-          {min: 1, max: 64, message: '名称长度不能超过 64 个字符', trigger: 'blur'}
+          { min: 1, max: 64, message: '名称长度不能超过 64 个字符', trigger: 'blur' }
         ]
       },
       creater: ''

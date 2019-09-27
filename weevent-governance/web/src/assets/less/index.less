@@ -1,17 +1,17 @@
 @import './animation';
 @import './webase';
 @import './color';
-@font-face {
-  font-family: 'syyh';
-  src: url('../font/syyh-normal.ttf')
-}
+// @font-face {
+//   font-family: 'syyh';
+//   src: url('../font/syyh-normal.ttf')
+// }
 html,body,div,p,ul,li,textarea{
   margin:0;
   padding:0;
   box-sizing:border-box;
   -moz-box-sizing:border-box;
   -webkit-box-sizing:border-box; 
-  font-family: 'syyh'
+  font-family: 'arial'
 }
 li{
   list-style: none;
@@ -301,7 +301,6 @@ html,body,#app{
     border-right:0;
     .el-menu-item{
       color: @black_text;
-      font-weight: bold;
       border-left:4px solid transparent;
       font-size: 16px;
       height:60px;
@@ -360,7 +359,7 @@ html,body,#app{
     }
     .top_cont{
       padding:0 20px;
-      font-family: 'syyh';
+      font-family: 'arial';
       font-size:40px;
       color:@blue;
       z-index: 2;
@@ -380,7 +379,7 @@ html,body,#app{
         line-height: 28px;
         color:@gray_text;
         .pre{
-          font-family: 'syyh'; 
+          font-family: 'arial'; 
           margin-top:0;
           margin-bottom:40px;
         }
@@ -601,14 +600,12 @@ html,body,#app{
 .el-submenu__title{
   padding-left:24px !important;
   color:@black_text !important;
-  font-weight: bold !important;
-  font-size: 16px;
+  font-size: 16px !important;
 }
 
 .el-submenu .el-menu-item{
   padding-left:52px !important;
   color:@black_text !important;
-  font-weight: bold !important;
 }
 
 .setPart{

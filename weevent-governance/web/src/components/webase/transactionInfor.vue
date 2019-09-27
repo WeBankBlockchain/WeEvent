@@ -122,7 +122,7 @@ export default {
         if (res.status === 200) {
           let tableData = res.data.data
           tableData.forEach(e => {
-            this.$set(e, 'logs', {'address': '', 'topics': [], 'hasEvent': false})
+            this.$set(e, 'logs', { 'address': '', 'topics': [], 'hasEvent': false })
           })
           this.tableData = tableData
           this.total = res.data.totalCount
