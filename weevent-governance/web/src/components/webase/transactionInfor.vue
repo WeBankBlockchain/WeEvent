@@ -1,12 +1,5 @@
 <template>
-  <div class="group  event-table">
-    <div class='control_part refresh'>
-      <el-input placeholder="请输入交易哈希或块高" v-model.trim='search_name'>
-        <template slot='append'>
-          <el-button type='primary' icon='el-icon-search' @click='search'></el-button>
-        </template>
-      </el-input>
-    </div>
+  <div class="group event-table">
     <el-table
       :data='tableData'
       stripe
@@ -122,16 +115,14 @@ export default {
     transList () {
       this.loading = true
       let url = '/' + localStorage.getItem('groupId') + '/' + this.pageIndex + '/' + this.pageSize + '?brokerId=' + localStorage.getItem('brokerId')
-      if (this.search_name.length < 10 && this.search_name.length > 0) {
-        url = url + '&blockNumber=' + this.search_name
-      } else if (this.search_name.length >= 10) {
-        url = url + '&transactionHash=' + this.search_name
+      if (sessionStorage.getItem('blockHash')) {
+        url = url + '&transactionHash=' + sessionStorage.getItem('blockHash')
       }
       API.transList(url).then(res => {
         if (res.status === 200) {
           let tableData = res.data.data
           tableData.forEach(e => {
-            this.$set(e, 'logs', {'address': '', 'topics': [], 'hasEvent': false})
+            this.$set(e, 'logs', { 'address': '', 'topics': [], 'hasEvent': false })
           })
           this.tableData = tableData
           this.total = res.data.totalCount
@@ -158,11 +149,6 @@ export default {
           this.tableData[i].logs.hasEvent = true
         }
       })
-    },
-    search () {
-      this.pageIndex = 1
-      this.total = 0
-      this.transList()
     }
   },
   mounted () {
@@ -171,6 +157,9 @@ export default {
   computed: {
     brokerId () {
       return this.$store.state.brokerId
+    },
+    groupId () {
+      return this.$store.state.groupId
     }
   },
   watch: {
@@ -179,7 +168,16 @@ export default {
       setTimeout(fun => {
         this.transList()
       }, 1000)
+    },
+    groupId () {
+      this.loading = true
+      setTimeout(fun => {
+        this.transList()
+      }, 1000)
     }
+  },
+  destroyed () {
+    sessionStorage.removeItem('blockHash')
   }
 }
 </script>

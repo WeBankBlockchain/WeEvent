@@ -111,7 +111,7 @@ export default {
       })
     },
     registered () {
-      this.$router.push({path: './registered', query: { reset: 1 }})
+      this.$router.push({ path: './registered', query: { reset: 1 } })
     },
     getPassWord () {
       let url = '?username=' + this.userName
