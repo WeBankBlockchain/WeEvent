@@ -116,18 +116,19 @@ public class CEPRuleServiceImpl implements CEPRuleService {
 
 
     @Override
-    public RetCode insert(CEPRule record) {
+    public String insert(CEPRule record) {
         // check all the field
         if (!checkField(record).getErrorMsg().equals("success")) {
-            return checkField(record);
+            return "-1";
         }
         record.setId(getGuid());
         record.setStatus(0); //default the status
         int ret = cepRuleMapper.insert(record);
         if (ret != 1) {
-            return Constants.INSERT_RECORD_FAIL;
+            return "-1";
         }
-        return Constants.SUCCESS;
+
+        return record.getId();
     }
     public  static boolean isJSONValid(String test) {
         try {

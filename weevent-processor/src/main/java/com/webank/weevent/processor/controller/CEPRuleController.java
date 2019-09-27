@@ -29,17 +29,6 @@ public class CEPRuleController extends BaseController {
 
     @Autowired
     private CEPRuleServiceImpl cepRuleService;
-//    @Autowired
-//    private CEPRuleCache initRule;
-//
-//    @RequestMapping("/refresh")
-//    public BaseRspEntity refresh() {
-//        BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
-//        List<CEPRule> cepRule = initRule.init();
-//        resEntity.setData(cepRule);
-//        log.info("cepRule:{}", JSONArray.toJSON(cepRule));
-//        return resEntity;
-//    }
 
     @RequestMapping("/getCEPRuleById")
     @ResponseBody
@@ -105,9 +94,13 @@ public class CEPRuleController extends BaseController {
     @ResponseBody
     public BaseRspEntity insert(@Valid @RequestBody CEPRule rule) {
         BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
-        RetCode ret = cepRuleService.insert(rule);
-        resEntity.setErrorCode(ret.getErrorCode());
-        resEntity.setErrorMsg(ret.getErrorMsg());
+        String ret = cepRuleService.insert(rule);
+        if(ret.equals("-1")){
+            resEntity.setErrorCode(Constants.FAIL.getErrorCode());
+            resEntity.setErrorMsg(Constants.FAIL.getErrorMsg());
+        }else{
+            resEntity.setData(ret);
+        }
 
         return resEntity;
     }

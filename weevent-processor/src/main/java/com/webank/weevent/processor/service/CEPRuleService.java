@@ -13,7 +13,7 @@ public interface CEPRuleService {
 
     List<CEPRule> selectByRuleName(String ruleName);
 
-    RetCode insert(CEPRule record);
+    String insert(CEPRule record);
 
     List<CEPRule> getCEPRuleList(String ruleName);
 
