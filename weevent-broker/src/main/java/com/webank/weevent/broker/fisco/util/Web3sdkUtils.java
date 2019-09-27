@@ -11,6 +11,7 @@ import java.util.Map;
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.web3sdk.v1.Web3SDKWrapper;
+import com.webank.weevent.broker.fisco.web3sdk.v2.SupportedVersion;
 import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDK2Wrapper;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.WeEvent;
@@ -138,7 +139,7 @@ public class Web3sdkUtils {
         for (Map.Entry<Long, String> topicControlAddress : original.entrySet()) {
             groupAddress.add(new EchoAddress(topicControlAddress.getKey(), topicControlAddress.getValue(), false));
 
-            if (!Web3SDK2Wrapper.supportedVersion.contains(topicControlAddress.getKey())) {
+            if (!SupportedVersion.history.contains(topicControlAddress.getKey())) {
                 log.error("unknown support version in group: {} CRUD: {}", groupId, topicControlAddress.getKey());
                 return false;
             }
@@ -147,11 +148,11 @@ public class Web3sdkUtils {
                 highestVersion = topicControlAddress.getKey();
             }
 
-            if (Web3SDK2Wrapper.nowVersion.equals(topicControlAddress.getKey())) {
+            if (SupportedVersion.history.equals(topicControlAddress.getKey())) {
                 exist = true;
                 log.info("find topic control address in now version, group: {} version: {} address: {}",
                         groupId,
-                        Web3SDK2Wrapper.nowVersion,
+                        SupportedVersion.nowVersion,
                         topicControlAddress.getKey());
             }
         }
@@ -164,20 +165,24 @@ public class Web3sdkUtils {
         String topicControlAddress = Web3SDK2Wrapper.deployTopicControl(web3j, credentials);
         log.info("deploy topic control success, group: {} version: {} address: {}",
                 groupId,
-                Web3SDK2Wrapper.nowVersion,
+                SupportedVersion.nowVersion,
                 topicControlAddress);
 
         // flush topic info from low into new version
-        if (highestVersion > 0L && highestVersion < Web3SDK2Wrapper.nowVersion) {
-            System.out.println(String.format("flush topic info from low version, %d -> %d", highestVersion, Web3SDK2Wrapper.nowVersion));
-            // todo
+        if (highestVersion > 0L && highestVersion < SupportedVersion.nowVersion) {
+            System.out.println(String.format("flush topic info from low version, %d -> %d", highestVersion, SupportedVersion.nowVersion));
+            boolean result = SupportedVersion.flushData(web3j, credentials, original, highestVersion, SupportedVersion.nowVersion);
+            if (!result) {
+                log.error("flush topic info data failed, {} -> {}", highestVersion, SupportedVersion.nowVersion);
+                return false;
+            }
         }
 
         // save topic control address into CRUD
-        boolean result = Web3SDK2Wrapper.addAddress(web3j, credentials, Web3SDK2Wrapper.nowVersion, topicControlAddress);
+        boolean result = Web3SDK2Wrapper.addAddress(web3j, credentials, SupportedVersion.nowVersion, topicControlAddress);
         log.info("save topic control address into CRUD, group: {} result: {}", groupId, result);
         if (result) {
-            groupAddress.add(new EchoAddress(Web3SDK2Wrapper.nowVersion, topicControlAddress, true));
+            groupAddress.add(new EchoAddress(SupportedVersion.nowVersion, topicControlAddress, true));
         }
 
         return true;

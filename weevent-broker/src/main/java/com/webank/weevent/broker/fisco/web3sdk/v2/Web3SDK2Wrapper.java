@@ -3,7 +3,6 @@ package com.webank.weevent.broker.fisco.web3sdk.v2;
 
 import java.lang.reflect.Method;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -19,7 +18,6 @@ import java.util.stream.Collectors;
 
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
-import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcos2;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
@@ -59,8 +57,6 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.PbftView;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TotalTransactionCount;
 import org.fisco.bcos.web3j.protocol.core.methods.response.Transaction;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.fisco.bcos.web3j.tuples.generated.Tuple1;
-import org.fisco.bcos.web3j.tuples.generated.Tuple3;
 import org.fisco.bcos.web3j.tx.Contract;
 import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -75,9 +71,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 @Slf4j
 public class Web3SDK2Wrapper {
-    public static final List<Long> supportedVersion = Arrays.asList(10L);
-    public static final Long nowVersion = 10L;
-
     // topic control address in CRUD
     public final static String WeEventTable = "WeEvent";
     public final static String WeEventTableKey = "key";
@@ -416,28 +409,10 @@ public class Web3SDK2Wrapper {
         }
     }
 
-    private static WeEvent decodeWeEventV10(TransactionReceipt receipt) {
-        // v10 is com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic
-        com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic topic = (com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic)
-                FiscoBcos2.getHistoryTopicContract().get(receipt.getContractAddress());
-
-        Tuple3<String, String, String> input = topic.getPublishWeEventInput(receipt);
-        Tuple1<BigInteger> output = topic.getPublishWeEventOutput(receipt);
-
-        String topicName = input.getValue1();
-        WeEvent event = new WeEvent(topicName,
-                input.getValue2().getBytes(StandardCharsets.UTF_8),
-                DataTypeUtils.json2Map(input.getValue3()));
-        event.setEventId(DataTypeUtils.encodeEventId(topicName,
-                receipt.getBlockNumber().intValue(),
-                output.getValue1().intValue()));
-
-        return event;
-    }
-
     /**
      * Fetch all event in target block.
      *
+     * @param web3j the web3j
      * @param blockNum the blockNum
      * @return null if net error
      */
@@ -455,7 +430,7 @@ public class Web3SDK2Wrapper {
                     .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
             List<String> transactionHashList = bcosBlock.getBlock().getTransactions().stream()
                     .map(transactionResult -> (String) transactionResult.get()).collect(Collectors.toList());
-            if (transactionHashList.size() <= 0) {
+            if (transactionHashList.isEmpty()) {
                 return events;
             }
             log.debug("tx in block: {}", transactionHashList.size());
@@ -473,17 +448,10 @@ public class Web3SDK2Wrapper {
                     Long version = FiscoBcos2.getHistoryTopicVersion().get(receipt.getContractAddress());
                     log.debug("detect event in version: {}", version);
 
-                    // support version list
-                    switch (version.intValue()) {
-                        case 10:
-                            WeEvent event = decodeWeEventV10(receipt);
-                            log.debug("get a event from block chain: {}", event);
-                            events.add(event);
-                            break;
-
-                        default:
-                            log.error("unknown WeEvent in version: {}", version);
-                            break;
+                    WeEvent event = SupportedVersion.decodeWeEvent(receipt, version.intValue());
+                    if (event != null) {
+                        log.debug("get a event from block chain: {}", event);
+                        events.add(event);
                     }
                 }
             }
@@ -540,9 +508,8 @@ public class Web3SDK2Wrapper {
                 BlockNumber number = web3j.getBlockNumber().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
                 BcosTransaction bcosTransaction = web3j.getTransactionByBlockNumberAndIndex(new DefaultBlockParameterNumber(number.getBlockNumber()), BigInteger.ZERO)
                         .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-                Transaction transaction = bcosTransaction.getTransaction().get();
-
-                if (transaction != null) {
+                if (!bcosTransaction.getTransaction().isPresent()) {
+                    Transaction transaction = bcosTransaction.getTransaction().get();
                     TbTransHash tbTransHash = new TbTransHash(transaction.getHash(), transaction.getFrom(), transaction.getTo(),
                             transaction.getBlockNumber(), null);
                     tbTransHashes.add(tbTransHash);

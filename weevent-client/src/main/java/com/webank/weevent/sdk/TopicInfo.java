@@ -44,5 +44,15 @@ public class TopicInfo {
     /**
      * last publish time.
      */
-    private Long lastPublishTime;
+    private Long lastTimestamp;
+
+    /**
+     * last publish sender.
+     */
+    private String lastSender;
+
+    /**
+     * last publish sender.
+     */
+    private Long lastBlock;
 }

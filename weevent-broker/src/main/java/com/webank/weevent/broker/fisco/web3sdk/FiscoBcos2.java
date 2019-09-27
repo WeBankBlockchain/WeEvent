@@ -13,6 +13,7 @@ import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
+import com.webank.weevent.broker.fisco.web3sdk.v2.SupportedVersion;
 import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDK2Wrapper;
 import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic;
 import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController;
@@ -29,6 +30,7 @@ import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -54,10 +56,10 @@ public class FiscoBcos2 {
     // real handler
     private Web3j web3j;
 
-    // topic control contract
+    // topic control contract in nowSupport
     private TopicController topicController;
 
-    // topic contract
+    // topic contract in nowSupport
     private Topic topic;
 
     // topic info list in local memory
@@ -81,54 +83,32 @@ public class FiscoBcos2 {
     }
 
     public void init(Long groupId) throws BrokerException {
-        log.info("WeEvent support solidity version, now: {} support: {}", Web3SDK2Wrapper.nowVersion, Web3SDK2Wrapper.supportedVersion);
+        log.info("WeEvent support solidity version, now: {} support: {}", SupportedVersion.nowVersion, SupportedVersion.history);
 
         if (this.topicController == null) {
             this.credentials = Web3SDK2Wrapper.getCredentials(this.fiscoConfig);
             this.web3j = Web3SDK2Wrapper.initWeb3j(groupId, this.fiscoConfig, FiscoBcosDelegate.threadPool);
 
             Map<Long, String> addresses = Web3SDK2Wrapper.listAddress(this.web3j, this.credentials);
-            if (addresses.isEmpty() || addresses.containsKey(Web3SDK2Wrapper.nowVersion)) {
-                log.error("no topic control[version:{}] address in CRUD, please deploy it first", Web3SDK2Wrapper.nowVersion);
+            if (addresses.isEmpty() || addresses.containsKey(SupportedVersion.nowVersion)) {
+                log.error("no topic control[version:{}] address in CRUD, please deploy it first", SupportedVersion.nowVersion);
                 throw new BrokerException(ErrorCode.TOPIC_CONTROLLER_IS_NULL);
             }
 
             for (Map.Entry<Long, String> controlAddress : addresses.entrySet()) {
                 log.info("detect topic control address from CRUD: {} -> {}", controlAddress.getKey(), controlAddress.getValue());
 
-                // support version list
-                switch (controlAddress.getKey().intValue()) {
-                    case 10:
-                        com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController topicController =
-                                (com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController)
-                                        getContractService(controlAddress.getValue(), com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController.class);
-                        String address = "";
-                        try {
-                            address = topicController.getTopicAddress().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-                        } catch (InterruptedException | ExecutionException e) {
-                            log.error("getTopicAddress failed due to transaction execution error. ", e);
-                            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
-                        } catch (TimeoutException e) {
-                            log.error("getTopicAddress failed due to transaction timeout. ", e);
-                            throw new BrokerException(ErrorCode.TRANSACTION_TIMEOUT);
-                        }
-                        com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic topic =
-                                (com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic)
-                                        getContractService(address, com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic.class);
-                        historyTopicContract.put(address, topic);
-                        historyTopicVersion.put(address, controlAddress.getKey());
+                ImmutablePair<Contract, Contract> contracts = SupportedVersion.loadTopicControlContract(
+                        this.web3j, this.credentials, controlAddress.getValue(), controlAddress.getKey().intValue());
+                historyTopicContract.put(contracts.right.getContractAddress(), topic);
+                historyTopicVersion.put(contracts.right.getContractAddress(), controlAddress.getKey());
 
-                        // publish and admin function use the nowVersion
-                        if (controlAddress.getKey().equals(Web3SDK2Wrapper.nowVersion)) {
-                            this.topicController = topicController;
-                            this.topic = topic;
-                        }
-                        break;
-
-                    default:
-                        log.error("unknown version: {}", controlAddress.getKey());
-                        break;
+                // publish and admin function use the nowVersion
+                if (controlAddress.getKey().equals(SupportedVersion.nowVersion)) {
+                    this.topicController = (TopicController) contracts.left;
+                    this.topic = (Topic) contracts.right;
                 }
+                break;
             }
         }
     }
@@ -260,7 +240,7 @@ public class FiscoBcos2 {
             topicInfo.setCreatedTimestamp(topic.getValue3().longValue());
             topicInfo.setSequenceNumber(topic.getValue5().longValue());
             topicInfo.setBlockNumber(topic.getValue6().longValue());
-            topicInfo.setLastPublishTime(topic.getValue7().longValue());
+            topicInfo.setLastTimestamp(topic.getValue7().longValue());
 
             this.topicInfo.put(topicName, topicInfo);
             return topicInfo;

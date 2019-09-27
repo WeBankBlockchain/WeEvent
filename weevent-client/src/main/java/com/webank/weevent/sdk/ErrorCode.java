@@ -137,6 +137,8 @@ public enum ErrorCode {
     WE3SDK_UNKNOWN_GROUP(200211, "FISCO-BCOS 2.x, unknown group id"),
 
     SUBSCRIPTION_NOTIFY_QUEUE_FULL(200212, "onEvent is blocked too long, notify queue is full"),
+
+    UNKNOWN_SOLIDITY_VERSION(200213, "unknown contract version"),
     ;
 
     /**

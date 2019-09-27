@@ -181,7 +181,7 @@ public class Web3SDKWrapper {
      *
      * @param web3j web3j handler
      * @param credentials credentials
-     * @return contract address
+     * @return contract
      * @throws BrokerException BrokerException
      */
     public static String deployTopicControl(Web3j web3j, Credentials credentials) throws BrokerException {
