@@ -6,8 +6,8 @@ export default new vuex.Store({
   state: {
     userName: '',
     goLogin: false,
-    active: '0',
-    menu: '首页',
+    active: '',
+    menu: '',
     brokerId: '',
     groupId: ''
   },

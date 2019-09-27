@@ -6,7 +6,6 @@ import registered from '../components/registered'
 import reset from '../components/reset'
 import index from '../module/index'
 import topicList from '../components/topicList'
-import mainCont from '../components/mainCont'
 import subcription from '../components/subcription'
 // WeBase Module
 import overview from '../components/webase/overview'
@@ -29,15 +28,11 @@ export default new Router({
         name: 'topicList',
         component: topicList
       }, {
-        path: '/index',
-        name: 'mainCont',
-        component: mainCont
-      }, {
         path: '/subcription',
         name: 'subcription',
         component: subcription
       }, {
-        path: '/overview',
+        path: '/index',
         name: 'overview',
         component: overview
       }, {

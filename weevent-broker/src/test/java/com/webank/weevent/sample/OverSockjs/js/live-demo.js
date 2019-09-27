@@ -4,7 +4,7 @@ var topic = null;
 var url = null;
 var login = "";
 var passcode = "";
-var type =1
+var type = 1
 
 
 function setConnected(connected) {
@@ -305,7 +305,7 @@ function getMember(message){
     var time = getTime()
     if (message.indexOf(">>> SEND") > -1 || message.indexOf("<<< ERROR") > -1 || message.indexOf("<<< CONNECTED")>-1||message.indexOf(">>> DISCONNECT")>-1||message.indexOf("send fail")>-1||message.indexOf(">>> SUBSCRIBE")>-1||message.indexOf(">>> UNSUBSCRIBE")>-1) {
         var str = '<p class="infor_list">'+ time +'-'+type+' - <br/>'+ message +'</p>'
-        if(type==1) {
+        if(type===1) {
             $('#pub-message').prepend(str)
         }else{
             $('#sub-message').prepend(str)
@@ -373,7 +373,7 @@ function checkSubInput () {
             var item = $(this).parent().children('.warningbox').hide()
         }
     })
-    if(index==0){
+    if(index===0){
         return true
     } else {
         return false
