@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs>
+    <style>
+      .cls-1 {
+        opacity: 0.8;
+      }
+
+      .cls-2 {
+        fill: none;
+      }
+
+      .cls-3 {
+        fill: #3a86f2;
+      }
+
+      .cls-4 {
+        fill: #1b5ebf;
+      }
+
+      .cls-5 {
+        fill: #599dff;
+      }
+    </style>
+  </defs>
+  <g id="banner-icon1" class="cls-1" transform="translate(-716.399 -156.247)">
+    <rect id="矩形_55" data-name="矩形 55" class="cls-2" width="120" height="120" transform="translate(716.399 156.247)"/>
+    <g id="组_198" data-name="组 198" transform="translate(-6.781 -6.582)">
+      <g id="组_194" data-name="组 194" transform="translate(727.668 204.244)">
+        <path id="路径_480" data-name="路径 480" class="cls-3" d="M99.94,178.9l-.052,18.911L83.25,207.477l.052-18.911Z" transform="translate(-66.502 -169.23)"/>
+        <path id="路径_481" data-name="路径 481" class="cls-4" d="M48.47,188.566l-.052,18.911L31.67,197.811l.055-18.911Z" transform="translate(-31.67 -169.23)"/>
+        <path id="路径_482" data-name="路径 482" class="cls-5" d="M65.222,158.79l-16.638,9.666L31.84,158.79l16.638-9.67Z" transform="translate(-31.785 -149.12)"/>
+      </g>
+      <g id="组_195" data-name="组 195" transform="translate(805.197 204.244)">
+        <path id="路径_480-2" data-name="路径 480" class="cls-3" d="M99.94,178.9l-.052,18.911L83.25,207.477l.052-18.911Z" transform="translate(-66.502 -169.23)"/>
+        <path id="路径_481-2" data-name="路径 481" class="cls-4" d="M48.47,188.566l-.052,18.911L31.67,197.811l.055-18.911Z" transform="translate(-31.67 -169.23)"/>
+        <path id="路径_482-2" data-name="路径 482" class="cls-5" d="M65.222,158.79l-16.638,9.666L31.84,158.79l16.638-9.67Z" transform="translate(-31.785 -149.12)"/>
+      </g>
+      <g id="组_193" data-name="组 193" transform="translate(766.432 238.163)">
+        <path id="路径_480-3" data-name="路径 480" class="cls-3" d="M99.94,178.9l-.052,18.911L83.25,207.477l.052-18.911Z" transform="translate(-66.502 -169.23)"/>
+        <path id="路径_481-3" data-name="路径 481" class="cls-4" d="M48.47,188.566l-.052,18.911L31.67,197.811l.055-18.911Z" transform="translate(-31.67 -169.23)"/>
+        <path id="路径_482-3" data-name="路径 482" class="cls-5" d="M65.222,158.79l-16.638,9.666L31.84,158.79l16.638-9.67Z" transform="translate(-31.785 -149.12)"/>
+      </g>
+      <g id="组_192" data-name="组 192" transform="translate(766.432 204.244)">
+        <path id="路径_480-4" data-name="路径 480" class="cls-3" d="M99.94,178.9l-.052,18.911L83.25,207.477l.052-18.911Z" transform="translate(-66.502 -169.23)"/>
+        <path id="路径_481-4" data-name="路径 481" class="cls-4" d="M48.47,188.566l-.052,18.911L31.67,197.811l.055-18.911Z" transform="translate(-31.67 -169.23)"/>
+        <path id="路径_482-4" data-name="路径 482" class="cls-5" d="M65.222,158.79l-16.638,9.666L31.84,158.79l16.638-9.67Z" transform="translate(-31.785 -149.12)"/>
+      </g>
+      <g id="组_191" data-name="组 191" transform="translate(766.432 168.71)">
+        <path id="路径_480-5" data-name="路径 480" class="cls-3" d="M99.94,178.9l-.052,18.911L83.25,207.477l.052-18.911Z" transform="translate(-66.502 -169.23)"/>
+        <path id="路径_481-5" data-name="路径 481" class="cls-4" d="M48.47,188.566l-.052,18.911L31.67,197.811l.055-18.911Z" transform="translate(-31.67 -169.23)"/>
+        <path id="路径_482-5" data-name="路径 482" class="cls-5" d="M65.222,158.79l-16.638,9.666L31.84,158.79l16.638-9.67Z" transform="translate(-31.785 -149.12)"/>
+      </g>
+    </g>
+  </g>
+</svg>

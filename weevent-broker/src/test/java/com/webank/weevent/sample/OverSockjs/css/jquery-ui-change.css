@@ -60,7 +60,7 @@
 /* Interaction Cues
 ----------------------------------*/
 .ui-state-disabled {
-    cursor: default !important;
+    cursor: default;
     pointer-events: none;
 }
 
@@ -212,7 +212,7 @@
 }
 
 /* no icon support for input elements */
-input.ui-button.ui-button-icon-only {
+input .ui-button-icon-only {
     text-indent: 0;
 }
 
@@ -225,7 +225,7 @@ input.ui-button.ui-button-icon-only {
     margin-left: -8px;
 }
 
-.ui-button.ui-icon-notext .ui-icon {
+.ui-icon-notext .ui-icon {
     padding: 0;
     width: 2.1em;
     height: 2.1em;
@@ -234,7 +234,7 @@ input.ui-button.ui-button-icon-only {
 
 }
 
-input.ui-button.ui-icon-notext .ui-icon {
+input.ui-icon-notext .ui-icon {
     width: auto;
     height: auto;
     text-indent: 0;
@@ -262,8 +262,8 @@ button.ui-button::-moz-focus-inner {
     border: none;
 }
 
-.ui-checkboxradio-radio-label.ui-checkboxradio-checked .ui-icon,
-.ui-checkboxradio-radio-label.ui-checkboxradio-checked:hover .ui-icon {
+.ui-checkboxradio-radio-label .ui-icon,
+.ui-checkboxradio-radio-label:hover .ui-icon {
     background-image: none;
     width: 8px;
     height: 8px;
@@ -336,8 +336,8 @@ button.ui-button::-moz-focus-inner {
     margin: 1px 0;
 }
 
-.ui-datepicker select.ui-datepicker-month,
-.ui-datepicker select.ui-datepicker-year {
+.ui-datepicker .ui-datepicker-month,
+.ui-datepicker .ui-datepicker-year {
     width: 45%;
 }
 
@@ -391,7 +391,7 @@ button.ui-button::-moz-focus-inner {
 }
 
 /* with multiple calendars */
-.ui-datepicker.ui-datepicker-multi {
+.ui-datepicker-multi {
     width: auto;
 }
 
@@ -749,13 +749,13 @@ button.ui-button::-moz-focus-inner {
     text-overflow: ellipsis;
 }
 
-.ui-selectmenu-button.ui-button {
+.ui-selectmenu-button {
     text-align: left;
     white-space: nowrap;
     width: 14em;
 }
 
-.ui-selectmenu-icon.ui-icon {
+.ui-selectmenu-icon {
     float: right;
     margin-top: 0;
 }
@@ -785,8 +785,8 @@ button.ui-button::-moz-focus-inner {
 }
 
 /* support: IE8 - See #6727 */
-.ui-slider.ui-state-disabled .ui-slider-handle,
-.ui-slider.ui-state-disabled .ui-slider-range {
+.ui-state-disabled .ui-slider-handle,
+.ui-state-disabled .ui-slider-range {
     filter: inherit;
 }
 
@@ -924,7 +924,7 @@ button.ui-button::-moz-focus-inner {
 
 .ui-tabs .ui-tabs-nav li.ui-tabs-active .ui-tabs-anchor,
 .ui-tabs .ui-tabs-nav li.ui-state-disabled .ui-tabs-anchor,
-.ui-tabs .ui-tabs-nav li.ui-tabs-loading .ui-tabs-anchor {
+.ui-tabs .ui-tabs-nav .ui-tabs-loading .ui-tabs-anchor {
     cursor: text;
 }
 
@@ -963,7 +963,7 @@ body .ui-tooltip {
     font-size: 1em;
 }
 
-.
+
 .ui-widget-content {
     color: #333333;
 }
@@ -990,8 +990,8 @@ body .ui-tooltip {
 .ui-button,
     /* We use html here because we need a greater specificity to make sure disabled
     works properly when clicked or hovered */
-html .ui-button.ui-state-disabled:hover,
-html .ui-button.ui-state-disabled:active {
+html .ui-state-disabled:hover,
+html .ui-state-disabled:active {
     /* border: 1px solid #c5c5c5; */
     background: #f6f6f6;
     font-weight: normal;
@@ -1046,7 +1046,7 @@ a.ui-button:focus {
 .ui-widget-header .ui-state-active,
 a.ui-button:active,
 .ui-button:active,
-.ui-button.ui-state-active:hover {
+.ui-state-active:hover {
     /* border: 1px solid #003eff; */
     background: #555;
     font-weight: normal;
