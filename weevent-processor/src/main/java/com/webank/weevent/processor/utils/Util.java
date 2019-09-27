@@ -26,8 +26,6 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -84,27 +82,71 @@ public class Util {
         }
     }
 
+    private static boolean CompareCondition(Integer RightKey, String eventContent, String item, String operation) throws JSONException {
+
+        JSONObject jObj = new JSONObject(eventContent);
+        String extract = Util.recurseKeys(jObj, item);
+        if ((operation.equals("<>") || operation.equals("!=")) && !Integer.valueOf(extract).equals(RightKey)) {
+            return true;
+        } else if (operation.equals("=") && (Integer.valueOf(extract).equals(RightKey))) {
+            return true;
+        } else if (operation.equals("<") && (Integer.valueOf(extract) < RightKey)) {
+            return true;
+        } else  if (operation.equals("<=")&&Integer.valueOf(extract) <= RightKey) {
+            return true;
+        } else  if (operation.equals(">")&&(Integer.valueOf(extract)) > RightKey) {
+            return true;
+        }else  if (operation.equals(">=")&&(Integer.valueOf(extract)) >= RightKey) {
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean CompareCondition(Integer leftValue,Integer rightValue, String eventContent, String item) throws JSONException {
+        JSONObject jObj = new JSONObject(eventContent);
+        String extract = Util.recurseKeys(jObj, item);
+        if (Integer.valueOf(extract) > leftValue && Integer.valueOf(extract) < rightValue) {
+            return true;
+        }
+        return false;
+    }
+    /**
+     * handle LIKE and IN
+     *
+     * @param rightValueStr like vale ,such as LIKE(?,?)
+     * @param eventContent event message
+     * @param item current item
+     * @param operation Like or in
+     * @return flag true or false
+     * @throws JSONException
+     */
+    private static boolean CompareCondition(String rightValueStr, String eventContent, String item, String operation) throws JSONException {
+
+        JSONObject jObj = new JSONObject(eventContent);
+        String extract = Util.recurseKeys(jObj, item);
+        if (operation.equals("LIKE") || operation.equals("IN")) {
+            if (rightValueStr.contains(extract)) {
+                log.info("hit it....");
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     public static boolean compareNumber(PlainSelect plainSelect, List<String> contentKeys, String eventContent, String operation) throws JSONException {
         boolean flag = false;
         String leftKey;
         int RightKey;
 
-        // :TODO  关键词转成大写
+        // :TODO  多条件
         for (int i = 0; i < contentKeys.size(); i++) {
             switch (operation) {
                 case "=":
                     leftKey = (((EqualsTo) plainSelect.getWhere()).getLeftExpression()).toString().toUpperCase();
                     RightKey = Integer.valueOf((((EqualsTo) plainSelect.getWhere()).getRightExpression()).toString());
                     if (contentKeys.get(i).equals(leftKey)) {
-                        // compare the value
-                        JSONObject jObj = new JSONObject(eventContent);
-                        String extract = Util.recurseKeys(jObj, contentKeys.get(i));
-                        log.info("extract:{},operation:{},leftKey:{}", extract, operation, leftKey);
-                        if (Integer.valueOf(extract) == RightKey) {
-                            log.info("hit it....");
-                            flag = true;
-                            break;
-                        }
+                        flag = CompareCondition(RightKey, eventContent, contentKeys.get(i), operation);
                     }
 
                     break;
@@ -113,113 +155,63 @@ public class Util {
                     leftKey = (((NotEqualsTo) plainSelect.getWhere()).getLeftExpression()).toString().toUpperCase();
                     RightKey = Integer.valueOf((((NotEqualsTo) plainSelect.getWhere()).getRightExpression()).toString());
                     if (contentKeys.get(i).equals(leftKey)) {
-                        // compare the value
-                        JSONObject jObj = new JSONObject(eventContent);
-                        String extract = Util.recurseKeys(jObj, contentKeys.get(i));
-                        log.info("extract:{},operation:{},leftKey:{}", extract, operation, leftKey);
-                        if (Integer.valueOf(extract) != RightKey) {
-                            log.info("hit it....");
-                            flag = true;
-                            break;
-                        }
+                        flag = CompareCondition(RightKey, eventContent, contentKeys.get(i), operation);
                     }
 
                     break;
-                case "<>":
 
+                case "<>":
                     leftKey = (((NotEqualsTo) plainSelect.getWhere()).getLeftExpression()).toString().toUpperCase();
                     RightKey = Integer.valueOf((((NotEqualsTo) plainSelect.getWhere()).getRightExpression()).toString());
                     if (contentKeys.get(i).equals(leftKey)) {
-                        // compare the value
-                        JSONObject jObj = new JSONObject(eventContent);
-                        String extract = Util.recurseKeys(jObj, contentKeys.get(i));
-                        log.info("extract:{},operation:{},leftKey:{}", extract, operation, leftKey);
-                        if (Integer.valueOf(extract) != RightKey) {
-                            log.info("hit it....");
-                            flag = true;
-                            break;
-
-                        }
+                        flag = CompareCondition(RightKey, eventContent, contentKeys.get(i), operation);
                     }
 
                     break;
+
                 case "<":
                     leftKey = (((MinorThan) plainSelect.getWhere()).getLeftExpression()).toString().toUpperCase();
                     RightKey = Integer.valueOf((((MinorThan) plainSelect.getWhere()).getRightExpression()).toString());
                     if (contentKeys.get(i).equals(leftKey)) {
-                        // compare the value
-                        JSONObject jObj = new JSONObject(eventContent);
-                        String extract = Util.recurseKeys(jObj, contentKeys.get(i));
-                        log.info("extract:{},operation:{},leftKey:{}", extract, operation, leftKey);
-                        if (Integer.valueOf(extract) < RightKey) {
-                            log.info("hit it....");
-                            flag = true;
-                            break;
-                        }
+                        flag = CompareCondition(RightKey, eventContent, contentKeys.get(i), operation);
                     }
+
                     break;
+
                 case "<=":
                     leftKey = (((MinorThanEquals) plainSelect.getWhere()).getLeftExpression()).toString().toUpperCase();
                     RightKey = Integer.valueOf((((MinorThanEquals) plainSelect.getWhere()).getRightExpression()).toString());
                     if (contentKeys.get(i).equals(leftKey)) {
-                        // compare the value
-                        JSONObject jObj = new JSONObject(eventContent);
-                        String extract = Util.recurseKeys(jObj, contentKeys.get(i));
-                        log.info("extract:{},operation:{},leftKey:{}", extract, operation, leftKey);
-                        if (Integer.valueOf(extract) <= RightKey) {
-                            log.info("hit it....");
-                            flag = true;
-                            break;
-                        }
+                        flag = CompareCondition(RightKey, eventContent, contentKeys.get(i), operation);
                     }
 
                     break;
+
                 case ">":
                     leftKey = (((GreaterThan) plainSelect.getWhere()).getLeftExpression()).toString().toUpperCase();
                     RightKey = Integer.valueOf((((GreaterThan) plainSelect.getWhere()).getRightExpression()).toString());
                     if (contentKeys.get(i).equals(leftKey)) {
-                        // compare the value
-                        JSONObject jObj = new JSONObject(eventContent);
-                        String extract = Util.recurseKeys(jObj, contentKeys.get(i));
-                        log.info("extract:{},operation:{},leftKey:{}", extract, operation, leftKey);
-                        if (Integer.valueOf(extract) > RightKey) {
-                            log.info("hit it....");
-                            flag = true;
-                            break;
-                        }
+                        flag = CompareCondition(RightKey, eventContent, contentKeys.get(i), operation);
                     }
+
                     break;
+
                 case ">=":
                     leftKey = (((GreaterThanEquals) plainSelect.getWhere()).getLeftExpression()).toString().toUpperCase();
                     RightKey = Integer.valueOf((((GreaterThanEquals) plainSelect.getWhere()).getRightExpression()).toString());
                     if (contentKeys.get(i).equals(leftKey)) {
-                        // compare the value
-                        JSONObject jObj = new JSONObject(eventContent);
-                        String extract = Util.recurseKeys(jObj, contentKeys.get(i));
-                        log.info("extract:{},operation:{},leftKey:{}", extract, operation, leftKey);
-                        if (Integer.valueOf(extract) >= RightKey) {
-                            log.info("hit it....");
-                            flag = true;
-                            break;
-                        }
+                        flag = CompareCondition(RightKey, eventContent, contentKeys.get(i), operation);
                     }
 
                     break;
+
                 case "BETWEEN":
                     log.info("check:start: {},end: {}", ((Between) plainSelect.getWhere()).getBetweenExpressionStart().toString(), ((Between) plainSelect.getWhere()).getBetweenExpressionEnd().toString());
                     int leftValue = Integer.valueOf(((Between) plainSelect.getWhere()).getBetweenExpressionStart().toString());
                     int rightValue = Integer.valueOf(((Between) plainSelect.getWhere()).getBetweenExpressionEnd().toString());
                     leftKey = ((Between) plainSelect.getWhere()).getLeftExpression().toString().toUpperCase();
                     if (contentKeys.get(i).equals(leftKey)) {
-                        // compare the value
-                        JSONObject jObj = new JSONObject(eventContent);
-                        String extract = Util.recurseKeys(jObj, contentKeys.get(i));
-                        log.info("extract:{},operation:{},leftKey:{}", extract, operation, leftKey);
-                        if (Integer.valueOf(extract) > leftValue && Integer.valueOf(extract) < rightValue) {
-                            log.info("hit it....");
-                            flag = true;
-                            break;
-                        }
+                        flag = CompareCondition( leftValue, rightValue,  eventContent,  contentKeys.get(i));
                     }
 
                     break;
@@ -227,15 +219,7 @@ public class Util {
                     leftKey = (((StringValue) ((LikeExpression) plainSelect.getWhere()).getLeftExpression()).getValue()).toUpperCase();
                     String rightValueStr = (((StringValue) ((LikeExpression) plainSelect.getWhere()).getRightExpression()).getValue());
                     if (contentKeys.get(i).equals(leftKey)) {
-                        // compare the value
-                        JSONObject jObj = new JSONObject(eventContent);
-                        String extract = Util.recurseKeys(jObj, contentKeys.get(i));
-                        log.info("extract:{},operation:{},leftKey:{}", extract, operation, leftKey);
-                        if (rightValueStr.contains(extract)) {
-                            log.info("hit it....");
-                            flag = true;
-                            break;
-                        }
+                        flag = CompareCondition(rightValueStr, eventContent, contentKeys.get(i), operation);
                     }
                     break;
 
@@ -256,20 +240,11 @@ public class Util {
                     leftKey = exprList.get(0).toString().toUpperCase();
                     rightValueStr = exprList.get(2).toString();
                     if (contentKeys.get(i).equals(leftKey)) {
-                        // compare the value
-                        JSONObject jObj = new JSONObject(eventContent);
-                        String extract = Util.recurseKeys(jObj, contentKeys.get(i));
-                        log.info("extract:{},operation:{},leftKey:{}", extract, operation, leftKey);
-                        if (rightValueStr.contains(extract)) {
-                            log.info("hit it....");
-                            flag = true;
-                            break;
-                        }
+                        flag = CompareCondition(rightValueStr, eventContent, contentKeys.get(i), operation);
                     }
                     break;
                 default:
                     log.error("default ");
-
             }
         }
         return flag;
