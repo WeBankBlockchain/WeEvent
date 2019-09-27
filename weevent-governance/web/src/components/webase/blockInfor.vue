@@ -1,12 +1,5 @@
 <template>
-  <div class="group  event-table">
-    <div class='control_part refresh'>
-      <el-input placeholder="请输入交易哈希或块高" v-model.trim='search_name'>
-        <template slot='append'>
-          <el-button type='primary' icon='el-icon-search' @click='search'></el-button>
-        </template>
-      </el-input>
-    </div>
+  <div class="group block event-table">
     <el-table
       :data='tableData'
       stripe
@@ -23,7 +16,12 @@
       <el-table-column
         prop='transCount'
         label='交易'
-        width=150
+        width=100
+      ></el-table-column>
+      <el-table-column
+        prop='blockTimestamp'
+        label='创建时间'
+        width=230
       ></el-table-column>
       <el-table-column
         label='区块哈希'
@@ -34,10 +32,13 @@
       </template>
       </el-table-column>
       <el-table-column
-        prop='blockTimestamp'
-        label='创建时间'
-         width=300
-      ></el-table-column>
+        label='操作'
+        width=200
+      >
+      <template  slot-scope="scope">
+        <span class='link_option' @click="linkToTrans(scope.row.pkHash)">查看交易详情</span>
+      </template>
+      </el-table-column>
     </el-table>
     <el-pagination
       @current-change="indexChange"
@@ -97,6 +98,12 @@ export default {
       })
       this.loading = false
     },
+    linkToTrans (e) {
+      sessionStorage.setItem('blockHash', e)
+      this.$store.commit('set_active', '1-2')
+      this.$store.commit('set_menu', ['区块链信息', '区块', '交易详情'])
+      this.$router.push('./transactionInfor')
+    },
     search () {
       this.pageIndex = 1
       this.total = 0
@@ -109,10 +116,19 @@ export default {
   computed: {
     brokerId () {
       return this.$store.state.brokerId
+    },
+    groupId () {
+      return this.$store.state.groupId
     }
   },
   watch: {
     brokerId () {
+      this.loading = true
+      setTimeout(fun => {
+        this.blockList()
+      }, 1000)
+    },
+    groupId (nVal) {
       this.loading = true
       setTimeout(fun => {
         this.blockList()

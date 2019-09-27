@@ -2,9 +2,20 @@
 <div class="headerBar">
   <div class='navigation'>
     <img src="../assets/image/weEvent.png" alt="" @click='home'>
-    <el-breadcrumb separator="/" v-show='!noServer'>
-      <el-breadcrumb-item v-for="(item, index) in menu" :key=index>{{item}}</el-breadcrumb-item>
-    </el-breadcrumb>
+    <span class='server_title' v-show='!noServer'>群组信息:</span>
+    <el-dropdown trigger="click" @command='selectGroup'  v-show='!noServer'>
+      <span>{{groupId}} <i class="el-icon-arrow-down el-icon-caret-bottom"></i></span>
+      <el-dropdown-menu slot="dropdown">
+        <el-dropdown-item v-for='(item, index) in groupList' :key='index' :command='item'>{{item}}</el-dropdown-item>
+      </el-dropdown-menu>
+    </el-dropdown>
+    <span class='server_title' v-show='!noServer'>当前服务:</span>
+    <el-dropdown trigger="click" @command='selecServers'  v-show='!noServer'>
+      <span>{{server}} <i class="el-icon-arrow-down el-icon-caret-bottom"></i></span>
+      <el-dropdown-menu slot="dropdown">
+        <el-dropdown-item v-for='(item, index) in servers' :key='index' :command='index'>{{item.name}}</el-dropdown-item>
+      </el-dropdown-menu>
+    </el-dropdown>
   </div>
   <div class='right_part'>
     <el-popover
@@ -12,7 +23,7 @@
       title="WeEvent版本信息"
       width="250"
       trigger="click"
-       v-show='!noServer'
+      v-show='!noServer'
       >
       <div id='version'>
         <p class='version_infor'>
@@ -40,24 +51,7 @@
       </div>
       <el-button slot="reference">版本: {{version.weEventVersion}}</el-button>
     </el-popover>
-    <span class='line'  v-show='!noServer'></span>
-    <span class='server_title' v-show='!noServer'>群组信息:</span>
-    <el-dropdown trigger="click" @command='selectGroup'  v-show='!noServer'>
-      <span>{{groupId}} <i class="el-icon-arrow-down el-icon-caret-bottom"></i></span>
-      <el-dropdown-menu slot="dropdown">
-        <el-dropdown-item v-for='(item, index) in groupList' :key='index' :command='item'>{{item}}</el-dropdown-item>
-      </el-dropdown-menu>
-    </el-dropdown>
-    <span class='line'  v-show='!noServer'></span>
-    <span class='server_title' v-show='!noServer'>当前服务:</span>
-    <el-dropdown trigger="click" @command='selecServers'  v-show='!noServer'>
-      <span>{{server}} <i class="el-icon-arrow-down el-icon-caret-bottom"></i></span>
-      <el-dropdown-menu slot="dropdown">
-        <el-dropdown-item v-for='(item, index) in servers' :key='index' :command='index'>{{item.name}}</el-dropdown-item>
-        <el-dropdown-item command='servers'>服务设置</el-dropdown-item>
-      </el-dropdown-menu>
-    </el-dropdown>
-    <span class='line'  v-show='!noServer'></span>
+    <router-link to='./servers' v-show='!noServer'>服务设置</router-link>
     <span class='el-icon-user-solid' style='margin-right:5px'></span>
     <el-dropdown trigger="click" @command='selectItem'>
       <span v-if='!userName' @click='loginIn'>请登录</span>
@@ -98,9 +92,9 @@ export default {
   },
   methods: {
     home () {
-      this.$router.push('./index')
-      this.$store.commit('set_active', '0')
-      this.$emit('selecChange', '0')
+      this.$router.push('./overview')
+      this.$store.commit('set_active', '1-1')
+      this.$emit('selecChange', '1-1')
     },
     loginIn () {
       this.$router.push('./login')
@@ -124,13 +118,9 @@ export default {
       }
     },
     selecServers (e) {
-      if (e === 'servers') {
-        this.$router.push('./servers')
-      } else {
-        this.server = this.servers[e].name
-        this.$store.commit('set_id', this.servers[e].id)
-        localStorage.setItem('brokerId', this.servers[e].id)
-      }
+      this.server = this.servers[e].name
+      this.$store.commit('set_id', this.servers[e].id)
+      localStorage.setItem('brokerId', this.servers[e].id)
     },
     selectGroup (e) {
       this.$store.commit('set_groupId', e)
