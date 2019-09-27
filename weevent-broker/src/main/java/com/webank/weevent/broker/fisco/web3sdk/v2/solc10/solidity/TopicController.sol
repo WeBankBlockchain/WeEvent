@@ -8,6 +8,7 @@ import "./Topic.sol";
 contract TopicController {
     // contract version 10, 11 and so on
     uint constant private VERSION = 10;
+
     uint constant private TOPIC_ALREADY_EXIST = 500100;
 
     Topic private topic;

@@ -89,17 +89,10 @@ public class FiscoBcos {
     private Contract getContractService(String contractAddress, Class<?> cls) throws BrokerException {
         if (this.web3j == null || this.credentials == null) {
             log.error("init web3sdk failed");
-            throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
+            throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
         }
 
-        Contract contract = Web3SDKWrapper.loadContract(contractAddress, this.web3j, this.credentials, cls);
-        if (contract == null) {
-            String msg = "load contract failed, " + cls.getSimpleName();
-            log.error(msg);
-            throw new BrokerException(ErrorCode.LOAD_CONTRACT_ERROR);
-        }
-
-        return contract;
+        return Web3SDKWrapper.loadContract(contractAddress, this.web3j, this.credentials, cls);
     }
 
     /**

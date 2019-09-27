@@ -3,7 +3,7 @@ pragma solidity ^0.4.25;
 // support string[]
 pragma experimental ABIEncoderV2;
 
-contract Topic {
+contract Topic11 {
     mapping (string => Snapshot) private topicSnapshot;
     
     struct Snapshot {

@@ -3,14 +3,12 @@ pragma solidity ^0.4.25;
 // support string[]
 pragma experimental ABIEncoderV2;
 
-import "./Topic.sol";
+import "./Topic11.sol";
 
-contract TopicController {
-    // contract version 10, 11 and so on
-    uint constant private VERSION = 11;
+contract TopicController11 {
     uint constant private TOPIC_ALREADY_EXIST = 500100;
 
-    Topic private topic;
+    Topic11 private topic;
     mapping (string => TopicInfo) private topicMap;
     string[] private topicIndex;
 

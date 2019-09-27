@@ -35,10 +35,7 @@ class EchoAddress {
 
     @Override
     public String toString() {
-        return String.format("version:%d\taddress:%s\tnew:%b",
-                this.version,
-                this.address,
-                this.isNew);
+        return String.format("version: %d\taddress: %s\tnew: %b", this.version, this.address, this.isNew);
     }
 }
 
@@ -118,9 +115,9 @@ public class Web3sdkUtils {
 
         System.out.println(nowTime() + " topic control address in every group:");
         for (Map.Entry<Long, List<EchoAddress>> e : echoAddresses.entrySet()) {
-            System.out.println("topic control address in group: " + e.getKey() + "\n");
+            System.out.println("topic control address in group: " + e.getKey());
             for (EchoAddress address : e.getValue()) {
-                System.out.println("\t" + address.toString() + "\n");
+                System.out.println("\t" + address.toString());
             }
         }
 
@@ -132,6 +129,8 @@ public class Web3sdkUtils {
                                         org.fisco.bcos.web3j.crypto.Credentials credentials,
                                         List<EchoAddress> groupAddress) throws BrokerException {
         Map<Long, String> original = Web3SDK2Wrapper.listAddress(web3j, credentials);
+        log.info("address list in CRUD groupId: {}, {}", groupId, original);
+
         // if nowVersion exist
         boolean exist = false;
         // highest version in CRUD
@@ -140,7 +139,7 @@ public class Web3sdkUtils {
             groupAddress.add(new EchoAddress(topicControlAddress.getKey(), topicControlAddress.getValue(), false));
 
             if (!SupportedVersion.history.contains(topicControlAddress.getKey())) {
-                log.error("unknown support version in group: {} CRUD: {}", groupId, topicControlAddress.getKey());
+                log.error("unknown solidity version in group: {} CRUD: {}", groupId, topicControlAddress.getKey());
                 return false;
             }
 
@@ -148,25 +147,19 @@ public class Web3sdkUtils {
                 highestVersion = topicControlAddress.getKey();
             }
 
-            if (SupportedVersion.history.equals(topicControlAddress.getKey())) {
+            if (SupportedVersion.nowVersion.equals(topicControlAddress.getKey())) {
                 exist = true;
-                log.info("find topic control address in now version, group: {} version: {} address: {}",
-                        groupId,
-                        SupportedVersion.nowVersion,
-                        topicControlAddress.getKey());
             }
         }
 
         if (exist) {
+            log.info("find topic control address in now version groupId: {}, skip", groupId);
             return true;
         }
 
         // deploy topic control
         String topicControlAddress = Web3SDK2Wrapper.deployTopicControl(web3j, credentials);
-        log.info("deploy topic control success, group: {} version: {} address: {}",
-                groupId,
-                SupportedVersion.nowVersion,
-                topicControlAddress);
+        log.info("deploy topic control success, group: {} version: {} address: {}", groupId, SupportedVersion.nowVersion, topicControlAddress);
 
         // flush topic info from low into new version
         if (highestVersion > 0L && highestVersion < SupportedVersion.nowVersion) {

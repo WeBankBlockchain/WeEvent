@@ -106,14 +106,14 @@ public class Web3SDKWrapper {
             if (StringUtils.isBlank(nodeVersion)
                     || !nodeVersion.contains(WeEventConstants.FISCO_BCOS_1_X_VERSION_PREFIX)) {
                 log.error("init web3sdk failed, dismatch fisco version in node: {}", nodeVersion);
-                throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
+                throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
             }
 
             log.info("initialize web3sdk success");
             return web3j;
         } catch (Exception e) {
             log.error("init web3sdk failed", e);
-            throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
+            throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
         }
     }
 
@@ -144,7 +144,7 @@ public class Web3SDKWrapper {
      * @param cls contract java class
      * @return Contract return null if error
      */
-    public static Contract loadContract(String contractAddress, Web3j web3j, Credentials credentials, Class<?> cls) {
+    public static Contract loadContract(String contractAddress, Web3j web3j, Credentials credentials, Class<?> cls) throws BrokerException {
         log.info("begin load contract, {}", cls.getSimpleName());
 
         try {
@@ -163,17 +163,17 @@ public class Web3SDKWrapper {
                     WeEventConstants.GAS_PRICE,
                     WeEventConstants.GAS_LIMIT);
 
-            if (contract == null) {
-                log.info("load contract failed, {}", cls.getSimpleName());
-                return null;
-            } else {
+            if (contract != null) {
                 log.info("load contract success, {}", cls.getSimpleName());
                 return (Contract) contract;
             }
+
+            log.info("load contract failed, {}", cls.getSimpleName());
         } catch (Exception e) {
-            log.error("load contract failed, {} {}", cls.getSimpleName(), e.getMessage());
-            return null;
+            log.error(String.format("load contract[%s] failed", cls.getSimpleName()), e);
         }
+
+        throw new BrokerException(ErrorCode.LOAD_CONTRACT_ERROR);
     }
 
     /**
@@ -212,7 +212,7 @@ public class Web3SDKWrapper {
             return topicController.getContractAddress();
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             log.error("deploy contract failed", e);
-            throw new BrokerException("deploy contract failed");
+            throw new BrokerException(ErrorCode.DEPLOY_CONTRACT_ERROR);
         }
     }
 
@@ -221,20 +221,15 @@ public class Web3SDKWrapper {
      *
      * @return address
      */
-    public static String getContractAbiMgr(Web3j web3j, Credentials credentials, String proxyAddress) {
+    public static String getContractAbiMgr(Web3j web3j, Credentials credentials, String proxyAddress) throws BrokerException {
+        SystemProxy systemProxy = (SystemProxy) loadContract(proxyAddress, web3j, credentials, SystemProxy.class);
         try {
-            SystemProxy systemProxy = (SystemProxy) loadContract(proxyAddress, web3j, credentials, SystemProxy.class);
-            if (systemProxy == null) {
-                log.error("load system proxy contract failed, address: {}", proxyAddress);
-                return "";
-            }
-
             Future<List<Type>> f = systemProxy.getRoute(new Utf8String("ContractAbiMgr"));
             List<Type> route = f.get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
             return route.get(0).toString();
         } catch (ExecutionException | TimeoutException | InterruptedException e) {
             log.error("get ContractAbiMgr address failed", e);
-            return "";
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
     }
 
@@ -244,14 +239,14 @@ public class Web3SDKWrapper {
      *
      * @return address
      */
-    public static String getAddress(Web3j web3j, Credentials credentials, String proxyAddress) {
-        try {
-            String CNSAddress = getContractAbiMgr(web3j, credentials, proxyAddress);
-            log.info("CNS address in system proxy: {}", CNSAddress);
-            if (StringUtils.isBlank(CNSAddress)) {
-                return "";
-            }
+    public static String getAddress(Web3j web3j, Credentials credentials, String proxyAddress) throws BrokerException {
+        String CNSAddress = getContractAbiMgr(web3j, credentials, proxyAddress);
+        log.info("CNS address in system proxy: {}", CNSAddress);
+        if (StringUtils.isBlank(CNSAddress)) {
+            return "";
+        }
 
+        try {
             ContractAbiMgr abiMgr = (ContractAbiMgr) loadContract(CNSAddress, web3j, credentials, ContractAbiMgr.class);
             Future<Address> f = abiMgr.getAddr(new Utf8String(WeEventTopicControlAddress));
             String address = f.get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS).toString();
@@ -263,7 +258,7 @@ public class Web3SDKWrapper {
             return address;
         } catch (ExecutionException | TimeoutException | InterruptedException | NullPointerException e) {
             log.error("load topic control address from CNS failed", e);
-            return "";
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
     }
 
@@ -292,12 +287,12 @@ public class Web3SDKWrapper {
             List<ContractAbiMgr.AddAbiEventResponse> resp = ContractAbiMgr.getAddAbiEvents(transactionReceipt);
             if (resp.isEmpty()) {
                 log.error("add topic control address into CNS failed");
-                throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+                throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
             }
             return true;
         } catch (ExecutionException | TimeoutException | InterruptedException | NullPointerException e) {
             log.error("add topic control address into CNS failed", e);
-            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
     }
 
@@ -377,7 +372,7 @@ public class Web3SDKWrapper {
             return null;
         } catch (RuntimeException e) {
             log.error("loop block failed due to RuntimeException", e);
-            throw new BrokerException("loop block failed due to RuntimeException", e);
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
     }
 

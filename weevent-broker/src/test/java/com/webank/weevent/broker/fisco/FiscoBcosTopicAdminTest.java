@@ -448,7 +448,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
     public void testStateTopicExist() throws Exception {
         TopicInfo topicInfo = this.iProducer.state(this.topicName, this.groupId);
         Assert.assertNotNull(topicInfo);
-        Assert.assertFalse(topicInfo.getTopicAddress().isEmpty());
+        Assert.assertFalse(topicInfo.getTopicName().isEmpty());
         Assert.assertFalse(topicInfo.getSenderAddress().isEmpty());
         Assert.assertTrue(topicInfo.getCreatedTimestamp().intValue() != 0);
     }

@@ -66,20 +66,12 @@ public class FiscoBcos2 {
     private Map<String, TopicInfo> topicInfo = new ConcurrentHashMap<>();
 
     // history topic, (address <-> Contract)
-    private static Map<String, Contract> historyTopicContract = new ConcurrentHashMap<>();
+    private Map<String, Contract> historyTopicContract = new ConcurrentHashMap<>();
     // history topic, (address <-> version)
-    private static Map<String, Long> historyTopicVersion = new ConcurrentHashMap<>();
+    private Map<String, Long> historyTopicVersion = new ConcurrentHashMap<>();
 
     public FiscoBcos2(FiscoConfig fiscoConfig) {
         this.fiscoConfig = fiscoConfig;
-    }
-
-    public static Map<String, Contract> getHistoryTopicContract() {
-        return historyTopicContract;
-    }
-
-    public static Map<String, Long> getHistoryTopicVersion() {
-        return historyTopicVersion;
     }
 
     public void init(Long groupId) throws BrokerException {
@@ -90,26 +82,31 @@ public class FiscoBcos2 {
             this.web3j = Web3SDK2Wrapper.initWeb3j(groupId, this.fiscoConfig, FiscoBcosDelegate.threadPool);
 
             Map<Long, String> addresses = Web3SDK2Wrapper.listAddress(this.web3j, this.credentials);
-            if (addresses.isEmpty() || addresses.containsKey(SupportedVersion.nowVersion)) {
-                log.error("no topic control[version:{}] address in CRUD, please deploy it first", SupportedVersion.nowVersion);
+            log.info("address list in CRUD: {}", addresses);
+
+            if (addresses.isEmpty() || !addresses.containsKey(SupportedVersion.nowVersion)) {
+                log.error("no topic control[nowVersion: {}] address in CRUD, please deploy it first", SupportedVersion.nowVersion);
                 throw new BrokerException(ErrorCode.TOPIC_CONTROLLER_IS_NULL);
             }
 
             for (Map.Entry<Long, String> controlAddress : addresses.entrySet()) {
-                log.info("detect topic control address from CRUD: {} -> {}", controlAddress.getKey(), controlAddress.getValue());
+                log.info("init topic control {} -> {}", controlAddress.getKey(), controlAddress.getValue());
 
                 ImmutablePair<Contract, Contract> contracts = SupportedVersion.loadTopicControlContract(
                         this.web3j, this.credentials, controlAddress.getValue(), controlAddress.getKey().intValue());
-                historyTopicContract.put(contracts.right.getContractAddress(), topic);
-                historyTopicVersion.put(contracts.right.getContractAddress(), controlAddress.getKey());
+                this.historyTopicContract.put(contracts.right.getContractAddress(), contracts.right);
+                this.historyTopicVersion.put(contracts.right.getContractAddress(), controlAddress.getKey());
 
                 // publish and admin function use the nowVersion
                 if (controlAddress.getKey().equals(SupportedVersion.nowVersion)) {
+                    log.info("detect topic control in now version: {}", SupportedVersion.nowVersion);
+
                     this.topicController = (TopicController) contracts.left;
                     this.topic = (Topic) contracts.right;
                 }
-                break;
             }
+
+            log.info("all supported solidity version: {}", this.historyTopicVersion);
         }
     }
 
@@ -131,7 +128,7 @@ public class FiscoBcos2 {
     protected Contract getContractService(String contractAddress, Class<?> cls) throws BrokerException {
         if (this.web3j == null || this.credentials == null) {
             log.error("init web3sdk failed");
-            throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
+            throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
         }
 
         if (StringUtils.isBlank(contractAddress)) {
@@ -140,14 +137,7 @@ public class FiscoBcos2 {
             throw new BrokerException(ErrorCode.LOAD_CONTRACT_ERROR);
         }
 
-        Contract contract = Web3SDK2Wrapper.loadContract(contractAddress, this.web3j, this.credentials, cls);
-        if (contract == null) {
-            String msg = "load contract failed, " + cls.getSimpleName();
-            log.error(msg);
-            throw new BrokerException(ErrorCode.LOAD_CONTRACT_ERROR);
-        }
-
-        return contract;
+        return Web3SDK2Wrapper.loadContract(contractAddress, this.web3j, this.credentials, cls);
     }
 
     public boolean isTopicExist(String topicName) throws BrokerException {
@@ -316,7 +306,7 @@ public class FiscoBcos2 {
      * @return java.lang.Integer null if net error
      */
     public List<WeEvent> loop(Long blockNum) throws BrokerException {
-        return Web3SDK2Wrapper.loop(this.web3j, blockNum);
+        return Web3SDK2Wrapper.loop(this.web3j, blockNum, this.historyTopicVersion, this.historyTopicContract);
     }
 
     public GroupGeneral getGroupGeneral(String groupId) throws BrokerException {

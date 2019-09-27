@@ -119,11 +119,11 @@ public class FiscoBcosDelegate {
 
         if (StringUtils.isBlank(fiscoConfig.getVersion())) {
             log.error("the fisco version in fisco.properties is null");
-            throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
+            throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
         }
         if (StringUtils.isBlank(fiscoConfig.getNodes())) {
             log.error("the fisco nodes in fisco.properties is null");
-            throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
+            throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
         }
 
         if (fiscoConfig.getVersion().startsWith(WeEventConstants.FISCO_BCOS_1_X_VERSION_PREFIX)) {
@@ -162,7 +162,7 @@ public class FiscoBcosDelegate {
             log.info("all group in nodes: {}", this.fiscoBcos2Map.keySet());
         } else {
             log.error("unknown FISCO-BCOS's version");
-            throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
+            throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
         }
 
         initRedisService();
@@ -206,13 +206,13 @@ public class FiscoBcosDelegate {
     private void checkVersion(Long groupId) throws BrokerException {
         if (this.fiscoBcos != null) {
             if (groupId != Long.parseLong(WeEvent.DEFAULT_GROUP_ID)) {
-                throw new BrokerException(ErrorCode.WE3SDK_VERSION_NOT_SUPPORT);
+                throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
             }
             return;
         }
 
         if (!this.fiscoBcos2Map.containsKey(groupId)) {
-            throw new BrokerException(ErrorCode.WE3SDK_UNKNOWN_GROUP);
+            throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
         }
     }
 

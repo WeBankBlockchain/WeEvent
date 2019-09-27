@@ -54,6 +54,8 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
 
     @Override
     public boolean open(String topic, String groupId) throws BrokerException {
+        log.info("open topic: {} groupId: {}", topic, groupId);
+
         ParamCheckUtils.validateTopicName(topic);
         this.validateGroupId(groupId);
         try {
@@ -82,6 +84,8 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
 
     @Override
     public boolean close(String topic, String groupId) throws BrokerException {
+        log.info("close topic: {} groupId: {}", topic, groupId);
+
         ParamCheckUtils.validateTopicName(topic);
         this.validateGroupId(groupId);
         if (exist(topic, groupId)) {
@@ -148,6 +152,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     public void validateGroupId(String groupId) throws BrokerException {
         ParamCheckUtils.validateGroupId(groupId, fiscoBcosDelegate.listGroupId());
     }
+
     @Override
     public GroupGeneral getGroupGeneral(String groupId) throws BrokerException {
         return fiscoBcosDelegate.getGroupGeneral(groupId);
@@ -167,5 +172,4 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     public List<TbNode> queryNodeList(QueryEntity queryEntity) throws BrokerException {
         return fiscoBcosDelegate.queryNodeList(queryEntity);
     }
-
 }

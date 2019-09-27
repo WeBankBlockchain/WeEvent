@@ -12,8 +12,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
-import com.webank.weevent.broker.fisco.web3sdk.FiscoBcos2;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
+import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic;
+import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController;
+import com.webank.weevent.broker.fisco.web3sdk.v2.solc11.TopicController11;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.TopicInfo;
@@ -47,10 +49,7 @@ public class SupportedVersion {
         // support version list
         switch (version) {
             case 10:
-                com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController topicController =
-                        (com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController)
-                                Web3SDK2Wrapper.loadContract(controlAddress, web3j, credentials,
-                                        com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController.class);
+                TopicController topicController = (TopicController) Web3SDK2Wrapper.loadContract(controlAddress, web3j, credentials, TopicController.class);
                 String address = "";
                 try {
                     address = topicController.getTopicAddress().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
@@ -61,9 +60,7 @@ public class SupportedVersion {
                     log.error("getTopicAddress failed due to transaction timeout. ", e);
                     throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
                 }
-                com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic topic =
-                        (com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic)
-                                Web3SDK2Wrapper.loadContract(address, web3j, credentials, com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic.class);
+                Topic topic = (Topic) Web3SDK2Wrapper.loadContract(address, web3j, credentials, Topic.class);
 
                 return new ImmutablePair<>(topicController, topic);
 
@@ -90,16 +87,7 @@ public class SupportedVersion {
         // load data from low version
         switch (low.intValue()) {
             case 10:
-                com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController lowControl =
-                        (com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController)
-                                Web3SDK2Wrapper.loadContract(versions.get(low), web3j, credentials,
-                                        com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController.class);
-                if (lowControl == null) {
-                    String msg = "load topic control contract failed, version: " + low;
-                    log.error(msg);
-                    throw new BrokerException(ErrorCode.LOAD_CONTRACT_ERROR);
-                }
-
+                TopicController lowControl = (TopicController) Web3SDK2Wrapper.loadContract(versions.get(low), web3j, credentials, TopicController.class);
                 final int pageSize = 100;
                 for (int i = 0; true; i++) {
                     try {
@@ -150,15 +138,8 @@ public class SupportedVersion {
         // flush data into high version
         switch (high.intValue()) {
             case 11:
-                com.webank.weevent.broker.fisco.web3sdk.v2.solc11.TopicController highControl =
-                        (com.webank.weevent.broker.fisco.web3sdk.v2.solc11.TopicController)
-                                Web3SDK2Wrapper.loadContract(versions.get(high), web3j, credentials, com.webank.weevent.broker.fisco.web3sdk.v2.solc11.TopicController.class);
-                if (highControl == null) {
-                    String msg = "load topic control contract failed, version: " + high;
-                    log.error(msg);
-                    throw new BrokerException(ErrorCode.LOAD_CONTRACT_ERROR);
-                }
-
+                /*
+                TopicController11 highControl = (TopicController11) Web3SDK2Wrapper.loadContract(versions.get(high), web3j, credentials, TopicController11.class);
                 for (List<TopicInfo> onePage : topicInfos) {
                     try {
                         List<String> topicName = new ArrayList<>();
@@ -191,6 +172,7 @@ public class SupportedVersion {
                         throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
                     }
                 }
+                */
                 break;
 
             default:
@@ -201,14 +183,12 @@ public class SupportedVersion {
         return true;
     }
 
-    public static WeEvent decodeWeEvent(TransactionReceipt receipt, int version) throws BrokerException {
+    public static WeEvent decodeWeEvent(TransactionReceipt receipt, int version, Map<String, Contract> historyTopic) {
         // support version list
         switch (version) {
             case 10:
                 // v10 is com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic
-                com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic topic = (com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic)
-                        FiscoBcos2.getHistoryTopicContract().get(receipt.getContractAddress());
-
+                Topic topic = (Topic) historyTopic.get(receipt.getTo());
                 Tuple3<String, String, String> input = topic.getPublishWeEventInput(receipt);
                 Tuple1<BigInteger> output = topic.getPublishWeEventOutput(receipt);
 
@@ -224,7 +204,7 @@ public class SupportedVersion {
 
             default:
                 log.error("unknown solidity version: {}", version);
-                throw new BrokerException(ErrorCode.UNKNOWN_SOLIDITY_VERSION);
+                return null;
         }
     }
 }

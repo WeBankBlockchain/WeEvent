@@ -130,15 +130,17 @@ public enum ErrorCode {
 
     LOAD_CONTRACT_ERROR(200208, "load contract failed"),
 
-    WE3SDK_INIT_ERROR(200209, "init web3sdk failed"),
+    WEB3SDK_INIT_ERROR(200209, "init web3sdk failed"),
 
-    WE3SDK_VERSION_NOT_SUPPORT(200210, "FISCO-BCOS 1.x, do not support group"),
+    WEB3SDK_VERSION_NOT_SUPPORT(200210, "FISCO-BCOS 1.x, do not support group"),
 
-    WE3SDK_UNKNOWN_GROUP(200211, "FISCO-BCOS 2.x, unknown group id"),
+    WEB3SDK_UNKNOWN_GROUP(200211, "FISCO-BCOS 2.x, unknown group id"),
 
     SUBSCRIPTION_NOTIFY_QUEUE_FULL(200212, "onEvent is blocked too long, notify queue is full"),
 
     UNKNOWN_SOLIDITY_VERSION(200213, "unknown contract version"),
+
+    WEB3SDK_RPC_ERROR(200214, "we3sdk's rpc failed"),
     ;
 
     /**
