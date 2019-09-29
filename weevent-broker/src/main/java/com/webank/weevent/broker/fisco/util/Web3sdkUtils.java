@@ -23,8 +23,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Data
 class EchoAddress {
-    Long version;
-    String address;
+    private Long version;
+    private String address;
     private Boolean isNew;
 
     EchoAddress(Long version, String address, Boolean isNew) {

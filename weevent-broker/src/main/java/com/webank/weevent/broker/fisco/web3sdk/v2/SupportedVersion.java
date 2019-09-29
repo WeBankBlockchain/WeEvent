@@ -15,7 +15,6 @@ import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic;
 import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController;
-import com.webank.weevent.broker.fisco.web3sdk.v2.solc11.TopicController11;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.TopicInfo;
@@ -70,24 +69,12 @@ public class SupportedVersion {
         }
     }
 
-    /**
-     * flush topic info from low to high
-     *
-     * @param web3j web3j handler
-     * @param credentials credentials
-     * @param versions version list
-     * @param low low version
-     * @param high high version
-     * @return true if success
-     */
-    public static boolean flushData(Web3j web3j, Credentials credentials, Map<Long, String> versions, Long low, Long high) throws BrokerException {
+    private static List<List<TopicInfo>> loadTopicData(Web3j web3j, Credentials credentials, String address, Long version) throws BrokerException {
         List<List<TopicInfo>> topicInfos = new ArrayList<>();
-
-        int total = 0;
-        // load data from low version
-        switch (low.intValue()) {
+        int total;
+        switch (version.intValue()) {
             case 10:
-                TopicController lowControl = (TopicController) Web3SDK2Wrapper.loadContract(versions.get(low), web3j, credentials, TopicController.class);
+                TopicController lowControl = (TopicController) Web3SDK2Wrapper.loadContract(address, web3j, credentials, TopicController.class);
                 final int pageSize = 100;
                 for (int i = 0; true; i++) {
                     try {
@@ -130,13 +117,17 @@ public class SupportedVersion {
                 break;
 
             default:
-                log.error("unknown solidity version: {}", low);
+                log.error("unknown solidity version: {}", version);
                 throw new BrokerException(ErrorCode.UNKNOWN_SOLIDITY_VERSION);
         }
 
-        log.info("topic size: {} in version: {}", total, low);
+        log.info("topic size: {} in version: {}", total, version);
+        return topicInfos;
+    }
+
+    private static void saveTopicData(Web3j web3j, Credentials credentials, List<List<TopicInfo>> topicInfos, String address, Long version) throws BrokerException {
         // flush data into high version
-        switch (high.intValue()) {
+        switch (version.intValue()) {
             case 11:
                 /*
                 TopicController11 highControl = (TopicController11) Web3SDK2Wrapper.loadContract(versions.get(high), web3j, credentials, TopicController11.class);
@@ -176,10 +167,25 @@ public class SupportedVersion {
                 break;
 
             default:
-                log.error("unknown solidity version: {}", high);
+                log.error("unknown solidity version: {}", version);
                 throw new BrokerException(ErrorCode.UNKNOWN_SOLIDITY_VERSION);
         }
+    }
 
+    /**
+     * flush topic info from low to high
+     *
+     * @param web3j web3j handler
+     * @param credentials credentials
+     * @param versions version list
+     * @param low low version
+     * @param high high version
+     * @return true if success
+     */
+    public static boolean flushData(Web3j web3j, Credentials credentials, Map<Long, String> versions, Long low, Long high) throws BrokerException {
+        // load data from low version
+        List<List<TopicInfo>> topicInfos = loadTopicData(web3j, credentials, versions.get(low), low);
+        saveTopicData(web3j, credentials, topicInfos, versions.get(high), high);
         return true;
     }
 

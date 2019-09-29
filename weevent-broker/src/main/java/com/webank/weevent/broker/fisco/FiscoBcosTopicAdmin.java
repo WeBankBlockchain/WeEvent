@@ -150,7 +150,6 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     }
 
     public void validateGroupId(String groupId) throws BrokerException {
-        this.validateGroupId(groupId);
         ParamCheckUtils.validateGroupId(groupId, fiscoBcosDelegate.listGroupId());
     }
 
