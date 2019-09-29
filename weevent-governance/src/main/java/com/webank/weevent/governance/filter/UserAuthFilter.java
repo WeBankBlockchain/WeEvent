@@ -15,6 +15,7 @@ import com.webank.weevent.governance.entity.BaseResponse;
 import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.service.BrokerService;
+import com.webank.weevent.governance.service.PermissionService;
 import com.webank.weevent.governance.utils.CookiesTools;
 
 import com.alibaba.fastjson.JSON;
@@ -30,6 +31,9 @@ public class UserAuthFilter implements Filter {
     @Autowired
     private CookiesTools cookiesTools;
 
+    @Autowired
+    private PermissionService permissionService;
+
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
@@ -41,8 +45,8 @@ public class UserAuthFilter implements Filter {
             String requestParam = attributeNames.nextElement();
             if ("brokerId".equals(requestParam)) {
                 String brokerId = request.getParameter("brokerId");
-                BrokerEntity brokerEntity = brokerService.getBroker(Integer.parseInt(brokerId));
-                if (!accountId.equals(brokerEntity.getUserId().toString())) {
+                Boolean flag = permissionService.verifyPermissions(Integer.valueOf(brokerId), accountId);
+                if (!flag) {
                     BaseResponse baseResponse = new BaseResponse(ConstantCode.ACCESS_DENIED);
                     response.setContentType("application/json;charset=UTF-8");
                     response.getWriter().write(JSON.toJSONString(baseResponse));

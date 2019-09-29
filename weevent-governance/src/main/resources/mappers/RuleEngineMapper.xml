@@ -68,9 +68,6 @@
         <if test="ruleName != null and  ruleName!=''">
             and rule_name = #{ruleName,jdbcType=VARCHAR}
         </if>
-        <if test="ruleName != null and  ruleName!=''">
-            and rule_name = #{ruleName,jdbcType=VARCHAR}
-        </if>
     </sql>
 
     <update id="updateRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity">
