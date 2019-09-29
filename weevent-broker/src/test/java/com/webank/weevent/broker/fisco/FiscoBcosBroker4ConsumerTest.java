@@ -196,7 +196,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
             this.iConsumer.subscribe(this.topicName, "100", WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
             Assert.fail();
         } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
         }
     }
 
