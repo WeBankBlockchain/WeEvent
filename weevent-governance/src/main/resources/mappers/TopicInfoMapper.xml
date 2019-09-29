@@ -15,7 +15,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-       id,create_date, last_update , topic_name, creater, broker_id,group_id,description
+        id,create_date, last_update , topic_name, creater, broker_id,group_id,description
     </sql>
 
 
@@ -38,8 +38,12 @@
 
     <insert id="openBrokeTopic" parameterType="com.webank.weevent.governance.entity.TopicEntity">
         <selectKey keyProperty="count" resultType="int" order="BEFORE">
-            select count(*) from t_topic where broker_id=#{topicEntity.brokerId} and topic_name =
-            #{topicEntity.topicName} and topic_name = #{topicEntity.groupId} and is_delete=0
+            select count(*) from t_topic
+            where broker_id=#{topicEntity.brokerId}
+            and topic_name =
+            #{topicEntity.topicName}
+            and topic_name = #{topicEntity.groupId}
+            and is_delete=0
         </selectKey>
         <if test="count > 0">
             update t_topic
@@ -61,13 +65,15 @@
     </insert>
 
     <delete id="deleteTopicInfo" parameterType="java.lang.Integer">
-	   update t_topic set is_delete=1
-       where id=#{id}
-	</delete>
+        update t_topic
+        set is_delete=1
+        where id = #{id}
+    </delete>
 
     <delete id="deleteByBrokerId" parameterType="java.lang.Integer">
-	   update t_topic set is_delete=1
-       where broker_id=#{brokerId}
-	</delete>
+        update t_topic
+        set is_delete=1
+        where broker_id = #{brokerId}
+    </delete>
 
 </mapper>

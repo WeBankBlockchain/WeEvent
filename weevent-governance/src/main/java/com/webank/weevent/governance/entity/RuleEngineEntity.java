@@ -63,4 +63,8 @@ public class RuleEngineEntity extends BaseEntity {
     private Integer pageSize;
 
     private Integer pageNumber;
+
+    private Integer startIndex;
+
+    private Integer endIndex;
 }

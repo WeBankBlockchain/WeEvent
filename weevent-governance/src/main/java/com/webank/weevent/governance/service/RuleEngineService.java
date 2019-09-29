@@ -17,8 +17,6 @@ import com.webank.weevent.governance.utils.CookiesTools;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,6 +55,8 @@ public class RuleEngineService {
             int count = ruleEngineMapper.countRuleEngine(ruleEngineEntity);
             List<RuleEngineEntity> ruleEngineEntities = null;
             if (count > 0) {
+                ruleEngineEntity.setStartIndex((ruleEngineEntity.getPageNumber() - 1) * ruleEngineEntity.getPageSize());
+                ruleEngineEntity.setEndIndex(ruleEngineEntity.getPageNumber() * ruleEngineEntity.getPageSize());
                 ruleEngineEntities = ruleEngineMapper.getRuleEngines(ruleEngineEntity);
             }
             return ruleEngineEntities;
@@ -69,7 +69,7 @@ public class RuleEngineService {
 
 
     @Transactional(rollbackFor = Throwable.class)
-    public boolean addRuleEngine(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response)
+    public RuleEngineEntity addRuleEngine(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         try {
             String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
@@ -87,7 +87,8 @@ public class RuleEngineService {
             if (ruleEngineEntity.getPayloadType() == null || ruleEngineEntity.getPayloadType() == 0) {
                 ruleEngineEntity.setPayloadType(PayloadEnum.JSON.getCode());
             }
-            return ruleEngineMapper.addRuleEngine(ruleEngineEntity);
+             ruleEngineMapper.addRuleEngine(ruleEngineEntity);
+            return ruleEngineEntity;
         } catch (Exception e) {
             log.error("add ruleEngineEntity fail", e);
             throw new GovernanceException("add ruleEngineEntity fail ", e);
@@ -98,6 +99,7 @@ public class RuleEngineService {
     public boolean deleteRuleEngine(RuleEngineEntity ruleEngineEntity, HttpServletRequest request) throws GovernanceException {
         authCheck(ruleEngineEntity, request);
         // commonService.getCloseResponse()
+        //delete cep ruleEngineEntity.getCepId()
         return ruleEngineMapper.deleteRuleEngine(ruleEngineEntity);
     }
 
@@ -141,7 +143,7 @@ public class RuleEngineService {
             throws GovernanceException {
         RuleEngineEntity rule = new RuleEngineEntity();
         try {
-            //query by id
+            //query by id and status
             rule.setId(ruleEngineEntity.getId());
             rule.setStatus(StatusEnum.NOT_STARTED.getCode());
             List<RuleEngineEntity> ruleEngines = ruleEngineMapper.getRuleEngines(rule);
@@ -150,7 +152,8 @@ public class RuleEngineService {
             }
 
             rule = ruleEngines.get(0);
-            String url = new StringBuffer(rule.getBrokerUrl()).append("/processor/startCEPRule?").append("id=").append(rule.getId()).toString();
+      /*      String afterUrl = getAfterUrl(rule);
+            String url = new StringBuffer(rule.getBrokerUrl()).append("/processor/startCEPRule?").append(afterUrl).toString();
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url);
             int statusCode = closeResponse.getStatusLine().getStatusCode();
             if (ErrorCode.SUCCESS.getCode() != statusCode) {
@@ -164,7 +167,7 @@ public class RuleEngineService {
             if (100 != code.intValue()) {
                 log.error("broker start ruleEngine fail");
                 throw new GovernanceException("broker start ruleEngine fail");
-            }
+            }*/
 
             //modify status
             RuleEngineEntity engineEntity = new RuleEngineEntity();
@@ -175,6 +178,11 @@ public class RuleEngineService {
             log.error("start ruleEngine fail", e);
             throw new GovernanceException("start ruleEngine fail", e);
         }
+    }
+
+    private String getAfterUrl(RuleEngineEntity rule) {
+        //Verify that the required fields are present
+        return  null;
     }
 
     public RuleEngineEntity getRuleEngineDetail(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response) {

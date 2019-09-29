@@ -16,7 +16,7 @@ import org.hibernate.validator.constraints.URL;
  * @since 2019/04/28
  */
 @Data
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(callSuper = false)
 public class BrokerEntity extends BaseEntity {
 
     @Min(1)
@@ -38,6 +38,10 @@ public class BrokerEntity extends BaseEntity {
      * 1 means creator, 2 means is authorized
      */
     private String isCreator;
+    /**
+     * 1 means configured ,2 means not configured
+     */
+    private String isConfigRule;
 
 
 }

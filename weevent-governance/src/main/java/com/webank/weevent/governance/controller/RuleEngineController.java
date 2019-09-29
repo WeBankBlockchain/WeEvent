@@ -43,8 +43,8 @@ public class RuleEngineController {
     public GovernanceResult addRuleEngine(@Valid @RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request,
                                           HttpServletResponse response) throws GovernanceException {
         log.info("add  ruleEngineEntity service into db :{}", ruleEngineEntity);
-        boolean flag = ruleEngineService.addRuleEngine(ruleEngineEntity, request, response);
-        return new GovernanceResult(flag);
+        RuleEngineEntity rule = ruleEngineService.addRuleEngine(ruleEngineEntity, request, response);
+        return new GovernanceResult(rule);
     }
 
     @PostMapping("/update")

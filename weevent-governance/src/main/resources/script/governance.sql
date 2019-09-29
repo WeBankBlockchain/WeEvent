@@ -16,6 +16,7 @@ CREATE TABLE t_broker (
   `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create date',
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP comment 'update date',
   `is_delete` int(1) NOT NULL DEFAULT  0 COMMENT '0 means not deleted 1 means deleted',
+  `is_config_rule` int(1) NOT NULL DEFAULT  NULL COMMENT '1 means configured ,2 means not configured',
   `user_id` int(11) NOT NULL  COMMENT 'user id',
   `name` varchar(256) NOT NULL COMMENT 'name',
   `broker_url` varchar(256) DEFAULT NULL COMMENT 'broker url',

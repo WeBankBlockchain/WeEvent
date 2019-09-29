@@ -25,21 +25,19 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-         id,create_date,last_update, rule_name,payload_type,payload,broker_id,cep_id,broker_url,user_id
+        id,create_date,last_update, rule_name,payload_type,payload,broker_id,cep_id,broker_url,user_id,
          from_destination,to_destination,select_field,condition_field,condition_type,
          database_url,error_destination,error_message,status
     </sql>
 
     <insert id="addRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
             useGeneratedKeys="true" keyProperty="id">
-        insert into
-         t_rule_engine(rule_name,payload_type,payload,broker_id,broker_url,user_id,cep_id
-         from_destination,to_destination,select_field,
-         condition_field,condition_type,status)
-        values
-        (#{ruleName},#{payloadType},#{payload},#{brokerId},#{brokerUrl},#{userId},#{cepId}
-        #{fromDestination},#{toDestination},#{selectField},
-        #{conditionField},#{conditionType},#{status})
+        insert into t_rule_engine(rule_name, payload_type, payload, broker_id, broker_url, user_id, cep_id,
+                                  from_destination, to_destination, select_field,
+                                  condition_field, condition_type, status)
+        values (#{ruleName}, #{payloadType}, #{payload}, #{brokerId}, #{brokerUrl}, #{userId}, #{cepId},
+            #{fromDestination}, #{toDestination}, #{selectField},
+                #{conditionField}, #{conditionType}, #{status})
     </insert>
 
     <select id="getRuleEngines" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
@@ -48,6 +46,9 @@
         <include refid="Base_Column_List"/>
         from t_rule_engine where status!=2
         <include refid="ruleEngineWhere"/>
+        <if test="startIndex != null and endIndex!=null">
+            limit #{startIndex},#{endIndex}
+        </if>
     </select>
 
     <sql id="ruleEngineWhere">
@@ -63,24 +64,38 @@
         <if test="ruleName != null and  ruleName!=''">
             and rule_name = #{ruleName,jdbcType=VARCHAR}
         </if>
+        <if test="ruleName != null and  ruleName!=''">
+            and rule_name = #{ruleName,jdbcType=VARCHAR}
+        </if>
     </sql>
 
     <update id="updateRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity">
-        update t_rule_engine set rule_name=#{ruleName},payload=#{payload},select_field=#{selectField},
-         condition_field=#{conditionField},condition_type=#{conditionType},from_destination=#{fromDestination},
-         to_destination=#{fromDestination},database_url=#{databaseUrl},error_destination=#{errorDestination},
-         error_message=#{errorMessage}
-         where id=#{id,jdbcType=INTEGER} and status!=2
+        update t_rule_engine
+        set rule_name=#{ruleName},
+            payload=#{payload},
+            select_field=#{selectField},
+            condition_field=#{conditionField},
+            condition_type=#{conditionType},
+            from_destination=#{fromDestination},
+            to_destination=#{fromDestination},
+            database_url=#{databaseUrl},
+            error_destination=#{errorDestination},
+            error_message=#{errorMessage}
+        where id = #{id,jdbcType=INTEGER}
+          and status != 2
     </update>
 
     <update id="updateRuleEngineStatus" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity">
-        update t_rule_engine set status=#{status} where id=#{id,jdbcType=INTEGER}
+        update t_rule_engine
+        set status=#{status}
+        where id = #{id,jdbcType=INTEGER}
     </update>
 
 
     <delete id="deleteRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity">
-        update  t_rule_engine set status=2
-        where id=#{id}
+        update t_rule_engine
+        set status=2
+        where id = #{id}
     </delete>
 
     <select id="countRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"

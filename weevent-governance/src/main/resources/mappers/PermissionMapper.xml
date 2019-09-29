@@ -44,15 +44,16 @@
     </delete>
 
     <delete id="deletePermission" parameterType="java.lang.Integer">
-	   delete from  t_permission
-       where broker_id = #{brokerId}
-	</delete>
+        delete
+        from t_permission
+        where broker_id = #{brokerId}
+    </delete>
 
     <update id="updatePermission" parameterType="com.webank.weevent.governance.entity.PermissionEntity">
-        update t_permission set
-            user_id=#{permissionEntity.userId},
+        update t_permission
+        set user_id=#{permissionEntity.userId},
             broker_id=#{permissionEntity.brokerId}
-        where id=#{id,jdbcType=INTEGER}
+        where id = #{id,jdbcType=INTEGER}
     </update>
 
 
@@ -65,9 +66,14 @@
     </insert>
 
     <select id="findUserIdByBrokerId" resultType="integer">
-        select distinct user_id as userId from t_broker where id=#{brokerId} and is_delete=0
+        select distinct user_id as userId
+        from t_broker
+        where id = #{brokerId}
+          and is_delete = 0
         union
-        select distinct user_id as userId from t_permission where broker_id=#{brokerId}
+        select distinct user_id as userId
+        from t_permission
+        where broker_id = #{brokerId}
     </select>
 
 </mapper>
