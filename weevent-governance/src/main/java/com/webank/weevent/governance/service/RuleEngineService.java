@@ -48,8 +48,6 @@ public class RuleEngineService {
     private final String regex = "^[a-z0-9A-Z_-]{1,100}";
 
 
-
-
     public List<RuleEngineEntity> getRuleEngines(HttpServletRequest request, RuleEngineEntity ruleEngineEntity) throws GovernanceException {
         try {
             String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
@@ -89,9 +87,6 @@ public class RuleEngineService {
             if (ruleEngineEntity.getPayloadType() == null || ruleEngineEntity.getPayloadType() == 0) {
                 ruleEngineEntity.setPayloadType(PayloadEnum.JSON.getCode());
             }
-            //todo addCEPRuleById  get cepId
-            Integer cepId=null;
-            ruleEngineEntity.setCepId(cepId);
             return ruleEngineMapper.addRuleEngine(ruleEngineEntity);
         } catch (Exception e) {
             log.error("add ruleEngineEntity fail", e);
@@ -102,7 +97,7 @@ public class RuleEngineService {
     @Transactional(rollbackFor = Throwable.class)
     public boolean deleteRuleEngine(RuleEngineEntity ruleEngineEntity, HttpServletRequest request) throws GovernanceException {
         authCheck(ruleEngineEntity, request);
-       // commonService.getCloseResponse()
+        // commonService.getCloseResponse()
         return ruleEngineMapper.deleteRuleEngine(ruleEngineEntity);
     }
 
@@ -122,7 +117,9 @@ public class RuleEngineService {
             //check databaseUrl
             commonService.checkDataBaseUrl(ruleEngineEntity.getDatabaseUrl());
             //updateCEPRuleById
-          //  commonService.
+            //判断是否有cepId，如果有就要更新cep
+            Integer cepId = ruleEngines.get(0).getCepId();
+            //  commonService.
             return ruleEngineMapper.updateRuleEngine(ruleEngineEntity);
         } catch (Exception e) {
             log.error("update ruleEngine fail", e);
@@ -130,7 +127,6 @@ public class RuleEngineService {
         }
 
     }
-
 
 
     @Transactional(rollbackFor = Throwable.class)
@@ -154,7 +150,7 @@ public class RuleEngineService {
             }
 
             rule = ruleEngines.get(0);
-            String url = new StringBuffer(rule.getBrokerUrl()).append("/processor/getCEPRuleById?").append("id=").append(rule.getId()).toString();
+            String url = new StringBuffer(rule.getBrokerUrl()).append("/processor/startCEPRule?").append("id=").append(rule.getId()).toString();
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url);
             int statusCode = closeResponse.getStatusLine().getStatusCode();
             if (ErrorCode.SUCCESS.getCode() != statusCode) {
