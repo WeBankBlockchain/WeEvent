@@ -87,7 +87,7 @@ public class RuleEngineService {
             if (ruleEngineEntity.getPayloadType() == null || ruleEngineEntity.getPayloadType() == 0) {
                 ruleEngineEntity.setPayloadType(PayloadEnum.JSON.getCode());
             }
-             ruleEngineMapper.addRuleEngine(ruleEngineEntity);
+            ruleEngineMapper.addRuleEngine(ruleEngineEntity);
             return ruleEngineEntity;
         } catch (Exception e) {
             log.error("add ruleEngineEntity fail", e);
@@ -182,7 +182,7 @@ public class RuleEngineService {
 
     private String getAfterUrl(RuleEngineEntity rule) {
         //Verify that the required fields are present
-        return  null;
+        return null;
     }
 
     public RuleEngineEntity getRuleEngineDetail(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response) {

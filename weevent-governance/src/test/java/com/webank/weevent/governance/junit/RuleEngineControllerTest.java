@@ -49,7 +49,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
     @Test
     public void testAddRuleEngine() throws Exception {
         String content = "{\"ruleName\":\"tempera_ture-alarm\",\"payloadType\":\"1\",\"payloadMap\":{\"temperate\":30,\"humidity\":0.5}," +
-                "\"userId\":\"1\",\"brokerId\":\"1\"}";
+                "\"userId\":\"1\",\"brokerId\":\"1\",\"groupId\":\"1\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/add").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
@@ -71,7 +71,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
 
     @Test
     public void testUpdateRuleEngine() throws Exception {
-        String content = "{\"id\":\"1\",\"ruleName\":\"temperature-alarm\",\"payloadType\":\"1\"," +
+        String content = "{\"id\":\"2\",\"ruleName\":\"temperature-alarm\",\"payloadType\":\"1\"," +
                 "\"payloadMap\":{\"temperate\":30,\"humidity\":0.5},\"brokerId\":\"1\"," +
                 "\"fromDestination\":\"airCondition\",\"toDestination\":\"test\"," +
                 "\"selectField\":\"temperate\",\"conditionField\":\"temperate>38\",\"conditionType\":\"1\"," +

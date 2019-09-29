@@ -29,6 +29,8 @@ public class RuleEngineEntity extends BaseEntity {
 
     private Integer userId;
 
+    private String groupId;
+
     private Integer brokerId;
 
     private Integer cepId;

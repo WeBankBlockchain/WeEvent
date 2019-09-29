@@ -22,22 +22,23 @@
         <result column="error_destination" property="errorDestination" jdbcType="VARCHAR"/>
         <result column="error_message" property="errorMessage" jdbcType="VARCHAR"/>
         <result column="status" property="status" jdbcType="INTEGER"/>
+        <result column="group_id" property="groupId" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id,create_date,last_update, rule_name,payload_type,payload,broker_id,cep_id,broker_url,user_id,
          from_destination,to_destination,select_field,condition_field,condition_type,
-         database_url,error_destination,error_message,status
+         database_url,error_destination,error_message,status,group_id
     </sql>
 
     <insert id="addRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
             useGeneratedKeys="true" keyProperty="id">
         insert into t_rule_engine(rule_name, payload_type, payload, broker_id, broker_url, user_id, cep_id,
                                   from_destination, to_destination, select_field,
-                                  condition_field, condition_type, status)
+                                  condition_field, condition_type, status, group_id)
         values (#{ruleName}, #{payloadType}, #{payload}, #{brokerId}, #{brokerUrl}, #{userId}, #{cepId},
-            #{fromDestination}, #{toDestination}, #{selectField},
-                #{conditionField}, #{conditionType}, #{status})
+                #{fromDestination}, #{toDestination}, #{selectField},
+                #{conditionField}, #{conditionType}, #{status}, #{groupId})
     </insert>
 
     <select id="getRuleEngines" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
@@ -57,6 +58,9 @@
         </if>
         <if test="userId != null">
             and user_id = #{userId,jdbcType=INTEGER}
+        </if>
+        <if test="groupId != null">
+            and group_id = #{groupId,jdbcType=VARCHAR}
         </if>
         <if test="brokerId != null">
             and broker_id = #{brokerId,jdbcType=INTEGER}
