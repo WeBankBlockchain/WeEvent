@@ -58,23 +58,28 @@ contract TopicController {
     }
     
     // page index start from 0, pageSize default 10
-    function listTopicName(uint pageIndex, uint pageSize) public constant returns (uint total, uint size, string[100] topics) {
+    function listTopicName(uint pageIndex, uint pageSize) public constant returns (uint total, uint size, string[] topics) {
         if (pageSize <= 0 || pageSize > 100) {
             pageSize = 10;
         }
 
-        uint idx = pageIndex * pageSize;
-        for (uint i = 0; i < pageSize; i++) {
-            if (idx >= topicIndex.length) {
-                break;
-            }
-            
-            topics[i] = topicIndex[idx];
-            idx = idx + 1;
-        }
-
         total = topicIndex.length;
-        size = i;
+        uint idx = pageIndex * pageSize;
+        if (topicIndex.length <= idx) {
+            size = 0;
+        }else{
+            size = topicIndex.length >= idx + pageSize ? pageSize : topicIndex.length - idx;
+            string[] memory localTopics = new string[](size);
+            for (uint i = 0; i < pageSize; i++) {
+                if (idx >= topicIndex.length) {
+                    break;
+                }
+
+                localTopics[i] = topicIndex[idx];
+                idx = idx + 1;
+            }
+            topics = localTopics;
+        }
     }
     
     // flush data while upgrade
@@ -90,9 +95,9 @@ contract TopicController {
                 
                 topicMap[oneName] = topicInfo;
                 topicIndex.push(oneName);
-            }            
+            }
         }
-        
+
         topic.flushSnapshot(topicName, lastSequence, lastBlock, lastTimestamp, lastSender);
-    }    
+    }
 }

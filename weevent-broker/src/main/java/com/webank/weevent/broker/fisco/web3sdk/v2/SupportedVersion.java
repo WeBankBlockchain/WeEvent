@@ -83,28 +83,30 @@ public class SupportedVersion {
 
                         total = tuple3.getValue1().intValue();
                         List<TopicInfo> onePage = new ArrayList<>();
-                        for (String topicName : tuple3.getValue3()) {
-                            TopicInfo topicInfo = new TopicInfo();
-                            Tuple8<Boolean, String, BigInteger, BigInteger, BigInteger, BigInteger, BigInteger, String> result =
-                                    lowControl.getTopicInfo(topicName).sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-                            if (result.getValue1()) {
-                                //topic
-                                topicInfo.setTopicName(topicName);
-                                topicInfo.setSenderAddress(result.getValue2());
-                                topicInfo.setCreatedTimestamp(result.getValue3().longValue());
-                                topicInfo.setBlockNumber(result.getValue4().longValue());
+                        if (tuple3.getValue2().intValue() > 0) {
+                            for (String topicName : tuple3.getValue3()) {
+                                TopicInfo topicInfo = new TopicInfo();
+                                Tuple8<Boolean, String, BigInteger, BigInteger, BigInteger, BigInteger, BigInteger, String> result =
+                                        lowControl.getTopicInfo(topicName).sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+                                if (result.getValue1()) {
+                                    //topic
+                                    topicInfo.setTopicName(topicName);
+                                    topicInfo.setSenderAddress(result.getValue2());
+                                    topicInfo.setCreatedTimestamp(result.getValue3().longValue());
+                                    topicInfo.setBlockNumber(result.getValue4().longValue());
 
-                                // last event
-                                topicInfo.setSequenceNumber(result.getValue5().longValue());
-                                topicInfo.setLastBlock(result.getValue6().longValue());
-                                topicInfo.setLastTimestamp(result.getValue7().longValue());
-                                topicInfo.setLastSender(result.getValue8());
+                                    // last event
+                                    topicInfo.setSequenceNumber(result.getValue5().longValue());
+                                    topicInfo.setLastBlock(result.getValue6().longValue());
+                                    topicInfo.setLastTimestamp(result.getValue7().longValue());
+                                    topicInfo.setLastSender(result.getValue8());
 
-                                onePage.add(topicInfo);
+                                    onePage.add(topicInfo);
+                                }
                             }
-                        }
 
-                        topicInfos.add(onePage);
+                            topicInfos.add(onePage);
+                        }
 
                         if (tuple3.getValue2().intValue() < pageSize) {
                             break;
