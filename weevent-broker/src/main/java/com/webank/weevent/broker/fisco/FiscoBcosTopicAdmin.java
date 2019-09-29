@@ -54,6 +54,8 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
 
     @Override
     public boolean open(String topic, String groupId) throws BrokerException {
+        log.info("open topic: {} groupId: {}", topic, groupId);
+
         ParamCheckUtils.validateTopicName(topic);
         this.validateGroupId(groupId);
         try {
@@ -82,6 +84,8 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
 
     @Override
     public boolean close(String topic, String groupId) throws BrokerException {
+        log.info("close topic: {} groupId: {}", topic, groupId);
+
         ParamCheckUtils.validateTopicName(topic);
         this.validateGroupId(groupId);
         if (exist(topic, groupId)) {
@@ -148,24 +152,28 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     public void validateGroupId(String groupId) throws BrokerException {
         ParamCheckUtils.validateGroupId(groupId, fiscoBcosDelegate.listGroupId());
     }
+
     @Override
     public GroupGeneral getGroupGeneral(String groupId) throws BrokerException {
-        return fiscoBcosDelegate.getGroupGeneral(groupId);
+        this.validateGroupId(groupId);
+        return fiscoBcosDelegate.getGroupGeneral(Long.valueOf(groupId));
     }
 
     @Override
     public List<TbTransHash> queryTransList(QueryEntity queryEntity) throws BrokerException {
-        return fiscoBcosDelegate.queryTransList(queryEntity);
+        this.validateGroupId(queryEntity.getGroupId());
+        return fiscoBcosDelegate.queryTransList(Long.valueOf(queryEntity.getGroupId()), queryEntity.getPkHash(), queryEntity.getBlockNumber());
     }
 
     @Override
     public List<TbBlock> queryBlockList(QueryEntity queryEntity) throws BrokerException {
-        return fiscoBcosDelegate.queryBlockList(queryEntity);
+        this.validateGroupId(queryEntity.getGroupId());
+        return fiscoBcosDelegate.queryBlockList(Long.valueOf(queryEntity.getGroupId()), queryEntity.getPkHash(), queryEntity.getBlockNumber());
     }
 
     @Override
     public List<TbNode> queryNodeList(QueryEntity queryEntity) throws BrokerException {
-        return fiscoBcosDelegate.queryNodeList(queryEntity);
+        this.validateGroupId(queryEntity.getGroupId());
+        return fiscoBcosDelegate.queryNodeList(Long.valueOf(queryEntity.getGroupId()));
     }
-
 }

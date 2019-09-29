@@ -1,14 +1,14 @@
-package com.webank.weevent.broker.fisco.web3sdk;
+package com.webank.weevent.broker.fisco.web3sdk.v2;
 
 
 import java.lang.reflect.Method;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -18,12 +18,8 @@ import java.util.stream.Collectors;
 
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
-import com.webank.weevent.broker.fisco.contract.v2.Topic;
-import com.webank.weevent.broker.fisco.contract.v2.TopicController;
-import com.webank.weevent.broker.fisco.contract.v2.TopicData;
-import com.webank.weevent.broker.fisco.util.DataTypeUtils;
+import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
-import com.webank.weevent.protocol.rest.entity.QueryEntity;
 import com.webank.weevent.protocol.rest.entity.TbBlock;
 import com.webank.weevent.protocol.rest.entity.TbNode;
 import com.webank.weevent.protocol.rest.entity.TbTransHash;
@@ -77,10 +73,8 @@ public class Web3SDK2Wrapper {
     public final static String WeEventTable = "WeEvent";
     public final static String WeEventTableKey = "key";
     public final static String WeEventTableValue = "value";
+    public final static String WeEventTableVersion = "version";
     public final static String WeEventTopicControlAddress = "topic_control_address";
-
-    // it's a trick. Topic.getLogWeEventEvents is not static
-    private static Topic topic;
 
     // static gas provider
     public static final ContractGasProvider gasProvider = new ContractGasProvider() {
@@ -154,14 +148,14 @@ public class Web3SDK2Wrapper {
             if (StringUtils.isBlank(nodeVersion)
                     || !nodeVersion.contains(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {
                 log.error("init web3sdk failed, mismatch FISCO-BCOS version in node: {}", nodeVersion);
-                throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
+                throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
             }
 
             log.info("initialize web3sdk success, group id: {}", groupId);
             return web3j;
         } catch (Exception e) {
             log.error("init web3sdk failed, group id: " + groupId, e);
-            throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
+            throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
         }
     }
 
@@ -190,13 +184,13 @@ public class Web3SDK2Wrapper {
      * @param crud table service
      * @return opened or exist table
      */
-    public static Table ensureTable(CRUDService crud) {
+    public static Table ensureTable(CRUDService crud) throws BrokerException {
         try {
             return crud.desc(WeEventTable);
         } catch (PrecompileMessageException e) {
             log.info("not exist table in CRUD, create it: {}", WeEventTable);
 
-            Table table = new Table(WeEventTable, WeEventTableKey, WeEventTableValue);
+            Table table = new Table(WeEventTable, WeEventTableKey, WeEventTableValue + "," + WeEventTableVersion);
             try {
                 int result = crud.createTable(table);
                 if (result == 0) {
@@ -205,74 +199,72 @@ public class Web3SDK2Wrapper {
                 }
 
                 log.error("create table in CRUD failed, " + WeEventTable);
-                return null;
             } catch (Exception e1) {
                 log.error("create table in CRUD failed, " + WeEventTable, e1);
-                return null;
             }
         } catch (Exception e) {
             log.error("ensure table in CRUD failed, " + WeEventTable, e);
-            return null;
         }
+
+        throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
     }
 
     /**
-     * get address from CRUD table
+     * list all address from CRUD table
      * https://fisco-bcos-documentation.readthedocs.io/zh_CN/release-2.0/en/docs/sdk/sdk.html?highlight=CRUDService#web3sdk-api
      *
      * @param web3j web3j
      * @param credentials credentials
-     * @return address
+     * @return address list
      */
-    public static String getAddress(Web3j web3j, Credentials credentials) throws BrokerException {
+    public static Map<Long, String> listAddress(Web3j web3j, Credentials credentials) throws BrokerException {
         String groupId = String.valueOf(((JsonRpc2_0Web3j) web3j).getGroupId());
         log.info("get topic control address from CRUD, groupId: {}", groupId);
 
         CRUDService crud = new CRUDService(web3j, credentials);
         Table table = ensureTable(crud);
-        if (table == null) {
-            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        }
-
+        List<Map<String, String>> records;
         try {
             table.setKey(WeEventTopicControlAddress);
             Condition condition = table.getCondition();
-            List<Map<String, String>> records = crud.select(table, condition);
-            if (records.isEmpty()) {
-                log.info("no record in CRUD table, {}", WeEventTable);
-                return "";
-            }
-            if (records.size() != 1) {
-                log.warn("more then one record in CRUD table, {}", WeEventTable);
-            }
-            return records.get(0).get(WeEventTableValue);
+            records = crud.select(table, condition);
+            log.info("records in CRUD, groupId: {}, {}", groupId, records);
         } catch (Exception e) {
             log.error("select from CRUD table failed", e);
-            return "";
+            throw new BrokerException(ErrorCode.UNKNOWN_SOLIDITY_VERSION);
         }
+
+        Map<Long, String> addresses = new HashMap<>();
+        for (Map<String, String> record : records) {
+            if (record.containsKey(WeEventTableValue) && record.containsKey(WeEventTableVersion)) {
+                addresses.put(Long.valueOf(record.get(WeEventTableVersion)), record.get(WeEventTableValue));
+            } else {
+                log.error("miss fields, {} OR {}", WeEventTableValue, WeEventTableVersion);
+                throw new BrokerException(ErrorCode.UNKNOWN_SOLIDITY_VERSION);
+            }
+        }
+
+        return addresses;
     }
 
-    public static boolean addAddress(Web3j web3j, Credentials credentials, String address) throws BrokerException {
+    public static boolean addAddress(Web3j web3j, Credentials credentials, Long version, String address) throws BrokerException {
         String groupId = String.valueOf(((JsonRpc2_0Web3j) web3j).getGroupId());
         log.info("add topic control address into CRUD, groupId: {}", groupId);
 
         // check exist manually to avoid duplicate record
-        String original = getAddress(web3j, credentials);
-        if (!StringUtils.isBlank(original)) {
-            log.info("topic control address already exist, {}", original);
+        Map<Long, String> topicControlAddresses = listAddress(web3j, credentials);
+        if (topicControlAddresses.containsKey(version)) {
+            log.info("already exist in CRUD, {} {}", version, address);
             return false;
         }
 
         CRUDService crud = new CRUDService(web3j, credentials);
         Table table = ensureTable(crud);
-        if (table == null) {
-            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        }
-
         try {
             table.setKey(WeEventTopicControlAddress);
             org.fisco.bcos.web3j.precompile.crud.Entry record = table.getEntry();
             record.put(WeEventTableValue, address);
+            record.put(WeEventTableVersion, String.valueOf(version));
             // notice: record's key can be duplicate in CRUD
             int result = crud.insert(table, record);
             if (result == 1) {
@@ -315,7 +307,7 @@ public class Web3SDK2Wrapper {
      * @param cls contract java class
      * @return Contract return null if error
      */
-    public static Contract loadContract(String contractAddress, Web3j web3j, Credentials credentials, Class<?> cls) {
+    public static Contract loadContract(String contractAddress, Web3j web3j, Credentials credentials, Class<?> cls) throws BrokerException {
         log.info("begin load contract, {}", cls.getSimpleName());
 
         try {
@@ -334,21 +326,21 @@ public class Web3SDK2Wrapper {
                     WeEventConstants.GAS_PRICE,
                     WeEventConstants.GAS_LIMIT);
 
-            if (contract == null) {
-                log.info("load contract failed, {}", cls.getSimpleName());
-                return null;
-            } else {
+            if (contract != null) {
                 log.info("load contract success, {}", cls.getSimpleName());
                 return (Contract) contract;
             }
+
+            log.info("load contract failed, {}", cls.getSimpleName());
         } catch (Exception e) {
-            log.error("load contract failed, {} {}", cls.getSimpleName(), e.getMessage());
-            return null;
+            log.error(String.format("load contract[%s] failed", cls.getSimpleName()), e);
         }
+
+        throw new BrokerException(ErrorCode.LOAD_CONTRACT_ERROR);
     }
 
     /**
-     * deploy topic control into web3j
+     * deploy topic control into web3j in Web3SDK2Wrapper.nowVersion
      *
      * @param web3j web3j handler
      * @param credentials credentials
@@ -359,18 +351,18 @@ public class Web3SDK2Wrapper {
         log.info("begin deploy topic control");
 
         try {
-            RemoteCall<TopicData> f1 = TopicData.deploy(web3j, credentials, gasProvider);
-            TopicData topicData = f1.sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-
-            log.info("topic data contract address: {}", topicData.getContractAddress());
-            if (topicData.getContractAddress().equals(WeEventConstants.ADDRESS_EMPTY)) {
-                log.error("contract address is empty after TopicData.deploy(...)");
+            // deploy Topic.sol in highest version(Web3SDK2Wrapper.nowVersion)
+            RemoteCall<com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic> f1 = com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic.deploy(web3j, credentials, gasProvider);
+            com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic topic = f1.sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+            log.info("topic contract address: {}", topic.getContractAddress());
+            if (topic.getContractAddress().equals(WeEventConstants.ADDRESS_EMPTY)) {
+                log.error("contract address is empty after Topic.deploy(...)");
                 throw new BrokerException(ErrorCode.DEPLOY_CONTRACT_ERROR);
             }
 
-            RemoteCall<TopicController> f2 = TopicController.deploy(web3j, credentials, gasProvider, topicData.getContractAddress());
-            TopicController topicController = f2.sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-
+            // deploy TopicController.sol in nowVersion
+            RemoteCall<com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController> f2 = com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController.deploy(web3j, credentials, gasProvider, topic.getContractAddress());
+            com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController topicController = f2.sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
             log.info("topic control contract address: {}", topicController.getContractAddress());
             if (topicController.getContractAddress().equals(WeEventConstants.ADDRESS_EMPTY)) {
                 log.error("contract address is empty after TopicController.deploy(...)");
@@ -381,16 +373,8 @@ public class Web3SDK2Wrapper {
             return topicController.getContractAddress();
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             log.error("deploy contract failed", e);
-            throw new BrokerException("deploy contract failed");
+            throw new BrokerException(ErrorCode.DEPLOY_CONTRACT_ERROR);
         }
-    }
-
-    public static List<Topic.LogWeEventEventResponse> receipt2LogWeEventEventResponse(Web3j web3j, Credentials credentials, TransactionReceipt receipt) throws BrokerException {
-        if (topic == null) {
-            topic = Topic.load("0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", web3j, credentials, gasProvider);
-        }
-
-        return topic.getLogWeEventEvents(receipt);
     }
 
     /**
@@ -418,10 +402,15 @@ public class Web3SDK2Wrapper {
     /**
      * Fetch all event in target block.
      *
+     * @param web3j the web3j
      * @param blockNum the blockNum
+     * @param supportedVersion version list
+     * @param historyTopic topic list
      * @return null if net error
      */
-    public static List<WeEvent> loop(Web3j web3j, Credentials credentials, Long blockNum) throws BrokerException {
+    public static List<WeEvent> loop(Web3j web3j, Long blockNum,
+                                     Map<String, Long> supportedVersion,
+                                     Map<String, Contract> historyTopic) throws BrokerException {
         List<WeEvent> events = new ArrayList<>();
         if (blockNum <= 0) {
             return events;
@@ -435,7 +424,7 @@ public class Web3SDK2Wrapper {
                     .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
             List<String> transactionHashList = bcosBlock.getBlock().getTransactions().stream()
                     .map(transactionResult -> (String) transactionResult.get()).collect(Collectors.toList());
-            if (transactionHashList.size() <= 0) {
+            if (transactionHashList.isEmpty()) {
                 return events;
             }
             log.debug("tx in block: {}", transactionHashList.size());
@@ -449,28 +438,31 @@ public class Web3SDK2Wrapper {
                 }
 
                 TransactionReceipt receipt = transactionReceipt.getTransactionReceipt().get();
-                List<Topic.LogWeEventEventResponse> logWeEventEvents = Web3SDK2Wrapper.receipt2LogWeEventEventResponse(web3j, credentials, receipt);
-                for (Topic.LogWeEventEventResponse logEvent : logWeEventEvents) {
-                    WeEvent event = new WeEvent(logEvent.topicName,
-                            logEvent.eventContent.getBytes(StandardCharsets.UTF_8),
-                            DataTypeUtils.json2Map(logEvent.extensions));
-                    event.setEventId(DataTypeUtils.encodeEventId(logEvent.topicName,
-                            logEvent.eventBlockNumer.intValue(),
-                            logEvent.eventSeq.intValue()));
+                // tx.to is contract address
+                String address = receipt.getTo();
+                if (historyTopic.containsKey(address)) {
+                    Long version = supportedVersion.get(address);
+                    log.debug("detect event in version: {}", version);
 
-                    log.debug("get a event from block chain: {}", event);
-                    events.add(event);
+                    WeEvent event = SupportedVersion.decodeWeEvent(receipt, version.intValue(), historyTopic);
+                    if (event != null) {
+                        log.debug("get a event from block chain: {}", event);
+                        events.add(event);
+                    }
                 }
             }
 
             return events;
-        } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
+        } catch (TimeoutException e) {
+            log.error("loop block failed due to timeout", e);
+            return null;
+        } catch (ExecutionException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
-            log.error("loop block failed due to ExecutionException|TimeoutException|NullPointerException|InterruptedException", e);
+            log.error("loop block failed due to web3sdk rpc error", e);
             return null;
         } catch (RuntimeException e) {
-            log.error("loop block failed due to RuntimeException", e);
-            throw new BrokerException("loop block failed due to RuntimeException", e);
+            log.error("loop block failed due to web3sdk rpc error", e);
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
     }
 
@@ -493,28 +485,24 @@ public class Web3SDK2Wrapper {
             return groupGeneral;
         } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
-            log.error("get group general failed due to ExecutionException|TimeoutException|NullPointerException|InterruptedException", e);
-            return null;
+            log.error("get group general failed due to web3sdk rpc error", e);
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         } catch (RuntimeException e) {
-            log.error("get group general failed due to RuntimeException", e);
-            throw new BrokerException("get group general failed due to RuntimeException", e);
+            log.error("get group general failed due to web3sdk rpc error", e);
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
     }
 
     //Traversing transactions
-    public static List<TbTransHash> queryTransList(Web3j web3j, QueryEntity queryEntity) throws BrokerException {
-
+    public static List<TbTransHash> queryTransList(Web3j web3j, String transHash, BigInteger blockNumber) throws BrokerException {
         List<TbTransHash> tbTransHashes = new ArrayList<>();
-        String transHash = queryEntity.getPkHash();
-        BigInteger blockNumber = queryEntity.getBlockNumber();
         try {
             if (transHash == null && blockNumber == null) {
                 BlockNumber number = web3j.getBlockNumber().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
                 BcosTransaction bcosTransaction = web3j.getTransactionByBlockNumberAndIndex(new DefaultBlockParameterNumber(number.getBlockNumber()), BigInteger.ZERO)
                         .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-                Transaction transaction = bcosTransaction.getTransaction().get();
-
-                if (transaction != null) {
+                if (!bcosTransaction.getTransaction().isPresent()) {
+                    Transaction transaction = bcosTransaction.getTransaction().get();
                     TbTransHash tbTransHash = new TbTransHash(transaction.getHash(), transaction.getFrom(), transaction.getTo(),
                             transaction.getBlockNumber(), null);
                     tbTransHashes.add(tbTransHash);
@@ -546,20 +534,17 @@ public class Web3SDK2Wrapper {
             return tbTransHashes;
         } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
-            log.error("query transaction failed due to ExecutionException|TimeoutException|NullPointerException|InterruptedException", e);
-            return null;
-        } catch (RuntimeException e) {
-            log.error("query transaction failed due to RuntimeException", e);
+            log.error("query transaction failed due to web3sdk rpc error", e);
             throw new BrokerException("query transaction failed due to RuntimeException", e);
+        } catch (RuntimeException e) {
+            log.error("query transaction failed due to web3sdk rpc error", e);
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
     }
 
     //Traverse block
-    public static List<TbBlock> queryBlockList(Web3j web3j, QueryEntity queryEntity) throws BrokerException {
-
+    public static List<TbBlock> queryBlockList(Web3j web3j, String transHash, BigInteger blockNumber) throws BrokerException {
         List<TbBlock> tbBlocks = new ArrayList<>();
-        String transHash = queryEntity.getPkHash();
-        BigInteger blockNumber = queryEntity.getBlockNumber();
         try {
             BcosBlock.Block block;
             if (transHash == null && blockNumber == null) {
@@ -593,15 +578,15 @@ public class Web3SDK2Wrapper {
             return tbBlocks;
         } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
-            log.error("query transaction failed due to ExecutionException|TimeoutException|NullPointerException|InterruptedException", e);
-            return null;
+            log.error("query transaction failed due to web3sdk rpc error", e);
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         } catch (RuntimeException e) {
-            log.error("query transaction failed due to RuntimeException", e);
-            throw new BrokerException("query transaction failed due to RuntimeException", e);
+            log.error("query transaction failed due to web3sdk rpc error", e);
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
     }
 
-    public static List<TbNode> queryNodeList(Web3j web3j, QueryEntity queryEntity) throws BrokerException {
+    public static List<TbNode> queryNodeList(Web3j web3j) throws BrokerException {
         //1、Current node, pbftview, and blockNumber
         List<TbNode> tbNodes = new ArrayList<>();
         try {
@@ -617,17 +602,17 @@ public class Web3SDK2Wrapper {
             tbNode.setBlockNumber(blockNumber.getBlockNumber());
             tbNode.setPbftView(pbftView.getPbftView());
             tbNode.setNodeId(nodeIds.get(0));
-            tbNode.setNodeName(queryEntity.getGroupId()+"_"+nodeIds.get(0).substring(0,nodeIds.get(0).length()-10));
+            tbNode.setNodeName(nodeIds.get(0).substring(0, nodeIds.get(0).length() - 10));
             tbNode.setNodeActive(1);
             tbNodes.add(tbNode);
             return tbNodes;
         } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
-            log.error("query node failed due to ExecutionException|TimeoutException|NullPointerException|InterruptedException", e);
-            return null;
+            log.error("query node failed due to web3sdk rpc error", e);
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         } catch (RuntimeException e) {
-            log.error("query node failed due to RuntimeException", e);
-            throw new BrokerException("query node failed due to RuntimeException", e);
+            log.error("query node failed due to web3sdk rpc error", e);
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
     }
 }

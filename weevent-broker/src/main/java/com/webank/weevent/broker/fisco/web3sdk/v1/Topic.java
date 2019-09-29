@@ -1,4 +1,4 @@
-package com.webank.weevent.broker.fisco.contract;
+package com.webank.weevent.broker.fisco.web3sdk.v1;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

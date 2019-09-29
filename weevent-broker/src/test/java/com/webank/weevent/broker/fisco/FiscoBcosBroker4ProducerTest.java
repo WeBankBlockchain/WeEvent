@@ -213,7 +213,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
             this.iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes()), "4");
             Assert.fail();
         } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
         }
     }
 

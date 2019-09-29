@@ -104,7 +104,7 @@ public class ParamCheckUtils {
         }
 
         if (!groups.contains(groupId)) {
-            throw new BrokerException(ErrorCode.WE3SDK_UNKNOWN_GROUP);
+            throw new BrokerException(ErrorCode.WEB3SDK_UNKNOWN_GROUP);
         }
     }
 

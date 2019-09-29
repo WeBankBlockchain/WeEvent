@@ -10,11 +10,12 @@ import java.util.concurrent.TimeoutException;
 
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
-import com.webank.weevent.broker.fisco.contract.Topic;
-import com.webank.weevent.broker.fisco.contract.TopicController;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
+import com.webank.weevent.broker.fisco.web3sdk.v1.Topic;
+import com.webank.weevent.broker.fisco.web3sdk.v1.TopicController;
+import com.webank.weevent.broker.fisco.web3sdk.v1.Web3SDKWrapper;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.SendResult;
@@ -88,17 +89,10 @@ public class FiscoBcos {
     private Contract getContractService(String contractAddress, Class<?> cls) throws BrokerException {
         if (this.web3j == null || this.credentials == null) {
             log.error("init web3sdk failed");
-            throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
+            throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
         }
 
-        Contract contract = Web3SDKWrapper.loadContract(contractAddress, this.web3j, this.credentials, cls);
-        if (contract == null) {
-            String msg = "load contract failed, " + cls.getSimpleName();
-            log.error(msg);
-            throw new BrokerException(ErrorCode.LOAD_CONTRACT_ERROR);
-        }
-
-        return contract;
+        return Web3SDKWrapper.loadContract(contractAddress, this.web3j, this.credentials, cls);
     }
 
     /**
