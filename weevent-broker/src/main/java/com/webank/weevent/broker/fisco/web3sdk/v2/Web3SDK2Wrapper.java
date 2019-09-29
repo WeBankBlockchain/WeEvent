@@ -20,7 +20,6 @@ import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
-import com.webank.weevent.protocol.rest.entity.QueryEntity;
 import com.webank.weevent.protocol.rest.entity.TbBlock;
 import com.webank.weevent.protocol.rest.entity.TbNode;
 import com.webank.weevent.protocol.rest.entity.TbTransHash;
@@ -459,10 +458,10 @@ public class Web3SDK2Wrapper {
             return null;
         } catch (ExecutionException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
-            log.error("loop block failed due to ExecutionException|NullPointerException|InterruptedException", e);
+            log.error("loop block failed due to web3sdk rpc error", e);
             return null;
         } catch (RuntimeException e) {
-            log.error("loop block failed due to RuntimeException", e);
+            log.error("loop block failed due to web3sdk rpc error", e);
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
     }
@@ -486,20 +485,17 @@ public class Web3SDK2Wrapper {
             return groupGeneral;
         } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
-            log.error("get group general failed due to ExecutionException|TimeoutException|NullPointerException|InterruptedException", e);
+            log.error("get group general failed due to web3sdk rpc error", e);
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         } catch (RuntimeException e) {
-            log.error("get group general failed due to RuntimeException", e);
+            log.error("get group general failed due to web3sdk rpc error", e);
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
     }
 
     //Traversing transactions
-    public static List<TbTransHash> queryTransList(Web3j web3j, QueryEntity queryEntity) throws BrokerException {
-
+    public static List<TbTransHash> queryTransList(Web3j web3j, String transHash, BigInteger blockNumber) throws BrokerException {
         List<TbTransHash> tbTransHashes = new ArrayList<>();
-        String transHash = queryEntity.getPkHash();
-        BigInteger blockNumber = queryEntity.getBlockNumber();
         try {
             if (transHash == null && blockNumber == null) {
                 BlockNumber number = web3j.getBlockNumber().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
@@ -538,20 +534,17 @@ public class Web3SDK2Wrapper {
             return tbTransHashes;
         } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
-            log.error("query transaction failed due to ExecutionException|TimeoutException|NullPointerException|InterruptedException", e);
+            log.error("query transaction failed due to web3sdk rpc error", e);
             throw new BrokerException("query transaction failed due to RuntimeException", e);
         } catch (RuntimeException e) {
-            log.error("query transaction failed due to RuntimeException", e);
+            log.error("query transaction failed due to web3sdk rpc error", e);
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
     }
 
     //Traverse block
-    public static List<TbBlock> queryBlockList(Web3j web3j, QueryEntity queryEntity) throws BrokerException {
-
+    public static List<TbBlock> queryBlockList(Web3j web3j, String transHash, BigInteger blockNumber) throws BrokerException {
         List<TbBlock> tbBlocks = new ArrayList<>();
-        String transHash = queryEntity.getPkHash();
-        BigInteger blockNumber = queryEntity.getBlockNumber();
         try {
             BcosBlock.Block block;
             if (transHash == null && blockNumber == null) {
@@ -585,15 +578,15 @@ public class Web3SDK2Wrapper {
             return tbBlocks;
         } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
-            log.error("query transaction failed due to ExecutionException|TimeoutException|NullPointerException|InterruptedException", e);
+            log.error("query transaction failed due to web3sdk rpc error", e);
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         } catch (RuntimeException e) {
-            log.error("query transaction failed due to RuntimeException", e);
+            log.error("query transaction failed due to web3sdk rpc error", e);
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
     }
 
-    public static List<TbNode> queryNodeList(Web3j web3j, QueryEntity queryEntity) throws BrokerException {
+    public static List<TbNode> queryNodeList(Web3j web3j) throws BrokerException {
         //1、Current node, pbftview, and blockNumber
         List<TbNode> tbNodes = new ArrayList<>();
         try {
@@ -609,16 +602,16 @@ public class Web3SDK2Wrapper {
             tbNode.setBlockNumber(blockNumber.getBlockNumber());
             tbNode.setPbftView(pbftView.getPbftView());
             tbNode.setNodeId(nodeIds.get(0));
-            tbNode.setNodeName(queryEntity.getGroupId() + "_" + nodeIds.get(0).substring(0, nodeIds.get(0).length() - 10));
+            tbNode.setNodeName(nodeIds.get(0).substring(0, nodeIds.get(0).length() - 10));
             tbNode.setNodeActive(1);
             tbNodes.add(tbNode);
             return tbNodes;
         } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
-            log.error("query node failed due to ExecutionException|TimeoutException|NullPointerException|InterruptedException", e);
+            log.error("query node failed due to web3sdk rpc error", e);
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         } catch (RuntimeException e) {
-            log.error("query node failed due to RuntimeException", e);
+            log.error("query node failed due to web3sdk rpc error", e);
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
     }

@@ -18,7 +18,6 @@ import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDK2Wrapper;
 import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic;
 import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
-import com.webank.weevent.protocol.rest.entity.QueryEntity;
 import com.webank.weevent.protocol.rest.entity.TbBlock;
 import com.webank.weevent.protocol.rest.entity.TbNode;
 import com.webank.weevent.protocol.rest.entity.TbTransHash;
@@ -198,10 +197,10 @@ public class FiscoBcos2 {
             listPage.setPageData(result.getValue3());
             return listPage;
         } catch (InterruptedException | ExecutionException e) {
-            log.error("listTopicName failed due to transaction execution error. ", e);
-            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+            log.error("listTopicName failed due to web3sdk rpc error.", e);
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         } catch (TimeoutException e) {
-            log.error("listTopicName failed due to transaction timeout. ", e);
+            log.error("listTopicName failed due to web3sdk rpc timeout. ", e);
             throw new BrokerException(ErrorCode.TRANSACTION_TIMEOUT);
         }
     }
@@ -216,7 +215,7 @@ public class FiscoBcos2 {
                     this.topicController.getTopicInfo(topicName).sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
             if (topic == null) {
                 log.error("TopicController.getTopicInfo result is empty");
-                throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+                throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
             }
 
             if (!topic.getValue1()) {
@@ -235,10 +234,10 @@ public class FiscoBcos2 {
             this.topicInfo.put(topicName, topicInfo);
             return topicInfo;
         } catch (InterruptedException | ExecutionException e) {
-            log.error("getTopicInfo failed due to transaction execution error. ", e);
-            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+            log.error("getTopicInfo failed due to web3sdk rpc error.", e);
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         } catch (TimeoutException e) {
-            log.error("getTopicInfo failed due to transaction timeout. ", e);
+            log.error("getTopicInfo failed due to web3sdk rpc timeout.", e);
             throw new BrokerException(ErrorCode.TRANSACTION_TIMEOUT);
         }
     }
@@ -309,20 +308,19 @@ public class FiscoBcos2 {
         return Web3SDK2Wrapper.loop(this.web3j, blockNum, this.historyTopicVersion, this.historyTopicContract);
     }
 
-    public GroupGeneral getGroupGeneral(String groupId) throws BrokerException {
+    public GroupGeneral getGroupGeneral() throws BrokerException {
         return Web3SDK2Wrapper.getGroupGeneral(this.web3j);
     }
 
-    public List<TbTransHash> queryTransList(QueryEntity queryEntity) throws BrokerException {
-        return Web3SDK2Wrapper.queryTransList(this.web3j, queryEntity);
+    public List<TbTransHash> queryTransList(String transHash, BigInteger blockNumber) throws BrokerException {
+        return Web3SDK2Wrapper.queryTransList(this.web3j, transHash, blockNumber);
     }
 
-    public List<TbBlock> queryBlockList(QueryEntity queryEntity) throws BrokerException {
-        return Web3SDK2Wrapper.queryBlockList(this.web3j, queryEntity);
+    public List<TbBlock> queryBlockList(String transHash, BigInteger blockNumber) throws BrokerException {
+        return Web3SDK2Wrapper.queryBlockList(this.web3j, transHash, blockNumber);
     }
 
-    public List<TbNode> queryNodeList(QueryEntity queryEntity) throws BrokerException {
-        return Web3SDK2Wrapper.queryNodeList(this.web3j, queryEntity);
-
+    public List<TbNode> queryNodeList() throws BrokerException {
+        return Web3SDK2Wrapper.queryNodeList(this.web3j);
     }
 }

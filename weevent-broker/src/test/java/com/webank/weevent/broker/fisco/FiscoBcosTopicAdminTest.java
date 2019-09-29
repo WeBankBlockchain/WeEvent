@@ -211,7 +211,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
             this.iProducer.open(this.topicName, "4");
             Assert.fail();
         } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
         }
     }
 
@@ -326,7 +326,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
             this.iProducer.close(this.topicName, "4");
             Assert.fail();
         } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
         }
     }
 
@@ -437,7 +437,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
             this.iProducer.exist(this.topicName, "4");
             Assert.fail();
         } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
         }
     }
 
@@ -569,7 +569,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
             this.iProducer.state(this.topicName, "100");
             Assert.fail();
         } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
         }
     }
 
@@ -725,7 +725,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
             this.iProducer.list(0, 10, "4");
             Assert.fail();
         } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
         }
     }
 
@@ -852,7 +852,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
             this.iProducer.getEvent(this.eventId, "4");
             Assert.fail();
         } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
         }
     }
 
