@@ -512,13 +512,15 @@ public class Web3SDK2Wrapper {
                 BlockNumber number = web3j.getBlockNumber().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
                 BcosTransaction bcosTransaction = web3j.getTransactionByBlockNumberAndIndex(new DefaultBlockParameterNumber(number.getBlockNumber()), BigInteger.ZERO)
                         .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+                boolean present = bcosTransaction.getTransaction().isPresent();
+                if (!present) {
+                    return null;
+                }
                 Transaction transaction = bcosTransaction.getTransaction().get();
 
-                if (transaction != null) {
-                    TbTransHash tbTransHash = new TbTransHash(transaction.getHash(), transaction.getFrom(), transaction.getTo(),
-                            transaction.getBlockNumber(), null);
-                    tbTransHashes.add(tbTransHash);
-                }
+                TbTransHash tbTransHash = new TbTransHash(transaction.getHash(), transaction.getFrom(), transaction.getTo(),
+                        transaction.getBlockNumber(), null);
+                tbTransHashes.add(tbTransHash);
             } else if (transHash != null) {
                 BcosTransaction bcosTransaction = web3j.getTransactionByHash(transHash).sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
                 Transaction trans = bcosTransaction.getResult();
@@ -617,7 +619,7 @@ public class Web3SDK2Wrapper {
             tbNode.setBlockNumber(blockNumber.getBlockNumber());
             tbNode.setPbftView(pbftView.getPbftView());
             tbNode.setNodeId(nodeIds.get(0));
-            tbNode.setNodeName(queryEntity.getGroupId()+"_"+nodeIds.get(0).substring(0,nodeIds.get(0).length()-10));
+            tbNode.setNodeName(queryEntity.getGroupId() + "_" + nodeIds.get(0).substring(0, nodeIds.get(0).length() - 10));
             tbNode.setNodeActive(1);
             tbNodes.add(tbNode);
             return tbNodes;
