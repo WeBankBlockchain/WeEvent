@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.webank.weevent.governance.code.ConstantCode;
 import com.webank.weevent.governance.entity.BaseResponse;
-import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.service.BrokerService;
 import com.webank.weevent.governance.service.PermissionService;
