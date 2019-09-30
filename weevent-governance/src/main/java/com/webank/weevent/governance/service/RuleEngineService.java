@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.code.ErrorCode;
-import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.entity.RuleEngineEntity;
 import com.webank.weevent.governance.enums.PayloadEnum;
 import com.webank.weevent.governance.enums.StatusEnum;
@@ -20,8 +19,6 @@ import com.webank.weevent.governance.utils.CookiesTools;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -123,7 +120,7 @@ public class RuleEngineService {
         try {
             authCheck(ruleEngineEntity, request);
             checkExist(ruleEngineEntity);
-            BrokerEntity broker = brokerService.getBroker(ruleEngineEntity.getBrokerId());
+       /*     BrokerEntity broker = brokerService.getBroker(ruleEngineEntity.getBrokerId());
             String brokerUrl = broker.getBrokerUrl();
             String deleteUrl = new StringBuffer(brokerUrl).append("/processor/deleteCEPRuleById?id=").append(ruleEngineEntity.getId()).toString();
 
@@ -139,7 +136,8 @@ public class RuleEngineService {
             if (this.processorSuccessCode != code) {
                 log.error("broker delete ruleEngine fail");
                 throw new GovernanceException("broker delete ruleEngine fail");
-            }
+            }*/
+            ruleEngineEntity.setStatus(StatusEnum.IS_DELETED.getCode());
             return ruleEngineMapper.deleteRuleEngine(ruleEngineEntity);
         } catch (Exception e) {
             log.error("delete ruleEngineEntity fail", e);
