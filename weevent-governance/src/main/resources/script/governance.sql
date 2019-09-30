@@ -46,3 +46,15 @@ CREATE TABLE t_permission (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment 't_permission';
 
+CREATE TABLE `t_historical_data` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
+  `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create date',
+  `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update date',
+  `topic_name` varchar(256) NOT NULL COMMENT 'topic name',
+  `group_id` varchar(256) DEFAULT NULL COMMENT 'group id',
+  `broker_number` int(11) NOT NULL COMMENT 'broker id',
+  `event_id` varchar(256) DEFAULT NULL COMMENT 'event id',
+  `broker_id` varchar(256) DEFAULT NULL COMMENT 'broker id',
+  `user_id` varchar(256) DEFAULT NULL COMMENT 'user id',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='t_historical_data';
