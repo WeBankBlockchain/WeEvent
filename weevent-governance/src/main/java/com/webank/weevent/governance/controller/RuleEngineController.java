@@ -13,6 +13,7 @@ import com.webank.weevent.governance.service.RuleEngineService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,8 +33,12 @@ public class RuleEngineController {
     // get all ruleEngine service
     @PostMapping("/list")
     public GovernanceResult getRuleEngines(HttpServletRequest request, @RequestBody RuleEngineEntity ruleEngineEntity) throws GovernanceException {
-        log.info("get all ruleEngine:{}", ruleEngineEntity);
+        log.info("get ruleEngines:{}", ruleEngineEntity);
         List<RuleEngineEntity> ruleEngines = ruleEngineService.getRuleEngines(request, ruleEngineEntity);
+
+        GovernanceResult governanceResult = new GovernanceResult(ruleEngines);
+        Integer count = CollectionUtils.isEmpty(ruleEngines) ? 0 : ruleEngines.get(0).getTotalCount();
+        governanceResult.setTotalCount(count);
         return new GovernanceResult(ruleEngines);
     }
 

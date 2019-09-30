@@ -69,4 +69,6 @@ public class RuleEngineEntity extends BaseEntity {
     private Integer startIndex;
 
     private Integer endIndex;
+
+    private Integer totalCount;
 }

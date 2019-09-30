@@ -66,6 +66,7 @@ public class RuleEngineService {
                 ruleEngineEntity.setStartIndex((ruleEngineEntity.getPageNumber() - 1) * ruleEngineEntity.getPageSize());
                 ruleEngineEntity.setEndIndex(ruleEngineEntity.getPageNumber() * ruleEngineEntity.getPageSize());
                 ruleEngineEntities = ruleEngineMapper.getRuleEngines(ruleEngineEntity);
+                ruleEngineEntities.get(0).setTotalCount(count);
             }
             return ruleEngineEntities;
         } catch (Exception e) {
@@ -265,6 +266,5 @@ public class RuleEngineService {
             throw new GovernanceException("the data no longer exists");
         }
     }
-
 
 }
