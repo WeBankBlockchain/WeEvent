@@ -9,7 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.dto.SubscriptionInfo;
-import com.webank.weevent.broker.util.ParamCheckUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.task.IBlockChain;
 import com.webank.weevent.broker.task.MainEventLoop;

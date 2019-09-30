@@ -7,7 +7,6 @@ import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fabric.config.FabricConfig;
 import com.webank.weevent.broker.fabric.sdk.FabricDelegate;
 import com.webank.weevent.broker.plugin.IEventTopic;
-import com.webank.weevent.broker.util.ParamCheckUtils;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.TopicInfo;

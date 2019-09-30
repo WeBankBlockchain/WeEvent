@@ -8,13 +8,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.webank.weevent.broker.fisco.config.FiscoConfig;
-import com.webank.weevent.broker.fisco.constant.FiscoBcosConstants;
-import com.webank.weevent.broker.fisco.contract.Topic;
-import com.webank.weevent.broker.fisco.contract.TopicController;
+import com.webank.weevent.broker.config.FiscoConfig;
+import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.dto.ListPage;
-import com.webank.weevent.broker.util.DataTypeUtils;
-import com.webank.weevent.broker.util.ParamCheckUtils;
+import com.webank.weevent.broker.fisco.util.DataTypeUtils;
+import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
+import com.webank.weevent.broker.fisco.web3sdk.v1.Topic;
+import com.webank.weevent.broker.fisco.web3sdk.v1.TopicController;
+import com.webank.weevent.broker.fisco.web3sdk.v1.Web3SDKWrapper;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.SendResult;
@@ -88,17 +89,10 @@ public class FiscoBcos {
     private Contract getContractService(String contractAddress, Class<?> cls) throws BrokerException {
         if (this.web3j == null || this.credentials == null) {
             log.error("init web3sdk failed");
-            throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
+            throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
         }
 
-        Contract contract = Web3SDKWrapper.loadContract(contractAddress, this.web3j, this.credentials, cls);
-        if (contract == null) {
-            String msg = "load contract failed, " + cls.getSimpleName();
-            log.error(msg);
-            throw new BrokerException(ErrorCode.LOAD_CONTRACT_ERROR);
-        }
-
-        return contract;
+        return Web3SDKWrapper.loadContract(contractAddress, this.web3j, this.credentials, cls);
     }
 
     /**
@@ -127,7 +121,7 @@ public class FiscoBcos {
 
             String topicAddress = address.toString();
             //topic is not exist if address is empty
-            if (topicAddress.equals(FiscoBcosConstants.ADDRESS_EMPTY)) {
+            if (topicAddress.equals(WeEventConstants.ADDRESS_EMPTY)) {
                 return null;
             }
 
@@ -153,9 +147,9 @@ public class FiscoBcos {
             }
 
             // deploy topic contract
-            Topic topic = Topic.deploy(this.web3j, this.credentials, FiscoBcosConstants.GAS_PRICE, FiscoBcosConstants.GAS_LIMIT,
-                    FiscoBcosConstants.INITIAL_VALUE).get();
-            if (topic.getContractAddress().equals(FiscoBcosConstants.ADDRESS_EMPTY)) {
+            Topic topic = Topic.deploy(this.web3j, this.credentials, WeEventConstants.GAS_PRICE, WeEventConstants.GAS_LIMIT,
+                    WeEventConstants.INITIAL_VALUE).get();
+            if (topic.getContractAddress().equals(WeEventConstants.ADDRESS_EMPTY)) {
                 log.error("contract address is empty after Topic.deploy(...)");
                 throw new BrokerException(ErrorCode.DEPLOY_CONTRACT_ERROR);
             }
@@ -224,7 +218,7 @@ public class FiscoBcos {
             }
 
             String topicAddress = typeList.get(0).toString();
-            if (FiscoBcosConstants.ADDRESS_EMPTY.equals(topicAddress)) {
+            if (WeEventConstants.ADDRESS_EMPTY.equals(topicAddress)) {
                 log.error("TopicController.getTopicInfo address is empty");
                 throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
             }

@@ -1,18 +1,13 @@
 <template>
-<div class='event-table'>
-  <div class='refresh'>
-    <div class='update_btn' @click='update'>
-      <img src="../assets/image/update.png" alt=""/>
-    </div>
-  </div>
+<div class='event-table subcription'>
   <el-table
     :data="tableData"
-    stripe
     :span-method='spanMethod'
     v-loading='loading'
     element-loading-spinner='el-icon-loading'
     element-loading-text='数据加载中...'
     element-loading-background='rgba(256,256,256,0.8)'
+    @row-click='checkDetial'
     style="width: 100%">
     <el-table-column
       label="机器地址"
@@ -25,8 +20,12 @@
     </el-table-column>
     <el-table-column
       label="订阅ID"
-      width='400'
+      width='350'
       prop='subscribeId'>
+    </el-table-column>
+    <el-table-column
+      label="订阅来源Ip"
+      prop="remoteIp">
     </el-table-column>
     <el-table-column
       label="订阅方式"
@@ -39,6 +38,10 @@
     <el-table-column
       label="待通知事件"
       prop="notifyingEventCount">
+    </el-table-column>
+     <el-table-column
+      label="订阅时间"
+      prop="createTimeStamp">
     </el-table-column>
   </el-table>
  </div>
@@ -60,14 +63,14 @@ export default {
       let vm = this
       vm.tableData = []
       vm.loading = true
-      let url = '?brokerId=' + localStorage.getItem('brokerId')
+      let url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId')
       API.subscription(url).then(res => {
         if (res.status === 200) {
           let data = res.data
           let list = []
           for (let key in data) {
             let cont = data[key]
-            // 判断是否是一个空对象
+            // check if it is empty
             let arr = Object.keys(cont)
             if (arr.length) {
               for (let x in cont) {
@@ -84,7 +87,9 @@ export default {
                 'subscribeId': '—',
                 'topicName': '—',
                 'notifiedEventCount': '—',
-                'childs': 0
+                'childs': 0,
+                'remoteIp': '—',
+                'createTimeStamp': '—'
               }
               list.push(item)
             }
@@ -99,7 +104,7 @@ export default {
         window.clearInterval(vm.getData)
       })
     },
-    spanMethod ({row, cloumn, rowIndex, columnIndex}) {
+    spanMethod ({ row, cloumn, rowIndex, columnIndex }) {
       let table = this.tableData
       if (columnIndex === 0) {
         // 先判断是第一行否存在并行 (根据row.childs个数确定该IP下有多少个topic)
@@ -129,15 +134,28 @@ export default {
       setTimeout(fun => {
         this.subscription()
       }, 1000)
+    },
+    checkDetial (e) {
+      this.$store.commit('set_active', '2-1')
+      this.$emit('selecChange', '2-1')
+      sessionStorage.setItem('topic', e.topicName)
+      this.$store.commit('set_menu', ['主题管理', '主题列表'])
+      this.$router.push('./topicList')
     }
   },
   computed: {
     brokerId () {
       return this.$store.state.brokerId
+    },
+    groupId () {
+      return this.$store.state.groupId
     }
   },
   watch: {
     brokerId () {
+      this.update()
+    },
+    groupId () {
       this.update()
     }
   },

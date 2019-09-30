@@ -3,11 +3,16 @@ package com.webank.weevent.broker.fisco;
 import java.util.List;
 
 import com.webank.weevent.BrokerApplication;
-import com.webank.weevent.broker.fisco.config.FiscoConfig;
+import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.dto.ListPage;
-import com.webank.weevent.broker.util.ParamCheckUtils;
+import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.plugin.IEventTopic;
+import com.webank.weevent.protocol.rest.entity.GroupGeneral;
+import com.webank.weevent.protocol.rest.entity.QueryEntity;
+import com.webank.weevent.protocol.rest.entity.TbBlock;
+import com.webank.weevent.protocol.rest.entity.TbNode;
+import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.TopicInfo;
@@ -49,6 +54,8 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
 
     @Override
     public boolean open(String topic, String groupId) throws BrokerException {
+        log.info("open topic: {} groupId: {}", topic, groupId);
+
         ParamCheckUtils.validateTopicName(topic);
         this.validateGroupId(groupId);
         try {
@@ -77,6 +84,8 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
 
     @Override
     public boolean close(String topic, String groupId) throws BrokerException {
+        log.info("close topic: {} groupId: {}", topic, groupId);
+
         ParamCheckUtils.validateTopicName(topic);
         this.validateGroupId(groupId);
         if (exist(topic, groupId)) {
@@ -142,5 +151,29 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
 
     public void validateGroupId(String groupId) throws BrokerException {
         ParamCheckUtils.validateGroupId(groupId, fiscoBcosDelegate.listGroupId());
+    }
+
+    @Override
+    public GroupGeneral getGroupGeneral(String groupId) throws BrokerException {
+        this.validateGroupId(groupId);
+        return fiscoBcosDelegate.getGroupGeneral(Long.valueOf(groupId));
+    }
+
+    @Override
+    public List<TbTransHash> queryTransList(QueryEntity queryEntity) throws BrokerException {
+        this.validateGroupId(queryEntity.getGroupId());
+        return fiscoBcosDelegate.queryTransList(Long.valueOf(queryEntity.getGroupId()), queryEntity.getPkHash(), queryEntity.getBlockNumber());
+    }
+
+    @Override
+    public List<TbBlock> queryBlockList(QueryEntity queryEntity) throws BrokerException {
+        this.validateGroupId(queryEntity.getGroupId());
+        return fiscoBcosDelegate.queryBlockList(Long.valueOf(queryEntity.getGroupId()), queryEntity.getPkHash(), queryEntity.getBlockNumber());
+    }
+
+    @Override
+    public List<TbNode> queryNodeList(QueryEntity queryEntity) throws BrokerException {
+        this.validateGroupId(queryEntity.getGroupId());
+        return fiscoBcosDelegate.queryNodeList(Long.valueOf(queryEntity.getGroupId()));
     }
 }

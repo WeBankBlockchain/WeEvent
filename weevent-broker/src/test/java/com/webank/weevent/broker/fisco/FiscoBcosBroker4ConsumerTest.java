@@ -60,6 +60,10 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
     @Before
     public void before() throws Exception {
+        log.info("=============================={}.{}==============================",
+                this.getClass().getSimpleName(),
+                this.testName.getMethodName());
+
         this.iProducer = IProducer.build();
         this.iConsumer = IConsumer.build();
         Assert.assertTrue(this.iProducer.startProducer());
@@ -93,8 +97,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testSingleSubscribeTopicIsBlank() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.iConsumer.subscribe("", this.groupId, WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
             Assert.fail();
@@ -108,8 +110,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testSingleSubscribeTopicIsBlank2() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.iConsumer.subscribe("", this.groupId, WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
             Assert.fail();
@@ -123,8 +123,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testSingleSubscribeTopicOverMaxLen() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.iConsumer.subscribe(
                     "qwertyuioplkjhgfdsazxcvbnmlkjhgfjshfljjdkdkfeffslkfsnkhkhhjjjjhggfsfsff",
@@ -140,8 +138,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testSingleSubscribeContainSpecialChar() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             char[] charStr = {69, 72, 31};
             String illegalTopic = new String(charStr);
@@ -157,8 +153,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testSingleSubscribeContainChineseChar() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.iConsumer.subscribe("中国", groupId, WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
             Assert.fail();
@@ -172,8 +166,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testSingleSubscribeGroupIdIsNull() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.iConsumer.subscribe(this.topicName, null, WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
             Assert.fail();
@@ -187,8 +179,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testSingleSubscribeGroupIdIsNotNum() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.iConsumer.subscribe(this.topicName, "abc", WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
             Assert.fail();
@@ -202,13 +192,11 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testSingleSubscribeGroupIdNotExist() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.iConsumer.subscribe(this.topicName, "100", WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
             Assert.fail();
         } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.WE3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
         }
     }
 
@@ -217,8 +205,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testSingleSubscribeOffsetNumGtBlock() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.iConsumer.subscribe(this.topicName, this.groupId, "317e7c4c-75-3290000000",
                     this.ext, this.defaultListener);
@@ -233,8 +219,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testSingleSubscribeOffsetOverMaxLen() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.iConsumer.subscribe(this.topicName, this.groupId,
                     "317e7c4c45gfjfs5369875452364875962-1213456789632145678564547896354775-329", this.ext,
@@ -250,8 +234,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testSingleSubscribeOffsetIsNull() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.iConsumer.subscribe(this.topicName, this.groupId, null, this.ext, this.defaultListener);
             Assert.fail();
@@ -265,8 +247,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testSingleSubscribeOffsetIsBlank() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.iConsumer.subscribe(this.topicName, this.groupId, " ", this.ext, this.defaultListener);
             Assert.fail();
@@ -280,8 +260,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test(expected = NullPointerException.class)
     public void testSingleSubscribeListenerIsNull() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.iConsumer.subscribe(this.topicName, this.groupId, WeEvent.OFFSET_LAST, this.ext, null);
             Assert.fail();
@@ -292,8 +270,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
     @Test
     public void testSingleTopicSubscribeLastEventIdCheck01() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         String result = this.iConsumer.subscribe(this.topicName, this.groupId, WeEvent.OFFSET_LAST,
                 this.ext, this.defaultListener);
         Assert.assertFalse(result.isEmpty());
@@ -301,8 +277,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
     @Test
     public void testSingleTopicSubscribeLastEventIdCheck02() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.iConsumer.subscribe(this.topicName, this.groupId, "123", this.ext, this.defaultListener);
             Assert.fail();
@@ -313,8 +287,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
     @Test
     public void testSingleTopicSubscribeLastEventIdCheck03() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.iConsumer.subscribe(this.topicName, this.groupId,
                     "123456789012345678901234567890123456789012345678901234567890123456",
@@ -327,8 +299,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
     @Test
     public void testSingleTopicSubscribeLastEventIDCheck04() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.iConsumer.subscribe(this.topicName, this.groupId, "xxx_xxxx", this.ext, this.defaultListener);
             Assert.fail();
@@ -342,8 +312,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testReSubscribeTopicNotSameFirst() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             String subId = this.iConsumer.subscribe(this.topicName, this.groupId, WeEvent.OFFSET_LAST,
                     this.ext, this.defaultListener);
@@ -358,8 +326,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
     @Test
     public void testSingleTopicSubscribeLastEventId() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         MyConsumerListener listener = new MyConsumerListener();
         log.info("lastEventId: {}", this.lastEventId);
         String result = this.iConsumer.subscribe(this.topicName, this.groupId, this.lastEventId, this.ext, listener);
@@ -376,8 +342,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
     @Test
     public void testSingleTopicSubscribeBoolean01() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         MyConsumerListener listener = new MyConsumerListener();
         String result = this.iConsumer.subscribe(this.topicName, this.groupId, WeEvent.OFFSET_FIRST, this.ext, listener);
         Assert.assertFalse(result.isEmpty());
@@ -391,8 +355,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
     @Test
     public void testSingleTopicSubscribeBoolean02() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         MyConsumerListener listener = new MyConsumerListener();
         String result = this.iConsumer.subscribe(this.topicName, this.groupId, WeEvent.OFFSET_LAST, this.ext, listener);
         Assert.assertFalse(result.isEmpty());
@@ -407,8 +369,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
     @Test
     public void testSingleTopicSubscribeList01() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         String[] topics = {this.topicName};
         String result = this.iConsumer.subscribe(topics, this.groupId, WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
         Assert.assertFalse(result.isEmpty());
@@ -416,8 +376,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
     @Test
     public void testSingleTopicSubscribeList02() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         MyConsumerListener listener = new MyConsumerListener();
         String[] topics = {this.topicName};
         String result = this.iConsumer.subscribe(topics, this.groupId, this.lastEventId, this.ext, listener);
@@ -426,8 +384,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
     @Test
     public void testSingleTopicSubscribeList04() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             String[] topics = {this.topicName};
             this.iConsumer.subscribe(topics, this.groupId, null, this.ext, this.defaultListener);
@@ -439,8 +395,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
     @Test
     public void testRepeatTopicSubscribe() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         // normal
         String result = this.iConsumer.subscribe(this.topicName, this.groupId, this.lastEventId, this.ext, this.defaultListener);
         Assert.assertFalse(result.isEmpty());
@@ -452,8 +406,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
     @Test
     public void testMultipleTopicSubscribe01() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         String[] topics = {this.topicName, this.topic2, this.topic3};
         String result = this.iConsumer.subscribe(topics, this.groupId, this.lastEventId, this.ext, this.defaultListener);
         Assert.assertFalse(result.isEmpty());
@@ -461,8 +413,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
     @Test
     public void testMultipleTopicSubscribe02() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             String[] topics = {this.topicName, this.topic2, this.topic3};
             this.iConsumer.subscribe(topics, this.groupId, "xxx_xxx", this.ext, this.defaultListener);
@@ -474,8 +424,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
     @Test
     public void testMultipleTopicSubscribe05() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         String[] topics = {this.topicName};
         String result = this.iConsumer.subscribe(topics, this.groupId, WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
         Assert.assertFalse(result.isEmpty());
@@ -483,8 +431,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
     @Test
     public void testUnsubscribe01() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.iConsumer.unSubscribe(null);
             Assert.fail();
@@ -495,8 +441,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
     @Test
     public void testUnsubscribe03() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         String subscription = this.iConsumer.subscribe(this.topicName, this.groupId, WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
         Assert.assertFalse(subscription.isEmpty());
         boolean result = this.iConsumer.unSubscribe(subscription);
@@ -505,8 +449,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
     @Test
     public void testUnsubscribe04() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         String[] topics = {this.topicName, this.topic2};
         String subscription = this.iConsumer.subscribe(topics, this.groupId, this.lastEventId, this.ext, this.defaultListener);
         Assert.assertFalse(subscription.isEmpty());
@@ -517,8 +459,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
     @Test
     public void testSubscribeCharacterSet() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         MyConsumerListener listener = new MyConsumerListener();
         String[] topics = {this.topicName};
         String result = this.iConsumer.subscribe(topics, this.groupId, this.lastEventId, this.ext, listener);
@@ -540,8 +480,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testReSubscribeSubIdIsNull() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.ext.put(IConsumer.SubscribeExt.SubscriptionId, null);
             this.iConsumer.subscribe(this.topicName, this.groupId, WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
@@ -556,8 +494,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testReSubscribeSubIdIsBlank() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.ext.put(IConsumer.SubscribeExt.SubscriptionId, "");
             this.iConsumer.subscribe(this.topicName, this.groupId, WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
@@ -572,8 +508,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testReSubscribeSubIdIsIllegal() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             this.ext.put(IConsumer.SubscribeExt.SubscriptionId, "sdgsgsgdg");
             this.iConsumer.subscribe(this.topicName, this.groupId, WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
@@ -588,8 +522,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testReSubscribeSubIdIsNotExist() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         String origin = "ec1776da-1748-4c68-b0eb-ed3e92f9aadb";
         this.ext.put(IConsumer.SubscribeExt.SubscriptionId, origin);
         String subId = this.iConsumer.subscribe(this.topicName, this.groupId, WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
@@ -601,8 +533,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testMulSubscribeTopicIsBlank() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             String[] topics = {""};
             this.iConsumer.subscribe(topics, this.groupId, this.lastEventId, this.ext, this.defaultListener);
@@ -617,8 +547,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testMulSubscribeTopicOverMaxLen() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             String[] topics = {"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
             this.iConsumer.subscribe(topics, this.groupId, WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
@@ -633,8 +561,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testMulSubscribeTopicsIsEmpty() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             String[] topics = {};
             this.iConsumer.subscribe(topics, this.groupId, WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
@@ -649,8 +575,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testMulSubscribeTopicContainSpecialChar() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             char[] charStr = {69, 72, 31};
             String illegalTopic = new String(charStr);
@@ -667,8 +591,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testMulSubscribeTopicsContainChiChar() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             String[] topics = {"中国"};
             this.iConsumer.subscribe(topics, groupId, WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
@@ -683,8 +605,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testMulSubscribeContainMultipleTopic() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         String[] topics = {this.topicName, topic2, topic3};
         String subID = this.iConsumer.subscribe(topics, groupId, WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
         Assert.assertFalse(subID.isEmpty());
@@ -695,8 +615,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testMulSubscribeGroupIdIsNull() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             String[] topics = {this.topicName};
             this.iConsumer.subscribe(topics, null, WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
@@ -711,8 +629,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testMulSubscribeGroupIdIsNotNum() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             String[] topics = {this.topicName};
             this.iConsumer.subscribe(topics, "abc", WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
@@ -727,8 +643,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
      */
     @Test
     public void testMulSubscribeOffsetIsNull() {
-        log.info("===================={}", this.testName.getMethodName());
-
         try {
             String[] topics = {this.topicName};
             this.iConsumer.subscribe(topics, this.groupId, null, this.ext, this.defaultListener);
@@ -740,8 +654,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
     @Test
     public void testSubscribePublishTag() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         // normal subscribe
         MyConsumerListener listener = new MyConsumerListener();
         String result = this.iConsumer.subscribe(this.topicName, this.groupId, WeEvent.OFFSET_LAST, this.ext, listener);
@@ -761,8 +673,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
     @Test
     public void testSubscribeTopicTag() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
-
         // subscribe tag
         String tag = "topic_tag";
         MyConsumerListener listener = new MyConsumerListener();

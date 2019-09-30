@@ -18,7 +18,6 @@ import java.util.concurrent.TimeoutException;
 import com.webank.weevent.broker.fabric.config.FabricConfig;
 import com.webank.weevent.broker.fabric.dto.TransactionInfo;
 import com.webank.weevent.broker.fabric.util.FabricUser;
-import com.webank.weevent.broker.util.DataTypeUtils;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;

@@ -3,16 +3,16 @@ package com.webank.weevent.protocol.stomp;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.BrokerApplication;
-import com.webank.weevent.broker.fisco.constant.FiscoBcosConstants;
+import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.util.WeEventUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
-import com.webank.weevent.broker.util.WeEventConstants;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
@@ -50,7 +50,6 @@ public class BrokerStomp extends TextWebSocketHandler {
     // session id <-> [header subscription id in stomp <-> (subscription id in consumer, topic)]
     private static Map<String, Map<String, Pair<String, String>>> sessionContext;
 
-
     @Autowired
     public void setProducer(IProducer producer) {
         this.iproducer = producer;
@@ -63,10 +62,6 @@ public class BrokerStomp extends TextWebSocketHandler {
 
     static {
         sessionContext = new HashMap<>();
-    }
-
-    public BrokerStomp() {
-        super();
     }
 
     @Override
@@ -143,6 +138,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
             default:
                 handleDefaultMessage(msg, session);
+                break;
         }
     }
 
@@ -185,7 +181,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
     @SuppressWarnings("unchecked")
     private void handleSendMessage(Message<byte[]> msg, WebSocketSession session) {
-        LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) msg.getHeaders().get("nativeHeaders"));
+        LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap<String, List<String>>) msg.getHeaders().get("nativeHeaders"));
         if (nativeHeaders == null) {
             log.error("assert nativeHeaders != null");
             return;
@@ -194,7 +190,7 @@ public class BrokerStomp extends TextWebSocketHandler {
         // send command receipt Id
         String headerReceiptIdStr = getHeadersValue("receipt", msg);
 
-        Map<String, String> extensions = WeEventUtils.getExtensions(nativeHeaders);
+        Map<String, String> extensions = WeEventUtils.getExtend(nativeHeaders);
 
         String groupId = WeEvent.DEFAULT_GROUP_ID;
         if ("fabric".equals(BrokerApplication.weEventConfig.getBlockChainType())) {
@@ -207,7 +203,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
         try {
             String simpDestination = getSimpDestination(msg);
-            handleSend(msg, simpDestination, extensions, groupId);
+            SendResult sendResult = handleSend(msg, simpDestination, extensions, groupId);
 
             // package the return frame
             StompCommand command = StompCommand.RECEIPT;
@@ -215,6 +211,7 @@ public class BrokerStomp extends TextWebSocketHandler {
             accessor.setDestination(simpDestination);
             accessor.setReceiptId(headerReceiptIdStr);
             accessor.setNativeHeader("receipt-id", headerReceiptIdStr);
+            accessor.setNativeHeader(WeEventConstants.EXTENSIONS_EVENT_ID, sendResult.getEventId());
             sendSimpleMessage(session, accessor);
         } catch (BrokerException e) {
             handleErrorMessage(session, e, headerReceiptIdStr);
@@ -429,10 +426,10 @@ public class BrokerStomp extends TextWebSocketHandler {
      * @param msg message
      * @param simpDestination topic name
      */
-    private void handleSend(Message<byte[]> msg,
-                            String simpDestination,
-                            Map<String, String> extensions,
-                            String groupId) throws BrokerException {
+    private SendResult handleSend(Message<byte[]> msg,
+                                  String simpDestination,
+                                  Map<String, String> extensions,
+                                  String groupId) throws BrokerException {
         if (!this.iproducer.startProducer()) {
             log.error("producer start failed");
         }
@@ -442,6 +439,7 @@ public class BrokerStomp extends TextWebSocketHandler {
         if (sendResult.getStatus() != SendResult.SendResultStatus.SUCCESS) {
             log.error("producer publish failed");
         }
+        return sendResult;
     }
 
     /**
@@ -464,10 +462,9 @@ public class BrokerStomp extends TextWebSocketHandler {
         log.info("destination: {} header subscribe id: {} group id: {}", simpDestination, headerIdStr, groupId);
 
         String[] curTopicList;
-        if (simpDestination.contains(",")) {
-            // NOT support
+        if (simpDestination.contains(WeEvent.MULTIPLE_TOPIC_SEPARATOR)) {
             log.info("subscribe topic list");
-            curTopicList = simpDestination.split(",");
+            curTopicList = simpDestination.split(WeEvent.MULTIPLE_TOPIC_SEPARATOR);
         } else {
             curTopicList = new String[]{simpDestination};
         }
@@ -490,8 +487,8 @@ public class BrokerStomp extends TextWebSocketHandler {
             ext.put(IConsumer.SubscribeExt.TopicTag, tag);
         }
 
-        // support only one topic
-        String subscriptionId = this.iconsumer.subscribe(curTopicList[0],
+        // support both single/multiple topic
+        String subscriptionId = this.iconsumer.subscribe(curTopicList,
                 groupId,
                 subEventId,
                 ext,
@@ -513,8 +510,9 @@ public class BrokerStomp extends TextWebSocketHandler {
                 });
 
         log.info("bind context, session id: {} header subscription id: {} consumer subscription id: {} topic: {}",
-                session.getId(), headerIdStr, subscriptionId, curTopicList[0]);
-        sessionContext.get(session.getId()).put(headerIdStr, new Pair<>(subscriptionId, curTopicList[0]));
+                session.getId(), headerIdStr, subscriptionId, Arrays.toString(curTopicList));
+        sessionContext.get(session.getId())
+                .put(headerIdStr, new Pair<>(subscriptionId, StringUtils.join(curTopicList,WeEvent.MULTIPLE_TOPIC_SEPARATOR)));
 
         log.info("consumer subscribe success, consumer subscriptionId: {}", subscriptionId);
         return subscriptionId;

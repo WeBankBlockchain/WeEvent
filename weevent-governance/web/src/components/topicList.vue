@@ -1,14 +1,18 @@
 <template>
-<div class='event-table'>
+<div class='event-table topic'>
   <div class='refresh'>
-    <el-button type='primary' icon='el-icon-plus' @click='addNewOne'>新增</el-button>
-    <div class='update_btn' @click='refresh'>
-      <img src="../assets/image/update.png" alt=""/>
+    <el-button type='primary' size='small' icon='el-icon-plus' @click='addNewOne'>新增</el-button>
+    <div class='search_part'>
+      <el-input v-model.trim='topicName'
+        placeholder="请输入topicn"
+        size='small'
+        clearable
+      ></el-input>
+      <el-button type='primary' size='small' @click='searchTopic'>搜索</el-button>
     </div>
   </div>
   <el-table
     :data="tableData"
-    stripe
     v-loading='loading'
     element-loading-spinner='el-icon-loading'
     element-loading-text='数据加载中...'
@@ -64,7 +68,10 @@
   <el-dialog title="新增 Topic" :visible.sync="dialogFormVisible" center width='450px' >
     <el-form :model="form" :rules="rules" ref='form'>
       <el-form-item label="名称:" prop='name'>
-        <el-input v-model.trim.trim="form.name" autocomplete="off"></el-input>
+        <el-input v-model.trim="form.name" autocomplete="off"></el-input>
+      </el-form-item>
+      <el-form-item label="详细描述:">
+        <el-input v-model="form.describe" type='textarea' autocomplete="off"></el-input>
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
@@ -80,6 +87,7 @@ import { getDateDetial } from '../utils/formatTime'
 export default {
   data () {
     return {
+      topicName: '',
       loading: false,
       dialogFormVisible: false,
       tableData: [],
@@ -87,12 +95,13 @@ export default {
       pageSize: 10,
       total: 0,
       form: {
-        name: ''
+        name: '',
+        describe: ''
       },
       rules: {
         name: [
           { required: true, message: '名称不能为空', trigger: 'blur' },
-          {min: 1, max: 64, message: '名称长度不能超过 64 个字符', trigger: 'blur'}
+          { min: 1, max: 64, message: '名称长度不能超过 64 个字符', trigger: 'blur' }
         ]
       },
       creater: ''
@@ -128,6 +137,7 @@ export default {
       })
     },
     refresh () {
+      sessionStorage.removeItem('topic')
       this.loading = true
       setTimeout(fun => {
         this.getLsitData()
@@ -150,7 +160,7 @@ export default {
       this.pageSize = e
       this.getLsitData()
     },
-    // 格式校验
+    // check formart
     checkName (e) {
       if (!e.topicName) {
         return '—'
@@ -179,7 +189,8 @@ export default {
           let data = {
             topic: vm.form.name,
             creater: localStorage.getItem('user'),
-            brokerId: Number(localStorage.getItem('brokerId'))
+            brokerId: Number(localStorage.getItem('brokerId')),
+            description: vm.form.describe
           }
           API.openTopic(data).then(res => {
             if (res.status === 200) {
@@ -218,26 +229,80 @@ export default {
           return false
         }
       })
+    },
+    searchTopic () {
+      var vm = this
+      if (vm.topicName) {
+        vm.tableData = []
+        let url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + vm.topicName
+        API.topicInfo(url).then(res => {
+          let time = getDateDetial(res.data.createdTimestamp)
+          res.data.createdTimestamp = time
+          let item = {
+            topicName: res.data.topicName,
+            creater: '——',
+            createdTimestamp: time,
+            detial: {}
+          }
+          vm.tableData.push(item)
+          vm.total = 1
+        })
+      } else {
+        vm.vmpageIndex = 1
+        vm.pageSize = 10
+        vm.getLsitData()
+      }
     }
   },
   mounted () {
-    this.getLsitData()
+    // if the data is exit so it means click form subscribtion list
+    if (sessionStorage.getItem('topic')) {
+      var vm = this
+      vm.tableData = []
+      if (sessionStorage.getItem('topic') !== '—') {
+        let url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + sessionStorage.getItem('topic')
+        API.topicInfo(url).then(res => {
+          let time = getDateDetial(res.data.createdTimestamp)
+          res.data.createdTimestamp = time
+          let item = {
+            topicName: res.data.topicName,
+            creater: '——',
+            createdTimestamp: time,
+            detial: {}
+          }
+          vm.tableData.push(item)
+          vm.total = 1
+        })
+      }
+    } else {
+      this.getLsitData()
+    }
   },
   computed: {
     brokerId () {
       return this.$store.state.brokerId
+    },
+    groupId () {
+      return this.$store.state.groupId
     }
   },
   watch: {
     dialogFormVisible (nVal) {
       if (!nVal) {
         this.form.name = ''
+        this.form.describe = ''
         this.$refs.form.resetFields()
       }
     },
     brokerId () {
       this.refresh()
+    },
+    groupId () {
+      this.refresh()
     }
+  },
+  destroyed () {
+    sessionStorage.removeItem('topic')
   }
 }
 

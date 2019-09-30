@@ -4,7 +4,10 @@ package com.webank.weevent.broker.task;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
@@ -42,6 +45,9 @@ public class MainEventLoop extends StoppableTask {
     // subscription in history loop
     private List<String> historySubscriptionIds = new ArrayList<>();
 
+    // new block notified
+    private BlockingDeque<Long> blockNotifyQueue;
+
     public MainEventLoop(ThreadPoolTaskExecutor threadPoolTaskExecutor, IBlockChain blockChain, String groupId) throws BrokerException {
         super("main-event-loop-" + groupId);
         this.threadPoolTaskExecutor = threadPoolTaskExecutor;
@@ -51,7 +57,12 @@ public class MainEventLoop extends StoppableTask {
         // get last block
         Long blockHeight = this.blockChain.getBlockHeight(this.groupId);
         if (blockHeight <= 0) {
-            throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
+            throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
+        }
+
+        // may be in notify strategy
+        if (blockChain.hasBlockEventNotify()) {
+            this.blockNotifyQueue = new LinkedBlockingDeque<>();
         }
 
         // init last block
@@ -136,46 +147,115 @@ public class MainEventLoop extends StoppableTask {
     @Override
     protected void taskOnceLoop() {
         try {
-            // the block try to deal with in this one loop
-            Long currentBlock = this.lastBlock + 1;
-
-            // get block height
-            Long blockHeight = this.blockChain.getBlockHeight(this.groupId);
-            if (blockHeight <= 0) {
-                // Don't try too fast if net error.
-                StoppableTask.idle(this.blockChain.getIdleTime());
-                return;
+            if (this.blockNotifyQueue == null) {
+                this.normalLoop();
+            } else {
+                this.loopWithNotifySupport();
             }
-            // no new block
-            if (currentBlock > blockHeight) {
-                log.debug("no new block in group: {}, idle", this.groupId);
-                StoppableTask.idle(this.blockChain.getIdleTime());
-                return;
-            }
-
-            // merge history if needed
-            this.mergeHistory();
-
-            // no need to fetch event if no subscription
-            if (!this.mainSubscriptionIds.isEmpty()) {
-                // fetch all event from block chain in this block
-                log.debug("fetch events from block height: {} in group: {}", currentBlock, this.groupId);
-                List<WeEvent> events = this.blockChain.loop(currentBlock, this.groupId);
-                // idle until get event information(include empty)
-                if (events == null) {
-                    StoppableTask.idle(this.blockChain.getIdleTime());
-                    return;
-                }
-                log.debug("fetch done, block: {} event size: {}", currentBlock, events.size());
-
-                this.dispatch(events, currentBlock);
-            }
-
-            // next block
-            this.lastBlock = currentBlock;
         } catch (BrokerException e) {
             log.error("main event loop exception in group: " + this.groupId, e);
             this.dispatch(e);
         }
+    }
+
+    /**
+     * normal loop, like in FISCO-BCOS 1.3
+     *
+     * @throws BrokerException BrokerException
+     */
+    private void normalLoop() throws BrokerException {
+        // the block try to deal with in this one loop
+        Long currentBlock = this.lastBlock + 1;
+
+        // get block height
+        Long blockHeight = this.blockChain.getBlockHeight(this.groupId);
+        if (blockHeight <= 0) {
+            log.error("get block height failed, retry");
+
+            // Don't try too fast if net error.
+            StoppableTask.idle(this.blockChain.getIdleTime());
+            return;
+        }
+
+        // no new block
+        if (currentBlock > blockHeight) {
+            log.debug("no new block in group: {}, idle", this.groupId);
+            StoppableTask.idle(this.blockChain.getIdleTime());
+            return;
+        }
+
+        this.dealOneBlock(currentBlock);
+    }
+
+    public void onNewBlock(Long blockHeight) {
+        log.info("new block event from web3sdk, {}", blockHeight);
+
+        try {
+            if (!this.blockNotifyQueue.offer(blockHeight, this.blockChain.getIdleTime(), TimeUnit.MILLISECONDS)) {
+                log.error("new block event queue failed due to queue is full");
+            }
+        } catch (InterruptedException e) {
+            log.error("new block event queue failed", e);
+        }
+    }
+
+    /**
+     * loop with new block event notify support, like in FISCO-BCOS 2.0
+     *
+     * @throws BrokerException BrokerException
+     */
+    private void loopWithNotifySupport() throws BrokerException {
+        // the block try to deal with in this one loop
+        Long currentBlock = this.lastBlock + 1;
+
+        // get block height
+        Long blockHeight;
+        try {
+            blockHeight = this.blockNotifyQueue.poll(this.blockChain.getIdleTime(), TimeUnit.MILLISECONDS);
+            if (blockHeight == null) {
+                log.debug("can not find new block event notify within idle time");
+
+                blockHeight = this.blockChain.getBlockHeight(this.groupId);
+                if (blockHeight <= 0) {
+                    log.error("get block height failed, retry");
+                    // retry if net error.
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            log.error("get notify from new block event queue failed", e);
+            return;
+        }
+
+        // retry if no new block
+        if (currentBlock > blockHeight) {
+            log.debug("no new block in group: {}, idle", this.groupId);
+            return;
+        }
+
+        this.dealOneBlock(currentBlock);
+    }
+
+    private void dealOneBlock(Long currentBlock) throws BrokerException {
+        // merge history if needed
+        this.mergeHistory();
+
+        // no need to fetch event if no subscription
+        if (!this.mainSubscriptionIds.isEmpty()) {
+            // fetch all event from block chain in this block
+            List<WeEvent> events = this.blockChain.loop(currentBlock, this.groupId);
+            // idle until get event information(include empty)
+            if (events == null) {
+                log.error("fetch events from block failed, block height: {}", currentBlock);
+                StoppableTask.idle(this.blockChain.getIdleTime());
+                return;
+            }
+            log.info("fetch events done, block: {} group: {} event size: {}", currentBlock, this.groupId, events.size());
+
+            this.dispatch(events, currentBlock);
+        }
+
+        // next block
+        this.lastBlock = currentBlock;
     }
 }

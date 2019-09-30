@@ -3,7 +3,6 @@ package com.webank.weevent.broker.plugin;
 import java.util.Map;
 
 import com.webank.weevent.BrokerApplication;
-import com.webank.weevent.broker.util.WeEventConstants;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.WeEvent;
 
@@ -175,7 +174,9 @@ public interface IConsumer extends IEventTopic {
     /**
      * get subscription list
      *
-     * @return boolean true if success
+     * @param groupId groupId
+     * @return subscription list if success
+     * @throws BrokerException invalid input param
      */
-    Map<String, Object> listSubscription();
+    Map<String, Object> listSubscription(String groupId) throws BrokerException;
 }

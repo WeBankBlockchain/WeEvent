@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.BrokerApplication;
+import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.plugin.IConsumer;
-import com.webank.weevent.broker.util.WeEventConstants;
 import com.webank.weevent.protocol.mqttbroker.store.IMessageIdStore;
 import com.webank.weevent.protocol.mqttbroker.store.ISessionStore;
 import com.webank.weevent.protocol.mqttbroker.store.ISubscribeStore;

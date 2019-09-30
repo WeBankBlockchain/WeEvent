@@ -1,0 +1,39 @@
+dependencies {
+    compile project(path: ":weevent-client")
+    // https://mvnrepository.com/artifact/org.apache.jmeter/ApacheJMeter_java
+    implementation("org.apache.jmeter:ApacheJMeter_java:5.0")
+    // https://mvnrepository.com/artifact/org.apache.jmeter/ApacheJMeter_core
+    implementation("org.apache.jmeter:ApacheJMeter_core:5.0")
+}
+
+jar {
+    destinationDir file("dist/apps")
+    archiveName project.name + "-" + version + ".jar"
+
+    exclude "**/*.xml"
+    exclude "**/*.properties"
+
+    doLast {
+        copy {
+            from file("src/main/resources/")
+            into "dist/conf"
+        }
+        copy {
+            from(configurations.runtime)
+            include("weevent-client*.jar", "jsonrpc4j-*.jar",
+                    "Java-WebSocket-*.jar", "spring-messaging-*.jar",
+                    "spring-core-*.jar"
+            )
+            into "dist/apps"
+        }
+        copy {
+            from file("build/libs/")
+            into "dist/apps"
+        }
+    }
+}
+
+
+artifacts {
+    archives jar
+}

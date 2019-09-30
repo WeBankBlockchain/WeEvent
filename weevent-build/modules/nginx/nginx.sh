@@ -39,7 +39,7 @@ start(){
             echo "start nginx fail"
             exit 1
         fi
-        i=$(( $i + 1 ))
+        i=$(( i + 1 ))
     done
 
     if [[ $(crontab -l | grep -w nginx | wc -l) -eq 0 ]]; then

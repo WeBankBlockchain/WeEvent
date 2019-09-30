@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.webank.weevent.broker.util.DataTypeUtils;
+import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
-import com.webank.weevent.broker.util.WeEventConstants;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
@@ -78,14 +78,14 @@ public class Subscription {
     private String remoteIp;
 
     /**
-     * idle time
+     * subscribe topic TimeStamp.
      */
-    private int idleTime = 1000;
+    private Date createTimeStamp = new Date();
 
     /**
-     * merge cache block area
+     * idle time
      */
-    private int mergeBlock = 8;
+    private int idleTime;
 
     /**
      * Event notify task.
@@ -99,18 +99,19 @@ public class Subscription {
 
     /**
      * helper to avoid repeat notify if exist HistoryEventLoop
+     * (eventId <-> timestamp), value is not used yet
      */
-    private Map<String, WeEvent> mergeCache;
+    private Map<String, Long> mergeCache;
+
+    /**
+     * merge cache block area
+     */
+    private int mergeBlock = 8;
 
     /**
      * first block in HistoryEventLoop dispatch
      */
     private Long historyBlock = 0L;
-
-    /**
-     * subscribe topic TimeStamp.
-     */
-    private Date createTimeStamp = new Date();
 
     @Override
     public String toString() {
@@ -134,8 +135,9 @@ public class Subscription {
         this.groupId = groupId;
         this.offset = offset;
         this.tag = tag;
+        this.idleTime = blockChain.getIdleTime();
 
-        this.notifyTask = new NotifyTask(this.uuid, blockChain.getIdleTime(), listener);
+        this.notifyTask = new NotifyTask(this.uuid, this.idleTime, listener);
 
         // not OFFSET_LAST, need history help task
         if (!WeEvent.OFFSET_LAST.equals(this.offset)) {
@@ -195,8 +197,9 @@ public class Subscription {
         // need merge in cache
         if (this.mergeCache != null) {
             topicEvents.removeIf((event) -> this.mergeCache.containsKey(event.getEventId()));
+            Long now = System.currentTimeMillis();
             for (WeEvent event : topicEvents) {
-                this.mergeCache.put(event.getEventId(), event);
+                this.mergeCache.put(event.getEventId(), now);
             }
 
             // cleanup merge cache if needed

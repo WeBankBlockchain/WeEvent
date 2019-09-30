@@ -2,7 +2,7 @@ package com.webank.weevent.broker.fisco;
 
 import java.nio.charset.StandardCharsets;
 
-import com.webank.weevent.broker.util.ParamCheckUtils;
+import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.SendResult;
@@ -13,9 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IProducer {
-    public FiscoBcosBroker4Producer() {
-        super();
-    }
 
     @Override
     public boolean startProducer() {

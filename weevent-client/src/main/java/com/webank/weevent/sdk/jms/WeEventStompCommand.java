@@ -2,6 +2,7 @@ package com.webank.weevent.sdk.jms;
 
 
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 import javax.jms.JMSException;
 
@@ -109,13 +110,18 @@ public class WeEventStompCommand {
     }
 
     // payload is WeEvent
-    public String encodeSend(WeEventTopic topic, byte[] payload, Long id) throws JMSException {
+    public String encodeSend(WeEventTopic topic, byte[] payload, Long id, WeEvent weEvent) throws JMSException {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SEND);
         accessor.setDestination(topic.getTopicName());
         accessor.setContentType(new MimeType("application", "json", StandardCharsets.UTF_8));
         accessor.setContentLength(payload.length);
         accessor.setNativeHeader("receipt", Long.toString(id));
-
+        if (!StringUtils.isBlank(topic.getGroupId())) {
+            accessor.setNativeHeader("groupId", topic.getGroupId());
+        }
+        for (Map.Entry<String, String> entry : weEvent.getExtensions().entrySet()) {
+            accessor.setNativeHeader(entry.getKey(), entry.getValue());
+        }
         return encodeRaw(accessor, payload);
     }
 
@@ -124,7 +130,7 @@ public class WeEventStompCommand {
         if (command == null) {
             return false;
         }
-        return command.equals("ERROR");
+        return "ERROR".equals(command);
     }
 
     public String getReceipt(Message message) {

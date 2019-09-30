@@ -2,7 +2,7 @@ package com.webank.weevent.broker.plugin;
 
 
 import com.webank.weevent.BrokerApplication;
-import com.webank.weevent.broker.util.WeEventConstants;
+import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
