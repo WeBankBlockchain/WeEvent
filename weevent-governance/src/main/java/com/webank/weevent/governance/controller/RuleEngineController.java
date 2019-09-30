@@ -39,7 +39,7 @@ public class RuleEngineController {
         GovernanceResult governanceResult = new GovernanceResult(ruleEngines);
         Integer count = CollectionUtils.isEmpty(ruleEngines) ? 0 : ruleEngines.get(0).getTotalCount();
         governanceResult.setTotalCount(count);
-        return new GovernanceResult(ruleEngines);
+        return governanceResult;
     }
 
     // add RuleEngineEntity
