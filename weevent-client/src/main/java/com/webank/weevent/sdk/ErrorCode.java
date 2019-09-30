@@ -141,6 +141,8 @@ public enum ErrorCode {
     UNKNOWN_SOLIDITY_VERSION(200213, "unknown contract version"),
 
     WEB3SDK_RPC_ERROR(200214, "we3sdk's rpc failed"),
+
+    SERIALIZE_ERROR(200215, "serialize WeEvent object failed"),
     ;
 
     /**
