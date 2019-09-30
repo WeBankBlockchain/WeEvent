@@ -1,5 +1,7 @@
 package com.webank.weevent.governance.service;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -46,6 +48,9 @@ public class RuleEngineService {
     @Autowired
     private PermissionService permissionService;
 
+    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd hh:mm:ss");
+
+
     @Autowired
     private BrokerService brokerService;
 
@@ -60,6 +65,7 @@ public class RuleEngineService {
             if (accountId == null || !accountId.equals(ruleEngineEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
+            Calendar calendar = Calendar.getInstance();
             int count = ruleEngineMapper.countRuleEngine(ruleEngineEntity);
             List<RuleEngineEntity> ruleEngineEntities = null;
             if (count > 0) {
@@ -67,6 +73,12 @@ public class RuleEngineService {
                 ruleEngineEntity.setEndIndex(ruleEngineEntity.getPageNumber() * ruleEngineEntity.getPageSize());
                 ruleEngineEntities = ruleEngineMapper.getRuleEngines(ruleEngineEntity);
                 ruleEngineEntities.get(0).setTotalCount(count);
+                for (RuleEngineEntity it : ruleEngineEntities) {
+                    calendar.setTime(it.getCreateDate());
+
+                    String format = simpleDateFormat.format(calendar.getTime());
+                    it.setCreateDate(simpleDateFormat.parse(format));
+                }
             }
             return ruleEngineEntities;
         } catch (Exception e) {
