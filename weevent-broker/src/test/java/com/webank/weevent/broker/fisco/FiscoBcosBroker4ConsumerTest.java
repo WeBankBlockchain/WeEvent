@@ -71,7 +71,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
         if (StringUtils.isBlank(this.lastEventId)) {
             String data = String.format("hello world! %s", System.currentTimeMillis());
             WeEvent weEvent = new WeEvent(this.topicName, data.getBytes());
-            SendResult sendResultDto = this.iProducer.publish(weEvent, this.groupId);
+            SendResult sendResultDto = this.iProducer. publish(weEvent, this.groupId);
             Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResultDto.getStatus());
             this.lastEventId = sendResultDto.getEventId();
             log.info("publish lastEventId: {}", this.lastEventId);

@@ -10,13 +10,15 @@ type TopicController struct {
 }
 
 type TopicInfo struct {
-	timepStamp string
-	version  string
+	CreatedTimestamp string `json:"createdTimestamp"`
+	Version  string `json:"version"`
+	Topic string `json:"topicName"`
 }
 
 var topicContractName string = ""
 var topicContractVersion string = ""
 var topicMap = make(map[string]TopicInfo)
+const TOPIC_ALREADY_EXIST = "500100";
 
 func (t *TopicController) Init(stub shim.ChaincodeStubInterface) pb.Response{
     fmt.Println(" << ====[Init] success init it is view in docker ======")
@@ -38,6 +40,8 @@ func (t *TopicController) Invoke(stub shim.ChaincodeStubInterface) pb.Response{
 			return t.addTopicInfo(stub, args)
 		case "getTopicInfo":
 			return t.getTopicInfo(stub, args)
+		case "isTopicExist":
+        	return t.isTopicExist(stub, args)
 	}
 
 	return shim.Error("invoke func error")
@@ -67,11 +71,15 @@ func (t *TopicController) getTopicContractVersion(stub shim.ChaincodeStubInterfa
 }
 
 func (t *TopicController) addTopicInfo(stub shim.ChaincodeStubInterface,args[] string) pb.Response{
+	if _, ok := topicMap[args[0]]; ok {
+        return shim.Error([]byte(TOPIC_ALREADY_EXIST))
+    }
 	var topicInfo TopicInfo
-	topicInfo.timepStamp = args[1]
-	topicInfo.version = args[2]
-	topicMap[args[0]] = topicInfo;//args[0]:topicName args[1]:timestamp args[2]:verison
-	return shim.Success([]byte("addTopicInfo success"))
+	topicInfo.CreatedTimestamp = args[1]
+	topicInfo.Version = args[2]
+	topicInfo.Topic = args[0]
+	topicMap[args[0]] = topicInfo;//args[0]:topicName args[1]:timestamp args[2]:
+    return shim.Success([]byte("addTopicInfo success"))
 }
 
 func (t *TopicController) getTopicInfo(stub shim.ChaincodeStubInterface,args[] string) pb.Response{
@@ -79,7 +87,15 @@ func (t *TopicController) getTopicInfo(stub shim.ChaincodeStubInterface,args[] s
 	if err != nil{
 		return shim.Error("getTopicInfo err")
 	}
-	return shim.Success([]byte(string(jsonTopicInfo)))
+	return shim.Success([]byte(jsonTopicInfo))
+}
+
+func (t *TopicController) isTopicExist(stub shim.ChaincodeStubInterface,args[] string) bool{
+	if _, ok := topicMap[args[0]]; ok {
+        return true
+    } else {
+        return false
+    }
 }
 
 func main(){

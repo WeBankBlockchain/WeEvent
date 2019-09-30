@@ -66,7 +66,7 @@ public class FabricDelegate {
     }
 
     public List<String> listChannel() throws BrokerException {
-        return fabricMap.get(WeEvent.DEFAULT_CHANNEL_NAME).listChannelName();
+        return FabricSDKWrapper.listChannelName();
     }
 
     public Long getBlockHeight(String channelName) throws BrokerException {

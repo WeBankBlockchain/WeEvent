@@ -40,7 +40,7 @@ import org.hyperledger.fabric.sdk.exception.ProposalException;
  */
 @Slf4j
 public class ChaincodeExecuter {
-    public String executeTransaction(HFClient client, Channel channel, ChaincodeID chaincodeID, boolean invoke, String func, String... args) throws InvalidArgumentException, ProposalException, UnsupportedEncodingException, InterruptedException, ExecutionException, TimeoutException {
+    public static String executeTransaction(HFClient client, Channel channel, ChaincodeID chaincodeID, boolean invoke, String func, String... args) throws InvalidArgumentException, ProposalException, UnsupportedEncodingException, InterruptedException, ExecutionException, TimeoutException {
         TransactionProposalRequest transactionProposalRequest = client.newTransactionProposalRequest();
         transactionProposalRequest.setChaincodeID(chaincodeID);
         transactionProposalRequest.setChaincodeLanguage(TransactionRequest.Type.GO_LANG);

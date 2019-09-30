@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -18,6 +19,8 @@ import com.webank.weevent.broker.fabric.config.FabricConfig;
 import com.webank.weevent.broker.fabric.dto.TransactionInfo;
 import com.webank.weevent.broker.fabric.util.FabricUser;
 import com.webank.weevent.broker.util.DataTypeUtils;
+import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +42,7 @@ import org.hyperledger.fabric.sdk.exception.ProposalException;
 import org.hyperledger.fabric.sdk.exception.TransactionException;
 import org.hyperledger.fabric.sdk.security.CryptoSuite;
 
+import static com.webank.weevent.broker.fabric.util.FabricDeployContractUtil.fabricConfig;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hyperledger.fabric.sdk.BlockInfo.EnvelopeType.TRANSACTION_ENVELOPE;
 
@@ -48,7 +52,7 @@ import static org.hyperledger.fabric.sdk.BlockInfo.EnvelopeType.TRANSACTION_ENVE
  * @since 2019/8/9
  */
 @Slf4j
-public class FabricSDKWrapper {
+public class  FabricSDKWrapper {
     // Create HFClient
     public static HFClient initializeClient(FabricConfig fabricConfig) throws InvalidArgumentException, IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException, CryptoException, ClassNotFoundException {
         HFClient hfClient = HFClient.createNewInstance();
@@ -59,6 +63,18 @@ public class FabricSDKWrapper {
 
     // Create Channel
     public static Channel initializeChannel(HFClient client, String channelName, FabricConfig fabricConfig) throws InvalidArgumentException, TransactionException {
+        Orderer orderer1 = getOrderer(client, fabricConfig);
+
+        Peer peer0 = getPeer(client, fabricConfig);
+
+        Channel channel = client.newChannel(channelName);
+        channel.addOrderer(orderer1);
+        channel.addPeer(peer0);
+        channel.initialize();
+        return channel;
+    }
+
+    public static Orderer getOrderer(HFClient client, FabricConfig fabricConfig) throws InvalidArgumentException {
         Properties orderer1Prop = new Properties();
         orderer1Prop.setProperty("pemFile", fabricConfig.getOrdererTlsCaFile());
         orderer1Prop.setProperty("sslProvider", "openSSL");
@@ -67,8 +83,11 @@ public class FabricSDKWrapper {
         orderer1Prop.setProperty("hostnameOverride", "orderer");
         orderer1Prop.setProperty("trustServerCertificate", "true");
         orderer1Prop.setProperty("allowAllHostNames", "true");
-        Orderer orderer1 = client.newOrderer("orderer", fabricConfig.getOrdererAddress(), orderer1Prop);
+        Orderer orderer = client.newOrderer("orderer", fabricConfig.getOrdererAddress(), orderer1Prop);
+        return orderer;
+    }
 
+    public static Peer getPeer(HFClient client, FabricConfig fabricConfig) throws InvalidArgumentException {
         Properties peer0Prop = new Properties();
         peer0Prop.setProperty("pemFile", fabricConfig.getPeerTlsCaFile());
         peer0Prop.setProperty("sslProvider", "openSSL");
@@ -76,13 +95,8 @@ public class FabricSDKWrapper {
         peer0Prop.setProperty("hostnameOverride", "peer0");
         peer0Prop.setProperty("trustServerCertificate", "true");
         peer0Prop.setProperty("allowAllHostNames", "true");
-        Peer peer0 = client.newPeer("peer0", fabricConfig.getPeerAddress(), peer0Prop);
-
-        Channel channel = client.newChannel(channelName);
-        channel.addOrderer(orderer1);
-        channel.addPeer(peer0);
-        channel.initialize();
-        return channel;
+        Peer peer = client.newPeer("peer0", fabricConfig.getPeerAddress(), peer0Prop);
+        return peer;
     }
 
     public static ChaincodeID getChainCodeID(String chaincodeName, String chaincodeVersion) {
@@ -161,7 +175,7 @@ public class FabricSDKWrapper {
         for (ProposalResponse response : transactionPropResp) {
             if (response.getStatus() == ProposalResponse.Status.SUCCESS) {
                 transactionInfo.setPayLoad(new String(response.getChaincodeActionResponsePayload()));
-                log.debug(String.format("[√] Got success response from peer {} => payload: {}", response.getPeer().getName(), transactionInfo.getPayLoad()));
+                log.info(String.format("[√] Got success response from peer {} => payload: {}", response.getPeer().getName(), transactionInfo.getPayLoad()));
                 successful.add(response);
             } else {
                 result = false;
@@ -177,7 +191,7 @@ public class FabricSDKWrapper {
             CompletableFuture<BlockEvent.TransactionEvent> carfuture = channel.sendTransaction(successful);
             BlockEvent.TransactionEvent transactionEvent = carfuture.get(transactionTimeout, TimeUnit.MILLISECONDS);
             transactionInfo.setBlockNumber(transactionEvent.getBlockEvent().getBlockNumber());
-            log.debug("Wait event return: " + transactionEvent.getChannelId() + " " + transactionEvent.getTransactionID() + " " + transactionEvent.getType() + " " + transactionEvent.getValidationCode());
+            log.info("Wait event return: " + transactionEvent.getChannelId() + " " + transactionEvent.getTransactionID() + " " + transactionEvent.getType() + " " + transactionEvent.getValidationCode());
         }
         return transactionInfo;
     }
@@ -205,5 +219,20 @@ public class FabricSDKWrapper {
             }
         }
         return weEventList;
+    }
+
+    public static List<String> listChannelName() throws BrokerException {
+//        List listChannel = new ArrayList();
+//        listChannel.add(fabricConfig.getChannelName());
+//        return listChannel;
+        try {
+            HFClient hfClient = initializeClient(fabricConfig);
+            Peer peer = FabricSDKWrapper.getPeer(hfClient, fabricConfig);
+            Set<String> channels = hfClient.queryChannels(peer);
+            return new ArrayList<>(channels);
+        } catch (Exception e) {
+            log.error("get channel name list failed , e: {}", e);
+            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
     }
 }

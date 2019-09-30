@@ -33,9 +33,9 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
         Assert.assertNotNull(this.iProducer);
         this.iProducer.startProducer();
 
-        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.groupId);
-        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
-        this.eventId = sendResult.getEventId();
+//        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.groupId);
+//        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
+//        this.eventId = sendResult.getEventId();
     }
 
     @After
