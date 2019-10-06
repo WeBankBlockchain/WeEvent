@@ -60,6 +60,15 @@ public class CEPRuleCache {
         ruleMap.remove(ruleId);
     }
 
+    public static void deleteCEPRuleById(CEPRule rule) {
+        // cancel the subscription
+        String ruleId = rule.getId();
+        if (ruleMap.get(ruleId)!=null) {
+            CEPRuleMQ.unSubscribeMsg(ruleMap.get(rule.getId()), CEPRuleMQ.subscriptionIdMap.get(ruleId));
+        }
+        ruleMap.remove(ruleId);
+    }
+
     public static void updateCEPRule(CEPRule rule) throws BrokerException {
         CEPRuleMQ.updateSubscribeMsg(rule, ruleMap);
     }

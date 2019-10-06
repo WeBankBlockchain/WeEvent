@@ -30,6 +30,7 @@ import org.springframework.util.StringUtils;
 
 @Slf4j
 public class CEPRuleMQ {
+    // <ruleId <--> subscriptionId>
     public static Map<String, String> subscriptionIdMap = new ConcurrentHashMap<>();
 
     public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException{
@@ -76,6 +77,7 @@ public class CEPRuleMQ {
     public static void unSubscribeMsg(CEPRule rule, String subscriptionId) {
         try {
             IWeEventClient client = IWeEventClient.build(rule.getBrokerUrl());
+            log.info("id:{},sunid:{}",rule.getId(),subscriptionId);
             client.unSubscribe(subscriptionId);
         } catch (BrokerException e) {
             log.info("BrokerException{}", e.toString());
