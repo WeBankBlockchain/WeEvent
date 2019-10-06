@@ -67,12 +67,102 @@ public class ServiceTest {
         log.info("return json:{}", responseString);
 
     }
+    @Test
+    public void startCEPRule() throws Exception {
+        String url = "/startCEPRule?id=201970367829835101";
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON);
+        MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
+        log.info("result:{}", result.getResponse().getContentAsString());
+        Assert.assertEquals(200, result.getResponse().getStatus());
+    }
+
+    @Test
+    public void getCEPRuleListByPage() throws Exception {
+        String url = "/getCEPRuleListByPage";
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON)
+                .param("currPage", "1")
+                .param("pageSize", "10");
+        MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
+        log.info("result:{}", result.getResponse().getContentAsString());
+        Assert.assertEquals(200, result.getResponse().getStatus());
+    }
+
+    @Test
+    public void getCEPRuleListByPageWrongParam() throws Exception {
+        String url = "/getCEPRuleListByPage";
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON)
+                .param("currPage", "1")
+                .param("pageSize", "0");
+        MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
+        log.info("result:{}", result.getResponse().getContentAsString());
+        Assert.assertEquals(200, result.getResponse().getStatus());
+
+    }
+
+
+    @Test
+    public void getCEPRuleListByPageWrongParam2() throws Exception {
+        String url = "/getCEPRuleListByPage";
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON)
+                .param("currPage", "1")
+                .param("pageSize", "1");
+        MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
+        log.info("result:{}", result.getResponse().getContentAsString());
+        Assert.assertEquals(200, result.getResponse().getStatus());
+    }
+
+    @Test
+    public void getCEPRuleListByPageWrongParam3() throws Exception {
+        String url = "/getCEPRuleListByPage";
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON)
+                .param("currPage", "1")
+                .param("pageSize", "51");
+        MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
+        log.info("result:{}", result.getResponse().getContentAsString());
+        Assert.assertEquals(200, result.getResponse().getStatus());
+
+    }
 
     @Test
     public void selectByRuleName() throws Exception {
         String url = "/getCEPRuleByName";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON).param("ruleName", "air3");
-        MvcResult result = mockMvc.perform(requestBuilder) .andDo(print()).andReturn();
+        MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
+        log.info("result:{}", result.getResponse().getContentAsString());
+        Assert.assertEquals(200, result.getResponse().getStatus());
+    }
+
+    @Test
+    public void selectByRuleNameWrongParam() throws Exception {
+        String url = "/getCEPRuleByName";
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON).param("ruleName", "");
+        MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
+        log.info("result:{}", result.getResponse().getContentAsString());
+        Assert.assertEquals(200, result.getResponse().getStatus());
+    }
+
+
+    @Test
+    public void selectByRuleNameWrongParam2() throws Exception {
+        String url = "/getCEPRuleByName";
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON).param("ruleName", "你好中国");
+        MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
+        log.info("result:{}", result.getResponse().getContentAsString());
+        Assert.assertEquals(200, result.getResponse().getStatus());
+    }
+    @Test
+    public void selectByRuleNameParam3() throws Exception {
+        String url = "/getCEPRuleByName";
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON).param("ruleName", "wyruewyruyewuryewuryuewy" +
+                "ewqewqeqweqeqwewqewqeqadadasdasdadadsadadhajsdajhdjahdjahdjahdjahdjahdjahdahdjahdjhadjahdjahdjahdjahdjajdadjadhajdhajhdjadadadadadadsd" +
+                "ewqewqeqweqeqwewqewqeqadadasdasdadadsadadhajsdajhdjahdjahdjahdjahdjahdjahdahdjahdjhadjahdjahdjahdjahdjajdadjadhajdhajhdjadadadadadadsd" +
+                "ewqewqeqweqeqwewqewqeqadadasdasdadadsadadhajsdajhdjahdjahdjahdjahdjahdjahdahdjahdjhadjahdjahdjahdjahdjajdadjadhajdhajhdjadadadadadadsd" +
+                "ewqewqeqweqeqwewqewqeqadadasdasdadadsadadhajsdajhdjahdjahdjahdjahdjahdjahdahdjahdjhadjahdjahdjahdjahdjajdadjadhajdhajhdjadadadadadadsd" +
+                "ewqewqeqweqeqwewqewqeqadadasdasdadadsadadhajsdajhdjahdjahdjahdjahdjahdjahdahdjahdjhadjahdjahdjahdjahdjajdadjadhajdhajhdjadadadadadadsd" +
+                "ewqewqeqweqeqwewqewqeqadadasdasdadadsadadhajsdajhdjahdjahdjahdjahdjahdjahdahdjahdjhadjahdjahdjahdjahdjajdadjadhajdhajhdjadadadadadadsd" +
+                "ewqewqeqweqeqwewqewqeqadadasdasdadadsadadhajsdajhdjahdjahdjahdjahdjahdjahdahdjahdjhadjahdjahdjahdjahdjajdadjadhajdhajhdjadadadadadadsd" +
+                "adadhsahdashdjsahdjhsadjhasjdhajhdjahdjhajdhajhdradadasdddddddddddddddddddddddddddddddddddddddddddddddddddddddddadadadadadadadsas");
+        MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
         log.info("result:{}", result.getResponse().getContentAsString());
         Assert.assertEquals(200, result.getResponse().getStatus());
     }
@@ -82,7 +172,7 @@ public class ServiceTest {
         String url = "/getCEPRuleById";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON)
                 .param("id", "6");
-        MvcResult result = mockMvc.perform(requestBuilder) .andDo(print()).andReturn();
+        MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
         log.info("result:{}", result.getResponse().getContentAsString());
         Assert.assertEquals(200, result.getResponse().getStatus());
 
@@ -113,7 +203,7 @@ public class ServiceTest {
                 "    }";
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
-        MvcResult result = mockMvc.perform(requestBuilder) .andDo(print()).andReturn();
+        MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
         log.info("result:{}", result.getResponse().getContentAsString());
         Assert.assertEquals(200, result.getResponse().getStatus());
     }
@@ -122,5 +212,4 @@ public class ServiceTest {
     public void insertRule400() throws Exception {
 
     }
-
 }

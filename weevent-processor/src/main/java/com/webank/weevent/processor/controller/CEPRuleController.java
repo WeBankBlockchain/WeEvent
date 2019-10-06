@@ -1,5 +1,6 @@
 package com.webank.weevent.processor.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -59,6 +60,12 @@ public class CEPRuleController extends BaseController {
     @ResponseBody
     public BaseRspEntity getCEPRuleListByPage(int currPage, int pageSize) {
         BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
+        if (currPage <= 0 || pageSize <= 0 || pageSize > 50) {
+            resEntity.setErrorCode(Constants.SUCCESS_CODE);
+            resEntity.setErrorMsg("the currPage or pageSize is not valid");
+            resEntity.setData(new ArrayList<>());
+            return resEntity;
+        }
         List<CEPRule> cepRule = cepRuleService.getCEPRuleListByPage(currPage, pageSize);
         resEntity.setData(cepRule);
         if (cepRule == null) {
@@ -95,10 +102,10 @@ public class CEPRuleController extends BaseController {
     public BaseRspEntity insert(@Valid @RequestBody CEPRule rule) {
         BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
         String ret = cepRuleService.insert(rule);
-        if(ret.equals("-1")){
+        if (ret.equals("-1")) {
             resEntity.setErrorCode(Constants.FAIL.getErrorCode());
             resEntity.setErrorMsg(Constants.FAIL.getErrorMsg());
-        }else{
+        } else {
             resEntity.setData(ret);
         }
 
