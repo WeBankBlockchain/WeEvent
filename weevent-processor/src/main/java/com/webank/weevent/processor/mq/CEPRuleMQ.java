@@ -14,15 +14,10 @@ import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.WeEvent;
 
+import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jsqlparser.expression.operators.relational.Between;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.InExpression;
-import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
-import net.sf.jsqlparser.expression.operators.relational.MinorThan;
-import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
+import net.sf.jsqlparser.expression.BinaryExpression;
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
@@ -34,15 +29,15 @@ public class CEPRuleMQ {
     // <ruleId <--> subscriptionId>
     public static Map<String, String> subscriptionIdMap = new ConcurrentHashMap<>();
 
-    public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException{
+    public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException {
         // unsubscribe old the topic
         ruleMap.get(rule.getId()).getToDestination();
         IWeEventClient client = IWeEventClient.build(rule.getBrokerUrl());
         client.unSubscribe(subscriptionIdMap.get(rule.getId()));
         // update the rule map
-        ruleMap.put(rule.getId(),rule);
+        ruleMap.put(rule.getId(), rule);
         // update subscribe
-        subscribeMsg(rule,ruleMap);
+        subscribeMsg(rule, ruleMap);
     }
 
     public static void subscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) {
@@ -78,7 +73,7 @@ public class CEPRuleMQ {
     public static void unSubscribeMsg(CEPRule rule, String subscriptionId) {
         try {
             IWeEventClient client = IWeEventClient.build(rule.getBrokerUrl());
-            log.info("id:{},sunid:{}",rule.getId(),subscriptionId);
+            log.info("id:{},sunid:{}", rule.getId(), subscriptionId);
             client.unSubscribe(subscriptionId);
         } catch (BrokerException e) {
             log.info("BrokerException{}", e.toString());
@@ -150,105 +145,176 @@ public class CEPRuleMQ {
      */
     private static boolean parsingCondition(String eventContent, String condition) throws JSONException {
         log.info("parsingCondition eventContent {},condition {}", eventContent, condition);
-        boolean flag = false;
-        List<String> contentKeys = Util.getKeys(eventContent);
         String temp = "SELECT * FROM table WHERE ";
         String trigger = temp.concat(" ").concat(condition);
         log.info("trigger: {}", trigger);
         CCJSqlParserManager parserManager = new CCJSqlParserManager();
-        String operationStr = "OTHER";
         PlainSelect plainSelect = null;
+        boolean flag = false;
         try {
+            trigger = "SELECT * FROM mytable WHERE a = :param OR a = :param2 AND b = :param3";
             Select select = (Select) parserManager.parse(new StringReader(trigger));
             plainSelect = (PlainSelect) select.getSelectBody();
 
-            List<String> oper = new ArrayList<>(Arrays.asList("=", "<>", "!=", "<", ">", ">=", "<=", "BETWEEN", "LIKE", "IN"));
-
+            // if contain Between ,like in and only support one
+            String operationStr = "OTHER";
+            // parsing the operation
+            List<String> oper = new ArrayList<>(Arrays.asList(Constants.BETWEEN, Constants.LIKE, Constants.IN));
             for (int i = 0; i < oper.size(); i++) {
-                if (trigger.contains(oper.get(i))) {
+                if (trigger.toString().contains(oper.get(i))) {
                     log.info("current:{}", oper.get(i));
                     operationStr = oper.get(i);
+                    flag = singleMatch(eventContent, plainSelect, operationStr);
+                    return flag;
                 }
+            }
+
+            // reslove  other operators
+            List<Expression> whereList = new ArrayList<>();
+            List<String> operatorList = new ArrayList<>();
+
+            Expression exp_l1 = ((BinaryExpression) plainSelect.getWhere()).getLeftExpression();
+            Expression exp_r1 = ((BinaryExpression) plainSelect.getWhere()).getRightExpression();
+            String exp_middle = ((BinaryExpression) plainSelect.getWhere()).getStringExpression();
+
+            whereList.add(exp_l1);
+            operatorList.add(exp_middle);
+
+            Expression expression = exp_r1;
+            while(((BinaryExpression) expression).getASTNode()==null){
+                Expression exp_rl = ((BinaryExpression) expression).getLeftExpression();
+                Expression exp_rr = ((BinaryExpression) expression).getRightExpression();
+                String exp_mid = ((BinaryExpression) expression).getStringExpression();
+                whereList.add(exp_rl);
+                operatorList.add(exp_mid);
+                if(((BinaryExpression) expression).getRightExpression().getASTNode().jjtGetNumChildren()>0){
+                    whereList.add(expression);
+                    log.info("whereList size:{}", whereList.size());
+                    log.info("operatorList size:{}", operatorList.size());
+                    break;
+                }
+
+            }
+            // check the priority ,hit rule at first
+            for (int t = 0; t < operatorList.size(); t++) {
+                // check AND
+                int current = t + 1;
+                if (operatorList.get(t).equals(Constants.AND)) {
+                    boolean flag1 = singleMatch(whereList.get(current), eventContent);
+                    boolean flag2 = singleMatch(whereList.get(current+1), eventContent);
+                    if (flag1 && flag2) {
+                        flag = true;
+                    }
+                }
+            }
+            // check OR
+            for (int t = 0; t < operatorList.size(); t++) {
+                // and > or
+                int current = t + 1;
+                if (operatorList.get(t).equals(Constants.OR)) {
+                    boolean flag1 = singleMatch(whereList.get(current), eventContent);
+                    boolean flag2 = singleMatch(whereList.get(current+1), eventContent);
+                    if (flag1 || flag2) {
+                        flag = true;
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            log.info("exception: {}", e.toString());
+        }
+        return flag;
+    }
+
+    private static boolean singleMatch(String eventContent,PlainSelect plainSelect,String operationStr) {
+
+        boolean flag = false;
+        List<String> contentKeys = Util.getKeys(eventContent);
+        try {
+            switch (operationStr) {
+                case Constants.BETWEEN:
+                    flag = Util.compareNumber(plainSelect, contentKeys, eventContent, Constants.BETWEEN);
+                    break;
+
+                case Constants.LIKE:
+                    flag = Util.compareNumber(plainSelect, contentKeys, eventContent, Constants.LIKE);
+                    break;
+
+                case Constants.IN:
+                    flag = Util.compareNumber(plainSelect, contentKeys, eventContent, Constants.IN);
+                    break;
+
+                default:
+                    log.error("other ", operationStr);
+
+
             }
         } catch (Exception e) {
             log.info("exception: {}", e.toString());
         }
+        return flag;
+    }
+
+    private static boolean singleMatch(Expression trigger, String eventContent) {
+
+        boolean flag = false;
+        List<String> contentKeys = Util.getKeys(eventContent);
+        String operationStr = "OTHER";
 
         // parsing the operation
-        switch (operationStr) {
-            case Constants.QUALS_TO:
-                log.info("EQUALS_TO:{}", operationStr);
-                log.info("left: {},right: {}", (((EqualsTo) plainSelect.getWhere()).getLeftExpression()).toString(), (((EqualsTo) plainSelect.getWhere()).getRightExpression()).toString());
-                flag = Util.compareNumber(plainSelect, contentKeys, eventContent, "=");
-                break;
+        List<String> oper = new ArrayList<>(Arrays.asList(Constants.QUALS_TO, Constants.NOT_QUALS_TO, Constants.NOT_QUALS_TO_TWO
+                , Constants.MINOR_THAN, Constants.MINOR_THAN_EQUAL, Constants.GREATER_THAN));
 
-            case Constants.NOT_QUALS_TO:
-                log.info("NOT_QUALS_TO:{}", operationStr);
-                log.info("check:{}", (((NotEqualsTo) plainSelect.getWhere()).getRightExpression()).toString());
+        for (int i = 0; i < oper.size(); i++) {
+            if (trigger.toString().contains(oper.get(i))) {
+                log.info("current:{}", oper.get(i));
+                operationStr = oper.get(i);
+            }
+        }
+        try {
+            switch (operationStr) {
+                case Constants.QUALS_TO:
+                    flag = Util.compareNumber(trigger, contentKeys, eventContent, Constants.QUALS_TO);
+                    break;
 
-                flag = Util.compareNumber(plainSelect, contentKeys, eventContent, "!=");
-                break;
+                case Constants.NOT_QUALS_TO:
+                    flag = Util.compareNumber(trigger, contentKeys, eventContent, Constants.NOT_QUALS_TO);
+                    break;
 
-            case Constants.NOT_QUALS_TO_TWO:
-                log.info("NOT_QUALS_TO:{}", operationStr);
-                log.info("check:{}", (((NotEqualsTo) plainSelect.getWhere()).getRightExpression()).toString());
-                flag = Util.compareNumber(plainSelect, contentKeys, eventContent, "!=");
-                break;
+                case Constants.NOT_QUALS_TO_TWO:
+                    flag = Util.compareNumber(trigger, contentKeys, eventContent, Constants.NOT_QUALS_TO_TWO);
+                    break;
 
-            case Constants.MINOR_THAN:
-                log.info("MINOR_THAN:{}", operationStr);
-                log.info("check:{}", (((MinorThan) plainSelect.getWhere()).getRightExpression()).toString());
-                flag = Util.compareNumber(plainSelect, contentKeys, eventContent, "<");
-                break;
+                case Constants.MINOR_THAN:
+                    flag = Util.compareNumber(trigger, contentKeys, eventContent, Constants.MINOR_THAN);
+                    break;
 
-            case Constants.MINOR_THAN_EQUAL:
-                log.info("MINOR_THAN_EQUAL:{}", operationStr);
-                log.info("check:{}", (((MinorThanEquals) plainSelect.getWhere()).getRightExpression()).toString());
-                flag = Util.compareNumber(plainSelect, contentKeys, eventContent, "<=");
-                break;
+                case Constants.MINOR_THAN_EQUAL:
+                    flag = Util.compareNumber(trigger, contentKeys, eventContent, Constants.MINOR_THAN_EQUAL);
+                    break;
 
-            case Constants.GREATER_THAN:
-                log.info("GREATER_THAN:{}", operationStr);
-                flag = Util.compareNumber(plainSelect, contentKeys, eventContent, ">");
+                case Constants.GREATER_THAN:
+                    flag = Util.compareNumber(trigger, contentKeys, eventContent, Constants.GREATER_THAN);
 
-                break;
+                    break;
 
-            case Constants.GREATER_THAN_EQUAL:
-                log.info("GREATER_THAN_EQUAL:{}", operationStr);
-                log.info("check:{}", (((GreaterThanEquals) plainSelect.getWhere()).getRightExpression()).toString());
-                flag = Util.compareNumber(plainSelect, contentKeys, eventContent, ">=");
+                case Constants.GREATER_THAN_EQUAL:
+                    flag = Util.compareNumber(trigger, contentKeys, eventContent, Constants.GREATER_THAN_EQUAL);
 
-                break;
-
-            case Constants.BETWEEN:
-                log.info("BETWEEN:{}", operationStr);
-                log.info("check:start: {},end: {}", ((Between) plainSelect.getWhere()).getBetweenExpressionStart().toString(), ((Between) plainSelect.getWhere()).getBetweenExpressionEnd().toString());
-                flag = Util.compareNumber(plainSelect, contentKeys, eventContent, "BETWEEN");
-                break;
-
-            case Constants.LIKE:
-                log.info("LIKE:{}", operationStr);
-                log.info("check:like: ", ((LikeExpression) plainSelect.getWhere()).toString());
-                flag = Util.compareNumber(plainSelect, contentKeys, eventContent, "LIKE");
-                break;
-
-            case Constants.IN:
-                log.info("IN:{}", operationStr);
-                log.info("check:IN: ", ((InExpression) plainSelect.getWhere()).toString());
-                flag = Util.compareNumber(plainSelect, contentKeys, eventContent, "IN");
-                break;
-
-            default:
-                log.error("other ", operationStr);
+                    break;
+                default:
+                    log.error("other ", operationStr);
 
 
+            }
+        } catch (Exception e) {
+            log.info("exception: {}", e.toString());
         }
         return flag;
     }
 
     private static boolean matchRule(String eventContent, String condition) throws JSONException {
         log.info("matchRule eventContent {},condition {}", eventContent, condition);
-
         boolean hitRule = parsingCondition(eventContent, condition);
         return hitRule;
     }

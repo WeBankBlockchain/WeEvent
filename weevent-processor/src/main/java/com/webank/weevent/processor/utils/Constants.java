@@ -27,6 +27,9 @@ public class Constants {
     public static final String BETWEEN="BETWEEN";
     public static final String LIKE="LIKE";
     public static final String IN="IN";
+    public static final String AND="AND";
+    public static final String OR="OR";
+
 
 
     public static final Integer RULE_STATUS_START = 1;

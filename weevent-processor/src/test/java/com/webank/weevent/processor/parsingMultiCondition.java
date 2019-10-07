@@ -122,4 +122,6 @@ public class parsingMultiCondition {
         assertEquals(3, ((PlainSelect) select.getSelectBody()).getOffset().getOffset());
         assertEquals(5, ((PlainSelect) select.getSelectBody()).getFetch().getRowCount());
     }
+
+
 }
