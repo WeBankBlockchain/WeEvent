@@ -15,6 +15,7 @@ public class Constants {
     public static RetCode TOPIC_ISNOT_EXIST = RetCode.mark(270006, "the topic is not exist");
     public static RetCode PAYLOAD_ISNOT_JSON = RetCode.mark(270007, "payload is not a json");
     public static RetCode CONDITIONTYPE_ISNOT_VALID = RetCode.mark(270007, "condition type is not valid");
+    public static RetCode  RULE_IS_NOT_VALID = RetCode.mark(270008, "rule is not valid");
 
     public static String QUALS_TO="=";
     public static String NOT_QUALS_TO="<>";
