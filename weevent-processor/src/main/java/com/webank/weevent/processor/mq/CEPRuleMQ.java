@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.processor.model.CEPRule;
+import com.webank.weevent.processor.utils.Constants;
 import com.webank.weevent.processor.utils.Util;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
@@ -175,63 +176,63 @@ public class CEPRuleMQ {
 
         // parsing the operation
         switch (operationStr) {
-            case "=":
+            case Constants.QUALS_TO:
                 log.info("EQUALS_TO:{}", operationStr);
                 log.info("left: {},right: {}", (((EqualsTo) plainSelect.getWhere()).getLeftExpression()).toString(), (((EqualsTo) plainSelect.getWhere()).getRightExpression()).toString());
                 flag = Util.compareNumber(plainSelect, contentKeys, eventContent, "=");
                 break;
 
-            case "<>":
+            case Constants.NOT_QUALS_TO:
                 log.info("NOT_QUALS_TO:{}", operationStr);
                 log.info("check:{}", (((NotEqualsTo) plainSelect.getWhere()).getRightExpression()).toString());
 
                 flag = Util.compareNumber(plainSelect, contentKeys, eventContent, "!=");
                 break;
 
-            case "!=":
+            case Constants.NOT_QUALS_TO_TWO:
                 log.info("NOT_QUALS_TO:{}", operationStr);
                 log.info("check:{}", (((NotEqualsTo) plainSelect.getWhere()).getRightExpression()).toString());
                 flag = Util.compareNumber(plainSelect, contentKeys, eventContent, "!=");
                 break;
 
-            case "<":
+            case Constants.MINOR_THAN:
                 log.info("MINOR_THAN:{}", operationStr);
                 log.info("check:{}", (((MinorThan) plainSelect.getWhere()).getRightExpression()).toString());
                 flag = Util.compareNumber(plainSelect, contentKeys, eventContent, "<");
                 break;
 
-            case "<=":
+            case Constants.MINOR_THAN_EQUAL:
                 log.info("MINOR_THAN_EQUAL:{}", operationStr);
                 log.info("check:{}", (((MinorThanEquals) plainSelect.getWhere()).getRightExpression()).toString());
                 flag = Util.compareNumber(plainSelect, contentKeys, eventContent, "<=");
                 break;
 
-            case ">":
+            case Constants.GREATER_THAN:
                 log.info("GREATER_THAN:{}", operationStr);
                 flag = Util.compareNumber(plainSelect, contentKeys, eventContent, ">");
 
                 break;
 
-            case ">=":
+            case Constants.GREATER_THAN_EQUAL:
                 log.info("GREATER_THAN_EQUAL:{}", operationStr);
                 log.info("check:{}", (((GreaterThanEquals) plainSelect.getWhere()).getRightExpression()).toString());
                 flag = Util.compareNumber(plainSelect, contentKeys, eventContent, ">=");
 
                 break;
 
-            case "BETWEEN":
+            case Constants.BETWEEN:
                 log.info("BETWEEN:{}", operationStr);
                 log.info("check:start: {},end: {}", ((Between) plainSelect.getWhere()).getBetweenExpressionStart().toString(), ((Between) plainSelect.getWhere()).getBetweenExpressionEnd().toString());
                 flag = Util.compareNumber(plainSelect, contentKeys, eventContent, "BETWEEN");
                 break;
 
-            case "LIKE":
+            case Constants.LIKE:
                 log.info("LIKE:{}", operationStr);
                 log.info("check:like: ", ((LikeExpression) plainSelect.getWhere()).toString());
                 flag = Util.compareNumber(plainSelect, contentKeys, eventContent, "LIKE");
                 break;
 
-            case "IN":
+            case Constants.IN:
                 log.info("IN:{}", operationStr);
                 log.info("check:IN: ", ((InExpression) plainSelect.getWhere()).toString());
                 flag = Util.compareNumber(plainSelect, contentKeys, eventContent, "IN");

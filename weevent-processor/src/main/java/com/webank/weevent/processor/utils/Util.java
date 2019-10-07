@@ -1,6 +1,5 @@
 package com.webank.weevent.processor.utils;
 
-import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -12,7 +11,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
@@ -31,6 +29,8 @@ import net.sf.jsqlparser.statement.select.PlainSelect;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+
+import static com.webank.weevent.processor.utils.Operators.QUALS_TO;
 
 @Slf4j
 public class Util {
@@ -93,17 +93,17 @@ public class Util {
 
         JSONObject jObj = new JSONObject(eventContent);
         String extract = Util.recurseKeys(jObj, item);
-        if ((operation.equals("<>") || operation.equals("!=")) && !Integer.valueOf(extract).equals(RightKey)) {
+        if ((operation.equals(Constants.NOT_QUALS_TO) || operation.equals(Constants.NOT_QUALS_TO_TWO)) && !Integer.valueOf(extract).equals(RightKey)) {
             return true;
-        } else if (operation.equals("=") && (Integer.valueOf(extract).equals(RightKey))) {
+        } else if (operation.equals(Constants.QUALS_TO) && (Integer.valueOf(extract).equals(RightKey))) {
             return true;
-        } else if (operation.equals("<") && (Integer.valueOf(extract) < RightKey)) {
+        } else if (operation.equals(Constants.MINOR_THAN) && (Integer.valueOf(extract) < RightKey)) {
             return true;
-        } else  if (operation.equals("<=")&&Integer.valueOf(extract) <= RightKey) {
+        } else  if (operation.equals(Constants.MINOR_THAN_EQUAL)&&Integer.valueOf(extract) <= RightKey) {
             return true;
-        } else  if (operation.equals(">")&&(Integer.valueOf(extract)) > RightKey) {
+        } else  if (operation.equals(Constants.GREATER_THAN)&&(Integer.valueOf(extract)) > RightKey) {
             return true;
-        }else  if (operation.equals(">=")&&(Integer.valueOf(extract)) >= RightKey) {
+        }else  if (operation.equals(Constants.MINOR_THAN_EQUAL)&&(Integer.valueOf(extract)) >= RightKey) {
             return true;
         }
         return false;
@@ -177,8 +177,9 @@ public class Util {
 
         // :TODO  多条件
         for (int i = 0; i < contentKeys.size(); i++) {
+            //TypeEnum typeEnum = TypeEnum.fromTypeName(operation);
             switch (operation) {
-                case "=":
+                case Constants.QUALS_TO:
                     leftKey = (((EqualsTo) plainSelect.getWhere()).getLeftExpression()).toString().toUpperCase();
                     RightKey = Integer.valueOf((((EqualsTo) plainSelect.getWhere()).getRightExpression()).toString());
                     if (contentKeys.get(i).equals(leftKey)) {
@@ -186,7 +187,7 @@ public class Util {
                     }
 
                     break;
-                case "!=":
+                case Constants.NOT_QUALS_TO:
 
                     leftKey = (((NotEqualsTo) plainSelect.getWhere()).getLeftExpression()).toString().toUpperCase();
                     RightKey = Integer.valueOf((((NotEqualsTo) plainSelect.getWhere()).getRightExpression()).toString());
@@ -196,7 +197,7 @@ public class Util {
 
                     break;
 
-                case "<>":
+                case Constants.NOT_QUALS_TO_TWO:
                     leftKey = (((NotEqualsTo) plainSelect.getWhere()).getLeftExpression()).toString().toUpperCase();
                     RightKey = Integer.valueOf((((NotEqualsTo) plainSelect.getWhere()).getRightExpression()).toString());
                     if (contentKeys.get(i).equals(leftKey)) {
@@ -205,7 +206,7 @@ public class Util {
 
                     break;
 
-                case "<":
+                case Constants.MINOR_THAN:
                     leftKey = (((MinorThan) plainSelect.getWhere()).getLeftExpression()).toString().toUpperCase();
                     RightKey = Integer.valueOf((((MinorThan) plainSelect.getWhere()).getRightExpression()).toString());
                     if (contentKeys.get(i).equals(leftKey)) {
@@ -214,7 +215,7 @@ public class Util {
 
                     break;
 
-                case "<=":
+                case Constants.MINOR_THAN_EQUAL:
                     leftKey = (((MinorThanEquals) plainSelect.getWhere()).getLeftExpression()).toString().toUpperCase();
                     RightKey = Integer.valueOf((((MinorThanEquals) plainSelect.getWhere()).getRightExpression()).toString());
                     if (contentKeys.get(i).equals(leftKey)) {
@@ -223,7 +224,7 @@ public class Util {
 
                     break;
 
-                case ">":
+                case Constants.GREATER_THAN:
                     leftKey = (((GreaterThan) plainSelect.getWhere()).getLeftExpression()).toString().toUpperCase();
                     RightKey = Integer.valueOf((((GreaterThan) plainSelect.getWhere()).getRightExpression()).toString());
                     if (contentKeys.get(i).equals(leftKey)) {
@@ -232,7 +233,7 @@ public class Util {
 
                     break;
 
-                case ">=":
+                case Constants.GREATER_THAN_EQUAL:
                     leftKey = (((GreaterThanEquals) plainSelect.getWhere()).getLeftExpression()).toString().toUpperCase();
                     RightKey = Integer.valueOf((((GreaterThanEquals) plainSelect.getWhere()).getRightExpression()).toString());
                     if (contentKeys.get(i).equals(leftKey)) {
@@ -241,7 +242,7 @@ public class Util {
 
                     break;
 
-                case "BETWEEN":
+                case Constants.BETWEEN:
                     log.info("check:start: {},end: {}", ((Between) plainSelect.getWhere()).getBetweenExpressionStart().toString(), ((Between) plainSelect.getWhere()).getBetweenExpressionEnd().toString());
                     int leftValue = Integer.valueOf(((Between) plainSelect.getWhere()).getBetweenExpressionStart().toString());
                     int rightValue = Integer.valueOf(((Between) plainSelect.getWhere()).getBetweenExpressionEnd().toString());
@@ -251,7 +252,7 @@ public class Util {
                     }
 
                     break;
-                case "LIKE":
+                case Constants.LIKE:
                     leftKey = (((StringValue) ((LikeExpression) plainSelect.getWhere()).getLeftExpression()).getValue()).toUpperCase();
                     String rightValueStr = (((StringValue) ((LikeExpression) plainSelect.getWhere()).getRightExpression()).getValue());
                     if (contentKeys.get(i).equals(leftKey)) {
@@ -259,7 +260,7 @@ public class Util {
                     }
                     break;
 
-                case "IN":
+                case Constants.IN:
                     final List exprList = new ArrayList();
                     Expression where = plainSelect.getWhere();
                     where.accept(new ExpressionVisitorAdapter() {
