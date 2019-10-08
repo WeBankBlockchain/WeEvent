@@ -52,7 +52,7 @@ CREATE TABLE `t_historical_data` (
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update date',
   `topic_name` varchar(256) NOT NULL COMMENT 'topic name',
   `group_id` varchar(256) DEFAULT NULL COMMENT 'group id',
-  `broker_number` int(11) NOT NULL COMMENT 'broker id',
+  `block_number` int(11) NOT NULL COMMENT 'block number',
   `event_id` varchar(256) DEFAULT NULL COMMENT 'event id',
   `broker_id` varchar(256) DEFAULT NULL COMMENT 'broker id',
   `user_id` varchar(256) DEFAULT NULL COMMENT 'user id',

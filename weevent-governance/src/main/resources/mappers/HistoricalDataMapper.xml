@@ -10,25 +10,35 @@
         <result column="broker_id" property="brokerId" jdbcType="INTEGER"/>
         <result column="topic_name" property="topicName" jdbcType="VARCHAR"/>
         <result column="group_id" property="groupId" jdbcType="VARCHAR"/>
-        <result column="broker_number" property="blockNumber" jdbcType="INTEGER"/>
+        <result column="block_number" property="blockNumber" jdbcType="INTEGER"/>
         <result column="event_id" property="eventId" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,create_date,last_update, broker_id,user_id,topic_name, group_id, broker_number, event_id
+        id,create_date,last_update, broker_id,user_id,topic_name, group_id, block_number, event_id
     </sql>
 
 
     <select id="historicalDataList" resultMap="BaseResultMap">
-        select distinct
-        <include refid="Base_Column_List"/>
-        from t_historical_data where 1=1
-
+        SELECT
+        topic_name,DATE_FORMAT(create_date,"%Y-%m-%d")as create_date ,count(event_id)
+        from t_historical_data
+        WHERE 1=1
+        <if test="beginDate != null">
+            AND DATE_FORMAT(create_date,"%Y-%m-%d")&gt;=DATE_FORMAT(#{beginDate},"%Y-%m-%d")
+        </if>
+        <if test="endDate != null">
+            AND DATE_FORMAT(create_date,"%Y-%m-%d")&lt;=DATE_FORMAT(#{endDate},"%Y-%m-%d")
+        </if>
+        <if test="topicName != null">
+            AND topic_name=#{topicName}
+        </if>
+        GROUP BY topic_name,DATE_FORMAT(create_date,"%Y-%m-%d")
     </select>
 
     <insert id="addHistoricalData" parameterType="com.webank.weevent.governance.entity.HistoricalDataEntity"
             useGeneratedKeys="true" keyProperty="id">
-        insert into t_historical_data(broker_id, user_id, topic_name, group_id, broker_number, event_id)
+        insert into t_historical_data(broker_id, user_id, topic_name, group_id, block_number, event_id)
         values (#{brokerId}, #{userId}, #{topicName}, #{groupId}, #{blockNumber}, #{eventId})
     </insert>
 
