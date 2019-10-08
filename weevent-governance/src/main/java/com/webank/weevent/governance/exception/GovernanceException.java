@@ -53,9 +53,9 @@ public class GovernanceException extends Exception {
      *            the cause
      */
     public GovernanceException(String message, Throwable cause) {
-        super(getText(-1, message), cause);
+        super(getText(-1, message+","+cause.getMessage()),cause);
         this.code = -1;
-        this.message = message;
+        this.message = message+","+cause.getMessage();
     }
 
     /**

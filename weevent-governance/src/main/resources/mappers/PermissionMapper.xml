@@ -25,7 +25,7 @@
             and user_id = #{permissionEntity.userId,jdbcType=INTEGER}
         </if>
         <if test="permissionEntity.createDate != null">
-            and create_date = #{createDate,jdbcType=TIMESTAMP}
+            and create_date = #{permissionEntity.createDate,jdbcType=TIMESTAMP}
         </if>
         <if test="permissionEntity.lastUpdate != null">
             and last_update = #{permissionEntity.lastUpdate,jdbcType=TIMESTAMP}
@@ -65,15 +65,5 @@
         </foreach>
     </insert>
 
-    <select id="findUserIdByBrokerId" resultType="integer">
-        select distinct user_id as userId
-        from t_broker
-        where id = #{brokerId}
-          and is_delete = 0
-        union
-        select distinct user_id as userId
-        from t_permission
-        where broker_id = #{brokerId}
-    </select>
 
 </mapper>

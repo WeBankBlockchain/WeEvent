@@ -3,6 +3,7 @@ package com.webank.weevent.governance.controller;
 import javax.servlet.http.HttpServletRequest;
 
 import com.webank.weevent.governance.exception.GovernanceException;
+import com.webank.weevent.governance.result.GovernanceResult;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -37,13 +38,11 @@ public class GlobalExceptionHandler {
     public Object baseErrorHandler(HttpServletRequest req, GovernanceException e) {
         log.error("detect GovernanceException", e);
 
-        SimpleException simpleException = new SimpleException();
-        simpleException.setCode(e.getCode());
-        simpleException.setMessage(e.getMessage());
+        GovernanceResult governanceResult = new GovernanceResult(e.getCode(),e.getMessage(),null);
 
         log.error("rest api GovernanceException, remote: {} uri: {} {}", req.getRemoteHost(), req.getRequestURL(),
-                simpleException);
-        return simpleException;
+                governanceResult);
+        return governanceResult;
     }
 
     @ExceptionHandler(value = Exception.class)
