@@ -1,10 +1,5 @@
 <template>
   <div class="group event-table">
-    <div class='refresh' >
-      <div class='update_btn' @click='update'>
-        <img src="../../assets/image/update.png" alt="">
-      </div>
-    </div>
     <el-table
       :data='tableData'
       stripe
@@ -106,10 +101,16 @@ export default {
   computed: {
     brokerId () {
       return this.$store.state.brokerId
+    },
+    groupId () {
+      return this.$store.state.groupId
     }
   },
   watch: {
     brokerId () {
+      this.update()
+    },
+    groupId () {
       this.update()
     }
   }

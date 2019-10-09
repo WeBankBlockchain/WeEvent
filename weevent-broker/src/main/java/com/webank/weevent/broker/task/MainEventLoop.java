@@ -57,7 +57,7 @@ public class MainEventLoop extends StoppableTask {
         // get last block
         Long blockHeight = this.blockChain.getBlockHeight(this.groupId);
         if (blockHeight <= 0) {
-            throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
+            throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
         }
 
         // may be in notify strategy
