@@ -72,7 +72,6 @@ public class RuleEngineService {
                 ruleEngineEntities.get(0).setTotalCount(count);
                 for (RuleEngineEntity it : ruleEngineEntities) {
                     calendar.setTime(it.getCreateDate());
-
                     String format = simpleDateFormat.format(calendar.getTime());
                     it.setCreateDate(simpleDateFormat.parse(format));
                 }
@@ -251,7 +250,21 @@ public class RuleEngineService {
         if (CollectionUtils.isEmpty(ruleEngines)) {
             return null;
         }
-        return ruleEngines.get(0);
+        //get sql
+        RuleEngineEntity engineEntity = ruleEngines.get(0);
+        String fullSql = parsingSQL(engineEntity);
+        engineEntity.setFullSQL(fullSql);
+        return engineEntity;
+    }
+
+    private String parsingSQL(RuleEngineEntity engineEntity) {
+        StringBuffer buffer = new StringBuffer();
+        if (engineEntity.getSelectField() == null) {
+            return null;
+        }
+        buffer.append("select ").append(engineEntity.getSelectField()).append(" ").append("from  ").append(engineEntity.getFromDestination())
+                .append(" where ").append(engineEntity.getConditionField());
+        return buffer.toString();
     }
 
     private boolean checkRuleName(String ruleName, String regex) {

@@ -59,8 +59,20 @@ public class RuleEngineControllerTest extends JUnitTestBase {
 
     @Test
     public void testGetRuleEngines() throws Exception {
-        String content = "{\"ruleName\":\"tempera_ture-alarm\",\"userId\":\"1\",\"brokerId\":\"1\",\"pageNumber\":\"1\",\"pageSize\":\"10\"}";
+        String content = "{\"id\":\"1\",\"userId\":\"1\",\"brokerId\":\"1\",\"pageNumber\":\"1\",\"pageSize\":\"10\"}";
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/list").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content))
+                .andReturn();
+        MockHttpServletResponse response = mvcResult.getResponse();
+
+        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(), GovernanceResult.class);
+        Assert.assertEquals(governanceResult.getStatus().intValue(), ErrorCode.SUCCESS.getCode());
+    }
+
+    @Test
+    public void testGetRuleEngineDetail() throws Exception {
+        String content = "{\"id\":\"1\",\"userId\":\"1\",\"brokerId\":\"1\",\"pageNumber\":\"1\",\"pageSize\":\"10\"}";
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/detail").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content))
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
 

@@ -45,6 +45,8 @@ public class RuleEngineEntity extends BaseEntity {
 
     private String conditionField;
 
+    private String fullSQL;
+
     /**
      * Trigger condition type, 1 identifies topic,
      * 2 identifies flow to relational database
