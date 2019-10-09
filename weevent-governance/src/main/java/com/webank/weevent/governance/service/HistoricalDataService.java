@@ -1,5 +1,7 @@
-﻿package com.webank.weevent.governance.service;
+package com.webank.weevent.governance.service;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,17 +22,24 @@ public class HistoricalDataService {
     @Autowired
     private HistoricalDataMapper historicalDataMapper;
 
-    @Autowired
-    private CommonService commonService;
 
     public List<HistoricalDataEntity> historicalDataList(HistoricalDataEntity historicalDataEntity, HttpServletRequest httpRequest,
                                                          HttpServletResponse httpResponse) throws GovernanceException {
         try {
             List<HistoricalDataEntity> historicalDataEntities = historicalDataMapper.historicalDataList(historicalDataEntity);
+            if (historicalDataEntity.getEndDate() == null) {
+                historicalDataEntity.setEndDate(new Date());
+            }
+            //get begin time
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(historicalDataEntity.getEndDate());
+            calendar.add(Calendar.DATE, -7);
+            historicalDataEntity.setBeginDate(calendar.getTime());
+
             return historicalDataEntities;
         } catch (Exception e) {
-            log.info("get all historicalDataEntity fail", e);
-            throw new GovernanceException("get all historicalDataEntity fail", e);
+            log.info("get historicalDataEntity fail", e);
+            throw new GovernanceException("get historicalDataEntity fail", e);
         }
 
     }

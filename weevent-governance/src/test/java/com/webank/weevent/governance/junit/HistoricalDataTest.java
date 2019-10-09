@@ -1,7 +1,12 @@
 package com.webank.weevent.governance.junit;
 
-import com.webank.weevent.governance.JUnitTestBase;
+import javax.servlet.http.Cookie;
 
+import com.webank.weevent.governance.JUnitTestBase;
+import com.webank.weevent.governance.properties.ConstantProperties;
+import com.webank.weevent.governance.result.GovernanceResult;
+
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,6 +27,7 @@ public class HistoricalDataTest extends JUnitTestBase {
     private WebApplicationContext wac;
 
     private MockMvc mockMvc;
+    Cookie cookie = new Cookie(ConstantProperties.COOKIE_MGR_ACCOUNT_ID, "1");
 
 
     @Before
@@ -40,10 +46,13 @@ public class HistoricalDataTest extends JUnitTestBase {
     @Test
     public void testHistoricalDataList() throws Exception {
         String content = "{\"groupId\":\"1\"}";
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/historicalData/list").contentType(MediaType.APPLICATION_JSON_UTF8).cookie().content(content)).andReturn();
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/historicalData/list")
+                .contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         String result = response.getContentAsString();
         Assert.assertNotNull(result);
+        GovernanceResult governanceResult = JSONObject.parseObject(result, GovernanceResult.class);
+        Assert.assertEquals(governanceResult.getStatus().toString(), "200");
     }
 
 }

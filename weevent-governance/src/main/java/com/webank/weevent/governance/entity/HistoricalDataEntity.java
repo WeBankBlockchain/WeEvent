@@ -1,4 +1,6 @@
-﻿package com.webank.weevent.governance.entity;
+package com.webank.weevent.governance.entity;
+
+import java.util.Date;
 
 import com.webank.weevent.governance.entity.base.BaseEntity;
 
@@ -21,5 +23,9 @@ public class HistoricalDataEntity  extends BaseEntity {
     private Integer blockNumber;
 
     private String eventId;
+
+    private Date beginDate;
+
+    private Date endDate;
 
 }
