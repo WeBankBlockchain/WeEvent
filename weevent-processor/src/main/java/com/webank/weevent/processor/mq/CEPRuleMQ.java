@@ -83,22 +83,22 @@ public class CEPRuleMQ {
 
     private static void handleOnEvent(WeEvent event, IWeEventClient client, Map<String, CEPRule> ruleMap) throws JSONException {
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
+
         // get the content ,and parsing it  byte[]-->String
         String content = new String(event.getContent());
+
         // match the rule and send message
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
             if (!StringUtils.isEmpty(entry.getValue().getPayload())
                     && !StringUtils.isEmpty(entry.getValue().getConditionField())) {
-                log.info("handleOnEvent isEmpty");
+
                 // parsing the payload && match the content,if true and hit it
                 if (checkJson(content, entry.getValue().getPayload())) {
-                    log.info("handleOnEvent checkJson");
-                    if (matchRule(content, entry.getValue().getConditionField())) {
-                        log.info("handleOnEvent matchRule");
+                    if (parsingCondition(content, entry.getValue().getConditionField())) {
+
                         // select the field and publish the message to the toDestination
                         try {
                             // :TODO select the field
-                            log.info(entry.getValue().getSelectField());
                             // publish the message
                             log.info("publish topic {}", entry.getValue().getSelectField());
                             client.publish(entry.getValue().getToDestination(), content.getBytes());
@@ -143,82 +143,33 @@ public class CEPRuleMQ {
      * @return true false
      * @throws JSONException
      */
-    private static boolean parsingCondition(String eventContent, String condition) throws JSONException {
+    private static boolean parsingCondition(String eventContent, String condition) {
+
         log.info("parsingCondition eventContent {},condition {}", eventContent, condition);
         String temp = "SELECT * FROM table WHERE ";
         String trigger = temp.concat(" ").concat(condition);
-        log.info("trigger: {}", trigger);
         CCJSqlParserManager parserManager = new CCJSqlParserManager();
         PlainSelect plainSelect = null;
         boolean flag = false;
+
         try {
+            // :TODO test
             trigger = "SELECT * FROM mytable WHERE a = :param OR a = :param2 AND b = :param3";
             Select select = (Select) parserManager.parse(new StringReader(trigger));
             plainSelect = (PlainSelect) select.getSelectBody();
 
-            // if contain Between ,like in and only support one
-            String operationStr = "OTHER";
-            // parsing the operation
+            // if contain Between ,like , in and only support one
             List<String> oper = new ArrayList<>(Arrays.asList(Constants.BETWEEN, Constants.LIKE, Constants.IN));
             for (int i = 0; i < oper.size(); i++) {
-                if (trigger.toString().contains(oper.get(i))) {
-                    log.info("current:{}", oper.get(i));
-                    operationStr = oper.get(i);
+                if (trigger.contains(oper.get(i))) {
+                    String operationStr = oper.get(i);
                     flag = singleMatch(eventContent, plainSelect, operationStr);
                     return flag;
                 }
             }
 
-            // reslove  other operators
-            List<Expression> whereList = new ArrayList<>();
-            List<String> operatorList = new ArrayList<>();
-
-            Expression exp_l1 = ((BinaryExpression) plainSelect.getWhere()).getLeftExpression();
-            Expression exp_r1 = ((BinaryExpression) plainSelect.getWhere()).getRightExpression();
-            String exp_middle = ((BinaryExpression) plainSelect.getWhere()).getStringExpression();
-
-            whereList.add(exp_l1);
-            operatorList.add(exp_middle);
-
-            Expression expression = exp_r1;
-            while(((BinaryExpression) expression).getASTNode()==null){
-                Expression exp_rl = ((BinaryExpression) expression).getLeftExpression();
-                Expression exp_rr = ((BinaryExpression) expression).getRightExpression();
-                String exp_mid = ((BinaryExpression) expression).getStringExpression();
-                whereList.add(exp_rl);
-                operatorList.add(exp_mid);
-                if(((BinaryExpression) expression).getRightExpression().getASTNode().jjtGetNumChildren()>0){
-                    whereList.add(expression);
-                    log.info("whereList size:{}", whereList.size());
-                    log.info("operatorList size:{}", operatorList.size());
-                    break;
-                }
-
-            }
-            // check the priority ,hit rule at first
-            for (int t = 0; t < operatorList.size(); t++) {
-                // check AND
-                int current = t + 1;
-                if (operatorList.get(t).equals(Constants.AND)) {
-                    boolean flag1 = singleMatch(whereList.get(current), eventContent);
-                    boolean flag2 = singleMatch(whereList.get(current+1), eventContent);
-                    if (flag1 && flag2) {
-                        flag = true;
-                    }
-                }
-            }
-            // check OR
-            for (int t = 0; t < operatorList.size(); t++) {
-                // and > or
-                int current = t + 1;
-                if (operatorList.get(t).equals(Constants.OR)) {
-                    boolean flag1 = singleMatch(whereList.get(current), eventContent);
-                    boolean flag2 = singleMatch(whereList.get(current+1), eventContent);
-                    if (flag1 || flag2) {
-                        flag = true;
-                    }
-                }
-            }
+            // according to the priority to match rule
+            flag = whereConditionOrderPriority(eventContent, plainSelect);
 
         } catch (Exception e) {
             log.info("exception: {}", e.toString());
@@ -226,7 +177,70 @@ public class CEPRuleMQ {
         return flag;
     }
 
-    private static boolean singleMatch(String eventContent,PlainSelect plainSelect,String operationStr) {
+    /**
+     * according to the priority to match rule
+     * @param eventContent event content
+     * @param plainSelect  condition message
+     * @return
+     */
+    private static boolean whereConditionOrderPriority(String eventContent, PlainSelect plainSelect) {
+        boolean flag = false;
+        List<Expression> whereList = new ArrayList<>();
+        List<String> operatorList = new ArrayList<>();
+
+        Expression exp_l1 = ((BinaryExpression) plainSelect.getWhere()).getLeftExpression();
+        Expression exp_r1 = ((BinaryExpression) plainSelect.getWhere()).getRightExpression();
+        String exp_middle = ((BinaryExpression) plainSelect.getWhere()).getStringExpression();
+
+        whereList.add(exp_l1);
+        operatorList.add(exp_middle);
+
+        Expression expression = exp_r1;
+        while (expression.getASTNode() == null) {
+            // left
+            whereList.add(((BinaryExpression) expression).getLeftExpression());
+            // middle
+            operatorList.add(((BinaryExpression) expression).getStringExpression());
+            // right
+            Expression exp_rr = ((BinaryExpression) expression).getRightExpression();
+
+            if (exp_rr.getASTNode().jjtGetNumChildren() > 0) {
+                whereList.add(expression);
+                log.info("whereList size:{},operatorList size:{}", whereList.size(), operatorList.size());
+                break;
+            }
+
+        }
+        // check the priority ,hit rule at first
+        for (int t = 0; t < operatorList.size(); t++) {
+            // check AND
+            int current = t + 1;
+            if (operatorList.get(t).equals(Constants.AND)) {
+                boolean flag1 = singleMatch(whereList.get(current), eventContent);
+                boolean flag2 = singleMatch(whereList.get(current + 1), eventContent);
+                if (flag1 && flag2) {
+                    flag = true;
+                    return flag;
+                }
+            }
+        }
+        // check OR
+        for (int t = 0; t < operatorList.size(); t++) {
+            // and > or
+            int current = t + 1;
+            if (operatorList.get(t).equals(Constants.OR)) {
+                boolean flag1 = singleMatch(whereList.get(current), eventContent);
+                boolean flag2 = singleMatch(whereList.get(current + 1), eventContent);
+                if (flag1 || flag2) {
+                    flag = true;
+                    return flag;
+                }
+            }
+        }
+        return flag;
+    }
+
+    private static boolean singleMatch(String eventContent, PlainSelect plainSelect, String operationStr) {
 
         boolean flag = false;
         List<String> contentKeys = Util.getKeys(eventContent);
@@ -313,9 +327,4 @@ public class CEPRuleMQ {
         return flag;
     }
 
-    private static boolean matchRule(String eventContent, String condition) throws JSONException {
-        log.info("matchRule eventContent {},condition {}", eventContent, condition);
-        boolean hitRule = parsingCondition(eventContent, condition);
-        return hitRule;
-    }
 }
