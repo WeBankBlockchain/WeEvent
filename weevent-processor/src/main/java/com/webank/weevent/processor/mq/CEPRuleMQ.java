@@ -14,6 +14,7 @@ import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.WeEvent;
 
+import com.alibaba.fastjson.JSONException;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.BinaryExpression;
@@ -21,7 +22,6 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
-import org.json.JSONException;
 import org.springframework.util.StringUtils;
 
 @Slf4j
@@ -31,13 +31,13 @@ public class CEPRuleMQ {
 
     public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException {
         // unsubscribe old the topic
-            ruleMap.get(rule.getId()).getToDestination();
-            IWeEventClient client = IWeEventClient.build(rule.getBrokerUrl());
-            // update the rule map
-            ruleMap.put(rule.getId(), rule);
-            // update subscribe
-            subscribeMsg(rule, ruleMap);
-            client.unSubscribe(subscriptionIdMap.get(rule.getId()));
+        ruleMap.get(rule.getId()).getToDestination();
+        IWeEventClient client = IWeEventClient.build(rule.getBrokerUrl());
+        // update the rule map
+        ruleMap.put(rule.getId(), rule);
+        // update subscribe
+        subscribeMsg(rule, ruleMap);
+        client.unSubscribe(subscriptionIdMap.get(rule.getId()));
     }
 
     public static void subscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) {
@@ -81,7 +81,7 @@ public class CEPRuleMQ {
     }
 
 
-    private static void handleOnEvent(WeEvent event, IWeEventClient client, Map<String, CEPRule> ruleMap) throws JSONException {
+    private static void handleOnEvent(WeEvent event, IWeEventClient client, Map<String, CEPRule> ruleMap) {
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
 
         // get the content ,and parsing it  byte[]-->String

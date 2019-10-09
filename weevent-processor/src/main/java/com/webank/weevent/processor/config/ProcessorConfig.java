@@ -11,6 +11,14 @@ import org.springframework.stereotype.Component;
 @Component
 @PropertySource(value = "classpath:processor.properties", encoding = "UTF-8")
 public class ProcessorConfig {
-//    @Value("${ip.check.white-table:}")
+    //    @Value("${ip.check.white-table:}")
 //    private String ipWhiteTable;
+    @Value("${redis.server.ip:}")
+    private String redisServerIp;
+
+    @Value("${redis.server.password:}")
+    private String redisServerPassword;
+
+    @Value("${redis.server.port:6379}")
+    private Integer redisServerPort;
 }

@@ -11,25 +11,18 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.Between;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.InExpression;
 import net.sf.jsqlparser.expression.operators.relational.ItemsList;
 import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
-import net.sf.jsqlparser.expression.operators.relational.MinorThan;
-import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.statement.select.PlainSelect;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 
 @Slf4j
 public class Util {
@@ -46,8 +39,7 @@ public class Util {
         String driver = "com.mysql.jdbc.Driver";
         try {
             Class.forName(driver);
-            Connection conn = DriverManager.getConnection(databaseUrl);
-            return conn;
+            return DriverManager.getConnection(databaseUrl);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             return null;
@@ -60,14 +52,17 @@ public class Util {
     public static List<String> getKeys(String objJson) {
         List<String> keys = new ArrayList<>();
         try {
-            Iterator<String> sIterator = (new org.json.JSONObject(objJson)).keys();
-
-            while (sIterator.hasNext()) {
-                String key = (sIterator.next());
-                keys.add(key);
+            if (checkValidJson(objJson)) {
+                for (Map.Entry<String, Object> entry : JSONObject.parseObject(objJson).entrySet()) {
+                    keys.add(entry.getKey());
+                }
+            } else {
+                keys = null;
             }
-        } catch (org.json.JSONException e) {
-            e.printStackTrace();
+
+        } catch (JSONException e) {
+            keys = null;
+            log.info("json get key error");
         }
         return keys;
     }
@@ -75,32 +70,35 @@ public class Util {
     /**
      * check valid json string
      *
-     * @param jsonStr json string
+     * @param test json string
      * @return true or false
      */
-    public static boolean checkValidJson(String jsonStr) {
-        Object object = null;
+    public final static boolean checkValidJson(String test) {
         try {
-            object = new JSONTokener(jsonStr).nextValue();
-            return true;
-        } catch (JSONException e) {
-            log.info(e.toString());
-            return false;
+            JSONObject.parseObject(test);
+        } catch (JSONException ex) {
+            try {
+                JSONObject.parseArray(test);
+            } catch (JSONException ex1) {
+                return false;
+            }
         }
+        return true;
     }
 
     /**
      * right value is a number
+     *
      * @param RightKey right value
      * @param eventContent event content
      * @param item
-     * @param operation  operation
+     * @param operation operation
      * @return
      * @throws JSONException
      */
     private static boolean CompareCondition(Integer RightKey, String eventContent, String item, String operation) throws JSONException {
 
-        JSONObject jObj = new JSONObject(eventContent);
+        JSONObject jObj = JSONObject.parseObject(eventContent);
         String extract = Util.recurseKeys(jObj, item);
         if ((operation.equals(Constants.NOT_QUALS_TO) || operation.equals(Constants.NOT_QUALS_TO_TWO)) && !Integer.valueOf(extract).equals(RightKey)) {
             return true;
@@ -150,7 +148,7 @@ public class Util {
      * @throws JSONException
      */
     private static boolean CompareCondition(Integer leftValue, Integer rightValue, String eventContent, String item) throws JSONException {
-        JSONObject jObj = new JSONObject(eventContent);
+        JSONObject jObj = JSONObject.parseObject(eventContent);
         String extract = Util.recurseKeys(jObj, item);
         if (Integer.valueOf(extract) > leftValue && Integer.valueOf(extract) < rightValue) {
             return true;
@@ -166,11 +164,10 @@ public class Util {
      * @param item current item
      * @param operation Like or in
      * @return flag true or false
-     * @throws JSONException
      */
     private static boolean CompareCondition(String rightValueStr, String eventContent, String item, String operation) throws JSONException {
 
-        JSONObject jObj = new JSONObject(eventContent);
+        JSONObject jObj = JSONObject.parseObject(eventContent);
         String extract = Util.recurseKeys(jObj, item);
         if (operation.equals("LIKE") || operation.equals("IN")) {
             if (rightValueStr.contains(extract)) {
@@ -181,7 +178,7 @@ public class Util {
         return false;
     }
 
-    public static boolean compareNumber(Expression whereCondition, List<String> contentKeys, String eventContent, String operation) throws JSONException {
+    public static boolean compareNumber(Expression whereCondition, List<String> contentKeys, String eventContent, String operation) {
         boolean flag = false;
         String leftKey;
         int RightKey;
@@ -195,7 +192,22 @@ public class Util {
         return flag;
     }
 
-    public static boolean compareNumber(PlainSelect plainSelect, List<String> contentKeys, String eventContent, String operation) throws JSONException {
+    public static String byte2hex(byte[] buffer) {
+        String h = "0x";
+
+        for (byte aBuffer : buffer) {
+            String temp = Integer.toHexString(aBuffer & 0xFF);
+            if (temp.length() == 1) {
+                temp = "0" + temp;
+            }
+            h = h + " " + temp;
+        }
+
+        return h;
+
+    }
+
+    public static boolean compareNumber(PlainSelect plainSelect, List<String> contentKeys, String eventContent, String operation) {
         boolean flag = false;
         String leftKey;
 
@@ -246,34 +258,12 @@ public class Util {
         return flag;
     }
 
-    public static String recurseKeys(JSONObject jObj, String findKey) throws JSONException {
+    public static String recurseKeys(JSONObject jObj, String findKey) {
         String finalValue = "";
         if (jObj == null) {
             return "";
         }
-
-        Iterator<String> keyItr = jObj.keys();
-        Map<String, String> map = new HashMap<>();
-
-        while (keyItr.hasNext()) {
-            String key = keyItr.next();
-            map.put(key, jObj.getString(key));
-        }
-
-        for (Map.Entry<String, String> e : (map).entrySet()) {
-            String key = e.getKey();
-            if (key.equalsIgnoreCase(findKey)) {
-                return jObj.getString(key);
-            }
-
-            // read value
-            Object value = jObj.get(key);
-
-            if (value instanceof JSONObject) {
-                finalValue = recurseKeys((JSONObject) value, findKey);
-            }
-        }
-
+        finalValue = jObj.get(findKey).toString();
         // key is not found
         return finalValue;
     }
