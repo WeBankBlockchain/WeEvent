@@ -31,13 +31,13 @@ public class CEPRuleMQ {
 
     public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException {
         // unsubscribe old the topic
-        ruleMap.get(rule.getId()).getToDestination();
-        IWeEventClient client = IWeEventClient.build(rule.getBrokerUrl());
-        client.unSubscribe(subscriptionIdMap.get(rule.getId()));
-        // update the rule map
-        ruleMap.put(rule.getId(), rule);
-        // update subscribe
-        subscribeMsg(rule, ruleMap);
+            ruleMap.get(rule.getId()).getToDestination();
+            IWeEventClient client = IWeEventClient.build(rule.getBrokerUrl());
+            // update the rule map
+            ruleMap.put(rule.getId(), rule);
+            // update subscribe
+            subscribeMsg(rule, ruleMap);
+            client.unSubscribe(subscriptionIdMap.get(rule.getId()));
     }
 
     public static void subscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) {
@@ -94,7 +94,7 @@ public class CEPRuleMQ {
 
                 // parsing the payload && match the content,if true and hit it
                 if (checkJson(content, entry.getValue().getPayload())) {
-                    if (parsingCondition(content, entry.getValue().getConditionField())) {
+                    if (hitRule(content, entry.getValue().getConditionField())) {
 
                         // select the field and publish the message to the toDestination
                         try {
@@ -143,25 +143,25 @@ public class CEPRuleMQ {
      * @return true false
      * @throws JSONException
      */
-    private static boolean parsingCondition(String eventContent, String condition) {
+    private static boolean hitRule(String eventContent, String condition) {
 
         log.info("parsingCondition eventContent {},condition {}", eventContent, condition);
         String temp = "SELECT * FROM table WHERE ";
-        String trigger = temp.concat(" ").concat(condition);
+        String whereCondition = temp.concat(" ").concat(condition);
         CCJSqlParserManager parserManager = new CCJSqlParserManager();
         PlainSelect plainSelect = null;
         boolean flag = false;
 
         try {
             // :TODO test
-            trigger = "SELECT * FROM mytable WHERE a = :param OR a = :param2 AND b = :param3";
-            Select select = (Select) parserManager.parse(new StringReader(trigger));
+            whereCondition = "SELECT * FROM mytable WHERE a = :param OR a = :param2 AND b = :param3";
+            Select select = (Select) parserManager.parse(new StringReader(whereCondition));
             plainSelect = (PlainSelect) select.getSelectBody();
 
             // if contain Between ,like , in and only support one
             List<String> oper = new ArrayList<>(Arrays.asList(Constants.BETWEEN, Constants.LIKE, Constants.IN));
             for (int i = 0; i < oper.size(); i++) {
-                if (trigger.contains(oper.get(i))) {
+                if (whereCondition.contains(oper.get(i))) {
                     String operationStr = oper.get(i);
                     flag = singleMatch(eventContent, plainSelect, operationStr);
                     return flag;
@@ -179,8 +179,9 @@ public class CEPRuleMQ {
 
     /**
      * according to the priority to match rule
+     *
      * @param eventContent event content
-     * @param plainSelect  condition message
+     * @param plainSelect condition message
      * @return
      */
     private static boolean whereConditionOrderPriority(String eventContent, PlainSelect plainSelect) {
@@ -269,7 +270,7 @@ public class CEPRuleMQ {
         return flag;
     }
 
-    private static boolean singleMatch(Expression trigger, String eventContent) {
+    private static boolean singleMatch(Expression whereCondition, String eventContent) {
 
         boolean flag = false;
         List<String> contentKeys = Util.getKeys(eventContent);
@@ -280,7 +281,7 @@ public class CEPRuleMQ {
                 , Constants.MINOR_THAN, Constants.MINOR_THAN_EQUAL, Constants.GREATER_THAN));
 
         for (int i = 0; i < oper.size(); i++) {
-            if (trigger.toString().contains(oper.get(i))) {
+            if (whereCondition.toString().contains(oper.get(i))) {
                 log.info("current:{}", oper.get(i));
                 operationStr = oper.get(i);
             }
@@ -288,32 +289,32 @@ public class CEPRuleMQ {
         try {
             switch (operationStr) {
                 case Constants.QUALS_TO:
-                    flag = Util.compareNumber(trigger, contentKeys, eventContent, Constants.QUALS_TO);
+                    flag = Util.compareNumber(whereCondition, contentKeys, eventContent, Constants.QUALS_TO);
                     break;
 
                 case Constants.NOT_QUALS_TO:
-                    flag = Util.compareNumber(trigger, contentKeys, eventContent, Constants.NOT_QUALS_TO);
+                    flag = Util.compareNumber(whereCondition, contentKeys, eventContent, Constants.NOT_QUALS_TO);
                     break;
 
                 case Constants.NOT_QUALS_TO_TWO:
-                    flag = Util.compareNumber(trigger, contentKeys, eventContent, Constants.NOT_QUALS_TO_TWO);
+                    flag = Util.compareNumber(whereCondition, contentKeys, eventContent, Constants.NOT_QUALS_TO_TWO);
                     break;
 
                 case Constants.MINOR_THAN:
-                    flag = Util.compareNumber(trigger, contentKeys, eventContent, Constants.MINOR_THAN);
+                    flag = Util.compareNumber(whereCondition, contentKeys, eventContent, Constants.MINOR_THAN);
                     break;
 
                 case Constants.MINOR_THAN_EQUAL:
-                    flag = Util.compareNumber(trigger, contentKeys, eventContent, Constants.MINOR_THAN_EQUAL);
+                    flag = Util.compareNumber(whereCondition, contentKeys, eventContent, Constants.MINOR_THAN_EQUAL);
                     break;
 
                 case Constants.GREATER_THAN:
-                    flag = Util.compareNumber(trigger, contentKeys, eventContent, Constants.GREATER_THAN);
+                    flag = Util.compareNumber(whereCondition, contentKeys, eventContent, Constants.GREATER_THAN);
 
                     break;
 
                 case Constants.GREATER_THAN_EQUAL:
-                    flag = Util.compareNumber(trigger, contentKeys, eventContent, Constants.GREATER_THAN_EQUAL);
+                    flag = Util.compareNumber(whereCondition, contentKeys, eventContent, Constants.GREATER_THAN_EQUAL);
 
                     break;
                 default:

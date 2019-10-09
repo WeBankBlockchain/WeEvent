@@ -89,6 +89,15 @@ public class Util {
         }
     }
 
+    /**
+     * right value is a number
+     * @param RightKey right value
+     * @param eventContent event content
+     * @param item
+     * @param operation  operation
+     * @return
+     * @throws JSONException
+     */
     private static boolean CompareCondition(Integer RightKey, String eventContent, String item, String operation) throws JSONException {
 
         JSONObject jObj = new JSONObject(eventContent);
@@ -172,12 +181,12 @@ public class Util {
         return false;
     }
 
-    public static boolean compareNumber(Expression trigger, List<String> contentKeys, String eventContent, String operation) throws JSONException {
+    public static boolean compareNumber(Expression whereCondition, List<String> contentKeys, String eventContent, String operation) throws JSONException {
         boolean flag = false;
         String leftKey;
         int RightKey;
-        leftKey = (((BinaryExpression) trigger).getLeftExpression()).toString().toUpperCase();
-        RightKey = Integer.valueOf((((BinaryExpression) trigger).getRightExpression()).toString());
+        leftKey = (((BinaryExpression) whereCondition).getLeftExpression()).toString().toUpperCase();
+        RightKey = Integer.valueOf((((BinaryExpression) whereCondition).getRightExpression()).toString());
         for (int i = 0; i < contentKeys.size(); i++) {
             if (contentKeys.get(i).equals(leftKey)) {
                 flag = CompareCondition(RightKey, eventContent, contentKeys.get(i), operation);

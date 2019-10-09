@@ -284,9 +284,11 @@ public class CEPRuleServiceImpl implements CEPRuleService {
                 CEPRuleCache.addCEPRule(rule);
             }
             if (handleType.equals("update")) {
-                CEPRuleCache.updateCEPRule(rule);
+                CEPRule ruleOld = cepRuleMapper.selectByPrimaryKey(rule.getId());
+                if (!ruleOld.getFromDestination().equals(rule.getFromDestination())) {
+                    CEPRuleCache.updateCEPRule(rule);
+                }
             }
         }
     }
-
 }

@@ -136,11 +136,7 @@ public class parsingSingleCondition {
 
         }
         log.info("========================================================");
-//        int i = 0;
-//        do {
-//            log.info("whereList:{},exp_middle:{}", whereList.get(i).toString(), operatorList.get(i));
-//            i++;
-//        } while (i < whereList.size());
+
 
         Expression exp_l = ((BinaryExpression) plainSelect.getWhere()).getLeftExpression();
         Expression exp_r = ((BinaryExpression) plainSelect.getWhere()).getRightExpression();
