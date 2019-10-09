@@ -1,8 +1,12 @@
 package com.webank.weevent.processor.mq;
 
 import java.io.StringReader;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,6 +19,7 @@ import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.WeEvent;
 
 import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.BinaryExpression;
@@ -23,6 +28,8 @@ import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import org.springframework.util.StringUtils;
+
+import static sun.plugin2.os.windows.OSVERSIONINFOA.size;
 
 @Slf4j
 public class CEPRuleMQ {
@@ -80,6 +87,48 @@ public class CEPRuleMQ {
         }
     }
 
+    private static void sendMessageToDB(String content, CEPRule rule) {
+        JSONObject eventContent = JSONObject.parseObject(content);
+        JSONObject payloadParams = JSONObject.parseObject(rule.getPayload());
+        try {
+            Connection conn = Util.getConnection(rule.getDatabaseUrl());
+
+            if (conn != null) {
+                Map<String,String> urlParamMap= Util.URLRequest(rule.getDatabaseUrl());
+                String insertExpression = "insert into ".concat(urlParamMap.get("tableName").concat("("));
+                String values = "values (";
+                Map<String, Integer> sqlvalue = contactsql(content, rule.getPayload());
+                List<String> result = new ArrayList(sqlvalue.keySet());
+
+                //contact insert into users (first_name, last_name, date_created, is_admin, num_points)
+                for (Map.Entry<String, Integer> entry : sqlvalue.entrySet()) {
+                    System.out.println(entry.getKey() + ":" + entry.getValue());
+                    if(entry.getValue().equals(1)){
+                        if(entry.getValue().equals(result.get(result.size()-1))){
+                            insertExpression.concat(entry.getKey()).concat(")");
+                            values.concat("?）");
+                        }else{
+                            insertExpression.concat(entry.getKey()).concat(",");
+                            values.concat("?，");
+                        }
+                    }
+                }
+
+                String query = insertExpression.concat(values);
+                log.info("query:{}",query);
+                PreparedStatement preparedStmt = conn.prepareStatement(query);
+                for(int t=0;t<result.size();t++){
+                    preparedStmt.setString (t+1, eventContent.get(result.get(t)).toString());
+                }
+                // execute the preparedstatement
+                preparedStmt.execute();
+                conn.close();
+            }
+        } catch (SQLException e) {
+            log.info(e.toString());
+        }
+
+    }
 
     private static void handleOnEvent(WeEvent event, IWeEventClient client, Map<String, CEPRule> ruleMap) {
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
@@ -95,13 +144,18 @@ public class CEPRuleMQ {
                 // parsing the payload && match the content,if true and hit it
                 if (checkJson(content, entry.getValue().getPayload())) {
                     if (hitRule(content, entry.getValue().getConditionField())) {
-
                         // select the field and publish the message to the toDestination
                         try {
-                            // :TODO select the field
-                            // publish the message
-                            log.info("publish topic {}", entry.getValue().getSelectField());
-                            client.publish(entry.getValue().getToDestination(), content.getBytes());
+                            if (entry.getValue().getConditionType().equals(2)) {
+                                sendMessageToDB(content, entry.getValue());
+                            } else {
+                                if (entry.getValue().getConditionType().equals(1)) {
+                                    // :TODO select the field
+                                    // publish the message
+                                    log.info("publish topic {}", entry.getValue().getSelectField());
+                                    client.publish(entry.getValue().getToDestination(), content.getBytes());
+                                }
+                            }
                         } catch (BrokerException e) {
                             log.error(e.toString());
                         }
@@ -133,6 +187,22 @@ public class CEPRuleMQ {
         }
         log.info("checkJson tag:{}", tag);
         return tag;
+    }
+
+    private static Map<String, Integer> contactsql(String content, String objJson) {
+        boolean tag = true;
+        Map<String, Integer> sql = new HashMap<>();
+        if (!StringUtils.isEmpty(content)
+                && !StringUtils.isEmpty(objJson)) {
+            List<String> objJsonKeys = Util.getKeys(objJson);
+            for (String key : objJsonKeys) {
+                sql.put(key, 0);
+                if (!content.contains(key)) {
+                    sql.put(key, 1);
+                }
+            }
+        }
+        return sql;
     }
 
     /**
