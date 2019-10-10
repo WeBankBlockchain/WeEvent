@@ -164,6 +164,7 @@ public class CommonService implements AutoCloseable {
         user = user.split(this.EQUAL_SIGN)[1].replaceAll("\"", "");
         int first = dataBaseUrl.indexOf(this.AND_SYMBOL);
         int second = dataBaseUrl.indexOf(this.AND_SYMBOL, first + 1);
+        int last = dataBaseUrl.lastIndexOf(this.AND_SYMBOL);
         String password = dataBaseUrl.substring(first, second);
         password = password.split(this.EQUAL_SIGN)[1].replaceAll("\"", "");
         try (Connection conn = DriverManager.getConnection(defaultUrl, user, password)) {
