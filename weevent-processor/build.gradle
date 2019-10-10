@@ -32,6 +32,10 @@ dependencies {
     //fastjson
     compile group: 'com.alibaba', name: 'fastjson', version: '1.2.47'
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    implementation("org.apache.commons:commons-pool2:2.7.0")
+    // redis
+    implementation("redis.clients:jedis:3.0.1")
 }
 
 bootJar {
