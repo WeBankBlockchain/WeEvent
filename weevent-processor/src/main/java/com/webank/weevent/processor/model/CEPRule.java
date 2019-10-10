@@ -1,8 +1,9 @@
 package com.webank.weevent.processor.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class CEPRule {
+public class CEPRule implements Serializable {
     private String id;
 
     private String ruleName;
@@ -36,6 +37,7 @@ public class CEPRule {
     private String errorMessage;
 
     private Date updatedTime;
+
 
     public CEPRule(String id, String ruleName, String fromDestination, String brokerUrl, String payload, Integer payloadType, String selectField, String conditionField, Integer conditionType, String toDestination, String databaseUrl, Date createdTime, Integer status, String errorDestination, String errorCode, String errorMessage, Date updatedTime) {
         this.id = id;

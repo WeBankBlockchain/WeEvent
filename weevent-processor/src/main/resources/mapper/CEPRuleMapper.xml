@@ -134,6 +134,27 @@
         <result property="errorMessage" column="error_message" javaType="java.lang.String" jdbcType="VARCHAR"/>
     </resultMap>
 
+    <resultMap id="DynamicRuleResultMapTwo" type="com.webank.weevent.processor.model.CEPRule">
+        <id property="id" column="id" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="ruleName" column="rule_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="fromDestination" column="from_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="brokerUrl" column="broker_url" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="payload" column="payload" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="payloadType" column="payload_type" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="selectField" column="select_field" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="conditionField" column="condition_field" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="conditionType" column="condition_type" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="toDestination" column="to_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="databaseUrl" column="database_url" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="createdTime" column="created_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="status" column="status" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="errorDestination" column="error_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="errorCode" column="error_code" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="errorMessage" column="error_message" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="updateTime" column="updated_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+
+    </resultMap>
+
     <resultMap id="DynamicRuleResultMap" type="com.webank.weevent.processor.model.CEPRule">
         <id property="id" column="id" javaType="java.lang.String" jdbcType="VARCHAR"/>
         <result property="ruleName" column="rule_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
@@ -173,6 +194,15 @@
         </where>
     </select>
 
+
+    <select id="getDynamicCEPRuleAllParamList" resultMap="DynamicRuleResultMapTwo">
+        select
+        <include refid="Rule_Column_List"/>
+        from cep_rule
+        <where>
+            status=2
+        </where>
+    </select>
 
     <select id="getCEPRuleList" parameterType="com.webank.weevent.processor.model.CEPRule" resultMap="CEPRuleResultMap">
         select

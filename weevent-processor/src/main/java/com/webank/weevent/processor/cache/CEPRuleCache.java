@@ -1,14 +1,15 @@
 package com.webank.weevent.processor.cache;
 
-import java.util.concurrent.ConcurrentHashMap;
-
+import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.processor.mapper.CEPRuleMapper;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.mq.CEPRuleMQ;
 import com.webank.weevent.processor.service.RedisService;
 import com.webank.weevent.sdk.BrokerException;
 
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
@@ -22,6 +23,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CEPRuleCache {
 //    private static Map<String, CEPRule> ruleMap = new ConcurrentHashMap<>();
+    private static List<String> idList = new ArrayList<>();;
+
     private static ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     // block data cached in redis
     private static RedisService redisService;
@@ -29,25 +32,43 @@ public class CEPRuleCache {
     @Autowired
     private CEPRuleMapper cEPRuleMapper;
 
+    private void initRedisService() {
+        if (redisService == null) {
+            // load redis service if needed
+            String redisServerIp = ProcessorApplication.processorConfig.getRedisServerIp();
+            Integer redisServerPort = ProcessorApplication.processorConfig.getRedisServerPort();
+            if (StringUtils.isNotBlank(redisServerIp) && redisServerPort > 0) {
+                log.info("init redis service");
+
+                redisService = ProcessorApplication.applicationContext.getBean(RedisService.class);
+            }
+        }
+    }
     @PostConstruct
     public void init() {
         // get all rule
-        List<CEPRule> dynamicRuleList = cEPRuleMapper.getDynamicCEPRuleList();
+        List<CEPRule> dynamicRuleList = cEPRuleMapper.getDynamicCEPRuleAllParamList();
+        initRedisService();
         log.info("dynamic rule list {}", dynamicRuleList.size());
+
         if (!CollectionUtils.isEmpty(dynamicRuleList)) {
 
-            for (CEPRule aDynamicRuleList : dynamicRuleList) {
-                redisService.writeRulesToRedis(aDynamicRuleList.getId(), aDynamicRuleList);
+            for (CEPRule aDynamicRule : dynamicRuleList) {
+                log.info("------------------++{}", JSONObject.toJSONString(aDynamicRule));
+                redisService.writeRulesToRedis(aDynamicRule.getId(), aDynamicRule);
+                log.info("+++++++++++++++++++++++{}", aDynamicRule.getId());
+                idList.add(aDynamicRule.getId());
             }
 
             executorService.execute(new Runnable() {
                 @Override
                 public void run() {
-                    Iterator<Map.Entry<String, CEPRule>> iter = redisService.readAllRulesFromRedis().entrySet().iterator();
+//                    redisService.readAllRulesFromRedis(idList);
+                    Iterator<Map.Entry<String, CEPRule>> iter = redisService.readAllRulesFromRedis(idList).entrySet().iterator();
                     while (iter.hasNext()) {
                         Map.Entry<String, CEPRule> entry = iter.next();
                         log.info("start subscribe all topic...");
-                        CEPRuleMQ.subscribeMsg(entry.getValue(), redisService.readAllRulesFromRedis());
+                        CEPRuleMQ.subscribeMsg(entry.getValue(), redisService.readAllRulesFromRedis(idList));
                     }
                 }
             });
@@ -57,13 +78,14 @@ public class CEPRuleCache {
     public static void addCEPRule(CEPRule rule) {
         //ruleMap.put(rule.getId(), rule);
         redisService.writeRulesToRedis(rule.getId(), rule);
+        idList.add(rule.getId());
         // add subscription
-        CEPRuleMQ.subscribeMsg(rule, redisService.readAllRulesFromRedis());
+        CEPRuleMQ.subscribeMsg(rule, redisService.readAllRulesFromRedis(idList));
     }
 
     public static void deleteCEPRuleById(String ruleId) {
         // cancel the subscription
-        CEPRuleMQ.unSubscribeMsg(redisService.readRulesFromRedis(ruleId), CEPRuleMQ.subscriptionIdMap.get(ruleId));
+        CEPRuleMQ.unSubscribeMsg((CEPRule) redisService.readRulesFromRedis(ruleId), CEPRuleMQ.subscriptionIdMap.get(ruleId));
         redisService.deleteRulesToRedis(ruleId);
     }
 
@@ -71,21 +93,22 @@ public class CEPRuleCache {
         // cancel the subscription
         String ruleId = rule.getId();
         if (redisService.readRulesFromRedis(ruleId)!=null) {
-            CEPRuleMQ.unSubscribeMsg(redisService.readRulesFromRedis(rule.getId()), CEPRuleMQ.subscriptionIdMap.get(ruleId));
+            CEPRuleMQ.unSubscribeMsg((CEPRule) redisService.readRulesFromRedis(rule.getId()), CEPRuleMQ.subscriptionIdMap.get(ruleId));
         }
 //        ruleMap.remove(ruleId);
         redisService.deleteRulesToRedis(ruleId);
     }
 
     public static void updateCEPRule(CEPRule rule) throws BrokerException {
-        CEPRuleMQ.updateSubscribeMsg(rule, redisService.readAllRulesFromRedis());
+        CEPRuleMQ.updateSubscribeMsg(rule, redisService.readAllRulesFromRedis(idList));
     }
 
     public static CEPRule getCEPRule(String ruleId) {
-        return redisService.readRulesFromRedis(ruleId);
+        return (CEPRule) redisService.readRulesFromRedis(ruleId);
     }
 
     public static Map<String, CEPRule> getCEPRuleMap() {
-        return redisService.readAllRulesFromRedis();
+        return redisService.readAllRulesFromRedis(idList);
     }
 }
+

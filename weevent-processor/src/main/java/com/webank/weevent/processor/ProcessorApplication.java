@@ -9,7 +9,6 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -40,19 +39,7 @@ public class ProcessorApplication {
         processorConfig = config;
     }
 
-    // daemon thread pool
-    @Bean(name = "processor_daemon_task_executor")
-    public static ThreadPoolTaskExecutor getThreadPoolTaskExecutor() {
-        ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
-        pool.setThreadNamePrefix("processor_daemon_");
-        // run in thread immediately, no blocking queue
-        pool.setQueueCapacity(0);
-        pool.setDaemon(true);
-        pool.initialize();
 
-        log.info("init processor daemon thread pool");
-        return pool;
-    }
 
     public static void exit() {
         if (applicationContext != null) {
@@ -86,12 +73,28 @@ public class ProcessorApplication {
         return redisService;
     }
 
+
+    // daemon thread pool
+    @Bean(name = "processor_daemon_task_executor")
+    public static ThreadPoolTaskExecutor getThreadPoolTaskExecutor() {
+        ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
+        pool.setThreadNamePrefix("processor_daemon_");
+        // run in thread immediately, no blocking queue
+        pool.setQueueCapacity(0);
+        pool.setDaemon(true);
+        pool.initialize();
+
+        log.info("init processor daemon thread pool");
+        return pool;
+    }
+
     @Bean
     CEPRuleCache cEPRuleCache() {
         log.info("cEPRuleCache....");
 
         return new CEPRuleCache();
     }
+
 }
 
 

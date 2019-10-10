@@ -25,6 +25,9 @@ public interface CEPRuleMapper {
 
     List<CEPRule> getDynamicCEPRuleList();
 
+    List<CEPRule> getDynamicCEPRuleAllParamList();
+
+
     List<CEPRule> getCEPRuleListByPage(Map<String, Integer> data);
 
     CEPRule selectByPrimaryKey(String id);

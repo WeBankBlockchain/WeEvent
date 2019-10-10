@@ -1,17 +1,12 @@
 package com.webank.weevent.processor.service;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.processor.model.CEPRule;
-import com.webank.weevent.processor.utils.SerializeUtils;
-import com.webank.weevent.processor.utils.Util;
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.processor.utils.ObjectTranscoder;
 
-import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.Jedis;
@@ -23,11 +18,13 @@ public class RedisService {
 
     private JedisPool jedisPool;
 
+
     public void writeRulesToRedis(String id, CEPRule rule) {
         try (Jedis jedis = getJedis()) {
-            jedis.setnx(id.getBytes(), SerializeUtils.serialize(rule.toString().getBytes()));
+            jedis.setnx(id.getBytes(), ObjectTranscoder.getInstance().serialize(rule));
         }
     }
+
 
     public void deleteRulesToRedis(String id) {
         try (Jedis jedis = getJedis()) {
@@ -38,21 +35,22 @@ public class RedisService {
     public CEPRule readRulesFromRedis(String id) {
         try (Jedis jedis = getJedis()) {
             byte[] in = jedis.get(id.getBytes());
-            return SerializeUtils.deserialize(in);
+            CEPRule rule = (CEPRule) (ObjectTranscoder.getInstance().deserialize(in));
+            log.info("id :{} rule name: {}", rule.getId(), rule.getRuleName());
+            return rule;
         }
     }
 
-    public Map<String, CEPRule> readAllRulesFromRedis() {
+
+    public Map<String, CEPRule> readAllRulesFromRedis(List<String> keys) {
         try (Jedis jedis = getJedis()) {
-            Set<byte[]> keySet = jedis.keys("*".getBytes());
-            byte[][] keys = keySet.toArray(new byte[keySet.size()][]);
-
-            byte[][] values = jedis.mget(keys).toArray(new byte[keySet.size()][]);
-
             Map<String, CEPRule> ruleMap = new ConcurrentHashMap<>();
-            for (int i = 0; i < keySet.size(); ++i) {
-                log.info(Util.byte2hex(keys[i]) + " --- " + Util.byte2hex(values[i]));
-                ruleMap.put(Util.byte2hex(keys[i]), SerializeUtils.deserialize(values[i]));
+
+            for (int i = 0; i < keys.size(); ++i) {
+                log.info("keys:{}",keys.get(i));
+                byte[] in = jedis.get(keys.get(i).getBytes());
+                CEPRule rule = (CEPRule) (ObjectTranscoder.getInstance().deserialize(in));
+                ruleMap.put(keys.get(i), rule);
             }
             return ruleMap;
         }
