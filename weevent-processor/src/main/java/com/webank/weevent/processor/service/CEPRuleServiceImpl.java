@@ -277,18 +277,16 @@ public class CEPRuleServiceImpl implements CEPRuleService {
 
     private void updateCache(CEPRule rule, String handleType) throws BrokerException {
         // update rule map
-        if (rule.getStatus() != 2) {
+        if (rule.getStatus() == 2) {
             CEPRuleCache.deleteCEPRuleById(rule);
-        } else {
-            if (handleType.equals("insert")) {
-                CEPRuleCache.addCEPRule(rule);
-            }
-            if (handleType.equals("update")) {
-                CEPRule ruleOld = cepRuleMapper.selectByPrimaryKey(rule.getId());
-                if (!ruleOld.getFromDestination().equals(rule.getFromDestination())) {
-                    CEPRuleCache.updateCEPRule(rule);
-                }
+        } else if (handleType.equals("insert") && rule.getStatus() == 1) {
+            CEPRuleCache.addCEPRule(rule);
+        } else if (handleType.equals("update") && rule.getStatus() == 1) {
+            CEPRule ruleOld = cepRuleMapper.selectByPrimaryKey(rule.getId());
+            if (!ruleOld.getFromDestination().equals(rule.getFromDestination())) {
+                CEPRuleCache.updateCEPRule(rule);
             }
         }
+
     }
 }
