@@ -1,6 +1,8 @@
 package com.webank.weevent.governance.entity;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.governance.entity.base.BaseEntity;
@@ -73,4 +75,6 @@ public class RuleEngineEntity extends BaseEntity {
     private Integer endIndex;
 
     private Integer totalCount;
+
+    private List<RuleEngineConditionEntity> ruleEngineConditionList = new ArrayList<>();
 }

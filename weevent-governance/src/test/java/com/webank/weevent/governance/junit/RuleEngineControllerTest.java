@@ -83,11 +83,10 @@ public class RuleEngineControllerTest extends JUnitTestBase {
 
     @Test
     public void testUpdateRuleEngine() throws Exception {
-        String content = "{\"id\":\"2\",\"ruleName\":\"temperature-alarm\",\"payloadType\":\"1\"," +
+        String content = "{\"id\":\"3\",\"ruleName\":\"temperature-alarm\",\"payloadType\":\"1\"," +
                 "\"payloadMap\":{\"temperate\":30,\"humidity\":0.5},\"brokerId\":\"1\"," +
                 "\"fromDestination\":\"airCondition\",\"toDestination\":\"test\"," +
-                "\"selectField\":\"temperate\",\"conditionField\":\"temperate>38\",\"conditionType\":\"1\"," +
-                "\"brokerUrl\":\"http://127.0.0.1:7000/weevent?groupId=1\"}";
+                "\"selectField\":\"temperate\",\"conditionField\":\"temperate>38\",\"conditionType\":\"1\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/update").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
@@ -107,8 +106,8 @@ public class RuleEngineControllerTest extends JUnitTestBase {
 
     @Test
     public void testDeleteRuleEngine() throws Exception {
-        String content = "{\"id\":\"1\",\"userId\":\"1\",\"brokerId\":\"1\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.delete("/ruleEngine/delete").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content))
+        String content = "{\"id\":\"3\",\"userId\":\"1\",\"brokerId\":\"1\"}";
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/delete").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(), GovernanceResult.class);

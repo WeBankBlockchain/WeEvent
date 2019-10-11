@@ -43,6 +43,7 @@ public class ConstantProperties {
 
 
     //process url begin ========================================================
+    public final static String PROCESSOR_INSERT = "/processor/insert";
     public final static String PROCESSOR_DELETE_CEP_RULE = "/processor/deleteCEPRuleById";
     public final static String PROCESSOR_UPDATE_CEP_RULE = "/processor/updateCEPRuleById";
     public final static String PROCESSOR_START_CEP_RULE = "/processor/startCEPRuleById";

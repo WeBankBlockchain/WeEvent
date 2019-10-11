@@ -177,6 +177,10 @@ public class CommonService implements AutoCloseable {
         }
     }
 
+
+
+
+
     @Override
     public void close() throws Exception {
         log.info("resource is close");
