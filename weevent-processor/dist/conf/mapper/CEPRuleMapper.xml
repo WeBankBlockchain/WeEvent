@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.demo.weevent.processor.mapper.CEPRuleMapper">
-    <resultMap id="BaseResultMap" type="com.demo.weevent.processor.model.CEPRule">
+<mapper namespace="com.webank.weevent.processor.mapper.CEPRuleMapper">
+    <resultMap id="BaseResultMap" type="com.webank.weevent.processor.model.CEPRule">
         <constructor>
-            <idArg column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+            <idArg column="id" javaType="java.lang.String" jdbcType="VARCHAR"/>
             <arg column="rule_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
             <arg column="from_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
             <arg column="broker_url" javaType="java.lang.String" jdbcType="VARCHAR"/>
-            <arg column="payloay" javaType="java.lang.String" jdbcType="VARCHAR"/>
-            <arg column="payload_type" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+            <arg column="payload" javaType="java.lang.String" jdbcType="VARCHAR"/>
+            <arg column="payload_type" javaType="java.lang.Integer" jdbcType="INTEGER"/>
             <arg column="select_field" javaType="java.lang.String" jdbcType="VARCHAR"/>
             <arg column="condition_field" javaType="java.lang.String" jdbcType="VARCHAR"/>
             <arg column="condition_type" javaType="java.lang.Integer" jdbcType="INTEGER"/>
             <arg column="to_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
-            <arg column="databaseUrl" javaType="java.lang.String" jdbcType="VARCHAR"/>
+            <arg column="database_url" javaType="java.lang.String" jdbcType="VARCHAR"/>
             <arg column="created_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
-            <arg column="status" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+            <arg column="status" javaType="java.lang.Integer" jdbcType="INTEGER"/>
             <arg column="error_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
             <arg column="error_code" javaType="java.lang.String" jdbcType="VARCHAR"/>
             <arg column="error_message" javaType="java.lang.String" jdbcType="VARCHAR"/>
@@ -83,11 +83,23 @@
         </where>
     </sql>
     <sql id="Base_Column_List">
-    id, rule_name, from_destination, broker_url, payloay, payload_type, select_field, 
-    condition_field, condition_type, to_destination, databaseUrl, created_time, status, 
+    id, rule_name, from_destination, broker_url, payload, payload_type, select_field,
+    condition_field, condition_type, to_destination, database_url, created_time, status,
     error_destination, error_code, error_message, updated_time
   </sql>
-    <select id="selectByExample" parameterType="com.demo.weevent.processor.model.CEPRuleExample"
+
+    <sql id="Common_Column_List">
+    id, rule_name, from_destination, broker_url, payload, payload_type, select_field,
+    condition_field, condition_type, to_destination, database_url, created_time, status,
+    error_destination, error_code, error_message
+  </sql>
+
+    <sql id="Rule_Column_List">
+    id, rule_name,from_destination, broker_url, payload, select_field,condition_field, condition_type, to_destination, database_url,  status,
+    error_destination, error_code, error_message
+  </sql>
+
+    <select id="selectByExample" parameterType="com.webank.weevent.processor.model.CEPRuleExample"
             resultMap="BaseResultMap">
         select
         <if test="distinct">
@@ -103,80 +115,137 @@
         </if>
     </select>
 
-    <resultMap id="CEPRuleResultMap" type="com.demo.weevent.processor.dao.CEPRuleVo">
-        <collection property="cEPRuleList"  javaType="java.util.ArrayList" ofType="com.demo.weevent.processor.model.CEPRule">
-            <id property="id" column="id" javaType="int" jdbcType="INTEGER"/>
-            <result  property="ruleName" column="rule_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
-            <result  property="fromDestination" column="from_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
-            <result  property="brokerUrl" column="broker_url" javaType="java.lang.String" jdbcType="VARCHAR"/>
-            <result  property="payloay" column="payloay" javaType="java.lang.String" jdbcType="VARCHAR"/>
-            <result  property="payloadType" column="payload_type" javaType="java.lang.Byte" jdbcType="TINYINT"/>
-            <result  property="selectField" column="select_field" javaType="java.lang.String" jdbcType="VARCHAR"/>
-            <result  property="conditionField" column="condition_field" javaType="java.lang.String" jdbcType="VARCHAR"/>
-            <result  property="conditionType" column="condition_type" javaType="java.lang.Integer" jdbcType="INTEGER"/>
-            <result  property="toDestination" column="to_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
-            <result  property="databaseurl" column="databaseUrl" javaType="java.lang.String" jdbcType="VARCHAR"/>
-            <result  property="createdTime" column="created_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
-            <result  property="status" column="status" javaType="java.lang.Byte" jdbcType="TINYINT"/>
-            <result  property="errorDestination" column="error_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
-            <result  property="errorCode" column="error_code" javaType="java.lang.String" jdbcType="VARCHAR"/>
-            <result  property="errorMessage" column="error_message" javaType="java.lang.String" jdbcType="VARCHAR"/>
-        </collection>
+    <resultMap id="CEPRuleResultMap" type="com.webank.weevent.processor.model.CEPRule">
+        <id property="id" column="id" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="ruleName" column="rule_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="fromDestination" column="from_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="brokerUrl" column="broker_url" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="payload" column="payload" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="payloadType" column="payload_type" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="selectField" column="select_field" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="conditionField" column="condition_field" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="conditionType" column="condition_type" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="toDestination" column="to_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="databaseUrl" column="database_url" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="createdTime" column="created_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="status" column="status" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="errorDestination" column="error_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="errorCode" column="error_code" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="errorMessage" column="error_message" javaType="java.lang.String" jdbcType="VARCHAR"/>
     </resultMap>
 
-    <select id="getCEPRuleList" parameterType="com.demo.weevent.processor.model.CEPRule" resultMap="CEPRuleResultMap">
+    <resultMap id="DynamicRuleResultMap" type="com.webank.weevent.processor.model.CEPRule">
+        <id property="id" column="id" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="ruleName" column="rule_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="fromDestination" column="from_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="brokerUrl" column="broker_url" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="payload" column="payload" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="selectField" column="select_field" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="conditionField" column="condition_field" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="conditionType" column="condition_type" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="toDestination" column="to_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="databaseUrl" column="database_url" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="status" column="status" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="errorDestination" column="error_destination" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="errorCode" column="error_code" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="errorMessage" column="error_message" javaType="java.lang.String" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <resultMap id="brokerMap" type="java.lang.String">
+        <result property="brokerUrl" column="broker_url" javaType="java.lang.String" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="getBrokerUrlList" resultMap="brokerMap">
+        select
+        distinct broker_url
+        from cep_rule
+        <where>
+            broker_url!=""
+        </where>
+    </select>
+
+    <select id="getDynamicCEPRuleList" resultMap="DynamicRuleResultMap">
+        select
+        <include refid="Rule_Column_List"/>
+        from cep_rule
+        <where>
+            status=2
+        </where>
+    </select>
+
+
+    <select id="getCEPRuleList" parameterType="com.webank.weevent.processor.model.CEPRule" resultMap="CEPRuleResultMap">
+        select
+        <include refid="Common_Column_List"/>
+        from cep_rule
+        <where>
+            <bind name="ruleNamePattern" value=" '%' + ruleName + '%' "/>
+            and rule_name LIKE #{ruleNamePattern}
+        </where>
+    </select>
+
+
+    <select id="getAllRuleList" parameterType="com.webank.weevent.processor.model.CEPRule" resultMap="CEPRuleResultMap">
+        select
+        <include refid="Common_Column_List"/>
+        from cep_rule
+    </select>
+
+    <select id="getCEPRuleListByPage" parameterType="map" resultMap="CEPRuleResultMap">
+        select
+        <include refid="Common_Column_List"/>
+        from cep_rule limit #{currIndex} , #{pageSize}
+    </select>
+
+
+    <select id="selectByRuleName" parameterType="com.webank.weevent.processor.model.CEPRule"
+            resultMap="CEPRuleResultMap">
+        select
+        <include refid="Common_Column_List"/>
+        from cep_rule
+        <where>
+            <bind name="ruleNamePattern" value=" '%' + ruleName + '%' "/>
+            and rule_name LIKE #{ruleNamePattern}
+        </where>
+    </select>
+
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from cep_rule
-        where rule_name like '%test%'
-    </select>
-
-    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from cep_rule
-        where id = #{id,jdbcType=INTEGER}
-    </select>
-    <select id="selectByRuleName" parameterType="com.demo.weevent.processor.model.CEPRule" resultMap="CEPRuleResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from cep_rule
-        where rule_name = #{ruleName,jdbcType=VARCHAR}
-    </select>
-
-    <select id="selectByRuleNameTest" parameterType="com.demo.weevent.processor.model.CEPRule" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from cep_rule
-        where rule_name like '%test%'
+        where id = #{id,jdbcType=VARCHAR}
     </select>
 
 
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
     delete from cep_rule
-    where id = #{id,jdbcType=INTEGER}
+    where id = #{id,jdbcType=VARCHAR}
   </delete>
-    <delete id="deleteByExample" parameterType="com.demo.weevent.processor.model.CEPRuleExample">
+
+
+    <delete id="deleteByExample" parameterType="com.webank.weevent.processor.model.CEPRuleExample">
         delete from cep_rule
         <if test="_parameter != null">
             <include refid="Example_Where_Clause"/>
         </if>
     </delete>
-    <insert id="insert" parameterType="com.demo.weevent.processor.model.CEPRule">
+    <insert id="insert" parameterType="com.webank.weevent.processor.model.CEPRule">
     insert into cep_rule (id, rule_name, from_destination, 
-      broker_url, payloay, payload_type, 
+      broker_url, payload, payload_type,
       select_field, condition_field, condition_type, 
-      to_destination, databaseUrl, created_time, 
+      to_destination, database_url, created_time,
       status, error_destination, error_code, 
       error_message, updated_time)
-    values (#{id,jdbcType=INTEGER}, #{ruleName,jdbcType=VARCHAR}, #{fromDestination,jdbcType=VARCHAR}, 
-      #{brokerUrl,jdbcType=VARCHAR}, #{payloay,jdbcType=VARCHAR}, #{payloadType,jdbcType=TINYINT}, 
+    values (#{id,jdbcType=VARCHAR}, #{ruleName,jdbcType=VARCHAR}, #{fromDestination,jdbcType=VARCHAR},
+      #{brokerUrl,jdbcType=VARCHAR}, #{payload,jdbcType=VARCHAR}, #{payloadType,jdbcType=INTEGER},
       #{selectField,jdbcType=VARCHAR}, #{conditionField,jdbcType=VARCHAR}, #{conditionType,jdbcType=INTEGER}, 
-      #{toDestination,jdbcType=VARCHAR}, #{databaseurl,jdbcType=VARCHAR}, #{createdTime,jdbcType=TIMESTAMP}, 
-      #{status,jdbcType=TINYINT}, #{errorDestination,jdbcType=VARCHAR}, #{errorCode,jdbcType=VARCHAR}, 
+      #{toDestination,jdbcType=VARCHAR}, #{databaseUrl,jdbcType=VARCHAR}, #{createdTime,jdbcType=TIMESTAMP},
+      #{status,jdbcType=INTEGER}, #{errorDestination,jdbcType=VARCHAR}, #{errorCode,jdbcType=VARCHAR},
       #{errorMessage,jdbcType=VARCHAR}, #{updatedTime,jdbcType=TIMESTAMP})
   </insert>
-    <insert id="insertSelective" parameterType="com.demo.weevent.processor.model.CEPRule">
+
+    <insert id="insertSelective" parameterType="com.webank.weevent.processor.model.CEPRule">
         insert into cep_rule
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -191,8 +260,8 @@
             <if test="brokerUrl != null">
                 broker_url,
             </if>
-            <if test="payloay != null">
-                payloay,
+            <if test="payload != null">
+                payload,
             </if>
             <if test="payloadType != null">
                 payload_type,
@@ -209,8 +278,8 @@
             <if test="toDestination != null">
                 to_destination,
             </if>
-            <if test="databaseurl != null">
-                databaseUrl,
+            <if test="databaseUrl != null">
+                database_url,
             </if>
             <if test="createdTime != null">
                 created_time,
@@ -233,7 +302,7 @@
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">
-                #{id,jdbcType=INTEGER},
+                #{id,jdbcType=VARCHAR},
             </if>
             <if test="ruleName != null">
                 #{ruleName,jdbcType=VARCHAR},
@@ -244,11 +313,11 @@
             <if test="brokerUrl != null">
                 #{brokerUrl,jdbcType=VARCHAR},
             </if>
-            <if test="payloay != null">
-                #{payloay,jdbcType=VARCHAR},
+            <if test="payload != null">
+                #{payload,jdbcType=VARCHAR},
             </if>
             <if test="payloadType != null">
-                #{payloadType,jdbcType=TINYINT},
+                #{payloadType,jdbcType=INTEGER},
             </if>
             <if test="selectField != null">
                 #{selectField,jdbcType=VARCHAR},
@@ -262,14 +331,14 @@
             <if test="toDestination != null">
                 #{toDestination,jdbcType=VARCHAR},
             </if>
-            <if test="databaseurl != null">
-                #{databaseurl,jdbcType=VARCHAR},
+            <if test="databaseUrl != null">
+                #{databaseUrl,jdbcType=VARCHAR},
             </if>
             <if test="createdTime != null">
                 #{createdTime,jdbcType=TIMESTAMP},
             </if>
             <if test="status != null">
-                #{status,jdbcType=TINYINT},
+                #{status,jdbcType=INTEGER},
             </if>
             <if test="errorDestination != null">
                 #{errorDestination,jdbcType=VARCHAR},
@@ -285,18 +354,20 @@
             </if>
         </trim>
     </insert>
-    <select id="countByExample" parameterType="com.demo.weevent.processor.model.CEPRuleExample"
+    <select id="countByExample" parameterType="com.webank.weevent.processor.model.CEPRuleExample"
             resultType="java.lang.Long">
         select count(*) from cep_rule
         <if test="_parameter != null">
             <include refid="Example_Where_Clause"/>
         </if>
     </select>
+
+
     <update id="updateByExampleSelective" parameterType="map">
         update cep_rule
         <set>
             <if test="record.id != null">
-                id = #{record.id,jdbcType=INTEGER},
+                id = #{record.id,jdbcType=VARCHAR},
             </if>
             <if test="record.ruleName != null">
                 rule_name = #{record.ruleName,jdbcType=VARCHAR},
@@ -307,11 +378,11 @@
             <if test="record.brokerUrl != null">
                 broker_url = #{record.brokerUrl,jdbcType=VARCHAR},
             </if>
-            <if test="record.payloay != null">
-                payloay = #{record.payloay,jdbcType=VARCHAR},
+            <if test="record.payload != null">
+                payload = #{record.payload,jdbcType=VARCHAR},
             </if>
             <if test="record.payloadType != null">
-                payload_type = #{record.payloadType,jdbcType=TINYINT},
+                payload_type = #{record.payloadType,jdbcType=INTEGER},
             </if>
             <if test="record.selectField != null">
                 select_field = #{record.selectField,jdbcType=VARCHAR},
@@ -325,14 +396,14 @@
             <if test="record.toDestination != null">
                 to_destination = #{record.toDestination,jdbcType=VARCHAR},
             </if>
-            <if test="record.databaseurl != null">
-                databaseUrl = #{record.databaseurl,jdbcType=VARCHAR},
+            <if test="record.databaseUrl != null">
+                database_url = #{record.databaseUrl,jdbcType=VARCHAR},
             </if>
             <if test="record.createdTime != null">
                 created_time = #{record.createdTime,jdbcType=TIMESTAMP},
             </if>
             <if test="record.status != null">
-                status = #{record.status,jdbcType=TINYINT},
+                status = #{record.status,jdbcType=INTEGER},
             </if>
             <if test="record.errorDestination != null">
                 error_destination = #{record.errorDestination,jdbcType=VARCHAR},
@@ -351,21 +422,22 @@
             <include refid="Update_By_Example_Where_Clause"/>
         </if>
     </update>
+
     <update id="updateByExample" parameterType="map">
         update cep_rule
-        set id = #{record.id,jdbcType=INTEGER},
+        set id = #{record.id,jdbcType=VARCHAR},
         rule_name = #{record.ruleName,jdbcType=VARCHAR},
         from_destination = #{record.fromDestination,jdbcType=VARCHAR},
         broker_url = #{record.brokerUrl,jdbcType=VARCHAR},
-        payloay = #{record.payloay,jdbcType=VARCHAR},
-        payload_type = #{record.payloadType,jdbcType=TINYINT},
+        payload = #{record.payload,jdbcType=VARCHAR},
+        payload_type = #{record.payloadType,jdbcType=INTEGER},
         select_field = #{record.selectField,jdbcType=VARCHAR},
         condition_field = #{record.conditionField,jdbcType=VARCHAR},
         condition_type = #{record.conditionType,jdbcType=INTEGER},
         to_destination = #{record.toDestination,jdbcType=VARCHAR},
-        databaseUrl = #{record.databaseurl,jdbcType=VARCHAR},
+        database_url = #{record.databaseUrl,jdbcType=VARCHAR},
         created_time = #{record.createdTime,jdbcType=TIMESTAMP},
-        status = #{record.status,jdbcType=TINYINT},
+        status = #{record.status,jdbcType=INTEGER},
         error_destination = #{record.errorDestination,jdbcType=VARCHAR},
         error_code = #{record.errorCode,jdbcType=VARCHAR},
         error_message = #{record.errorMessage,jdbcType=VARCHAR},
@@ -374,7 +446,8 @@
             <include refid="Update_By_Example_Where_Clause"/>
         </if>
     </update>
-    <update id="updateByPrimaryKeySelective" parameterType="com.demo.weevent.processor.model.CEPRule">
+
+    <update id="updateFieldById" parameterType="com.webank.weevent.processor.model.CEPRule">
         update cep_rule
         <set>
             <if test="ruleName != null">
@@ -386,11 +459,8 @@
             <if test="brokerUrl != null">
                 broker_url = #{brokerUrl,jdbcType=VARCHAR},
             </if>
-            <if test="payloay != null">
-                payloay = #{payloay,jdbcType=VARCHAR},
-            </if>
-            <if test="payloadType != null">
-                payload_type = #{payloadType,jdbcType=TINYINT},
+            <if test="payload != null">
+                payload = #{payload,jdbcType=VARCHAR},
             </if>
             <if test="selectField != null">
                 select_field = #{selectField,jdbcType=VARCHAR},
@@ -404,14 +474,8 @@
             <if test="toDestination != null">
                 to_destination = #{toDestination,jdbcType=VARCHAR},
             </if>
-            <if test="databaseurl != null">
-                databaseUrl = #{databaseurl,jdbcType=VARCHAR},
-            </if>
-            <if test="createdTime != null">
-                created_time = #{createdTime,jdbcType=TIMESTAMP},
-            </if>
-            <if test="status != null">
-                status = #{status,jdbcType=TINYINT},
+            <if test="databaseUrl != null">
+                database_url = #{databaseUrl,jdbcType=VARCHAR},
             </if>
             <if test="errorDestination != null">
                 error_destination = #{errorDestination,jdbcType=VARCHAR},
@@ -426,26 +490,82 @@
                 updated_time = #{updatedTime,jdbcType=TIMESTAMP},
             </if>
         </set>
-        where id = #{id,jdbcType=INTEGER}
+        where id = #{id,jdbcType=VARCHAR}
     </update>
-    <update id="updateByPrimaryKey" parameterType="com.demo.weevent.processor.model.CEPRule">
+
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.webank.weevent.processor.model.CEPRule">
+        update cep_rule
+        <set>
+            <if test="ruleName != null">
+                rule_name = #{ruleName,jdbcType=VARCHAR},
+            </if>
+            <if test="fromDestination != null">
+                from_destination = #{fromDestination,jdbcType=VARCHAR},
+            </if>
+            <if test="brokerUrl != null">
+                broker_url = #{brokerUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="payload != null">
+                payload = #{payload,jdbcType=VARCHAR},
+            </if>
+            <if test="payloadType != null">
+                payload_type = #{payloadType,jdbcType=INTEGER},
+            </if>
+            <if test="selectField != null">
+                select_field = #{selectField,jdbcType=VARCHAR},
+            </if>
+            <if test="conditionField != null">
+                condition_field = #{conditionField,jdbcType=VARCHAR},
+            </if>
+            <if test="conditionType != null">
+                condition_type = #{conditionType,jdbcType=INTEGER},
+            </if>
+            <if test="toDestination != null">
+                to_destination = #{toDestination,jdbcType=VARCHAR},
+            </if>
+            <if test="databaseUrl != null">
+                database_url = #{databaseUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="createdTime != null">
+                created_time = #{createdTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null">
+                status = #{status,jdbcType=INTEGER},
+            </if>
+            <if test="errorDestination != null">
+                error_destination = #{errorDestination,jdbcType=VARCHAR},
+            </if>
+            <if test="errorCode != null">
+                error_code = #{errorCode,jdbcType=VARCHAR},
+            </if>
+            <if test="errorMessage != null">
+                error_message = #{errorMessage,jdbcType=VARCHAR},
+            </if>
+            <if test="updatedTime != null">
+                updated_time = #{updatedTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.webank.weevent.processor.model.CEPRule">
     update cep_rule
     set rule_name = #{ruleName,jdbcType=VARCHAR},
       from_destination = #{fromDestination,jdbcType=VARCHAR},
       broker_url = #{brokerUrl,jdbcType=VARCHAR},
-      payloay = #{payloay,jdbcType=VARCHAR},
-      payload_type = #{payloadType,jdbcType=TINYINT},
+      payload = #{payload,jdbcType=VARCHAR},
+      payload_type = #{payloadType,jdbcType=INTEGER},
       select_field = #{selectField,jdbcType=VARCHAR},
       condition_field = #{conditionField,jdbcType=VARCHAR},
       condition_type = #{conditionType,jdbcType=INTEGER},
       to_destination = #{toDestination,jdbcType=VARCHAR},
-      databaseUrl = #{databaseurl,jdbcType=VARCHAR},
+      database_url = #{databaseUrl,jdbcType=VARCHAR},
       created_time = #{createdTime,jdbcType=TIMESTAMP},
-      status = #{status,jdbcType=TINYINT},
+      status = #{status,jdbcType=INTEGER},
       error_destination = #{errorDestination,jdbcType=VARCHAR},
       error_code = #{errorCode,jdbcType=VARCHAR},
       error_message = #{errorMessage,jdbcType=VARCHAR},
       updated_time = #{updatedTime,jdbcType=TIMESTAMP}
-    where id = #{id,jdbcType=INTEGER}
+    where id = #{id,jdbcType=VARCHAR}
   </update>
 </mapper>
