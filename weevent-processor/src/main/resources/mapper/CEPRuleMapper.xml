@@ -200,7 +200,7 @@
         <include refid="Rule_Column_List"/>
         from cep_rule
         <where>
-            status=2
+            status=1
         </where>
     </select>
 

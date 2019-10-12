@@ -21,6 +21,8 @@ public interface CEPRuleService {
 
     RetCode updateByPrimaryKey(CEPRule record);
 
+    RetCode setCEPRule(CEPRule rule);
+
     RetCode setCEPRule(String id, int type);
 
     RetCode updateByPrimaryKeySelective(CEPRule record);

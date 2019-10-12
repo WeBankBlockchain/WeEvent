@@ -67,7 +67,37 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         }
 
         try {
-            updateCache(cepRuleMapper.selectByPrimaryKey(id), "setstatus");
+            if(type == Constants.RULE_STATUS_START){
+                updateCache(cepRuleMapper.selectByPrimaryKey(id), "setstatus");
+            }
+        } catch (BrokerException e) {
+            log.info(e.toString());
+        }
+        return Constants.SUCCESS;
+    }
+
+
+    @Override
+    public RetCode setCEPRule(CEPRule rule) {
+        // check all the field
+        try {
+            if (!checkField(rule).getErrorMsg().equals("success")) {
+                return Constants.FAIL;
+            }
+        } catch (Exception e) {
+            log.error(e.toString());
+        }
+
+        rule.setStatus(1); //default the status
+        // update the db
+        int ret = cepRuleMapper.updateByPrimaryKeySelective(rule);
+        if (ret != Constants.SUCCESS_CODE) {
+            return Constants.FAIL;
+        }
+
+        // update the cache
+        try {
+            updateCache(cepRuleMapper.selectByPrimaryKey(rule.getId()), "start");
         } catch (BrokerException e) {
             log.info(e.toString());
         }
@@ -102,21 +132,14 @@ public class CEPRuleServiceImpl implements CEPRuleService {
 
     @Override
     public RetCode updateByPrimaryKeySelective(CEPRule record) {
-        // check the field
-        RetCode ret = checkField(record);
-        if (!ret.getErrorCode().equals(Constants.RULE_STATUS_START)) {
+        // check rule name
+        if (StringUtils.isBlank(record.getRuleName()) || record.getRuleName().isEmpty()) {
             return Constants.FAIL;
         }
+        // update the record
         int count = cepRuleMapper.updateFieldById(record);
         if (count > 0) {
-            try {
-                CEPRule rule = cepRuleMapper.selectByPrimaryKey(record.getId());
-                updateCache(rule, "update");
-                return Constants.SUCCESS;
-            } catch (BrokerException e) {
-                log.info(e.toString());
-            }
-
+            return Constants.SUCCESS;
         }
         return Constants.FAIL;
     }
@@ -129,21 +152,20 @@ public class CEPRuleServiceImpl implements CEPRuleService {
 
     @Override
     public String insert(CEPRule record) {
-        // check all the field
-        if (!checkField(record).getErrorMsg().equals("success")) {
+        // check the rule name
+        if (StringUtils.isBlank(record.getRuleName()) || record.getRuleName().isEmpty()) {
             return "-1";
         }
+        // gennerate the id
         record.setId(getGuid());
         record.setStatus(0); //default the status
+
+        // instert the rule
         int ret = cepRuleMapper.insert(record);
         if (ret != 1) {
             return "-1";
         }
-        try {
-            updateCache(record, "insert");
-        } catch (BrokerException e) {
-            log.info(e.toString());
-        }
+
         return record.getId();
     }
 
@@ -275,17 +297,14 @@ public class CEPRuleServiceImpl implements CEPRuleService {
     }
 
 
+    // start insert or update
     private void updateCache(CEPRule rule, String handleType) throws BrokerException {
         // update rule map
         if (rule.getStatus() == 2) {
             CEPRuleCache.deleteCEPRuleById(rule);
-        } else if (handleType.equals("insert") && rule.getStatus() == 1) {
-            CEPRuleCache.addCEPRule(rule);
-        } else if (handleType.equals("update") && rule.getStatus() == 1) {
-            CEPRule ruleOld = cepRuleMapper.selectByPrimaryKey(rule.getId());
-            if (!ruleOld.getFromDestination().equals(rule.getFromDestination())) {
-                CEPRuleCache.updateCEPRule(rule);
-            }
+        } else if (handleType.equals("start") && rule.getStatus() == 1) {
+            // start situation can update the rule
+            CEPRuleCache.addOrUpdateCEPRule(rule);
         }
 
     }

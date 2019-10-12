@@ -18,7 +18,6 @@ import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class CEPRuleCache {
@@ -63,11 +62,10 @@ public class CEPRuleCache {
             executorService.execute(new Runnable() {
                 @Override
                 public void run() {
-//                    redisService.readAllRulesFromRedis(idList);
                     Iterator<Map.Entry<String, CEPRule>> iter = redisService.readAllRulesFromRedis(idList).entrySet().iterator();
                     while (iter.hasNext()) {
                         Map.Entry<String, CEPRule> entry = iter.next();
-                        log.info("start subscribe all topic...");
+                        log.info("start subscribe all topic...:{}",JSONObject.toJSONString(entry.getValue()));
                         CEPRuleMQ.subscribeMsg(entry.getValue(), redisService.readAllRulesFromRedis(idList));
                     }
                 }
@@ -75,12 +73,19 @@ public class CEPRuleCache {
         }
     }
 
-    public static void addCEPRule(CEPRule rule) {
-        //ruleMap.put(rule.getId(), rule);
-        redisService.writeRulesToRedis(rule.getId(), rule);
-        idList.add(rule.getId());
-        // add subscription
-        CEPRuleMQ.subscribeMsg(rule, redisService.readAllRulesFromRedis(idList));
+    public static void addOrUpdateCEPRule(CEPRule rule) throws BrokerException {
+        if(redisService.isRuleExistInRedis(rule.getId())){
+            // if exist , just update
+            CEPRuleCache.updateCEPRule(rule);
+        }else{
+            //ruleMap.put(rule.getId(), rule);
+            redisService.writeRulesToRedis(rule.getId(), rule);
+
+            idList.add(rule.getId());
+            // add subscription
+            CEPRuleMQ.subscribeMsg(rule, redisService.readAllRulesFromRedis(idList));
+        }
+
     }
 
     public static void deleteCEPRuleById(String ruleId) {
