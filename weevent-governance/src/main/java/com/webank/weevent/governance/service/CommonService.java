@@ -40,6 +40,7 @@ import org.springframework.stereotype.Component;
 public class CommonService implements AutoCloseable {
 
     public static final String HTTPS = "https";
+    public static final String HTTP = "http";
     public static final String HTTPS_CLIENT = "httpsClient";
     public static final String HTTP_CLIENT = "httpClient";
     public static final String CONTENT_TYPE = "Content-Type";

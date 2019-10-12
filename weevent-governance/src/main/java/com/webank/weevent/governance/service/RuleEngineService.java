@@ -350,7 +350,7 @@ public class RuleEngineService {
         }
         String selectField = StringUtil.isBlank(engineEntity.getSelectField()) ? ConstantProperties.ASTERISK : engineEntity.getSelectField();
         boolean flag = StringUtil.isBlank(engineEntity.getConditionField());
-        buffer.append("select ").append(engineEntity.getSelectField()).append(selectField).append(" from  ").append(engineEntity.getFromDestination());
+        buffer.append("select ").append(engineEntity.getSelectField()).append(selectField).append(" from").append(" ").append(engineEntity.getFromDestination());
         if (!flag) {
             buffer.append(" where ").append(engineEntity.getConditionField());
         }
@@ -390,6 +390,11 @@ public class RuleEngineService {
         }
 
     }
+
+/*    private String getProcessorUrl(String brokerUrl){
+        String ip = brokerUrl.substring(brokerUrl.indexOf("//"), brokerUrl.indexOf(":"));
+      //  String processorUrl = commonService.HTTPS
+    }*/
 
 
 }

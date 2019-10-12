@@ -62,7 +62,6 @@ public class TopicService {
             throws GovernanceException {
         String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
         String groupId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_GROUP_ID);
-        ;
         BrokerEntity brokerEntity = brokerService.getBroker(brokerId);
         if (brokerEntity == null) {
             return false;
