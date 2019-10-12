@@ -24,6 +24,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 @Slf4j
 @Service
@@ -46,6 +48,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         return new Long(cepRuleMapper.countByExample(cEPRuleExample)).intValue();
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public RetCode setCEPRule(String id, int type) {
         CEPRule rule = cepRuleMapper.selectByPrimaryKey(id);
@@ -67,16 +70,17 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         }
 
         try {
-            if(type == Constants.RULE_STATUS_START){
+            if (type == Constants.RULE_STATUS_START) {
                 updateCache(cepRuleMapper.selectByPrimaryKey(id), "setstatus");
             }
         } catch (BrokerException e) {
             log.info(e.toString());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
         return Constants.SUCCESS;
     }
 
-
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public RetCode setCEPRule(CEPRule rule) {
         // check all the field
@@ -84,8 +88,10 @@ public class CEPRuleServiceImpl implements CEPRuleService {
             if (!checkField(rule).getErrorMsg().equals("success")) {
                 return Constants.FAIL;
             }
+
         } catch (Exception e) {
             log.error(e.toString());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
 
         rule.setStatus(1); //default the status
