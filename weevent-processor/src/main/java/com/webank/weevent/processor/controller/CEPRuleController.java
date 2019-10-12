@@ -91,6 +91,17 @@ public class CEPRuleController extends BaseController {
 
     @RequestMapping(value = "/updateCEPRuleById", method = RequestMethod.POST)
     @ResponseBody
+    public BaseRspEntity updateCEPRuleById(@Valid @RequestBody CEPRule rule) {
+        BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
+        RetCode ret = cepRuleService.updateByPrimaryKeySelective(rule);
+        resEntity.setErrorCode(ret.getErrorCode());
+        resEntity.setErrorMsg(ret.getErrorMsg());
+        return resEntity;
+
+    }
+
+    @RequestMapping(value = "/updateCEPRuleByIdParam", method = RequestMethod.POST)
+    @ResponseBody
     public BaseRspEntity updateCEPRuleById(@RequestParam("id") String id, @RequestParam("ruleName") String ruleName, @RequestParam(value = "fromDestination", required = false) String fromDestination, @RequestParam(value = "brokerUrl", required = false) String brokerUrl,
                                            @RequestParam(value = "payload", required = false) String payload, @RequestParam(value = "payloadType", required = false) Integer payloadType, @RequestParam(value = "selectField", required = false) String selectField,
                                            @RequestParam(value = "conditionField", required = false) String conditionField, @RequestParam(value = "conditionType", required = false) Integer conditionType, @RequestParam(value = "toDestination", required = false) String toDestination,
@@ -156,6 +167,20 @@ public class CEPRuleController extends BaseController {
     }
 
     @RequestMapping(value = "/startCEPRule", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseRspEntity startCEPRule(@Valid @RequestBody CEPRule rule) {
+        BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
+        RetCode ret = cepRuleService.setCEPRule(rule);
+        if (!ret.getErrorCode().equals(Constants.SUCCESS_CODE)) {
+            resEntity.setErrorCode(ret.getErrorCode());
+            resEntity.setErrorMsg(ret.getErrorMsg());
+        }
+        log.info("cepRule:{}", JSONArray.toJSON(ret));
+        return resEntity;
+    }
+
+
+    @RequestMapping(value = "/startCEPRuleParam", method = RequestMethod.POST)
     @ResponseBody
     public BaseRspEntity startCEPRule(@Param("id") String id, @Param("ruleName") String ruleName, @Param("fromDestination") String fromDestination, @Param("brokerUrl") String brokerUrl,
                                       @Param("payload") String payload, @Param("payloadType") Integer payloadType, @Param("selectField") String selectField,
