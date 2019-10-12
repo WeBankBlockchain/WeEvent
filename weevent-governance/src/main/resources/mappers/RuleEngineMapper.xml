@@ -11,7 +11,7 @@
         <result column="payload" property="payload" jdbcType="VARCHAR"/>
         <result column="user_id" property="userId" jdbcType="INTEGER"/>
         <result column="broker_id" property="brokerId" jdbcType="INTEGER"/>
-        <result column="cep_id" property="cepId" jdbcType="INTEGER"/>
+        <result column="cep_id" property="cepId" jdbcType="VARCHAR"/>
         <result column="broker_url" property="brokerUrl" jdbcType="VARCHAR"/>
         <result column="from_destination" property="fromDestination" jdbcType="VARCHAR"/>
         <result column="to_destination" property="toDestination" jdbcType="VARCHAR"/>
