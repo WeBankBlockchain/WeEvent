@@ -34,6 +34,8 @@ public class Constants {
 
     public static final Integer RULE_STATUS_START = 1;
     public static final Integer RULE_STATUS_DELETE = 2;
-    public static final Integer SUCCESS_CODE = 1;
+    public static final Integer SUCCESS_CODE = 0;
+    public static final String SUCCESS_MESSAGE = "success";
+
 
 }

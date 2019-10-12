@@ -94,8 +94,10 @@ public class CEPRuleController extends BaseController {
     public BaseRspEntity updateCEPRuleById(@Valid @RequestBody CEPRule rule) {
         BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
         RetCode ret = cepRuleService.updateByPrimaryKeySelective(rule);
-        resEntity.setErrorCode(ret.getErrorCode());
-        resEntity.setErrorMsg(ret.getErrorMsg());
+        if (!ret.getErrorCode().equals(1)) { //fail
+            resEntity.setErrorCode(Constants.RET_FAIL.getErrorCode());
+            resEntity.setErrorMsg(Constants.RET_FAIL.getErrorMsg());
+        }
         return resEntity;
 
     }
@@ -126,8 +128,13 @@ public class CEPRuleController extends BaseController {
         rule.setErrorMessage(errorMessage);
         rule.setUpdatedTime(new Date(updatedTime));
         RetCode ret = cepRuleService.updateByPrimaryKeySelective(rule);
-        resEntity.setErrorCode(ret.getErrorCode());
-        resEntity.setErrorMsg(ret.getErrorMsg());
+
+        //fail
+        if (!ret.getErrorCode().equals(1)) { //fail
+            resEntity.setErrorCode(Constants.RET_FAIL.getErrorCode());
+            resEntity.setErrorMsg(Constants.RET_FAIL.getErrorMsg());
+        }
+
         return resEntity;
     }
 
@@ -142,9 +149,9 @@ public class CEPRuleController extends BaseController {
         rule.setCreatedTime(new Date(createdTime));
 
         String ret = cepRuleService.insert(rule);
-        if (ret.equals("-1")) {
-            resEntity.setErrorCode(Constants.FAIL.getErrorCode());
-            resEntity.setErrorMsg(Constants.FAIL.getErrorMsg());
+        if (ret.equals("-1")) { //fail
+            resEntity.setErrorCode(Constants.RET_FAIL.getErrorCode());
+            resEntity.setErrorMsg(Constants.RET_FAIL.getErrorMsg());
         } else {
             resEntity.setData(ret);
         }
@@ -158,10 +165,12 @@ public class CEPRuleController extends BaseController {
     public BaseRspEntity deleteCEPRuleById(@RequestParam(name = "id") String id) {
         BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
         RetCode ret = cepRuleService.setCEPRule(id, Constants.RULE_STATUS_DELETE);
-        if (!ret.getErrorCode().equals(Constants.SUCCESS_CODE)) {
+
+        if (!ret.getErrorCode().equals(1)) { //fail
             resEntity.setErrorCode(ret.getErrorCode());
             resEntity.setErrorMsg(ret.getErrorMsg());
         }
+
         log.info("cepRule:{}", JSONArray.toJSON(ret));
         return resEntity;
     }
@@ -171,10 +180,12 @@ public class CEPRuleController extends BaseController {
     public BaseRspEntity startCEPRule(@Valid @RequestBody CEPRule rule) {
         BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
         RetCode ret = cepRuleService.setCEPRule(rule);
-        if (!ret.getErrorCode().equals(Constants.SUCCESS_CODE)) {
-            resEntity.setErrorCode(ret.getErrorCode());
-            resEntity.setErrorMsg(ret.getErrorMsg());
+
+        if (!ret.getErrorCode().equals(1)) { //fail
+            resEntity.setErrorCode(Constants.RET_FAIL.getErrorCode());
+            resEntity.setErrorMsg(Constants.RET_FAIL.getErrorMsg());
         }
+
         log.info("cepRule:{}", JSONArray.toJSON(ret));
         return resEntity;
     }
@@ -205,9 +216,10 @@ public class CEPRuleController extends BaseController {
         rule.setErrorMessage(errorMessage);
         rule.setUpdatedTime(new Date(updatedTime));
         RetCode ret = cepRuleService.setCEPRule(rule);
-        if (!ret.getErrorCode().equals(Constants.SUCCESS_CODE)) {
-            resEntity.setErrorCode(ret.getErrorCode());
-            resEntity.setErrorMsg(ret.getErrorMsg());
+
+        if (!ret.getErrorCode().equals(1)) { //fail
+            resEntity.setErrorCode(Constants.RET_FAIL.getErrorCode());
+            resEntity.setErrorMsg(Constants.RET_FAIL.getErrorMsg());
         }
         log.info("cepRule:{}", JSONArray.toJSON(ret));
         return resEntity;
