@@ -35,7 +35,7 @@ public class RuleEngineEntity extends BaseEntity {
 
     private Integer brokerId;
 
-    private Integer cepId;
+    private String cepId;
 
     private String brokerUrl;
 

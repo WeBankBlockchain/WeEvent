@@ -56,7 +56,7 @@ CREATE TABLE `t_rule_engine` (
   `payload_type` int(4)  NULL DEFAULT NULL COMMENT '1 means JASON, 2 means binary',
   `payload` varchar(255)  NULL DEFAULT NULL COMMENT 'message payload',
   `broker_id` int(11) not NULL COMMENT 'broker id',
-  `cep_id` int(11) NULL COMMENT 'complex event processing id',
+  `cep_id` varchar(64) NULL COMMENT 'complex event processing id',
   `user_id` int(11) not NULL COMMENT 'user id',
   `group_id` int(64) not NULL COMMENT 'group id',
   `broker_url` varchar(255) NULL DEFAULT NULL COMMENT 'broker url',

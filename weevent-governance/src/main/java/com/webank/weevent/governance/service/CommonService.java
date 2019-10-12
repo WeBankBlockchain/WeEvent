@@ -70,6 +70,24 @@ public class CommonService implements AutoCloseable {
         return closeResponse;
     }
 
+    public CloseableHttpResponse getCloseResponse(HttpServletRequest req, String newUrl, String jsonString) throws ServletException {
+        CloseableHttpResponse closeResponse;
+        try {
+            CloseableHttpClient client = this.generateHttpClient(newUrl);
+            if (req.getMethod().equals(METHOD_TYPE)) {
+                HttpGet get = this.getMethod(newUrl, req);
+                closeResponse = client.execute(get);
+            } else {
+                HttpPost postMethod = this.postMethod(newUrl, req, jsonString);
+                closeResponse = client.execute(postMethod);
+            }
+        } catch (Exception e) {
+            log.error("getCloseResponse fail,error:{}", e.getMessage());
+            throw new ServletException(e.getMessage());
+        }
+        return closeResponse;
+    }
+
     public HttpGet getMethod(String uri, HttpServletRequest request) throws GovernanceException {
         try {
             URIBuilder builder = new URIBuilder(uri);
@@ -84,6 +102,15 @@ public class CommonService implements AutoCloseable {
             throw new GovernanceException(ErrorCode.BUILD_URL_METHOD);
         }
     }
+
+    private HttpPost postMethod(String uri, HttpServletRequest request, String jsonString) {
+        StringEntity entity = new StringEntity(jsonString, "UTF-8");
+        HttpPost httpPost = new HttpPost(uri);
+        httpPost.setHeader(CONTENT_TYPE, request.getHeader(CONTENT_TYPE));
+        httpPost.setEntity(entity);
+        return httpPost;
+    }
+
 
     private HttpPost postMethod(String uri, HttpServletRequest request) {
         StringEntity entity;
@@ -176,9 +203,6 @@ public class CommonService implements AutoCloseable {
             throw new GovernanceException("database url is error", e);
         }
     }
-
-
-
 
 
     @Override
