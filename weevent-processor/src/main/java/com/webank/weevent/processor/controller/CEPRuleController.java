@@ -1,6 +1,7 @@
 package com.webank.weevent.processor.controller;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +16,7 @@ import com.webank.weevent.processor.utils.RetCode;
 
 import com.alibaba.fastjson.JSONArray;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -89,8 +91,29 @@ public class CEPRuleController extends BaseController {
 
     @RequestMapping(value = "/updateCEPRuleById", method = RequestMethod.POST)
     @ResponseBody
-    public BaseRspEntity updateCEPRuleById(@Valid @RequestBody CEPRule rule) {
+    public BaseRspEntity updateCEPRuleById(@RequestParam("id") String id, @RequestParam("ruleName") String ruleName, @RequestParam(value = "fromDestination", required = false) String fromDestination, @RequestParam(value = "brokerUrl", required = false) String brokerUrl,
+                                           @RequestParam(value = "payload", required = false) String payload, @RequestParam(value = "payloadType", required = false) Integer payloadType, @RequestParam(value = "selectField", required = false) String selectField,
+                                           @RequestParam(value = "conditionField", required = false) String conditionField, @RequestParam(value = "conditionType", required = false) Integer conditionType, @RequestParam(value = "toDestination", required = false) String toDestination,
+                                           @RequestParam(value = "databaseUrl", required = false) String databaseUrl, @RequestParam(value = "errorDestination", required = false) String errorDestination,
+                                           @RequestParam(value = "errorCode", required = false) String errorCode, @RequestParam(value = "errorMessage", required = false) String errorMessage,
+                                           @RequestParam("updatedTime") long updatedTime) {
         BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
+        // update status must be 0
+        CEPRule rule = new CEPRule();
+        rule.setRuleName(ruleName);
+        rule.setFromDestination(fromDestination);
+        rule.setBrokerUrl(brokerUrl);
+        rule.setPayload(payload);
+        rule.setPayloadType(payloadType);
+        rule.setSelectField(selectField);
+        rule.setConditionField(conditionField);
+        rule.setConditionType(conditionType);
+        rule.setToDestination(toDestination);
+        rule.setDatabaseUrl(databaseUrl);
+        rule.setErrorDestination(errorDestination);
+        rule.setErrorCode(errorCode);
+        rule.setErrorMessage(errorMessage);
+        rule.setUpdatedTime(new Date(updatedTime));
         RetCode ret = cepRuleService.updateByPrimaryKeySelective(rule);
         resEntity.setErrorCode(ret.getErrorCode());
         resEntity.setErrorMsg(ret.getErrorMsg());
@@ -99,8 +122,14 @@ public class CEPRuleController extends BaseController {
 
     @RequestMapping(value = "/insert", method = RequestMethod.POST)
     @ResponseBody
-    public BaseRspEntity insert(@Valid @RequestBody CEPRule rule) {
+    public BaseRspEntity insert(@Param("ruleName") String ruleName, @Param("createdTime") long createdTime, @Param("updatedTime") long updatedTime) {
+        // insert status must be 0
         BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
+        CEPRule rule = new CEPRule();
+        rule.setRuleName(ruleName);
+        rule.setUpdatedTime(new Date(updatedTime));
+        rule.setCreatedTime(new Date(createdTime));
+
         String ret = cepRuleService.insert(rule);
         if (ret.equals("-1")) {
             resEntity.setErrorCode(Constants.FAIL.getErrorCode());
@@ -111,6 +140,7 @@ public class CEPRuleController extends BaseController {
 
         return resEntity;
     }
+
 
     @RequestMapping(value = "/deleteCEPRuleById", method = RequestMethod.POST)
     @ResponseBody
@@ -127,9 +157,29 @@ public class CEPRuleController extends BaseController {
 
     @RequestMapping(value = "/startCEPRule", method = RequestMethod.POST)
     @ResponseBody
-    public BaseRspEntity startCEPRule(@RequestParam(name = "id") String id) {
+    public BaseRspEntity startCEPRule(@Param("id") String id, @Param("ruleName") String ruleName, @Param("fromDestination") String fromDestination, @Param("brokerUrl") String brokerUrl,
+                                      @Param("payload") String payload, @Param("payloadType") Integer payloadType, @Param("selectField") String selectField,
+                                      @Param("conditionField") String conditionField, @Param("conditionType") Integer conditionType, @Param("toDestination") String toDestination,
+                                      @Param("databaseUrl") String databaseUrl, @Param("errorDestination") String errorDestination,
+                                      @RequestParam(value = "errorCode", required = false) String errorCode, @RequestParam(value = "errorMessage", required = false) String errorMessage,
+                                      @Param("updatedTime") long updatedTime) {
         BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
-        RetCode ret = cepRuleService.setCEPRule(id, Constants.RULE_STATUS_START);
+        CEPRule rule = new CEPRule();
+        rule.setRuleName(ruleName);
+        rule.setFromDestination(fromDestination);
+        rule.setBrokerUrl(brokerUrl);
+        rule.setPayload(payload);
+        rule.setPayloadType(payloadType);
+        rule.setSelectField(selectField);
+        rule.setConditionField(conditionField);
+        rule.setConditionType(conditionType);
+        rule.setToDestination(toDestination);
+        rule.setDatabaseUrl(databaseUrl);
+        rule.setErrorDestination(errorDestination);
+        rule.setErrorCode(errorCode);
+        rule.setErrorMessage(errorMessage);
+        rule.setUpdatedTime(new Date(updatedTime));
+        RetCode ret = cepRuleService.setCEPRule(rule);
         if (!ret.getErrorCode().equals(Constants.SUCCESS_CODE)) {
             resEntity.setErrorCode(ret.getErrorCode());
             resEntity.setErrorMsg(ret.getErrorMsg());

@@ -9,6 +9,7 @@ import com.webank.weevent.processor.utils.ObjectTranscoder;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -22,6 +23,8 @@ public class RedisService {
     public void writeRulesToRedis(String id, CEPRule rule) {
         try (Jedis jedis = getJedis()) {
             jedis.setnx(id.getBytes(), ObjectTranscoder.getInstance().serialize(rule));
+        }catch(Exception e){
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
     }
 
