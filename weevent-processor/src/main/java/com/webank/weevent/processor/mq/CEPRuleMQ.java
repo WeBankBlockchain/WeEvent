@@ -185,7 +185,6 @@ public class CEPRuleMQ {
 
 
     private static boolean hitRuleEngine(String payload, String eventContent, String condition) {
-        boolean flag = false;
         if(Util.checkJson(eventContent, payload)){
             List<String> eventContentKeys = Util.getKeys(payload);
             JSONObject event = JSONObject.parseObject(eventContent);
@@ -196,13 +195,9 @@ public class CEPRuleMQ {
                 context.set(key, event.get(key));
             }
             // Create an expression  "a>10"
-            String jexlExp = condition;
-           if(jexl.createExpression(jexlExp).evaluate(context).equals(true)){
-               flag=true;
-           }
+            return (Boolean)jexl.createExpression(condition).evaluate(context);
         }
-
-        return flag;
+        return Boolean.FALSE;
     }
 
 }
