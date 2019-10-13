@@ -22,9 +22,9 @@
         <!--jdbc的数据库连接 -->
         <jdbcConnection
                 driverClass="com.mysql.jdbc.Driver"
-                connectionURL="jdbc:mysql://127.0.0.1:3306/cep"
+                connectionURL="jdbc:mysql://182.254.159.91:3306/cep"
                 userId="root"
-                password="123456">
+                password="WeEvent@2019">
         </jdbcConnection>
 
         <!-- java类型处理器
@@ -80,7 +80,8 @@
                 3，XMLMAPPER：会生成Mapper接口，接口完全依赖XML；
             注意，如果context是MyBatis3Simple：只支持ANNOTATEDMAPPER和XMLMAPPER
         -->
-        <javaClientGenerator targetPackage="com.webank.weevent.processor.mapper" type="XMLMAPPER" targetProject="src/main/java">
+        <javaClientGenerator targetPackage="com.webank.weevent.processor.mapper" type="XMLMAPPER"
+                             targetProject="src/main/java">
             <!-- 在targetPackage的基础上，根据数据库的schema再生成一层package，最终生成的类放在这个package下，默认为false -->
             <property name="enableSubPackages" value="true"/>
         </javaClientGenerator>

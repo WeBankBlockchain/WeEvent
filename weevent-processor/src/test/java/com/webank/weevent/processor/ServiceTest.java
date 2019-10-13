@@ -1,9 +1,6 @@
 package com.webank.weevent.processor;
 
-
-import com.webank.weevent.processor.mapper.CEPRuleMapper;
 import com.webank.weevent.processor.model.CEPRule;
-import com.webank.weevent.processor.service.CEPRuleService;
 import com.webank.weevent.processor.service.CEPRuleServiceImpl;
 
 import com.alibaba.fastjson.JSONObject;
@@ -25,7 +22,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -212,7 +208,7 @@ public class ServiceTest {
     }
 
     @Test
-    public void insertNullRule400() throws Exception{
+    public void insertNullRule400() throws Exception {
         String url = "/insert";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON);
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
