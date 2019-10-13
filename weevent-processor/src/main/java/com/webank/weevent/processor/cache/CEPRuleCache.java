@@ -22,7 +22,7 @@ import java.util.concurrent.ScheduledExecutorService;
 @Slf4j
 public class CEPRuleCache {
 //    private static Map<String, CEPRule> ruleMap = new ConcurrentHashMap<>();
-    private static List<String> idList = new ArrayList<>();;
+    private static List<String> idList = new ArrayList<>();
 
     private static ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     // block data cached in redis
