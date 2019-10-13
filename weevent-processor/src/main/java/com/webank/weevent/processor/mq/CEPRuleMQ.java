@@ -142,7 +142,6 @@ public class CEPRuleMQ {
                         // select the field and publish the message to the toDestination
                         try {
                             if (entry.getValue().getConditionType().equals(1)) {
-                                // :TODO select the field
                                 // publish the message
                                 log.info("publish topic {}", entry.getValue().getSelectField());
                                 client.publish(entry.getValue().getToDestination(), content.getBytes());
