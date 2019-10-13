@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.processor.model.CEPRule;
-import com.webank.weevent.processor.utils.Constants;
 import com.webank.weevent.processor.utils.Util;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
@@ -83,7 +82,6 @@ public class CEPRuleMQ {
 
     private static void sendMessageToDB(String content, CEPRule rule) {
         JSONObject eventContent = JSONObject.parseObject(content);
-        JSONObject payloadParams = JSONObject.parseObject(rule.getPayload());
         try {
             Connection conn = Util.getConnection(rule.getDatabaseUrl());
 

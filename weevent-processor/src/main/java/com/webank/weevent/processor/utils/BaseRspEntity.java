@@ -1,7 +1,5 @@
 package com.webank.weevent.processor.utils;
 
-import lombok.Value;
-
 /**
  * Entity class of response info.
  */

@@ -5,7 +5,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -23,8 +22,8 @@ public class Util {
     /**
      * check the database url
      *
-     * @param databaseUrl
-     * @return
+     * @param databaseUrl data bae url
+     * @return connection
      */
 
     public static Connection getConnection(String databaseUrl) {
@@ -89,26 +88,22 @@ public class Util {
         if (strUrlParam == null) {
             return mapRequest;
         }
-        //每个键值为一组 www.2cto.com
         arrSplit = strUrlParam.split("[&]");
         for (String strSplit : arrSplit) {
             String[] arrSplitEqual = null;
             arrSplitEqual = strSplit.split("[=]");
 
-            //解析出键值
             if (arrSplitEqual.length > 1) {
-                //正确解析
                 mapRequest.put(arrSplitEqual[0], arrSplitEqual[1]);
 
             } else {
-                if (arrSplitEqual[0] != "") {
+                if (!arrSplitEqual[0].equals("")) {
                     mapRequest.put(arrSplitEqual[0], "");
                 }
             }
         }
         return mapRequest;
     }
-
 
 
     public static List<String> getKeys(String objJson) {
@@ -172,7 +167,6 @@ public class Util {
     }
 
     public static Map<String, Integer> contactsql(String content, String objJson) {
-        boolean tag = true;
         Map<String, Integer> sql = new HashMap<>();
         if (!StringUtils.isEmpty(content)
                 && !StringUtils.isEmpty(objJson)) {
@@ -188,7 +182,6 @@ public class Util {
     }
 
 
-
     /**
      * check the pattern of url
      *
@@ -196,15 +189,14 @@ public class Util {
      * @return true false
      */
     private static Boolean isHttpUrl(String urls) {
-        boolean isurl = false;
         String regex = "(((https|http)?://)?([a-z0-9]+[.])|(www.))"
                 + "\\w+[.|\\/]([a-z0-9]{0,})?[[.]([a-z0-9]{0,})]+((/[\\S&&[^,;\u4E00-\u9FA5]]+)+)?([.][a-z0-9]{0,}+|/?)";//设置正则表达式
 
         Pattern pat = Pattern.compile(regex.trim());
         Matcher mat = pat.matcher(urls.trim());
-        isurl = mat.matches();
-        if (isurl) {
-            return true;
+        if (mat.matches()) {
+            boolean temp = true;
+            return temp;
         } else {
             return false;
         }

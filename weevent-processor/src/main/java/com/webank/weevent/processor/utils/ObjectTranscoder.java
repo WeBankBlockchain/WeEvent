@@ -7,11 +7,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 public class ObjectTranscoder {
+
+    private static ObjectTranscoder obj = new ObjectTranscoder();
+
     private ObjectTranscoder() {
 
     }
-
-    private static ObjectTranscoder obj = new ObjectTranscoder();
 
     public static ObjectTranscoder getInstance() {
         return obj;

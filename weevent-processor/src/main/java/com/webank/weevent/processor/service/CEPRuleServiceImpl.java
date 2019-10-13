@@ -1,7 +1,6 @@
 package com.webank.weevent.processor.service;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -30,6 +29,8 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 @Slf4j
 @Service
 public class CEPRuleServiceImpl implements CEPRuleService {
+    //  generator the id
+    private volatile int guid = 100;
 
     @Override
     public List<CEPRule> getCEPRuleListByPage(int currPage, int pageSize) {
@@ -40,7 +41,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
     }
 
     @Autowired
-    CEPRuleMapper cepRuleMapper;
+    private CEPRuleMapper cepRuleMapper;
 
 
     @Override
@@ -85,7 +86,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
     public RetCode setCEPRule(CEPRule rule) {
         // check all the field
         try {
-            if (!checkField(rule).getErrorMsg().equals("success")) {
+            if (!(checkField(rule)).getErrorMsg().equals("success")) {
                 return Constants.FAIL;
             }
 
@@ -175,7 +176,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         return record.getId();
     }
 
-    static boolean isJSONValid(String test) {
+    private static boolean isJSONValid(String test) {
         try {
             JSONObject.parseObject(test);
         } catch (JSONException ex) {
@@ -193,7 +194,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
      * check  ruleName、payloay、selectField、conditionField、conditionType、fromDestination、toDestination、databaseUrl
      *
      * @param record on single record
-     * @return
+     * @return return code and message
      */
     private RetCode checkField(CEPRule record) {
         // checkPayload
@@ -218,14 +219,16 @@ public class CEPRuleServiceImpl implements CEPRuleService {
             } else {
                 // check the topic is exist or not
                 if (record.getConditionType() == 1) {
-                    if (!checkTopic(record.getToDestination(), record.getBrokerUrl())) {
+                    boolean temp = checkTopic(record.getToDestination(), record.getBrokerUrl());
+                    if (!temp) {
                         log.info("the topic is not exist");
                         return Constants.TOPIC_ISNOT_EXIST;
                     }
                 }
                 // check the databaseUrl,check is valid (http://...?account=**&password=**)
                 if (record.getConditionType() == 2) {
-                    if (!checkDatabase(record.getDatabaseUrl())) {
+                    boolean temp = checkDatabase(record.getDatabaseUrl());
+                    if (!temp) {
                         log.info("database url is wrong");
                         return Constants.URL_ISNOT_VALID;
                     }
@@ -240,7 +243,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            return null;
+            return Constants.FAIL;
         }
         return Constants.SUCCESS;
     }
@@ -250,7 +253,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
      *
      * @param databaseUrl database url
      * @return true/false
-     * @throws SQLException
+     * @throws SQLException check connect db
      */
     private Boolean checkDatabase(String databaseUrl) throws SQLException {
         boolean connectUrl = false;
@@ -284,9 +287,6 @@ public class CEPRuleServiceImpl implements CEPRuleService {
     }
 
 
-    //  generator the id
-    private volatile int guid = 100;
-
     private String getGuid() {
         guid += 1;
         long now = System.currentTimeMillis();
@@ -308,10 +308,9 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         // update rule map
         if (rule.getStatus() == 2) {
             CEPRuleCache.deleteCEPRuleById(rule);
-        } else if (handleType.equals("start") && rule.getStatus() == 1) {
+        } else if ("start".equals(handleType) && rule.getStatus() == 1) {
             // start situation can update the rule
             CEPRuleCache.addOrUpdateCEPRule(rule);
         }
-
     }
 }

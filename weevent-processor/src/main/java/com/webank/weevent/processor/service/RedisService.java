@@ -9,8 +9,6 @@ import com.webank.weevent.processor.utils.ObjectTranscoder;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
