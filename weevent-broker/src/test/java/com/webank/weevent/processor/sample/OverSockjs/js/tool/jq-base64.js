@@ -25,7 +25,7 @@ jQuery.base64 = ( function( $ ) {
         if(ch < 0x80) {
             y.shift();
             x.push(String.fromCharCode(ch));
-        }else if((ch & 0x80) == 0xc0){
+        }else if((ch & 0x80) === 0xc0){
             if(y.length < 2) break;
             ch = y.shift();
             var ch1 = y.shift();

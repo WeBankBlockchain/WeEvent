@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs>
+    <style>
+      .cls-1 {
+        opacity: 0.8;
+      }
+
+      .cls-2 {
+        fill: none;
+      }
+
+      .cls-3 {
+        fill: #3a86f2;
+      }
+
+      .cls-4 {
+        fill: #1b5ebf;
+      }
+
+      .cls-5 {
+        fill: #599dff;
+      }
+    </style>
+  </defs>
+  <g id="banner-icon2" class="cls-1" transform="translate(27 3.537)">
+    <rect id="矩形_57" data-name="矩形 57" class="cls-2" width="120" height="120" transform="translate(-27 -3.537)"/>
+    <g id="组_196" data-name="组 196" transform="translate(-4.729 -3.537)">
+      <g id="组_133" data-name="组 133" transform="translate(14.876 53.183)">
+        <path id="路径_400" data-name="路径 400" class="cls-3" d="M25.122,36.68l-.087,29.3L10.26,74.566l.087-29.3Z" transform="translate(-10.26 -36.68)"/>
+      </g>
+      <g id="组_134" data-name="组 134" transform="translate(0 53.183)">
+        <path id="路径_401" data-name="路径 401" class="cls-4" d="M14.963,45.263l-.087,29.3L0,65.983l.087-29.3Z" transform="translate(0 -36.68)"/>
+      </g>
+      <g id="组_135" data-name="组 135" transform="translate(0.087 44.599)">
+        <path id="路径_402" data-name="路径 402" class="cls-5" d="M29.711,39.343,14.936,47.927.06,39.343,14.835,30.76Z" transform="translate(-0.06 -30.76)"/>
+      </g>
+      <g id="组_136" data-name="组 136" transform="translate(37.161 8.583)">
+        <path id="路径_403" data-name="路径 403" class="cls-3" d="M40.651,5.92,40.4,93.842,25.63,102.426l.246-87.908Z" transform="translate(-25.63 -5.92)"/>
+      </g>
+      <g id="组_137" data-name="组 137" transform="translate(22.285 8.583)">
+        <path id="路径_404" data-name="路径 404" class="cls-4" d="M30.493,14.518l-.246,87.908L15.37,93.842,15.631,5.92Z" transform="translate(-15.37 -5.92)"/>
+      </g>
+      <g id="组_138" data-name="组 138" transform="translate(22.546)">
+        <path id="路径_405" data-name="路径 405" class="cls-5" d="M45.186,8.583l-14.775,8.6L15.55,8.583,30.325,0Z" transform="translate(-15.55)"/>
+      </g>
+      <g id="组_139" data-name="组 139" transform="translate(60.244 67.232)">
+        <path id="路径_406" data-name="路径 406" class="cls-3" d="M56.455,46.37l-.13,43.947-14.775,8.6.116-43.961Z" transform="translate(-41.55 -46.37)"/>
+      </g>
+      <g id="组_140" data-name="组 140" transform="translate(45.368 67.232)">
+        <path id="路径_407" data-name="路径 407" class="cls-4" d="M46.282,54.953l-.116,43.961-14.876-8.6.13-43.947Z" transform="translate(-31.29 -46.37)"/>
+      </g>
+      <g id="组_141" data-name="组 141" transform="translate(45.498 58.634)">
+        <path id="路径_408" data-name="路径 408" class="cls-5" d="M61.031,49.038,46.242,57.621,31.38,49.038l14.775-8.6Z" transform="translate(-31.38 -40.44)"/>
+      </g>
+    </g>
+  </g>
+</svg>
