@@ -1,23 +1,24 @@
-package com.webank.weevent.governance.entity;
+package com.webank.weevent.governance.vo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weevent.governance.entity.RuleEngineConditionEntity;
 import com.webank.weevent.governance.entity.base.BaseEntity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * RuleEngineEntity class
+ * RuleEngineVo class
  *
- * @since 2019/09/23
+ * @since 2019/10/14
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class RuleEngineEntity extends BaseEntity {
+public class RuleEngineVo extends BaseEntity {
 
     private String ruleName;
     /**
@@ -65,6 +66,16 @@ public class RuleEngineEntity extends BaseEntity {
     private String errorDestination;
 
     private String errorMessage;
+
+    private Integer pageSize;
+
+    private Integer pageNumber;
+
+    private Integer startIndex;
+
+    private Integer endIndex;
+
+    private Integer totalCount;
 
     private List<RuleEngineConditionEntity> ruleEngineConditionList = new ArrayList<>();
 }

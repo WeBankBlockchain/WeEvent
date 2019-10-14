@@ -35,10 +35,10 @@
             useGeneratedKeys="true" keyProperty="id">
         insert into t_rule_engine(rule_name, payload_type, payload, broker_id, broker_url, user_id, cep_id,
                                   from_destination, to_destination, select_field,
-                                  condition_field, condition_type, status, group_id)
+                                  condition_field, condition_type, status, group_id, error_message)
         values (#{ruleName}, #{payloadType}, #{payload}, #{brokerId}, #{brokerUrl}, #{userId}, #{cepId},
                 #{fromDestination}, #{toDestination}, #{selectField},
-                #{conditionField}, #{conditionType}, #{status}, #{groupId})
+                #{conditionField}, #{conditionType}, #{status}, #{groupId}, #{errorMsg})
     </insert>
 
     <select id="getRuleEngines" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
@@ -47,6 +47,28 @@
         <include refid="Base_Column_List"/>
         from t_rule_engine where status!=2
         <include refid="ruleEngineWhere"/>
+    </select>
+
+    <select id="getRuleEnginePage" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from t_rule_engine where status!=2
+        <if test="ruleEngineEntity.id != null">
+            and id = #{ruleEngineEntity.id,jdbcType=INTEGER}
+        </if>
+        <if test="ruleEngineEntity.userId != null">
+            and user_id = #{ruleEngineEntity.userId,jdbcType=INTEGER}
+        </if>
+        <if test="ruleEngineEntity.groupId != null">
+            and group_id = #{ruleEngineEntity.groupId,jdbcType=VARCHAR}
+        </if>
+        <if test="ruleEngineEntity.brokerId != null">
+            and broker_id = #{ruleEngineEntity.brokerId,jdbcType=INTEGER}
+        </if>
+        <if test="ruleEngineEntity.ruleName != null and ruleEngineEntity.ruleName!=''">
+            and rule_name = #{ruleEngineEntity.ruleName,jdbcType=VARCHAR}
+        </if>
         <if test="startIndex != null and endIndex!=null">
             limit #{startIndex},#{endIndex}
         </if>

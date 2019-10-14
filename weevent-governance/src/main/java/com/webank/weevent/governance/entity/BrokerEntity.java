@@ -27,7 +27,6 @@ public class BrokerEntity extends BaseEntity {
     @URL
     private String brokerUrl;
 
-    @URL
     private String webaseUrl;
 
     private List<Integer> userIdList;

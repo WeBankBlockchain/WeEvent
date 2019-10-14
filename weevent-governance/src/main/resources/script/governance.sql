@@ -35,7 +35,7 @@ CREATE TABLE  t_topic (
   `group_id` varchar(64) DEFAULT NULL COMMENT 'group id',
   `description` varchar(256)  NULL  DEFAULT NULL COMMENT 'description',
    PRIMARY KEY (`id`),
-   UNIQUE KEY `brokerIdTopicNameGroupId` (`broker_id`,`topic_name`,`groupId`)
+   UNIQUE KEY `brokerIdTopicNameGroupId` (`broker_id`,`topic_name`,`group_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment 't_topic';
 
 
@@ -79,5 +79,17 @@ CREATE TABLE `t_circulation_database` (
   `user_id` varchar(256) DEFAULT NULL COMMENT 'user id',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='t_circulation_database';
+
+CREATE TABLE `t_rule_engine_condition` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
+  `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create date',
+  `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update date',
+  `rule_id` int(64) DEFAULT NULL COMMENT 'rule id',
+  `connection_operator` varchar(10) DEFAULT NULL COMMENT 'database connection operator;(and ,or)',
+  `conditional_operator` varchar(10) DEFAULT NULL COMMENT 'database conditional operator;(>,<,= etc)',
+  `column_name` varchar(64) DEFAULT NULL COMMENT 'broker id',
+  `sql_condition` varchar(128) DEFAULT NULL COMMENT 'user id',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='t_rule_engine_condition';
 
 

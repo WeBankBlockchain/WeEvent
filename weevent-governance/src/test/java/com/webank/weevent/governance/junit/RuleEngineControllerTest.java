@@ -4,7 +4,6 @@ package com.webank.weevent.governance.junit;
 import javax.servlet.http.Cookie;
 
 import com.webank.weevent.governance.JUnitTestBase;
-import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.result.GovernanceResult;
 
@@ -54,64 +53,67 @@ public class RuleEngineControllerTest extends JUnitTestBase {
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(), GovernanceResult.class);
-        Assert.assertEquals(governanceResult.getStatus().intValue(), ErrorCode.SUCCESS.getCode());
+        Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
     }
 
     @Test
     public void testGetRuleEngines() throws Exception {
-        String content = "{\"id\":\"1\",\"userId\":\"1\",\"brokerId\":\"1\",\"pageNumber\":\"1\",\"pageSize\":\"10\"}";
+        String content = "{\"userId\":\"1\",\"brokerId\":\"1\",\"pageNumber\":\"1\",\"pageSize\":\"10\"}";
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/list").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content))
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(), GovernanceResult.class);
-        Assert.assertEquals(governanceResult.getStatus().intValue(), ErrorCode.SUCCESS.getCode());
+        Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
     }
 
     @Test
     public void testGetRuleEngineDetail() throws Exception {
-        String content = "{\"id\":\"1\",\"userId\":\"1\",\"brokerId\":\"1\",\"pageNumber\":\"1\",\"pageSize\":\"10\"}";
+        String content = "{\"userId\":\"1\",\"brokerId\":\"1\"}";
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/detail").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content))
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(), GovernanceResult.class);
-        Assert.assertEquals(governanceResult.getStatus().intValue(), ErrorCode.SUCCESS.getCode());
+        Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
     }
+
 
     @Test
     public void testUpdateRuleEngine() throws Exception {
-        String content = "{\"id\":\"3\",\"ruleName\":\"temperature-alarm\",\"payloadType\":\"1\"," +
+        String content = "{\"id\":\"28\",\"ruleName\":\"temperature-alarm\",\"payloadType\":\"1\"," +
                 "\"payloadMap\":{\"temperate\":30,\"humidity\":0.5},\"brokerId\":\"1\"," +
-                "\"fromDestination\":\"airCondition\",\"toDestination\":\"test\"," +
+                "\"fromDestination\":\"airCondition11\",\"toDestination\":\"test\"," +
                 "\"selectField\":\"temperate\",\"conditionField\":\"temperate>38\",\"conditionType\":\"1\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/update").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(), GovernanceResult.class);
-        Assert.assertEquals(governanceResult.getStatus().intValue(), ErrorCode.SUCCESS.getCode());
+        Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
     }
+
 
     @Test
-    public void testUpdateRuleEngineStatus() throws Exception {
-        String content = "{\"id\":\"2\",\"status\":\"1\",\"userId\":\"1\",\"brokerId\":\"1\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/updateStatus").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn().getResponse();
-
+    public void testStartEngine() throws Exception {
+        String content = "{\"id\":\"33\",\"userId\":\"1\",\"brokerId\":\"1\"}";
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/start").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content))
+                .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(), GovernanceResult.class);
-        Assert.assertEquals(governanceResult.getStatus().intValue(), ErrorCode.SUCCESS.getCode());
+        Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
     }
+
 
     @Test
     public void testDeleteRuleEngine() throws Exception {
-        String content = "{\"id\":\"3\",\"userId\":\"1\",\"brokerId\":\"1\"}";
+        String content = "{\"id\":\"29\",\"userId\":\"1\",\"brokerId\":\"1\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/delete").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(), GovernanceResult.class);
-        Assert.assertEquals(governanceResult.getStatus().intValue(), ErrorCode.SUCCESS.getCode());
+        Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
     }
 
 

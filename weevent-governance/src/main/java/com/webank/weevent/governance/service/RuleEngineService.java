@@ -15,8 +15,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.code.ErrorCode;
+import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.entity.RuleEngineConditionEntity;
 import com.webank.weevent.governance.entity.RuleEngineEntity;
+import com.webank.weevent.governance.enums.ConditionTypeEnum;
 import com.webank.weevent.governance.enums.PayloadEnum;
 import com.webank.weevent.governance.enums.StatusEnum;
 import com.webank.weevent.governance.exception.GovernanceException;
@@ -26,12 +28,14 @@ import com.webank.weevent.governance.mapper.RuleEngineMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.utils.CookiesTools;
 import com.webank.weevent.governance.utils.NumberValidationUtils;
+import com.webank.weevent.governance.vo.RuleEngineVo;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.helper.StringUtil;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -84,20 +88,23 @@ public class RuleEngineService {
     private String ERROR_MSG = "success";
 
     @SuppressWarnings("unchecked")
-    public List<RuleEngineEntity> getRuleEngines(HttpServletRequest request, RuleEngineEntity ruleEngineEntity) throws GovernanceException {
+    public List<RuleEngineEntity> getRuleEngines(HttpServletRequest request, RuleEngineVo ruleEngineVo) throws GovernanceException {
         try {
             String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-            if (accountId == null || !accountId.equals(ruleEngineEntity.getUserId().toString())) {
+
+            if (accountId == null || !accountId.equals(ruleEngineVo.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
             Calendar calendar = Calendar.getInstance();
+            RuleEngineEntity ruleEngineEntity = new RuleEngineEntity();
+            BeanUtils.copyProperties(ruleEngineVo, ruleEngineEntity);
             int count = ruleEngineMapper.countRuleEngine(ruleEngineEntity);
+            ruleEngineVo.setTotalCount(count);
             List<RuleEngineEntity> ruleEngineEntities = null;
             if (count > 0) {
-                ruleEngineEntity.setStartIndex((ruleEngineEntity.getPageNumber() - 1) * ruleEngineEntity.getPageSize());
-                ruleEngineEntity.setEndIndex(ruleEngineEntity.getPageNumber() * ruleEngineEntity.getPageSize());
-                ruleEngineEntities = ruleEngineMapper.getRuleEngines(ruleEngineEntity);
-                ruleEngineEntities.get(0).setTotalCount(count);
+                int startIndex = (ruleEngineVo.getPageNumber() - 1) * ruleEngineVo.getPageSize();
+                int endIndex = ruleEngineVo.getPageNumber() * ruleEngineVo.getPageSize();
+                ruleEngineEntities = ruleEngineMapper.getRuleEnginePage(ruleEngineEntity, startIndex, endIndex);
                 for (RuleEngineEntity it : ruleEngineEntities) {
                     calendar.setTime(it.getCreateDate());
                     String format = simpleDateFormat.format(calendar.getTime());
@@ -134,18 +141,18 @@ public class RuleEngineService {
             if (ruleEngineEntity.getPayloadType() == null || ruleEngineEntity.getPayloadType() == 0) {
                 ruleEngineEntity.setPayloadType(PayloadEnum.JSON.getCode());
             }
-            //insert ruleEngine
             ruleEngineEntity.setCreateDate(new Date());
             ruleEngineEntity.setLastUpdate(new Date());
+            ruleEngineEntity.setErrorMessage(this.ERROR_MSG);
             //insert processor
-            /*BrokerEntity broker = brokerMapper.getBroker(ruleEngineEntity.getBrokerId());
+            BrokerEntity broker = brokerMapper.getBroker(ruleEngineEntity.getBrokerId());
             ruleEngineEntity.setBrokerUrl(broker.getBrokerUrl());
             String url = new StringBuffer(this.getProcessorUrl(broker.getBrokerUrl())).append(ConstantProperties.PROCESSOR_INSERT).toString();
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(ruleEngineEntity));
 
             //deal process result
             int statusCode = closeResponse.getStatusLine().getStatusCode();
-            if (ErrorCode.SUCCESS.getCode() != statusCode) {
+            if (200 != statusCode) {
                 log.error(ErrorCode.PROCESS_CONNECT_ERROR.getCodeDesc());
                 throw new GovernanceException(ErrorCode.PROCESS_CONNECT_ERROR);
             }
@@ -153,11 +160,13 @@ public class RuleEngineService {
             JSONObject jsonObject = JSONObject.parseObject(mes);
             Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
             if (this.PROCESSOR_SUCCESS_CODE != code) {
-                log.error("broker start ruleEngine fail");
-                throw new GovernanceException("broker start ruleEngine fail");
+                String msg = jsonObject.get("errorMsg").toString();
+                log.error("processor start ruleEngine fail! {}", msg);
+                throw new GovernanceException("processor start ruleEngine fail " + msg);
             }
             String cepId = jsonObject.get("data").toString();
-            ruleEngineEntity.setCepId(cepId);*/
+            ruleEngineEntity.setCepId(cepId);
+            //insert ruleEngine
             ruleEngineMapper.addRuleEngine(ruleEngineEntity);
             return ruleEngineEntity;
         } catch (Exception e) {
@@ -178,8 +187,8 @@ public class RuleEngineService {
             if (engineEntity.getStatus() != StatusEnum.NOT_STARTED.getCode()) {
                 throw new GovernanceException("only unstarted data can be deleted");
             }
-
-          /*  BrokerEntity broker = brokerService.getBroker(ruleEngines.get(0).getBrokerId());
+            ruleEngineEntity.setStatus(StatusEnum.IS_DELETED.getCode());
+            BrokerEntity broker = brokerService.getBroker(ruleEngines.get(0).getBrokerId());
             String brokerUrl = broker.getBrokerUrl();
             String deleteUrl = new StringBuffer(this.getProcessorUrl(brokerUrl)).append(ConstantProperties.PROCESSOR_DELETE_CEP_RULE).append(ConstantProperties.QUESTION_MARK)
                     .append("id=").append(engineEntity.getCepId()).toString();
@@ -187,7 +196,7 @@ public class RuleEngineService {
 
             //deal processor result
             int statusCode = closeResponse.getStatusLine().getStatusCode();
-            if (ErrorCode.SUCCESS.getCode() != statusCode) {
+            if (200 != statusCode) {
                 log.error(ErrorCode.PROCESS_CONNECT_ERROR.getCodeDesc());
                 throw new GovernanceException(ErrorCode.PROCESS_CONNECT_ERROR);
             }
@@ -195,15 +204,15 @@ public class RuleEngineService {
             JSONObject jsonObject = JSONObject.parseObject(mes);
             Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
             if (this.PROCESSOR_SUCCESS_CODE != code) {
-                log.error("broker delete ruleEngine fail");
-                throw new GovernanceException("broker delete ruleEngine fail");
-            }*/
+                String msg = jsonObject.get("errorMsg").toString();
+                log.error("processor delete ruleEngine fail ! {}", msg);
+                throw new GovernanceException("processor delete ruleEngine fail " + msg);
+            }
             //delete RuleEngineCondition
             RuleEngineConditionEntity ruleEngineConditionEntity = new RuleEngineConditionEntity();
             ruleEngineConditionEntity.setRuleId(ruleEngineEntity.getId());
             ruleEngineConditionMapper.deleteRuleEngineCondition(ruleEngineConditionEntity);
             //delete RuleEngine
-            ruleEngineEntity.setStatus(StatusEnum.IS_DELETED.getCode());
             return ruleEngineMapper.deleteRuleEngine(ruleEngineEntity);
         } catch (Exception e) {
             log.error("delete ruleEngineEntity fail", e);
@@ -230,25 +239,29 @@ public class RuleEngineService {
 
             //check databaseUrl
             commonService.checkDataBaseUrl(ruleEngineEntity.getDatabaseUrl());
-            //如果selectField为空的情况，conditionList不为空的情况
+            //If the selectField is empty, the conditionList is not empty.
             List<RuleEngineConditionEntity> ruleEngineConditionList = ruleEngineEntity.getRuleEngineConditionList();
-
             String selectField = getSelectField(ruleEngineEntity);
             String conditionField = getConditionField(ruleEngineConditionList);
             ruleEngineEntity.setSelectField(selectField);
             ruleEngineEntity.setConditionField(conditionField);
-            //updateCEPRuleById
+            //
             String cepId = rule.getCepId();
-            String url = new StringBuffer(this.getProcessorUrl(ruleEngineEntity.getBrokerUrl())).append(ConstantProperties.PROCESSOR_UPDATE_CEP_RULE).toString();
+            BrokerEntity broker = brokerMapper.getBroker(rule.getBrokerId());
+            ruleEngineEntity.setBrokerUrl(broker.getBrokerUrl());
+            String url = new StringBuffer(this.getProcessorUrl(broker.getBrokerUrl())).append(ConstantProperties.PROCESSOR_UPDATE_CEP_RULE).toString();
             String jsonString = JSONObject.toJSONString(ruleEngineEntity);
             Map map = JSONObject.parseObject(jsonString, Map.class);
             map.put("id", cepId);
             map.put("updatedTime", rule.getLastUpdate());
+            map.put("createdTime", rule.getCreateDate());
+
+            //updateCEPRuleById
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(map));
 
             //deal processor result
             int statusCode = closeResponse.getStatusLine().getStatusCode();
-            if (ErrorCode.SUCCESS.getCode() != statusCode) {
+            if (200 != statusCode) {
                 log.error(ErrorCode.PROCESS_CONNECT_ERROR.getCodeDesc());
                 throw new GovernanceException(ErrorCode.PROCESS_CONNECT_ERROR);
             }
@@ -257,8 +270,8 @@ public class RuleEngineService {
             JSONObject jsonObject = JSONObject.parseObject(mes);
             Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
             if (this.PROCESSOR_SUCCESS_CODE != code) {
-                log.error("broker start ruleEngine fail");
-                throw new GovernanceException("broker start ruleEngine fail");
+                log.error("processor start ruleEngine fail");
+                throw new GovernanceException("processor start ruleEngine fail");
             }
             //delete old ruleEngineConditionEntity
             RuleEngineConditionEntity ruleEngineConditionEntity = new RuleEngineConditionEntity();
@@ -288,10 +301,10 @@ public class RuleEngineService {
             return null;
         }
         String blank = " ";
-        StringBuffer buffer = new StringBuffer("where 1=1").append(blank);
+        StringBuffer buffer = new StringBuffer(blank);
         for (RuleEngineConditionEntity entity : ruleEngineConditionList) {
             buffer.append(entity.getConnectionOperator()).append(blank).append(entity.getColumnName()).append(blank)
-                    .append(entity.getConditionalOperator()).append(blank).append(entity.getSqlCondition());
+                    .append(entity.getConditionalOperator()).append(blank).append(entity.getSqlCondition()).append(blank);
         }
         return buffer.toString();
     }
@@ -300,8 +313,9 @@ public class RuleEngineService {
         if (!StringUtil.isBlank(ruleEngineEntity.getSelectField())) {
             return ruleEngineEntity.getSelectField();
         }
-        Map<String, Object> map = ruleEngineEntity.getPayloadMap();
-        Set<String> set = map.keySet();
+        String payload = ruleEngineEntity.getPayload();
+        JSONObject jsonObject = JSONObject.parseObject(payload);
+        Set<String> set = jsonObject.keySet();
         return String.join(",", set);
     }
 
@@ -314,6 +328,7 @@ public class RuleEngineService {
     }
 
     @Transactional(rollbackFor = Throwable.class)
+    @SuppressWarnings("unchecked")
     public boolean startRuleEngine(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         RuleEngineEntity rule = new RuleEngineEntity();
@@ -323,41 +338,89 @@ public class RuleEngineService {
             rule.setStatus(StatusEnum.NOT_STARTED.getCode());
             List<RuleEngineEntity> ruleEngines = ruleEngineMapper.getRuleEngines(rule);
             if (CollectionUtils.isEmpty(ruleEngines)) {
-                throw new GovernanceException("the data is not exists");
+                throw new GovernanceException("the data is not non-start state");
             }
+
+            //set required fields
             rule = ruleEngines.get(0);
             rule.setErrorMessage(ERROR_MSG);
+            rule.setConditionField(getConditionField(this.getRuleEngineConditionList(rule)));
+            rule.setSelectField(this.getSelectField(rule));
+            BrokerEntity broker = brokerMapper.getBroker(rule.getBrokerId());
+            rule.setBrokerUrl(broker.getBrokerUrl());
+            rule.setStatus(StatusEnum.RUNNING.getCode());
+            //Verify required fields
+            checkRule(rule);
+
+            //to jsonString
+            rule.setLastUpdate(new Date());
             String jsonString = JSONObject.toJSONString(rule);
             Map map = JSONObject.parseObject(jsonString, Map.class);
-            //需要校验非必填字段
-
-
             map.put("id", rule.getCepId());
+            map.put("updatedTime", rule.getLastUpdate());
+            map.put("createdTime", rule.getCreateDate());
             String url = new StringBuffer(this.getProcessorUrl(rule.getBrokerUrl())).append(ConstantProperties.PROCESSOR_START_CEP_RULE).toString();
+
+            //Start the rules engine
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(map));
             int statusCode = closeResponse.getStatusLine().getStatusCode();
-            if (ErrorCode.SUCCESS.getCode() != statusCode) {
+            if (200 != statusCode) {
                 log.error(ErrorCode.PROCESS_CONNECT_ERROR.getCodeDesc());
                 throw new GovernanceException(ErrorCode.PROCESS_CONNECT_ERROR);
             }
-
+            //deal processor result
             String mes = EntityUtils.toString(closeResponse.getEntity());
             JSONObject jsonObject = JSONObject.parseObject(mes);
             Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
+            String msg = jsonObject.get("errorMsg").toString();
             if (this.PROCESSOR_SUCCESS_CODE != code) {
-                log.error("broker start ruleEngine fail");
-                throw new GovernanceException("broker start ruleEngine fail");
+                log.error("processor start ruleEngine fail,error:{}", msg);
+                throw new GovernanceException("processor start ruleEngine fail! " + msg);
             }
 
             //modify status
             RuleEngineEntity engineEntity = new RuleEngineEntity();
             engineEntity.setId(rule.getId());
-            engineEntity.setStatus(StatusEnum.RUNNING.getCode());
+            ruleEngineEntity.setStatus(StatusEnum.RUNNING.getCode());
+            ruleEngineEntity.setLastUpdate(rule.getLastUpdate());
             return ruleEngineMapper.updateRuleEngineStatus(engineEntity);
         } catch (Exception e) {
             log.error("start ruleEngine fail", e);
             throw new GovernanceException("start ruleEngine fail", e);
         }
+    }
+
+    private void checkRule(RuleEngineEntity rule) throws GovernanceException {
+        if (StringUtil.isBlank(rule.getRuleName())) {
+            log.error("the ruleName is empty");
+            throw new GovernanceException("the ruleName is empty");
+        }
+        if (StringUtil.isBlank(rule.getPayload())) {
+            log.error("the payload is empty");
+            throw new GovernanceException("the payload is empty");
+        }
+        if (rule.getConditionType() == null) {
+            log.error("the conditionType is empty");
+            throw new GovernanceException("the conditionType is empty");
+        }
+        if (ConditionTypeEnum.TOPIC.getCode() == rule.getConditionType() && StringUtil.isBlank(rule.getToDestination())) {
+            log.error("the toDestination is empty");
+            throw new GovernanceException("the toDestination is empty");
+        }
+        if (ConditionTypeEnum.DATABASE.getCode() == rule.getConditionType() && StringUtil.isBlank(rule.getDatabaseUrl())) {
+            log.error("the databaseUrl is empty");
+            throw new GovernanceException("the databaseUrl is empty");
+        }
+        if (StringUtil.isBlank(rule.getFromDestination())) {
+            log.error("the fromDestination is empty");
+            throw new GovernanceException("the fromDestination is empty");
+        }
+        if (StringUtil.isBlank(rule.getBrokerUrl())) {
+            log.error("the brokerUrl is empty");
+            throw new GovernanceException("the brokerUrl is empty");
+        }
+
+
     }
 
     @SuppressWarnings("unchecked")
@@ -438,6 +501,13 @@ public class RuleEngineService {
         String ip = brokerUrl.substring(brokerUrl.indexOf("//") + 2, brokerUrl.lastIndexOf(":"));
         return new StringBuffer(commonService.HTTP).append(":").append("//").append(ip).append(":")
                 .append(this.processorPort).append("/weevent").toString();
+    }
+
+    private List<RuleEngineConditionEntity> getRuleEngineConditionList(RuleEngineEntity rule) {
+        RuleEngineConditionEntity ruleEngineConditionEntity = new RuleEngineConditionEntity();
+        ruleEngineConditionEntity.setRuleId(rule.getId());
+        List<RuleEngineConditionEntity> ruleEngineConditionEntities = ruleEngineConditionMapper.ruleEngineConditionList(ruleEngineConditionEntity);
+        return ruleEngineConditionEntities;
     }
 
 }

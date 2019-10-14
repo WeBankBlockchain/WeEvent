@@ -10,10 +10,10 @@ import com.webank.weevent.governance.entity.RuleEngineEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.service.RuleEngineService;
+import com.webank.weevent.governance.vo.RuleEngineVo;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,13 +32,12 @@ public class RuleEngineController {
 
     // get all ruleEngine service
     @PostMapping("/list")
-    public GovernanceResult getRuleEngines(HttpServletRequest request, @RequestBody RuleEngineEntity ruleEngineEntity) throws GovernanceException {
-        log.info("get ruleEngines:{}", ruleEngineEntity);
-        List<RuleEngineEntity> ruleEngines = ruleEngineService.getRuleEngines(request, ruleEngineEntity);
+    public GovernanceResult getRuleEngines(HttpServletRequest request, @RequestBody RuleEngineVo ruleEngineVo) throws GovernanceException {
+        log.info("get ruleEngines:{}", ruleEngineVo);
+        List<RuleEngineEntity> ruleEngines = ruleEngineService.getRuleEngines(request, ruleEngineVo);
 
         GovernanceResult governanceResult = new GovernanceResult(ruleEngines);
-        Integer count = CollectionUtils.isEmpty(ruleEngines) ? 0 : ruleEngines.get(0).getTotalCount();
-        governanceResult.setTotalCount(count);
+        governanceResult.setTotalCount(ruleEngineVo.getTotalCount());
         return governanceResult;
     }
 
@@ -77,7 +76,7 @@ public class RuleEngineController {
     @PostMapping("/start")
     public GovernanceResult startRuleEngine(@RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request,
                                             HttpServletResponse response) throws GovernanceException {
-        log.info("update  ruleEngineStatus service ,status:{}", ruleEngineEntity.getStatus());
+        log.info("update  ruleEngineStatus service ,ruleEngineEntity:{}", ruleEngineEntity);
         boolean flag = ruleEngineService.startRuleEngine(ruleEngineEntity, request, response);
         return new GovernanceResult(flag);
     }
