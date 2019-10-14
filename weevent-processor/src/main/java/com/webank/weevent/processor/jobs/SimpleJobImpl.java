@@ -7,8 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SimpleJobImpl implements SimpleJob {
     @Override
-    public void  execute(ShardingContext shardingContext) {
-        log.info("Thread ID: {},ShardingTotalCount:{},getJobName:{},getShardingItem:{},getShardingParameter:{}",Thread.currentThread().getId(), shardingContext.getShardingTotalCount(), shardingContext.getJobName(), shardingContext.getShardingItem(), shardingContext.getShardingParameter());
+    public void execute(ShardingContext shardingContext) {
+        log.info("Thread ID: {},ShardingTotalCount:{},getJobName:{},getShardingItem:{},getShardingParameter:{}", Thread.currentThread().getId(), shardingContext.getShardingTotalCount(), shardingContext.getJobName(), shardingContext.getShardingItem(), shardingContext.getShardingParameter());
         int shardingItem = shardingContext.getShardingItem();
         switch (shardingItem) {
             case 0:
@@ -29,6 +29,8 @@ public class SimpleJobImpl implements SimpleJob {
             case 5:
                 log.info("55555");
                 break;
+            default:
+                log.info("default");
         }
     }
 
