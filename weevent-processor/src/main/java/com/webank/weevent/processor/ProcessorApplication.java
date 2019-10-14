@@ -30,6 +30,7 @@ public class ProcessorApplication {
 
     public static void main(String[] args) {
         log.info("start processor success");
+       // EmbedZookeeperServer.start(6181);
         SpringApplication.run(ProcessorApplication.class, args);
 
     }
