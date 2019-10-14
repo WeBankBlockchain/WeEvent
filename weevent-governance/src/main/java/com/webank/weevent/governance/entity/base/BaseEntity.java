@@ -22,12 +22,4 @@ public class BaseEntity {
 
     private Date lastUpdate;
 
-  /*  public void setCreateDate(Date createDate) throws ParseException {
-        if (createDate == null) {
-            this.createDate = null;
-            return;
-        }
-        String format = simpleDateFormat.format(createDate);
-        this.createDate = simpleDateFormat.parse(format);
-    }*/
 }

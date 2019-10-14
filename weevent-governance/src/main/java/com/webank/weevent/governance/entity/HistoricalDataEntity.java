@@ -22,6 +22,8 @@ public class HistoricalDataEntity  extends BaseEntity {
 
     private Integer blockNumber;
 
+    private Integer eventCount;
+
     private String eventId;
 
     private Date beginDate;
