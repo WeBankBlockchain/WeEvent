@@ -218,7 +218,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
                 return Constants.CONDITIONTYPE_ISNOT_VALID;
             } else {
                 // check the topic is exist or not
-                if (record.getConditionType() == 1) {
+                if (1 == record.getConditionType()) {
                     boolean temp = checkTopic(record.getToDestination(), record.getBrokerUrl());
                     if (!temp) {
                         log.info("the topic is not exist");
@@ -226,7 +226,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
                     }
                 }
                 // check the databaseUrl,check is valid (http://...?account=**&password=**)
-                if (record.getConditionType() == 2) {
+                if (2 == record.getConditionType()) {
                     boolean temp = checkDatabase(record.getDatabaseUrl());
                     if (!temp) {
                         log.info("database url is wrong");
