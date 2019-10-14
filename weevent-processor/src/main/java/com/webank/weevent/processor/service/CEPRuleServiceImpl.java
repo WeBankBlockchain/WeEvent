@@ -65,8 +65,8 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         if (type == Constants.RULE_STATUS_DELETE) {
             rule.setStatus(Constants.RULE_STATUS_DELETE);// 2 is represent delete status
         }
-        int ret = cepRuleMapper.updateByPrimaryKeySelective(rule);
-        if (ret != Constants.SUCCESS_CODE) {
+        int ret = cepRuleMapper.updateByPrimaryKeySelective(rule); // 1 success
+        if (1 != ret) {
             return Constants.FAIL;
         }
 
@@ -97,8 +97,8 @@ public class CEPRuleServiceImpl implements CEPRuleService {
 
         rule.setStatus(1); //default the status
         // update the db
-        int ret = cepRuleMapper.updateByPrimaryKeySelective(rule);
-        if (ret != Constants.SUCCESS_CODE) {
+        int ret = cepRuleMapper.updateByPrimaryKeySelective(rule); // 1 is success
+        if (1 != ret) {
             return Constants.FAIL;
         }
 
