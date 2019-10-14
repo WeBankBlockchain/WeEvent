@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @Slf4j
@@ -33,17 +34,11 @@ public class HistoricalDataService {
     public Map<String, List<Integer>> historicalDataList(HistoricalDataEntity historicalDataEntity, HttpServletRequest httpRequest,
                                                          HttpServletResponse httpResponse) throws GovernanceException {
         try {
-            if (historicalDataEntity.getEndDate() == null) {
-                historicalDataEntity.setEndDate(new Date());
-            }
             Map<String, List<Integer>> returnMap = new HashMap<>();
-
-            //get begin time
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(historicalDataEntity.getEndDate());
-            calendar.add(Calendar.DATE, -6);
-            historicalDataEntity.setBeginDate(calendar.getTime());
             List<HistoricalDataEntity> historicalDataEntities = historicalDataMapper.historicalDataList(historicalDataEntity);
+            if (CollectionUtils.isEmpty(historicalDataEntities)) {
+                return null;
+            }
             //deal data
             Map<String, List<HistoricalDataEntity>> map = new HashMap<>();
             List<Date> dateList = new ArrayList<>();
