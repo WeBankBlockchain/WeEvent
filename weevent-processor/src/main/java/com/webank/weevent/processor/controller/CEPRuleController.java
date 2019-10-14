@@ -98,8 +98,24 @@ public class CEPRuleController extends BaseController {
         return resEntity;
 
     }
-
     @RequestMapping(value = "/insert", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseRspEntity insert(@RequestBody CEPRule rule) {
+        // insert status must be 0
+        BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
+
+        String ret = cepRuleService.insert(rule);
+        if ("-1".equals(ret)) { //fail
+            resEntity.setErrorCode(Constants.RET_FAIL.getErrorCode());
+            resEntity.setErrorMsg(Constants.RET_FAIL.getErrorMsg());
+        } else {
+            resEntity.setData(ret);
+        }
+
+        return resEntity;
+    }
+
+    @RequestMapping(value = "/insertByParam", method = RequestMethod.POST)
     @ResponseBody
     public BaseRspEntity insert(@Param("ruleName") String ruleName, @Param("createdTime") long createdTime, @Param("updatedTime") long updatedTime) {
         // insert status must be 0
