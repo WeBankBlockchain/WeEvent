@@ -172,7 +172,7 @@ public class AdminRest extends RestHA {
         List<TbBlock> tbBlocks = this.consumer.queryBlockList(queryEntity);
         responseData.setCode(ErrorCode.SUCCESS.getCode());
         responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
-        responseData.setData(tbBlocks.toArray());
+        responseData.setData(tbBlocks);
         responseData.setTotalCount(tbBlocks.size());
         return responseData;
     }

@@ -17,7 +17,7 @@ public class ResponseData<T> {
     /**
      * The generic type result object.
      */
-    private Object data;
+    private T data;
 
     /**
      * The error code.
