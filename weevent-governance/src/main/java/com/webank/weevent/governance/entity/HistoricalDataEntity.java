@@ -1,6 +1,7 @@
 package com.webank.weevent.governance.entity;
 
 import java.util.Date;
+import java.util.List;
 
 import com.webank.weevent.governance.entity.base.BaseEntity;
 
@@ -29,5 +30,7 @@ public class HistoricalDataEntity  extends BaseEntity {
     private Date beginDate;
 
     private Date endDate;
+
+    private List<String> topicList;
 
 }
