@@ -21,4 +21,15 @@ public class ProcessorConfig {
 
     @Value("${redis.server.port:6379}")
     private Integer redisServerPort;
+
+    @Value("${simpleJob.cron:}")
+    private String simpleJobCron;
+
+
+    @Value("${simpleJob.shardingTotalCount:}")
+    private String shardingTotalCount;
+
+    @Value("${simpleJob.shardingItemParameters:}")
+    private String shardingItemParameters;
+
 }

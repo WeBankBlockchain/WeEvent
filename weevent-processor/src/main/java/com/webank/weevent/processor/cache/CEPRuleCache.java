@@ -100,11 +100,10 @@ public class CEPRuleCache {
         if (redisService.readRulesFromRedis(ruleId)!=null) {
             CEPRuleMQ.unSubscribeMsg((CEPRule) redisService.readRulesFromRedis(rule.getId()), CEPRuleMQ.subscriptionIdMap.get(ruleId));
         }
-//        ruleMap.remove(ruleId);
         redisService.deleteRulesToRedis(ruleId);
     }
 
-    public static void updateCEPRule(CEPRule rule) throws BrokerException {
+    private static void updateCEPRule(CEPRule rule) throws BrokerException {
         CEPRuleMQ.updateSubscribeMsg(rule, redisService.readAllRulesFromRedis(idList));
     }
 
