@@ -1,7 +1,5 @@
 package com.webank.weevent.governance.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -28,8 +26,6 @@ public class HistoricalDataService {
     public List<HistoricalDataEntity> historicalDataList(HistoricalDataEntity historicalDataEntity, HttpServletRequest httpRequest,
                                                          HttpServletResponse httpResponse) throws GovernanceException {
         try {
-            List<String> topicList = new ArrayList<>(Arrays.asList("test1","com.weevent.test"));
-            historicalDataEntity.setTopicList(topicList);
             if (historicalDataEntity.getEndDate() == null) {
                 historicalDataEntity.setEndDate(new Date());
             }
