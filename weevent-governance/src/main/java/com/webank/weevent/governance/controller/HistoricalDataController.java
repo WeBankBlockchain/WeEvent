@@ -2,6 +2,7 @@ package com.webank.weevent.governance.controller;
 
 
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,8 +33,8 @@ public class HistoricalDataController {
     public GovernanceResult HistoricalDataList(@RequestBody HistoricalDataEntity historicalDataEntity, HttpServletRequest request,
                                                HttpServletResponse response) throws GovernanceException {
         log.info("get  historicalDataEntity:{} ",historicalDataEntity);
-        List<HistoricalDataEntity> historicalDataEntities = historicalDataService.historicalDataList(historicalDataEntity, request, response);
-        return new GovernanceResult(historicalDataEntities);
+        Map<String, List<Integer>> returnMap = historicalDataService.historicalDataList(historicalDataEntity, request, response);
+        return new GovernanceResult(returnMap);
     }
 
 }
