@@ -30,6 +30,12 @@ dependencies {
     
     // https://mvnrepository.com/artifact/org.apache.commons/commons-jexl3
     compile group: 'org.apache.commons', name: 'commons-jexl3', version: '3.1'
+
+    // https://mvnrepository.com/artifact/com.dangdang/elastic-job-lite-core
+    compile group: 'com.dangdang', name: 'elastic-job-lite-core', version: '2.1.5'
+    
+   // https://mvnrepository.com/artifact/com.dangdang/elastic-job-lite-spring
+    compile group: 'com.dangdang', name: 'elastic-job-lite-spring', version: '2.1.5'
 }
 
 bootJar {
