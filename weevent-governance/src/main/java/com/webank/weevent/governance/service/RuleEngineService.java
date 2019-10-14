@@ -146,7 +146,9 @@ public class RuleEngineService {
             ruleEngineEntity.setErrorMessage(this.ERROR_MSG);
             //insert processor
             BrokerEntity broker = brokerMapper.getBroker(ruleEngineEntity.getBrokerId());
-            ruleEngineEntity.setBrokerUrl(broker.getBrokerUrl());
+            String brokerUrl = new StringBuffer(broker.getBrokerUrl()).append(ConstantProperties.AND_SYMBOL)
+                    .append("groupId=").append(ruleEngineEntity.getGroupId()).toString();
+            ruleEngineEntity.setBrokerUrl(brokerUrl);
             String url = new StringBuffer(this.getProcessorUrl(broker.getBrokerUrl())).append(ConstantProperties.PROCESSOR_INSERT).toString();
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(ruleEngineEntity));
 
@@ -248,7 +250,9 @@ public class RuleEngineService {
             //
             String cepId = rule.getCepId();
             BrokerEntity broker = brokerMapper.getBroker(rule.getBrokerId());
-            ruleEngineEntity.setBrokerUrl(broker.getBrokerUrl());
+            String brokerUrl = new StringBuffer(broker.getBrokerUrl()).append(ConstantProperties.AND_SYMBOL)
+                    .append("groupId=").append(ruleEngineEntity.getGroupId()).toString();
+            ruleEngineEntity.setBrokerUrl(brokerUrl);
             String url = new StringBuffer(this.getProcessorUrl(broker.getBrokerUrl())).append(ConstantProperties.PROCESSOR_UPDATE_CEP_RULE).toString();
             String jsonString = JSONObject.toJSONString(ruleEngineEntity);
             Map map = JSONObject.parseObject(jsonString, Map.class);
@@ -347,7 +351,9 @@ public class RuleEngineService {
             rule.setConditionField(getConditionField(this.getRuleEngineConditionList(rule)));
             rule.setSelectField(this.getSelectField(rule));
             BrokerEntity broker = brokerMapper.getBroker(rule.getBrokerId());
-            rule.setBrokerUrl(broker.getBrokerUrl());
+            String brokerUrl = new StringBuffer(broker.getBrokerUrl()).append(ConstantProperties.AND_SYMBOL)
+                    .append("groupId=").append(ruleEngineEntity.getGroupId()).toString();
+            ruleEngineEntity.setBrokerUrl(brokerUrl);
             rule.setStatus(StatusEnum.RUNNING.getCode());
             //Verify required fields
             checkRule(rule);
