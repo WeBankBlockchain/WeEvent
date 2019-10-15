@@ -409,11 +409,13 @@ public class RuleEngineService {
             log.error("the conditionType is empty");
             throw new GovernanceException("the conditionType is empty");
         }
-        if (ConditionTypeEnum.TOPIC.getCode() == rule.getConditionType() && StringUtil.isBlank(rule.getToDestination())) {
+        boolean flag = ConditionTypeEnum.TOPIC.getCode().intValue() == rule.getConditionType().intValue() && StringUtil.isBlank(rule.getToDestination());
+        if (flag) {
             log.error("the toDestination is empty");
             throw new GovernanceException("the toDestination is empty");
         }
-        if (ConditionTypeEnum.DATABASE.getCode() == rule.getConditionType() && StringUtil.isBlank(rule.getDatabaseUrl())) {
+        flag = ConditionTypeEnum.DATABASE.getCode().intValue() == rule.getConditionType().intValue() && StringUtil.isBlank(rule.getDatabaseUrl());
+        if (flag) {
             log.error("the databaseUrl is empty");
             throw new GovernanceException("the databaseUrl is empty");
         }

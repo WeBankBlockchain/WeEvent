@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import com.webank.weevent.governance.code.ConstantCode;
 import com.webank.weevent.governance.entity.BaseResponse;
 import com.webank.weevent.governance.properties.ConstantProperties;
-import com.webank.weevent.governance.service.BrokerService;
 import com.webank.weevent.governance.service.PermissionService;
 import com.webank.weevent.governance.utils.CookiesTools;
 
@@ -23,9 +22,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UserAuthFilter implements Filter {
-
-    @Autowired
-    private BrokerService brokerService;
 
     @Autowired
     private CookiesTools cookiesTools;

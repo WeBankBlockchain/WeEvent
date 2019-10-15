@@ -48,7 +48,7 @@ CREATE TABLE t_permission (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment 't_permission';
 
-CREATE TABLE `t_rule_engine` (
+CREATE TABLE t_rule_engine (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
   `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create date',
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update date',
@@ -70,7 +70,7 @@ CREATE TABLE `t_rule_engine` (
    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='t_rule_engine';
 
-CREATE TABLE `t_circulation_database` (
+CREATE TABLE t_circulation_database (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
   `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create date',
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update date',
@@ -80,7 +80,7 @@ CREATE TABLE `t_circulation_database` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='t_circulation_database';
 
-CREATE TABLE `t_rule_engine_condition` (
+CREATE TABLE t_rule_engine_condition (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
   `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create date',
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update date',
