@@ -30,9 +30,9 @@ public class HistoricalDataController {
     private HistoricalDataService historicalDataService;
 
     @PostMapping("/list")
-    public GovernanceResult HistoricalDataList(@RequestBody HistoricalDataVo historicalDataVo, HttpServletRequest request,
+    public GovernanceResult historicalDataList(@RequestBody HistoricalDataVo historicalDataVo, HttpServletRequest request,
                                                HttpServletResponse response) throws GovernanceException {
-        log.info("get  historicalDataVo:{} ",historicalDataVo);
+        log.info("get  historicalDataVo:{} ", historicalDataVo);
         Map<String, List<Integer>> returnMap = historicalDataService.historicalDataList(historicalDataVo, request, response);
         return new GovernanceResult(returnMap);
     }

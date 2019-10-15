@@ -27,7 +27,8 @@ public class HistoricalDataTest extends JUnitTestBase {
     private WebApplicationContext wac;
 
     private MockMvc mockMvc;
-    Cookie cookie = new Cookie(ConstantProperties.COOKIE_MGR_ACCOUNT_ID, "1");
+
+    private Cookie cookie = new Cookie(ConstantProperties.COOKIE_MGR_ACCOUNT_ID, "1");
 
 
     @Before
