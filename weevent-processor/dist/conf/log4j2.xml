@@ -9,8 +9,8 @@
         </Console>
 
         <RollingRandomAccessFile name="fileAppender"
-                                 fileName="${logPath}event-broker.log"
-                                 filePattern="${logPath}event-broker.log.%d{yyyy-MM-dd}.%i.log.gz">
+                                 fileName="${logPath}event-processor.log"
+                                 filePattern="${logPath}event-processor.log.%d{yyyy-MM-dd}.%i.log.gz">
             <PatternLayout pattern="%-d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%pid-%tid %t] [%F:%L %M] %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy/>
@@ -21,8 +21,8 @@
     </Appenders>
 
     <Loggers>
-        <root level="info" includeLocation="true">
-            <appender-ref ref="fileAppender"/>
+        <root level="debug" includeLocation="true">
+            <appender-ref ref="console"/>
         </root>
     </Loggers>
 </Configuration>

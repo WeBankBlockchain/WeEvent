@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.processor.model.CEPRule;
+import com.webank.weevent.processor.service.AnalysisWeEventIdService;
+import com.webank.weevent.processor.utils.UrlUtil;
 import com.webank.weevent.processor.utils.Util;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
@@ -39,6 +41,25 @@ public class CEPRuleMQ {
         client.unSubscribe(subscriptionIdMap.get(rule.getId()));
     }
 
+    private static IWeEventClient getClient(CEPRule rule) {
+        try {
+            Map<String, String> mapRequest = UrlUtil.uRLRequest(rule.getBrokerUrl());
+            String baseUrl = UrlUtil.urlPage(rule.getBrokerUrl());
+            IWeEventClient client;
+            if (null != mapRequest.get("groupId")) {
+                //  client = IWeEventClient.build(baseUrl,mapRequest.get("groupId"));
+                client = IWeEventClient.build(baseUrl);
+            } else {
+                client = IWeEventClient.build(baseUrl);
+            }
+            return client;
+        } catch (BrokerException e) {
+            log.info("BrokerException{}", e.toString());
+            return null;
+        }
+
+    }
+
     public static void subscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) {
         try {
             IWeEventClient client = IWeEventClient.build(rule.getBrokerUrl());
@@ -53,15 +74,16 @@ public class CEPRuleMQ {
                         if (Util.checkValidJson(content)) {
                             handleOnEvent(event, client, ruleMap);
                         }
-                    } catch (JSONException e) {
+                        //Analysis WeEventId  to the governance database
+                        AnalysisWeEventIdService.analysisWeEventId(rule, event.getEventId());
+                    } catch (JSONException | BrokerException e) {
                         log.error(e.toString());
                     }
-
                 }
 
                 @Override
                 public void onException(Throwable e) {
-                    log.info("on event:{}",e.toString());
+                    log.info("on event:{}", e.toString());
                 }
             });
             subscriptionIdMap.put(rule.getId(), subscriptionId);
@@ -137,20 +159,20 @@ public class CEPRuleMQ {
                 if (entry.getValue().getConditionType().equals(2)) {
                     sendMessageToDB(content, entry.getValue());
 
-                } else  if (hitRuleEngine(entry.getValue().getPayload(), content, entry.getValue().getConditionField())) {
+                } else if (hitRuleEngine(entry.getValue().getPayload(), content, entry.getValue().getConditionField())) {
 
-                        // select the field and publish the message to the toDestination
-                        try {
-                            if (entry.getValue().getConditionType().equals(1)) {
-                                // publish the message
-                                log.info("publish topic {}", entry.getValue().getSelectField());
-                                client.publish(entry.getValue().getToDestination(), content.getBytes());
-                            }
-                        } catch (BrokerException e) {
-                            log.error(e.toString());
+                    // select the field and publish the message to the toDestination
+                    try {
+                        if (entry.getValue().getConditionType().equals(1)) {
+                            // publish the message
+                            log.info("publish topic {}", entry.getValue().getSelectField());
+                            client.publish(entry.getValue().getToDestination(), content.getBytes());
                         }
+                    } catch (BrokerException e) {
+                        log.error(e.toString());
                     }
                 }
+            }
 
         }
 
@@ -158,7 +180,7 @@ public class CEPRuleMQ {
 
 
     private static boolean hitRuleEngine(String payload, String eventContent, String condition) {
-        if(Util.checkJson(eventContent, payload)){
+        if (Util.checkJson(eventContent, payload)) {
             List<String> eventContentKeys = Util.getKeys(payload);
             JSONObject event = JSONObject.parseObject(eventContent);
             JexlEngine jexl = new JexlBuilder().create();
@@ -168,7 +190,7 @@ public class CEPRuleMQ {
                 context.set(key, event.get(key));
             }
             // Create an expression  "a>10"
-            return (Boolean)jexl.createExpression(condition).evaluate(context);
+            return (Boolean) jexl.createExpression(condition).evaluate(context);
         }
         return Boolean.FALSE;
     }

@@ -26,13 +26,12 @@ import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 @RestController
-public class CEPRuleController extends BaseController {
+public class CEPRuleController{
 
     @Autowired
     private CEPRuleServiceImpl cepRuleService;
 
     @RequestMapping("/getCEPRuleById")
-    @ResponseBody
     public BaseRspEntity getCEPRuleById(@RequestParam(name = "id") String id) {
         BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
         CEPRule cepRule = cepRuleService.selectByPrimaryKey(id);
@@ -42,7 +41,6 @@ public class CEPRuleController extends BaseController {
     }
 
     @RequestMapping("/getCEPRuleByName")
-    @ResponseBody
     public BaseRspEntity getCEPRuleByName(@RequestParam(name = "ruleName") String ruleName) {
         BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
         if (StringUtils.isBlank(ruleName) || ruleName.isEmpty()) {
@@ -57,7 +55,6 @@ public class CEPRuleController extends BaseController {
     }
 
     @RequestMapping("/getCEPRuleListByPage")
-    @ResponseBody
     public BaseRspEntity getCEPRuleListByPage(int currPage, int pageSize) {
         BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
         if (currPage <= 0 || pageSize <= 0 || pageSize > 50) {
@@ -75,9 +72,8 @@ public class CEPRuleController extends BaseController {
         log.info("cepRule:{}", JSONArray.toJSON(cepRule));
         return resEntity;
     }
-
+    // use rule name to get rule list
     @RequestMapping("/getCEPRuleList")
-    @ResponseBody
     public BaseRspEntity getCEPRuleList(@RequestParam(name = "ruleName") String ruleName) {
         BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
         List<CEPRule> cepRule = cepRuleService.getCEPRuleList(ruleName);
@@ -86,6 +82,7 @@ public class CEPRuleController extends BaseController {
         return resEntity;
     }
 
+    // use the rule id to get rule detail
     @RequestMapping(value = "/updateCEPRuleById", method = RequestMethod.POST)
     @ResponseBody
     public BaseRspEntity updateCEPRuleById(@Valid @RequestBody CEPRule rule) {
@@ -98,6 +95,7 @@ public class CEPRuleController extends BaseController {
         return resEntity;
 
     }
+
     @RequestMapping(value = "/insert", method = RequestMethod.POST)
     @ResponseBody
     public BaseRspEntity insert(@RequestBody CEPRule rule) {

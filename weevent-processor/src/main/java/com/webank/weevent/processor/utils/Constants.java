@@ -17,6 +17,9 @@ public class Constants {
     public static RetCode CONDITIONTYPE_ISNOT_VALID = RetCode.mark(270007, "condition type is not valid");
     public static RetCode  RULE_IS_NOT_VALID = RetCode.mark(270008, "rule is not valid");
 
+    public static final String QUESTION_MARK = "?";
+    public static final String AND_SYMBOL = "&";
+    public static final String CONNECTION_SYMBOL = "-";
     public static final String QUALS_TO="=";
     public static final String NOT_QUALS_TO="<>";
     public static final String NOT_QUALS_TO_TWO="!=";
