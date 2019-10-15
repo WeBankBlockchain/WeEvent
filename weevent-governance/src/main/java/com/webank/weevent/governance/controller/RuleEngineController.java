@@ -10,7 +10,6 @@ import com.webank.weevent.governance.entity.RuleEngineEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.service.RuleEngineService;
-import com.webank.weevent.governance.vo.RuleEngineVo;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
