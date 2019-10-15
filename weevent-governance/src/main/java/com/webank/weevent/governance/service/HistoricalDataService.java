@@ -11,9 +11,12 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.webank.weevent.governance.code.ConstantCode;
 import com.webank.weevent.governance.entity.HistoricalDataEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.HistoricalDataMapper;
+import com.webank.weevent.governance.properties.ConstantProperties;
+import com.webank.weevent.governance.utils.CookiesTools;
 import com.webank.weevent.governance.vo.HistoricalDataVo;
 
 import lombok.extern.slf4j.Slf4j;
@@ -30,12 +33,24 @@ public class HistoricalDataService {
     @Autowired
     private HistoricalDataMapper historicalDataMapper;
 
+    @Autowired
+    private PermissionService permissionService;
+
+    @Autowired
+    private CookiesTools cookiesTools;
+
+
     private final static String simpleDateFormat = "YYYY-MM-dd";
 
 
     public Map<String, List<Integer>> historicalDataList(HistoricalDataVo historicalDataVo, HttpServletRequest httpRequest,
                                                          HttpServletResponse httpResponse) throws GovernanceException {
         try {
+            String accountId = cookiesTools.getCookieValueByName(httpRequest, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
+            Boolean flag = permissionService.verifyPermissions(historicalDataVo.getBrokerId(), accountId);
+            if (!flag) {
+                throw new GovernanceException(ConstantCode.ACCESS_DENIED.getMsg());
+            }
             Map<String, List<Integer>> returnMap = new HashMap<>();
             List<HistoricalDataEntity> historicalDataEntities = historicalDataMapper.historicalDataList(historicalDataVo);
             if (CollectionUtils.isEmpty(historicalDataEntities)) {
@@ -47,8 +62,8 @@ public class HistoricalDataService {
             Date beginDate = historicalDataVo.getBeginDate();
             Date endDate = historicalDataVo.getEndDate();
 
-            historicalDataVo.setBeginDate(DateUtils.parseDate(DateFormatUtils.format(beginDate, simpleDateFormat),simpleDateFormat));
-            historicalDataVo.setEndDate(DateUtils.parseDate(DateFormatUtils.format(endDate, simpleDateFormat),simpleDateFormat));
+            historicalDataVo.setBeginDate(DateUtils.parseDate(DateFormatUtils.format(beginDate, simpleDateFormat), simpleDateFormat));
+            historicalDataVo.setEndDate(DateUtils.parseDate(DateFormatUtils.format(endDate, simpleDateFormat), simpleDateFormat));
             //deal data
             Map<String, List<HistoricalDataEntity>> map = new HashMap<>();
             historicalDataEntities.forEach(it -> {

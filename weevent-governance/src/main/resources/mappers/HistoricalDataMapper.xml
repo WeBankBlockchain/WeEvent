@@ -33,6 +33,12 @@
         <if test="topicName != null">
             AND topic_name=#{topicName}
         </if>
+        <if test="userId != null">
+            AND user_id=#{userId}
+        </if>
+        <if test="brokerId != null">
+            AND broker_id=#{brokerId}
+        </if>
         <if test="topicList != null and topicList.size()>0">
             and topic_name in
             <foreach collection="topicList" item="topic" open="(" separator="," close=")">

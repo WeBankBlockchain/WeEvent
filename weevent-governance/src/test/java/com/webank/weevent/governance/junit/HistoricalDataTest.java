@@ -46,7 +46,7 @@ public class HistoricalDataTest extends JUnitTestBase {
 
     @Test
     public void testHistoricalDataList() throws Exception {
-        String content = "{\"groupId\":\"1\",\"beginDate\":\"2019-10-08\",\"endDate\":\"2019-10-15\"}";
+        String content = "{\"groupId\":\"1\",\"userId\":\"1\",\"brokerId\":\"1\",\"beginDate\":\"2019-10-08\",\"endDate\":\"2019-10-15\"}";
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/historicalData/list")
                 .contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
