@@ -6,7 +6,13 @@ import java.util.List;
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fabric.config.FabricConfig;
 import com.webank.weevent.broker.fabric.sdk.FabricDelegate;
+import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.plugin.IEventTopic;
+import com.webank.weevent.protocol.rest.entity.GroupGeneral;
+import com.webank.weevent.protocol.rest.entity.QueryEntity;
+import com.webank.weevent.protocol.rest.entity.TbBlock;
+import com.webank.weevent.protocol.rest.entity.TbNode;
+import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.TopicInfo;
@@ -47,7 +53,7 @@ public class FabricTopicAdmin implements IEventTopic {
     public boolean open(String topic, String channelName) throws BrokerException {
         ParamCheckUtils.validateTopicName(topic);
         checkChannelName(channelName);
-        return fabricDelegate.getFabricMap().get(fabricConfig.getChannelName()).createTopic(topic);
+        return fabricDelegate.getFabricMap().get(channelName).createTopic(topic);
     }
 
     @Override
@@ -66,7 +72,9 @@ public class FabricTopicAdmin implements IEventTopic {
 
     @Override
     public WeEvent getEvent(String eventId, String channelName) throws BrokerException {
-        return null;
+        checkChannelName(channelName);
+
+        return fabricDelegate.getFabricMap().get(channelName).getEvent(eventId);
     }
 
     @Override
@@ -74,13 +82,14 @@ public class FabricTopicAdmin implements IEventTopic {
         ParamCheckUtils.validateTopicName(topic);
         checkChannelName(channelName);
 
-        return fabricDelegate.getFabricMap().get(fabricConfig.getChannelName()).isTopicExist(topic);
+        return fabricDelegate.getFabricMap().get(channelName).isTopicExist(topic);
     }
 
     @Override
     public TopicPage list(Integer pageIndex, Integer pageSize, String channelName) throws BrokerException {
         checkChannelName(channelName);
-        return null;
+
+        return fabricDelegate.getFabricMap().get(channelName).listTopicName(pageIndex, pageSize);
     }
 
     @Override
@@ -88,12 +97,43 @@ public class FabricTopicAdmin implements IEventTopic {
         ParamCheckUtils.validateTopicName(topic);
         checkChannelName(channelName);
 
-        return fabricDelegate.getFabricMap().get(fabricConfig.getChannelName()).getTopicInfo(topic);
+        return fabricDelegate.getFabricMap().get(channelName).getTopicInfo(topic);
     }
 
     @Override
     public List<String> listGroupId() {
         return channels;
+    }
+
+    @Override
+    public GroupGeneral getGroupGeneral(String channelName) throws BrokerException {
+        checkChannelName(channelName);
+
+        return fabricDelegate.getFabricMap().get(channelName).getGroupGeneral();
+
+    }
+
+    @Override
+    public List<TbTransHash> queryTransList(QueryEntity queryEntity) throws BrokerException {
+        checkChannelName(queryEntity.getGroupId());
+
+        return fabricDelegate.getFabricMap().get(queryEntity.getGroupId())
+                .queryTransList(queryEntity.getPkHash(), queryEntity.getBlockNumber());
+    }
+
+    @Override
+    public List<TbBlock> queryBlockList(QueryEntity queryEntity) throws BrokerException {
+        checkChannelName(queryEntity.getGroupId());
+
+        return fabricDelegate.getFabricMap().get(queryEntity.getGroupId())
+                .queryBlockList(queryEntity.getPkHash(), queryEntity.getBlockNumber());
+    }
+
+    @Override
+    public List<TbNode> queryNodeList(QueryEntity queryEntity) throws BrokerException {
+        checkChannelName(queryEntity.getGroupId());
+
+        return fabricDelegate.getFabricMap().get(queryEntity.getGroupId()).queryNodeList();
     }
 
     private void checkChannelName(String channelName) throws BrokerException {

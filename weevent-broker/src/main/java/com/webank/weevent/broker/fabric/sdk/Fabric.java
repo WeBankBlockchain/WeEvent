@@ -1,6 +1,7 @@
 package com.webank.weevent.broker.fabric.sdk;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -12,14 +13,23 @@ import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fabric.config.FabricConfig;
 import com.webank.weevent.broker.fabric.dto.TransactionInfo;
 import com.webank.weevent.broker.fabric.util.ChaincodeExecuter;
+import com.webank.weevent.broker.fisco.dto.ListPage;
+import com.webank.weevent.broker.fisco.util.DataTypeUtils;
+import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
+import com.webank.weevent.protocol.rest.entity.GroupGeneral;
+import com.webank.weevent.protocol.rest.entity.TbBlock;
+import com.webank.weevent.protocol.rest.entity.TbNode;
+import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.TopicInfo;
+import com.webank.weevent.sdk.TopicPage;
 import com.webank.weevent.sdk.WeEvent;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.StringUtils;
 import org.hyperledger.fabric.sdk.ChaincodeID;
 import org.hyperledger.fabric.sdk.Channel;
@@ -115,11 +125,48 @@ public class Fabric {
         }
     }
 
-    public void listTopicName(Integer pageIndex, Integer pageSize) throws BrokerException {
+    public TopicPage listTopicName(Integer pageIndex, Integer pageSize) throws BrokerException {
+        TopicPage topicPage = new TopicPage();
+        try {
+            ChaincodeID chaincodeID = FabricSDKWrapper.getChainCodeID(fabricConfig.getTopicControllerName(),
+                    fabricConfig.getTopicControllerVersion());
+            String payload = ChaincodeExecuter.executeTransaction(hfClient, channel, chaincodeID, false,
+                    "listTopicName", String.valueOf(pageIndex), String.valueOf(pageSize));
+            System.out.println("##########################");
+            System.out.println("payload:"+payload);
+            ListPage<String> listPage = JSONObject.parseObject(payload, ListPage.class);
 
+            topicPage.setPageIndex(listPage.getPageIndex());
+            topicPage.setPageSize(listPage.getPageSize());
+            topicPage.setTotal(listPage.getTotal());
+            for (String topic : listPage.getPageData()) {
+                topicPage.getTopicInfoList().add(getTopicInfo(topic));
+            }
+
+            return topicPage;
+        } catch (InterruptedException | ProposalException | ExecutionException | InvalidArgumentException
+                | UnsupportedEncodingException exception) {
+            log.error("list topicName failed due to transaction execution error.{}", exception);
+            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (TimeoutException timeout) {
+            log.error("list topicName failed due to transaction execution timeout. {}", timeout);
+            throw new BrokerException(ErrorCode.TRANSACTION_TIMEOUT);
+        }
     }
 
-    public void getEvent(String eventId) throws BrokerException {
+    public WeEvent getEvent(String eventId) throws BrokerException {
+        ParamCheckUtils.validateEventId("", eventId, getBlockHeight());
+
+        Long blockNum = DataTypeUtils.decodeBlockNumber(eventId);
+        List<WeEvent> events = this.loop(blockNum);
+        for (WeEvent event : events) {
+            if (eventId.equals(event.getEventId())) {
+                log.info("event:{}", event);
+                return event;
+            }
+        }
+
+        throw new BrokerException(ErrorCode.EVENT_ID_NOT_EXIST);
 
     }
 
@@ -189,4 +236,43 @@ public class Fabric {
         return df.format(date);
     }
 
+    public GroupGeneral getGroupGeneral() throws BrokerException {
+
+        try {
+            return FabricSDKWrapper.getGroupGeneral(channel);
+        } catch (ProposalException |InvalidArgumentException e) {
+            log.error("get group general error:{}", e);
+            throw new BrokerException(ErrorCode.FABRICSDK_GETBLOCKINFO_ERROR);
+        }
+    }
+
+    public List<TbTransHash> queryTransList(String transHash, BigInteger blockNumber) throws BrokerException {
+
+        try {
+            return FabricSDKWrapper.queryTransList(channel, transHash, blockNumber);
+        } catch (InvalidArgumentException | ProposalException | DecoderException e) {
+            log.error("query trans list by transHash and blockNum error:{}", e);
+            throw new BrokerException(ErrorCode.FABRICSDK_GETBLOCKINFO_ERROR);
+        }
+    }
+
+    public List<TbBlock> queryBlockList(String transHash, BigInteger blockNumber) throws BrokerException {
+
+        try {
+            return FabricSDKWrapper.queryBlockList(channel, transHash, blockNumber);
+        } catch (InvalidArgumentException | ProposalException | DecoderException e) {
+            log.error("query block list by transHash and blockNum error:{}", e);
+            throw new BrokerException(ErrorCode.FABRICSDK_GETBLOCKINFO_ERROR);
+        }
+    }
+
+    public List<TbNode> queryNodeList() throws BrokerException {
+
+        try {
+            return FabricSDKWrapper.queryNodeList(channel);
+        } catch (InvalidArgumentException | ProposalException | DecoderException e) {
+            log.error("query node list by transHash and blockNum error:{}", e);
+            throw new BrokerException(ErrorCode.FABRICSDK_GETBLOCKINFO_ERROR);
+        }
+    }
 }

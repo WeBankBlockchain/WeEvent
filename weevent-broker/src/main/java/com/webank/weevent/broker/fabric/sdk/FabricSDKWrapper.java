@@ -2,6 +2,7 @@ package com.webank.weevent.broker.fabric.sdk;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,11 +19,19 @@ import java.util.concurrent.TimeoutException;
 import com.webank.weevent.broker.fabric.config.FabricConfig;
 import com.webank.weevent.broker.fabric.dto.TransactionInfo;
 import com.webank.weevent.broker.fabric.util.FabricUser;
+import com.webank.weevent.broker.fisco.util.DataTypeUtils;
+import com.webank.weevent.protocol.rest.entity.GroupGeneral;
+import com.webank.weevent.protocol.rest.entity.TbBlock;
+import com.webank.weevent.protocol.rest.entity.TbNode;
+import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.StringUtils;
 import org.hyperledger.fabric.sdk.BlockEvent;
 import org.hyperledger.fabric.sdk.BlockInfo;
 import org.hyperledger.fabric.sdk.ChaincodeID;
@@ -233,5 +242,77 @@ public class  FabricSDKWrapper {
             log.error("get channel name list failed , e: {}", e);
             throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
         }
+    }
+
+    public static GroupGeneral getGroupGeneral(Channel channel) throws InvalidArgumentException, ProposalException {
+        GroupGeneral groupGeneral = new GroupGeneral();
+        long currentBlockNum = channel.queryBlockchainInfo().getHeight();
+        BlockInfo blockInfo = channel.queryBlockByNumber(currentBlockNum);
+        groupGeneral.setGroupId(channel.getName());
+        groupGeneral.setLatestBlock(BigInteger.valueOf(currentBlockNum - 1));
+        groupGeneral.setNodeCount(channel.getPeers().size());
+        if (blockInfo != null){
+            groupGeneral.setTransactionCount(BigInteger.valueOf(blockInfo.getTransactionCount()));
+        }
+
+        return groupGeneral;
+    }
+
+    public static List<TbTransHash> queryTransList(Channel channel, String transHash, BigInteger blockNumber) throws DecoderException, ProposalException, InvalidArgumentException {
+        List<TbTransHash> tbTransHashes = new ArrayList<>();
+        BlockInfo blockInfo = getBlockInfo(channel, transHash, blockNumber);
+        if (blockInfo != null){
+            TbTransHash tbTransHash = new TbTransHash();
+            tbTransHash.setBlockNumber(BigInteger.valueOf(blockInfo.getBlockNumber()));
+            tbTransHash.setTransHash(Hex.encodeHexString(blockInfo.getDataHash()));
+            tbTransHashes.add(tbTransHash);
+        }
+
+        return tbTransHashes;
+    }
+
+    public static List<TbBlock> queryBlockList(Channel channel, String transHash, BigInteger blockNumber) throws DecoderException, ProposalException, InvalidArgumentException {
+        List<TbBlock> tbBlocks = new ArrayList<>();
+        BlockInfo blockInfo = getBlockInfo(channel, transHash, blockNumber);
+        if (blockInfo != null){
+            TbBlock tbBlock = new TbBlock();
+            tbBlock.setPkHash(Hex.encodeHexString(blockInfo.getDataHash()));
+            tbBlock.setBlockNumber(BigInteger.valueOf(blockInfo.getBlockNumber()));
+            tbBlock.setTransCount(blockInfo.getEnvelopeCount());
+            tbBlocks.add(tbBlock);
+        }
+
+        return tbBlocks;
+    }
+
+    public static List<TbNode> queryNodeList(Channel channel) throws DecoderException, ProposalException, InvalidArgumentException {
+        List<TbNode> tbNodes = new ArrayList<>();
+        BlockInfo blockInfo = getBlockInfo(channel, null, null);
+
+        Collection<Peer> peers = channel.getPeers();
+        for (Peer peer : peers) {
+            TbNode tbNode = new TbNode();
+            tbNode.setGroupId(channel.getName());
+            tbNode.setBlockNumber(BigInteger.valueOf(blockInfo.getBlockNumber()));
+            tbNode.setNodeName(peer.getName());
+            tbNode.setNodeIp(peer.getUrl());
+            tbNodes.add(tbNode);
+        }
+        return tbNodes;
+    }
+
+    private static BlockInfo getBlockInfo(Channel channel, String transHash, BigInteger blockNumber) throws ProposalException, InvalidArgumentException, DecoderException {
+        BlockInfo blockInfo;
+        if (StringUtils.isBlank(transHash) && blockNumber == null) {
+            long currentBlockNum = channel.queryBlockchainInfo(new FabricUser(fabricConfig)).getHeight();
+            blockInfo = channel.queryBlockByNumber(currentBlockNum);
+        } else {
+            if (StringUtils.isNotBlank(transHash)){
+                blockInfo = channel.queryBlockByHash(Hex.decodeHex(transHash));
+            } else {
+                blockInfo = channel.queryBlockByNumber(blockNumber.longValue());
+            }
+        }
+        return blockInfo;
     }
 }

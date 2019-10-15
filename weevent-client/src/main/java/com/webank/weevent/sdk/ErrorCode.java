@@ -143,6 +143,8 @@ public enum ErrorCode {
     UNKNOWN_SOLIDITY_VERSION(200213, "unknown contract version"),
 
     WEB3SDK_RPC_ERROR(200214, "we3sdk's rpc failed"),
+
+    FABRICSDK_GETBLOCKINFO_ERROR(200214, "Fabric 1.4x, get blockInfo error"),
     ;
 
     /**

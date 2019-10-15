@@ -1,14 +1,12 @@
 package com.webank.weevent.broker.fabric;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.BrokerApplication;
-import com.webank.weevent.broker.fisco.dto.SubscriptionInfo;
+import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.task.IBlockChain;
 import com.webank.weevent.broker.task.MainEventLoop;
@@ -205,6 +203,11 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
     }
 
     @Override
+    public Map<String, Object> listSubscription(String groupId) throws BrokerException {
+        return null;
+    }
+
+    @Override
     public boolean isStarted() {
         return this.consumerStarted;
     }
@@ -242,32 +245,32 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
         return true;
     }
 
-    @Override
-    public synchronized Map<String, Object> listSubscription() {
-        Map<String, Object> subscribeIdList = new HashMap<>();
-        for (Map.Entry<String, Subscription> entry : this.subscriptions.entrySet()) {
-            Subscription subscription = entry.getValue();
-            SubscriptionInfo subscriptionInfo = new SubscriptionInfo();
-
-            subscriptionInfo.setInterfaceType(subscription.getInterfaceType());
-            subscriptionInfo.setNotifiedEventCount(subscription.getNotifiedEventCount().toString());
-            subscriptionInfo.setNotifyingEventCount(subscription.getNotifyingEventCount().toString());
-            subscriptionInfo.setNotifyTimeStamp(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(subscription.getNotifyTimeStamp()));
-
-            // Arrays.toString will append plus "[]"
-            if (subscription.getTopics().length == 1) {
-                subscriptionInfo.setTopicName(subscription.getTopics()[0]);
-            } else {
-                subscriptionInfo.setTopicName(Arrays.toString(subscription.getTopics()));
-            }
-
-            subscriptionInfo.setSubscribeId(subscription.getUuid());
-            subscribeIdList.put(subscription.getUuid(), subscriptionInfo);
-        }
-
-        log.debug("subscriptions: {}", this.subscriptions.toString());
-        return subscribeIdList;
-    }
+//    @Override
+//    public synchronized Map<String, Object> listSubscription() {
+//        Map<String, Object> subscribeIdList = new HashMap<>();
+//        for (Map.Entry<String, Subscription> entry : this.subscriptions.entrySet()) {
+//            Subscription subscription = entry.getValue();
+//            SubscriptionInfo subscriptionInfo = new SubscriptionInfo();
+//
+//            subscriptionInfo.setInterfaceType(subscription.getInterfaceType());
+//            subscriptionInfo.setNotifiedEventCount(subscription.getNotifiedEventCount().toString());
+//            subscriptionInfo.setNotifyingEventCount(subscription.getNotifyingEventCount().toString());
+//            subscriptionInfo.setNotifyTimeStamp(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(subscription.getNotifyTimeStamp()));
+//
+//            // Arrays.toString will append plus "[]"
+//            if (subscription.getTopics().length == 1) {
+//                subscriptionInfo.setTopicName(subscription.getTopics()[0]);
+//            } else {
+//                subscriptionInfo.setTopicName(Arrays.toString(subscription.getTopics()));
+//            }
+//
+//            subscriptionInfo.setSubscribeId(subscription.getUuid());
+//            subscribeIdList.put(subscription.getUuid(), subscriptionInfo);
+//        }
+//
+//        log.debug("subscriptions: {}", this.subscriptions.toString());
+//        return subscribeIdList;
+//    }
 
     @Override
     public int getIdleTime() {
@@ -277,6 +280,11 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
     @Override
     public Long getBlockHeight(String channelName) throws BrokerException {
         return fabricDelegate.getBlockHeight(channelName) - 1;
+    }
+
+    @Override
+    public boolean hasBlockEventNotify() {
+        return false;
     }
 
     @Override
