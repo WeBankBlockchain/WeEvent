@@ -144,7 +144,6 @@ public class AdminRest extends RestHA {
         responseData.setCode(ErrorCode.SUCCESS.getCode());
         responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
         responseData.setData(tbTransHashes);
-        responseData.setTotalCount(tbTransHashes == null ? 0 : tbTransHashes.size());
         return responseData;
     }
 
@@ -173,7 +172,6 @@ public class AdminRest extends RestHA {
         responseData.setCode(ErrorCode.SUCCESS.getCode());
         responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
         responseData.setData(tbBlocks);
-        responseData.setTotalCount(tbBlocks.size());
         return responseData;
     }
 
@@ -197,7 +195,6 @@ public class AdminRest extends RestHA {
         responseData.setCode(ErrorCode.SUCCESS.getCode());
         responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
         List<TbNode> tbNodeList = this.consumer.queryNodeList(queryEntity);
-        responseData.setTotalCount(tbNodeList == null ? 0 : tbNodeList.size());
         responseData.setData(tbNodeList);
         return responseData;
     }
