@@ -401,6 +401,14 @@ public class RuleEngineService {
             log.error("the ruleName is empty");
             throw new GovernanceException("the ruleName is empty");
         }
+        if (rule.getUserId() == null) {
+            log.error("the userId is empty");
+            throw new GovernanceException("the userId is empty");
+        }
+        if (rule.getBrokerId() == null) {
+            log.error("the brokerId is empty");
+            throw new GovernanceException("the brokerId is empty");
+        }
         if (StringUtil.isBlank(rule.getPayload())) {
             log.error("the payload is empty");
             throw new GovernanceException("the payload is empty");
