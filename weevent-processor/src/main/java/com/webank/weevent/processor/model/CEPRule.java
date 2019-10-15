@@ -38,8 +38,11 @@ public class CEPRule implements Serializable {
 
     private Date updatedTime;
 
+    private String brokerId;
 
-    public CEPRule(String id, String ruleName, String fromDestination, String brokerUrl, String payload, Integer payloadType, String selectField, String conditionField, Integer conditionType, String toDestination, String databaseUrl, Date createdTime, Integer status, String errorDestination, String errorCode, String errorMessage, Date updatedTime) {
+    private String userId;
+
+    public CEPRule(String id, String ruleName, String fromDestination, String brokerUrl, String payload, Integer payloadType, String selectField, String conditionField, Integer conditionType, String toDestination, String databaseUrl, Date createdTime, Integer status, String errorDestination, String errorCode, String errorMessage, Date updatedTime, String brokerId, String userId) {
         this.id = id;
         this.ruleName = ruleName;
         this.fromDestination = fromDestination;
@@ -57,6 +60,8 @@ public class CEPRule implements Serializable {
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
         this.updatedTime = updatedTime;
+        this.brokerId = brokerId;
+        this.userId = userId;
     }
 
     public CEPRule() {
@@ -197,5 +202,21 @@ public class CEPRule implements Serializable {
 
     public void setUpdatedTime(Date updatedTime) {
         this.updatedTime = updatedTime;
+    }
+
+    public String getBrokerId() {
+        return brokerId;
+    }
+
+    public void setBrokerId(String brokerId) {
+        this.brokerId = brokerId == null ? null : brokerId.trim();
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId == null ? null : userId.trim();
     }
 }

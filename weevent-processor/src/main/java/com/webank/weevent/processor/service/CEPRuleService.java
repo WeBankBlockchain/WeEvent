@@ -26,4 +26,11 @@ public interface CEPRuleService {
     RetCode updateByPrimaryKeySelective(CEPRule record);
 
     int getCountByCondition(CEPRuleExample cEPRuleExample);
+
+
+    List<CEPRule> getRulesByBrokerId(String brokerId);
+
+    List<CEPRule> getRulesByUserId( String userId);
+
+    List<CEPRule>  getRulesByUserIdAndBroker( String userId,String brokerId);
 }

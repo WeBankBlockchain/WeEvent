@@ -1244,6 +1244,146 @@ public class CEPRuleExample {
             addCriterion("updated_time not between", value1, value2, "updatedTime");
             return (Criteria) this;
         }
+
+        public Criteria andBrokerIdIsNull() {
+            addCriterion("broker_id is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andBrokerIdIsNotNull() {
+            addCriterion("broker_id is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andBrokerIdEqualTo(String value) {
+            addCriterion("broker_id =", value, "brokerId");
+            return (Criteria) this;
+        }
+
+        public Criteria andBrokerIdNotEqualTo(String value) {
+            addCriterion("broker_id <>", value, "brokerId");
+            return (Criteria) this;
+        }
+
+        public Criteria andBrokerIdGreaterThan(String value) {
+            addCriterion("broker_id >", value, "brokerId");
+            return (Criteria) this;
+        }
+
+        public Criteria andBrokerIdGreaterThanOrEqualTo(String value) {
+            addCriterion("broker_id >=", value, "brokerId");
+            return (Criteria) this;
+        }
+
+        public Criteria andBrokerIdLessThan(String value) {
+            addCriterion("broker_id <", value, "brokerId");
+            return (Criteria) this;
+        }
+
+        public Criteria andBrokerIdLessThanOrEqualTo(String value) {
+            addCriterion("broker_id <=", value, "brokerId");
+            return (Criteria) this;
+        }
+
+        public Criteria andBrokerIdLike(String value) {
+            addCriterion("broker_id like", value, "brokerId");
+            return (Criteria) this;
+        }
+
+        public Criteria andBrokerIdNotLike(String value) {
+            addCriterion("broker_id not like", value, "brokerId");
+            return (Criteria) this;
+        }
+
+        public Criteria andBrokerIdIn(List<String> values) {
+            addCriterion("broker_id in", values, "brokerId");
+            return (Criteria) this;
+        }
+
+        public Criteria andBrokerIdNotIn(List<String> values) {
+            addCriterion("broker_id not in", values, "brokerId");
+            return (Criteria) this;
+        }
+
+        public Criteria andBrokerIdBetween(String value1, String value2) {
+            addCriterion("broker_id between", value1, value2, "brokerId");
+            return (Criteria) this;
+        }
+
+        public Criteria andBrokerIdNotBetween(String value1, String value2) {
+            addCriterion("broker_id not between", value1, value2, "brokerId");
+            return (Criteria) this;
+        }
+
+        public Criteria andUserIdIsNull() {
+            addCriterion("user_id is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andUserIdIsNotNull() {
+            addCriterion("user_id is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andUserIdEqualTo(String value) {
+            addCriterion("user_id =", value, "userId");
+            return (Criteria) this;
+        }
+
+        public Criteria andUserIdNotEqualTo(String value) {
+            addCriterion("user_id <>", value, "userId");
+            return (Criteria) this;
+        }
+
+        public Criteria andUserIdGreaterThan(String value) {
+            addCriterion("user_id >", value, "userId");
+            return (Criteria) this;
+        }
+
+        public Criteria andUserIdGreaterThanOrEqualTo(String value) {
+            addCriterion("user_id >=", value, "userId");
+            return (Criteria) this;
+        }
+
+        public Criteria andUserIdLessThan(String value) {
+            addCriterion("user_id <", value, "userId");
+            return (Criteria) this;
+        }
+
+        public Criteria andUserIdLessThanOrEqualTo(String value) {
+            addCriterion("user_id <=", value, "userId");
+            return (Criteria) this;
+        }
+
+        public Criteria andUserIdLike(String value) {
+            addCriterion("user_id like", value, "userId");
+            return (Criteria) this;
+        }
+
+        public Criteria andUserIdNotLike(String value) {
+            addCriterion("user_id not like", value, "userId");
+            return (Criteria) this;
+        }
+
+        public Criteria andUserIdIn(List<String> values) {
+            addCriterion("user_id in", values, "userId");
+            return (Criteria) this;
+        }
+
+        public Criteria andUserIdNotIn(List<String> values) {
+            addCriterion("user_id not in", values, "userId");
+            return (Criteria) this;
+        }
+
+        public Criteria andUserIdBetween(String value1, String value2) {
+            addCriterion("user_id between", value1, value2, "userId");
+            return (Criteria) this;
+        }
+
+        public Criteria andUserIdNotBetween(String value1, String value2) {
+            addCriterion("user_id not between", value1, value2, "userId");
+            return (Criteria) this;
+        }
     }
 
     public static class Criteria extends GeneratedCriteria {

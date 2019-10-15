@@ -54,6 +54,37 @@ public class CEPRuleController{
         return resEntity;
     }
 
+    // get user's rules
+    @RequestMapping("/getRulesByUserId")
+    public BaseRspEntity getRulesByUserId(@RequestParam(name = "userId") String userId) {
+        BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
+        if (StringUtils.isBlank(userId) || userId.isEmpty()) {
+            resEntity.setErrorCode(280001);
+            resEntity.setErrorMsg("fail");
+            return resEntity;
+        }
+        List<CEPRule> cepRule = cepRuleService.getRulesByUserId(userId);
+        resEntity.setData(cepRule);
+        log.info("cepRule:{}", JSONArray.toJSON(cepRule));
+        return resEntity;
+    }
+
+    // user has some rules in the broker
+    @RequestMapping("/getRulesByUserIdAndBroker")
+    public BaseRspEntity getRulesByUserIdAndBroker(@RequestParam(name = "userId") String userId,@RequestParam(name = "brokerId") String brokerId) {
+        BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
+        if (StringUtils.isBlank(userId) || userId.isEmpty()) {
+            resEntity.setErrorCode(280001);
+            resEntity.setErrorMsg("fail");
+            return resEntity;
+        }
+        List<CEPRule> cepRule = cepRuleService.getRulesByUserIdAndBroker(userId,brokerId);
+        resEntity.setData(cepRule);
+        log.info("cepRule:{}", JSONArray.toJSON(cepRule));
+        return resEntity;
+    }
+
+
     @RequestMapping("/getCEPRuleListByPage")
     public BaseRspEntity getCEPRuleListByPage(int currPage, int pageSize) {
         BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);

@@ -49,6 +49,20 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         return new Long(cepRuleMapper.countByExample(cEPRuleExample)).intValue();
     }
 
+    @Override
+    public List<CEPRule> getRulesByBrokerId(String brokerId) {
+        return cepRuleMapper.getRulesByBrokerId(brokerId);    }
+
+    @Override
+    public List<CEPRule> getRulesByUserId(String userId) {
+        return cepRuleMapper.getRulesByUserId(userId);
+    }
+
+    @Override
+    public List<CEPRule> getRulesByUserIdAndBroker(String userId, String brokerId) {
+        return cepRuleMapper.getRulesByUserIdAndBroker(userId,brokerId);
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public RetCode setCEPRule(String id, int type) {
@@ -204,6 +218,13 @@ public class CEPRuleServiceImpl implements CEPRuleService {
             }
             if (StringUtils.isBlank(record.getRuleName()) || record.getRuleName().isEmpty()) {
                 return Constants.RULENAME_IS_BLANK;
+            }
+            if(StringUtils.isBlank(record.getUserId()) || record.getUserId().isEmpty()){
+                return Constants.USERID_IS_BLANK;
+            }
+
+            if(StringUtils.isBlank(record.getBrokerId()) || record.getBrokerId().isEmpty()){
+                return Constants.BROKERID_IS_BLANK;
             }
             String payload = record.getPayload();
             if (payload.isEmpty() || StringUtils.isBlank(payload)) {
