@@ -1,8 +1,8 @@
 package com.webank.weevent.governance.service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -14,9 +14,11 @@ import javax.servlet.http.HttpServletResponse;
 import com.webank.weevent.governance.entity.HistoricalDataEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.HistoricalDataMapper;
+import com.webank.weevent.governance.vo.HistoricalDataVo;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -31,21 +33,29 @@ public class HistoricalDataService {
     private final static String simpleDateFormat = "YYYY-MM-dd";
 
 
-    public Map<String, List<Integer>> historicalDataList(HistoricalDataEntity historicalDataEntity, HttpServletRequest httpRequest,
+    public Map<String, List<Integer>> historicalDataList(HistoricalDataVo historicalDataVo, HttpServletRequest httpRequest,
                                                          HttpServletResponse httpResponse) throws GovernanceException {
         try {
             Map<String, List<Integer>> returnMap = new HashMap<>();
-            List<HistoricalDataEntity> historicalDataEntities = historicalDataMapper.historicalDataList(historicalDataEntity);
+            List<HistoricalDataEntity> historicalDataEntities = historicalDataMapper.historicalDataList(historicalDataVo);
             if (CollectionUtils.isEmpty(historicalDataEntities)) {
                 return null;
             }
+            if (historicalDataVo.getBeginDate() == null || historicalDataVo.getEndDate() == null) {
+                throw new GovernanceException("beginDate or endDate is empty");
+            }
+            Date beginDate = historicalDataVo.getBeginDate();
+            Date endDate = historicalDataVo.getEndDate();
+
+            historicalDataVo.setBeginDate(DateUtils.parseDate(DateFormatUtils.format(beginDate, simpleDateFormat),simpleDateFormat));
+            historicalDataVo.setEndDate(DateUtils.parseDate(DateFormatUtils.format(endDate, simpleDateFormat),simpleDateFormat));
             //deal data
             Map<String, List<HistoricalDataEntity>> map = new HashMap<>();
-            List<Date> dateList = new ArrayList<>();
             historicalDataEntities.forEach(it -> {
-                map.merge(it.getTopicName(), new ArrayList<>(Arrays.asList(it)), (a, b) -> this.mergeCollection(a, b));
+                map.merge(it.getTopicName(), new ArrayList<>(Collections.singletonList(it)), this::mergeCollection);
             });
-            List<String> listDate = listDate(historicalDataEntity.getBeginDate(), historicalDataEntity.getEndDate());
+            List<String> listDate;
+            listDate = listDate(historicalDataVo.getBeginDate(), historicalDataVo.getEndDate());
 
             map.forEach((k, v) -> {
                 Map<String, Integer> eventCountMap = new HashMap<>();
@@ -76,14 +86,14 @@ public class HistoricalDataService {
 
     private List<String> listDate(Date beginDate, Date endDate) {
         List<String> dateList = new ArrayList<>();
-        dateList.add(DateFormatUtils.format(beginDate, this.simpleDateFormat));
+        dateList.add(DateFormatUtils.format(beginDate, simpleDateFormat));
         Calendar calBegin = Calendar.getInstance();
         Calendar calEnd = Calendar.getInstance();
         calEnd.setTime(endDate);
         calBegin.setTime(beginDate);
         while (endDate.after(calBegin.getTime())) {
             calBegin.add(Calendar.DAY_OF_MONTH, 1);
-            dateList.add(DateFormatUtils.format(calBegin.getTime(), this.simpleDateFormat));
+            dateList.add(DateFormatUtils.format(calBegin.getTime(), simpleDateFormat));
         }
         return dateList;
     }

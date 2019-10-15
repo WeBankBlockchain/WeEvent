@@ -1,14 +1,16 @@
-package com.webank.weevent.governance.entity;
+package com.webank.weevent.governance.vo;
+
+import java.util.Date;
+import java.util.List;
 
 import com.webank.weevent.governance.entity.base.BaseEntity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class HistoricalDataEntity  extends BaseEntity {
+public class HistoricalDataVo extends BaseEntity {
 
     private Integer brokerId;
 
@@ -24,4 +26,9 @@ public class HistoricalDataEntity  extends BaseEntity {
 
     private String eventId;
 
+    private Date beginDate;
+
+    private Date endDate;
+
+    private List<String> topicList;
 }

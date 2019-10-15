@@ -54,7 +54,5 @@ CREATE TABLE `t_historical_data` (
   `group_id` varchar(256) DEFAULT NULL COMMENT 'group id',
   `block_number` int(11) NOT NULL COMMENT 'block number',
   `event_id` varchar(256) DEFAULT NULL COMMENT 'event id',
-  `broker_id` varchar(256) DEFAULT NULL COMMENT 'broker id',
-  `user_id` varchar(256) DEFAULT NULL COMMENT 'user id',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='t_historical_data';

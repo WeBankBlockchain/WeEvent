@@ -42,7 +42,7 @@
         GROUP BY topic_name,DATE_FORMAT(create_date,"%Y-%m-%d")
     </select>
 
-    <insert id="addHistoricalData" parameterType="com.webank.weevent.governance.entity.HistoricalDataEntity"
+    <insert id="addHistoricalData" parameterType="com.webank.weevent.governance.vo.HistoricalDataVo"
             useGeneratedKeys="true" keyProperty="id">
         insert into t_historical_data(broker_id, user_id, topic_name, group_id, block_number, event_id)
         values (#{brokerId}, #{userId}, #{topicName}, #{groupId}, #{blockNumber}, #{eventId})
