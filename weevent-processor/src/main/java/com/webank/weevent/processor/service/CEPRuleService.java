@@ -6,8 +6,6 @@ import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.model.CEPRuleExample;
 import com.webank.weevent.processor.utils.RetCode;
 
-import org.apache.ibatis.annotations.Param;
-
 public interface CEPRuleService {
     CEPRule selectByPrimaryKey(String id);
 

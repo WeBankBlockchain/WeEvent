@@ -5,6 +5,7 @@ import com.webank.weevent.processor.utils.ObjectTranscoder;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Assert;
 import org.junit.Test;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -40,6 +41,7 @@ public class RedisServiceTest {
         CEPRule r3 = (CEPRule) (ObjectTranscoder.getInstance().deserialize(in));
         log.info("after:{}", r3.getRuleName());
         log.info("after:{}", JSONObject.toJSONString(r3));
+        Assert.assertEquals("air3", r3.getRuleName());
     }
 
     @Test
@@ -86,6 +88,7 @@ public class RedisServiceTest {
         CEPRule r3 = (CEPRule) (ObjectTranscoder.getInstance().deserialize(in));
         log.info("after:{}", r3.getRuleName());
         log.info("after:{}", JSONObject.toJSONString(r3));
+        Assert.assertEquals("air3", r3.getRuleName());
     }
 
 
@@ -115,5 +118,6 @@ public class RedisServiceTest {
         CEPRule r3 = (CEPRule) (ObjectTranscoder.getInstance().deserialize(in));
         log.info("after:{}", r3.getRuleName());
         log.info("after:{}", JSONObject.toJSONString(r3));
+        Assert.assertEquals("air3", r3.getRuleName());
     }
 }

@@ -41,26 +41,26 @@ public class Util {
     }
 
 
-    public static String UrlPage(String strURL) {
-        String strPage = null;
-        String[] arrSplit = null;
+    public static String urlPage(String url) {
+        String page = null;
+        String[] arrSplit;
 
-        strURL = strURL.trim().toLowerCase();
+        url = url.trim().toLowerCase();
 
-        arrSplit = strURL.split("[?]");
-        if (strURL.length() > 0) {
+        arrSplit = url.split("[?]");
+        if (url.length() > 0) {
             if (arrSplit.length > 1) {
                 if (arrSplit[0] != null) {
-                    strPage = arrSplit[0];
+                    page = arrSplit[0];
                 }
             }
         }
 
-        return strPage;
+        return page;
     }
 
 
-    private static String TruncateUrlPage(String strURL) {
+    private static String truncateUrlPage(String strURL) {
         String strAllParam = null;
         String[] arrSplit = null;
 
@@ -79,12 +79,12 @@ public class Util {
     }
 
 
-    public static Map<String, String> URLRequest(String URL) {
+    public static Map<String, String> uRLRequest(String URL) {
         Map<String, String> mapRequest = new HashMap<String, String>();
 
         String[] arrSplit = null;
 
-        String strUrlParam = TruncateUrlPage(URL);
+        String strUrlParam = truncateUrlPage(URL);
         if (strUrlParam == null) {
             return mapRequest;
         }
@@ -195,8 +195,7 @@ public class Util {
         Pattern pat = Pattern.compile(regex.trim());
         Matcher mat = pat.matcher(urls.trim());
         if (mat.matches()) {
-            boolean temp = true;
-            return temp;
+            return true;
         } else {
             return false;
         }

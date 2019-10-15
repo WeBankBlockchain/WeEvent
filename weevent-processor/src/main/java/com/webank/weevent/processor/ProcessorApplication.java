@@ -42,7 +42,7 @@ public class ProcessorApplication {
 
 
 
-    public static void exit() {
+    private static void exit() {
         if (applicationContext != null) {
             System.exit(SpringApplication.exit(applicationContext));
         } else {
@@ -90,9 +90,8 @@ public class ProcessorApplication {
     }
 
     @Bean
-    CEPRuleCache cEPRuleCache() {
+    public CEPRuleCache cEPRuleCache() {
         log.info("cEPRuleCache....");
-
         return new CEPRuleCache();
     }
 

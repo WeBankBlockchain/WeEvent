@@ -61,7 +61,7 @@ public class CEPRuleMQ {
 
                 @Override
                 public void onException(Throwable e) {
-
+                    log.info("on event:{}",e.toString());
                 }
             });
             subscriptionIdMap.put(rule.getId(), subscriptionId);
@@ -86,7 +86,7 @@ public class CEPRuleMQ {
             Connection conn = Util.getConnection(rule.getDatabaseUrl());
 
             if (conn != null) {
-                Map<String, String> urlParamMap = Util.URLRequest(rule.getDatabaseUrl());
+                Map<String, String> urlParamMap = Util.uRLRequest(rule.getDatabaseUrl());
                 String insertExpression = "insert into ".concat(urlParamMap.get("tableName").concat("("));
                 String values = "values (";
                 Map<String, Integer> sqlvalue = Util.contactsql(content, rule.getPayload());

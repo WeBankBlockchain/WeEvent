@@ -5,13 +5,16 @@ import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.MapContext;
+import org.junit.Assert;
 import org.junit.Test;
+
+import static org.junit.Assert.assertNotNull;
 
 @Slf4j
 public class SqlParserTest {
 
     @Test
-    public void basicExpression(){
+    public void basicExpression() {
         JexlEngine jexl = new JexlBuilder().create();
         JexlContext context = new MapContext();
         context.set("a", 1);
@@ -19,13 +22,13 @@ public class SqlParserTest {
         context.set("c", 1);
         // Create an expression
         String jexlExp = "a>10 and b<10 or c<10";
-        Object e = jexl.createExpression(jexlExp).evaluate(context);
+        Boolean e = (Boolean) jexl.createExpression(jexlExp).evaluate(context);
         log.info(e.toString());
-        // Create a context and add data
+        Assert.assertEquals(true, e);
     }
 
     @Test
-    public void basicExpression2(){
+    public void basicExpressionSingle() {
         JexlEngine jexl = new JexlBuilder().create();
         JexlContext context = new MapContext();
         context.set("a", 11);
@@ -33,9 +36,9 @@ public class SqlParserTest {
         context.set("c", 1);
         // Create an expression
         String jexlExp = "a>10";
-        Object e = jexl.createExpression(jexlExp).evaluate(context);
+        Boolean e = (Boolean) jexl.createExpression(jexlExp).evaluate(context);
         log.info(e.toString());
-        // Create a context and add data
+        Assert.assertEquals(true, e);
     }
 
 }

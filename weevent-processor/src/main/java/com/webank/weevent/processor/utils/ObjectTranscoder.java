@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class ObjectTranscoder {
 
     private static ObjectTranscoder obj = new ObjectTranscoder();
@@ -33,7 +36,7 @@ public class ObjectTranscoder {
             bos.close();
             rv = bos.toByteArray();
         } catch (IOException e) {
-            throw new IllegalArgumentException("Non-serializable object", e);
+            e.printStackTrace();
         } finally {
             try {
                 if (os != null) os.close();

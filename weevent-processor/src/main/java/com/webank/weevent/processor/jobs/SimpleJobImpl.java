@@ -14,21 +14,15 @@ public class SimpleJobImpl implements SimpleJob {
             case 0:
                 log.info("000000");
                 break;
+
             case 1:
                 log.info("11111");
                 break;
+
             case 2:
                 log.info("22222");
                 break;
-            case 3:
-                log.info("33333");
-                break;
-            case 4:
-                log.info("44444");
-                break;
-            case 5:
-                log.info("55555");
-                break;
+
             default:
                 log.info("default");
         }
