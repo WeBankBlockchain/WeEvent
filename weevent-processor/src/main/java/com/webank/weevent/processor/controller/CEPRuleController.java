@@ -26,7 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 @RestController
-public class CEPRuleController{
+public class CEPRuleController {
 
     @Autowired
     private CEPRuleServiceImpl cepRuleService;
@@ -71,14 +71,14 @@ public class CEPRuleController{
 
     // user has some rules in the broker
     @RequestMapping("/getRulesByUserIdAndBroker")
-    public BaseRspEntity getRulesByUserIdAndBroker(@RequestParam(name = "userId") String userId,@RequestParam(name = "brokerId") String brokerId) {
+    public BaseRspEntity getRulesByUserIdAndBroker(@RequestParam(name = "userId") String userId, @RequestParam(name = "brokerId") String brokerId) {
         BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
         if (StringUtils.isBlank(userId) || userId.isEmpty()) {
             resEntity.setErrorCode(280001);
             resEntity.setErrorMsg("fail");
             return resEntity;
         }
-        List<CEPRule> cepRule = cepRuleService.getRulesByUserIdAndBroker(userId,brokerId);
+        List<CEPRule> cepRule = cepRuleService.getRulesByUserIdAndBroker(userId, brokerId);
         resEntity.setData(cepRule);
         log.info("cepRule:{}", JSONArray.toJSON(cepRule));
         return resEntity;
@@ -103,6 +103,7 @@ public class CEPRuleController{
         log.info("cepRule:{}", JSONArray.toJSON(cepRule));
         return resEntity;
     }
+
     // use rule name to get rule list
     @RequestMapping("/getCEPRuleList")
     public BaseRspEntity getCEPRuleList(@RequestParam(name = "ruleName") String ruleName) {
@@ -146,11 +147,14 @@ public class CEPRuleController{
 
     @RequestMapping(value = "/insertByParam", method = RequestMethod.POST)
     @ResponseBody
-    public BaseRspEntity insert(@Param("ruleName") String ruleName, @Param("createdTime") long createdTime, @Param("updatedTime") long updatedTime) {
+    public BaseRspEntity insert(@Param("ruleName") String ruleName, @Param("createdTime") long createdTime,
+                                @Param("updatedTime") long updatedTime, @Param("userId") String userId, @Param("brokerId") String brokerId) {
         // insert status must be 0
         BaseRspEntity resEntity = new BaseRspEntity(Constants.RET_SUCCESS);
         CEPRule rule = new CEPRule();
         rule.setRuleName(ruleName);
+        rule.setUserId(userId);
+        rule.setBrokerId(brokerId);
         rule.setUpdatedTime(new Date(updatedTime));
         rule.setCreatedTime(new Date(createdTime));
 
