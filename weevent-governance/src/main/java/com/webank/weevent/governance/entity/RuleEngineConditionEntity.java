@@ -1,21 +1,13 @@
 package com.webank.weevent.governance.entity;
 
 import com.webank.weevent.governance.entity.base.BaseEntity;
+import com.webank.weevent.governance.entity.base.RuleEngineConditionBase;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class RuleEngineConditionEntity extends BaseEntity {
+public class RuleEngineConditionEntity extends RuleEngineConditionBase {
 
-    private Integer ruleId;
-
-    private String connectionOperator;
-
-    private String conditionalOperator;
-
-    private String columnName;
-
-    private String sqlCondition;
 }

@@ -88,23 +88,22 @@ public class RuleEngineService {
     private String ERROR_MSG = "success";
 
     @SuppressWarnings("unchecked")
-    public List<RuleEngineEntity> getRuleEngines(HttpServletRequest request, RuleEngineVo ruleEngineVo) throws GovernanceException {
+    public List<RuleEngineEntity> getRuleEngines(HttpServletRequest request, RuleEngineEntity ruleEngineEntity) throws GovernanceException {
         try {
             String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
 
-            if (accountId == null || !accountId.equals(ruleEngineVo.getUserId().toString())) {
+            if (accountId == null || !accountId.equals(ruleEngineEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
-            Calendar calendar = Calendar.getInstance();
-            RuleEngineEntity ruleEngineEntity = new RuleEngineEntity();
-            BeanUtils.copyProperties(ruleEngineVo, ruleEngineEntity);
             int count = ruleEngineMapper.countRuleEngine(ruleEngineEntity);
-            ruleEngineVo.setTotalCount(count);
+            ruleEngineEntity.setTotalCount(count);
             List<RuleEngineEntity> ruleEngineEntities = null;
             if (count > 0) {
-                int startIndex = (ruleEngineVo.getPageNumber() - 1) * ruleEngineVo.getPageSize();
-                int endIndex = ruleEngineVo.getPageNumber() * ruleEngineVo.getPageSize();
+                int startIndex = (ruleEngineEntity.getPageNumber() - 1) * ruleEngineEntity.getPageSize();
+                int endIndex = ruleEngineEntity.getPageNumber() * ruleEngineEntity.getPageSize();
                 ruleEngineEntities = ruleEngineMapper.getRuleEnginePage(ruleEngineEntity, startIndex, endIndex);
+
+                Calendar calendar = Calendar.getInstance();
                 for (RuleEngineEntity it : ruleEngineEntities) {
                     calendar.setTime(it.getCreateDate());
                     String format = simpleDateFormat.format(calendar.getTime());

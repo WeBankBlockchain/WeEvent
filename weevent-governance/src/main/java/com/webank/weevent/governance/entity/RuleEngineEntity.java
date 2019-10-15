@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.governance.entity.base.BaseEntity;
+import com.webank.weevent.governance.entity.base.RuleEngineBase;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,54 +18,24 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class RuleEngineEntity extends BaseEntity {
+public class RuleEngineEntity extends RuleEngineBase {
 
-    private String ruleName;
-    /**
-     * Type, the current default is json
-     */
-    private Integer payloadType;
-
-    private String payload;
 
     private Map<String, Object> payloadMap = new HashMap<>();
 
-    private Integer userId;
-
-    private String groupId;
-
-    private Integer brokerId;
-
-    private String cepId;
-
     private String brokerUrl;
-
-    private String fromDestination;
-
-    private String toDestination;
-
-    private String selectField;
-
-    private String conditionField;
 
     private String fullSQL;
 
-    /**
-     * Trigger condition type, 1 identifies topic,
-     * 2 identifies flow to relational database
-     */
-    private Integer conditionType;
+    private Integer pageSize;
 
-    /**
-     * 0 means not started, 1 means running,2 means is deleted
-     */
-    private Integer status;
+    private Integer pageNumber;
 
-    private String databaseUrl;
+    private Integer startIndex;
 
-    private String errorDestination;
+    private Integer endIndex;
 
-    private String errorMessage;
+    private Integer totalCount;
 
     private List<RuleEngineConditionEntity> ruleEngineConditionList = new ArrayList<>();
 }

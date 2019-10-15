@@ -30,14 +30,14 @@ public class RuleEngineController {
     private RuleEngineService ruleEngineService;
 
 
-    // get all ruleEngine service
+    // get  ruleEngine list
     @PostMapping("/list")
-    public GovernanceResult getRuleEngines(HttpServletRequest request, @RequestBody RuleEngineVo ruleEngineVo) throws GovernanceException {
-        log.info("get ruleEngines:{}", ruleEngineVo);
-        List<RuleEngineEntity> ruleEngines = ruleEngineService.getRuleEngines(request, ruleEngineVo);
+    public GovernanceResult getRuleEngines(HttpServletRequest request, @RequestBody RuleEngineEntity ruleEngineEntity) throws GovernanceException {
+        log.info("get ruleEngines , ruleEngineEntity :{}", ruleEngineEntity);
+        List<RuleEngineEntity> ruleEngines = ruleEngineService.getRuleEngines(request, ruleEngineEntity);
 
         GovernanceResult governanceResult = new GovernanceResult(ruleEngines);
-        governanceResult.setTotalCount(ruleEngineVo.getTotalCount());
+        governanceResult.setTotalCount(ruleEngineEntity.getTotalCount());
         return governanceResult;
     }
 
