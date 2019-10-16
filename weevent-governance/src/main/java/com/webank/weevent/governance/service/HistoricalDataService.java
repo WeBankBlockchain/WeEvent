@@ -17,7 +17,6 @@ import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.HistoricalDataMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.utils.CookiesTools;
-import com.webank.weevent.governance.vo.HistoricalDataVo;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -43,34 +42,34 @@ public class HistoricalDataService {
     private final static String simpleDateFormat = "YYYY-MM-dd";
 
 
-    public Map<String, List<Integer>> historicalDataList(HistoricalDataVo historicalDataVo, HttpServletRequest httpRequest,
+    public Map<String, List<Integer>> historicalDataList(HistoricalDataEntity historicalDataEntity, HttpServletRequest httpRequest,
                                                          HttpServletResponse httpResponse) throws GovernanceException {
         try {
             String accountId = cookiesTools.getCookieValueByName(httpRequest, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-            Boolean flag = permissionService.verifyPermissions(historicalDataVo.getBrokerId(), accountId);
+            Boolean flag = permissionService.verifyPermissions(historicalDataEntity.getBrokerId(), accountId);
             if (!flag) {
                 throw new GovernanceException(ConstantCode.ACCESS_DENIED.getMsg());
             }
             Map<String, List<Integer>> returnMap = new HashMap<>();
-            List<HistoricalDataEntity> historicalDataEntities = historicalDataMapper.historicalDataList(historicalDataVo);
+            List<HistoricalDataEntity> historicalDataEntities = historicalDataMapper.historicalDataList(historicalDataEntity);
             if (CollectionUtils.isEmpty(historicalDataEntities)) {
                 return null;
             }
-            if (historicalDataVo.getBeginDate() == null || historicalDataVo.getEndDate() == null) {
+            if (historicalDataEntity.getBeginDate() == null || historicalDataEntity.getEndDate() == null) {
                 throw new GovernanceException("beginDate or endDate is empty");
             }
-            Date beginDate = historicalDataVo.getBeginDate();
-            Date endDate = historicalDataVo.getEndDate();
+            Date beginDate = historicalDataEntity.getBeginDate();
+            Date endDate = historicalDataEntity.getEndDate();
 
-            historicalDataVo.setBeginDate(DateUtils.parseDate(DateFormatUtils.format(beginDate, simpleDateFormat), simpleDateFormat));
-            historicalDataVo.setEndDate(DateUtils.parseDate(DateFormatUtils.format(endDate, simpleDateFormat), simpleDateFormat));
+            historicalDataEntity.setBeginDate(DateUtils.parseDate(DateFormatUtils.format(beginDate, simpleDateFormat), simpleDateFormat));
+            historicalDataEntity.setEndDate(DateUtils.parseDate(DateFormatUtils.format(endDate, simpleDateFormat), simpleDateFormat));
             //deal data
             Map<String, List<HistoricalDataEntity>> map = new HashMap<>();
             historicalDataEntities.forEach(it -> {
                 map.merge(it.getTopicName(), new ArrayList<>(Collections.singletonList(it)), this::mergeCollection);
             });
             List<String> listDate;
-            listDate = listDate(historicalDataVo.getBeginDate(), historicalDataVo.getEndDate());
+            listDate = listDate(historicalDataEntity.getBeginDate(), historicalDataEntity.getEndDate());
 
             map.forEach((k, v) -> {
                 Map<String, Integer> eventCountMap = new HashMap<>();
