@@ -301,7 +301,7 @@
       select_field, condition_field, condition_type, 
       to_destination, database_url, created_time,
       status, error_destination, error_code, 
-      error_message, updated_time)
+      error_message, updated_time,broker_id,user_id)
     values (#{id,jdbcType=VARCHAR}, #{ruleName,jdbcType=VARCHAR}, #{fromDestination,jdbcType=VARCHAR},
       #{brokerUrl,jdbcType=VARCHAR}, #{payload,jdbcType=VARCHAR}, #{payloadType,jdbcType=INTEGER},
       #{selectField,jdbcType=VARCHAR}, #{conditionField,jdbcType=VARCHAR}, #{conditionType,jdbcType=INTEGER}, 
