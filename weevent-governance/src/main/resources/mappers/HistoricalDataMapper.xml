@@ -39,6 +39,9 @@
         <if test="brokerId != null">
             AND broker_id=#{brokerId}
         </if>
+        <if test="groupId != null">
+            AND group_id=#{groupId}
+        </if>
         <if test="topicList != null and topicList.size()>0">
             and topic_name in
             <foreach collection="topicList" item="topic" open="(" separator="," close=")">
