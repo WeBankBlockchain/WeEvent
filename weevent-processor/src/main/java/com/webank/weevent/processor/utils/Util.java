@@ -175,7 +175,7 @@ public class Util {
         return sql;
     }
 
-    
+
     public static String byte2hex(byte[] buffer) {
         String h = "0x";
 

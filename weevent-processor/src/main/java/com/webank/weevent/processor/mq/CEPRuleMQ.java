@@ -32,7 +32,7 @@ public class CEPRuleMQ {
     public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException {
         // unsubscribe old the topic
         ruleMap.get(rule.getId()).getToDestination();
-        IWeEventClient client = IWeEventClient.build(rule.getBrokerUrl());
+        IWeEventClient client = getClient(rule);
         // update the rule map
         ruleMap.put(rule.getId(), rule);
         // update subscribe
@@ -61,7 +61,7 @@ public class CEPRuleMQ {
 
     public static void subscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) {
         try {
-            IWeEventClient client = IWeEventClient.build(rule.getBrokerUrl());
+            IWeEventClient client = getClient(rule);;
             // subscribe topic
             log.info("subscribe topic:{}", rule.getFromDestination());
             String subscriptionId = client.subscribe(rule.getFromDestination(), WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
@@ -93,7 +93,7 @@ public class CEPRuleMQ {
 
     public static void unSubscribeMsg(CEPRule rule, String subscriptionId) {
         try {
-            IWeEventClient client = IWeEventClient.build(rule.getBrokerUrl());
+            IWeEventClient client = getClient(rule);
             log.info("id:{},sunid:{}", rule.getId(), subscriptionId);
             client.unSubscribe(subscriptionId);
         } catch (BrokerException e) {
