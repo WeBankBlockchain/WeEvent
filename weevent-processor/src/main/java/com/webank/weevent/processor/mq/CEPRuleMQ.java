@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.service.AnalysisWeEventIdService;
-import com.webank.weevent.processor.utils.Util;
+import com.webank.weevent.processor.utils.CommonUtil;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.WeEvent;
@@ -42,8 +42,8 @@ public class CEPRuleMQ {
 
     private static IWeEventClient getClient(CEPRule rule) {
         try {
-            Map<String, String> mapRequest = Util.uRLRequest(rule.getBrokerUrl());
-            String baseUrl = Util.urlPage(rule.getBrokerUrl());
+            Map<String, String> mapRequest = CommonUtil.uRLRequest(rule.getBrokerUrl());
+            String baseUrl = CommonUtil.urlPage(rule.getBrokerUrl());
             IWeEventClient client;
             if (null != mapRequest.get("groupId")) {
                 //  client = IWeEventClient.build(baseUrl,mapRequest.get("groupId"));
@@ -70,7 +70,7 @@ public class CEPRuleMQ {
                     try {
                         String content = new String(event.getContent());
                         log.info("on event:{},content:{}", event.toString(), content);
-                        if (Util.checkValidJson(content)) {
+                        if (CommonUtil.checkValidJson(content)) {
                             handleOnEvent(event, client, ruleMap);
                         }
                         //Analysis WeEventId  to the governance database
@@ -104,13 +104,13 @@ public class CEPRuleMQ {
     private static void sendMessageToDB(String content, CEPRule rule) {
         JSONObject eventContent = JSONObject.parseObject(content);
         try {
-            Connection conn = Util.getConnection(rule.getDatabaseUrl());
+            Connection conn = CommonUtil.getConnection(rule.getDatabaseUrl());
 
             if (conn != null) {
-                Map<String, String> urlParamMap = Util.uRLRequest(rule.getDatabaseUrl());
+                Map<String, String> urlParamMap = CommonUtil.uRLRequest(rule.getDatabaseUrl());
                 String insertExpression = "insert into ".concat(urlParamMap.get("tableName").concat("("));
                 String values = "values (";
-                Map<String, Integer> sqlvalue = Util.contactsql(content, rule.getPayload());
+                Map<String, Integer> sqlvalue = CommonUtil.contactsql(content, rule.getPayload());
                 List<String> result = new ArrayList(sqlvalue.keySet());
 
                 //contact insert into users (first_name, last_name, date_created, is_admin, num_points)
@@ -179,8 +179,8 @@ public class CEPRuleMQ {
 
 
     private static boolean hitRuleEngine(String payload, String eventContent, String condition) {
-        if (Util.checkJson(eventContent, payload)) {
-            List<String> eventContentKeys = Util.getKeys(payload);
+        if (CommonUtil.checkJson(eventContent, payload)) {
+            List<String> eventContentKeys = CommonUtil.getKeys(payload);
             JSONObject event = JSONObject.parseObject(eventContent);
             JexlEngine jexl = new JexlBuilder().create();
 

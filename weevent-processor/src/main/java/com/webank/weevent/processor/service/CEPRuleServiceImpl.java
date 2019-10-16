@@ -11,9 +11,9 @@ import com.webank.weevent.processor.cache.CEPRuleCache;
 import com.webank.weevent.processor.mapper.CEPRuleMapper;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.model.CEPRuleExample;
+import com.webank.weevent.processor.utils.CommonUtil;
 import com.webank.weevent.processor.utils.Constants;
 import com.webank.weevent.processor.utils.RetCode;
-import com.webank.weevent.processor.utils.Util;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 
@@ -279,7 +279,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
     private Boolean checkDatabase(String databaseUrl) throws SQLException {
         boolean connectUrl = false;
         try {
-            Connection conn = Util.getConnection(databaseUrl);
+            Connection conn = CommonUtil.getConnection(databaseUrl);
             if (conn != null) {
                 connectUrl = true;
                 conn.close();
