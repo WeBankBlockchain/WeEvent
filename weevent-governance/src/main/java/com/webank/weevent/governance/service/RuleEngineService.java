@@ -588,10 +588,9 @@ public class RuleEngineService {
     }
 
     private String getProcessorUrl(String brokerUrl) {
-        return "http://localhost:7008/weevent";
-        /*String ip = brokerUrl.substring(brokerUrl.indexOf("//") + 2, brokerUrl.lastIndexOf(":"));
+        String ip = brokerUrl.substring(brokerUrl.indexOf("//") + 2, brokerUrl.lastIndexOf(":"));
         return new StringBuffer(commonService.HTTP).append(":").append("//").append(ip).append(":")
-                .append(this.processorPort).append("/weevent").toString();*/
+                .append(this.processorPort).append("/weevent").toString();
     }
 
     private List<RuleEngineConditionEntity> getRuleEngineConditionList(RuleEngineEntity rule) {
