@@ -24,7 +24,6 @@ public class ProcessorApplication {
     public static ProcessorConfig processorConfig;
 
     public static ApplicationContext applicationContext;
-    private static Scheduler scheduler;
 
     @Autowired
     public void setContext(ApplicationContext context) {
