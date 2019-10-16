@@ -83,7 +83,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
 
     @Test
     public void testUpdateRuleEngine() throws Exception {
-        String content = "{\"id\":\"28\",\"ruleName\":\"temperature-alarm\",\"payloadType\":\"1\"," +
+        String content = "{\"id\":\"1\",\"ruleName\":\"temperature-alarm\",\"payloadType\":\"1\"," +
                 "\"payloadMap\":{\"temperate\":30,\"humidity\":0.5},\"brokerId\":\"1\"," +
                 "\"fromDestination\":\"airCondition11\",\"toDestination\":\"test\"," +
                 "\"selectField\":\"temperate\",\"conditionField\":\"temperate>38\",\"conditionType\":\"1\"}";
@@ -97,7 +97,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
 
     @Test
     public void testStartEngine() throws Exception {
-        String content = "{\"id\":\"33\",\"userId\":\"1\",\"brokerId\":\"1\"}";
+        String content = "{\"id\":\"1\",\"userId\":\"1\",\"brokerId\":\"1\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/start").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
@@ -108,7 +108,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
 
     @Test
     public void testDeleteRuleEngine() throws Exception {
-        String content = "{\"id\":\"29\",\"userId\":\"1\",\"brokerId\":\"1\"}";
+        String content = "{\"id\":\"1\",\"userId\":\"1\",\"brokerId\":\"1\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/delete").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);

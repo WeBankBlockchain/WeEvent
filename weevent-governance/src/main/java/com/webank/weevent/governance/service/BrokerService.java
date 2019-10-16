@@ -53,9 +53,6 @@ public class BrokerService {
     @Autowired
     private CommonService commonService;
 
-    private final static String brokerListUrl = "/admin/getVersion";
-
-    private final static String weBaseNodeUrl = "/node/nodeInfo/1";
 
     private final static String HTTP_GET_SUCCESS_CODE = "0";
 
@@ -191,7 +188,7 @@ public class BrokerService {
             String brokerServerUrl = brokerEntity.getBrokerUrl();
             log.info("check Broker server, url:{}", brokerServerUrl);
             try {
-                checkUrl(brokerServerUrl, brokerListUrl, request);
+                checkUrl(brokerServerUrl, ConstantProperties.BROKER_LIST_URL, request);
             } catch (GovernanceException e) {
                 log.error("check Broker server failed. e:{}", e);
                 return ErrorCode.BROKER_CONNECT_ERROR;
@@ -201,7 +198,7 @@ public class BrokerService {
             String WebaseServerUrl = brokerEntity.getWebaseUrl();
             log.info("check WeBase server, url:{}", WebaseServerUrl);
             try {
-                checkUrl(WebaseServerUrl, weBaseNodeUrl, request);
+                checkUrl(WebaseServerUrl, ConstantProperties.WEBASE_NODE_URL, request);
             } catch (GovernanceException e) {
                 log.error("check WeBase server failed. e:{}", e);
                 return ErrorCode.WEBASE_CONNECT_ERROR;
@@ -236,7 +233,7 @@ public class BrokerService {
     }
 
     public String getVersion(HttpServletRequest request, String brokerUrl) throws GovernanceException {
-        String versionUrl = brokerUrl + brokerListUrl;
+        String versionUrl = brokerUrl + ConstantProperties.BROKER_LIST_URL;
         try {
             CloseableHttpResponse versionResponse = commonService.getCloseResponse(request, versionUrl);
             String mes = EntityUtils.toString(versionResponse.getEntity());

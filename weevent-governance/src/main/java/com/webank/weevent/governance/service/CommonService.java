@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.exception.GovernanceException;
+import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.utils.SpringContextUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -40,17 +41,13 @@ import org.springframework.stereotype.Component;
 public class CommonService implements AutoCloseable {
 
     public static final String HTTPS = "https";
-    public static final String HTTP = "http";
     public static final String HTTPS_CLIENT = "httpsClient";
     public static final String HTTP_CLIENT = "httpClient";
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String METHOD_TYPE = "GET";
     public static final String FORMAT_TYPE = "json";
 
-    public static final String QUESTION_MARK = "?";
-    public static final String AND_SYMBOL = "&";
-    public static final String LAYER_SEPARATE = "/";
-    public static final String EQUAL_SIGN = "=";
+
 
 
     public CloseableHttpResponse getCloseResponse(HttpServletRequest req, String newUrl) throws ServletException {
@@ -187,13 +184,13 @@ public class CommonService implements AutoCloseable {
         if (StringUtil.isBlank(dataBaseUrl)) {
             return;
         }
-        String defaultUrl = dataBaseUrl.substring(0, dataBaseUrl.indexOf(this.QUESTION_MARK));
-        String user = dataBaseUrl.substring(dataBaseUrl.indexOf(this.QUESTION_MARK) + 1, dataBaseUrl.indexOf(this.AND_SYMBOL));
-        user = user.split(this.EQUAL_SIGN)[1].replaceAll("\"", "");
-        int first = dataBaseUrl.indexOf(this.AND_SYMBOL);
-        int second = dataBaseUrl.indexOf(this.AND_SYMBOL, first + 1);
+        String defaultUrl = dataBaseUrl.substring(0, dataBaseUrl.indexOf(ConstantProperties.QUESTION_MARK));
+        String user = dataBaseUrl.substring(dataBaseUrl.indexOf(ConstantProperties.QUESTION_MARK) + 1, dataBaseUrl.indexOf(ConstantProperties.AND_SYMBOL));
+        user = user.split(ConstantProperties.EQUAL_SIGN)[1].replaceAll("\"", "");
+        int first = dataBaseUrl.indexOf(ConstantProperties.AND_SYMBOL);
+        int second = dataBaseUrl.indexOf(ConstantProperties.AND_SYMBOL, first + 1);
         String password = dataBaseUrl.substring(first, second);
-        password = password.split(this.EQUAL_SIGN)[1].replaceAll("\"", "");
+        password = password.split(ConstantProperties.EQUAL_SIGN)[1].replaceAll("\"", "");
         try (Connection conn = DriverManager.getConnection(defaultUrl, user, password)) {
             if (conn != null) {
                 log.info("database connect success,dataBaseUrl:{}", dataBaseUrl);

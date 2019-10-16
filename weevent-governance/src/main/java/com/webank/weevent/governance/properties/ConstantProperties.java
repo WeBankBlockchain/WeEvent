@@ -16,19 +16,20 @@ public class ConstantProperties {
     public static final String CONSTANT_PREFIX = "constant";
     public static final String COOKIE_JSESSIONID = "JSESSIONID"; // cookie key---session
     public static final String COOKIE_MGR_ACCOUNT = "GOVERNANCE_MGR_ACCOUNT_C"; // cookie key---account
-    public static final String COOKIE_MGR_ACCOUNT_ID = "GOVERNANCE_MGR_ACCOUNT_ID";
-    public static final String COOKIE_GROUP_ID = "GOVERNANCE_GROUP_ID";
+    public static final String COOKIE_MGR_ACCOUNT_ID = "GOVERNANCE_MGR_ACCOUNT_ID";//cookie---account id
+    public static final String COOKIE_GROUP_ID = "GOVERNANCE_GROUP_ID";//cookie---group id
     public static final String SESSION_MGR_ACCOUNT = "GOVERNANCE_MGR_ACCOUNT_S"; // session key---account
 
     public static final String QUESTION_MARK = "?";
     public static final String AND_SYMBOL = "&";
     public static final String LAYER_SEPARATE = "/";
+    public static final String RIGHT_SLASH = "\"";
     public static final String ASTERISK = "*";
-
+    public static final String EQUAL_SIGN = "=";
     //broker url begin ========================================================
     public final static String BROKER_LIST_URL = "/admin/getVersion";
     public final static String BROKER_REST_CLOSE = "/rest/close";
-    public final static String BROKER_REST_LIST = "/rest//list";
+    public final static String BROKER_REST_LIST = "/rest/list";
     public final static String BROKER_REST_STATE = "/rest/state";
     public final static String BROKER_REST_OPEN = "/rest/open";
 
@@ -63,6 +64,6 @@ public class ConstantProperties {
     public Long sleepWhenHttpMaxFail = 60000L; // default 1min
 
     // COOKIE
-    public Integer cookieMaxAge = 24 * 60 * 60; // seconds
+    public Integer cookieMaxAge = 86400; //  24 * 60 * 60 seconds
 
 }

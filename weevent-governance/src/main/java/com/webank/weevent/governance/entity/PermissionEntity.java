@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 
 /**
  *  PermissionEntity class
- * @since 2019-08-28
+ * @since 2019/08/28
  */
 @Data
 @EqualsAndHashCode(callSuper = false)

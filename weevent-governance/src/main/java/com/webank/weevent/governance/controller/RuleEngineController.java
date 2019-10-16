@@ -82,7 +82,7 @@ public class RuleEngineController {
 
     @PostMapping("/detail")
     public GovernanceResult getRuleEngineDetail(@RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request,
-                                                HttpServletResponse response) {
+                                                HttpServletResponse response) throws GovernanceException {
         log.info("get ruleEngineDetail service ,status:{}", ruleEngineEntity.getStatus());
         RuleEngineEntity ruleEngineDetail = ruleEngineService.getRuleEngineDetail(ruleEngineEntity, request, response);
         return new GovernanceResult(ruleEngineDetail);

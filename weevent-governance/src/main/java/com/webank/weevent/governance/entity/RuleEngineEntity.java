@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.webank.weevent.governance.entity.base.BaseEntity;
 import com.webank.weevent.governance.entity.base.RuleEngineBase;
 
 import lombok.Data;

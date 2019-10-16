@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 /**
  * CirculationDatabaseEntity class
  *
- * @since 2019/04/28
+ * @since 2019/09/28
  */
 @Data
 @EqualsAndHashCode(callSuper = false)

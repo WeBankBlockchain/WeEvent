@@ -33,7 +33,7 @@ public class TopicController {
     @RequestMapping(value = "/close")
     public Boolean close(@RequestParam("brokerId") Integer brokerId, @RequestParam String topic,
                          HttpServletRequest request, HttpServletResponse response) throws GovernanceException {
-        log.info("close topic,brokerId:" + brokerId + "close: " + topic);
+        log.info("close topic ,brokerId:{},topic:{}", brokerId, topic);
         return topicService.close(brokerId, topic, request, response);
 
     }
@@ -49,7 +49,7 @@ public class TopicController {
     @RequestMapping(value = "/openTopic")
     public GovernanceResult open(@RequestBody TopicCreateEntity topicCreateEntity, HttpServletRequest request,
                                  HttpServletResponse response) throws GovernanceException {
-        log.info("openTopic,creator: " + topicCreateEntity.getCreater() + " open: " + topicCreateEntity.getTopic());
+        log.info("open topic creator:{} ,topic:{}",topicCreateEntity.getCreater(), topicCreateEntity.getTopic());
         return topicService.open(topicCreateEntity.getBrokerId(), topicCreateEntity.getTopic(),
                 topicCreateEntity.getCreater(), request, response);
     }

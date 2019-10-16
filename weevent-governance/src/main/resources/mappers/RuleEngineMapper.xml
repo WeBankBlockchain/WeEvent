@@ -38,7 +38,7 @@
                                   condition_field, condition_type, status, group_id, error_message)
         values (#{ruleName}, #{payloadType}, #{payload}, #{brokerId}, #{brokerUrl}, #{userId}, #{cepId},
                 #{fromDestination}, #{toDestination}, #{selectField},
-                #{conditionField}, #{conditionType}, #{status}, #{groupId}, #{errorMsg})
+                #{conditionField}, #{conditionType}, #{status}, #{groupId}, #{errorMessage})
     </insert>
 
     <select id="getRuleEngines" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"

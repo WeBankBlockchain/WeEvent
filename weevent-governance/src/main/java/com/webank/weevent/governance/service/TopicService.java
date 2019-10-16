@@ -114,11 +114,11 @@ public class TopicService {
         CloseableHttpClient client = commonService.generateHttpClient(brokerEntity.getBrokerUrl());
         String url;
         if (groupId != null) {
-            url = new StringBuffer(brokerEntity.getBrokerUrl()).append("/rest/list")
+            url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_LIST)
                     .append("?pageIndex=").append(pageIndex).append("&pageSize=").append(pageSize)
                     .append("groupId=").append(groupId).toString();
         } else {
-            url = new StringBuffer(brokerEntity.getBrokerUrl()).append("/rest/list")
+            url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_LIST)
                     .append("?pageIndex=").append(pageIndex).append("&pageSize=").append(pageSize).toString();
         }
         log.info("url: " + url);
@@ -170,7 +170,7 @@ public class TopicService {
 
         CloseableHttpClient client = commonService.generateHttpClient(broker.getBrokerUrl());
         // get event broker url
-        String url = new StringBuffer(broker.getBrokerUrl()).append("/rest/state").append("?topic=")
+        String url = new StringBuffer(broker.getBrokerUrl()).append(ConstantProperties.BROKER_REST_STATE).append("?topic=")
                 .append(topic).toString();
         if (!StringUtils.isBlank(groupId)) {
             url = new StringBuffer(url).append("&groupId=").append(groupId).toString();
@@ -223,10 +223,10 @@ public class TopicService {
         CloseableHttpClient client = commonService.generateHttpClient(brokerEntity.getBrokerUrl());
         String url;
         if (groupId != null) {
-            url = new StringBuffer(brokerEntity.getBrokerUrl()).append("/rest/open?topic=").append(topic)
+            url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_OPEN).append("?topic=").append(topic)
                     .append("&groupId=").append(groupId).toString();
         } else {
-            url = new StringBuffer(brokerEntity.getBrokerUrl()).append("/rest/open?topic=").append(topic).toString();
+            url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_OPEN).append("?topic=").append(topic).toString();
         }
         log.info("url: " + url);
         String mes;
