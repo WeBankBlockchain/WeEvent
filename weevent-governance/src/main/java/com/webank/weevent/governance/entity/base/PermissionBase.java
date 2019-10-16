@@ -4,8 +4,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * @author puremilkfan
- * @since 2019-08-28
+ *  PermissionBase class
+ *
+ * @since 2019/10/15
  */
 @Data
 @EqualsAndHashCode(callSuper=false)

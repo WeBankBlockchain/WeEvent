@@ -1,14 +1,12 @@
 package com.webank.weevent.governance.entity.base;
 
-import java.util.Date;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * TopicEntity class
+ * TopicBase class
  *
- * @since 2019/02/11
+ * @since 2019/10/15
  */
 @Data
 @EqualsAndHashCode(callSuper=false)

@@ -4,9 +4,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * BrokerEntity class
+ * CirculationDatabaseBase class
  *
- * @since 2019/04/28
+ * @since 2019/10/15
  */
 @Data
 @EqualsAndHashCode(callSuper = false)

@@ -1,7 +1,5 @@
 package com.webank.weevent.governance.entity.base;
 
-import java.util.List;
-
 import javax.validation.constraints.Min;
 
 import lombok.Data;
@@ -9,9 +7,9 @@ import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.URL;
 
 /**
- * BrokerEntity class
+ * BrokerBase class
  *
- * @since 2019/04/28
+ * @since 2019/10/15
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
