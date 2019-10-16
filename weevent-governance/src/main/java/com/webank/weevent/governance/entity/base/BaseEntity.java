@@ -1,6 +1,5 @@
 package com.webank.weevent.governance.entity.base;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import lombok.Data;
@@ -12,7 +11,6 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = false)
 public class BaseEntity {
 
-    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd hh:mm:ss");
     /**
      * primary key
      */
