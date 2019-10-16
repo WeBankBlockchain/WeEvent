@@ -3,13 +3,8 @@ package com.webank.weevent.processor.model;
 import java.util.Date;
 
 
-
 public class JobConfig {
     private String id;
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     private Date createAt;
 
@@ -44,6 +39,9 @@ public class JobConfig {
         return id;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public Date getCreateAt() {
         return createAt;

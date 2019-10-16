@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.service.AnalysisWeEventIdService;
-import com.webank.weevent.processor.utils.UrlUtil;
 import com.webank.weevent.processor.utils.Util;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
@@ -43,8 +42,8 @@ public class CEPRuleMQ {
 
     private static IWeEventClient getClient(CEPRule rule) {
         try {
-            Map<String, String> mapRequest = UrlUtil.uRLRequest(rule.getBrokerUrl());
-            String baseUrl = UrlUtil.urlPage(rule.getBrokerUrl());
+            Map<String, String> mapRequest = Util.uRLRequest(rule.getBrokerUrl());
+            String baseUrl = Util.urlPage(rule.getBrokerUrl());
             IWeEventClient client;
             if (null != mapRequest.get("groupId")) {
                 //  client = IWeEventClient.build(baseUrl,mapRequest.get("groupId"));

@@ -22,9 +22,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
 @RunWith(SpringRunner.class)
@@ -38,9 +36,10 @@ public class ServiceTest {
     @Autowired
     protected WebApplicationContext wac;
 
+
     @Before
     public void setup() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();  //初始化MockMvc对象
+        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
     }
 
     @Test
@@ -51,19 +50,6 @@ public class ServiceTest {
         log.info("rule:{},rule id:{},rule name:{}", rule.toString(), rule.getId(), rule.getRuleName());
     }
 
-    @Test
-    public void getId() throws Exception {
-        String url = "/getCEPRuleById";
-        String responseString = mockMvc.perform(get(url)
-                .param("id", "6")
-                .accept(MediaType.APPLICATION_JSON)
-        )
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andReturn().getResponse().getContentAsString();
-        log.info("return json:{}", responseString);
-
-    }
 
     @Test
     public void startCEPRule() throws Exception {

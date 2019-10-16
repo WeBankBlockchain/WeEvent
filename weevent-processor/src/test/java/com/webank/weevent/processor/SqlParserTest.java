@@ -8,8 +8,6 @@ import org.apache.commons.jexl3.MapContext;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.assertNotNull;
-
 @Slf4j
 public class SqlParserTest {
 

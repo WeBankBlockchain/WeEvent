@@ -64,10 +64,10 @@ public class Util {
         String strAllParam = null;
         String[] arrSplit = null;
 
-        strURL = strURL.trim().toLowerCase();
+        String url = strURL.trim().toLowerCase();
 
-        arrSplit = strURL.split("[?]");
-        if (strURL.length() > 1) {
+        arrSplit = url.split("[?]");
+        if (url.length() > 1) {
             if (arrSplit.length > 1) {
                 if (arrSplit[1] != null) {
                     strAllParam = arrSplit[1];

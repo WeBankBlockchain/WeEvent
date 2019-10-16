@@ -1,16 +1,19 @@
 package com.webank.weevent.processor.utils;
 
 import lombok.extern.slf4j.Slf4j;
-import org.quartz.*;
+import org.quartz.CronTrigger;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.TriggerKey;
 import org.quartz.impl.StdSchedulerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
-
 import java.text.ParseException;
-
 import com.webank.weevent.processor.config.AutoWiringSpringBeanJobFactory;
 import com.webank.weevent.processor.model.JobConfig;
 
