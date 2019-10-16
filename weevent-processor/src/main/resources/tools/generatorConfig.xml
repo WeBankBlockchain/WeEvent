@@ -22,7 +22,7 @@
         <!--jdbc的数据库连接 -->
         <jdbcConnection
                 driverClass="com.mysql.jdbc.Driver"
-                connectionURL="jdbc:mysql://182.254.159.91:3306/cep"
+                connectionURL="jdbc:mysql://127.0.0.1:3306/cep"
                 userId="root"
                 password="WeEvent@2019">
         </jdbcConnection>

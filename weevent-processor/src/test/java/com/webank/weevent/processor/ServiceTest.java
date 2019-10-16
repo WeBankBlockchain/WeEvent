@@ -171,14 +171,14 @@ public class ServiceTest {
                 " \t\t\"id\":1,\n" +
                 "        \"ruleName\": \"air3\",\n" +
                 "        \"fromDestination\": \"from.com.webank.weevent\",\n" +
-                "        \"brokerUrl\": \"http://182.254.159.91:8090/weevent\",\n" +
+                "        \"brokerUrl\": \"http://127.0.0.1:8090/weevent\",\n" +
                 "        \"payload\":\"{\\\"studentName\\\":\\\"lily\\\",\\\"studentAge\\\":12}\",\n" +
                 "        \"payloadType\": 0,\n" +
                 "        \"selectField\": null,\n" +
                 "        \"conditionField\": null,\n" +
                 "        \"conditionType\": 1,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseurl\": \"jdbc:mysql://182.254.159.91:3306/cep?user=root&password=WeEvent@2019\",\n" +
+                "        \"databaseurl\": \"jdbc:mysql://127.0.0.1:3306/cep?user=root&password=WeEvent@2019\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -210,14 +210,14 @@ public class ServiceTest {
                 " \t\t\"id\":1,\n" +
                 "        \"ruleName\": \"air3\",\n" +
                 "        \"fromDestination\": \"from.com.webank.weevent\",\n" +
-                "        \"brokerUrl\": \"http://182.254.159.91:8090/weevent\",\n" +
+                "        \"brokerUrl\": \"http://127.0.0.1:8090/weevent\",\n" +
                 "        \"payload\":\"{\\\"studentName\\\":\\\"lily\\\",\\\"studentAge\\\":12}\",\n" +
                 "        \"payloadType\": 0,\n" +
                 "        \"selectField\": null,\n" +
                 "        \"conditionField\": null,\n" +
                 "        \"conditionType\": 1,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseurl\": \"jdbc:mysql://182.254.159.91:3306/cep?user=root&password=WeEvent@2019\",\n" +
+                "        \"databaseurl\": \"jdbc:mysql://127.0.0.1:3306/cep?user=root&password=WeEvent@2019\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +

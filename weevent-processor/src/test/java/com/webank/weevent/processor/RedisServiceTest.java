@@ -25,7 +25,7 @@ public class RedisServiceTest {
         jedisPool.getResource().ping();
         Jedis jedis = jedisPool.getResource();
 
-        String bbb = "{\"brokerUrl\":\"http://182.254.159.91:8090/weevent\",\"conditionField\":\"temperate>35\",\"conditionType\":1,\"createdTime\":1570696435791,\"databaseUrl\":\"meifen\",\"errorCode\":\"1\",\"errorDestination\":\"test\",\"errorMessage\":\"test\",\"fromDestination\":\"com.webank.weevent.from\",\"id\":\"106\",\"payloadType\":0,\"ruleName\":\"air3\",\"selectField\":\"temperate\",\"status\":2,\"toDestination\":\"com.webank.weevent.test\",\"updatedTime\":1570696435791}";
+        String bbb = "{\"brokerUrl\":\"http://127.0.0.1:8090/weevent\",\"conditionField\":\"temperate>35\",\"conditionType\":1,\"createdTime\":1570696435791,\"databaseUrl\":\"meifen\",\"errorCode\":\"1\",\"errorDestination\":\"test\",\"errorMessage\":\"test\",\"fromDestination\":\"com.webank.weevent.from\",\"id\":\"106\",\"payloadType\":0,\"ruleName\":\"air3\",\"selectField\":\"temperate\",\"status\":2,\"toDestination\":\"com.webank.weevent.test\",\"updatedTime\":1570696435791}";
 
 
         JSONObject obj = JSONObject.parseObject(bbb);
@@ -59,14 +59,14 @@ public class RedisServiceTest {
                 " \t\t\"id\":1,\n" +
                 "        \"ruleName\": \"air3\",\n" +
                 "        \"fromDestination\": \"from.com.webank.weevent\",\n" +
-                "        \"brokerUrl\": \"http://182.254.159.91:8090/weevent\",\n" +
+                "        \"brokerUrl\": \"http://127.0.0.1:8090/weevent\",\n" +
                 "        \"payload\":\"{\\\"studentName\\\":\\\"lily\\\",\\\"studentAge\\\":12}\",\n" +
                 "        \"payloadType\": 0,\n" +
                 "        \"selectField\": null,\n" +
                 "        \"conditionField\": \"temperate>35\",\n" +
                 "        \"conditionType\": 1,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseurl\": \"jdbc:mysql://182.254.159.91:3306/cep?user=root&password=WeEvent@2019\",\n" +
+                "        \"databaseurl\": \"jdbc:mysql://127.0.0.1:3306/cep?user=root&password=WeEvent@2019\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
