@@ -6,6 +6,7 @@ import com.webank.weevent.processor.service.RedisService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.mybatis.spring.annotation.MapperScan;
+import org.quartz.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -21,7 +22,9 @@ import redis.clients.jedis.Protocol;
 @MapperScan(basePackages = "com.webank.weevent.processor")
 public class ProcessorApplication {
     public static ProcessorConfig processorConfig;
+
     public static ApplicationContext applicationContext;
+    private static Scheduler scheduler;
 
     @Autowired
     public void setContext(ApplicationContext context) {
@@ -30,16 +33,13 @@ public class ProcessorApplication {
 
     public static void main(String[] args) {
         log.info("start processor success");
-       // EmbedZookeeperServer.start(6181);
         SpringApplication.run(ProcessorApplication.class, args);
-
     }
 
     @Autowired
     public void setProcessorConfig(ProcessorConfig config) {
         processorConfig = config;
     }
-
 
 
     private static void exit() {

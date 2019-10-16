@@ -4,14 +4,14 @@ apply plugin: "io.spring.dependency-management"
 dependencies {
     // spring boot
     implementation("org.springframework.boot:spring-boot-starter")
-    
+
     implementation("org.springframework.boot:spring-boot-starter-web")
-    
+
     runtime('mysql:mysql-connector-java')
 
     // spring boot with log4j2
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
-    
+
     // avoid "Log4j appears to be running in a Servlet environment, but there's no log4j-web module available."
     implementation("org.apache.logging.log4j:log4j-web:2.11.2")
 
@@ -22,10 +22,10 @@ dependencies {
     implementation("log4j:log4j:1.2.17")
 
     implementation("com.webank.weevent:weevent-client:1.0.0")
-    
+
     //fastjson
     implementation("com.alibaba:fastjson:1.2.47")
-    
+
     // redis
     implementation("redis.clients:jedis:3.0.1")
 
@@ -35,11 +35,8 @@ dependencies {
 
     implementation("org.apache.commons:commons-jexl3:3.1")
 
-    // https://mvnrepository.com/artifact/com.dangdang/elastic-job-lite-core
-    implementation("com.dangdang:elastic-job-lite-core:2.1.5")
-
-    // https://mvnrepository.com/artifact/com.dangdang/elastic-job-lite-spring
-    implementation("com.dangdang:elastic-job-lite-spring:2.1.5")
+    // https://mvnrepository.com/artifact/org.quartz-scheduler/quartz
+    compile group: 'org.quartz-scheduler', name: 'quartz', version: '2.2.1'
 }
 
 bootJar {
