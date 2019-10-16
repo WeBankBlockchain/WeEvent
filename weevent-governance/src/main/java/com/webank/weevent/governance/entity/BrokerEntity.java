@@ -2,14 +2,10 @@ package com.webank.weevent.governance.entity;
 
 import java.util.List;
 
-import javax.validation.constraints.Min;
-
-import com.webank.weevent.governance.entity.base.BaseEntity;
 import com.webank.weevent.governance.entity.base.BrokerBase;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.hibernate.validator.constraints.URL;
 
 /**
  * BrokerEntity class

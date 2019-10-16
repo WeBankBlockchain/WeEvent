@@ -2,7 +2,6 @@ package com.webank.weevent.governance.entity;
 
 import java.util.Date;
 
-import com.webank.weevent.governance.entity.base.BaseEntity;
 import com.webank.weevent.governance.entity.base.TopicBase;
 
 import lombok.Data;
