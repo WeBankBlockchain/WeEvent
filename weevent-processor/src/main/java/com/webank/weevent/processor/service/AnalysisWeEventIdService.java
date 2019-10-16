@@ -14,7 +14,6 @@ import org.apache.commons.lang3.StringUtils;
 @Slf4j
 public class AnalysisWeEventIdService implements AutoCloseable {
 
-
     public static void analysisWeEventId(CEPRule rule, String eventId) throws BrokerException {
         if (StringUtils.isBlank(eventId)) {
             throw new BrokerException("eventId is empty");
@@ -53,11 +52,13 @@ public class AnalysisWeEventIdService implements AutoCloseable {
         String[] brokerArray = brokerUrl.split(Constants.QUALS_TO);
         String groupId = brokerArray[1];
         String sql = new StringBuffer("insert into t_historical_data").append("(")
-                .append("topic_name,group_id,block_number,event_id")
+                .append("topic_name,group_id,block_number,user_id,broker_id,event_id")
                 .append(")").append("values(").append("\"")
                 .append(cepRule.getFromDestination()).append("\",")
                 .append("\"").append(groupId).append("\",")
                 .append(lastBlock).append(",")
+                .append(cepRule.getUserId()).append(",")
+                .append(cepRule.getBrokerId()).append(",")
                 .append("\"").append(eventId).append("\"")
                 .append(")").toString();
         return sql;
