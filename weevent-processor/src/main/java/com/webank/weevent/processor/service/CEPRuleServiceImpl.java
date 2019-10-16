@@ -31,6 +31,8 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 public class CEPRuleServiceImpl implements CEPRuleService {
     //  generator the id
     private volatile int guid = 100;
+    @Autowired
+    private CEPRuleMapper cepRuleMapper;
 
     @Override
     public List<CEPRule> getCEPRuleListByPage(int currPage, int pageSize) {
@@ -40,9 +42,6 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         return cepRuleMapper.getCEPRuleListByPage(data);
     }
 
-    @Autowired
-    private CEPRuleMapper cepRuleMapper;
-
 
     @Override
     public int getCountByCondition(CEPRuleExample cEPRuleExample) {
@@ -51,7 +50,8 @@ public class CEPRuleServiceImpl implements CEPRuleService {
 
     @Override
     public List<CEPRule> getRulesByBrokerId(String brokerId) {
-        return cepRuleMapper.getRulesByBrokerId(brokerId);    }
+        return cepRuleMapper.getRulesByBrokerId(brokerId);
+    }
 
     @Override
     public List<CEPRule> getRulesByUserId(String userId) {
@@ -60,7 +60,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
 
     @Override
     public List<CEPRule> getRulesByUserIdAndBroker(String userId, String brokerId) {
-        return cepRuleMapper.getRulesByUserIdAndBroker(userId,brokerId);
+        return cepRuleMapper.getRulesByUserIdAndBroker(userId, brokerId);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -219,11 +219,11 @@ public class CEPRuleServiceImpl implements CEPRuleService {
             if (StringUtils.isBlank(record.getRuleName()) || record.getRuleName().isEmpty()) {
                 return Constants.RULENAME_IS_BLANK;
             }
-            if(StringUtils.isBlank(record.getUserId()) || record.getUserId().isEmpty()){
+            if (StringUtils.isBlank(record.getUserId()) || record.getUserId().isEmpty()) {
                 return Constants.USERID_IS_BLANK;
             }
 
-            if(StringUtils.isBlank(record.getBrokerId()) || record.getBrokerId().isEmpty()){
+            if (StringUtils.isBlank(record.getBrokerId()) || record.getBrokerId().isEmpty()) {
                 return Constants.BROKERID_IS_BLANK;
             }
             String payload = record.getPayload();
