@@ -73,9 +73,9 @@ public class TopicService {
         CloseableHttpClient client = commonService.generateHttpClient(brokerEntity.getBrokerUrl());
         String url;
         if (groupId == null) {
-            url = new StringBuffer(brokerEntity.getBrokerUrl()).append("/rest/close?topic=").append(topic).toString();
+            url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_CLOSE).append("?topic=").append(topic).toString();
         } else {
-            url = new StringBuffer(brokerEntity.getBrokerUrl()).append("/rest/close?topic=").append(topic)
+            url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_CLOSE).append("?topic=").append(topic)
                     .append("&groupId=").append(groupId).toString();
 
         }
