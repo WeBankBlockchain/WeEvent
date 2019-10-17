@@ -1,6 +1,7 @@
 package com.webank.weevent.governance.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.entity.PermissionEntity;
@@ -34,15 +35,11 @@ public class PermissionService {
         if (CollectionUtils.isEmpty(userIds)) {
             return false;
         }
-        Boolean flag = false;
-        for (Integer id : userIds) {
-            if (id.toString().equals(userId)) {
-                flag = true;
-                break;
-            }
+        List<Integer> collect = userIds.stream().filter(it -> it.toString().equals(userId)).collect(Collectors.toList());
+        if (!collect.isEmpty()) {
+            return true;
         }
-
-        return flag;
+        return false;
     }
 
 
