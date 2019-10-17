@@ -16,9 +16,10 @@ public class JsoupUtil {
     }
 
     public static String clean(String content) {
-        if (StringUtils.isNotBlank(content)) {
-            content = content.trim();
+        String param = content;
+        if (StringUtils.isNotBlank(param)) {
+            param = param.trim();
         }
-        return Jsoup.clean(content, "", whitelist, outputSettings);
+        return Jsoup.clean(param, "", whitelist, outputSettings);
     }
 }

@@ -22,6 +22,10 @@ public class GovernanceResult {
     // response data
     private Object data;
 
+    // total number;
+    private Integer totalCount;
+
+
     public static GovernanceResult build(Integer status, String msg, Object data) {
         return new GovernanceResult(status, msg, data);
     }
