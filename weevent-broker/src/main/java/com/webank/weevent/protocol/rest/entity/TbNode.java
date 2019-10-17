@@ -25,10 +25,6 @@ public class TbNode {
 
     private String nodeId;
     private String nodeName;
-    private Integer groupId;
-    private String nodeIp;
-    private Integer p2pPort;
-    private String description;
     private BigInteger blockNumber;
     private BigInteger pbftView;
     private int nodeActive;
