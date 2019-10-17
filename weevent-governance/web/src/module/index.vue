@@ -49,9 +49,21 @@ export default {
           this.$store.commit('set_menu', ['主题管理', '主题列表'])
           this.$router.push('./topicList')
           break
+        case '2-2':
+          this.$store.commit('set_menu', ['主题管理', '事件统计'])
+          this.$router.push('./statistics')
+          break
         case '3':
           this.$store.commit('set_menu', ['订阅列表'])
           this.$router.push('./subcription')
+          break
+        case '4-1':
+          this.$store.commit('set_menu', ['规则引擎', '规则管理'])
+          this.$router.push('./rule')
+          break
+        case '4-2':
+          this.$store.commit('set_menu', ['规则引擎', '数据源设置'])
+          this.$router.push('./dataBase')
           break
       }
     }
@@ -101,8 +113,25 @@ export default {
         this.$store.commit('set_active', '2-1')
         this.$store.commit('set_menu', ['主题管理', '主题列表'])
         break
+      case '/statistics':
+        this.$store.commit('set_active', '2-2')
+        this.$store.commit('set_menu', ['主题管理', '事件统计'])
+        break
       case '/subcription':
         this.$store.commit('set_active', '3')
+        this.$store.commit('set_menu', ['订阅列表'])
+        break
+      case '/rule':
+        this.$store.commit('set_active', '4-1')
+        this.$store.commit('set_menu', ['规则引擎', '规则管理'])
+        break
+      case '/ruleDetail':
+        this.$store.commit('set_active', '4-1')
+        this.$store.commit('set_menu', ['规则引擎', '规则管理', '规则详情'])
+        break
+      case '/dataBase':
+        this.$store.commit('set_active', '4-2')
+        this.$store.commit('set_menu', ['规则引擎', '数据源设置'])
         break
     }
   },

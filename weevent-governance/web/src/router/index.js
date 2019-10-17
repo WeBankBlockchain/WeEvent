@@ -7,12 +7,16 @@ import reset from '../components/reset'
 import index from '../module/index'
 import topicList from '../components/topicList'
 import subcription from '../components/subcription'
+import rule from '../components/rule'
+import ruleDetail from '../components/ruleDetail'
 // WeBase Module
 import overview from '../components/webase/overview'
 import group from '../components/webase/group'
 import blockInfor from '../components/webase/blockInfor'
 import transactionInfor from '../components/webase/transactionInfor'
 import servers from '../components/servers'
+import dataBase from '../components/dataBase'
+import statistics from '../components/statistics'
 
 Vue.use(Router)
 
@@ -47,6 +51,22 @@ export default new Router({
         path: '/transactionInfor',
         name: 'transactionInfor',
         component: transactionInfor
+      }, {
+        path: '/rule',
+        name: 'rule',
+        component: rule
+      }, {
+        path: '/ruleDetail',
+        name: 'ruleDetail',
+        component: ruleDetail
+      }, {
+        path: '/dataBase',
+        name: 'dataBase',
+        component: dataBase
+      }, {
+        path: '/statistics',
+        name: 'statistics',
+        component: statistics
       }]
     }, {
       path: '/servers',

@@ -47,8 +47,30 @@ export default {
       }
     }
   },
+  computed: {
+    brokerId () {
+      return this.$store.state.brokerId
+    },
+    groupId () {
+      return this.$store.state.groupId
+    }
+  },
+  watch: {
+    brokerId () {
+      if (localStorage.getItem('groupId')) {
+        this.transDaily()
+      }
+    },
+    groupId () {
+      this.transDaily()
+    }
+  },
   mounted () {
-    this.transDaily()
+    setTimeout(fun => {
+      if (localStorage.getItem('groupId') && localStorage.getItem('brokerId')) {
+        this.transDaily()
+      }
+    }, 500)
   },
   methods: {
     transDaily () {
