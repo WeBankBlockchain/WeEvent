@@ -53,9 +53,6 @@ public class BrokerService {
     @Autowired
     private CommonService commonService;
 
-    private final static String brokerListUrl = "/admin/getVersion";
-
-    private final static String weBaseNodeUrl = "/node/nodeInfo/1";
 
     private final static String HTTP_GET_SUCCESS_CODE = "0";
 
@@ -154,7 +151,7 @@ public class BrokerService {
             return ErrorCode.ILLEGAL_INPUT;
         }
         String version = this.getVersion(request, brokerEntity.getBrokerUrl());
-        if (version != null && !version.startsWith(this.weEventVersion) && StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
+        if (version != null && !version.startsWith(weEventVersion) && StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
             return ErrorCode.WEBASE_REQUIRED;
         }
         //checkServerUrl
@@ -175,7 +172,7 @@ public class BrokerService {
             return ErrorCode.ILLEGAL_INPUT;
         }
         String version = this.getVersion(request, brokerEntity.getBrokerUrl());
-        if (version != null && !version.startsWith(this.weEventVersion) && StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
+        if (version != null && !version.startsWith(weEventVersion) && StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
             return ErrorCode.WEBASE_REQUIRED;
         }
         return check(brokerEntity, request);
@@ -191,9 +188,9 @@ public class BrokerService {
             String brokerServerUrl = brokerEntity.getBrokerUrl();
             log.info("check Broker server, url:{}", brokerServerUrl);
             try {
-                checkUrl(brokerServerUrl, brokerListUrl, request);
+                checkUrl(brokerServerUrl, ConstantProperties.BROKER_LIST_URL, request);
             } catch (GovernanceException e) {
-                log.error("check Broker server failed. e:{}", e);
+                log.error("check Broker server failed. e", e);
                 return ErrorCode.BROKER_CONNECT_ERROR;
             }
         }
@@ -201,9 +198,9 @@ public class BrokerService {
             String WebaseServerUrl = brokerEntity.getWebaseUrl();
             log.info("check WeBase server, url:{}", WebaseServerUrl);
             try {
-                checkUrl(WebaseServerUrl, weBaseNodeUrl, request);
+                checkUrl(WebaseServerUrl, ConstantProperties.WEBASE_NODE_URL, request);
             } catch (GovernanceException e) {
-                log.error("check WeBase server failed. e:{}", e);
+                log.error("check WeBase server failed. e", e);
                 return ErrorCode.WEBASE_CONNECT_ERROR;
             }
         }
@@ -226,24 +223,24 @@ public class BrokerService {
             jsonObject = JSONObject.parseObject(responseResult);
         } catch (Exception e) {
             log.error("url {}, connect fail,error:{}", headUrl, e.getMessage());
-            throw new GovernanceException("url " + headUrl + " connect fail", e);
+            throw new GovernanceException("url:{}" + headUrl + " connect fail", e);
         }
 
-        if (!this.HTTP_GET_SUCCESS_CODE.equals(String.valueOf(jsonObject.get("code")))) {
+        if (!HTTP_GET_SUCCESS_CODE.equals(String.valueOf(jsonObject.get("code")))) {
             log.error("url {}, connect fail.", headUrl);
             throw new GovernanceException("url " + headUrl + " connect fail");
         }
     }
 
     public String getVersion(HttpServletRequest request, String brokerUrl) throws GovernanceException {
-        String versionUrl = brokerUrl + brokerListUrl;
+        String versionUrl = brokerUrl + ConstantProperties.BROKER_LIST_URL;
         try {
             CloseableHttpResponse versionResponse = commonService.getCloseResponse(request, versionUrl);
             String mes = EntityUtils.toString(versionResponse.getEntity());
             JSONObject jsonObject = JSONObject.parseObject(mes);
             return jsonObject.get("weEventVersion") == null ? null : jsonObject.get("weEventVersion").toString();
         } catch (Exception e) {
-            log.error("get version fail,error:{}", e);
+            log.error("get version fail,error:", e);
             throw new GovernanceException("get version fail,error:{}");
         }
     }

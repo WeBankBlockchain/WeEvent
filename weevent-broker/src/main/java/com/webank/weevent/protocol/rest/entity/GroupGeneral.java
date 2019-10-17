@@ -19,10 +19,7 @@ import lombok.Data;
 @Data
 public class GroupGeneral {
 
-    private String groupId;
-    private int orgCount;
     private int nodeCount;
-    private int contractCount;
     private BigInteger transactionCount = BigInteger.ZERO;
     private BigInteger latestBlock = BigInteger.ZERO;
 
