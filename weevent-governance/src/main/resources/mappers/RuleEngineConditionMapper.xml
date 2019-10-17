@@ -14,7 +14,6 @@
     </resultMap>
 
 
-    <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
         id,create_date,last_update,rule_id,connection_operator,conditional_operator,column_name,sql_condition
     </sql>

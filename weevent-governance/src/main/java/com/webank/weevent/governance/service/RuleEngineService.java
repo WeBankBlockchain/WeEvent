@@ -396,28 +396,6 @@ public class RuleEngineService {
             checkRule(rule);
             //Start the rules engine
             this.startProcessRule(request, rule);
-            /* String jsonString = JSONObject.toJSONString(rule);
-            Map map = JSONObject.parseObject(jsonString, Map.class);
-            map.put("id", rule.getCepId());
-            map.put("updatedTime", rule.getLastUpdate());
-            map.put("createdTime", rule.getCreateDate());
-            String url = new StringBuffer(this.getProcessorUrl(rule.getBrokerUrl())).append(ConstantProperties.PROCESSOR_START_CEP_RULE).toString();
-            CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(map));
-            int statusCode = closeResponse.getStatusLine().getStatusCode();
-            if (200 != statusCode) {
-                log.error(ErrorCode.PROCESS_CONNECT_ERROR.getCodeDesc());
-                throw new GovernanceException(ErrorCode.PROCESS_CONNECT_ERROR);
-            }
-            //deal processor result
-            String mes = EntityUtils.toString(closeResponse.getEntity());
-            JSONObject jsonObject = JSONObject.parseObject(mes);
-            Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
-            String msg = jsonObject.get("errorMsg").toString();
-            if (this.PROCESSOR_SUCCESS_CODE != code) {
-                log.error("processor start ruleEngine fail,error:{}", msg);
-                throw new GovernanceException("processor start ruleEngine fail! " + msg);
-            }*/
-
             //modify status
             RuleEngineEntity engineEntity = new RuleEngineEntity();
             engineEntity.setId(rule.getId());

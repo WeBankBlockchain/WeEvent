@@ -3,7 +3,6 @@
 <mapper namespace="com.webank.weevent.governance.mapper.CirculationDatabaseMapper">
 
 
-    <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.webank.weevent.governance.entity.CirculationDatabaseEntity">
         <result column="id" property="id" jdbcType="INTEGER"/>
         <result column="create_date" property="createDate" jdbcType="TIMESTAMP"/>
@@ -13,7 +12,6 @@
         <result column="database_url" property="databaseUrl" jdbcType="VARCHAR"/>
     </resultMap>
 
-    <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
         id,create_date,last_update,user_id,broker_id,database_url
     </sql>

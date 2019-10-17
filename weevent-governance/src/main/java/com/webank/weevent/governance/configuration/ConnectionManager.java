@@ -86,13 +86,6 @@ public class ConnectionManager {
         HttpClientContext clientContext = HttpClientContext.adapt(context);
         HttpRequest request = clientContext.getRequest();
         return !(request instanceof HttpEntityEnclosingRequest);
-      /*
-       boolean idempotent = !(request instanceof HttpEntityEnclosingRequest);
-       if (idempotent) {
-            // Retry if the request is considered idempotent
-            return true;
-        }
-        return false;*/
     };
 
     /**
