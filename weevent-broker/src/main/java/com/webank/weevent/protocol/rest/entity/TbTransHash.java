@@ -28,7 +28,6 @@ public class TbTransHash {
     private String transTo;
     private BigInteger blockNumber;
     private LocalDateTime blockTimestamp;
-    private Integer statisticsFlag;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
 
