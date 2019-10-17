@@ -7,13 +7,13 @@
       element-loading-spinner='el-icon-loading'
       element-loading-text='数据加载中...'
       element-loading-background='rgba(256,256,256,0.8)'
-      @expand-change='readDetial'
+      @expand-change='readDetail'
     >
       <el-table-column type='expand'>
         <template slot-scope='props'>
             <el-tabs type="border-card">
               <el-tab-pane label="input">
-                <ul class='trans_detial'>
+                <ul class='trans_detail'>
                   <li>
                     <span>Block Height:</span>
                     <span>{{props.row.blockNumber}}</span>
@@ -34,7 +34,7 @@
               </el-tab-pane>
 
               <el-tab-pane label="event" :disabled="!props.row.logs.hasEvent">
-                <ul class='trans_detial'>
+                <ul class='trans_detail'>
                   <li>
                     <span>Address:</span>
                     <span>{{props.row.logs.address}}</span>
@@ -109,7 +109,7 @@ export default {
         message: '复制成功'
       })
     },
-    detial (e) {
+    detail (e) {
       this.$alert(e, '错误信息')
     },
     transList () {
@@ -130,7 +130,7 @@ export default {
       })
       this.loading = false
     },
-    readDetial (e) {
+    readDetail (e) {
       let url = '/' + localStorage.getItem('groupId') + '/' + e.blockNumber + '?brokerId=' + localStorage.getItem('brokerId')
       let index = this.tableData.indexOf(e)
       API.blockByNumber(url).then(res => {
