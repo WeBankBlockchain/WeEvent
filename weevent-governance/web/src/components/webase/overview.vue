@@ -29,8 +29,8 @@
   </div>
 </template>
 <script>
-import chart from './chart.vue'
 import API from '../../API/resource.js'
+import chart from './chart.vue'
 export default {
   components: {
     chart
@@ -52,9 +52,16 @@ export default {
   },
   watch: {
     brokerId () {
-      this.general()
+      if (localStorage.getItem('groupId')) {
+        this.general()
+      }
     },
-    groupId (nVal) {
+    groupId () {
+      this.general()
+    }
+  },
+  mounted () {
+    if (localStorage.getItem('groupId') && localStorage.getItem('brokerId')) {
       this.general()
     }
   },
@@ -84,9 +91,6 @@ export default {
       this.$store.commit('set_menu', ['区块链信息', '区块', '交易详情'])
       this.$router.push('./transactionInfor')
     }
-  },
-  mounted () {
-    this.general()
   }
 }
 </script>

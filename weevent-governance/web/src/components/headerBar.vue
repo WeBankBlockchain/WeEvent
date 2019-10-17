@@ -119,8 +119,18 @@ export default {
     },
     selecServers (e) {
       this.server = this.servers[e].name
+      let isConfigRule = this.servers[e].isConfigRule
       this.$store.commit('set_id', this.servers[e].id)
+      this.$store.commit('setConfigRule', this.servers[e].isConfigRule)
       localStorage.setItem('brokerId', this.servers[e].id)
+      if (isConfigRule !== '1') {
+        let url = this.$route.path
+        if (url === '/rule' || url === '/ruleDetail' || url === '/dataBase') {
+          this.$store.commit('set_active', '1-1')
+          this.$store.commit('set_menu', ['区块链信息', '数据概览'])
+          this.$router.push('./index')
+        }
+      }
     },
     selectGroup (e) {
       this.$store.commit('set_groupId', e)
@@ -140,6 +150,7 @@ export default {
                   vm.server = e.name
                   let id = e.id
                   vm.$store.commit('set_id', id)
+                  vm.$store.commit('setConfigRule', e.isConfigRule)
                   localStorage.setItem('brokerId', id)
                 }
               })
@@ -147,6 +158,7 @@ export default {
               vm.server = res.data[0].name
               let id = res.data[0].id
               vm.$store.commit('set_id', id)
+              vm.$store.commit('setConfigRule', res.data[0].isConfigRule)
               localStorage.setItem('brokerId', id)
             }
             vm.listGroup()
@@ -162,21 +174,27 @@ export default {
       })
     },
     listGroup () {
+      let vm = this
       API.listGroup('?brokerId=' + localStorage.getItem('brokerId')).then(res => {
         // if groupId is not existed so set it
         // else use existed groupId
-        if (!localStorage.getItem('grouId')) {
-          this.groupList = [].concat(res.data)
-          this.$store.commit('set_groupId', res.data[0])
-          localStorage.setItem('groupId', res.data[0])
+        vm.groupList = [].concat(res.data)
+        if (!localStorage.getItem('groupId')) {
+          vm.$nextTick(fun => {
+            vm.$store.commit('set_groupId', res.data[0])
+            localStorage.setItem('groupId', res.data[0])
+          })
+        } else {
+          vm.$store.commit('set_groupId', localStorage.getItem('groupId'))
         }
       })
     },
     getVersion () {
       let url = '?brokerId=' + localStorage.getItem('brokerId')
+      let vm = this
       API.getVersion(url).then(res => {
         if (res.data.code === 0) {
-          this.version = Object.assign({}, res.data.data)
+          vm.version = Object.assign({}, res.data.data)
         }
       })
     }

@@ -8,10 +8,10 @@ const getDate = (timestamp) => {
   const year = date.getFullYear()
   const month = date.getMonth() + 1
   const day = date.getDate()
-  return `${year}年${month >= 10 ? month : '0' + month}月${day >= 10 ? day : '0' + day}日`
+  return `${year}-${month >= 10 ? month : '0' + month}-${day >= 10 ? day : '0' + day}`
 }
 
-const getDateDetial = (timestamp) => {
+const getDateDetail = (timestamp) => {
   const date = new Date(timestamp)
   const year = date.getFullYear()
   const month = date.getMonth() + 1
@@ -116,12 +116,25 @@ const getLastWeek = () => {
   return lastWeek
 }
 
+const getTimeList = (start, end) => {
+  let n = 0
+  let getDayList = []
+  do {
+    let d = 24 * 3600 * 1000
+    var thisData = d * n + start
+    getDayList.push(getDate(thisData))
+    n++
+  } while (thisData < end)
+  return getDayList
+}
+
 export {
   getAge,
   getAstro,
   dateBeforeAfter,
   convertStrToInt,
   getDate,
-  getDateDetial,
-  getLastWeek
+  getDateDetail,
+  getLastWeek,
+  getTimeList
 }

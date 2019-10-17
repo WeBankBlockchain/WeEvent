@@ -23,11 +23,27 @@
       <el-menu-item index='2-1'>
         主题列表
       </el-menu-item>
+      <el-menu-item index='2-2'>
+        事件统计
+      </el-menu-item>
     </el-submenu>
     <el-menu-item index="3">
       <i class="el-icon-document"></i>
       <span slot="title">订阅列表</span>
     </el-menu-item>
+    <!-- <el-submenu index="4" v-show="isConfigRule === '1'"> -->
+    <el-submenu index="4">
+      <template slot='title'>
+        <i class="el-icon-s-tools"></i>
+        <span slot="title">规则引擎</span>
+      </template>
+      <el-menu-item index='4-1'>
+        规则管理
+      </el-menu-item>
+      <el-menu-item index='4-2'>
+        数据源设置
+      </el-menu-item>
+    </el-submenu>
   </el-menu>
 </template>
 <script>
@@ -49,11 +65,21 @@ export default {
           this.$emit('selecChange', e)
         }
       }
+      if (e === '4-1') {
+        let url = this.$route.path
+        if (url === '/ruleDetail') {
+          this.$store.commit('set_active', e)
+          this.$emit('selecChange', e)
+        }
+      }
     }
   },
   computed: {
     active () {
       return this.$store.state.active
+    },
+    isConfigRule () {
+      return this.$store.state.isConfigRule
     }
   }
 }
