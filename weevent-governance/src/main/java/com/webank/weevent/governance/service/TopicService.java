@@ -1,7 +1,7 @@
 package com.webank.weevent.governance.service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,7 +79,7 @@ public class TopicService {
                     .append("&groupId=").append(groupId).toString();
 
         }
-        log.info("url: " + url);
+        log.info("url:{}", url);
         HttpGet get = commonService.getMethod(url, request);
 
         try {
@@ -121,7 +121,7 @@ public class TopicService {
             url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_LIST)
                     .append("?pageIndex=").append(pageIndex).append("&pageSize=").append(pageSize).toString();
         }
-        log.info("url: " + url);
+        log.info("url: {}", url);
 
         HttpGet get = commonService.getMethod(url, request);
         try {
@@ -176,7 +176,7 @@ public class TopicService {
             url = new StringBuffer(url).append("&groupId=").append(groupId).toString();
         }
 
-        log.info("getTopicInfo url: " + url);
+        log.info("getTopicInfo url:{}", url);
 
         try {
             HttpGet get = commonService.getMethod(url, request);
@@ -187,7 +187,7 @@ public class TopicService {
 
             if (result != null) {
                 // get creator from database
-                List<TopicEntity> creators = this.topicInfoMapper.getCreator(brokerId, groupId, new ArrayList<>(Arrays.asList(topic)));
+                List<TopicEntity> creators = this.topicInfoMapper.getCreator(brokerId, groupId, new ArrayList<>(Collections.singletonList(topic)));
                 if (CollectionUtils.isNotEmpty(creators)) {
                     result.setCreater(creators.get(0).getCreater());
                 }
@@ -228,7 +228,7 @@ public class TopicService {
         } else {
             url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_OPEN).append("?topic=").append(topic).toString();
         }
-        log.info("url: " + url);
+        log.info("url: {}", url);
         String mes;
         try {
             HttpGet get = commonService.getMethod(url, request);
@@ -251,7 +251,7 @@ public class TopicService {
     }
 
     private String getKey(Integer brokerId, String groupId, String topicName) {
-        return brokerId + SPLIT + topicName + SPLIT + groupId;
+        return new StringBuilder(brokerId).append(SPLIT).append(topicName).append(SPLIT).append(groupId).toString();
     }
 
 }

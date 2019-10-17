@@ -151,7 +151,7 @@ public class BrokerService {
             return ErrorCode.ILLEGAL_INPUT;
         }
         String version = this.getVersion(request, brokerEntity.getBrokerUrl());
-        if (version != null && !version.startsWith(this.weEventVersion) && StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
+        if (version != null && !version.startsWith(weEventVersion) && StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
             return ErrorCode.WEBASE_REQUIRED;
         }
         //checkServerUrl
@@ -172,7 +172,7 @@ public class BrokerService {
             return ErrorCode.ILLEGAL_INPUT;
         }
         String version = this.getVersion(request, brokerEntity.getBrokerUrl());
-        if (version != null && !version.startsWith(this.weEventVersion) && StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
+        if (version != null && !version.startsWith(weEventVersion) && StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
             return ErrorCode.WEBASE_REQUIRED;
         }
         return check(brokerEntity, request);
@@ -190,7 +190,7 @@ public class BrokerService {
             try {
                 checkUrl(brokerServerUrl, ConstantProperties.BROKER_LIST_URL, request);
             } catch (GovernanceException e) {
-                log.error("check Broker server failed. e:{}", e);
+                log.error("check Broker server failed. e", e);
                 return ErrorCode.BROKER_CONNECT_ERROR;
             }
         }
@@ -200,7 +200,7 @@ public class BrokerService {
             try {
                 checkUrl(WebaseServerUrl, ConstantProperties.WEBASE_NODE_URL, request);
             } catch (GovernanceException e) {
-                log.error("check WeBase server failed. e:{}", e);
+                log.error("check WeBase server failed. e", e);
                 return ErrorCode.WEBASE_CONNECT_ERROR;
             }
         }
@@ -223,10 +223,10 @@ public class BrokerService {
             jsonObject = JSONObject.parseObject(responseResult);
         } catch (Exception e) {
             log.error("url {}, connect fail,error:{}", headUrl, e.getMessage());
-            throw new GovernanceException("url " + headUrl + " connect fail", e);
+            throw new GovernanceException("url:{}" + headUrl + " connect fail", e);
         }
 
-        if (!this.HTTP_GET_SUCCESS_CODE.equals(String.valueOf(jsonObject.get("code")))) {
+        if (!HTTP_GET_SUCCESS_CODE.equals(String.valueOf(jsonObject.get("code")))) {
             log.error("url {}, connect fail.", headUrl);
             throw new GovernanceException("url " + headUrl + " connect fail");
         }
@@ -240,7 +240,7 @@ public class BrokerService {
             JSONObject jsonObject = JSONObject.parseObject(mes);
             return jsonObject.get("weEventVersion") == null ? null : jsonObject.get("weEventVersion").toString();
         } catch (Exception e) {
-            log.error("get version fail,error:{}", e);
+            log.error("get version fail,error:", e);
             throw new GovernanceException("get version fail,error:{}");
         }
     }
