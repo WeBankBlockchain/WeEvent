@@ -5,6 +5,7 @@ import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.security.cert.X509Certificate;
+
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -29,7 +30,7 @@ public class HttpsClientRequestFactory extends SimpleClientHttpRequestFactory {
 
             HttpsURLConnection httpsConnection = (HttpsURLConnection) connection;
 
-            TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+            TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
                 @Override
                 public java.security.cert.X509Certificate[] getAcceptedIssuers() {
                     return null;
@@ -43,7 +44,7 @@ public class HttpsClientRequestFactory extends SimpleClientHttpRequestFactory {
                 public void checkServerTrusted(X509Certificate[] certs, String authType) {
                 }
 
-            } };
+            }};
 
             SSLContext sslContext = SSLContext.getInstance("TLS");
             sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
@@ -98,7 +99,7 @@ public class HttpsClientRequestFactory extends SimpleClientHttpRequestFactory {
 
         @Override
         public Socket createSocket(final String host, final int port, final InetAddress localAddress,
-                final int localPort) throws IOException {
+                                   final int localPort) throws IOException {
             final Socket underlyingSocket = delegate.createSocket(host, port, localAddress, localPort);
             return overrideProtocol(underlyingSocket);
         }
@@ -111,7 +112,7 @@ public class HttpsClientRequestFactory extends SimpleClientHttpRequestFactory {
 
         @Override
         public Socket createSocket(final InetAddress host, final int port, final InetAddress localAddress,
-                final int localPort) throws IOException {
+                                   final int localPort) throws IOException {
             final Socket underlyingSocket = delegate.createSocket(host, port, localAddress, localPort);
             return overrideProtocol(underlyingSocket);
         }
@@ -120,7 +121,7 @@ public class HttpsClientRequestFactory extends SimpleClientHttpRequestFactory {
             if (!(socket instanceof SSLSocket)) {
                 throw new RuntimeException("An instance of SSLSocket is expected");
             }
-            ((SSLSocket) socket).setEnabledProtocols(new String[] { "TLSv1" });
+            ((SSLSocket) socket).setEnabledProtocols(new String[]{"TLSv1"});
             return socket;
         }
     }
