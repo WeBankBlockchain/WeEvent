@@ -29,10 +29,6 @@ public class ResponseData<T> {
      */
     private String message;
 
-    /**
-     * The total number of data
-     */
-    private Integer totalCount;
 
     /**
      * set a ErrorCode type errorCode.

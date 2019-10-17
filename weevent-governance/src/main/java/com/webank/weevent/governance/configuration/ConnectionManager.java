@@ -5,6 +5,7 @@ import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManager;
@@ -34,8 +35,6 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * http connect pool cofigure
- * 
- * @date 2018/04/30
  */
 @Configuration
 @Slf4j
@@ -86,12 +85,7 @@ public class ConnectionManager {
 
         HttpClientContext clientContext = HttpClientContext.adapt(context);
         HttpRequest request = clientContext.getRequest();
-        boolean idempotent = !(request instanceof HttpEntityEnclosingRequest);
-        if (idempotent) {
-            // Retry if the request is considered idempotent
-            return true;
-        }
-        return false;
+        return !(request instanceof HttpEntityEnclosingRequest);
     };
 
     /**

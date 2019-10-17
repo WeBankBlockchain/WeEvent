@@ -10,7 +10,7 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface TopicInfoMapper {
 
-    List<TopicEntity> getCreator(@Param("brokerId") Integer brokerId, @Param("topicNameList") List<String> topicNameList);
+    List<TopicEntity> getCreator(@Param("brokerId") Integer brokerId,@Param("groupId") String groupId, @Param("topicNameList") List<String> topicNameList);
 
     Boolean openBrokeTopic(@Param("topicEntity") TopicEntity topicEntity);
 

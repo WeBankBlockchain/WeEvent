@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.entity.BrokerEntity;
+import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.service.BrokerService;
 import com.webank.weevent.governance.service.CommonService;
 
@@ -29,14 +30,6 @@ public class ForwardWebaseFilter implements Filter {
     @Autowired
     private CommonService commonService;
 
-    private static final String transDaily = "/group/transDaily";
-    private static final String general = "/group/general";
-    private static final String transList = "/transaction/transList";
-    private static final String blockList = "/block/blockList";
-    private static final String nodeList = "/node/nodeList";
-    private static final String questionMark = "?";
-    private static final String andSymbol = "&";
-    private static final String layerSeparate = "/";
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -67,46 +60,46 @@ public class ForwardWebaseFilter implements Filter {
 
     private String mappingWeEventUrl(String subStrUrl) {
         String weEventUrl = "";
-        if (subStrUrl.contains(this.transDaily)) {
-            weEventUrl = spliceNewUrl(subStrUrl, this.transDaily);
-        } else if (subStrUrl.contains(this.general)) {
-            weEventUrl = spliceNewUrl(subStrUrl, this.general);
-        } else if (subStrUrl.contains(this.transList)) {
-            weEventUrl = spliceNewUrl(subStrUrl, this.transList);
-        } else if (subStrUrl.contains(this.blockList)) {
-            weEventUrl = spliceNewUrl(subStrUrl, this.blockList);
-        } else if (subStrUrl.contains(this.nodeList)) {
-            weEventUrl = spliceNewUrl(subStrUrl, this.nodeList);
+        if (subStrUrl.contains(ConstantProperties.BROKER_TRANS_DAILY)) {
+            weEventUrl = spliceNewUrl(subStrUrl, ConstantProperties.BROKER_TRANS_DAILY);
+        } else if (subStrUrl.contains(ConstantProperties.BROKER_GROUP_GENERAL)) {
+            weEventUrl = spliceNewUrl(subStrUrl, ConstantProperties.BROKER_GROUP_GENERAL);
+        } else if (subStrUrl.contains(ConstantProperties.BROKER_TRANS_LIST)) {
+            weEventUrl = spliceNewUrl(subStrUrl, ConstantProperties.BROKER_TRANS_LIST);
+        } else if (subStrUrl.contains(ConstantProperties.BROKER_BLOCK_LIST)) {
+            weEventUrl = spliceNewUrl(subStrUrl, ConstantProperties.BROKER_BLOCK_LIST);
+        } else if (subStrUrl.contains(ConstantProperties.BROKER_NODE_LIST)) {
+            weEventUrl = spliceNewUrl(subStrUrl, ConstantProperties.BROKER_NODE_LIST);
 
         }
         return weEventUrl;
     }
 
     private String spliceNewUrl(String subStrUrl, String key) {
-        if (subStrUrl.contains(this.questionMark)) {
-            String midUrl = subStrUrl.substring(subStrUrl.indexOf(key) + key.length() + 1, subStrUrl.indexOf(this.questionMark));
-            String afterUrl = subStrUrl.substring(subStrUrl.indexOf(this.questionMark) + 1, subStrUrl.length() - 1);
-            if (key.equals(this.transDaily) || key.equals(this.general)) {
-                midUrl = new StringBuffer(this.questionMark).append("groupId=").append(midUrl).append(this.andSymbol).append(afterUrl).toString();
+        if (subStrUrl.contains(ConstantProperties.QUESTION_MARK)) {
+            String midUrl = subStrUrl.substring(subStrUrl.indexOf(key) + key.length() + 1, subStrUrl.indexOf(ConstantProperties.QUESTION_MARK));
+            String afterUrl = subStrUrl.substring(subStrUrl.indexOf(ConstantProperties.QUESTION_MARK) + 1, subStrUrl.length() - 1);
+            if (key.equals(ConstantProperties.BROKER_TRANS_DAILY) || key.equals(ConstantProperties.BROKER_GROUP_GENERAL)) {
+                midUrl = new StringBuffer(ConstantProperties.QUESTION_MARK).append("groupId=").append(midUrl).append(ConstantProperties.AND_SYMBOL).append(afterUrl).toString();
                 return key + midUrl;
             } else {
                 // if key.equals(this.blockList) || key.equals(this.nodeList) || key.equals(this.transList)
-                String[] split = midUrl.split(this.layerSeparate);
-                midUrl = new StringBuffer(this.questionMark).append("groupId=").append(split[0]).append(this.andSymbol)
-                        .append("pageNumber=").append(split[1]).append(this.andSymbol).append("pageSize=").append(split[2])
-                        .append(this.andSymbol).append(afterUrl).toString();
+                String[] split = midUrl.split(ConstantProperties.LAYER_SEPARATE);
+                midUrl = new StringBuffer(ConstantProperties.QUESTION_MARK).append("groupId=").append(split[0]).append(ConstantProperties.AND_SYMBOL)
+                        .append("pageNumber=").append(split[1]).append(ConstantProperties.AND_SYMBOL).append("pageSize=").append(split[2])
+                        .append(ConstantProperties.AND_SYMBOL).append(afterUrl).toString();
                 return key + midUrl;
             }
         } else {
             String midUrl = subStrUrl.substring(subStrUrl.indexOf(key) + key.length() + 1);
-            if (key.equals(this.transDaily) || key.equals(this.general)) {
-                midUrl = new StringBuffer(this.questionMark).append("groupId=").append(midUrl).toString();
+            if (key.equals(ConstantProperties.BROKER_GROUP_GENERAL) || key.equals(ConstantProperties.BROKER_GROUP_GENERAL)) {
+                midUrl = new StringBuffer(ConstantProperties.QUESTION_MARK).append("groupId=").append(midUrl).toString();
                 return key + midUrl;
             } else {
                 // if key.equals(this.blockList) || key.equals(this.nodeList) || key.equals(this.transList)
-                String[] split = midUrl.split(this.layerSeparate);
-                midUrl = new StringBuffer(this.questionMark).append("groupId=").append(split[0]).append(this.andSymbol)
-                        .append("pageNumber=").append(split[1]).append(this.andSymbol).append("pageSize=").append(split[2])
+                String[] split = midUrl.split(ConstantProperties.LAYER_SEPARATE);
+                midUrl = new StringBuffer(ConstantProperties.QUESTION_MARK).append("groupId=").append(split[0]).append(ConstantProperties.AND_SYMBOL)
+                        .append("pageNumber=").append(split[1]).append(ConstantProperties.AND_SYMBOL).append("pageSize=").append(split[2])
                         .toString();
                 return key + midUrl;
             }

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.webank.weevent.governance.mapper.RuleEngineMapper">
+
+    <resultMap id="BaseResultMap" type="com.webank.weevent.governance.entity.RuleEngineEntity">
+        <result column="id" property="id" jdbcType="INTEGER"/>
+        <result column="create_date" property="createDate" jdbcType="TIMESTAMP"/>
+        <result column="last_update" property="lastUpdate" jdbcType="TIMESTAMP"/>
+        <result column="rule_name" property="ruleName" jdbcType="INTEGER"/>
+        <result column="payload_type" property="payloadType" jdbcType="INTEGER"/>
+        <result column="payload" property="payload" jdbcType="VARCHAR"/>
+        <result column="user_id" property="userId" jdbcType="INTEGER"/>
+        <result column="broker_id" property="brokerId" jdbcType="INTEGER"/>
+        <result column="cep_id" property="cepId" jdbcType="VARCHAR"/>
+        <result column="broker_url" property="brokerUrl" jdbcType="VARCHAR"/>
+        <result column="from_destination" property="fromDestination" jdbcType="VARCHAR"/>
+        <result column="to_destination" property="toDestination" jdbcType="VARCHAR"/>
+        <result column="select_field" property="selectField" jdbcType="VARCHAR"/>
+        <result column="condition_field" property="conditionField" jdbcType="VARCHAR"/>
+        <result column="condition_type" property="conditionType" jdbcType="INTEGER"/>
+        <result column="database_url" property="databaseUrl" jdbcType="VARCHAR"/>
+        <result column="error_destination" property="errorDestination" jdbcType="VARCHAR"/>
+        <result column="error_message" property="errorMessage" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="INTEGER"/>
+        <result column="group_id" property="groupId" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,create_date,last_update, rule_name,payload_type,payload,broker_id,cep_id,broker_url,user_id,
+         from_destination,to_destination,select_field,condition_field,condition_type,
+         database_url,error_destination,error_message,status,group_id
+    </sql>
+
+    <insert id="addRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into t_rule_engine(rule_name, payload_type, payload, broker_id, broker_url, user_id, cep_id,
+                                  from_destination, to_destination, select_field,
+                                  condition_field, condition_type, status, group_id, error_message)
+        values (#{ruleName}, #{payloadType}, #{payload}, #{brokerId}, #{brokerUrl}, #{userId}, #{cepId},
+                #{fromDestination}, #{toDestination}, #{selectField},
+                #{conditionField}, #{conditionType}, #{status}, #{groupId}, #{errorMessage})
+    </insert>
+
+    <select id="getRuleEngines" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from t_rule_engine where status!=2
+        <include refid="ruleEngineWhere"/>
+    </select>
+
+    <select id="getRuleEnginePage" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from t_rule_engine where status!=2
+        <if test="ruleEngineEntity.id != null">
+            and id = #{ruleEngineEntity.id,jdbcType=INTEGER}
+        </if>
+        <if test="ruleEngineEntity.userId != null">
+            and user_id = #{ruleEngineEntity.userId,jdbcType=INTEGER}
+        </if>
+        <if test="ruleEngineEntity.groupId != null">
+            and group_id = #{ruleEngineEntity.groupId,jdbcType=VARCHAR}
+        </if>
+        <if test="ruleEngineEntity.brokerId != null">
+            and broker_id = #{ruleEngineEntity.brokerId,jdbcType=INTEGER}
+        </if>
+        <if test="ruleEngineEntity.ruleName != null and ruleEngineEntity.ruleName!=''">
+            and rule_name = #{ruleEngineEntity.ruleName,jdbcType=VARCHAR}
+        </if>
+        <if test="startIndex != null and endIndex!=null">
+            limit #{startIndex},#{endIndex}
+        </if>
+    </select>
+
+    <sql id="ruleEngineWhere">
+        <if test="id != null">
+            and id = #{id,jdbcType=INTEGER}
+        </if>
+        <if test="userId != null">
+            and user_id = #{userId,jdbcType=INTEGER}
+        </if>
+        <if test="groupId != null">
+            and group_id = #{groupId,jdbcType=VARCHAR}
+        </if>
+        <if test="brokerId != null">
+            and broker_id = #{brokerId,jdbcType=INTEGER}
+        </if>
+        <if test="ruleName != null and  ruleName!=''">
+            and rule_name = #{ruleName,jdbcType=VARCHAR}
+        </if>
+    </sql>
+
+    <update id="updateRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity">
+        update t_rule_engine
+        set rule_name=#{ruleName},
+            payload=#{payload},
+            select_field=#{selectField},
+            condition_field=#{conditionField},
+            condition_type=#{conditionType},
+            from_destination=#{fromDestination},
+            to_destination=#{fromDestination},
+            database_url=#{databaseUrl},
+            error_destination=#{errorDestination},
+            error_message=#{errorMessage}
+        where id = #{id,jdbcType=INTEGER}
+          and status != 2
+    </update>
+
+    <update id="updateRuleEngineStatus" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity">
+        update t_rule_engine
+        set status=#{status}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+
+    <delete id="deleteRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity">
+        update t_rule_engine
+        set status=2
+        where id = #{id}
+    </delete>
+
+    <select id="countRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
+            resultType="int">
+        select count(1) from t_rule_engine
+        where status!=2
+        <include refid="ruleEngineWhere"/>
+    </select>
+
+
+</mapper>
