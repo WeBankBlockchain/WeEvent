@@ -79,7 +79,7 @@ export default {
         message: '复制成功'
       })
     },
-    detial (e) {
+    detail (e) {
       this.$alert(e, '错误信息')
     },
     blockList () {
