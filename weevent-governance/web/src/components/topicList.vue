@@ -29,14 +29,15 @@
           <el-form-item label="创建时间:">
             <span>{{ props.row.detail.createdTimestamp }}</span>
           </el-form-item><br/>
-          <el-form-item label="地址:">
-            <span>{{ props.row.detail.topicAddress }}</span>
-          </el-form-item><br/>
+
            <el-form-item label="已发布事件数:">
             <span>{{ props.row.detail.sequenceNumber }}</span>
           </el-form-item><br/>
            <el-form-item label="最新事件块高:">
             <span>{{ props.row.detail.blockNumber }}</span>
+          </el-form-item><br/>
+          <el-form-item label="地址:">
+            <span>{{ props.row.detail.topicAddress }}</span>
           </el-form-item>
         </el-form>
       </template>
@@ -295,9 +296,13 @@ export default {
       }
     },
     brokerId () {
+      this.pageIndex = 1
+      this.pageSize = 10
       this.refresh()
     },
     groupId () {
+      this.pageIndex = 1
+      this.pageSize = 10
       this.refresh()
     }
   },

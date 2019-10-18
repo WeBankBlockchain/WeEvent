@@ -2,18 +2,18 @@
 <div class="headerBar">
   <div class='navigation'>
     <img src="../assets/image/weEvent.png" alt="" @click='home'>
-    <span class='server_title' v-show='!noServer'>群组信息:</span>
-    <el-dropdown trigger="click" @command='selectGroup'  v-show='!noServer'>
-      <span>{{groupId}} <i class="el-icon-arrow-down el-icon-caret-bottom"></i></span>
-      <el-dropdown-menu slot="dropdown">
-        <el-dropdown-item v-for='(item, index) in groupList' :key='index' :command='item'>{{item}}</el-dropdown-item>
-      </el-dropdown-menu>
-    </el-dropdown>
     <span class='server_title' v-show='!noServer'>当前服务:</span>
     <el-dropdown trigger="click" @command='selecServers'  v-show='!noServer'>
       <span>{{server}} <i class="el-icon-arrow-down el-icon-caret-bottom"></i></span>
       <el-dropdown-menu slot="dropdown">
         <el-dropdown-item v-for='(item, index) in servers' :key='index' :command='index'>{{item.name}}</el-dropdown-item>
+      </el-dropdown-menu>
+    </el-dropdown>
+    <span class='server_title' v-show='!noServer'>群组信息:</span>
+    <el-dropdown trigger="click" @command='selectGroup'  v-show='!noServer'>
+      <span>{{groupId}} <i class="el-icon-arrow-down el-icon-caret-bottom"></i></span>
+      <el-dropdown-menu slot="dropdown">
+        <el-dropdown-item v-for='(item, index) in groupList' :key='index' :command='item'>{{item}}</el-dropdown-item>
       </el-dropdown-menu>
     </el-dropdown>
   </div>
@@ -51,15 +51,16 @@
       </div>
       <el-button slot="reference">版本: {{version.weEventVersion}}</el-button>
     </el-popover>
-    <router-link to='./servers' v-show='!noServer'>服务设置</router-link>
-    <span class='el-icon-user-solid' style='margin-right:5px'></span>
+    <!-- <router-link to='./servers' v-show='!noServer'>服务设置</router-link> -->
+    <span class='el-icon-user-solid' style='margin:0 5px 0 15px'></span>
     <el-dropdown trigger="click" @command='selectItem'>
       <span v-if='!userName' @click='loginIn'>请登录</span>
       <span class="el-dropdown-link" v-else-if='userName'>
         {{userName}}<i class="el-icon-arrow-down el-icon-caret-bottom"></i>
       </span>
       <el-dropdown-menu slot="dropdown">
-        <el-dropdown-item command='setting'>设置</el-dropdown-item>
+        <el-dropdown-item command='server_setting'>服务设置</el-dropdown-item>
+        <el-dropdown-item command='user_setting'>用户设置</el-dropdown-item>
         <el-dropdown-item command='loginOut'>退出</el-dropdown-item>
       </el-dropdown-menu>
     </el-dropdown>
@@ -101,8 +102,11 @@ export default {
     },
     selectItem (e) {
       switch (e) {
-        case 'setting':
+        case 'user_setting':
           this.$router.push({ path: './registered', query: { reset: 0 } })
+          break
+        case 'server_setting':
+          this.$router.push('./servers')
           break
         case 'loginOut':
           API.loginOut('').then(res => {
