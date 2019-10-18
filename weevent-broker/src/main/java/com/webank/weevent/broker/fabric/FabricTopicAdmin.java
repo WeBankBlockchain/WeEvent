@@ -1,6 +1,5 @@
 package com.webank.weevent.broker.fabric;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.webank.weevent.BrokerApplication;
@@ -31,7 +30,6 @@ import org.apache.commons.lang3.StringUtils;
 public class FabricTopicAdmin implements IEventTopic {
     protected static FabricDelegate fabricDelegate;
     protected static FabricConfig fabricConfig;
-    protected static List<String> channels = new ArrayList<>();
 
     static {
         fabricConfig = new FabricConfig();
@@ -42,7 +40,6 @@ public class FabricTopicAdmin implements IEventTopic {
         try {
             fabricDelegate = new FabricDelegate();
             fabricDelegate.initProxy(fabricConfig);
-            channels = fabricDelegate.listChannel();
         } catch (BrokerException e) {
             log.error("init Fabric failed", e);
             BrokerApplication.exit();
@@ -51,9 +48,18 @@ public class FabricTopicAdmin implements IEventTopic {
 
     @Override
     public boolean open(String topic, String channelName) throws BrokerException {
+        log.info("open topic: {} channelName: {}", topic, channelName);
+
         ParamCheckUtils.validateTopicName(topic);
-        checkChannelName(channelName);
-        return fabricDelegate.getFabricMap().get(channelName).createTopic(topic);
+        validateChannelName(channelName);
+        try {
+            return fabricDelegate.getFabricMap().get(channelName).createTopic(topic);
+        } catch (BrokerException e) {
+            if (e.getCode() == ErrorCode.TOPIC_ALREADY_EXIST.getCode()) {
+                return true;
+            }
+            throw e;
+        }
     }
 
     @Override
@@ -61,7 +67,7 @@ public class FabricTopicAdmin implements IEventTopic {
         log.info("close topic: {} channelName: {}", topic, channelName);
 
         ParamCheckUtils.validateTopicName(topic);
-        checkChannelName(channelName);
+        validateChannelName(channelName);
 
         if (exist(topic, channelName)) {
             return true;
@@ -72,22 +78,30 @@ public class FabricTopicAdmin implements IEventTopic {
 
     @Override
     public WeEvent getEvent(String eventId, String channelName) throws BrokerException {
-        checkChannelName(channelName);
+        log.debug("getEvent function input param eventId: {}", eventId);
 
+        validateChannelName(channelName);
         return fabricDelegate.getFabricMap().get(channelName).getEvent(eventId);
     }
 
     @Override
     public boolean exist(String topic, String channelName) throws BrokerException {
         ParamCheckUtils.validateTopicName(topic);
-        checkChannelName(channelName);
+        validateChannelName(channelName);
 
         return fabricDelegate.getFabricMap().get(channelName).isTopicExist(topic);
     }
 
     @Override
     public TopicPage list(Integer pageIndex, Integer pageSize, String channelName) throws BrokerException {
-        checkChannelName(channelName);
+
+        if (pageIndex == null || pageIndex < 0) {
+            throw new BrokerException(ErrorCode.TOPIC_PAGE_INDEX_INVALID);
+        }
+        if (pageSize == null || pageSize <= 0 || pageSize > 100) {
+            throw new BrokerException(ErrorCode.TOPIC_PAGE_SIZE_INVALID);
+        }
+        validateChannelName(channelName);
 
         return fabricDelegate.getFabricMap().get(channelName).listTopicName(pageIndex, pageSize);
     }
@@ -95,19 +109,20 @@ public class FabricTopicAdmin implements IEventTopic {
     @Override
     public TopicInfo state(String topic, String channelName) throws BrokerException {
         ParamCheckUtils.validateTopicName(topic);
-        checkChannelName(channelName);
+        validateChannelName(channelName);
 
         return fabricDelegate.getFabricMap().get(channelName).getTopicInfo(topic);
     }
 
     @Override
-    public List<String> listGroupId() {
-        return channels;
+    public List<String> listGroupId() throws BrokerException {
+
+        return fabricDelegate.listChannel();
     }
 
     @Override
     public GroupGeneral getGroupGeneral(String channelName) throws BrokerException {
-        checkChannelName(channelName);
+        validateChannelName(channelName);
 
         return fabricDelegate.getFabricMap().get(channelName).getGroupGeneral();
 
@@ -115,31 +130,29 @@ public class FabricTopicAdmin implements IEventTopic {
 
     @Override
     public List<TbTransHash> queryTransList(QueryEntity queryEntity) throws BrokerException {
-        checkChannelName(queryEntity.getGroupId());
+        validateChannelName(queryEntity.getGroupId());
 
-        return fabricDelegate.getFabricMap().get(queryEntity.getGroupId())
-                .queryTransList(queryEntity.getPkHash(), queryEntity.getBlockNumber());
+        return fabricDelegate.getFabricMap().get(queryEntity.getGroupId()).queryTransList(queryEntity.getBlockNumber());
     }
 
     @Override
     public List<TbBlock> queryBlockList(QueryEntity queryEntity) throws BrokerException {
-        checkChannelName(queryEntity.getGroupId());
+        validateChannelName(queryEntity.getGroupId());
 
-        return fabricDelegate.getFabricMap().get(queryEntity.getGroupId())
-                .queryBlockList(queryEntity.getPkHash(), queryEntity.getBlockNumber());
+        return fabricDelegate.getFabricMap().get(queryEntity.getGroupId()).queryBlockList(queryEntity.getBlockNumber());
     }
 
     @Override
     public List<TbNode> queryNodeList(QueryEntity queryEntity) throws BrokerException {
-        checkChannelName(queryEntity.getGroupId());
+        validateChannelName(queryEntity.getGroupId());
 
         return fabricDelegate.getFabricMap().get(queryEntity.getGroupId()).queryNodeList();
     }
 
-    private void checkChannelName(String channelName) throws BrokerException {
+    protected void validateChannelName(String channelName) throws BrokerException {
         log.debug("check channelName: {} exist. ", channelName);
-        if (StringUtils.isBlank(channelName) || !channels.contains(channelName)){
-            throw new BrokerException(ErrorCode.EVENT_GROUP_ID_INVALID);
+        if (StringUtils.isBlank(channelName) || !fabricDelegate.listChannel().contains(channelName)){
+            throw new BrokerException(ErrorCode.FABRICSDK_CHANNEL_NAME_INVALID);
         }
     }
 

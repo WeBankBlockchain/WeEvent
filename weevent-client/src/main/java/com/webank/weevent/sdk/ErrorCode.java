@@ -138,13 +138,15 @@ public enum ErrorCode {
 
     SUBSCRIPTION_NOTIFY_QUEUE_FULL(200212, "onEvent is blocked too long, notify queue is full"),
 
-    FABRICSDK_UNKNOWN_CHANNEL(200213, "Fabric 1.4x, unknown channel"),
+    FABRICSDK_CHANNEL_NAME_INVALID(200213, "Fabric 1.4x, channel name invalid"),
 
     UNKNOWN_SOLIDITY_VERSION(200213, "unknown contract version"),
 
     WEB3SDK_RPC_ERROR(200214, "we3sdk's rpc failed"),
 
     FABRICSDK_GETBLOCKINFO_ERROR(200214, "Fabric 1.4x, get blockInfo error"),
+
+    FABRICSDK_CHAINCODE_INVOKE_FAILED(200216, "Fabric 1.4x, execute chaincode invoke failed"),
     ;
 
     /**

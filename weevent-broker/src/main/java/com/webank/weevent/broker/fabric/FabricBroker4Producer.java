@@ -28,11 +28,12 @@ public class FabricBroker4Producer extends FabricTopicAdmin implements IProducer
     }
 
     @Override
-    public SendResult publish(WeEvent event, String groupId) throws BrokerException {
+    public SendResult publish(WeEvent event, String channelName) throws BrokerException {
         log.debug("publish input param WeEvent: {}", event);
         ParamCheckUtils.validateEvent(event);
+        this.validateChannelName(channelName);
         SendResult sendResult = fabricDelegate.publishEvent(event.getTopic(),
-                groupId,
+                channelName,
                 new String(event.getContent(), StandardCharsets.UTF_8),
                 JSON.toJSONString(event.getExtensions()));
         return sendResult;

@@ -29,9 +29,7 @@ import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.lang3.StringUtils;
 import org.hyperledger.fabric.sdk.BlockEvent;
 import org.hyperledger.fabric.sdk.BlockInfo;
 import org.hyperledger.fabric.sdk.ChaincodeID;
@@ -50,7 +48,6 @@ import org.hyperledger.fabric.sdk.exception.ProposalException;
 import org.hyperledger.fabric.sdk.exception.TransactionException;
 import org.hyperledger.fabric.sdk.security.CryptoSuite;
 
-import static com.webank.weevent.broker.fabric.util.FabricDeployContractUtil.fabricConfig;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hyperledger.fabric.sdk.BlockInfo.EnvelopeType.TRANSACTION_ENVELOPE;
 
@@ -60,7 +57,7 @@ import static org.hyperledger.fabric.sdk.BlockInfo.EnvelopeType.TRANSACTION_ENVE
  * @since 2019/8/9
  */
 @Slf4j
-public class  FabricSDKWrapper {
+public class FabricSDKWrapper {
     // Create HFClient
     public static HFClient initializeClient(FabricConfig fabricConfig) throws InvalidArgumentException, IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException, CryptoException, ClassNotFoundException {
         HFClient hfClient = HFClient.createNewInstance();
@@ -127,7 +124,8 @@ public class  FabricSDKWrapper {
         return propResp;
     }
 
-    public static Collection<ProposalResponse> instantiateProposal(HFClient client, Channel channel, ChaincodeID chaincodeID, TransactionRequest.Type chaincodeLang, Long proposalTimeout) throws InvalidArgumentException, ProposalException, InterruptedException, ExecutionException, TimeoutException {
+    public static Collection<ProposalResponse> instantiateProposal(HFClient client, Channel channel, ChaincodeID chaincodeID,
+                                                                   TransactionRequest.Type chaincodeLang, Long proposalTimeout) throws InvalidArgumentException, ProposalException {
         InstantiateProposalRequest instantiateProposalRequest = client.newInstantiationProposalRequest();
         instantiateProposalRequest.setProposalWaitTime(proposalTimeout);//time in milliseconds
         instantiateProposalRequest.setChaincodeID(chaincodeID);
@@ -165,7 +163,8 @@ public class  FabricSDKWrapper {
         return transactionEvent;
     }
 
-    public static TransactionInfo executeTransaction(HFClient client, Channel channel, ChaincodeID chaincodeID, boolean invoke, String func, Long transactionTimeout, String... args) throws InvalidArgumentException, ProposalException, InterruptedException, ExecutionException, TimeoutException {
+    public static TransactionInfo executeTransaction(HFClient client, Channel channel, ChaincodeID chaincodeID, boolean invoke, String func,
+                                                     Long transactionTimeout, String... args) throws InvalidArgumentException, ProposalException, InterruptedException, ExecutionException, TimeoutException {
         TransactionProposalRequest transactionProposalRequest = client.newTransactionProposalRequest();
         transactionProposalRequest.setChaincodeID(chaincodeID);
         transactionProposalRequest.setChaincodeLanguage(TransactionRequest.Type.GO_LANG);
@@ -174,22 +173,24 @@ public class  FabricSDKWrapper {
         transactionProposalRequest.setArgs(args);
         transactionProposalRequest.setProposalWaitTime(120000);
 
-        List<ProposalResponse> successful = new LinkedList<ProposalResponse>();
-        List<ProposalResponse> failed = new LinkedList<ProposalResponse>();
+        List<ProposalResponse> successful = new LinkedList<>();
+        List<ProposalResponse> failed = new LinkedList<>();
         // there is no need to retry. If not, you should re-send the transaction proposal.
         Collection<ProposalResponse> transactionPropResp = channel.sendTransactionProposal(transactionProposalRequest);
         TransactionInfo transactionInfo = new TransactionInfo();
         Boolean result = true;
         for (ProposalResponse response : transactionPropResp) {
             if (response.getStatus() == ProposalResponse.Status.SUCCESS) {
+                transactionInfo.setCode(ErrorCode.SUCCESS.getCode());
                 transactionInfo.setPayLoad(new String(response.getChaincodeActionResponsePayload()));
                 log.info(String.format("[√] Got success response from peer {} => payload: {}", response.getPeer().getName(), transactionInfo.getPayLoad()));
                 successful.add(response);
             } else {
                 result = false;
+                transactionInfo.setCode(ErrorCode.FABRICSDK_CHAINCODE_INVOKE_FAILED.getCode());
+                transactionInfo.setMessage(response.getMessage());
                 String status = response.getStatus().toString();
-                String msg = response.getMessage();
-                log.warn(String.format("[×] Got failed response from peer{} => {}: {} ", response.getPeer().getName(), status, msg));
+                log.warn(String.format("[×] Got failed response from peer{} => {}: {} ", response.getPeer().getName(), status, transactionInfo.getMessage()));
                 failed.add(response);
             }
         }
@@ -229,54 +230,53 @@ public class  FabricSDKWrapper {
         return weEventList;
     }
 
-    public static List<String> listChannelName() throws BrokerException {
-//        List listChannel = new ArrayList();
-//        listChannel.add(fabricConfig.getChannelName());
-//        return listChannel;
+    public static List<String> listChannelName(FabricConfig fabricConfig) throws BrokerException {
         try {
             HFClient hfClient = initializeClient(fabricConfig);
             Peer peer = FabricSDKWrapper.getPeer(hfClient, fabricConfig);
             Set<String> channels = hfClient.queryChannels(peer);
             return new ArrayList<>(channels);
         } catch (Exception e) {
-            log.error("get channel name list failed , e: {}", e);
+            log.error("get channel name list failed , e: ", e);
             throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
         }
     }
 
     public static GroupGeneral getGroupGeneral(Channel channel) throws InvalidArgumentException, ProposalException {
         GroupGeneral groupGeneral = new GroupGeneral();
-        long currentBlockNum = channel.queryBlockchainInfo().getHeight();
+        long currentBlockNum = channel.queryBlockchainInfo().getHeight() - 1;
         BlockInfo blockInfo = channel.queryBlockByNumber(currentBlockNum);
         groupGeneral.setGroupId(channel.getName());
         groupGeneral.setLatestBlock(BigInteger.valueOf(currentBlockNum - 1));
         groupGeneral.setNodeCount(channel.getPeers().size());
-        if (blockInfo != null){
+        if (blockInfo != null) {
             groupGeneral.setTransactionCount(BigInteger.valueOf(blockInfo.getTransactionCount()));
         }
 
         return groupGeneral;
     }
 
-    public static List<TbTransHash> queryTransList(Channel channel, String transHash, BigInteger blockNumber) throws DecoderException, ProposalException, InvalidArgumentException {
+    public static List<TbTransHash> queryTransList(FabricConfig fabricConfig, Channel channel, BigInteger blockNumber) throws ProposalException, InvalidArgumentException {
         List<TbTransHash> tbTransHashes = new ArrayList<>();
-        BlockInfo blockInfo = getBlockInfo(channel, transHash, blockNumber);
-        if (blockInfo != null){
+
+        BlockInfo blockInfo = getBlockInfo(fabricConfig, channel, blockNumber);
+        if (blockInfo != null) {
             TbTransHash tbTransHash = new TbTransHash();
             tbTransHash.setBlockNumber(BigInteger.valueOf(blockInfo.getBlockNumber()));
-            tbTransHash.setTransHash(Hex.encodeHexString(blockInfo.getDataHash()));
+            tbTransHash.setTransHash(Hex.encodeHexString(blockInfo.getPreviousHash()));
+//            tbTransHash.setTransHash(Hex.encodeHexString(blockInfo.getBlock().getHeader().toByteArray()));
             tbTransHashes.add(tbTransHash);
         }
 
         return tbTransHashes;
     }
 
-    public static List<TbBlock> queryBlockList(Channel channel, String transHash, BigInteger blockNumber) throws DecoderException, ProposalException, InvalidArgumentException {
+    public static List<TbBlock> queryBlockList(FabricConfig fabricConfig, Channel channel, BigInteger blockNumber) throws ProposalException, InvalidArgumentException {
         List<TbBlock> tbBlocks = new ArrayList<>();
-        BlockInfo blockInfo = getBlockInfo(channel, transHash, blockNumber);
-        if (blockInfo != null){
+        BlockInfo blockInfo = getBlockInfo(fabricConfig, channel, blockNumber);
+        if (blockInfo != null) {
             TbBlock tbBlock = new TbBlock();
-            tbBlock.setPkHash(Hex.encodeHexString(blockInfo.getDataHash()));
+//            tbBlock.setPkHash(Hex.encodeHexString(blockInfo.getPreviousHash()));
             tbBlock.setBlockNumber(BigInteger.valueOf(blockInfo.getBlockNumber()));
             tbBlock.setTransCount(blockInfo.getEnvelopeCount());
             tbBlocks.add(tbBlock);
@@ -285,9 +285,9 @@ public class  FabricSDKWrapper {
         return tbBlocks;
     }
 
-    public static List<TbNode> queryNodeList(Channel channel) throws DecoderException, ProposalException, InvalidArgumentException {
+    public static List<TbNode> queryNodeList(FabricConfig fabricConfig, Channel channel) throws ProposalException, InvalidArgumentException {
         List<TbNode> tbNodes = new ArrayList<>();
-        BlockInfo blockInfo = getBlockInfo(channel, null, null);
+        BlockInfo blockInfo = getBlockInfo(fabricConfig, channel, null);
 
         Collection<Peer> peers = channel.getPeers();
         for (Peer peer : peers) {
@@ -301,17 +301,13 @@ public class  FabricSDKWrapper {
         return tbNodes;
     }
 
-    private static BlockInfo getBlockInfo(Channel channel, String transHash, BigInteger blockNumber) throws ProposalException, InvalidArgumentException, DecoderException {
+    private static BlockInfo getBlockInfo(FabricConfig fabricConfig, Channel channel, BigInteger blockNumber) throws ProposalException, InvalidArgumentException {
         BlockInfo blockInfo;
-        if (StringUtils.isBlank(transHash) && blockNumber == null) {
-            long currentBlockNum = channel.queryBlockchainInfo(new FabricUser(fabricConfig)).getHeight();
+        if (blockNumber == null) {
+            long currentBlockNum = channel.queryBlockchainInfo(new FabricUser(fabricConfig)).getHeight() - 1;
             blockInfo = channel.queryBlockByNumber(currentBlockNum);
         } else {
-            if (StringUtils.isNotBlank(transHash)){
-                blockInfo = channel.queryBlockByHash(Hex.decodeHex(transHash));
-            } else {
-                blockInfo = channel.queryBlockByNumber(blockNumber.longValue());
-            }
+            blockInfo = channel.queryBlockByNumber(blockNumber.longValue());
         }
         return blockInfo;
     }

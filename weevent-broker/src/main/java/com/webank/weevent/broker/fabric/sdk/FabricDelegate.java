@@ -1,5 +1,6 @@
 package com.webank.weevent.broker.fabric.sdk;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,6 +33,8 @@ public class FabricDelegate {
     // block data cached in local memory
     private static LRUCache<String, List<WeEvent>> blockCache;
 
+    private static List<String> channels = new ArrayList<>();
+
     public FabricDelegate() {
         this.fabricMap = new ConcurrentHashMap<>();
     }
@@ -59,14 +62,16 @@ public class FabricDelegate {
         Fabric fabric = new Fabric(fabricConfig);
         fabric.init(fabricConfig.getChannelName());
         fabricMap.put(fabricConfig.getChannelName(), fabric);
+        channels = FabricSDKWrapper.listChannelName(fabricConfig);
     }
 
     public SendResult publishEvent(String topicName, String channelName, String eventContent, String extensions) throws BrokerException {
+
         return this.fabricMap.get(channelName).publishEvent(topicName, eventContent, extensions);
     }
 
-    public List<String> listChannel() throws BrokerException {
-        return FabricSDKWrapper.listChannelName();
+    public List<String> listChannel() {
+        return channels;
     }
 
     public Long getBlockHeight(String channelName) throws BrokerException {

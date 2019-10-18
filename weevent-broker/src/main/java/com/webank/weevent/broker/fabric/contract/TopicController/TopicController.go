@@ -18,18 +18,18 @@ type TopicInfo struct {
 
 type ListTopicName struct {
 	Total int `json:"total"`
-	Size  string `json:"size"`
-	TopicNameList []string `json:"topicNameList"`
+	Size  string `json:"pageSize"`
+	TopicList []string `json:"pageData"`
 }
 
 var topicContractName string = ""
 var topicContractVersion string = ""
 var topicMap = make(map[string]TopicInfo)
-var topicIndex = make([]String,0)
-const TOPIC_ALREADY_EXIST = "500100";
+var topicIndex = make([]string,0)
+const TOPIC_ALREADY_EXIST string = "100100"
 
 func (t *TopicController) Init(stub shim.ChaincodeStubInterface) pb.Response{
-    fmt.Println(" << ====[Init] success init it is view in docker ======")
+    fmt.Println(" << ====[TopicController Init] success init it is view in docker ====== >>")
     return shim.Success([]byte("success init"))
 }
 
@@ -81,8 +81,9 @@ func (t *TopicController) getTopicContractVersion(stub shim.ChaincodeStubInterfa
 }
 
 func (t *TopicController) addTopicInfo(stub shim.ChaincodeStubInterface,args[] string) pb.Response{
+    fmt.Println(" << ====[TopicController] addTopicInfo topic: ====== >>", args[0])
 	if _, ok := topicMap[args[0]]; ok {
-        return shim.Error([]byte(TOPIC_ALREADY_EXIST))
+        return shim.Error(TOPIC_ALREADY_EXIST)
     }
 	var topicInfo TopicInfo
 	topicInfo.Topic = args[0]
@@ -101,11 +102,11 @@ func (t *TopicController) getTopicInfo(stub shim.ChaincodeStubInterface,args[] s
 	return shim.Success([]byte(jsonTopicInfo))
 }
 
-func (t *TopicController) isTopicExist(stub shim.ChaincodeStubInterface,args[] string) bool{
+func (t *TopicController) isTopicExist(stub shim.ChaincodeStubInterface,args[] string) pb.Response{
 	if _, ok := topicMap[args[0]]; ok {
-        return true
+        return shim.Success([]byte("topic exist"))
     } else {
-        return false
+        return shim.Error("topic not exist")
     }
 }
 
@@ -115,18 +116,20 @@ func (t *TopicController) listTopicName(stub shim.ChaincodeStubInterface,args[] 
     if err !=nil {
         return shim.Error("listTopicName err")
     }
+
     pageSize,err := strconv.Atoi(args[1])
     if err !=nil {
         return shim.Error("listTopicName err")
     }
 
-    var topicNameList = make([]String, 0)
+    var topicList = make([]string, 0)
     var size int
     if (pageSize <= 0 || pageSize > 100) {
         pageSize = 10
     }
     var total = len(topicIndex)
     var idx = pageIndex * pageSize
+
     if (len(topicIndex) <= idx) {
         size = 0
     }else{
@@ -139,15 +142,20 @@ func (t *TopicController) listTopicName(stub shim.ChaincodeStubInterface,args[] 
             if (idx >= len(topicIndex)) {
                 break
             }
-            topicNameList = append(topicNameList,topicIndex[i])
+            topicList = append(topicList,topicIndex[i])
             idx++
         }
     }
     var listTopicName ListTopicName
-    listTopicName.total = total
-    listTopicName.size = size
-    listTopicName.topicNameList = topicNameList
-    return return shim.Success([]byte(listTopicName))
+    listTopicName.Total = total
+    listTopicName.Size = strconv.Itoa(size)
+    listTopicName.TopicList = topicList
+
+    listTopicNameJson, err := json.Marshal(listTopicName)
+    if err != nil{
+        return shim.Error("listTopicName err")
+    }
+    return shim.Success([]byte(listTopicNameJson))
 }
 
 func main(){

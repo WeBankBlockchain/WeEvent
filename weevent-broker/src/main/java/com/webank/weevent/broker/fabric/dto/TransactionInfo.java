@@ -9,6 +9,23 @@ import lombok.Data;
  */
 @Data
 public class TransactionInfo {
+    /**
+     * The payLoad
+     */
     private String payLoad;
+
+    /**
+     * blockNumber
+     */
     private Long blockNumber;
+
+    /**
+     * The error code.
+     */
+    private int code;
+
+    /**
+     * The error message.
+     */
+    private String message;
 }

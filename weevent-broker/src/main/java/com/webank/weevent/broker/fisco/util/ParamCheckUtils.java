@@ -110,7 +110,7 @@ public class ParamCheckUtils {
 
     public static void validateChannelName(String channelName, List<String> channelNames) throws BrokerException {
         if (!channelNames.contains(channelName)) {
-            throw new BrokerException(ErrorCode.FABRICSDK_UNKNOWN_CHANNEL);
+            throw new BrokerException(ErrorCode.FABRICSDK_CHANNEL_NAME_INVALID);
         }
     }
 

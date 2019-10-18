@@ -19,6 +19,13 @@ public class FabricUpdateContractUtil {
 
     public static void main(String[] args) throws Exception {
         fabricConfig.load();
+
+        if (null == args || args.length != 1) {
+            args = new String[1];
+        }
+
+        args[0] = "add";
+
         HFClient client = FabricSDKWrapper.initializeClient(fabricConfig);
         Channel channel = FabricSDKWrapper.initializeChannel(client, fabricConfig.getChannelName(), fabricConfig);
         ChaincodeID chaincodeID = ChaincodeID.newBuilder().setName(fabricConfig.getTopicControllerName()).setVersion(fabricConfig.getTopicControllerVersion()).build();

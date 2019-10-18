@@ -11,7 +11,7 @@ type Topic struct {
 }
 
 func (t *Topic) Init(stub shim.ChaincodeStubInterface) pb.Response{
-    fmt.Println(" << ====[Init] success init it is view in docker ======")
+    fmt.Println(" << ====[Topic Init] success init it is view in docker ====== >>")
     return shim.Success([]byte("success init"))
 }
 
@@ -24,6 +24,7 @@ func (t *Topic) Invoke(stub shim.ChaincodeStubInterface) pb.Response{
 }
 
 func (t *Topic) publish(stub shim.ChaincodeStubInterface,args []string) pb.Response{
+    fmt.Println(" << ====[Topic] publish ====== >>")
 	sequenceNumber = sequenceNumber + 1
 	fmt.Println("topicName:" + args[0] + " contents:" + args[1] + " extensions:" + args[2] + " sequenceNumber:" + strconv.Itoa(sequenceNumber))
 	return shim.Success([]byte(strconv.Itoa(sequenceNumber)))

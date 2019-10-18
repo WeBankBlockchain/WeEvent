@@ -1,11 +1,14 @@
 package com.webank.weevent.broker.fabric;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.BrokerApplication;
+import com.webank.weevent.broker.fisco.dto.SubscriptionInfo;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.task.IBlockChain;
@@ -126,12 +129,14 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
         return subscribeTopic(topics, channelName, offset, ext, listener);
     }
 
-    private String subscribeTopic(String topic, String channelName, String offset, Map<SubscribeExt, String> ext, ConsumerListener listener) throws BrokerException {
+    private String subscribeTopic(String topic, String channelName, String offset, Map<SubscribeExt, String> ext,
+                                  ConsumerListener listener) throws BrokerException {
         String[] topics = {topic};
         return subscribeTopic(topics, channelName, offset, ext, listener);
     }
 
-    private String subscribeTopic(String[] topics, String channelName, String offset, Map<SubscribeExt, String> ext, ConsumerListener listener) throws BrokerException {
+    private String subscribeTopic(String[] topics, String channelName, String offset, Map<SubscribeExt, String> ext,
+                                  ConsumerListener listener) throws BrokerException {
         // external params
         String interfaceType = "";
         if (ext.containsKey(SubscribeExt.InterfaceType)) {
@@ -195,7 +200,7 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
         }
 
         Subscription subscription = this.subscriptions.get(subscriptionId);
-        this.mainEventLoops.get(Long.valueOf(subscription.getGroupId())).removeSubscription(subscription);
+        this.mainEventLoops.get(subscription.getGroupId()).removeSubscription(subscription);
         this.subscriptions.remove(subscriptionId);
 
         log.info("unSubscribe success, subscriptionId {}", subscriptionId);
@@ -203,8 +208,39 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
     }
 
     @Override
-    public Map<String, Object> listSubscription(String groupId) throws BrokerException {
-        return null;
+    public Map<String, Object> listSubscription(String channnelName) throws BrokerException {
+        this.validateChannelName(channnelName);
+        Map<String, Object> subscribeIdList = new HashMap<>();
+        for (Map.Entry<String, Subscription> entry : this.subscriptions.entrySet()) {
+            Subscription subscription = entry.getValue();
+            if (!channnelName.equals(subscription.getGroupId())){
+                continue;
+            }
+
+            SubscriptionInfo subscriptionInfo = new SubscriptionInfo();
+            subscriptionInfo.setInterfaceType(subscription.getInterfaceType());
+            subscriptionInfo.setNotifiedEventCount(subscription.getNotifiedEventCount().toString());
+            subscriptionInfo.setNotifyingEventCount(subscription.getNotifyingEventCount().toString());
+            subscriptionInfo.setNotifyTimeStamp(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                    .format(subscription.getNotifyTimeStamp()));
+            subscriptionInfo.setRemoteIp(subscription.getRemoteIp());
+            subscriptionInfo.setCreateTimeStamp(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                    .format(subscription.getCreateTimeStamp()));
+            subscriptionInfo.setGroupId(subscription.getGroupId());
+
+            // Arrays.toString will append plus "[]"
+            if (subscription.getTopics().length == 1) {
+                subscriptionInfo.setTopicName(subscription.getTopics()[0]);
+            } else {
+                subscriptionInfo.setTopicName(Arrays.toString(subscription.getTopics()));
+            }
+
+            subscriptionInfo.setSubscribeId(subscription.getUuid());
+            subscribeIdList.put(subscription.getUuid(), subscriptionInfo);
+        }
+
+        log.debug("subscriptions: {}", this.subscriptions.toString());
+        return subscribeIdList;
     }
 
     @Override
@@ -245,33 +281,6 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
         return true;
     }
 
-//    @Override
-//    public synchronized Map<String, Object> listSubscription() {
-//        Map<String, Object> subscribeIdList = new HashMap<>();
-//        for (Map.Entry<String, Subscription> entry : this.subscriptions.entrySet()) {
-//            Subscription subscription = entry.getValue();
-//            SubscriptionInfo subscriptionInfo = new SubscriptionInfo();
-//
-//            subscriptionInfo.setInterfaceType(subscription.getInterfaceType());
-//            subscriptionInfo.setNotifiedEventCount(subscription.getNotifiedEventCount().toString());
-//            subscriptionInfo.setNotifyingEventCount(subscription.getNotifyingEventCount().toString());
-//            subscriptionInfo.setNotifyTimeStamp(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(subscription.getNotifyTimeStamp()));
-//
-//            // Arrays.toString will append plus "[]"
-//            if (subscription.getTopics().length == 1) {
-//                subscriptionInfo.setTopicName(subscription.getTopics()[0]);
-//            } else {
-//                subscriptionInfo.setTopicName(Arrays.toString(subscription.getTopics()));
-//            }
-//
-//            subscriptionInfo.setSubscribeId(subscription.getUuid());
-//            subscribeIdList.put(subscription.getUuid(), subscriptionInfo);
-//        }
-//
-//        log.debug("subscriptions: {}", this.subscriptions.toString());
-//        return subscribeIdList;
-//    }
-
     @Override
     public int getIdleTime() {
         return this.idleTime;
@@ -279,7 +288,7 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
 
     @Override
     public Long getBlockHeight(String channelName) throws BrokerException {
-        return fabricDelegate.getBlockHeight(channelName) - 1;
+        return fabricDelegate.getBlockHeight(channelName);
     }
 
     @Override

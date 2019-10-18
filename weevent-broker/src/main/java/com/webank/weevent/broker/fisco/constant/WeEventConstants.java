@@ -121,4 +121,6 @@ public class WeEventConstants {
 
     public static final String FABRIC = "fabric";
 
+    public static final String TOPIC_ALREADY_EXIST = "100100";
+
 }
