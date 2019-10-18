@@ -31,8 +31,7 @@
       <i class="el-icon-document"></i>
       <span slot="title">订阅列表</span>
     </el-menu-item>
-    <!-- <el-submenu index="4" v-show="isConfigRule === '1'"> -->
-    <el-submenu index="4">
+    <el-submenu index="4" v-show="isConfigRule === '1'">
       <template slot='title'>
         <i class="el-icon-s-tools"></i>
         <span slot="title">规则引擎</span>
