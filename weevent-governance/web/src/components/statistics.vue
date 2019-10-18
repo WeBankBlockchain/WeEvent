@@ -7,8 +7,8 @@
           <el-option
             v-for="(item, index) in topicList"
             :key="index"
-            :label="item.vaule"
-            :value="item.name"
+            :label="item"
+            :value="item"
             >
           </el-option>
         </el-select>
@@ -34,7 +34,7 @@
 <script>
 import Highcharts from 'highcharts/highstock'
 import { getLastWeek, getTimeList } from '../utils/formatTime'
-// import API from '../API/resource.js'
+import API from '../API/resource.js'
 export default{
   data () {
     return {
@@ -43,20 +43,8 @@ export default{
           return time.getTime() > Date.now()
         }
       },
-      topicList: [{
-        'name': 'topic1',
-        'value': '1'
-      }, {
-        'name': 'topic2',
-        'value': '2'
-      }, {
-        'name': 'topic3',
-        'value': '1'
-      }, {
-        'name': 'topic4',
-        'value': '4'
-      }],
-      topic: ['topic1', 'topic2', 'topic3'],
+      topicList: [],
+      topic: [],
       selectTime: [],
       option: {
         title: {
@@ -68,7 +56,7 @@ export default{
           lineWidth: 2
         },
         xAxis: {
-          categories: getLastWeek()
+          categories: []
         },
         tooltip: {
           shared: true,
@@ -82,37 +70,69 @@ export default{
         },
         credits: {
           enabled: false
+        },
+        lang: {
+          noData: '该时段暂无数据'
         }
       }
     }
   },
   methods: {
-    newData () {
+    beginDate (e) {
       let vm = this
-      let time = vm.option.xAxis.categories
-      let items = vm.topic
-      let start = 0
-      vm.option.series = []
-      for (let x = 0; x < items.length; x++) {
-        let oneItem = {
-          'name': items[x],
-          'data': []
-        }
-        vm.option.series.push(oneItem)
-        start++
-        let data = start
-        for (let y = 0; y < time.length; y++) {
-          vm.option.series[x].data[y] = data
-          data++
-        }
+      let data = {
+        'beginDate': vm.selectTime[0],
+        'endDate': vm.selectTime[1],
+        'topicList': vm.topic,
+        'groupId': localStorage.getItem('groupId'),
+        'brokerId': localStorage.getItem('brokerId'),
+        'userId': localStorage.getItem('userId')
       }
-      Highcharts.chart('chart', vm.option)
+      API.historicalData(data).then(res => {
+        if (res.data.status === 200) {
+          let resData = res.data.data
+          let topic = []
+          vm.option.series = []
+          if (e) {
+            vm.topicList = []
+          }
+          for (var key in resData) {
+            if (e) {
+              vm.topicList.push(key)
+            }
+            topic.push(key)
+            let item = {
+              'name': key,
+              'data': resData[key]
+            }
+            vm.option.series.push(item)
+          }
+          let max = 10
+          vm.option.series.forEach(x => {
+            x.data.forEach(y => {
+              max = y > max ? y : max
+            })
+          })
+          vm.option.yAxis.max = max
+          vm.topic = [].concat(topic)
+          Highcharts.chart('chart', vm.option)
+        } else {
+          vm.$message({
+            type: 'warning',
+            message: '数据获取失败'
+          })
+        }
+      })
     },
     getTime (e) {
-      let timeList = getTimeList(e[0], e[1])
       let vm = this
-      vm.option.xAxis.categories = [].concat(timeList)
-      this.newData()
+      if (!e) {
+        vm.getDate()
+      } else {
+        let timeList = getTimeList(e[0], e[1])
+        vm.option.xAxis.categories = [].concat(timeList)
+      }
+      this.beginDate(true)
     },
     getDate () {
       let data = getLastWeek()
@@ -120,16 +140,33 @@ export default{
       let end = new Date(data[data.length - 1]).getTime()
       this.selectTime.push(start)
       this.selectTime.push(end)
+      this.option.xAxis.categories = [].concat(data)
+      this.beginDate(true)
     },
     selectChange (e) {
       if (!e) {
-        this.newData()
+        this.beginDate(false)
       }
+    }
+  },
+  computed: {
+    brokerId () {
+      return this.$store.state.brokerId
+    },
+    groupId () {
+      return this.$store.state.groupId
+    }
+  },
+  watch: {
+    brokerId () {
+      this.beginDate(true)
+    },
+    groupId () {
+      this.beginDate(true)
     }
   },
   mounted () {
     this.getDate()
-    this.newData()
   }
 }
 </script>
