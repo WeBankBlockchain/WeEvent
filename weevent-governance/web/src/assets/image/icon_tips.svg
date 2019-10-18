@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #6ac4f8;
+      }
+
+      .cls-2 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <g id="icon_tips" transform="translate(-813 -626)">
+    <circle id="椭圆_3" data-name="椭圆 3" class="cls-1" cx="9" cy="9" r="9" transform="translate(813 626)"/>
+    <circle id="椭圆_4" data-name="椭圆 4" class="cls-2" cx="1" cy="1" r="1" transform="translate(821 630)"/>
+    <rect id="矩形_33" data-name="矩形 33" class="cls-2" width="2" height="7" rx="1" transform="translate(821 633)"/>
+  </g>
+</svg>
