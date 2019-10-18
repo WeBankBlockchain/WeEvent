@@ -58,7 +58,9 @@
       </div>
       <el-form :model="sqlOption" :rules="sqlCheck" ref='sql'>
         <el-form-item label="字段">
-          <el-input v-model="sqlOption.selectField" size='small' autocomplete="off"></el-input>
+          <el-select v-model="sqlOption.selectField" size='small'>
+            <el-option :label="key" :value="key" v-for='(item, key, index) in columnName' :key='index'></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="数据流转" prop='fromDestination'>
           <el-input v-model="sqlOption.fromDestination" size='small' autocomplete="off" placeholder="例如: TopicName"></el-input>
@@ -240,6 +242,14 @@ export default{
       }]
     }
   },
+  computed: {
+    brokerId () {
+      return this.$store.state.brokerId
+    },
+    groupId () {
+      return this.$store.state.groupId
+    }
+  },
   watch: {
     createRule (nVal) {
       if (!nVal) {
@@ -280,6 +290,16 @@ export default{
         }
         vm.$refs.options.resetFields()
       }
+    },
+    brokerId () {
+      this.$store.commit('set_menu', ['规则引擎', '规则管理'])
+      this.$store.commit('set_active', '4-1')
+      this.$router.push('./rule')
+    },
+    groupId () {
+      this.$store.commit('set_menu', ['规则引擎', '规则管理'])
+      this.$store.commit('set_active', '4-1')
+      this.$router.push('./rule')
     }
   },
   methods: {

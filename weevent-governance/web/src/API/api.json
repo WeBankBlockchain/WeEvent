@@ -128,5 +128,9 @@
   "dbUpdate": {
     "method": "post",
     "url": "weevent-governance/circulationDatabase/update"
+  },
+  "historicalData": {
+    "method": "post",
+    "url": "weevent-governance/historicalData/list"
   }
 }
