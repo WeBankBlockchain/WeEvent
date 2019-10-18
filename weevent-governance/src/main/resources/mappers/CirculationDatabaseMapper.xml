@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.webank.weevent.governance.mapper.CirculationDatabaseMapper">
+
+
+    <resultMap id="BaseResultMap" type="com.webank.weevent.governance.entity.CirculationDatabaseEntity">
+        <result column="id" property="id" jdbcType="INTEGER"/>
+        <result column="create_date" property="createDate" jdbcType="TIMESTAMP"/>
+        <result column="last_update" property="lastUpdate" jdbcType="TIMESTAMP"/>
+        <result column="user_id" property="userId" jdbcType="INTEGER"/>
+        <result column="broker_id" property="brokerId" jdbcType="INTEGER"/>
+        <result column="database_url" property="databaseUrl" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,create_date,last_update,user_id,broker_id,database_url
+    </sql>
+
+    <select id="circulationDatabaseList" resultMap="BaseResultMap"
+            parameterType="com.webank.weevent.governance.entity.CirculationDatabaseEntity">
+        select
+        <include refid="Base_Column_List"/>
+        from t_circulation_database
+        where 1=1
+        <if test="id != null">
+            and id = #{id,jdbcType=INTEGER}
+        </if>
+        <if test="userId != null">
+            and user_id = #{userId,jdbcType=INTEGER}
+        </if>
+        <if test="createDate != null">
+            and create_date = #{createDate,jdbcType=TIMESTAMP}
+        </if>
+        <if test="lastUpdate != null">
+            and last_update = #{astUpdate,jdbcType=TIMESTAMP}
+        </if>
+        <if test="brokerId != null">
+            and broker_id = #{brokerId,jdbcType=INTEGER}
+        </if>
+        <if test="databaseUrl != null">
+            and database_url = #{databaseUrl,jdbcType=VARCHAR}
+        </if>
+    </select>
+
+    <delete id="deleteCirculationDatabase"
+            parameterType="com.webank.weevent.governance.entity.CirculationDatabaseEntity">
+        delete
+        from t_circulation_database
+        where id = #{id}
+    </delete>
+
+    <update id="updateCirculationDatabase"
+            parameterType="com.webank.weevent.governance.entity.CirculationDatabaseEntity">
+        update t_circulation_database
+        set database_url=#{databaseUrl}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+
+    <insert id="addCirculationDatabase">
+        INSERT INTO t_circulation_database(`user_id`, `broker_id`, `database_url`)
+        VALUES (#{userId}, #{brokerId}, #{databaseUrl})
+    </insert>
+
+    <insert id="batchInsert">
+        INSERT INTO t_circulation_database(`user_id`,`broker_id`,`database_url`)
+        VALUES
+        <foreach collection="circulationDatabaseList" item="circulationDatabase" separator=",">
+            (#{circulationDatabase.userId},#{circulationDatabase.brokerId},#{circulationDatabase.databaseUrl})
+        </foreach>
+    </insert>
+
+    <select id="countCirculationDatabase" resultType="int">
+        select  count(*) from t_circulation_database
+        where 1=1
+        <if test="id != null">
+            and id = #{id,jdbcType=INTEGER}
+        </if>
+        <if test="userId != null">
+            and user_id = #{userId,jdbcType=INTEGER}
+        </if>
+        <if test="createDate != null">
+            and create_date = #{createDate,jdbcType=TIMESTAMP}
+        </if>
+        <if test="lastUpdate != null">
+            and last_update = #{astUpdate,jdbcType=TIMESTAMP}
+        </if>
+        <if test="brokerId != null">
+            and broker_id = #{brokerId,jdbcType=INTEGER}
+        </if>
+        <if test="databaseUrl != null">
+            and database_url = #{databaseUrl,jdbcType=VARCHAR}
+        </if>
+    </select>
+</mapper>

@@ -526,6 +526,7 @@ html,body,#app{
           margin-bottom:0;
           .el-form-item__label{
             width:140px;
+            text-align: center;
           }
           .el-form-item__content{
             color:@gray_text
@@ -580,6 +581,325 @@ html,body,#app{
     padding-top:16px !important;
 }
 
+.statistics{
+  background: #fff;
+  position: absolute;
+  top: 59px;
+  left: 24px;
+  bottom: 24px;
+  right: 24px;
+  .dataContent{
+    width:100%;
+    height:100%;
+    position: relative;
+    .selectOptions{
+      padding:30px;
+      .optionTitle{
+        margin-right: 20px;
+      }
+    }
+    .statisticsCharts{
+      position: absolute;
+      top:93px;
+      bottom: 30px;
+      left:30px;
+      right: 30px;
+      #chart{
+        width:100%;
+        height:100%;
+      }
+    }
+  }
+}
+
+.rule{
+  color:@gray_text;
+  .rule_title{
+    font-size: 18px;
+    color:@black_text;
+    font-weight: bold;
+  }
+  .rule_descript, .step_list_item{
+    font-size: 12px;
+    margin-top:20px;
+    margin-bottom: 30px;
+  }
+  .step, .rule_list{
+    background: #fff;
+    padding:30px;
+    @shadow();
+    border-radius: 5px;
+  }
+  .step_list{
+    display: flex;
+    align-items: center;
+    .el-icon-right{
+      margin-left:40px;
+      margin-right: 36px;
+      margin-top:-10px;
+    }
+    .step_list_item{
+      position: relative;
+      .num{
+        display: inline-block;
+        width:30px;
+        height:30px;
+        text-align: center;
+        line-height: 30px;
+        border-radius: 16px;
+        border:1px solid @gray_text;
+        margin-right: 8px;
+      }
+      .item_name{
+        font-size: 12px;
+      }
+
+      .creat_rule{
+        position: absolute;
+        right:0;
+        bottom:-14px;
+        font-size: 12px;
+        color:@blue;
+        cursor: pointer;
+      }
+    }
+  }
+  .rule_list{
+    position: absolute;
+    top:316px;
+    left:24px;
+    right:24px;
+    bottom:24px;
+    
+    .control_part{
+      display: flex;
+      justify-content:space-between;
+      margin-top: 30px;
+      margin-bottom: 10px;
+      .search_part{
+        display: flex;
+        .el-input{
+          width:300px;
+          margin-right: 10px;
+        }
+      }
+    }
+
+    .el-table{
+      .el-table__header-wrapper{
+        table .has-gutter tr th{
+          font-weight: 100;
+          background: @light_gray;
+          color:@black_text;
+        }
+      }
+      .el-table__body-wrapper{
+        .el-table__body tbody tr td .cell{
+          span {
+            .notActive, .isActive{
+              display: inline-block;
+              width:10px;
+              height:10px;
+              background:#FF5656;
+              border-radius: 50%;
+              margin-right: 5px;
+            }
+            .isActive{
+              background: #67c23a;
+            }
+          }
+
+          a{
+            color:@blue;
+            cursor: pointer;
+            margin-right: 8px;
+          }
+
+        } 
+      }
+    }
+    .el-pagination{
+      position: inherit;
+      margin-top:10px;
+    }
+  }
+  .el-dialog__wrapper{
+    .el-dialog{
+      width:600px;
+      .el-dialog__header{
+        border-bottom:1px solid @table_border-color;
+        .el-dialog__title{
+          font-size: 14px;
+          color:@black_text;
+        }
+      }
+      .el-dialog__body{
+        padding:32px;
+        .warning_part{
+          display: flex;
+          padding:20px;
+          background: @dig_bg_blue;
+          border:1px solid @dig_border_blue;
+          border-radius: 5px;
+          img{
+            width:15px;
+            height:15px;
+            margin-right: 10px;
+          }
+        }
+        .sql_part{
+          flex-direction: column;
+          color:@gray_text;
+          p:first-child{
+            display: flex;
+            justify-content: space-between; 
+            margin-bottom: 15px;
+            span:first-child{
+              color:@black_text;
+              font-weight: bold;
+            }
+            span:last-child{
+              color:@blue;
+              cursor: pointer;
+            }
+          }
+        }
+        .el-form{
+          margin-top: 15px;
+          .el-form-item{
+            margin-bottom: 10px;
+            .el-radio-button__inner, .el-radio-group{
+              width:100%;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.rule_detail{
+  .step {
+    margin-top:24px;
+    padding:24px;
+    .rule_title{
+      font-size: 15px;
+    }
+
+    .el-button--primary{
+      margin:15px 0;
+    }
+    .rule_name{
+      font-size: 14px;
+      font-weight: bold;
+      color:@black_text;
+    }
+    .name{
+      font-size: 12px;
+      color:@black_text;
+      margin-top:20px;
+      span{
+        margin-right:14px;
+      }
+    }
+    .sql_content{
+      height:100px;
+      background:@bg;
+      border-radius: 2px;
+      .no_sql{
+        text-align: center;
+        line-height: 100px;
+        font-size: 12px;
+        img{
+          width:15px;
+          margin-right: 5px;
+        }
+        .creat_sql{
+          color:@blue;
+          cursor: pointer;
+        }
+      }
+      .sql_lession{
+        width:100%;
+        height:100%;
+        padding:10px;
+        word-wrap: break-word;
+      }
+    }
+
+    .foward_list{
+      width:100%;
+      li{
+        border-bottom:1px solid #ddd;
+        font-size: 14px;
+        height:48px;
+        line-height: 49px;
+        padding:0 20px;
+        border-bottom: 1px solid #ebf5f5;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+      .foward_list_title {
+        background: #f8f8f8;
+      }
+      .no_content{
+        text-align: center;
+      }
+    }
+  } 
+  
+  .el-dialog__body .el-form .el-form-item .el-form-item__content .el-select{
+    width:100%;
+  }
+
+}
+
+.el-select-dropdown__list{
+  width:auto;
+  max-width: 534px;
+}
+
+.conditionItem{
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-bottom: 20px;
+  .el-icon-remove-outline{
+    color:@bg_blue;
+    margin-left:5px;
+    font-size: 15px;
+  }
+  .line{
+   margin:0 5px;
+  }
+  .conditionaWarning {
+    position: absolute;
+    bottom:-30px;
+    font-size: 12px;
+    color:#F56C6C;
+    display: none;
+  }
+}
+.el-form-item .el-icon-plus{
+  width: 20px;
+  height:20px;
+  line-height: 20px;
+  border-radius: 10px;
+  text-align: center;
+  background: @bg_blue;
+  color:#fff; 
+}
+
+.no_dbList{
+  font-size: 14px;
+  color:@black_text;
+  span{
+    color:@blue;
+    cursor: pointer;
+  }
+}
+
 .searchBox{
   margin:20px 0;
   text-align: right;
@@ -601,6 +921,9 @@ html,body,#app{
   padding-left:24px !important;
   color:@black_text !important;
   font-size: 16px !important;
+  i{
+    color:@black_text
+  }
 }
 
 .el-submenu .el-menu-item{

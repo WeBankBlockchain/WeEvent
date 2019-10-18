@@ -246,7 +246,6 @@ public class FabricSDKWrapper {
         GroupGeneral groupGeneral = new GroupGeneral();
         long currentBlockNum = channel.queryBlockchainInfo().getHeight() - 1;
         BlockInfo blockInfo = channel.queryBlockByNumber(currentBlockNum);
-        groupGeneral.setGroupId(channel.getName());
         groupGeneral.setLatestBlock(BigInteger.valueOf(currentBlockNum - 1));
         groupGeneral.setNodeCount(channel.getPeers().size());
         if (blockInfo != null) {
@@ -292,10 +291,8 @@ public class FabricSDKWrapper {
         Collection<Peer> peers = channel.getPeers();
         for (Peer peer : peers) {
             TbNode tbNode = new TbNode();
-            tbNode.setGroupId(channel.getName());
             tbNode.setBlockNumber(BigInteger.valueOf(blockInfo.getBlockNumber()));
             tbNode.setNodeName(peer.getName());
-            tbNode.setNodeIp(peer.getUrl());
             tbNodes.add(tbNode);
         }
         return tbNodes;

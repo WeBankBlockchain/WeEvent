@@ -13,8 +13,8 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-		id,create_date, last_update, username, password, email
-	</sql>
+        id,create_date, last_update, username, password, email
+    </sql>
     <select id="accountList" resultMap="BaseResultMap"
             parameterType="com.webank.weevent.governance.entity.AccountEntity">
         select
@@ -30,21 +30,19 @@
 
     </select>
     <insert id="insertAccount" parameterType="com.webank.weevent.governance.entity.AccountEntity">
-		insert into
-		t_account (id, username, password,email)
-		values
-		(#{id,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR},
-		#{password,jdbcType=VARCHAR},
-		#{email,jdbcType=VARCHAR})
-	</insert>
+        insert into t_account (id, username, password, email)
+        values (#{id,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR},
+                #{password,jdbcType=VARCHAR},
+                #{email,jdbcType=VARCHAR})
+    </insert>
 
     <update id="updateAccount" parameterType="com.webank.weevent.governance.entity.AccountEntity">
-		update t_account
-		set username = #{username,jdbcType=VARCHAR},
-		password = #{password,jdbcType=VARCHAR},
-		email = #{email,jdbcType=VARCHAR}
-		where id = #{id,jdbcType=INTEGER}
-	</update>
+        update t_account
+        set username = #{username,jdbcType=VARCHAR},
+            password = #{password,jdbcType=VARCHAR},
+            email    = #{email,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
 
     <select id="countAccount" parameterType="com.webank.weevent.governance.entity.AccountEntity"
             resultType="int">
@@ -61,9 +59,10 @@
     </select>
 
     <delete id="deleteAccount" parameterType="java.lang.Integer">
-		update t_account set is_delete=1
-		where id = #{id,jdbcType=INTEGER}
-	</delete>
+        update t_account
+        set is_delete=1
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
 
 
 </mapper>

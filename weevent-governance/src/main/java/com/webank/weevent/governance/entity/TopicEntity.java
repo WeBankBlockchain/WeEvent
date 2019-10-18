@@ -2,7 +2,7 @@ package com.webank.weevent.governance.entity;
 
 import java.util.Date;
 
-import com.webank.weevent.governance.entity.base.BaseEntity;
+import com.webank.weevent.governance.entity.base.TopicBase;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -14,15 +14,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class TopicEntity extends BaseEntity {
-
-    private Integer isDelete;
-
-    private Integer brokerId;
-
-    private String topicName;
-
-    private String creater;
+public class TopicEntity extends TopicBase {
 
     private String topicAddress;
 
@@ -33,7 +25,5 @@ public class TopicEntity extends BaseEntity {
     private Long sequenceNumber;
 
     private Long blockNumber;
-
-    private String description;
 
 }

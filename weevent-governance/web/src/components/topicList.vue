@@ -18,25 +18,26 @@
     element-loading-text='数据加载中...'
     element-loading-background='rgba(256,256,256,0.8)'
     style="width: 100%"
-    @expand-change='readDetial'
+    @expand-change='readDetail'
     >
     <el-table-column type="expand">
       <template slot-scope="props">
         <el-form label-position="left" inline class="demo-table-expand">
           <el-form-item label="Topic:">
-            <span>{{ props.row.detial.topicName }}</span>
+            <span>{{ props.row.detail.topicName }}</span>
           </el-form-item><br/>
           <el-form-item label="创建时间:">
-            <span>{{ props.row.detial.createdTimestamp }}</span>
+            <span>{{ props.row.detail.createdTimestamp }}</span>
           </el-form-item><br/>
-          <el-form-item label="地址:">
-            <span>{{ props.row.detial.topicAddress }}</span>
-          </el-form-item><br/>
+
            <el-form-item label="已发布事件数:">
-            <span>{{ props.row.detial.sequenceNumber }}</span>
+            <span>{{ props.row.detail.sequenceNumber }}</span>
           </el-form-item><br/>
            <el-form-item label="最新事件块高:">
-            <span>{{ props.row.detial.blockNumber }}</span>
+            <span>{{ props.row.detail.blockNumber }}</span>
+          </el-form-item><br/>
+          <el-form-item label="地址:">
+            <span>{{ props.row.detail.topicAddress }}</span>
           </el-form-item>
         </el-form>
       </template>
@@ -83,7 +84,7 @@
 </template>
 <script>
 import API from '../API/resource.js'
-import { getDateDetial } from '../utils/formatTime'
+import { getDateDetail } from '../utils/formatTime'
 export default {
   data () {
     return {
@@ -127,7 +128,7 @@ export default {
             'topicAddress': ''
           }
           listData.forEach(item => {
-            vm.$set(item, 'detial', det)
+            vm.$set(item, 'detail', det)
           })
           vm.tableData = [].concat(listData)
         }
@@ -143,13 +144,13 @@ export default {
         this.getLsitData()
       }, 1000)
     },
-    readDetial (e) {
+    readDetail (e) {
       var vm = this
       let url = '?brokerId=' + localStorage.getItem('brokerId') + '&topic=' + e.topicName
       API.topicState(url).then(res => {
-        let time = getDateDetial(res.data.createdTimestamp)
+        let time = getDateDetail(res.data.createdTimestamp)
         res.data.createdTimestamp = time
-        vm.$set(e, 'detial', res.data)
+        vm.$set(e, 'detail', res.data)
       })
     },
     indexChange (e) {
@@ -177,7 +178,7 @@ export default {
     },
     checkTime (e) {
       const time = e.createdTimestamp
-      return getDateDetial(time)
+      return getDateDetail(time)
     },
     addNewOne () {
       this.dialogFormVisible = true
@@ -236,13 +237,13 @@ export default {
         vm.tableData = []
         let url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + vm.topicName
         API.topicInfo(url).then(res => {
-          let time = getDateDetial(res.data.createdTimestamp)
+          let time = getDateDetail(res.data.createdTimestamp)
           res.data.createdTimestamp = time
           let item = {
             topicName: res.data.topicName,
             creater: '——',
             createdTimestamp: time,
-            detial: {}
+            detail: {}
           }
           vm.tableData.push(item)
           vm.total = 1
@@ -262,13 +263,13 @@ export default {
       if (sessionStorage.getItem('topic') !== '—') {
         let url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + sessionStorage.getItem('topic')
         API.topicInfo(url).then(res => {
-          let time = getDateDetial(res.data.createdTimestamp)
+          let time = getDateDetail(res.data.createdTimestamp)
           res.data.createdTimestamp = time
           let item = {
             topicName: res.data.topicName,
             creater: '——',
             createdTimestamp: time,
-            detial: {}
+            detail: {}
           }
           vm.tableData.push(item)
           vm.total = 1
@@ -295,9 +296,13 @@ export default {
       }
     },
     brokerId () {
+      this.pageIndex = 1
+      this.pageSize = 10
       this.refresh()
     },
     groupId () {
+      this.pageIndex = 1
+      this.pageSize = 10
       this.refresh()
     }
   },
