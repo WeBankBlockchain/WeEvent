@@ -232,7 +232,7 @@ public class ServiceTest {
         assertEquals(200, result.getResponse().getStatus());
 
         String ruleId = JSONObject.parseObject(result.getResponse().getContentAsString()).get("data").toString();
-        ArgumentCaptor<CEPRule> argument = ArgumentCaptor.forClass(CEPRule.class);
+        ArgumentCaptor.forClass(CEPRule.class);
         CEPRule rule = ruleService.selectByPrimaryKey(ruleId);
         assertEquals(ruleId, rule.getId());
         assertEquals("air3", rule.getRuleName());
