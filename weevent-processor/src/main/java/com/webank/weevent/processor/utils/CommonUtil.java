@@ -43,15 +43,11 @@ public class CommonUtil {
         String page = null;
         String[] arrSplit;
 
-        url = url.trim().toLowerCase();
+        String urlTemp = url.trim().toLowerCase();
 
-        arrSplit = url.split("[?]");
-        if (url.length() > 0) {
-            if (arrSplit.length > 1) {
-                if (arrSplit[0] != null) {
-                    page = arrSplit[0];
-                }
-            }
+        arrSplit = urlTemp.split("[?]");
+        if ((urlTemp.length()) > 0 && (arrSplit.length > 1) && (arrSplit[0] != null)) {
+            page = arrSplit[0];
         }
 
         return page;
