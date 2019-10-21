@@ -17,17 +17,13 @@ import org.springframework.stereotype.Service;
 public class IAuthServiceImpl implements IAuthService {
     @Override
     public boolean verifyUserName(String userName, String password) {
-        if (StringUtils.isBlank(BrokerApplication.weEventConfig.getMqttUserName())
-                || StringUtils.isBlank(BrokerApplication.weEventConfig.getMqttPassCode())) {
+        String authAccount = BrokerApplication.environment.getProperty("spring.security.user.name");
+        String authPassword = BrokerApplication.environment.getProperty("spring.security.user.password");
+
+        if (StringUtils.isBlank(authAccount) || StringUtils.isBlank(authPassword)) {
             return true;
         }
 
-        if (BrokerApplication.weEventConfig.getMqttUserName().equals(userName)
-                && BrokerApplication.weEventConfig.getMqttPassCode().equals(password)) {
-            return true;
-        }
-
-        log.error("invalid userName/password");
-        return false;
+        return authAccount.equals(userName) && authPassword.equals(password);
     }
 }
