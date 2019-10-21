@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Slf4j
 @Configuration
-@ConditionalOnExpression("'${quartz.enabled}'=='true'")
 public class SchedulerConfig {
     @Autowired
     private ApplicationContext applicationContext;
