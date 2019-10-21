@@ -28,7 +28,7 @@ dependencies {
     // curator prefer zookeeper 3.5
     // http://curator.apache.org/zk-compatibility.html
     implementation("org.apache.curator:curator-recipes:4.2.0")
-    
+
     // redis
     implementation("redis.clients:jedis:3.0.0")
 
