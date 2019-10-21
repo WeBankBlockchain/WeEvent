@@ -61,7 +61,7 @@ public class CEPRuleMQ {
 
     public static void subscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) {
         try {
-            IWeEventClient client = getClient(rule);;
+            IWeEventClient client = getClient(rule);
             // subscribe topic
             log.info("subscribe topic:{}", rule.getFromDestination());
             String subscriptionId = client.subscribe(rule.getFromDestination(), WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
@@ -108,8 +108,10 @@ public class CEPRuleMQ {
 
             if (conn != null) {
                 Map<String, String> urlParamMap = CommonUtil.uRLRequest(rule.getDatabaseUrl());
-                String insertExpression = "insert into ".concat(urlParamMap.get("tableName").concat("("));
-                String values = "values (";
+                StringBuffer insertExpression = new StringBuffer( "insert into ");
+                insertExpression.append(urlParamMap.get("tableName"));
+                insertExpression.append("(");
+                StringBuffer values = new StringBuffer("values (");
                 Map<String, Integer> sqlvalue = CommonUtil.contactsql(content, rule.getPayload());
                 List<String> result = new ArrayList(sqlvalue.keySet());
 
@@ -118,18 +120,18 @@ public class CEPRuleMQ {
                     System.out.println(entry.getKey() + ":" + entry.getValue());
                     if (entry.getValue().equals(1)) {
                         if (entry.getValue().equals(result.get(result.size() - 1))) {
-                            insertExpression.concat(entry.getKey()).concat(")");
-                            values.concat("?）");
+                            insertExpression.append(entry.getKey()).append(")");
+                            values.append("?）");
                         } else {
-                            insertExpression.concat(entry.getKey()).concat(",");
-                            values.concat("?，");
+                            insertExpression.append(entry.getKey()).append(",");
+                            values.append("?，");
                         }
                     }
                 }
 
-                String query = insertExpression.concat(values);
+                StringBuffer query = insertExpression.append(values);
                 log.info("query:{}", query);
-                PreparedStatement preparedStmt = conn.prepareStatement(query);
+                PreparedStatement preparedStmt = conn.prepareStatement(query.toString());
                 for (int t = 0; t < result.size(); t++) {
                     preparedStmt.setString(t + 1, eventContent.get(result.get(t)).toString());
                 }
