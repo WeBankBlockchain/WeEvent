@@ -12,7 +12,7 @@ import com.webank.weevent.processor.mapper.CEPRuleMapper;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.model.CEPRuleExample;
 import com.webank.weevent.processor.utils.CommonUtil;
-import com.webank.weevent.processor.utils.Constants;
+import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.RetCode;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
@@ -68,31 +68,31 @@ public class CEPRuleServiceImpl implements CEPRuleService {
     public RetCode setCEPRule(String id, int type) {
         CEPRule rule = cepRuleMapper.selectByPrimaryKey(id);
         //0-->1-->2
-        if (rule.getStatus().equals(Constants.RULE_STATUS_DELETE)) {
-            return Constants.ALREADY_DELETE;
+        if (rule.getStatus().equals(ConstantsHelper.RULE_STATUS_DELETE)) {
+            return ConstantsHelper.ALREADY_DELETE;
         }
 
-        if (type == Constants.RULE_STATUS_START) {
-            rule.setStatus(Constants.RULE_STATUS_START);// 1 is represent start status
+        if (type == ConstantsHelper.RULE_STATUS_START) {
+            rule.setStatus(ConstantsHelper.RULE_STATUS_START);// 1 is represent start status
         }
 
-        if (type == Constants.RULE_STATUS_DELETE) {
-            rule.setStatus(Constants.RULE_STATUS_DELETE);// 2 is represent delete status
+        if (type == ConstantsHelper.RULE_STATUS_DELETE) {
+            rule.setStatus(ConstantsHelper.RULE_STATUS_DELETE);// 2 is represent delete status
         }
         int ret = cepRuleMapper.updateByPrimaryKeySelective(rule); // 1 success
         if (1 != ret) {
-            return Constants.FAIL;
+            return ConstantsHelper.FAIL;
         }
 
         try {
-            if (type == Constants.RULE_STATUS_START) {
+            if (type == ConstantsHelper.RULE_STATUS_START) {
                 updateCache(cepRuleMapper.selectByPrimaryKey(id), "setstatus");
             }
         } catch (BrokerException e) {
             log.info(e.toString());
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
-        return Constants.SUCCESS;
+        return ConstantsHelper.SUCCESS;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -101,7 +101,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         // check all the field
         try {
             if (!(checkField(rule)).getErrorMsg().equals("success")) {
-                return Constants.FAIL;
+                return ConstantsHelper.FAIL;
             }
 
         } catch (Exception e) {
@@ -113,7 +113,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         // update the db
         int ret = cepRuleMapper.updateByPrimaryKeySelective(rule); // 1 is success
         if (1 != ret) {
-            return Constants.FAIL;
+            return ConstantsHelper.FAIL;
         }
 
         // update the cache
@@ -122,7 +122,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         } catch (BrokerException e) {
             log.info(e.toString());
         }
-        return Constants.SUCCESS;
+        return ConstantsHelper.SUCCESS;
     }
 
     @Override
@@ -140,14 +140,14 @@ public class CEPRuleServiceImpl implements CEPRuleService {
     public RetCode updateByPrimaryKey(CEPRule record) {
         //check  ruleName、payloay、selectField、conditionField、conditionType、fromDestination、toDestination、databaseUrl
         RetCode ret = checkField(record);
-        if (!ret.getErrorCode().equals(Constants.RULE_STATUS_START)) {
-            return Constants.FAIL;
+        if (!ret.getErrorCode().equals(ConstantsHelper.RULE_STATUS_START)) {
+            return ConstantsHelper.FAIL;
         }
         int count = cepRuleMapper.updateByPrimaryKey(record);
         if (count > 0) {
-            return Constants.SUCCESS;
+            return ConstantsHelper.SUCCESS;
         }
-        return Constants.FAIL;
+        return ConstantsHelper.FAIL;
     }
 
 
@@ -155,14 +155,14 @@ public class CEPRuleServiceImpl implements CEPRuleService {
     public RetCode updateByPrimaryKeySelective(CEPRule record) {
         // check rule name
         if (StringUtils.isBlank(record.getRuleName()) || record.getRuleName().isEmpty()) {
-            return Constants.FAIL;
+            return ConstantsHelper.FAIL;
         }
         // update the record
         int count = cepRuleMapper.updateFieldById(record);
         if (count > 0) {
-            return Constants.SUCCESS;
+            return ConstantsHelper.SUCCESS;
         }
-        return Constants.FAIL;
+        return ConstantsHelper.FAIL;
     }
 
     @Override
@@ -214,36 +214,36 @@ public class CEPRuleServiceImpl implements CEPRuleService {
         // checkPayload
         try {
             if (record == null) {
-                return Constants.RULE_IS_NOT_VALID;
+                return ConstantsHelper.RULE_IS_NOT_VALID;
             }
             if (StringUtils.isBlank(record.getRuleName()) || record.getRuleName().isEmpty()) {
-                return Constants.RULENAME_IS_BLANK;
+                return ConstantsHelper.RULENAME_IS_BLANK;
             }
             if (StringUtils.isBlank(record.getUserId()) || record.getUserId().isEmpty()) {
-                return Constants.USERID_IS_BLANK;
+                return ConstantsHelper.USERID_IS_BLANK;
             }
 
             if (StringUtils.isBlank(record.getBrokerId()) || record.getBrokerId().isEmpty()) {
-                return Constants.BROKERID_IS_BLANK;
+                return ConstantsHelper.BROKERID_IS_BLANK;
             }
             String payload = record.getPayload();
             if (payload.isEmpty() || StringUtils.isBlank(payload)) {
-                return Constants.PAYLOAD_IS_BLANK;
+                return ConstantsHelper.PAYLOAD_IS_BLANK;
             } else {
                 //check relation between payloay and selectField
                 if (!isJSONValid(payload)) {
-                    return Constants.PAYLOAD_ISNOT_JSON;
+                    return ConstantsHelper.PAYLOAD_ISNOT_JSON;
                 }
             }
             if (record.getConditionType() != 1 && record.getConditionType() != 2) {
-                return Constants.CONDITIONTYPE_ISNOT_VALID;
+                return ConstantsHelper.CONDITIONTYPE_ISNOT_VALID;
             } else {
                 // check the topic is exist or not
                 if (1 == record.getConditionType()) {
                     boolean temp = checkTopic(record.getToDestination(), record.getBrokerUrl());
                     if (!temp) {
                         log.info("the topic is not exist");
-                        return Constants.TOPIC_ISNOT_EXIST;
+                        return ConstantsHelper.TOPIC_ISNOT_EXIST;
                     }
                 }
                 // check the databaseUrl,check is valid (http://...?account=**&password=**)
@@ -251,7 +251,7 @@ public class CEPRuleServiceImpl implements CEPRuleService {
                     boolean temp = checkDatabase(record.getDatabaseUrl());
                     if (!temp) {
                         log.info("database url is wrong");
-                        return Constants.URL_ISNOT_VALID;
+                        return ConstantsHelper.URL_ISNOT_VALID;
                     }
                 }
 
@@ -260,13 +260,13 @@ public class CEPRuleServiceImpl implements CEPRuleService {
             // check topic and check the broker
             if (!checkTopic(record.getFromDestination(), record.getBrokerUrl())) {
                 log.info("the topic is not exist");
-                return Constants.TOPIC_ISNOT_EXIST;
+                return ConstantsHelper.TOPIC_ISNOT_EXIST;
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            return Constants.FAIL;
+            return ConstantsHelper.FAIL;
         }
-        return Constants.SUCCESS;
+        return ConstantsHelper.SUCCESS;
     }
 
     /**

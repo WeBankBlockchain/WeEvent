@@ -1,6 +1,6 @@
 package com.webank.weevent.processor.utils;
 
-public class Constants {
+public class ConstantsHelper {
     public static RetCode SUCCESS = RetCode.mark(1, "success");
     public static RetCode FAIL = RetCode.mark(0, "fail");
 

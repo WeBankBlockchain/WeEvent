@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 import java.sql.Statement;
 
 import com.webank.weevent.processor.model.CEPRule;
-import com.webank.weevent.processor.utils.Constants;
+import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.sdk.BrokerException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -23,13 +23,13 @@ public class AnalysisWeEventIdService implements AutoCloseable {
             return;
         }
         //get database username password
-        String defaultUrl = dataBaseUrl.substring(0, dataBaseUrl.indexOf(Constants.QUESTION_MARK));
-        String user = dataBaseUrl.substring(dataBaseUrl.indexOf(Constants.QUESTION_MARK) + 1, dataBaseUrl.indexOf(Constants.AND_SYMBOL));
-        user = user.split(Constants.QUALS_TO)[1].replaceAll("\"", "");
-        int first = dataBaseUrl.indexOf(Constants.AND_SYMBOL);
-        int second = dataBaseUrl.indexOf(Constants.AND_SYMBOL, first + 1);
+        String defaultUrl = dataBaseUrl.substring(0, dataBaseUrl.indexOf(ConstantsHelper.QUESTION_MARK));
+        String user = dataBaseUrl.substring(dataBaseUrl.indexOf(ConstantsHelper.QUESTION_MARK) + 1, dataBaseUrl.indexOf(ConstantsHelper.AND_SYMBOL));
+        user = user.split(ConstantsHelper.QUALS_TO)[1].replaceAll("\"", "");
+        int first = dataBaseUrl.indexOf(ConstantsHelper.AND_SYMBOL);
+        int second = dataBaseUrl.indexOf(ConstantsHelper.AND_SYMBOL, first + 1);
         String password = dataBaseUrl.substring(first, second);
-        password = password.split(Constants.QUALS_TO)[1].replaceAll("\"", "");
+        password = password.split(ConstantsHelper.QUALS_TO)[1].replaceAll("\"", "");
         try (Connection conn = DriverManager.getConnection(defaultUrl, user, password)) {
             if (conn == null) {
                 log.info("database connect fail,dataBaseUrl:{}", defaultUrl);
@@ -47,9 +47,9 @@ public class AnalysisWeEventIdService implements AutoCloseable {
     private static String getInsertSql(String eventId, CEPRule cepRule) {
         String brokerUrl = cepRule.getBrokerUrl();
 
-        String[] split = eventId.split(Constants.CONNECTION_SYMBOL);
+        String[] split = eventId.split(ConstantsHelper.CONNECTION_SYMBOL);
         String lastBlock = split[2];
-        String[] brokerArray = brokerUrl.split(Constants.QUALS_TO);
+        String[] brokerArray = brokerUrl.split(ConstantsHelper.QUALS_TO);
         String groupId = brokerArray[1];
         String sql = new StringBuffer("insert into t_historical_data").append("(")
                 .append("topic_name,group_id,block_number,user_id,broker_id,event_id")
