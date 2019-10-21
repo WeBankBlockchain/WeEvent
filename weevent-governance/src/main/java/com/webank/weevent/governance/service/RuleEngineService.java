@@ -76,8 +76,6 @@ public class RuleEngineService {
     @Autowired
     private BrokerService brokerService;
 
-    private final String regex = "^[a-z0-9A-Z_-]{1,100}";
-
     private final static List<String> operatorList = new ArrayList<>(Arrays.asList(">=", "<=", ">", "<", "=", "!="));
 
     private static final int PROCESSOR_SUCCESS_CODE = 0;
@@ -531,11 +529,8 @@ public class RuleEngineService {
         if (StringUtil.isBlank(ruleEngineEntity.getRuleName())) {
             throw new GovernanceException("ruleName is empty");
         }
-        boolean flag = this.checkRuleName(ruleEngineEntity.getRuleName(), this.regex);
-        if (!flag) {
-            throw new GovernanceException("illegal ruleName format");
-        }
-        flag = checkRuleNameRepeat(ruleEngineEntity);
+
+        boolean flag = checkRuleNameRepeat(ruleEngineEntity);
         if (!flag) {
             throw new GovernanceException("ruleName repeat");
         }
