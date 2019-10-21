@@ -23,7 +23,7 @@ $ docker pull weevent/weevent:1.0.0; docker run -d -p 8080:8080 weevent/weevent:
 ```
 
 #### Bash一键安装
-下载并且解压安装包，如`weevent-1.0.0.tar.gz` ,在解压目录中执行安装脚本。
+下载并且解压安装包，如weevent-1.0.0.tar.gz ,在解压目录中执行安装脚本。
 ```
 $ ./install-all.sh -p /usr/local/weevent/
 ```
