@@ -334,11 +334,10 @@ function  checkPublishInput () {
             $(this).parent().children('.warningbox').hide()
         }
     })
-    if(index==0){
+    if(index===0){
         return true
-    } else {
-        return false
     }
+    return false
 }
 
 // 检查 customer_header 的key 是不是以 'weevent-' 开头定义的
