@@ -263,7 +263,6 @@ public class FabricSDKWrapper {
             TbTransHash tbTransHash = new TbTransHash();
             tbTransHash.setBlockNumber(BigInteger.valueOf(blockInfo.getBlockNumber()));
             tbTransHash.setTransHash(Hex.encodeHexString(blockInfo.getPreviousHash()));
-//            tbTransHash.setTransHash(Hex.encodeHexString(blockInfo.getBlock().getHeader().toByteArray()));
             tbTransHashes.add(tbTransHash);
         }
 
@@ -275,7 +274,6 @@ public class FabricSDKWrapper {
         BlockInfo blockInfo = getBlockInfo(fabricConfig, channel, blockNumber);
         if (blockInfo != null) {
             TbBlock tbBlock = new TbBlock();
-//            tbBlock.setPkHash(Hex.encodeHexString(blockInfo.getPreviousHash()));
             tbBlock.setBlockNumber(BigInteger.valueOf(blockInfo.getBlockNumber()));
             tbBlock.setTransCount(blockInfo.getEnvelopeCount());
             tbBlocks.add(tbBlock);

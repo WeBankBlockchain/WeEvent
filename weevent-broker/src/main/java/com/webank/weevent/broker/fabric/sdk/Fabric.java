@@ -185,10 +185,9 @@ public class Fabric {
         }
 
         SendResult sendResult = new SendResult();
-        TransactionInfo transactionInfo = new TransactionInfo();
         try {
             ChaincodeID chaincodeID = getChaincodeID(fabricConfig);
-            transactionInfo = FabricSDKWrapper.executeTransaction(hfClient, channel, chaincodeID, true, "publish", fabricConfig.getTransactionTimeout(), topicName, eventContent, extensions);
+            TransactionInfo transactionInfo = FabricSDKWrapper.executeTransaction(hfClient, channel, chaincodeID, true, "publish", fabricConfig.getTransactionTimeout(), topicName, eventContent, extensions);
             sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
             sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, transactionInfo.getBlockNumber().intValue(), Integer.parseInt(transactionInfo.getPayLoad())));
             sendResult.setTopic(topicName);
