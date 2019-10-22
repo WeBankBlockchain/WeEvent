@@ -53,7 +53,7 @@ public class CRUDJobs implements Job {
                 break;
 
             default:
-                log.info("the job name unknow:{}", type);
+                log.info("the job name type:{}", type);
                 break;
         }
     }

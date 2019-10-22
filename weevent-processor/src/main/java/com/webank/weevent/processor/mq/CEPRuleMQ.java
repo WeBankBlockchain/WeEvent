@@ -4,16 +4,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.processor.job.CRUDJobs;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.service.AnalysisWeEventIdService;
 import com.webank.weevent.processor.utils.CommonUtil;
+import com.webank.weevent.processor.service.QuartzManager;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.WeEvent;
@@ -25,17 +25,20 @@ import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.MapContext;
-import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.JobKey;
-import org.quartz.SchedulerException;
 import org.springframework.util.StringUtils;
 
 @Slf4j
 public class CEPRuleMQ {
     // <ruleId <--> subscriptionId>
     public static Map<String, String> subscriptionIdMap = new ConcurrentHashMap<>();
+
+
+//    private static QuartzManager quartzManager;
+
+//    public CEPRuleMQ(QuartzManager quartzManager) {
+//        this.quartzManager = quartzManager;
+//    }
 
     public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException {
         // unsubscribe old the topic
@@ -188,32 +191,16 @@ public class CEPRuleMQ {
 
     }
 
+
     private static void createJob(WeEvent weevent, String type, IWeEventClient client, Map<String, CEPRule> ruleMap) {
-        try {
-            JobDataMap jobmap = new JobDataMap();
-            jobmap.put("weevent", weevent);
-            jobmap.put("type", type);
-            jobmap.put("client", client);
-            jobmap.put("ruleMap", ruleMap);
 
-            JobKey jobkey = new JobKey(new Date().toString(), type);
-            JobDetail jobDetail = JobBuilder.newJob(CRUDJobs.class)
-                    .withIdentity(jobkey)
-                    .requestRecovery()
-                    .setJobData(jobmap)
-                    .build();
-            // if exist ,then replace
-            if (ProcessorApplication.scheduler.checkExists(jobkey)) {
-                ProcessorApplication.scheduler.addJob(jobDetail, true);
-            } else {
-                // if not exist ,then insert,and can not replace
-                ProcessorApplication.scheduler.addJob(jobDetail, false);
-            }
+        JobDataMap jobmap = new JobDataMap();
+        jobmap.put("weevent", weevent);
+        jobmap.put("type", type);
+        jobmap.put("client", client);
+        jobmap.put("ruleMap", ruleMap);
+        QuartzManager.addJob(weevent.getEventId(), "onEvent", "onEvent", "onEvent-trigger", CRUDJobs.class, jobmap);
 
-
-        } catch (SchedulerException e) {
-            e.printStackTrace();
-        }
     }
 
     private static boolean hitRuleEngine(String payload, String eventContent, String condition) {
@@ -231,6 +218,5 @@ public class CEPRuleMQ {
         }
         return Boolean.FALSE;
     }
-
 }
 

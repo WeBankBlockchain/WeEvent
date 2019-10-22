@@ -44,5 +44,9 @@ public class ConstantsHelper {
     public static final Integer SUCCESS_CODE = 0;
     public static final String SUCCESS_MESSAGE = "success";
 
+    private final String job_prefix = "job_";
+    private final String job_group_prefix = "job_group_";
+    private final String trigger_prefix = "trigger_";
+    private final String trigger_group_prefix = "trigger_group_";
 
 }

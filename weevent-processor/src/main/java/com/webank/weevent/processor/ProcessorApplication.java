@@ -6,14 +6,6 @@ import com.webank.weevent.processor.service.RedisService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.mybatis.spring.annotation.MapperScan;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.SchedulerFactory;
-import org.quartz.SimpleScheduleBuilder;
-import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
-import org.quartz.TriggerKey;
-import org.quartz.impl.StdSchedulerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -30,8 +22,8 @@ import redis.clients.jedis.Protocol;
 @MapperScan(basePackages = "com.webank.weevent.processor")
 public class ProcessorApplication {
     public static ProcessorConfig processorConfig;
-    public static Scheduler scheduler;
     public static ApplicationContext applicationContext;
+
 
     @Autowired
     public void setContext(ApplicationContext context) {
@@ -44,8 +36,6 @@ public class ProcessorApplication {
         app.addListeners(new ApplicationPidFileWriter());
         app.run(args);
         log.info("start processor success");
-//        scheduler = (StdScheduler) applicationContext.getBean("scheduler");
-        startScheduler();
     }
 
     @Autowired
@@ -105,28 +95,6 @@ public class ProcessorApplication {
     public CEPRuleCache cEPRuleCache() {
         log.info("cEPRuleCache....");
         return new CEPRuleCache();
-    }
-
-
-    private static void startScheduler() {
-        try {
-            SchedulerFactory factory = new StdSchedulerFactory();
-            scheduler = factory.getScheduler();
-            scheduler.start();
-
-            //  set the scheduler time
-            SimpleScheduleBuilder simpleBuilder = SimpleScheduleBuilder.simpleSchedule().withRepeatCount(0);
-            TriggerKey triggerKey = new TriggerKey("trigger1_1", "tGroup1");
-
-            Trigger trigger = TriggerBuilder.newTrigger()
-                    .withIdentity(triggerKey).startNow()
-                    .withSchedule(simpleBuilder)
-                    .build();
-            scheduler.scheduleJob(trigger);
-        } catch (
-                SchedulerException e) {
-            e.printStackTrace();
-        }
     }
 }
 

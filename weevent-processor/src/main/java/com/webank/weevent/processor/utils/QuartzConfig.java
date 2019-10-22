@@ -1,0 +1,47 @@
+package com.webank.weevent.processor.utils;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+
+import org.quartz.Scheduler;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.quartz.SchedulerFactoryBean;
+
+@Configuration
+public class QuartzConfig {
+
+    private JobFactory jobFactory;
+
+    public QuartzConfig(JobFactory jobFactory) {
+        this.jobFactory = jobFactory;
+    }
+
+    /**
+     * SchedulerFactoryBean
+     */
+    @Bean
+    public SchedulerFactoryBean schedulerFactoryBean() {
+        SchedulerFactoryBean factory = new SchedulerFactoryBean();
+        try {
+            String fileUtl = this.getClass().getClassLoader().getResource("processor.properties").getPath();
+            FileInputStream in = new FileInputStream(fileUtl);
+
+            Properties quartzPropertie = new Properties();
+            quartzPropertie.load(in);
+            factory.setQuartzProperties(quartzPropertie);
+            factory.setJobFactory(jobFactory);
+            in.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return factory;
+    }
+
+    @Bean(name = "scheduler")
+    public Scheduler scheduler() {
+        return schedulerFactoryBean().getScheduler();
+    }
+}

@@ -6,8 +6,8 @@ import java.util.List;
 
 import javax.validation.Valid;
 
-import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.processor.job.CRUDJobs;
+import com.webank.weevent.processor.service.QuartzManager;
 import com.webank.weevent.processor.utils.BaseRspEntity;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.service.CEPRuleServiceImpl;
@@ -17,11 +17,7 @@ import com.webank.weevent.processor.utils.RetCode;
 import com.alibaba.fastjson.JSONArray;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.annotations.Param;
-import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.JobKey;
-import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,6 +33,9 @@ public class CEPRuleController {
 
     @Autowired
     private CEPRuleServiceImpl cepRuleService;
+
+    @Autowired
+    private QuartzManager quartzManager;
 
     @RequestMapping("/getCEPRuleById")
     public BaseRspEntity getCEPRuleById(@RequestParam(name = "id") String id) {
@@ -219,66 +218,27 @@ public class CEPRuleController {
     }
 
     private void createJob(CEPRule rule, String type) {
-        try {
-            JobDataMap ruleMap = new JobDataMap();
-            //String type = "write";
-            ruleMap.put("rule", rule);
-            ruleMap.put("type", type);
-            ruleMap.put("id", rule.getId());
-            JobKey jobkey = new JobKey(new Date().toString(), type);
-            JobDetail jobDetail = JobBuilder.newJob(CRUDJobs.class)
-                    .withIdentity(jobkey)
-                    .requestRecovery()
-                    .setJobData(ruleMap)
-                    .build();
-            // if exist ,then replace
-            if (ProcessorApplication.scheduler.checkExists(jobkey)) {
-                ProcessorApplication.scheduler.addJob(jobDetail, true);
-            } else {
-                // if not exist ,then insert,and can not replace
-                ProcessorApplication.scheduler.addJob(jobDetail, false);
-            }
+        JobDataMap  jobmap = new JobDataMap();
+        jobmap.put("rule", rule);
+        jobmap.put("type", type);
+        quartzManager.addJob(rule.getId(), "rule", "rule", "rule-trigger", CRUDJobs.class, jobmap);
 
-
-        } catch (SchedulerException e) {
-            e.printStackTrace();
-        }
     }
 
     private void createJob(List<CEPRule> rule, String type) {
-        try {
-            JobDataMap ruleMap = new JobDataMap();
-            ruleMap.put("rule", rule);
-            ruleMap.put("type", type);
-            JobKey jobkey = new JobKey(type.concat(new Date().toString()), type);
-            JobDetail jobDetail = JobBuilder.newJob(CRUDJobs.class)
-                    .withIdentity(jobkey)
-                    .requestRecovery()
-                    .setJobData(ruleMap)
-                    .build();
-            // if exist ,then replace
-            if (ProcessorApplication.scheduler.checkExists(jobkey)) {
-                ProcessorApplication.scheduler.addJob(jobDetail, true);
-            } else {
-                // if not exist ,then insert,and can not replace
-                ProcessorApplication.scheduler.addJob(jobDetail, false);
-            }
+        JobDataMap  jobmap = new JobDataMap();
+        jobmap.put("rule", rule);
+        jobmap.put("type", type);
+        quartzManager.addJob(new Date().toString(), "ruleList", "ruleList", "ruleList-trigger", CRUDJobs.class, jobmap);
 
-
-        } catch (SchedulerException e) {
-            e.printStackTrace();
-        }
     }
 
-
     private void deleteJob(String id) {
-        try {
-            JobKey jobkey = new JobKey(id, "write");
-            if (ProcessorApplication.scheduler.checkExists(jobkey)) {
-                ProcessorApplication.scheduler.deleteJob(jobkey);
-            }
-        } catch (SchedulerException e) {
-            e.printStackTrace();
-        }
+        JobDataMap  jobmap = new JobDataMap();
+        jobmap.put("rule", id);
+        jobmap.put("type", "delete");
+        quartzManager.addJob(new Date().toString(), "deleteJob", "deleteJob", "deleteJob-trigger", CRUDJobs.class, jobmap);
+
+
     }
 }
