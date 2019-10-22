@@ -72,7 +72,6 @@
           <div style='text-align:right'>
             <span class='el-icon-plus' @click='addConditionItem'></span>
           </div>
-          <!-- <el-input v-model="sqlOption.conditionField" size='small' autocomplete="off"></el-input> -->
             <div class='conditionItem' v-for="(item, index) in sqlOption.ruleEngineConditionList" :key='index'>
               <el-select v-model="item.connectionOperator" size='small'>
                   <el-option label="and" value="and"></el-option>
@@ -332,7 +331,9 @@ export default{
           for (let key in vm.options) {
             vm.options[key] = res.data.data[key]
             if (key === 'conditionType') {
-              vm.options.conditionType = res.data.data.conditionType.toString()
+              if (res.data.data.conditionType || res.data.data.conditionType === 0) {
+                vm.options.conditionType = res.data.data.conditionType.toString()
+              }
             }
           }
           if (vm.options.conditionType === '1') {
@@ -342,6 +343,7 @@ export default{
           }
           this.fullSQL = res.data.data.fullSQL
           this.columnName = Object.assign({}, JSON.parse(res.data.data.payload))
+          console.log(this.columnName)
         }
       })
     },
