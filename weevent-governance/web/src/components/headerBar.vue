@@ -51,7 +51,6 @@
       </div>
       <el-button slot="reference">版本: {{version.weEventVersion}}</el-button>
     </el-popover>
-    <!-- <router-link to='./servers' v-show='!noServer'>服务设置</router-link> -->
     <span class='el-icon-user-solid' style='margin:0 5px 0 15px'></span>
     <el-dropdown trigger="click" @command='selectItem'>
       <span v-if='!userName' @click='loginIn'>请登录</span>
