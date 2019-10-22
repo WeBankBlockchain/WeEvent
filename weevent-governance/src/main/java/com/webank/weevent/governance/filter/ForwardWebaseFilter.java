@@ -92,7 +92,7 @@ public class ForwardWebaseFilter implements Filter {
             }
         } else {
             String midUrl = subStrUrl.substring(subStrUrl.indexOf(key) + key.length() + 1);
-            if (key.equals(ConstantProperties.BROKER_GROUP_GENERAL) || key.equals(ConstantProperties.BROKER_GROUP_GENERAL)) {
+            if (key.equals(ConstantProperties.BROKER_TRANS_DAILY) || key.equals(ConstantProperties.BROKER_GROUP_GENERAL)) {
                 midUrl = new StringBuffer(ConstantProperties.QUESTION_MARK).append("groupId=").append(midUrl).toString();
                 return key + midUrl;
             } else {
