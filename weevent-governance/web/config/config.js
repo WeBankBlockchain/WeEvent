@@ -1,4 +1,4 @@
-const url = 'http://10.107.96.107:8080'
+const url = ''
 let root
 if (process.env.NODE_ENV === 'development') {
   // 开发环境
