@@ -26,7 +26,7 @@ public class SmartLoadConfig {
      * @param propertiesKey config file's key in system properties. "" if not care.
      * @return true if success
      */
-    static boolean load(Object configObj, String propertiesKey) {
+    public boolean load(Object configObj, String propertiesKey) {
         Class<?> clz = configObj.getClass();
         if (!clz.isAnnotationPresent(PropertySource.class)) {
             log.error("use @PropertySource to set configuration file name");

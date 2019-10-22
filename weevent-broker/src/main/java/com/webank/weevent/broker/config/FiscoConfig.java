@@ -82,6 +82,6 @@ public class FiscoConfig {
      * @return true if success, else false
      */
     public boolean load() {
-        return SmartLoadConfig.load(this, propertiesFileKey);
+        return new SmartLoadConfig().load(this, propertiesFileKey);
     }
 }
