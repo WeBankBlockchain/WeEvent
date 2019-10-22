@@ -49,17 +49,14 @@ public class WeEventConfig {
     @Value("${broker.zookeeper.timeout:3000}")
     private Integer zookeeperTimeout;
 
-    @Value("${stomp.user.login:}")
-    private String stompLogin;
-
-    @Value("${stomp.user.passcode:}")
-    private String stompPasscode;
-
     @Value("${stomp.heartbeats:30}")
     private Integer stompHeartbeats;
 
-    @Value("${mqtt.broker.port:8083}")
+    @Value("${mqtt.broker.port:7001}")
     private Integer brokerServerPort;
+
+    @Value("${mqtt.websocket.port:7002}")
+    private Integer webSocketPort;
 
     @Value("${mqtt.broker.sobacklog:511}")
     private Integer soBackLog;
@@ -73,12 +70,4 @@ public class WeEventConfig {
     @Value("${mqtt.websocket.path:/weevent/mqtt}")
     private String webSocketServerPath;
 
-    @Value("${mqtt.websocket.port:8084}")
-    private Integer webSocketPort;
-
-    @Value("${mqtt.user.login:}")
-    private String mqttUserName;
-
-    @Value("${mqtt.user.passcode:}")
-    private String mqttPassCode;
 }

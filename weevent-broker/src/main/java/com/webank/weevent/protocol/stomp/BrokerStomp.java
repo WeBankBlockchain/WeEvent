@@ -315,11 +315,11 @@ public class BrokerStomp extends TextWebSocketHandler {
     }
 
     private StompCommand checkConnect(Message<byte[]> msg) {
-        String authAccount = BrokerApplication.weEventConfig.getStompLogin();
-        String authPassword = BrokerApplication.weEventConfig.getStompPasscode();
-
         StompCommand command = StompCommand.CONNECTED;
-        if (authAccount.isEmpty() || authPassword.isEmpty()) {
+
+        String authAccount = BrokerApplication.environment.getProperty("spring.security.user.name");
+        String authPassword = BrokerApplication.environment.getProperty("spring.security.user.password");
+        if (StringUtils.isBlank(authAccount) || StringUtils.isBlank(authPassword)) {
             return command;
         }
 
@@ -512,7 +512,7 @@ public class BrokerStomp extends TextWebSocketHandler {
         log.info("bind context, session id: {} header subscription id: {} consumer subscription id: {} topic: {}",
                 session.getId(), headerIdStr, subscriptionId, Arrays.toString(curTopicList));
         sessionContext.get(session.getId())
-                .put(headerIdStr, new Pair<>(subscriptionId, StringUtils.join(curTopicList,WeEvent.MULTIPLE_TOPIC_SEPARATOR)));
+                .put(headerIdStr, new Pair<>(subscriptionId, StringUtils.join(curTopicList, WeEvent.MULTIPLE_TOPIC_SEPARATOR)));
 
         log.info("consumer subscribe success, consumer subscriptionId: {}", subscriptionId);
         return subscriptionId;
