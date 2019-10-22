@@ -6,7 +6,6 @@ import java.util.Map;
 
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.mq.CEPRuleMQ;
-import com.webank.weevent.processor.service.CEPRuleServiceImpl;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.WeEvent;
 
@@ -14,7 +13,6 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Slf4j

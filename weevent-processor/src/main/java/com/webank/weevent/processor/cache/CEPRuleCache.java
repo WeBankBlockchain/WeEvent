@@ -1,7 +1,6 @@
 package com.webank.weevent.processor.cache;
 
 import com.webank.weevent.processor.ProcessorApplication;
-import com.webank.weevent.processor.job.CRUDJobs;
 import com.webank.weevent.processor.mapper.CEPRuleMapper;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.mq.CEPRuleMQ;
