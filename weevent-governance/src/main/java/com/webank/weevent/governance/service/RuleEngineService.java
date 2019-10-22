@@ -524,7 +524,7 @@ public class RuleEngineService {
         //get ruleEngineConditionList
         List<RuleEngineConditionEntity> ruleEngineConditionEntities = ruleEngineConditionMapper.ruleEngineConditionList(ruleEngineConditionEntity);
         String selectField = StringUtil.isBlank(engineEntity.getSelectField()) ? ConstantProperties.ASTERISK : engineEntity.getSelectField();
-        buffer.append("select ").append(engineEntity.getSelectField()).append(selectField).append(" from").append(" ").append(engineEntity.getFromDestination());
+        buffer.append("select ").append(selectField).append(" from").append(" ").append(engineEntity.getFromDestination());
         if (!CollectionUtils.isEmpty(ruleEngineConditionEntities)) {
             buffer.append(" where ").append(engineEntity.getConditionField());
         }
