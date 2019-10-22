@@ -3,7 +3,6 @@ package com.webank.weevent.processor.job;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.service.CEPRuleServiceImpl;
 
 import lombok.extern.slf4j.Slf4j;
@@ -16,9 +15,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class RuleJobs implements Job {
 
-    @Autowired
-    private CEPRuleServiceImpl cepRuleService;
-
     public void execute(JobExecutionContext context) {
         log.info(context.getJobDetail().getDescription());
         SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -26,8 +22,6 @@ public class RuleJobs implements Job {
         context.getJobDetail().getKey().getGroup();
         log.info("{},{} Job execute {}    executing...", this.toString(), jobName, f.format(new Date()));
         log.info("insert rule{}",context.getJobDetail().getJobDataMap().get("insert"));
-        //String ret = cepRuleService.insert(rule);
-
 
     }
 }

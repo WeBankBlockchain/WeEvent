@@ -108,7 +108,7 @@ public class ProcessorApplication {
     }
 
 
-    static void startScheduler() {
+    private static void startScheduler() {
         try {
             SchedulerFactory factory = new StdSchedulerFactory();
             scheduler = factory.getScheduler();

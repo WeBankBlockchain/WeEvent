@@ -21,9 +21,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class CRUDJobs implements Job {
 
-    @Autowired
-    private CEPRuleServiceImpl cepRuleService;
-
     public void execute(JobExecutionContext context) {
         log.info(context.getJobDetail().getDescription());
         SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -59,7 +56,7 @@ public class CRUDJobs implements Job {
 
             default:
                 log.info("the job name unknow:{}", type);
-
+                break;
         }
     }
 
