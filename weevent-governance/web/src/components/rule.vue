@@ -48,7 +48,9 @@
         </div>
         <el-table
             :data="ruleList"
-            style="width: 100%">
+            style="width: 100%"
+            height='400'
+            >
             <el-table-column
             prop="ruleName"
             label="规则名称"
@@ -67,7 +69,7 @@
             :formatter="payloadMap">
             </el-table-column>
             <el-table-column
-            prop="createDate"
+            prop="createDateStr"
             label="创建时间">
             </el-table-column>
             <el-table-column
@@ -153,6 +155,7 @@ export default {
       }
     }
     return {
+      tabHeight: 0,
       createRule: false,
       ruleName: '',
       pageNum: 1,
@@ -243,7 +246,7 @@ export default {
       if (JSON.stringify(e.payloadMap) === '{}') {
         return '—'
       } else {
-        return e.payloadMap
+        return JSON.stringify(e.payloadMap)
       }
     },
     ruleStart (e) {
