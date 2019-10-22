@@ -24,4 +24,5 @@ public class BaseEntity {
     private Date createDate;
 
     private Date lastUpdate;
+
 }

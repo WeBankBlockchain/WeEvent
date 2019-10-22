@@ -58,7 +58,9 @@
       </div>
       <el-form :model="sqlOption" :rules="sqlCheck" ref='sql'>
         <el-form-item label="字段">
-          <el-input v-model="sqlOption.selectField" size='small' autocomplete="off"></el-input>
+          <el-select v-model="sqlOption.selectField" size='small'>
+            <el-option :label="key" :value="key" v-for='(item, key, index) in columnName' :key='index'></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="数据流转" prop='fromDestination'>
           <el-input v-model="sqlOption.fromDestination" size='small' autocomplete="off" placeholder="例如: TopicName"></el-input>
@@ -70,7 +72,6 @@
           <div style='text-align:right'>
             <span class='el-icon-plus' @click='addConditionItem'></span>
           </div>
-          <!-- <el-input v-model="sqlOption.conditionField" size='small' autocomplete="off"></el-input> -->
             <div class='conditionItem' v-for="(item, index) in sqlOption.ruleEngineConditionList" :key='index'>
               <el-select v-model="item.connectionOperator" size='small'>
                   <el-option label="and" value="and"></el-option>
@@ -240,6 +241,14 @@ export default{
       }]
     }
   },
+  computed: {
+    brokerId () {
+      return this.$store.state.brokerId
+    },
+    groupId () {
+      return this.$store.state.groupId
+    }
+  },
   watch: {
     createRule (nVal) {
       if (!nVal) {
@@ -280,6 +289,16 @@ export default{
         }
         vm.$refs.options.resetFields()
       }
+    },
+    brokerId () {
+      this.$store.commit('set_menu', ['规则引擎', '规则管理'])
+      this.$store.commit('set_active', '4-1')
+      this.$router.push('./rule')
+    },
+    groupId () {
+      this.$store.commit('set_menu', ['规则引擎', '规则管理'])
+      this.$store.commit('set_active', '4-1')
+      this.$router.push('./rule')
     }
   },
   methods: {
@@ -312,7 +331,9 @@ export default{
           for (let key in vm.options) {
             vm.options[key] = res.data.data[key]
             if (key === 'conditionType') {
-              vm.options.conditionType = res.data.data.conditionType.toString()
+              if (res.data.data.conditionType || res.data.data.conditionType === 0) {
+                vm.options.conditionType = res.data.data.conditionType.toString()
+              }
             }
           }
           if (vm.options.conditionType === '1') {
@@ -322,6 +343,7 @@ export default{
           }
           this.fullSQL = res.data.data.fullSQL
           this.columnName = Object.assign({}, JSON.parse(res.data.data.payload))
+          console.log(this.columnName)
         }
       })
     },

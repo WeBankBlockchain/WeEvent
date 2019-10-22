@@ -126,11 +126,7 @@ public class WeEventStompCommand {
     }
 
     public boolean isError(Message message) {
-        String command = message.getHeaders().get("stompCommand").toString();
-        if (command == null) {
-            return false;
-        }
-        return "ERROR".equals(command);
+        return "ERROR".equals(message.getHeaders().get("stompCommand"));
     }
 
     public String getReceipt(Message message) {
@@ -140,7 +136,6 @@ public class WeEventStompCommand {
 
     public String getSubscriptionId(Message message) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
-
-        return accessor.getNativeHeader("subscription-id").get(0).toString();
+        return accessor.getNativeHeader("subscription-id").get(0);
     }
 }
