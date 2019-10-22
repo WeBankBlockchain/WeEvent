@@ -4,16 +4,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.webank.weevent.processor.job.CRUDJobs;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.service.AnalysisWeEventIdService;
 import com.webank.weevent.processor.utils.CommonUtil;
-import com.webank.weevent.processor.service.QuartzManager;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.WeEvent;
@@ -25,7 +22,6 @@ import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.MapContext;
-import org.quartz.JobDataMap;
 import org.springframework.util.StringUtils;
 
 @Slf4j
@@ -33,12 +29,6 @@ public class CEPRuleMQ {
     // <ruleId <--> subscriptionId>
     public static Map<String, String> subscriptionIdMap = new ConcurrentHashMap<>();
 
-
-//    private static QuartzManager quartzManager;
-
-//    public CEPRuleMQ(QuartzManager quartzManager) {
-//        this.quartzManager = quartzManager;
-//    }
 
     public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException {
         // unsubscribe old the topic
@@ -83,7 +73,7 @@ public class CEPRuleMQ {
                         log.info("on event:{},content:{}", event.toString(), content);
 
                         if (CommonUtil.checkValidJson(content)) {
-                            createJob(event, "onEvent", client, ruleMap);
+                            handleOnEvent(event, client, ruleMap);
                         }
                         //Analysis WeEventId  to the governance database
                         AnalysisWeEventIdService.analysisWeEventId(rule, event.getEventId());
@@ -192,16 +182,16 @@ public class CEPRuleMQ {
     }
 
 
-    private static void createJob(WeEvent weevent, String type, IWeEventClient client, Map<String, CEPRule> ruleMap) {
-
-        JobDataMap jobmap = new JobDataMap();
-        jobmap.put("weevent", weevent);
-        jobmap.put("type", type);
-        jobmap.put("client", client);
-        jobmap.put("ruleMap", ruleMap);
-        QuartzManager.addJob(weevent.getEventId(), "onEvent", "onEvent", "onEvent-trigger", CRUDJobs.class, jobmap);
-
-    }
+//    private static void createJob(WeEvent weevent, String type, IWeEventClient client, Map<String, CEPRule> ruleMap) {
+//
+//        JobDataMap jobmap = new JobDataMap();
+//        jobmap.put("weevent", weevent);
+//        jobmap.put("type", type);
+//        jobmap.put("client", client);
+//        jobmap.put("ruleMap", ruleMap);
+//        QuartzManager.addModifyJob(weevent.getEventId(), "onEvent", "onEvent", "onEvent-trigger", CRUDJobs.class, jobmap);
+//
+//    }
 
     private static boolean hitRuleEngine(String payload, String eventContent, String condition) {
         if (CommonUtil.checkJson(eventContent, payload)) {

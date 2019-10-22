@@ -9,11 +9,13 @@ import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
-import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
 import org.springframework.stereotype.Service;
+
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
+import static org.quartz.TriggerBuilder.newTrigger;
 
 @Service
 public class QuartzManager {
@@ -40,7 +42,7 @@ public class QuartzManager {
             JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).build();
             job.getJobDataMap().putAll(params);
 
-            TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger();
+            TriggerBuilder<Trigger> triggerBuilder = newTrigger();
             triggerBuilder.withIdentity(triggerName, triggerGroupName);
             triggerBuilder.startNow();
             triggerBuilder.withSchedule(CronScheduleBuilder.cronSchedule(cron));
@@ -58,7 +60,7 @@ public class QuartzManager {
 
 
     /**
-     * add job
+     * add job and modify
      *
      * @param jobName job name
      * @param jobGroupName job group name
@@ -67,22 +69,29 @@ public class QuartzManager {
      * @param jobClass job class
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public static void addJob(String jobName, String jobGroupName, String triggerName, String triggerGroupName, Class jobClass, JobDataMap params) {
+    public static void addModifyJob(String jobName, String jobGroupName, String triggerName, String triggerGroupName, Class jobClass, JobDataMap params) {
         try {
 
-            JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData( params).build();
-//            job.getJobDataMap().putAll(params);
+            JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).build();
 
 
-            TriggerKey triggerKey = new TriggerKey(triggerName, triggerGroupName);
-            SimpleScheduleBuilder simpleBuilder = SimpleScheduleBuilder.simpleSchedule().withRepeatCount(0);
+//            TriggerKey triggerKey = new TriggerKey(triggerName, triggerGroupName);
+//            SimpleScheduleBuilder simpleBuilder = simpleSchedule().withRepeatCount(0);
+//
+//            Trigger trigger = newTrigger()
+//                    .withIdentity(triggerKey).startNow()
+//                    .withSchedule(simpleBuilder)
+//                    .build();
 
-            Trigger trigger = TriggerBuilder.newTrigger()
-                    .withIdentity(triggerKey).startNow()
-                    .withSchedule(simpleBuilder)
+            Trigger trigger = newTrigger()
+                    .withIdentity("trigger3", "group1")
+                    .startNow()  // if a start time is not given (if this line were omitted), "now" is implied
+                    .withSchedule(simpleSchedule()
+                            .withIntervalInSeconds(10)
+                            .withRepeatCount(10)) // note that 10 repeats will give a total of 11 firings
                     .build();
-            scheduler.scheduleJob(job, trigger);
 
+            scheduler.scheduleJob(job, trigger);
             if (!scheduler.isShutdown()) {
                 scheduler.start();
             }
@@ -100,6 +109,7 @@ public class QuartzManager {
      */
     public void modifyJobTime(String triggerName, String triggerGroupName, String cron) {
         try {
+
             TriggerKey triggerKey = TriggerKey.triggerKey(triggerName, triggerGroupName);
             CronTrigger trigger = (CronTrigger) scheduler.getTrigger(triggerKey);
             if (trigger == null) {
@@ -108,7 +118,7 @@ public class QuartzManager {
 
             String oldTime = trigger.getCronExpression();
             if (!oldTime.equalsIgnoreCase(cron)) {
-                TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger();
+                TriggerBuilder<Trigger> triggerBuilder = newTrigger();
                 triggerBuilder.withIdentity(triggerName, triggerGroupName);
                 triggerBuilder.startNow();
                 triggerBuilder.withSchedule(CronScheduleBuilder.cronSchedule(cron));
@@ -116,6 +126,21 @@ public class QuartzManager {
                 scheduler.rescheduleJob(triggerKey, trigger);
 
             }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    /**
+     * modify Job Time
+     *
+     * @param jobName job name
+     * @param jobGroupName job group name
+     */
+    public JobDetail getJobDetail(String jobName, String jobGroupName) {
+        try {
+            return scheduler.getJobDetail(new JobKey(jobName, jobGroupName));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

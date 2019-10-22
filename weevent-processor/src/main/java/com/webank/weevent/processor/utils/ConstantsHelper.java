@@ -15,28 +15,26 @@ public class ConstantsHelper {
     public static RetCode TOPIC_ISNOT_EXIST = RetCode.mark(270006, "the topic is not exist");
     public static RetCode PAYLOAD_ISNOT_JSON = RetCode.mark(270007, "payload is not a json");
     public static RetCode CONDITIONTYPE_ISNOT_VALID = RetCode.mark(270008, "condition type is not valid");
-    public static RetCode  RULE_IS_NOT_VALID = RetCode.mark(270009, "rule is not valid");
+    public static RetCode RULE_IS_NOT_VALID = RetCode.mark(270009, "rule is not valid");
     public static RetCode BROKERID_IS_BLANK = RetCode.mark(280010, "broker id is blank");
     public static RetCode USERID_IS_BLANK = RetCode.mark(280011, "user id is blank");
-
 
 
     public static final String QUESTION_MARK = "?";
     public static final String AND_SYMBOL = "&";
     public static final String CONNECTION_SYMBOL = "-";
-    public static final String QUALS_TO="=";
-    public static final String NOT_QUALS_TO="<>";
-    public static final String NOT_QUALS_TO_TWO="!=";
-    public static final String MINOR_THAN="<";
-    public static final String MINOR_THAN_EQUAL="<=";
-    public static final String GREATER_THAN=">";
-    public static final String GREATER_THAN_EQUAL=">=";
-    public static final String BETWEEN="BETWEEN";
-    public static final String LIKE="LIKE";
-    public static final String IN="IN";
-    public static final String AND="AND";
-    public static final String OR="OR";
-
+    public static final String QUALS_TO = "=";
+    public static final String NOT_QUALS_TO = "<>";
+    public static final String NOT_QUALS_TO_TWO = "!=";
+    public static final String MINOR_THAN = "<";
+    public static final String MINOR_THAN_EQUAL = "<=";
+    public static final String GREATER_THAN = ">";
+    public static final String GREATER_THAN_EQUAL = ">=";
+    public static final String BETWEEN = "BETWEEN";
+    public static final String LIKE = "LIKE";
+    public static final String IN = "IN";
+    public static final String AND = "AND";
+    public static final String OR = "OR";
 
 
     public static final Integer RULE_STATUS_START = 1;
@@ -44,9 +42,25 @@ public class ConstantsHelper {
     public static final Integer SUCCESS_CODE = 0;
     public static final String SUCCESS_MESSAGE = "success";
 
-    private final String job_prefix = "job_";
-    private final String job_group_prefix = "job_group_";
-    private final String trigger_prefix = "trigger_";
-    private final String trigger_group_prefix = "trigger_group_";
+    public static final String job_prefix = "job_";
+    public static final String job_group_prefix = "job_group_";
+    public static final String trigger_prefix = "trigger_";
+    public static final String trigger_group_prefix = "trigger_group_";
+
+
+    public static final String jobStoreClass = "org.quartz.jobStore.class";
+    public static final String JobStoreTX = "org.quartz.impl.jdbcjobstore.JobStoreTX";
+    public static final String driverDelegateClass = "org.quartz.jobStore.driverDelegateClass";
+    public static final String StdJDBCDelegate = "org.quartz.impl.jdbcjobstore.StdJDBCDelegate";
+    public static final String isClustered = "org.quartz.jobStore.isClustered";
+    public static final String isClusteredValue = "true";
+    public static final String threadPoolClass = "org.quartz.threadPool.class";
+    public static final String SimpleThreadPool = "org.quartz.simpl.SimpleThreadPool";
+    public static final String makeThreadsDaemons = "org.quartz.threadPool.makeThreadsDaemons";
+    public static final String makeThreadsDaemonsValue = "true";
+    public static final String cleanShutdown = "org.quartz.plugin.shutdownHook.cleanShutdown";
+    public static final String cleanShutdownValue = "true";
+    public static final String shutdownHookClass = "org.quartz.plugin.shutdownHook.class";
+    public static final String ShutdownHookPlugin = "org.quartz.plugins.management.ShutdownHookPlugin";
 
 }

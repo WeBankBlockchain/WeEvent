@@ -42,7 +42,7 @@ public class CEPRuleController {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         CEPRule cepRule = cepRuleService.selectByPrimaryKey(id);
         resEntity.setData(cepRule);
-        createJob(cepRule, "getCEPRuleById");
+        getJobDetail(id);
         log.info("cepRule:{}", JSONArray.toJSON(cepRule));
         return resEntity;
     }
@@ -56,7 +56,6 @@ public class CEPRuleController {
             return resEntity;
         }
         List<CEPRule> cepRule = cepRuleService.selectByRuleName(ruleName);
-        createJob(cepRule, "getCEPRuleByName");
         resEntity.setData(cepRule);
         log.info("cepRule:{}", JSONArray.toJSON(cepRule));
         return resEntity;
@@ -73,7 +72,6 @@ public class CEPRuleController {
         }
         List<CEPRule> cepRule = cepRuleService.getRulesByUserId(userId);
         resEntity.setData(cepRule);
-        createJob(cepRule, "getRulesByUserId");
         log.info("cepRule:{}", JSONArray.toJSON(cepRule));
         return resEntity;
     }
@@ -89,7 +87,6 @@ public class CEPRuleController {
         }
         List<CEPRule> cepRule = cepRuleService.getRulesByUserIdAndBroker(userId, brokerId);
         resEntity.setData(cepRule);
-        createJob(cepRule, "getRulesByUserIdAndBroker");
         log.info("cepRule:{}", JSONArray.toJSON(cepRule));
         return resEntity;
     }
@@ -109,8 +106,6 @@ public class CEPRuleController {
         if (cepRule == null) {
             resEntity.setErrorCode(ConstantsHelper.SUCCESS_CODE);
             resEntity.setErrorMsg("fail");
-        } else {
-            createJob(cepRule, "getCEPRuleListByPage");
         }
         log.info("cepRule:{}", JSONArray.toJSON(cepRule));
         return resEntity;
@@ -122,7 +117,7 @@ public class CEPRuleController {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         List<CEPRule> cepRule = cepRuleService.getCEPRuleList(ruleName);
         resEntity.setData(cepRule);
-        createJob(cepRule, "getCEPRuleList");
+
         log.info("cepRule:{}", JSONArray.toJSON(cepRule));
         return resEntity;
     }
@@ -177,7 +172,7 @@ public class CEPRuleController {
             resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());
         } else {
             resEntity.setData(ret);
-            createJob(rule, "insertByParam");
+            createJob(rule, "insert");
         }
         return resEntity;
     }
@@ -186,6 +181,7 @@ public class CEPRuleController {
     @RequestMapping(value = "/deleteCEPRuleById", method = RequestMethod.POST)
     @ResponseBody
     public BaseRspEntity deleteCEPRuleById(@RequestParam(name = "id") String id) {
+
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = cepRuleService.setCEPRule(id, ConstantsHelper.RULE_STATUS_DELETE);
 
@@ -218,27 +214,42 @@ public class CEPRuleController {
     }
 
     private void createJob(CEPRule rule, String type) {
-        JobDataMap  jobmap = new JobDataMap();
+        JobDataMap jobmap = new JobDataMap();
         jobmap.put("rule", rule);
         jobmap.put("type", type);
-        quartzManager.addJob(rule.getId(), "rule", "rule", "rule-trigger", CRUDJobs.class, jobmap);
+        quartzManager.addModifyJob(rule.getId(), "rule", "rule", "rule-trigger", CRUDJobs.class, jobmap);
 
     }
 
-    private void createJob(List<CEPRule> rule, String type) {
-        JobDataMap  jobmap = new JobDataMap();
-        jobmap.put("rule", rule);
-        jobmap.put("type", type);
-        quartzManager.addJob(new Date().toString(), "ruleList", "ruleList", "ruleList-trigger", CRUDJobs.class, jobmap);
+    // for test
+    @RequestMapping(value = "/test", method = RequestMethod.GET)
+    @ResponseBody
+    public BaseRspEntity test() {
+        // insert status must be 0
+        BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
+        CEPRule rule = new CEPRule();
+        rule.setRuleName("1111");
+        rule.setUserId("111");
+        rule.setBrokerId("222");
+        rule.setUpdatedTime(new Date());
+        rule.setCreatedTime(new Date());
+        String ret = cepRuleService.insert(rule);
+        if ("-1".equals(ret)) { //fail
+            resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
+            resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());
+        } else {
+            resEntity.setData(ret);
+            createJob(rule, "insert");
+        }
+        return resEntity;
+    }
 
+    private void getJobDetail(String id) {
+        quartzManager.getJobDetail(id, "rule");
     }
 
     private void deleteJob(String id) {
-        JobDataMap  jobmap = new JobDataMap();
-        jobmap.put("rule", id);
-        jobmap.put("type", "delete");
-        quartzManager.addJob(new Date().toString(), "deleteJob", "deleteJob", "deleteJob-trigger", CRUDJobs.class, jobmap);
-
+        quartzManager.removeJob(id, "rule", "rule", "rule-trigger");
 
     }
 }

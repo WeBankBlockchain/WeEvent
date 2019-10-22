@@ -4,8 +4,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
+import com.webank.weevent.processor.cache.CEPRuleCache;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.mq.CEPRuleMQ;
+import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.WeEvent;
 
@@ -20,7 +22,6 @@ import org.springframework.stereotype.Component;
 public class CRUDJobs implements Job {
 
     public void execute(JobExecutionContext context) {
-        log.info(context.getJobDetail().getDescription());
         SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String jobName = context.getJobDetail().getKey().getName();
         String type = context.getJobDetail().getJobDataMap().get("type").toString();
@@ -31,16 +32,12 @@ public class CRUDJobs implements Job {
                 getDetail(context, jobName);
                 break;
 
-            case "insertByParam":
-                getDetail(context, jobName);
-                break;
-
             case "deleteCEPRuleById":
                 getDetail(context, jobName);
                 break;
 
             case "startCEPRule":
-                getDetail(context, jobName);
+                startCEPRule(context, jobName);
                 break;
 
             case "updateCEPRuleById":
@@ -66,11 +63,31 @@ public class CRUDJobs implements Job {
     }
 
     private void getDetail(JobExecutionContext context, String jobName) {
-        String id = context.getJobDetail().getJobDataMap().get("id").toString();
         Object obj = context.getJobDetail().getJobDataMap().get("rule");
         if (obj instanceof CEPRule) {
             log.info("{}", (CEPRule) obj);
         }
-        log.info("startCEPRule in job: {},id:{},rule:{}", jobName, id, JSONObject.toJSON(obj));
+        log.info("startCEPRule in job: {},rule:{}", jobName, JSONObject.toJSON(obj));
+
+        // insert
+    }
+
+    private void startCEPRule(JobExecutionContext context, String jobName) {
+        Object obj = context.getJobDetail().getJobDataMap().get("rule");
+        try {
+            if (obj instanceof CEPRule) {
+                log.info("{}", (CEPRule) obj);
+                CEPRule rule = (CEPRule) obj;
+                // check the json
+                // update the rule map
+                // subscribe
+                CEPRuleCache.updateCEPRule(rule);
+                log.info("startCEPRule in job: {},rule:{}", jobName, JSONObject.toJSON(obj));
+
+            }
+        }catch (BrokerException e){
+            log.info("BrokerException:{}",e.toString());
+        }
+
     }
 }

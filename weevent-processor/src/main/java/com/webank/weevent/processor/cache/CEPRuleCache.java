@@ -16,12 +16,13 @@ import org.springframework.util.CollectionUtils;
 import javax.annotation.PostConstruct;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 @Slf4j
 public class CEPRuleCache {
-//    private static Map<String, CEPRule> ruleMap = new ConcurrentHashMap<>();
+    private static Map<String, CEPRule> ruleMapRam = new ConcurrentHashMap<>();
     private static List<String> idList = new ArrayList<>();
 
     private static ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
@@ -57,6 +58,7 @@ public class CEPRuleCache {
                 redisService.writeRulesToRedis(aDynamicRule.getId(), aDynamicRule);
                 log.info("+++++++++++++++++++++++{}", aDynamicRule.getId());
                 idList.add(aDynamicRule.getId());
+                ruleMapRam.put(aDynamicRule.getId(),aDynamicRule);
             }
 
             executorService.execute(new Runnable() {
@@ -65,6 +67,7 @@ public class CEPRuleCache {
                     Iterator<Map.Entry<String, CEPRule>> iter = redisService.readAllRulesFromRedis(idList).entrySet().iterator();
                     while (iter.hasNext()) {
                         Map.Entry<String, CEPRule> entry = iter.next();
+
                         log.info("start subscribe all topic...:{}",JSONObject.toJSONString(entry.getValue()));
                         CEPRuleMQ.subscribeMsg(entry.getValue(), redisService.readAllRulesFromRedis(idList));
                     }
@@ -103,7 +106,7 @@ public class CEPRuleCache {
         redisService.deleteRulesToRedis(ruleId);
     }
 
-    private static void updateCEPRule(CEPRule rule) throws BrokerException {
+    public static void updateCEPRule(CEPRule rule) throws BrokerException {
         CEPRuleMQ.updateSubscribeMsg(rule, redisService.readAllRulesFromRedis(idList));
     }
 
