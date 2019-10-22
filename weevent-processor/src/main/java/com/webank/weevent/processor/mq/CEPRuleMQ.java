@@ -4,10 +4,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.webank.weevent.processor.ProcessorApplication;
+import com.webank.weevent.processor.job.CRUDJobs;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.service.AnalysisWeEventIdService;
 import com.webank.weevent.processor.utils.CommonUtil;
@@ -22,6 +25,11 @@ import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.MapContext;
+import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.JobKey;
+import org.quartz.SchedulerException;
 import org.springframework.util.StringUtils;
 
 @Slf4j
@@ -70,8 +78,9 @@ public class CEPRuleMQ {
                     try {
                         String content = new String(event.getContent());
                         log.info("on event:{},content:{}", event.toString(), content);
+
                         if (CommonUtil.checkValidJson(content)) {
-                            handleOnEvent(event, client, ruleMap);
+                            createJob(event, "onEvent", client, ruleMap);
                         }
                         //Analysis WeEventId  to the governance database
                         AnalysisWeEventIdService.analysisWeEventId(rule, event.getEventId());
@@ -108,7 +117,7 @@ public class CEPRuleMQ {
 
             if (conn != null) {
                 Map<String, String> urlParamMap = CommonUtil.uRLRequest(rule.getDatabaseUrl());
-                StringBuffer insertExpression = new StringBuffer( "insert into ");
+                StringBuffer insertExpression = new StringBuffer("insert into ");
                 insertExpression.append(urlParamMap.get("tableName"));
                 insertExpression.append("(");
                 StringBuffer values = new StringBuffer("values (");
@@ -145,7 +154,7 @@ public class CEPRuleMQ {
 
     }
 
-    private static void handleOnEvent(WeEvent event, IWeEventClient client, Map<String, CEPRule> ruleMap) {
+    public static void handleOnEvent(WeEvent event, IWeEventClient client, Map<String, CEPRule> ruleMap) {
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
 
         // get the content ,and parsing it  byte[]-->String
@@ -179,6 +188,33 @@ public class CEPRuleMQ {
 
     }
 
+    private static void createJob(WeEvent weevent, String type, IWeEventClient client, Map<String, CEPRule> ruleMap) {
+        try {
+            JobDataMap jobmap = new JobDataMap();
+            jobmap.put("weevent", weevent);
+            jobmap.put("type", type);
+            jobmap.put("client", client);
+            jobmap.put("ruleMap", ruleMap);
+
+            JobKey jobkey = new JobKey(new Date().toString(), type);
+            JobDetail jobDetail = JobBuilder.newJob(CRUDJobs.class)
+                    .withIdentity(jobkey)
+                    .requestRecovery()
+                    .setJobData(jobmap)
+                    .build();
+            // if exist ,then replace
+            if (ProcessorApplication.scheduler.checkExists(jobkey)) {
+                ProcessorApplication.scheduler.addJob(jobDetail, true);
+            } else {
+                // if not exist ,then insert,and can not replace
+                ProcessorApplication.scheduler.addJob(jobDetail, false);
+            }
+
+
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+        }
+    }
 
     private static boolean hitRuleEngine(String payload, String eventContent, String condition) {
         if (CommonUtil.checkJson(eventContent, payload)) {

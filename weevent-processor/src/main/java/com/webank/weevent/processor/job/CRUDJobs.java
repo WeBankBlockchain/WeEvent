@@ -2,9 +2,13 @@ package com.webank.weevent.processor.job;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 
 import com.webank.weevent.processor.model.CEPRule;
+import com.webank.weevent.processor.mq.CEPRuleMQ;
 import com.webank.weevent.processor.service.CEPRuleServiceImpl;
+import com.webank.weevent.sdk.IWeEventClient;
+import com.webank.weevent.sdk.WeEvent;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -48,14 +52,22 @@ public class CRUDJobs implements Job {
                 getDetail(context, jobName);
                 break;
 
-            case "selectByPage":
-
+            case "onEvent":
+                handleWeEvent(context);
+                log.info("onEvent:{}", jobName);
                 break;
 
             default:
                 log.info("the job name unknow:{}", type);
 
         }
+    }
+
+    private void handleWeEvent(JobExecutionContext context) {
+        WeEvent event = (WeEvent) context.getJobDetail().getJobDataMap().get("weevent");
+        IWeEventClient client = (IWeEventClient) context.getJobDetail().getJobDataMap().get("client");
+        Map<String, CEPRule> ruleMap = (Map<String, CEPRule>) context.getJobDetail().getJobDataMap().get("ruleMap");
+        CEPRuleMQ.handleOnEvent(event, client, ruleMap);
     }
 
     private void getDetail(JobExecutionContext context, String jobName) {
