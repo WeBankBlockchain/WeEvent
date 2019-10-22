@@ -85,10 +85,7 @@ CREATE TABLE t_rule_engine_condition (
   `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create date',
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update date',
   `rule_id` int(64) DEFAULT NULL COMMENT 'rule id',
-  `connection_operator` varchar(10) DEFAULT NULL COMMENT 'database connection operator',
-  `conditional_operator` varchar(10) DEFAULT NULL COMMENT 'database conditional operator',
-  `column_name` varchar(64) DEFAULT NULL COMMENT 'broker id',
-  `sql_condition` varchar(128) DEFAULT NULL COMMENT 'user id',
+  `sql_condition_json` varchar(512) DEFAULT NULL COMMENT 'sql condition json',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='t_rule_engine_condition';
 

@@ -134,7 +134,7 @@ public class RuleEngineService {
             //check rule
             this.checkRule(ruleEngineEntity);
             //insert processor
-            //  this.addProcessRule(request, ruleEngineEntity);
+            this.addProcessRule(request, ruleEngineEntity);
             //insert ruleEngine
             ruleEngineMapper.addRuleEngine(ruleEngineEntity);
             return ruleEngineEntity;
@@ -197,7 +197,7 @@ public class RuleEngineService {
             ruleEngineEntity.setStatus(StatusEnum.IS_DELETED.getCode());
 
             //delete processor rule
-            //  this.deleteProcessRule(request, engineEntity);
+            this.deleteProcessRule(request, engineEntity);
             //delete RuleEngineCondition
             RuleEngineConditionEntity ruleEngineConditionEntity = new RuleEngineConditionEntity();
             ruleEngineConditionEntity.setRuleId(ruleEngineEntity.getId());
@@ -265,7 +265,7 @@ public class RuleEngineService {
             rule.setId(ruleEngineEntity.getId());
             List<RuleEngineEntity> ruleEngines = ruleEngineMapper.getRuleEngines(rule);
             rule = ruleEngines.get(0);
-            //  this.updateProcessRule(request, ruleEngineEntity, rule);
+            this.updateProcessRule(request, ruleEngineEntity, rule);
 
             //delete old ruleEngineConditionEntity
             RuleEngineConditionEntity ruleEngineConditionEntity = new RuleEngineConditionEntity();
@@ -278,6 +278,8 @@ public class RuleEngineService {
                 for (RuleEngineConditionEntity engineConditionEntity : ruleEngineConditionList) {
                     engineConditionEntity.setRuleId(ruleEngineEntity.getId());
                     checkSqlCondition(engineConditionEntity);
+                    //get sql json
+                    engineConditionEntity.setSqlConditionJson(getSqlJson(engineConditionEntity));
                 }
                 //insert new data
                 ruleEngineConditionMapper.batchInsert(ruleEngineConditionList);
@@ -288,6 +290,15 @@ public class RuleEngineService {
             throw new GovernanceException("update ruleEngine fail", e);
         }
 
+    }
+
+    private String getSqlJson(RuleEngineConditionEntity engineConditionEntity) {
+        Map<String, String> map = new HashMap<>();
+        map.put("connectionOperator", engineConditionEntity.getConnectionOperator());
+        map.put("columnName", engineConditionEntity.getColumnName());
+        map.put("conditionalOperator", engineConditionEntity.getConditionalOperator());
+        map.put("sqlCondition", engineConditionEntity.getSqlCondition());
+        return JSONObject.toJSONString(map);
     }
 
     @SuppressWarnings("unchecked")
@@ -387,7 +398,7 @@ public class RuleEngineService {
             //Verify required fields
             this.checkStartRuleRequired(rule);
             //Start the rules engine
-            // this.startProcessRule(request, rule);
+            this.startProcessRule(request, rule);
             //modify status
             RuleEngineEntity engineEntity = new RuleEngineEntity();
             engineEntity.setId(rule.getId());
@@ -498,7 +509,7 @@ public class RuleEngineService {
         RuleEngineConditionEntity ruleEngineConditionEntity = new RuleEngineConditionEntity();
         ruleEngineConditionEntity.setRuleId(engineEntity.getId());
         //get ruleEngineConditionList
-        List<RuleEngineConditionEntity> ruleEngineConditionEntities = ruleEngineConditionMapper.ruleEngineConditionList(ruleEngineConditionEntity);
+        List<RuleEngineConditionEntity> ruleEngineConditionEntities = this.getRuleEngineConditionList(engineEntity);
         engineEntity.setRuleEngineConditionList(ruleEngineConditionEntities == null ? new ArrayList<>() : ruleEngineConditionEntities);
         engineEntity.setConditionField(this.getConditionField(ruleEngineConditionEntities));
         String fullSql = parsingSQL(engineEntity);
@@ -598,7 +609,31 @@ public class RuleEngineService {
         RuleEngineConditionEntity ruleEngineConditionEntity = new RuleEngineConditionEntity();
         ruleEngineConditionEntity.setRuleId(rule.getId());
         List<RuleEngineConditionEntity> ruleEngineConditionEntities = ruleEngineConditionMapper.ruleEngineConditionList(ruleEngineConditionEntity);
+        if (!CollectionUtils.isEmpty(ruleEngineConditionEntities)) {
+            for (RuleEngineConditionEntity engineConditionEntity : ruleEngineConditionEntities) {
+                RuleEngineConditionEntity entity = JSONObject.parseObject(engineConditionEntity.getSqlConditionJson(), RuleEngineConditionEntity.class);
+                engineConditionEntity.setConditionalOperator(entity.getConditionalOperator());
+                engineConditionEntity.setConnectionOperator(entity.getConnectionOperator());
+                engineConditionEntity.setColumnName(entity.getColumnName());
+                engineConditionEntity.setSqlCondition(entity.getSqlCondition());
+            }
+        }
         return ruleEngineConditionEntities;
     }
+
+ /*   public static void main(String[] args) {
+        RuleEngineConditionEntity entity = new RuleEngineConditionEntity();
+        entity.setSqlCondition("10");
+        entity.setConditionalOperator(">");
+        entity.setConnectionOperator("and");
+        entity.setColumnName("abc");
+        RuleEngineService ruleEngineService = new RuleEngineService();
+        String sqlJson = ruleEngineService.getSqlJson(entity);
+        entity.setSqlConditionJson(sqlJson);
+        List<RuleEngineConditionEntity> list = new ArrayList<>();
+        list.add(entity);
+        String conditionField = ruleEngineService.getConditionField(list);
+        System.out.printf(sqlJson);
+    }*/
 
 }
