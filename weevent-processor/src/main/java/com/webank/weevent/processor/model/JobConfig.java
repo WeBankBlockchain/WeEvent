@@ -20,7 +20,9 @@ public class JobConfig {
 
     private String updateAt;
 
-    public JobConfig(String id, Date createAt, String cronTime, String fullEntity, String groupName, String name, Integer status, String updateAt) {
+    private CEPRule cepRule;
+
+    public JobConfig(String id, Date createAt, String cronTime, String fullEntity, String groupName, String name, Integer status, String updateAt,CEPRule cepRule) {
         this.id = id;
         this.createAt = createAt;
         this.cronTime = cronTime;
@@ -29,6 +31,16 @@ public class JobConfig {
         this.name = name;
         this.status = status;
         this.updateAt = updateAt;
+        this.cepRule = cepRule;
+    }
+
+
+    public CEPRule getCepRule() {
+        return cepRule;
+    }
+
+    public void setCepRule(CEPRule cepRule) {
+        this.cepRule = cepRule;
     }
 
     public JobConfig() {
