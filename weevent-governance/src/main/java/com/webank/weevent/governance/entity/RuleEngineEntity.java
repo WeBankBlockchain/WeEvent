@@ -36,5 +36,7 @@ public class RuleEngineEntity extends RuleEngineBase {
 
     private Integer totalCount;
 
+    private String createDateStr;
+
     private List<RuleEngineConditionEntity> ruleEngineConditionList = new ArrayList<>();
 }
