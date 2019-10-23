@@ -7,7 +7,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 import com.webank.weevent.processor.job.CRUDJobs;
-import com.webank.weevent.processor.service.QuartzManager;
+import com.webank.weevent.processor.quartz.QuartzManager;
 import com.webank.weevent.processor.utils.BaseRspEntity;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.service.CEPRuleServiceImpl;

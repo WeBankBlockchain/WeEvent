@@ -1,4 +1,4 @@
-package com.webank.weevent.processor.utils;
+package com.webank.weevent.processor.quartz;
 
 import org.quartz.spi.TriggerFiredBundle;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;

@@ -28,20 +28,8 @@ public class CRUDJobs implements Job {
         log.info("{},{} Job execute {}    executing...", this.toString(), jobName, f.format(new Date()));
 
         switch (type) {
-            case "insert":
-                getDetail(context, jobName);
-                break;
-
-            case "deleteCEPRuleById":
-                getDetail(context, jobName);
-                break;
-
             case "startCEPRule":
                 startCEPRule(context, jobName);
-                break;
-
-            case "updateCEPRuleById":
-                getDetail(context, jobName);
                 break;
 
             case "onEvent":
@@ -59,18 +47,11 @@ public class CRUDJobs implements Job {
         WeEvent event = (WeEvent) context.getJobDetail().getJobDataMap().get("weevent");
         IWeEventClient client = (IWeEventClient) context.getJobDetail().getJobDataMap().get("client");
         Map<String, CEPRule> ruleMap = (Map<String, CEPRule>) context.getJobDetail().getJobDataMap().get("ruleMap");
+        log.info("startCEPRule in job: {},rule:{}", JSONObject.toJSON(event));
+
         CEPRuleMQ.handleOnEvent(event, client, ruleMap);
     }
 
-    private void getDetail(JobExecutionContext context, String jobName) {
-        Object obj = context.getJobDetail().getJobDataMap().get("rule");
-        if (obj instanceof CEPRule) {
-            log.info("{}", (CEPRule) obj);
-        }
-        log.info("startCEPRule in job: {},rule:{}", jobName, JSONObject.toJSON(obj));
-
-        // insert
-    }
 
     private void startCEPRule(JobExecutionContext context, String jobName) {
         Object obj = context.getJobDetail().getJobDataMap().get("rule");
@@ -78,9 +59,7 @@ public class CRUDJobs implements Job {
             if (obj instanceof CEPRule) {
                 log.info("{}", (CEPRule) obj);
                 CEPRule rule = (CEPRule) obj;
-                // check the json
-                // update the rule map
-                // subscribe
+                // check the json ，update the rule map，subscribe
                 CEPRuleCache.updateCEPRule(rule);
                 log.info("startCEPRule in job: {},rule:{}", jobName, JSONObject.toJSON(obj));
 

@@ -1,4 +1,4 @@
-package com.webank.weevent.processor.service;
+package com.webank.weevent.processor.quartz;
 
 import java.util.Map;
 
@@ -84,7 +84,7 @@ public class QuartzManager {
 //                    .build();
 
             Trigger trigger = newTrigger()
-                    .withIdentity("trigger3", "group1")
+                    .withIdentity(triggerName, triggerGroupName)
                     .startNow()  // if a start time is not given (if this line were omitted), "now" is implied
                     .withSchedule(simpleSchedule()
                             .withIntervalInSeconds(10)
