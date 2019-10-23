@@ -1,7 +1,5 @@
 package com.webank.weevent.processor.controller;
 
-import java.util.Date;
-
 import javax.validation.Valid;
 
 import com.webank.weevent.processor.quartz.CRUDJobs;
@@ -50,8 +48,6 @@ public class CEPRuleController {
         // insert status must be 0
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = createJob(rule, "insert");
-        ;
-        ;
         if (!ret.getErrorCode().equals(1)) { //fail
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
             resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());

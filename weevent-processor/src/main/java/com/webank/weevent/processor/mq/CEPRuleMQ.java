@@ -29,7 +29,6 @@ public class CEPRuleMQ {
     // <ruleId <--> subscriptionId>
     public static Map<String, String> subscriptionIdMap = new ConcurrentHashMap<>();
 
-
     public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException {
         // unsubscribe old the topic
         ruleMap.get(rule.getId()).getToDestination();
