@@ -7,7 +7,7 @@
     element-loading-spinner='el-icon-loading'
     element-loading-text='数据加载中...'
     element-loading-background='rgba(256,256,256,0.8)'
-    @row-click='checkDetial'
+    @row-click='checkDetail'
     style="width: 100%">
     <el-table-column
       label="机器地址"
@@ -135,7 +135,7 @@ export default {
         this.subscription()
       }, 1000)
     },
-    checkDetial (e) {
+    checkDetail (e) {
       this.$store.commit('set_active', '2-1')
       this.$emit('selecChange', '2-1')
       sessionStorage.setItem('topic', e.topicName)
