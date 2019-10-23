@@ -18,12 +18,13 @@ import static com.webank.weevent.broker.fabric.util.FabricDeployContractUtil.fab
 public class FabricUpdateContractUtil {
 
     public static void main(String[] args) throws Exception {
+        String commond = args[0];
         fabricConfig.load();
 
         HFClient client = FabricSDKWrapper.initializeClient(fabricConfig);
         Channel channel = FabricSDKWrapper.initializeChannel(client, fabricConfig.getChannelName(), fabricConfig);
         ChaincodeID chaincodeID = ChaincodeID.newBuilder().setName(fabricConfig.getTopicControllerName()).setVersion(fabricConfig.getTopicControllerVersion()).build();
-        switch (args[0]) {
+        switch (commond) {
             case "add":
                 FabricSDKWrapper.executeTransaction(client, channel, chaincodeID, true, "addTopicContractName", fabricConfig.getTransactionTimeout(), fabricConfig.getTopicName(), fabricConfig.getTopicVerison());
                 String topicContractNameAdd = FabricSDKWrapper.executeTransaction(client, channel, chaincodeID, false, "getTopicContractName", fabricConfig.getTransactionTimeout()).getPayLoad();

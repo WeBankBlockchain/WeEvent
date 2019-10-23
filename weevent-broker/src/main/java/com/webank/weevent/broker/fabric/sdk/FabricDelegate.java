@@ -63,6 +63,7 @@ public class FabricDelegate {
         fabric.init(fabricConfig.getChannelName());
         fabricMap.put(fabricConfig.getChannelName(), fabric);
         channels = FabricSDKWrapper.listChannelName(fabricConfig);
+        initRedisService();
     }
 
     public SendResult publishEvent(String topicName, String channelName, String eventContent, String extensions) throws BrokerException {
