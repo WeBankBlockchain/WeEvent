@@ -19,6 +19,8 @@ public class WeEvent implements Serializable {
 
     public static final String DEFAULT_GROUP_ID = "1";
 
+    public static final int DEFAULT_CHAINCODE_PARAM_COUNT = 4;
+
     public static final String OFFSET_FIRST = "OFFSET_FIRST";
     public static final String OFFSET_LAST = "OFFSET_LAST";
 
