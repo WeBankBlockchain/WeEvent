@@ -47,10 +47,9 @@ git, gradle 4.10, java 1.8, nodejs 10.16, prefer IntelliJ IDEA.
 
 -  [Git workflow](https://github.com/WeBankFinTech/WeEvent/wiki/Project-WorkFlow)  
 
-
 WeEvent love contributor！Please read the [CONTRIBUTING.md](https://github.com/WeBankFinTech/WeEvent/blob/master/CONTRIBUTING.md), and then submit a pull request.
 
 Thank you!
 
 ## Community
--  Contacts：weevent@webank.com
+-  Contacts：weevent@webank.com  

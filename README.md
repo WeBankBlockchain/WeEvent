@@ -45,10 +45,9 @@ git，gradle 4.10，java 1.8，nodejs 10.16，推荐使用IntelliJ IDEA。
 
 -  [代码提交](https://github.com/WeBankFinTech/WeEvent/wiki/Project-WorkFlow)  
 
-
 WeEvent爱贡献者！请阅读[贡献文档](https://github.com/WeBankFinTech/WeEvent/blob/master/CONTRIBUTING.md)，了解如何贡献代码，并提交你的贡献。
 
 希望在您的帮助下WeEvent继续前进。
 
 ## 社区
--  联系我们：weevent@webank.com
+-  联系我们：weevent@webank.com  
