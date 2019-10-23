@@ -37,7 +37,7 @@ There are some base usecase showed via browser，like [Publish Event](http://loc
 For more examples, see the [WeEvent tutorials](https://weeventdoc.readthedocs.io/zh_CN/latest/protocal/restful.html).
 
 ## User’s Guide
-[WeEvent online document](https://weeventdoc.readthedocs.io/latest).
+[WeEvent online documents](https://weeventdoc.readthedocs.io/latest).
 
 ## Contribution
 - Develop environment  
