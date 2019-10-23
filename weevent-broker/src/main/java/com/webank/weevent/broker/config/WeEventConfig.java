@@ -37,6 +37,9 @@ public class WeEventConfig {
     @Value("${cgi.subscribe.notify.timeout:5000}")
     private Integer cgi_notify_timeout;
 
+    @Value("${broker.blockchain.type}")
+    private String blockChainType;
+
     @Value("${broker.zookeeper.ip:}")
     private String zookeeperIp;
 
