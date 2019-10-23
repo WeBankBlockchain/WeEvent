@@ -11,16 +11,6 @@ import org.springframework.stereotype.Component;
 @Component
 @PropertySource(value = "classpath:processor.properties", encoding = "UTF-8")
 public class ProcessorConfig {
-    //    @Value("${ip.check.white-table:}")
-//    private String ipWhiteTable;
-    @Value("${redis.server.ip:}")
-    private String redisServerIp;
-
-    @Value("${redis.server.password:}")
-    private String redisServerPassword;
-
-    @Value("${redis.server.port:6379}")
-    private Integer redisServerPort;
 
     @Value("${org.quartz.scheduler.instanceName:}")
     private String schedulerInstanceName;
@@ -81,6 +71,5 @@ public class ProcessorConfig {
 
     @Value("${org.quartz.threadPool.threadPriority:}")
     private String threadPriority;
-
 
 }

@@ -1,6 +1,14 @@
 package com.webank.weevent.processor.quartz;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+
+import com.webank.weevent.processor.model.CEPRule;
+import com.webank.weevent.processor.utils.ConstantsHelper;
+import com.webank.weevent.processor.utils.RetCode;
 
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.CronScheduleBuilder;
@@ -13,6 +21,7 @@ import org.quartz.Scheduler;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
+import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.stereotype.Service;
 
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
@@ -28,38 +37,6 @@ public class QuartzManager {
         this.scheduler = scheduler;
     }
 
-    /**
-     * add a job
-     *
-     * @param jobName job name
-     * @param jobGroupName job group name
-     * @param triggerName trigger name
-     * @param triggerGroupName trigger group name
-     * @param jobClass job class
-     * @param cron time quartz
-     */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public void addJob(String jobName, String jobGroupName, String triggerName, String triggerGroupName, Class jobClass, String cron, Map<String, Object> params) {
-        try {
-            JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).build();
-            job.getJobDataMap().putAll(params);
-
-            TriggerBuilder<Trigger> triggerBuilder = newTrigger();
-            triggerBuilder.withIdentity(triggerName, triggerGroupName);
-            triggerBuilder.startNow();
-            triggerBuilder.withSchedule(CronScheduleBuilder.cronSchedule(cron));
-            CronTrigger trigger = (CronTrigger) triggerBuilder.build();
-
-            scheduler.scheduleJob(job, trigger);
-
-            if (!scheduler.isShutdown()) {
-                scheduler.start();
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
 
     /**
      * add job and modify
@@ -71,20 +48,29 @@ public class QuartzManager {
      * @param jobClass job class
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public static void addModifyJob(String jobName, String jobGroupName, String triggerName, String triggerGroupName, Class jobClass, JobDataMap params) {
+    public RetCode addModifyJob(String jobName, String jobGroupName, String triggerName, String triggerGroupName, Class jobClass, JobDataMap params) {
         try {
+            // get the whole rules
+            Iterator<JobKey> it = scheduler.getJobKeys(GroupMatcher.anyGroup()).iterator();
+            List<CEPRule> ruleList = new ArrayList<>();
+            Map<String, CEPRule> ruleMap = new HashMap<>();
 
+            while (it.hasNext()) {
+                JobKey jobKey = (JobKey) it.next();
+                CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
+                ruleList.add(rule);
+                ruleMap.put(rule.getId(), rule);
+                log.info("{}", jobKey);
+            }
+            // add current rule
+            CEPRule currentRule = (CEPRule) params.get("rule");
+            ruleMap.put(currentRule.getId(), currentRule);
+            ruleList.add(currentRule);
+            params.put("ruleList", currentRule);
+            params.put("ruleMap", ruleMap);
             JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).build();
 
-
-//            TriggerKey triggerKey = new TriggerKey(triggerName, triggerGroupName);
-//            SimpleScheduleBuilder simpleBuilder = simpleSchedule().withRepeatCount(0);
-//
-//            Trigger trigger = newTrigger()
-//                    .withIdentity(triggerKey).startNow()
-//                    .withSchedule(simpleBuilder)
-//                    .build();
-
+            // just do one time
             Trigger trigger = newTrigger()
                     .withIdentity(triggerName, triggerGroupName)
                     .startNow()  // if a start time is not given (if this line were omitted), "now" is implied
@@ -92,13 +78,15 @@ public class QuartzManager {
                             .withIntervalInSeconds(10)
                             .withRepeatCount(10)) // note that 10 repeats will give a total of 11 firings
                     .build();
-
             scheduler.scheduleJob(job, trigger);
             if (!scheduler.isShutdown()) {
                 scheduler.start();
             }
+            return ConstantsHelper.SUCCESS;
+
         } catch (Exception e) {
             log.error("e:{}", e.toString());
+            return ConstantsHelper.FAIL;
         }
     }
 
@@ -156,14 +144,17 @@ public class QuartzManager {
      * @param triggerName trigger name
      * @param triggerGroupName trigger group name
      */
-    public void removeJob(String jobName, String jobGroupName, String triggerName, String triggerGroupName) {
+    public RetCode removeJob(String jobName, String jobGroupName, String triggerName, String triggerGroupName) {
         try {
 
             TriggerKey triggerKey = TriggerKey.triggerKey(triggerName, triggerGroupName);
 
             scheduler.pauseTrigger(triggerKey);
             scheduler.unscheduleJob(triggerKey);
-            scheduler.deleteJob(JobKey.jobKey(jobName, jobGroupName));
+            if (scheduler.deleteJob(JobKey.jobKey(jobName, jobGroupName))) {
+                return ConstantsHelper.SUCCESS;
+            }
+            return ConstantsHelper.FAIL;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

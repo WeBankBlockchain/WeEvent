@@ -182,17 +182,6 @@ public class CEPRuleMQ {
     }
 
 
-//    private static void createJob(WeEvent weevent, String type, IWeEventClient client, Map<String, CEPRule> ruleMap) {
-//
-//        JobDataMap jobmap = new JobDataMap();
-//        jobmap.put("weevent", weevent);
-//        jobmap.put("type", type);
-//        jobmap.put("client", client);
-//        jobmap.put("ruleMap", ruleMap);
-//        QuartzManager.addModifyJob(weevent.getEventId(), "onEvent", "onEvent", "onEvent-trigger", CRUDJobs.class, jobmap);
-//
-//    }
-
     private static boolean hitRuleEngine(String payload, String eventContent, String condition) {
         if (CommonUtil.checkJson(eventContent, payload)) {
             List<String> eventContentKeys = CommonUtil.getKeys(payload);
