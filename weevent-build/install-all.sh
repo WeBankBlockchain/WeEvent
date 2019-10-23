@@ -19,9 +19,6 @@ mysql_port=
 mysql_user=
 mysql_password=
 
-processor_port=
-
-
 current_path=$PWD
 
 function yellow_echo (){
@@ -68,9 +65,6 @@ function set_global_param(){
     mysql_port=$(properties_get  "governance.mysql.port")
     mysql_user=$(properties_get "governance.mysql.user")
     mysql_password=$(properties_get "governance.mysql.password")
-
-    processor_enable=$(properties_get  "processor.enable")
-    processor_port=$(properties_get "processor.port")
 }
 
 function check_port(){
@@ -144,13 +138,6 @@ function install_module(){
         ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} &>> ${current_path}/install.log
         check_result "install governance"
     fi
-    if [[ ${processor_enable} = "true" ]];then
-        yellow_echo "install module processor"
-        cd ${current_path}/modules/processor
-        ./install-processor.sh --out_path ${out_path}/processor --server_port ${processor_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} &>> ${current_path}/install.log
-        check_result "install processor"
-    fi
-
 }
 
 function config_java_home(){
@@ -165,13 +152,7 @@ function config_java_home(){
     fi 
     if [[ -e ${current_path}/modules/governance/init-governance.sh ]];then
         sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/governance/init-governance.sh
-    fi
-    if [[ -e ${current_path}/modules/processor/processor.sh ]];then
-        sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/processor/processor.sh
-    fi
-    if [[ -e ${current_path}/modules/governance/init-processor.sh ]];then
-        sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/processor/init-processor.sh
-    fi
+    fi   
 }
 
 function update_server_port(){

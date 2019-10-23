@@ -107,12 +107,6 @@ function copy_install_file(){
     cp ${current_path}/modules/governance/install-governance.sh ${out_path}/modules/governance
     cp -r ${top_path}/weevent-governance/dist/* ${out_path}/modules/governance
 
-    mkdir -p ${out_path}/modules/processor
-    cp ${current_path}/modules/processor/install-processor.sh ${out_path}/modules/processor
-    cp -r ${top_path}/weevent-processor/dist/* ${out_path}/modules/processor
-
-
-
     mkdir -p ${out_path}/modules/nginx
     cp ${current_path}/modules/nginx/install-nginx.sh ./modules/nginx/nginx.sh ${out_path}/modules/nginx
     cp -r ${current_path}/modules/nginx/conf ${out_path}/modules/nginx
@@ -130,11 +124,6 @@ function switch_to_prod(){
     rm -rf ${out_path}/modules/governance/conf/application-dev.properties
     if [[ -e ${out_path}/modules/governance/conf/application.properties ]]; then
         sed -i 's/dev/prod/' ${out_path}/modules/governance/conf/application.properties
-    fi
-
-    rm -rf ${out_path}/modules/processor/conf/application-dev.properties
-    if [[ -e ${out_path}/modules/processor/conf/application.properties ]]; then
-        sed -i 's/dev/prod/' ${out_path}/modules/processor/conf/application.properties
     fi
 }
 
@@ -170,23 +159,6 @@ function tar_governance(){
     rm -rf ${current_path}/governance-${version}
 }
 
-
-function tar_processor(){
-    local target=$1
-    yellow_echo "generate ${target}"
-
-    cp -r ${out_path}/modules/processor ${current_path}/processor-${version}
-    # no need install shell
-    rm -rf ${current_path}/processor-${version}/install-processor.sh
-
-    # do not tar the top dir
-    cd ${current_path}/processor-${version}
-    tar -czpvf ${target} *
-    mv ${target} ${current_path}
-
-    rm -rf ${current_path}/processor-${version}
-}
-
 function tar_weevent(){
     local target=$1
     yellow_echo "generate ${target}"
@@ -199,7 +171,6 @@ function tar_weevent(){
         if [[ -e ${out_path}/modules/governance/lib/${commonjar} ]]; then
             cp ${out_path}/modules/broker/lib/${commonjar} ${out_path}/modules/lib
             rm ${out_path}/modules/governance/lib/${commonjar}
-            rm ${out_path}/modules/processor/lib/${commonjar}
             rm ${out_path}/modules/broker/lib/${commonjar}
         fi
     done
@@ -231,9 +202,6 @@ function package(){
 
     # tar governance module
     tar_governance weevent-governance-${version}.tar.gz
-
-    # tar processor module
-    tar_processor weevent-processor-${version}.tar.gz
 
     # tar weevent
     tar_weevent weevent-${version}.tar.gz
