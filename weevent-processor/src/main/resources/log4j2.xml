@@ -21,8 +21,8 @@
     </Appenders>
 
     <Loggers>
-        <root level="debug" includeLocation="true">
-            <appender-ref ref="console"/>
+        <root level="info" includeLocation="true">
+            <appender-ref ref="fileAppender"/>
         </root>
     </Loggers>
 </Configuration>

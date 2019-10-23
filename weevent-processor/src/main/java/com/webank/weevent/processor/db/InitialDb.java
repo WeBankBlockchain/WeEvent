@@ -51,7 +51,7 @@ public class InitialDb {
         String defaultUrl = goalUrl.substring(0,first-1);
         Class.forName(driverName);
 
-        List<String> tableSqlList = readSql();
+        List<String> tableSqlList = readCEPSql();
         try (Connection conn = DriverManager.getConnection(defaultUrl, user, password);
              Statement stat = conn.createStatement()) {
             String querySql = "SELECT count(1) FROM information_schema.SCHEMATA where SCHEMA_NAME=" + "'" + dbName + "'";
@@ -77,7 +77,7 @@ public class InitialDb {
         }
     }
 
-    private static List<String> readSql() throws IOException {
+    private static List<String> readCEPSql() throws IOException {
         InputStream resourceAsStream = InitialDb.class.getResourceAsStream("/script/processor.sql");
         StringBuffer sqlBuffer = new StringBuffer();
         List<String> sqlList = new ArrayList<>();
