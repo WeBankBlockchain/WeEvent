@@ -57,7 +57,7 @@ public class SmartLoadConfig {
             Properties properties = new Properties();
             properties.load(inputStream);
 
-            Field[] fields = FiscoConfig.class.getDeclaredFields();
+            Field[] fields = clz.getDeclaredFields();
             for (Field field : fields) {
                 if (field.isAnnotationPresent(Value.class)) {
                     Value value = field.getAnnotation(Value.class);
