@@ -1,5 +1,6 @@
 package com.webank.weevent.processor.controller;
 
+
 import javax.validation.Valid;
 
 import com.webank.weevent.processor.quartz.CRUDJobs;
@@ -34,7 +35,7 @@ public class CEPRuleController {
     public BaseRspEntity updateCEPRuleById(@Valid @RequestBody CEPRule rule) {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = createJob(rule, "updateCEPRuleById");
-        if (!(ret.getErrorCode() == 1)) { //fail
+        if (!(1 == ret.getErrorCode())) { //fail
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
             resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());
         }
@@ -48,7 +49,7 @@ public class CEPRuleController {
         // insert status must be 0
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = createJob(rule, "insert");
-        if (!(ret.getErrorCode() == 1)) { //fail
+        if (!(1 == ret.getErrorCode())) { //fail
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
             resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());
         } else {
@@ -66,7 +67,7 @@ public class CEPRuleController {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = deleteJob(id);
 
-        if (!(ret.getErrorCode() == 1)) { //fail
+        if (!(1 == ret.getErrorCode())) { //fail
             resEntity.setErrorCode(ret.getErrorCode());
             resEntity.setErrorMsg(ret.getErrorMsg());
         }
@@ -82,14 +83,13 @@ public class CEPRuleController {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = createJob(rule, "startCEPRule");
 
-        if (!(ret.getErrorCode() == 1)) { //fail
+        if (!(1 == ret.getErrorCode())) { //fail
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
             resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());
         }
         log.info("cepRule:{}", JSONArray.toJSON(ret));
         return resEntity;
     }
-
 
     private RetCode createJob(CEPRule rule, String type) {
 
