@@ -1,12 +1,8 @@
 package com.webank.weevent.processor.quartz;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.Date;
 
-import com.webank.weevent.processor.model.CEPRule;
+
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.RetCode;
 
@@ -21,10 +17,8 @@ import org.quartz.Scheduler;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
-import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.stereotype.Service;
 
-import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
 @Slf4j
@@ -36,7 +30,6 @@ public class QuartzManager {
     public QuartzManager(Scheduler scheduler) {
         this.scheduler = scheduler;
     }
-
 
     /**
      * add job and modify
@@ -51,39 +44,42 @@ public class QuartzManager {
     public RetCode addModifyJob(String jobName, String jobGroupName, String triggerName, String triggerGroupName, Class jobClass, JobDataMap params) {
         try {
             // get the whole rules
-            Iterator<JobKey> it = scheduler.getJobKeys(GroupMatcher.anyGroup()).iterator();
-            List<CEPRule> ruleList = new ArrayList<>();
-            Map<String, CEPRule> ruleMap = new HashMap<>();
+//            Iterator<JobKey> it = scheduler.getJobKeys(GroupMatcher.anyGroup()).iterator();
+//            List<CEPRule> ruleList = new ArrayList<>();
+//            Map<String, CEPRule> ruleMap = new HashMap<>();
+//
+//            while (it.hasNext()) {
+//                JobKey jobKey = (JobKey) it.next();
+//                CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
+//                ruleList.add(rule);
+//                ruleMap.put(rule.getId(), rule);
+//                log.info("{}", jobKey);
+//            }
+//            // add current rule
+//            CEPRule currentRule = (CEPRule) params.get("rule");
+//            ruleMap.put(currentRule.getId(), currentRule);
+//            ruleList.add(currentRule);
+//            params.put("ruleMap", ruleMap);
 
-            while (it.hasNext()) {
-                JobKey jobKey = (JobKey) it.next();
-                CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
-                ruleList.add(rule);
-                ruleMap.put(rule.getId(), rule);
-                log.info("{}", jobKey);
-            }
-            // add current rule
-            CEPRule currentRule = (CEPRule) params.get("rule");
-            ruleMap.put(currentRule.getId(), currentRule);
-            ruleList.add(currentRule);
-            params.put("ruleList", currentRule);
-            params.put("ruleMap", ruleMap);
             JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).build();
 
             // just do one time
-            Trigger trigger = newTrigger()
-                    .withIdentity(triggerName, triggerGroupName)
-                    .startNow()  // if a start time is not given (if this line were omitted), "now" is implied
-                    .withSchedule(simpleSchedule()
-                            .withIntervalInSeconds(10)
-                            .withRepeatCount(10)) // note that 10 repeats will give a total of 11 firings
-                    .build();
+            TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger();
+            triggerBuilder.withIdentity(new Date().toString(), "triggerGroupNameCronTriggerModify222");
+            triggerBuilder.startNow();
+            triggerBuilder.withSchedule(CronScheduleBuilder.cronSchedule("0 0/2 8-23 * * ?"));
+            CronTrigger trigger = (CronTrigger) triggerBuilder.build();
+
+
             scheduler.scheduleJob(job, trigger);
             if (!scheduler.isShutdown()) {
                 scheduler.start();
             }
-            return ConstantsHelper.SUCCESS;
+            if(scheduler.checkExists(JobKey.jobKey(jobName, jobGroupName))){
+                return ConstantsHelper.SUCCESS;
+            }
 
+            return ConstantsHelper.FAIL;
         } catch (Exception e) {
             log.error("e:{}", e.toString());
             return ConstantsHelper.FAIL;
