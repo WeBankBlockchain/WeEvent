@@ -159,8 +159,8 @@ function config_java_home(){
     if [[ -e ${current_path}/modules/broker/broker.sh ]];then
         sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/broker/broker.sh
     fi   
-    if [[ -e ${current_path}/modules/broker/deploy-fisco-topic-control.sh ]];then
-        sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/broker/deploy-fisco-topic-control.sh
+    if [[ -e ${current_path}/modules/broker/deploy-topic-control.sh ]];then
+        sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/broker/deploy-topic-control.sh
     fi
     if [[ -e ${current_path}/modules/broker/deploy-fabric-topic-control.sh ]];then
         sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/broker/deploy-fabric-topic-control.sh

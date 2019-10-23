@@ -69,13 +69,13 @@ if [[ ${block_chain_type} == "fisco" ]];then
 else
     sed -i "s|^.*chain.orderer.address=.*$|chain.orderer.address=${fabric_orderer_address}|g" ${out_path}/conf/fabric/fabric.properties
     sed -i "s|^.*chain.peer.address=.*$|chain.peer.address=${fabric_peer_address}|g" ${out_path}/conf/fabric/fabric.properties
-    rm -f ${out_path}/deploy-fisco-topic-control.sh
+    rm -f ${out_path}/deploy-topic-control.sh
 fi
 
 #deploy contract
 cd ${out_path}
 if [[ ${block_chain_type} == "fisco" ]];then
-    ./deploy-fisco-topic-control.sh
+    ./deploy-topic-control.sh
     if [[ $? -eq 0 ]];then
         echo "deploy topic control contract success"
     else
