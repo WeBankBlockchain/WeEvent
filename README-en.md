@@ -21,18 +21,18 @@ WeEvent is an open source architecture developed by WeBank for peer-to-peer coop
 
 ## Getting Start
 We can quick install WeEvent in 3 different ways：[Docker image](https://hub.docker.com/r/weevent/), [Bash Shell](https://weeventdoc.readthedocs.io/zh_CN/latest/install/quickinstall.html), [Advanced](https://weeventdoc.readthedocs.io/zh_CN/latest/install/module/index.html)。
-#### Docker image
-```
+### Docker image
+```shell
 $ docker pull weevent/weevent:1.0.0; docker run -d -p 8080:8080 weevent/weevent:1.0.0 /root/run.sh
 ```
 
-#### Bash shell
+### Bash shell
 [Download](https://weeventdoc.readthedocs.io/zh_CN/latest/install/download.html) and unzip the install package, like weevent-1.0.0.tar.gz. And then execute the install shell.
-```
+```shell
 $ ./install-all.sh -p /usr/local/weevent/
 ```
 
-#### Tutorials
+### Tutorials
 There are some base usecase showed via browser，like [Publish Event](http://localhost:8080/weevent/rest/publish?topic=test&content=helloevent).
 For more examples, see the [WeEvent tutorials](https://weeventdoc.readthedocs.io/zh_CN/latest/protocal/restful.html).
 
@@ -40,14 +40,17 @@ For more examples, see the [WeEvent tutorials](https://weeventdoc.readthedocs.io
 [WeEvent online documents](https://weeventdoc.readthedocs.io/latest).
 
 ## Contribution
-- Develop environment  
+-  Develop environment  
 git, gradle 4.10, java 1.8, nodejs 10.16, prefer IntelliJ IDEA.
-- [WeEvent roadmap](https://github.com/WeBankFinTech/WeEvent/wiki/Project-RoadMap)  
-- [Git workflow](https://github.com/WeBankFinTech/WeEvent/wiki/Project-WorkFlow)  
+
+-  [WeEvent roadmap](https://github.com/WeBankFinTech/WeEvent/wiki/Project-RoadMap)  
+
+-  [Git workflow](https://github.com/WeBankFinTech/WeEvent/wiki/Project-WorkFlow)  
+
 
 WeEvent love contributor！Please read the [CONTRIBUTING.md](https://github.com/WeBankFinTech/WeEvent/blob/master/CONTRIBUTING.md), and then submit a pull request.
 
 Thank you!
 
 ## Community
-- Contacts：weevent@webank.com
+-  Contacts：weevent@webank.com

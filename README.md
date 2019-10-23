@@ -1,4 +1,4 @@
-[中文](README.md) | [English](README_en.md)
+[中文](README.md) | [English](README-en.md)
 
 ![image](https://github.com/WeBankFinTech/WeEvent-docs/blob/master/docs/image/weevent-logo.png)
 
@@ -20,13 +20,13 @@ WeEvent由微众银行自主研发并完全开源，秉承分布式商业模式�
 ## 快速入门
 WeEvent支持三种安装方式：[Docker镜像](https://hub.docker.com/r/weevent/)、[Bash一键脚本](https://weeventdoc.readthedocs.io/zh_CN/latest/install/quickinstall.html)、[普通安装](https://weeventdoc.readthedocs.io/zh_CN/latest/install/module/index.html)。
 #### Docker镜像安装
-```
+```shell
 $ docker pull weevent/weevent:1.0.0; docker run -d -p 8080:8080 weevent/weevent:1.0.0 /root/run.sh
 ```
 
 #### Bash一键安装
 [下载](https://weeventdoc.readthedocs.io/zh_CN/latest/install/download.html)并且解压安装包，如weevent-1.0.0.tar.gz。在解压目录中执行安装脚本。
-```
+```shell
 $ ./install-all.sh -p /usr/local/weevent/
 ```
 
@@ -38,14 +38,17 @@ $ ./install-all.sh -p /usr/local/weevent/
 [WeEvent在线文档](https://weeventdoc.readthedocs.io/zh_CN/latest)。
 
 ## 项目贡献
-- 开发环境  
+-  开发环境  
 git，gradle 4.10，java 1.8，nodejs 10.16，推荐使用IntelliJ IDEA。
-- [项目计划](https://github.com/WeBankFinTech/WeEvent/wiki/Project-RoadMap)  
-- [代码提交](https://github.com/WeBankFinTech/WeEvent/wiki/Project-WorkFlow)  
+
+-  [项目计划](https://github.com/WeBankFinTech/WeEvent/wiki/Project-RoadMap)  
+
+-  [代码提交](https://github.com/WeBankFinTech/WeEvent/wiki/Project-WorkFlow)  
+
 
 WeEvent爱贡献者！请阅读[贡献文档](https://github.com/WeBankFinTech/WeEvent/blob/master/CONTRIBUTING.md)，了解如何贡献代码，并提交你的贡献。
 
 希望在您的帮助下WeEvent继续前进。
 
 ## 社区
-- 联系我们：weevent@webank.com
+-  联系我们：weevent@webank.com
