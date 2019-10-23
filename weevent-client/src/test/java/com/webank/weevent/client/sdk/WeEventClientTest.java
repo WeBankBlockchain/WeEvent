@@ -83,7 +83,7 @@ public class WeEventClientTest {
         });
 
         Assert.assertFalse(subscribeId.isEmpty());
-        sleep(1000000);
+        sleep(10000);
     }
 
     /**

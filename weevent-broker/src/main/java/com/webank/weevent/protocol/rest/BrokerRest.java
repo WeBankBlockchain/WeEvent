@@ -60,11 +60,13 @@ public class BrokerRest implements IBrokerRpc {
         WeEvent event = new WeEvent(eventData.get(WeEventConstants.EVENT_TOPIC), eventData.get(WeEventConstants.EVENT_CONTENT).getBytes(), extensions);
 
         // default group id
-        String groupId = WeEvent.DEFAULT_GROUP_ID;
+        String groupId = null;
         if (eventData.containsKey(WeEventConstants.EVENT_GROUP_ID)) {
             groupId = eventData.get(WeEventConstants.EVENT_GROUP_ID);
             if (StringUtils.isBlank(groupId)) {
-                throw new BrokerException(ErrorCode.EVENT_GROUP_ID_INVALID);
+                if (StringUtils.isBlank(groupId)) {
+                    groupId = WeEventUtils.getDefaultGroupId();
+                }
             }
         }
         return this.producer.publish(event, groupId);
@@ -78,7 +80,7 @@ public class BrokerRest implements IBrokerRpc {
 
         String groupId = groupIdStr;
         if (StringUtils.isBlank(groupId)) {
-            groupId = WeEvent.DEFAULT_GROUP_ID;
+            groupId = WeEventUtils.getDefaultGroupId();
         }
         return this.producer.getEvent(eventId, groupId);
     }
@@ -91,7 +93,7 @@ public class BrokerRest implements IBrokerRpc {
 
         String groupId = groupIdStr;
         if (StringUtils.isBlank(groupId)) {
-            groupId = WeEvent.DEFAULT_GROUP_ID;
+            groupId = WeEventUtils.getDefaultGroupId();
         }
         return this.producer.open(topic, groupId);
     }
@@ -104,7 +106,7 @@ public class BrokerRest implements IBrokerRpc {
 
         String groupId = groupIdStr;
         if (StringUtils.isBlank(groupId)) {
-            groupId = WeEvent.DEFAULT_GROUP_ID;
+            groupId = WeEventUtils.getDefaultGroupId();
         }
         return this.producer.close(topic, groupId);
     }
@@ -117,7 +119,7 @@ public class BrokerRest implements IBrokerRpc {
 
         String groupId = groupIdStr;
         if (StringUtils.isBlank(groupId)) {
-            groupId = WeEvent.DEFAULT_GROUP_ID;
+            groupId = WeEventUtils.getDefaultGroupId();
         }
         return this.producer.exist(topic, groupId);
     }
@@ -131,7 +133,7 @@ public class BrokerRest implements IBrokerRpc {
 
         String groupId = groupIdStr;
         if (StringUtils.isBlank(groupId)) {
-            groupId = WeEvent.DEFAULT_GROUP_ID;
+            groupId = WeEventUtils.getDefaultGroupId();
         }
         return this.producer.list(pageIndex, pageSize, groupId);
     }
@@ -144,7 +146,7 @@ public class BrokerRest implements IBrokerRpc {
 
         String groupId = groupIdStr;
         if (StringUtils.isBlank(groupId)) {
-            groupId = WeEvent.DEFAULT_GROUP_ID;
+            groupId = WeEventUtils.getDefaultGroupId();
         }
         return this.producer.state(topic, groupId);
     }
