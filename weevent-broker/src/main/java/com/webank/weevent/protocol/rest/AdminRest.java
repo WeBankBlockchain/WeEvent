@@ -9,6 +9,7 @@ import java.util.Map;
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.config.BuildInfo;
 import com.webank.weevent.broker.fisco.util.SystemInfoUtils;
+import com.webank.weevent.broker.fisco.util.WeEventUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
 import com.webank.weevent.protocol.rest.entity.QueryEntity;
@@ -17,7 +18,6 @@ import com.webank.weevent.protocol.rest.entity.TbNode;
 import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
-import com.webank.weevent.sdk.WeEvent;
 
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +57,7 @@ public class AdminRest extends RestHA {
     public Map<String, Object> listSubscription(@RequestParam(name = "groupId", required = false) String groupIdStr) throws BrokerException {
         String groupId = groupIdStr;
         if (StringUtils.isBlank(groupId)) {
-            groupId = WeEvent.DEFAULT_GROUP_ID;
+            groupId = WeEventUtils.getDefaultGroupId();
         }
         Map<String, Object> nodesInfo = new HashMap<>();
         if (this.masterJob.getClient() == null) {
@@ -106,13 +106,15 @@ public class AdminRest extends RestHA {
      * get general
      */
     @RequestMapping(path = "/group/general")
-    public ResponseData<GroupGeneral> getGroupGeneral(@RequestParam("groupId") Integer groupId) throws BrokerException {
+    public ResponseData<GroupGeneral> getGroupGeneral(@RequestParam(value = "groupId", required = false) String groupId) throws BrokerException {
         ResponseData<GroupGeneral> responseData = new ResponseData<>();
         Instant startTime = Instant.now();
-        log.info("start getGroupGeneral startTime:{} groupId:{}", startTime.toEpochMilli(),
-                groupId);
+        log.info("start getGroupGeneral startTime:{} groupId:{}", startTime.toEpochMilli(), groupId);
 
-        GroupGeneral groupGeneral = this.consumer.getGroupGeneral(String.valueOf(groupId));
+        if (StringUtils.isBlank(groupId)) {
+            groupId = WeEventUtils.getDefaultGroupId();
+        }
+        GroupGeneral groupGeneral = this.consumer.getGroupGeneral(groupId);
         responseData.setCode(ErrorCode.SUCCESS.getCode());
         responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
         responseData.setData(groupGeneral);
@@ -124,7 +126,7 @@ public class AdminRest extends RestHA {
      * query transaction list.
      */
     @RequestMapping(path = "/transaction/transList")
-    public ResponseData<List<TbTransHash>> queryTransList(@RequestParam("groupId") Integer groupId,
+    public ResponseData<List<TbTransHash>> queryTransList(@RequestParam(value = "groupId", required = false) String groupId,
                                                           @RequestParam("pageNumber") Integer pageNumber,
                                                           @RequestParam("pageSize") Integer pageSize,
                                                           @RequestParam(value = "transactionHash", required = false) String transHash,
@@ -134,11 +136,13 @@ public class AdminRest extends RestHA {
         log.info(
                 "start queryTransList startTime:{} groupId:{} pageNumber:{} pageSize:{} "
                         + "pkHash:{} blockNumber:{}",
-                startTime.toEpochMilli(), groupId,
-                pageNumber, pageSize, transHash, blockNumber);
+                startTime.toEpochMilli(), groupId, pageNumber, pageSize, transHash, blockNumber);
 
+        if (StringUtils.isBlank(groupId)) {
+            groupId = WeEventUtils.getDefaultGroupId();
+        }
         ResponseData<List<TbTransHash>> responseData = new ResponseData<>();
-        QueryEntity queryEntity = new QueryEntity(groupId.toString(), pageNumber, pageSize, transHash, blockNumber);
+        QueryEntity queryEntity = new QueryEntity(groupId, pageNumber, pageSize, transHash, blockNumber);
 
         List<TbTransHash> tbTransHashes = this.consumer.queryTransList(queryEntity);
         responseData.setCode(ErrorCode.SUCCESS.getCode());
@@ -152,7 +156,7 @@ public class AdminRest extends RestHA {
      * query block list.
      */
     @RequestMapping(path = "/block/blockList")
-    public ResponseData<List<TbBlock>> queryBlockList(@RequestParam("groupId") Integer groupId,
+    public ResponseData<List<TbBlock>> queryBlockList(@RequestParam(value = "groupId", required = false) String groupId,
                                                       @RequestParam("pageNumber") Integer pageNumber,
                                                       @RequestParam("pageSize") Integer pageSize,
                                                       @RequestParam(value = "pkHash", required = false) String pkHash,
@@ -162,11 +166,13 @@ public class AdminRest extends RestHA {
         log.info(
                 "start queryBlockList startTime:{} groupId:{} pageNumber:{} pageSize:{} "
                         + "pkHash:{} blockNumber:{}",
-                startTime.toEpochMilli(), groupId,
-                pageNumber, pageSize, pkHash, blockNumber);
+                startTime.toEpochMilli(), groupId, pageNumber, pageSize, pkHash, blockNumber);
 
+        if (StringUtils.isBlank(groupId)) {
+            groupId = WeEventUtils.getDefaultGroupId();
+        }
         ResponseData<List<TbBlock>> responseData = new ResponseData<>();
-        QueryEntity queryEntity = new QueryEntity(groupId.toString(), pageNumber, pageSize, pkHash, blockNumber);
+        QueryEntity queryEntity = new QueryEntity(groupId, pageNumber, pageSize, pkHash, blockNumber);
 
         List<TbBlock> tbBlocks = this.consumer.queryBlockList(queryEntity);
         responseData.setCode(ErrorCode.SUCCESS.getCode());
@@ -179,7 +185,7 @@ public class AdminRest extends RestHA {
      * qurey node info list.
      */
     @RequestMapping(path = "/node/nodeList")
-    public ResponseData<List<TbNode>> queryNodeList(@RequestParam("groupId") Integer groupId,
+    public ResponseData<List<TbNode>> queryNodeList(@RequestParam(value = "groupId", required = false) String groupId,
                                                     @RequestParam("pageNumber") Integer pageNumber,
                                                     @RequestParam("pageSize") Integer pageSize,
                                                     @RequestParam(value = "nodeName", required = false) String nodeName)
@@ -187,9 +193,11 @@ public class AdminRest extends RestHA {
         Instant startTime = Instant.now();
         log.info(
                 "start queryNodeList startTime:{} groupId:{}  pageNumber:{} pageSize:{} nodeName:{}",
-                startTime.toEpochMilli(), groupId, pageNumber,
-                pageSize, nodeName);
-        QueryEntity queryEntity = new QueryEntity(groupId.toString(), pageNumber, pageSize, null, null);
+                startTime.toEpochMilli(), groupId, pageNumber, pageSize, nodeName);
+        if (StringUtils.isBlank(groupId)) {
+            groupId = WeEventUtils.getDefaultGroupId();
+        }
+        QueryEntity queryEntity = new QueryEntity(groupId, pageNumber, pageSize, null, null);
         queryEntity.setNodeName(nodeName);
         ResponseData<List<TbNode>> responseData = new ResponseData<>();
         responseData.setCode(ErrorCode.SUCCESS.getCode());
@@ -203,8 +211,11 @@ public class AdminRest extends RestHA {
      * query the number of transactions in the last week
      */
     @GetMapping("/group/transDaily")
-    public ResponseData getTransDaily(@RequestParam("groupId") Integer groupId)
+    public ResponseData getTransDaily(@RequestParam(value = "groupId", required = false) String groupId)
             throws BrokerException {
+        if (StringUtils.isBlank(groupId)) {
+            groupId = WeEventUtils.getDefaultGroupId();
+        }
         ResponseData responseData = new ResponseData();
         responseData.setCode(ErrorCode.SUCCESS.getCode());
         responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());

@@ -6,9 +6,12 @@
 
 java_home_path=
 out_path=""
+block_chain_type=
 block_chain_version=
 block_chain_channel=
 block_chain_node_path=
+fabric_orderer_address=
+fabric_peer_address=
 broker_port=7000
 
 nginx_port=8080
@@ -18,6 +21,9 @@ mysql_ip=
 mysql_port=
 mysql_user=
 mysql_password=
+
+processor_port=
+
 
 current_path=$PWD
 
@@ -46,13 +52,19 @@ function properties_get(){
 
 function set_global_param(){
     java_home_path=$(properties_get "JAVA_HOME")
-    block_chain_version=$(properties_get "fisco-bcos.version")
-    block_chain_channel=$(properties_get "fisco-bcos.channel")
-    block_chain_node_path=$(properties_get  "fisco-bcos.node_path")
-    if [[ "${block_chain_node_path:0:1}" == "~" ]];then
-        block_chain_node_path=$(realpath -m ${HOME}/${block_chain_node_path:1})
+    block_chain_type=$(properties_get "blockchain.type")
+    if [[ ${block_chain_type} == "fisco" ]];then
+        block_chain_version=$(properties_get "fisco-bcos.version")
+        block_chain_channel=$(properties_get "fisco-bcos.channel")
+        block_chain_node_path=$(properties_get  "fisco-bcos.node_path")
+        if [[ "${block_chain_node_path:0:1}" == "~" ]];then
+            block_chain_node_path=$(realpath -m ${HOME}/${block_chain_node_path:1})
+        else
+            block_chain_node_path=$(realpath -m ${block_chain_node_path})
+        fi
     else
-        block_chain_node_path=$(realpath -m ${block_chain_node_path})
+        fabric_orderer_address=$(properties_get "chain.orderer.address")
+        fabric_peer_address=$(properties_get "chain.peer.address")
     fi
     nginx_port=$(properties_get "nginx.port")
     
@@ -65,6 +77,9 @@ function set_global_param(){
     mysql_port=$(properties_get  "governance.mysql.port")
     mysql_user=$(properties_get "governance.mysql.user")
     mysql_password=$(properties_get "governance.mysql.password")
+
+    processor_enable=$(properties_get  "processor.enable")
+    processor_port=$(properties_get "processor.port")
 }
 
 function check_port(){
@@ -96,18 +111,20 @@ function check_param(){
         echo "JAVA_HOME path not exist, ${java_home_path}"
         exit 1;
     fi
-    
-    if [[ -d ${block_chain_node_path} ]]; then
-        check_port ${broker_port}
-        check_port ${nginx_port}
-        check_telnet ${block_chain_channel}
-        if [[ ${governance_enable} = "true" ]];then
-            check_telnet ${mysql_ip}:${mysql_port}
+
+    check_port ${broker_port}
+    check_port ${nginx_port}
+    if [[ ${governance_enable} = "true" ]];then
+        check_telnet ${mysql_ip}:${mysql_port}
+    fi
+    if [[ ${block_chain_type} == "fisco" ]];then
+        if [[ -d ${block_chain_node_path} ]]; then
+            check_telnet ${block_chain_channel}
+            echo "param ok"
+        else
+            echo "path not exist, ${block_chain_node_path}"
+            exit 1
         fi
-        echo "param ok"
-    else
-        echo "path not exist, ${block_chain_node_path}"
-        exit 1
     fi
 }
 
@@ -124,7 +141,11 @@ function check_result(){
 function install_module(){
     yellow_echo "install module broker"
     cd ${current_path}/modules/broker
-    ./install-broker.sh --out_path ${out_path}/broker --listen_port ${broker_port} --block_chain_node_path ${block_chain_node_path} --channel_info ${block_chain_channel} --version ${block_chain_version}
+    if [[ ${block_chain_type} == "fisco" ]];then
+        ./install-broker.sh --out_path ${out_path}/broker --listen_port ${broker_port} --block_chain_type ${block_chain_type} --block_chain_node_path ${block_chain_node_path} --channel_info ${block_chain_channel} --version ${block_chain_version}
+    else
+        ./install-broker.sh --out_path ${out_path}/broker --listen_port ${broker_port} --block_chain_type ${block_chain_type} --fabric_orderer_address ${fabric_orderer_address} --fabric_peer_address ${fabric_peer_address}
+    fi
     check_result "install broker"
 
     yellow_echo "install module nginx"
@@ -138,6 +159,13 @@ function install_module(){
         ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} &>> ${current_path}/install.log
         check_result "install governance"
     fi
+    if [[ ${processor_enable} = "true" ]];then
+        yellow_echo "install module processor"
+        cd ${current_path}/modules/processor
+        ./install-processor.sh --out_path ${out_path}/processor --server_port ${processor_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} &>> ${current_path}/install.log
+        check_result "install processor"
+    fi
+
 }
 
 function config_java_home(){
@@ -147,12 +175,21 @@ function config_java_home(){
     if [[ -e ${current_path}/modules/broker/deploy-topic-control.sh ]];then
         sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/broker/deploy-topic-control.sh
     fi
+    if [[ -e ${current_path}/modules/broker/deploy-fabric-topic-control.sh ]];then
+        sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/broker/deploy-fabric-topic-control.sh
+    fi
     if [[ -e ${current_path}/modules/governance/governance.sh ]];then
         sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/governance/governance.sh
     fi 
     if [[ -e ${current_path}/modules/governance/init-governance.sh ]];then
         sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/governance/init-governance.sh
-    fi   
+    fi
+    if [[ -e ${current_path}/modules/processor/processor.sh ]];then
+        sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/processor/processor.sh
+    fi
+    if [[ -e ${current_path}/modules/governance/init-processor.sh ]];then
+        sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/processor/init-processor.sh
+    fi
 }
 
 function update_server_port(){

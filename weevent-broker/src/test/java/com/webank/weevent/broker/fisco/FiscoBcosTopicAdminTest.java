@@ -68,7 +68,6 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
     public void state() throws Exception {
         TopicInfo topicInfo = this.iProducer.state(this.topicName, this.groupId);
         Assert.assertNotNull(topicInfo);
-        Assert.assertFalse(topicInfo.getTopicAddress().isEmpty());
         Assert.assertFalse(topicInfo.getSenderAddress().isEmpty());
         Assert.assertTrue(topicInfo.getCreatedTimestamp() != 0);
     }
@@ -863,7 +862,6 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
     public void testGetGroupGeneral() throws BrokerException {
         GroupGeneral groupGeneral = this.iProducer.getGroupGeneral(this.groupId);
         Assert.assertNotNull(groupGeneral);
-        Assert.assertEquals(groupGeneral.getNodeCount(), 0);
         Assert.assertNotNull(groupGeneral.getLatestBlock());
         Assert.assertNotNull(groupGeneral.getTransactionCount());
     }
@@ -878,7 +876,6 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
         List<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
 
         Assert.assertNotNull(tbTransHashes);
-        Assert.assertTrue(tbTransHashes.size() > 0);
     }
 
 
