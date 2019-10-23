@@ -1,4 +1,4 @@
-[中文](README.md) | [English](README_en.md)
+[中文](README.md) | [English](README-en.md)
 
 ![image](https://github.com/WeBankFinTech/WeEvent-docs/blob/master/docs/image/weevent-logo.png)
 
