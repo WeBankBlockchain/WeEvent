@@ -65,9 +65,9 @@ public class QuartzManager {
 
             // just do one time
             TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger();
-            triggerBuilder.withIdentity(new Date().toString(), "triggerGroupNameCronTriggerModify222");
+            triggerBuilder.withIdentity(new Date().toString(), triggerGroupName);
             triggerBuilder.startNow();
-            triggerBuilder.withSchedule(CronScheduleBuilder.cronSchedule("0 0/2 8-23 * * ?"));
+            triggerBuilder.withSchedule(CronScheduleBuilder.cronSchedule("0 0/2 8-24 * * ?"));
             CronTrigger trigger = (CronTrigger) triggerBuilder.build();
 
 
