@@ -20,7 +20,7 @@ WeEvent is an open source architecture developed by WeBank for peer-to-peer coop
 [WeEvent Official Site](http://fintech.webank.com/weevent).
 
 ## Getting Start
-We can quick install WeEvent in 3 different ways：[Docker image](https://hub.docker.com/r/weevent/), [Bash Shell](https://weeventdoc.readthedocs.io/zh_CN/latest/install/quickinstall.html), [Advanced](https://weeventdoc.readthedocs.io/zh_CN/latest/install/module/index.html)。
+We can quick install WeEvent in 3 different ways：[Docker image](https://hub.docker.com/r/weevent/), [Bash Shell](https://weeventdoc.readthedocs.io/zh_CN/latest/install/quickinstall.html), [Advanced](https://weeventdoc.readthedocs.io/zh_CN/latest/install/module/index.html).
 ### Docker image
 ```shell
 $ docker pull weevent/weevent:1.0.0; docker run -d -p 8080:8080 weevent/weevent:1.0.0 /root/run.sh
