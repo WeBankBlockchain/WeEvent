@@ -20,22 +20,6 @@ public class RetCode {
         return new RetCode(errorCode, null);
     }
 
-//    public Integer getErrorCode() {
-//        return errorCode;
-//    }
-//
-//    public String getErrorMsg() {
-//        return errorMsg;
-//    }
-//
-//    public void setErrorCode(int errorCode) {
-//        this.errorCode = errorCode;
-//    }
-//
-//    public void setErrorMsg(String errorMsg) {
-//        this.errorMsg = errorMsg;
-//    }
-
     @Override
     public String toString() {
         return "RetCode [errorCode=" + errorCode + ", errorMsg=" + errorMsg + "]";
