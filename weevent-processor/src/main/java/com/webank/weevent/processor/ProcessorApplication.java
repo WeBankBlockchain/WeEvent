@@ -19,7 +19,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class ProcessorApplication {
     public static ProcessorConfig processorConfig;
     public static ApplicationContext applicationContext;
-    
     @Autowired
     public void setContext(ApplicationContext context) {
         applicationContext = context;
@@ -38,8 +37,15 @@ public class ProcessorApplication {
         processorConfig = config;
     }
 
+    private static void exit() {
+        if (applicationContext != null) {
+            System.exit(SpringApplication.exit(applicationContext));
+        } else {
+            System.exit(1);
+        }
+    }
 
-    // daemon thread pool
+
     @Bean(name = "processor_daemon_task_executor")
     public static ThreadPoolTaskExecutor getThreadPoolTaskExecutor() {
         ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
