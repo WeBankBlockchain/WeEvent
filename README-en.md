@@ -40,16 +40,14 @@ For more examples, see the [WeEvent tutorials](https://weeventdoc.readthedocs.io
 [WeEvent online documents](https://weeventdoc.readthedocs.io/latest).
 
 ## Contribution
--  Develop environment  
+*   Develop environment
 git, gradle 4.10, java 1.8, nodejs 10.16, prefer IntelliJ IDEA.
-
--  [WeEvent roadmap](https://github.com/WeBankFinTech/WeEvent/wiki/Project-RoadMap)  
-
--  [Git workflow](https://github.com/WeBankFinTech/WeEvent/wiki/Project-WorkFlow)  
+*   [WeEvent roadmap](https://github.com/WeBankFinTech/WeEvent/wiki/Project-RoadMap)
+*   [Git workflow](https://github.com/WeBankFinTech/WeEvent/wiki/Project-WorkFlow)
 
 WeEvent love contributor！Please read the [CONTRIBUTING.md](https://github.com/WeBankFinTech/WeEvent/blob/master/CONTRIBUTING.md), and then submit a pull request.
 
 Thank you!
 
 ## Community
--  Contacts：weevent@webank.com  
+*   Contacts：weevent@webank.com
