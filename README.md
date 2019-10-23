@@ -24,15 +24,9 @@ WeEvent支持三种安装方式：[Docker镜像](https://hub.docker.com/r/weeven
 $ docker pull weevent/weevent:1.0.0; docker run -d -p 8080:8080 weevent/weevent:1.0.0 /root/run.sh
 ```
 
-<<<<<<< HEAD
-#### Bash一键安装
-下载并且解压安装包，如weevent-1.0.0.tar.gz ,在解压目录中执行安装脚本。
-```
-=======
 ### Bash一键安装
 [下载](https://weeventdoc.readthedocs.io/zh_CN/latest/install/download.html)并且解压安装包，如weevent-1.0.0.tar.gz。在解压目录中执行安装脚本。
 ```shell
->>>>>>> 5e6b5d840ce6f2dd841a3825c60e831f0fb19391
 $ ./install-all.sh -p /usr/local/weevent/
 ```
 
