@@ -190,8 +190,6 @@ public class BrokerStomp extends TextWebSocketHandler {
         // send command receipt Id
         String headerReceiptIdStr = getHeadersValue("receipt", msg);
 
-        Map<String, String> extensions = WeEventUtils.getExtend(nativeHeaders);
-
         String groupId = WeEvent.DEFAULT_GROUP_ID;
         Object eventGroupId = nativeHeaders.get(WeEventConstants.EVENT_GROUP_ID);
         if (nativeHeaders.containsKey(WeEventConstants.EVENT_GROUP_ID) && eventGroupId != null) {
@@ -200,7 +198,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
         try {
             String simpDestination = getSimpDestination(msg);
-            SendResult sendResult = handleSend(msg, simpDestination, extensions, groupId);
+            SendResult sendResult = handleSend(msg, groupId);
 
             // package the return frame
             StompCommand command = StompCommand.RECEIPT;
@@ -421,17 +419,26 @@ public class BrokerStomp extends TextWebSocketHandler {
 
     /**
      * @param msg message
-     * @param simpDestination topic name
      */
     private SendResult handleSend(Message<byte[]> msg,
-                                  String simpDestination,
-                                  Map<String, String> extensions,
                                   String groupId) throws BrokerException {
         if (!this.iproducer.startProducer()) {
             log.error("producer start failed");
         }
 
-        SendResult sendResult = this.iproducer.publish(new WeEvent(simpDestination, msg.getPayload(), extensions), groupId);
+        ObjectMapper mapper = new ObjectMapper();
+        WeEvent event = null;
+        try {
+            event = mapper.readValue(msg.getPayload(), WeEvent.class);
+        } catch (IOException e) {
+            log.error("read payload from msg failed, e ", e);
+            throw new BrokerException("read payload from msg failed");
+        }
+        if (event == null){
+            log.error("payload in msg is null");
+            throw new BrokerException("payload in msg is null");
+        }
+        SendResult sendResult = this.iproducer.publish(event, groupId);
         log.info("publish result, {}", sendResult);
         if (sendResult.getStatus() != SendResult.SendResultStatus.SUCCESS) {
             log.error("producer publish failed");
