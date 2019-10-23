@@ -4,5 +4,6 @@ include "weevent-client"
 include "weevent-broker"
 include "weevent-governance"
 include "weevent-robust"
+include "weevent-processor"
 include "weevent-jmeter"
 
