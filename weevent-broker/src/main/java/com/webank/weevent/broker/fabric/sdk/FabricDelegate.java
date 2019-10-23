@@ -81,4 +81,9 @@ public class FabricDelegate {
     public List<WeEvent> loop(Long blockNum, String channelName) throws BrokerException {
         return fabricMap.get(channelName).loop(blockNum);
     }
+
+    public static String getChannelName() {
+        return channels.get(0);
+    }
+
 }

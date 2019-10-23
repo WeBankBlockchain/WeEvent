@@ -35,7 +35,6 @@ public class FabricTopicAdminTest extends JUnitTestBase {
     private IProducer iProducer;
     private String eventId = "";
     private QueryEntity queryEntity;
-    private String channelName = WeEvent.DEFAULT_CHANNEL_NAME;
     private final BigInteger blockNumber = BigInteger.valueOf(1);
 
 

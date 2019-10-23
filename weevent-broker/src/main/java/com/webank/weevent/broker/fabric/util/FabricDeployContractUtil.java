@@ -2,6 +2,8 @@ package com.webank.weevent.broker.fabric.util;
 
 import java.util.Collection;
 
+import com.webank.weevent.broker.fabric.config.FabricConfig;
+import com.webank.weevent.broker.fabric.sdk.FabricSDKWrapper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hyperledger.fabric.sdk.BlockEvent;
@@ -11,9 +13,6 @@ import org.hyperledger.fabric.sdk.Channel;
 import org.hyperledger.fabric.sdk.HFClient;
 import org.hyperledger.fabric.sdk.ProposalResponse;
 import org.hyperledger.fabric.sdk.TransactionRequest;
-
-import com.webank.weevent.broker.fabric.config.FabricConfig;
-import com.webank.weevent.broker.fabric.sdk.FabricSDKWrapper;
 
 /**
  * @author websterchen
@@ -26,6 +25,7 @@ public class FabricDeployContractUtil {
 
     public static void main(String[] args) throws Exception {
         fabricConfig.load();
+
         try {
             HFClient client = FabricSDKWrapper.initializeClient(fabricConfig);
             Channel channel = FabricSDKWrapper.initializeChannel(client, fabricConfig.getChannelName(), fabricConfig);
@@ -38,7 +38,7 @@ public class FabricDeployContractUtil {
                     log.debug("Install Topic SUCC Txid={}, peer={}", response.getTransactionID(), response.getPeer().getUrl());
                 } else {
                     log.error("Install Topic FAIL Txid={}, peer={}", response.getMessage(), response.getTransactionID(), response.getPeer().getUrl());
-                    return;
+                    systemExit(1);
                 }
             }
             //instant Topic chaincode
@@ -48,7 +48,7 @@ public class FabricDeployContractUtil {
                 log.debug("Instantiate Topic SUCC transactionEvent={}", transactionEvent);
             } else {
                 log.error("Instantiate Topic FAIL transactionEvent={}", transactionEvent);
-                return;
+                systemExit(1);
             }
 
             //get TopicController chaincodeID
@@ -60,7 +60,7 @@ public class FabricDeployContractUtil {
                     log.debug("Install TopicController SUCC Txid={}, peer={}", response.getTransactionID(), response.getPeer().getUrl());
                 } else {
                     log.error("Install TopicController FAIL errorMsg={} Txid={}, peer={}", response.getMessage(), response.getTransactionID(), response.getPeer().getUrl());
-                    return;
+                    systemExit(1);
                 }
             }
 
@@ -71,12 +71,18 @@ public class FabricDeployContractUtil {
                 log.debug("Instantiate TopicController SUCC transactionEvent={}", transactionEvent);
             } else {
                 log.error("Instantiate TopicController FAIL transactionEvent={}", transactionEvent);
-                return;
+                systemExit(1);
             }
             log.info("Shutdown channel.");
             channel.shutdown(true);
         } catch (Exception e) {
             log.error("exception", e);
+            systemExit(1);
         }
+    }
+
+    private static void systemExit(int code) {
+        System.out.flush();
+        System.exit(code);
     }
 }

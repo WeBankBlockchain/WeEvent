@@ -32,6 +32,7 @@ public class FabricUpdateContractUtil {
                     log.debug("add TopicContract success");
                 } else {
                     log.error("add TopicContrct error");
+                    systemExit(1);
                 }
                 break;
             case "update":
@@ -42,8 +43,14 @@ public class FabricUpdateContractUtil {
                     log.debug("update TopicContract success");
                 } else {
                     log.error("update TopicContrct error");
+                    systemExit(1);
                 }
                 break;
         }
+    }
+
+    private static void systemExit(int code) {
+        System.out.flush();
+        System.exit(code);
     }
 }

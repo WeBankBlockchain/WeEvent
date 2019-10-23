@@ -18,7 +18,6 @@ public class WeEvent implements Serializable {
     private static final long serialVersionUID = 2026046567802960173L;
 
     public static final String DEFAULT_GROUP_ID = "1";
-    public static final String DEFAULT_CHANNEL_NAME = "mychannel";
 
     public static final int DEFAULT_CHAINCODE_PARAM_COUNT = 4;
 
