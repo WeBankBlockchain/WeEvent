@@ -169,32 +169,6 @@ public class CommonUtil {
         return sql;
     }
 
-
-    public static String byte2hex(byte[] buffer) {
-        String h = "0x";
-
-        for (byte aBuffer : buffer) {
-            String temp = Integer.toHexString(aBuffer & 0xFF);
-            if (temp.length() == 1) {
-                temp = "0" + temp;
-            }
-            h = h + " " + temp;
-        }
-
-        return h;
-
-    }
-
-
-    public static String recurseKeys(JSONObject jObj, String findKey) {
-        String finalValue = "";
-        if (jObj == null) {
-            return "";
-        }
-        finalValue = jObj.get(findKey).toString();
-        // key is not found
-        return finalValue;
-    }
 }
 
 

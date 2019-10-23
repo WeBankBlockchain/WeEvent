@@ -1,8 +1,8 @@
 package com.webank.weevent.processor.utils;
 
-/**
- * REST服务端的返回类
- */
+import lombok.Data;
+
+@Data
 public class RetCode {
     private int errorCode;
     private String errorMsg;
@@ -20,21 +20,21 @@ public class RetCode {
         return new RetCode(errorCode, null);
     }
 
-    public Integer getErrorCode() {
-        return errorCode;
-    }
-
-    public String getErrorMsg() {
-        return errorMsg;
-    }
-
-    public void setErrorCode(int errorCode) {
-        this.errorCode = errorCode;
-    }
-
-    public void setErrorMsg(String errorMsg) {
-        this.errorMsg = errorMsg;
-    }
+//    public Integer getErrorCode() {
+//        return errorCode;
+//    }
+//
+//    public String getErrorMsg() {
+//        return errorMsg;
+//    }
+//
+//    public void setErrorCode(int errorCode) {
+//        this.errorCode = errorCode;
+//    }
+//
+//    public void setErrorMsg(String errorMsg) {
+//        this.errorMsg = errorMsg;
+//    }
 
     @Override
     public String toString() {

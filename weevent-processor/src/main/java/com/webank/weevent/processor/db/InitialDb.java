@@ -78,7 +78,7 @@ public class InitialDb {
     }
 
     private static List<String> readCEPSql() throws IOException {
-        InputStream resourceAsStream = InitialDb.class.getResourceAsStream("/db/cep_rule.sql");
+        InputStream resourceAsStream = InitialDb.class.getResourceAsStream("/dist/cep_rule.sql");
         StringBuffer sqlBuffer = new StringBuffer();
         List<String> sqlList = new ArrayList<>();
         byte[] buff = new byte[1024];

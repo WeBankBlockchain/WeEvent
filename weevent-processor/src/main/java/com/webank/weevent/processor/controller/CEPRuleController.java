@@ -34,7 +34,7 @@ public class CEPRuleController {
     public BaseRspEntity updateCEPRuleById(@Valid @RequestBody CEPRule rule) {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = createJob(rule, "updateCEPRuleById");
-        if (!ret.getErrorCode().equals(1)) { //fail
+        if (!(ret.getErrorCode() == 1)) { //fail
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
             resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());
         }
@@ -48,7 +48,7 @@ public class CEPRuleController {
         // insert status must be 0
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = createJob(rule, "insert");
-        if (!ret.getErrorCode().equals(1)) { //fail
+        if (!(ret.getErrorCode() == 1)) { //fail
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
             resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());
         } else {
@@ -59,14 +59,14 @@ public class CEPRuleController {
     }
 
 
-    @RequestMapping(value = "/deleteCEPRuleById", method = RequestMethod.POST)
+    @RequestMapping(value = "/deleteCEPRuleById", method = RequestMethod.GET)
     @ResponseBody
     public BaseRspEntity deleteCEPRuleById(@RequestParam(name = "id") String id) {
 
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = deleteJob(id);
 
-        if (!ret.getErrorCode().equals(1)) { //fail
+        if (!(ret.getErrorCode() == 1)) { //fail
             resEntity.setErrorCode(ret.getErrorCode());
             resEntity.setErrorMsg(ret.getErrorMsg());
         }
@@ -75,13 +75,14 @@ public class CEPRuleController {
         return resEntity;
     }
 
+
     @RequestMapping(value = "/startCEPRule", method = RequestMethod.POST)
     @ResponseBody
     public BaseRspEntity startCEPRule(@Valid @RequestBody CEPRule rule) {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = createJob(rule, "startCEPRule");
 
-        if (!ret.getErrorCode().equals(1)) { //fail
+        if (!(ret.getErrorCode() == 1)) { //fail
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
             resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());
         }
