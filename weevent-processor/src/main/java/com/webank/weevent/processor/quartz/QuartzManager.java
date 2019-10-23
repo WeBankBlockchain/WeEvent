@@ -2,6 +2,7 @@ package com.webank.weevent.processor.quartz;
 
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
+@Slf4j
 @Service
 public class QuartzManager {
 
@@ -96,7 +98,7 @@ public class QuartzManager {
                 scheduler.start();
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("e:{}", e.toString());
         }
     }
 
@@ -180,7 +182,8 @@ public class QuartzManager {
         try {
             return scheduler.getTriggerState(TriggerKey.triggerKey(triggerName, triggerGroupName)) == Trigger.TriggerState.NONE;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("Exception:{}:", e.toString());
+            return false;
         }
     }
 
