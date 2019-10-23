@@ -1,7 +1,6 @@
 package com.webank.weevent.processor;
 
 import com.webank.weevent.processor.model.CEPRule;
-import com.webank.weevent.processor.service.CEPRuleServiceImpl;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
