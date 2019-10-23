@@ -133,10 +133,10 @@ public class RuleEngineService {
 
             //check rule
             this.checkRule(ruleEngineEntity);
-            //insert processor
-            this.addProcessRule(request, ruleEngineEntity);
             //insert ruleEngine
             ruleEngineMapper.addRuleEngine(ruleEngineEntity);
+            //insert processor
+            this.addProcessRule(request, ruleEngineEntity);
             return ruleEngineEntity;
         } catch (Exception e) {
             log.error("add ruleEngineEntity fail", e);
@@ -173,8 +173,6 @@ public class RuleEngineService {
                 String msg = jsonObject.get("errorMsg").toString();
                 throw new GovernanceException(msg);
             }
-            String cepId = jsonObject.get("data").toString();
-            ruleEngineEntity.setCepId(cepId);
         } catch (Exception e) {
             log.error("processor add ruleEngine fail! {}", e.getMessage());
             throw new GovernanceException("processor add ruleEngine fail ", e);
@@ -216,7 +214,7 @@ public class RuleEngineService {
             BrokerEntity broker = brokerService.getBroker(engineEntity.getBrokerId());
             String brokerUrl = broker.getBrokerUrl();
             String deleteUrl = new StringBuffer(this.getProcessorUrl(brokerUrl)).append(ConstantProperties.PROCESSOR_DELETE_CEP_RULE).append(ConstantProperties.QUESTION_MARK)
-                    .append("id=").append(engineEntity.getCepId()).toString();
+                    .append("id=").append(engineEntity.getId()).toString();
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, deleteUrl);
 
             //deal processor result
@@ -304,7 +302,6 @@ public class RuleEngineService {
     @SuppressWarnings("unchecked")
     private void updateProcessRule(HttpServletRequest request, RuleEngineEntity ruleEngineEntity, RuleEngineEntity oldRule) throws GovernanceException {
         try {
-            String cepId = oldRule.getCepId();
             BrokerEntity broker = brokerMapper.getBroker(oldRule.getBrokerId());
             String brokerUrl = new StringBuffer(broker.getBrokerUrl()).append(ConstantProperties.AND_SYMBOL)
                     .append("groupId=").append(ruleEngineEntity.getGroupId()).toString();
@@ -312,7 +309,6 @@ public class RuleEngineService {
             String url = new StringBuffer(this.getProcessorUrl(broker.getBrokerUrl())).append(ConstantProperties.PROCESSOR_UPDATE_CEP_RULE).toString();
             String jsonString = JSONObject.toJSONString(ruleEngineEntity);
             Map map = JSONObject.parseObject(jsonString, Map.class);
-            map.put("id", cepId);
             map.put("updatedTime", ruleEngineEntity.getLastUpdate());
             map.put("createdTime", oldRule.getCreateDate());
 
@@ -416,7 +412,6 @@ public class RuleEngineService {
         try {
             String jsonString = JSONObject.toJSONString(rule);
             Map map = JSONObject.parseObject(jsonString, Map.class);
-            map.put("id", rule.getCepId());
             map.put("updatedTime", rule.getLastUpdate());
             map.put("createdTime", rule.getCreateDate());
             String url = new StringBuffer(this.getProcessorUrl(rule.getBrokerUrl())).append(ConstantProperties.PROCESSOR_START_CEP_RULE).toString();
@@ -620,20 +615,5 @@ public class RuleEngineService {
         }
         return ruleEngineConditionEntities;
     }
-
- /*   public static void main(String[] args) {
-        RuleEngineConditionEntity entity = new RuleEngineConditionEntity();
-        entity.setSqlCondition("10");
-        entity.setConditionalOperator(">");
-        entity.setConnectionOperator("and");
-        entity.setColumnName("abc");
-        RuleEngineService ruleEngineService = new RuleEngineService();
-        String sqlJson = ruleEngineService.getSqlJson(entity);
-        entity.setSqlConditionJson(sqlJson);
-        List<RuleEngineConditionEntity> list = new ArrayList<>();
-        list.add(entity);
-        String conditionField = ruleEngineService.getConditionField(list);
-        System.out.printf(sqlJson);
-    }*/
 
 }
