@@ -17,8 +17,8 @@ done
 echo "param out_path: ${out_path}"
 echo "param listen_port: ${listen_port}"
 echo "param version: ${version}"
-echo "param block_chain_node_path: $block_chain_node_path"
-echo "param channel_info: $channel_info"
+echo "param block_chain_node_path: ${block_chain_node_path}"
+echo "param channel_info: ${channel_info}"
 
 #copy file
 function copy_file(){
@@ -64,6 +64,7 @@ else
     echo "deploy topic control contract failed"
     exit 1
 fi
+
 cd ${current_path}
 
 if [[ ${listen_port} -gt 0 ]]; then
