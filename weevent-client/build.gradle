@@ -10,6 +10,7 @@ dependencies {
 
     // stomp
     implementation("org.java-websocket:Java-WebSocket:1.4.0")
+    implementation("org.springframework.data:spring-data-commons:2.2.0.RELEASE")
     implementation("org.springframework:spring-messaging:5.1.6.RELEASE")
 }
 
