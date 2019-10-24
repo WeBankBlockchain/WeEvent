@@ -60,7 +60,7 @@ public class CEPRuleController {
     }
 
 
-    @RequestMapping(value = "/deleteCEPRuleById", method = RequestMethod.GET)
+    @RequestMapping(value = "/deleteCEPRuleById", method = RequestMethod.POST)
     @ResponseBody
     public BaseRspEntity deleteCEPRuleById(@RequestParam(name = "id") String id) {
 
@@ -90,7 +90,6 @@ public class CEPRuleController {
         log.info("cepRule:{}", JSONArray.toJSON(ret));
         return resEntity;
     }
-
 
 
     private RetCode createJob(CEPRule rule, String type) {

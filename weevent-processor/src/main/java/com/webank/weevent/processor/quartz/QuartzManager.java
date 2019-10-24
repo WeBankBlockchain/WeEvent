@@ -1,8 +1,14 @@
 package com.webank.weevent.processor.quartz;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 
+import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.RetCode;
 
@@ -17,6 +23,7 @@ import org.quartz.Scheduler;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
+import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.stereotype.Service;
 
 import static org.quartz.TriggerBuilder.newTrigger;
@@ -44,22 +51,25 @@ public class QuartzManager {
     public RetCode addModifyJob(String jobName, String jobGroupName, String triggerName, String triggerGroupName, Class jobClass, JobDataMap params) {
         try {
             // get the whole rules
-//            Iterator<JobKey> it = scheduler.getJobKeys(GroupMatcher.anyGroup()).iterator();
-//            List<CEPRule> ruleList = new ArrayList<>();
-//            Map<String, CEPRule> ruleMap = new HashMap<>();
-//
-//            while (it.hasNext()) {
-//                JobKey jobKey = (JobKey) it.next();
-//                CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
-//                ruleList.add(rule);
-//                ruleMap.put(rule.getId(), rule);
-//                log.info("{}", jobKey);
-//            }
-//            // add current rule
-//            CEPRule currentRule = (CEPRule) params.get("rule");
-//            ruleMap.put(currentRule.getId(), currentRule);
-//            ruleList.add(currentRule);
-//            params.put("ruleMap", ruleMap);
+            Iterator<JobKey> it = scheduler.getJobKeys(GroupMatcher.anyGroup()).iterator();
+            List<CEPRule> ruleList = new ArrayList<>();
+            Map<String, CEPRule> ruleMap = new HashMap<>();
+
+            while (it.hasNext()) {
+                JobKey jobKey = (JobKey) it.next();
+                if (null != (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
+                    CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
+                    ruleList.add(rule);
+                    ruleMap.put(rule.getId(), rule);
+                    log.info("{}", jobKey);
+                }
+
+            }
+            // add current rule
+            CEPRule currentRule = (CEPRule) params.get("rule");
+            ruleMap.put(currentRule.getId(), currentRule);
+            ruleList.add(currentRule);
+            params.put("ruleMap", ruleMap);
 
             JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).build();
 
@@ -67,7 +77,7 @@ public class QuartzManager {
             TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger();
             triggerBuilder.withIdentity(new Date().toString(), triggerGroupName);
             triggerBuilder.startNow();
-            triggerBuilder.withSchedule(CronScheduleBuilder.cronSchedule("0 0/2 8-24 * * ?"));
+            triggerBuilder.withSchedule(CronScheduleBuilder.cronSchedule("0 0/2 8-23 * * ?"));
             CronTrigger trigger = (CronTrigger) triggerBuilder.build();
 
 
@@ -75,7 +85,7 @@ public class QuartzManager {
             if (!scheduler.isShutdown()) {
                 scheduler.start();
             }
-            if(scheduler.checkExists(JobKey.jobKey(jobName, jobGroupName))){
+            if (scheduler.checkExists(JobKey.jobKey(jobName, jobGroupName))) {
                 return ConstantsHelper.SUCCESS;
             }
 
