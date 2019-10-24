@@ -108,6 +108,12 @@ public class ParamCheckUtils {
         }
     }
 
+    public static void validateChannelName(String channelName, List<String> channelNames) throws BrokerException {
+        if (!channelNames.contains(channelName)) {
+            throw new BrokerException(ErrorCode.FABRICSDK_CHANNEL_NAME_INVALID);
+        }
+    }
+
     public static void validateEventContent(String eventContent) throws BrokerException {
         if (StringUtils.isBlank(eventContent)) {
             throw new BrokerException(ErrorCode.EVENT_CONTENT_IS_BLANK);
