@@ -1,36 +1,21 @@
 #!/bin/bash
+current_path=$(pwd)
 
-function yellow_echo () {
-    local what=$*
-    if true;then
-        echo -e "\e[1;33m${what} \e[0m"
-    fi
-}
-
-# check broker
-function check_broker(){
-    echo "check broker service"
-
-    existTopic=$(curl -s "http://127.0.0.1:8080/weevent/rest/exist?topic=hello")
-    if [[ "${existTopic}" == "true" || "${existTopic}" == "false" ]];then
-        yellow_echo "broker service is ok"
-    else
-        yellow_echo "broker service is error"
-    fi 
-    
-}
-
-function check_governance(){
-    echo "check governance service"
-    curl -s "http://127.0.0.1:8080/weevent-governance/topic/getTopics?pageIndex=0&pageSize=10" | grep 302000 >>/dev/null
-    if [[ $? -eq 0 ]];then
-        yellow_echo "governance service is ok"
-    else
-        yellow_echo "governance service is error"
-    fi
- }
+# check processor
 function check_processor(){
-    echo "check processor service"
+    echo "check processor service "
+
+    if [[ ! -e ${current_path}/conf/application-prod.properties ]];then
+        echo "${current_path}/conf/application-prod.properties not exist"
+        exit 1
+    fi
+
+    port=$(grep "port" ${current_path}/conf/application-prod.properties| head -1 | awk -F':' '{print $NF}' | sed s/[[:space:]]//g)
+    if [[ $? -ne 0 ]];then
+        echo "get processor port fail"
+        exit 1
+    fi
+
     curl -s "http://127.0.0.1:8080/weevent/processor/getCEPRuleListByPage?currPage=1&pageSize=10" | grep 302000 >>/dev/null
     if [[ $? -eq 0 ]];then
         yellow_echo "processor service is ok"
@@ -39,13 +24,5 @@ function check_processor(){
     fi
  }
 
-
-check_broker
-if [[ -d "governance" ]]; then
-    check_governance
-fi
-
-if [[ -d "processor" ]]; then
-    check_processor
-fi
+check_processor
 

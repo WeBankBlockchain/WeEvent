@@ -48,6 +48,12 @@ function nginx_setup() {
         echo "set governance_url: $governance_url"
         sed -i "s/localhost:7009/$governance_url/g" ${nginx_path}/conf/conf.d/http_rs_quickinstall.conf
     fi
+
+        if  [[ -n ${processor_port} ]]; then
+        processor_url="localhost:${processor_port}"
+        echo "set processor_url: $processor_url"
+        sed -i "s/localhost:7008/$processor_url/g" ${nginx_path}/conf/conf.d/http_rs_quickinstall.conf
+    fi
     
     cp nginx.sh ${nginx_path}
 
@@ -58,7 +64,7 @@ function nginx_setup() {
 if [[ $# -lt 2 ]]; then
     echo "Usage:"
     echo "    $0 --nginx_path /data/app/weevent/nginx "
-    echo "    --broker_port --governance_port"
+    echo "    --broker_port --governance_port --processor_port"
     exit 1
 fi
 
@@ -68,6 +74,7 @@ nginx_port=
 ssl=
 broker_port=
 governance_port=
+processor_port=
 current_path=$(pwd)
 top_path=$(dirname $(dirname $(pwd)))
 
@@ -81,6 +88,8 @@ while [[ $# -ge 2 ]]; do
         --broker_port) param="$1 = $2;"; broker_port="$2"; shift 2;;
         --governance_ip) param="$1 = $2;"; governance_ip="$2"; shift 2;;
         --governance_port) param="$1 = $2;"; governance_port="$2"; shift 2;;
+        --processor_ip) param="$1 = $2;"; processor_ip="$2"; shift 2;;
+        --processor_port) param="$1 = $2;"; processor_port="$2"; shift 2;;
         *) echo "unknown parameter $1."; exit 1; break;;
         esac
 done
