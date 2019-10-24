@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 
+import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.RetCode;
@@ -77,7 +78,7 @@ public class QuartzManager {
             TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger();
             triggerBuilder.withIdentity(new Date().toString(), triggerGroupName);
             triggerBuilder.startNow();
-            triggerBuilder.withSchedule(CronScheduleBuilder.cronSchedule("0 0/2 8-23 * * ?"));
+            triggerBuilder.withSchedule(CronScheduleBuilder.cronSchedule(ProcessorApplication.processorConfig.getCronExpression()));
             CronTrigger trigger = (CronTrigger) triggerBuilder.build();
 
 
