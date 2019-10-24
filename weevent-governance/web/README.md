@@ -20,7 +20,7 @@ npm run build --report
 # run e2e tests
 npm run e2e
 
-# run all tests data
+# run all tests data data
 npm test
 ```
 
