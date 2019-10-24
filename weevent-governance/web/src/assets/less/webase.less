@@ -1,161 +1,48 @@
 @import './color';
 .overview{
-	width:100%;
-	height:100%;
 	.top_content{
-		display: flex;
-		justify-content: space-between;
-		border-radius: 5px;
 		.num_block{
-			width:20%;
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+			border-radius: 5px;
+			margin-bottom: 24px;
 			.num_part{
-				height:80px;
-				width:100%;
+				height:200px;
+				width:30%;
 				background:#fff;
 				border-radius: 5px;
+				cursor: pointer;
 				@shadow();
-				padding:0 10px;
+				padding:0 36px;
 				display: flex;
 				justify-content:space-between;
 				align-items: center;
 
-				.color_part{
-					width:40px;
-					height:40px;
-					margin-left: 10px;
-					border-radius: 20px;
-					display: flex;
-					justify-content:space-between;
-					align-items: center;
-					img{
-						margin:auto
-					}
-				}
-				.puple{
-					background:@radio_puple;
-				}
-				.blue{
-					background:@radio_blue;
-				}
-				.yellow{
-					background:@radio_yellow;
-				}
-				.right_part{
-					margin-right:20px;
-					text-align: right;
-				}
-
 				.title_name{
 					color:@black_text;
-					font-size: 24px;
+					font-size: 36px;
 				}
 
 				.number{
-					font-size: 12px;
+					font-size: 14px;
 					color:@gray_text
 				}
-				&:nth-child(2){
-					margin:24px 0;
-				}
 			}
-		}
-		.chart{
-			width:78%;
-			height:288px;
-			border-radius: 5px;
-			padding:10px 15px;
-			background:#fff;
-			@shadow();
 		}
 	}
-	.bottom_content{
-		display: flex;
-		flex-direction: row;
-		justify-content: space-between;
-		margin-top:24px;
-		.block,.transaction{
-			width:49%;
-			border-radius: 5px;
-			background:#fff;
-			@shadow();
-			.title{
-				display: flex;
-				flex-direction: row;
-				justify-content: space-between;
-				padding:0 24px;
-				height:70px;
-				line-height: 70px;
-				border-bottom:1px solid #f1f1f1;
-				span:first-child{
-					color:@black_text;
-					border-bottom:3px solid @black_text;
-					font-weight: bold;
-				}
-			}
-			.more_date a{
-				cursor: pointer;
-				color: @blue;
-				text-decoration: none;
-				font-size: 14px;
-			}
-			ul li{
-				display: flex;
-				flex-direction: row;
-				justify-content: space-between;
-				align-items: center;
-				padding:15px 24px;
-				font-size: 14px;
-				&>div{
-					p:first-child{
-						color:@blue;
-					}
-					p:last-child{
-						color:@gray_text;
-					}
-				}
-				.detial{
-					display: flex;
-					align-items: center;
-					span{
-						width:120px;
-						overflow: hidden;
-						white-space: nowrap;
-						text-overflow: ellipsis;
-						color:@gray_text;
-					}
-					i{
-						margin:0 10px;
-						color:@gray_text;
-					}
-				}
-				.time{
-					color:@gray_text;
-				}
-				.right_part{
-					p:first-child{
-						color:@black_text;
-						align-self: center;
-						width:200px;
-						overflow: hidden;
-						white-space: nowrap;
-						text-overflow: ellipsis;
-					}
-					span{
-						float:right;
-						background:@light_yellow;
-						color:@yellow;
-						font-size: 12px;
-						margin-top:5px;
-						padding:2px 5px;
-					}
-				}
-			}
-			.transaction_data_list li p{
-				width:300px;
-				overflow: hidden;
-				white-space: nowrap;
-				text-overflow: ellipsis;
-			}
+
+	.chart{
+		border-radius: 5px;
+		padding:30px 30px 70px;
+		background:#fff;
+		@shadow();
+		.highcharts-title{
+			font-size: 18px !important;
+			color:@black_text !important;
+			font-weight: bold !important;
+			font-family: 'syyh';
+			margin-bottom:40px;
 		}
 	}
 }
@@ -198,7 +85,7 @@
 		white-space: nowrap
 	}
 
-	.trans_detial li{
+	.trans_detail li{
 		display: flex;
 		padding:5px 0;
 		span:nth-child(1){
@@ -212,7 +99,7 @@
 		span:last-child{
 			color:@gray_text;
 		}
-		.funciton_detial{
+		.funciton_detail{
 			border:1px solid #EBEEF5;
 			border-radius: 5px;
 			width: calc(100% - 200px);

@@ -6,10 +6,11 @@ export default new vuex.Store({
   state: {
     userName: '',
     goLogin: false,
-    active: '0',
-    menu: '首页',
+    active: '',
+    menu: '',
     brokerId: '',
-    groupId: ''
+    groupId: '',
+    isConfigRule: ''
   },
   mutations: {
     set_name (state, note) {
@@ -29,6 +30,9 @@ export default new vuex.Store({
     },
     set_groupId (state, id) {
       state.groupId = id
+    },
+    setConfigRule (state, config) {
+      state.isConfigRule = config
     }
   }
 })

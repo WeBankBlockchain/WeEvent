@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -16,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.exception.GovernanceException;
+import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.utils.SpringContextUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -30,18 +33,22 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.jsoup.helper.StringUtil;
 import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
 public class CommonService implements AutoCloseable {
 
-    private static final String HTTPS = "https";
-    private static final String HTTPS_CLIENT = "httpsClient";
-    private static final String HTTP_CLIENT = "httpClient";
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String METHOD_TYPE = "GET";
-    private static final String FORMAT_TYPE = "json";
+    public static final String HTTPS = "https";
+    public static final String HTTP = "http";
+    public static final String HTTPS_CLIENT = "httpsClient";
+    public static final String HTTP_CLIENT = "httpClient";
+    public static final String CONTENT_TYPE = "Content-Type";
+    public static final String METHOD_TYPE = "GET";
+    public static final String FORMAT_TYPE = "json";
+
+
 
 
     public CloseableHttpResponse getCloseResponse(HttpServletRequest req, String newUrl) throws ServletException {
@@ -53,6 +60,24 @@ public class CommonService implements AutoCloseable {
                 closeResponse = client.execute(get);
             } else {
                 HttpPost postMethod = this.postMethod(newUrl, req);
+                closeResponse = client.execute(postMethod);
+            }
+        } catch (Exception e) {
+            log.error("getCloseResponse fail,error:{}", e.getMessage());
+            throw new ServletException(e.getMessage());
+        }
+        return closeResponse;
+    }
+
+    public CloseableHttpResponse getCloseResponse(HttpServletRequest req, String newUrl, String jsonString) throws ServletException {
+        CloseableHttpResponse closeResponse;
+        try {
+            CloseableHttpClient client = this.generateHttpClient(newUrl);
+            if (req.getMethod().equals(METHOD_TYPE)) {
+                HttpGet get = this.getMethod(newUrl, req);
+                closeResponse = client.execute(get);
+            } else {
+                HttpPost postMethod = this.postMethod(newUrl, req, jsonString);
                 closeResponse = client.execute(postMethod);
             }
         } catch (Exception e) {
@@ -76,6 +101,15 @@ public class CommonService implements AutoCloseable {
             throw new GovernanceException(ErrorCode.BUILD_URL_METHOD);
         }
     }
+
+    private HttpPost postMethod(String uri, HttpServletRequest request, String jsonString) {
+        StringEntity entity = new StringEntity(jsonString, "UTF-8");
+        HttpPost httpPost = new HttpPost(uri);
+        httpPost.setHeader(CONTENT_TYPE, request.getHeader(CONTENT_TYPE));
+        httpPost.setEntity(entity);
+        return httpPost;
+    }
+
 
     private HttpPost postMethod(String uri, HttpServletRequest request) {
         StringEntity entity;
@@ -145,6 +179,29 @@ public class CommonService implements AutoCloseable {
         ServletOutputStream out = res.getOutputStream();
         out.write(mes.getBytes());
     }
+
+
+    public void checkDataBaseUrl(String dataBaseUrl) throws GovernanceException {
+        if (StringUtil.isBlank(dataBaseUrl)) {
+            return;
+        }
+        String defaultUrl = dataBaseUrl.substring(0, dataBaseUrl.indexOf(ConstantProperties.QUESTION_MARK));
+        String user = dataBaseUrl.substring(dataBaseUrl.indexOf(ConstantProperties.QUESTION_MARK) + 1, dataBaseUrl.indexOf(ConstantProperties.AND_SYMBOL));
+        user = user.split(ConstantProperties.EQUAL_SIGN)[1].replaceAll("\"", "");
+        int first = dataBaseUrl.indexOf(ConstantProperties.AND_SYMBOL);
+        int second = dataBaseUrl.indexOf(ConstantProperties.AND_SYMBOL, first + 1);
+        String password = dataBaseUrl.substring(first, second);
+        password = password.split(ConstantProperties.EQUAL_SIGN)[1].replaceAll("\"", "");
+        try (Connection conn = DriverManager.getConnection(defaultUrl, user, password)) {
+            if (conn != null) {
+                log.info("database connect success,dataBaseUrl:{}", dataBaseUrl);
+            }
+        } catch (Exception e) {
+            log.error("database url is error", e);
+            throw new GovernanceException("database url is error", e);
+        }
+    }
+
 
     @Override
     public void close() throws Exception {

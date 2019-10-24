@@ -84,5 +84,53 @@
   "permissionList": {
     "method": "post",
     "url": "weevent-governance/permission/permissionList"
+  },
+  "ruleList": {
+    "method": "post",
+    "url": "weevent-governance/ruleEngine/list"
+  },
+  "ruleAdd": {
+    "method": "post",
+    "url": "weevent-governance/ruleEngine/add"
+  },
+  "ruleUpdate": {
+    "method": "post",
+    "url": "weevent-governance/ruleEngine/update"
+  },
+  "ruleStart": {
+    "method": "post",
+    "url": "weevent-governance/ruleEngine/start"
+  },
+  "ruleDelete": {
+    "method": "post",
+    "url": "weevent-governance/ruleEngine/delete"
+  },
+  "ruleStop": {
+    "method": "post",
+    "url": "weevent-governance/ruleEngine/updateStatus"
+  },
+  "ruleDetail": {
+    "method": "post",
+    "url": "weevent-governance/ruleEngine/detail"
+  },
+  "dbList": {
+    "method": "post",
+    "url": "weevent-governance/circulationDatabase/list"
+  },
+  "dbAdd": {
+    "method": "post",
+    "url": "weevent-governance/circulationDatabase/add"
+  },
+  "dbDelete": {
+    "method": "post",
+    "url": "weevent-governance/circulationDatabase/delete"
+  },
+  "dbUpdate": {
+    "method": "post",
+    "url": "weevent-governance/circulationDatabase/update"
+  },
+  "historicalData": {
+    "method": "post",
+    "url": "weevent-governance/historicalData/list"
   }
 }
