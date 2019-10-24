@@ -7,15 +7,12 @@
         <result column="create_date" property="createDate" jdbcType="TIMESTAMP"/>
         <result column="last_update" property="lastUpdate" jdbcType="TIMESTAMP"/>
         <result column="rule_id" property="ruleId" jdbcType="INTEGER"/>
-        <result column="connection_operator" property="connectionOperator" jdbcType="VARCHAR"/>
-        <result column="conditional_operator" property="conditionalOperator" jdbcType="VARCHAR"/>
-        <result column="column_name" property="columnName" jdbcType="VARCHAR"/>
-        <result column="sql_condition" property="sqlCondition" jdbcType="VARCHAR"/>
+        <result column="sql_condition_json" property="sqlConditionJson" jdbcType="VARCHAR"/>
     </resultMap>
 
 
     <sql id="Base_Column_List">
-        id,create_date,last_update,rule_id,connection_operator,conditional_operator,column_name,sql_condition
+        id,create_date,last_update,rule_id,sql_condition_json
     </sql>
     <select id="ruleEngineConditionList" resultMap="BaseResultMap"
             parameterType="com.webank.weevent.governance.entity.RuleEngineConditionEntity">
@@ -32,22 +29,18 @@
 
     </select>
     <insert id="batchInsert" parameterType="com.webank.weevent.governance.entity.RuleEngineConditionEntity">
-        insert into t_rule_engine_condition(rule_id, connection_operator, conditional_operator, column_name,
-        sql_condition)
+        insert into t_rule_engine_condition(rule_id, sql_condition_json)
         VALUES
         <foreach collection="ruleEngineConditionList" item="ruleEngineCondition" separator=",">
-            (#{ruleEngineCondition.ruleId}, #{ruleEngineCondition.connectionOperator},
-            #{ruleEngineCondition.conditionalOperator},
-            #{ruleEngineCondition.columnName}, #{ruleEngineCondition.sqlCondition})
+            (#{ruleEngineCondition.ruleId}, #{ruleEngineCondition.sqlConditionJson})
         </foreach>
     </insert>
 
 
     <insert id="addRuleEngineCondition" parameterType="com.webank.weevent.governance.entity.RuleEngineConditionEntity"
             useGeneratedKeys="true" keyProperty="id">
-        insert into t_rule_engine_condition(rule_id, connection_operator, conditional_operator, column_name,
-                                            sql_condition)
-        values (#{ruleId}, #{connectionOperator}, #{conditionalOperator}, #{columnName}, #{sqlCondition})
+        insert into t_rule_engine_condition(rule_id, sql_condition_json)
+        values (#{ruleId}, #{sqlConditionJson})
     </insert>
 
     <delete id="deleteRuleEngineCondition"

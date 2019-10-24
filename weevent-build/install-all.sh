@@ -187,7 +187,7 @@ function config_java_home(){
     if [[ -e ${current_path}/modules/processor/processor.sh ]];then
         sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/processor/processor.sh
     fi
-    if [[ -e ${current_path}/modules/governance/init-processor.sh ]];then
+    if [[ -e ${current_path}/modules/processor/init-processor.sh ]];then
         sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/processor/init-processor.sh
     fi
 }
