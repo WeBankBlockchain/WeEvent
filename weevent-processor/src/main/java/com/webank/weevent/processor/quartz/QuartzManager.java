@@ -75,7 +75,7 @@ public class QuartzManager {
             JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).build();
 
             // just do one time
-            TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger();
+            TriggerBuilder<Trigger> triggerBuilder = newTrigger();
             triggerBuilder.withIdentity(new Date().toString(), triggerGroupName);
             triggerBuilder.startNow();
             triggerBuilder.withSchedule(CronScheduleBuilder.cronSchedule(ProcessorApplication.processorConfig.getCronExpression()));
