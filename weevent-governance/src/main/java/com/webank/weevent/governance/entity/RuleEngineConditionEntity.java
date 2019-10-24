@@ -13,4 +13,12 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 public class RuleEngineConditionEntity extends RuleEngineConditionBase {
 
+    private String connectionOperator;
+
+    private String conditionalOperator;
+
+    private String columnName;
+
+    private String sqlCondition;
+
 }
