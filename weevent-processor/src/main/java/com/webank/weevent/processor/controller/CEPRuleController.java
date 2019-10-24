@@ -91,7 +91,6 @@ public class CEPRuleController {
         return resEntity;
     }
 
-
     private RetCode createJob(CEPRule rule, String type) {
 
         JobDataMap jobmap = new JobDataMap();

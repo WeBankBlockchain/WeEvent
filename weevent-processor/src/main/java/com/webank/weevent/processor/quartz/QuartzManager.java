@@ -81,7 +81,6 @@ public class QuartzManager {
             triggerBuilder.withSchedule(CronScheduleBuilder.cronSchedule(ProcessorApplication.processorConfig.getCronExpression()));
             CronTrigger trigger = (CronTrigger) triggerBuilder.build();
 
-
             scheduler.scheduleJob(job, trigger);
             if (!scheduler.isShutdown()) {
                 scheduler.start();
