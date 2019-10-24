@@ -11,7 +11,7 @@
 [![Documentation Status](https://readthedocs.org/projects/weeventdoc/badge/?version=latest)](https://weeventdoc.readthedocs.io/zh_CN/latest)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-## What's WeEvent？
+## What's WeEvent?
 
 WeEvent is a distributed event-driven architecture that implements trustworthy, reliable and efficient cross-institutional and cross-platform event notification mechanism.
 
@@ -39,13 +39,13 @@ For more examples, see the [WeEvent tutorials](https://weeventdoc.readthedocs.io
 ## User’s Guide
 [WeEvent online documents](https://weeventdoc.readthedocs.io/latest).
 
-## Contribution
-*   Develop environment
+## Contributions
+*   Develop environment  
 git, gradle 4.10, java 1.8, nodejs 10.16, prefer IntelliJ IDEA.
 *   [WeEvent roadmap](https://github.com/WeBankFinTech/WeEvent/wiki/Project-RoadMap)
 *   [Git workflow](https://github.com/WeBankFinTech/WeEvent/wiki/Project-WorkFlow)
 
-WeEvent love contributor！Please read the [CONTRIBUTING.md](https://github.com/WeBankFinTech/WeEvent/blob/master/CONTRIBUTING.md), and then submit a pull request.
+WeEvent love contributor！Please read the [CONTRIBUTING.md](https://github.com/WeBankFinTech/WeEvent/blob/master/CONTRIBUTING.md) first, and then submit a pull request.
 
 Thank you!
 
