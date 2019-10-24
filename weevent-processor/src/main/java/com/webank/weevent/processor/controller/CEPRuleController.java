@@ -60,7 +60,7 @@ public class CEPRuleController {
     }
 
 
-    @RequestMapping(value = "/deleteCEPRuleById", method = RequestMethod.GET)
+    @RequestMapping(value = "/deleteCEPRuleById", method = RequestMethod.POST)
     @ResponseBody
     public BaseRspEntity deleteCEPRuleById(@RequestParam(name = "id") String id) {
 
