@@ -184,29 +184,45 @@ public class Web3SDK2Wrapper {
      * @param crud table service
      * @return opened or exist table
      */
-    public static Table ensureTable(CRUDService crud) throws BrokerException {
+    private static Table ensureTable(CRUDService crud) throws BrokerException {
         try {
-            return crud.desc(WeEventTable);
+            Table table = crud.desc(WeEventTable);
+            if (WeEventTableKey.equals(table.getKey())) {
+                List<String> fields = Arrays.asList(table.getValueFields().split(","));
+                if (fields.size() == 2 && fields.contains(WeEventTableValue) && fields.contains(WeEventTableVersion)) {
+                    return table;
+                }
+            }
+
+            log.error("miss fields in CRUD table, {}/{}/{}", WeEventTableKey, WeEventTableValue, WeEventTableVersion);
+            throw new BrokerException(ErrorCode.UNKNOWN_SOLIDITY_VERSION);
         } catch (PrecompileMessageException e) {
             log.info("not exist table in CRUD, create it: {}", WeEventTable);
 
-            Table table = new Table(WeEventTable, WeEventTableKey, WeEventTableValue + "," + WeEventTableVersion);
-            try {
-                int result = crud.createTable(table);
-                if (result == 0) {
-                    log.info("create table in CRUD success, {}", WeEventTable);
-                    return table;
-                }
-
-                log.error("create table in CRUD failed, " + WeEventTable);
-            } catch (Exception e1) {
-                log.error("create table in CRUD failed, " + WeEventTable, e1);
-            }
+            return createTable(crud);
+        } catch (BrokerException e) {
+            throw e;
         } catch (Exception e) {
             log.error("ensure table in CRUD failed, " + WeEventTable, e);
+            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
         }
+    }
 
-        throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+    private static Table createTable(CRUDService crud) throws BrokerException {
+        Table table = new Table(WeEventTable, WeEventTableKey, WeEventTableValue + "," + WeEventTableVersion);
+        try {
+            int result = crud.createTable(table);
+            if (result == 0) {
+                log.info("create table in CRUD success, {}", WeEventTable);
+                return table;
+            }
+
+            log.error("create table in CRUD failed, " + WeEventTable);
+            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (Exception e) {
+            log.error("create table in CRUD failed, " + WeEventTable, e);
+            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
     }
 
     /**
@@ -236,14 +252,8 @@ public class Web3SDK2Wrapper {
 
         Map<Long, String> addresses = new HashMap<>();
         for (Map<String, String> record : records) {
-            if (record.containsKey(WeEventTableValue) && record.containsKey(WeEventTableVersion)) {
-                addresses.put(Long.valueOf(record.get(WeEventTableVersion)), record.get(WeEventTableValue));
-            } else {
-                log.error("miss fields, {} OR {}", WeEventTableValue, WeEventTableVersion);
-                throw new BrokerException(ErrorCode.UNKNOWN_SOLIDITY_VERSION);
-            }
+            addresses.put(Long.valueOf(record.get(WeEventTableVersion)), record.get(WeEventTableValue));
         }
-
         return addresses;
     }
 
