@@ -178,7 +178,7 @@ public class Web3sdkUtils {
             groupAddress.add(new EchoAddress(SupportedVersion.nowVersion, topicControlAddress, true));
         }
 
-        return true;
+        return result;
     }
 
     private static boolean deployV1Contract(FiscoConfig fiscoConfig, ThreadPoolTaskExecutor taskExecutor) throws BrokerException {
