@@ -47,7 +47,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
 
     @Test
     public void testAddRuleEngine() throws Exception {
-        String content = "{\"ruleName\":\"tempera_ture-alarm\",\"payloadType\":\"1\",\"payloadMap\":{\"temperate\":30,\"humidity\":0.5}," +
+        String content = "{\"ruleName\":\"tempera_ture-alarm12\",\"payloadType\":\"1\",\"payloadMap\":{\"temperate\":30,\"humidity\":0.5}," +
                 "\"userId\":\"1\",\"brokerId\":\"1\",\"groupId\":\"1\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/add").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
                 .andReturn().getResponse();

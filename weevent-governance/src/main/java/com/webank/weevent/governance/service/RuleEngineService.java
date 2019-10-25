@@ -599,9 +599,7 @@ public class RuleEngineService {
     }
 
     private String getProcessorUrl(String brokerUrl) {
-        String ip = brokerUrl.substring(brokerUrl.indexOf("//") + 2, brokerUrl.lastIndexOf(":"));
-        return new StringBuffer(commonService.HTTP).append(":").append("//").append(ip).append(":")
-                .append(this.processorPort).append("/weevent").toString();
+        return brokerUrl.substring(0,brokerUrl.lastIndexOf("/"));
     }
 
     private List<RuleEngineConditionEntity> getRuleEngineConditionList(RuleEngineEntity rule) {
@@ -618,6 +616,10 @@ public class RuleEngineService {
             }
         }
         return ruleEngineConditionEntities;
+    }
+
+    public static void main(String[] args) throws Exception {
+        new RuleEngineService().getProcessorUrl("");
     }
 
 }
