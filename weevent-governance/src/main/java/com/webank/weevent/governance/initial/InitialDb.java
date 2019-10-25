@@ -8,7 +8,6 @@ import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
  * tool to initdb
  */
 @Slf4j
-public class InitialDb {
+public class InitialDb implements AutoCloseable {
 
     public static void main(String[] args) throws Exception {
         String goalUrl = "";
@@ -72,9 +71,11 @@ public class InitialDb {
                 stat.executeUpdate(sql);
             }
             log.info("create database {} {}", dbName, " success!");
-        } catch (SQLException e) {
+            System.exit(0);
+        } catch (Exception e) {
             log.error("create database fail,message: {}", e.getMessage());
-            throw e;
+            System.out.printf(e.getMessage());
+            throw new GovernanceException(e.getMessage());
         }
     }
 
@@ -97,5 +98,10 @@ public class InitialDb {
             resourceAsStream.close();
         }
         return sqlList;
+    }
+
+    @Override
+    public void close() throws Exception {
+        log.info("resource is close");
     }
 }

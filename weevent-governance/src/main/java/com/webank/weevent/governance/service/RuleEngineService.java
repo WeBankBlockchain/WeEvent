@@ -540,6 +540,10 @@ public class RuleEngineService {
         if (!flag) {
             throw new GovernanceException("ruleName repeat");
         }
+        if (ruleEngineEntity.getPayloadMap().size() == 0) {
+            throw new GovernanceException("rule description is empty");
+
+        }
         if (ruleEngineEntity.getPayload() != null && ruleEngineEntity.getPayload().length() > 100) {
             throw new GovernanceException("rule description length cannot exceed 100");
         }
