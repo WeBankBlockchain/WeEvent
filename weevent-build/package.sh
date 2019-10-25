@@ -196,7 +196,7 @@ function tar_weevent(){
     for commonjar in $(ls ${out_path}/modules/broker/lib/);
     do
         # copy common jar into modules lib
-        if [[ -e ${out_path}/modules/governance/lib/${commonjar} ]]; then
+        if [[ (-e ${out_path}/modules/governance/lib/${commonjar}) && (-e ${out_path}/modules/processor/lib/${commonjar}) ]]; then
             cp ${out_path}/modules/broker/lib/${commonjar} ${out_path}/modules/lib
             rm ${out_path}/modules/governance/lib/${commonjar}
             rm ${out_path}/modules/processor/lib/${commonjar}
