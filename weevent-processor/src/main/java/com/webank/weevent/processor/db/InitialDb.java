@@ -8,7 +8,6 @@ import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
  * init db tool
  */
 @Slf4j
-public class InitialDb {
+public class InitialDb implements AutoCloseable {
 
     public static void main(String[] args) throws Exception {
         String goalUrl = "";
@@ -32,7 +31,7 @@ public class InitialDb {
         String dbName;
         try {
             Properties properties = new Properties();
-            URL url = InitialDb.class.getClassLoader().getResource("application-prod.properties");
+            URL url = InitialDb.class.getClassLoader().getResource("application-dev.properties");
             if (url != null) {
                 properties.load(new FileInputStream(url.getFile()));
                 goalUrl = properties.getProperty("spring.datasource.url");
@@ -45,10 +44,10 @@ public class InitialDb {
         }
 
         // first use dbself database
-        int first = goalUrl.lastIndexOf("/")+1;
+        int first = goalUrl.lastIndexOf("/") + 1;
         dbName = goalUrl.substring(first);
         // get mysql default url like jdbc:mysql://127.0.0.1:3306
-        String defaultUrl = goalUrl.substring(0,first-1);
+        String defaultUrl = goalUrl.substring(0, first - 1);
         Class.forName(driverName);
 
         List<String> tableSqlList = readCEPSql();
@@ -71,9 +70,10 @@ public class InitialDb {
                 stat.executeUpdate(sql);
             }
             log.info("create database {} {}", dbName, " success!");
-        } catch (SQLException e) {
+            System.exit(0);
+        } catch (Exception e) {
             log.error("create database fail,message: {}", e.getMessage());
-            throw e;
+            throw new BrokerException(e.getMessage());
         }
     }
 
@@ -96,5 +96,10 @@ public class InitialDb {
             resourceAsStream.close();
         }
         return sqlList;
+    }
+
+    @Override
+    public void close() throws Exception {
+        log.info("resource is close");
     }
 }
