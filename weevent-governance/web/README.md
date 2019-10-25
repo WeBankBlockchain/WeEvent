@@ -1,7 +1,3 @@
-# weEvent
-
-> weEvent Web site
-
 ## Build Setup
 
 ``` bash
