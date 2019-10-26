@@ -70,7 +70,6 @@ public class InitialDb implements AutoCloseable {
                 stat.executeUpdate(sql);
             }
             log.info("create database {} {}", dbName, " success!");
-            System.exit(0);
         } catch (Exception e) {
             log.error("create database fail,message: {}", e.getMessage());
             throw new BrokerException(e.getMessage());
