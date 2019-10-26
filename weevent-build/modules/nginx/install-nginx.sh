@@ -74,7 +74,6 @@ nginx_port=
 ssl=
 broker_port=
 governance_port=
-processor_port=
 current_path=$(pwd)
 top_path=$(dirname $(dirname $(pwd)))
 
@@ -88,8 +87,6 @@ while [[ $# -ge 2 ]]; do
         --broker_port) param="$1 = $2;"; broker_port="$2"; shift 2;;
         --governance_ip) param="$1 = $2;"; governance_ip="$2"; shift 2;;
         --governance_port) param="$1 = $2;"; governance_port="$2"; shift 2;;
-        --processor_ip) param="$1 = $2;"; processor_ip="$2"; shift 2;;
-        --processor_port) param="$1 = $2;"; processor_port="$2"; shift 2;;
         *) echo "unknown parameter $1."; exit 1; break;;
         esac
 done
