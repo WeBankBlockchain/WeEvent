@@ -1,4 +1,4 @@
-println("current gradle version is " + gradle.gradleVersion + ", support version in [4.7, 5.0) prefer 4.10")
+println("Notice: current gradle version is " + gradle.gradleVersion + ", WeEvent support gradle version in [4.10, 5.0)")
 
 buildscript {
     repositories {
