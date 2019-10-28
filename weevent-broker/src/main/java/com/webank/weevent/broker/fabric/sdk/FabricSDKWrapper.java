@@ -28,8 +28,10 @@ import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
+import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
+import org.hyperledger.fabric.protos.peer.Query;
 import org.hyperledger.fabric.sdk.BlockEvent;
 import org.hyperledger.fabric.sdk.BlockInfo;
 import org.hyperledger.fabric.sdk.ChaincodeID;
@@ -233,7 +235,7 @@ public class FabricSDKWrapper {
     public static List<String> listChannelName(FabricConfig fabricConfig) throws BrokerException {
         try {
             HFClient hfClient = initializeClient(fabricConfig);
-            Peer peer = FabricSDKWrapper.getPeer(hfClient, fabricConfig);
+            Peer peer = getPeer(hfClient, fabricConfig);
             Set<String> channels = hfClient.queryChannels(peer);
             return new ArrayList<>(channels);
         } catch (Exception e) {
@@ -306,4 +308,14 @@ public class FabricSDKWrapper {
         }
         return blockInfo;
     }
+
+    public static List<Pair<String, String>> queryInstalledChaincodes(HFClient client, Peer peer) throws ProposalException, InvalidArgumentException {
+        List<Query.ChaincodeInfo> listChainCodeInfo = client.queryInstalledChaincodes(peer);
+        List<Pair<String, String>> chainCodeList = new ArrayList<>();
+        for (Query.ChaincodeInfo chaincodeInfo : listChainCodeInfo) {
+            chainCodeList.add(new Pair<>(chaincodeInfo.getName(), chaincodeInfo.getVersion()));
+        }
+        return chainCodeList;
+    }
+
 }
