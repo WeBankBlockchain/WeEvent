@@ -327,8 +327,8 @@ public class RuleEngineService {
                 throw new GovernanceException(msg);
             }
         } catch (Exception e) {
-            log.error("processor start ruleEngine fail");
-            throw new GovernanceException("processor start ruleEngine fail");
+            log.error("processor update ruleEngine fail");
+            throw new GovernanceException("processor update ruleEngine fail");
         }
 
     }
@@ -616,10 +616,6 @@ public class RuleEngineService {
             }
         }
         return ruleEngineConditionEntities;
-    }
-
-    public static void main(String[] args) throws Exception {
-        new RuleEngineService().getProcessorUrl("");
     }
 
 }
