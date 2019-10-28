@@ -5,26 +5,26 @@
       stripe
       v-loading='loading'
       element-loading-spinner='el-icon-loading'
-      element-loading-text='数据加载中...'
+      :element-loading-text="$t('common.loading')"
       element-loading-background='rgba(256,256,256,0.8)'
     >
       <el-table-column
         prop='blockNumber'
-        label='块高'
+        :label="$t('tableCont.blockNumber')"
         width=150
       ></el-table-column>
       <el-table-column
         prop='transCount'
-        label='交易'
+        :label="$t('tableCont.transCount')"
         width=100
       ></el-table-column>
       <el-table-column
         prop='blockTimestamp'
-        label='创建时间'
+        :label="$t('tableCont.timestamp')"
         width=230
       ></el-table-column>
       <el-table-column
-        label='区块哈希'
+        :label="$t('tableCont.pkHash')"
       >
       <template  slot-scope="scope">
         <i class='el-icon-copy-document' style='margin-right:5px;cursor:pointer' v-clipboard:copy='scope.row.pkHash' v-clipboard:success='onCopy'></i>
@@ -32,11 +32,11 @@
       </template>
       </el-table-column>
       <el-table-column
-        label='操作'
+        :label="$t('common.action')"
         width=200
       >
       <template  slot-scope="scope">
-        <span class='link_option' @click="linkToTrans(scope.row.pkHash)">查看交易详情</span>
+        <span class='link_option' @click="linkToTrans(scope.row.pkHash)">{{$t('tableCont.transDetial')}}</span>
       </template>
       </el-table-column>
     </el-table>
@@ -76,11 +76,8 @@ export default {
     onCopy () {
       this.$message({
         type: 'success',
-        message: '复制成功'
+        message: this.$t('tableCont.copySuccess')
       })
-    },
-    detail (e) {
-      this.$alert(e, '错误信息')
     },
     blockList () {
       this.loading = true
@@ -101,7 +98,7 @@ export default {
     linkToTrans (e) {
       sessionStorage.setItem('blockHash', e)
       this.$store.commit('set_active', '1-2')
-      this.$store.commit('set_menu', ['区块链信息', '区块', '交易详情'])
+      this.$store.commit('set_menu', [this.$t('sideBar.blockChainInfor'), this.$t('sideBar.transaction'), this.$t('sideBar.transactionDetial')])
       this.$router.push('./transactionInfor')
     },
     search () {
