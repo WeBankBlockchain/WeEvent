@@ -7,6 +7,10 @@ import(
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
 
+type TopicController struct {
+    fmt.Println("<< ====[TopicController] declare struct ====== >>")
+}
+
 type TopicInfo struct {
 	CreatedTimestamp string `json:"createdTimestamp"`
 	Version  string `json:"version"`
@@ -26,7 +30,7 @@ var topicIndex = make([]string,0)
 const TOPIC_ALREADY_EXIST string = "100100"
 
 func (t *TopicController) Init(stub shim.ChaincodeStubInterface) pb.Response{
-    fmt.Println(" << ====[TopicController Init] success init it is view in docker ====== >>")
+    fmt.Println("<< ====[TopicController Init] success init it is view in docker ====== >>")
     return shim.Success([]byte("success init"))
 }
 
@@ -78,7 +82,7 @@ func (t *TopicController) getTopicContractVersion(stub shim.ChaincodeStubInterfa
 }
 
 func (t *TopicController) addTopicInfo(stub shim.ChaincodeStubInterface,args[] string) pb.Response{
-    fmt.Println(" << ====[TopicController] addTopicInfo topic: ====== >>", args[0])
+    fmt.Println("<< ====[TopicController] addTopicInfo topic: ====== >>", args[0])
 	if _, ok := topicMap[args[0]]; ok {
         return shim.Error(TOPIC_ALREADY_EXIST)
     }

@@ -18,7 +18,7 @@ WeEvent由微众银行自主研发并完全开源，秉承分布式商业模式�
 [WeEvent官网](http://fintech.webank.com/weevent)。
 
 ## 快速入门
-WeEvent支持三种安装方式：[Docker镜像](https://hub.docker.com/r/weevent/)、[Bash一键脚本](https://weeventdoc.readthedocs.io/zh_CN/latest/install/quickinstall.html)、[普通安装](https://weeventdoc.readthedocs.io/zh_CN/latest/install/module/index.html)。
+WeEvent支持三种安装方式：[Docker镜像](https://hub.docker.com/r/weevent/)、[Bash一键脚本](https://weeventdoc.readthedocs.io/zh_CN/latest/install/quickinstall.html)、[进阶安装](https://weeventdoc.readthedocs.io/zh_CN/latest/install/module/index.html)。
 ### Docker镜像安装
 ```shell
 $ docker pull weevent/weevent:1.0.0; docker run -d -p 8080:8080 weevent/weevent:1.0.0 /root/run.sh
@@ -31,17 +31,17 @@ $ ./install-all.sh -p /usr/local/weevent/
 ```
 
 ### 功能体验
-通过浏览器即可体验事件发布等基本功能，如[发布事件](http://localhost:8080/weevent/rest/publish?topic=test&content=helloevent)。
+通过浏览器即可体验事件发布等基本功能，如[发布事件](http://localhost:8080/weevent/rest/publish?topic=test&content=helloevent)。  
 更多功能，请参见[WeEvent接入](https://weeventdoc.readthedocs.io/zh_CN/latest/protocal/restful.html)。
 
 ## 用户文档
 [WeEvent在线文档](https://weeventdoc.readthedocs.io/zh_CN/latest)。
 
 ## 项目贡献
-*   开发环境
+*   开发环境  
 git，gradle 4.10，java 1.8，nodejs 10.16，推荐使用IntelliJ IDEA。
-*   [项目计划](https://github.com/WeBankFinTech/WeEvent/wiki/Project-RoadMap)
-*   [代码提交](https://github.com/WeBankFinTech/WeEvent/wiki/Project-WorkFlow)
+*   [项目计划](https://github.com/WeBankFinTech/WeEvent/wiki/Project-RoadMap)  
+*   [代码提交](https://github.com/WeBankFinTech/WeEvent/wiki/Project-WorkFlow)  
 
 WeEvent爱贡献者！请阅读[贡献文档](https://github.com/WeBankFinTech/WeEvent/blob/master/CONTRIBUTING.md)，了解如何贡献代码，并提交你的贡献。
 
