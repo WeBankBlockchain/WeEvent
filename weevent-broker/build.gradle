@@ -6,6 +6,7 @@ dependencies {
     // spring boot
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.data:spring-data-commons:2.2.0.RELEASE")
 
     // spring boot with log4j2
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
@@ -46,7 +47,10 @@ dependencies {
         exclude group: "org.slf4j", module: "slf4j-log4j12"
         exclude group: "org.springframework"
     }
-
+    
+    // fabric 1.4.4
+    implementation("org.hyperledger.fabric-sdk-java:fabric-sdk-java:1.4.4")
+    
     // depend project
     implementation project(path: ":weevent-client")
 

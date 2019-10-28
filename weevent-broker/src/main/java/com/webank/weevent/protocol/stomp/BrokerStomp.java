@@ -18,10 +18,11 @@ import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import javafx.util.Pair;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -190,9 +191,10 @@ public class BrokerStomp extends TextWebSocketHandler {
         // send command receipt Id
         String headerReceiptIdStr = getHeadersValue("receipt", msg);
 
-        Map<String, String> extensions = WeEventUtils.getExtend(nativeHeaders);
+        // Map<String, String> extensions = WeEventUtils.getExtend(nativeHeaders);
 
-        String groupId = WeEvent.DEFAULT_GROUP_ID;
+        String groupId = WeEventUtils.getDefaultGroupId();
+
         Object eventGroupId = nativeHeaders.get(WeEventConstants.EVENT_GROUP_ID);
         if (nativeHeaders.containsKey(WeEventConstants.EVENT_GROUP_ID) && eventGroupId != null) {
             groupId = ((List) eventGroupId).get(0).toString();
@@ -200,7 +202,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
         try {
             String simpDestination = getSimpDestination(msg);
-            SendResult sendResult = handleSend(msg, simpDestination, extensions, groupId);
+            SendResult sendResult = handleSend(msg, groupId);
 
             // package the return frame
             StompCommand command = StompCommand.RECEIPT;
@@ -354,7 +356,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
         log.info("find topic num: {}, try to unSubscribe one by one", topicMap.size());
         for (Map.Entry<String, Pair<String, String>> topicPair : topicMap.entrySet()) {
-            String subscriptionId = topicPair.getValue().getKey();
+            String subscriptionId = topicPair.getValue().getFirst();
             try {
                 boolean result = this.iconsumer.unSubscribe(subscriptionId);
                 log.info("consumer unSubscribe result, subscriptionId: {}, result: {}", subscriptionId, result);
@@ -421,17 +423,26 @@ public class BrokerStomp extends TextWebSocketHandler {
 
     /**
      * @param msg message
-     * @param simpDestination topic name
      */
     private SendResult handleSend(Message<byte[]> msg,
-                                  String simpDestination,
-                                  Map<String, String> extensions,
                                   String groupId) throws BrokerException {
         if (!this.iproducer.startProducer()) {
             log.error("producer start failed");
         }
 
-        SendResult sendResult = this.iproducer.publish(new WeEvent(simpDestination, msg.getPayload(), extensions), groupId);
+        ObjectMapper mapper = new ObjectMapper();
+        WeEvent event = null;
+        try {
+            event = mapper.readValue(msg.getPayload(), WeEvent.class);
+        } catch (IOException e) {
+            log.error("read payload from msg failed, e ", e);
+            throw new BrokerException("read payload from msg failed");
+        }
+        if (event == null){
+            log.error("payload in msg is null");
+            throw new BrokerException("payload in msg is null");
+        }
+        SendResult sendResult = this.iproducer.publish(event, groupId);
         log.info("publish result, {}", sendResult);
         if (sendResult.getStatus() != SendResult.SendResultStatus.SUCCESS) {
             log.error("producer publish failed");
@@ -509,7 +520,7 @@ public class BrokerStomp extends TextWebSocketHandler {
         log.info("bind context, session id: {} header subscription id: {} consumer subscription id: {} topic: {}",
                 session.getId(), headerIdStr, subscriptionId, Arrays.toString(curTopicList));
         sessionContext.get(session.getId())
-                .put(headerIdStr, new Pair<>(subscriptionId, StringUtils.join(curTopicList, WeEvent.MULTIPLE_TOPIC_SEPARATOR)));
+                .put(headerIdStr, Pair.of(subscriptionId, StringUtils.join(curTopicList, WeEvent.MULTIPLE_TOPIC_SEPARATOR)));
 
         log.info("consumer subscribe success, consumer subscriptionId: {}", subscriptionId);
         return subscriptionId;
@@ -548,7 +559,7 @@ public class BrokerStomp extends TextWebSocketHandler {
             return false;
         }
 
-        String subscriptionId = sessionContext.get(session.getId()).get(headerIdStr).getKey();
+        String subscriptionId = sessionContext.get(session.getId()).get(headerIdStr).getFirst();
         // unSubscribe
         boolean result = this.iconsumer.unSubscribe(subscriptionId);
         log.info("consumer unSubscribe, subscriptionId: {} result: {}", subscriptionId, result);
