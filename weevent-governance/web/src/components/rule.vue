@@ -1,49 +1,49 @@
 <template>
   <div class='rule'>
     <div class='step'>
-        <p class='rule_title'>数据流新手引导</p>
-        <p class='rule_descript'>数据流转类型的规则可以对设备上报的数据进行简单处理,并将处理后的数据流转到其他Topic,支持JSON数据格式。<span>使用文档</span></p>
+        <p class='rule_title'>{{$t('rule.dataGuide')}}</p>
+        <p class='rule_descript'>{{$t('rule.creatRuleRemark')}}。<span class='useText'>{{$t('rule.useText')}}</span></p>
         <div class='step_list'>
             <div class='step_list_item'>
                 <span class='num'>1</span>
-                <span class='item_name'>新建规则</span>
-                <span class='creat_rule' @click='createRule = !createRule'>立即创建</span>
+                <span class='item_name'>{{$t('rule.creatNewRule')}}</span>
+                <span class='creat_rule' @click='createRule = !createRule'>{{$t('rule.creatNow')}}</span>
             </div>
             <span class="el-icon-right"></span>
             <div class='step_list_item'>
                 <span class='num'>2</span>
-                <span class="item_name">编写SQL</span>
+                <span class="item_name">{{$t('rule.editRule')}}</span>
             </div>
             <span class="el-icon-right"></span>
             <div class='step_list_item'>
                 <span class='num'>3</span>
-                <span class='item_name'>添加操作</span>
+                <span class='item_name'>{{$t('rule.addOperation')}}</span>
             </div>
             <span class="el-icon-right"></span>
             <div class='step_list_item'>
                 <span class='num'>4</span>
-                <span class='item_name'>验证规则</span>
+                <span class='item_name'>{{$t('rule.checkRule')}}</span>
             </div>
             <span class="el-icon-right"></span>
             <div class='step_list_item'>
                 <span class='num'>5</span>
-                <span class='item_name'>启动规则</span>
+                <span class='item_name'>{{$t('rule.startRule')}}</span>
             </div>
         </div>
     </div>
     <div class='rule_list'>
         <p class='rule_title'>
-            数据流转换表
+          {{$t('rule.ruleList')}}
         </p>
         <div class='control_part'>
-            <el-button type='primary' size='small'  @click='createRule = !createRule'>创建规则</el-button>
+            <el-button type='primary' size='small'  @click='createRule = !createRule'>{{$t('rule.creatRule')}}</el-button>
             <div class='search_part'>
                 <el-input v-model.trim='ruleName'
-                    placeholder="请输入规则名称"
+                    :placeholder="$t('rule.enterRuleName')"
                     size='small'
                     clearable
                 ></el-input>
-                <el-button type='primary' size='small' @click='searchRule'>搜索</el-button>
+                <el-button type='primary' size='small' @click='searchRule'>{{$t('common.search')}}</el-button>
             </div>
         </div>
         <el-table
@@ -53,42 +53,42 @@
             >
             <el-table-column
             prop="ruleName"
-            label="规则名称"
+            :label="$t('rule.ruleName')"
             >
             </el-table-column>
             <el-table-column
             prop="payloadType"
-            label="规则格式"
+            :label="$t('rule.payloadType')"
             width='100'
             :formatter="payloadType"
             >
             </el-table-column>
             <el-table-column
             prop="payloadMap"
-            label="规则描述"
+            :label="$t('rule.payloadMap')"
             :formatter="payloadMap">
             </el-table-column>
             <el-table-column
             prop="createDateStr"
-            label="创建时间">
+            :label="$t('tableCont.timestamp')">
             </el-table-column>
             <el-table-column
-            label="状态"
+            :label="$t('tableCont.state')"
             width='110'
             >
               <template  slot-scope="scope">
-                <span v-show="scope.row.status === 1"><i class='isActive'></i>运行中</span>
-                <span v-show="scope.row.status === 0"><i class='notActive'></i>未启动</span>
+                <span v-show="scope.row.status === 1"><i class='isActive'></i>{{$t('rule.run')}}</span>
+                <span v-show="scope.row.status === 0"><i class='notActive'></i>{{$t('rule.notRun')}}</span>
               </template>
             </el-table-column>
             <el-table-column
-            label="操作"
+            :label="$t('common.action')"
             width='170'>
                 <template  slot-scope="scope">
-                    <a v-show='scope.row.status === 0' @click='ruleStart(scope.row)'>启动</a>
-                    <a v-show='scope.row.status === 1' @click='ruleStop(scope.row)'>停止</a>
-                    <a @click='readDetail(scope.row)'>查看</a>
-                    <a v-show='scope.row.status === 0' @click='ruleDelete(scope.row)'>删除</a>
+                    <a v-show='scope.row.status === 0' @click='ruleStart(scope.row)'>{{$t('rule.start')}}</a>
+                    <a v-show='scope.row.status === 1' @click='ruleStop(scope.row)'>{{$t('rule.stop')}}</a>
+                    <a @click='readDetail(scope.row)'>{{$t('rule.read')}}</a>
+                    <a v-show='scope.row.status === 0' @click='ruleDelete(scope.row)'>{{$t('rule.delete')}}</a>
                 </template>
             </el-table-column>
         </el-table>
@@ -100,27 +100,27 @@
           >
         </el-pagination>
     </div>
-    <el-dialog title="创建规则" :visible.sync="createRule">
+    <el-dialog :title="$t('rule.creatRule')" :visible.sync="createRule">
       <div class='warning_part'>
         <img src="../assets/image/icon_tips.svg" alt="">
-        <p>数据流转类型的规则可以对设备上报的数据进行简单处理,并将处理后的数据流转到其他Topic,支持JSON数据格式。</p>
+        <p>{{$t('rule.creatRuleRemark')}}</p>
       </div>
       <el-form :model="rule" :rules="rules" ref='rule'>
-        <el-form-item label="规则名称" prop='ruleName'>
+        <el-form-item :label="$t('rule.ruleName')  + ' :'" prop='ruleName'>
           <el-input v-model="rule.ruleName" size='small' autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="数据格式">
+        <el-form-item :label="$t('rule.dataType')  + ' :'">
           <el-radio-group v-model="rule.payloadType">
             <el-radio label="1">JSON</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="规则描述" prop='payloadMap'>
-          <el-input v-model="rule.payloadMap" size='small' type='textarea' :rows='5' placeholder="请输入规则描述" autocomplete="off"></el-input>
+        <el-form-item :label="$t('rule.payloadMap')  + ' :'" prop='payloadMap'>
+          <el-input v-model="rule.payloadMap" size='small' type='textarea' :rows='5' :placeholder="$t('rule.enterPayload')" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" size="small" @click='addRule'>提交</el-button>
-        <el-button  size="small" @click='createRule = !createRule'>取 消</el-button>
+        <el-button type="primary" size="small" @click='addRule'>{{$t('rule.commit')}}</el-button>
+        <el-button  size="small" @click='createRule = !createRule'>{{$t('common.cancel')}}</el-button>
       </div>
     </el-dialog>
   </div>
@@ -131,14 +131,14 @@ export default {
   data () {
     var ruleName = (rule, value, callback) => {
       if (value === '') {
-        callback(new Error('请输入规则名称'))
+        callback(new Error(this.$t('rule.enterRuleName')))
       } else {
         callback()
       }
     }
     var payloadMap = (rule, value, callback) => {
       if (value === '') {
-        callback(new Error('请输入规则描述'))
+        callback(new Error(this.$t('rule.enterPayload')))
       } else {
         if (typeof value === 'string') {
           try {
@@ -146,10 +146,10 @@ export default {
             if (typeof obj === 'object' && obj) {
               callback()
             } else {
-              callback(new Error('格式错误'))
+              callback(new Error(this.$t('rule.errorType')))
             }
           } catch (e) {
-            callback(new Error('格式错误'))
+            callback(new Error(this.$t('rule.errorType')))
           }
         }
       }
@@ -260,12 +260,12 @@ export default {
           this.getRuleList()
           this.$message({
             type: 'success',
-            message: '已启动'
+            message: this.$t('rule.isStart')
           })
         } else {
           this.$message({
             type: 'warning',
-            message: '启动失败'
+            message: this.$t('rule.startFail')
           })
         }
       })
@@ -282,20 +282,21 @@ export default {
           this.getRuleList()
           this.$message({
             type: 'success',
-            message: '已停止'
+            message: this.$t('rule.isStop')
           })
         } else {
           this.$message({
             type: 'warning',
-            message: '操作失败'
+            message: this.$t('common.operFail')
           })
         }
       })
     },
     ruleDelete (e) {
-      this.$confirm('确认删除？', '删除规则', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+      let vm = this
+      vm.$confirm(vm.$t('rule.isDelete'), vm.$t('rule.deleteRule'), {
+        confirmButtonText: vm.$t('common.ok'),
+        cancelButtonText: vm.$t('common.cancel'),
         type: 'warning'
       }).then(() => {
         let data = {
@@ -305,15 +306,15 @@ export default {
         }
         API.ruleDelete(data).then(res => {
           if (res.data.status === 200) {
-            this.getRuleList()
-            this.$message({
+            vm.getRuleList()
+            vm.$message({
               type: 'success',
-              message: '已删除'
+              message: vm.$t('rule.hasDelete')
             })
           } else {
-            this.$message({
+            vm.$message({
               type: 'warning',
-              message: '操作失败'
+              message: vm.$t('common.operFail')
             })
           }
         })
@@ -321,7 +322,7 @@ export default {
     },
     readDetail (e) {
       sessionStorage.setItem('ruleId', e.id)
-      this.$store.commit('set_menu', ['规则引擎', '规则管理', '规则详情'])
+      this.$store.commit('set_menu', [this.$t('sideBar.engine'), this.$t('sideBar.ruleMana'), this.$t('sideBar.ruleDetail')])
       this.$router.push('./ruleDetail')
     },
     addRule () {
@@ -341,12 +342,12 @@ export default {
               this.getRuleList()
               this.$message({
                 type: 'success',
-                message: '创建成功'
+                message: this.$t('rule.creatSuccess')
               })
             } else {
               this.$message({
                 type: 'warning',
-                message: '创建失败'
+                message: this.$t('rule.creatFail')
               })
             }
             vm.createRule = false

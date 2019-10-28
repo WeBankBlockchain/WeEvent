@@ -7,6 +7,7 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import VueClipboard from 'vue-clipboard2'
 import store from './store/index'
+import i18n from './i18n/index'
 
 Vue.use(ElementUI)
 Vue.config.productionTip = false
@@ -17,6 +18,7 @@ new Vue({
   el: '#app',
   router,
   store,
+  i18n,
   components: { App },
   template: '<App/>'
 })

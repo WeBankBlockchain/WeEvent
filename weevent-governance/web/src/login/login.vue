@@ -7,33 +7,33 @@
     <div class='login_box'>
       <img src="../assets/image/login.png" alt="" class='login_logo'>
       <div class='login_error'>
-        <p :class="{'show_error': show_error}">用户名或密码错误，请重新输入</p>
+        <p :class="{'show_error': show_error}">{{$t('userSet.errorLogin')}}</p>
       </div>
       <el-form label-position="right" :rules="rules" :model='form' ref='loginForm'>
         <el-form-item label='' prop='name'>
-          <el-input v-model.trim='form.name' auto-complete="off" prefix-icon='el-icon-user' placeholder="请输入用户名"></el-input>
+          <el-input v-model.trim='form.name' auto-complete="off" prefix-icon='el-icon-user' :placeholder="$t('userSet.userName')"></el-input>
         </el-form-item>
         <el-form-item label='' prop='passWord'>
-          <el-input v-model.trim='form.passWord' auto-complete="off" type='password' prefix-icon='el-icon-lock' placeholder="请输入密码"></el-input>
-          <span class='forget' @click='changePass'>忘记密码？</span>
+          <el-input v-model.trim='form.passWord' auto-complete="off" type='password' prefix-icon='el-icon-lock' :placeholder="$t('userSet.passWord')"></el-input>
+          <span class='forget' @click='changePass'>{{$t('userSet.forgetPassWord')}}</span>
         </el-form-item>
         <el-form-item>
-          <el-button type='primary' @click='onSubmit("loginForm")' @keyup.enter.native='onSubmit("loginForm")'>登录</el-button>
-          <span class='registered_btn' @click='registered'>快速注册</span>
+          <el-button type='primary' @click='onSubmit("loginForm")' @keyup.enter.native='onSubmit("loginForm")'>{{$t('userSet.login')}}</el-button>
+          <span class='registered_btn' @click='registered'>{{$t('userSet.quickRegistered')}}</span>
         </el-form-item>
       </el-form>
     </div>
     <el-dialog
-      title='密码重置'
+      :title="$t('userSet.resetPassWord')"
       :visible.sync="getPass"
       width='420px'
     >
-      <p class='input_title'>请输入用户名:</p>
+      <p class='input_title'>{{$t('userSet.enterUserName') + ' :'}}</p>
       <el-input v-model='userName'></el-input>
-      <p class='input_warning'><i>*</i>请注意，重置密码的链接将会发送到帐号绑定的邮箱!</p>
+      <p class='input_warning'><i>*</i>{{$t('userSet.mailWarning')}}</p>
       <span slot='footer' class='dialog-footer'>
-        <el-button @click='getPass=false'>取消</el-button>
-        <el-button type='primary' @click='getPassWord'>确认</el-button>
+        <el-button @click='getPass=false'>{{$t('common.cancel')}}</el-button>
+        <el-button type='primary' @click='getPassWord'>{{$t('common.ok')}}</el-button>
       </span>
     </el-dialog>
   </div>
@@ -44,7 +44,7 @@ export default {
   data () {
     var checkName = (rule, value, callback) => {
       if (value === '') {
-        callback(new Error('请输入用户名'))
+        callback(new Error(this.$t('userSet.enterUserName')))
       } else {
         if (this.form.passWord !== '') {
           this.$refs.loginForm.validateField('checkPass')
@@ -54,7 +54,7 @@ export default {
     }
     var checkPassWord = (rule, value, callback) => {
       if (value === '') {
-        callback(new Error('请输入密码'))
+        callback(new Error(this.$t('userSet.enterPassWord')))
       }
       callback()
     }
@@ -91,7 +91,7 @@ export default {
       }
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          // 登录操作
+          // login
           API.login(data).then(res => {
             if (res.status === 200 && res.data.code === 0) {
               localStorage.setItem('userId', res.data.data.userId)
@@ -120,23 +120,23 @@ export default {
           if (res.data.status === 400) {
             this.$message({
               type: 'warning',
-              message: '用户名不存在!'
+              message: this.$t('userSet.noUser')
             })
           } else if (res.data.code === 100102) {
             this.$message({
               type: 'warning',
-              message: '发送邮件失败'
+              message: this.$t('userSet.sendMailFail')
             })
           } else {
             this.$message({
               type: 'success',
-              message: '邮件已发送至绑定邮箱'
+              message: this.$t('userSet.sendMailSuccess')
             })
           }
         } else {
           this.$message({
             type: 'warning',
-            message: '发送邮件失败'
+            message: this.$t('userSet.sendMailFail')
           })
         }
       })
