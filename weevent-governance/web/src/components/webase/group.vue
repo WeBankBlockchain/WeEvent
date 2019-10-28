@@ -5,16 +5,16 @@
       stripe
       v-loading='loading'
       element-loading-spinner='el-icon-loading'
-      element-loading-text='数据加载中...'
+      :element-loading-text="$t('common.loading')"
       element-loading-background='rgba(256,256,256,0.8)'
     >
       <el-table-column
         prop='nodeName'
-        label='节点列表'
+        :label="$t('tableCont.nodeName')"
       ></el-table-column>
       <el-table-column
         prop='blockNumber'
-        label='块高'
+        :label="$t('tableCont.blockNumber')"
          width='300'
       ></el-table-column>
       <el-table-column
@@ -23,16 +23,16 @@
          width='300'
       ></el-table-column>
       <el-table-column
-        label='状态'
+      :label="$t('tableCont.state')"
         width='100'
       >
         <template  slot-scope="scope">
           <span style='color:#67c23a' v-show='scope.row.nodeActive === 1'>
             <i class='dot dot_act'></i>
-              运行
+              {{$t('tableCont.run')}}
           </span>
-          <span class='dot dot_act' style='color:#909399' v-show='scope.row.nodeActive === 0'>
-            <i class='dot'></i> 停止
+          <span style='color:#909399' v-show='scope.row.nodeActive === 0'>
+            <i class='dot'></i> {{$t('tableCont.stop')}}
           </span>
         </template>
       </el-table-column>
@@ -88,7 +88,7 @@ export default {
         } else {
           this.$message({
             type: 'warning',
-            message: '数据请求出错'
+            message: this.$t('tableCont.getDataError')
           })
         }
       })

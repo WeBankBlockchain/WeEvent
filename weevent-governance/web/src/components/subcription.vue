@@ -5,12 +5,12 @@
     :span-method='spanMethod'
     v-loading='loading'
     element-loading-spinner='el-icon-loading'
-    element-loading-text='数据加载中...'
+    :element-loading-text="$t('common.loading')"
     element-loading-background='rgba(256,256,256,0.8)'
     @row-click='checkDetail'
     style="width: 100%">
     <el-table-column
-      label="机器地址"
+      :label="$t('tableCont.machine')"
       prop='ip'
       >
     </el-table-column>
@@ -19,28 +19,31 @@
       prop='topicName'>
     </el-table-column>
     <el-table-column
-      label="订阅ID"
-      width='350'
+      :label="$t('tableCont.subscribeId')"
+      width='300'
       prop='subscribeId'>
     </el-table-column>
     <el-table-column
-      label="订阅来源Ip"
+      :label="$t('tableCont.remoteIp')"
       prop="remoteIp">
     </el-table-column>
     <el-table-column
-      label="订阅方式"
+      :label="$t('tableCont.interfaceType')"
       prop="interfaceType">
     </el-table-column>
     <el-table-column
-      label="已通知事件"
+     width='120'
+      :label="$t('tableCont.notifiedEventCount')"
       prop="notifiedEventCount">
     </el-table-column>
     <el-table-column
-      label="待通知事件"
+     width='120'
+      :label="$t('tableCont.notifyingEventCount')"
       prop="notifyingEventCount">
     </el-table-column>
      <el-table-column
-      label="订阅时间"
+      width='150'
+      :label="$t('tableCont.createTimeStamp')"
       prop="createTimeStamp">
     </el-table-column>
   </el-table>
@@ -139,7 +142,7 @@ export default {
       this.$store.commit('set_active', '2-1')
       this.$emit('selecChange', '2-1')
       sessionStorage.setItem('topic', e.topicName)
-      this.$store.commit('set_menu', ['主题管理', '主题列表'])
+      this.$store.commit('set_menu', [this.$t('sideBar.topic'), this.$t('sideBar.topicList')])
       this.$router.push('./topicList')
     }
   },
