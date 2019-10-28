@@ -2,8 +2,8 @@
   <div class='statistics'>
     <div class='dataContent'>
       <div class='selectOptions'>
-        <span class='optionTitle'>选择主题</span>
-        <el-select v-model="topic" multiple placeholder="请选择" @visible-change="selectChange" collapse-tags size="small">
+        <span class='optionTitle'>{{$t('tableCont.chooseTopic')}}</span>
+        <el-select v-model="topic" multiple :placeholder="$t('common.choose')" @visible-change="selectChange" collapse-tags size="small">
           <el-option
             v-for="(item, index) in topicList"
             :key="index"
@@ -12,7 +12,7 @@
             >
           </el-option>
         </el-select>
-        <span class='optionTitle' style='margin-left:20px'>选择时间</span>
+        <span class='optionTitle' style='margin-left:20px'>{{$t('tableCont.chooseTime')}}</span>
         <el-date-picker
           size="small"
           type="daterange"
@@ -20,9 +20,9 @@
           v-model='selectTime'
           @change="getTime"
           :picker-options="pickerOptions"
-          range-separator="至"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期">
+          range-separator="-"
+          :start-placeholder="$t('tableCont.beginTime')"
+          :end-placeholder="$t('tableCont.endTime')">
         </el-date-picker>
       </div>
       <div class='statisticsCharts'>
@@ -70,9 +70,6 @@ export default{
         },
         credits: {
           enabled: false
-        },
-        lang: {
-          noData: '该时段暂无数据'
         }
       }
     }
@@ -115,11 +112,12 @@ export default{
           })
           vm.option.yAxis.max = max
           vm.topic = [].concat(topic)
+          console.log(vm.option)
           Highcharts.chart('chart', vm.option)
         } else {
           vm.$message({
             type: 'warning',
-            message: '数据获取失败'
+            message: this.$t('tableCont.getDataError')
           })
         }
       })
