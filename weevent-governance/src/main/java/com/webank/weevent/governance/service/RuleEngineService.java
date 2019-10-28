@@ -540,7 +540,7 @@ public class RuleEngineService {
         if (!flag) {
             throw new GovernanceException("ruleName repeat");
         }
-        if (ruleEngineEntity.getPayloadMap().size() == 0) {
+        if (ruleEngineEntity.getPayloadMap().isEmpty()) {
             throw new GovernanceException("rule description is empty");
 
         }
@@ -550,7 +550,7 @@ public class RuleEngineService {
     }
 
     private boolean checkRuleName(String ruleName, String regex) {
-        if (ruleName == null || ruleName.trim().length() == 0) {
+        if (StringUtil.isBlank(ruleName)) {
             return false;
         }
         return Pattern.matches(regex, ruleName);
@@ -599,7 +599,7 @@ public class RuleEngineService {
     }
 
     private String getProcessorUrl(String brokerUrl) {
-        return brokerUrl.substring(0,brokerUrl.lastIndexOf("/"));
+        return brokerUrl.substring(0, brokerUrl.lastIndexOf("/"));
     }
 
     private List<RuleEngineConditionEntity> getRuleEngineConditionList(RuleEngineEntity rule) {

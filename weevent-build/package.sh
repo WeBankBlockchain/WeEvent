@@ -6,12 +6,12 @@
 # 3. java 1.8
 # 4. nodejs 10.16
 ################################################################################
-
+weevent_version=1.1.0
 function usage(){
     echo "Usage:"
-    echo "    package master: ./package.sh --version 1.1.0"
-    echo "    package tag: ./package.sh --tag v1.1.0 --version 1.1.0"
-    echo "    package local: ./package.sh --tag local --version 1.1.0"
+    echo "    package master: ./package.sh --version ${weevent_version}"
+    echo "    package tag: ./package.sh --tag v${weevent_version} --version ${weevent_version}"
+    echo "    package local: ./package.sh --tag local --version ${weevent_version}"
 }
 
 version=""

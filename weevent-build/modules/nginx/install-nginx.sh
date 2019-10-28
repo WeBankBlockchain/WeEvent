@@ -64,7 +64,7 @@ function nginx_setup() {
 if [[ $# -lt 2 ]]; then
     echo "Usage:"
     echo "    $0 --nginx_path /data/app/weevent/nginx "
-    echo "    --broker_port --governance_port --processor_port"
+    echo "    --broker_port 7000 --governance_port 7009 --processor_port 7008"
     exit 1
 fi
 
