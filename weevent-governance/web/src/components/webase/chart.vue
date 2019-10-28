@@ -10,13 +10,12 @@ export default {
     return {
       option: {
         title: {
-          text: '关键监控指标',
+          text: this.$t('overview.essential'),
           align: 'left'
         },
         subtitle: {
-          text: '最近一周的交易量(笔)',
+          text: this.$t('overview.lastWeek'),
           align: 'right',
-          floating: true,
           verticalAlign: 'top'
         },
         yAxis: {
@@ -30,8 +29,8 @@ export default {
         tooltip: {
           shared: true,
           crosshairs: true,
-          formatter () {
-            return this.x + '<br/>交易量:' + parseInt(this.y.toFixed(2)) + '笔'
+          formatter (e) {
+            return this.x + '<br/>' + parseInt(this.y.toFixed(2))
           }
         },
         series: [{
