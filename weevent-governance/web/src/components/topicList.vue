@@ -1,21 +1,21 @@
 <template>
 <div class='event-table topic'>
   <div class='refresh'>
-    <el-button type='primary' size='small' icon='el-icon-plus' @click='addNewOne'>新增</el-button>
+    <el-button type='primary' size='small' icon='el-icon-plus' @click='addNewOne'>{{$t('common.add')}}</el-button>
     <div class='search_part'>
       <el-input v-model.trim='topicName'
-        placeholder="请输入topicn"
+        :placeholder="$t('tableCont.searchTpoic')"
         size='small'
         clearable
       ></el-input>
-      <el-button type='primary' size='small' @click='searchTopic'>搜索</el-button>
+      <el-button type='primary' size='small' @click='searchTopic'>{{$t('common.search')}}</el-button>
     </div>
   </div>
   <el-table
     :data="tableData"
     v-loading='loading'
     element-loading-spinner='el-icon-loading'
-    element-loading-text='数据加载中...'
+    :element-loading-text="$t('common.loading')"
     element-loading-background='rgba(256,256,256,0.8)'
     style="width: 100%"
     @expand-change='readDetail'
@@ -23,20 +23,19 @@
     <el-table-column type="expand">
       <template slot-scope="props">
         <el-form label-position="left" inline class="demo-table-expand">
-          <el-form-item label="Topic:">
+          <el-form-item label="Topic :">
             <span>{{ props.row.detail.topicName }}</span>
           </el-form-item><br/>
-          <el-form-item label="创建时间:">
+          <el-form-item :label="$t('tableCont.timestamp')  + ' :'">
             <span>{{ props.row.detail.createdTimestamp }}</span>
           </el-form-item><br/>
-
-           <el-form-item label="已发布事件数:">
+           <el-form-item :label="$t('tableCont.sequenceNumber')  + ' :'">
             <span>{{ props.row.detail.sequenceNumber }}</span>
           </el-form-item><br/>
-           <el-form-item label="最新事件块高:">
+           <el-form-item :label="$t('tableCont.newBlockNumber')  + ' :'">
             <span>{{ props.row.detail.blockNumber }}</span>
           </el-form-item><br/>
-          <el-form-item label="地址:">
+          <el-form-item :label="$t('tableCont.address')  + ' :'">
             <span>{{ props.row.detail.topicAddress }}</span>
           </el-form-item>
         </el-form>
@@ -48,12 +47,12 @@
       :formatter="checkName">
     </el-table-column>
     <el-table-column
-      label="创建人"
+      :label="$t('tableCont.creater')"
       prop="creater"
       :formatter="checkCreater">
     </el-table-column>
      <el-table-column
-      label="创建时间"
+      :label="$t('tableCont.timestamp')"
       prop="createdTimestamp"
       :formatter="checkTime">
     </el-table-column>
@@ -66,18 +65,18 @@
     layout="sizes,total, prev, pager, next, jumper"
     :total="total">
   </el-pagination>
-  <el-dialog title="新增 Topic" :visible.sync="dialogFormVisible" center width='450px' >
+  <el-dialog :title="$t('tableCont.addTopic')" :visible.sync="dialogFormVisible" center width='450px' >
     <el-form :model="form" :rules="rules" ref='form'>
-      <el-form-item label="名称:" prop='name'>
+      <el-form-item :label="$t('common.name') + ' :'" prop='name'>
         <el-input v-model.trim="form.name" autocomplete="off"></el-input>
       </el-form-item>
-      <el-form-item label="详细描述:">
+      <el-form-item :label="$t('common.detail') + ' :'">
         <el-input v-model="form.describe" type='textarea' autocomplete="off"></el-input>
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
-      <el-button type="primary" @click='addTopic(form)'>确 定</el-button>
-      <el-button @click="dialogFormVisible = false">取 消</el-button>
+      <el-button type="primary" @click='addTopic(form)'>{{$t('common.ok')}}</el-button>
+      <el-button @click="dialogFormVisible = false">{{$t('common.cancel')}}</el-button>
     </div>
   </el-dialog>
  </div>
@@ -87,6 +86,13 @@ import API from '../API/resource.js'
 import { getDateDetail } from '../utils/formatTime'
 export default {
   data () {
+    var name = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error(this.$t('tableCont.noName')))
+      } else {
+        callback()
+      }
+    }
     return {
       topicName: '',
       loading: false,
@@ -101,8 +107,7 @@ export default {
       },
       rules: {
         name: [
-          { required: true, message: '名称不能为空', trigger: 'blur' },
-          { min: 1, max: 64, message: '名称长度不能超过 64 个字符', trigger: 'blur' }
+          { validator: name, trigger: 'blur' }
         ]
       },
       creater: ''
@@ -198,31 +203,31 @@ export default {
               if (res.data.code && (res.data.code === 100106)) {
                 vm.$message({
                   type: 'error',
-                  message: 'topic名称格式错误'
+                  message: this.$t('tableCont.errorTopicName')
                 })
               } else if (res.data.code === 100) {
                 vm.$message({
                   type: 'error',
-                  message: '新增失败'
+                  message: this.$t('common.addFail')
                 })
               } else {
                 vm.$message({
                   type: 'success',
-                  message: '添加成功'
+                  message: this.$t('common.addSuccess')
                 })
                 vm.refresh()
               }
             } else {
               vm.$message({
                 type: 'error',
-                message: '操作失败'
+                message: this.$t('common.addFail')
               })
             }
             vm.dialogFormVisible = false
           }).catch(e => {
             vm.$message({
               type: 'error',
-              message: '操作失败'
+              message: this.$t('common.addFail')
             })
           })
           vm.dialogFormVisible = false
