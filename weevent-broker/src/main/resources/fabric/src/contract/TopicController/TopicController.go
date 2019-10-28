@@ -7,6 +7,9 @@ import(
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
 
+type TopicController struct {
+}
+
 type TopicInfo struct {
 	CreatedTimestamp string `json:"createdTimestamp"`
 	Version  string `json:"version"`

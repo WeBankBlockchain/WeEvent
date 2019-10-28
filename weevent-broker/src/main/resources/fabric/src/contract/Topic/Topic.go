@@ -7,6 +7,9 @@ import(
 )
 var sequenceNumber int
 
+type Topic struct {
+}
+
 func (t *Topic) Init(stub shim.ChaincodeStubInterface) pb.Response{
     fmt.Println(" << ====[Topic Init] success init it is view in docker ====== >>")
     return shim.Success([]byte("success init"))
