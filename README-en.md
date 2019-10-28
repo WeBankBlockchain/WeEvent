@@ -33,7 +33,7 @@ $ ./install-all.sh -p /usr/local/weevent/
 ```
 
 ### Tutorials
-There are some base usecase showed via browser，like [Publish Event](http://localhost:8080/weevent/rest/publish?topic=test&content=helloevent).
+There are some base usecase showed via browser，like [Publish Event](http://localhost:8080/weevent/rest/publish?topic=test&content=helloevent).  
 For more examples, see the [WeEvent tutorials](https://weeventdoc.readthedocs.io/zh_CN/latest/protocal/restful.html).
 
 ## User’s Guide
@@ -42,10 +42,10 @@ For more examples, see the [WeEvent tutorials](https://weeventdoc.readthedocs.io
 ## Contributions
 *   Develop environment  
 git, gradle 4.10, java 1.8, nodejs 10.16, prefer IntelliJ IDEA.
-*   [WeEvent roadmap](https://github.com/WeBankFinTech/WeEvent/wiki/Project-RoadMap)
-*   [Git workflow](https://github.com/WeBankFinTech/WeEvent/wiki/Project-WorkFlow)
+*   [WeEvent roadmap](https://github.com/WeBankFinTech/WeEvent/wiki/Project-RoadMap)  
+*   [Git workflow](https://github.com/WeBankFinTech/WeEvent/wiki/Project-WorkFlow)  
 
-WeEvent love contributor！Please read the [CONTRIBUTING.md](https://github.com/WeBankFinTech/WeEvent/blob/master/CONTRIBUTING.md) first, and then submit a pull request.
+WeEvent love contributor! Please read the [CONTRIBUTING.md](https://github.com/WeBankFinTech/WeEvent/blob/master/CONTRIBUTING.md) first, and then submit a pull request.
 
 Thank you!
 
