@@ -3,17 +3,17 @@
     <div class='registered_part'>
       <img src="../assets/image/login.png" alt="">
       <el-form :model="ruleForm2" status-icon :rules="rules2" ref="ruleForm2" class="demo-ruleForm" >
-        <el-form-item label="用户名">
+        <el-form-item :label="$t('userSet.userName')">
           <el-input v-model.trim="ruleForm2.name" disabled></el-input>
         </el-form-item>
-         <el-form-item label="新密码" prop="newPass" >
+         <el-form-item :label="$t('userSet.newPassWord')" prop="newPass" >
           <el-input type="password" v-model.trim="ruleForm2.newPass" autocomplete="off"></el-input>
         </el-form-item>
-         <el-form-item label="再次输入" prop="checkNewPass" >
+         <el-form-item :label="$t('userSet.enterAgain')" prop="checkNewPass" >
           <el-input type="password" v-model.trim="ruleForm2.checkNewPass" autocomplete="off"></el-input>
         </el-form-item>
          <el-form-item>
-          <el-button type="primary" @click="submit('ruleForm2')">重置密码</el-button>
+          <el-button type="primary" @click="submit('ruleForm2')">{{$t('userSet.resetPassWord')}}</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -25,16 +25,16 @@ export default {
   data () {
     var newPass = (rule, value, callback) => {
       if (value === '') {
-        callback(new Error('请输入密码'))
+        callback(new Error(this.$t('userSet.enterPassWord')))
       } else {
         callback()
       }
     }
     var checkNewPass = (rule, value, callback) => {
       if (value === '') {
-        callback(new Error('请再次输入密码'))
+        callback(new Error(this.$t('userSet.enterPassWord')))
       } else if (value !== this.ruleForm2.newPass) {
-        callback(new Error('两次输入密码不一致!'))
+        callback(new Error(this.$t('userSet.passWordInconsistent')))
       } else {
         callback()
       }
@@ -67,13 +67,13 @@ export default {
             if (res.status === 200 && res.data.data) {
               this.$message({
                 type: 'success',
-                message: '密码更新成功'
+                message: this.$t('userSet.passWordModifySuccess')
               })
               this.login(data)
             } else {
               this.$message({
                 type: 'warning',
-                message: '密码重置失败'
+                message: this.$t('common.operFail')
               })
             }
           })
@@ -91,7 +91,7 @@ export default {
         } else {
           this.$message({
             type: 'warning',
-            message: '登录失败'
+            message: this.$t('userSet.loginFail')
           })
         }
       })
