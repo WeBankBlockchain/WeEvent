@@ -72,7 +72,7 @@ public class QuartzManager {
             ruleList.add(currentRule);
             params.put("ruleMap", ruleMap);
 
-            JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).build();
+            JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(false).build();
 
             // just do one time
             TriggerBuilder<Trigger> triggerBuilder = newTrigger();
@@ -81,6 +81,9 @@ public class QuartzManager {
             triggerBuilder.withSchedule(CronScheduleBuilder.cronSchedule(ProcessorApplication.processorConfig.getCronExpression()));
             CronTrigger trigger = (CronTrigger) triggerBuilder.build();
 
+            if (scheduler.checkExists(JobKey.jobKey(jobName, jobGroupName))) {
+                removeJob(jobName, jobGroupName, triggerName, triggerGroupName);
+            }
             scheduler.scheduleJob(job, trigger);
             if (!scheduler.isShutdown()) {
                 scheduler.start();
@@ -95,6 +98,7 @@ public class QuartzManager {
             return ConstantsHelper.FAIL;
         }
     }
+
 
     /**
      * modify Job Time
@@ -181,6 +185,55 @@ public class QuartzManager {
         } catch (Exception e) {
             log.error("Exception:{}:", e.toString());
             return false;
+        }
+    }
+
+
+    public RetCode addModifyJob1(String jobName, String jobGroupName, String triggerName, String triggerGroupName, Class jobClass, JobDataMap params) {
+        try {
+            // get the whole rules
+            Iterator<JobKey> it = scheduler.getJobKeys(GroupMatcher.anyGroup()).iterator();
+            List<CEPRule> ruleList = new ArrayList<>();
+            Map<String, CEPRule> ruleMap = new HashMap<>();
+
+            while (it.hasNext()) {
+                JobKey jobKey = (JobKey) it.next();
+                if (null != (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
+                    CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
+                    ruleList.add(rule);
+                    ruleMap.put(rule.getId(), rule);
+                    log.info("{}", jobKey);
+                }
+
+            }
+            // add current rule
+            CEPRule currentRule = (CEPRule) params.get("rule");
+            ruleMap.put(currentRule.getId(), currentRule);
+            ruleList.add(currentRule);
+            params.put("ruleMap", ruleMap);
+
+            JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).build();
+
+            // just do one time
+            TriggerBuilder<Trigger> triggerBuilder = newTrigger();
+            triggerBuilder.withIdentity(new Date().toString(), triggerGroupName);
+            triggerBuilder.startNow();
+            triggerBuilder.withSchedule(CronScheduleBuilder.cronSchedule(ProcessorApplication.processorConfig.getCronExpression()));
+            CronTrigger trigger = (CronTrigger) triggerBuilder.build();
+
+
+            scheduler.scheduleJob(job, trigger);
+            if (!scheduler.isShutdown()) {
+                scheduler.start();
+            }
+            if (scheduler.checkExists(JobKey.jobKey(jobName, jobGroupName))) {
+                return ConstantsHelper.SUCCESS;
+            }
+
+            return ConstantsHelper.FAIL;
+        } catch (Exception e) {
+            log.error("e:{}", e.toString());
+            return ConstantsHelper.FAIL;
         }
     }
 
