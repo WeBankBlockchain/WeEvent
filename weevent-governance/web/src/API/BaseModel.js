@@ -2,6 +2,7 @@ import axios from 'axios'
 import { Message } from 'element-ui'
 import qs from 'qs'
 import store from '../store'
+import i18n from '../i18n/index'
 const con = require('../../config/config.js')
 
 class BaseModule {
@@ -39,26 +40,26 @@ class BaseModule {
         } else {
           Message({
             type: 'warning',
-            message: '请求异常'
+            message: i18n.messages[i18n.locale].common.reqException
           })
           reject(config)
         }
       }).catch((e) => {
         Message({
           type: 'error',
-          message: '请求未响应,稍后重试'
+          message: i18n.messages[i18n.locale].common.reqException
         })
       })
     }, error => {
       if (error.message.includes('timeout')) {
         Message({
           type: 'error',
-          message: '请求超时请稍后重试'
+          message: i18n.messages[i18n.locale].common.timeOut
         })
       } else {
         Message({
           type: 'error',
-          message: '数据请求失败'
+          message: i18n.messages[i18n.locale].common.reqException
         })
       }
     })

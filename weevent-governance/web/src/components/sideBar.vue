@@ -3,44 +3,44 @@
     <el-submenu index='1'>
       <template slot='title'>
         <i class='el-icon-share'></i>
-        <span>区块链信息</span>
+        <span>{{$t('sideBar.blockChainInfor')}}</span>
       </template>
       <el-menu-item index='1-1'>
-        数据概览
+        {{$t('sideBar.overview')}}
       </el-menu-item>
       <el-menu-item index='1-2'>
-        交易详情
+        {{$t('sideBar.transaction')}}
       </el-menu-item>
       <el-menu-item index='1-3'>
-        节点列表
+        {{$t('sideBar.nodeList')}}
       </el-menu-item>
     </el-submenu>
     <el-submenu index='2'>
       <template slot='title'>
         <i class="el-icon-edit-outline"></i>
-        <span slot="title">主题管理</span>
+        <span slot="title">{{$t('sideBar.topic')}}</span>
       </template>
       <el-menu-item index='2-1'>
-        主题列表
+        {{$t('sideBar.topicList')}}
       </el-menu-item>
       <el-menu-item index='2-2'>
-        事件统计
+        {{$t('sideBar.statistics')}}
       </el-menu-item>
     </el-submenu>
     <el-menu-item index="3">
       <i class="el-icon-document"></i>
-      <span slot="title">订阅列表</span>
+      <span slot="title">{{$t('sideBar.subcription')}}</span>
     </el-menu-item>
-    <el-submenu index="4" v-show="isConfigRule === '1'">
+    <el-submenu index="4">
       <template slot='title'>
         <i class="el-icon-s-tools"></i>
-        <span slot="title">规则引擎</span>
+        <span slot="title">{{$t('sideBar.engine')}}</span>
       </template>
       <el-menu-item index='4-1'>
-        规则管理
+        {{$t('sideBar.ruleMana')}}
       </el-menu-item>
       <el-menu-item index='4-2'>
-        数据源设置
+        {{$t('sideBar.sources')}}
       </el-menu-item>
     </el-submenu>
   </el-menu>
