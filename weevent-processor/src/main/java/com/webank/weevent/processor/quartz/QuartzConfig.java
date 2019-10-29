@@ -41,6 +41,11 @@ public class QuartzConfig {
                 quartzPropertie.setProperty("org.quartz.scheduler.instanceId","auto");
                 quartzPropertie.setProperty("org.quartz.scheduler.skipupdateCheck","auto");
                 quartzPropertie.setProperty("org.quartz.dataSource.weevent_processor.driver","com.mysql.jdbc.Driver");
+
+                quartzPropertie.setProperty("org.quartz.jobStore.tablePrefix","QRTZ_");
+                quartzPropertie.setProperty("org.quartz.jobStore.misfireThreshold","25000");
+                quartzPropertie.setProperty("org.quartz.jobStore.clusterCheckinInterval","20000");
+                
                 factory.setQuartzProperties(quartzPropertie);
                 factory.setJobFactory(jobFactory);
                 in.close();
