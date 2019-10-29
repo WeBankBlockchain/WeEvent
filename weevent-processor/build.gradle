@@ -50,13 +50,7 @@ bootJar {
     doLast {
         copy {
             from file("src/main/resources/")
-            exclude("cep_rule.sql")
             into "dist/conf"
-        }
-        copy {
-            from file("src/main/resources/")
-            include("cep_rule.sql")
-            into "dist"
         }
         copy {
             from configurations.runtimeClasspath
