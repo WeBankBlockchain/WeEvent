@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
@@ -90,9 +91,11 @@ public class ParamCheckUtils {
         validateTopicName(event.getTopic());
         validateEventContent(new String(event.getContent(), StandardCharsets.UTF_8));
 
-        if (event.getExtensions() != null
-                && event.getExtensions().toString().length() > WeEventConstants.EVENT_EXTENSIONS_MAX_LENGTH) {
-            throw new BrokerException(ErrorCode.EVENT_EXTENSIONS_EXCEEDS_MAX_LENGTH);
+        if (event.getExtensions() != null) {
+            checkExtensionsKeyIsLegal(event.getExtensions());
+            if (event.getExtensions().toString().length() > WeEventConstants.EVENT_EXTENSIONS_MAX_LENGTH) {
+                throw new BrokerException(ErrorCode.EVENT_EXTENSIONS_EXCEEDS_MAX_LENGTH);
+            }
         }
     }
 
@@ -133,6 +136,14 @@ public class ParamCheckUtils {
             throw new BrokerException(ErrorCode.URL_INVALID_FORMAT);
         } catch (IOException e) {
             throw new BrokerException(ErrorCode.URL_CONNECT_FAILED);
+        }
+    }
+
+    public static void checkExtensionsKeyIsLegal(Map<String, String> extensions) throws BrokerException {
+        for (Map.Entry<String, String> extension : extensions.entrySet()) {
+            if (!extension.getKey().startsWith(WeEventConstants.EXTENSIONS_PREFIX_CHAR)) {
+                throw new BrokerException(ErrorCode.EVENT_EXTENSIONS_KEY_INVALID);
+            }
         }
     }
 }
