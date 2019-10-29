@@ -8,6 +8,7 @@ import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
  * tool to initdb
  */
 @Slf4j
-public class InitialDb implements AutoCloseable {
+public class InitialDb {
 
     public static void main(String[] args) throws Exception {
         String goalUrl = "";
@@ -59,22 +60,21 @@ public class InitialDb implements AutoCloseable {
             while (resultSet.next()) {
                 int num = resultSet.getInt(1);
                 if (num == 1) {
-                    log.error("database {} {}", dbName, " is exist!");
-                    throw new GovernanceException("database " + dbName + " is exist!");
+                    log.error("database {} {}",dbName," is exist!");
+                    throw new GovernanceException("database " +dbName+" is exist!");
                 }
             }
             String dbSql = "create database " + dbName + " default character set utf8 collate utf8_general_ci;";
-            tableSqlList.add(0, dbSql);
-            String useDataBase = "use " + dbName + ";";
-            tableSqlList.add(1, useDataBase);
+            tableSqlList.add(0,dbSql);
+            String useDataBase = "use "+dbName+";";
+            tableSqlList.add(1,useDataBase);
             for (String sql : tableSqlList) {
                 stat.executeUpdate(sql);
             }
-            log.info("create database {} {}", dbName, " success!");
-        } catch (Exception e) {
-            log.error("create database fail,message: {}", e.getMessage());
-            System.out.printf(e.getMessage());
-            throw new GovernanceException(e.getMessage());
+            log.info("create database {} {}",dbName," success!");
+        } catch (SQLException e) {
+            log.error("create database fail,message: {}",e.getMessage());
+            throw e;
         }
     }
 
@@ -97,10 +97,5 @@ public class InitialDb implements AutoCloseable {
             resourceAsStream.close();
         }
         return sqlList;
-    }
-
-    @Override
-    public void close() throws Exception {
-        log.info("resource is close");
     }
 }
