@@ -28,7 +28,9 @@ import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.TopicPage;
 import com.webank.weevent.sdk.WeEvent;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.hyperledger.fabric.sdk.ChaincodeID;
 import org.hyperledger.fabric.sdk.Channel;
@@ -144,8 +146,7 @@ public class Fabric {
                 throw new BrokerException(transactionInfo.getCode(), transactionInfo.getMessage());
             }
 
-            ListPage<String> listPage = JSONObject.parseObject(transactionInfo.getPayLoad(), ListPage.class);
-
+            ListPage<String> listPage = JSON.parseObject(transactionInfo.getPayLoad(), new TypeReference<ListPage<String>>(){});
             topicPage.setPageIndex(pageIndex);
             topicPage.setPageSize(listPage.getPageSize());
             topicPage.setTotal(listPage.getTotal());
