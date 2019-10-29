@@ -72,7 +72,7 @@ public class QuartzManager {
             ruleList.add(currentRule);
             params.put("ruleMap", ruleMap);
 
-            JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).build();
+            JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(false).build();
 
             // just do one time
             TriggerBuilder<Trigger> triggerBuilder = newTrigger();
@@ -81,6 +81,9 @@ public class QuartzManager {
             triggerBuilder.withSchedule(CronScheduleBuilder.cronSchedule(ProcessorApplication.processorConfig.getCronExpression()));
             CronTrigger trigger = (CronTrigger) triggerBuilder.build();
 
+            if (scheduler.checkExists(JobKey.jobKey(jobName, jobGroupName))) {
+                removeJob(jobName, jobGroupName, triggerName, triggerGroupName);
+            }
             scheduler.scheduleJob(job, trigger);
             if (!scheduler.isShutdown()) {
                 scheduler.start();
@@ -95,6 +98,7 @@ public class QuartzManager {
             return ConstantsHelper.FAIL;
         }
     }
+
 
     /**
      * modify Job Time
@@ -183,5 +187,5 @@ public class QuartzManager {
             return false;
         }
     }
-
+    
 }
