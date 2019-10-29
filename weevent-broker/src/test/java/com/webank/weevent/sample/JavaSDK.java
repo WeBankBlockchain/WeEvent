@@ -29,7 +29,7 @@ public class JavaSDK {
             client.open(topicName);
             Map<String, String> extensions = new HashMap<>();
             extensions.put(WeEvent.WeEvent_FORMAT, "json");
-            WeEvent weEvent = new WeEvent(topicName,"{\"hello\":\" wolrd\"}".getBytes(),extensions);
+            WeEvent weEvent = new WeEvent(topicName, "{\"hello\":\" wolrd\"}".getBytes(), extensions);
             // publish an event to topic :"com.weevent.test"
             SendResult sendResult = client.publish(weEvent);
             System.out.println(sendResult.toString());

@@ -43,6 +43,8 @@ public enum ErrorCode {
 
     EVENT_EXTENSIONS_IS_NUll(100205, "event extensions is null"),
 
+    EVENT_EXTENSIONS_KEY_INVALID(100206, "event extensions key not startwith weevent-"),
+
     EVENT_ID_IS_BLANK(100300, "eventId is blank"),
 
     EVENT_ID_EXCEEDS_MAX_LENGTH(100301, "eventId exceeds max length[64 bytes]"),
