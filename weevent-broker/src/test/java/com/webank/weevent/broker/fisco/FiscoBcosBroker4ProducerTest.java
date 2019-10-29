@@ -87,27 +87,48 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * extensions contain multiple key,value
+     * extensions contain multiple key and value ,key start with 'weevent-'
      */
     @Test
-    public void testPublishExtContainMulKeyValue() throws Exception {
+    public void testPublishExtContainMulKey() throws BrokerException {
         Map<String, String> ext = new HashMap<>();
-        ext.put("test1", "test value");
-        ext.put("test2", "test value2");
-        ext.put("test3", "test value3");
+        ext.put("weevent-test", "test value");
+        ext.put("weevent-test2", "test value2");
+        ext.put("weevent-test3", "test value3");
         SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), ext), this.groupId);
-        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
+        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 
     /**
-     * extensions contain one key,value
+     * extensions contain multiple key and value ,one key not start with 'weevent-'
      */
     @Test
-    public void testPublishExtContainOneKeyValue() throws Exception {
-        Map<String, String> ext = new HashMap<>();
-        ext.put("test1", "test value");
-        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), ext), this.groupId);
-        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
+    public void testPublishExtContainMulKeyContainNotInvalidKey() {
+        try {
+            Map<String, String> ext = new HashMap<>();
+            ext.put("weevent-test", "test value");
+            ext.put("weevent-test2", "test value2");
+            ext.put("test3", "test value3");
+            this.iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), ext), this.groupId);
+            Assert.fail();
+        } catch (BrokerException e) {
+            Assert.assertEquals(ErrorCode.EVENT_EXTENSIONS_KEY_INVALID.getCode(), e.getCode());
+        }
+    }
+
+    /**
+     * extensions contain one key and value, key not start with 'weevent-'
+     */
+    @Test
+    public void testPublishExtContainNotInvalidKey() {
+        try {
+            Map<String, String> ext = new HashMap<>();
+            ext.put("test1", "test value");
+            this.iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), ext), this.groupId);
+            Assert.fail();
+        } catch (BrokerException e) {
+            Assert.assertEquals(ErrorCode.EVENT_EXTENSIONS_KEY_INVALID.getCode(), e.getCode());
+        }
     }
 
     /**
