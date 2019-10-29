@@ -5,7 +5,7 @@
       stripe
       v-loading='loading'
       element-loading-spinner='el-icon-loading'
-      element-loading-text='数据加载中...'
+      :element-loading-text="$t('common.loading')"
       element-loading-background='rgba(256,256,256,0.8)'
       @expand-change='readDetail'
     >
@@ -51,7 +51,7 @@
         </template>
       </el-table-column>
       <el-table-column
-        label='交易哈希'
+        :label="$t('tableCont.transHash')"
       >
       <template  slot-scope="scope">
         <i class='el-icon-copy-document' style='margin-right:5px;cursor:pointer' v-clipboard:copy='scope.row.transHash' v-clipboard:success='onCopy'></i>
@@ -60,13 +60,13 @@
       </el-table-column>
       <el-table-column
         prop='blockNumber'
-        label='块高'
+        :label="$t('tableCont.blockNumber')"
         width=150
       ></el-table-column>
 
       <el-table-column
         prop='blockTimestamp'
-        label='创建时间'
+        :label="$t('tableCont.timestamp')"
          width=300
       ></el-table-column>
     </el-table>
@@ -106,11 +106,11 @@ export default {
     onCopy () {
       this.$message({
         type: 'success',
-        message: '复制成功'
+        message: this.$t('tableCont.copySuccess')
       })
     },
     detail (e) {
-      this.$alert(e, '错误信息')
+      // this.$alert(e, '错误信息')
     },
     transList () {
       this.loading = true
