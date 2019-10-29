@@ -21,12 +21,14 @@ import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
+import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.stereotype.Service;
 
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
 @Slf4j
@@ -72,15 +74,19 @@ public class QuartzManager {
             ruleList.add(currentRule);
             params.put("ruleMap", ruleMap);
 
-            JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).build();
+            JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).storeDurably(true).build();
 
             // just do one time
-            TriggerBuilder<Trigger> triggerBuilder = newTrigger();
-            triggerBuilder.withIdentity(new Date().toString(), triggerGroupName);
-            triggerBuilder.startNow();
-            triggerBuilder.withSchedule(CronScheduleBuilder.cronSchedule(ProcessorApplication.processorConfig.getCronExpression()));
-            CronTrigger trigger = (CronTrigger) triggerBuilder.build();
+            SimpleTrigger trigger = newTrigger()
+                .withIdentity(new Date().toString(), triggerGroupName)
+                .startNow()
+                .withSchedule(simpleSchedule())
+                .forJob(jobName, jobGroupName)
+                .build();
 
+            if (scheduler.checkExists(JobKey.jobKey(jobName, jobGroupName))) {
+                removeJob(jobName, jobGroupName, triggerName, triggerGroupName);
+            }
             scheduler.scheduleJob(job, trigger);
             if (!scheduler.isShutdown()) {
                 scheduler.start();
@@ -95,6 +101,7 @@ public class QuartzManager {
             return ConstantsHelper.FAIL;
         }
     }
+
 
     /**
      * modify Job Time
@@ -183,5 +190,5 @@ public class QuartzManager {
             return false;
         }
     }
-
+    
 }
