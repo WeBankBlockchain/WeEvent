@@ -17,9 +17,11 @@
     "ecstatic": "^4.1.2",
     "element-ui": "^2.8.2",
     "highcharts": "^7.1.1",
+    "highcharts-no-data-to-display": "^0.1.7",
     "http-server": "^0.11.1",
     "vue": "^2.5.2",
     "vue-clipboard2": "^0.2.1",
+    "vue-i18n": "^8.15.0",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1"
   },
