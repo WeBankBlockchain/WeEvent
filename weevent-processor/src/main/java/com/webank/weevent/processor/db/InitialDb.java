@@ -8,7 +8,6 @@ import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
  * init db tool
  */
 @Slf4j
-public class InitialDb {
+public class InitialDb implements AutoCloseable {
 
     public static void main(String[] args) throws Exception {
         String goalUrl = "";
@@ -45,10 +44,10 @@ public class InitialDb {
         }
 
         // first use dbself database
-        int first = goalUrl.lastIndexOf("/")+1;
+        int first = goalUrl.lastIndexOf("/") + 1;
         dbName = goalUrl.substring(first);
         // get mysql default url like jdbc:mysql://127.0.0.1:3306
-        String defaultUrl = goalUrl.substring(0,first-1);
+        String defaultUrl = goalUrl.substring(0, first - 1);
         Class.forName(driverName);
 
         List<String> tableSqlList = readCEPSql();
@@ -71,14 +70,14 @@ public class InitialDb {
                 stat.executeUpdate(sql);
             }
             log.info("create database {} {}", dbName, " success!");
-        } catch (SQLException e) {
+        } catch (Exception e) {
             log.error("create database fail,message: {}", e.getMessage());
-            throw e;
+            throw new BrokerException(e.getMessage());
         }
     }
 
     private static List<String> readCEPSql() throws IOException {
-        InputStream resourceAsStream = InitialDb.class.getResourceAsStream("/dist/cep_rule.sql");
+        InputStream resourceAsStream = InitialDb.class.getResourceAsStream("/cep_rule.sql");
         StringBuffer sqlBuffer = new StringBuffer();
         List<String> sqlList = new ArrayList<>();
         byte[] buff = new byte[1024];
@@ -96,5 +95,10 @@ public class InitialDb {
             resourceAsStream.close();
         }
         return sqlList;
+    }
+
+    @Override
+    public void close() throws Exception {
+        log.info("resource is close");
     }
 }
