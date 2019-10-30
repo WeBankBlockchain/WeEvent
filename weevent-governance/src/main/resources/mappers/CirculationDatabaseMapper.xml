@@ -10,10 +10,11 @@
         <result column="user_id" property="userId" jdbcType="INTEGER"/>
         <result column="broker_id" property="brokerId" jdbcType="INTEGER"/>
         <result column="database_url" property="databaseUrl" jdbcType="VARCHAR"/>
+        <result column="database_name" property="databaseName" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,create_date,last_update,user_id,broker_id,database_url
+        id,create_date,last_update,user_id,broker_id,database_url,database_name
     </sql>
 
     <select id="circulationDatabaseList" resultMap="BaseResultMap"
@@ -52,26 +53,27 @@
     <update id="updateCirculationDatabase"
             parameterType="com.webank.weevent.governance.entity.CirculationDatabaseEntity">
         update t_circulation_database
-        set database_url=#{databaseUrl}
+        set database_url=#{databaseUrl},
+            database_name=#{databaseName}
         where id = #{id,jdbcType=INTEGER}
     </update>
 
 
     <insert id="addCirculationDatabase">
-        INSERT INTO t_circulation_database(`user_id`, `broker_id`, `database_url`)
-        VALUES (#{userId}, #{brokerId}, #{databaseUrl})
+        INSERT INTO t_circulation_database(`user_id`, `broker_id`, `database_url`, `database_name`)
+        VALUES (#{userId}, #{brokerId}, #{databaseUrl}, #{databaseName})
     </insert>
 
     <insert id="batchInsert">
-        INSERT INTO t_circulation_database(`user_id`,`broker_id`,`database_url`)
+        INSERT INTO t_circulation_database(`user_id`,`broker_id`,`database_url`,`database_name`)
         VALUES
         <foreach collection="circulationDatabaseList" item="circulationDatabase" separator=",">
-            (#{circulationDatabase.userId},#{circulationDatabase.brokerId},#{circulationDatabase.databaseUrl})
+            (#{circulationDatabase.userId},#{circulationDatabase.brokerId},#{circulationDatabase.databaseUrl},,#{circulationDatabase.databaseName})
         </foreach>
     </insert>
 
     <select id="countCirculationDatabase" resultType="int">
-        select  count(*) from t_circulation_database
+        select count(*) from t_circulation_database
         where 1=1
         <if test="id != null">
             and id = #{id,jdbcType=INTEGER}

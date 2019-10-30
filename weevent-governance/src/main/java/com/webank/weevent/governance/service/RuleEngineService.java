@@ -15,8 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.BrokerEntity;
-import com.webank.weevent.governance.entity.RuleEngineEntity;
 import com.webank.weevent.governance.entity.RuleEngineConditionEntity;
+import com.webank.weevent.governance.entity.RuleEngineEntity;
 import com.webank.weevent.governance.enums.ConditionTypeEnum;
 import com.webank.weevent.governance.enums.PayloadEnum;
 import com.webank.weevent.governance.enums.StatusEnum;
@@ -76,7 +76,7 @@ public class RuleEngineService {
     @Autowired
     private BrokerService brokerService;
 
-    private final static List<String> operatorList = new ArrayList<>(Arrays.asList(">=", "<=", ">", "<", "=", "!="));
+    private final static List<String> operatorList = new ArrayList<>(Arrays.asList(">=", "<=", ">", "<"));
 
     private static final int PROCESSOR_SUCCESS_CODE = 0;
 
@@ -327,8 +327,8 @@ public class RuleEngineService {
                 throw new GovernanceException(msg);
             }
         } catch (Exception e) {
-            log.error("processor start ruleEngine fail");
-            throw new GovernanceException("processor start ruleEngine fail");
+            log.error("processor update ruleEngine fail");
+            throw new GovernanceException("processor update ruleEngine fail");
         }
 
     }
@@ -540,13 +540,17 @@ public class RuleEngineService {
         if (!flag) {
             throw new GovernanceException("ruleName repeat");
         }
+        if (ruleEngineEntity.getPayloadMap().isEmpty()) {
+            throw new GovernanceException("rule description is empty");
+
+        }
         if (ruleEngineEntity.getPayload() != null && ruleEngineEntity.getPayload().length() > 100) {
             throw new GovernanceException("rule description length cannot exceed 100");
         }
     }
 
     private boolean checkRuleName(String ruleName, String regex) {
-        if (ruleName == null || ruleName.trim().length() == 0) {
+        if (StringUtil.isBlank(ruleName)) {
             return false;
         }
         return Pattern.matches(regex, ruleName);
@@ -586,7 +590,7 @@ public class RuleEngineService {
             throw new GovernanceException("conditional row field cannot be empty");
         }
         //check number
-        if (operatorList.contains(conditionEntity.getConditionalOperator())) {
+        if ("=".equals(conditionEntity.getConditionalOperator()) || "!=".equals(conditionEntity.getConditionalOperator())) {
             boolean matches = NumberValidationUtils.isRealNumber(conditionEntity.getSqlCondition());
             if (!matches) {
                 throw new GovernanceException("sqlCondition is not number");
@@ -595,9 +599,8 @@ public class RuleEngineService {
     }
 
     private String getProcessorUrl(String brokerUrl) {
-        String ip = brokerUrl.substring(brokerUrl.indexOf("//") + 2, brokerUrl.lastIndexOf(":"));
-        return new StringBuffer(commonService.HTTP).append(":").append("//").append(ip).append(":")
-                .append(this.processorPort).append("/weevent").toString();
+        return "http://10.107.96.107:7008";
+        //   return brokerUrl.substring(0, brokerUrl.lastIndexOf("/"));
     }
 
     private List<RuleEngineConditionEntity> getRuleEngineConditionList(RuleEngineEntity rule) {
