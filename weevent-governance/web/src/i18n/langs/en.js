@@ -184,7 +184,9 @@ module.exports = {
     'databaseUrl': 'JDBC Resources',
     'addAddress': 'New Database',
     'enterDB': 'Please input database JDBC URL',
-    'editAddress': 'Edit Database',
+    'JDBCname': 'JDBC Name',
+    'enterJDBCname': 'Please input database JDBC Name',
+    'enditAddress': 'Edit Database',
     'deleteAddress': 'Delete database?'
   },
   ruleDetail: {
