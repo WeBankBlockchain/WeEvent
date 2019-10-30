@@ -1,45 +1,45 @@
 <template>
   <div class='rule_detail rule'>
     <div class='step'>
-      <p class='rule_title'>数据流转详情</p>
-      <el-button type='primary' size='mini' @click="createRule = !createRule">编辑</el-button>
+      <p class='rule_title'>{{$t('ruleDetail.guideDetail')}}</p>
+      <el-button type='primary' size='mini' @click="createRule = !createRule">{{$t('common.edit')}}</el-button>
       <p class='rule_name'>{{ruleItem.ruleName}}</p>
-      <p class='name'><span>数据格式:</span>{{ruleItem.payloadType === 1 ? 'JSON' : '' }}</p>
-      <p class='name'><span>规则描述:</span>{{ruleItem.payloadMap}}</p>
+      <p class='name'><span>{{$t('rule.dataType')}} :</span>{{ruleItem.payloadType === 1 ? 'JSON' : '' }}</p>
+      <p class='name'><span>{{$t('rule.payloadMap')}} :</span>{{ruleItem.payloadMap}}</p>
     </div>
-    <el-dialog title="编辑规则" :visible.sync="createRule">
+    <el-dialog :title="$t('ruleDetail.editRule')" :visible.sync="createRule">
       <div class='warning_part'>
         <img src="../assets/image/icon_tips.svg" alt="">
-        <p>数据流转类型的规则可以对设备上报的数据进行简单处理,并将处理后的数据流转到其他Topic,支持JSON数据格式。</p>
+        <p>{{$t('rule.creatRuleRemark')}}</p>
       </div>
       <el-form :model="rule" :rules="rules" ref='rule'>
-        <el-form-item label="规则名称" prop='ruleName'>
+        <el-form-item :label="$t('rule.ruleName')  + ' :'" prop='ruleName'>
           <el-input v-model="rule.ruleName" size='small' autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="数据格式">
+        <el-form-item :label="$t('rule.dataType')  + ' :'">
           <el-radio-group v-model="rule.payloadType">
             <el-radio label="1">JSON</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="规则描述" prop='payloadMap'>
-          <el-input v-model="rule.payloadMap" size='small' type='textarea' :rows='5' placeholder="请输入规则描述" autocomplete="off"></el-input>
+        <el-form-item :label="$t('rule.payloadMap')  + ' :'" prop='payloadMap'>
+          <el-input v-model="rule.payloadMap" size='small' type='textarea' :rows='5' :placeholder="$t('rule.enterPayload')" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" size="small" @click='update("rule")'>提交</el-button>
-        <el-button  size="small" @click="createRule = !createRule">取 消</el-button>
+        <el-button type="primary" size="small" @click='update("rule")'>{{$t('rule.commit')}}</el-button>
+        <el-button  size="small" @click="createRule = !createRule">{{$t('common.cancel')}}</el-button>
       </div>
     </el-dialog>
 
     <div class='step'>
-      <p class='rule_title'>数据流转详情</p>
-      <el-button type='primary' size='mini' @click="createSQL = !createSQL">编写SQL</el-button>
-      <el-button size='mini'>SQL语法说明</el-button>
+      <p class='rule_title'>{{$t('ruleDetail.processData')}}</p>
+      <el-button type='primary' size='mini' @click="createSQL = !createSQL">{{$t('rule.editRule')}}</el-button>
+      <el-button size='mini'>{{$t('ruleDetail.sqlDescription')}}</el-button>
       <div class='sql_content'>
         <div class='no_sql' v-show='!fullSQL'>
           <img src="../assets/image/icon_tips.svg" alt="">
-          <span>您还没有编写SQL语句处理数据,</span>
-          <span class='creat_sql' @click="createSQL = !createSQL">编写SQL</span>
+          <span>{{$t('ruleDetail.noRule')}}</span>
+          <span class='creat_sql' @click="createSQL = !createSQL">{{$t('rule.editRule')}}</span>
         </div>
         <div class='sql_lession' v-show='fullSQL'>
           {{this.fullSQL}}
@@ -48,27 +48,27 @@
       </div>
     </div>
 
-    <el-dialog title="编写SQL" :visible.sync="createSQL">
+    <el-dialog :title="$t('rule.editRule')" :visible.sync="createSQL">
       <div class='warning_part sql_part'>
         <p>
-          <span>规则查询语言:</span>
+          <span>{{$t('ruleDetail.ruleSearchLetter')}}</span>
           <!-- <span>复制语句</span> -->
         </p>
-        <p>选择下方选项后,语句将自动生成</p>
+        <p>{{$t('ruleDetail.ruleSearchWarning')}}</p>
       </div>
       <el-form :model="sqlOption" :rules="sqlCheck" ref='sql'>
-        <el-form-item label="字段">
+        <el-form-item :label="$t('ruleDetail.letter')  + ' :'">
           <el-select v-model="sqlOption.selectField" size='small'>
             <el-option :label="key" :value="key" v-for='(item, key, index) in columnName' :key='index'></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="数据流转" prop='fromDestination'>
-          <el-input v-model="sqlOption.fromDestination" size='small' autocomplete="off" placeholder="例如: TopicName"></el-input>
+        <el-form-item :label="$t('ruleDetail.dataCirculat')  + ' :'" prop='fromDestination'>
+          <el-input v-model="sqlOption.fromDestination" size='small' autocomplete="off" :placeholder="$t('common.examples') + 'TopicName'"></el-input>
         </el-form-item>
-        <el-form-item label="异常流转" prop='toDestination'>
-          <el-input v-model="sqlOption.toDestination" size='small' autocomplete="off" placeholder="例如: TopicName"></el-input>
+        <el-form-item :label="$t('ruleDetail.abnormalData')  + ' :'" prop='toDestination'>
+          <el-input v-model="sqlOption.toDestination" size='small' autocomplete="off" :placeholder="$t('common.examples') + 'TopicName'"></el-input>
         </el-form-item>
-        <el-form-item label="条件(选填)">
+        <el-form-item :label="$t('ruleDetail.condition')">
           <div style='text-align:right'>
             <span class='el-icon-plus' @click='addConditionItem'></span>
           </div>
@@ -87,53 +87,53 @@
                   <el-option label=">=" value=">="></el-option>
                   <el-option label="<" value="<"></el-option>
                   <el-option label="<=" value="<="></el-option>
-                  <el-option label="!=" value=">="></el-option>
-                  <el-option label="=" value=">="></el-option>
+                  <el-option label="!=" value="!="></el-option>
+                  <el-option label="=" value="="></el-option>
                 </el-select>
                 <span class='line'>-</span>
                 <el-input size='small' v-model.trim="item.sqlCondition" autocomplete="off"></el-input>
                 <span class='el-icon-remove-outline' @click='remove(index)'></span>
-                <p class='conditionaWarning'>请填写完整的语句</p>
+                <p class='conditionaWarning'>{{$t('ruleDetail.completeLetter')}}</p>
             </div>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" size="small" @click='update("sql")'>提交</el-button>
-        <el-button  size="small" @click="createSQL = !createSQL">取 消</el-button>
+        <el-button type="primary" size="small" @click='update("sql")'>{{$t('rule.commit')}}</el-button>
+        <el-button  size="small" @click="createSQL = !createSQL">{{$t('common.cancel')}}</el-button>
       </div>
     </el-dialog>
 
     <div class='step'>
-      <p class='rule_title'>转发数据</p>
-      <el-button type='primary' size='mini' @click='option = !option'>转发操作</el-button>
+      <p class='rule_title'>{{$t('ruleDetail.forwardData')}}</p>
+      <el-button type='primary' size='mini' @click='option = !option'>{{$t('ruleDetail.forwardOption')}}</el-button>
       <ul class='foward_list'>
-        <li class='foward_list_title'>数据目的地</li>
-        <li class='no_content' v-show='!condition'>暂无数据</li>
+        <li class='foward_list_title'>{{$t('ruleDetail.dataDestination')}}</li>
+        <li class='no_content' v-show='!condition'>{{$t('common.noData')}}</li>
         <li v-show='condition' :title='condition'>{{condition}}</li>
       </ul>
     </div>
 
-    <el-dialog title="添加操作" :visible.sync="option">
+    <el-dialog :title="$t('rule.addOperation')" :visible.sync="option">
       <el-form :model="options" :rules="optionsCheck" ref='options'>
-        <el-form-item label="选择操作" prop='conditionType'>
-          <el-select  v-model='options.conditionType' placeholder="请选择数据流转方式" size='mini' @change="selectType">
-            <el-option label="发布到一个Topic" value="1"></el-option>
-            <el-option label="发布到一个DB" value="2"></el-option>
+        <el-form-item :label="$t('ruleDetail.selectOperation')  + ' :'" prop='conditionType'>
+          <el-select  v-model='options.conditionType' :placeholder="$t('ruleDetail.selectGuide')" size='mini' @change="selectType">
+            <el-option :label="$t('ruleDetail.toTopic')" value="1"></el-option>
+            <el-option :label="$t('ruleDetail.toDB')" value="2"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="Topic" v-show="options.conditionType === '1'" prop='errorDestination'>
-          <el-input v-model="options.errorDestination" size='small' autocomplete="off" placeholder="流转错误时的topic"></el-input>
+        <el-form-item label="Topic :" v-show="options.conditionType === '1'" prop='errorDestination'>
+          <el-input v-model="options.errorDestination" size='small' autocomplete="off" :placeholder="$t('ruleDetail.errorTopic')"></el-input>
         </el-form-item>
-        <el-form-item label="数据库" v-show="options.conditionType === '2'" prop='databaseUrl'>
-          <el-select  placeholder="请选择数据库" size='mini' name='options_dialog' v-model="options.databaseUrl" v-show="dbList.length > 0">
-            <el-option v-for="(item, index) in dbList" :key='index' :value="item.databaseUrl" :label="item.databaseUrl"></el-option>
+        <el-form-item :label="$t('ruleDetail.db')  + ' :'" v-show="options.conditionType === '2'" prop='databaseUrl'>
+          <el-select  :placeholder="$t('ruleDetail.selectDB')" size='mini' name='options_dialog' v-model="options.databaseUrl" v-show="dbList.length > 0">
+            <el-option v-for="(item, index) in dbList" :key='index' :value="item.databaseUrl" :label="item.databaseName"></el-option>
           </el-select>
-          <p class='no_dbList' v-show="dbList.length === 0">还未配置数据流转路径, <span @click="creatDB" >前往配置</span></p>
+          <p class='no_dbList' v-show="dbList.length === 0">{{$t('ruleDetail.guideURL')}} <span @click="creatDB" >{{$t('ruleDetail.setGuide')}}</span></p>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" size="small" @click='update("options")'>提交</el-button>
-        <el-button  size="small" @click='option = !option'>取 消</el-button>
+        <el-button type="primary" size="small" @click='update("options")'>{{$t('rule.commit')}}</el-button>
+        <el-button  size="small" @click='option = !option'>{{$t('common.cancel')}}</el-button>
       </div>
     </el-dialog>
   </div>
@@ -144,14 +144,14 @@ export default{
   data () {
     var ruleName = (rule, value, callback) => {
       if (value === '') {
-        callback(new Error('请输入规则名称'))
+        callback(new Error(this.$t('rule.enterRuleName')))
       } else {
         callback()
       }
     }
     var payloadMap = (rule, value, callback) => {
       if (value === '') {
-        callback(new Error('请输入规则描述'))
+        callback(new Error(this.$t('rule.enterPayload')))
       } else {
         if (typeof value === 'string') {
           try {
@@ -159,10 +159,10 @@ export default{
             if (typeof obj === 'object' && obj) {
               callback()
             } else {
-              callback(new Error('格式错误'))
+              callback(new Error(this.$t('rule.errorType')))
             }
           } catch (e) {
-            callback(new Error('格式错误'))
+            callback(new Error(this.$t('rule.errorType')))
           }
         }
       }
@@ -207,10 +207,10 @@ export default{
       },
       sqlCheck: {
         fromDestination: [
-          { required: true, message: '数据流转地址必须填写', trigger: 'blur' }
+          { required: true, message: this.$t('ruleDetail.guideAddress'), trigger: 'blur' }
         ],
         toDestination: [
-          { required: true, message: '异常流转地址必须填写', trigger: 'blur' }
+          { required: true, message: this.$t('ruleDetail.abnormalAddress'), trigger: 'blur' }
         ]
       },
       options: {
@@ -220,13 +220,13 @@ export default{
       },
       optionsCheck: {
         conditionType: [
-          { required: true, message: '请选择', trigger: 'blur' }
+          { required: true, message: this.$t('common.choose'), trigger: 'blur' }
         ],
         databaseUrl: [
-          { required: true, message: '请选择', trigger: 'blur' }
+          { required: true, message: this.$t('common.choose'), trigger: 'blur' }
         ],
         errorDestination: [
-          { required: true, message: '请填写', trigger: 'blur' }
+          { required: true, message: this.$t('common.enter'), trigger: 'blur' }
         ]
       },
       dbList: [],
@@ -291,12 +291,12 @@ export default{
       }
     },
     brokerId () {
-      this.$store.commit('set_menu', ['规则引擎', '规则管理'])
+      this.$store.commit('set_menu', [this.$t('sideBar.engine'), this.$t('sideBar.ruleMana')])
       this.$store.commit('set_active', '4-1')
       this.$router.push('./rule')
     },
     groupId () {
-      this.$store.commit('set_menu', ['规则引擎', '规则管理'])
+      this.$store.commit('set_menu', [this.$t('sideBar.engine'), this.$t('sideBar.ruleMana')])
       this.$store.commit('set_active', '4-1')
       this.$router.push('./rule')
     }
@@ -343,7 +343,6 @@ export default{
           }
           this.fullSQL = res.data.data.fullSQL
           this.columnName = Object.assign({}, JSON.parse(res.data.data.payload))
-          console.log(this.columnName)
         }
       })
     },
@@ -363,7 +362,7 @@ export default{
       }
     },
     creatDB () {
-      this.$store.commit('set_menu', ['规则引擎', '数据源设置'])
+      this.$store.commit('set_menu', [this.$t('sideBar.engine'), this.$t('sideBar.sources')])
       this.$store.commit('set_active', '4-2')
       this.$router.push('./dataBase')
     },
@@ -431,7 +430,7 @@ export default{
           if (res.data.status === 200) {
             vm.$message({
               type: 'success',
-              message: '编辑成功'
+              message: vm.$t('common.editSuccess')
             })
             vm.createRule = false
             vm.createSQL = false
@@ -440,7 +439,7 @@ export default{
           } else {
             vm.$message({
               type: 'warning',
-              message: '操作失败'
+              message: vm.$t('common.operFail')
             })
           }
         })
