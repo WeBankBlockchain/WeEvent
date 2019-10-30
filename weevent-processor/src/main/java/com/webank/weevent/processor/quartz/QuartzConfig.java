@@ -40,7 +40,7 @@ public class QuartzConfig {
                 quartzPropertie.setProperty("org.quartz.plugin.shutdownHook.class","org.quartz.plugins.management.ShutdownHookPlugin");
                 quartzPropertie.setProperty("org.quartz.scheduler.instanceId","auto");
                 quartzPropertie.setProperty("org.quartz.scheduler.skipupdateCheck","auto");
-                quartzPropertie.setProperty("org.quartz.dataSource.weevent_processor.driver","com.mysql.jdbc.Driver");
+                quartzPropertie.setProperty("org.quartz.dataSource.WeEvent_processor.driver","com.mysql.jdbc.Driver");
                 factory.setQuartzProperties(quartzPropertie);
                 factory.setJobFactory(jobFactory);
                 in.close();
