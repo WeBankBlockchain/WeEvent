@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 
-import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.RetCode;
@@ -70,12 +69,14 @@ public class QuartzManager {
             }
             // add current rule
             CEPRule currentRule = (CEPRule) params.get("rule");
-            ruleMap.put(currentRule.getId(), currentRule);
-            ruleList.add(currentRule);
+            if (currentRule.getStatus().equals(1)) {
+                ruleMap.put(currentRule.getId(), currentRule);
+                ruleList.add(currentRule);
+            }
+
             params.put("ruleMap", ruleMap);
 
             JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).storeDurably(true).build();
-
             // just do one time
             SimpleTrigger trigger = newTrigger()
                 .withIdentity(new Date().toString(), triggerGroupName)
