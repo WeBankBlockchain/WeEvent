@@ -306,6 +306,7 @@ public class RuleEngineService {
             String brokerUrl = new StringBuffer(broker.getBrokerUrl()).append(ConstantProperties.AND_SYMBOL)
                     .append("groupId=").append(ruleEngineEntity.getGroupId()).toString();
             ruleEngineEntity.setBrokerUrl(brokerUrl);
+            ruleEngineEntity.setStatus(oldRule.getStatus());
             String url = new StringBuffer(this.getProcessorUrl(broker.getBrokerUrl())).append(ConstantProperties.PROCESSOR_UPDATE_CEP_RULE).toString();
             String jsonString = JSONObject.toJSONString(ruleEngineEntity);
             Map map = JSONObject.parseObject(jsonString, Map.class);
@@ -340,9 +341,16 @@ public class RuleEngineService {
         }
         String blank = " ";
         StringBuffer buffer = new StringBuffer(blank);
+        int count = 0;
         for (RuleEngineConditionEntity entity : ruleEngineConditionList) {
-            buffer.append(entity.getConnectionOperator()).append(blank).append(entity.getColumnName()).append(blank)
-                    .append(entity.getConditionalOperator()).append(blank).append(entity.getSqlCondition()).append(blank);
+            if (count == 0) {
+                buffer.append(blank).append(entity.getColumnName()).append(blank)
+                        .append(entity.getConditionalOperator()).append(blank).append(entity.getSqlCondition()).append(blank);
+            } else {
+                buffer.append(entity.getConnectionOperator()).append(blank).append(entity.getColumnName()).append(blank)
+                        .append(entity.getConditionalOperator()).append(blank).append(entity.getSqlCondition()).append(blank);
+            }
+            count++;
         }
         return buffer.toString();
     }
@@ -599,7 +607,7 @@ public class RuleEngineService {
     }
 
     private String getProcessorUrl(String brokerUrl) {
-        return "http://10.107.96.107:7008";
+        return "http://localhost:7008";
         //   return brokerUrl.substring(0, brokerUrl.lastIndexOf("/"));
     }
 
