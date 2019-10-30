@@ -11,6 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.service.AnalysisWeEventIdService;
 import com.webank.weevent.processor.utils.CommonUtil;
+import com.webank.weevent.processor.utils.ConstantsHelper;
+import com.webank.weevent.processor.utils.RetCode;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.WeEvent;
@@ -156,16 +158,15 @@ public class CEPRuleMQ {
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
             if (!StringUtils.isEmpty(entry.getValue().getPayload())
                     && !StringUtils.isEmpty(entry.getValue().getConditionField())) {
-
-                // parsing the payload && match the content,if true and hit it
-                if (entry.getValue().getConditionType().equals(2)) {
-                    sendMessageToDB(content, entry.getValue());
-
-                } else if (hitRuleEngine(entry.getValue().getPayload(), content, entry.getValue().getConditionField())) {
-
-                    // select the field and publish the message to the toDestination
+                    log.info("check the josn and return fine !");
+                if (hitRuleEngine(entry.getValue().getPayload(), content, entry.getValue().getConditionField())) {
                     try {
-                        if (entry.getValue().getConditionType().equals(1)) {
+                        // parsing the payload && match the content,if true and hit it
+                        if (entry.getValue().getConditionType().equals(2)) {
+                            sendMessageToDB(content, entry.getValue());
+
+                        } else if (entry.getValue().getConditionType().equals(1)) {
+                            // select the field and publish the message to the toDestination
                             // publish the message
                             log.info("publish topic {}", entry.getValue().getSelectField());
                             client.publish(entry.getValue().getToDestination(), content.getBytes());
@@ -179,7 +180,6 @@ public class CEPRuleMQ {
         }
 
     }
-
 
     private static boolean hitRuleEngine(String payload, String eventContent, String condition) {
         if (CommonUtil.checkJson(eventContent, payload)) {
@@ -195,6 +195,27 @@ public class CEPRuleMQ {
             return (Boolean) jexl.createExpression(condition).evaluate(context);
         }
         return Boolean.FALSE;
+    }
+
+    public static RetCode checkCondition(String payload, String condition) {
+        try {
+            List<String> payloadContentKeys = CommonUtil.getKeys(payload);
+            JSONObject payloadJson = JSONObject.parseObject(payload);
+            JexlEngine jexl = new JexlBuilder().create();
+
+            JexlContext context = new MapContext();
+            for (String key : payloadContentKeys) {
+                context.set(key, payloadJson.get(key));
+            }
+            Boolean e = (Boolean) jexl.createExpression(condition).evaluate(context);
+            log.info(e.toString());
+            // if can check the true or false,is must be the right number
+            return ConstantsHelper.SUCCESS;
+        } catch (Exception e) {
+            log.info("error number");
+            return ConstantsHelper.FAIL;
+        }
+
     }
 }
 
