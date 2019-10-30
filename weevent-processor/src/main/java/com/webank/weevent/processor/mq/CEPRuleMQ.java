@@ -158,9 +158,8 @@ public class CEPRuleMQ {
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
             if (!StringUtils.isEmpty(entry.getValue().getPayload())
                     && !StringUtils.isEmpty(entry.getValue().getConditionField())) {
-
+                    log.info("check the josn and return fine !");
                 if (hitRuleEngine(entry.getValue().getPayload(), content, entry.getValue().getConditionField())) {
-
                     try {
                         // parsing the payload && match the content,if true and hit it
                         if (entry.getValue().getConditionType().equals(2)) {
