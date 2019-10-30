@@ -35,6 +35,7 @@
 import Highcharts from 'highcharts/highstock'
 import { getLastWeek, getTimeList } from '../utils/formatTime'
 import API from '../API/resource.js'
+require('highcharts/modules/no-data-to-display.js')(Highcharts)
 export default{
   data () {
     return {
@@ -63,6 +64,16 @@ export default{
           crosshairs: true
         },
         series: [],
+        lang: {
+          noData: this.$t('common.noData')
+        },
+        noData: {
+          style: {
+            fontWeight: 'bold',
+            fontSize: '15px',
+            color: '#303030'
+          }
+        },
         legend: {
           align: 'center',
           verticalAlign: 'top',
@@ -88,6 +99,10 @@ export default{
       API.historicalData(data).then(res => {
         if (res.data.status === 200) {
           let resData = res.data.data
+          if (!resData || resData.length === 0) {
+            Highcharts.chart('chart', vm.option).showNoData()
+            return
+          }
           let topic = []
           vm.option.series = []
           if (e) {
@@ -112,13 +127,13 @@ export default{
           })
           vm.option.yAxis.max = max
           vm.topic = [].concat(topic)
-          console.log(vm.option)
           Highcharts.chart('chart', vm.option)
         } else {
           vm.$message({
             type: 'warning',
             message: this.$t('tableCont.getDataError')
           })
+          Highcharts.chart('chart', vm.option).showNoData()
         }
       })
     },
@@ -153,6 +168,9 @@ export default{
     },
     groupId () {
       return this.$store.state.groupId
+    },
+    lang () {
+      return this.$store.state.lang
     }
   },
   watch: {
@@ -161,6 +179,15 @@ export default{
     },
     groupId () {
       this.beginDate(true)
+    },
+    lang () {
+      if (this.option.series.length === 0) {
+        this.option.lang.noData = this.$t('common.noData')
+        Highcharts.chart('chart', this.option).showNoData()
+      } else {
+        this.option.lang.noData = this.$t('common.noData')
+        Highcharts.chart('chart', this.option)
+      }
     }
   },
   mounted () {
