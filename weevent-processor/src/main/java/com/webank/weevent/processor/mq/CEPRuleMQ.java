@@ -29,17 +29,21 @@ import org.springframework.util.StringUtils;
 @Slf4j
 public class CEPRuleMQ {
     // <ruleId <--> subscriptionId>
-    public static Map<String, String> subscriptionIdMap = new ConcurrentHashMap<>();
+    private static Map<String, String> subscriptionIdMap = new ConcurrentHashMap<>();
 
     public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException {
         // unsubscribe old the topic
-        ruleMap.get(rule.getId()).getToDestination();
         IWeEventClient client = getClient(rule);
-        // update the rule map
-        ruleMap.put(rule.getId(), rule);
-        // update subscribe
-        subscribeMsg(rule, ruleMap);
-        client.unSubscribe(subscriptionIdMap.get(rule.getId()));
+        // when is in run status. update the rule map
+        if (1 == rule.getStatus()) {
+            ruleMap.put(rule.getId(), rule);
+            // update subscribe
+            subscribeMsg(rule, ruleMap);
+        }
+        String subId = subscriptionIdMap.get(rule.getId());
+        if (null != subId) {
+            client.unSubscribe(subId);
+        }
     }
 
     private static IWeEventClient getClient(CEPRule rule) {
@@ -61,7 +65,7 @@ public class CEPRuleMQ {
 
     }
 
-    public static void subscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) {
+    private static void subscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) {
         try {
             IWeEventClient client = getClient(rule);
             // subscribe topic
@@ -148,7 +152,7 @@ public class CEPRuleMQ {
 
     }
 
-    public static void handleOnEvent(WeEvent event, IWeEventClient client, Map<String, CEPRule> ruleMap) {
+    private static void handleOnEvent(WeEvent event, IWeEventClient client, Map<String, CEPRule> ruleMap) {
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
 
         // get the content ,and parsing it  byte[]-->String
@@ -158,7 +162,7 @@ public class CEPRuleMQ {
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
             if (!StringUtils.isEmpty(entry.getValue().getPayload())
                     && !StringUtils.isEmpty(entry.getValue().getConditionField())) {
-                    log.info("check the josn and return fine !");
+                log.info("check the josn and return fine !");
                 if (hitRuleEngine(entry.getValue().getPayload(), content, entry.getValue().getConditionField())) {
                     try {
                         // parsing the payload && match the content,if true and hit it
