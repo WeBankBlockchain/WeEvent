@@ -8,7 +8,7 @@
       <div class='table_part'>
         <p class='title'>
           <span>{{$t('serverSet.serverMana')}}</span>
-          <i class='el-icon-plus' @click='showLog = true' ></i>
+          <i class='el-icon-plus' @click="showLog = true" ></i>
         </p>
         <el-table
           :data="server"
@@ -45,6 +45,8 @@
         </el-form-item>
         <el-form-item :label="$t('serverSet.brokerURLAddress') + ' :'" prop='brokerUrl'>
           <el-input v-model.trim="form.brokerUrl" autocomplete="off"  :placeholder="$t('serverSet.borkerPlaceholder')"></el-input>
+          <!-- <p class='version' v-show="showVersion">{{$t('header.version') + ':'}}<span v-for='(item, key, index) in version' :key='index'>{{item}}</span></p> -->
+          <p class='version' v-show="version" v-html="version"></p>
         </el-form-item>
         <el-form-item :label="$t('serverSet.webaseURLAddress') + ' :'" prop='webaseUrl'>
           <el-input v-model.trim="form.webaseUrl" autocomplete="off"  :placeholder="$t('serverSet.webasePlaceholder')"></el-input>
@@ -94,13 +96,15 @@ export default {
       if (value === '') {
         callback(new Error(this.$t('serverSet.emptyPort')))
       } else {
-        let data = {
-          'userId': parseInt(localStorage.getItem('userId')),
-          'id': parseInt(localStorage.getItem('brokerId')),
-          'brokerUrl': value
-        }
-        API.checkBrokerServer(data).then(res => {
-          if (res.data === 'SUCCESS') {
+        let url = '?brokerUrl=' + value
+        API.getVersion(url).then(res => {
+          if (res.data.code === 0) {
+            let data = res.data.data
+            let str = this.$t('header.version') + ': '
+            for (var key in data) {
+              str += data[key] + '&nbsp&nbsp'
+            }
+            this.version = str
             callback()
           } else {
             callback(new Error(this.$t('serverSet.errorAddress')))
@@ -128,6 +132,8 @@ export default {
       }
     }
     return {
+      version: '',
+      showVersion: false,
       server: [],
       showLog: false,
       isEdit: false,
@@ -162,10 +168,14 @@ export default {
         this.$set(this.form, 'brokerUrl', '')
         this.$set(this.form, 'webaseUrl', '')
         this.$set(this.form, 'userIdList', [])
+        this.version = ''
         this.brokerId = ''
         this.showAccount = true
+        this.isEdit = false
       } else {
-        this.title = this.$t('serverSet.addServer')
+        if (!this.isEdit) {
+          this.title = this.$t('serverSet.addServer')
+        }
         API.accountList('').then(res => {
           if (res.data.status === 200) {
             this.accountList = [].concat(res.data.data)
@@ -284,9 +294,10 @@ export default {
       } else {
         this.showAccount = false
       }
-      this.title = this.$t('serverSet.editServer')
+      this.title = '编辑信息'
       this.showLog = true
       this.isEdit = true
+      this.title = this.$t('serverSet.editServer')
     },
     deleteItem (e) {
       var vm = this
