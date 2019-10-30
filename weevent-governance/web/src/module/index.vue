@@ -108,7 +108,6 @@ export default {
           this.$store.commit('set_menu', [this.$t('sideBar.engine'), this.$t('sideBar.ruleMana')])
           break
         case '/ruleDetail':
-          console.log('a')
           this.$store.commit('set_active', '4-1')
           this.$store.commit('set_menu', [this.$t('sideBar.engine'), this.$t('sideBar.ruleMana'), this.$t('sideBar.ruleDetail')])
           break
