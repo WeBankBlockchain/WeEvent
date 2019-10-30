@@ -87,8 +87,8 @@
                   <el-option label=">=" value=">="></el-option>
                   <el-option label="<" value="<"></el-option>
                   <el-option label="<=" value="<="></el-option>
-                  <el-option label="!=" value=">="></el-option>
-                  <el-option label="=" value=">="></el-option>
+                  <el-option label="!=" value="!="></el-option>
+                  <el-option label="=" value="="></el-option>
                 </el-select>
                 <span class='line'>-</span>
                 <el-input size='small' v-model.trim="item.sqlCondition" autocomplete="off"></el-input>
@@ -126,7 +126,7 @@
         </el-form-item>
         <el-form-item :label="$t('ruleDetail.db')  + ' :'" v-show="options.conditionType === '2'" prop='databaseUrl'>
           <el-select  :placeholder="$t('ruleDetail.selectDB')" size='mini' name='options_dialog' v-model="options.databaseUrl" v-show="dbList.length > 0">
-            <el-option v-for="(item, index) in dbList" :key='index' :value="item.databaseUrl" :label="item.databaseUrl"></el-option>
+            <el-option v-for="(item, index) in dbList" :key='index' :value="item.databaseUrl" :label="item.databaseName"></el-option>
           </el-select>
           <p class='no_dbList' v-show="dbList.length === 0">{{$t('ruleDetail.guideURL')}} <span @click="creatDB" >{{$t('ruleDetail.setGuide')}}</span></p>
         </el-form-item>
