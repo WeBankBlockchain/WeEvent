@@ -18,40 +18,6 @@
     </el-dropdown>
   </div>
   <div class='right_part'>
-    <el-popover
-      placement="bottom"
-      :title="$t('header.weEventVersion')"
-      width="250"
-      trigger="click"
-      v-show='!noServer'
-      >
-      <div id='version'>
-        <p class='version_infor'>
-          <span class='version_title'>
-            Branch :
-          </span>
-          <span class='version_content'>
-            {{version.gitBranch}}
-          </span>
-        </p>
-        <p class='version_infor'>
-          <span class='version_title'>
-            CommitHash :
-          </span>
-          <span class='version_content'>
-            {{version.gitCommitHash}}
-          </span>
-        </p>
-        <p class='version_infor'>
-          <span class='version_title'>
-            {{$t('header.lastCommit')}}
-          </span>
-          <span class='version_content'>{{version.gitCommitTimeStamp}}</span>
-        </p>
-      </div>
-      <el-button slot="reference">{{$t('header.version') + ':'}} {{version.weEventVersion}}</el-button>
-    </el-popover>
-    <span style='margin:0 5px 0 15px'></span>
     <el-dropdown trigger="click" @command='selectLang'>
       <span>{{$t('header.lang')}}<i class="el-icon-arrow-down el-icon-caret-bottom"></i></span>
       <el-dropdown-menu slot="dropdown">
@@ -174,7 +140,6 @@ export default {
               localStorage.setItem('brokerId', id)
             }
             vm.listGroup()
-            vm.getVersion()
           } else {
             vm.$message({
               type: 'warning',
@@ -198,15 +163,6 @@ export default {
           })
         } else {
           vm.$store.commit('set_groupId', localStorage.getItem('groupId'))
-        }
-      })
-    },
-    getVersion () {
-      let url = '?brokerId=' + localStorage.getItem('brokerId')
-      let vm = this
-      API.getVersion(url).then(res => {
-        if (res.data.code === 0) {
-          vm.version = Object.assign({}, res.data.data)
         }
       })
     },
