@@ -48,6 +48,12 @@ function nginx_setup() {
         echo "set governance_url: $governance_url"
         sed -i "s/localhost:7009/$governance_url/g" ${nginx_path}/conf/conf.d/http_rs_quickinstall.conf
     fi
+
+        if  [[ -n ${processor_port} ]]; then
+        processor_url="localhost:${processor_port}"
+        echo "set processor_url: $processor_url"
+        sed -i "s/localhost:7008/$processor_url/g" ${nginx_path}/conf/conf.d/http_rs_quickinstall.conf
+    fi
     
     cp nginx.sh ${nginx_path}
 
@@ -58,7 +64,7 @@ function nginx_setup() {
 if [[ $# -lt 2 ]]; then
     echo "Usage:"
     echo "    $0 --nginx_path /data/app/weevent/nginx "
-    echo "    --broker_port --governance_port"
+    echo "    --broker_port 7000 --governance_port 7009 --processor_port 7008"
     exit 1
 fi
 
