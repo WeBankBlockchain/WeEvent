@@ -1,7 +1,12 @@
 package com.webank.weevent.processor;
 
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.sdk.IWeEventClient;
+import com.webank.weevent.sdk.WeEvent;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +26,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @Slf4j
@@ -116,14 +120,14 @@ public class ServiceTest {
                 " \t\t\"id\":1,\n" +
                 "        \"ruleName\": \"air3\",\n" +
                 "        \"fromDestination\": \"from.com.webank.weevent\",\n" +
-                "        \"brokerUrl\": \"http://122.51.93.181:8090/weevent\",\n" +
+                "        \"brokerUrl\": \"http://127.0.0.1:8090/weevent\",\n" +
                 "        \"payload\":\"{\\\"studentName\\\":\\\"lily\\\",\\\"studentAge\\\":12}\",\n" +
                 "        \"payloadType\": 0,\n" +
                 "        \"selectField\": null,\n" +
                 "        \"conditionField\": null,\n" +
                 "        \"conditionType\": 1,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseurl\": \"jdbc:mysql://122.51.93.181:3306/cep?user=root&password=WeEvent@2019\",\n" +
+                "        \"databaseurl\": \"jdbc:mysql://127.0.0.1:3306/cep?user=root&password=WeEvent@2019\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -180,14 +184,14 @@ public class ServiceTest {
                 " \t\t\"id\":1032,\n" +
                 "        \"ruleName\": \"air3\",\n" +
                 "        \"fromDestination\": \"from.com.webank.weevent\",\n" +
-                "        \"brokerUrl\": \"http://122.51.93.181:8090/weevent\",\n" +
+                "        \"brokerUrl\": \"http://127.0.0.1:8090/weevent\",\n" +
                 "        \"payload\":\"{\\\"a\\\":1,\\\"b\\\":\\\"test\\\",\\\"c\\\":10}\",\n" +
                 "        \"payloadType\":\"c<20\",\n" +
                 "        \"selectField\": null,\n" +
                 "        \"conditionField\": null,\n" +
                 "        \"conditionType\": 1,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseurl\": \"jdbc:mysql://122.51.93.181:3306/cep?user=root&password=WeEvent@2019\",\n" +
+                "        \"databaseurl\": \"jdbc:mysql://127.0.0.1:3306/cep?user=root&password=WeEvent@2019\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -200,14 +204,16 @@ public class ServiceTest {
         log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
         // publish message
-        IWeEventClient client = IWeEventClient.build("http://122.51.93.181:8090/weevent");
-        client.publish("from.com.webank.weevent", "{\"a\":1,\"b\":\"test\",\"c\":10}".getBytes());
+        IWeEventClient client = IWeEventClient.build("http://127.0.0.1:8090/weevent");
+        Map<String, String> extensions = new HashMap<>();
+        WeEvent weEvent = new WeEvent("from.com.webank.weevent", "{\"a\":1,\"b\":\"test\",\"c\":10}".getBytes(StandardCharsets.UTF_8), extensions);
+        client.publish(weEvent);
         assertEquals(200, result.getResponse().getStatus());
     }
 
     @Test
     public void urlPage() {
-        String url = "http://122.51.93.181:8090/weevent";
+        String url = "http://127.0.0.1:8090/weevent";
         String page = null;
         String[] arrSplit;
 
