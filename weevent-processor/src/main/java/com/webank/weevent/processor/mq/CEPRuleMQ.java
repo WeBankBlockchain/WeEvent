@@ -40,10 +40,10 @@ public class CEPRuleMQ {
         if (1 == rule.getStatus()) {
             ruleMap.put(rule.getId(), rule);
             // update subscribe
-            subscribeMsg(rule, ruleMap);
+           subscribeMsg(rule, ruleMap);
         }
         String subId = subscriptionIdMap.get(rule.getId());
-        if (null != subId) {
+        if (null == subId) {
             client.unSubscribe(subId);
         }
     }
