@@ -76,9 +76,9 @@ public class FabricDeployContractUtil {
                 proposalResponses = FabricSDKWrapper.instantiateProposal(client, channel, chaincodeID, TransactionRequest.Type.GO_LANG, fabricConfig.getProposalTimeout());
                 transactionEvent = FabricSDKWrapper.sendTransaction(channel, proposalResponses, fabricConfig.getTransactionTimeout());
                 if (!"".equals(transactionEvent.getTransactionID())) {
-                    log.debug("Instantiate TopicController SUCC transactionEvent={}", transactionEvent);
+                    log.debug("Instantiate TopicController SUCC transactionEvent:{}", transactionEvent);
                 } else {
-                    log.error("Instantiate TopicController FAIL transactionEvent={}", transactionEvent);
+                    log.error("Instantiate TopicController FAIL transactionEvent:{}", transactionEvent);
                     systemExit(1);
                 }
             }
