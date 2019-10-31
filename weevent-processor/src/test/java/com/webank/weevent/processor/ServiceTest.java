@@ -1,12 +1,6 @@
 package com.webank.weevent.processor;
 
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.webank.weevent.processor.model.CEPRule;
-import com.webank.weevent.sdk.IWeEventClient;
-import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
@@ -51,14 +45,14 @@ public class ServiceTest {
                 " \t\t\"id\":1031,\n" +
                 "        \"ruleName\": \"air3\",\n" +
                 "        \"fromDestination\": \"from.com.webank.weevent\",\n" +
-                "        \"brokerUrl\": \"http://122.51.93.181:7000/weevent\",\n" +
+                "        \"brokerUrl\": \"http://127.0.0.1:7000/weevent\",\n" +
                 "        \"payload\":\"{\\\"studentName\\\":\\\"lily\\\",\\\"studentAge\\\":12}\",\n" +
                 "        \"payloadType\": 0,\n" +
                 "        \"selectField\": null,\n" +
                 "        \"conditionField\": null,\n" +
                 "        \"conditionType\": 1,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://122.51.93.181:3306/cep?user=root&password=WeEvent@2019\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/cep?user=root&password=WeEvent@2019\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -80,14 +74,14 @@ public class ServiceTest {
                 " \t\t\"id\":1,\n" +
                 "        \"ruleName\": \"air3\",\n" +
                 "        \"fromDestination\": \"from.com.webank.weevent\",\n" +
-                "        \"brokerUrl\": \"http://122.51.93.181:7000/weevent\",\n" +
+                "        \"brokerUrl\": \"http://127.0.0.1:7000/weevent\",\n" +
                 "        \"payload\":\"{\\\"studentName\\\":\\\"lily\\\",\\\"studentAge\\\":12}\",\n" +
                 "        \"payloadType\": 0,\n" +
                 "        \"selectField\": null,\n" +
                 "        \"conditionField\": null,\n" +
                 "        \"conditionType\": 1,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://122.51.93.181:3306/cep?user=root&password=WeEvent@2019\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/cep?user=root&password=WeEvent@2019\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -119,14 +113,14 @@ public class ServiceTest {
                 " \t\t\"id\":1,\n" +
                 "        \"ruleName\": \"air3\",\n" +
                 "        \"fromDestination\": \"from.com.webank.weevent\",\n" +
-                "        \"brokerUrl\": \"http://122.51.93.181:7000/weevent\",\n" +
+                "        \"brokerUrl\": \"http://127.0.0.1:7000/weevent\",\n" +
                 "        \"payload\":\"{\\\"studentName\\\":\\\"lily\\\",\\\"studentAge\\\":12}\",\n" +
                 "        \"payloadType\": 0,\n" +
                 "        \"selectField\": null,\n" +
                 "        \"conditionField\": null,\n" +
                 "        \"conditionType\": 1,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://122.51.93.181:3306/cep?user=root&password=WeEvent@2019\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/cep?user=root&password=WeEvent@2019\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -181,14 +175,14 @@ public class ServiceTest {
                 " \t\t\"id\":10321253,\n" +
                 "        \"ruleName\": \"air3\",\n" +
                 "        \"fromDestination\": \"from.com.webank.weevent\",\n" +
-                "        \"brokerUrl\": \"http://122.51.93.181:7000/weevent\",\n" +
+                "        \"brokerUrl\": \"http://127.0.0.1:7000/weevent\",\n" +
                 "        \"payload\":\"{\\\"a\\\":1,\\\"b\\\":\\\"test\\\",\\\"c\\\":10}\",\n" +
                 "        \"payloadType\":1,\n" +
                 "        \"selectField\": \"a,b,c\",\n" +
                 "        \"conditionField\": \"c<20\",\n" +
                 "        \"conditionType\": 1,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://122.51.93.181:3306/cep?user=root&password=WeEvent@2019\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/cep?user=root&password=WeEvent@2019\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -204,6 +198,7 @@ public class ServiceTest {
         assertEquals(200, result.getResponse().getStatus());
         Thread.sleep(200000);
     }
+
     @Test
     public void checkHitToDB() throws Exception {
         String url = "/startCEPRule";
@@ -218,7 +213,7 @@ public class ServiceTest {
                 "        \"conditionField\": \"c<20\",\n" +
                 "        \"conditionType\": 2,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://122.51.93.181:3306/cep?user=root&password=WeEvent@2019&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/cep?user=root&password=WeEvent@2019&tableName=fromIfttt\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
