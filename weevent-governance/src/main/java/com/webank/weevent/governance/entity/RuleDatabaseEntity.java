@@ -1,6 +1,6 @@
 package com.webank.weevent.governance.entity;
 
-import com.webank.weevent.governance.entity.base.CirculationDatabaseBase;
+import com.webank.weevent.governance.entity.base.RuleDatabaseBase;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -12,6 +12,6 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class CirculationDatabaseEntity extends CirculationDatabaseBase {
+public class RuleDatabaseEntity extends RuleDatabaseBase {
 
 }
