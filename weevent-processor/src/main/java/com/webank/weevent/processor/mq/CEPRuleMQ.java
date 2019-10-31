@@ -1,9 +1,10 @@
 package com.webank.weevent.processor.mq;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,6 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.service.AnalysisWeEventIdService;
 import com.webank.weevent.processor.utils.CommonUtil;
+import com.webank.weevent.processor.utils.ConstantsHelper;
+import com.webank.weevent.processor.utils.RetCode;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.WeEvent;
@@ -27,17 +30,21 @@ import org.springframework.util.StringUtils;
 @Slf4j
 public class CEPRuleMQ {
     // <ruleId <--> subscriptionId>
-    public static Map<String, String> subscriptionIdMap = new ConcurrentHashMap<>();
+    private static Map<String, String> subscriptionIdMap = new ConcurrentHashMap<>();
 
     public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException {
         // unsubscribe old the topic
-        ruleMap.get(rule.getId()).getToDestination();
         IWeEventClient client = getClient(rule);
-        // update the rule map
-        ruleMap.put(rule.getId(), rule);
-        // update subscribe
-        subscribeMsg(rule, ruleMap);
-        client.unSubscribe(subscriptionIdMap.get(rule.getId()));
+        // when is in run status. update the rule map
+        if (1 == rule.getStatus()) {
+            ruleMap.put(rule.getId(), rule);
+            // update subscribe
+            subscribeMsg(rule, ruleMap);
+        }
+        String subId = subscriptionIdMap.get(rule.getId());
+        if (null == subId) {
+            client.unSubscribe(subId);
+        }
     }
 
     private static IWeEventClient getClient(CEPRule rule) {
@@ -59,7 +66,7 @@ public class CEPRuleMQ {
 
     }
 
-    public static void subscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) {
+    private static void subscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) {
         try {
             IWeEventClient client = getClient(rule);
             // subscribe topic
@@ -112,32 +119,42 @@ public class CEPRuleMQ {
                 StringBuffer insertExpression = new StringBuffer("insert into ");
                 insertExpression.append(urlParamMap.get("tableName"));
                 insertExpression.append("(");
-                StringBuffer values = new StringBuffer("values (");
-                Map<String, Integer> sqlvalue = CommonUtil.contactsql(content, rule.getPayload());
-                List<String> result = new ArrayList(sqlvalue.keySet());
+                StringBuffer values = new StringBuffer(" values (");
 
-                //contact insert into users (first_name, last_name, date_created, is_admin, num_points)
-                for (Map.Entry<String, Integer> entry : sqlvalue.entrySet()) {
-                    System.out.println(entry.getKey() + ":" + entry.getValue());
-                    if (entry.getValue().equals(1)) {
-                        if (entry.getValue().equals(result.get(result.size() - 1))) {
-                            insertExpression.append(entry.getKey()).append(")");
-                            values.append("?）");
-                        } else {
-                            insertExpression.append(entry.getKey()).append(",");
-                            values.append("?，");
-                        }
+                // select key and value
+                Map<String, String> sqlvalue = CommonUtil.contactsql(content, rule.getSelectField(), rule.getPayload());
+                // just the order key and need write in db
+                List<String> keys = CommonUtil.getAllKey(sqlvalue);
+
+                // payload just like the table
+                for (int i = 0; i < keys.size(); i++) {
+                    if ((keys.size() - 1) == i) {
+                        // last key
+                        insertExpression.append(keys.get(i)).append(")");
+                        values.append("?)");
+                    } else {
+                        // concat the key
+                        insertExpression.append(keys.get(i)).append(",");
+
+                        values.append("?,");
                     }
+
                 }
 
                 StringBuffer query = insertExpression.append(values);
                 log.info("query:{}", query);
                 PreparedStatement preparedStmt = conn.prepareStatement(query.toString());
-                for (int t = 0; t < result.size(); t++) {
-                    preparedStmt.setString(t + 1, eventContent.get(result.get(t)).toString());
+                for (int t = 0; t < keys.size(); t++) {
+                    preparedStmt.setString(t + 1, sqlvalue.get(keys.get(t)));
                 }
+                log.info("preparedStmt:{}", preparedStmt.toString());
                 // execute the preparedstatement
-                preparedStmt.execute();
+                int res = preparedStmt.executeUpdate();
+                if (res > 0) {
+                    System.out.println("insert db success!!!");
+                }
+                preparedStmt.close();
+
                 conn.close();
             }
         } catch (SQLException e) {
@@ -146,7 +163,7 @@ public class CEPRuleMQ {
 
     }
 
-    public static void handleOnEvent(WeEvent event, IWeEventClient client, Map<String, CEPRule> ruleMap) {
+    private static void handleOnEvent(WeEvent event, IWeEventClient client, Map<String, CEPRule> ruleMap) {
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
 
         // get the content ,and parsing it  byte[]-->String
@@ -154,21 +171,27 @@ public class CEPRuleMQ {
 
         // match the rule and send message
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
-            if (!StringUtils.isEmpty(entry.getValue().getPayload())
-                    && !StringUtils.isEmpty(entry.getValue().getConditionField())) {
+            if (!StringUtils.isEmpty(entry.getValue().getSelectField()) && !(StringUtils.isEmpty(entry.getValue().getPayload())) && !(StringUtils.isEmpty(entry.getValue().getConditionField()))) {
 
-                // parsing the payload && match the content,if true and hit it
-                if (entry.getValue().getConditionType().equals(2)) {
-                    sendMessageToDB(content, entry.getValue());
-
-                } else if (hitRuleEngine(entry.getValue().getPayload(), content, entry.getValue().getConditionField())) {
-
-                    // select the field and publish the message to the toDestination
+                log.info("check the josn and return fine !");
+                if (hitRuleEngine(entry.getValue().getPayload(), content, entry.getValue().getConditionField())) {
                     try {
-                        if (entry.getValue().getConditionType().equals(1)) {
+                        // parsing the payload && match the content,if true and hit it
+                        if (entry.getValue().getConditionType().equals(2)) {
+                            sendMessageToDB(content, entry.getValue());
+
+                        } else if (entry.getValue().getConditionType().equals(1)) {
+                            // select the field and publish the message to the toDestination
+                            String eventContent = getContent(content, entry.getValue().getSelectField());
+                            log.info("publish select: {},eventContent:{}", entry.getValue().getSelectField(), eventContent);
+
                             // publish the message
-                            log.info("publish topic {}", entry.getValue().getSelectField());
-                            client.publish(entry.getValue().getToDestination(), content.getBytes());
+                            Map<String, String> extensions = new HashMap<>();
+                            extensions.put("weevent-type", "ifttt");
+                            WeEvent weEvent = new WeEvent(entry.getValue().getToDestination(), eventContent.getBytes(StandardCharsets.UTF_8), extensions);
+                            log.info("weEvent event {}", weEvent.toString());
+
+                            client.publish(weEvent);
                         }
                     } catch (BrokerException e) {
                         log.error(e.toString());
@@ -180,6 +203,18 @@ public class CEPRuleMQ {
 
     }
 
+    private static String getContent(String content, String selectField) {
+        JSONObject eventContent = JSONObject.parseObject(content);
+        String[] result = selectField.split(",");
+        JSONObject iftttContent = new JSONObject();
+        for (int i = 0; i < result.length; i++) {
+            if (eventContent.containsKey(result[i])) {
+                iftttContent.put(result[i], eventContent.get(result[i]));
+            }
+        }
+
+        return iftttContent.toString();
+    }
 
     private static boolean hitRuleEngine(String payload, String eventContent, String condition) {
         if (CommonUtil.checkJson(eventContent, payload)) {
@@ -192,9 +227,32 @@ public class CEPRuleMQ {
                 context.set(key, event.get(key));
             }
             // Create an expression  "a>10"
-            return (Boolean) jexl.createExpression(condition).evaluate(context);
+            boolean checkFlag = (Boolean) jexl.createExpression(condition).evaluate(context);
+            log.info("payload:{},eventContent:{},condition:{},hit rule:{}", payload, eventContent, condition, checkFlag);
+            return checkFlag;
         }
-        return Boolean.FALSE;
+        return false;
+    }
+
+    public static RetCode checkCondition(String payload, String condition) {
+        try {
+            List<String> payloadContentKeys = CommonUtil.getKeys(payload);
+            JSONObject payloadJson = JSONObject.parseObject(payload);
+            JexlEngine jexl = new JexlBuilder().create();
+
+            JexlContext context = new MapContext();
+            for (String key : payloadContentKeys) {
+                context.set(key, payloadJson.get(key));
+            }
+            Boolean e = (Boolean) jexl.createExpression(condition).evaluate(context);
+            log.info(e.toString());
+            // if can check the true or false,is must be the right number
+            return ConstantsHelper.SUCCESS;
+        } catch (Exception e) {
+            log.info("error number");
+            return ConstantsHelper.FAIL;
+        }
+
     }
 }
 
