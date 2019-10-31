@@ -3,7 +3,7 @@ package com.webank.weevent.governance.entity;
 import java.util.Date;
 import java.util.List;
 
-import com.webank.weevent.governance.entity.base.HistoricalDataBase;
+import com.webank.weevent.governance.entity.base.TopicHistoricalBase;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class HistoricalDataEntity  extends HistoricalDataBase {
+public class TopicTopicHistoricalEntity extends TopicHistoricalBase {
 
     private Integer eventCount;
 
