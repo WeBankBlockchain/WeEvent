@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.webank.weevent.governance.code.ConstantCode;
 import com.webank.weevent.governance.entity.TopicTopicHistoricalEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
-import com.webank.weevent.governance.mapper.TopicHistoricalMapper;
+import com.webank.weevent.governance.mapper.HistoricalDataMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.utils.CookiesTools;
 
@@ -30,7 +30,7 @@ import org.springframework.util.CollectionUtils;
 public class HistoricalDataService {
 
     @Autowired
-    private TopicHistoricalMapper topicHistoricalMapper;
+    private HistoricalDataMapper historicalDataMapper;
 
     @Autowired
     private PermissionService permissionService;
@@ -51,7 +51,7 @@ public class HistoricalDataService {
                 throw new GovernanceException(ConstantCode.ACCESS_DENIED.getMsg());
             }
             Map<String, List<Integer>> returnMap = new HashMap<>();
-            List<TopicTopicHistoricalEntity> historicalDataEntities = topicHistoricalMapper.historicalDataList(topicHistoricalEntity);
+            List<TopicTopicHistoricalEntity> historicalDataEntities = historicalDataMapper.historicalDataList(topicHistoricalEntity);
             if (CollectionUtils.isEmpty(historicalDataEntities)) {
                 return null;
             }
@@ -93,7 +93,7 @@ public class HistoricalDataService {
 
     public List<TopicTopicHistoricalEntity> eventList(TopicTopicHistoricalEntity topicHistoricalEntity, HttpServletRequest httpRequest) throws GovernanceException {
         try {
-            return topicHistoricalMapper.historicalDataList(topicHistoricalEntity);
+            return historicalDataMapper.historicalDataList(topicHistoricalEntity);
         } catch (Exception e) {
             log.info("get eventList fail", e);
             throw new GovernanceException("get eventList fail", e);

@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 @Mapper
-public interface RuleDatabaseMapper {
+public interface CirculationDatabaseMapper {
 
     // get circulationDatabaseList
     List<RuleDatabaseEntity> circulationDatabaseList(RuleDatabaseEntity ruleDatabaseEntity);
