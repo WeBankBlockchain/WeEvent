@@ -22,7 +22,7 @@
             parameterType="com.webank.weevent.governance.entity.CirculationDatabaseEntity">
         select
         <include refid="Base_Column_List"/>
-        from t_circulation_database
+        from t_rule_database
         where 1=1
         <if test="id != null">
             and id = #{id,jdbcType=INTEGER}
@@ -47,13 +47,13 @@
     <delete id="deleteCirculationDatabase"
             parameterType="com.webank.weevent.governance.entity.CirculationDatabaseEntity">
         delete
-        from t_circulation_database
+        from t_rule_database
         where id = #{id}
     </delete>
 
     <update id="updateCirculationDatabase"
             parameterType="com.webank.weevent.governance.entity.CirculationDatabaseEntity">
-        update t_circulation_database
+        update t_rule_database
         set database_url=#{databaseUrl},
             database_name=#{databaseName},
             table_name=#{tableName}
@@ -62,12 +62,12 @@
 
 
     <insert id="addCirculationDatabase">
-        INSERT INTO t_circulation_database(`user_id`, `broker_id`, `database_url`, `database_name`, `table_name`)
+        INSERT INTO t_rule_database(`user_id`, `broker_id`, `database_url`, `database_name`, `table_name`)
         VALUES (#{userId}, #{brokerId}, #{databaseUrl}, #{databaseName})
     </insert>
 
     <insert id="batchInsert">
-        INSERT INTO t_circulation_database(`user_id`,`broker_id`,`database_url`,`database_name`, `table_name`)
+        INSERT INTO t_rule_database(`user_id`,`broker_id`,`database_url`,`database_name`, `table_name`)
         VALUES
         <foreach collection="circulationDatabaseList" item="circulationDatabase" separator=",">
             (#{circulationDatabase.userId},#{circulationDatabase.brokerId},#{circulationDatabase.databaseUrl},#{circulationDatabase.databaseName},#{circulationDatabase.tableName})
@@ -75,7 +75,7 @@
     </insert>
 
     <select id="countCirculationDatabase" resultType="int">
-        select count(*) from t_circulation_database
+        select count(*) from t_rule_database
         where 1=1
         <if test="id != null">
             and id = #{id,jdbcType=INTEGER}
