@@ -26,18 +26,21 @@ public class ConstantProperties {
     public static final String RIGHT_SLASH = "\"";
     public static final String ASTERISK = "*";
     public static final String EQUAL_SIGN = "=";
+    public static final String LOWER_CONNECTOR = "_";
     //broker url begin ========================================================
     public final static String BROKER_LIST_URL = "/admin/getVersion";
     public final static String BROKER_REST_CLOSE = "/rest/close";
     public final static String BROKER_REST_LIST = "/rest/list";
     public final static String BROKER_REST_STATE = "/rest/state";
     public final static String BROKER_REST_OPEN = "/rest/open";
+    public final static String BROKER_REST_EXIST = "/rest/exist";
 
     public static final String BROKER_TRANS_DAILY = "/group/transDaily";
     public static final String BROKER_GROUP_GENERAL = "/group/general";
     public static final String BROKER_TRANS_LIST = "/transaction/transList";
     public static final String BROKER_BLOCK_LIST = "/block/blockList";
     public static final String BROKER_NODE_LIST = "/node/nodeList";
+    public static final String REST_LIST_SUBSCRIPTION = "/rest/listGroup";
 
 
     //broker url end ===========================================================
@@ -47,6 +50,7 @@ public class ConstantProperties {
     public final static String PROCESSOR_INSERT = "/processor/insert";
     public final static String PROCESSOR_DELETE_CEP_RULE = "/processor/deleteCEPRuleById";
     public final static String PROCESSOR_UPDATE_CEP_RULE = "/processor/updateCEPRuleById";
+    public final static String PROCESSOR_CHECK_WHERE_CONDITION = "/processor/checkWhereCondition";
     public final static String PROCESSOR_START_CEP_RULE = "/processor/startCEPRule";
 
 
