@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
-public class CirculationDatabaseService {
+public class RuleDatabaseService {
 
     @Autowired
     private CommonService commonService;

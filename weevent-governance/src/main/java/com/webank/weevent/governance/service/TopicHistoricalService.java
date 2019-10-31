@@ -27,7 +27,7 @@ import org.springframework.util.CollectionUtils;
 
 @Service
 @Slf4j
-public class HistoricalDataService {
+public class TopicHistoricalService {
 
     @Autowired
     private TopicHistoricalMapper topicHistoricalMapper;
