@@ -4,14 +4,24 @@
 * @return {String} {2017-02-02}
 */
 const getDate = (timestamp) => {
+  if (timestamp && typeof timestamp !== 'number') {
+    throw new Error('请输入数字类型参数!');
+  }
   const date = new Date(timestamp)
   const year = date.getFullYear()
   const month = date.getMonth() + 1
   const day = date.getDate()
   return `${year}-${month >= 10 ? month : '0' + month}-${day >= 10 ? day : '0' + day}`
 }
-
+/**
+* @function getDate 获取详细时间，格式为： 年-月-日 时:分:秒
+* @param  {timestamp} timestamp {时间戳}
+* @return {String} {2019-10-31 16:39:00}
+*/
 const getDateDetail = (timestamp) => {
+  if (timestamp && typeof timestamp !== 'number') {
+    throw new Error('请输入数字类型参数!');
+  }
   const date = new Date(timestamp)
   const year = date.getFullYear()
   const month = date.getMonth() + 1
