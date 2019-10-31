@@ -79,8 +79,7 @@ public class InitialDb {
     }
 
     private static List<String> readSql() throws IOException {
-
-        InputStream resourceAsStream = InitialDb.class.getResourceAsStream("/../script/governance.sql");//配置文件路径
+        InputStream resourceAsStream = InitialDb.class.getResourceAsStream("/governance.sql");//配置文件路径
         StringBuffer sqlBuffer = new StringBuffer();
         List<String> sqlList = new ArrayList<>();
         byte[] buff = new byte[1024];
