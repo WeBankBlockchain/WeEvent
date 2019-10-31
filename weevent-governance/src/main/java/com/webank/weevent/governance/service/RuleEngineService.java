@@ -265,7 +265,7 @@ public class RuleEngineService {
             rule = ruleEngines.get(0);
 
             // check sql condition
-           // checkSqlCondition(request, ruleEngineEntity);
+            // validationConditions(request, ruleEngineEntity);
 
             //update process rule
             this.updateProcessRule(request, ruleEngineEntity, rule);
@@ -630,7 +630,7 @@ public class RuleEngineService {
         return ruleEngineConditionEntities;
     }
 
-    private boolean checkSqlCondition(HttpServletRequest request, RuleEngineEntity ruleEngineEntity) throws GovernanceException {
+    private boolean validationConditions(HttpServletRequest request, RuleEngineEntity ruleEngineEntity) throws GovernanceException {
         if (StringUtil.isBlank(ruleEngineEntity.getConditionField())) {
             return true;
         }
@@ -648,7 +648,7 @@ public class RuleEngineService {
             String msg = EntityUtils.toString(closeResponse.getEntity());
             JSONObject jsonObject = JSONObject.parseObject(msg);
             Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
-            if (this.PROCESSOR_SUCCESS_CODE != code) {
+            if (PROCESSOR_SUCCESS_CODE != code) {
                 throw new GovernanceException(msg);
             }
             return false;
