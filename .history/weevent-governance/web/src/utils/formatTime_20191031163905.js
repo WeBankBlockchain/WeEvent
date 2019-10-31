@@ -14,9 +14,9 @@ const getDate = (timestamp) => {
   return `${year}-${month >= 10 ? month : '0' + month}-${day >= 10 ? day : '0' + day}`
 }
 /**
-* @function getDate 获取详细时间，格式为： 年-月-日 时:分:秒
+* @function getDate 获取年月日 时分秒
 * @param  {timestamp} timestamp {时间戳}
-* @return {String} {2019-10-31 16:39:00}
+* @return {String} {2019-10-31 00:00:00}
 */
 const getDateDetail = (timestamp) => {
   if (timestamp && typeof timestamp !== 'number') {
