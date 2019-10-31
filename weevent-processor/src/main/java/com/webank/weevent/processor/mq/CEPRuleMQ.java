@@ -190,6 +190,7 @@ public class CEPRuleMQ {
                             extensions.put("weevent-type", "ifttt");
                             WeEvent weEvent = new WeEvent(entry.getValue().getToDestination(), eventContent.getBytes(StandardCharsets.UTF_8), extensions);
                             log.info("weEvent event {}", weEvent.toString());
+
                             client.publish(weEvent);
                         }
                     } catch (BrokerException e) {
