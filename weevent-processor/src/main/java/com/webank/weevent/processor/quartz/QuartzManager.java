@@ -1,10 +1,12 @@
 package com.webank.weevent.processor.quartz;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.utils.ConstantsHelper;
@@ -18,6 +20,7 @@ import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
+import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
@@ -36,7 +39,6 @@ public class QuartzManager {
     public QuartzManager(Scheduler scheduler) {
         this.scheduler = scheduler;
     }
-
 
     /**
      * add job and modify
@@ -57,38 +59,50 @@ public class QuartzManager {
 
             while (it.hasNext()) {
                 JobKey jobKey = (JobKey) it.next();
-                CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
-                ruleList.add(rule);
-                ruleMap.put(rule.getId(), rule);
-                log.info("{}", jobKey);
+                if (null != (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
+                    CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
+                    ruleList.add(rule);
+                    ruleMap.put(rule.getId(), rule);
+                    log.info("{}", jobKey);
+                }
+
             }
             // add current rule
             CEPRule currentRule = (CEPRule) params.get("rule");
-            ruleMap.put(currentRule.getId(), currentRule);
-            ruleList.add(currentRule);
-            params.put("ruleList", currentRule);
-            params.put("ruleMap", ruleMap);
-            JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).build();
+            if (currentRule.getStatus().equals(1)) {
+                ruleMap.put(currentRule.getId(), currentRule);
+                ruleList.add(currentRule);
+            }
 
+            params.put("ruleMap", ruleMap);
+
+            JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).storeDurably(true).build();
             // just do one time
-            Trigger trigger = newTrigger()
-                    .withIdentity(triggerName, triggerGroupName)
-                    .startNow()  // if a start time is not given (if this line were omitted), "now" is implied
-                    .withSchedule(simpleSchedule()
-                            .withIntervalInSeconds(10)
-                            .withRepeatCount(10)) // note that 10 repeats will give a total of 11 firings
-                    .build();
+            SimpleTrigger trigger = newTrigger()
+                .withIdentity(new Date().toString(), triggerGroupName)
+                .startNow()
+                .withSchedule(simpleSchedule())
+                .forJob(jobName, jobGroupName)
+                .build();
+
+            if (scheduler.checkExists(JobKey.jobKey(jobName, jobGroupName))) {
+                removeJob(jobName, jobGroupName, triggerName, triggerGroupName);
+            }
             scheduler.scheduleJob(job, trigger);
             if (!scheduler.isShutdown()) {
                 scheduler.start();
             }
-            return ConstantsHelper.SUCCESS;
+            if (scheduler.checkExists(JobKey.jobKey(jobName, jobGroupName))) {
+                return ConstantsHelper.SUCCESS;
+            }
 
+            return ConstantsHelper.FAIL;
         } catch (Exception e) {
             log.error("e:{}", e.toString());
             return ConstantsHelper.FAIL;
         }
     }
+
 
     /**
      * modify Job Time
@@ -177,5 +191,5 @@ public class QuartzManager {
             return false;
         }
     }
-
+    
 }

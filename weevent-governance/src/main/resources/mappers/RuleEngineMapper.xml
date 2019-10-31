@@ -100,7 +100,7 @@
             condition_field=#{conditionField},
             condition_type=#{conditionType},
             from_destination=#{fromDestination},
-            to_destination=#{fromDestination},
+            to_destination=#{toDestination},
             database_url=#{databaseUrl},
             error_destination=#{errorDestination},
             error_message=#{errorMessage}

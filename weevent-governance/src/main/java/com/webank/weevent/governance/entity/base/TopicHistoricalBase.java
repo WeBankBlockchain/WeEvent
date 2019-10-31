@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class HistoricalDataBase extends BaseEntity {
+public class TopicHistoricalBase extends BaseEntity {
 
     private Integer brokerId;
 

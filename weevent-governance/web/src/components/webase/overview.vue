@@ -5,21 +5,21 @@
         <div class="num_part">
           <div @click='toGroup'>
             <p class='title_name'>{{node}}</p>
-            <p class='number'>节点个数</p>
+            <p class='number'>{{$t('overview.nodeNum')}}</p>
           </div>
           <img src="../../assets/image/overview/banner-icon1.svg" alt="">
         </div>
         <div class="num_part">
           <div @click='toBlock'>
             <p class='title_name'>{{block}}</p>
-            <p class='number'>区块数量</p>
+            <p class='number'>{{$t('overview.blockNum')}}</p>
           </div>
           <img src="../../assets/image/overview/banner-icon2.svg" alt="">
         </div>
         <div class="num_part">
-          <div @click='toTrans'>
+          <div  @click='toBlock'>
             <p class='title_name'>{{transaction}}</p>
-            <p class='number'>交易数量</p>
+            <p class='number'>{{$t('overview.transactionNum')}}</p>
           </div>
           <img src="../../assets/image/overview/banner-icon3.svg" alt="">
         </div>
@@ -69,7 +69,7 @@ export default {
     general () {
       let url = '/' + localStorage.getItem('groupId') + '?brokerId=' + localStorage.getItem('brokerId')
       API.general(url).then(res => {
-        if (res.status === 200) {
+        if (res.data.code === 0) {
           this.node = res.data.data.nodeCount
           this.block = res.data.data.latestBlock
           this.transaction = res.data.data.transactionCount
@@ -78,18 +78,13 @@ export default {
     },
     toGroup () {
       this.$store.commit('set_active', '1-3')
-      this.$store.commit('set_menu', ['区块链信息', '节点列表'])
+      this.$store.commit('set_menu', [this.$t('sideBar.blockChainInfor'), this.$t('sideBar.nodeList')])
       this.$router.push('./group')
     },
     toBlock () {
       this.$store.commit('set_active', '1-2')
-      this.$store.commit('set_menu', ['区块链信息', '区块'])
+      this.$store.commit('set_menu', [this.$t('sideBar.blockChainInfor'), this.$t('sideBar.transaction')])
       this.$router.push('./blockInfor')
-    },
-    toTrans () {
-      this.$store.commit('set_active', '1-2')
-      this.$store.commit('set_menu', ['区块链信息', '区块', '交易详情'])
-      this.$router.push('./transactionInfor')
     }
   }
 }

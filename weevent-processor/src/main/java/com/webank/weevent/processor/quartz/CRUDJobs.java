@@ -45,9 +45,11 @@ public class CRUDJobs implements Job {
             if (obj instanceof CEPRule) {
                 log.info("{}", (CEPRule) obj);
                 CEPRule rule = (CEPRule) obj;
-                CEPRuleCache.updateCEPRule(rule,ruleMap);
+                // check the status,when the status equal 1,then update
+                if (1 == rule.getStatus()||0 == rule.getStatus()||2 == rule.getStatus()) {
+                    CEPRuleCache.updateCEPRule(rule, ruleMap);
+                }
                 log.info("startCEPRule in job: {},rule:{}", jobName, JSONObject.toJSON(obj));
-
             }
         }catch (BrokerException e){
             log.info("BrokerException:{}",e.toString());

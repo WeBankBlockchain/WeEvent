@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -43,10 +44,8 @@ public class CommonUtil {
         String page = null;
         String[] arrSplit;
 
-        String urlTemp = url.trim().toLowerCase();
-
-        arrSplit = urlTemp.split("[?]");
-        if ((urlTemp.length()) > 0 && (arrSplit.length >=1) && (arrSplit[0] != null)) {
+        arrSplit = url.split("[?]");
+        if ((url.length()) > 0 && (arrSplit.length >= 1) && (arrSplit[0] != null)) {
             page = arrSplit[0];
         }
 
@@ -56,10 +55,10 @@ public class CommonUtil {
 
     private static String truncateUrlPage(String strURL) {
         String strAllParam = null;
-        String url = strURL.trim().toLowerCase();
+      //  String url = strURL.trim().toLowerCase();
 
-        String[] arrSplit = url.split("[?]");
-        if ((url.length() > 1) && (arrSplit.length) > 1 && (arrSplit[1] != null)) {
+        String[] arrSplit = strURL.split("[?]");
+        if ((strURL.length() > 1) && (arrSplit.length) > 1 && (arrSplit[1] != null)) {
             strAllParam = arrSplit[1];
         }
 
@@ -154,19 +153,45 @@ public class CommonUtil {
         return tag;
     }
 
-    public static Map<String, Integer> contactsql(String content, String objJson) {
-        Map<String, Integer> sql = new HashMap<>();
+    public static List<String> getAllKey(Map<String, String> map) {
+        List<String> keys = new ArrayList<>();
+        Iterator it = map.entrySet().iterator();
+        while (it.hasNext()){
+            Map.Entry entry = (Map.Entry)it.next();
+            keys.add((String) entry.getKey());
+        }
+        return keys;
+    }
+
+    public static Map<String, String> contactsql(String content, String objJson, String payload) {
+        Map<String, String> sql = new HashMap<>();
+        Map<String, String> sqlOrder = new HashMap<>();
+
         if (!StringUtils.isEmpty(content)
                 && !StringUtils.isEmpty(objJson)) {
-            List<String> objJsonKeys = getKeys(objJson);
-            for (String key : objJsonKeys) {
-                sql.put(key, 0);
-                if (!content.contains(key)) {
-                    sql.put(key, 1);
+            String[] result = objJson.split(",");
+            JSONObject eventContent = JSONObject.parseObject(content);
+            JSONObject table = JSONObject.parseObject(payload);
+
+            // get all select field and value
+            for (String key : result) {
+                sql.put(key, null);
+                if (eventContent.containsKey(key)) {
+                    sql.put(key, eventContent.get(key).toString());
                 }
             }
+
+            // keep the  right order
+            for (Map.Entry<String, Object> entry : table.entrySet()) {
+                for (String key : result) {
+                    if (entry.getKey().equals(key)) {
+                        sqlOrder.put(entry.getKey(), sql.get(key));
+                    }
+                }
+            }
+
         }
-        return sql;
+        return sqlOrder;
     }
 
 }
