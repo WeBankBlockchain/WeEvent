@@ -1,5 +1,6 @@
 package com.webank.weevent.governance.service;
 
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,8 +64,8 @@ public class RuleEngineService {
     @Autowired
     private BrokerMapper brokerMapper;
 
-    @Value("${weevent.processor.port:7008}")
-    private String processorPort;
+    @Value("${weevent.processor.url:(http://localhost:7008)}")
+    private String processorUrl;
 
     @Autowired
     private RuleEngineConditionMapper ruleEngineConditionMapper;
@@ -152,7 +153,7 @@ public class RuleEngineService {
             String brokerUrl = new StringBuffer(broker.getBrokerUrl()).append(ConstantProperties.AND_SYMBOL)
                     .append("groupId=").append(ruleEngineEntity.getGroupId()).toString();
             ruleEngineEntity.setBrokerUrl(brokerUrl);
-            String url = new StringBuffer(this.getProcessorUrl(broker.getBrokerUrl())).append(ConstantProperties.PROCESSOR_INSERT).toString();
+            String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_INSERT).toString();
             String jsonString = JSONObject.toJSONString(ruleEngineEntity);
             Map map = JSONObject.parseObject(jsonString, Map.class);
             map.put("updatedTime", ruleEngineEntity.getLastUpdate());
@@ -213,7 +214,7 @@ public class RuleEngineService {
         try {
             BrokerEntity broker = brokerService.getBroker(engineEntity.getBrokerId());
             String brokerUrl = broker.getBrokerUrl();
-            String deleteUrl = new StringBuffer(this.getProcessorUrl(brokerUrl)).append(ConstantProperties.PROCESSOR_DELETE_CEP_RULE).append(ConstantProperties.QUESTION_MARK)
+            String deleteUrl = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_DELETE_CEP_RULE).append(ConstantProperties.QUESTION_MARK)
                     .append("id=").append(engineEntity.getId()).toString();
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, deleteUrl);
 
@@ -258,11 +259,15 @@ public class RuleEngineService {
             ruleEngineEntity.setSelectField(selectField);
             ruleEngineEntity.setConditionField(conditionField);
 
-            //update process rule
             RuleEngineEntity rule = new RuleEngineEntity();
             rule.setId(ruleEngineEntity.getId());
             List<RuleEngineEntity> ruleEngines = ruleEngineMapper.getRuleEngines(rule);
             rule = ruleEngines.get(0);
+
+            // check sql condition
+           // checkSqlCondition(request, ruleEngineEntity);
+
+            //update process rule
             this.updateProcessRule(request, ruleEngineEntity, rule);
 
             //delete old ruleEngineConditionEntity
@@ -304,15 +309,14 @@ public class RuleEngineService {
         try {
             BrokerEntity broker = brokerMapper.getBroker(oldRule.getBrokerId());
             String brokerUrl = new StringBuffer(broker.getBrokerUrl()).append(ConstantProperties.AND_SYMBOL)
-                    .append("groupId=").append(ruleEngineEntity.getGroupId()).toString();
+                    .append("groupId=").append(oldRule.getGroupId()).toString();
             ruleEngineEntity.setBrokerUrl(brokerUrl);
             ruleEngineEntity.setStatus(oldRule.getStatus());
-            String url = new StringBuffer(this.getProcessorUrl(broker.getBrokerUrl())).append(ConstantProperties.PROCESSOR_UPDATE_CEP_RULE).toString();
+            String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_UPDATE_CEP_RULE).toString();
             String jsonString = JSONObject.toJSONString(ruleEngineEntity);
             Map map = JSONObject.parseObject(jsonString, Map.class);
             map.put("updatedTime", ruleEngineEntity.getLastUpdate());
             map.put("createdTime", oldRule.getCreateDate());
-
             //updateCEPRuleById
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(map));
             //deal processor result
@@ -394,7 +398,7 @@ public class RuleEngineService {
             rule.setSelectField(this.getSelectField(rule));
             BrokerEntity broker = brokerMapper.getBroker(rule.getBrokerId());
             String brokerUrl = new StringBuffer(broker.getBrokerUrl()).append(ConstantProperties.AND_SYMBOL)
-                    .append("groupId=").append(ruleEngineEntity.getGroupId()).toString();
+                    .append("groupId=").append(rule.getGroupId()).toString();
             rule.setBrokerUrl(brokerUrl);
             rule.setStatus(StatusEnum.RUNNING.getCode());
             rule.setLastUpdate(new Date());
@@ -422,7 +426,7 @@ public class RuleEngineService {
             Map map = JSONObject.parseObject(jsonString, Map.class);
             map.put("updatedTime", rule.getLastUpdate());
             map.put("createdTime", rule.getCreateDate());
-            String url = new StringBuffer(this.getProcessorUrl(rule.getBrokerUrl())).append(ConstantProperties.PROCESSOR_START_CEP_RULE).toString();
+            String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_START_CEP_RULE).toString();
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(map));
             int statusCode = closeResponse.getStatusLine().getStatusCode();
             if (200 != statusCode) {
@@ -606,9 +610,8 @@ public class RuleEngineService {
         }
     }
 
-    private String getProcessorUrl(String brokerUrl) {
-        return "http://localhost:7008";
-        //   return brokerUrl.substring(0, brokerUrl.lastIndexOf("/"));
+    private String getProcessorUrl() {
+        return processorUrl;
     }
 
     private List<RuleEngineConditionEntity> getRuleEngineConditionList(RuleEngineEntity rule) {
@@ -625,6 +628,35 @@ public class RuleEngineService {
             }
         }
         return ruleEngineConditionEntities;
+    }
+
+    private boolean checkSqlCondition(HttpServletRequest request, RuleEngineEntity ruleEngineEntity) throws GovernanceException {
+        if (StringUtil.isBlank(ruleEngineEntity.getConditionField())) {
+            return true;
+        }
+        try {
+            String payload = ruleEngineEntity.getPayload();
+            String condition = ruleEngineEntity.getConditionField();
+            String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_CHECK_WHERE_CONDITION)
+                    .append("?").append("payload=").append(URLEncoder.encode(payload, "UTF-8")).append("&condition=").append(URLEncoder.encode(condition, "UTF-8"))
+                    .toString();
+            CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url);
+            int statusCode = closeResponse.getStatusLine().getStatusCode();
+            if (200 != statusCode) {
+                throw new GovernanceException(ErrorCode.PROCESS_CONNECT_ERROR);
+            }
+            String msg = EntityUtils.toString(closeResponse.getEntity());
+            JSONObject jsonObject = JSONObject.parseObject(msg);
+            Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
+            if (this.PROCESSOR_SUCCESS_CODE != code) {
+                throw new GovernanceException(msg);
+            }
+            return false;
+        } catch (Exception e) {
+            log.error("check condition fail", e);
+            throw new GovernanceException(e.getMessage());
+        }
+
     }
 
 }
