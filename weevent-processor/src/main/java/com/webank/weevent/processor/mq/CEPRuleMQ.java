@@ -1,9 +1,11 @@
 package com.webank.weevent.processor.mq;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -173,7 +175,9 @@ public class CEPRuleMQ {
                             // select the field and publish the message to the toDestination
                             // publish the message
                             log.info("publish topic {}", entry.getValue().getSelectField());
-                            client.publish(entry.getValue().getToDestination(), content.getBytes());
+                            Map<String, String> extensions = new HashMap<>();
+                            WeEvent weEvent = new WeEvent(entry.getValue().getToDestination(), content.getBytes(StandardCharsets.UTF_8), extensions);
+                            client.publish(weEvent);
                         }
                     } catch (BrokerException e) {
                         log.error(e.toString());
