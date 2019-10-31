@@ -43,10 +43,8 @@ public class CommonUtil {
         String page = null;
         String[] arrSplit;
 
-        String urlTemp = url.trim().toLowerCase();
-
-        arrSplit = urlTemp.split("[?]");
-        if ((urlTemp.length()) > 0 && (arrSplit.length >=1) && (arrSplit[0] != null)) {
+        arrSplit = url.split("[?]");
+        if ((url.length()) > 0 && (arrSplit.length >= 1) && (arrSplit[0] != null)) {
             page = arrSplit[0];
         }
 
