@@ -5,7 +5,7 @@
 */
 const getDate = (timestamp) => {
   if (timestamp && typeof timestamp !== 'number') {
-    throw new Error('请输入数字类型参数~');
+    throw new Error('请输入数字类型参数!');
   }
   const date = new Date(timestamp)
   const year = date.getFullYear()
@@ -20,7 +20,7 @@ const getDate = (timestamp) => {
 */
 const getDateDetail = (timestamp) => {
   if (timestamp && typeof timestamp !== 'number') {
-    throw new Error('请输入数字类型参数~');
+    throw new Error('请输入数字类型参数!');
   }
   const date = new Date(timestamp)
   const year = date.getFullYear()
