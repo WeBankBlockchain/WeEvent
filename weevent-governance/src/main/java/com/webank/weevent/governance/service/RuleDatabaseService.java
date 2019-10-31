@@ -6,9 +6,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.code.ErrorCode;
-import com.webank.weevent.governance.entity.CirculationDatabaseEntity;
+import com.webank.weevent.governance.entity.RuleDatabaseEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
-import com.webank.weevent.governance.mapper.CirculationDatabaseMapper;
+import com.webank.weevent.governance.mapper.RuleDatabaseMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.utils.CookiesTools;
 
@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
-public class CirculationDatabaseService {
+public class RuleDatabaseService {
 
     @Autowired
     private CommonService commonService;
@@ -28,16 +28,16 @@ public class CirculationDatabaseService {
     private CookiesTools cookiesTools;
 
     @Autowired
-    private CirculationDatabaseMapper circulationDatabaseMapper;
+    private RuleDatabaseMapper ruleDatabaseMapper;
 
-    public List<CirculationDatabaseEntity> circulationDatabaseList(HttpServletRequest request, CirculationDatabaseEntity CirculationDatabaseEntity) throws GovernanceException {
+    public List<RuleDatabaseEntity> circulationDatabaseList(HttpServletRequest request, RuleDatabaseEntity RuleDatabaseEntity) throws GovernanceException {
         try {
             String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-            if (accountId == null || !accountId.equals(CirculationDatabaseEntity.getUserId().toString())) {
+            if (accountId == null || !accountId.equals(RuleDatabaseEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
-            List<CirculationDatabaseEntity> CirculationDatabaseEntities = null;
-            CirculationDatabaseEntities = circulationDatabaseMapper.circulationDatabaseList(CirculationDatabaseEntity);
+            List<RuleDatabaseEntity> CirculationDatabaseEntities = null;
+            CirculationDatabaseEntities = ruleDatabaseMapper.circulationDatabaseList(RuleDatabaseEntity);
             return CirculationDatabaseEntities;
         } catch (Exception e) {
             log.error("get circulationDatabaseList fail", e);
@@ -48,17 +48,17 @@ public class CirculationDatabaseService {
 
 
     @Transactional(rollbackFor = Throwable.class)
-    public CirculationDatabaseEntity addCirculationDatabase(CirculationDatabaseEntity circulationDatabaseEntity, HttpServletRequest request, HttpServletResponse response)
+    public RuleDatabaseEntity addCirculationDatabase(RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         try {
             String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-            if (accountId == null || !accountId.equals(circulationDatabaseEntity.getUserId().toString())) {
+            if (accountId == null || !accountId.equals(ruleDatabaseEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
             //check dbUrl
-            commonService.checkDataBaseUrl(circulationDatabaseEntity.getDatabaseUrl());
-            circulationDatabaseMapper.addCirculationDatabase(circulationDatabaseEntity);
-            return circulationDatabaseEntity;
+            commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseUrl());
+            ruleDatabaseMapper.addCirculationDatabase(ruleDatabaseEntity);
+            return ruleDatabaseEntity;
         } catch (Exception e) {
             log.error("add circulationDatabaseEntity fail", e.getMessage());
             throw new GovernanceException("add circulationDatabaseEntity fail ", e);
@@ -66,13 +66,13 @@ public class CirculationDatabaseService {
     }
 
     @Transactional(rollbackFor = Throwable.class)
-    public boolean deleteCirculationDatabase(CirculationDatabaseEntity circulationDatabaseEntity, HttpServletRequest request) throws GovernanceException {
+    public boolean deleteCirculationDatabase(RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
         try {
             String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-            if (accountId == null || !accountId.equals(circulationDatabaseEntity.getUserId().toString())) {
+            if (accountId == null || !accountId.equals(ruleDatabaseEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
-            return circulationDatabaseMapper.deleteCirculationDatabase(circulationDatabaseEntity);
+            return ruleDatabaseMapper.deleteCirculationDatabase(ruleDatabaseEntity);
         } catch (Exception e) {
             log.error("delete circulationDatabaseEntity fail", e);
             throw new GovernanceException("delete circulationDatabaseEntity fail ", e);
@@ -80,16 +80,16 @@ public class CirculationDatabaseService {
     }
 
     @Transactional(rollbackFor = Throwable.class)
-    public boolean updateCirculationDatabase(CirculationDatabaseEntity circulationDatabaseEntity, HttpServletRequest request, HttpServletResponse response)
+    public boolean updateCirculationDatabase(RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         try {
             String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-            if (accountId == null || !accountId.equals(circulationDatabaseEntity.getUserId().toString())) {
+            if (accountId == null || !accountId.equals(ruleDatabaseEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
             //check databaseUrl
-            commonService.checkDataBaseUrl(circulationDatabaseEntity.getDatabaseUrl());
-            return circulationDatabaseMapper.updateCirculationDatabase(circulationDatabaseEntity);
+            commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseUrl());
+            return ruleDatabaseMapper.updateCirculationDatabase(ruleDatabaseEntity);
         } catch (Exception e) {
             log.error("update circulationDatabase fail", e);
             throw new GovernanceException("update circulationDatabase fail", e);
