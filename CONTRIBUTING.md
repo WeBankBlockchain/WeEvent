@@ -20,7 +20,7 @@
 
 #### 编写文档
 
-我们的文档工程位于(https://github.com/WeBankFinTech/WeEvent-docs)。会自动生成最新文档到(https://weeventdoc.readthedocs.io/zh_CN/latest/)。你看到一个错字或其他方法来改善它吗？欢迎提交PR。
+我们的文档工程位于[WeEvent-docs](https://github.com/WeBankFinTech/WeEvent-docs)。会自动生成最新文档到[readthedocs](https://weeventdoc.readthedocs.io/zh_CN/latest/)。你看到一个错字或其他方法来改善它吗？欢迎提交PR。
 
 #### 提供帮助
 
