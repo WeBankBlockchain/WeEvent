@@ -250,6 +250,33 @@ public class TopicService {
         }
     }
 
+    @Transactional(rollbackFor = Throwable.class)
+    public boolean exist(String topic,String brokerUrl,String groupId,HttpServletRequest request) throws GovernanceException {
+        String url = new StringBuffer(brokerUrl).append(ConstantProperties.BROKER_REST_OPEN).append("?topic=").append(topic)
+                .append("&groupId=").append(groupId).toString();
+        log.info("url: {}", url);
+        String mes;
+        try {
+            CloseableHttpClient client = commonService.generateHttpClient(brokerUrl);
+            HttpGet get = commonService.getMethod(url, request);
+            CloseableHttpResponse closeResponse = client.execute(get);
+            mes = EntityUtils.toString(closeResponse.getEntity());
+        } catch (Exception e) {
+            log.error("broker connect error,error:{}", e.getMessage());
+            throw new GovernanceException(ErrorCode.BROKER_CONNECT_ERROR);
+        }
+        try {
+            return (Boolean) JSON.parse(mes);
+        } catch (Exception e) {
+            log.error("parse json fail,error:{}", e.getMessage());
+            JSON json = JSON.parseObject(mes);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = JSON.toJavaObject(json, Map.class);
+            throw new GovernanceException((Integer) (result.get("code")), result.get("message").toString());
+        }
+    }
+
+
     private String getKey(Integer brokerId, String groupId, String topicName) {
         return new StringBuilder(brokerId).append(SPLIT).append(topicName).append(SPLIT).append(groupId).toString();
     }
