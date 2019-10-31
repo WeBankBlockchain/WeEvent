@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.RuleDatabaseEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
-import com.webank.weevent.governance.mapper.CirculationDatabaseMapper;
+import com.webank.weevent.governance.mapper.RuleDatabaseMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.utils.CookiesTools;
 
@@ -28,7 +28,7 @@ public class CirculationDatabaseService {
     private CookiesTools cookiesTools;
 
     @Autowired
-    private CirculationDatabaseMapper circulationDatabaseMapper;
+    private RuleDatabaseMapper ruleDatabaseMapper;
 
     public List<RuleDatabaseEntity> circulationDatabaseList(HttpServletRequest request, RuleDatabaseEntity RuleDatabaseEntity) throws GovernanceException {
         try {
@@ -37,7 +37,7 @@ public class CirculationDatabaseService {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
             List<RuleDatabaseEntity> CirculationDatabaseEntities = null;
-            CirculationDatabaseEntities = circulationDatabaseMapper.circulationDatabaseList(RuleDatabaseEntity);
+            CirculationDatabaseEntities = ruleDatabaseMapper.circulationDatabaseList(RuleDatabaseEntity);
             return CirculationDatabaseEntities;
         } catch (Exception e) {
             log.error("get circulationDatabaseList fail", e);
@@ -57,7 +57,7 @@ public class CirculationDatabaseService {
             }
             //check dbUrl
             commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseUrl());
-            circulationDatabaseMapper.addCirculationDatabase(ruleDatabaseEntity);
+            ruleDatabaseMapper.addCirculationDatabase(ruleDatabaseEntity);
             return ruleDatabaseEntity;
         } catch (Exception e) {
             log.error("add circulationDatabaseEntity fail", e.getMessage());
@@ -72,7 +72,7 @@ public class CirculationDatabaseService {
             if (accountId == null || !accountId.equals(ruleDatabaseEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
-            return circulationDatabaseMapper.deleteCirculationDatabase(ruleDatabaseEntity);
+            return ruleDatabaseMapper.deleteCirculationDatabase(ruleDatabaseEntity);
         } catch (Exception e) {
             log.error("delete circulationDatabaseEntity fail", e);
             throw new GovernanceException("delete circulationDatabaseEntity fail ", e);
@@ -89,7 +89,7 @@ public class CirculationDatabaseService {
             }
             //check databaseUrl
             commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseUrl());
-            return circulationDatabaseMapper.updateCirculationDatabase(ruleDatabaseEntity);
+            return ruleDatabaseMapper.updateCirculationDatabase(ruleDatabaseEntity);
         } catch (Exception e) {
             log.error("update circulationDatabase fail", e);
             throw new GovernanceException("update circulationDatabase fail", e);

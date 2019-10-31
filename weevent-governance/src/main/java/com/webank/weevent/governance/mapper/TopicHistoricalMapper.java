@@ -7,7 +7,7 @@ import com.webank.weevent.governance.entity.TopicTopicHistoricalEntity;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface HistoricalDataMapper {
+public interface TopicHistoricalMapper {
 
     List<TopicTopicHistoricalEntity> historicalDataList(TopicTopicHistoricalEntity topicHistoricalEntity);
 
