@@ -3,7 +3,6 @@ package com.webank.weevent.governance.service;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -76,8 +75,6 @@ public class RuleEngineService {
 
     @Autowired
     private BrokerService brokerService;
-
-    private final static List<String> operatorList = new ArrayList<>(Arrays.asList(">=", "<=", ">", "<"));
 
     private static final int PROCESSOR_SUCCESS_CODE = 0;
 
@@ -630,7 +627,7 @@ public class RuleEngineService {
         return ruleEngineConditionEntities;
     }
 
-    private boolean validationConditions(HttpServletRequest request, RuleEngineEntity ruleEngineEntity) throws GovernanceException {
+    public  boolean validationConditions(HttpServletRequest request, RuleEngineEntity ruleEngineEntity) throws GovernanceException {
         if (StringUtil.isBlank(ruleEngineEntity.getConditionField())) {
             return true;
         }
