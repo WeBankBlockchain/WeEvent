@@ -2,6 +2,7 @@ apply plugin: "org.springframework.boot"
 apply plugin: "io.spring.dependency-management"
 
 dependencies {
+    implementation project(path: ":weevent-client")
     // spring boot
     implementation("org.springframework.boot:spring-boot-starter")
 
@@ -20,9 +21,7 @@ dependencies {
     implementation("org.apache.tomcat:tomcat-jdbc:8.5.23");
 
     implementation("log4j:log4j:1.2.17")
-
-    implementation("com.webank.weevent:weevent-client:1.0.0")
-
+    
     //fastjson
     implementation("com.alibaba:fastjson:1.2.47")
 
