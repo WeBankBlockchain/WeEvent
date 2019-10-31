@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class CirculationDatabaseBase extends BaseEntity {
+public class RuleDatabaseBase extends BaseEntity {
 
     private Integer userId;
 

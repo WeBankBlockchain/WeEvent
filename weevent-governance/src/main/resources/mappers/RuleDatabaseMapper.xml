@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.webank.weevent.governance.mapper.CirculationDatabaseMapper">
+<mapper namespace="com.webank.weevent.governance.mapper.RuleDatabaseMapper">
 
 
-    <resultMap id="BaseResultMap" type="com.webank.weevent.governance.entity.CirculationDatabaseEntity">
+    <resultMap id="BaseResultMap" type="com.webank.weevent.governance.entity.RuleDatabaseEntity">
         <result column="id" property="id" jdbcType="INTEGER"/>
         <result column="create_date" property="createDate" jdbcType="TIMESTAMP"/>
         <result column="last_update" property="lastUpdate" jdbcType="TIMESTAMP"/>
@@ -19,7 +19,7 @@
     </sql>
 
     <select id="circulationDatabaseList" resultMap="BaseResultMap"
-            parameterType="com.webank.weevent.governance.entity.CirculationDatabaseEntity">
+            parameterType="com.webank.weevent.governance.entity.RuleDatabaseEntity">
         select
         <include refid="Base_Column_List"/>
         from t_rule_database
@@ -45,14 +45,14 @@
     </select>
 
     <delete id="deleteCirculationDatabase"
-            parameterType="com.webank.weevent.governance.entity.CirculationDatabaseEntity">
+            parameterType="com.webank.weevent.governance.entity.RuleDatabaseEntity">
         delete
         from t_rule_database
         where id = #{id}
     </delete>
 
     <update id="updateCirculationDatabase"
-            parameterType="com.webank.weevent.governance.entity.CirculationDatabaseEntity">
+            parameterType="com.webank.weevent.governance.entity.RuleDatabaseEntity">
         update t_rule_database
         set database_url=#{databaseUrl},
             database_name=#{databaseName},

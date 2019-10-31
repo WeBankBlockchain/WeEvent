@@ -7,7 +7,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.weevent.governance.entity.HistoricalDataEntity;
+import com.webank.weevent.governance.entity.TopicTopicHistoricalEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.service.HistoricalDataService;
@@ -30,11 +30,19 @@ public class HistoricalDataController {
     private HistoricalDataService historicalDataService;
 
     @PostMapping("/list")
-    public GovernanceResult historicalDataList(@RequestBody HistoricalDataEntity historicalDataEntity, HttpServletRequest request,
+    public GovernanceResult historicalDataList(@RequestBody TopicTopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request,
                                                HttpServletResponse response) throws GovernanceException {
-        log.info("get  historicalDataEntity:{} ", historicalDataEntity);
-        Map<String, List<Integer>> returnMap = historicalDataService.historicalDataList(historicalDataEntity, request, response);
+        log.info("get  historicalDataEntity:{} ", topicHistoricalEntity);
+        Map<String, List<Integer>> returnMap = historicalDataService.historicalDataList(topicHistoricalEntity, request, response);
         return new GovernanceResult(returnMap);
+    }
+
+    @PostMapping("/eventList")
+    public GovernanceResult eventList(@RequestBody TopicTopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request,
+                                      HttpServletResponse response) throws GovernanceException {
+        log.info("get  eventList:{} ", topicHistoricalEntity);
+        List<TopicTopicHistoricalEntity> topicTopicHistoricalEntities = historicalDataService.eventList(topicHistoricalEntity, request);
+        return new GovernanceResult(topicTopicHistoricalEntities);
     }
 
 }

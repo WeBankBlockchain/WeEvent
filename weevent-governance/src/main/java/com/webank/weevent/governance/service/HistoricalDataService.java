@@ -12,9 +12,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.code.ConstantCode;
-import com.webank.weevent.governance.entity.HistoricalDataEntity;
+import com.webank.weevent.governance.entity.TopicTopicHistoricalEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
-import com.webank.weevent.governance.mapper.HistoricalDataMapper;
+import com.webank.weevent.governance.mapper.TopicHistoricalMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.utils.CookiesTools;
 
@@ -30,7 +30,7 @@ import org.springframework.util.CollectionUtils;
 public class HistoricalDataService {
 
     @Autowired
-    private HistoricalDataMapper historicalDataMapper;
+    private TopicHistoricalMapper topicHistoricalMapper;
 
     @Autowired
     private PermissionService permissionService;
@@ -42,38 +42,38 @@ public class HistoricalDataService {
     private final static String simpleDateFormat = "YYYY-MM-dd";
 
 
-    public Map<String, List<Integer>> historicalDataList(HistoricalDataEntity historicalDataEntity, HttpServletRequest httpRequest,
+    public Map<String, List<Integer>> historicalDataList(TopicTopicHistoricalEntity topicHistoricalEntity, HttpServletRequest httpRequest,
                                                          HttpServletResponse httpResponse) throws GovernanceException {
         try {
             String accountId = cookiesTools.getCookieValueByName(httpRequest, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-            Boolean flag = permissionService.verifyPermissions(historicalDataEntity.getBrokerId(), accountId);
+            Boolean flag = permissionService.verifyPermissions(topicHistoricalEntity.getBrokerId(), accountId);
             if (!flag) {
                 throw new GovernanceException(ConstantCode.ACCESS_DENIED.getMsg());
             }
             Map<String, List<Integer>> returnMap = new HashMap<>();
-            List<HistoricalDataEntity> historicalDataEntities = historicalDataMapper.historicalDataList(historicalDataEntity);
+            List<TopicTopicHistoricalEntity> historicalDataEntities = topicHistoricalMapper.historicalDataList(topicHistoricalEntity);
             if (CollectionUtils.isEmpty(historicalDataEntities)) {
                 return null;
             }
-            if (historicalDataEntity.getBeginDate() == null || historicalDataEntity.getEndDate() == null) {
+            if (topicHistoricalEntity.getBeginDate() == null || topicHistoricalEntity.getEndDate() == null) {
                 throw new GovernanceException("beginDate or endDate is empty");
             }
-            Date beginDate = historicalDataEntity.getBeginDate();
-            Date endDate = historicalDataEntity.getEndDate();
+            Date beginDate = topicHistoricalEntity.getBeginDate();
+            Date endDate = topicHistoricalEntity.getEndDate();
 
-            historicalDataEntity.setBeginDate(DateUtils.parseDate(DateFormatUtils.format(beginDate, simpleDateFormat), simpleDateFormat));
-            historicalDataEntity.setEndDate(DateUtils.parseDate(DateFormatUtils.format(endDate, simpleDateFormat), simpleDateFormat));
+            topicHistoricalEntity.setBeginDate(DateUtils.parseDate(DateFormatUtils.format(beginDate, simpleDateFormat), simpleDateFormat));
+            topicHistoricalEntity.setEndDate(DateUtils.parseDate(DateFormatUtils.format(endDate, simpleDateFormat), simpleDateFormat));
             //deal data
-            Map<String, List<HistoricalDataEntity>> map = new HashMap<>();
+            Map<String, List<TopicTopicHistoricalEntity>> map = new HashMap<>();
             historicalDataEntities.forEach(it -> {
                 map.merge(it.getTopicName(), new ArrayList<>(Collections.singletonList(it)), this::mergeCollection);
             });
             List<String> listDate;
-            listDate = listDate(historicalDataEntity.getBeginDate(), historicalDataEntity.getEndDate());
+            listDate = listDate(topicHistoricalEntity.getBeginDate(), topicHistoricalEntity.getEndDate());
 
             map.forEach((k, v) -> {
                 Map<String, Integer> eventCountMap = new HashMap<>();
-                for (HistoricalDataEntity dataEntity : v) {
+                for (TopicTopicHistoricalEntity dataEntity : v) {
                     eventCountMap.put(DateFormatUtils.format(dataEntity.getCreateDate(), simpleDateFormat), dataEntity.getEventCount());
                 }
                 List<Integer> integerList = new ArrayList<>();
@@ -91,8 +91,18 @@ public class HistoricalDataService {
 
     }
 
-    private List<HistoricalDataEntity> mergeCollection(List<HistoricalDataEntity> a, List<HistoricalDataEntity> b) {
-        List<HistoricalDataEntity> list = new ArrayList<>();
+    public List<TopicTopicHistoricalEntity> eventList(TopicTopicHistoricalEntity topicHistoricalEntity, HttpServletRequest httpRequest) throws GovernanceException {
+        try {
+            return topicHistoricalMapper.historicalDataList(topicHistoricalEntity);
+        } catch (Exception e) {
+            log.info("get eventList fail", e);
+            throw new GovernanceException("get eventList fail", e);
+        }
+
+    }
+
+    private List<TopicTopicHistoricalEntity> mergeCollection(List<TopicTopicHistoricalEntity> a, List<TopicTopicHistoricalEntity> b) {
+        List<TopicTopicHistoricalEntity> list = new ArrayList<>();
         list.addAll(a);
         list.addAll(b);
         return list;

@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.webank.weevent.governance.entity.CirculationDatabaseEntity;
+import com.webank.weevent.governance.entity.RuleDatabaseEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.service.CirculationDatabaseService;
@@ -31,35 +31,35 @@ public class CirculationDatabaseController {
 
     // get all circulationDatabaseEntity service
     @PostMapping("/list")
-    public GovernanceResult getCirculationDatabases(HttpServletRequest request, @RequestBody CirculationDatabaseEntity circulationDatabaseEntity) throws GovernanceException {
-        log.info("get circulationDatabaseEntity:{}", circulationDatabaseEntity);
-        List<CirculationDatabaseEntity> circulationDatabases = circulationDatabaseService.circulationDatabaseList(request, circulationDatabaseEntity);
+    public GovernanceResult getCirculationDatabases(HttpServletRequest request, @RequestBody RuleDatabaseEntity ruleDatabaseEntity) throws GovernanceException {
+        log.info("get circulationDatabaseEntity:{}", ruleDatabaseEntity);
+        List<RuleDatabaseEntity> circulationDatabases = circulationDatabaseService.circulationDatabaseList(request, ruleDatabaseEntity);
 
         return new GovernanceResult(circulationDatabases);
     }
 
     // add circulationDatabaseEntity
     @PostMapping("/add")
-    public GovernanceResult addCirculationDatabase(@Valid @RequestBody CirculationDatabaseEntity circulationDatabaseEntity, HttpServletRequest request,
+    public GovernanceResult addCirculationDatabase(@Valid @RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request,
                                                    HttpServletResponse response) throws GovernanceException {
-        log.info("add  circulationDatabaseEntity service into db :{}", circulationDatabaseEntity);
-        CirculationDatabaseEntity rule = circulationDatabaseService.addCirculationDatabase(circulationDatabaseEntity, request, response);
+        log.info("add  circulationDatabaseEntity service into db :{}", ruleDatabaseEntity);
+        RuleDatabaseEntity rule = circulationDatabaseService.addCirculationDatabase(ruleDatabaseEntity, request, response);
         return new GovernanceResult(rule);
     }
 
     @PostMapping("/update")
-    public GovernanceResult updateCirculationDatabase(@RequestBody CirculationDatabaseEntity circulationDatabaseEntity, HttpServletRequest request,
+    public GovernanceResult updateCirculationDatabase(@RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request,
                                                       HttpServletResponse response) throws GovernanceException {
-        log.info("update  circulationDatabaseEntity service ,circulationDatabaseEntity:{}", circulationDatabaseEntity);
-        boolean flag = circulationDatabaseService.updateCirculationDatabase(circulationDatabaseEntity, request, response);
+        log.info("update  circulationDatabaseEntity service ,circulationDatabaseEntity:{}", ruleDatabaseEntity);
+        boolean flag = circulationDatabaseService.updateCirculationDatabase(ruleDatabaseEntity, request, response);
         return new GovernanceResult(flag);
     }
 
 
     @PostMapping("/delete")
-    public GovernanceResult deleteCirculationDatabase(@RequestBody CirculationDatabaseEntity circulationDatabaseEntity, HttpServletRequest request) throws GovernanceException {
-        log.info("delete  circulationDatabaseEntity service ,id:{}", circulationDatabaseEntity.getId());
-        boolean flag = circulationDatabaseService.deleteCirculationDatabase(circulationDatabaseEntity, request);
+    public GovernanceResult deleteCirculationDatabase(@RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
+        log.info("delete  circulationDatabaseEntity service ,id:{}", ruleDatabaseEntity.getId());
+        boolean flag = circulationDatabaseService.deleteCirculationDatabase(ruleDatabaseEntity, request);
         return new GovernanceResult(flag);
     }
 }
