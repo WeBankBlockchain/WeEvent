@@ -15,7 +15,7 @@
 */
 
 # SET NAMES utf8mb4;
-# SET FOREIGN_KEY_CHECKS = 0;
+ SET FOREIGN_KEY_CHECKS = 0;
 
 #
 # Quartz seems to work best with the driver mm.mysql-2.0.7-bin.jar
