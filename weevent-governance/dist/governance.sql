@@ -77,7 +77,8 @@ CREATE TABLE t_circulation_database (
   `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create date',
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update date',
   `database_url` varchar(256) NOT NULL COMMENT 'database url',
-  `dataBaseName` varchar(128) NOT NULL COMMENT 'database name',
+  `database_name` varchar(128) NOT NULL COMMENT 'database name',
+  `table_name` varchar(128) NOT NULL COMMENT 'table name',
   `broker_id` varchar(256) DEFAULT NULL COMMENT 'broker id',
   `user_id` varchar(256) DEFAULT NULL COMMENT 'user id',
   PRIMARY KEY (`id`)

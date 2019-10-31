@@ -20,4 +20,6 @@ public class CirculationDatabaseBase extends BaseEntity {
 
     private String databaseName;
 
+    private String tableName;
+
 }
