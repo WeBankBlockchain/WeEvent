@@ -8,6 +8,7 @@ import com.webank.weevent.broker.fabric.sdk.FabricSDKWrapper;
 
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.hyperledger.fabric.sdk.BlockEvent;
 import org.hyperledger.fabric.sdk.ChaincodeID;
 import org.hyperledger.fabric.sdk.ChaincodeResponse;
@@ -52,7 +53,7 @@ public class FabricDeployContractUtil {
                 // instant Topic chaincode
                 proposalResponses = FabricSDKWrapper.instantiateProposal(client, channel, chaincodeID, TransactionRequest.Type.GO_LANG, fabricConfig.getProposalTimeout());
                 BlockEvent.TransactionEvent transactionEvent = FabricSDKWrapper.sendTransaction(channel, proposalResponses, fabricConfig.getTransactionTimeout());
-                if (!"".equals(transactionEvent.getTransactionID())) {
+                if (!StringUtils.isBlank(transactionEvent.getTransactionID())) {
                     log.debug("Instantiate Topic SUCC transactionEvent={}", transactionEvent);
                 } else {
                     log.error("Instantiate Topic FAIL transactionEvent={}", transactionEvent);
@@ -75,10 +76,10 @@ public class FabricDeployContractUtil {
                 // instant TopicController chaincode
                 proposalResponses = FabricSDKWrapper.instantiateProposal(client, channel, chaincodeID, TransactionRequest.Type.GO_LANG, fabricConfig.getProposalTimeout());
                 transactionEvent = FabricSDKWrapper.sendTransaction(channel, proposalResponses, fabricConfig.getTransactionTimeout());
-                if (!"".equals(transactionEvent.getTransactionID())) {
-                    log.debug("Instantiate TopicController SUCC transactionEvent={}", transactionEvent);
+                if (!StringUtils.isBlank(transactionEvent.getTransactionID())) {
+                    log.debug("Instantiate TopicController SUCC transactionEvent:{}", transactionEvent);
                 } else {
-                    log.error("Instantiate TopicController FAIL transactionEvent={}", transactionEvent);
+                    log.error("Instantiate TopicController FAIL transactionEvent:{}", transactionEvent);
                     systemExit(1);
                 }
             }
