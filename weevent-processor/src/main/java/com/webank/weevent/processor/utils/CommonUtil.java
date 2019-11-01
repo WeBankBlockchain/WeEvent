@@ -55,8 +55,6 @@ public class CommonUtil {
 
     private static String truncateUrlPage(String strURL) {
         String strAllParam = null;
-      //  String url = strURL.trim().toLowerCase();
-
         String[] arrSplit = strURL.split("[?]");
         if ((strURL.length() > 1) && (arrSplit.length) > 1 && (arrSplit[1] != null)) {
             strAllParam = arrSplit[1];
@@ -156,8 +154,8 @@ public class CommonUtil {
     public static List<String> getAllKey(Map<String, String> map) {
         List<String> keys = new ArrayList<>();
         Iterator it = map.entrySet().iterator();
-        while (it.hasNext()){
-            Map.Entry entry = (Map.Entry)it.next();
+        while (it.hasNext()) {
+            Map.Entry entry = (Map.Entry) it.next();
             keys.add((String) entry.getKey());
         }
         return keys;
