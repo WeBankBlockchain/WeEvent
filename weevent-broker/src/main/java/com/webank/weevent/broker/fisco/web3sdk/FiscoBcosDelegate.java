@@ -102,7 +102,8 @@ public class FiscoBcosDelegate {
         pool.setThreadNamePrefix("web3sdk_");
         pool.setCorePoolSize(fiscoConfig.getWeb3sdkCorePoolSize());
         pool.setMaxPoolSize(fiscoConfig.getWeb3sdkMaxPoolSize());
-        pool.setQueueCapacity(fiscoConfig.getWeb3sdkQueueSize());
+        // queue conflict with thread pool scale up, forbid it
+        pool.setQueueCapacity(0);
         pool.setKeepAliveSeconds(fiscoConfig.getWeb3sdkKeepAliveSeconds());
         // abort policy
         pool.setRejectedExecutionHandler(null);
