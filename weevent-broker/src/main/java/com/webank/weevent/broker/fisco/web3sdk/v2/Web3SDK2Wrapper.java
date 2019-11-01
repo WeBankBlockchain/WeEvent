@@ -556,6 +556,7 @@ public class Web3SDK2Wrapper {
     public static List<TbBlock> queryBlockList(Web3j web3j, String transHash, BigInteger blockNumber) throws BrokerException {
         List<TbBlock> tbBlocks = new ArrayList<>();
         try {
+            //存在一个块高或者hash只有一个值，总条数就是块高、如果什么都不带，那么就要查最多50次，依次累计
             BcosBlock.Block block;
             if (transHash == null && blockNumber == null) {
                 BlockNumber number = web3j.getBlockNumber().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
@@ -596,6 +597,32 @@ public class Web3SDK2Wrapper {
         }
     }
 
+    private static List<TbBlock> queryTbBlockPage(Web3j web3j, String transHash, BigInteger blockNumber) throws InterruptedException, ExecutionException, TimeoutException {
+        Integer pageSize = 10;
+        Integer pageIndex = 1;
+        List<TbBlock> tbBlocks = new ArrayList<>();
+        BlockNumber number = web3j.getBlockNumber().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+        BcosBlock bcosBlock = web3j.getBlockByNumber(new DefaultBlockParameterNumber(number.getBlockNumber()), true)
+                .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+        BcosBlock.Block block = bcosBlock.getBlock();
+
+        if (block == null) {
+            return null;
+        }
+        Instant instant = Instant.ofEpochMilli(block.getTimestamp().longValue());
+        ZoneId zone = ZoneId.systemDefault();
+        LocalDateTime blockTimestamp = LocalDateTime.ofInstant(instant, zone);
+
+        int size = block.getTransactions() == null ? 0 : 1;
+        int sealerIndex = Integer.parseInt(block.getSealer().substring(2), 16);
+        TbBlock tbBlock = new TbBlock(block.getHash(), block.getNumber(), blockTimestamp,
+                size, sealerIndex);
+        tbBlock.setSealer(block.getSealer());
+        tbBlocks.add(tbBlock);
+
+        return tbBlocks;
+    }
+
     public static List<TbNode> queryNodeList(Web3j web3j) throws BrokerException {
         //1、Current node, pbftview, and blockNumber
         List<TbNode> tbNodes = new ArrayList<>();
@@ -610,6 +637,8 @@ public class Web3SDK2Wrapper {
             BlockNumber blockNumber = web3j.getBlockNumber().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
             TbNode tbNode = new TbNode();
             tbNode.setBlockNumber(blockNumber.getBlockNumber());
+            //多个节点，每个节点都要查一次，怎么查
+
             tbNode.setPbftView(pbftView.getPbftView());
             tbNode.setNodeId(nodeIds.get(0));
             tbNode.setNodeName(nodeIds.get(0).substring(0, nodeIds.get(0).length() - 10));
