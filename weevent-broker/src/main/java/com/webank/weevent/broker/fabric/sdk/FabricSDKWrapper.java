@@ -150,12 +150,12 @@ public class FabricSDKWrapper {
         for (ProposalResponse response : propResp) {
             if (response.getStatus() == ProposalResponse.Status.SUCCESS) {
                 String payload = new String(response.getChaincodeActionResponsePayload());
-                log.debug(String.format("[√] Got success response from peer {} => payload: {}", response.getPeer().getName(), payload));
+                log.debug("[√] Got success response from peer:{}, payload:{}", response.getPeer().getName(), payload);
                 successful.add(response);
             } else {
                 String status = response.getStatus().toString();
                 String msg = response.getMessage();
-                log.error(String.format("[×] Got failed response from peer{} => {}: {} ", response.getPeer().getName(), status, msg));
+                log.error("[×] Got failed response from peer:{}, status:{}, error message:{} ", response.getPeer().getName(), status, msg);
                 failed.add(response);
             }
         }
@@ -185,14 +185,14 @@ public class FabricSDKWrapper {
             if (response.getStatus() == ProposalResponse.Status.SUCCESS) {
                 transactionInfo.setCode(ErrorCode.SUCCESS.getCode());
                 transactionInfo.setPayLoad(new String(response.getChaincodeActionResponsePayload()));
-                log.info(String.format("[√] Got success response from peer {} => payload: {}", response.getPeer().getName(), transactionInfo.getPayLoad()));
+                log.info("[√] Got success response from peer:{} , payload:{}", response.getPeer().getName(), transactionInfo.getPayLoad());
                 successful.add(response);
             } else {
                 result = false;
                 transactionInfo.setCode(ErrorCode.FABRICSDK_CHAINCODE_INVOKE_FAILED.getCode());
                 transactionInfo.setMessage(response.getMessage());
                 String status = response.getStatus().toString();
-                log.warn(String.format("[×] Got failed response from peer{} => {}: {} ", response.getPeer().getName(), status, transactionInfo.getMessage()));
+                log.error("[×] Got failed response from peer:{}, status:{}, error message:{}", response.getPeer().getName(), status, transactionInfo.getMessage());
                 failed.add(response);
             }
         }

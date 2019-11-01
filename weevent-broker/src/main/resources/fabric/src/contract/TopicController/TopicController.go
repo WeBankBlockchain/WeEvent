@@ -8,7 +8,7 @@ import(
 )
 
 type TopicController struct {
-    fmt.Println("<< ====[TopicController] declare struct ====== >>")
+    version string
 }
 
 type TopicInfo struct {
