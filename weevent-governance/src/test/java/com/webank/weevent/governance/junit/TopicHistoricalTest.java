@@ -21,7 +21,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @Slf4j
-public class HistoricalDataTest extends JUnitTestBase {
+public class TopicHistoricalTest extends JUnitTestBase {
 
     @Autowired
     private WebApplicationContext wac;
@@ -48,6 +48,18 @@ public class HistoricalDataTest extends JUnitTestBase {
     public void testHistoricalDataList() throws Exception {
         String content = "{\"groupId\":\"1\",\"userId\":\"1\",\"brokerId\":\"1\",\"beginDate\":\"2019-10-08\",\"endDate\":\"2019-10-15\"}";
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/historicalData/list")
+                .contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn();
+        MockHttpServletResponse response = mvcResult.getResponse();
+        String result = response.getContentAsString();
+        Assert.assertNotNull(result);
+        GovernanceResult governanceResult = JSONObject.parseObject(result, GovernanceResult.class);
+        Assert.assertEquals(governanceResult.getStatus().toString(), "200");
+    }
+
+    @Test
+    public void testEventList() throws Exception {
+        String content = "{\"groupId\":\"1\",\"userId\":\"1\",\"brokerId\":\"1\",\"beginDate\":\"2019-10-08\",\"endDate\":\"2019-10-15\"}";
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/historicalData/eventList")
                 .contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         String result = response.getContentAsString();
