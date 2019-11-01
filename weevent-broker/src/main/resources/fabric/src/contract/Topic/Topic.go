@@ -8,7 +8,7 @@ import(
 var sequenceNumber int
 
 type Topic struct {
-    fmt.Println("<< ====[Topic] declare struct ====== >>")
+    version string
 }
 
 func (t *Topic) Init(stub shim.ChaincodeStubInterface) pb.Response{
