@@ -40,13 +40,10 @@ public class FiscoConfig {
     @Value("${web3sdk.core-pool-size:10}")
     private Integer web3sdkCorePoolSize;
 
-    @Value("${web3sdk.max-pool-size:200}")
+    @Value("${web3sdk.max-pool-size:1000}")
     private Integer web3sdkMaxPoolSize;
 
-    @Value("${web3sdk.queue-capacity:1000}")
-    private Integer web3sdkQueueSize;
-
-    @Value("${web3sdk.keep-alive-seconds:60}")
+    @Value("${web3sdk.keep-alive-seconds:10}")
     private Integer web3sdkKeepAliveSeconds;
 
     @Value("${v1.ca-crt-path:ca.crt}")
