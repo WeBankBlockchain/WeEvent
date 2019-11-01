@@ -2,6 +2,7 @@ package com.webank.weevent.protocol.rest;
 
 import java.math.BigInteger;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,9 +54,41 @@ public class AdminRest extends RestHA {
         this.buildInfo = buildInfo;
     }
 
+    @RequestMapping(path = "/listNodes")
+    public ResponseData<List<String>> listNodes() throws BrokerException {
+        log.info("query node list.");
+        ResponseData<List<String>> responseData = new ResponseData<>();
+        List<String> nodesInfo = new ArrayList<>();
+        if (this.masterJob.getClient() == null) {
+            nodesInfo.add(SystemInfoUtils.getCurrentIp() + ":" + SystemInfoUtils.getCurrentPort());
+        } else {
+            try {
+                List<String> ipList = this.masterJob.getClient().getChildren().forPath(BrokerApplication.weEventConfig.getZookeeperPath() + "/nodes");
+                log.info("zookeeper ip List:{}", ipList);
+                for (String nodeIP : ipList) {
+                    byte[] ip = this.masterJob.getZookeeperNode(BrokerApplication.weEventConfig.getZookeeperPath() + "/nodes" + "/" + nodeIP);
+                    nodesInfo.add(new String(ip));
+                }
+            } catch (Exception e) {
+                log.error("find listNodes fail", e);
+                throw new BrokerException("find listNodes fail", e);
+            }
+        }
+        responseData.setErrorCode(ErrorCode.SUCCESS);
+        responseData.setData(nodesInfo);
+        return responseData;
+    }
+
     @RequestMapping(path = "/listSubscription")
-    public Map<String, Object> listSubscription(@RequestParam(name = "groupId", required = false) String groupIdStr) throws BrokerException {
+    public ResponseData<Map<String, Object>> listSubscription(@RequestParam(name = "nodeIp") String nodeIp,
+                                                              @RequestParam(name = "groupId", required = false) String groupIdStr) throws BrokerException {
+        log.info("groupId:{}, nodeIp:{}", groupIdStr, nodeIp);
+        ResponseData<Map<String, Object>> responseData = new ResponseData<>();
         String groupId = groupIdStr;
+        if (StringUtils.isBlank(nodeIp)) {
+            log.error("node ipList is null.");
+            throw new BrokerException("node ipList is null.");
+        }
         if (StringUtils.isBlank(groupId)) {
             groupId = WeEventUtils.getDefaultGroupId();
         }
@@ -65,19 +98,20 @@ public class AdminRest extends RestHA {
                     this.consumer.listSubscription(groupId));
         } else {
             try {
-                List<String> ipList = this.masterJob.getClient().getChildren().forPath(BrokerApplication.weEventConfig.getZookeeperPath() + "/nodes");
-                log.info("zookeeper ip List:{}", ipList);
-                for (String nodeIP : ipList) {
-                    byte[] ip = this.masterJob.getZookeeperNode(BrokerApplication.weEventConfig.getZookeeperPath() + "/nodes" + "/" + nodeIP);
-                    SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-                    RestTemplate rest = new RestTemplate(requestFactory);
-                    String url = new StringBuffer("http://").append(new String(ip)).append("/weevent/admin/innerListSubscription")
-                            .append("?groupId=").append(groupId).toString();
-                    log.info("url:{}", url);
+                log.info("zookeeper ip List:{}", nodeIp);
+                String[] ipList = nodeIp.split(",");
+                for (String ipStr : ipList) {
+                    if (!StringUtils.isBlank(ipStr)) {
+                        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+                        RestTemplate rest = new RestTemplate(requestFactory);
+                        String url = new StringBuffer("http://").append(ipStr).append("/weevent/admin/innerListSubscription")
+                                .append("?groupId=").append(groupId).toString();
+                        log.info("url:{}", url);
 
-                    ResponseEntity<String> rsp = rest.getForEntity(url, String.class);
-                    log.debug("innerListSubscription:{}", JSON.parse(rsp.getBody()));
-                    nodesInfo.put(new String(ip), JSON.parse(rsp.getBody()));
+                        ResponseEntity<String> rsp = rest.getForEntity(url, String.class);
+                        log.debug("innerListSubscription:{}", JSON.parse(rsp.getBody()));
+                        nodesInfo.put(nodeIp, JSON.parse(rsp.getBody()));
+                    }
                 }
             } catch (Exception e) {
                 log.error("find subscriptionList fail", e);
@@ -85,8 +119,9 @@ public class AdminRest extends RestHA {
             }
         }
 
-
-        return nodesInfo;
+        responseData.setErrorCode(ErrorCode.SUCCESS);
+        responseData.setData(nodesInfo);
+        return responseData;
     }
 
     @RequestMapping(path = "/innerListSubscription")
