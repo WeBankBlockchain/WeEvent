@@ -19,6 +19,8 @@ public class TopicTopicHistoricalEntity extends TopicHistoricalBase {
 
     private Date endDate;
 
+    private String createDateStr;
+
     private List<String> topicList;
 
 }

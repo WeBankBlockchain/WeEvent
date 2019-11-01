@@ -262,7 +262,7 @@ public class RuleEngineService {
             rule = ruleEngines.get(0);
 
             // check sql condition
-            // validationConditions(request, ruleEngineEntity);
+             validationConditions(request, ruleEngineEntity);
 
             //update process rule
             this.updateProcessRule(request, ruleEngineEntity, rule);
@@ -556,6 +556,7 @@ public class RuleEngineService {
         if (ruleEngineEntity.getPayload() != null && ruleEngineEntity.getPayload().length() > 100) {
             throw new GovernanceException("rule description length cannot exceed 100");
         }
+
     }
 
     private boolean checkRuleName(String ruleName, String regex) {
@@ -599,7 +600,7 @@ public class RuleEngineService {
             throw new GovernanceException("conditional row field cannot be empty");
         }
         //check number
-        if ("=".equals(conditionEntity.getConditionalOperator()) || "!=".equals(conditionEntity.getConditionalOperator())) {
+        if (!"=".equals(conditionEntity.getConditionalOperator()) && !"!=".equals(conditionEntity.getConditionalOperator())) {
             boolean matches = NumberValidationUtils.isRealNumber(conditionEntity.getSqlCondition());
             if (!matches) {
                 throw new GovernanceException("sqlCondition is not number");
@@ -627,7 +628,7 @@ public class RuleEngineService {
         return ruleEngineConditionEntities;
     }
 
-    public  boolean validationConditions(HttpServletRequest request, RuleEngineEntity ruleEngineEntity) throws GovernanceException {
+    public boolean validationConditions(HttpServletRequest request, RuleEngineEntity ruleEngineEntity) throws GovernanceException {
         if (StringUtil.isBlank(ruleEngineEntity.getConditionField())) {
             return true;
         }

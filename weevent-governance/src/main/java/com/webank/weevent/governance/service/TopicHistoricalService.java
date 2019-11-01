@@ -93,7 +93,19 @@ public class TopicHistoricalService {
 
     public List<TopicTopicHistoricalEntity> eventList(TopicTopicHistoricalEntity topicHistoricalEntity, HttpServletRequest httpRequest) throws GovernanceException {
         try {
-            return topicHistoricalMapper.historicalDataList(topicHistoricalEntity);
+            String accountId = cookiesTools.getCookieValueByName(httpRequest, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
+            Boolean flag = permissionService.verifyPermissions(topicHistoricalEntity.getBrokerId(), accountId);
+            if (!flag) {
+                throw new GovernanceException(ConstantCode.ACCESS_DENIED.getMsg());
+            }
+            List<TopicTopicHistoricalEntity> historicalEntities = topicHistoricalMapper.eventList(topicHistoricalEntity);
+            if (CollectionUtils.isEmpty(historicalEntities)) {
+                return historicalEntities;
+            }
+            for (TopicTopicHistoricalEntity historicalEntity : historicalEntities) {
+                historicalEntity.setCreateDateStr(DateFormatUtils.format(historicalEntity.getCreateDate(), simpleDateFormat));
+            }
+            return historicalEntities;
         } catch (Exception e) {
             log.info("get eventList fail", e);
             throw new GovernanceException("get eventList fail", e);

@@ -51,6 +51,38 @@
         GROUP BY topic_name,DATE_FORMAT(create_date,"%Y-%m-%d")
     </select>
 
+    <select id="eventList" resultMap="BaseResultMap">
+        SELECT
+        DATE_FORMAT(create_date,"%Y-%m-%d")as create_date ,count(event_id) as eventCount
+        from t_topic_historical
+        WHERE 1=1
+        <if test="beginDate != null">
+            AND DATE_FORMAT(create_date,"%Y-%m-%d")&gt;=DATE_FORMAT(#{beginDate},"%Y-%m-%d")
+        </if>
+        <if test="endDate != null">
+            AND DATE_FORMAT(create_date,"%Y-%m-%d")&lt;=DATE_FORMAT(#{endDate},"%Y-%m-%d")
+        </if>
+        <if test="topicName != null">
+            AND topic_name=#{topicName}
+        </if>
+        <if test="userId != null">
+            AND user_id=#{userId}
+        </if>
+        <if test="brokerId != null">
+            AND broker_id=#{brokerId}
+        </if>
+        <if test="groupId != null">
+            AND group_id=#{groupId}
+        </if>
+        <if test="topicList != null and topicList.size()>0">
+            and topic_name in
+            <foreach collection="topicList" item="topic" open="(" separator="," close=")">
+                #{topic}
+            </foreach>
+        </if>
+        GROUP BY DATE_FORMAT(create_date,"%Y-%m-%d")
+    </select>
+
     <insert id="addHistoricalData" parameterType="com.webank.weevent.governance.entity.TopicTopicHistoricalEntity"
             useGeneratedKeys="true" keyProperty="id">
         insert into t_topic_historical(broker_id, user_id, topic_name, group_id, block_number, event_id)

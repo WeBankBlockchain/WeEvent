@@ -63,7 +63,7 @@
 
     <insert id="addCirculationDatabase">
         INSERT INTO t_rule_database(`user_id`, `broker_id`, `database_url`, `database_name`, `table_name`)
-        VALUES (#{userId}, #{brokerId}, #{databaseUrl}, #{databaseName})
+        VALUES (#{userId}, #{brokerId}, #{databaseUrl}, #{databaseName}, #{tableName})
     </insert>
 
     <insert id="batchInsert">
