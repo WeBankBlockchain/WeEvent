@@ -2,8 +2,8 @@
   <div class='statistics'>
     <div class='dataContent'>
       <div class='selectOptions'>
-        <span class='optionTitle'>选择主题</span>
-        <el-select v-model="topic" multiple placeholder="请选择" @visible-change="selectChange" collapse-tags size="small">
+        <span class='optionTitle'>{{$t('tableCont.chooseTopic')}}</span>
+        <el-select v-model="topic" multiple :placeholder="$t('common.choose')" @visible-change="selectChange" collapse-tags size="small">
           <el-option
             v-for="(item, index) in topicList"
             :key="index"
@@ -12,7 +12,7 @@
             >
           </el-option>
         </el-select>
-        <span class='optionTitle' style='margin-left:20px'>选择时间</span>
+        <span class='optionTitle' style='margin-left:20px'>{{$t('tableCont.chooseTime')}}</span>
         <el-date-picker
           size="small"
           type="daterange"
@@ -20,9 +20,9 @@
           v-model='selectTime'
           @change="getTime"
           :picker-options="pickerOptions"
-          range-separator="至"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期">
+          range-separator="-"
+          :start-placeholder="$t('tableCont.beginTime')"
+          :end-placeholder="$t('tableCont.endTime')">
         </el-date-picker>
       </div>
       <div class='statisticsCharts'>
@@ -35,6 +35,7 @@
 import Highcharts from 'highcharts/highstock'
 import { getLastWeek, getTimeList } from '../utils/formatTime'
 import API from '../API/resource.js'
+require('highcharts/modules/no-data-to-display.js')(Highcharts)
 export default{
   data () {
     return {
@@ -63,6 +64,16 @@ export default{
           crosshairs: true
         },
         series: [],
+        lang: {
+          noData: this.$t('common.noData')
+        },
+        noData: {
+          style: {
+            fontWeight: 'bold',
+            fontSize: '15px',
+            color: '#303030'
+          }
+        },
         legend: {
           align: 'center',
           verticalAlign: 'top',
@@ -70,9 +81,6 @@ export default{
         },
         credits: {
           enabled: false
-        },
-        lang: {
-          noData: '该时段暂无数据'
         }
       }
     }
@@ -91,6 +99,10 @@ export default{
       API.historicalData(data).then(res => {
         if (res.data.status === 200) {
           let resData = res.data.data
+          if (!resData || resData.length === 0) {
+            Highcharts.chart('chart', vm.option).showNoData()
+            return
+          }
           let topic = []
           vm.option.series = []
           if (e) {
@@ -119,8 +131,9 @@ export default{
         } else {
           vm.$message({
             type: 'warning',
-            message: '数据获取失败'
+            message: this.$t('tableCont.getDataError')
           })
+          Highcharts.chart('chart', vm.option).showNoData()
         }
       })
     },
@@ -155,6 +168,9 @@ export default{
     },
     groupId () {
       return this.$store.state.groupId
+    },
+    lang () {
+      return this.$store.state.lang
     }
   },
   watch: {
@@ -163,6 +179,15 @@ export default{
     },
     groupId () {
       this.beginDate(true)
+    },
+    lang () {
+      if (this.option.series.length === 0) {
+        this.option.lang.noData = this.$t('common.noData')
+        Highcharts.chart('chart', this.option).showNoData()
+      } else {
+        this.option.lang.noData = this.$t('common.noData')
+        Highcharts.chart('chart', this.option)
+      }
     }
   },
   mounted () {

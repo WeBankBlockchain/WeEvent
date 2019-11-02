@@ -1,8 +1,9 @@
 package com.webank.weevent.processor.controller;
 
-
 import javax.validation.Valid;
 
+import com.webank.weevent.processor.ProcessorApplication;
+import com.webank.weevent.processor.mq.CEPRuleMQ;
 import com.webank.weevent.processor.quartz.CRUDJobs;
 import com.webank.weevent.processor.quartz.QuartzManager;
 import com.webank.weevent.processor.utils.BaseRspEntity;
@@ -91,12 +92,28 @@ public class CEPRuleController {
         return resEntity;
     }
 
+    @RequestMapping(value = "/checkWhereCondition", method = RequestMethod.GET)
+    @ResponseBody
+    public BaseRspEntity checkWhereCondition(@RequestParam(name = "payload") String payload, @RequestParam(name = "condition") String condition) {
+        BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
+        RetCode ret = CEPRuleMQ.checkCondition(payload, condition);
+
+        if (!(1 == ret.getErrorCode())) { //fail
+            resEntity.setErrorCode(ret.getErrorCode());
+            resEntity.setErrorMsg(ret.getErrorMsg());
+        }
+
+        log.info("ret:{}", JSONArray.toJSON(ret));
+        return resEntity;
+    }
+
     private RetCode createJob(CEPRule rule, String type) {
 
         JobDataMap jobmap = new JobDataMap();
         jobmap.put("rule", rule);
         jobmap.put("type", type);
-        // keep the whole map
+        // set the original instance
+        jobmap.put("instance", ProcessorApplication.processorConfig.getSchedulerInstanceName());
         return quartzManager.addModifyJob(rule.getId(), "rule", "rule", "rule-trigger", CRUDJobs.class, jobmap);
 
     }

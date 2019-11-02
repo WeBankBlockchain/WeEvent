@@ -16,6 +16,7 @@ import com.webank.weevent.governance.service.CommonService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.jsoup.helper.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,18 +36,19 @@ public class ForwardBrokerFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
         String idStr = request.getParameter("brokerId");
+        String brokerUrl = request.getParameter("brokerUrl");
         String originUrl = req.getRequestURI();
         // get tail of brokerEntity url
         String subStrUrl = originUrl.substring(originUrl.indexOf("/weevent/") + "/weevent".length());
-
-        Integer id = Integer.parseInt(idStr);
-        BrokerEntity brokerEntity = brokerService.getBroker(id);
-        String brokerUrl = brokerEntity.getBrokerUrl();
+        if (!StringUtil.isBlank(idStr) && StringUtil.isBlank(brokerUrl)) {
+            Integer id = Integer.parseInt(idStr);
+            BrokerEntity brokerEntity = brokerService.getBroker(id);
+            brokerUrl = brokerEntity.getBrokerUrl();
+        }
         // get complete forward brokerEntity url
         String newUrl = brokerUrl + subStrUrl;
-
         // get client according url
         CloseableHttpResponse closeResponse = commonService.getCloseResponse(req, newUrl);
-        commonService.writeResponse(closeResponse,res);
+        commonService.writeResponse(closeResponse, res);
     }
 }

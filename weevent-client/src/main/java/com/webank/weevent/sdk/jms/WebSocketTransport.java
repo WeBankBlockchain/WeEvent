@@ -20,11 +20,12 @@ import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import javafx.util.Pair;
+
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ServerHandshake;
+import org.springframework.data.util.Pair;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompDecoder;
@@ -171,7 +172,7 @@ public class WebSocketTransport extends WebSocketClient {
         String req = stompCommand.encodeConnect(userName, password);
         sequence2Id.put(Long.toString(0L), 0L);
         Message stompResponse = this.stompRequest(req, 0L);
-        this.account = new Pair<>(userName, password);
+        this.account = Pair.of(userName, password);
 
         // initialize connection context
         this.cleanup();
@@ -482,8 +483,8 @@ public class WebSocketTransport extends WebSocketClient {
                     Thread.sleep(3000);
                 }
                 // check the stomp connect,and use cache login and password
-                while (!this.webSocketTransport.stompConnect(this.webSocketTransport.account.getKey(),
-                        this.webSocketTransport.account.getValue())) {
+                while (!this.webSocketTransport.stompConnect(this.webSocketTransport.account.getFirst(),
+                        this.webSocketTransport.account.getSecond())) {
                     Thread.sleep(3000);
                 }
             } catch (InterruptedException | JMSException e) {
