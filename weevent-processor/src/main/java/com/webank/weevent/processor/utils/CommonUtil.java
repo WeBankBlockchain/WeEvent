@@ -9,6 +9,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weevent.sdk.WeEvent;
+
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -136,14 +138,11 @@ public class CommonUtil {
             List<String> contentKeys = getKeys(content);
             List<String> objJsonKeys = getKeys(objJson);
 
-            // objJsonKeys must longer than the contentKeys
-            if (contentKeys.size() > objJsonKeys.size()) {
-                tag = false;
-            } else {
-                for (String contentKey : contentKeys) {
-                    if (!objJsonKeys.contains(contentKey)) {
-                        tag = false;
-                    }
+            for (String contentKey : contentKeys) {
+                //&& (!ConstantsHelper.EVENT_ID.equals(contentKey))
+                if (!objJsonKeys.contains(contentKey)) {
+                    tag = false;
+                    break;
                 }
             }
         }
@@ -161,34 +160,61 @@ public class CommonUtil {
         return keys;
     }
 
-    public static Map<String, String> contactsql(String content, String objJson, String payload) {
+    public static Map<String, String> contactsql(WeEvent eventMessage, String selectFields, String payload) {
+        String content = new String(eventMessage.getContent());
+        String eventId = eventMessage.getEventId();
+
         Map<String, String> sql = new HashMap<>();
         Map<String, String> sqlOrder = new HashMap<>();
+        boolean eventFlag = false;
+        List<String> result = new ArrayList<>();
+        // if select is equal * ,then select all fields.
+        if ("*".equals(selectFields)) {
+            String selectFieldsTemp = payload;
+            Iterator it = JSONObject.parseObject(selectFieldsTemp).entrySet().iterator();
 
-        if (!StringUtils.isEmpty(content)
-                && !StringUtils.isEmpty(objJson)) {
-            String[] result = objJson.split(",");
-            JSONObject eventContent = JSONObject.parseObject(content);
-            JSONObject table = JSONObject.parseObject(payload);
-
-            // get all select field and value
-            for (String key : result) {
-                sql.put(key, null);
-                if (eventContent.containsKey(key)) {
-                    sql.put(key, eventContent.get(key).toString());
-                }
+            while (it.hasNext()) {
+                Map.Entry entry = (Map.Entry) it.next();
+                result.add((String) entry.getKey());
             }
 
-            // keep the  right order
-            for (Map.Entry<String, Object> entry : table.entrySet()) {
-                for (String key : result) {
-                    if (entry.getKey().equals(key)) {
-                        sqlOrder.put(entry.getKey(), sql.get(key));
-                    }
-                }
+        } else {
+            String[] array = selectFields.split(",");
+            for (String s : array) {
+                result.add(s);
             }
-
         }
+
+
+        JSONObject eventContent = JSONObject.parseObject(content);
+        JSONObject table = JSONObject.parseObject(payload);
+
+        // get all select field and value, and the select field must in eventContent.
+        for (String key : result) {
+            sql.put(key, null);
+            if (eventContent.containsKey(key)) {
+                sql.put(key, eventContent.get(key).toString());
+            }
+            // set the flag
+            if (ConstantsHelper.EVENT_ID.equals(key)) {
+                eventFlag = true;
+            }
+        }
+
+        // keep the  right order
+        for (Map.Entry<String, Object> entry : table.entrySet()) {
+            for (String key : result) {
+                if (entry.getKey().equals(key)) {
+                    sqlOrder.put(entry.getKey(), sql.get(key));
+                }
+            }
+        }
+
+        // if user need eventId , add the event id
+        if (eventFlag) {
+            sqlOrder.put(ConstantsHelper.EVENT_ID, eventId);
+        }
+
         return sqlOrder;
     }
 

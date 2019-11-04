@@ -107,20 +107,24 @@ public class CEPRuleMQ {
         }
     }
 
-    private static void sendMessageToDB(String content, CEPRule rule) {
-        JSONObject eventContent = JSONObject.parseObject(content);
+    private static void sendMessageToDB(WeEvent eventContent, CEPRule rule) {
         try {
+
             Connection conn = CommonUtil.getConnection(rule.getDatabaseUrl());
 
             if (conn != null) {
+                // get the sql params
                 Map<String, String> urlParamMap = CommonUtil.uRLRequest(rule.getDatabaseUrl());
+
+                // get the insert sql
                 StringBuffer insertExpression = new StringBuffer("insert into ");
                 insertExpression.append(urlParamMap.get("tableName"));
                 insertExpression.append("(");
                 StringBuffer values = new StringBuffer(" values (");
 
                 // select key and value
-                Map<String, String> sqlvalue = CommonUtil.contactsql(content, rule.getSelectField(), rule.getPayload());
+                Map<String, String> sqlvalue = CommonUtil.contactsql(eventContent, rule.getSelectField(), rule.getPayload());
+
                 // just the order key and need write in db
                 List<String> keys = CommonUtil.getAllKey(sqlvalue);
 
@@ -131,6 +135,7 @@ public class CEPRuleMQ {
                         insertExpression.append(keys.get(i)).append(")");
                         values.append("?)");
                     } else {
+
                         // concat the key
                         insertExpression.append(keys.get(i)).append(",");
 
@@ -164,23 +169,20 @@ public class CEPRuleMQ {
     private static void handleOnEvent(WeEvent event, IWeEventClient client, Map<String, CEPRule> ruleMap) {
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
 
-        // get the content ,and parsing it  byte[]-->String
-        String content = new String(event.getContent());
-
         // match the rule and send message
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
-            if (!StringUtils.isEmpty(entry.getValue().getSelectField()) && !(StringUtils.isEmpty(entry.getValue().getPayload())) && !(StringUtils.isEmpty(entry.getValue().getConditionField()))) {
+            if (!StringUtils.isEmpty(entry.getValue().getSelectField()) && !(StringUtils.isEmpty(entry.getValue().getPayload()))) {
 
                 log.info("check the josn and return fine !");
-                if (hitRuleEngine(entry.getValue().getPayload(), content, entry.getValue().getConditionField())) {
+                if (hitRuleEngine(entry.getValue().getPayload(), event, entry.getValue().getConditionField())) {
                     try {
                         // parsing the payload && match the content,if true and hit it
                         if (entry.getValue().getConditionType().equals(2)) {
-                            sendMessageToDB(content, entry.getValue());
+                            sendMessageToDB(event, entry.getValue());
 
                         } else if (entry.getValue().getConditionType().equals(1)) {
                             // select the field and publish the message to the toDestination
-                            String eventContent = getContent(content, entry.getValue().getSelectField());
+                            String eventContent = getContent(event, entry.getValue().getSelectField(), entry.getValue().getPayload());
                             log.info("publish select: {},eventContent:{}", entry.getValue().getSelectField(), eventContent);
 
                             // publish the message
@@ -201,21 +203,45 @@ public class CEPRuleMQ {
 
     }
 
-    private static String getContent(String content, String selectField) {
+    private static String getContent(WeEvent eventMessage, String selectField, String payload) {
+        String content = new String(eventMessage.getContent());
         JSONObject eventContent = JSONObject.parseObject(content);
-        String[] result = selectField.split(",");
+        JSONObject payloadContent = JSONObject.parseObject(payload);
+
+        // match the table
         JSONObject iftttContent = new JSONObject();
+        // check the star and get all parameters
+        if ("*".equals(selectField)) {
+            for (Map.Entry<String, Object> entry : payloadContent.entrySet()) {
+                if (eventContent.containsKey(entry.getKey())) {
+                    iftttContent.put(entry.getKey(), eventContent.get(entry.getKey()));
+                }
+            }
+        }
+        // get all fields
+        String[] result = selectField.split(",");
+        // event content must contain the select message
         for (int i = 0; i < result.length; i++) {
             if (eventContent.containsKey(result[i])) {
                 iftttContent.put(result[i], eventContent.get(result[i]));
+            }
+            // if contain the eventId ,need  add the field
+            if ("eventId".equals(result[i])) {
+                iftttContent.put(result[i], eventMessage.getEventId());
             }
         }
 
         return iftttContent.toString();
     }
 
-    private static boolean hitRuleEngine(String payload, String eventContent, String condition) {
-        if (CommonUtil.checkJson(eventContent, payload)) {
+    private static boolean hitRuleEngine(String payload, WeEvent eventMessage, String condition) {
+
+        String eventContent = new String(eventMessage.getContent());
+        // all parameter must be the same
+        if (CommonUtil.checkJson(eventContent, payload) && (condition.isEmpty())) {
+            // if the confition is empty, just return all message
+            return true;
+        } else if (CommonUtil.checkJson(eventContent, payload)) {
             List<String> eventContentKeys = CommonUtil.getKeys(payload);
             JSONObject event = JSONObject.parseObject(eventContent);
             JexlEngine jexl = new JexlBuilder().create();
@@ -224,7 +250,7 @@ public class CEPRuleMQ {
             for (String key : eventContentKeys) {
                 context.set(key, event.get(key));
             }
-            // Create an expression  "a>10"
+            // check the expression ,if match then true
             boolean checkFlag = (Boolean) jexl.createExpression(condition).evaluate(context);
             log.info("payload:{},eventContent:{},condition:{},hit rule:{}", payload, eventContent, condition, checkFlag);
             return checkFlag;
