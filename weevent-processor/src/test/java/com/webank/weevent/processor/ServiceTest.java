@@ -458,14 +458,14 @@ public class ServiceTest {
                 " \t\t\"id\":11011604,\n" +
                 "        \"ruleName\": \"air3\",\n" +
                 "        \"fromDestination\": \"from.hitselectEventIDParamToDB\",\n" +
-                "        \"brokerUrl\": \"http://122.51.93.181:7000/weevent\",\n" +
+                "        \"brokerUrl\": \"http://127.0.0.1:7000/weevent\",\n" +
                 "        \"payload\":\"{\\\"b\\\":1,\\\"c\\\":\\\"test\\\",\\\"d\\\":10}\",\n" +
                 "        \"payloadType\":1,\n" +
                 "        \"selectField\": \"a,eventId\",\n" +
                 "        \"conditionField\": \"d<10\",\n" +
                 "        \"conditionType\":2,\n" +
                 "        \"toDestination\": \"to.hitselectEventIDParamToDB\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://122.51.93.181:3306/cep?user=root&password=WeEvent@2019&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/cep?user=root&password=WeEvent@2019&tableName=fromIfttt\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -490,14 +490,14 @@ public class ServiceTest {
                 " \t\t\"id\":11011604,\n" +
                 "        \"ruleName\": \"air3\",\n" +
                 "        \"fromDestination\": \"from.notHitselectEventIDParamToDB\",\n" +
-                "        \"brokerUrl\": \"http://122.51.93.181:7000/weevent\",\n" +
+                "        \"brokerUrl\": \"http://127.0.0.1:7000/weevent\",\n" +
                 "        \"payload\":\"{\\\"b\\\":1,\\\"c\\\":\\\"test\\\",\\\"d\\\":10}\",\n" +
                 "        \"payloadType\":1,\n" +
                 "        \"selectField\": \"a,eventId\",\n" +
                 "        \"conditionField\": \"d<0\",\n" +
                 "        \"conditionType\":2,\n" +
                 "        \"toDestination\": \"to.notHitselectEventIDParamToDB\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://122.51.93.181:3306/cep?user=root&password=WeEvent@2019&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/cep?user=root&password=WeEvent@2019&tableName=fromIfttt\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
