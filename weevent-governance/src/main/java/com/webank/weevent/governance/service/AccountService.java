@@ -17,6 +17,7 @@ import com.webank.weevent.governance.utils.CookiesTools;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.helper.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -136,7 +137,9 @@ public class AccountService {
         }
         // get user by username
         AccountEntity user = this.queryByUsername(username);
-
+        if (StringUtil.isBlank(user.getEmail())) {
+            throw new GovernanceException(ErrorCode.NO_MAILBOX_CONFIGURED);
+        }
         String content = "reset url is : " + emailSendUrl;
         try {
             mailService.sendSimpleMail(user.getEmail(), "Reset Password url", content);

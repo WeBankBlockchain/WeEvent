@@ -122,7 +122,7 @@ export default {
               type: 'warning',
               message: this.$t('userSet.noUser')
             })
-          } else if (res.data.code === 100102) {
+          } else if (res.data.status === 100102) {
             this.$message({
               type: 'warning',
               message: this.$t('userSet.sendMailFail')

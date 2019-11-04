@@ -72,10 +72,8 @@
     </el-table>
     <el-pagination
       @current-change="indexChange"
-      @size-change='sizeChange'
       :current-page="pageIndex"
-      :page-sizes="[10, 20, 30, 50]"
-      layout="sizes,total, prev, pager, next, jumper"
+      layout="total, prev, pager, next, jumper"
       :total="total">
     </el-pagination>
   </div>
@@ -89,18 +87,12 @@ export default {
       search_name: '',
       tableData: [],
       pageIndex: 1,
-      pageSize: 10,
       total: 0
     }
   },
   methods: {
     indexChange (e) {
       this.pageIndex = e
-      this.transList()
-    },
-    sizeChange (e) {
-      this.pageSize = e
-      this.pageIndex = 1
       this.transList()
     },
     onCopy () {
@@ -114,7 +106,7 @@ export default {
     },
     transList () {
       this.loading = true
-      let url = '/' + localStorage.getItem('groupId') + '/' + this.pageIndex + '/' + this.pageSize + '?brokerId=' + localStorage.getItem('brokerId')
+      let url = '/' + localStorage.getItem('groupId') + '/' + this.pageIndex + '/10?brokerId=' + localStorage.getItem('brokerId')
       if (sessionStorage.getItem('blockHash')) {
         url = url + '&transactionHash=' + sessionStorage.getItem('blockHash')
       }

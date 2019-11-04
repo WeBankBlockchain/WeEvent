@@ -56,7 +56,7 @@ public class RuleDatabaseService {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
             //check dbUrl
-            commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseUrl());
+            commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseUrl(),ruleDatabaseEntity.getTableName());
             ruleDatabaseMapper.addCirculationDatabase(ruleDatabaseEntity);
             return ruleDatabaseEntity;
         } catch (Exception e) {
@@ -88,7 +88,7 @@ public class RuleDatabaseService {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
             //check databaseUrl
-            commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseUrl());
+            commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseUrl(),ruleDatabaseEntity.getTableName());
             return ruleDatabaseMapper.updateCirculationDatabase(ruleDatabaseEntity);
         } catch (Exception e) {
             log.error("update circulationDatabase fail", e);

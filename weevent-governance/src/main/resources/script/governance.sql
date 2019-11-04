@@ -67,6 +67,7 @@ CREATE TABLE t_rule_engine (
   `condition_type` int(2) NULL DEFAULT NULL COMMENT 'condition type',
   `status` int(2)  NULL DEFAULT null COMMENT '0 means not started, 1 means running,2 means is deleted',
   `database_url` varchar(255) NULL DEFAULT NULL COMMENT 'database url',
+  `rule_database_id` int(11) NULL DEFAULT NULL COMMENT 'rule database id',
   `error_destination` varchar(255) NULL DEFAULT NULL COMMENT 'error destination',
   `error_message` varchar(255) NULL DEFAULT NULL COMMENT 'error message',
    PRIMARY KEY (`id`)
@@ -101,7 +102,7 @@ CREATE TABLE t_topic_historical (
    `topic_name` varchar(256) NOT NULL COMMENT 'topic name',
    `group_id` varchar(256) DEFAULT NULL COMMENT 'group id',
    `block_number` int(11) NOT NULL COMMENT 'block number',
-   `event_id` varchar(256) DEFAULT NULL COMMENT 'event id',
+   `eventId` varchar(64) DEFAULT NULL COMMENT 'event id',
    `broker_id` int(11) NOT NULL COMMENT 'broker_id',
    `user_id` int(11) NOT NULL COMMENT 'user_id',
   PRIMARY KEY (`id`)

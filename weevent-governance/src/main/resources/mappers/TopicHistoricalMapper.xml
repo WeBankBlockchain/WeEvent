@@ -11,18 +11,18 @@
         <result column="topic_name" property="topicName" jdbcType="VARCHAR"/>
         <result column="group_id" property="groupId" jdbcType="VARCHAR"/>
         <result column="block_number" property="blockNumber" jdbcType="INTEGER"/>
-        <result column="event_id" property="eventId" jdbcType="VARCHAR"/>
+        <result column="eventId" property="eventId" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,create_date,last_update, broker_id,user_id,topic_name, group_id, block_number, event_id
+        id,create_date,last_update, broker_id,user_id,topic_name, group_id, block_number, eventId
     </sql>
 
 
     <select id="historicalDataList" resultMap="BaseResultMap">
         SELECT
-        topic_name,DATE_FORMAT(create_date,"%Y-%m-%d")as create_date ,count(event_id) as eventCount
-        from t_topic_historical
+        topic_name,DATE_FORMAT(create_date,"%Y-%m-%d")as create_date ,count(eventId) as eventCount
+        from  #{tableName}
         WHERE 1=1
         <if test="beginDate != null">
             AND DATE_FORMAT(create_date,"%Y-%m-%d")&gt;=DATE_FORMAT(#{beginDate},"%Y-%m-%d")
@@ -51,22 +51,54 @@
         GROUP BY topic_name,DATE_FORMAT(create_date,"%Y-%m-%d")
     </select>
 
+    <select id="eventList" resultMap="BaseResultMap">
+        SELECT
+        DATE_FORMAT(create_date,"%Y-%m-%d")as create_date ,count(eventId) as eventCount
+        from  #{tableName}
+        WHERE 1=1
+        <if test="beginDate != null">
+            AND DATE_FORMAT(create_date,"%Y-%m-%d")&gt;=DATE_FORMAT(#{beginDate},"%Y-%m-%d")
+        </if>
+        <if test="endDate != null">
+            AND DATE_FORMAT(create_date,"%Y-%m-%d")&lt;=DATE_FORMAT(#{endDate},"%Y-%m-%d")
+        </if>
+        <if test="topicName != null">
+            AND topic_name=#{topicName}
+        </if>
+        <if test="userId != null">
+            AND user_id=#{userId}
+        </if>
+        <if test="brokerId != null">
+            AND broker_id=#{brokerId}
+        </if>
+        <if test="groupId != null">
+            AND group_id=#{groupId}
+        </if>
+        <if test="topicList != null and topicList.size()>0">
+            and topic_name in
+            <foreach collection="topicList" item="topic" open="(" separator="," close=")">
+                #{topic}
+            </foreach>
+        </if>
+        GROUP BY DATE_FORMAT(create_date,"%Y-%m-%d")
+    </select>
+
     <insert id="addHistoricalData" parameterType="com.webank.weevent.governance.entity.TopicTopicHistoricalEntity"
             useGeneratedKeys="true" keyProperty="id">
-        insert into t_topic_historical(broker_id, user_id, topic_name, group_id, block_number, event_id)
+        insert into  #{tableName}(broker_id, user_id, topic_name, group_id, block_number, eventId)
         values (#{brokerId}, #{userId}, #{topicName}, #{groupId}, #{blockNumber}, #{eventId})
     </insert>
 
 
     <delete id="deleteHistoricalData">
         delete
-        from t_topic_historical
+        from  #{tableName}
         where id = #{id}
     </delete>
 
     <select id="countHistoricalData" resultType="int">
         select count(1)
-        from t_topic_historical
+        from  #{tableName}
         where 1 = 1
     </select>
 

@@ -9,18 +9,23 @@
       element-loading-background='rgba(256,256,256,0.8)'
     >
       <el-table-column
-        prop='nodeName'
         :label="$t('tableCont.nodeName')"
-      ></el-table-column>
+      >
+        <template  slot-scope="scope">
+          <span :title='scope.row.nodeId'>
+            {{scope.row.nodeId}}
+          </span>
+        </template>
+      </el-table-column>
       <el-table-column
         prop='blockNumber'
         :label="$t('tableCont.blockNumber')"
-         width='300'
+         width='100'
       ></el-table-column>
       <el-table-column
         prop='pbftView'
         label='pbftView'
-         width='300'
+         width='120'
       ></el-table-column>
       <el-table-column
       :label="$t('tableCont.state')"
@@ -37,14 +42,14 @@
         </template>
       </el-table-column>
     </el-table>
-    <el-pagination
+    <!-- <el-pagination
       @current-change="indexChange"
       @size-change='sizeChange'
       :current-page="pageIndex"
       :page-sizes="[10, 20, 30, 50]"
       layout="sizes,total, prev, pager, next, jumper"
       :total="total">
-    </el-pagination>
+    </el-pagination> -->
   </div>
 </template>
 <script>
@@ -53,34 +58,31 @@ export default {
   data () {
     return {
       loading: false,
-      node_name: '',
-      tableData: [],
-      pageIndex: 1,
-      pageSize: 10,
-      total: 0
+      tableData: []
     }
   },
   methods: {
-    indexChange (e) {
-      this.pageIndex = e
-      this.getNode()
-    },
-    sizeChange (e) {
-      this.pageSize = e
-      this.pageIndex = 1
-      this.getNode()
-    },
+    // indexChange (e) {
+    //   this.pageIndex = e
+    //   this.getNode()
+    // },
+    // sizeChange (e) {
+    //   this.pageSize = e
+    //   this.pageIndex = 1
+    //   this.getNode()
+    // },
     update () {
       this.loading = true
-      this.pageSize = 10
-      this.pageIndex = 1
+      // this.pageSize = 10
+      // this.pageIndex = 1
       setTimeout(fun => {
         this.getNode()
       }, 1000)
     },
     getNode () {
       this.loading = true
-      let url = '/' + localStorage.getItem('groupId') + '/' + this.pageIndex + '/' + this.pageSize + '?brokerId=' + localStorage.getItem('brokerId')
+      let url = '/' + localStorage.getItem('groupId') + '/1/10?brokerId=' + localStorage.getItem('brokerId')
+      // let url = '/' + localStorage.getItem('groupId') + '/?brokerId=' + localStorage.getItem('brokerId')
       API.nodeList(url).then(res => {
         if (res.status === 200) {
           this.tableData = res.data.data
