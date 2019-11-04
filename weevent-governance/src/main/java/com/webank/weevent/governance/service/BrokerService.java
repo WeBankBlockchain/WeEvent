@@ -100,7 +100,7 @@ public class BrokerService {
                 brokerMapper.addBroker(brokerEntity);
             }
             //Create a table based on the brokerId and groupId, start a rule engine
-            topicHistoricalService.createTopicHistoricalTable(request, response, brokerEntity);
+           // topicHistoricalService.createTopicHistoricalTable(request, response, brokerEntity);
             return GovernanceResult.ok(true);
         } catch (Exception e) {
             log.error("add broker fail", e);
