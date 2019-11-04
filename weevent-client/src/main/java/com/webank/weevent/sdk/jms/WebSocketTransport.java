@@ -20,7 +20,6 @@ import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
@@ -49,25 +48,25 @@ public class WebSocketTransport extends WebSocketClient {
     private int timeout;
 
     // not only web socket, it's means stomp connection is ok
-    private boolean connected;
+    private boolean connected = false;
 
     // atomic sequence on connection
-    private AtomicLong sequence;
+    private AtomicLong sequence = new AtomicLong(0);
 
     // stomp command response (receipt <-> ResponseFuture)
-    private Map<Long, ResponseFuture> futures;
+    private Map<Long, ResponseFuture> futures = new ConcurrentHashMap<>();
 
     // (receiptId in stomp <-> subscriptionId in biz)
-    private Map<String, String> subscriptionId2ReceiptId;
+    private Map<String, String> subscriptionId2ReceiptId = new ConcurrentHashMap<>();
 
     // (receiptId <-> subscriptionId)
-    private Map<String, String> receiptId2SubscriptionId;
+    private Map<String, String> receiptId2SubscriptionId = new ConcurrentHashMap<>();
 
     // (headerId in stomp <-> asyncSeq in biz )
-    private Map<String, Long> sequence2Id;
+    private Map<String, Long> sequence2Id = new ConcurrentHashMap<>();
 
     //(subscription <-> WeEvent topic)
-    private Map<String, WeEventTopic> subscription2EventCache;
+    private Map<String, WeEventTopic> subscription2EventCache = new ConcurrentHashMap<>();
 
     private Pair<String, String> account;
 
@@ -150,7 +149,7 @@ public class WebSocketTransport extends WebSocketClient {
 
     // Stomp command
     public Message stompRequest(String req, Long asyncSeq) throws JMSException {
-        log.info("stomp request, size: {}", req.length());
+        log.info("stomp request, seq: {} size: {}", asyncSeq, req.length());
 
         try {
             // asyncSeq use for synchronous to asynchronous
@@ -261,10 +260,10 @@ public class WebSocketTransport extends WebSocketClient {
     }
 
     /**
-     * stompUnsubscribe stomp unsubscribe
+     * stompUnsubscribe stomp unSubscribe
      *
-     * @param subscriptionId subscribetion id
-     * @return true unsubcribe success,false unsubscribe fail
+     * @param subscriptionId subscription id
+     * @return true if success
      * @throws JMSException error
      */
     public boolean stompUnsubscribe(String subscriptionId) throws JMSException {
@@ -275,41 +274,6 @@ public class WebSocketTransport extends WebSocketClient {
         sequence2Id.put(headerId, asyncSeq);
         Message stompResponse = this.stompRequest(req, asyncSeq);
         return !stompCommand.isError(stompResponse);
-    }
-
-    // overwrite method from WebSocketClient
-    public WebSocketTransport(URI server) {
-        super(server, new Draft_6455());
-
-        this.connected = false;
-        this.sequence = new AtomicLong(0);
-        this.futures = new ConcurrentHashMap<>();
-        this.receiptId2SubscriptionId = new ConcurrentHashMap<>();
-        this.subscriptionId2ReceiptId = new ConcurrentHashMap<>();
-        this.sequence2Id = new ConcurrentHashMap<>();
-        this.subscription2EventCache = new ConcurrentHashMap<>();
-    }
-
-    @Override
-    public void onOpen(ServerHandshake handshakedata) {
-        log.info("WebSocket transport opened, remote address: {}", this.getRemoteSocketAddress().toString());
-    }
-
-    @Override
-    public void onMessage(String message) {
-        log.info("in onMessage");
-
-        if (this.topicConnection == null) {
-            log.info("topic Connection is null");
-            return;
-        }
-        //decode from message
-        StompDecoder decoder = new StompDecoder();
-        List<Message<byte[]>> messages = decoder.decode(ByteBuffer.wrap(message.getBytes(StandardCharsets.UTF_8)));
-        for (Message<byte[]> stompMsg : messages) {
-            // handle the frame from the server
-            handleFrame(stompMsg);
-        }
     }
 
     private void handleFrame(Message<byte[]> stompMsg) {
@@ -430,26 +394,6 @@ public class WebSocketTransport extends WebSocketClient {
         throw new JMSException("message:" + accessor.getNativeHeader("message").get(0) + "code:" + code);
     }
 
-    @Override
-    public void onClose(int code, String reason, boolean remote) {
-        log.info("WebSocket transport closed, code: {} reason: {} remote: {}", code, reason, remote);
-        this.connected = false;
-        this.cleanup();
-        // reconnect if connection lost
-        if (remote) {
-            if (!this.connectFlag) {
-                WSThread wSThread = new WSThread(this);
-                wSThread.start();
-            }
-        }
-
-    }
-
-    @Override
-    public void onError(Exception ex) {
-        log.error("WebSocket transport error", ex);
-    }
-
     /**
      * use for get the headers
      *
@@ -504,6 +448,55 @@ public class WebSocketTransport extends WebSocketClient {
 
             log.info("auto redo thread exit");
         }
+    }
+
+    // The following are methods from super class WebSocketClient
+
+    // overwrite method from WebSocketClient
+    public WebSocketTransport(URI server) {
+        super(server, new Draft_6455());
+    }
+
+    @Override
+    public void onOpen(ServerHandshake handshake) {
+        log.info("WebSocket transport opened, remote address: {}", this.getRemoteSocketAddress());
+    }
+
+    @Override
+    public void onMessage(String message) {
+        log.info("in onMessage");
+
+        if (this.topicConnection == null) {
+            log.info("topic Connection is null");
+            return;
+        }
+        //decode from message
+        StompDecoder decoder = new StompDecoder();
+        List<Message<byte[]>> messages = decoder.decode(ByteBuffer.wrap(message.getBytes(StandardCharsets.UTF_8)));
+        for (Message<byte[]> stompMsg : messages) {
+            // handle the frame from the server
+            handleFrame(stompMsg);
+        }
+    }
+
+    @Override
+    public void onClose(int code, String reason, boolean remote) {
+        log.info("WebSocket transport closed, code: {} reason: {} remote: {}", code, reason, remote);
+        this.connected = false;
+        this.cleanup();
+        // reconnect if connection lost
+        if (remote) {
+            if (!this.connectFlag) {
+                WSThread wSThread = new WSThread(this);
+                wSThread.start();
+            }
+        }
+
+    }
+
+    @Override
+    public void onError(Exception ex) {
+        log.error("WebSocket transport error", ex);
     }
 }
 
