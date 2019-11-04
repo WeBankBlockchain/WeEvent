@@ -43,7 +43,7 @@ public class CRUDJobs implements Job {
         }
     }
 
-
+    @SuppressWarnings("unchecked")
     private static void startCEPRule(JobExecutionContext context, String jobName) {
         Object obj = context.getJobDetail().getJobDataMap().get("rule");
         // ruleMap
