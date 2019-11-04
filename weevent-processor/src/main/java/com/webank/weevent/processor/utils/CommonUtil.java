@@ -160,15 +160,7 @@ public class CommonUtil {
         return keys;
     }
 
-    public static Map<String, String> contactsql(String brokerId,String groupId,WeEvent eventMessage, String selectFields, String payload) {
-        String content = new String(eventMessage.getContent());
-        String eventId = eventMessage.getEventId();
-        String topicName = eventMessage.getTopic();
-
-
-        Map<String, String> sql = new HashMap<>();
-        Map<String, String> sqlOrder = new HashMap<>();
-        boolean eventIdFlag = false, topicNameFlag = false, brokerIdFlag = false, groupIdFlag = false;
+    private static List<String> getSelectFieldList(String selectFields, String payload) {
         List<String> result = new ArrayList<>();
         // if select is equal * ,then select all fields.
         if ("*".equals(selectFields)) {
@@ -186,7 +178,21 @@ public class CommonUtil {
                 result.add(s);
             }
         }
+        return result;
+    }
 
+    public static Map<String, String> contactsql(String brokerId, String groupId, WeEvent eventMessage, String selectFields, String payload) {
+        String content = new String(eventMessage.getContent());
+        String eventId = eventMessage.getEventId();
+        String topicName = eventMessage.getTopic();
+
+
+        Map<String, String> sql = new HashMap<>();
+        Map<String, String> sqlOrder = new HashMap<>();
+        boolean eventIdFlag = false, topicNameFlag = false, brokerIdFlag = false, groupIdFlag = false;
+
+        // get select field
+        List<String> result = getSelectFieldList(selectFields, payload);
 
         JSONObject eventContent = JSONObject.parseObject(content);
         JSONObject table = JSONObject.parseObject(payload);
