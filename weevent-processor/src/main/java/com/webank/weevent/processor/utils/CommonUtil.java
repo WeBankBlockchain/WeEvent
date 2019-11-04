@@ -160,7 +160,7 @@ public class CommonUtil {
         return keys;
     }
 
-    public static Map<String, String> contactsql(WeEvent eventMessage, String objJson, String payload) {
+    public static Map<String, String> contactsql(WeEvent eventMessage, String selectFields, String payload) {
         String content = new String(eventMessage.getContent());
         String eventId = eventMessage.getEventId();
 
@@ -169,9 +169,9 @@ public class CommonUtil {
         boolean eventFlag = false;
         List<String> result = new ArrayList<>();
         // if select is equal * ,then select all fields.
-        if ("*".equals(objJson)) {
-            objJson = payload;
-            Iterator it = JSONObject.parseObject(objJson).entrySet().iterator();
+        if ("*".equals(selectFields)) {
+            selectFields = payload;
+            Iterator it = JSONObject.parseObject(selectFields).entrySet().iterator();
 
             while (it.hasNext()) {
                 Map.Entry entry = (Map.Entry) it.next();
@@ -179,7 +179,7 @@ public class CommonUtil {
             }
 
         } else {
-            String[] array = objJson.split(",");
+            String[] array = selectFields.split(",");
             for (String s : array) {
                 result.add(s);
             }
