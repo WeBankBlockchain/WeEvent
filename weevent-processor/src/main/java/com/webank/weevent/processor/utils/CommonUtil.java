@@ -170,8 +170,8 @@ public class CommonUtil {
         List<String> result = new ArrayList<>();
         // if select is equal * ,then select all fields.
         if ("*".equals(selectFields)) {
-            selectFields = payload;
-            Iterator it = JSONObject.parseObject(selectFields).entrySet().iterator();
+            String selectFieldsTemp = payload;
+            Iterator it = JSONObject.parseObject(selectFieldsTemp).entrySet().iterator();
 
             while (it.hasNext()) {
                 Map.Entry entry = (Map.Entry) it.next();
