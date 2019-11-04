@@ -437,7 +437,7 @@ public class RuleEngineService {
             rule.setStatus(StatusEnum.RUNNING.getCode());
             rule.setLastUpdate(new Date());
             //set dataBaseUrl
-            RuleDatabaseEntity ruleDataBase = getRuleDataBase(ruleEngineEntity.getRuleDataBaseId());
+            RuleDatabaseEntity ruleDataBase = getRuleDataBase(rule.getRuleDataBaseId());
             if (ruleDataBase != null) {
                 rule.setDatabaseUrl(ruleDataBase.getDatabaseUrl() + "&tableName=" + ruleDataBase.getTableName());
             }
