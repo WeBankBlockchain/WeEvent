@@ -146,7 +146,10 @@ module.exports = {
     'interfaceType': '订阅方式',
     'notifiedEventCount': '已通知事件',
     'notifyingEventCount': '待通知事件',
-    'createTimeStamp': '订阅时间'
+    'createTimeStamp': '订阅时间',
+    'nodeType': '节点类型',
+    'sealer': '共识节点',
+    'observer': '观察节点'
   },
   rule: {
     'dataGuide': '新手引导',

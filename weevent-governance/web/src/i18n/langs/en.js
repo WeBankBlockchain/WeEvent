@@ -122,7 +122,7 @@ module.exports = {
     'transDetial': 'Transactions',
     'copySuccess': 'Copyed',
     'transHash': 'Transaction Hash',
-    'nodeName': 'Node Name',
+    'nodeName': 'Node',
     'state': 'Status',
     'run': 'Run',
     'stop': 'Stop',
@@ -146,7 +146,10 @@ module.exports = {
     'interfaceType': 'Protocol',
     'notifiedEventCount': 'Notified events',
     'notifyingEventCount': 'Notifying events',
-    'createTimeStamp': 'Create timestamp'
+    'createTimeStamp': 'Create timestamp',
+    'nodeType': 'Node Type',
+    'sealer': 'sealer',
+    'observer': 'observer'
   },
   rule: {
     'dataGuide': 'User Guide',

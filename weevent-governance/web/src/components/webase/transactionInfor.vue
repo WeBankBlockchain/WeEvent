@@ -112,12 +112,12 @@ export default {
       }
       API.transList(url).then(res => {
         if (res.status === 200) {
-          let tableData = res.data.data
+          let tableData = res.data.data.pageData
           tableData.forEach(e => {
             this.$set(e, 'logs', { 'address': '', 'topics': [], 'hasEvent': false })
           })
           this.tableData = tableData
-          this.total = res.data.totalCount
+          this.total = res.data.data.total
         }
       })
       this.loading = false

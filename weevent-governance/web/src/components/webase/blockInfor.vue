@@ -81,8 +81,8 @@ export default {
       }
       API.blockList(url).then(res => {
         if (res.status === 200) {
-          this.tableData = res.data.data
-          this.total = res.data.totalCount
+          this.tableData = res.data.data.pageData
+          this.total = res.data.data.total
         }
       })
       this.loading = false

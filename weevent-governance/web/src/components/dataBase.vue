@@ -42,7 +42,7 @@
       <el-form-item :label="$t('rule.tableName')" prop='tableName'>
         <el-input v-model.trim="form.tableName" autocomplete="off"></el-input>
       </el-form-item>
-      <el-form-item :label="$t('rule.databaseUrl')" prop='url'>
+      <el-form-item :label="$t('rule.ruleDataBaseId')" prop='url'>
         <el-input v-model.trim="form.url" type='textarea' :rows='4' autocomplete="off" :placeholder="$t('common.examples') + 'jdbc:mysql://127.0.0.1:3306/governance?root=root&password=123456&useUnicode=true&characterEncoding=utf-8&useSSL=false'"></el-input>
       </el-form-item>
     </el-form>

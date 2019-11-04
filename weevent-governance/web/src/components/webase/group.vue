@@ -17,6 +17,20 @@
           </span>
         </template>
       </el-table-column>
+       <el-table-column
+        prop='nodeType'
+        :label="$t('tableCont.nodeType')"
+         width='100'
+      >
+         <template  slot-scope="scope">
+          <span v-show="scope.row.nodeType === 'sealer'">
+            {{$t('tableCont.sealer')}}
+          </span>
+          <span v-show="scope.row.nodeType === 'observer'">
+            {{$t('tableCont.observer')}}
+          </span>
+        </template>
+      </el-table-column>
       <el-table-column
         prop='blockNumber'
         :label="$t('tableCont.blockNumber')"
@@ -85,8 +99,8 @@ export default {
       // let url = '/' + localStorage.getItem('groupId') + '/?brokerId=' + localStorage.getItem('brokerId')
       API.nodeList(url).then(res => {
         if (res.status === 200) {
-          this.tableData = res.data.data
-          this.total = res.data.totalCount
+          this.tableData = res.data.data.pageData
+          // this.total = res.data.totalCount
         } else {
           this.$message({
             type: 'warning',

@@ -316,16 +316,16 @@ export default{
         vm.$refs.sql.resetFields()
       }
     },
-    // brokerId () {
-    //   this.$store.commit('set_menu', [this.$t('sideBar.engine'), this.$t('sideBar.ruleMana')])
-    //   this.$store.commit('set_active', '4-1')
-    //   this.$router.push('./rule')
-    // },
-    // groupId () {
-    //   this.$store.commit('set_menu', [this.$t('sideBar.engine'), this.$t('sideBar.ruleMana')])
-    //   this.$store.commit('set_active', '4-1')
-    //   this.$router.push('./rule')
-    // },
+    brokerId () {
+      this.$store.commit('set_menu', [this.$t('sideBar.engine'), this.$t('sideBar.ruleMana')])
+      this.$store.commit('set_active', '4-1')
+      this.$router.push('./rule')
+    },
+    groupId () {
+      this.$store.commit('set_menu', [this.$t('sideBar.engine'), this.$t('sideBar.ruleMana')])
+      this.$store.commit('set_active', '4-1')
+      this.$router.push('./rule')
+    },
     pageIndex (nVal) {
       this.getLsitData()
     },
@@ -501,8 +501,6 @@ export default{
                 }
               }
             }
-          } else {
-            return
           }
           if (hasEmpty) {
             return
@@ -520,6 +518,22 @@ export default{
             }
           }
         }
+        API.ruleUpdate(data).then(res => {
+          if (res.data.status === 200) {
+            vm.$message({
+              type: 'success',
+              message: vm.$t('common.editSuccess')
+            })
+            vm.createRule = false
+            vm.createSQL = false
+            vm.getDetail()
+          } else {
+            vm.$message({
+              type: 'warning',
+              message: vm.$t('common.operFail')
+            })
+          }
+        })
       })
     },
     addConditionItem () {
