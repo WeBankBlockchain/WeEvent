@@ -57,6 +57,42 @@ public interface IWeEventClient {
     }
 
     /**
+     * Open a topic
+     *
+     * @param topic topic name
+     * @return true if success
+     * @throws BrokerException broker exception
+     */
+    boolean open(String topic) throws BrokerException;
+
+    /**
+     * Close a topic.
+     *
+     * @param topic topic name
+     * @return true if success
+     * @throws BrokerException broker exception
+     */
+    boolean close(String topic) throws BrokerException;
+
+    /**
+     * Check a topic is exist or not.
+     *
+     * @param topic topic name
+     * @return true if exist
+     * @throws BrokerException broker exception
+     */
+    boolean exist(String topic) throws BrokerException;
+
+    /**
+     * Publish an event to topic.
+     *
+     * @param weEvent WeEvent(String topic, byte[] content, Map extensions)
+     * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
+     * @throws BrokerException broker exception
+     */
+    SendResult publish(WeEvent weEvent) throws BrokerException;
+
+    /**
      * Interface for notify callback
      */
     interface EventListener {
@@ -122,40 +158,14 @@ public interface IWeEventClient {
     String subscribe(String[] topics, String offset, String subscriptionId, @NonNull EventListener listener) throws BrokerException;
 
     /**
-     * Open a topic
+     * Unsubscribe an exist subscription subscribed by subscribe interface.
+     * The consumer will no longer receive messages from broker after this.
      *
-     * @param topic topic name
-     * @return true if success
+     * @param subscriptionId invalid input
+     * @return success if true
      * @throws BrokerException broker exception
      */
-    boolean open(String topic) throws BrokerException;
-
-    /**
-     * Publish an event to topic.
-     *
-     * @param weEvent WeEvent(String topic, byte[] content, Map extensions)
-     * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
-     * @throws BrokerException broker exception
-     */
-    SendResult publish(WeEvent weEvent) throws BrokerException;
-
-    /**
-     * Close a topic.
-     *
-     * @param topic topic name
-     * @return true if success
-     * @throws BrokerException broker exception
-     */
-    boolean close(String topic) throws BrokerException;
-
-    /**
-     * Check a topic is exist or not.
-     *
-     * @param topic topic name
-     * @return true if exist
-     * @throws BrokerException broker exception
-     */
-    boolean exist(String topic) throws BrokerException;
+    boolean unSubscribe(String subscriptionId) throws BrokerException;
 
     /**
      * List all topics in WeEvent's broker.
@@ -184,15 +194,4 @@ public interface IWeEventClient {
      * @throws BrokerException broker exception
      */
     WeEvent getEvent(String eventId) throws BrokerException;
-
-    /**
-     * Unsubscribe an exist subscription subscribed by subscribe interface.
-     * The consumer will no longer receive messages from broker after this.
-     *
-     * @param subscriptionId invalid input
-     * @return success if true
-     * @throws BrokerException broker exception
-     */
-    boolean unSubscribe(String subscriptionId) throws BrokerException;
-
 }
