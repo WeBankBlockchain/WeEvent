@@ -74,7 +74,7 @@ public class RestfullAdminTest extends JUnitTestBase {
 
     @Test
     public void testQueryTransList() {
-        ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "transaction/transList?pageNumber={pageNumber}&pageSize={pageSize}", ResponseData.class, 0, 10);
+        ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "transaction/transList?pageNumber={pageNumber}&pageSize={pageSize}", ResponseData.class, 1, 10);
         log.info("get transaction list, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody().getCode() == 0);
@@ -83,7 +83,7 @@ public class RestfullAdminTest extends JUnitTestBase {
 
     @Test
     public void testQueryBlockList() {
-        ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "block/blockList?pageNumber={pageNumber}&pageSize={pageSize}", ResponseData.class, 0, 10);
+        ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "block/blockList?pageNumber={pageNumber}&pageSize={pageSize}", ResponseData.class, 1, 10);
         log.info("get blockList list, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody().getCode() == 0);
@@ -92,19 +92,11 @@ public class RestfullAdminTest extends JUnitTestBase {
 
     @Test
     public void testQueryNodeList() {
-        ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "node/nodeList?pageNumber={pageNumber}&pageSize={pageSize}", ResponseData.class, 0, 10);
+        ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "node/nodeList?pageNumber={pageNumber}&pageSize={pageSize}", ResponseData.class, 1, 10);
         log.info("get node list, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody().getCode() == 0);
         Assert.assertTrue(rsp.getBody().getData() != null);
-    }
-
-    @Test
-    public void testQueryTransDaily() {
-        ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "group/transDaily", ResponseData.class);
-        log.info("get node list, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
-        Assert.assertTrue(rsp.getStatusCodeValue() == 200);
-        Assert.assertTrue(rsp.getBody().getCode() == 0);
     }
 
 

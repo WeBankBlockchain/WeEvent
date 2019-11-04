@@ -2,6 +2,11 @@ package com.webank.weevent.broker.fisco.util;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Map;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
@@ -18,6 +23,9 @@ import org.bouncycastle.util.encoders.Hex;
  */
 @Slf4j
 public final class DataTypeUtils {
+
+    private static String STRING_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
     /**
      * encode eventId
      *
@@ -132,5 +140,39 @@ public final class DataTypeUtils {
             log.error("parse extensions failed");
             return null;
         }
+    }
+
+    /**
+     * convert data timestamp to String.
+     *
+     * @param date the date
+     * @return the String timestamp
+     */
+    public static String getTimestamp(Date date) {
+        return getDefaultDateFormat().format(date);
+    }
+
+    /**
+     * convert long timestamp to String.
+     *
+     * @param date the date
+     * @return the String timestamp
+     */
+    public static String getTimestamp(long date) {
+        return getDefaultDateFormat().format(date);
+    }
+
+    /**
+     * Gets the default date format.
+     *
+     * @return the default date format
+     */
+    private static DateFormat getDefaultDateFormat() {
+        return new SimpleDateFormat(STRING_DATE_FORMAT);
+    }
+
+    public static LocalDateTime getTimestampStr(long date) {
+        DateTimeFormatter df = DateTimeFormatter.ofPattern(STRING_DATE_FORMAT);
+        return LocalDateTime.parse(getTimestamp(date), df);
     }
 }

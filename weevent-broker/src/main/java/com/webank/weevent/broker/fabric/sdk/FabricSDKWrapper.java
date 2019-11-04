@@ -19,6 +19,7 @@ import java.util.concurrent.TimeoutException;
 import com.webank.weevent.broker.fabric.config.FabricConfig;
 import com.webank.weevent.broker.fabric.dto.TransactionInfo;
 import com.webank.weevent.broker.fabric.util.FabricUser;
+import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
 import com.webank.weevent.protocol.rest.entity.TbBlock;
@@ -257,7 +258,7 @@ public class FabricSDKWrapper {
         return groupGeneral;
     }
 
-    public static List<TbTransHash> queryTransList(FabricConfig fabricConfig, Channel channel, BigInteger blockNumber) throws ProposalException, InvalidArgumentException {
+    public static ListPage<TbTransHash> queryTransList(FabricConfig fabricConfig, Channel channel, BigInteger blockNumber) throws ProposalException, InvalidArgumentException {
         List<TbTransHash> tbTransHashes = new ArrayList<>();
 
         BlockInfo blockInfo = getBlockInfo(fabricConfig, channel, blockNumber);
@@ -267,11 +268,11 @@ public class FabricSDKWrapper {
             tbTransHash.setTransHash(Hex.encodeHexString(blockInfo.getPreviousHash()));
             tbTransHashes.add(tbTransHash);
         }
-
-        return tbTransHashes;
+        return null;
+//        return tbTransHashes;
     }
 
-    public static List<TbBlock> queryBlockList(FabricConfig fabricConfig, Channel channel, BigInteger blockNumber) throws ProposalException, InvalidArgumentException {
+    public static ListPage<TbBlock> queryBlockList(FabricConfig fabricConfig, Channel channel, BigInteger blockNumber) throws ProposalException, InvalidArgumentException {
         List<TbBlock> tbBlocks = new ArrayList<>();
         BlockInfo blockInfo = getBlockInfo(fabricConfig, channel, blockNumber);
         if (blockInfo != null) {
@@ -281,10 +282,11 @@ public class FabricSDKWrapper {
             tbBlocks.add(tbBlock);
         }
 
-        return tbBlocks;
+        return null;
+//        return tbBlocks;
     }
 
-    public static List<TbNode> queryNodeList(FabricConfig fabricConfig, Channel channel) throws ProposalException, InvalidArgumentException {
+    public static ListPage<TbNode> queryNodeList(FabricConfig fabricConfig, Channel channel) throws ProposalException, InvalidArgumentException {
         List<TbNode> tbNodes = new ArrayList<>();
         BlockInfo blockInfo = getBlockInfo(fabricConfig, channel, null);
 
@@ -295,7 +297,8 @@ public class FabricSDKWrapper {
             tbNode.setNodeName(peer.getName());
             tbNodes.add(tbNode);
         }
-        return tbNodes;
+        return null;
+//        return tbNodes;
     }
 
     private static BlockInfo getBlockInfo(FabricConfig fabricConfig, Channel channel, BigInteger blockNumber) throws ProposalException, InvalidArgumentException {

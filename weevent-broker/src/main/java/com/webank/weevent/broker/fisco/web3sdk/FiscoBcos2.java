@@ -312,15 +312,15 @@ public class FiscoBcos2 {
         return Web3SDK2Wrapper.getGroupGeneral(this.web3j);
     }
 
-    public List<TbTransHash> queryTransList(String transHash, BigInteger blockNumber) throws BrokerException {
-        return Web3SDK2Wrapper.queryTransList(this.web3j, transHash, blockNumber);
+    public ListPage<TbTransHash> queryTransList(String transHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize) throws BrokerException {
+        return Web3SDK2Wrapper.queryTransList(this.web3j, transHash, blockNumber, pageIndex, pageSize);
     }
 
-    public List<TbBlock> queryBlockList(String transHash, BigInteger blockNumber) throws BrokerException {
-        return Web3SDK2Wrapper.queryBlockList(this.web3j, transHash, blockNumber);
+    public ListPage<TbBlock> queryBlockList(String transHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize) throws BrokerException {
+        return Web3SDK2Wrapper.queryBlockList(this.web3j, transHash, blockNumber, pageIndex, pageSize);
     }
 
-    public List<TbNode> queryNodeList() throws BrokerException {
+    public ListPage<TbNode> queryNodeList() throws BrokerException {
         return Web3SDK2Wrapper.queryNodeList(this.web3j);
     }
 }
