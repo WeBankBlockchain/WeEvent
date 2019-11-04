@@ -259,7 +259,7 @@ public class Fabric {
         }
     }
 
-    public List<TbTransHash> queryTransList(BigInteger blockNumber) throws BrokerException {
+    public ListPage<TbTransHash> queryTransList(BigInteger blockNumber) throws BrokerException {
 
         try {
             return FabricSDKWrapper.queryTransList(fabricConfig, channel, blockNumber);
@@ -269,7 +269,7 @@ public class Fabric {
         }
     }
 
-    public List<TbBlock> queryBlockList(BigInteger blockNumber) throws BrokerException {
+    public ListPage<TbBlock> queryBlockList(BigInteger blockNumber) throws BrokerException {
 
         try {
             return FabricSDKWrapper.queryBlockList(fabricConfig, channel, blockNumber);
@@ -279,7 +279,7 @@ public class Fabric {
         }
     }
 
-    public List<TbNode> queryNodeList() throws BrokerException {
+    public ListPage<TbNode> queryNodeList() throws BrokerException {
 
         try {
             return FabricSDKWrapper.queryNodeList(fabricConfig, channel);

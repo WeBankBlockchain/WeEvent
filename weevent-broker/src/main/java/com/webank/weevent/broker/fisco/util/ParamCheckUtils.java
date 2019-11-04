@@ -100,12 +100,6 @@ public class ParamCheckUtils {
     }
 
     public static void validateGroupId(String groupId, List<String> groups) throws BrokerException {
-        try {
-            Long.parseLong(groupId);
-        } catch (Exception e) {
-            throw new BrokerException(ErrorCode.EVENT_GROUP_ID_INVALID);
-        }
-
         if (!groups.contains(groupId)) {
             throw new BrokerException(ErrorCode.WEB3SDK_UNKNOWN_GROUP);
         }

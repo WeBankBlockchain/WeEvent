@@ -5,6 +5,7 @@ import java.util.List;
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fabric.config.FabricConfig;
 import com.webank.weevent.broker.fabric.sdk.FabricDelegate;
+import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.plugin.IEventTopic;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
@@ -129,21 +130,21 @@ public class FabricTopicAdmin implements IEventTopic {
     }
 
     @Override
-    public List<TbTransHash> queryTransList(QueryEntity queryEntity) throws BrokerException {
+    public ListPage<TbTransHash> queryTransList(QueryEntity queryEntity) throws BrokerException {
         validateChannelName(queryEntity.getGroupId());
 
         return fabricDelegate.getFabricMap().get(queryEntity.getGroupId()).queryTransList(queryEntity.getBlockNumber());
     }
 
     @Override
-    public List<TbBlock> queryBlockList(QueryEntity queryEntity) throws BrokerException {
+    public ListPage<TbBlock> queryBlockList(QueryEntity queryEntity) throws BrokerException {
         validateChannelName(queryEntity.getGroupId());
 
         return fabricDelegate.getFabricMap().get(queryEntity.getGroupId()).queryBlockList(queryEntity.getBlockNumber());
     }
 
     @Override
-    public List<TbNode> queryNodeList(QueryEntity queryEntity) throws BrokerException {
+    public ListPage<TbNode> queryNodeList(QueryEntity queryEntity) throws BrokerException {
         validateChannelName(queryEntity.getGroupId());
 
         return fabricDelegate.getFabricMap().get(queryEntity.getGroupId()).queryNodeList();
