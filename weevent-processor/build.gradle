@@ -56,8 +56,3 @@ bootJar {
     }
 }
 
-
-mybatisGenerator {
-    verbose = true
-    configFile = 'src/main/resources/tools/generatorConfig.xml'
-}
