@@ -53,8 +53,7 @@ public class CEPRuleMQ {
             String baseUrl = CommonUtil.urlPage(rule.getBrokerUrl());
             IWeEventClient client;
             if (null != mapRequest.get("groupId")) {
-                //  client = IWeEventClient.build(baseUrl,mapRequest.get("groupId"));
-                client = IWeEventClient.build(baseUrl);
+                client = IWeEventClient.build(baseUrl, mapRequest.get("groupId"));
             } else {
                 client = IWeEventClient.build(baseUrl);
             }
@@ -109,9 +108,8 @@ public class CEPRuleMQ {
         }
     }
 
-    private static void sendMessageToDB(WeEvent eventContent, CEPRule rule) {
+    private static void sendMessageToDB(String groupId, WeEvent eventContent, CEPRule rule) {
         try {
-
             Connection conn = CommonUtil.getConnection(rule.getDatabaseUrl());
 
             if (conn != null) {
@@ -125,7 +123,7 @@ public class CEPRuleMQ {
                 StringBuffer values = new StringBuffer(" values (");
 
                 // select key and value
-                Map<String, String> sqlvalue = CommonUtil.contactsql(eventContent, rule.getSelectField(), rule.getPayload());
+                Map<String, String> sqlvalue = CommonUtil.contactsql(rule.getBrokerId(), groupId, eventContent, rule.getSelectField(), rule.getPayload());
 
                 // just the order key and need write in db
                 List<String> keys = CommonUtil.getAllKey(sqlvalue);
@@ -168,6 +166,16 @@ public class CEPRuleMQ {
 
     }
 
+    private static String getGroupId(CEPRule rule) {
+        // get the groupId
+        String groupId = "";
+        Map<String, String> mapRequest = CommonUtil.uRLRequest(rule.getBrokerUrl());
+        if (null != mapRequest.get("groupId")) {
+            groupId = mapRequest.get("groupId");
+        }
+        return groupId;
+    }
+
     private static void handleOnEvent(WeEvent event, Map<String, CEPRule> ruleMap) {
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
 
@@ -178,13 +186,15 @@ public class CEPRuleMQ {
                 log.info("check the josn and return fine !");
                 if (hitRuleEngine(entry.getValue().getPayload(), event, entry.getValue().getConditionField())) {
                     try {
+                        // get the system parameter
+                        String groupId = getGroupId(entry.getValue());
                         // parsing the payload && match the content,if true and hit it
                         if (entry.getValue().getConditionType().equals(2)) {
-                            sendMessageToDB(event, entry.getValue());
+                            sendMessageToDB(groupId, event, entry.getValue());
 
                         } else if (entry.getValue().getConditionType().equals(1)) {
                             // select the field and publish the message to the toDestination
-                            String eventContent = getContent(event, entry.getValue().getSelectField(), entry.getValue().getPayload());
+                            String eventContent = setWeEventContent(entry.getValue().getBrokerId(), groupId, event, entry.getValue().getSelectField(), entry.getValue().getPayload());
                             log.info("publish select: {},eventContent:{}", entry.getValue().getSelectField(), eventContent);
 
                             // publish the message
@@ -205,7 +215,7 @@ public class CEPRuleMQ {
 
     }
 
-    private static String getContent(WeEvent eventMessage, String selectField, String payload) {
+    private static String setWeEventContent(String brokerId, String groupId, WeEvent eventMessage, String selectField, String payload) {
         String content = new String(eventMessage.getContent());
         JSONObject eventContent = JSONObject.parseObject(content);
         JSONObject payloadContent = JSONObject.parseObject(payload);
@@ -228,8 +238,17 @@ public class CEPRuleMQ {
                 iftttContent.put(result[i], eventContent.get(result[i]));
             }
             // if contain the eventId ,need  add the field
-            if ("eventId".equals(result[i])) {
+            if (ConstantsHelper.EVENT_ID.equals(result[i])) {
                 iftttContent.put(result[i], eventMessage.getEventId());
+            }
+            if (ConstantsHelper.TOPIC_NAME.equals(result[i])) {
+                iftttContent.put(result[i], eventMessage.getTopic());
+            }
+            if (ConstantsHelper.BROKER_ID.equals(result[i])) {
+                iftttContent.put(result[i], brokerId);
+            }
+            if (ConstantsHelper.GROUP_ID.equals(result[i])) {
+                iftttContent.put(result[i], groupId);
             }
         }
 

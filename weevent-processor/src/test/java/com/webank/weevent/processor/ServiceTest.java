@@ -425,14 +425,14 @@ public class ServiceTest {
                 " \t\t\"id\":11041548,\n" +
                 "        \"ruleName\": \"air3\",\n" +
                 "        \"fromDestination\": \"from.selectAddEventIDToTopic\",\n" +
-                "        \"brokerUrl\": \"http://127.0.0.1:7000/weevent\",\n" +
+                "        \"brokerUrl\": \"http://122.51.93.181:7000/weevent?groupId=1\",\n" +
                 "        \"payload\":\"{\\\"a\\\":1,\\\"b\\\":\\\"test\\\",\\\"c\\\":10}\",\n" +
                 "        \"payloadType\":1,\n" +
-                "        \"selectField\": \"a,eventId\",\n" +
+                "        \"selectField\": \"a,eventId,topicName,brokerId,groupId\",\n" +
                 "        \"conditionField\": \"c=10\",\n" +
                 "        \"conditionType\": 1,\n" +
                 "        \"toDestination\": \"to.selectAddEventIDToTopic\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/cep?user=root&password=WeEvent@2019&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://122.51.93.181:3306/cep?user=root&password=WeEvent@2019&tableName=fromIfttt\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -451,6 +451,36 @@ public class ServiceTest {
 
     @Test
     public void selectAddEventIDToDB() throws Exception {
+        String url = "/startCEPRule";
+        String cEPrule = " {\n" +
+                " \t\t\"id\":11011604,\n" +
+                "        \"ruleName\": \"air3\",\n" +
+                "        \"fromDestination\": \"from.selectAddEventIDToDB\",\n" +
+                "        \"brokerUrl\": \"http://122.51.93.181:7000/weevent?groupId=1\",\n" +
+                "        \"payload\":\"{\\\"a\\\":1,\\\"b\\\":\\\"test\\\",\\\"c\\\":10}\",\n" +
+                "        \"payloadType\":1,\n" +
+                "        \"selectField\": \"a,eventId,topicName,brokerId,groupId\",\n" +
+                "        \"conditionField\": \"c<20\",\n" +
+                "        \"conditionType\":2,\n" +
+                "        \"toDestination\": \"to.selectAddEventIDToDB\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://122.51.93.181:3306/cep?user=root&password=WeEvent@2019&tableName=fromIfttt\",\n" +
+                "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
+                "        \"status\": 1,\n" +
+                "        \"errorDestination\": null,\n" +
+                "        \"errorCode\": null,\n" +
+                "        \"errorMessage\": null,\n" +
+                "        \"brokerId\": \"1\",\n" +
+                "        \"userId\": \"1\",\n" +
+                "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
+                "    }";
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
+        MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
+        log.info("result:{}", result.getResponse().getContentAsString());
+        assertEquals(200, result.getResponse().getStatus());
+        Thread.sleep(200000);
+    }
+    @Test
+    public void selectAddEventIDToDBMoreParam() throws Exception {
         String url = "/startCEPRule";
         String cEPrule = " {\n" +
                 " \t\t\"id\":11011604,\n" +
@@ -479,7 +509,6 @@ public class ServiceTest {
         assertEquals(200, result.getResponse().getStatus());
         Thread.sleep(200000);
     }
-
 
     @Test
     public void hitselectEventIDParamToDB() throws Exception {
