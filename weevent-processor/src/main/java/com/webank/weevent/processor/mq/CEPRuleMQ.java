@@ -79,7 +79,7 @@ public class CEPRuleMQ {
                         log.info("on event:{},content:{}", event.toString(), content);
 
                         if (CommonUtil.checkValidJson(content)) {
-                            handleOnEvent(event, client, ruleMap);
+                            handleOnEvent(event, ruleMap);
                         }
                         //Analysis WeEventId  to the governance database
                         AnalysisWeEventIdService.analysisWeEventId(rule, event.getEventId());
@@ -168,7 +168,7 @@ public class CEPRuleMQ {
 
     }
 
-    private static void handleOnEvent(WeEvent event, IWeEventClient client, Map<String, CEPRule> ruleMap) {
+    private static void handleOnEvent(WeEvent event,  Map<String, CEPRule> ruleMap) {
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
 
         // match the rule and send message
@@ -192,7 +192,7 @@ public class CEPRuleMQ {
                             extensions.put("weevent-type", "ifttt");
                             WeEvent weEvent = new WeEvent(entry.getValue().getToDestination(), eventContent.getBytes(StandardCharsets.UTF_8), extensions);
                             log.info("weEvent event {}", weEvent.toString());
-
+                            IWeEventClient client = getClient(entry.getValue());
                             client.publish(weEvent);
                         }
                     } catch (BrokerException e) {
