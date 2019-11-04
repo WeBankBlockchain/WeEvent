@@ -16,8 +16,8 @@ function check_processor(){
         exit 1
     fi
 
-    curl -s "http://127.0.0.1:${port}/weevent/processor/getCEPRuleListByPage?currPage=1&pageSize=10" | grep 302000 >>/dev/null
-    if [[ $? -eq 0 ]];then
+    result=${curl -H "Content-type: application/json" -X POST -d '{"id":"1","ruleName":"airCondition","status":"0"}' http://localhost:7008/processor/insert
+    if [[ "${result.errorCode}" == "0" || "${result.errorCode}" == "1" ]];then
         yellow_echo "processor service is ok"
     else
         yellow_echo "processor service is error"

@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -73,7 +74,7 @@ public class ScheduledService implements AutoCloseable {
 
     private final static String HTTP_HEADER = "http://";
 
-    private final static String REST_TOPIC = "com.weevent.rest";
+    private final static String REST_TOPIC = "from";
 
     private final static String JSON_RPC_TOPIC = "com.weevent.jsonrpc";
 
@@ -175,11 +176,13 @@ public class ScheduledService implements AutoCloseable {
     private void restfulPublic() {
         // use the rest request to post a message
         String callUrl = HTTP_HEADER + this.url + "/weevent/rest/publish?topic={topic}&content={content}";
+        Map<String, String> map = new HashMap<>();
+        map.put("num", "12");
         ResponseEntity<String> rsp = this.restTemplate.getForEntity(
                 callUrl,
                 String.class,
                 REST_TOPIC,
-                "hello weevent restful");
+                JSONObject.toJSONString(map));
         log.info("restful send message:{}", rsp.getBody());
         if (rsp.getStatusCodeValue() == 200) {
             countTimes(restfulSendMap, this.getFormatTime(new Date()));
@@ -207,7 +210,9 @@ public class ScheduledService implements AutoCloseable {
 
     private void mqttPublish() {
         // Mqtt sends a message to weevent broker
-        mqttGateway.sendToMqtt(MQTT_TOPIC, "hello mqtt");
+        Map<String, String> map = new HashMap<>();
+        map.put("name", "mark");
+        mqttGateway.sendToMqtt("from", JSONObject.toJSONString(map));
         countTimes(mqttSendMap, this.getFormatTime(new Date()));
         log.info("mqtt send msg");
     }

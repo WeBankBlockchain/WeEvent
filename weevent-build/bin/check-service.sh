@@ -31,8 +31,8 @@ function check_governance(){
  }
 function check_processor(){
     echo "check processor service"
-    curl -s "http://127.0.0.1:8080/weevent/processor/getCEPRuleListByPage?currPage=1&pageSize=10" | grep 302000 >>/dev/null
-    if [[ $? -eq 0 ]];then
+    result= $(curl -H "Content-type: application/json" -X POST -d '{"id":"1","ruleName":"airCondition","status":"0"}' http://127.0.0.1:8080/processor/insert)
+    if [[ "${result}" == 0 || "${result.errorCode}" == 1 ]];then
         yellow_echo "processor service is ok"
     else
         yellow_echo "processor service is error"
