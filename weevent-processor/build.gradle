@@ -16,8 +16,6 @@ dependencies {
     // avoid "Log4j appears to be running in a Servlet environment, but there's no log4j-web module available."
     implementation("org.apache.logging.log4j:log4j-web:2.11.2")
 
-    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:1.1.1")
-
     implementation("org.apache.tomcat:tomcat-jdbc:8.5.23");
 
     implementation("log4j:log4j:1.2.17")
@@ -57,23 +55,7 @@ bootJar {
         }
     }
 }
-//mybatis generator plugin ------ start
-buildscript {
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath "gradle.plugin.com.arenagod.gradle:mybatis-generator-plugin:1.4"
-    }
-}
 
-apply plugin: "com.arenagod.gradle.MybatisGenerator"
-
-configurations {
-    mybatisGenerator
-}
 
 mybatisGenerator {
     verbose = true
