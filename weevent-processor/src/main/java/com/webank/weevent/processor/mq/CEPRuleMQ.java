@@ -168,7 +168,7 @@ public class CEPRuleMQ {
 
     }
 
-    private static void handleOnEvent(WeEvent event,  Map<String, CEPRule> ruleMap) {
+    private static void handleOnEvent(WeEvent event, Map<String, CEPRule> ruleMap) {
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
 
         // match the rule and send message

@@ -17,6 +17,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class ProcessorApplication {
     public static ProcessorConfig processorConfig;
     public static ApplicationContext applicationContext;
+
     @Autowired
     public void setContext(ApplicationContext context) {
         applicationContext = context;
