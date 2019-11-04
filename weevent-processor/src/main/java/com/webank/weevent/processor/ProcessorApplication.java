@@ -4,6 +4,7 @@ import com.webank.weevent.processor.cache.CEPRuleCache;
 import com.webank.weevent.processor.config.ProcessorConfig;
 
 import lombok.extern.slf4j.Slf4j;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,10 +15,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Slf4j
 @SpringBootApplication
+@MapperScan(basePackages = "com.webank.weevent.processor")
 public class ProcessorApplication {
     public static ProcessorConfig processorConfig;
     public static ApplicationContext applicationContext;
-
     @Autowired
     public void setContext(ApplicationContext context) {
         applicationContext = context;

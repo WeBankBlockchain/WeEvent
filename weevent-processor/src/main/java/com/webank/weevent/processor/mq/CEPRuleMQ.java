@@ -191,7 +191,7 @@ public class CEPRuleMQ {
                             Map<String, String> extensions = new HashMap<>();
                             extensions.put("weevent-type", "ifttt");
                             WeEvent weEvent = new WeEvent(entry.getValue().getToDestination(), eventContent.getBytes(StandardCharsets.UTF_8), extensions);
-                            log.info("weEvent event {}", weEvent.toString());
+                            log.info("after hitRuleEngine weEvent event {}", weEvent.toString());
                             IWeEventClient client = getClient(entry.getValue());
                             client.publish(weEvent);
                         }
@@ -236,28 +236,54 @@ public class CEPRuleMQ {
         return iftttContent.toString();
     }
 
-    private static boolean hitRuleEngine(String payload, WeEvent eventMessage, String condition) {
-
+    private static boolean handleTheEqual(WeEvent eventMessage, String condition) {
         String eventContent = new String(eventMessage.getContent());
-        // all parameter must be the same
-        if (CommonUtil.checkJson(eventContent, payload) && (condition.isEmpty())) {
-            // if the confition is empty, just return all message
-            return true;
-        } else if (CommonUtil.checkJson(eventContent, payload)) {
-            List<String> eventContentKeys = CommonUtil.getKeys(payload);
-            JSONObject event = JSONObject.parseObject(eventContent);
-            JexlEngine jexl = new JexlBuilder().create();
-
-            JexlContext context = new MapContext();
-            for (String key : eventContentKeys) {
-                context.set(key, event.get(key));
+        JSONObject event = JSONObject.parseObject(eventContent);
+        String[] strs = condition.split("=");
+        if (strs.length == 2) {
+            // event contain left key
+            if (event.containsKey(strs[0]) && event.get(strs[0]).toString().equals(strs[1])) {
+                log.info("get the a=1 pattern {}", "true");
+                return true;
+            } else {
+                return false;
             }
-            // check the expression ,if match then true
-            boolean checkFlag = (Boolean) jexl.createExpression(condition).evaluate(context);
-            log.info("payload:{},eventContent:{},condition:{},hit rule:{}", payload, eventContent, condition, checkFlag);
-            return checkFlag;
         }
+
         return false;
+    }
+
+    private static boolean hitRuleEngine(String payload, WeEvent eventMessage, String condition) {
+        try {
+            String eventContent = new String(eventMessage.getContent());
+            // all parameter must be the same
+            if (CommonUtil.checkJson(eventContent, payload) && (condition.isEmpty())) {
+                // if the confition is empty, just return all message
+                return true;
+            } else if (CommonUtil.checkJson(eventContent, payload)) {
+                List<String> eventContentKeys = CommonUtil.getKeys(payload);
+                JSONObject event = JSONObject.parseObject(eventContent);
+                JexlEngine jexl = new JexlBuilder().create();
+
+                JexlContext context = new MapContext();
+                for (String key : eventContentKeys) {
+                    context.set(key, event.get(key));
+                }
+                // check the expression ,if match then true
+                boolean checkFlag = (Boolean) jexl.createExpression(condition).evaluate(context);
+                log.info("payload:{},eventContent:{},condition:{},hit rule:{}", payload, eventContent, condition, checkFlag);
+                return checkFlag;
+            }
+            return false;
+        } catch (Exception e) {
+            if (handleTheEqual(eventMessage, condition)) {
+                return true;
+            } else {
+                log.info("error number");
+                return false;
+            }
+
+        }
     }
 
     public static RetCode checkCondition(String payload, String condition) {
