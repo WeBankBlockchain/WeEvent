@@ -347,7 +347,6 @@ public class FabricSDKWrapper {
             tbBlocks.add(tbBlock);
             blcokTotalCount = 1;
         } else {
-//            blockInfo = channel.query
             BlockchainInfo blockchainInfo = channel.queryBlockchainInfo();
             blockInfo = getBlockInfo(fabricConfig, channel, blockNumber);
             Long lastestblcokNum = blockInfo.getBlockNumber();
@@ -364,7 +363,6 @@ public class FabricSDKWrapper {
             tbBlocks = getTbBlocKList(channel, blockNums, blockchainInfo);
             blcokTotalCount = Integer.valueOf(String.valueOf(lastestblockInfo.getBlockNumber()));
             Collections.sort(tbBlocks, (arg0, arg1) -> arg1.getBlockNumber().compareTo(arg0.getBlockNumber()));
-
         }
 
         tbBlockListPage.setPageSize(pageSize);

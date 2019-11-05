@@ -4,7 +4,7 @@
         <Property name="logPath">./logs/</Property>
     </Properties>
     <Appenders>
-        <Console name="debug" target="SYSTEM_OUT">
+        <Console name="console" target="SYSTEM_OUT">
             <PatternLayout pattern="%-d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%pid-%tid %t] [%F:%L %M] %m%n"/>
         </Console>
 
@@ -21,7 +21,7 @@
     </Appenders>
 
     <Loggers>
-        <root level="debug" includeLocation="true">
+        <root level="info" includeLocation="true">
             <appender-ref ref="fileAppender"/>
         </root>
     </Loggers>
