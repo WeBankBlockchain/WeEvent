@@ -95,6 +95,7 @@ public class RuleEngineService {
             if (accountId == null || !accountId.equals(ruleEngineEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
+            ruleEngineEntity.setIsVisible("1");
             int count = ruleEngineMapper.countRuleEngine(ruleEngineEntity);
             ruleEngineEntity.setTotalCount(count);
             List<RuleEngineEntity> ruleEngineEntities = null;
@@ -126,6 +127,7 @@ public class RuleEngineService {
             if (accountId == null || !accountId.equals(ruleEngineEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
+            ruleEngineEntity.setIsVisible("1");
             ruleEngineEntity.setStatus(StatusEnum.NOT_STARTED.getCode());
             String payload = JSONObject.toJSON(ruleEngineEntity.getPayloadMap()).toString();
             ruleEngineEntity.setPayload(payload);
@@ -637,7 +639,7 @@ public class RuleEngineService {
         rule.setUserId(ruleEngineEntity.getUserId());
         rule.setBrokerId(ruleEngineEntity.getBrokerId());
         rule.setRuleName(ruleEngineEntity.getRuleName());
-
+        rule.setIsVisible("1");
         List<RuleEngineEntity> ruleEngines = ruleEngineMapper.getRuleEngines(rule);
         if (CollectionUtils.isEmpty(ruleEngines)) {
             return true;

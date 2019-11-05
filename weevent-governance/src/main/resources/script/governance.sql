@@ -56,7 +56,7 @@ CREATE TABLE t_rule_engine (
   `broker_id` int(11) not NULL COMMENT 'broker id',
   `cep_id` varchar(64) NULL COMMENT 'complex event processing id',
   `user_id` int(11) not NULL COMMENT 'user id',
-  `group_id` int(64) not NULL COMMENT 'group id',
+  `group_id` varchar(64) not NULL COMMENT 'group id',
   `broker_url` varchar(255) NULL DEFAULT NULL COMMENT 'broker url',
   `from_destination` varchar(64)  NULL DEFAULT NULL COMMENT  'message origin',
   `to_destination` varchar(64)  NULL DEFAULT NULL COMMENT  'message reached',
@@ -68,6 +68,7 @@ CREATE TABLE t_rule_engine (
   `rule_database_id` int(11) NULL DEFAULT NULL COMMENT 'rule database id',
   `error_destination` varchar(255) NULL DEFAULT NULL COMMENT 'error destination',
   `error_message` varchar(255) NULL DEFAULT NULL COMMENT 'error message',
+  `is_visible` varchar(1) NOT NULL DEFAULT '1' COMMENT '1 visible ,2 invisible',
    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='t_rule_engine';
 
@@ -80,6 +81,7 @@ CREATE TABLE t_rule_database (
   `table_name` varchar(128) NOT NULL COMMENT 'table name',
   `broker_id` varchar(256) DEFAULT NULL COMMENT 'broker id',
   `user_id` varchar(256) DEFAULT NULL COMMENT 'user id',
+  `is_visible` varchar(1) NOT NULL DEFAULT '1' COMMENT '1 visible ,2 invisible',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='t_rule_database';
 

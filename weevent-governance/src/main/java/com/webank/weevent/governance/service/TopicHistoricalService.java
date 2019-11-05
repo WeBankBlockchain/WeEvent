@@ -236,6 +236,7 @@ public class TopicHistoricalService {
         ruleDatabaseEntity.setUserId(userId);
         ruleDatabaseEntity.setTableName(newTableName);
         ruleDatabaseEntity.setDatabaseUrl(dataBaseUrl);
+        ruleDatabaseEntity.setIsVisible("2");
         return ruleDatabaseEntity;
     }
 
@@ -261,6 +262,7 @@ public class TopicHistoricalService {
         ruleEngineEntity.setPayloadType(PayloadEnum.JSON.getCode());
         ruleEngineEntity.setConditionType(ConditionTypeEnum.DATABASE.getCode());
         ruleEngineEntity.setFromDestination("#");
+        ruleEngineEntity.setIsVisible("2");
         return ruleEngineEntity;
     }
 

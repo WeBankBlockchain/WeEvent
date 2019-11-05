@@ -55,4 +55,8 @@ public class RuleEngineBase extends BaseEntity {
 
     private String errorMessage;
 
+    /**
+     * 1 visible ,2 invisible
+     */
+    private String isVisible;
 }

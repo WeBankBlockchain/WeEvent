@@ -30,14 +30,15 @@ public class RuleDatabaseService {
     @Autowired
     private RuleDatabaseMapper ruleDatabaseMapper;
 
-    public List<RuleDatabaseEntity> circulationDatabaseList(HttpServletRequest request, RuleDatabaseEntity RuleDatabaseEntity) throws GovernanceException {
+    public List<RuleDatabaseEntity> circulationDatabaseList(HttpServletRequest request, RuleDatabaseEntity ruleDatabaseEntity) throws GovernanceException {
         try {
             String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-            if (accountId == null || !accountId.equals(RuleDatabaseEntity.getUserId().toString())) {
+            if (accountId == null || !accountId.equals(ruleDatabaseEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
             List<RuleDatabaseEntity> CirculationDatabaseEntities = null;
-            CirculationDatabaseEntities = ruleDatabaseMapper.circulationDatabaseList(RuleDatabaseEntity);
+            ruleDatabaseEntity.setIsVisible("1");
+            CirculationDatabaseEntities = ruleDatabaseMapper.circulationDatabaseList(ruleDatabaseEntity);
             return CirculationDatabaseEntities;
         } catch (Exception e) {
             log.error("get circulationDatabaseList fail", e);
@@ -57,6 +58,7 @@ public class RuleDatabaseService {
             }
             //check dbUrl
             commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseUrl(),ruleDatabaseEntity.getTableName());
+            ruleDatabaseEntity.setIsVisible("1");
             ruleDatabaseMapper.addCirculationDatabase(ruleDatabaseEntity);
             return ruleDatabaseEntity;
         } catch (Exception e) {
