@@ -56,7 +56,7 @@ public class FiscoBcos {
     // topic control
     private TopicController topicController;
 
-    // topic list
+    // topic list, local cache will not be expired forever
     private Map<String, Topic> topicMap = new ConcurrentHashMap<>();
 
     public FiscoBcos(FiscoConfig fiscoConfig) {
@@ -176,7 +176,7 @@ public class FiscoBcos {
         }
     }
 
-    public ListPage listTopicName(Integer pageIndex, Integer pageSize) throws BrokerException {
+    public ListPage<String> listTopicName(Integer pageIndex, Integer pageSize) throws BrokerException {
         try {
             ListPage<String> listPage = new ListPage<>();
             List<Type> result = this.topicController.listTopicName(Web3SDKWrapper.intToUint256(pageIndex),
