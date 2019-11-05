@@ -8,9 +8,6 @@ dependencies {
     // jms
     implementation("javax.jms:jms:1.1")
     
-    // log4j
-    implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.11.1")
-    
     // stomp, see https://github.com/TooTallNate/Java-WebSocket
     implementation("org.java-websocket:Java-WebSocket:1.4.0")
     implementation("org.springframework.data:spring-data-commons:2.2.0.RELEASE")
