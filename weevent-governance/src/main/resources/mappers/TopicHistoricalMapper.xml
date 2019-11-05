@@ -6,7 +6,6 @@
         <result column="id" property="id" jdbcType="INTEGER"/>
         <result column="create_date" property="createDate" jdbcType="TIMESTAMP"/>
         <result column="last_update" property="lastUpdate" jdbcType="TIMESTAMP"/>
-        <result column="user_id" property="userId" jdbcType="INTEGER"/>
         <result column="brokerId" property="brokerId" jdbcType="INTEGER"/>
         <result column="topicName" property="topicName" jdbcType="VARCHAR"/>
         <result column="groupId" property="groupId" jdbcType="VARCHAR"/>
@@ -15,7 +14,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,create_date,last_update, brokerId,user_id,topicName, groupId, block_number, eventId
+        id,create_date,last_update, brokerId,topicName, groupId, block_number, eventId
     </sql>
 
 
@@ -33,9 +32,7 @@
         <if test="topicName != null">
             AND topicName=#{topicName}
         </if>
-        <if test="userId != null">
-            AND user_id=#{userId}
-        </if>
+
         <if test="brokerId != null">
             AND brokerId=#{brokerId}
         </if>
@@ -65,9 +62,7 @@
         <if test="topicName != null">
             AND topicName=#{topicName}
         </if>
-        <if test="userId != null">
-            AND user_id=#{userId}
-        </if>
+
         <if test="brokerId != null">
             AND brokerId=#{brokerId}
         </if>
@@ -85,8 +80,8 @@
 
     <insert id="addHistoricalData" parameterType="com.webank.weevent.governance.entity.TopicTopicHistoricalEntity"
             useGeneratedKeys="true" keyProperty="id">
-        insert into  t_topic_historical(brokerId, user_id, topicName, groupId, block_number, eventId)
-        values (#{brokerId}, #{userId}, #{topicName}, #{groupId}, #{blockNumber}, #{eventId})
+        insert into  t_topic_historical(brokerId, topicName, groupId, block_number, eventId)
+        values (#{brokerId}, #{topicName}, #{groupId}, #{blockNumber}, #{eventId})
     </insert>
 
 
