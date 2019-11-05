@@ -1,8 +1,10 @@
 package com.webank.weevent.processor;
 
 import java.util.List;
+import java.util.Map;
 
 import com.webank.weevent.processor.utils.CommonUtil;
+import com.webank.weevent.sdk.IWeEventClient;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -35,15 +37,22 @@ public class SqlParserTest {
         try {
             JexlEngine jexl = new JexlBuilder().create();
             JexlContext context = new MapContext();
-            context.set("a", "rere");
             context.set("b", 1);
             context.set("c", 1);
-            // Create an expression
-            String jexlExp = "a>10";
+            String jexlExp = "c=1";
             Boolean e = (Boolean) jexl.createExpression(jexlExp).evaluate(context);
             log.info(e.toString());
             Assert.assertEquals(true, e);
         } catch (Exception e) {
+            int c = 1;
+            Boolean e1 = false;
+            if (c == 1) {
+                e1 = true;
+                Assert.assertEquals(true, e1);
+            } else {
+                Assert.assertEquals(false, e1);
+            }
+
             log.info("error number");
         }
 
@@ -71,4 +80,32 @@ public class SqlParserTest {
 
     }
 
+    @Test
+    public void checkEqual() {
+        String condition = "a=1";
+        String eventMessage = "{\"a\":1,\"b\":\"test\",\"c\":10}";
+
+        //String eventContent = new String(eventMessage.getContent());
+        JSONObject event = JSONObject.parseObject(eventMessage);
+        String[] strs = condition.split("=");
+        if (strs.length == 2) {
+            // event contain left key
+            if (event.containsKey(strs[0]) && event.get(strs[0]).toString().equals(strs[1])) {
+                log.info("{}", "true");
+
+            } else {
+                log.info("{}", "false 1");
+
+            }
+        }
+    }
+
+    @Test
+    public void checkRequestParams() {
+        Map<String, String> mapRequest = CommonUtil.uRLRequest("http://127.0.0.1:7000/weevent/rest/publish?topic=from.selectAddEventIDToTopic&groupId=1");
+        if (null != mapRequest.get("groupId")) {
+            log.info("{}",mapRequest.get("groupId"));
+        }
+
+    }
 }
