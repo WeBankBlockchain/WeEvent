@@ -141,7 +141,7 @@ export default{
     groupId () {
       this.beginDate()
     },
-    lang () {
+    lang (nVal) {
       this.option.lang.noData = this.$t('common.noData')
       this.option.title.text = this.$t('overview.essential')
       this.option.subtitle.text = this.$t('overview.lastWeek')

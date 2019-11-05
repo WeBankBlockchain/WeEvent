@@ -181,6 +181,17 @@ export default{
         }
       }
     }
+    var toDestination = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error(this.$t('common.choose')))
+      } else {
+        if (value === this.sqlOption.fromDestination) {
+          callback(new Error(this.$t('ruleDetail.cannotSame')))
+        } else {
+          callback()
+        }
+      }
+    }
     return {
       selAll: false,
       createRule: false,
@@ -236,7 +247,7 @@ export default{
           { required: true, message: this.$t('ruleDetail.guideURL'), trigger: 'change' }
         ],
         toDestination: [
-          { required: true, message: this.$t('common.choose'), trigger: 'change' }
+          { required: true, validator: toDestination, trigger: 'change' }
         ],
         errorDestination: [
           { validator: errorDestination, trigger: 'change' }

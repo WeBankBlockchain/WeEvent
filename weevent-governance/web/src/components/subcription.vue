@@ -165,13 +165,17 @@ export default {
       }, 1000)
     },
     checkDetail (e) {
-      if (e.topicName !== '—') {
-        this.$store.commit('set_active', '2-1')
-        this.$emit('selecChange', '2-1')
+      console.log(e)
+      if (e.topicName === '#') {
+        console.log('a')
+        sessionStorage.removeItem('topic')
+      } else {
         sessionStorage.setItem('topic', e.topicName)
-        this.$store.commit('set_menu', [this.$t('sideBar.topic'), this.$t('sideBar.topicList')])
-        this.$router.push('./topicList')
       }
+      this.$store.commit('set_active', '2-1')
+      this.$emit('selecChange', '2-1')
+      this.$store.commit('set_menu', [this.$t('sideBar.topic'), this.$t('sideBar.topicList')])
+      this.$router.push('./topicList')
     },
     selectShow (e) {
       if (e.length === 0) {

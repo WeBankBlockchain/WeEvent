@@ -270,21 +270,19 @@ export default {
     if (sessionStorage.getItem('topic')) {
       var vm = this
       vm.tableData = []
-      if (sessionStorage.getItem('topic') !== '—') {
-        let url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + sessionStorage.getItem('topic')
-        API.topicInfo(url).then(res => {
-          let time = getDateDetail(res.data.createdTimestamp)
-          res.data.createdTimestamp = time
-          let item = {
-            topicName: res.data.topicName,
-            creater: '——',
-            createdTimestamp: time,
-            detail: {}
-          }
-          vm.tableData.push(item)
-          vm.total = 1
-        })
-      }
+      let url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + sessionStorage.getItem('topic')
+      API.topicInfo(url).then(res => {
+        let time = getDateDetail(res.data.createdTimestamp)
+        res.data.createdTimestamp = time
+        let item = {
+          topicName: res.data.topicName,
+          creater: '——',
+          createdTimestamp: time,
+          detail: {}
+        }
+        vm.tableData.push(item)
+        vm.total = 1
+      })
     } else {
       this.getLsitData()
     }
