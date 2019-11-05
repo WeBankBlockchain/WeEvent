@@ -97,7 +97,7 @@ export default {
           break
         case '/subcription':
           this.$store.commit('set_active', '2-2')
-          this.$store.commit('set_menu', [this.$t('sideBar.subcription')])
+          this.$store.commit('set_menu', [this.$t('sideBar.topic'), this.$t('sideBar.subcription')])
           break
         case '/statistics':
           this.$store.commit('set_active', '2-3')
