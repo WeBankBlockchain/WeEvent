@@ -837,12 +837,6 @@ public class FabricTopicAdminTest extends JUnitTestBase {
         queryEntity.setPageNumber(1);
         ListPage<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
         Assert.assertNotNull(tbTransHashes);
-
-        queryEntity.setBlockNumber(null);
-        queryEntity.setPkHash(tbTransHashes.getPageData().get(0).getTransHash());
-        tbTransHashes = this.iProducer.queryTransList(queryEntity);
-        Assert.assertNotNull(tbTransHashes);
-        Assert.assertTrue(tbTransHashes.getTotal() > 0);
     }
 
     /**

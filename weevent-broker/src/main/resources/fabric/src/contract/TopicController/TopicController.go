@@ -7,16 +7,19 @@ import(
     pb "github.com/hyperledger/fabric/protos/peer"
 )
 
+//struct TopicController
 type TopicController struct {
     version string
 }
 
+//struct TopicInfo
 type TopicInfo struct {
     CreatedTimestamp string `json:"createdTimestamp"`
     Version  string `json:"version"`
     Topic string `json:"topicName"`
 }
 
+//struct ListTopicName
 type ListTopicName struct {
     Total int `json:"total"`
     Size  string `json:"pageSize"`
@@ -27,13 +30,16 @@ var topicContractName string
 var topicContractVersion string
 var topicMap = make(map[string]TopicInfo)
 var topicIndex = make([]string,0)
-const TOPIC_ALREADY_EXIST string = "100100"
+//topic name already exist
+const topicAlreadyExist string = "100100"
 
+//Init function
 func (t *TopicController) Init(stub shim.ChaincodeStubInterface) pb.Response{
     fmt.Println("<< ====[TopicController Init] success init it is view in docker ====== >>")
     return shim.Success([]byte("success init"))
 }
 
+//Invoke function
 func (t *TopicController) Invoke(stub shim.ChaincodeStubInterface) pb.Response{
     fn, args := stub.GetFunctionAndParameters()
     switch fn {
@@ -84,7 +90,7 @@ func (t *TopicController) getTopicContractVersion(stub shim.ChaincodeStubInterfa
 func (t *TopicController) addTopicInfo(stub shim.ChaincodeStubInterface,args[] string) pb.Response{
     fmt.Println("<< ====[TopicController] addTopicInfo topic: ====== >>", args[0])
     if _, ok := topicMap[args[0]]; ok {
-        return shim.Error(TOPIC_ALREADY_EXIST)
+        return shim.Error(topicAlreadyExist)
     }
     var topicInfo TopicInfo
     topicInfo.Topic = args[0]
@@ -106,9 +112,9 @@ func (t *TopicController) getTopicInfo(stub shim.ChaincodeStubInterface,args[] s
 func (t *TopicController) isTopicExist(stub shim.ChaincodeStubInterface,args[] string) pb.Response{
     if _, ok := topicMap[args[0]]; ok {
         return shim.Success([]byte("topic exist"))
-    } else {
-        return shim.Error("topic not exist")
     }
+    return shim.Error("topic not exist")
+
 }
 
 // page index start from 0, pageSize default 10
@@ -152,16 +158,16 @@ func (t *TopicController) listTopicName(stub shim.ChaincodeStubInterface,args[] 
     listTopicName.Size = strconv.Itoa(size)
     listTopicName.TopicList = topicList
 
-    listTopicNameJson, err := json.Marshal(listTopicName)
+    listTopicNameJSON, err := json.Marshal(listTopicName)
     if err != nil{
         return shim.Error("listTopicName err")
     }
-    return shim.Success([]byte(listTopicNameJson))
+    return shim.Success([]byte(listTopicNameJSON))
 }
 
 func main(){
     err := shim.Start(new(TopicController))
     if err != nil{
-        fmt.Println("Error starting Simple chaincode : %s",err)
+        fmt.Println(err)
     }
 }

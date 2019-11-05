@@ -7,15 +7,18 @@ import(
 )
 var sequenceNumber int
 
+//Topic struct
 type Topic struct {
     version string
 }
 
+//Init function
 func (t *Topic) Init(stub shim.ChaincodeStubInterface) pb.Response{
     fmt.Println("<< ====[Topic Init] success init it is view in docker ====== >>")
     return shim.Success([]byte("success init"))
 }
 
+//Invoke function
 func (t *Topic) Invoke(stub shim.ChaincodeStubInterface) pb.Response{
     fn, args := stub.GetFunctionAndParameters()
     if fn == "publish" {
@@ -34,6 +37,6 @@ func (t *Topic) publish(stub shim.ChaincodeStubInterface,args []string) pb.Respo
 func main(){
     err := shim.Start(new(Topic))
     if err != nil{
-        fmt.Println("Error starting Simple chaincode : %s",err)
+        fmt.Println(err)
     }
 }
