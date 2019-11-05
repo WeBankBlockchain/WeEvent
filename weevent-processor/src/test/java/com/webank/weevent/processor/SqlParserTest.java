@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.processor.utils.CommonUtil;
-import com.webank.weevent.sdk.IWeEventClient;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -81,6 +80,71 @@ public class SqlParserTest {
     }
 
     @Test
+    public void basicCheckExpressionEqual() {
+        try {
+            String payload = "{\"a\":1,\"b\":\"test\",\"c\":10}";
+            String condition = "(c=10) and c>1";
+            List<String> payloadContentKeys = CommonUtil.getKeys(payload);
+            JSONObject payloadJson = JSONObject.parseObject(payload);
+            JexlEngine jexl = new JexlBuilder().create();
+
+            JexlContext context = new MapContext();
+            for (String key : payloadContentKeys) {
+                context.set(key, payloadJson.get(key));
+            }
+            Boolean e = (Boolean) jexl.createExpression(condition).evaluate(context);
+            log.info(e.toString());
+            Assert.assertEquals(true, e);
+        } catch (Exception e) {
+            log.info("error number");
+        }
+    }
+
+    @Test
+    public void basicCheckExpressionEqualThree() {
+        try {
+            String payload = "{\"a\":1,\"b\":10,\"c\":10}";
+            String condition = " a >= 1 and (b = 10) or c > 1 ";
+            List<String> payloadContentKeys = CommonUtil.getKeys(payload);
+            JSONObject payloadJson = JSONObject.parseObject(payload);
+            JexlEngine jexl = new JexlBuilder().create();
+
+            JexlContext context = new MapContext();
+            for (String key : payloadContentKeys) {
+                context.set(key, payloadJson.get(key));
+            }
+            Boolean e = (Boolean) jexl.createExpression(condition).evaluate(context);
+            log.info(e.toString());
+            Assert.assertEquals(true, e);
+        } catch (Exception e) {
+            log.info("error number");
+        }
+
+    }
+
+    @Test
+    public void basicCheckExpressionEqualTwo() {
+        try {
+            String payload = "{\"a\":1,\"b\":\"test\",\"c\":10}";
+            String condition = "(c=10)and(b=\"test\")";
+            List<String> payloadContentKeys = CommonUtil.getKeys(payload);
+            JSONObject payloadJson = JSONObject.parseObject(payload);
+            JexlEngine jexl = new JexlBuilder().create();
+
+            JexlContext context = new MapContext();
+            for (String key : payloadContentKeys) {
+                context.set(key, payloadJson.get(key));
+            }
+            Boolean e = (Boolean) jexl.createExpression(condition).evaluate(context);
+            log.info(e.toString());
+            Assert.assertEquals(true, e);
+        } catch (Exception e) {
+            log.info("error number");
+        }
+
+    }
+
+    @Test
     public void checkEqual() {
         String condition = "a=1";
         String eventMessage = "{\"a\":1,\"b\":\"test\",\"c\":10}";
@@ -92,20 +156,16 @@ public class SqlParserTest {
             // event contain left key
             if (event.containsKey(strs[0]) && event.get(strs[0]).toString().equals(strs[1])) {
                 log.info("{}", "true");
+                Assert.assertEquals("true", "true");
+
 
             } else {
                 log.info("{}", "false 1");
+                Assert.assertEquals("fail", "fail");
 
             }
         }
     }
 
-    @Test
-    public void checkRequestParams() {
-        Map<String, String> mapRequest = CommonUtil.uRLRequest("http://127.0.0.1:7000/weevent/rest/publish?topic=from.selectAddEventIDToTopic&groupId=1");
-        if (null != mapRequest.get("groupId")) {
-            log.info("{}",mapRequest.get("groupId"));
-        }
-
-    }
+    
 }
