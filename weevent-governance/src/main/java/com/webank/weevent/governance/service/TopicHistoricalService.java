@@ -87,11 +87,7 @@ public class TopicHistoricalService {
             }
             Map<String, List<Integer>> returnMap = new HashMap<>();
 
-            TopicTopicHistoricalEntity historicalEntity = new TopicTopicHistoricalEntity();
-            BeanUtils.copyProperties(topicHistoricalEntity, historicalEntity, "userId", "brokerId", "groupId");
-            String tableName = new StringBuffer(TOPIC_HISTORICAL).append("_").append(topicHistoricalEntity.getBrokerId()).append("_").append(topicHistoricalEntity.getGroupId()).toString();
-            historicalEntity.setTableName(tableName);
-            List<TopicTopicHistoricalEntity> historicalDataEntities = topicHistoricalMapper.historicalDataList(historicalEntity);
+            List<TopicTopicHistoricalEntity> historicalDataEntities = topicHistoricalMapper.historicalDataList(topicHistoricalEntity);
             if (CollectionUtils.isEmpty(historicalDataEntities)) {
                 return null;
             }
@@ -138,11 +134,7 @@ public class TopicHistoricalService {
             if (!flag) {
                 throw new GovernanceException(ConstantCode.ACCESS_DENIED.getMsg());
             }
-            TopicTopicHistoricalEntity historicalEntity = new TopicTopicHistoricalEntity();
-            BeanUtils.copyProperties(topicHistoricalEntity, historicalEntity, "userId", "brokerId", "groupId");
-            String tableName = new StringBuffer(TOPIC_HISTORICAL).append("_").append(topicHistoricalEntity.getBrokerId()).append("_").append(topicHistoricalEntity.getGroupId()).toString();
-            historicalEntity.setTableName(tableName);
-            List<TopicTopicHistoricalEntity> historicalEntities = topicHistoricalMapper.eventList(historicalEntity);
+            List<TopicTopicHistoricalEntity> historicalEntities = topicHistoricalMapper.eventList(topicHistoricalEntity);
             if (CollectionUtils.isEmpty(historicalEntities)) {
                 return historicalEntities;
             }
