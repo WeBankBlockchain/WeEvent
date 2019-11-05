@@ -806,25 +806,6 @@ public class FabricTopicAdminTest extends JUnitTestBase {
         Assert.assertTrue(tbTransHashes.getTotal() > 0);
     }
 
-
-    /**
-     * test queryTransList with blockNumber
-     */
-    @Test
-    public void queryTransListBlockNumber() throws BrokerException {
-        this.queryEntity = new QueryEntity();
-        queryEntity.setGroupId(this.channelName);
-        queryEntity.setBlockNumber(blockNumber);
-        queryEntity.setPageSize(10);
-        queryEntity.setPageNumber(1);
-        ListPage<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
-
-        Assert.assertNotNull(tbTransHashes);
-        Assert.assertTrue(tbTransHashes.getTotal() > 0);
-        Assert.assertEquals(tbTransHashes.getPageData().get(0).getBlockNumber().toString(), this.blockNumber.toString());
-    }
-
-
     /**
      * test queryTransList with tranHash
      */

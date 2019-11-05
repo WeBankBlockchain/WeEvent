@@ -273,8 +273,12 @@ public class FabricSDKWrapper {
         ListPage<TbTransHash> tbTransHashListPage = new ListPage<>();
         List<TbTransHash> tbTransHashes = new ArrayList<>();
 
-
-        BlockInfo blockInfo = channel.queryBlockByHash(Hex.decodeHex(blockHash));
+        BlockInfo blockInfo = null;
+        if (!StringUtils.isBlank(blockHash)) {
+            blockInfo = channel.queryBlockByHash(Hex.decodeHex(blockHash));
+        } else {
+            blockInfo = getBlockInfo(fabricConfig, channel, blockNumber);
+        }
 
         if (blockInfo == null) {
             log.error("query block by blockHash failed, block is empty.");
@@ -317,9 +321,6 @@ public class FabricSDKWrapper {
         tbTransHashListPage.setPageSize(transSize);
         tbTransHashListPage.setTotal(transCount);
         tbTransHashListPage.setPageData(tbTransHashes);
-        log.info("+++++++++++++++++++++++++++++++++++");
-        log.info(tbTransHashListPage.getPageData().get(0).getBlockNumber().toString());
-        log.info("+++++++++++++++++++++++++++++++++++");
     }
 
     public static ListPage<TbBlock> queryBlockList(FabricConfig fabricConfig,
