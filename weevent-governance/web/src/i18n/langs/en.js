@@ -150,7 +150,7 @@ module.exports = {
     'nodeType': 'Node Type',
     'sealer': 'sealer',
     'observer': 'observer',
-    'lastTimestamp': 'Last UpDate Time'
+    'lastTimestamp': 'Last Update Time'
   },
   rule: {
     'dataGuide': 'User Guide',
@@ -219,7 +219,7 @@ module.exports = {
     'selectGuide': 'Please select a destination',
     'toTopic': 'Target To Topic',
     'toDB': 'Target To DB',
-    'errorTopic': 'Error Target Topic',
+    'errorTopic': 'Select Topic',
     'db': 'Database',
     'selectDB': 'Select Database',
     'guideURL': 'No Target',
