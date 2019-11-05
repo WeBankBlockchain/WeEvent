@@ -22,7 +22,7 @@
       width='200'>
     </el-table-column>
     <el-table-column
-      :label="$t('rule.databaseUrl')"
+      :label="$t('rule.ruleDataBaseId')"
       prop="databaseUrl">
     </el-table-column>
     <el-table-column
