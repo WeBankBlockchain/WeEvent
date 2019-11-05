@@ -1,9 +1,11 @@
 <template>
   <div class='rule_detail rule'>
     <div class='step'>
-      <p class='rule_title'>{{$t('ruleDetail.guideDetail')}}</p>
-      <el-button type='primary' size='mini' @click="createRule = !createRule">{{$t('common.edit')}}</el-button>
-      <p class='rule_name'>{{ruleItem.ruleName}}</p>
+      <!-- <p class='rule_title'>{{$t('ruleDetail.guideDetail')}}</p> -->
+      <p class='rule_name' style='font-size:18px'>
+        {{ruleItem.ruleName}}
+        <el-button type='primary' size='mini' @click="createRule = !createRule">{{$t('common.edit')}}</el-button>
+      </p>
       <p class='name'><span>{{$t('rule.dataType')}} :</span>{{ruleItem.payloadType === 1 ? 'JSON' : '' }}</p>
       <p class='name'><span>{{$t('rule.payloadMap')}} :</span>{{ruleItem.payloadMap}}</p>
     </div>

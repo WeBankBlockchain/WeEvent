@@ -80,8 +80,7 @@ public class AccountService {
 
     public GovernanceResult register(AccountEntity user) {
         // data criteral
-        if (StringUtils.isBlank(user.getUsername()) || StringUtils.isBlank(user.getPassword())
-                || StringUtils.isBlank(user.getEmail())) {
+        if (StringUtils.isBlank(user.getUsername()) || StringUtils.isBlank(user.getPassword())) {
             return GovernanceResult.build(400, "user data incomplete，regist fail");
         }
         // check username exist
