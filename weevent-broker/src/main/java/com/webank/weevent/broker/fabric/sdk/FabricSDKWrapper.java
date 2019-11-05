@@ -32,6 +32,7 @@ import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.DecoderException;
@@ -257,10 +258,6 @@ public class FabricSDKWrapper {
         BlockInfo blockInfo = channel.queryBlockByNumber(currentBlockNum);
         groupGeneral.setLatestBlock(BigInteger.valueOf(currentBlockNum));
         groupGeneral.setNodeCount(channel.getPeers().size());
-//        channel
-        if (blockInfo != null) {
-            groupGeneral.setTransactionCount(BigInteger.valueOf(blockInfo.getTransactionCount()));
-        }
 
         return groupGeneral;
     }
@@ -309,7 +306,9 @@ public class FabricSDKWrapper {
         Iterable<BlockInfo.EnvelopeInfo> envelopeInfos = blockInfo.getEnvelopeInfos();
         for (BlockInfo.EnvelopeInfo envelopeInfo : envelopeInfos) {
             TbTransHash tbTransHash = new TbTransHash();
-            tbTransHash.setCreateTime(DataTypeUtils.getTimestampStr(envelopeInfo.getTimestamp().getTime()));
+            tbTransHash.setCreateTime(DataTypeUtils.getTimestamp(envelopeInfo.getTimestamp()));
+            tbTransHash.setBlockTimestamp(DataTypeUtils.getTimestamp(envelopeInfo.getTimestamp()));
+            tbTransHash.setTransHash(envelopeInfo.getTransactionID());
             tbTransHash.setBlockNumber(BigInteger.valueOf(blockInfo.getBlockNumber()));
             tbTransHashes.add(tbTransHash);
         }
@@ -328,7 +327,7 @@ public class FabricSDKWrapper {
                                                    BigInteger blockNumber,
                                                    String blockHash,
                                                    Integer pageIndex,
-                                                   Integer pageSize) throws ProposalException, InvalidArgumentException, ExecutionException, InterruptedException, DecoderException {
+                                                   Integer pageSize) throws ProposalException, InvalidArgumentException, ExecutionException, InterruptedException, DecoderException, InvalidProtocolBufferException {
         ListPage<TbBlock> tbBlockListPage = new ListPage<>();
         List<TbBlock> tbBlocks = new CopyOnWriteArrayList<>();
         Integer blcokTotalCount = 0;
@@ -363,11 +362,9 @@ public class FabricSDKWrapper {
             }
 
             tbBlocks = getTbBlocKList(channel, blockNums, blockchainInfo);
-            blcokTotalCount = Integer.valueOf(lastestblcokNum.intValue());
+            blcokTotalCount = Integer.valueOf(String.valueOf(lastestblockInfo.getBlockNumber()));
             Collections.sort(tbBlocks, (arg0, arg1) -> arg1.getBlockNumber().compareTo(arg0.getBlockNumber()));
 
-            tbBlocks.add(tbBlock);
-            blcokTotalCount = tbBlocks.size();
         }
 
         tbBlockListPage.setPageSize(pageSize);
@@ -377,13 +374,16 @@ public class FabricSDKWrapper {
         return tbBlockListPage;
     }
 
-    private static void generateTbBlock(Channel channel, BigInteger blockNumber, BlockInfo lastestblockInfo, BlockInfo blockInfo, TbBlock tbBlock) throws InvalidArgumentException, ProposalException {
+    private static void generateTbBlock(Channel channel, BigInteger blockNumber, BlockInfo lastestblockInfo, BlockInfo blockInfo, TbBlock tbBlock) throws InvalidArgumentException, ProposalException, InvalidProtocolBufferException {
         if (!blockNumber.equals(lastestblockInfo.getBlockNumber())) {
             BlockInfo nextBlockInfo = channel.queryBlockByNumber(blockNumber.longValue() + 1);
             tbBlock.setPkHash(Hex.encodeHexString(nextBlockInfo.getPreviousHash()));
         } else {
             BlockchainInfo blockchainInfo = channel.queryBlockchainInfo();
             tbBlock.setPkHash(Hex.encodeHexString(blockchainInfo.getCurrentBlockHash()));
+        }
+        if (blockInfo.getEnvelopeCount() > 0) {
+            tbBlock.setBlockTimestamp(DataTypeUtils.getTimestamp(blockInfo.getEnvelopeInfo(0).getTimestamp()));
         }
         tbBlock.setTransCount(blockInfo.getEnvelopeCount());
         tbBlock.setBlockNumber(blockNumber);
@@ -397,21 +397,23 @@ public class FabricSDKWrapper {
             long blockNumber = blockNums.get(i);
             CompletableFuture<List<TbBlock>> future = CompletableFuture.supplyAsync(() ->{
                 TbBlock tbBlock = new TbBlock();
-                BlockInfo blockInfo = null;
-                if (blockNumber != (blockchainInfo.getHeight() -1 )) {
-                    try {
-                        blockInfo = channel.queryBlockByNumber(blockNumber + 1);
-                    } catch (InvalidArgumentException |ProposalException e) {
-                        log.error("query block by blockNumber failed, e:", e);
-                        return null;
+                try {
+                    BlockInfo blockInfo = channel.queryBlockByNumber(blockNumber);
+                    if (blockNumber != (blockchainInfo.getHeight() -1 )) {
+                        BlockInfo nextBlockInfo = channel.queryBlockByNumber(blockNumber + 1);
+                        tbBlock.setPkHash(Hex.encodeHexString(nextBlockInfo.getPreviousHash()));
+                    } else {
+                        tbBlock.setPkHash(Hex.encodeHexString(blockchainInfo.getCurrentBlockHash()));
                     }
-                    tbBlock.setPkHash(Hex.encodeHexString(blockInfo.getPreviousHash()));
-                } else {
-                    tbBlock.setPkHash(Hex.encodeHexString(blockchainInfo.getCurrentBlockHash()));
+                    if (blockInfo.getEnvelopeCount() > 0) {
+                        tbBlock.setBlockTimestamp(DataTypeUtils.getTimestamp(blockInfo.getEnvelopeInfo(0).getTimestamp()));
+                    }
+                    tbBlock.setBlockNumber(new BigInteger(String.valueOf(blockNumber)));
+                    tbBlock.setTransCount(blockInfo.getTransactionCount());
+                } catch (InvalidArgumentException | ProposalException | InvalidProtocolBufferException e) {
+                    log.error("query block by blockNumber failed, e:", e);
+                    return null;
                 }
-
-                tbBlock.setBlockNumber(new BigInteger(String.valueOf(blockNumber)));
-                tbBlock.setTransCount(blockInfo.getTransactionCount());
                 tbBlocks.add(tbBlock);
                 return tbBlocks;
             });
@@ -437,7 +439,6 @@ public class FabricSDKWrapper {
         for (Peer peer : peers) {
             TbNode tbNode = new TbNode();
             tbNode.setBlockNumber(BigInteger.valueOf(blockInfo.getBlockNumber()));
-//            tbNode.setNodeName(peer.getName());
             tbNode.setNodeId(peer.getUrl());
             tbNode.setNodeActive(1);
             tbNode.setNodeType(WeEventConstants.NODE_TYPE_SEALER);

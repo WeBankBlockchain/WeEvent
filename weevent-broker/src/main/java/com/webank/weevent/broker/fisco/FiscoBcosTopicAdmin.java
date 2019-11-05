@@ -104,12 +104,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     public TopicPage list(Integer pageIndex, Integer pageSize, String groupId) throws BrokerException {
         log.debug("list function input param, pageIndex: {} pageSize: {}", pageIndex, pageSize);
 
-        if (pageIndex == null || pageIndex < 0) {
-            throw new BrokerException(ErrorCode.TOPIC_PAGE_INDEX_INVALID);
-        }
-        if (pageSize == null || pageSize <= 0 || pageSize > 100) {
-            throw new BrokerException(ErrorCode.TOPIC_PAGE_SIZE_INVALID);
-        }
+        ParamCheckUtils.validatePagIndexAndSize(pageIndex, pageSize);
         this.validateGroupId(groupId);
         @SuppressWarnings(value = "unchecked")
         ListPage<String> listPage = fiscoBcosDelegate.listTopicName(pageIndex, pageSize, Long.parseLong(groupId));
@@ -162,6 +157,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     @Override
     public ListPage<TbTransHash> queryTransList(QueryEntity queryEntity) throws BrokerException {
         this.validateGroupId(queryEntity.getGroupId());
+        ParamCheckUtils.validatePagIndexAndSize(queryEntity.getPageNumber(), queryEntity.getPageSize());
         return fiscoBcosDelegate.queryTransList(Long.valueOf(queryEntity.getGroupId()), queryEntity.getPkHash(), queryEntity.getBlockNumber(),
                 queryEntity.getPageNumber(), queryEntity.getPageSize());
     }
@@ -169,6 +165,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     @Override
     public ListPage<TbBlock> queryBlockList(QueryEntity queryEntity) throws BrokerException {
         this.validateGroupId(queryEntity.getGroupId());
+        ParamCheckUtils.validatePagIndexAndSize(queryEntity.getPageNumber(), queryEntity.getPageSize());
         return fiscoBcosDelegate.queryBlockList(Long.valueOf(queryEntity.getGroupId()), queryEntity.getPkHash(), queryEntity.getBlockNumber(),
                 queryEntity.getPageNumber(), queryEntity.getPageSize());
     }

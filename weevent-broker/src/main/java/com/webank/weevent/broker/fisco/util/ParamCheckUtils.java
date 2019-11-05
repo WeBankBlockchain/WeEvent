@@ -140,4 +140,13 @@ public class ParamCheckUtils {
             }
         }
     }
+
+    public static void validatePagIndexAndSize(Integer pageIndex, Integer pageSize) throws BrokerException {
+        if (pageIndex == null || pageIndex < 0) {
+            throw new BrokerException(ErrorCode.TOPIC_PAGE_INDEX_INVALID);
+        }
+        if (pageSize == null || pageSize <= 0 || pageSize > 100) {
+            throw new BrokerException(ErrorCode.TOPIC_PAGE_SIZE_INVALID);
+        }
+    }
 }

@@ -4,7 +4,6 @@ package com.webank.weevent.broker.fisco.web3sdk.v2;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -81,6 +80,12 @@ public class Web3SDK2Wrapper {
     public final static String WeEventTableValue = "value";
     public final static String WeEventTableVersion = "version";
     public final static String WeEventTopicControlAddress = "topic_control_address";
+    // partial key of FISCO block info
+    public final static String BLOCK_NUMBER = "blockNumber";
+    public final static String NODE_ID = "nodeId";
+    public final static String PEERS = "peers";
+    public final static String VIEW = "view";
+
 
     // static gas provider
     public static final ContractGasProvider gasProvider = new ContractGasProvider() {
@@ -565,7 +570,7 @@ public class Web3SDK2Wrapper {
                 .map(transactionResult -> (Transaction) transactionResult.get()).collect(Collectors.toList()).subList(transIndexStart, transSize + transIndexStart);
         transactionHashList.forEach(tx -> {
             TbTransHash tbTransHash = new TbTransHash(tx.getHash(), tx.getFrom(), tx.getTo(),
-                    tx.getBlockNumber(), DataTypeUtils.getTimestampStr(bcosBlock.getBlock().getTimestamp().longValue()));
+                    tx.getBlockNumber(), DataTypeUtils.getTimestamp(bcosBlock.getBlock().getTimestamp().longValue()));
             tbTransHashes.add(tbTransHash);
         });
         tbTransHashListPage.setPageSize(transSize);
@@ -633,7 +638,7 @@ public class Web3SDK2Wrapper {
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
 
-        LocalDateTime blockTimestamp = DataTypeUtils.getTimestampStr(block.getTimestamp().longValue());
+        String blockTimestamp = DataTypeUtils.getTimestamp(block.getTimestamp().longValue());
 
         int transactions = 0;
         if (!block.getTransactions().isEmpty()) {
@@ -710,16 +715,16 @@ public class Web3SDK2Wrapper {
         Set<String> set = syncStatusArr.keySet();
         Map<String, String> map = new HashMap<>();
         for (String s : set) {
-            if ("blockNumber".equals(s) || "nodeId".equals(s)) {
+            if (BLOCK_NUMBER.equals(s) || NODE_ID.equals(s)) {
                 map.put(s, syncStatusArr.getString(s));
             }
-            if ("peers".equals(s)) {
+            if (PEERS.equals(s)) {
                 String peersListStr = syncStatusArr.getString(s);
                 JSONArray peersListJSONArray = JSONObject.parseArray(peersListStr);
                 convertJSONArrayToList(nodeBlockNums, peersListJSONArray);
             }
         }
-        nodeBlockNums.put(syncStatusArr.getString("nodeId"), map);
+        nodeBlockNums.put(syncStatusArr.getString(NODE_ID), map);
         return nodeBlockNums;
     }
 
@@ -731,11 +736,8 @@ public class Web3SDK2Wrapper {
                 Map<String, String> objMap = new HashMap<>();
                 for (String key : keySet) {
                     objMap.put(key, ((JSONObject) object).getString(key));
-                    if ("view".equals(key)) {
-                        System.out.println("view:"+objMap.get("view"));
-                    }
                 }
-                map.put(objMap.get("nodeId"), objMap);
+                map.put(objMap.get(NODE_ID), objMap);
             }
         }
     }
@@ -747,10 +749,10 @@ public class Web3SDK2Wrapper {
         BigInteger blockNum = null;
         BigInteger pbftView = null;
         if (nodeBlockNums.containsKey(nodeId)) {
-            blockNum = new BigInteger(nodeBlockNums.get(nodeId).get("blockNumber"));
+            blockNum = new BigInteger(nodeBlockNums.get(nodeId).get(BLOCK_NUMBER));
         }
         if (nodeViews.containsKey(nodeId)) {
-            pbftView = new BigInteger(nodeViews.get(nodeId).get("view"));
+            pbftView = new BigInteger(nodeViews.get(nodeId).get(VIEW));
         }
         tbNode.setNodeId(nodeId);
         tbNode.setBlockNumber(blockNum);
@@ -785,7 +787,7 @@ public class Web3SDK2Wrapper {
                     return null;
                 }
 
-                LocalDateTime blockTimestamp = DataTypeUtils.getTimestampStr(block.getTimestamp().longValue());
+                String blockTimestamp = DataTypeUtils.getTimestamp(block.getTimestamp().longValue());
 
                 int transactions = 0;
                 if (!block.getTransactions().isEmpty()) {

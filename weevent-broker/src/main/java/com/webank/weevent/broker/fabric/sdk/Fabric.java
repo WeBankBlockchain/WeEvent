@@ -31,6 +31,7 @@ import com.webank.weevent.sdk.WeEvent;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.DecoderException;
 import org.hyperledger.fabric.sdk.ChaincodeID;
@@ -274,7 +275,7 @@ public class Fabric {
 
         try {
             return FabricSDKWrapper.queryBlockList(fabricConfig, channel, blockNumber, blockHash, pageIndex, pageSize);
-        } catch (InvalidArgumentException | ProposalException | ExecutionException | InterruptedException | DecoderException e) {
+        } catch (InvalidArgumentException | ProposalException | ExecutionException | InterruptedException | DecoderException | InvalidProtocolBufferException e) {
             log.error("query block list by transHash and blockNum error:{}", e);
             throw new BrokerException(ErrorCode.FABRICSDK_GETBLOCKINFO_ERROR);
         }

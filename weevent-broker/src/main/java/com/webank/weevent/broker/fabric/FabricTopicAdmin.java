@@ -96,12 +96,7 @@ public class FabricTopicAdmin implements IEventTopic {
     @Override
     public TopicPage list(Integer pageIndex, Integer pageSize, String channelName) throws BrokerException {
 
-        if (pageIndex == null || pageIndex < 0) {
-            throw new BrokerException(ErrorCode.TOPIC_PAGE_INDEX_INVALID);
-        }
-        if (pageSize == null || pageSize <= 0 || pageSize > 100) {
-            throw new BrokerException(ErrorCode.TOPIC_PAGE_SIZE_INVALID);
-        }
+        ParamCheckUtils.validatePagIndexAndSize(pageIndex, pageSize);
         validateChannelName(channelName);
 
         return fabricDelegate.getFabricMap().get(channelName).listTopicName(pageIndex, pageSize);
@@ -132,7 +127,7 @@ public class FabricTopicAdmin implements IEventTopic {
     @Override
     public ListPage<TbTransHash> queryTransList(QueryEntity queryEntity) throws BrokerException {
         validateChannelName(queryEntity.getGroupId());
-
+        ParamCheckUtils.validatePagIndexAndSize(queryEntity.getPageNumber(), queryEntity.getPageSize());
         return fabricDelegate.getFabricMap().get(queryEntity.getGroupId())
                 .queryTransList(queryEntity.getBlockNumber(), queryEntity.getPkHash(), queryEntity.getPageNumber(), queryEntity.getPageSize());
     }
@@ -140,7 +135,7 @@ public class FabricTopicAdmin implements IEventTopic {
     @Override
     public ListPage<TbBlock> queryBlockList(QueryEntity queryEntity) throws BrokerException {
         validateChannelName(queryEntity.getGroupId());
-
+        ParamCheckUtils.validatePagIndexAndSize(queryEntity.getPageNumber(), queryEntity.getPageSize());
         return fabricDelegate.getFabricMap().get(queryEntity.getGroupId())
                 .queryBlockList(queryEntity.getBlockNumber(), queryEntity.getPkHash(), queryEntity.getPageNumber(), queryEntity.getPageSize());
     }

@@ -4,8 +4,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Map;
 
@@ -171,8 +169,4 @@ public final class DataTypeUtils {
         return new SimpleDateFormat(STRING_DATE_FORMAT);
     }
 
-    public static LocalDateTime getTimestampStr(long date) {
-        DateTimeFormatter df = DateTimeFormatter.ofPattern(STRING_DATE_FORMAT);
-        return LocalDateTime.parse(getTimestamp(date), df);
-    }
 }
