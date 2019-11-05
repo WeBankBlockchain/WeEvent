@@ -160,13 +160,15 @@ public class CommonUtil {
         return keys;
     }
 
-    public static Map<String, String> contactsql(WeEvent eventMessage, String selectFields, String payload) {
+    public static Map<String, String> contactsql(String brokerId,String groupId,WeEvent eventMessage, String selectFields, String payload) {
         String content = new String(eventMessage.getContent());
         String eventId = eventMessage.getEventId();
+        String topicName = eventMessage.getTopic();
+
 
         Map<String, String> sql = new HashMap<>();
         Map<String, String> sqlOrder = new HashMap<>();
-        boolean eventFlag = false;
+        boolean eventIdFlag = false, topicNameFlag = false, brokerIdFlag = false, groupIdFlag = false;
         List<String> result = new ArrayList<>();
         // if select is equal * ,then select all fields.
         if ("*".equals(selectFields)) {
@@ -197,7 +199,16 @@ public class CommonUtil {
             }
             // set the flag
             if (ConstantsHelper.EVENT_ID.equals(key)) {
-                eventFlag = true;
+                eventIdFlag = true;
+            }
+            if (ConstantsHelper.TOPIC_NAME.equals(key)) {
+                topicNameFlag = true;
+            }
+            if (ConstantsHelper.BROKER_ID.equals(key)) {
+                brokerIdFlag = true;
+            }
+            if (ConstantsHelper.GROUP_ID.equals(key)) {
+                groupIdFlag = true;
             }
         }
 
@@ -211,8 +222,17 @@ public class CommonUtil {
         }
 
         // if user need eventId , add the event id
-        if (eventFlag) {
+        if (eventIdFlag) {
             sqlOrder.put(ConstantsHelper.EVENT_ID, eventId);
+        }
+        if (topicNameFlag) {
+            sqlOrder.put(ConstantsHelper.TOPIC_NAME, topicName);
+        }
+        if (brokerIdFlag) {
+            sqlOrder.put(ConstantsHelper.BROKER_ID, brokerId);
+        }
+        if (groupIdFlag) {
+            sqlOrder.put(ConstantsHelper.GROUP_ID, groupId);
         }
 
         return sqlOrder;

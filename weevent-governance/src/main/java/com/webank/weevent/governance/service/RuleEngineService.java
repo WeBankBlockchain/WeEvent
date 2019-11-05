@@ -36,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.helper.StringUtil;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -273,6 +274,8 @@ public class RuleEngineService {
                 ruleEngineEntity.setDatabaseUrl(ruleDataBase.getDatabaseUrl() + "&tableName=" + ruleDataBase.getTableName());
             }
             checkSourceDestinationTopic(ruleEngineEntity);
+            ruleEngineEntity.setStatus(rule.getStatus());
+
             //update process rule
             this.updateProcessRule(request, ruleEngineEntity, rule);
 
@@ -336,7 +339,6 @@ public class RuleEngineService {
             String brokerUrl = new StringBuffer(broker.getBrokerUrl()).append(ConstantProperties.AND_SYMBOL)
                     .append("groupId=").append(oldRule.getGroupId()).toString();
             ruleEngineEntity.setBrokerUrl(brokerUrl);
-            ruleEngineEntity.setStatus(oldRule.getStatus());
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_UPDATE_CEP_RULE).toString();
             String jsonString = JSONObject.toJSONString(ruleEngineEntity);
             Map map = JSONObject.parseObject(jsonString, Map.class);
@@ -389,6 +391,25 @@ public class RuleEngineService {
     public boolean updateRuleEngineStatus(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         authCheck(ruleEngineEntity, request);
+        RuleEngineEntity rule = new RuleEngineEntity();
+        rule.setId(ruleEngineEntity.getId());
+        List<RuleEngineEntity> ruleEngines = ruleEngineMapper.getRuleEngines(rule);
+        rule = ruleEngines.get(0);
+        BeanUtils.copyProperties(rule, ruleEngineEntity, "status");
+        //set payload
+        String payload = JSONObject.toJSON(ruleEngineEntity.getPayloadMap()).toString();
+        ruleEngineEntity.setPayload(payload);
+        ruleEngineEntity.setLastUpdate(new Date());
+
+        //set selectFiled 、conditionField
+        List<RuleEngineConditionEntity> ruleEngineConditionList = ruleEngineEntity.getRuleEngineConditionList();
+        String conditionField = this.getConditionField(ruleEngineConditionList);
+        ruleEngineEntity.setConditionField(conditionField);
+        RuleDatabaseEntity ruleDataBase = getRuleDataBase(ruleEngineEntity.getRuleDataBaseId());
+        if (ruleDataBase != null) {
+            ruleEngineEntity.setDatabaseUrl(ruleDataBase.getDatabaseUrl() + "&tableName=" + ruleDataBase.getTableName());
+        }
+        this.updateProcessRule(request, ruleEngineEntity, rule);
         return ruleEngineMapper.updateRuleEngineStatus(ruleEngineEntity);
     }
 
@@ -416,7 +437,7 @@ public class RuleEngineService {
             rule.setStatus(StatusEnum.RUNNING.getCode());
             rule.setLastUpdate(new Date());
             //set dataBaseUrl
-            RuleDatabaseEntity ruleDataBase = getRuleDataBase(ruleEngineEntity.getRuleDataBaseId());
+            RuleDatabaseEntity ruleDataBase = getRuleDataBase(rule.getRuleDataBaseId());
             if (ruleDataBase != null) {
                 rule.setDatabaseUrl(ruleDataBase.getDatabaseUrl() + "&tableName=" + ruleDataBase.getTableName());
             }

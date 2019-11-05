@@ -178,11 +178,10 @@ public class TopicHistoricalService {
         return dateList;
     }
 
-    public void createTopicHistoricalTable(HttpServletRequest request, HttpServletResponse response, BrokerEntity brokerEntity) throws GovernanceException {
+    public void createRule(HttpServletRequest request, HttpServletResponse response, BrokerEntity brokerEntity) throws GovernanceException {
         String goalUrl = "";
         String user = "";
         String password = "";
-        String driverName = "";
         String dbName;
         try {
             Properties properties = new Properties();
@@ -195,7 +194,6 @@ public class TopicHistoricalService {
                 goalUrl = properties.getProperty("spring.datasource.url");
                 user = properties.getProperty("spring.datasource.username");
                 password = properties.getProperty("spring.datasource.password");
-                driverName = properties.getProperty("spring.datasource.driver-class-name");
             }
             // first use dbself database
             int first = goalUrl.lastIndexOf("/");
@@ -203,29 +201,26 @@ public class TopicHistoricalService {
             dbName = goalUrl.substring(first + 1, end);
             // get mysql default url like jdbc:mysql://127.0.0.1:3306
             String defaultUrl = goalUrl.substring(0, first);
-            Class.forName(driverName);
+
+            String dataBaseUrl = new StringBuffer(defaultUrl).append("/").append(dbName).append(ConstantProperties.QUESTION_MARK).append("user=").append(user)
+                    .append(ConstantProperties.AND_SYMBOL).append("password=").append(password).toString();
+            RuleDatabaseEntity ruleDatabaseEntity = initializationRuleDataBase(dbName, TOPIC_HISTORICAL, dataBaseUrl, brokerEntity.getUserId());
+            ruleDatabaseEntity = existRuleDataBase(ruleDatabaseEntity);
+            if (ruleDatabaseEntity.getId() == null) {
+                ruleDatabaseMapper.addCirculationDatabase(ruleDatabaseEntity);
+            }
+
             //Request broker to get all groups
             List<String> groupList = getGroupList(request, brokerEntity);
             for (String groupId : groupList) {
                 //get new tableName
                 groupId = groupId.replaceAll("\"", "");
-                String newTableName = TOPIC_HISTORICAL + "_" + brokerEntity.getId() + "_" + groupId;
-                List<String> tableSqlList = readSql(TOPIC_HISTORICAL, newTableName, dbName);
-                //create a table
-                this.executeCreate(tableSqlList, defaultUrl, user, password);
-                //built-in rule engine data and start
-                String dataBaseUrl = new StringBuffer(defaultUrl).append("/").append("user=").append(user)
-                        .append(ConstantProperties.AND_SYMBOL).append("password=").append(password).toString();
-                String newDbName = new StringBuffer(dbName).append("_").append(brokerEntity.getId()).append("_").append(groupId).toString();
-
-                RuleDatabaseEntity ruleDatabaseEntity = initializationRuleDataBase(newDbName, newTableName, dataBaseUrl, brokerEntity.getUserId());
-                ruleDatabaseMapper.addCirculationDatabase(ruleDatabaseEntity);
-
-                RuleEngineEntity ruleEngineEntity = initializationRule(newTableName, brokerEntity, groupId, ruleDatabaseEntity.getId());
+                RuleEngineEntity ruleEngineEntity = initializationRule(TOPIC_HISTORICAL, brokerEntity, groupId, ruleDatabaseEntity.getId());
                 ruleEngineMapper.addRuleEngine(ruleEngineEntity);
                 //determine if the processor's service is available
                 boolean exist = ruleEngineService.checkProcessorExist(request);
                 if (exist) {
+                    //built-in rule engine data and start
                     ruleEngineService.startRuleEngine(ruleEngineEntity, request, response);
                 }
             }
@@ -245,9 +240,11 @@ public class TopicHistoricalService {
     }
 
     private RuleEngineEntity initializationRule(String newTableName, BrokerEntity brokerEntity, String groupId, Integer dataBaseId) {
-        String selectField = "topic_name,eventId";
+        String selectField = "eventId,topicName,groupId,brokerId";
         Map<String, String> map = new HashMap<>();
-        map.put("topic_name", "*");
+        map.put("topicName", "*");
+        map.put("brokerId", "*");
+        map.put("groupId", "*");
         map.put("eventId", "*");
         RuleEngineEntity ruleEngineEntity = new RuleEngineEntity();
         ruleEngineEntity.setRuleName(newTableName);
@@ -288,45 +285,6 @@ public class TopicHistoricalService {
 
     }
 
-    //执行sql
-    private void executeCreate(List<String> tableSqlList, String defaultUrl, String user, String password) throws GovernanceException {
-        try (
-                Connection conn = DriverManager.getConnection(defaultUrl, user, password);
-                Statement stat = conn.createStatement()) {
-            for (String sql : tableSqlList) {
-                stat.executeUpdate(sql);
-            }
-            log.info("create table success!");
-        } catch (Exception e) {
-            log.error("create table fail,message: {}", e.getMessage());
-            throw new GovernanceException(e.getMessage());
-        }
-    }
-
-    //解析sql替换表名
-    private static List<String> readSql(String oldTableName, String newTableName, String dbName) throws IOException {
-        InputStream resourceAsStream = TopicHistoricalService.class.getResourceAsStream("/script/topicHistorical.sql");
-        StringBuffer sqlBuffer = new StringBuffer("use ").append(dbName).append("; \n ");
-        sqlBuffer.append("drop table if exists ").append(oldTableName).append(";\n ");
-        List<String> sqlList = new ArrayList<>();
-        byte[] buff = new byte[1024];
-        int byteRead = 0;
-        while ((byteRead = resourceAsStream.read(buff)) != -1) {
-            sqlBuffer.append(new String(buff, 0, byteRead, Charset.defaultCharset()));
-        }
-        String[] sqlArr = sqlBuffer.toString().split("(;\\s*\\r\\n)|(;\\s*\\n)");
-
-        for (int i = 0; i < sqlArr.length; i++) {
-            String sql = sqlArr[i].replaceAll("--.*", "").trim();
-            if (!StringUtil.isBlank(sql)) {
-                sql = sql.replaceAll(oldTableName, newTableName);
-                sqlList.add(sql);
-            }
-            resourceAsStream.close();
-        }
-        return sqlList;
-    }
-
     private String getActiveFile() throws Exception {
         URL url = TopicHistoricalService.class.getClassLoader().getResource("application.properties");
         Properties properties = new Properties();
@@ -334,5 +292,14 @@ public class TopicHistoricalService {
         String active = properties.getProperty("spring.profiles.active");
         return new StringBuffer("application").append("-").append(active).append(".properties").toString();
     }
+
+    private RuleDatabaseEntity existRuleDataBase(RuleDatabaseEntity ruleDatabaseEntity) {
+        List<RuleDatabaseEntity> ruleDatabaseEntities = ruleDatabaseMapper.circulationDatabaseList(ruleDatabaseEntity);
+        if (CollectionUtils.isEmpty(ruleDatabaseEntities)) {
+            return ruleDatabaseEntity;
+        }
+        return ruleDatabaseEntities.get(0);
+    }
+
 
 }
