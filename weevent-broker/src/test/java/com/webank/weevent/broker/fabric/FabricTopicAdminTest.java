@@ -797,6 +797,9 @@ public class FabricTopicAdminTest extends JUnitTestBase {
     public void queryTransList() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.channelName);
+        queryEntity.setPageSize(10);
+        queryEntity.setPageNumber(1);
+        queryEntity.setBlockNumber(new BigInteger("10"));
         ListPage<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
 
         Assert.assertNotNull(tbTransHashes);
@@ -812,6 +815,8 @@ public class FabricTopicAdminTest extends JUnitTestBase {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.channelName);
         queryEntity.setBlockNumber(blockNumber);
+        queryEntity.setPageSize(10);
+        queryEntity.setPageNumber(1);
         ListPage<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
 
         Assert.assertNotNull(tbTransHashes);
@@ -828,6 +833,8 @@ public class FabricTopicAdminTest extends JUnitTestBase {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.channelName);
         queryEntity.setBlockNumber(blockNumber);
+        queryEntity.setPageSize(10);
+        queryEntity.setPageNumber(1);
         ListPage<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
         Assert.assertNotNull(tbTransHashes);
 
@@ -845,6 +852,8 @@ public class FabricTopicAdminTest extends JUnitTestBase {
     public void queryTransListTranHash1() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.channelName);
+        queryEntity.setPageSize(10);
+        queryEntity.setPageNumber(1);
         ListPage<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
         Assert.assertNotNull(tbTransHashes);
 
@@ -862,6 +871,8 @@ public class FabricTopicAdminTest extends JUnitTestBase {
     public void queryBlockList() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.channelName);
+        queryEntity.setPageSize(10);
+        queryEntity.setPageNumber(1);
         ListPage<TbBlock> tbBlocks = this.iProducer.queryBlockList(queryEntity);
         Assert.assertNotNull(tbBlocks);
         Assert.assertTrue(tbBlocks.getTotal() > 0);
@@ -875,6 +886,8 @@ public class FabricTopicAdminTest extends JUnitTestBase {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.channelName);
         queryEntity.setBlockNumber(blockNumber);
+        queryEntity.setPageSize(10);
+        queryEntity.setPageNumber(1);
         ListPage<TbBlock> tbBlocks = this.iProducer.queryBlockList(queryEntity);
 
         Assert.assertNotNull(tbBlocks);
@@ -890,6 +903,8 @@ public class FabricTopicAdminTest extends JUnitTestBase {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.channelName);
         queryEntity.setBlockNumber(blockNumber);
+        queryEntity.setPageSize(10);
+        queryEntity.setPageNumber(1);
 
         ListPage<TbBlock> tbBlocks = this.iProducer.queryBlockList(queryEntity);
         Assert.assertNotNull(tbBlocks);
@@ -909,6 +924,8 @@ public class FabricTopicAdminTest extends JUnitTestBase {
     public void queryNodeList() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.channelName);
+        queryEntity.setPageSize(10);
+        queryEntity.setPageNumber(1);
         ListPage<TbNode> tbNodes = this.iProducer.queryNodeList(queryEntity);
         Assert.assertNotNull(tbNodes);
         Assert.assertTrue(tbNodes.getTotal() > 0);

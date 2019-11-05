@@ -906,8 +906,8 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
     public void queryTransListTranHash() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.groupId);
-        queryEntity.setBlockNumber(blockNumber);
-        queryEntity.setPageNumber(1);
+        queryEntity.setBlockNumber(new BigInteger("5000"));
+        queryEntity.setPageNumber(2);
         queryEntity.setPageSize(10);
         ListPage<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
         Assert.assertNotNull(tbTransHashes);

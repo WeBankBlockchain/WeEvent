@@ -133,21 +133,24 @@ public class FabricTopicAdmin implements IEventTopic {
     public ListPage<TbTransHash> queryTransList(QueryEntity queryEntity) throws BrokerException {
         validateChannelName(queryEntity.getGroupId());
 
-        return fabricDelegate.getFabricMap().get(queryEntity.getGroupId()).queryTransList(queryEntity.getBlockNumber());
+        return fabricDelegate.getFabricMap().get(queryEntity.getGroupId())
+                .queryTransList(queryEntity.getBlockNumber(), queryEntity.getPkHash(), queryEntity.getPageNumber(), queryEntity.getPageSize());
     }
 
     @Override
     public ListPage<TbBlock> queryBlockList(QueryEntity queryEntity) throws BrokerException {
         validateChannelName(queryEntity.getGroupId());
 
-        return fabricDelegate.getFabricMap().get(queryEntity.getGroupId()).queryBlockList(queryEntity.getBlockNumber());
+        return fabricDelegate.getFabricMap().get(queryEntity.getGroupId())
+                .queryBlockList(queryEntity.getBlockNumber(), queryEntity.getPkHash(), queryEntity.getPageNumber(), queryEntity.getPageSize());
     }
 
     @Override
     public ListPage<TbNode> queryNodeList(QueryEntity queryEntity) throws BrokerException {
         validateChannelName(queryEntity.getGroupId());
 
-        return fabricDelegate.getFabricMap().get(queryEntity.getGroupId()).queryNodeList();
+        return fabricDelegate.getFabricMap().get(queryEntity.getGroupId())
+                .queryNodeList(queryEntity.getPageNumber(), queryEntity.getPageSize());
     }
 
     protected void validateChannelName(String channelName) throws BrokerException {

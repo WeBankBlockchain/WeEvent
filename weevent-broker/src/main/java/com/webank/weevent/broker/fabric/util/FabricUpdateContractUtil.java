@@ -18,7 +18,7 @@ import static com.webank.weevent.broker.fabric.util.FabricDeployContractUtil.fab
 public class FabricUpdateContractUtil {
 
     public static void main(String[] args) throws Exception {
-        String commond = args[0];
+        String commond = "add";
         fabricConfig.load();
 
         HFClient client = FabricSDKWrapper.initializeClient(fabricConfig);

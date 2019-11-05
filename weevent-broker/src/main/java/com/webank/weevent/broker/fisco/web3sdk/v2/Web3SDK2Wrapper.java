@@ -562,7 +562,7 @@ public class Web3SDK2Wrapper {
         Integer transIndexStart = (pageIndex - 1) * pageSize;
 
         List<Transaction> transactionHashList = block.getTransactions().stream()
-                .map(transactionResult -> (Transaction) transactionResult.get()).collect(Collectors.toList()).subList(transIndexStart, transSize);
+                .map(transactionResult -> (Transaction) transactionResult.get()).collect(Collectors.toList()).subList(transIndexStart, transSize + transIndexStart);
         transactionHashList.forEach(tx -> {
             TbTransHash tbTransHash = new TbTransHash(tx.getHash(), tx.getFrom(), tx.getTo(),
                     tx.getBlockNumber(), DataTypeUtils.getTimestampStr(bcosBlock.getBlock().getTimestamp().longValue()));
@@ -764,12 +764,12 @@ public class Web3SDK2Wrapper {
         return nodeIds.contains(nodeId)? 1 : 0;
     }
 
-    private static CopyOnWriteArrayList<TbBlock> getTbBlock(Web3j web3j, List<Long> blockNum) throws ExecutionException, InterruptedException {
+    private static CopyOnWriteArrayList<TbBlock> getTbBlock(Web3j web3j, List<Long> blockNums) throws ExecutionException, InterruptedException {
 
-        CompletableFuture<List<TbBlock>>[] completableFutureArr = new CompletableFuture[blockNum.size()];
+        CompletableFuture<List<TbBlock>>[] completableFutureArr = new CompletableFuture[blockNums.size()];
         CopyOnWriteArrayList<TbBlock> tbBlocks = new CopyOnWriteArrayList<>();
-        for (int i = 0; i < blockNum.size(); i++) {
-            long blockNumber = blockNum.get(i);
+        for (int i = 0; i < blockNums.size(); i++) {
+            long blockNumber = blockNums.get(i);
             CompletableFuture<List<TbBlock>> future = CompletableFuture.supplyAsync(() ->{
                 BcosBlock bcosBlock = null;
                 try {
@@ -796,7 +796,6 @@ public class Web3SDK2Wrapper {
                         transactions, sealerIndex);
                 tbBlock.setSealer(block.getSealer());
                 tbBlocks.add(tbBlock);
-                log.info("########## query blockNum:" + blockNumber + " success ##########");
                 return tbBlocks;
             });
 
