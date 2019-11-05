@@ -202,11 +202,11 @@ public class TopicHistoricalService {
             // get mysql default url like jdbc:mysql://127.0.0.1:3306
             String defaultUrl = goalUrl.substring(0, first);
 
-            String dataBaseUrl = new StringBuffer(defaultUrl).append("/").append("user=").append(user)
+            String dataBaseUrl = new StringBuffer(defaultUrl).append("/").append(dbName).append(ConstantProperties.QUESTION_MARK).append("user=").append(user)
                     .append(ConstantProperties.AND_SYMBOL).append("password=").append(password).toString();
             RuleDatabaseEntity ruleDatabaseEntity = initializationRuleDataBase(dbName, TOPIC_HISTORICAL, dataBaseUrl, brokerEntity.getUserId());
-            boolean existRuleDataBase = existRuleDataBase(ruleDatabaseEntity);
-            if (!existRuleDataBase) {
+            ruleDatabaseEntity = existRuleDataBase(ruleDatabaseEntity);
+            if (ruleDatabaseEntity.getId() == null) {
                 ruleDatabaseMapper.addCirculationDatabase(ruleDatabaseEntity);
             }
 
@@ -240,9 +240,11 @@ public class TopicHistoricalService {
     }
 
     private RuleEngineEntity initializationRule(String newTableName, BrokerEntity brokerEntity, String groupId, Integer dataBaseId) {
-        String selectField = "topic_name,eventId";
+        String selectField = "eventId,topicName,groupId,brokerId";
         Map<String, String> map = new HashMap<>();
-        map.put("topic_name", "*");
+        map.put("topicName", "*");
+        map.put("brokerId", "*");
+        map.put("groupId", "*");
         map.put("eventId", "*");
         RuleEngineEntity ruleEngineEntity = new RuleEngineEntity();
         ruleEngineEntity.setRuleName(newTableName);
@@ -291,12 +293,12 @@ public class TopicHistoricalService {
         return new StringBuffer("application").append("-").append(active).append(".properties").toString();
     }
 
-    private boolean existRuleDataBase( RuleDatabaseEntity ruleDatabaseEntity) {
+    private RuleDatabaseEntity existRuleDataBase(RuleDatabaseEntity ruleDatabaseEntity) {
         List<RuleDatabaseEntity> ruleDatabaseEntities = ruleDatabaseMapper.circulationDatabaseList(ruleDatabaseEntity);
-        if (!CollectionUtils.isEmpty(ruleDatabaseEntities)) {
-            return false;
+        if (CollectionUtils.isEmpty(ruleDatabaseEntities)) {
+            return ruleDatabaseEntity;
         }
-        return true;
+        return ruleDatabaseEntities.get(0);
     }
 
 
