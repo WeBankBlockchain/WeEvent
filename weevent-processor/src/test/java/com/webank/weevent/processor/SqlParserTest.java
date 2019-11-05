@@ -1,8 +1,6 @@
 package com.webank.weevent.processor;
 
 import java.util.List;
-import java.util.Map;
-
 import com.webank.weevent.processor.utils.CommonUtil;
 
 import com.alibaba.fastjson.JSONObject;
@@ -157,8 +155,6 @@ public class SqlParserTest {
             if (event.containsKey(strs[0]) && event.get(strs[0]).toString().equals(strs[1])) {
                 log.info("{}", "true");
                 Assert.assertEquals("true", "true");
-
-
             } else {
                 log.info("{}", "false 1");
                 Assert.assertEquals("fail", "fail");
@@ -166,6 +162,4 @@ public class SqlParserTest {
             }
         }
     }
-
-    
 }
