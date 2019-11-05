@@ -106,15 +106,17 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
 
         ParamCheckUtils.validatePagIndexAndSize(pageIndex, pageSize);
         this.validateGroupId(groupId);
-        @SuppressWarnings(value = "unchecked")
-        ListPage<String> listPage = fiscoBcosDelegate.listTopicName(pageIndex, pageSize, Long.parseLong(groupId));
+
+        Long groupIdLong = Long.parseLong(groupId);
+        ListPage<String> listPage = fiscoBcosDelegate.listTopicName(pageIndex, pageSize, groupIdLong);
 
         TopicPage topicPage = new TopicPage();
         topicPage.setTotal(listPage.getTotal());
         topicPage.setPageIndex(listPage.getPageIndex());
         topicPage.setPageSize(listPage.getPageSize());
         for (String topic : listPage.getPageData()) {
-            topicPage.getTopicInfoList().add(state(topic, groupId));
+            // use cache is ok
+            topicPage.getTopicInfoList().add(fiscoBcosDelegate.getTopicInfo(topic, groupIdLong, false));
         }
 
         log.debug("block chain topic name list: {} block chain topic info list: {}", listPage, topicPage);
@@ -128,7 +130,9 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
 
         this.validateGroupId(groupId);
         ParamCheckUtils.validateTopicName(topic);
-        return fiscoBcosDelegate.getTopicInfo(topic, Long.parseLong(groupId));
+
+        // state force to query block, can not use local cache
+        return fiscoBcosDelegate.getTopicInfo(topic, Long.parseLong(groupId), true);
     }
 
     @Override

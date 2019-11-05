@@ -7,11 +7,11 @@ dependencies {
 
     // jms
     implementation("javax.jms:jms:1.1")
-
+    
     // log4j
     implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.11.1")
-
-    // stomp
+    
+    // stomp, see https://github.com/TooTallNate/Java-WebSocket
     implementation("org.java-websocket:Java-WebSocket:1.4.0")
     implementation("org.springframework.data:spring-data-commons:2.2.0.RELEASE")
     implementation("org.springframework:spring-messaging:5.1.6.RELEASE")
@@ -20,7 +20,7 @@ dependencies {
 jar {
     destinationDir file("dist/apps")
     archiveName project.name + "-" + version + ".jar"
-    
+
     exclude "**/*.xml"
     exclude "**/*.properties"
 
@@ -47,7 +47,7 @@ task sourcesJar(type: Jar) {
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
+    classifier = "javadoc"
     from javadoc.destinationDir
 }
 
