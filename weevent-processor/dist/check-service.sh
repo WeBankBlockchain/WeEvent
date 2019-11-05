@@ -16,8 +16,8 @@ function check_processor(){
         exit 1
     fi
 
-    result=${curl -H "Content-type: application/json" -X POST -d '{"id":"1","ruleName":"airCondition","status":"0"}' http://localhost:7008/processor/insert
-    if [[ "${result.errorCode}" == "0" || "${result.errorCode}" == "1" ]];then
+    curl -s -H "Content-type: application/json" -X POST -d '{"id":"1","ruleName":"airCondition","status":"0"}' http://127.0.0.1:8080/processor/insert | grep "1" >>/dev/null
+    if [[ $? -eq 0 ]];then
         yellow_echo "processor service is ok"
     else
         yellow_echo "processor service is error"

@@ -274,7 +274,7 @@ public class CEPRuleMQ {
         try {
             String eventContent = new String(eventMessage.getContent());
             // all parameter must be the same
-            if (CommonUtil.checkJson(eventContent, payload) && (condition.isEmpty())) {
+            if (CommonUtil.checkJson(eventContent, payload) && (StringUtils.isEmpty(condition))) {
                 // if the confition is empty, just return all message
                 return true;
             } else if (CommonUtil.checkJson(eventContent, payload)) {
