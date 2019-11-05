@@ -35,7 +35,10 @@
            <el-form-item :label="$t('tableCont.newBlockNumber')  + ' :'">
             <span>{{ props.row.detail.blockNumber }}</span>
           </el-form-item><br/>
-          <el-form-item :label="$t('tableCont.address')  + ' :'">
+          <el-form-item :label="$t('tableCont.lastTimestamp')  + ' :'">
+            <span>{{ props.row.detail.lastTimestamp }}</span>
+          </el-form-item><br/>
+          <el-form-item :label="$t('tableCont.address')  + ' :'" v-show="props.row.detail.topicAddress">
             <span>{{ props.row.detail.topicAddress }}</span>
           </el-form-item>
         </el-form>
@@ -130,7 +133,8 @@ export default {
           let det = {
             'topicName': '',
             'createdTimestamp': '',
-            'topicAddress': ''
+            'topicAddress': '',
+            'lastTimestamp': ''
           }
           listData.forEach(item => {
             vm.$set(item, 'detail', det)
@@ -155,6 +159,7 @@ export default {
       API.topicState(url).then(res => {
         let time = getDateDetail(res.data.createdTimestamp)
         res.data.createdTimestamp = time
+        res.data.lastTimestamp = getDateDetail(res.data.lastTimestamp)
         vm.$set(e, 'detail', res.data)
       })
     },

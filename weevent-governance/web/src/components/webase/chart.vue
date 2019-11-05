@@ -142,14 +142,14 @@ export default{
       this.beginDate()
     },
     lang () {
+      this.option.lang.noData = this.$t('common.noData')
+      this.option.title.text = this.$t('overview.essential')
+      this.option.subtitle.text = this.$t('overview.lastWeek')
       if (this.option.series.length === 0) {
         Highcharts.chart('chart', this.option).showNoData()
       } else {
         Highcharts.chart('chart', this.option)
       }
-      this.option.lang.noData = this.$t('common.noData')
-      this.option.title.text = this.$t('overview.essential')
-      this.option.subtitle.text = this.$t('overview.lastWeek')
     }
   },
   mounted () {

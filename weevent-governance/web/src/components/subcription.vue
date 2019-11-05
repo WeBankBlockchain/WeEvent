@@ -1,5 +1,6 @@
 <template>
 <div class='event-table subcription'>
+  <span>{{$t('tableCont.machine') + ":"}}</span>
   <el-select  @change='selectShow' v-model='nodes' multiple collapse-tags>
     <el-option  v-for='(item, index) in nodeList' :key='index' :label="item" :value="item"></el-option>
   </el-select>
@@ -96,28 +97,30 @@ export default {
           let list = []
           for (let key in data) {
             let cont = data[key]
-            // check if it is empty
-            let arr = Object.keys(cont)
-            if (arr.length) {
-              for (let x in cont) {
-                vm.$set(cont[x], 'ip', key)
-                vm.$set(cont[x], 'childs', arr.length)
-                list.push(cont[x])
+            if (JSON.stringify(cont) !== '{}') {
+              // check if it is empty
+              let arr = Object.keys(cont)
+              if (arr.length) {
+                for (let x in cont) {
+                  vm.$set(cont[x], 'ip', key)
+                  vm.$set(cont[x], 'childs', arr.length)
+                  list.push(cont[x])
+                }
+              } else {
+                const item = {
+                  'ip': key,
+                  'interfaceType': '—',
+                  'notifyingEventCount': '—',
+                  'notifyTimeStamp': '—',
+                  'subscribeId': '—',
+                  'topicName': '—',
+                  'notifiedEventCount': '—',
+                  'childs': 0,
+                  'remoteIp': '—',
+                  'createTimeStamp': '—'
+                }
+                list.push(item)
               }
-            } else {
-              const item = {
-                'ip': key,
-                'interfaceType': '—',
-                'notifyingEventCount': '—',
-                'notifyTimeStamp': '—',
-                'subscribeId': '—',
-                'topicName': '—',
-                'notifiedEventCount': '—',
-                'childs': 0,
-                'remoteIp': '—',
-                'createTimeStamp': '—'
-              }
-              list.push(item)
             }
           }
           vm.tableData = [].concat(list)

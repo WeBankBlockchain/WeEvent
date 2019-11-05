@@ -181,12 +181,12 @@ export default{
       this.beginDate(true)
     },
     lang () {
+      this.option.lang.noData = this.$t('common.noData')
       if (this.option.series.length === 0) {
         Highcharts.chart('chart', this.option).showNoData()
       } else {
         Highcharts.chart('chart', this.option)
       }
-      this.option.lang.noData = this.$t('common.noData')
     }
   },
   mounted () {

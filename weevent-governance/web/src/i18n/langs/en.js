@@ -149,7 +149,8 @@ module.exports = {
     'createTimeStamp': 'Create timestamp',
     'nodeType': 'Node Type',
     'sealer': 'sealer',
-    'observer': 'observer'
+    'observer': 'observer',
+    'lastTimestamp': 'Last Update Time'
   },
   rule: {
     'dataGuide': 'User Guide',
@@ -199,7 +200,7 @@ module.exports = {
     'guideDetail': 'Data Guide Detial',
     'ruleInfo': 'Rule Info',
     'editRule': 'Edit Rule',
-    'processData': 'Process Data',
+    'processData': 'Rule Detail',
     'sqlDescription': 'Grammar instructions',
     'ruleDetail': 'Rule Detail',
     'noRule': 'Empty rule detail',
@@ -218,7 +219,7 @@ module.exports = {
     'selectGuide': 'Please select a destination',
     'toTopic': 'Target To Topic',
     'toDB': 'Target To DB',
-    'errorTopic': 'Error Target Topic',
+    'errorTopic': 'Select Topic',
     'db': 'Database',
     'selectDB': 'Select Database',
     'guideURL': 'No Target',

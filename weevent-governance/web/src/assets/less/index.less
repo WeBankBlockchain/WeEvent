@@ -792,10 +792,18 @@ html,body,#app{
     .rule_title{
       font-size: 15px;
     }
-
     .el-button--primary{
       margin:15px 0;
     }
+
+    &:first-child{
+      .el-button--primary{
+        margin:0;
+        // margin-left: 30px;
+        float: right;
+      } 
+    }
+
     .rule_name{
       font-size: 14px;
       font-weight: bold;

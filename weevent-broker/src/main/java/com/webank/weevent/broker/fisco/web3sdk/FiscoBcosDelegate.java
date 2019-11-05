@@ -363,19 +363,43 @@ public class FiscoBcosDelegate {
     }
 
     public GroupGeneral getGroupGeneral(Long groupId) throws BrokerException {
-        return this.fiscoBcos2Map.get(groupId).getGroupGeneral();
+        checkVersion(groupId);
+
+        if (this.fiscoBcos != null) {
+            throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
+        } else {
+            return this.fiscoBcos2Map.get(groupId).getGroupGeneral();
+        }
     }
 
     public ListPage<TbTransHash> queryTransList(Long groupId, String transHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize) throws BrokerException {
-        return this.fiscoBcos2Map.get(groupId).queryTransList(transHash, blockNumber, pageIndex, pageSize);
+        checkVersion(groupId);
+
+        if (this.fiscoBcos != null) {
+            throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
+        } else {
+            return this.fiscoBcos2Map.get(groupId).queryTransList(transHash, blockNumber, pageIndex, pageSize);
+        }
     }
 
     public ListPage<TbBlock> queryBlockList(Long groupId, String transHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize) throws BrokerException {
-        return this.fiscoBcos2Map.get(groupId).queryBlockList(transHash, blockNumber, pageIndex, pageSize);
+        checkVersion(groupId);
+
+        if (this.fiscoBcos != null) {
+            throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
+        } else {
+            return this.fiscoBcos2Map.get(groupId).queryBlockList(transHash, blockNumber, pageIndex, pageSize);
+        }
     }
 
     public ListPage<TbNode> queryNodeList(Long groupId) throws BrokerException {
-        return this.fiscoBcos2Map.get(groupId).queryNodeList();
+        checkVersion(groupId);
+
+        if (this.fiscoBcos != null) {
+            throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
+        } else {
+            return this.fiscoBcos2Map.get(groupId).queryNodeList();
+        }
     }
 
 }
