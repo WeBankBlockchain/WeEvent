@@ -231,7 +231,7 @@ public class RuleEngineService {
             String mes = EntityUtils.toString(closeResponse.getEntity());
             JSONObject jsonObject = JSONObject.parseObject(mes);
             Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
-            if (this.PROCESSOR_SUCCESS_CODE != code) {
+            if (PROCESSOR_SUCCESS_CODE != code) {
                 String msg = jsonObject.get("errorMsg").toString();
                 throw new GovernanceException(msg);
             }
@@ -305,7 +305,7 @@ public class RuleEngineService {
     }
 
     private void checkSourceDestinationTopic(RuleEngineEntity ruleEngineEntity) throws GovernanceException {
-        ArrayList list = new ArrayList();
+        ArrayList<String> list = new ArrayList<>();
         if (!StringUtil.isBlank(ruleEngineEntity.getFromDestination())) {
             list.add(ruleEngineEntity.getFromDestination().trim());
         }
@@ -316,8 +316,7 @@ public class RuleEngineService {
         if (!StringUtil.isBlank(ruleEngineEntity.getErrorDestination())) {
             list.add(ruleEngineEntity.getErrorDestination().trim());
         }
-        Set<String> topicSet = new HashSet<>();
-        topicSet.addAll(list);
+        Set<String> topicSet = new HashSet<>(list);
         if (topicSet.size() < list.size()) {
             throw new GovernanceException("source topic 、destination topic and error topic cannot be the same");
         }
@@ -365,8 +364,7 @@ public class RuleEngineService {
 
     }
 
-
-    private String getConditionField(List<RuleEngineConditionEntity> ruleEngineConditionList) {
+    private String getConditionFieldDetail(List<RuleEngineConditionEntity> ruleEngineConditionList) {
         if (CollectionUtils.isEmpty(ruleEngineConditionList)) {
             return null;
         }
@@ -376,10 +374,40 @@ public class RuleEngineService {
         for (RuleEngineConditionEntity entity : ruleEngineConditionList) {
             if (count == 0) {
                 buffer.append(blank).append(entity.getColumnName()).append(blank)
-                        .append(entity.getConditionalOperator()).append(blank).append(entity.getSqlCondition()).append(blank);
+                        .append(entity.getConditionalOperator().toUpperCase()).append(blank).append(entity.getSqlCondition()).append(blank);
             } else {
-                buffer.append(entity.getConnectionOperator()).append(blank).append(entity.getColumnName()).append(blank)
-                        .append(entity.getConditionalOperator()).append(blank).append(entity.getSqlCondition()).append(blank);
+                buffer.append(entity.getConnectionOperator().toUpperCase()).append(blank).append(entity.getColumnName()).append(blank)
+                        .append(entity.getConditionalOperator().toUpperCase()).append(blank).append(entity.getSqlCondition().toUpperCase()).append(blank);
+            }
+            count++;
+        }
+        return buffer.toString();
+    }
+
+    private String getConditionField(List<RuleEngineConditionEntity> ruleEngineConditionList) {
+        if (CollectionUtils.isEmpty(ruleEngineConditionList)) {
+            return null;
+        }
+        String blank = " ";
+        StringBuffer buffer = new StringBuffer(blank);
+        int count = 0;
+        for (RuleEngineConditionEntity entity : ruleEngineConditionList) {
+            if (count == 0 && ruleEngineConditionList.size() > 1) {
+                if (entity.getConditionalOperator().equals("=")) {
+                    buffer.append(blank).append("(").append(entity.getColumnName()).append(blank)
+                            .append(entity.getConditionalOperator()).append(blank).append(entity.getSqlCondition()).append(")").append(blank);
+                } else {
+                    buffer.append(blank).append(entity.getColumnName()).append(blank)
+                            .append(entity.getConditionalOperator()).append(blank).append(entity.getSqlCondition()).append(blank);
+                }
+            } else {
+                if (entity.getConditionalOperator().equals("=")) {
+                    buffer.append(entity.getConnectionOperator()).append(blank).append("(").append(entity.getColumnName()).append(blank)
+                            .append(entity.getConditionalOperator()).append(blank).append(entity.getSqlCondition()).append(")").append(blank);
+                } else {
+                    buffer.append(entity.getConnectionOperator()).append(blank).append(entity.getColumnName()).append(blank)
+                            .append(entity.getConditionalOperator()).append(blank).append(entity.getSqlCondition()).append(blank);
+                }
             }
             count++;
         }
@@ -552,13 +580,13 @@ public class RuleEngineService {
         //get ruleEngineConditionList
         List<RuleEngineConditionEntity> ruleEngineConditionEntities = this.getRuleEngineConditionList(engineEntity);
         engineEntity.setRuleEngineConditionList(ruleEngineConditionEntities == null ? new ArrayList<>() : ruleEngineConditionEntities);
-        engineEntity.setConditionField(this.getConditionField(ruleEngineConditionEntities));
-        String fullSql = parsingSQL(engineEntity);
+        engineEntity.setConditionField(this.getConditionFieldDetail(ruleEngineConditionEntities));
+        String fullSql = parsingDetailSQL(engineEntity);
         engineEntity.setFullSQL(fullSql);
         return engineEntity;
     }
 
-    private String parsingSQL(RuleEngineEntity engineEntity) {
+    private String parsingDetailSQL(RuleEngineEntity engineEntity) {
         StringBuffer buffer = new StringBuffer();
         if (StringUtil.isBlank(engineEntity.getFromDestination())) {
             return null;
@@ -568,9 +596,9 @@ public class RuleEngineService {
         //get ruleEngineConditionList
         List<RuleEngineConditionEntity> ruleEngineConditionEntities = ruleEngineConditionMapper.ruleEngineConditionList(ruleEngineConditionEntity);
         String selectField = StringUtil.isBlank(engineEntity.getSelectField()) ? ConstantProperties.ASTERISK : engineEntity.getSelectField();
-        buffer.append("select ").append(selectField).append(" from").append(" ").append(engineEntity.getFromDestination());
+        buffer.append("SELECT ").append(selectField).append(" FROM").append(" ").append(engineEntity.getFromDestination());
         if (!CollectionUtils.isEmpty(ruleEngineConditionEntities)) {
-            buffer.append(" where ").append(engineEntity.getConditionField());
+            buffer.append(" WHERE ").append(engineEntity.getConditionField());
         }
 
         return buffer.toString();
