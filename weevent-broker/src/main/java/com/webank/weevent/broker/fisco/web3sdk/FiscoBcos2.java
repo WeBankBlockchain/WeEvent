@@ -61,7 +61,7 @@ public class FiscoBcos2 {
     // topic contract in nowSupport
     private Topic topic;
 
-    // topic info list in local memory
+    // topic info list in local memory, some fields may be expired
     private Map<String, TopicInfo> topicInfo = new ConcurrentHashMap<>();
 
     // history topic, (address <-> Contract)
@@ -141,7 +141,7 @@ public class FiscoBcos2 {
 
     public boolean isTopicExist(String topicName) throws BrokerException {
         try {
-            getTopicInfo(topicName);
+            getTopicInfo(topicName, false);
             return true;
         } catch (BrokerException e) {
             if (e.getCode() == ErrorCode.TOPIC_NOT_EXIST.getCode()) {
@@ -182,7 +182,7 @@ public class FiscoBcos2 {
         }
     }
 
-    public ListPage listTopicName(Integer pageIndex, Integer pageSize) throws BrokerException {
+    public ListPage<String> listTopicName(Integer pageIndex, Integer pageSize) throws BrokerException {
         try {
             ListPage<String> listPage = new ListPage<>();
             Tuple3<BigInteger, BigInteger, List<String>> result = this.topicController.listTopicName(BigInteger.valueOf(pageIndex),
@@ -205,8 +205,8 @@ public class FiscoBcos2 {
         }
     }
 
-    public TopicInfo getTopicInfo(String topicName) throws BrokerException {
-        if (this.topicInfo.containsKey(topicName)) {
+    public TopicInfo getTopicInfo(String topicName, boolean skipCache) throws BrokerException {
+        if (!skipCache && this.topicInfo.containsKey(topicName)) {
             return this.topicInfo.get(topicName);
         }
 
