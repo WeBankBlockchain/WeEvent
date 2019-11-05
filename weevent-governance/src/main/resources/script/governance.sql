@@ -4,10 +4,9 @@ CREATE TABLE t_account(
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP comment 'update date',
   `is_delete` int(1) NOT NULL DEFAULT  0 COMMENT '0 means not deleted 1 means deleted',
   `email` varchar(256) NOT NULL COMMENT 'email',
-  `username` varchar(256) NOT NULL COMMENT 'username',
+  `username` varchar(64) NOT NULL COMMENT 'username',
   `password` varchar(256) NOT NULL COMMENT 'password`',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `username` (`username`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment 't_account';
 
 
@@ -34,8 +33,7 @@ CREATE TABLE  t_topic (
   `broker_id` int(11) NOT NULL COMMENT 'broker id',
   `group_id` varchar(64) DEFAULT NULL COMMENT 'group id',
   `description` varchar(256)  NULL  DEFAULT NULL COMMENT 'description',
-   PRIMARY KEY (`id`),
-   UNIQUE KEY `brokerIdTopicNameGroupId` (`broker_id`,`topic_name`,`group_id`)
+   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment 't_topic';
 
 
@@ -67,6 +65,7 @@ CREATE TABLE t_rule_engine (
   `condition_type` int(2) NULL DEFAULT NULL COMMENT 'condition type',
   `status` int(2)  NULL DEFAULT null COMMENT '0 means not started, 1 means running,2 means is deleted',
   `database_url` varchar(255) NULL DEFAULT NULL COMMENT 'database url',
+  `rule_database_id` int(11) NULL DEFAULT NULL COMMENT 'rule database id',
   `error_destination` varchar(255) NULL DEFAULT NULL COMMENT 'error destination',
   `error_message` varchar(255) NULL DEFAULT NULL COMMENT 'error message',
    PRIMARY KEY (`id`)
@@ -98,11 +97,10 @@ CREATE TABLE t_topic_historical (
    `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
    `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create date',
    `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update date',
-   `topic_name` varchar(256) NOT NULL COMMENT 'topic name',
-   `group_id` varchar(256) DEFAULT NULL COMMENT 'group id',
-   `block_number` int(11) NOT NULL COMMENT 'block number',
-   `event_id` varchar(256) DEFAULT NULL COMMENT 'event id',
-   `broker_id` int(11) NOT NULL COMMENT 'broker_id',
-   `user_id` int(11) NOT NULL COMMENT 'user_id',
+   `topicName` varchar(128) NOT NULL COMMENT 'topic name',
+   `groupId` varchar(64) NOT NULL COMMENT 'group id',
+   `block_number` int(11) NULL DEFAULT NULL COMMENT 'block number',
+   `eventId` varchar(64)  NOT NULL COMMENT 'event id',
+   `brokerId` varchar(64) NOT  NULL COMMENT 'broker id',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='t_topic_historical';

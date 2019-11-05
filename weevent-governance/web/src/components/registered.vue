@@ -103,7 +103,7 @@ export default {
     var checkEmail = (rule, value, callback) => {
       let reg = new RegExp(/^([a-zA-Z0-9._-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-])+/)
       if (!value) {
-        callback(new Error(this.$t('userSet.emptyEail')))
+        callback()
       } else {
         if (reg.test(value)) {
           callback()

@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.processor.model.CEPRule;
-import com.webank.weevent.processor.service.AnalysisWeEventIdService;
 import com.webank.weevent.processor.utils.CommonUtil;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.RetCode;
@@ -74,15 +73,14 @@ public class CEPRuleMQ {
                 @Override
                 public void onEvent(WeEvent event) {
                     try {
+
                         String content = new String(event.getContent());
                         log.info("on event:{},content:{}", event.toString(), content);
 
                         if (CommonUtil.checkValidJson(content)) {
                             handleOnEvent(event, ruleMap);
                         }
-                        //Analysis WeEventId  to the governance database
-                        AnalysisWeEventIdService.analysisWeEventId(rule, event.getEventId());
-                    } catch (JSONException | BrokerException e) {
+                    } catch (JSONException e) {
                         log.error(e.toString());
                     }
                 }
@@ -276,7 +274,7 @@ public class CEPRuleMQ {
         try {
             String eventContent = new String(eventMessage.getContent());
             // all parameter must be the same
-            if (CommonUtil.checkJson(eventContent, payload) && (condition.isEmpty())) {
+            if (CommonUtil.checkJson(eventContent, payload) && (StringUtils.isEmpty(condition))) {
                 // if the confition is empty, just return all message
                 return true;
             } else if (CommonUtil.checkJson(eventContent, payload)) {
@@ -315,6 +313,7 @@ public class CEPRuleMQ {
             for (String key : payloadContentKeys) {
                 context.set(key, payloadJson.get(key));
             }
+            condition = condition.replaceAll("\"","");
             Boolean e = (Boolean) jexl.createExpression(condition).evaluate(context);
             log.info(e.toString());
             // if can check the true or false,is must be the right number

@@ -38,7 +38,8 @@ module.exports = {
     'noData': '暂无数据',
     'enter': '请填写',
     'reqException': '数据请求异常',
-    'timeOut': '请求超时,请稍后重试'
+    'timeOut': '请求超时,请稍后重试',
+    'all': '全选'
   },
   serverSet: {
     'serverMana': '服务管理',
@@ -92,7 +93,7 @@ module.exports = {
     'sendMailSuccess': '邮件已发送至绑定邮箱'
   },
   sideBar: {
-    'blockChainInfor': '区块连信息',
+    'blockChainInfor': '区块链信息',
     'overview': '数据概览',
     'transaction': '交易详情',
     'transactionDetial': '交易列表',
@@ -110,7 +111,7 @@ module.exports = {
     'nodeNum': '节点数量',
     'blockNum': '区块数量',
     'transactionNum': '交易数量',
-    'lastWeek': '最近一周的交易量(笔)',
+    'lastWeek': '所选时间内发生的事件数',
     'essential': '关键监控指标'
   },
   tableCont: {
@@ -121,7 +122,7 @@ module.exports = {
     'transDetial': '查看交易',
     'copySuccess': '复制成功',
     'transHash': '交易哈希',
-    'nodeName': '节点名称',
+    'nodeName': '节点',
     'state': '状态',
     'run': '运行',
     'stop': '停止',
@@ -145,7 +146,10 @@ module.exports = {
     'interfaceType': '订阅方式',
     'notifiedEventCount': '已通知事件',
     'notifyingEventCount': '待通知事件',
-    'createTimeStamp': '订阅时间'
+    'createTimeStamp': '订阅时间',
+    'nodeType': '节点类型',
+    'sealer': '共识节点',
+    'observer': '观察节点'
   },
   rule: {
     'dataGuide': '新手引导',
@@ -181,11 +185,13 @@ module.exports = {
     'hasDelete': '已删除',
     'creatSuccess': '创建成功',
     'creatFail': '创建失败',
-    'databaseUrl': '数据库地址',
+    'ruleDataBaseId': '数据库地址',
     'addAddress': '新增地址',
     'enterDB': '请填写DB地址',
     'JDBCname': '数据库名称',
+    'tableName': '表名',
     'enterJDBCname': '请输入数据库名称',
+    'enterTableName': '请填写表名',
     'enditAddress': '修改地址',
     'deleteAddress': '删除该地址?'
   },
@@ -197,15 +203,16 @@ module.exports = {
     'noRule': '您还没有编写规则语句处理数据,',
     'ruleSearchLetter': '规则查询语句',
     'ruleSearchWarning': '选择下方选项后,语句将自动生成',
-    'letter': '字段',
-    'dataCirculat': '数据流转',
-    'abnormalData': '异常数据',
-    'condition': '条件(选填)',
+    'letter': '提取字段',
+    'dataCirculat': '数据来源',
+    'abnormalData': '异常流转',
+    'condition': '过滤条件',
+    'nocondition': '请设置过滤条件',
     'completeLetter': '请填写完整语句',
     'forwardData': '转发数据',
     'forwardOption': '转发操作',
     'dataDestination': '数据目的地',
-    'selectOperation': '选择操作',
+    'selectOperation': '数据目的',
     'selectGuide': '请选择数据流转方式',
     'toTopic': '发布到一个Topic',
     'toDB': '发布到一个DB',
@@ -215,6 +222,7 @@ module.exports = {
     'guideURL': '还未配置数据流转路径,',
     'setGuide': '前往配置',
     'guideAddress': '数据流转地址必须填写',
-    'abnormalAddress': '异常流转地址必须填写'
+    'abnormalAddress': '异常流转地址必须填写',
+    'cannotSame': "不能和 '数据来源' 相同"
   }
 }

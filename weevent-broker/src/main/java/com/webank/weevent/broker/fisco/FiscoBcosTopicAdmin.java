@@ -160,19 +160,21 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     }
 
     @Override
-    public List<TbTransHash> queryTransList(QueryEntity queryEntity) throws BrokerException {
+    public ListPage<TbTransHash> queryTransList(QueryEntity queryEntity) throws BrokerException {
         this.validateGroupId(queryEntity.getGroupId());
-        return fiscoBcosDelegate.queryTransList(Long.valueOf(queryEntity.getGroupId()), queryEntity.getPkHash(), queryEntity.getBlockNumber());
+        return fiscoBcosDelegate.queryTransList(Long.valueOf(queryEntity.getGroupId()), queryEntity.getPkHash(), queryEntity.getBlockNumber(),
+                queryEntity.getPageNumber(), queryEntity.getPageSize());
     }
 
     @Override
-    public List<TbBlock> queryBlockList(QueryEntity queryEntity) throws BrokerException {
+    public ListPage<TbBlock> queryBlockList(QueryEntity queryEntity) throws BrokerException {
         this.validateGroupId(queryEntity.getGroupId());
-        return fiscoBcosDelegate.queryBlockList(Long.valueOf(queryEntity.getGroupId()), queryEntity.getPkHash(), queryEntity.getBlockNumber());
+        return fiscoBcosDelegate.queryBlockList(Long.valueOf(queryEntity.getGroupId()), queryEntity.getPkHash(), queryEntity.getBlockNumber(),
+                queryEntity.getPageNumber(), queryEntity.getPageSize());
     }
 
     @Override
-    public List<TbNode> queryNodeList(QueryEntity queryEntity) throws BrokerException {
+    public ListPage<TbNode> queryNodeList(QueryEntity queryEntity) throws BrokerException {
         this.validateGroupId(queryEntity.getGroupId());
         return fiscoBcosDelegate.queryNodeList(Long.valueOf(queryEntity.getGroupId()));
     }

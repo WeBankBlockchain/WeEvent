@@ -1,10 +1,10 @@
 package main
 import(
-	"fmt"
-	"strconv"
-	"encoding/json"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-	pb "github.com/hyperledger/fabric/protos/peer"
+    "fmt"
+    "strconv"
+    "encoding/json"
+    "github.com/hyperledger/fabric/core/chaincode/shim"
+    pb "github.com/hyperledger/fabric/protos/peer"
 )
 
 type TopicController struct {
@@ -12,15 +12,15 @@ type TopicController struct {
 }
 
 type TopicInfo struct {
-	CreatedTimestamp string `json:"createdTimestamp"`
-	Version  string `json:"version"`
-	Topic string `json:"topicName"`
+    CreatedTimestamp string `json:"createdTimestamp"`
+    Version  string `json:"version"`
+    Topic string `json:"topicName"`
 }
 
 type ListTopicName struct {
-	Total int `json:"total"`
-	Size  string `json:"pageSize"`
-	TopicList []string `json:"pageData"`
+    Total int `json:"total"`
+    Size  string `json:"pageSize"`
+    TopicList []string `json:"pageData"`
 }
 
 var topicContractName string
@@ -36,75 +36,75 @@ func (t *TopicController) Init(stub shim.ChaincodeStubInterface) pb.Response{
 
 func (t *TopicController) Invoke(stub shim.ChaincodeStubInterface) pb.Response{
     fn, args := stub.GetFunctionAndParameters()
-	switch fn {
-		case "addTopicContractName":
-			return t.addTopicContractName(stub, args)
-		case "updateTopicContractName":
-			return t.updateTopicContractName(stub, args)
-		case "getTopicContractName":
-			return t.getTopicContractName(stub, args)
-		case "getTopicContractVersion":
-		    return t.getTopicContractVersion(stub,args)
-		case "addTopicInfo":
-			return t.addTopicInfo(stub, args)
-		case "getTopicInfo":
-			return t.getTopicInfo(stub, args)
-		case "isTopicExist":
-        	return t.isTopicExist(stub, args)
+    switch fn {
+        case "addTopicContractName":
+            return t.addTopicContractName(stub, args)
+        case "updateTopicContractName":
+            return t.updateTopicContractName(stub, args)
+        case "getTopicContractName":
+            return t.getTopicContractName(stub, args)
+        case "getTopicContractVersion":
+            return t.getTopicContractVersion(stub,args)
+        case "addTopicInfo":
+            return t.addTopicInfo(stub, args)
+        case "getTopicInfo":
+            return t.getTopicInfo(stub, args)
+        case "isTopicExist":
+            return t.isTopicExist(stub, args)
         case "listTopicName":
             return t.listTopicName(stub, args)
-	}
+    }
 
-	return shim.Error("invoke func error")
+    return shim.Error("invoke func error")
 }
 
 func (t *TopicController) addTopicContractName(stub shim.ChaincodeStubInterface,args[] string) pb.Response{
-	if(topicContractName == "" && topicContractVersion == ""){
-		topicContractName=args[0]
-		topicContractVersion=args[1]
-		return shim.Success([]byte("setTopicName success"))
-	}
-	return shim.Error("topicContractName exist")
+    if(topicContractName == "" && topicContractVersion == ""){
+        topicContractName=args[0]
+        topicContractVersion=args[1]
+        return shim.Success([]byte("setTopicName success"))
+    }
+    return shim.Error("topicContractName exist")
 }
 
 func (t *TopicController) updateTopicContractName(stub shim.ChaincodeStubInterface,args[] string) pb.Response{
-	topicContractName=args[0]
-	topicContractVersion=args[1]
-	return shim.Success([]byte("updateTopicContractName success"))
+    topicContractName=args[0]
+    topicContractVersion=args[1]
+    return shim.Success([]byte("updateTopicContractName success"))
 }
 
 func (t *TopicController) getTopicContractName(stub shim.ChaincodeStubInterface,args[] string) pb.Response{
-	return shim.Success([]byte(topicContractName))
+    return shim.Success([]byte(topicContractName))
 }
 
 func (t *TopicController) getTopicContractVersion(stub shim.ChaincodeStubInterface,args[] string) pb.Response{
-	return shim.Success([]byte(topicContractVersion))
+    return shim.Success([]byte(topicContractVersion))
 }
 
 func (t *TopicController) addTopicInfo(stub shim.ChaincodeStubInterface,args[] string) pb.Response{
     fmt.Println("<< ====[TopicController] addTopicInfo topic: ====== >>", args[0])
-	if _, ok := topicMap[args[0]]; ok {
+    if _, ok := topicMap[args[0]]; ok {
         return shim.Error(TOPIC_ALREADY_EXIST)
     }
-	var topicInfo TopicInfo
-	topicInfo.Topic = args[0]
-	topicInfo.CreatedTimestamp = args[1]
-	topicInfo.Version = args[2]
-	topicIndex = append(topicIndex,args[0])
-	topicMap[args[0]] = topicInfo;//args[0]:topicName args[1]:timestamp args[2]:
+    var topicInfo TopicInfo
+    topicInfo.Topic = args[0]
+    topicInfo.CreatedTimestamp = args[1]
+    topicInfo.Version = args[2]
+    topicIndex = append(topicIndex,args[0])
+    topicMap[args[0]] = topicInfo;//args[0]:topicName args[1]:timestamp args[2]:
     return shim.Success([]byte("addTopicInfo success"))
 }
 
 func (t *TopicController) getTopicInfo(stub shim.ChaincodeStubInterface,args[] string) pb.Response{
-	jsonTopicInfo, err := json.Marshal(topicMap[args[0]])
-	if err != nil{
-		return shim.Error("getTopicInfo err")
-	}
-	return shim.Success([]byte(jsonTopicInfo))
+    jsonTopicInfo, err := json.Marshal(topicMap[args[0]])
+    if err != nil{
+        return shim.Error("getTopicInfo err")
+    }
+    return shim.Success([]byte(jsonTopicInfo))
 }
 
 func (t *TopicController) isTopicExist(stub shim.ChaincodeStubInterface,args[] string) pb.Response{
-	if _, ok := topicMap[args[0]]; ok {
+    if _, ok := topicMap[args[0]]; ok {
         return shim.Success([]byte("topic exist"))
     } else {
         return shim.Error("topic not exist")

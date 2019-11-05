@@ -6,7 +6,7 @@ module.exports = {
     'version': 'Version',
     'lastCommit': 'Last git commit',
     'weEventVersion': "WeEvent's version",
-    'serverSetting': 'WeEvent broker setting',
+    'serverSetting': 'Broker setting',
     'userSetting': 'User setting',
     'login': 'Sign In',
     'loginOut': 'Sign Out'
@@ -38,7 +38,8 @@ module.exports = {
     'noData': 'Empty data',
     'enter': 'Please input',
     'reqException': 'Request exception',
-    'timeOut': 'Request timeout'
+    'timeOut': 'Request timeout',
+    'all': 'all'
   },
   serverSet: {
     'serverMana': 'Server Management',
@@ -104,13 +105,13 @@ module.exports = {
     'engine': 'Streaming',
     'ruleMana': 'Rule Engine',
     'ruleDetail': 'Rule Detail',
-    'sources': 'DB Resources'
+    'sources': 'DataBase Resources'
   },
   overview: {
     'nodeNum': 'Nodes',
     'blockNum': 'Blocks',
     'transactionNum': 'Transactions',
-    'lastWeek': 'Transactions in Last Week',
+    'lastWeek': 'Events in selected Times',
     'essential': 'Monitor'
   },
   tableCont: {
@@ -121,7 +122,7 @@ module.exports = {
     'transDetial': 'Transactions',
     'copySuccess': 'Copyed',
     'transHash': 'Transaction Hash',
-    'nodeName': 'Node Name',
+    'nodeName': 'Node',
     'state': 'Status',
     'run': 'Run',
     'stop': 'Stop',
@@ -145,7 +146,10 @@ module.exports = {
     'interfaceType': 'Protocol',
     'notifiedEventCount': 'Notified events',
     'notifyingEventCount': 'Notifying events',
-    'createTimeStamp': 'Create timestamp'
+    'createTimeStamp': 'Create timestamp',
+    'nodeType': 'Node Type',
+    'sealer': 'sealer',
+    'observer': 'observer'
   },
   rule: {
     'dataGuide': 'User Guide',
@@ -161,7 +165,7 @@ module.exports = {
     'creatNow': 'Create Now',
     'enterRuleName': 'Please input rule name',
     'ruleName': 'Rule Name',
-    'payloadType': 'Event payload format',
+    'payloadType': 'format',
     'payloadMap': 'Event payload Samples',
     'run': 'Running',
     'notRun': 'Init',
@@ -181,11 +185,13 @@ module.exports = {
     'hasDelete': 'Deleted',
     'creatSuccess': 'Create success',
     'creatFail': 'Create fail',
-    'databaseUrl': 'JDBC Resources',
+    'ruleDataBaseId': 'JDBC Resources',
     'addAddress': 'New Database',
     'enterDB': 'Please input database JDBC URL',
     'JDBCname': 'JDBC Name',
+    'tableName': 'Table Name',
     'enterJDBCname': 'Please input database JDBC Name',
+    'enterTableName': 'Please input database Table Name',
     'enditAddress': 'Edit Database',
     'deleteAddress': 'Delete database?'
   },
@@ -202,7 +208,8 @@ module.exports = {
     'letter': 'Fields',
     'dataCirculat': 'Streaming Target',
     'abnormalData': 'Exception',
-    'condition': 'Filter Condition(Optional)',
+    'condition': 'Filter Condition',
+    'nocondition': 'please set filter condition',
     'completeLetter': 'Unfinished',
     'forwardData': 'Target',
     'forwardOption': 'Forward while exception',
@@ -217,6 +224,7 @@ module.exports = {
     'guideURL': 'No Target',
     'setGuide': 'Setting',
     'guideAddress': 'Empty database',
-    'abnormalAddress': 'Empty error database'
+    'abnormalAddress': 'Empty error database',
+    'cannotSame': 'Cannot same with Streaming Target'
   }
 }
