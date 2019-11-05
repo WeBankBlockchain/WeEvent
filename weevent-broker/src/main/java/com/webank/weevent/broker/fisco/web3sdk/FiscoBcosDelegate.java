@@ -237,7 +237,7 @@ public class FiscoBcosDelegate {
         }
     }
 
-    public ListPage listTopicName(Integer pageIndex, Integer pageSize, Long groupId) throws BrokerException {
+    public ListPage<String> listTopicName(Integer pageIndex, Integer pageSize, Long groupId) throws BrokerException {
         checkVersion(groupId);
 
         if (this.fiscoBcos != null) {
@@ -247,13 +247,13 @@ public class FiscoBcosDelegate {
         }
     }
 
-    public TopicInfo getTopicInfo(String topicName, Long groupId) throws BrokerException {
+    public TopicInfo getTopicInfo(String topicName, Long groupId, boolean skipCache) throws BrokerException {
         checkVersion(groupId);
 
         if (this.fiscoBcos != null) {
             return this.fiscoBcos.getTopicInfo(topicName);
         } else {
-            return this.fiscoBcos2Map.get(groupId).getTopicInfo(topicName);
+            return this.fiscoBcos2Map.get(groupId).getTopicInfo(topicName, skipCache);
         }
     }
 
