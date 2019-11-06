@@ -29,6 +29,10 @@
     "method": "get",
     "url": "weevent-governance/weevent/admin/listSubscription"
   },
+  "getNodes": {
+    "method": "get",
+    "url": "weevent-governance/weevent/admin/listNodes"
+  },
   "addServer": {
     "method": "post",
     "url": "weevent-governance/broker/add"
@@ -132,5 +136,9 @@
   "historicalData": {
     "method": "post",
     "url": "weevent-governance/historicalData/list"
+  },
+  "eventList": {
+    "method": "post",
+    "url": "weevent-governance/historicalData/eventList"
   }
 }

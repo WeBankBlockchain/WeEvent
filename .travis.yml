@@ -12,6 +12,7 @@ branches:
   only:
     - master
     - develop
+    - governance-review
     - /^v\d+\.\d+\.\d+$/
 
 language: java

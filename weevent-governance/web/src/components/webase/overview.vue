@@ -61,9 +61,11 @@ export default {
     }
   },
   mounted () {
-    if (localStorage.getItem('groupId') && localStorage.getItem('brokerId')) {
-      this.general()
-    }
+    setTimeout(fun => {
+      if (localStorage.getItem('brokerId')) {
+        this.general()
+      }
+    }, 500)
   },
   methods: {
     general () {

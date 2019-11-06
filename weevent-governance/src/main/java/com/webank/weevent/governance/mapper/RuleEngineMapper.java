@@ -13,7 +13,7 @@ public interface RuleEngineMapper {
     // get RuleEngineEntityList
     List<RuleEngineEntity> getRuleEngines(RuleEngineEntity ruleEngineEntity);
 
-    List<RuleEngineEntity> getRuleEnginePage(@Param("ruleEngineEntity") RuleEngineEntity ruleEngineEntity,@Param("startIndex")Integer startIndex,@Param("endIndex")Integer endIndex);
+    List<RuleEngineEntity> getRuleEnginePage(@Param("ruleEngineEntity") RuleEngineEntity ruleEngineEntity, @Param("startIndex") Integer startIndex, @Param("endIndex") Integer endIndex);
 
     // add RuleEngineEntity
     Boolean addRuleEngine(RuleEngineEntity ruleEngineEntity);
@@ -27,5 +27,7 @@ public interface RuleEngineMapper {
     Boolean updateRuleEngineStatus(RuleEngineEntity ruleEngineEntity);
 
     int countRuleEngine(RuleEngineEntity ruleEngineEntity);
+
+    RuleEngineEntity getRuleById(Integer id);
 
 }
