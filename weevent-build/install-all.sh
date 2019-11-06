@@ -156,13 +156,13 @@ function install_module(){
     if [[ ${governance_enable} = "true" ]];then
         yellow_echo "install module governance"
         cd ${current_path}/modules/governance
-        ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} &>> ${current_path}/install.log
+        ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password}
         check_result "install governance"
     fi
     if [[ ${processor_enable} = "true" ]];then
         yellow_echo "install module processor"
         cd ${current_path}/modules/processor
-        ./install-processor.sh --out_path ${out_path}/processor --server_port ${processor_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} &>> ${current_path}/install.log
+        ./install-processor.sh --out_path ${out_path}/processor --server_port ${processor_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password}
         check_result "install processor"
     fi
 
