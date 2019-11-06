@@ -6,12 +6,9 @@
 
 java_home_path=
 out_path=""
-block_chain_type=
 block_chain_version=
 block_chain_channel=
 block_chain_node_path=
-fabric_orderer_address=
-fabric_peer_address=
 broker_port=7000
 
 nginx_port=8080
@@ -52,19 +49,13 @@ function properties_get(){
 
 function set_global_param(){
     java_home_path=$(properties_get "JAVA_HOME")
-    block_chain_type=$(properties_get "blockchain.type")
-    if [[ ${block_chain_type} == "fisco" ]];then
-        block_chain_version=$(properties_get "fisco-bcos.version")
-        block_chain_channel=$(properties_get "fisco-bcos.channel")
-        block_chain_node_path=$(properties_get  "fisco-bcos.node_path")
-        if [[ "${block_chain_node_path:0:1}" == "~" ]];then
-            block_chain_node_path=$(realpath -m ${HOME}/${block_chain_node_path:1})
-        else
-            block_chain_node_path=$(realpath -m ${block_chain_node_path})
-        fi
+    block_chain_version=$(properties_get "fisco-bcos.version")
+    block_chain_channel=$(properties_get "fisco-bcos.channel")
+    block_chain_node_path=$(properties_get  "fisco-bcos.node_path")
+    if [[ "${block_chain_node_path:0:1}" == "~" ]];then
+        block_chain_node_path=$(realpath -m ${HOME}/${block_chain_node_path:1})
     else
-        fabric_orderer_address=$(properties_get "chain.orderer.address")
-        fabric_peer_address=$(properties_get "chain.peer.address")
+        block_chain_node_path=$(realpath -m ${block_chain_node_path})
     fi
     nginx_port=$(properties_get "nginx.port")
 
@@ -117,14 +108,12 @@ function check_param(){
     if [[ ${governance_enable} = "true" ]];then
         check_telnet ${mysql_ip}:${mysql_port}
     fi
-    if [[ ${block_chain_type} == "fisco" ]];then
-        if [[ -d ${block_chain_node_path} ]]; then
-            check_telnet ${block_chain_channel}
-            echo "param ok"
-        else
-            echo "path not exist, ${block_chain_node_path}"
-            exit 1
-        fi
+    if [[ -d ${block_chain_node_path} ]]; then
+        check_telnet ${block_chain_channel}
+        echo "param ok"
+    else
+        echo "path not exist, ${block_chain_node_path}"
+        exit 1
     fi
 }
 
@@ -141,11 +130,8 @@ function check_result(){
 function install_module(){
     yellow_echo "install module broker"
     cd ${current_path}/modules/broker
-    if [[ ${block_chain_type} == "fisco" ]];then
-        ./install-broker.sh --out_path ${out_path}/broker --listen_port ${broker_port} --block_chain_type ${block_chain_type} --block_chain_node_path ${block_chain_node_path} --channel_info ${block_chain_channel} --version ${block_chain_version}
-    else
-        ./install-broker.sh --out_path ${out_path}/broker --listen_port ${broker_port} --block_chain_type ${block_chain_type} --fabric_orderer_address ${fabric_orderer_address} --fabric_peer_address ${fabric_peer_address}
-    fi
+    ./install-broker.sh --out_path ${out_path}/broker --listen_port ${broker_port} --block_chain_node_path ${block_chain_node_path} --channel_info ${block_chain_channel} --version ${block_chain_version}
+
     check_result "install broker"
 
     yellow_echo "install module nginx"
