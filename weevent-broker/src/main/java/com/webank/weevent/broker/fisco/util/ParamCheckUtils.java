@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
@@ -91,6 +92,7 @@ public class ParamCheckUtils {
         validateEventContent(new String(event.getContent(), StandardCharsets.UTF_8));
 
         if (event.getExtensions() != null) {
+            checkExtensionsKeyIsLegal(event.getExtensions());
             if (event.getExtensions().toString().length() > WeEventConstants.EVENT_EXTENSIONS_MAX_LENGTH) {
                 throw new BrokerException(ErrorCode.EVENT_EXTENSIONS_EXCEEDS_MAX_LENGTH);
             }
@@ -98,14 +100,14 @@ public class ParamCheckUtils {
     }
 
     public static void validateGroupId(String groupId, List<String> groups) throws BrokerException {
-        try {
-            Long.parseLong(groupId);
-        } catch (Exception e) {
-            throw new BrokerException(ErrorCode.EVENT_GROUP_ID_INVALID);
-        }
-
         if (!groups.contains(groupId)) {
-            throw new BrokerException(ErrorCode.WE3SDK_UNKNOWN_GROUP);
+            throw new BrokerException(ErrorCode.WEB3SDK_UNKNOWN_GROUP);
+        }
+    }
+
+    public static void validateChannelName(String channelName, List<String> channelNames) throws BrokerException {
+        if (!channelNames.contains(channelName)) {
+            throw new BrokerException(ErrorCode.FABRICSDK_CHANNEL_NAME_INVALID);
         }
     }
 
@@ -128,6 +130,23 @@ public class ParamCheckUtils {
             throw new BrokerException(ErrorCode.URL_INVALID_FORMAT);
         } catch (IOException e) {
             throw new BrokerException(ErrorCode.URL_CONNECT_FAILED);
+        }
+    }
+
+    public static void checkExtensionsKeyIsLegal(Map<String, String> extensions) throws BrokerException {
+        for (Map.Entry<String, String> extension : extensions.entrySet()) {
+            if (!extension.getKey().startsWith(WeEventConstants.EXTENSIONS_PREFIX_CHAR)) {
+                throw new BrokerException(ErrorCode.EVENT_EXTENSIONS_KEY_INVALID);
+            }
+        }
+    }
+
+    public static void validatePagIndexAndSize(Integer pageIndex, Integer pageSize) throws BrokerException {
+        if (pageIndex == null || pageIndex < 0) {
+            throw new BrokerException(ErrorCode.TOPIC_PAGE_INDEX_INVALID);
+        }
+        if (pageSize == null || pageSize <= 0 || pageSize > 100) {
+            throw new BrokerException(ErrorCode.TOPIC_PAGE_SIZE_INVALID);
         }
     }
 }

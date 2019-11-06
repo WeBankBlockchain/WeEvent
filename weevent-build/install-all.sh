@@ -13,12 +13,14 @@ broker_port=7000
 
 nginx_port=8080
 
-governance=
 governance_port=
 mysql_ip=
 mysql_port=
 mysql_user=
 mysql_password=
+
+processor_port=
+
 
 current_path=$PWD
 
@@ -66,6 +68,9 @@ function set_global_param(){
     mysql_port=$(properties_get  "governance.mysql.port")
     mysql_user=$(properties_get "governance.mysql.user")
     mysql_password=$(properties_get "governance.mysql.password")
+
+    processor_enable=$(properties_get  "processor.enable")
+    processor_port=$(properties_get "processor.port")
 }
 
 function check_port(){
@@ -97,14 +102,14 @@ function check_param(){
         echo "JAVA_HOME path not exist, ${java_home_path}"
         exit 1;
     fi
-    
+
+    check_port ${broker_port}
+    check_port ${nginx_port}
+    if [[ ${governance_enable} = "true" ]];then
+        check_telnet ${mysql_ip}:${mysql_port}
+    fi
     if [[ -d ${block_chain_node_path} ]]; then
-        check_port ${broker_port}
-        check_port ${nginx_port}
         check_telnet ${block_chain_channel}
-        if [[ ${governance_enable} = "true" ]];then
-            check_telnet ${mysql_ip}:${mysql_port}
-        fi
         echo "param ok"
     else
         echo "path not exist, ${block_chain_node_path}"
@@ -126,6 +131,7 @@ function install_module(){
     yellow_echo "install module broker"
     cd ${current_path}/modules/broker
     ./install-broker.sh --out_path ${out_path}/broker --listen_port ${broker_port} --block_chain_node_path ${block_chain_node_path} --channel_info ${block_chain_channel} --version ${block_chain_version}
+
     check_result "install broker"
 
     yellow_echo "install module nginx"
@@ -136,9 +142,16 @@ function install_module(){
     if [[ ${governance_enable} = "true" ]];then
         yellow_echo "install module governance"
         cd ${current_path}/modules/governance
-        ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --broker_port ${broker_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} &>> ${current_path}/install.log
+        ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} &>> ${current_path}/install.log
         check_result "install governance"
     fi
+    if [[ ${processor_enable} = "true" ]];then
+        yellow_echo "install module processor"
+        cd ${current_path}/modules/processor
+        ./install-processor.sh --out_path ${out_path}/processor --server_port ${processor_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} &>> ${current_path}/install.log
+        check_result "install processor"
+    fi
+
 }
 
 function config_java_home(){
@@ -148,12 +161,21 @@ function config_java_home(){
     if [[ -e ${current_path}/modules/broker/deploy-topic-control.sh ]];then
         sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/broker/deploy-topic-control.sh
     fi
+    if [[ -e ${current_path}/modules/broker/deploy-fabric-topic-control.sh ]];then
+        sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/broker/deploy-fabric-topic-control.sh
+    fi
     if [[ -e ${current_path}/modules/governance/governance.sh ]];then
         sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/governance/governance.sh
     fi 
     if [[ -e ${current_path}/modules/governance/init-governance.sh ]];then
         sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/governance/init-governance.sh
-    fi   
+    fi
+    if [[ -e ${current_path}/modules/processor/processor.sh ]];then
+        sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/processor/processor.sh
+    fi
+    if [[ -e ${current_path}/modules/processor/init-processor.sh ]];then
+        sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/processor/init-processor.sh
+    fi
 }
 
 function update_server_port(){
@@ -187,6 +209,9 @@ function main(){
     
     # set the JAVA_HOME
     config_java_home
+
+    # copy jar
+    cp -r ${current_path}/modules/lib/ ${out_path}
 
     # install module
     install_module

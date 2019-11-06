@@ -3,6 +3,7 @@ package com.webank.weevent.governance.junit;
 import com.webank.weevent.governance.JUnitTestBase;
 
 import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,6 +17,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+@Slf4j
 public class AccountControllerTest extends JUnitTestBase {
 
     @Autowired
@@ -23,9 +25,18 @@ public class AccountControllerTest extends JUnitTestBase {
 
     private MockMvc mockMvc;
 
+
+
     @Before
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+    }
+
+    @Before
+    public void before() {
+        log.info("=============================={}.{}==============================",
+                this.getClass().getSimpleName(),
+                this.testName.getMethodName());
     }
 
     @Test

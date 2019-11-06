@@ -10,11 +10,12 @@ import java.util.concurrent.TimeoutException;
 
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
-import com.webank.weevent.broker.fisco.contract.Topic;
-import com.webank.weevent.broker.fisco.contract.TopicController;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
+import com.webank.weevent.broker.fisco.web3sdk.v1.Topic;
+import com.webank.weevent.broker.fisco.web3sdk.v1.TopicController;
+import com.webank.weevent.broker.fisco.web3sdk.v1.Web3SDKWrapper;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.SendResult;
@@ -55,7 +56,7 @@ public class FiscoBcos {
     // topic control
     private TopicController topicController;
 
-    // topic list
+    // topic list, local cache will not be expired forever
     private Map<String, Topic> topicMap = new ConcurrentHashMap<>();
 
     public FiscoBcos(FiscoConfig fiscoConfig) {
@@ -88,17 +89,10 @@ public class FiscoBcos {
     private Contract getContractService(String contractAddress, Class<?> cls) throws BrokerException {
         if (this.web3j == null || this.credentials == null) {
             log.error("init web3sdk failed");
-            throw new BrokerException(ErrorCode.WE3SDK_INIT_ERROR);
+            throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
         }
 
-        Contract contract = Web3SDKWrapper.loadContract(contractAddress, this.web3j, this.credentials, cls);
-        if (contract == null) {
-            String msg = "load contract failed, " + cls.getSimpleName();
-            log.error(msg);
-            throw new BrokerException(ErrorCode.LOAD_CONTRACT_ERROR);
-        }
-
-        return contract;
+        return Web3SDKWrapper.loadContract(contractAddress, this.web3j, this.credentials, cls);
     }
 
     /**
@@ -182,7 +176,7 @@ public class FiscoBcos {
         }
     }
 
-    public ListPage listTopicName(Integer pageIndex, Integer pageSize) throws BrokerException {
+    public ListPage<String> listTopicName(Integer pageIndex, Integer pageSize) throws BrokerException {
         try {
             ListPage<String> listPage = new ListPage<>();
             List<Type> result = this.topicController.listTopicName(Web3SDKWrapper.intToUint256(pageIndex),

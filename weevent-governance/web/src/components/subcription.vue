@@ -1,52 +1,56 @@
 <template>
-<div class='event-table'>
-  <div class='refresh'>
-    <div class='update_btn' @click='update'>
-      <img src="../assets/image/update.png" alt=""/>
-    </div>
-  </div>
+<div class='event-table subcription'>
+  <span>{{$t('tableCont.machine') + ":"}}</span>
+  <el-select  @change='selectShow' v-model='nodes' multiple collapse-tags>
+    <el-option  v-for='(item, index) in nodeList' :key='index' :label="item" :value="item"></el-option>
+  </el-select>
   <el-table
     :data="tableData"
-    stripe
     :span-method='spanMethod'
     v-loading='loading'
     element-loading-spinner='el-icon-loading'
-    element-loading-text='数据加载中...'
+    :element-loading-text="$t('common.loading')"
     element-loading-background='rgba(256,256,256,0.8)'
-    @row-click='checkDetial'
+    @row-click='checkDetail'
     style="width: 100%">
     <el-table-column
-      label="机器地址"
+      :label="$t('tableCont.machine')"
+      width='150'
       prop='ip'
       >
     </el-table-column>
      <el-table-column
       label="Topic"
+      width='150'
       prop='topicName'>
     </el-table-column>
     <el-table-column
-      label="订阅ID"
-      width='350'
+      :label="$t('tableCont.subscribeId')"
       prop='subscribeId'>
     </el-table-column>
     <el-table-column
-      label="订阅来源Ip"
+     width='120'
+      :label="$t('tableCont.remoteIp')"
       prop="remoteIp">
     </el-table-column>
     <el-table-column
-      label="订阅方式"
+    width='120'
+      :label="$t('tableCont.interfaceType')"
       prop="interfaceType">
     </el-table-column>
     <el-table-column
-      label="已通知事件"
+     width='120'
+      :label="$t('tableCont.notifiedEventCount')"
       prop="notifiedEventCount">
     </el-table-column>
     <el-table-column
-      label="待通知事件"
+     width='120'
+      :label="$t('tableCont.notifyingEventCount')"
       prop="notifyingEventCount">
     </el-table-column>
      <el-table-column
-      label="订阅时间"
+      width='150'
+      :label="$t('tableCont.createTimeStamp')"
       prop="createTimeStamp">
     </el-table-column>
   </el-table>
@@ -59,45 +63,64 @@ export default {
   data () {
     return {
       loading: false,
+      nodeList: [],
+      nodes: [],
       tableData: [],
       currentPage: 1,
       getData: {}
     }
   },
   methods: {
+    getNodeList () {
+      let url = '?brokerId=' + localStorage.getItem('brokerId')
+      API.getNodes(url).then(res => {
+        if (res.data.code === 0) {
+          this.nodeList = [].concat(res.data.data)
+        } else {
+          this.$message({
+            type: 'warning',
+            message: this.$t('common.reqException')
+          })
+        }
+      })
+    },
     subscription () {
       let vm = this
       vm.tableData = []
       vm.loading = true
-      let url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId')
+      let nodelist = ''
+      nodelist = vm.nodes.join(',')
+      let url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&nodeIp=' + nodelist
       API.subscription(url).then(res => {
-        if (res.status === 200) {
-          let data = res.data
+        if (res.data.code === 0) {
+          let data = res.data.data
           let list = []
           for (let key in data) {
             let cont = data[key]
-            // 判断是否是一个空对象
-            let arr = Object.keys(cont)
-            if (arr.length) {
-              for (let x in cont) {
-                vm.$set(cont[x], 'ip', key)
-                vm.$set(cont[x], 'childs', arr.length)
-                list.push(cont[x])
+            if (JSON.stringify(cont) !== '{}') {
+              // check if it is empty
+              let arr = Object.keys(cont)
+              if (arr.length) {
+                for (let x in cont) {
+                  vm.$set(cont[x], 'ip', key)
+                  vm.$set(cont[x], 'childs', arr.length)
+                  list.push(cont[x])
+                }
+              } else {
+                const item = {
+                  'ip': key,
+                  'interfaceType': '—',
+                  'notifyingEventCount': '—',
+                  'notifyTimeStamp': '—',
+                  'subscribeId': '—',
+                  'topicName': '—',
+                  'notifiedEventCount': '—',
+                  'childs': 0,
+                  'remoteIp': '—',
+                  'createTimeStamp': '—'
+                }
+                list.push(item)
               }
-            } else {
-              const item = {
-                'ip': key,
-                'interfaceType': '—',
-                'notifyingEventCount': '—',
-                'notifyTimeStamp': '—',
-                'subscribeId': '—',
-                'topicName': '—',
-                'notifiedEventCount': '—',
-                'childs': 0,
-                'remoteIp': '—',
-                'createTimeStamp': '—'
-              }
-              list.push(item)
             }
           }
           vm.tableData = [].concat(list)
@@ -110,7 +133,7 @@ export default {
         window.clearInterval(vm.getData)
       })
     },
-    spanMethod ({row, cloumn, rowIndex, columnIndex}) {
+    spanMethod ({ row, cloumn, rowIndex, columnIndex }) {
       let table = this.tableData
       if (columnIndex === 0) {
         // 先判断是第一行否存在并行 (根据row.childs个数确定该IP下有多少个topic)
@@ -141,11 +164,27 @@ export default {
         this.subscription()
       }, 1000)
     },
-    checkDetial (e) {
-      this.$store.commit('set_active', '2')
-      this.$emit('selecChange', '2')
-      sessionStorage.setItem('topic', e.topicName)
+    checkDetail (e) {
+      console.log(e)
+      if (e.topicName === '#') {
+        console.log('a')
+        sessionStorage.removeItem('topic')
+      } else {
+        sessionStorage.setItem('topic', e.topicName)
+      }
+      this.$store.commit('set_active', '2-1')
+      this.$emit('selecChange', '2-1')
+      this.$store.commit('set_menu', [this.$t('sideBar.topic'), this.$t('sideBar.topicList')])
       this.$router.push('./topicList')
+    },
+    selectShow (e) {
+      if (e.length === 0) {
+        this.nodes = []
+      }
+      this.loading = true
+      setTimeout(fun => {
+        this.subscription()
+      }, 1000)
     }
   },
   computed: {
@@ -158,16 +197,18 @@ export default {
   },
   watch: {
     brokerId () {
-      this.update()
+      this.getNodeList()
+      this.nodes = []
+      this.subscription()
     },
     groupId () {
-      this.update()
+      this.getNodeList()
+      this.nodes = []
+      this.subscription()
     }
   },
   mounted () {
-    let time = 60 * 1000
-    this.subscription()
-    this.getData = setInterval(this.subscription, time)
+    this.getNodeList()
   },
   beforeDestroy () {
     window.clearInterval(this.getData)

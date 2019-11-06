@@ -43,6 +43,8 @@ public enum ErrorCode {
 
     EVENT_EXTENSIONS_IS_NUll(100205, "event extensions is null"),
 
+    EVENT_EXTENSIONS_KEY_INVALID(100206, "event extensions key not startwith weevent-"),
+
     EVENT_ID_IS_BLANK(100300, "eventId is blank"),
 
     EVENT_ID_EXCEEDS_MAX_LENGTH(100301, "eventId exceeds max length[64 bytes]"),
@@ -106,7 +108,7 @@ public enum ErrorCode {
     PARAM_IS_NOT_MAP(101015, "the input param class is not Map"),
 
     //server error(200000, 300000)
-    TOPIC_CONTROLLER_IS_NULL(200100, "get topic control address from CNS failed, deploy it first"),
+    TOPIC_CONTROLLER_IS_NULL(200100, "get topic control address from CNS failed, please deploy it first"),
 
     CONSUMER_ALREADY_STARTED(200102, "consumer already started"),
 
@@ -130,13 +132,23 @@ public enum ErrorCode {
 
     LOAD_CONTRACT_ERROR(200208, "load contract failed"),
 
-    WE3SDK_INIT_ERROR(200209, "init web3sdk failed"),
+    WEB3SDK_INIT_ERROR(200209, "init web3sdk failed"),
 
-    WE3SDK_VERSION_NOT_SUPPORT(200210, "FISCO-BCOS 1.x, do not support group"),
+    WEB3SDK_VERSION_NOT_SUPPORT(200210, "FISCO-BCOS 1.x, do not support group"),
 
-    WE3SDK_UNKNOWN_GROUP(200211, "FISCO-BCOS 2.x, unknown group id"),
+    WEB3SDK_UNKNOWN_GROUP(200211, "FISCO-BCOS 2.x, unknown group id"),
 
     SUBSCRIPTION_NOTIFY_QUEUE_FULL(200212, "onEvent is blocked too long, notify queue is full"),
+
+    FABRICSDK_CHANNEL_NAME_INVALID(200213, "Fabric 1.4x, channel name invalid"),
+
+    UNKNOWN_SOLIDITY_VERSION(200213, "unknown contract version"),
+
+    WEB3SDK_RPC_ERROR(200214, "we3sdk's rpc failed"),
+
+    FABRICSDK_GETBLOCKINFO_ERROR(200214, "Fabric 1.4x, get blockInfo error"),
+
+    FABRICSDK_CHAINCODE_INVOKE_FAILED(200216, "Fabric 1.4x, execute chaincode invoke failed"),
     ;
 
     /**

@@ -15,15 +15,15 @@ import org.springframework.web.client.RestTemplate;
 public class ForwardController {
 
     @Autowired
-    RestTemplate restTemplate;
+    private RestTemplate restTemplate;
 
     @Value("${weevent.url}")
     private String url;
 
     @RequestMapping(value = "/weevent/{path1}/{path2}", method = RequestMethod.GET)
     public Object forward(@PathVariable(name = "path1") String path1, @PathVariable(name = "path2") String path2) {
-        log.info("weevent url: /wevent/" + path1 + "/" + path2);
-        String forwarUrl = this.url + "/" + path1 + "/" + path2;
+        log.info("weevent url: /wevent/ {}  \"/\" {}", path1, path2);
+        String forwarUrl = new StringBuffer(this.url).append("/").append(path1).append("/").append(path2).toString();
         Object result = restTemplate.getForEntity(forwarUrl, Object.class).getBody();
         return result;
     }
@@ -31,17 +31,17 @@ public class ForwardController {
     @RequestMapping(value = "/weevent/admin/deploy_topic_control", method = RequestMethod.GET)
     public Object forward() {
         log.info("wevent url: /weevent/admin/deploy_topic_control");
-        String forwarUrl = this.url + "/admin/deploy_topic_control";
+        String forwarUrl = new StringBuffer(this.url).append("/admin/deploy_topic_control").toString();
         String result = restTemplate.getForEntity(forwarUrl, String.class).getBody();
         return result;
     }
 
     @RequestMapping(value = "/weevent/{path1}/{path2}")
     public Object forward(@PathVariable(name = "path1") String path1, @PathVariable(name = "path2") String path2,
-            @RequestParam String topic) {
-        log.info("wevent url: /weevent/" + path1 + "/" + path2);
+                          @RequestParam String topic) {
+        log.info("weevent url: /wevent/ {}  \"/\" {}", path1, path2);
 
-        String forwarUrl = this.url + "/" + path1 + "/" + path2 + "?topic=" + topic;
+        String forwarUrl = new StringBuffer(this.url).append("/").append(path1).append("/").append(path2).append("?topic=").append(topic).toString();
         Object result = restTemplate.getForEntity(forwarUrl, Object.class).getBody();
         return result;
     }

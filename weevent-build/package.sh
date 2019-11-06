@@ -6,12 +6,12 @@
 # 3. java 1.8
 # 4. nodejs 10.16
 ################################################################################
-
+weevent_version=1.1.0
 function usage(){
     echo "Usage:"
-    echo "    package master: ./package.sh --version 1.0.0"
-    echo "    package tag: ./package.sh --tag v1.0.0 --version 1.0.0"
-    echo "    package local: ./package.sh --tag local --version 1.0.0"
+    echo "    package master: ./package.sh --version ${weevent_version}"
+    echo "    package tag: ./package.sh --tag v${weevent_version} --version ${weevent_version}"
+    echo "    package local: ./package.sh --tag local --version ${weevent_version}"
 }
 
 version=""
@@ -78,6 +78,10 @@ function build_weevent(){
     # node.js build html and css
     yellow_echo "build web in node.js"
     cd ${top_path}/weevent-governance/web
+    if [[ -e build-web.sh ]];then
+        chmod +x build-web.sh
+        dos2unix build-web.sh
+    fi
     ./build-web.sh
 
     # gradle clean then build
@@ -103,6 +107,12 @@ function copy_install_file(){
     cp ${current_path}/modules/governance/install-governance.sh ${out_path}/modules/governance
     cp -r ${top_path}/weevent-governance/dist/* ${out_path}/modules/governance
 
+    mkdir -p ${out_path}/modules/processor
+    cp ${current_path}/modules/processor/install-processor.sh ${out_path}/modules/processor
+    cp -r ${top_path}/weevent-processor/dist/* ${out_path}/modules/processor
+
+
+
     mkdir -p ${out_path}/modules/nginx
     cp ${current_path}/modules/nginx/install-nginx.sh ./modules/nginx/nginx.sh ${out_path}/modules/nginx
     cp -r ${current_path}/modules/nginx/conf ${out_path}/modules/nginx
@@ -121,38 +131,82 @@ function switch_to_prod(){
     if [[ -e ${out_path}/modules/governance/conf/application.properties ]]; then
         sed -i 's/dev/prod/' ${out_path}/modules/governance/conf/application.properties
     fi
+
+    rm -rf ${out_path}/modules/processor/conf/application-dev.properties
+    if [[ -e ${out_path}/modules/processor/conf/application.properties ]]; then
+        sed -i 's/dev/prod/' ${out_path}/modules/processor/conf/application.properties
+    fi
 }
 
 function tar_broker(){
     local target=$1
-
     yellow_echo "generate ${target}"
-    cd ${out_path}/modules
 
-    cp -r broker broker-${version}
+    cp -r ${out_path}/modules/broker ${current_path}/broker-${version}
     # no need install shell
-    rm -rf broker-${version}/install-broker.sh
+    rm -rf ${current_path}/broker-${version}/install-broker.sh
 
     # do not tar the top dir
-    cd broker-${version}
+    cd ${current_path}/broker-${version}
     tar -czpvf ${target} *
     mv ${target} ${current_path}
+
+    rm -rf ${current_path}/broker-${version}
 }
 
 function tar_governance(){
     local target=$1
-
     yellow_echo "generate ${target}"
-    cd ${out_path}/modules
 
-    cp -r governance governance-${version}
+    cp -r ${out_path}/modules/governance ${current_path}/governance-${version}
     # no need install shell
-    rm -rf governance-${version}/install-governance.sh
+    rm -rf ${current_path}/governance-${version}/install-governance.sh
 
     # do not tar the top dir
-    cd governance-${version}
+    cd ${current_path}/governance-${version}
     tar -czpvf ${target} *
     mv ${target} ${current_path}
+
+    rm -rf ${current_path}/governance-${version}
+}
+
+
+function tar_processor(){
+    local target=$1
+    yellow_echo "generate ${target}"
+
+    cp -r ${out_path}/modules/processor ${current_path}/processor-${version}
+    # no need install shell
+    rm -rf ${current_path}/processor-${version}/install-processor.sh
+
+    # do not tar the top dir
+    cd ${current_path}/processor-${version}
+    tar -czpvf ${target} *
+    mv ${target} ${current_path}
+
+    rm -rf ${current_path}/processor-${version}
+}
+
+function tar_weevent(){
+    local target=$1
+    yellow_echo "generate ${target}"
+
+    # thin spring boot jar, merge comm jars into one lib to reduce tar size
+    mkdir -p ${out_path}/modules/lib
+    for commonjar in $(ls ${out_path}/modules/broker/lib/);
+    do
+        # copy common jar into modules lib
+        if [[ (-e ${out_path}/modules/governance/lib/${commonjar}) && (-e ${out_path}/modules/processor/lib/${commonjar}) ]]; then
+            cp ${out_path}/modules/broker/lib/${commonjar} ${out_path}/modules/lib
+            rm ${out_path}/modules/governance/lib/${commonjar}
+            rm ${out_path}/modules/processor/lib/${commonjar}
+            rm ${out_path}/modules/broker/lib/${commonjar}
+        fi
+    done
+
+    # tar
+    cd ${current_path}
+    tar -czpvf weevent-${version}.tar.gz $(basename ${out_path})
 }
 
 # package weevent-$version
@@ -172,16 +226,17 @@ function package(){
     switch_to_prod
     set_permission
 
-    # tar weevent
-    yellow_echo "generate weevent-${version}.tar.gz"
-    cd ${current_path}
-    tar -czpvf weevent-${version}.tar.gz $(basename ${out_path})
-
     # tar broker module
     tar_broker weevent-broker-${version}.tar.gz
 
     # tar governance module
     tar_governance weevent-governance-${version}.tar.gz
+
+    # tar processor module
+    tar_processor weevent-processor-${version}.tar.gz
+
+    # tar weevent
+    tar_weevent weevent-${version}.tar.gz
 
     # remove temporary path
     rm -rf ${out_path}

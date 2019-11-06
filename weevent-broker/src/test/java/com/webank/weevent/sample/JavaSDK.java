@@ -1,7 +1,6 @@
 package com.webank.weevent.sample;
 
 
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,21 +17,25 @@ import com.webank.weevent.sdk.WeEvent;
  */
 public class JavaSDK {
     public static void main(String[] args) {
+
         System.out.println("This is WeEvent Java SDK sample.");
         try {
-            // get client
-            IWeEventClient client = IWeEventClient.build("http://localhost:8080/weevent");
-            String topicName = "com.weevent.test";
             String groupId = WeEvent.DEFAULT_GROUP_ID;
+            // get client
+            IWeEventClient client = IWeEventClient.build("http://localhost:8080/weevent", groupId);
+            String topicName = "com.weevent.test";
+
             // ensure topic exist
-            client.open(topicName, groupId);
+            client.open(topicName);
             Map<String, String> extensions = new HashMap<>();
             extensions.put(WeEvent.WeEvent_FORMAT, "json");
-            WeEvent weEvent = new WeEvent(topicName,"{\"hello\":\" wolrd\"}".getBytes(),extensions);
-            SendResult sendResult = client.publish(weEvent, groupId);
+            WeEvent weEvent = new WeEvent(topicName, "{\"hello\":\" wolrd\"}".getBytes(), extensions);
+            // publish an event to topic :"com.weevent.test"
+            SendResult sendResult = client.publish(weEvent);
             System.out.println(sendResult.toString());
-            // subscribe topic with groupId
-            String subscriptionId = client.subscribe(topicName, groupId, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
+
+            // subscribe topic
+            String subscriptionId = client.subscribe(topicName, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
                 @Override
                 public void onEvent(WeEvent event) {
                     System.out.println("received event: " + event.toString());
@@ -43,12 +46,6 @@ public class JavaSDK {
 
                 }
             });
-
-            // publish event
-            for (int i = 0; i < 10; i++) {
-                weEvent.setContent(("hello weevent: " + i).getBytes(StandardCharsets.UTF_8));
-                client.publish(weEvent, groupId);
-            }
 
             // unSubscribe topic
             client.unSubscribe(subscriptionId);

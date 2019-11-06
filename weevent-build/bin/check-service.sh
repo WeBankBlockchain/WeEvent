@@ -29,9 +29,23 @@ function check_governance(){
         yellow_echo "governance service is error"
     fi
  }
+function check_processor(){
+    echo "check processor service"
+    curl -s  -d 'payload={\"a\":\"1\"}&condition=a<10' http://127.0.0.1:8080/processor/checkWhereCondition | grep "errorCode" >>/dev/null
+    if [[ $? -eq 0 ]];then
+        yellow_echo "processor service is ok"
+    else
+        yellow_echo "processor service is error"
+    fi
+ }
+
 
 check_broker
 if [[ -d "governance" ]]; then
     check_governance
+fi
+
+if [[ -d "processor" ]]; then
+    check_processor
 fi
 

@@ -3,6 +3,7 @@ package com.webank.weevent.protocol.stomp;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,10 +18,10 @@ import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -49,7 +50,6 @@ public class BrokerStomp extends TextWebSocketHandler {
     // session id <-> [header subscription id in stomp <-> (subscription id in consumer, topic)]
     private static Map<String, Map<String, Pair<String, String>>> sessionContext;
 
-
     @Autowired
     public void setProducer(IProducer producer) {
         this.iproducer = producer;
@@ -62,40 +62,6 @@ public class BrokerStomp extends TextWebSocketHandler {
 
     static {
         sessionContext = new HashMap<>();
-    }
-
-    public BrokerStomp() {
-        super();
-    }
-
-    @Override
-    public void afterConnectionEstablished(WebSocketSession session) {
-        log.info("afterConnectionEstablished, {} {}", session.getId(), session.getRemoteAddress());
-
-        sessionContext.put(session.getId(), new HashMap<>());
-    }
-
-    @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        if (!sessionContext.containsKey(session.getId())) {
-            log.error("unknown session id, skip it");
-            return;
-        }
-
-        StompDecoder decoder = new StompDecoder();
-        List<Message<byte[]>> stompMsg = decoder.decode(ByteBuffer.wrap(message.getPayload().getBytes(StandardCharsets.UTF_8)));
-        for (Message<byte[]> msg : stompMsg) {
-            handleSingleMessage(msg, session);
-        }
-
-        super.handleTextMessage(session, message);
-    }
-
-    @Override
-    protected void handlePongMessage(WebSocketSession session, PongMessage message) throws Exception {
-        log.debug("handle pong message, {}", session.getId());
-
-        super.handlePongMessage(session, message);
     }
 
     private void handleSingleMessage(Message<byte[]> msg, WebSocketSession session) {
@@ -142,6 +108,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
             default:
                 handleDefaultMessage(msg, session);
+                break;
         }
     }
 
@@ -195,7 +162,8 @@ public class BrokerStomp extends TextWebSocketHandler {
 
         Map<String, String> extensions = WeEventUtils.getExtend(nativeHeaders);
 
-        String groupId = WeEvent.DEFAULT_GROUP_ID;
+        // group id
+        String groupId = WeEventUtils.getDefaultGroupId();
         Object eventGroupId = nativeHeaders.get(WeEventConstants.EVENT_GROUP_ID);
         if (nativeHeaders.containsKey(WeEventConstants.EVENT_GROUP_ID) && eventGroupId != null) {
             groupId = ((List) eventGroupId).get(0).toString();
@@ -203,7 +171,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
         try {
             String simpDestination = getSimpDestination(msg);
-            SendResult sendResult = handleSend(msg, simpDestination, extensions, groupId);
+            SendResult sendResult = handleSend(new WeEvent(simpDestination, msg.getPayload(), extensions), groupId);
 
             // package the return frame
             StompCommand command = StompCommand.RECEIPT;
@@ -315,11 +283,11 @@ public class BrokerStomp extends TextWebSocketHandler {
     }
 
     private StompCommand checkConnect(Message<byte[]> msg) {
-        String authAccount = BrokerApplication.weEventConfig.getStompLogin();
-        String authPassword = BrokerApplication.weEventConfig.getStompPasscode();
-
         StompCommand command = StompCommand.CONNECTED;
-        if (authAccount.isEmpty() || authPassword.isEmpty()) {
+
+        String authAccount = BrokerApplication.environment.getProperty("spring.security.user.name");
+        String authPassword = BrokerApplication.environment.getProperty("spring.security.user.password");
+        if (StringUtils.isBlank(authAccount) || StringUtils.isBlank(authPassword)) {
             return command;
         }
 
@@ -357,7 +325,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
         log.info("find topic num: {}, try to unSubscribe one by one", topicMap.size());
         for (Map.Entry<String, Pair<String, String>> topicPair : topicMap.entrySet()) {
-            String subscriptionId = topicPair.getValue().getKey();
+            String subscriptionId = topicPair.getValue().getFirst();
             try {
                 boolean result = this.iconsumer.unSubscribe(subscriptionId);
                 log.info("consumer unSubscribe result, subscriptionId: {}, result: {}", subscriptionId, result);
@@ -378,26 +346,6 @@ public class BrokerStomp extends TextWebSocketHandler {
         accessor.setReceiptId(receiptId);
         accessor.setNativeHeader("receipt-id", receiptId);
         sendSimpleMessage(session, accessor);
-    }
-
-    @Override
-    public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-        log.info("message decode error, {} message decode exception: {}", session.getId(), exception);
-
-        super.handleTransportError(session, exception);
-    }
-
-    @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        log.info("connection closed, {} CloseStatus: {}", session.getId(), status);
-
-        clearSession(session);
-        super.afterConnectionClosed(session, status);
-    }
-
-    @Override
-    public boolean supportsPartialMessages() {
-        return super.supportsPartialMessages();
     }
 
     private void send2Remote(WebSocketSession session, TextMessage textMessage) {
@@ -423,18 +371,19 @@ public class BrokerStomp extends TextWebSocketHandler {
     }
 
     /**
-     * @param msg message
-     * @param simpDestination topic name
+     * publish event into block
+     *
+     * @param event event
+     * @param groupId groupId
+     * @return send result
+     * @throws BrokerException broker exception
      */
-    private SendResult handleSend(Message<byte[]> msg,
-                                  String simpDestination,
-                                  Map<String, String> extensions,
-                                  String groupId) throws BrokerException {
+    private SendResult handleSend(WeEvent event, String groupId) throws BrokerException {
         if (!this.iproducer.startProducer()) {
             log.error("producer start failed");
         }
 
-        SendResult sendResult = this.iproducer.publish(new WeEvent(simpDestination, msg.getPayload(), extensions), groupId);
+        SendResult sendResult = this.iproducer.publish(event, groupId);
         log.info("publish result, {}", sendResult);
         if (sendResult.getStatus() != SendResult.SendResultStatus.SUCCESS) {
             log.error("producer publish failed");
@@ -462,10 +411,9 @@ public class BrokerStomp extends TextWebSocketHandler {
         log.info("destination: {} header subscribe id: {} group id: {}", simpDestination, headerIdStr, groupId);
 
         String[] curTopicList;
-        if (simpDestination.contains(",")) {
-            // NOT support
+        if (simpDestination.contains(WeEvent.MULTIPLE_TOPIC_SEPARATOR)) {
             log.info("subscribe topic list");
-            curTopicList = simpDestination.split(",");
+            curTopicList = simpDestination.split(WeEvent.MULTIPLE_TOPIC_SEPARATOR);
         } else {
             curTopicList = new String[]{simpDestination};
         }
@@ -488,8 +436,8 @@ public class BrokerStomp extends TextWebSocketHandler {
             ext.put(IConsumer.SubscribeExt.TopicTag, tag);
         }
 
-        // support only one topic
-        String subscriptionId = this.iconsumer.subscribe(curTopicList[0],
+        // support both single/multiple topic
+        String subscriptionId = this.iconsumer.subscribe(curTopicList,
                 groupId,
                 subEventId,
                 ext,
@@ -511,8 +459,9 @@ public class BrokerStomp extends TextWebSocketHandler {
                 });
 
         log.info("bind context, session id: {} header subscription id: {} consumer subscription id: {} topic: {}",
-                session.getId(), headerIdStr, subscriptionId, curTopicList[0]);
-        sessionContext.get(session.getId()).put(headerIdStr, new Pair<>(subscriptionId, curTopicList[0]));
+                session.getId(), headerIdStr, subscriptionId, Arrays.toString(curTopicList));
+        sessionContext.get(session.getId())
+                .put(headerIdStr, Pair.of(subscriptionId, StringUtils.join(curTopicList, WeEvent.MULTIPLE_TOPIC_SEPARATOR)));
 
         log.info("consumer subscribe success, consumer subscriptionId: {}", subscriptionId);
         return subscriptionId;
@@ -544,14 +493,14 @@ public class BrokerStomp extends TextWebSocketHandler {
      * @return boolean true if ok
      */
     private boolean handleUnSubscribe(WebSocketSession session, String headerIdStr) throws BrokerException {
-        log.info("session id: {} header id: {} subscription id: {}", session.getId(), headerIdStr);
-
         if (!sessionContext.get(session.getId()).containsKey(headerIdStr)) {
             log.info("unknown subscription id, {}", headerIdStr);
             return false;
         }
 
-        String subscriptionId = sessionContext.get(session.getId()).get(headerIdStr).getKey();
+        String subscriptionId = sessionContext.get(session.getId()).get(headerIdStr).getFirst();
+        log.info("session id: {} header id: {} subscriptionId: {}", session.getId(), headerIdStr, subscriptionId);
+
         // unSubscribe
         boolean result = this.iconsumer.unSubscribe(subscriptionId);
         log.info("consumer unSubscribe, subscriptionId: {} result: {}", subscriptionId, result);
@@ -591,5 +540,55 @@ public class BrokerStomp extends TextWebSocketHandler {
         }
 
         return simpDestination;
+    }
+
+    // methods from super class
+
+    @Override
+    public void afterConnectionEstablished(WebSocketSession session) {
+        log.info("afterConnectionEstablished, {} {}", session.getId(), session.getRemoteAddress());
+
+        sessionContext.put(session.getId(), new HashMap<>());
+    }
+
+    @Override
+    protected void handlePongMessage(WebSocketSession session, PongMessage message) throws Exception {
+        log.debug("handle pong message, {}", session.getId());
+
+        super.handlePongMessage(session, message);
+    }
+
+    @Override
+    public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
+        log.info("message decode error, {} message decode exception: {}", session.getId(), exception);
+
+        super.handleTransportError(session, exception);
+    }
+
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+        log.info("connection closed, {} CloseStatus: {}", session.getId(), status);
+
+        clearSession(session);
+        super.afterConnectionClosed(session, status);
+    }
+
+    @Override
+    public boolean supportsPartialMessages() {
+        return super.supportsPartialMessages();
+    }
+
+    @Override
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        if (!sessionContext.containsKey(session.getId())) {
+            log.error("unknown session id, skip it");
+            return;
+        }
+
+        StompDecoder decoder = new StompDecoder();
+        List<Message<byte[]>> stompMsg = decoder.decode(ByteBuffer.wrap(message.getPayload().getBytes(StandardCharsets.UTF_8)));
+        for (Message<byte[]> msg : stompMsg) {
+            handleSingleMessage(msg, session);
+        }
     }
 }

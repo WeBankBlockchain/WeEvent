@@ -2,37 +2,39 @@
 <div class="headerBar">
   <div class='navigation'>
     <img src="../assets/image/weEvent.png" alt="" @click='home'>
-    <el-breadcrumb separator="/" v-show='!noServer'>
-      <el-breadcrumb-item v-for="(item, index) in menu" :key=index>{{item}}</el-breadcrumb-item>
-    </el-breadcrumb>
-  </div>
-  <div class='right_part'>
-    <span class='server_title' v-show='!noServer'>群组信息:</span>
+    <span class='server_title' v-show='!noServer'>{{$t('header.broker')}} :</span>
+    <el-dropdown trigger="click" @command='selecServers'  v-show='!noServer'>
+      <span>{{server}} <i class="el-icon-arrow-down el-icon-caret-bottom"></i></span>
+      <el-dropdown-menu slot="dropdown">
+        <el-dropdown-item v-for='(item, index) in servers' :key='index' :command='index'>{{item.name}}</el-dropdown-item>
+      </el-dropdown-menu>
+    </el-dropdown>
+    <span class='server_title' v-show='!noServer'>{{$t('header.group')}} :</span>
     <el-dropdown trigger="click" @command='selectGroup'  v-show='!noServer'>
       <span>{{groupId}} <i class="el-icon-arrow-down el-icon-caret-bottom"></i></span>
       <el-dropdown-menu slot="dropdown">
         <el-dropdown-item v-for='(item, index) in groupList' :key='index' :command='item'>{{item}}</el-dropdown-item>
       </el-dropdown-menu>
     </el-dropdown>
-    <span class='line'  v-show='!noServer'></span>
-    <span class='server_title' v-show='!noServer'>当前服务:</span>
-    <el-dropdown trigger="click" @command='selecServers'  v-show='!noServer'>
-      <span>{{server}} <i class="el-icon-arrow-down el-icon-caret-bottom"></i></span>
+  </div>
+  <div class='right_part'>
+    <el-dropdown trigger="click" @command='selectLang'>
+      <span>{{$t('header.lang')}}<i class="el-icon-arrow-down el-icon-caret-bottom"></i></span>
       <el-dropdown-menu slot="dropdown">
-        <el-dropdown-item v-for='(item, index) in servers' :key='index' :command='index'>{{item.name}}</el-dropdown-item>
-        <el-dropdown-item command='servers'>服务设置</el-dropdown-item>
+        <el-dropdown-item command='zh'>中文</el-dropdown-item>
+        <el-dropdown-item command='en'>English</el-dropdown-item>
       </el-dropdown-menu>
     </el-dropdown>
-    <span class='line'  v-show='!noServer'></span>
-    <span class='el-icon-user-solid' style='margin-right:5px'></span>
+    <span class='el-icon-user-solid' style='margin:0 5px 0 15px'></span>
     <el-dropdown trigger="click" @command='selectItem'>
-      <span v-if='!userName' @click='loginIn'>请登录</span>
+      <span v-if='!userName' @click='loginIn'>{{$t('header.login')}}</span>
       <span class="el-dropdown-link" v-else-if='userName'>
         {{userName}}<i class="el-icon-arrow-down el-icon-caret-bottom"></i>
       </span>
       <el-dropdown-menu slot="dropdown">
-        <el-dropdown-item command='setting'>设置</el-dropdown-item>
-        <el-dropdown-item command='loginOut'>退出</el-dropdown-item>
+        <el-dropdown-item command='server_setting'>{{$t('header.serverSetting')}}</el-dropdown-item>
+        <el-dropdown-item command='user_setting'>{{$t('header.userSetting')}}</el-dropdown-item>
+        <el-dropdown-item command='loginOut'>{{$t('header.loginOut')}}</el-dropdown-item>
       </el-dropdown-menu>
     </el-dropdown>
   </div>
@@ -50,7 +52,13 @@ export default {
       userName: localStorage.getItem('user'),
       server: '',
       servers: [],
-      groupList: []
+      groupList: [],
+      version: {
+        buildTimeStamp: '',
+        gitBranch: '',
+        gitCommitHash: '',
+        weEventVersion: ''
+      }
     }
   },
   mounted () {
@@ -59,16 +67,20 @@ export default {
   methods: {
     home () {
       this.$router.push('./index')
-      this.$store.commit('set_active', '0')
-      this.$emit('selecChange', '0')
+      this.$store.commit('set_active', '1-1')
+      this.$store.commit('set_menu', [this.$t('sideBar.blockChainInfor'), this.$t('sideBar.overview')])
+      this.$emit('selecChange', '1-1')
     },
     loginIn () {
       this.$router.push('./login')
     },
     selectItem (e) {
       switch (e) {
-        case 'setting':
+        case 'user_setting':
           this.$router.push({ path: './registered', query: { reset: 0 } })
+          break
+        case 'server_setting':
+          this.$router.push('./servers')
           break
         case 'loginOut':
           API.loginOut('').then(res => {
@@ -84,12 +96,18 @@ export default {
       }
     },
     selecServers (e) {
-      if (e === 'servers') {
-        this.$router.push('./servers')
-      } else {
-        this.server = this.servers[e].name
-        this.$store.commit('set_id', this.servers[e].id)
-        localStorage.setItem('brokerId', this.servers[e].id)
+      this.server = this.servers[e].name
+      let isConfigRule = this.servers[e].isConfigRule
+      this.$store.commit('set_id', this.servers[e].id)
+      this.$store.commit('setConfigRule', this.servers[e].isConfigRule)
+      localStorage.setItem('brokerId', this.servers[e].id)
+      if (isConfigRule !== '1') {
+        let url = this.$route.path
+        if (url === '/rule' || url === '/ruleDetail' || url === '/dataBase' || url === '/transactionInfor') {
+          this.$store.commit('set_active', '1-1')
+          this.$store.commit('set_menu', [this.$t('sideBar.blockChainInfor'), this.$t('sideBar.overview')])
+          this.$router.push('./index')
+        }
       }
     },
     selectGroup (e) {
@@ -110,6 +128,7 @@ export default {
                   vm.server = e.name
                   let id = e.id
                   vm.$store.commit('set_id', id)
+                  vm.$store.commit('setConfigRule', e.isConfigRule)
                   localStorage.setItem('brokerId', id)
                 }
               })
@@ -117,6 +136,7 @@ export default {
               vm.server = res.data[0].name
               let id = res.data[0].id
               vm.$store.commit('set_id', id)
+              vm.$store.commit('setConfigRule', res.data[0].isConfigRule)
               localStorage.setItem('brokerId', id)
             }
             vm.listGroup()
@@ -131,15 +151,25 @@ export default {
       })
     },
     listGroup () {
+      let vm = this
       API.listGroup('?brokerId=' + localStorage.getItem('brokerId')).then(res => {
         // if groupId is not existed so set it
         // else use existed groupId
-        if (!localStorage.getItem('grouId')) {
-          this.groupList = [].concat(res.data)
-          this.$store.commit('set_groupId', res.data[0])
-          localStorage.setItem('groupId', res.data[0])
+        vm.groupList = [].concat(res.data)
+        if (!localStorage.getItem('groupId')) {
+          vm.$nextTick(fun => {
+            vm.$store.commit('set_groupId', res.data[0])
+            localStorage.setItem('groupId', res.data[0])
+          })
+        } else {
+          vm.$store.commit('set_groupId', localStorage.getItem('groupId'))
         }
       })
+    },
+    selectLang (e) {
+      this.$i18n.locale = e
+      localStorage.setItem('lang', e)
+      this.$store.commit('setlang', e)
     }
   },
   computed: {

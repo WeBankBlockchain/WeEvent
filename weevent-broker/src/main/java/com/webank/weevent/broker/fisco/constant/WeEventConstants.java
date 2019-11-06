@@ -117,4 +117,16 @@ public class WeEventConstants {
      */
     public static final String FISCO_BCOS_2_X_VERSION_PREFIX = "2.";
 
+    public static final String FISCO = "fisco";
+
+    public static final String FABRIC = "fabric";
+
+    public static final String TOPIC_ALREADY_EXIST = "100100";
+
+    public static final String NODE_TYPE_SEALER = "sealer";
+
+    public static final String NODE_TYPE_OBSERVER = "observer";
+
+    public static final int DEFAULT_CHAINCODE_PARAM_COUNT = 4;
+
 }

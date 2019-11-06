@@ -1,26 +1,19 @@
 <template>
-  <div class="group  event-table">
-    <div class='control_part refresh'>
-      <el-input placeholder="请输入交易哈希或块高" v-model.trim='search_name'>
-        <template slot='append'>
-          <el-button type='primary' icon='el-icon-search' @click='search'></el-button>
-        </template>
-      </el-input>
-    </div>
+  <div class="group event-table">
     <el-table
       :data='tableData'
       stripe
       v-loading='loading'
       element-loading-spinner='el-icon-loading'
-      element-loading-text='数据加载中...'
+      :element-loading-text="$t('common.loading')"
       element-loading-background='rgba(256,256,256,0.8)'
-      @expand-change='readDetial'
+      @expand-change='readDetail'
     >
       <el-table-column type='expand'>
         <template slot-scope='props'>
             <el-tabs type="border-card">
               <el-tab-pane label="input">
-                <ul class='trans_detial'>
+                <ul class='trans_detail'>
                   <li>
                     <span>Block Height:</span>
                     <span>{{props.row.blockNumber}}</span>
@@ -41,7 +34,7 @@
               </el-tab-pane>
 
               <el-tab-pane label="event" :disabled="!props.row.logs.hasEvent">
-                <ul class='trans_detial'>
+                <ul class='trans_detail'>
                   <li>
                     <span>Address:</span>
                     <span>{{props.row.logs.address}}</span>
@@ -58,7 +51,7 @@
         </template>
       </el-table-column>
       <el-table-column
-        label='交易哈希'
+        :label="$t('tableCont.transHash')"
       >
       <template  slot-scope="scope">
         <i class='el-icon-copy-document' style='margin-right:5px;cursor:pointer' v-clipboard:copy='scope.row.transHash' v-clipboard:success='onCopy'></i>
@@ -67,22 +60,20 @@
       </el-table-column>
       <el-table-column
         prop='blockNumber'
-        label='块高'
+        :label="$t('tableCont.blockNumber')"
         width=150
       ></el-table-column>
 
       <el-table-column
         prop='blockTimestamp'
-        label='创建时间'
+        :label="$t('tableCont.timestamp')"
          width=300
       ></el-table-column>
     </el-table>
     <el-pagination
       @current-change="indexChange"
-      @size-change='sizeChange'
       :current-page="pageIndex"
-      :page-sizes="[10, 20, 30, 50]"
-      layout="sizes,total, prev, pager, next, jumper"
+      layout="total, prev, pager, next, jumper"
       :total="total">
     </el-pagination>
   </div>
@@ -96,7 +87,6 @@ export default {
       search_name: '',
       tableData: [],
       pageIndex: 1,
-      pageSize: 10,
       total: 0
     }
   },
@@ -105,41 +95,34 @@ export default {
       this.pageIndex = e
       this.transList()
     },
-    sizeChange (e) {
-      this.pageSize = e
-      this.pageIndex = 1
-      this.transList()
-    },
     onCopy () {
       this.$message({
         type: 'success',
-        message: '复制成功'
+        message: this.$t('tableCont.copySuccess')
       })
     },
-    detial (e) {
-      this.$alert(e, '错误信息')
+    detail (e) {
+      // this.$alert(e, '错误信息')
     },
     transList () {
       this.loading = true
-      let url = '/' + localStorage.getItem('groupId') + '/' + this.pageIndex + '/' + this.pageSize + '?brokerId=' + localStorage.getItem('brokerId')
-      if (this.search_name.length < 10 && this.search_name.length > 0) {
-        url = url + '&blockNumber=' + this.search_name
-      } else if (this.search_name.length >= 10) {
-        url = url + '&transactionHash=' + this.search_name
+      let url = '/' + localStorage.getItem('groupId') + '/' + this.pageIndex + '/10?brokerId=' + localStorage.getItem('brokerId')
+      if (sessionStorage.getItem('blockHash')) {
+        url = url + '&transactionHash=' + sessionStorage.getItem('blockHash')
       }
       API.transList(url).then(res => {
         if (res.status === 200) {
-          let tableData = res.data.data
+          let tableData = res.data.data.pageData
           tableData.forEach(e => {
-            this.$set(e, 'logs', {'address': '', 'topics': [], 'hasEvent': false})
+            this.$set(e, 'logs', { 'address': '', 'topics': [], 'hasEvent': false })
           })
           this.tableData = tableData
-          this.total = res.data.totalCount
+          this.total = res.data.data.total
         }
       })
       this.loading = false
     },
-    readDetial (e) {
+    readDetail (e) {
       let url = '/' + localStorage.getItem('groupId') + '/' + e.blockNumber + '?brokerId=' + localStorage.getItem('brokerId')
       let index = this.tableData.indexOf(e)
       API.blockByNumber(url).then(res => {
@@ -158,11 +141,6 @@ export default {
           this.tableData[i].logs.hasEvent = true
         }
       })
-    },
-    search () {
-      this.pageIndex = 1
-      this.total = 0
-      this.transList()
     }
   },
   mounted () {
@@ -171,6 +149,9 @@ export default {
   computed: {
     brokerId () {
       return this.$store.state.brokerId
+    },
+    groupId () {
+      return this.$store.state.groupId
     }
   },
   watch: {
@@ -179,7 +160,16 @@ export default {
       setTimeout(fun => {
         this.transList()
       }, 1000)
+    },
+    groupId () {
+      this.loading = true
+      setTimeout(fun => {
+        this.transList()
+      }, 1000)
     }
+  },
+  destroyed () {
+    sessionStorage.removeItem('blockHash')
   }
 }
 </script>

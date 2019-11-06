@@ -12,6 +12,9 @@ class ResoruceService extends BaseModel {
   listGroup (data) {
     return this.request(api.listGroup, data)
   }
+  getVersion (data) {
+    return this.request(api.getVersion, data)
+  }
   topicList (data) {
     return this.request(api.topicList, data)
   }
@@ -83,6 +86,51 @@ class ResoruceService extends BaseModel {
   }
   permissionList (data) {
     return this.request(api.permissionList, data)
+  }
+  checkBrokerServer (data) {
+    return this.request(api.checkBrokerServer, data)
+  }
+  ruleList (data) {
+    return this.request(api.ruleList, data)
+  }
+  ruleAdd (data) {
+    return this.request(api.ruleAdd, data)
+  }
+  ruleStart (data) {
+    return this.request(api.ruleStart, data)
+  }
+  ruleUpdate (data) {
+    return this.request(api.ruleUpdate, data)
+  }
+  ruleDelete (data) {
+    return this.request(api.ruleDelete, data)
+  }
+  ruleStop (data) {
+    return this.request(api.ruleStop, data)
+  }
+  ruleDetail (data) {
+    return this.request(api.ruleDetail, data)
+  }
+  dbList (data) {
+    return this.request(api.dbList, data)
+  }
+  dbDelete (data) {
+    return this.request(api.dbDelete, data)
+  }
+  dbAdd (data) {
+    return this.request(api.dbAdd, data)
+  }
+  dbUpdate (data) {
+    return this.request(api.dbUpdate, data)
+  }
+  historicalData (data) {
+    return this.request(api.historicalData, data)
+  }
+  getNodes (data) {
+    return this.request(api.getNodes, data)
+  }
+  eventList (data) {
+    return this.request(api.eventList, data)
   }
 }
 

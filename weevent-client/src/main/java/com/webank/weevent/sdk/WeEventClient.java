@@ -32,6 +32,7 @@ import com.webank.weevent.sdk.jms.WeEventTopicPublisher;
 import com.webank.weevent.sdk.jms.WeEventTopicSubscriber;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.googlecode.jsonrpc4j.ProxyUtil;
@@ -45,73 +46,49 @@ public class WeEventClient implements IWeEventClient {
     // json rpc proxy
     private IBrokerRpc brokerRpc;
 
+    // groupId
+    private String groupId;
+
     // default STOMP url, ws://localhost:8080/weevent/stomp
-    private static WeEventConnectionFactory connectionFactory;
+    private WeEventConnectionFactory connectionFactory;
 
     // stomp connection
     private TopicConnection connection;
     // (subscriptionId <-> TopicSession)
     private Map<String, TopicSession> sessionMap;
 
+    // rpc timeout
+    private final int timeoutMillis = 5000;
 
     WeEventClient() throws BrokerException {
         buildRpc(defaultJsonRpcUrl);
         buildJms(WeEventConnectionFactory.defaultBrokerUrl, "", "");
+        this.groupId = WeEvent.DEFAULT_GROUP_ID;
     }
 
     WeEventClient(String brokerUrl) throws BrokerException {
         validateParam(brokerUrl);
         buildRpc(brokerUrl + "/jsonrpc");
         buildJms(getStompUrl(brokerUrl), "", "");
+        this.groupId = WeEvent.DEFAULT_GROUP_ID;
     }
 
-    WeEventClient(String brokerUrl, String userName, String password) throws BrokerException {
+    WeEventClient(String brokerUrl, String groupId) throws BrokerException {
+        validateParam(brokerUrl);
+        buildRpc(brokerUrl + "/jsonrpc");
+        buildJms(getStompUrl(brokerUrl), "", "");
+        initGroupId(groupId);
+    }
+
+    WeEventClient(String brokerUrl, String groupId, String userName, String password) throws BrokerException {
         validateParam(brokerUrl);
         validateUser(userName, password);
         buildRpc(brokerUrl + "/jsonrpc");
         buildJms(getStompUrl(brokerUrl), userName, password);
+        initGroupId(groupId);
     }
 
-
-    public String subscribe(String topic, String offset, @NonNull EventListener listener) throws BrokerException {
-        try {
-            validateParam(topic);
-            validateParam(offset);
-            TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-            // create topic
-            Topic destination = session.createTopic(topic);
-
-            // create subscriber
-            ((WeEventTopic) destination).setOffset(offset);
-            WeEventTopicSubscriber subscriber = (WeEventTopicSubscriber) session.createSubscriber(destination);
-
-            // create listener
-            subscriber.setMessageListener(new MessageListener() {
-                public void onMessage(Message message) {
-                    if (message instanceof BytesMessage) {
-                        try {
-                            BytesMessage bytesMessage = (BytesMessage) message;
-                            ObjectMapper mapper = new ObjectMapper();
-                            byte[] body = new byte[(int) bytesMessage.getBodyLength()];
-                            bytesMessage.readBytes(body);
-                            WeEvent event = mapper.readValue(body, WeEvent.class);
-                            listener.onEvent(event);
-                        } catch (IOException | JMSException e) {
-                            log.error("onMessage exception", e);
-                            listener.onException(e);
-                        }
-                    }
-                }
-            });
-
-            this.sessionMap.put(subscriber.getSubscriptionId(), session);
-            return subscriber.getSubscriptionId();
-        } catch (JMSException e) {
-            log.error("jms exception", e);
-            throw jms2BrokerException(e);
-        }
-    }
-
+    @Override
     public boolean unSubscribe(String subscriptionId) throws BrokerException {
         validateParam(subscriptionId);
 
@@ -131,82 +108,109 @@ public class WeEventClient implements IWeEventClient {
         return false;
     }
 
-
+    @Override
     public boolean open(String topic) throws BrokerException {
         validateParam(topic);
-        return this.brokerRpc.open(topic);
+        return this.brokerRpc.open(topic, this.groupId);
     }
 
-
+    @Override
     public boolean close(String topic) throws BrokerException {
         validateParam(topic);
-        return this.brokerRpc.close(topic);
+        return this.brokerRpc.close(topic, this.groupId);
     }
 
+    @Override
     public boolean exist(String topic) throws BrokerException {
         validateParam(topic);
-        return this.brokerRpc.exist(topic);
+        return this.brokerRpc.exist(topic, this.groupId);
     }
 
+    @Override
     public TopicPage list(Integer pageIndex, Integer pageSize) throws BrokerException {
-        return this.brokerRpc.list(pageIndex, pageSize);
+        return this.brokerRpc.list(pageIndex, pageSize, this.groupId);
     }
 
+    @Override
     public TopicInfo state(String topic) throws BrokerException {
         validateParam(topic);
-        return this.brokerRpc.state(topic);
+        return this.brokerRpc.state(topic, this.groupId);
     }
 
+    @Override
     public WeEvent getEvent(String eventId) throws BrokerException {
         validateParam(eventId);
-        return this.brokerRpc.getEvent(eventId);
+        return this.brokerRpc.getEvent(eventId, this.groupId);
     }
 
     @Override
     public SendResult publish(WeEvent weEvent) throws BrokerException {
-        return this.publish(weEvent, WeEvent.DEFAULT_GROUP_ID);
-    }
-
-    public SendResult publish(WeEvent weEvent, String groupId) throws BrokerException {
         validateWeEvent(weEvent);
-        validateParam(groupId);
+        log.info("start to publish: {}", weEvent);
+
         SendResult sendResult = new SendResult();
+        sendResult.setTopic(weEvent.getTopic());
         try {
             TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
             // create topic
             WeEventTopic weEventTopic = (WeEventTopic) session.createTopic(weEvent.getTopic());
-            weEventTopic.setGroupId(groupId);
-            //create bytesMessage
+            weEventTopic.setGroupId(this.groupId);
+            weEventTopic.setExtensions(weEvent.getExtensions());
+
+            // create bytesMessage
             WeEventBytesMessage bytesMessage = new WeEventBytesMessage();
-            bytesMessage.writeObject(weEvent);
-            //publish
+            bytesMessage.writeBytes(weEvent.getContent());
+
+            // publish
             WeEventTopicPublisher publisher = (WeEventTopicPublisher) session.createPublisher(weEventTopic);
             publisher.publish(bytesMessage);
-            //return
+
+            // return
             sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
             sendResult.setEventId(bytesMessage.getJMSMessageID());
-            sendResult.setTopic(weEvent.getTopic());
+
+            log.info("publish success, eventID: {}", bytesMessage.getJMSMessageID());
+        } catch (JMSException e) {
+            log.error("jms exception", e);
+            throw jms2BrokerException(e);
         } catch (Exception e) {
-            log.error("publish fail,error message: {}", e.getMessage());
+            log.error("publish failed", e);
             sendResult.setStatus(SendResult.SendResultStatus.ERROR);
-            sendResult.setTopic(weEvent.getTopic());
         }
+
         return sendResult;
     }
 
+    @Override
+    public String subscribe(String topic, String offset, @NonNull EventListener listener) throws BrokerException {
 
-    public boolean close(String topic, String groupId) throws BrokerException {
-        validateParam(topic);
-        validateParam(groupId);
-        return this.brokerRpc.close(topic, groupId);
+        return dealSubscribe(topic, offset, null, listener);
     }
 
-
-    public String subscribe(String topic, String groupId, String offset,
+    @Override
+    public String subscribe(String topic, String offset, String subscriptionId,
                             @NonNull EventListener listener) throws BrokerException {
+
+        return dealSubscribe(topic, offset, subscriptionId, listener);
+    }
+
+    @Override
+    public String subscribe(String[] topics, String offset, @NonNull EventListener listener) throws BrokerException {
+
+        String topic = StringUtils.join(topics, WeEvent.MULTIPLE_TOPIC_SEPARATOR);
+        return dealSubscribe(topic, offset, "", listener);
+    }
+
+    @Override
+    public String subscribe(String[] topics, String offset, String subscriptionId,
+                            @NonNull EventListener listener) throws BrokerException {
+        String topic = StringUtils.join(topics, WeEvent.MULTIPLE_TOPIC_SEPARATOR);
+        return dealSubscribe(topic, offset, subscriptionId, listener);
+    }
+
+    private String dealSubscribe(String topic, String offset, String subscriptionId, EventListener listener) throws BrokerException {
         try {
             validateParam(topic);
-            validateParam(groupId);
             validateParam(offset);
             TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
             // create topic
@@ -214,7 +218,10 @@ public class WeEventClient implements IWeEventClient {
 
             // create subscriber
             ((WeEventTopic) destination).setOffset(offset);
-            ((WeEventTopic) destination).setGroupId(groupId);//if not set default 1
+            ((WeEventTopic) destination).setGroupId(this.groupId);
+            if (!StringUtils.isBlank(subscriptionId)) {
+                ((WeEventTopic) destination).setContinueSubscriptionId(subscriptionId);
+            }
             WeEventTopicSubscriber subscriber = (WeEventTopicSubscriber) session.createSubscriber(destination);
 
             // create listener
@@ -243,80 +250,6 @@ public class WeEventClient implements IWeEventClient {
             throw jms2BrokerException(e);
         }
     }
-
-    public String subscribe(String topic, String groupId, String offset, String subscriptionId,
-                            @NonNull EventListener listener) throws BrokerException {
-        try {
-            validateParam(topic);
-            validateParam(groupId);
-            validateParam(offset);
-            TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-            // create topic
-            Topic destination = session.createTopic(topic);
-
-            // create subscriber
-            ((WeEventTopic) destination).setOffset(offset);
-            ((WeEventTopic) destination).setGroupId(groupId);//if not set default 1
-            ((WeEventTopic) destination).setContinueSubscriptionId(subscriptionId);
-            WeEventTopicSubscriber subscriber = (WeEventTopicSubscriber) session.createSubscriber(destination);
-
-            // create listener
-            subscriber.setMessageListener(new MessageListener() {
-                public void onMessage(Message message) {
-                    if (message instanceof BytesMessage) {
-                        try {
-                            BytesMessage bytesMessage = (BytesMessage) message;
-                            ObjectMapper mapper = new ObjectMapper();
-                            byte[] body = new byte[(int) bytesMessage.getBodyLength()];
-                            bytesMessage.readBytes(body);
-                            WeEvent event = mapper.readValue(body, WeEvent.class);
-                            listener.onEvent(event);
-                        } catch (IOException | JMSException e) {
-                            log.error("onMessage exception", e);
-                            listener.onException(e);
-                        }
-                    }
-                }
-            });
-
-            this.sessionMap.put(subscriber.getSubscriptionId(), session);
-            return subscriber.getSubscriptionId();
-        } catch (JMSException e) {
-            log.error("jms exception", e);
-            throw jms2BrokerException(e);
-        }
-    }
-
-
-    public boolean exist(String topic, String groupId) throws BrokerException {
-        validateParam(topic);
-        validateParam(groupId);
-        return this.brokerRpc.exist(topic, groupId);
-    }
-
-    public boolean open(String topic, String groupId) throws BrokerException {
-        validateParam(topic);
-        validateParam(groupId);
-        return this.brokerRpc.open(topic, groupId);
-    }
-
-    public TopicPage list(Integer pageIndex, Integer pageSize, String groupId) throws BrokerException {
-        validateParam(groupId);
-        return this.brokerRpc.list(pageIndex, pageSize, groupId);
-    }
-
-    public TopicInfo state(String topic, String groupId) throws BrokerException {
-        validateParam(topic);
-        validateParam(groupId);
-        return this.brokerRpc.state(topic, groupId);
-    }
-
-    public WeEvent getEvent(String eventId, String groupId) throws BrokerException {
-        validateParam(groupId);
-        validateParam(eventId);
-        return this.brokerRpc.getEvent(eventId, groupId);
-    }
-
 
     private String getStompUrl(String brokerUrl) throws BrokerException {
         String stompUrl;
@@ -373,6 +306,10 @@ public class WeEventClient implements IWeEventClient {
         }
 
         JsonRpcHttpClient client = new JsonRpcHttpClient(url);
+        client.setConnectionTimeoutMillis(this.timeoutMillis);
+        client.setReadTimeoutMillis(this.timeoutMillis);
+
+        // ssl
         if (jsonRpcUrl.contains("https://")) {
             SSLContext sslContext = getSSLContext();
             client.setSslContext(sslContext);
@@ -384,6 +321,14 @@ public class WeEventClient implements IWeEventClient {
                 }
             });
         }
+
+        // custom Exception
+        // {"jsonrpc":"2.0","id":"1","error":{"code":100106,"message":"topic name contain invalid char, ascii must be in[32, 128] except wildcard(+,#)"}}
+        client.setExceptionResolver(response -> {
+            log.error("Exception in json rpc invoke, {}", response.toString());
+            JsonNode error = response.get("error");
+            return new BrokerException(error.get("code").intValue(), error.get("message").textValue());
+        });
 
         this.brokerRpc = ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);
     }
@@ -441,7 +386,18 @@ public class WeEventClient implements IWeEventClient {
     }
 
     private static BrokerException jms2BrokerException(JMSException e) {
-        return new BrokerException(Integer.parseInt(e.getErrorCode()), e.getMessage());
+        if (StringUtils.isBlank(e.getErrorCode())) {
+            return new BrokerException(e.getMessage());
+        } else {
+            return new BrokerException(Integer.parseInt(e.getErrorCode()), e.getMessage());
+        }
     }
 
+    private void initGroupId(String groupId) {
+        if (StringUtils.isBlank(groupId)) {
+            this.groupId = WeEvent.DEFAULT_GROUP_ID;
+        } else {
+            this.groupId = groupId;
+        }
+    }
 }

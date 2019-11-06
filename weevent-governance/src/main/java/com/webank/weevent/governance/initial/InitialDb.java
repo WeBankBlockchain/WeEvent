@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
  * tool to initdb
  */
 @Slf4j
-public class InitialDb {
+public class InitialDb implements AutoCloseable {
 
     public static void main(String[] args) throws Exception {
         String goalUrl = "";
@@ -60,20 +60,20 @@ public class InitialDb {
             while (resultSet.next()) {
                 int num = resultSet.getInt(1);
                 if (num == 1) {
-                    log.error("database {} {}",dbName," is exist!");
-                    throw new GovernanceException("database " +dbName+" is exist!");
+                    log.error("database {} {}", dbName, " is exist!");
+                    throw new GovernanceException("database " + dbName + " is exist!");
                 }
             }
             String dbSql = "create database " + dbName + " default character set utf8 collate utf8_general_ci;";
-            tableSqlList.add(0,dbSql);
-            String useDataBase = "use "+dbName+";";
-            tableSqlList.add(1,useDataBase);
+            tableSqlList.add(0, dbSql);
+            String useDataBase = "use " + dbName + ";";
+            tableSqlList.add(1, useDataBase);
             for (String sql : tableSqlList) {
                 stat.executeUpdate(sql);
             }
-            log.info("create database {} {}",dbName," success!");
+            log.info("create database {} {}", dbName, " success!");
         } catch (SQLException e) {
-            log.error("create database fail,message: {}",e.getMessage());
+            log.error("create database fail,message: {}", e.getMessage());
             throw e;
         }
     }
@@ -97,5 +97,10 @@ public class InitialDb {
             resourceAsStream.close();
         }
         return sqlList;
+    }
+
+    @Override
+    public void close() throws Exception {
+        log.error("resource is close");
     }
 }

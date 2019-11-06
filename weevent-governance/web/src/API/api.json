@@ -5,6 +5,10 @@
     "url": "user/login",
     "headers": {"Content-Type": "application/x-www-form-urlencoded"}
   },
+  "getVersion": {
+    "method": "get",
+    "url": "weevent-governance/weevent/admin/getVersion"
+  },
   "listGroup": {
     "method": "get",
     "url": "weevent-governance/weevent/rest/listGroup"
@@ -25,6 +29,10 @@
     "method": "get",
     "url": "weevent-governance/weevent/admin/listSubscription"
   },
+  "getNodes": {
+    "method": "get",
+    "url": "weevent-governance/weevent/admin/listNodes"
+  },
   "addServer": {
     "method": "post",
     "url": "weevent-governance/broker/add"
@@ -40,6 +48,10 @@
   "deleteServer": {
     "method": "post",
     "url": "weevent-governance/broker/delete"
+  },
+  "checkBrokerServer": {
+    "method": "post",
+    "url": "weevent-governance/broker/checkServer"
   },
   "topicState": {
     "method": "get",
@@ -76,5 +88,57 @@
   "permissionList": {
     "method": "post",
     "url": "weevent-governance/permission/permissionList"
+  },
+  "ruleList": {
+    "method": "post",
+    "url": "weevent-governance/ruleEngine/list"
+  },
+  "ruleAdd": {
+    "method": "post",
+    "url": "weevent-governance/ruleEngine/add"
+  },
+  "ruleUpdate": {
+    "method": "post",
+    "url": "weevent-governance/ruleEngine/update"
+  },
+  "ruleStart": {
+    "method": "post",
+    "url": "weevent-governance/ruleEngine/start"
+  },
+  "ruleDelete": {
+    "method": "post",
+    "url": "weevent-governance/ruleEngine/delete"
+  },
+  "ruleStop": {
+    "method": "post",
+    "url": "weevent-governance/ruleEngine/updateStatus"
+  },
+  "ruleDetail": {
+    "method": "post",
+    "url": "weevent-governance/ruleEngine/detail"
+  },
+  "dbList": {
+    "method": "post",
+    "url": "weevent-governance/circulationDatabase/list"
+  },
+  "dbAdd": {
+    "method": "post",
+    "url": "weevent-governance/circulationDatabase/add"
+  },
+  "dbDelete": {
+    "method": "post",
+    "url": "weevent-governance/circulationDatabase/delete"
+  },
+  "dbUpdate": {
+    "method": "post",
+    "url": "weevent-governance/circulationDatabase/update"
+  },
+  "historicalData": {
+    "method": "post",
+    "url": "weevent-governance/historicalData/list"
+  },
+  "eventList": {
+    "method": "post",
+    "url": "weevent-governance/historicalData/eventList"
   }
 }

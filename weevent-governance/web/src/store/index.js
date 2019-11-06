@@ -6,10 +6,12 @@ export default new vuex.Store({
   state: {
     userName: '',
     goLogin: false,
-    active: '0',
-    menu: '首页',
+    active: '',
+    menu: '',
     brokerId: '',
-    groupId: ''
+    groupId: '',
+    isConfigRule: '',
+    lang: localStorage.getItem('lang') || 'zh'
   },
   mutations: {
     set_name (state, note) {
@@ -29,6 +31,12 @@ export default new vuex.Store({
     },
     set_groupId (state, id) {
       state.groupId = id
+    },
+    setConfigRule (state, config) {
+      state.isConfigRule = config
+    },
+    setlang (state, lang) {
+      state.lang = lang
     }
   }
 })

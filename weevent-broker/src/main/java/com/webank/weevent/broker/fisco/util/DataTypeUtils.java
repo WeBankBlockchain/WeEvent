@@ -2,6 +2,9 @@ package com.webank.weevent.broker.fisco.util;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
@@ -18,11 +21,14 @@ import org.bouncycastle.util.encoders.Hex;
  */
 @Slf4j
 public final class DataTypeUtils {
+
+    private static String STRING_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
     /**
      * encode eventId
      *
      * @param topicName topic name
-     * @param eventBlockNumber blockchain blocknumber
+     * @param eventBlockNumber block chain block number
      * @param eventSeq eventSeq number
      * @return encodeString
      */
@@ -69,7 +75,7 @@ public final class DataTypeUtils {
         if (tokens[0].length() != WeEventConstants.TOPIC_NAME_ENCODE_LENGTH) {
             throw new BrokerException(ErrorCode.EVENT_ID_IS_ILLEGAL);
         }
-        return DataTypeUtils.String2Long(tokens[1]);
+        return DataTypeUtils.stringToLong(tokens[1]);
     }
 
     /**
@@ -86,7 +92,7 @@ public final class DataTypeUtils {
         if (tokens[0].length() != WeEventConstants.TOPIC_NAME_ENCODE_LENGTH) {
             throw new BrokerException(ErrorCode.EVENT_ID_IS_ILLEGAL);
         }
-        return DataTypeUtils.String2Long(tokens[2]);
+        return DataTypeUtils.stringToLong(tokens[2]);
     }
 
     /**
@@ -112,7 +118,7 @@ public final class DataTypeUtils {
      * @param value the value
      * @return java.lang.Long
      */
-    public static Long String2Long(String value) {
+    public static Long stringToLong(String value) {
         try {
             return Long.valueOf(value);
         } catch (NumberFormatException e) {
@@ -133,4 +139,34 @@ public final class DataTypeUtils {
             return null;
         }
     }
+
+    /**
+     * convert data timestamp to String.
+     *
+     * @param date the date
+     * @return the String timestamp
+     */
+    public static String getTimestamp(Date date) {
+        return getDefaultDateFormat().format(date);
+    }
+
+    /**
+     * convert long timestamp to String.
+     *
+     * @param date the date
+     * @return the String timestamp
+     */
+    public static String getTimestamp(long date) {
+        return getDefaultDateFormat().format(date);
+    }
+
+    /**
+     * Gets the default date format.
+     *
+     * @return the default date format
+     */
+    private static DateFormat getDefaultDateFormat() {
+        return new SimpleDateFormat(STRING_DATE_FORMAT);
+    }
+
 }

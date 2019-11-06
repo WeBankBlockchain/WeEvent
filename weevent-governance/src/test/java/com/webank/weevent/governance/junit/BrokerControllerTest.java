@@ -3,10 +3,14 @@ package com.webank.weevent.governance.junit;
 
 import java.util.List;
 
+import javax.servlet.http.Cookie;
+
 import com.webank.weevent.governance.JUnitTestBase;
 import com.webank.weevent.governance.entity.BrokerEntity;
+import com.webank.weevent.governance.properties.ConstantProperties;
 
 import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.junit.Assert;
 import org.junit.Before;
@@ -20,6 +24,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+@Slf4j
 public class BrokerControllerTest extends JUnitTestBase {
 
     @Autowired
@@ -27,15 +32,26 @@ public class BrokerControllerTest extends JUnitTestBase {
 
     private MockMvc mockMvc;
 
+    private Cookie cookie;
+
     @Before
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+        this.cookie = new Cookie(ConstantProperties.COOKIE_MGR_ACCOUNT_ID, "1");
+
+    }
+
+    @Before
+    public void before() {
+        log.info("=============================={}.{}==============================",
+                this.getClass().getSimpleName(),
+                this.testName.getMethodName());
     }
 
     @Test
     public void testAddBroker() throws Exception {
         String content = "{\"name\":\"broker2\",\"brokerUrl\":\"http://127.0.0.1:7000/weevent\",\"webaseUrl\":\"http://127.0.0.1:7000/weevent\",\"userId\":\"1\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         Assert.assertTrue(response.getContentAsString().contains("true"));

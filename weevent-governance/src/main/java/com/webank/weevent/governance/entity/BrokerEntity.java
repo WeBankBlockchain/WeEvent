@@ -2,12 +2,10 @@ package com.webank.weevent.governance.entity;
 
 import java.util.List;
 
-import javax.validation.constraints.Min;
-
-import com.webank.weevent.governance.entity.base.BaseEntity;
+import com.webank.weevent.governance.entity.base.BrokerBase;
 
 import lombok.Data;
-import org.hibernate.validator.constraints.URL;
+import lombok.EqualsAndHashCode;
 
 /**
  * BrokerEntity class
@@ -15,22 +13,10 @@ import org.hibernate.validator.constraints.URL;
  * @since 2019/04/28
  */
 @Data
-public class BrokerEntity extends BaseEntity {
-
-    @Min(1)
-    private Integer userId;
-
-    private String name;
-
-    @URL
-    private String brokerUrl;
-
-    @URL
-    private String webaseUrl;
+@EqualsAndHashCode(callSuper = false)
+public class BrokerEntity extends BrokerBase {
 
     private List<Integer> userIdList;
-
-    private Integer isDelete;
 
     /**
      * 1 means creator, 2 means is authorized

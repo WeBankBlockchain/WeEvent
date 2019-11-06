@@ -2,38 +2,23 @@ package com.webank.weevent.governance.entity;
 
 import java.util.List;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-
-import com.webank.weevent.governance.entity.base.BaseEntity;
+import com.webank.weevent.governance.entity.base.AccountBase;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * User class
+ * AccountEntity class
  *
  * @since 2019/04/28
  */
 @Data
-public class AccountEntity extends BaseEntity {
-
-
-    @NotBlank
-    private String username;
-
-    @NotBlank
-    private String password;
-
-    @Email
-    private String email;
+@EqualsAndHashCode(callSuper=false)
+public class AccountEntity extends AccountBase {
 
     private String oldPassword;
 
-    private Integer isDelete;
-
     private List<Integer> permissionIdList;
-
-    private Integer brokerId;
 
 
 }

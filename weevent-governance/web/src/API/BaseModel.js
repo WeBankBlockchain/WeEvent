@@ -1,7 +1,8 @@
 import axios from 'axios'
-import {Message} from 'element-ui'
+import { Message } from 'element-ui'
 import qs from 'qs'
 import store from '../store'
+import i18n from '../i18n/index'
 const con = require('../../config/config.js')
 
 class BaseModule {
@@ -17,7 +18,7 @@ class BaseModule {
         'X-Requested-With': 'XMLHttpRequest'
       }
     }
-    // 请求前的数据拦截
+
     this.$http.interceptors.request.use(config => {
       config.url = con.ROOT + config.url
       if (config.method === 'delete' || config.method === 'get') {
@@ -25,7 +26,7 @@ class BaseModule {
       }
       return config
     })
-    // 收到数据的拦截
+
     this.$http.interceptors.response.use(config => {
       return new Promise((resolve, reject) => {
         let data = config.data
@@ -39,26 +40,26 @@ class BaseModule {
         } else {
           Message({
             type: 'warning',
-            message: '请求异常'
+            message: i18n.messages[i18n.locale].common.reqException
           })
           reject(config)
         }
       }).catch((e) => {
         Message({
           type: 'error',
-          message: '请求未响应,稍后重试'
+          message: i18n.messages[i18n.locale].common.reqException
         })
       })
     }, error => {
       if (error.message.includes('timeout')) {
         Message({
           type: 'error',
-          message: '请求超时请稍后重试'
+          message: i18n.messages[i18n.locale].common.timeOut
         })
       } else {
         Message({
           type: 'error',
-          message: '数据请求失败'
+          message: i18n.messages[i18n.locale].common.reqException
         })
       }
     })
