@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
  * tool to initdb
  */
 @Slf4j
-public class InitialDb {
+public class InitialDb implements AutoCloseable {
 
     public static void main(String[] args) throws Exception {
         String goalUrl = "";
@@ -97,5 +97,10 @@ public class InitialDb {
             resourceAsStream.close();
         }
         return sqlList;
+    }
+
+    @Override
+    public void close() throws Exception {
+        log.error("resource is close");
     }
 }
