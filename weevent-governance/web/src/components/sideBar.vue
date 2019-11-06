@@ -24,13 +24,12 @@
         {{$t('sideBar.topicList')}}
       </el-menu-item>
       <el-menu-item index='2-2'>
+        {{$t('sideBar.subcription')}}
+      </el-menu-item>
+      <el-menu-item index='2-3'>
         {{$t('sideBar.statistics')}}
       </el-menu-item>
     </el-submenu>
-    <el-menu-item index="3">
-      <i class="el-icon-document"></i>
-      <span slot="title">{{$t('sideBar.subcription')}}</span>
-    </el-menu-item>
     <el-submenu index="4">
       <template slot='title'>
         <i class="el-icon-s-tools"></i>

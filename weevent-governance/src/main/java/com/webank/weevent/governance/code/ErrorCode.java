@@ -11,6 +11,7 @@ public enum ErrorCode {
     ILLEGAL_INPUT(100105, "illegal input"),
     WEBASE_REQUIRED(100105, "when it is version 1.3, WeBase url is required"),
     PROCESS_CONNECT_ERROR(100106, "process connect error!"),
+    NO_MAILBOX_CONFIGURED(100107, "no mailbox configured"),
     ;
 
 

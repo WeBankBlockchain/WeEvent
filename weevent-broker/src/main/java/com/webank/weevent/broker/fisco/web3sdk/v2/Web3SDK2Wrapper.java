@@ -1,16 +1,18 @@
 package com.webank.weevent.broker.fisco.web3sdk.v2;
 
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -18,6 +20,8 @@ import java.util.stream.Collectors;
 
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.dto.ListPage;
+import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
 import com.webank.weevent.protocol.rest.entity.TbBlock;
@@ -27,6 +31,8 @@ import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -42,16 +48,15 @@ import org.fisco.bcos.web3j.precompile.exception.PrecompileMessageException;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.Web3jService;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
+import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameterNumber;
 import org.fisco.bcos.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.fisco.bcos.web3j.protocol.core.RemoteCall;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock;
-import org.fisco.bcos.web3j.protocol.core.methods.response.BcosTransaction;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BcosTransactionReceipt;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BlockNumber;
 import org.fisco.bcos.web3j.protocol.core.methods.response.GroupList;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeIDList;
-import org.fisco.bcos.web3j.protocol.core.methods.response.PbftView;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TotalTransactionCount;
 import org.fisco.bcos.web3j.protocol.core.methods.response.Transaction;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -75,6 +80,12 @@ public class Web3SDK2Wrapper {
     public final static String WeEventTableValue = "value";
     public final static String WeEventTableVersion = "version";
     public final static String WeEventTopicControlAddress = "topic_control_address";
+    // partial key of FISCO block info
+    public final static String BLOCK_NUMBER = "blockNumber";
+    public final static String NODE_ID = "nodeId";
+    public final static String PEERS = "peers";
+    public final static String VIEW = "view";
+
 
     // static gas provider
     public static final ContractGasProvider gasProvider = new ContractGasProvider() {
@@ -504,44 +515,31 @@ public class Web3SDK2Wrapper {
     }
 
     //Traversing transactions
-    public static List<TbTransHash> queryTransList(Web3j web3j, String transHash, BigInteger blockNumber) throws BrokerException {
+    public static ListPage<TbTransHash> queryTransList(Web3j web3j, String blockHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize) throws BrokerException {
+        ListPage<TbTransHash> tbTransHashListPage = new ListPage<>();
         List<TbTransHash> tbTransHashes = new ArrayList<>();
+
         try {
-            if (transHash == null && blockNumber == null) {
-                BlockNumber number = web3j.getBlockNumber().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-                BcosTransaction bcosTransaction = web3j.getTransactionByBlockNumberAndIndex(new DefaultBlockParameterNumber(number.getBlockNumber()), BigInteger.ZERO)
+            if (blockHash != null) {
+                // get TbTransHash list by blockHash
+                BcosBlock bcosBlock = web3j.getBlockByHash(blockHash, true)
                         .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-                if (!bcosTransaction.getTransaction().isPresent()) {
-                    Transaction transaction = bcosTransaction.getTransaction().get();
-                    TbTransHash tbTransHash = new TbTransHash(transaction.getHash(), transaction.getFrom(), transaction.getTo(),
-                            transaction.getBlockNumber(), null);
-                    tbTransHashes.add(tbTransHash);
-                }
-            } else if (transHash != null) {
-                BcosTransaction bcosTransaction = web3j.getTransactionByHash(transHash).sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-                Transaction trans = bcosTransaction.getResult();
-                TbTransHash tbTransHash;
-                if (trans != null) {
-                    tbTransHash = new TbTransHash(transHash, trans.getFrom(), trans.getTo(),
-                            trans.getBlockNumber(), null);
-                    tbTransHashes.add(tbTransHash);
-                }
+
+                generateTbTransHashListPage(pageIndex, pageSize, tbTransHashListPage, tbTransHashes, bcosBlock);
             } else {
-                BcosBlock bcosBlock = web3j.getBlockByNumber(new DefaultBlockParameterNumber(blockNumber), true)
-                        .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-                BcosBlock.Block block = bcosBlock.getBlock();
-                if (block == null || CollectionUtils.isEmpty(block.getTransactions())) {
-                    return null;
+                // get TbTransHash list by blockNumber
+                BigInteger blockNum = blockNumber;
+                if (blockNumber == null) {
+                    blockNum = web3j.getBlockNumber().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS).getBlockNumber();
                 }
-                List<Transaction> transactionHashList = block.getTransactions().stream()
-                        .map(transactionResult -> (Transaction) transactionResult.get()).collect(Collectors.toList());
-                transactionHashList.forEach(it -> {
-                    TbTransHash tbTransHash = new TbTransHash(it.getHash(), it.getFrom(), it.getTo(),
-                            blockNumber, null);
-                    tbTransHashes.add(tbTransHash);
-                });
+                BcosBlock bcosBlock = web3j.getBlockByNumber(DefaultBlockParameter.valueOf(blockNum), true)
+                        .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+
+                generateTbTransHashListPage(pageIndex, pageSize, tbTransHashListPage, tbTransHashes, bcosBlock);
             }
-            return tbTransHashes;
+            tbTransHashListPage.setPageIndex(pageIndex);
+            tbTransHashListPage.setPageSize(pageSize);
+            return tbTransHashListPage;
         } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
             log.error("query transaction failed due to web3sdk rpc error", e);
@@ -552,40 +550,78 @@ public class Web3SDK2Wrapper {
         }
     }
 
+    private static void generateTbTransHashListPage(Integer pageIndex, Integer pageSize, ListPage<TbTransHash> tbTransHashListPage, List<TbTransHash> tbTransHashes, BcosBlock bcosBlock) throws BrokerException {
+        BcosBlock.Block block = bcosBlock.getBlock();
+        if (block == null || CollectionUtils.isEmpty(block.getTransactions())) {
+            log.error("query transaction from block failed. transaction in block is empty");
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
+        }
+
+        Integer transCount = block.getTransactions().size();
+
+        if (pageIndex < 1 || (pageIndex - 1) * pageSize > transCount) {
+            log.error("pageIndex error.");
+            throw new BrokerException("pageIndex error.");
+        }
+        Integer transSize = (transCount <= pageIndex * pageSize) ? (transCount - ((pageIndex - 1) * pageSize)) : pageSize;
+        Integer transIndexStart = (pageIndex - 1) * pageSize;
+
+        List<Transaction> transactionHashList = block.getTransactions().stream()
+                .map(transactionResult -> (Transaction) transactionResult.get()).collect(Collectors.toList()).subList(transIndexStart, transSize + transIndexStart);
+        transactionHashList.forEach(tx -> {
+            TbTransHash tbTransHash = new TbTransHash(tx.getHash(), tx.getFrom(), tx.getTo(),
+                    tx.getBlockNumber(), DataTypeUtils.getTimestamp(bcosBlock.getBlock().getTimestamp().longValue()));
+            tbTransHashes.add(tbTransHash);
+        });
+        tbTransHashListPage.setPageSize(transSize);
+        tbTransHashListPage.setTotal(transCount);
+        tbTransHashListPage.setPageData(tbTransHashes);
+    }
+
     //Traverse block
-    public static List<TbBlock> queryBlockList(Web3j web3j, String transHash, BigInteger blockNumber) throws BrokerException {
-        List<TbBlock> tbBlocks = new ArrayList<>();
+    public static ListPage<TbBlock> queryBlockList(Web3j web3j, String blockHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize) throws BrokerException {
+        ListPage<TbBlock> tbBlockListPage = new ListPage<>();
+        List<TbBlock> tbBlocks = new CopyOnWriteArrayList<>();
+        Integer blcokCount = 0;
         try {
             BcosBlock.Block block;
-            if (transHash == null && blockNumber == null) {
-                BlockNumber number = web3j.getBlockNumber().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-                BcosBlock bcosBlock = web3j.getBlockByNumber(new DefaultBlockParameterNumber(number.getBlockNumber()), true)
+            if (blockHash != null) {
+                BcosBlock bcosBlock = web3j.getBlockByHash(blockHash, true)
                         .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
                 block = bcosBlock.getBlock();
-            } else if (transHash != null) {
-                BcosBlock bcosBlock = web3j.getBlockByHash(transHash, true)
-                        .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-                block = bcosBlock.getBlock();
-            } else {
+                blcokCount = 1;
+                getTbBlockList(tbBlocks, block);
+            } else if (blockNumber != null) {
                 BcosBlock bcosBlock = web3j.getBlockByNumber(new DefaultBlockParameterNumber(blockNumber), true)
                         .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
                 block = bcosBlock.getBlock();
+                blcokCount = 1;
+                getTbBlockList(tbBlocks, block);
+            } else {
+                BigInteger blockNum = web3j.getBlockNumber().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS).getBlockNumber();
 
-            }
-            if (block == null) {
-                return null;
-            }
-            Instant instant = Instant.ofEpochMilli(block.getTimestamp().longValue());
-            ZoneId zone = ZoneId.systemDefault();
-            LocalDateTime blockTimestamp = LocalDateTime.ofInstant(instant, zone);
+                if (pageIndex < 1 || (pageIndex-1) * pageSize > blockNum.longValue()) {
+                    log.error("pageIndex error.");
+                    throw new BrokerException("pageIndex error.");
+                }
+                Integer blockSize = (blockNum.longValue() <= pageIndex * pageSize) ? (Integer.valueOf(blockNum.toString()) - ((pageIndex-1) * pageSize)) : pageSize;
+                long blockNumberIndex = (pageIndex-1) * pageSize + 1;
 
-            int size = block.getTransactions() == null ? 0 : 1;
-            int sealerIndex = Integer.parseInt(block.getSealer().substring(2), 16);
-            TbBlock tbBlock = new TbBlock(block.getHash(), block.getNumber(), blockTimestamp,
-                    size, sealerIndex);
-            tbBlock.setSealer(block.getSealer());
-            tbBlocks.add(tbBlock);
-            return tbBlocks;
+                List<Long> blockNums = new ArrayList<>();
+                for (int i = 0; i < blockSize; i++) {
+                    blockNums.add(blockNumberIndex);
+                    blockNumberIndex ++;
+                }
+                blcokCount = blockNum.intValue();
+                tbBlocks = getTbBlock(web3j, blockNums);
+
+                Collections.sort(tbBlocks, (arg0, arg1) -> arg1.getBlockNumber().compareTo(arg0.getBlockNumber()));
+            }
+            tbBlockListPage.setPageIndex(pageIndex);
+            tbBlockListPage.setPageSize(pageSize);
+            tbBlockListPage.setTotal(blcokCount);
+            tbBlockListPage.setPageData(tbBlocks);
+            return tbBlockListPage;
         } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
             log.error("query transaction failed due to web3sdk rpc error", e);
@@ -596,27 +632,62 @@ public class Web3SDK2Wrapper {
         }
     }
 
-    public static List<TbNode> queryNodeList(Web3j web3j) throws BrokerException {
+    private static void getTbBlockList(List<TbBlock> tbBlocks, BcosBlock.Block block) throws BrokerException {
+        if (block == null) {
+            log.error("query block failed, block is null.");
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
+        }
+
+        String blockTimestamp = DataTypeUtils.getTimestamp(block.getTimestamp().longValue());
+
+        int transactions = 0;
+        if (!block.getTransactions().isEmpty()) {
+            transactions = block.getTransactions().size();
+        }
+        int sealerIndex = Integer.parseInt(block.getSealer().substring(2), 16);
+        TbBlock tbBlock = new TbBlock(block.getHash(), block.getNumber(), blockTimestamp,
+                transactions, sealerIndex);
+        tbBlock.setSealer(block.getSealer());
+        tbBlocks.add(tbBlock);
+    }
+
+    public static synchronized ListPage<TbNode> queryNodeList(Web3j web3j) throws BrokerException {
+        ListPage<TbNode> tbNodeListPage = new ListPage<>();
         //1、Current node, pbftview, and blockNumber
         List<TbNode> tbNodes = new ArrayList<>();
         try {
-            NodeIDList nodeIDList = web3j.getNodeIDList()
-                    .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-            List<String> nodeIds = nodeIDList.getNodeIDList();
-            if (CollectionUtils.isEmpty(nodeIds)) {
-                return null;
+
+            List<String> observerList = web3j.getObserverList().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS).getObserverList();
+            List<String> sealerList = web3j.getSealerList().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS).getSealerList();
+
+            if (CollectionUtils.isEmpty(sealerList)) {
+                log.error("nodeList query from web3j is empty.");
+                throw new BrokerException("nodeList query from web3j is empty");
             }
-            PbftView pbftView = web3j.getPbftView().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-            BlockNumber blockNumber = web3j.getBlockNumber().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-            TbNode tbNode = new TbNode();
-            tbNode.setBlockNumber(blockNumber.getBlockNumber());
-            tbNode.setPbftView(pbftView.getPbftView());
-            tbNode.setNodeId(nodeIds.get(0));
-            tbNode.setNodeName(nodeIds.get(0).substring(0, nodeIds.get(0).length() - 10));
-            tbNode.setNodeActive(1);
-            tbNodes.add(tbNode);
-            return tbNodes;
-        } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
+
+            List<String> nodeIds = web3j.getNodeIDList()
+                    .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS).getNodeIDList();
+
+            // get PbftView from each nodes
+            Map<String, Map<String, String>> nodeViews = getNodeViews(web3j);
+            // get blockNum from each nodes
+            Map<String, Map<String, String>> nodeBlockNums = getBlockNums(web3j);
+
+            for (String sealerNodeId : sealerList) {
+                TbNode tbNode = generateTbNode(nodeViews, nodeBlockNums, sealerNodeId, nodeIds);
+                tbNode.setNodeType(WeEventConstants.NODE_TYPE_SEALER);
+                tbNodes.add(tbNode);
+            }
+            for (String observerNodeId : observerList) {
+                TbNode tbNode = generateTbNode(nodeViews, nodeBlockNums, observerNodeId, nodeIds);
+                tbNode.setNodeType(WeEventConstants.NODE_TYPE_OBSERVER);
+                tbNodes.add(tbNode);
+            }
+
+            tbNodeListPage.setPageData(tbNodes);
+            tbNodeListPage.setTotal(tbNodes.size());
+            return tbNodeListPage;
+        } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException | IOException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
             log.error("query node failed due to web3sdk rpc error", e);
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
@@ -624,6 +695,119 @@ public class Web3SDK2Wrapper {
             log.error("query node failed due to web3sdk rpc error", e);
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
+    }
+
+    private static Map<String, Map<String, String>> getNodeViews(Web3j web3j) throws IOException {
+        JSONArray consensusStatusArr = JSONObject.parseArray(web3j.getConsensusStatus().sendForReturnString());
+        Map<String, Map<String, String>> nodeviews = new HashMap<>();
+        for (int i =0; i < consensusStatusArr.size(); i++){
+            Object jsonObj = consensusStatusArr.get(i);
+            if (jsonObj instanceof JSONArray) {
+                convertJSONArrayToList(nodeviews, (JSONArray) jsonObj);
+            }
+        }
+        return nodeviews;
+    }
+
+    private static Map<String, Map<String, String>> getBlockNums(Web3j web3j) throws IOException {
+        JSONObject syncStatusArr = JSONObject.parseObject(web3j.getSyncStatus().sendForReturnString());
+        Map<String, Map<String, String>> nodeBlockNums = new HashMap<>();
+        Set<String> set = syncStatusArr.keySet();
+        Map<String, String> map = new HashMap<>();
+        for (String s : set) {
+            if (BLOCK_NUMBER.equals(s) || NODE_ID.equals(s)) {
+                map.put(s, syncStatusArr.getString(s));
+            }
+            if (PEERS.equals(s)) {
+                String peersListStr = syncStatusArr.getString(s);
+                JSONArray peersListJSONArray = JSONObject.parseArray(peersListStr);
+                convertJSONArrayToList(nodeBlockNums, peersListJSONArray);
+            }
+        }
+        nodeBlockNums.put(syncStatusArr.getString(NODE_ID), map);
+        return nodeBlockNums;
+    }
+
+    private static void convertJSONArrayToList(Map<String, Map<String, String>> map, JSONArray jsonObj) {
+        for (int i = 0; i < jsonObj.size(); i++) {
+            Object object = jsonObj.get(i);
+            if (object instanceof JSONObject) {
+                Set<String> keySet = ((JSONObject) object).keySet();
+                Map<String, String> objMap = new HashMap<>();
+                for (String key : keySet) {
+                    objMap.put(key, ((JSONObject) object).getString(key));
+                }
+                map.put(objMap.get(NODE_ID), objMap);
+            }
+        }
+    }
+
+    private static TbNode generateTbNode(Map<String, Map<String, String>> nodeViews,
+                                         Map<String, Map<String, String>> nodeBlockNums,
+                                         String nodeId, List<String> nodeIds) {
+        TbNode tbNode = new TbNode();
+        BigInteger blockNum = null;
+        BigInteger pbftView = null;
+        if (nodeBlockNums.containsKey(nodeId)) {
+            blockNum = new BigInteger(nodeBlockNums.get(nodeId).get(BLOCK_NUMBER));
+        }
+        if (nodeViews.containsKey(nodeId)) {
+            pbftView = new BigInteger(nodeViews.get(nodeId).get(VIEW));
+        }
+        tbNode.setNodeId(nodeId);
+        tbNode.setBlockNumber(blockNum);
+        tbNode.setPbftView(pbftView);
+        tbNode.setNodeActive(checkNodeActive(nodeId, nodeIds));
+        return tbNode;
+    }
+
+    private static int checkNodeActive(String nodeId, List<String> nodeIds) {
+        // 1 means node active; 0 means inactive
+        return nodeIds.contains(nodeId)? 1 : 0;
+    }
+
+    private static CopyOnWriteArrayList<TbBlock> getTbBlock(Web3j web3j, List<Long> blockNums) throws ExecutionException, InterruptedException {
+
+        CompletableFuture<List<TbBlock>>[] completableFutureArr = new CompletableFuture[blockNums.size()];
+        CopyOnWriteArrayList<TbBlock> tbBlocks = new CopyOnWriteArrayList<>();
+        for (int i = 0; i < blockNums.size(); i++) {
+            long blockNumber = blockNums.get(i);
+            CompletableFuture<List<TbBlock>> future = CompletableFuture.supplyAsync(() ->{
+                BcosBlock bcosBlock = null;
+                try {
+                    bcosBlock = web3j.getBlockByNumber(new DefaultBlockParameterNumber(blockNumber), true)
+                            .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException |ExecutionException |TimeoutException e) {
+                    log.error("query block by blockNumber failed. e:", e);
+                    return null;
+                }
+                BcosBlock.Block block = bcosBlock.getBlock();
+
+                if (block == null) {
+                    return null;
+                }
+
+                String blockTimestamp = DataTypeUtils.getTimestamp(block.getTimestamp().longValue());
+
+                int transactions = 0;
+                if (!block.getTransactions().isEmpty()) {
+                    transactions = block.getTransactions().size();
+                }
+                int sealerIndex = Integer.parseInt(block.getSealer().substring(2), 16);
+                TbBlock tbBlock = new TbBlock(block.getHash(), block.getNumber(), blockTimestamp,
+                        transactions, sealerIndex);
+                tbBlock.setSealer(block.getSealer());
+                tbBlocks.add(tbBlock);
+                return tbBlocks;
+            });
+
+            completableFutureArr[i] = future;
+        }
+
+        CompletableFuture<Void> combindFuture = CompletableFuture.allOf(completableFutureArr);
+        combindFuture.get();
+
+        return tbBlocks;
     }
 }
 

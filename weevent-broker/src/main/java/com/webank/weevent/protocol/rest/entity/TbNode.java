@@ -25,10 +25,10 @@ public class TbNode {
 
     private String nodeId;
     private String nodeName;
+    private String nodeType;
     private BigInteger blockNumber;
     private BigInteger pbftView;
     private int nodeActive;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
-
 }

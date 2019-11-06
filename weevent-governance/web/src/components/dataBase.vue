@@ -17,7 +17,12 @@
       width='200'>
     </el-table-column>
     <el-table-column
-      :label="$t('rule.databaseUrl')"
+      :label="$t('rule.tableName')"
+      prop="tableName"
+      width='200'>
+    </el-table-column>
+    <el-table-column
+      :label="$t('rule.ruleDataBaseId')"
       prop="databaseUrl">
     </el-table-column>
     <el-table-column
@@ -34,8 +39,12 @@
       <el-form-item :label="$t('rule.JDBCname')" prop='databaseName'>
         <el-input v-model.trim="form.databaseName" autocomplete="off"></el-input>
       </el-form-item>
-      <el-form-item :label="$t('rule.databaseUrl')" prop='url'>
-        <el-input v-model.trim="form.url" type='textarea' :rows='4' autocomplete="off" :placeholder="$t('common.examples') + 'jdbc:mysql://127.0.0.1:3306/governance?root=root&password=123456&useUnicode=true&characterEncoding=utf-8&useSSL=false&tableName=tableName'"></el-input>
+
+      <el-form-item :label="$t('rule.ruleDataBaseId')" prop='url'>
+        <el-input v-model.trim="form.url" type='textarea' :rows='4' autocomplete="off" :placeholder="$t('common.examples') + 'jdbc:mysql://127.0.0.1:3306/governance?root=root&password=123456&useUnicode=true&characterEncoding=utf-8&useSSL=false'"></el-input>
+      </el-form-item>
+      <el-form-item :label="$t('rule.tableName')" prop='tableName'>
+        <el-input v-model.trim="form.tableName" autocomplete="off"></el-input>
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
@@ -63,6 +72,13 @@ export default {
         callback()
       }
     }
+    var tableName = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error(this.$t('rule.enterTableName')))
+      } else {
+        callback()
+      }
+    }
     return {
       topicName: '',
       loading: false,
@@ -73,23 +89,31 @@ export default {
       title: this.$t('rule.addAddress'),
       form: {
         databaseName: '',
-        url: ''
+        url: '',
+        tableName: ''
       },
       rules: {
         databaseName: [
-          { validator: databaseName, trigger: 'blur' }
+          { required: true, validator: databaseName, trigger: 'blur' }
         ],
         url: [
-          { validator: url, trigger: 'blur' }
+          { required: true, validator: url, trigger: 'blur' }
+        ],
+        tableName: [
+          { required: true, validator: tableName, trigger: 'blur' }
         ]
       }
     }
   },
   watch: {
     showlog (nVal) {
-      console.log(this.form)
       if (!nVal) {
-        this.form.url = ''
+        let data = {
+          databaseName: '',
+          tableName: '',
+          url: ''
+        }
+        this.form = Object.assign({}, data)
         this.type = 1
         this.title = this.$t('rule.addAddress')
         this.$refs.form.resetFields()
@@ -110,6 +134,7 @@ export default {
         let data = {
           'databaseUrl': vm.form.url,
           'databaseName': vm.form.databaseName,
+          'tableName': vm.form.tableName,
           'userId': localStorage.getItem('userId')
         }
         if (valid) {
@@ -155,6 +180,7 @@ export default {
       this.showlog = true
       this.id = e.id
       this.form.databaseName = e.databaseName
+      this.form.tableName = e.tableName
       this.form.url = e.databaseUrl
       this.title = this.$t('rule.enditAddress')
       this.type = 2

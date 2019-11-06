@@ -363,19 +363,43 @@ public class FiscoBcosDelegate {
     }
 
     public GroupGeneral getGroupGeneral(Long groupId) throws BrokerException {
-        return this.fiscoBcos2Map.get(groupId).getGroupGeneral();
+        checkVersion(groupId);
+
+        if (this.fiscoBcos != null) {
+            throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
+        } else {
+            return this.fiscoBcos2Map.get(groupId).getGroupGeneral();
+        }
     }
 
-    public List<TbTransHash> queryTransList(Long groupId, String transHash, BigInteger blockNumber) throws BrokerException {
-        return this.fiscoBcos2Map.get(groupId).queryTransList(transHash, blockNumber);
+    public ListPage<TbTransHash> queryTransList(Long groupId, String transHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize) throws BrokerException {
+        checkVersion(groupId);
+
+        if (this.fiscoBcos != null) {
+            throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
+        } else {
+            return this.fiscoBcos2Map.get(groupId).queryTransList(transHash, blockNumber, pageIndex, pageSize);
+        }
     }
 
-    public List<TbBlock> queryBlockList(Long groupId, String transHash, BigInteger blockNumber) throws BrokerException {
-        return this.fiscoBcos2Map.get(groupId).queryBlockList(transHash, blockNumber);
+    public ListPage<TbBlock> queryBlockList(Long groupId, String transHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize) throws BrokerException {
+        checkVersion(groupId);
+
+        if (this.fiscoBcos != null) {
+            throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
+        } else {
+            return this.fiscoBcos2Map.get(groupId).queryBlockList(transHash, blockNumber, pageIndex, pageSize);
+        }
     }
 
-    public List<TbNode> queryNodeList(Long groupId) throws BrokerException {
-        return this.fiscoBcos2Map.get(groupId).queryNodeList();
+    public ListPage<TbNode> queryNodeList(Long groupId) throws BrokerException {
+        checkVersion(groupId);
+
+        if (this.fiscoBcos != null) {
+            throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
+        } else {
+            return this.fiscoBcos2Map.get(groupId).queryNodeList();
+        }
     }
 
 }

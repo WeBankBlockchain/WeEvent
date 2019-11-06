@@ -126,6 +126,12 @@ class ResoruceService extends BaseModel {
   historicalData (data) {
     return this.request(api.historicalData, data)
   }
+  getNodes (data) {
+    return this.request(api.getNodes, data)
+  }
+  eventList (data) {
+    return this.request(api.eventList, data)
+  }
 }
 
 export default new ResoruceService()
