@@ -7,11 +7,6 @@ import javax.jms.BytesMessage;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 
-import com.webank.weevent.sdk.ErrorCode;
-import com.webank.weevent.sdk.WeEvent;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -25,6 +20,7 @@ public class WeEventBytesMessage implements BytesMessage {
     private byte[] bytes;
 
     private String eventId;
+
     // BytesMessage override methods
 
     @Override
@@ -97,6 +93,9 @@ public class WeEventBytesMessage implements BytesMessage {
             return 0;
         }
 
+        if (bytes.length < this.bytes.length) {
+            throw new JMSException("too little buffer size");
+        }
         System.arraycopy(this.bytes, 0, bytes, 0, this.bytes.length);
         return this.bytes.length;
     }
@@ -153,7 +152,8 @@ public class WeEventBytesMessage implements BytesMessage {
 
     @Override
     public void writeBytes(byte[] bytes) throws JMSException {
-        this.bytes = bytes;
+        this.bytes = new byte[bytes.length];
+        System.arraycopy(bytes, 0, this.bytes, 0, bytes.length);
     }
 
     @Override
@@ -163,17 +163,7 @@ public class WeEventBytesMessage implements BytesMessage {
 
     @Override
     public void writeObject(Object o) throws JMSException {
-        if (o instanceof WeEvent) {
-            try {
-                ObjectMapper mapper = new ObjectMapper();
-                this.bytes = mapper.writeValueAsBytes(o);
-            } catch (JsonProcessingException e) {
-                log.error("jackson encode failed", e);
-                WeEventConnectionFactory.error2JMSException(ErrorCode.SDK_JMS_EXCEPTION_JSON_ENCODE);
-            }
-        } else {
-            throw new JMSException(WeEventConnectionFactory.NotSupportTips);
-        }
+        throw new JMSException(WeEventConnectionFactory.NotSupportTips);
     }
 
     @Override
