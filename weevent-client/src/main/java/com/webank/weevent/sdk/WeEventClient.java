@@ -146,27 +146,38 @@ public class WeEventClient implements IWeEventClient {
     @Override
     public SendResult publish(WeEvent weEvent) throws BrokerException {
         validateWeEvent(weEvent);
+        log.info("start to publish: {}", weEvent);
+
         SendResult sendResult = new SendResult();
+        sendResult.setTopic(weEvent.getTopic());
         try {
             TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
             // create topic
             WeEventTopic weEventTopic = (WeEventTopic) session.createTopic(weEvent.getTopic());
             weEventTopic.setGroupId(this.groupId);
-            //create bytesMessage
+            weEventTopic.setExtensions(weEvent.getExtensions());
+
+            // create bytesMessage
             WeEventBytesMessage bytesMessage = new WeEventBytesMessage();
-            bytesMessage.writeObject(weEvent);
-            //publish
+            bytesMessage.writeBytes(weEvent.getContent());
+
+            // publish
             WeEventTopicPublisher publisher = (WeEventTopicPublisher) session.createPublisher(weEventTopic);
             publisher.publish(bytesMessage);
-            //return
+
+            // return
             sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
             sendResult.setEventId(bytesMessage.getJMSMessageID());
-            sendResult.setTopic(weEvent.getTopic());
+
+            log.info("publish success, eventID: {}", bytesMessage.getJMSMessageID());
+        } catch (JMSException e) {
+            log.error("jms exception", e);
+            throw jms2BrokerException(e);
         } catch (Exception e) {
-            log.error("publish fail,error message: {}", e.getMessage());
+            log.error("publish failed", e);
             sendResult.setStatus(SendResult.SendResultStatus.ERROR);
-            sendResult.setTopic(weEvent.getTopic());
         }
+
         return sendResult;
     }
 
@@ -375,7 +386,11 @@ public class WeEventClient implements IWeEventClient {
     }
 
     private static BrokerException jms2BrokerException(JMSException e) {
-        return new BrokerException(Integer.parseInt(e.getErrorCode()), e.getMessage());
+        if (StringUtils.isBlank(e.getErrorCode())) {
+            return new BrokerException(e.getMessage());
+        } else {
+            return new BrokerException(Integer.parseInt(e.getErrorCode()), e.getMessage());
+        }
     }
 
     private void initGroupId(String groupId) {
