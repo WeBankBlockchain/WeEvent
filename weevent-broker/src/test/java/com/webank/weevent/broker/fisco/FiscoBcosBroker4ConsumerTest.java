@@ -170,7 +170,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
             this.iConsumer.subscribe(this.topicName, null, WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
             Assert.fail();
         } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
+            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
         }
     }
 
@@ -183,7 +183,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
             this.iConsumer.subscribe(this.topicName, "abc", WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
             Assert.fail();
         } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
+            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
         }
     }
 
@@ -620,7 +620,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
             this.iConsumer.subscribe(topics, null, WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
             Assert.fail();
         } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
+            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
         }
     }
 
@@ -634,7 +634,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
             this.iConsumer.subscribe(topics, "abc", WeEvent.OFFSET_LAST, this.ext, this.defaultListener);
             Assert.fail();
         } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
+            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
         }
     }
 

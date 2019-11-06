@@ -49,8 +49,14 @@ public class RuleEngineBase extends BaseEntity {
 
     private String databaseUrl;
 
+    private Integer ruleDataBaseId;
+
     private String errorDestination;
 
     private String errorMessage;
 
+    /**
+     * 1 visible ,2 invisible
+     */
+    private String isVisible;
 }

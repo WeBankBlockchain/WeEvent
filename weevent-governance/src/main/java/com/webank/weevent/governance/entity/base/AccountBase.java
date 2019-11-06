@@ -1,6 +1,5 @@
 package com.webank.weevent.governance.entity.base;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
 import lombok.Data;
@@ -22,7 +21,6 @@ public class AccountBase extends BaseEntity {
     @NotBlank
     private String password;
 
-    @Email
     private String email;
 
     private String oldPassword;

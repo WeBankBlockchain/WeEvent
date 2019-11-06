@@ -68,6 +68,8 @@ public class BrokerRest implements IBrokerRpc {
                     groupId = WeEventUtils.getDefaultGroupId();
                 }
             }
+        } else {
+            groupId = WeEventUtils.getDefaultGroupId();
         }
         return this.producer.publish(event, groupId);
     }
