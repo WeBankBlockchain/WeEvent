@@ -747,16 +747,10 @@ public class RuleEngineService {
 
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url);
             int statusCode = closeResponse.getStatusLine().getStatusCode();
-            if (200 != statusCode) {
-                return false;
-            }
-            String msg = EntityUtils.toString(closeResponse.getEntity());
-            JSONObject jsonObject = JSONObject.parseObject(msg);
-            Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
-            return PROCESSOR_SUCCESS_CODE == code;
+            return 200 == statusCode;
         } catch (Exception e) {
             log.error("check condition fail", e);
-            throw new GovernanceException(e.getMessage());
+            return false;
         }
     }
 
