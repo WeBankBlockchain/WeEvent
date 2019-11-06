@@ -13,6 +13,9 @@ public interface RuleDatabaseMapper {
     // get circulationDatabaseList
     List<RuleDatabaseEntity> circulationDatabaseList(RuleDatabaseEntity ruleDatabaseEntity);
 
+    RuleDatabaseEntity getRuleDataBaseById(Integer id);
+
+
     // add circulationDatabaseEntity
     Boolean addCirculationDatabase(RuleDatabaseEntity ruleDatabaseEntity);
 

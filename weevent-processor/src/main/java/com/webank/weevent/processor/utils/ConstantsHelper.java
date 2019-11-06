@@ -63,4 +63,8 @@ public class ConstantsHelper {
     public static final String shutdownHookClass = "org.quartz.plugin.shutdownHook.class";
     public static final String ShutdownHookPlugin = "org.quartz.plugins.management.ShutdownHookPlugin";
 
+    public static final String EVENT_ID = "eventId";
+    public static final String TOPIC_NAME = "topicName";
+    public static final String BROKER_ID = "brokerId";
+    public static final String GROUP_ID = "groupId";
 }

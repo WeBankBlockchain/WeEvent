@@ -24,7 +24,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @Slf4j
-public class CirculationDatabaseControllerTest extends JUnitTestBase {
+public class RuleDatabaseControllerTest extends JUnitTestBase {
 
     @Autowired
     private WebApplicationContext wac;

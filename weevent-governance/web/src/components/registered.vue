@@ -103,7 +103,7 @@ export default {
     var checkEmail = (rule, value, callback) => {
       let reg = new RegExp(/^([a-zA-Z0-9._-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-])+/)
       if (!value) {
-        callback(new Error(this.$t('userSet.emptyEail')))
+        callback()
       } else {
         if (reg.test(value)) {
           callback()
@@ -162,7 +162,7 @@ export default {
             'email': this.ruleForm.email
           }
           API.register(data).then(res => {
-            if (res.status === 200) {
+            if (res.data.status === 200) {
               this.$message({
                 type: 'success',
                 message: this.$t('userSet.regSuccess')

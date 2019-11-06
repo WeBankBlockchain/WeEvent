@@ -83,7 +83,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
 
     @Test
     public void testUpdateRuleEngine() throws Exception {
-        String content = "{\"id\":\"19\",\"ruleName\":\"temperature-alarm6616\",\"payloadType\":\"1\"," +
+        String content = "{\"id\":\"1\",\"ruleName\":\"temperature-alarm6616\",\"payloadType\":\"1\"," +
                 "\"payloadMap\":{\"temperate\":30,\"humidity\":0.5},\"brokerId\":\"1\"," +
                 "\"fromDestination\":\"com.weevent.stomp\",\"com.weevent.mqtt\":\"test\"," +
                 "\"selectField\":\"temperate\",\"conditionField\":\"temperate>38\",\"conditionType\":\"1\"}";

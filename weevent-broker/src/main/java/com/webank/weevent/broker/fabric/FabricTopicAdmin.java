@@ -5,6 +5,7 @@ import java.util.List;
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fabric.config.FabricConfig;
 import com.webank.weevent.broker.fabric.sdk.FabricDelegate;
+import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.plugin.IEventTopic;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
@@ -95,12 +96,7 @@ public class FabricTopicAdmin implements IEventTopic {
     @Override
     public TopicPage list(Integer pageIndex, Integer pageSize, String channelName) throws BrokerException {
 
-        if (pageIndex == null || pageIndex < 0) {
-            throw new BrokerException(ErrorCode.TOPIC_PAGE_INDEX_INVALID);
-        }
-        if (pageSize == null || pageSize <= 0 || pageSize > 100) {
-            throw new BrokerException(ErrorCode.TOPIC_PAGE_SIZE_INVALID);
-        }
+        ParamCheckUtils.validatePagIndexAndSize(pageIndex, pageSize);
         validateChannelName(channelName);
 
         return fabricDelegate.getFabricMap().get(channelName).listTopicName(pageIndex, pageSize);
@@ -129,24 +125,27 @@ public class FabricTopicAdmin implements IEventTopic {
     }
 
     @Override
-    public List<TbTransHash> queryTransList(QueryEntity queryEntity) throws BrokerException {
+    public ListPage<TbTransHash> queryTransList(QueryEntity queryEntity) throws BrokerException {
         validateChannelName(queryEntity.getGroupId());
-
-        return fabricDelegate.getFabricMap().get(queryEntity.getGroupId()).queryTransList(queryEntity.getBlockNumber());
+        ParamCheckUtils.validatePagIndexAndSize(queryEntity.getPageNumber(), queryEntity.getPageSize());
+        return fabricDelegate.getFabricMap().get(queryEntity.getGroupId())
+                .queryTransList(queryEntity.getBlockNumber(), queryEntity.getPkHash(), queryEntity.getPageNumber(), queryEntity.getPageSize());
     }
 
     @Override
-    public List<TbBlock> queryBlockList(QueryEntity queryEntity) throws BrokerException {
+    public ListPage<TbBlock> queryBlockList(QueryEntity queryEntity) throws BrokerException {
         validateChannelName(queryEntity.getGroupId());
-
-        return fabricDelegate.getFabricMap().get(queryEntity.getGroupId()).queryBlockList(queryEntity.getBlockNumber());
+        ParamCheckUtils.validatePagIndexAndSize(queryEntity.getPageNumber(), queryEntity.getPageSize());
+        return fabricDelegate.getFabricMap().get(queryEntity.getGroupId())
+                .queryBlockList(queryEntity.getBlockNumber(), queryEntity.getPkHash(), queryEntity.getPageNumber(), queryEntity.getPageSize());
     }
 
     @Override
-    public List<TbNode> queryNodeList(QueryEntity queryEntity) throws BrokerException {
+    public ListPage<TbNode> queryNodeList(QueryEntity queryEntity) throws BrokerException {
         validateChannelName(queryEntity.getGroupId());
 
-        return fabricDelegate.getFabricMap().get(queryEntity.getGroupId()).queryNodeList();
+        return fabricDelegate.getFabricMap().get(queryEntity.getGroupId())
+                .queryNodeList(queryEntity.getPageNumber(), queryEntity.getPageSize());
     }
 
     protected void validateChannelName(String channelName) throws BrokerException {
