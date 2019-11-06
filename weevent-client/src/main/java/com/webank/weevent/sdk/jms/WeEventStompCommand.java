@@ -9,6 +9,7 @@ import javax.jms.JMSException;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -25,6 +26,7 @@ import org.springframework.util.MimeType;
  * @author cristicmei
  * @since 2019/04/11
  */
+@Slf4j
 @Data
 public class WeEventStompCommand {
     private final static String stompVersion = "1.1";
@@ -46,11 +48,11 @@ public class WeEventStompCommand {
     }
 
     public String encodeRaw(StompHeaderAccessor accessor, byte[] payload) {
+        log.debug("encode STOMP command: {}", accessor.getCommand());
+
         MessageHeaders headers = accessor.getMessageHeaders();
         Message<byte[]> message = MessageBuilder.createMessage(payload != null ? payload : "".getBytes(StandardCharsets.UTF_8), headers);
-        byte[] bytes = new StompEncoder().encode(message);
-
-        return new String(bytes, StandardCharsets.UTF_8);
+        return new String((new StompEncoder()).encode(message), StandardCharsets.UTF_8);
     }
 
     public String encodeConnect(String userName, String password) {
@@ -110,11 +112,11 @@ public class WeEventStompCommand {
     }
 
     // payload is WeEvent
-    public String encodeSend(WeEventTopic topic, byte[] payload, Long id, WeEvent weEvent) throws JMSException {
+    public String encodeSend(Long id, WeEventTopic topic, WeEvent weEvent) throws JMSException {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SEND);
         accessor.setDestination(topic.getTopicName());
-        accessor.setContentType(new MimeType("application", "json", StandardCharsets.UTF_8));
-        accessor.setContentLength(payload.length);
+        accessor.setContentType(new MimeType("text", "plain", StandardCharsets.UTF_8));
+        accessor.setContentLength(weEvent.getContent().length);
         accessor.setNativeHeader("receipt", Long.toString(id));
         if (!StringUtils.isBlank(topic.getGroupId())) {
             accessor.setNativeHeader("groupId", topic.getGroupId());
@@ -122,7 +124,7 @@ public class WeEventStompCommand {
         for (Map.Entry<String, String> entry : weEvent.getExtensions().entrySet()) {
             accessor.setNativeHeader(entry.getKey(), entry.getValue());
         }
-        return encodeRaw(accessor, payload);
+        return encodeRaw(accessor, weEvent.getContent());
     }
 
     public boolean isError(Message message) {
