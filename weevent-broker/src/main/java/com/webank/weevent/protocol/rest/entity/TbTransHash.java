@@ -11,7 +11,6 @@
 package com.webank.weevent.protocol.rest.entity;
 
 import java.math.BigInteger;
-import java.time.LocalDateTime;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,14 +26,14 @@ public class TbTransHash {
     private String transFrom;
     private String transTo;
     private BigInteger blockNumber;
-    private LocalDateTime blockTimestamp;
-    private LocalDateTime createTime;
-    private LocalDateTime modifyTime;
+    private String blockTimestamp;
+    private String createTime;
+    private String modifyTime;
 
     /**
      * init by transaction、blockNumber、blockTimestamp.
      */
-    public TbTransHash(String transHash, String transFrom, String transTo, BigInteger blockNumber, LocalDateTime blockTimestamp) {
+    public TbTransHash(String transHash, String transFrom, String transTo, BigInteger blockNumber, String blockTimestamp) {
         this.transHash = transHash;
         this.transFrom = transFrom;
         this.transTo = transTo;

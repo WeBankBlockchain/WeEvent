@@ -1,13 +1,35 @@
 <template>
-  <div class='chart' id='chart'></div>
+  <div class='statisticsCharts'>
+    <span class='optionTitle' style='margin-left:20px'>{{$t('tableCont.chooseTime')}}</span>
+    <el-date-picker
+        size="small"
+        type="daterange"
+        value-format="timestamp"
+        v-model='selectTime'
+        @change="getTime"
+        :picker-options="pickerOptions"
+        range-separator="-"
+        :start-placeholder="$t('tableCont.beginTime')"
+        :end-placeholder="$t('tableCont.endTime')">
+      </el-date-picker>
+    <div class='chart' id='chart'></div>
+  </div>
 </template>
 <script>
 import Highcharts from 'highcharts/highstock'
-import { getLastWeek } from '../../utils/formatTime'
+import { getLastWeek, getTimeList } from '../../utils/formatTime'
 import API from '../../API/resource.js'
-export default {
+require('highcharts/modules/no-data-to-display.js')(Highcharts)
+export default{
   data () {
     return {
+      pickerOptions: {
+        disabledDate (time) {
+          return time.getTime() > Date.now()
+        }
+      },
+      topic: [],
+      selectTime: [],
       option: {
         title: {
           text: this.$t('overview.essential'),
@@ -20,23 +42,26 @@ export default {
         },
         yAxis: {
           title: '',
-          max: '10',
-          gridLineDashStyle: 'Dot'
+          max: '20',
+          lineWidth: 2
         },
         xAxis: {
-          categories: getLastWeek()
-        },
-        tooltip: {
-          shared: true,
-          crosshairs: true,
-          formatter (e) {
-            return this.x + '<br/>' + parseInt(this.y.toFixed(2))
-          }
+          categories: []
         },
         series: [{
           name: '',
-          data: [0, 0, 0, 0, 0, 0, 0]
+          data: []
         }],
+        lang: {
+          noData: this.$t('common.noData')
+        },
+        noData: {
+          style: {
+            fontWeight: 'bold',
+            fontSize: '15px',
+            color: '#303030'
+          }
+        },
         legend: {
           enabled: false
         },
@@ -46,54 +71,89 @@ export default {
       }
     }
   },
+  methods: {
+    beginDate () {
+      let vm = this
+      let data = {
+        'beginDate': vm.selectTime[0],
+        'endDate': vm.selectTime[1],
+        'groupId': localStorage.getItem('groupId'),
+        'brokerId': localStorage.getItem('brokerId'),
+        'userId': localStorage.getItem('userId')
+      }
+      vm.option.series[0].data = []
+      API.eventList(data).then(res => {
+        if (res.data.status === 200) {
+          let max = 20
+          let data = res.data.data
+          let time = [].concat(vm.option.xAxis.categories)
+          for (let i = 0; i < time.length; i++) {
+            vm.option.series[0].data[i] = 0
+            for (let x = 0; x < data.length; x++) {
+              if (data[x].createDateStr === time[i]) {
+                vm.option.series[0].data[i] = data[x].eventCount
+                max = max < data[x].eventCount ? data[x].eventCount : max
+              }
+            }
+          }
+          vm.$set(vm.option.yAxis, 'max', max)
+        }
+        setTimeout(fun => {
+          Highcharts.chart('chart', vm.option)
+        }, 500)
+      })
+    },
+    getTime (e) {
+      let vm = this
+      if (!e) {
+        vm.getDate()
+      } else {
+        let timeList = getTimeList(e[0], e[1])
+        vm.option.xAxis.categories = [].concat(timeList)
+      }
+      this.beginDate()
+    },
+    getDate () {
+      let data = getLastWeek()
+      let start = new Date(data[0]).getTime()
+      let end = new Date(data[data.length - 1]).getTime()
+      this.selectTime.push(start)
+      this.selectTime.push(end)
+      this.option.xAxis.categories = [].concat(data)
+      this.beginDate()
+    }
+  },
   computed: {
     brokerId () {
       return this.$store.state.brokerId
     },
     groupId () {
       return this.$store.state.groupId
+    },
+    lang () {
+      return this.$store.state.lang
     }
   },
   watch: {
     brokerId () {
-      if (localStorage.getItem('groupId')) {
-        this.transDaily()
-      }
+      this.beginDate()
     },
     groupId () {
-      this.transDaily()
+      this.beginDate()
+    },
+    lang (nVal) {
+      this.option.lang.noData = this.$t('common.noData')
+      this.option.title.text = this.$t('overview.essential')
+      this.option.subtitle.text = this.$t('overview.lastWeek')
+      if (this.option.series.length === 0) {
+        Highcharts.chart('chart', this.option).showNoData()
+      } else {
+        Highcharts.chart('chart', this.option)
+      }
     }
   },
   mounted () {
-    setTimeout(fun => {
-      if (localStorage.getItem('groupId') && localStorage.getItem('brokerId')) {
-        this.transDaily()
-      }
-    }, 500)
-  },
-  methods: {
-    transDaily () {
-      let vm = this
-      let url = '/' + localStorage.getItem('groupId') + '?brokerId=' + localStorage.getItem('brokerId')
-      API.transDaily(url).then(res => {
-        if (res.status === 200) {
-          let chatData = res.data.data
-          let dateList = vm.option.xAxis.categories
-          let max = vm.option.yAxis.max
-          chatData.forEach(e => {
-            if (dateList.indexOf(e.day) !== -1) {
-              let index = dateList.indexOf(e.day)
-              vm.option.series[0].data[index] = e.transCount
-              max = max > e.transCount ? max : e.transCount
-            }
-          })
-          vm.$set(vm.option.yAxis, 'max', max)
-        }
-        Highcharts.chart('chart', vm.option)
-      }).catch(e => {
-        Highcharts.chart('chart', vm.option)
-      })
-    }
+    this.getDate()
   }
 }
 </script>

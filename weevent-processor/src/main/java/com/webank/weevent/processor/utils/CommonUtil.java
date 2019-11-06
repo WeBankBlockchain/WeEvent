@@ -9,6 +9,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weevent.sdk.WeEvent;
+
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -136,14 +138,11 @@ public class CommonUtil {
             List<String> contentKeys = getKeys(content);
             List<String> objJsonKeys = getKeys(objJson);
 
-            // objJsonKeys must longer than the contentKeys
-            if (contentKeys.size() > objJsonKeys.size()) {
-                tag = false;
-            } else {
-                for (String contentKey : contentKeys) {
-                    if (!objJsonKeys.contains(contentKey)) {
-                        tag = false;
-                    }
+            for (String contentKey : contentKeys) {
+                //&& (!ConstantsHelper.EVENT_ID.equals(contentKey))
+                if (!objJsonKeys.contains(contentKey)) {
+                    tag = false;
+                    break;
                 }
             }
         }
@@ -161,33 +160,92 @@ public class CommonUtil {
         return keys;
     }
 
-    public static Map<String, String> contactsql(String content, String objJson, String payload) {
+    private static List<String> getSelectFieldList(String selectFields, String payload) {
+        List<String> result = new ArrayList<>();
+        // if select is equal * ,then select all fields.
+        if ("*".equals(selectFields)) {
+            String selectFieldsTemp = payload;
+            Iterator it = JSONObject.parseObject(selectFieldsTemp).entrySet().iterator();
+
+            while (it.hasNext()) {
+                Map.Entry entry = (Map.Entry) it.next();
+                result.add((String) entry.getKey());
+            }
+
+        } else {
+            String[] array = selectFields.split(",");
+            for (String s : array) {
+                result.add(s);
+            }
+        }
+        return result;
+    }
+
+    public static Map<String, String> contactsql(String brokerId, String groupId, WeEvent eventMessage, String selectFields, String payload) {
+        String content = new String(eventMessage.getContent());
+        String eventId = eventMessage.getEventId();
+        String topicName = eventMessage.getTopic();
+
+        // get select field
+        List<String> result = getSelectFieldList(selectFields, payload);
+
+        JSONObject eventContent = JSONObject.parseObject(content);
+        JSONObject table = JSONObject.parseObject(payload);
+
+        Map<String, String> sqlOrder = generateSqlOrder(brokerId, groupId, eventId, topicName, result, eventContent, table);
+        return sqlOrder;
+    }
+
+    private static Map<String, String> generateSqlOrder(String brokerId, String groupId, String eventId, String topicName, List<String> result, JSONObject eventContent, JSONObject table) {
         Map<String, String> sql = new HashMap<>();
         Map<String, String> sqlOrder = new HashMap<>();
+        boolean eventIdFlag = false;
+        boolean topicNameFlag = false;
+        boolean brokerIdFlag = false;
+        boolean groupIdFlag = false;
 
-        if (!StringUtils.isEmpty(content)
-                && !StringUtils.isEmpty(objJson)) {
-            String[] result = objJson.split(",");
-            JSONObject eventContent = JSONObject.parseObject(content);
-            JSONObject table = JSONObject.parseObject(payload);
+        // get all select field and value, and the select field must in eventContent.
+        for (String key : result) {
+            sql.put(key, null);
+            if (eventContent.containsKey(key)) {
+                sql.put(key, eventContent.get(key).toString());
+            }
+            // set the flag
+            if (ConstantsHelper.EVENT_ID.equals(key)) {
+                eventIdFlag = true;
+            }
+            if (ConstantsHelper.TOPIC_NAME.equals(key)) {
+                topicNameFlag = true;
+            }
+            if (ConstantsHelper.BROKER_ID.equals(key)) {
+                brokerIdFlag = true;
+            }
+            if (ConstantsHelper.GROUP_ID.equals(key)) {
+                groupIdFlag = true;
+            }
+        }
 
-            // get all select field and value
+        // keep the right order
+        for (Map.Entry<String, Object> entry : table.entrySet()) {
             for (String key : result) {
-                sql.put(key, null);
-                if (eventContent.containsKey(key)) {
-                    sql.put(key, eventContent.get(key).toString());
+                if (entry.getKey().equals(key)) {
+                    sqlOrder.put(entry.getKey(), sql.get(key));
                 }
             }
+        }
 
-            // keep the  right order
-            for (Map.Entry<String, Object> entry : table.entrySet()) {
-                for (String key : result) {
-                    if (entry.getKey().equals(key)) {
-                        sqlOrder.put(entry.getKey(), sql.get(key));
-                    }
-                }
-            }
-
+        // if user need eventId, add the event id
+        if (eventIdFlag) {
+            sqlOrder.put(ConstantsHelper.EVENT_ID, eventId);
+        }
+        if (topicNameFlag) {
+            sqlOrder.put(ConstantsHelper.TOPIC_NAME, topicName);
+        }
+        if (brokerIdFlag) {
+            sqlOrder.put(ConstantsHelper.BROKER_ID, brokerId);
+        }
+        if (groupIdFlag) {
+            sqlOrder.put(ConstantsHelper.GROUP_ID, groupId);
         }
         return sqlOrder;
     }
