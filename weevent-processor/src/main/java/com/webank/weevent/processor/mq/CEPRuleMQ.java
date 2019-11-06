@@ -316,7 +316,7 @@ public class CEPRuleMQ {
             JSONObject event = JSONObject.parseObject(payload);
             String[] strs = condition.split("=");
             boolean flag = false;
-            if (strs.length == 2 && !(strs[0].contains("<") || strs[0].contains(">") || (strs[1].contains("<") || strs[1].contains(">")))
+            if (strs.length == 2 && !(strs[0].contains("<") || strs[0].contains(">") || (strs[1].contains("<") || strs[1].contains(">"))))
             {
                 flag = true;
             }
