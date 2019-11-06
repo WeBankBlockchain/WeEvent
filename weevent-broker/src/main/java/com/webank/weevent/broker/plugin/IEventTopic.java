@@ -2,6 +2,7 @@ package com.webank.weevent.broker.plugin;
 
 import java.util.List;
 
+import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
 import com.webank.weevent.protocol.rest.entity.QueryEntity;
 import com.webank.weevent.protocol.rest.entity.TbBlock;
@@ -85,10 +86,11 @@ public interface IEventTopic {
 
     GroupGeneral getGroupGeneral(String groupId) throws BrokerException;
 
-    List<TbTransHash> queryTransList(QueryEntity queryEntity) throws BrokerException;
+    ListPage<TbTransHash> queryTransList(QueryEntity queryEntity) throws BrokerException;
 
-    List<TbBlock> queryBlockList(QueryEntity queryEntity) throws BrokerException;
+    ListPage<TbBlock> queryBlockList(QueryEntity queryEntity) throws BrokerException;
 
-    List<TbNode> queryNodeList(QueryEntity queryEntity) throws BrokerException;
+    ListPage<TbNode> queryNodeList(QueryEntity queryEntity) throws BrokerException;
+
 
 }
