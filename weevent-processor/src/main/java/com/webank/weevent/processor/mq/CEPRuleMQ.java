@@ -316,10 +316,9 @@ public class CEPRuleMQ {
             JSONObject event = JSONObject.parseObject(payload);
             String[] strs = condition.split("=");
             boolean flag = false;
-            if(strs.length == 2){
-                if(!(strs[0].contains("<")||strs[0].contains(">")||(strs[1].contains("<")||strs[1].contains(">")))){
-                    flag=true;
-                }
+            if (strs.length == 2 && !(strs[0].contains("<") || strs[0].contains(">") || (strs[1].contains("<") || strs[1].contains(">")))
+            {
+                flag = true;
             }
             if (flag) {
                 // event contain left key
@@ -330,8 +329,7 @@ public class CEPRuleMQ {
 
                     } else {
                         if (event.get(strs[0]) instanceof Number) {
-                            boolean result = strs[1].matches("[0-9]+");
-                            if (result == true) {
+                            if (strs[1].matches("[0-9]+")) {
                                 log.info("{}", "true2");
                                 return ConstantsHelper.SUCCESS;
 
