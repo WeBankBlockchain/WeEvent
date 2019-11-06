@@ -92,7 +92,7 @@ public class CEPRuleController {
         return resEntity;
     }
 
-    @RequestMapping(value = "/checkWhereCondition", method = RequestMethod.GET)
+    @RequestMapping(value = "/checkWhereCondition")
     @ResponseBody
     public BaseRspEntity checkWhereCondition(@RequestParam(name = "payload") String payload, @RequestParam(name = "condition") String condition) {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
