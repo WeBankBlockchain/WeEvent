@@ -29,7 +29,7 @@ start(){
         echo "${server_name} is running, (PID=${current_pid})"
         exit 0
     fi
-    nohup ${JAVA_HOME}/bin/java ${JAVA_OPTS} -Xbootclasspath/a:./conf -jar ./apps/*  >/dev/null 2>&1 &
+    nohup ${JAVA_HOME}/bin/java ${JAVA_OPTS} ${APP_PARAMS} >/dev/null 2>&1 &
     i=0
     while :
     do
