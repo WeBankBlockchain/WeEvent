@@ -13,7 +13,6 @@
 package com.webank.weevent.protocol.rest.entity;
 
 import java.math.BigInteger;
-import java.time.LocalDateTime;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

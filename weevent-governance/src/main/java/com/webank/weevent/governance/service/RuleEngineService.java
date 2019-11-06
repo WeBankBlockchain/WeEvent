@@ -742,10 +742,7 @@ public class RuleEngineService {
             String msg = EntityUtils.toString(closeResponse.getEntity());
             JSONObject jsonObject = JSONObject.parseObject(msg);
             Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
-            if (PROCESSOR_SUCCESS_CODE != code) {
-                return false;
-            }
-            return true;
+            return PROCESSOR_SUCCESS_CODE == code;
         } catch (Exception e) {
             log.error("check condition fail", e);
             throw new GovernanceException(e.getMessage());

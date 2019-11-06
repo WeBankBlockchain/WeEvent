@@ -1,5 +1,5 @@
 CREATE TABLE t_account(
-   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
+  `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
   `create_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create date',
   `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP comment 'update date',
   `is_delete` INT(1) NOT NULL DEFAULT  0 COMMENT '0 means not deleted 1 means deleted',

@@ -313,8 +313,8 @@ public class CEPRuleMQ {
             for (String key : payloadContentKeys) {
                 context.set(key, payloadJson.get(key));
             }
-            condition = condition.replaceAll("\"","");
-            Boolean e = (Boolean) jexl.createExpression(condition).evaluate(context);
+            String conditionNew = condition.replaceAll("\"","");
+            Boolean e = (Boolean) jexl.createExpression(conditionNew).evaluate(context);
             log.info(e.toString());
             // if can check the true or false,is must be the right number
             return ConstantsHelper.SUCCESS;

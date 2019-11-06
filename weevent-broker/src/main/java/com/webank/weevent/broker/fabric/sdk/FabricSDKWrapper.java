@@ -255,7 +255,6 @@ public class FabricSDKWrapper {
     public static GroupGeneral getGroupGeneral(Channel channel) throws InvalidArgumentException, ProposalException {
         GroupGeneral groupGeneral = new GroupGeneral();
         long currentBlockNum = channel.queryBlockchainInfo().getHeight() - 1;
-        BlockInfo blockInfo = channel.queryBlockByNumber(currentBlockNum);
         groupGeneral.setLatestBlock(BigInteger.valueOf(currentBlockNum));
         groupGeneral.setNodeCount(channel.getPeers().size());
 
@@ -281,7 +280,7 @@ public class FabricSDKWrapper {
             log.error("query block by blockHash failed, block is empty.");
             throw new BrokerException("query block by blockHash failed, block is empty.");
         }
-        generateTbTransHashListPage(pageIndex, pageSize, blockHash, tbTransHashListPage, tbTransHashes, blockInfo);
+        generateTbTransHashListPage(pageIndex, pageSize, tbTransHashListPage, tbTransHashes, blockInfo);
 
         tbTransHashListPage.setPageData(tbTransHashes);
         return tbTransHashListPage;
@@ -289,7 +288,6 @@ public class FabricSDKWrapper {
 
     private static void generateTbTransHashListPage(Integer pageIndex,
                                                     Integer pageSize,
-                                                    String blockHash,
                                                     ListPage<TbTransHash> tbTransHashListPage,
                                                     List<TbTransHash> tbTransHashes,
                                                     BlockInfo blockInfo) throws BrokerException{

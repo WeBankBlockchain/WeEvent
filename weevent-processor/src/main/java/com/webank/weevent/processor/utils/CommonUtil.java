@@ -186,16 +186,23 @@ public class CommonUtil {
         String eventId = eventMessage.getEventId();
         String topicName = eventMessage.getTopic();
 
-
-        Map<String, String> sql = new HashMap<>();
-        Map<String, String> sqlOrder = new HashMap<>();
-        boolean eventIdFlag = false, topicNameFlag = false, brokerIdFlag = false, groupIdFlag = false;
-
         // get select field
         List<String> result = getSelectFieldList(selectFields, payload);
 
         JSONObject eventContent = JSONObject.parseObject(content);
         JSONObject table = JSONObject.parseObject(payload);
+
+        Map<String, String> sqlOrder = generateSqlOrder(brokerId, groupId, eventId, topicName, result, eventContent, table);
+        return sqlOrder;
+    }
+
+    private static Map<String, String> generateSqlOrder(String brokerId, String groupId, String eventId, String topicName, List<String> result, JSONObject eventContent, JSONObject table) {
+        Map<String, String> sql = new HashMap<>();
+        Map<String, String> sqlOrder = new HashMap<>();
+        boolean eventIdFlag = false;
+        boolean topicNameFlag = false;
+        boolean brokerIdFlag = false;
+        boolean groupIdFlag = false;
 
         // get all select field and value, and the select field must in eventContent.
         for (String key : result) {
@@ -218,7 +225,7 @@ public class CommonUtil {
             }
         }
 
-        // keep the  right order
+        // keep the right order
         for (Map.Entry<String, Object> entry : table.entrySet()) {
             for (String key : result) {
                 if (entry.getKey().equals(key)) {
@@ -227,7 +234,7 @@ public class CommonUtil {
             }
         }
 
-        // if user need eventId , add the event id
+        // if user need eventId, add the event id
         if (eventIdFlag) {
             sqlOrder.put(ConstantsHelper.EVENT_ID, eventId);
         }
@@ -240,7 +247,6 @@ public class CommonUtil {
         if (groupIdFlag) {
             sqlOrder.put(ConstantsHelper.GROUP_ID, groupId);
         }
-
         return sqlOrder;
     }
 
