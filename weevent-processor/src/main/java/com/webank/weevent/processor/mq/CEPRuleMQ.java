@@ -313,16 +313,51 @@ public class CEPRuleMQ {
             for (String key : payloadContentKeys) {
                 context.set(key, payloadJson.get(key));
             }
-            String conditionNew = condition.replaceAll("\"","");
-            Boolean e = (Boolean) jexl.createExpression(conditionNew).evaluate(context);
-            log.info(e.toString());
-            // if can check the true or false,is must be the right number
-            return ConstantsHelper.SUCCESS;
+            JSONObject event = JSONObject.parseObject(payload);
+            String[] strs = condition.split("=");
+            boolean flag = false;
+            if(strs.length == 2){
+                if(!(strs[0].contains("<")||strs[0].contains(">")||(strs[1].contains("<")||strs[1].contains(">")))){
+                    flag=true;
+                }
+            }
+            if (flag) {
+                // event contain left key
+                if (event.containsKey(strs[0])) {
+                    if (event.get(strs[0]) instanceof String) {
+                        log.info("{}", "true1");
+                        return ConstantsHelper.SUCCESS;
+
+                    } else {
+                        if (event.get(strs[0]) instanceof Number) {
+                            boolean result = strs[1].matches("[0-9]+");
+                            if (result == true) {
+                                log.info("{}", "true2");
+                                return ConstantsHelper.SUCCESS;
+
+                            } else {
+                                log.info("{}", "false 1");
+                                return ConstantsHelper.FAIL;
+
+                            }
+                        }
+                    }
+                } else {
+                    log.info("{}", "false 2");
+                    return ConstantsHelper.FAIL;
+                }
+            } else {
+                Boolean e = (Boolean) jexl.createExpression(condition).evaluate(context);
+                log.info("rusult:{}", e);
+                return ConstantsHelper.SUCCESS;
+
+            }
         } catch (Exception e) {
             log.info("error number");
             return ConstantsHelper.FAIL;
         }
-
+        return ConstantsHelper.FAIL;
     }
+
 }
 
