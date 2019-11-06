@@ -7,8 +7,8 @@ const os = require('os')
 var needHost = ''
 
 try {
-  let network = os.networkInterfaces() // 获得网络接口列表。
-  needHost = network[Object.keys(network)[0]][1].address // 本机ip
+  let network = os.networkInterfaces()
+  needHost = network[Object.keys(network)[0]][1].address
 } catch (e) {
   needHost = 'localhost'
 }

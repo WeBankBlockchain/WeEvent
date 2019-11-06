@@ -1,5 +1,8 @@
 package com.webank.weevent;
 
+import java.lang.reflect.Method;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -10,6 +13,8 @@ import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.googlecode.jsonrpc4j.ErrorResolver;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImplExporter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -165,13 +170,24 @@ public class BrokerApplication {
         };
     }
 
-    //jsonrpc4j exporter
+    // export jsonrpc4j
     @Bean
     public static AutoJsonRpcServiceImplExporter autoJsonRpcServiceImplExporter() {
         //in here you can provide custom HTTP status code providers etc. eg:
         //exporter.setHttpStatusCodeProvider();
-        //exporter.setErrorResolver();
-        return new AutoJsonRpcServiceImplExporter();
+
+        AutoJsonRpcServiceImplExporter exporter = new AutoJsonRpcServiceImplExporter();
+        exporter.setErrorResolver((Throwable t, Method method, List<JsonNode> arguments) -> {
+            log.error("Exception in json rpc invoke", t);
+
+            int code = ErrorResolver.JsonError.ERROR_NOT_HANDLED.code;
+            if (t instanceof BrokerException) {
+                code = ((BrokerException) t).getCode();
+            }
+            return new ErrorResolver.JsonError(code, t.getMessage(), null);
+        });
+
+        return exporter;
     }
 
     //IProducer

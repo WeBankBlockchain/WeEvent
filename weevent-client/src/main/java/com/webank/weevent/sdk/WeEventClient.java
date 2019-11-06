@@ -32,6 +32,7 @@ import com.webank.weevent.sdk.jms.WeEventTopicPublisher;
 import com.webank.weevent.sdk.jms.WeEventTopicSubscriber;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.googlecode.jsonrpc4j.ProxyUtil;
@@ -55,6 +56,9 @@ public class WeEventClient implements IWeEventClient {
     private TopicConnection connection;
     // (subscriptionId <-> TopicSession)
     private Map<String, TopicSession> sessionMap;
+
+    // rpc timeout
+    private final int timeoutMillis = 5000;
 
     WeEventClient() throws BrokerException {
         buildRpc(defaultJsonRpcUrl);
@@ -142,27 +146,38 @@ public class WeEventClient implements IWeEventClient {
     @Override
     public SendResult publish(WeEvent weEvent) throws BrokerException {
         validateWeEvent(weEvent);
+        log.info("start to publish: {}", weEvent);
+
         SendResult sendResult = new SendResult();
+        sendResult.setTopic(weEvent.getTopic());
         try {
             TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
             // create topic
             WeEventTopic weEventTopic = (WeEventTopic) session.createTopic(weEvent.getTopic());
             weEventTopic.setGroupId(this.groupId);
-            //create bytesMessage
+            weEventTopic.setExtensions(weEvent.getExtensions());
+
+            // create bytesMessage
             WeEventBytesMessage bytesMessage = new WeEventBytesMessage();
-            bytesMessage.writeObject(weEvent);
-            //publish
+            bytesMessage.writeBytes(weEvent.getContent());
+
+            // publish
             WeEventTopicPublisher publisher = (WeEventTopicPublisher) session.createPublisher(weEventTopic);
             publisher.publish(bytesMessage);
-            //return
+
+            // return
             sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
             sendResult.setEventId(bytesMessage.getJMSMessageID());
-            sendResult.setTopic(weEvent.getTopic());
+
+            log.info("publish success, eventID: {}", bytesMessage.getJMSMessageID());
+        } catch (JMSException e) {
+            log.error("jms exception", e);
+            throw jms2BrokerException(e);
         } catch (Exception e) {
-            log.error("publish fail,error message: {}", e.getMessage());
+            log.error("publish failed", e);
             sendResult.setStatus(SendResult.SendResultStatus.ERROR);
-            sendResult.setTopic(weEvent.getTopic());
         }
+
         return sendResult;
     }
 
@@ -182,18 +197,18 @@ public class WeEventClient implements IWeEventClient {
     @Override
     public String subscribe(String[] topics, String offset, @NonNull EventListener listener) throws BrokerException {
 
-        String topic = StringUtils.join(topics,WeEvent.MULTIPLE_TOPIC_SEPARATOR);
+        String topic = StringUtils.join(topics, WeEvent.MULTIPLE_TOPIC_SEPARATOR);
         return dealSubscribe(topic, offset, "", listener);
     }
 
     @Override
     public String subscribe(String[] topics, String offset, String subscriptionId,
                             @NonNull EventListener listener) throws BrokerException {
-        String topic = StringUtils.join(topics,WeEvent.MULTIPLE_TOPIC_SEPARATOR);
+        String topic = StringUtils.join(topics, WeEvent.MULTIPLE_TOPIC_SEPARATOR);
         return dealSubscribe(topic, offset, subscriptionId, listener);
     }
 
-    private String dealSubscribe(String topic,String offset, String subscriptionId,EventListener listener) throws BrokerException {
+    private String dealSubscribe(String topic, String offset, String subscriptionId, EventListener listener) throws BrokerException {
         try {
             validateParam(topic);
             validateParam(offset);
@@ -291,6 +306,10 @@ public class WeEventClient implements IWeEventClient {
         }
 
         JsonRpcHttpClient client = new JsonRpcHttpClient(url);
+        client.setConnectionTimeoutMillis(this.timeoutMillis);
+        client.setReadTimeoutMillis(this.timeoutMillis);
+
+        // ssl
         if (jsonRpcUrl.contains("https://")) {
             SSLContext sslContext = getSSLContext();
             client.setSslContext(sslContext);
@@ -302,6 +321,14 @@ public class WeEventClient implements IWeEventClient {
                 }
             });
         }
+
+        // custom Exception
+        // {"jsonrpc":"2.0","id":"1","error":{"code":100106,"message":"topic name contain invalid char, ascii must be in[32, 128] except wildcard(+,#)"}}
+        client.setExceptionResolver(response -> {
+            log.error("Exception in json rpc invoke, {}", response.toString());
+            JsonNode error = response.get("error");
+            return new BrokerException(error.get("code").intValue(), error.get("message").textValue());
+        });
 
         this.brokerRpc = ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);
     }
@@ -359,11 +386,15 @@ public class WeEventClient implements IWeEventClient {
     }
 
     private static BrokerException jms2BrokerException(JMSException e) {
-        return new BrokerException(Integer.parseInt(e.getErrorCode()), e.getMessage());
+        if (StringUtils.isBlank(e.getErrorCode())) {
+            return new BrokerException(e.getMessage());
+        } else {
+            return new BrokerException(Integer.parseInt(e.getErrorCode()), e.getMessage());
+        }
     }
 
-    private void initGroupId(String groupId){
-        if (StringUtils.isBlank(groupId)){
+    private void initGroupId(String groupId) {
+        if (StringUtils.isBlank(groupId)) {
             this.groupId = WeEvent.DEFAULT_GROUP_ID;
         } else {
             this.groupId = groupId;

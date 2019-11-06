@@ -10,12 +10,22 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class CirculationDatabaseBase extends BaseEntity {
+public class RuleDatabaseBase extends BaseEntity {
 
     private Integer userId;
 
     private Integer brokerId;
 
     private String databaseUrl;
+
+    private String databaseName;
+
+    private String tableName;
+
+    /**
+     * 1 visible ,2 invisible
+     */
+    private String isVisible;
+
 
 }

@@ -5,13 +5,13 @@
     </Properties>
     <Appenders>
         <Console name="console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%-d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%t] [%F:%L %M] %m%n"/>
+            <PatternLayout pattern="%-d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%pid-%tid %t] [%F:%L %M] %m%n"/>
         </Console>
 
         <RollingRandomAccessFile name="fileAppender"
                                  fileName="${logPath}event-client.log"
                                  filePattern="${logPath}event-client.log.%d{yyyy-MM-dd}.%i.log.gz">
-            <PatternLayout pattern="%-d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%t] [%F:%L %M] %m%n"/>
+            <PatternLayout pattern="%-d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%pid-%tid %t] [%F:%L %M] %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy/>
                 <SizeBasedTriggeringPolicy size="100 MB"/>
