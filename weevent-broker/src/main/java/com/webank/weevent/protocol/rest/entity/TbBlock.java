@@ -13,7 +13,6 @@
 package com.webank.weevent.protocol.rest.entity;
 
 import java.math.BigInteger;
-import java.time.LocalDateTime;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,19 +25,19 @@ import lombok.NoArgsConstructor;
 public class TbBlock {
     private String pkHash;
     private BigInteger blockNumber = BigInteger.ZERO;
-    private LocalDateTime blockTimestamp;
+    private String blockTimestamp;
     private int transCount;
     private int sealerIndex;
     private String sealer;
-    private LocalDateTime createTime;
-    private LocalDateTime modifyTime;
+    private String createTime;
+    private String modifyTime;
 
 
     /**
      * init by  pkHash、blockNumber、blockTimestamp、transCount.
      */
     public TbBlock(String pkHash, BigInteger blockNumber,
-                   LocalDateTime blockTimestamp, Integer transCount, int sealerIndex) {
+                   String blockTimestamp, Integer transCount, int sealerIndex) {
         super();
         this.pkHash = pkHash;
         this.blockNumber = blockNumber;

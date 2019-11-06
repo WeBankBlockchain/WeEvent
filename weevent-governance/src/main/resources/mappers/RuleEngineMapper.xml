@@ -19,26 +19,28 @@
         <result column="condition_field" property="conditionField" jdbcType="VARCHAR"/>
         <result column="condition_type" property="conditionType" jdbcType="INTEGER"/>
         <result column="database_url" property="databaseUrl" jdbcType="VARCHAR"/>
+        <result column="rule_database_id" property="ruleDataBaseId" jdbcType="INTEGER"/>
         <result column="error_destination" property="errorDestination" jdbcType="VARCHAR"/>
         <result column="error_message" property="errorMessage" jdbcType="VARCHAR"/>
         <result column="status" property="status" jdbcType="INTEGER"/>
         <result column="group_id" property="groupId" jdbcType="VARCHAR"/>
+        <result column="is_visible" property="isVisible" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id,create_date,last_update, rule_name,payload_type,payload,broker_id,cep_id,broker_url,user_id,
          from_destination,to_destination,select_field,condition_field,condition_type,
-         database_url,error_destination,error_message,status,group_id
+         rule_database_id,error_destination,error_message,status,group_id,is_visible
     </sql>
 
     <insert id="addRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
             useGeneratedKeys="true" keyProperty="id">
         insert into t_rule_engine(rule_name, payload_type, payload, broker_id, broker_url, user_id, cep_id,
                                   from_destination, to_destination, select_field,
-                                  condition_field, condition_type, status, group_id, error_message)
+                                  condition_field, condition_type, status, group_id, error_message,rule_database_id,is_visible)
         values (#{ruleName}, #{payloadType}, #{payload}, #{brokerId}, #{brokerUrl}, #{userId}, #{cepId},
                 #{fromDestination}, #{toDestination}, #{selectField},
-                #{conditionField}, #{conditionType}, #{status}, #{groupId}, #{errorMessage})
+                #{conditionField}, #{conditionType}, #{status}, #{groupId}, #{errorMessage},#{ruleDataBaseId},#{isVisible})
     </insert>
 
     <select id="getRuleEngines" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
@@ -69,6 +71,9 @@
         <if test="ruleEngineEntity.ruleName != null and ruleEngineEntity.ruleName!=''">
             and rule_name = #{ruleEngineEntity.ruleName,jdbcType=VARCHAR}
         </if>
+        <if test="ruleEngineEntity.isVisible != null and ruleEngineEntity.isVisible!=''">
+            and is_visible = #{ruleEngineEntity.isVisible,jdbcType=VARCHAR}
+        </if>
         <if test="startIndex != null and endIndex!=null">
             limit #{startIndex},#{endIndex}
         </if>
@@ -90,6 +95,9 @@
         <if test="ruleName != null and  ruleName!=''">
             and rule_name = #{ruleName,jdbcType=VARCHAR}
         </if>
+        <if test="isVisible != null">
+            and is_visible = #{isVisible,jdbcType=VARCHAR}
+        </if>
     </sql>
 
     <update id="updateRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity">
@@ -101,7 +109,7 @@
             condition_type=#{conditionType},
             from_destination=#{fromDestination},
             to_destination=#{toDestination},
-            database_url=#{databaseUrl},
+            rule_database_id=#{ruleDataBaseId},
             error_destination=#{errorDestination},
             error_message=#{errorMessage}
         where id = #{id,jdbcType=INTEGER}
@@ -128,5 +136,10 @@
         <include refid="ruleEngineWhere"/>
     </select>
 
-
+    <select id="getRuleById" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from t_rule_database
+        where id=#{id}
+    </select>
 </mapper>

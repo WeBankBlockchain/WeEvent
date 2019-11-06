@@ -103,7 +103,6 @@ public class WeEventProducer extends AbstractJavaSamplerClient {
         SampleResult result = new SampleResult();
         result.setSampleLabel("producer");
         try {
-
             result.sampleStart();
             SendResult sendResult = this.weEventClient.publish(this.weEvent);
             result.sampleEnd();
@@ -126,7 +125,4 @@ public class WeEventProducer extends AbstractJavaSamplerClient {
         return super.getNewLogger();
     }
 
-
 }
-
-

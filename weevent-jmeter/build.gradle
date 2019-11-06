@@ -22,7 +22,7 @@ jar {
             from(configurations.runtime)
             include("weevent-client*.jar", "jsonrpc4j-*.jar",
                     "Java-WebSocket-*.jar", "spring-messaging-*.jar",
-                    "spring-core-*.jar"
+                    "spring-core-*.jar", "spring-data-commons-*.jar"
             )
             into "dist/apps"
         }
