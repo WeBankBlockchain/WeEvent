@@ -31,7 +31,9 @@ import com.webank.weevent.sdk.WeEvent;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.DecoderException;
 import org.hyperledger.fabric.sdk.ChaincodeID;
 import org.hyperledger.fabric.sdk.Channel;
 import org.hyperledger.fabric.sdk.HFClient;
@@ -259,30 +261,30 @@ public class Fabric {
         }
     }
 
-    public List<TbTransHash> queryTransList(BigInteger blockNumber) throws BrokerException {
+    public ListPage<TbTransHash> queryTransList(BigInteger blockNumber, String blockHash, Integer pageIndex, Integer pageSize) throws BrokerException {
 
         try {
-            return FabricSDKWrapper.queryTransList(fabricConfig, channel, blockNumber);
-        } catch (InvalidArgumentException | ProposalException  e) {
+            return FabricSDKWrapper.queryTransList(fabricConfig, channel, blockNumber, blockHash, pageIndex, pageSize);
+        } catch (InvalidArgumentException | ProposalException | DecoderException e) {
             log.error("query trans list by transHash and blockNum error:{}", e);
             throw new BrokerException(ErrorCode.FABRICSDK_GETBLOCKINFO_ERROR);
         }
     }
 
-    public List<TbBlock> queryBlockList(BigInteger blockNumber) throws BrokerException {
+    public ListPage<TbBlock> queryBlockList(BigInteger blockNumber, String blockHash, Integer pageIndex, Integer pageSize) throws BrokerException {
 
         try {
-            return FabricSDKWrapper.queryBlockList(fabricConfig, channel, blockNumber);
-        } catch (InvalidArgumentException | ProposalException e) {
+            return FabricSDKWrapper.queryBlockList(fabricConfig, channel, blockNumber, blockHash, pageIndex, pageSize);
+        } catch (InvalidArgumentException | ProposalException | ExecutionException | InterruptedException | DecoderException | InvalidProtocolBufferException e) {
             log.error("query block list by transHash and blockNum error:{}", e);
             throw new BrokerException(ErrorCode.FABRICSDK_GETBLOCKINFO_ERROR);
         }
     }
 
-    public List<TbNode> queryNodeList() throws BrokerException {
+    public ListPage<TbNode> queryNodeList(Integer pageIndex, Integer pageSize) throws BrokerException {
 
         try {
-            return FabricSDKWrapper.queryNodeList(fabricConfig, channel);
+            return FabricSDKWrapper.queryNodeList(fabricConfig, channel, pageIndex, pageSize);
         } catch (InvalidArgumentException | ProposalException e) {
             log.error("query node list by transHash and blockNum error:{}", e);
             throw new BrokerException(ErrorCode.FABRICSDK_GETBLOCKINFO_ERROR);
