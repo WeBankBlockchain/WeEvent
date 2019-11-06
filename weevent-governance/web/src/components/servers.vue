@@ -45,7 +45,6 @@
         </el-form-item>
         <el-form-item :label="$t('serverSet.brokerURLAddress') + ' :'" prop='brokerUrl'>
           <el-input v-model.trim="form.brokerUrl" autocomplete="off"  :placeholder="$t('serverSet.borkerPlaceholder')"></el-input>
-          <!-- <p class='version' v-show="showVersion">{{$t('header.version') + ':'}}<span v-for='(item, key, index) in version' :key='index'>{{item}}</span></p> -->
           <p class='version' v-show="version" v-html="version"></p>
         </el-form-item>
         <el-form-item :label="$t('serverSet.webaseURLAddress') + ' :'" prop='webaseUrl'>
@@ -125,7 +124,7 @@ export default {
         //   if (res.data === 'SUCCESS') {
         //     callback()
         //   } else {
-        //     callback('服务地址错误,服务无法连接')
+        //     callback('error')
         //   }
         // })
         callback()

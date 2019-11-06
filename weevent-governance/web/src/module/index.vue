@@ -50,12 +50,12 @@ export default {
           this.$router.push('./topicList')
           break
         case '2-2':
+          this.$store.commit('set_menu', [this.$t('sideBar.topic'), this.$t('sideBar.subcription')])
+          this.$router.push('./subcription')
+          break
+        case '2-3':
           this.$store.commit('set_menu', [this.$t('sideBar.topic'), this.$t('sideBar.statistics')])
           this.$router.push('./statistics')
-          break
-        case '3':
-          this.$store.commit('set_menu', [this.$t('sideBar.subcription')])
-          this.$router.push('./subcription')
           break
         case '4-1':
           this.$store.commit('set_menu', [this.$t('sideBar.engine'), this.$t('sideBar.ruleMana')])
@@ -95,13 +95,13 @@ export default {
           this.$store.commit('set_active', '2-1')
           this.$store.commit('set_menu', [this.$t('sideBar.topic'), this.$t('sideBar.topicList')])
           break
-        case '/statistics':
-          this.$store.commit('set_active', '2-2')
-          this.$store.commit('set_menu', [this.$t('sideBar.topic'), this.$t('sideBar.statistics')])
-          break
         case '/subcription':
-          this.$store.commit('set_active', '3')
-          this.$store.commit('set_menu', [this.$t('sideBar.subcription')])
+          this.$store.commit('set_active', '2-2')
+          this.$store.commit('set_menu', [this.$t('sideBar.topic'), this.$t('sideBar.subcription')])
+          break
+        case '/statistics':
+          this.$store.commit('set_active', '2-3')
+          this.$store.commit('set_menu', [this.$t('sideBar.topic'), this.$t('sideBar.statistics')])
           break
         case '/rule':
           this.$store.commit('set_active', '4-1')

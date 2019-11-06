@@ -42,6 +42,16 @@
         <if test="databaseUrl != null">
             and database_url = #{databaseUrl,jdbcType=VARCHAR}
         </if>
+        <if test="isVisible != null">
+            and is_visible = #{isVisible,jdbcType=VARCHAR}
+        </if>
+    </select>
+
+    <select id="getRuleDataBaseById" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from t_rule_database
+        where id=#{id}
     </select>
 
     <delete id="deleteCirculationDatabase"
@@ -61,9 +71,9 @@
     </update>
 
 
-    <insert id="addCirculationDatabase">
-        INSERT INTO t_rule_database(`user_id`, `broker_id`, `database_url`, `database_name`, `table_name`)
-        VALUES (#{userId}, #{brokerId}, #{databaseUrl}, #{databaseName})
+    <insert id="addCirculationDatabase" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_rule_database(`user_id`, `broker_id`, `database_url`, `database_name`, `table_name`,`is_visible`)
+        VALUES (#{userId}, #{brokerId}, #{databaseUrl}, #{databaseName}, #{tableName},#{isVisible})
     </insert>
 
     <insert id="batchInsert">
@@ -94,6 +104,9 @@
         </if>
         <if test="databaseUrl != null">
             and database_url = #{databaseUrl,jdbcType=VARCHAR}
+        </if>
+        <if test="isVisible != null">
+            and is_visible = #{isVisible,jdbcType=VARCHAR}
         </if>
     </select>
 </mapper>

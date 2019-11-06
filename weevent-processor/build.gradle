@@ -21,7 +21,7 @@ dependencies {
     implementation("org.apache.tomcat:tomcat-jdbc:8.5.23");
 
     implementation("log4j:log4j:1.2.17")
-    
+
     //fastjson
     implementation("com.alibaba:fastjson:1.2.47")
 
