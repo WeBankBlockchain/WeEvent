@@ -7,9 +7,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -49,8 +53,6 @@ public class CommonService implements AutoCloseable {
     public static final String FORMAT_TYPE = "json";
 
 
-
-
     public CloseableHttpResponse getCloseResponse(HttpServletRequest req, String newUrl) throws ServletException {
         CloseableHttpResponse closeResponse;
         try {
@@ -72,6 +74,7 @@ public class CommonService implements AutoCloseable {
     public CloseableHttpResponse getCloseResponse(HttpServletRequest req, String newUrl, String jsonString) throws ServletException {
         CloseableHttpResponse closeResponse;
         try {
+            log.info("url {}", newUrl);
             CloseableHttpClient client = this.generateHttpClient(newUrl);
             if (req.getMethod().equals(METHOD_TYPE)) {
                 HttpGet get = this.getMethod(newUrl, req);
@@ -181,25 +184,73 @@ public class CommonService implements AutoCloseable {
     }
 
 
-    public void checkDataBaseUrl(String dataBaseUrl) throws GovernanceException {
+    public void checkDataBaseUrl(String dataBaseUrl, String tableName) throws GovernanceException {
         if (StringUtil.isBlank(dataBaseUrl)) {
             return;
         }
+        Map<String, String> stringStringMap = uRLRequest(dataBaseUrl);
         String defaultUrl = dataBaseUrl.substring(0, dataBaseUrl.indexOf(ConstantProperties.QUESTION_MARK));
-        String user = dataBaseUrl.substring(dataBaseUrl.indexOf(ConstantProperties.QUESTION_MARK) + 1, dataBaseUrl.indexOf(ConstantProperties.AND_SYMBOL));
-        user = user.split(ConstantProperties.EQUAL_SIGN)[1].replaceAll("\"", "");
-        int first = dataBaseUrl.indexOf(ConstantProperties.AND_SYMBOL);
-        int second = dataBaseUrl.indexOf(ConstantProperties.AND_SYMBOL, first + 1);
-        String password = dataBaseUrl.substring(first, second);
-        password = password.split(ConstantProperties.EQUAL_SIGN)[1].replaceAll("\"", "");
-        try (Connection conn = DriverManager.getConnection(defaultUrl, user, password)) {
+        String user = stringStringMap.get("user");
+        String password = stringStringMap.get("password");
+        // first use database
+        int first = dataBaseUrl.lastIndexOf("/");
+        int end = dataBaseUrl.indexOf("?");
+        String dbName = dataBaseUrl.substring(first + 1, end);
+        try (Connection conn = DriverManager.getConnection(defaultUrl, user, password);
+             Statement stat = conn.createStatement()) {
             if (conn != null) {
                 log.info("database connect success,dataBaseUrl:{}", dataBaseUrl);
+            }
+            String querySql = "SELECT t.table_name FROM information_schema.TABLES t WHERE t.TABLE_SCHEMA =" + "\"" + dbName + "\" AND t.table_name=\"" + tableName + "\"";
+            ResultSet resultSet = stat.executeQuery(querySql);
+            while (resultSet.next()) {
+                String name = resultSet.getString(1);
+                if (!tableName.equals(name)) {
+                    log.error("table: {}  is not exist!", tableName);
+                    throw new GovernanceException("table " + tableName + " is not exist!");
+                }
             }
         } catch (Exception e) {
             log.error("database url is error", e);
             throw new GovernanceException("database url is error", e);
         }
+    }
+
+
+    public static Map<String, String> uRLRequest(String URL) {
+        Map<String, String> mapRequest = new HashMap<>();
+
+        String[] arrSplit = null;
+
+        String strUrlParam = truncateUrlPage(URL);
+        if (strUrlParam == null) {
+            return mapRequest;
+        }
+        arrSplit = strUrlParam.split("[&]");
+        for (String strSplit : arrSplit) {
+            String[] arrSplitEqual = null;
+            arrSplitEqual = strSplit.split("[=]");
+
+            if (arrSplitEqual.length > 1) {
+                mapRequest.put(arrSplitEqual[0], arrSplitEqual[1]);
+
+            } else {
+                if (!arrSplitEqual[0].equals("")) {
+                    mapRequest.put(arrSplitEqual[0], "");
+                }
+            }
+        }
+        return mapRequest;
+    }
+
+    private static String truncateUrlPage(String strURL) {
+        String strAllParam = null;
+        String[] arrSplit = strURL.split("[?]");
+        if ((strURL.length() > 1) && (arrSplit.length) > 1 && (arrSplit[1] != null)) {
+            strAllParam = arrSplit[1];
+        }
+
+        return strAllParam;
     }
 
 
