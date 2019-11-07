@@ -9,7 +9,7 @@
       <p class='name'><span>{{$t('rule.dataType')}} :</span>{{ruleItem.payloadType === 1 ? 'JSON' : '' }}</p>
       <p class='name'><span>{{$t('rule.payloadMap')}} :</span>{{ruleItem.payloadMap}}</p>
     </div>
-    <el-dialog :title="$t('ruleDetail.editRule')" :visible.sync="createRule">
+    <el-dialog :title="$t('ruleDetail.editRule')" :visible.sync="createRule" :close-on-click-modal='false'>
       <div class='warning_part'>
         <img src="../assets/image/icon_tips.svg" alt="">
         <p>{{$t('rule.creatRuleRemark')}}</p>
@@ -49,7 +49,7 @@
       </div>
     </div>
 
-    <el-dialog :title="$t('rule.editRule')" :visible.sync="createSQL">
+    <el-dialog :title="$t('rule.editRule')" :visible.sync="createSQL" :close-on-click-modal='false'>
       <el-form :model="sqlOption" :rules="sqlCheck" ref='sql'>
         <el-form-item :label="$t('ruleDetail.dataCirculat')  + ' :'" prop='fromDestination'>
           <el-select  v-model='sqlOption.fromDestination'  size='mini' @visible-change='selectShow' :placeholder="$t('common.choose')">
