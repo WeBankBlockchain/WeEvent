@@ -106,7 +106,11 @@ function check_param(){
     check_port ${broker_port}
     check_port ${nginx_port}
     if [[ ${governance_enable} = "true" ]];then
+        check_port ${governance_port}
         check_telnet ${mysql_ip}:${mysql_port}
+    fi
+    if [[ ${processor_enable} = "true" ]];then
+        check_port ${processor_port}
     fi
     if [[ -d ${block_chain_node_path} ]]; then
         check_telnet ${block_chain_channel}
