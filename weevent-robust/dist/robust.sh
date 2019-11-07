@@ -1,51 +1,60 @@
 #!/bin/bash
-echo "source ~/.bashrc to confirm java jdk environment"
-source ~/.bashrc >/dev/null 2>&1
+JAVA_HOME=
+APP_PARAMS="-Xbootclasspath/a:./conf -cp ./apps/* -Dloader.path=./lib,../lib org.springframework.boot.loader.PropertiesLauncher"
 
-pid_file=./logs/robust.pid
+###############################################################################
+# The following is common logic for start a java application. DO NOT EDIT IT SOLELY.
+###############################################################################
+JAVA_OPTS="-Xverify:none -XX:+DisableExplicitGC"
+
 current_pid=
+server_name=$(basename $0|awk -F"." '{print $1}')
+pid_file=./logs/${server_name}.pid
 
-JAVA_OPTS=
+if [[ -z ${JAVA_HOME} ]];then
+   echo "JAVA_HOME is empty, please set it first"
+   exit 1
+fi
 
 get_pid(){
     if [[ -e ${pid_file} ]]; then
-        pid =  "cat ${pid_file}"
-        current_pid="ps aux|grep "robust" | grep ${pid} | grep -v grep | awk '{print $2}'"
+        pid="cat ${pid_file}"
+        current_pid=$(ps aux|grep "${server_name}" | grep "${pid}" | grep -v grep | awk '{print $2}')
     fi
 }
 
 start(){
     get_pid
 	if [[ -n "${current_pid}" ]];then
-        echo "robust is running, (PID=${current_pid})"
+        echo "${server_name} is running, (PID=${current_pid})"
         exit 0
     fi
-    nohup java ${JAVA_OPTS} -Xbootclasspath/a:./conf -jar ./apps/*  >/dev/null 2>&1 &
+    nohup ${JAVA_HOME}/bin/java ${JAVA_OPTS} ${APP_PARAMS} >/dev/null 2>&1 &
     i=0
     while :
     do
         sleep 1
         get_pid
         if [[ -n "${current_pid}" ]];then
-            echo "start robust success (PID=${current_pid})"
+            echo "start ${server_name} success (PID=${current_pid})"
             break
         fi
 
         if [[ i -eq 15 ]];then
-            echo "start robust fail"
+            echo "start ${server_name} fail"
             exit 1
         fi
         i=$((i + 1 ))
     done
 
-    if [[ "crontab -l | grep -w robust | wc -l" -eq 0 ]]; then
+    if [[ $(crontab -l | grep -w ${server_name} | wc -l) -eq 0 ]]; then
          crontab -l > cron.backup
-         echo "* * * * * cd ${pwd}; ./robust.sh monitor >> ./logs/monitor.log 2>&1" >> cron.backup
+         echo "* * * * * cd ${pwd}; ./${server_name}.sh monitor >> ./logs/monitor.log 2>&1" >> cron.backup
          crontab cron.backup
          rm cron.backup
     fi
 
-    if [[ "crontab -l | grep -w robust | wc -l" -gt 0 ]]; then
+    if [[ $(crontab -l | grep -w ${server_name} | wc -l) -gt 0 ]]; then
          echo "add the crontab job success"
          exit 0
     else
@@ -59,23 +68,23 @@ stop(){
     kill_cmd="kill -9 ${current_pid}"
     if [[ -n "${current_pid}" ]];then
         eval ${kill_cmd}
-        
-        echo "stop robust success"
-        if [[ "crontab -l | grep -w robust | wc -l" -gt 0 ]]; then
+
+        echo "stop ${server_name} success"
+        if [[ "crontab -l | grep -w ${server_name} | wc -l" -gt 0 ]]; then
             crontab -l>cron.backup
-            sed -i ""/robust/d" cron.backup
+            sed -i '/'${server_name}'/d' cron.backup
             crontab cron.backup
             rm cron.backup
         fi
 
-        if [[ "crontab -l | grep -w robust | wc -l" -gt 0 ]]; then
+        if [[ "crontab -l | grep -w ${server_name} | wc -l" -gt 0 ]]; then
             echo "remove the crontab job fail"
             exit 1
         else
             echo "remove the crontab job success"
         fi
     else
-        echo "robust is not running"
+        echo "${server_name} is not running"
         exit 1
     fi
 }
@@ -83,11 +92,11 @@ stop(){
 monitor(){
     get_pid
     if [[ -n "${current_pid}" ]]; then
-        echo "${date}: robust is running(PID=${current_pid})"
+        echo "${date}: ${server_name} is running(PID=${current_pid})"
     else
-        echo "${date}: robust is not running, restart robust now..."
+        echo "${date}: ${server_name} is not running, restart ${server_name} now..."
         start
-    fi   
+    fi
 }
 
 # command list
@@ -103,7 +112,7 @@ monitor)
     ;;
 *)
     echo "    illegal param: $1"
-    echo "Usage:"    
-    echo "    ./robust.sh start|stop|monitor"
+    echo "Usage:"
+    echo "    ./${server_name}.sh start|stop|monitor"
     ;;
 esac
