@@ -202,12 +202,8 @@ public class TopicHistoricalService {
                 groupId = groupId.replaceAll("\"", "");
                 RuleEngineEntity ruleEngineEntity = initializationRule(TOPIC_HISTORICAL, brokerEntity, groupId, ruleDatabaseEntity.getId());
                 ruleEngineMapper.addRuleEngine(ruleEngineEntity);
-                //determine if the processor's service is available
-                boolean exist = ruleEngineService.checkProcessorExist(request);
-                if (exist) {
-                    //built-in rule engine data and start
-                    ruleEngineService.startRuleEngine(ruleEngineEntity, request, response);
-                }
+                //built-in rule engine data and start
+                ruleEngineService.startRuleEngine(ruleEngineEntity, request, response);
             }
         } catch (Exception e) {
             log.error("create table fail error,{}", e.getMessage());

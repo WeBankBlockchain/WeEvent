@@ -23,15 +23,17 @@ function processor_setup() {
         exit 1
     else
        sed -i "s/127.0.0.1:3306/${mysql_ip}:3306/" ${out_path}/conf/application-prod.properties
+       sed -i "s/127.0.0.1:3306/${mysql_ip}:3306/" ${out_path}/conf/processor.properties
     fi
     echo "set mysql_ip success"
-     
+
     if [[ -z ${mysql_port} ]];then
         echo "mysql_port is empty."
         echo "set mysql_port failed"
         exit 1
     else
        sed -i "s/3306/${mysql_port}/" ${out_path}/conf/application-prod.properties
+       sed -i "s/3306/${mysql_port}/" ${out_path}/conf/processor.properties
     fi
     echo "set mysql_port success"
 
@@ -41,15 +43,17 @@ function processor_setup() {
         exit 1
     else
        sed -i "s/xxxx/${mysql_user}/" ${out_path}/conf/application-prod.properties
+       sed -i "s/xxxx/${mysql_user}/" ${out_path}/conf/processor.properties
     fi
     echo "set mysql_user success"
-  
+
     if [[ -z ${mysql_pwd} ]];then
         echo "mysql_pwd is empty"
         echo "set mysql_pwd failed"
         exit 1
     else
        sed -i "s/yyyy/${mysql_pwd}/" ${out_path}/conf/application-prod.properties
+       sed -i "s/yyyy/${mysql_pwd}/" ${out_path}/conf/processor.properties
     fi
     echo "set mysql_pwd success"
        
