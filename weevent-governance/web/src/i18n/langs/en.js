@@ -54,6 +54,7 @@ module.exports = {
     'webasePlaceholder': 'eg: "http://127.0.0.1:8080/webase"',
     'authorizedPlaceholder': 'Select Account',
     'errorServer': 'Invalid server name',
+    'noServerName': 'Empty server name',
     'emptyPort': 'Invalid server URL',
     'errorAddress': 'Can not connect to server'
   },
@@ -111,7 +112,7 @@ module.exports = {
     'nodeNum': 'Nodes',
     'blockNum': 'Blocks',
     'transactionNum': 'Transactions',
-    'lastWeek': 'Events in selected Times',
+    'lastWeek': 'Events in selected time',
     'essential': 'Monitor'
   },
   tableCont: {
@@ -128,8 +129,8 @@ module.exports = {
     'stop': 'Stop',
     'getDataError': 'Requset failed',
     'searchTpoic': 'Please input topic',
-    'sequenceNumber': 'Published events',
-    'newBlockNumber': 'Last event’s block',
+    'sequenceNumber': 'Published Events',
+    'newBlockNumber': 'Last Event’s Block',
     'address': 'Topic Contract Address',
     'creater': 'Create Account',
     'addTopic': 'New topic',
@@ -166,8 +167,8 @@ module.exports = {
     'creatNow': 'Create Now',
     'enterRuleName': 'Please input rule name',
     'ruleName': 'Rule Name',
-    'payloadType': 'format',
-    'payloadMap': 'Event payload Samples',
+    'payloadType': 'Format',
+    'payloadMap': 'Event Payload Samples',
     'run': 'Running',
     'notRun': 'Init',
     'start': 'Start',
