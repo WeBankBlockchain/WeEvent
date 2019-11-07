@@ -163,10 +163,10 @@ export default {
       },
       rules: {
         ruleName: [
-          { validator: ruleName, trigger: 'blur' }
+          { required: true, validator: ruleName, trigger: 'blur' }
         ],
         payloadMap: [
-          { validator: payloadMap, trigger: 'blur' }
+          { required: true, validator: payloadMap, trigger: 'blur' }
         ]
       }
     }

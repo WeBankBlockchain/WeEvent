@@ -110,7 +110,7 @@ export default {
       },
       rules: {
         name: [
-          { validator: name, trigger: 'blur' }
+          { required: true, validator: name, trigger: 'blur' }
         ]
       },
       creater: ''
