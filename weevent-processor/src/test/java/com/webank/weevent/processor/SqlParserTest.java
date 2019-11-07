@@ -45,8 +45,12 @@ public class SqlParserTest {
             Boolean e1 = false;
             if (c == 1) {
                 e1 = true;
+                log.info("11error number");
+
                 Assert.assertEquals(true, e1);
             } else {
+                log.info("22error number");
+
                 Assert.assertEquals(false, e1);
             }
 
@@ -162,4 +166,6 @@ public class SqlParserTest {
             }
         }
     }
+
+
 }
