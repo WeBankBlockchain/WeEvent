@@ -39,10 +39,13 @@ public class CEPRuleMQ {
             ruleMap.put(rule.getId(), rule);
             // update subscribe
             subscribeMsg(rule, ruleMap);
+            log.info("start rule ,and subscribe rule:{}",rule.getId());
         }
-        String subId = subscriptionIdMap.get(rule.getId());
-        if (null == subId) {
+        if (2 == rule.getStatus()) {
+            // update unsubscribe
+            String subId = subscriptionIdMap.get(rule.getId());
             client.unSubscribe(subId);
+            log.info("delete rule ,and unsubscribe");
         }
     }
 
@@ -69,27 +72,52 @@ public class CEPRuleMQ {
             IWeEventClient client = getClient(rule);
             // subscribe topic
             log.info("subscribe topic:{}", rule.getFromDestination());
-            String subscriptionId = client.subscribe(rule.getFromDestination(), WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
-                @Override
-                public void onEvent(WeEvent event) {
-                    try {
+            String subscriptionId;
+            if (StringUtils.isEmpty(rule.getOffSet())) {
+                subscriptionId = client.subscribe(rule.getFromDestination(), WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
+                    @Override
+                    public void onEvent(WeEvent event) {
+                        try {
 
-                        String content = new String(event.getContent());
-                        log.info("on event:{},content:{}", event.toString(), content);
+                            String content = new String(event.getContent());
+                            log.info("on event:{},content:{}", event.toString(), content);
 
-                        if (CommonUtil.checkValidJson(content)) {
-                            handleOnEvent(event, ruleMap);
+                            if (CommonUtil.checkValidJson(content)) {
+                                handleOnEvent(event, ruleMap);
+                            }
+                        } catch (JSONException e) {
+                            log.error(e.toString());
                         }
-                    } catch (JSONException e) {
-                        log.error(e.toString());
                     }
-                }
 
-                @Override
-                public void onException(Throwable e) {
-                    log.info("on event:{}", e.toString());
-                }
-            });
+                    @Override
+                    public void onException(Throwable e) {
+                        log.info("on event:{}", e.toString());
+                    }
+                });
+            } else {
+                subscriptionId = client.subscribe(rule.getFromDestination(), rule.getOffSet(), new IWeEventClient.EventListener() {
+                    @Override
+                    public void onEvent(WeEvent event) {
+                        try {
+
+                            String content = new String(event.getContent());
+                            log.info("on event:{},content:{}", event.toString(), content);
+
+                            if (CommonUtil.checkValidJson(content)) {
+                                handleOnEvent(event, ruleMap);
+                            }
+                        } catch (JSONException e) {
+                            log.error(e.toString());
+                        }
+                    }
+
+                    @Override
+                    public void onException(Throwable e) {
+                        log.info("on event:{}", e.toString());
+                    }
+                });
+            }
             subscriptionIdMap.put(rule.getId(), subscriptionId);
         } catch (BrokerException e) {
             log.info("BrokerException{}", e.toString());
@@ -108,7 +136,7 @@ public class CEPRuleMQ {
 
     private static void sendMessageToDB(String groupId, WeEvent eventContent, CEPRule rule) {
         try {
-            Connection conn = CommonUtil.getConnection(rule.getDatabaseUrl());
+            try (Connection conn = CommonUtil.getConnection(rule.getDatabaseUrl());) {
 
             if (conn != null) {
                 // get the sql params
@@ -157,6 +185,7 @@ public class CEPRuleMQ {
                 preparedStmt.close();
 
                 conn.close();
+                }
             }
         } catch (SQLException e) {
             log.info(e.toString());
@@ -287,13 +316,16 @@ public class CEPRuleMQ {
                     context.set(key, event.get(key));
                 }
                 // check the expression ,if match then true
+                log.info("condition:{}",condition);
                 boolean checkFlag = (Boolean) jexl.createExpression(condition).evaluate(context);
                 log.info("payload:{},eventContent:{},condition:{},hit rule:{}", payload, eventContent, condition, checkFlag);
                 return checkFlag;
             }
+            log.info("payload:{},eventContent:{},condition:{},hit rule:false", payload, eventContent, condition);
             return false;
         } catch (Exception e) {
             if (handleTheEqual(eventMessage, condition)) {
+                log.info("single equal match");
                 return true;
             } else {
                 log.info("error number");

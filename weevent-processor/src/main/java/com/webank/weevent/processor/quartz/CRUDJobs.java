@@ -36,6 +36,10 @@ public class CRUDJobs implements Job {
                     startCEPRule(context, jobName);
                     break;
 
+                case "deleteCEPRuleById":
+                    startCEPRule(context, jobName);
+                    break;
+
                 default:
                     log.info("the job name type:{}", type);
                     break;

@@ -61,17 +61,26 @@ public class QuartzManager {
                 JobKey jobKey = (JobKey) it.next();
                 if (null != (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
                     CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
-                    ruleList.add(rule);
-                    ruleMap.put(rule.getId(), rule);
-                    log.info("{}", jobKey);
+                    // if the current is delete
+                    if ((("deleteCEPRuleById".equals(params.get("type").toString()))) && (jobName.equals(rule.getId()))) {
+                        // update the status
+                        rule.setStatus(2);
+                        params.put("rule", rule);
+                    } else {
+                        ruleList.add(rule);
+                        ruleMap.put(rule.getId(), rule);
+                        log.info("{}", jobKey);
+                    }
                 }
 
             }
-            // add current rule
-            CEPRule currentRule = (CEPRule) params.get("rule");
-            if (currentRule.getStatus().equals(1)) {
-                ruleMap.put(currentRule.getId(), currentRule);
-                ruleList.add(currentRule);
+            if (!("deleteCEPRuleById".equals(params.get("type").toString()))) {
+                // add current rule
+                CEPRule currentRule = (CEPRule) params.get("rule");
+                if (currentRule.getStatus().equals(1)) {
+                    ruleMap.put(currentRule.getId(), currentRule);
+                    ruleList.add(currentRule);
+                }
             }
 
             params.put("ruleMap", ruleMap);
