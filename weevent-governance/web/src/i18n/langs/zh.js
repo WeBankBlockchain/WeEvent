@@ -56,6 +56,7 @@ module.exports = {
     'authorizedPlaceholder': '请选择用户',
     'errorServer': '服务名格式错误',
     'emptyPort': '服务端口不能为空',
+    'noServerName': '服务名不能为空',
     'errorAddress': '服务地址错误,无法连接!'
   },
   userSet: {
