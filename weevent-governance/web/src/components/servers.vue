@@ -81,7 +81,7 @@ export default {
   data () {
     var checkName = (rule, value, callback) => {
       if (value === '') {
-        callback(new Error(this.$t('userSet.enterUserName')))
+        callback(new Error(this.$t('serverSet.noServerName')))
       } else {
         let regex = /^[0-9A-Za-z]{1,20}$/
         if (regex.exec(value)) {
@@ -148,10 +148,10 @@ export default {
       brokerId: '',
       rules: {
         name: [
-          { validator: checkName, trigger: 'blur' }
+          { required: true, validator: checkName, trigger: 'blur' }
         ],
         brokerUrl: [
-          { validator: checkBroker, trigger: 'blur' }
+          { required: true, validator: checkBroker, trigger: 'blur' }
         ],
         webaseUrl: [
           { validator: checkWeBase, trigger: 'blur' }

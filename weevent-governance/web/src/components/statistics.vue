@@ -3,7 +3,7 @@
     <div class='dataContent'>
       <div class='selectOptions'>
         <span class='optionTitle'>{{$t('tableCont.chooseTopic')}}</span>
-        <el-select v-model="topic" multiple :placeholder="$t('common.choose')" @visible-change="selectChange" collapse-tags size="small">
+        <el-select v-model="topic" multiple @visible-change="selectChange" collapse-tags size="small">
           <el-option
             v-for="(item, index) in topicList"
             :key="index"
@@ -36,7 +36,7 @@ import Highcharts from 'highcharts/highstock'
 import { getLastWeek, getTimeList } from '../utils/formatTime'
 import API from '../API/resource.js'
 require('highcharts/modules/no-data-to-display.js')(Highcharts)
-export default{
+export default {
   data () {
     return {
       pickerOptions: {
