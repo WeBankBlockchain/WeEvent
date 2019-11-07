@@ -1,9 +1,9 @@
 package com.webank.weevent.sdk.jms;
 
-import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,7 +19,6 @@ import javax.jms.JMSException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
@@ -29,6 +28,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.LinkedMultiValueMap;
 
 
@@ -201,38 +201,44 @@ public class WebSocketTransport extends WebSocketClient {
 
     // return receipt-id
     public String stompSend(WeEventTopic topic, BytesMessage bytesMessage) throws JMSException {
-        Long asyncSeq = (this.sequence.incrementAndGet());
-        WeEventStompCommand stompCommand = new WeEventStompCommand();
-        // read byte
-        byte[] body = new byte[(int) bytesMessage.getBodyLength()];
-        bytesMessage.readBytes(body);
-        WeEvent weEvent = new WeEvent(topic.getTopicName(), body, topic.getExtensions());
+        if (bytesMessage instanceof WeEventBytesMessage) {
+            WeEventBytesMessage message = (WeEventBytesMessage) bytesMessage;
 
-        // header id equal asyncSeq
-        String req = stompCommand.encodeSend(asyncSeq, topic, weEvent);
-        this.sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
+            Long asyncSeq = (this.sequence.incrementAndGet());
+            WeEventStompCommand stompCommand = new WeEventStompCommand();
+            // read byte
+            byte[] body = new byte[(int) message.getBodyLength()];
+            message.readBytes(body);
+            WeEvent weEvent = new WeEvent(topic.getTopicName(), body, message.getExtensions());
 
-        Message stompResponse = this.stompRequest(req, asyncSeq);
-        if (stompCommand.isError(stompResponse)) {
-            log.info("STOMP ERROR received: {}", stompResponse.toString());
+            // header id equal asyncSeq
+            String req = stompCommand.encodeSend(asyncSeq, topic, weEvent);
+            this.sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
 
-            if (stompResponse.getHeaders().containsKey("message")) {
-                throw new JMSException(stompResponse.getHeaders().get("message").toString());
-            } else {
+            Message stompResponse = this.stompRequest(req, asyncSeq);
+            if (stompCommand.isError(stompResponse)) {
+                log.info("STOMP ERROR received: {}", stompResponse.toString());
+
+                if (stompResponse.getHeaders().containsKey("message")) {
+                    throw new JMSException(stompResponse.getHeaders().get("message").toString());
+                } else {
+                    throw WeEventConnectionFactory.error2JMSException(ErrorCode.SDK_JMS_EXCEPTION_STOMP_EXECUTE);
+                }
+            }
+
+            // handler stompResponse
+            LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) stompResponse.getHeaders().get("nativeHeaders"));
+            if (nativeHeaders == null) {
+                log.error("unknown native header");
                 throw WeEventConnectionFactory.error2JMSException(ErrorCode.SDK_JMS_EXCEPTION_STOMP_EXECUTE);
             }
+
+            String eventID = nativeHeaders.get("eventId") == null ? "" : nativeHeaders.get("eventId").get(0).toString();
+            bytesMessage.setJMSMessageID(eventID);
+            return nativeHeaders.get("receipt-id") == null ? "" : nativeHeaders.get("receipt-id").get(0).toString();
         }
 
-        // handler stompResponse
-        LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) stompResponse.getHeaders().get("nativeHeaders"));
-        if (nativeHeaders == null) {
-            log.error("unknown native header");
-            throw WeEventConnectionFactory.error2JMSException(ErrorCode.SDK_JMS_EXCEPTION_STOMP_EXECUTE);
-        }
-
-        String eventID = nativeHeaders.get("eventId") == null ? "" : nativeHeaders.get("eventId").get(0).toString();
-        bytesMessage.setJMSMessageID(eventID);
-        return nativeHeaders.get("receipt-id") == null ? "" : nativeHeaders.get("receipt-id").get(0).toString();
+        throw new JMSException(WeEventConnectionFactory.NotSupportTips);
     }
 
     // return subscriptionId
@@ -347,29 +353,38 @@ public class WebSocketTransport extends WebSocketClient {
      *
      * @param stompMsg handle the message frame
      */
+    @SuppressWarnings("unchecked")
     private void handleMessageFrame(Message<byte[]> stompMsg) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(stompMsg);
         log.info("accessor:{}", accessor.toString());
 
         String messageId = getHeadersValue(accessor, "message-id");
         String subscriptionId = getHeadersValue(accessor, "subscription-id");
-        WeEvent event = null;
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            event = mapper.readValue(stompMsg.getPayload(), WeEvent.class);
-        } catch (IOException e) {
-            log.error("jackson decode WeEvent failed", e);
+
+        // custom properties, eventId is in native header
+        Map<String, String> extensions = new HashMap<>();
+        for (Map.Entry<String, List<String>> entry : ((Map<String, List<String>>) stompMsg.getHeaders().get(NativeMessageHeaderAccessor.NATIVE_HEADERS)).entrySet()) {
+            if (entry.getKey().startsWith("weevent-")) {
+                extensions.put(entry.getKey(), entry.getValue().get(0));
+            }
         }
+
+        WeEvent event = new WeEvent(accessor.getDestination(), stompMsg.getPayload(), extensions);
+        event.setEventId(accessor.getNativeHeader("eventId").get(0));
+
+        log.info("received: {}", event);
 
         // update the cache eventId
         if (this.subscription2EventCache.containsKey(subscriptionId)) {
             this.subscription2EventCache.get(subscriptionId).setOffset(event.getEventId());
         }
 
+        // dispatch to listener
         if (this.receiptId2SubscriptionId.containsKey(messageId)) {
             WeEventStompCommand weEventStompCommand = new WeEventStompCommand(event);
             weEventStompCommand.setSubscriptionId(subscriptionId);
             weEventStompCommand.setHeaderId(messageId);
+            weEventStompCommand.setTopic(new WeEventTopic(event.getTopic()));
 
             // dispatch event message
             this.topicConnection.dispatch(weEventStompCommand);

@@ -1,7 +1,6 @@
 package com.webank.weevent.sdk;
 
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyManagementException;
@@ -11,10 +10,7 @@ import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.jms.BytesMessage;
 import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
 import javax.jms.Session;
 import javax.jms.Topic;
 import javax.jms.TopicConnection;
@@ -33,7 +29,6 @@ import com.webank.weevent.sdk.jms.WeEventTopicSubscriber;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.googlecode.jsonrpc4j.ProxyUtil;
 import lombok.NonNull;
@@ -155,21 +150,20 @@ public class WeEventClient implements IWeEventClient {
             // create topic
             WeEventTopic weEventTopic = (WeEventTopic) session.createTopic(weEvent.getTopic());
             weEventTopic.setGroupId(this.groupId);
-            weEventTopic.setExtensions(weEvent.getExtensions());
 
             // create bytesMessage
-            WeEventBytesMessage bytesMessage = new WeEventBytesMessage();
-            bytesMessage.writeBytes(weEvent.getContent());
-
+            WeEventBytesMessage weEventBytesMessage = new WeEventBytesMessage();
+            weEventBytesMessage.writeBytes(weEvent.getContent());
+            weEventBytesMessage.setExtensions(weEvent.getExtensions());
             // publish
             WeEventTopicPublisher publisher = (WeEventTopicPublisher) session.createPublisher(weEventTopic);
-            publisher.publish(bytesMessage);
+            publisher.publish(weEventBytesMessage);
 
             // return
             sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
-            sendResult.setEventId(bytesMessage.getJMSMessageID());
+            sendResult.setEventId(weEventBytesMessage.getJMSMessageID());
 
-            log.info("publish success, eventID: {}", bytesMessage.getJMSMessageID());
+            log.info("publish success, eventID: {}", weEventBytesMessage.getJMSMessageID());
         } catch (JMSException e) {
             log.error("jms exception", e);
             throw jms2BrokerException(e);
@@ -225,23 +219,24 @@ public class WeEventClient implements IWeEventClient {
             WeEventTopicSubscriber subscriber = (WeEventTopicSubscriber) session.createSubscriber(destination);
 
             // create listener
-            subscriber.setMessageListener(new MessageListener() {
-                public void onMessage(Message message) {
-                    if (message instanceof BytesMessage) {
-                        try {
-                            BytesMessage bytesMessage = (BytesMessage) message;
-                            ObjectMapper mapper = new ObjectMapper();
-                            byte[] body = new byte[(int) bytesMessage.getBodyLength()];
-                            bytesMessage.readBytes(body);
-                            WeEvent event = mapper.readValue(body, WeEvent.class);
-                            listener.onEvent(event);
-                        } catch (IOException | JMSException e) {
-                            log.error("onMessage exception", e);
-                            listener.onException(e);
+            subscriber.setMessageListener(bytesMessage -> {
+                        if (bytesMessage instanceof WeEventBytesMessage) {
+                            try {
+                                WeEventBytesMessage message = (WeEventBytesMessage) bytesMessage;
+                                byte[] body = new byte[(int) message.getBodyLength()];
+                                message.readBytes(body);
+
+                                WeEventTopic weEventTopic = (WeEventTopic) message.getJMSDestination();
+                                WeEvent event = new WeEvent(weEventTopic.getTopicName(), body, message.getExtensions());
+                                event.setEventId(message.getJMSMessageID());
+                                listener.onEvent(event);
+                            } catch (JMSException e) {
+                                log.error("onMessage exception", e);
+                                listener.onException(jms2BrokerException(e));
+                            }
                         }
                     }
-                }
-            });
+            );
 
             this.sessionMap.put(subscriber.getSubscriptionId(), session);
             return subscriber.getSubscriptionId();
