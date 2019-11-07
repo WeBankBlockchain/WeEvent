@@ -259,7 +259,9 @@ public class CEPRuleMQ {
         String[] strs = condition.split("=");
         if (strs.length == 2) {
             // event contain left key
-            if (event.containsKey(strs[0]) && event.get(strs[0]).toString().equals(strs[1])) {
+            String key = strs[0].replaceAll("\"", "").trim();
+            String value = strs[1].replaceAll("\"", "").trim();
+            if (event.containsKey(key) && event.get(key).toString().equals(value)) {
                 log.info("get the a=1 pattern {}", "true");
                 return true;
             } else {
@@ -293,13 +295,8 @@ public class CEPRuleMQ {
             }
             return false;
         } catch (Exception e) {
-            if (handleTheEqual(eventMessage, condition)) {
-                return true;
-            } else {
-                log.info("error number");
-                return false;
-            }
-
+            log.info("eventMessage :{} contains =", eventMessage);
+            return handleTheEqual(eventMessage, condition);
         }
     }
 
@@ -316,8 +313,7 @@ public class CEPRuleMQ {
             JSONObject event = JSONObject.parseObject(payload);
             String[] strs = condition.split("=");
             boolean flag = false;
-            if (strs.length == 2 && !(strs[0].contains("<") || strs[0].contains(">") || (strs[1].contains("<") || strs[1].contains(">"))))
-            {
+            if (strs.length == 2 && !(strs[0].contains("<") || strs[0].contains(">") || (strs[1].contains("<") || strs[1].contains(">")))) {
                 flag = true;
             }
             if (flag) {
