@@ -367,7 +367,7 @@ a:hover {
 }
 .broker input{
     border: 1px solid #ccc;
-    width: 600px;
+    width: 450px;
     height: 14px;
     margin-left:10px;
     line-height: 14px;
@@ -378,6 +378,10 @@ a:hover {
     -webkit-box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.06);
     -moz-box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.06);
     box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.06);
+}
+
+.broker .login{
+    width:140px;
 }
 
 .field {
@@ -392,7 +396,7 @@ a:hover {
     bottom:0;
     left:66px;
     color:#ca0021;
-    display: none;
+    opacity: 0;
 }
 
 .field input[type=text],
