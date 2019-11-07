@@ -143,7 +143,7 @@
 </template>
 <script>
 import API from '../API/resource'
-export default{
+export default {
   data () {
     var ruleName = (rule, value, callback) => {
       if (value === '') {
@@ -218,10 +218,10 @@ export default{
       },
       rules: {
         ruleName: [
-          { validator: ruleName, trigger: 'blur' }
+          { required: true, validator: ruleName, trigger: 'blur' }
         ],
         payloadMap: [
-          { validator: payloadMap, trigger: 'blur' }
+          { required: true, validator: payloadMap, trigger: 'blur' }
         ]
       },
       sqlOption: {
@@ -585,26 +585,6 @@ export default{
       if (e && this.pageIndex !== 1) {
         this.pageIndex = 1
         this.getLsitData()
-      }
-    },
-    selectColumn (e) {
-      let list = []
-      for (let key in this.columnName) {
-        list.push(key)
-      }
-      if (e.indexOf('*') >= -1) {
-        this.sqlOption.selectField = [].concat(list)
-        this.sqlOption.selectField.unshift('*')
-        this.sqlOption.selectField.push('eventId')
-      } else {
-        if (e.length === list.length + 1) {
-          if (e[e.length - 1] !== 'eventId') {
-
-          } else {
-
-          }
-          // this.sqlOption.selectField.unshift('*')
-        }
       }
     },
     selField (e) {
