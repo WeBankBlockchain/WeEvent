@@ -34,7 +34,7 @@
       </template>
     </el-table-column>
   </el-table>
-  <el-dialog :title="title" :visible.sync="showlog" center width='450px' >
+  <el-dialog :title="title" :visible.sync="showlog" center width='450px' :close-on-click-modal='false'>
     <el-form :model="form" :rules="rules" ref='form'>
       <el-form-item :label="$t('rule.JDBCname')" prop='databaseName'>
         <el-input v-model.trim="form.databaseName" autocomplete="off"></el-input>

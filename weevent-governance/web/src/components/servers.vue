@@ -38,7 +38,7 @@
         </el-table>
       </div>
     </div>
-    <el-dialog :title="title" :visible.sync="showLog">
+    <el-dialog :title="title" :visible.sync="showLog" :close-on-click-modal='false'>
       <el-form :model="form" :rules="rules" ref='form'>
         <el-form-item :label="$t('common.name') + ' :'" prop='name'>
           <el-input v-model.trim="form.name" autocomplete="off" :placeholder="$t('serverSet.namePlaceholder')"></el-input>
@@ -108,6 +108,8 @@ export default {
           } else {
             callback(new Error(this.$t('serverSet.errorAddress')))
           }
+        }).catch(e => {
+          callback(new Error(this.$t('serverSet.errorAddress')))
         })
       }
     }

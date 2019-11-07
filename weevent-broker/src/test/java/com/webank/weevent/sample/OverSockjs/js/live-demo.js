@@ -5,6 +5,7 @@ var url = null;
 var login = "";
 var passcode = "";
 var type = 1
+var subID = ''
 
 
 function setConnected(connected) {
@@ -40,6 +41,10 @@ function connect() {
         } else {
             connectBtn(false)
         }
+    }
+    socket.onclose = function() {
+        type=1
+        disconnectChannel()
     }
 }
 
@@ -124,7 +129,12 @@ function subscribeConnect() {
         }catch(e){
 
         }
-    }   
+    }
+
+    socket.onclose = function () {
+        type=2
+        disconnectSubscribe()
+    }
 }
 
 // Subscribe disconnect
@@ -143,7 +153,6 @@ function disconnectSubscribe() {
 
 // Subscribe subscribeTopic
 function subMultiSubscribeTopic() {   
-    // 消息订阅
     try{
         if (stompClientSub.active) {
             if(!checkSubInput()){
@@ -174,11 +183,17 @@ function subMultiSubscribeTopic() {
             stompClientSub.subscribe(multiSubscribeTopicArr,function (message) {
                 if (message.body) {
                     // console.log('stompClient.connected subscribe...');
-                    var con = JSON.parse(message.body)
-                    var content = $.base64.decode(con.content)
-                    con.content = content
-                    var time = getTime()
-                    var str = '<p class="infor_list">'+ time +' - <br/>'+ JSON.stringify(con) +'</p>'
+                    var con = message.headers
+                    let keyStr = ""
+                    for (var key in con) {
+                        if (key.indexOf('weevent') > -1) {
+                            keyStr += key + ':' + con[key] + '<br/>'
+                        }
+                    }
+                    console.log(keyStr)
+                    data.body = message.body
+                    // var str = '<p class="infor_list">'+ getTime() +' - <br/> <<< MESSAGE <br/>'+ JSON.stringify(data) + '</p>'
+                    var str = '<p class="infor_list">'+ getTime() +' - <br/> <<< MESSAGE <br/>destination: '+ con.destination + '<br/>eventId: '+ con.eventId +'<br/>'+ keyStr +'content-length: '+ con['content-length'] + '<br/>'+ message.body +'</p>'
                     $('#sub-message').prepend(str)
                 }
             },data);
@@ -197,7 +212,7 @@ function unsubscribeTopic() {
         subscribe(false)
         stompClientSub.unsubscribe(topicValue, {
             id: window.uuid,
-            destination: topicValue,
+            destination: subID,
             body: "unsubscribeTopic"
         })
     } else {
@@ -303,8 +318,18 @@ function changeEventId(e) {
 // Publish click Send-btn 
 function getMember(message){
     var time = getTime()
-    if (message.indexOf(">>> SEND") > -1 || message.indexOf("<<< ERROR") > -1 || message.indexOf("<<< CONNECTED")>-1||message.indexOf(">>> DISCONNECT")>-1||message.indexOf("send fail")>-1||message.indexOf(">>> SUBSCRIBE")>-1||message.indexOf(">>> UNSUBSCRIBE")>-1) {
+    if (message.indexOf(">>> SEND") > -1 || message.indexOf("<<< ERROR") > -1 || message.indexOf("<<< CONNECTED")>-1||message.indexOf(">>> DISCONNECT")>-1||message.indexOf("send fail")>-1||message.indexOf(">>> SUBSCRIBE")>-1||message.indexOf(">>> UNSUBSCRIBE")>-1||message.indexOf("<<< RECEIPT")>-1) {
         var str = '<p class="infor_list">'+ time +'-'+type+' - <br/>'+ message +'</p>'
+        if (message.indexOf('subscription-id') > -1) {
+            var s = message
+            s = s.split('RECEIPT')
+            var strList = s[1].split(':')
+            for (var o = 0; o < strList.length; o++) {
+                if (strList[o].indexOf('subscription-id') > -1) {
+                    subID = strList[0+1]
+                }
+            }
+        }
         if(type===1) {
             $('#pub-message').prepend(str)
         }else{
@@ -325,13 +350,13 @@ function subMember(str) {
 function  checkPublishInput () {
     var index = 0
     $('.error_type').hide()
-    $('.publish-part .warningbox').hide()
+    $('.publish-part .warningbox').css('opacity', 0)
     $('.publish-part .checked').each(function(){
         if($(this).val() == '') {
-            $(this).parent().children('.warningbox').show()
+            $(this).parent().children('.warningbox').css('opacity', 1)
             index++
         }else{
-            $(this).parent().children('.warningbox').hide()
+            $(this).parent().children('.warningbox').css('opacity', 0)
         }
     })
     return index === 0;
@@ -363,10 +388,10 @@ function checkSubInput () {
     $('.subscribe-part .checked').each(function(){
         if($(this).val() == '') {
             var item = $(this).parent().children('.warningbox')
-            $(item).show()
+            $(item).css('opacity', 1)
             index ++
         } else {
-            var item = $(this).parent().children('.warningbox').hide()
+            var item = $(this).parent().children('.warningbox').css('opacity', 0)
         }
     })
     if(index===0){
