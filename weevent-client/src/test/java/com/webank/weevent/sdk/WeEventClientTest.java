@@ -56,6 +56,7 @@ public class WeEventClientTest {
         WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
         SendResult sendResult = this.weEventClient.publish(weEvent);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
+        Assert.assertFalse(sendResult.getEventId().isEmpty());
     }
 
     @Test
@@ -64,13 +65,16 @@ public class WeEventClientTest {
         String subscribeId = this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
-                System.out.println("onEvent:" + event.toString());
-                log.info("onEvent:" + event.toString());
+                log.info("onEvent: {}", event.toString());
+
+                Assert.assertFalse(event.getTopic().isEmpty());
+                Assert.assertFalse(event.getEventId().isEmpty());
             }
 
             @Override
             public void onException(Throwable e) {
-                e.printStackTrace();
+                log.error("onException", e);
+                Assert.fail();
             }
         });
 
