@@ -68,10 +68,10 @@
     layout="sizes,total, prev, pager, next, jumper"
     :total="total">
   </el-pagination>
-  <el-dialog :title="$t('tableCont.addTopic')" :visible.sync="dialogFormVisible" center width='450px' >
+  <el-dialog :title="$t('tableCont.addTopic')" :visible.sync="dialogFormVisible" center width='450px' :close-on-click-modal='false'>
     <el-form :model="form" :rules="rules" ref='form'>
       <el-form-item :label="$t('common.name') + ' :'" prop='name'>
-        <el-input v-model.trim="form.name" autocomplete="off"></el-input>
+        <el-input v-model="form.name" autocomplete="off"></el-input>
       </el-form-item>
       <el-form-item :label="$t('common.detail') + ' :'">
         <el-input v-model="form.describe" type='textarea' autocomplete="off"></el-input>
@@ -204,24 +204,12 @@ export default {
             description: vm.form.describe
           }
           API.openTopic(data).then(res => {
-            if (res.status === 200) {
-              if (res.data.code && (res.data.code === 100106)) {
-                vm.$message({
-                  type: 'error',
-                  message: this.$t('tableCont.errorTopicName')
-                })
-              } else if (res.data.code === 100) {
-                vm.$message({
-                  type: 'error',
-                  message: this.$t('common.addFail')
-                })
-              } else {
-                vm.$message({
-                  type: 'success',
-                  message: this.$t('common.addSuccess')
-                })
-                vm.refresh()
-              }
+            if (res.data.status === 200) {
+              vm.$message({
+                type: 'success',
+                message: this.$t('common.addSuccess')
+              })
+              vm.refresh()
             } else {
               vm.$message({
                 type: 'error',
