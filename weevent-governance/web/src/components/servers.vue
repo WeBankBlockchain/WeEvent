@@ -133,7 +133,6 @@ export default {
       }
     }
     return {
-      serverPass: false,
       version: '',
       showVersion: false,
       server: [],
@@ -192,12 +191,6 @@ export default {
   methods: {
     confirm () {
       let vm = this
-      if (!vm.form.name) {
-        vm.$refs.form.validate((valid) => {})
-      }
-      if (!vm.form.brokerUrl) {
-        vm.$refs.form.validate((valid) => {})
-      }
       vm.$refs.form.validate((valid) => {
         if (valid) {
           if (vm.isEdit) {
