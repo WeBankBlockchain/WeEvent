@@ -94,7 +94,7 @@
           >
         </el-pagination>
     </div>
-    <el-dialog :title="$t('rule.creatRule')" :visible.sync="createRule">
+    <el-dialog :title="$t('rule.creatRule')" :visible.sync="createRule" :close-on-click-modal='false'>
       <div class='warning_part'>
         <img src="../assets/image/icon_tips.svg" alt="">
         <p>{{$t('rule.creatRuleRemark')}}</p>
