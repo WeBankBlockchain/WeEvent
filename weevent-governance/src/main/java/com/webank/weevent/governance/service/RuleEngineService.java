@@ -166,6 +166,7 @@ public class RuleEngineService {
             map.put("updatedTime", ruleEngineEntity.getLastUpdate());
             map.put("createdTime", ruleEngineEntity.getCreateDate());
 
+            log.info("add rule begin====map:{}",JSONObject.toJSONString(map));
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(map));
 
             //deal process result
@@ -351,6 +352,7 @@ public class RuleEngineService {
             map.put("updatedTime", ruleEngineEntity.getLastUpdate());
             map.put("createdTime", oldRule.getCreateDate());
             //updateCEPRuleById
+            log.info("update rule begin====map:{}",JSONObject.toJSONString(map));
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(map));
             //deal processor result
             int statusCode = closeResponse.getStatusLine().getStatusCode();
@@ -370,6 +372,10 @@ public class RuleEngineService {
         }
 
     }
+
+
+
+
 
     private String getConditionFieldDetail(List<RuleEngineConditionEntity> ruleEngineConditionList) {
         if (CollectionUtils.isEmpty(ruleEngineConditionList)) {
@@ -446,8 +452,43 @@ public class RuleEngineService {
             ruleEngineEntity.setDatabaseUrl(ruleDataBase.getDatabaseUrl() + "&tableName=" + ruleDataBase.getTableName());
             log.info("dataBaseUrl:{}", ruleEngineEntity.getDatabaseUrl());
         }
-        this.updateProcessRule(request, ruleEngineEntity, rule);
+        this.stopProcessRule(request, ruleEngineEntity, rule);
         return ruleEngineMapper.updateRuleEngineStatus(ruleEngineEntity);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void stopProcessRule(HttpServletRequest request, RuleEngineEntity ruleEngineEntity, RuleEngineEntity oldRule) throws GovernanceException {
+        try {
+            BrokerEntity broker = brokerMapper.getBroker(oldRule.getBrokerId());
+            String brokerUrl = new StringBuffer(broker.getBrokerUrl()).append(ConstantProperties.QUESTION_MARK)
+                    .append("groupId=").append(oldRule.getGroupId()).toString();
+            ruleEngineEntity.setBrokerUrl(brokerUrl);
+            log.info("brokerUrl:{}", brokerUrl);
+            String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_STOP_CEP_RULE).toString();
+            String jsonString = JSONObject.toJSONString(ruleEngineEntity);
+            Map map = JSONObject.parseObject(jsonString, Map.class);
+            map.put("updatedTime", ruleEngineEntity.getLastUpdate());
+            map.put("createdTime", oldRule.getCreateDate());
+            //updateCEPRuleById
+            log.info("update rule begin====map:{}",JSONObject.toJSONString(map));
+            CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(map));
+            //deal processor result
+            int statusCode = closeResponse.getStatusLine().getStatusCode();
+            if (200 != statusCode) {
+                throw new GovernanceException(ErrorCode.PROCESS_CONNECT_ERROR);
+            }
+            String updateMes = EntityUtils.toString(closeResponse.getEntity());
+            JSONObject jsonObject = JSONObject.parseObject(updateMes);
+            Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
+            if (PROCESSOR_SUCCESS_CODE != code) {
+                String msg = jsonObject.get("errorMsg").toString();
+                throw new GovernanceException(msg);
+            }
+        } catch (Exception e) {
+            log.error("processor stop ruleEngine fail", e);
+            throw new GovernanceException("processor stop ruleEngine fail", e);
+        }
+
     }
 
     @Transactional(rollbackFor = Throwable.class)
@@ -506,6 +547,7 @@ public class RuleEngineService {
             map.put("updatedTime", rule.getLastUpdate());
             map.put("createdTime", rule.getCreateDate());
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_START_CEP_RULE).toString();
+            log.info("start rule begin====map:{}",JSONObject.toJSONString(map));
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(map));
             int statusCode = closeResponse.getStatusLine().getStatusCode();
             if (200 != statusCode) {
