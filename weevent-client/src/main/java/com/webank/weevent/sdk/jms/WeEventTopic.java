@@ -1,8 +1,6 @@
 package com.webank.weevent.sdk.jms;
 
 
-import java.util.Map;
-
 import javax.jms.JMSException;
 import javax.jms.Topic;
 
@@ -16,7 +14,6 @@ public class WeEventTopic implements Topic {
     private String topicName;
     private String offset;
     private String groupId;
-    private Map<String, String> extensions;
     private String continueSubscriptionId;
 
     public WeEventTopic(String topicName) {
@@ -42,14 +39,6 @@ public class WeEventTopic implements Topic {
 
     public void setGroupId(String groupId) {
         this.groupId = groupId;
-    }
-
-    public Map<String, String> getExtensions() {
-        return this.extensions;
-    }
-
-    public void setExtensions(Map<String, String> extensions) {
-        this.extensions = extensions;
     }
 
     public String getContinueSubscriptionId() {
