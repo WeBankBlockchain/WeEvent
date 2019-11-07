@@ -17,7 +17,6 @@ import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -477,14 +476,24 @@ public class BrokerStomp extends TextWebSocketHandler {
         accessor.setNativeHeader("subscription-id", subscriptionId);
         accessor.setNativeHeader("message-id", headerIdStr);
         accessor.setMessageId(headerIdStr);
+        accessor.setDestination(event.getTopic());
         accessor.setContentType(new MimeType("text", "plain", StandardCharsets.UTF_8));
-        ObjectMapper mapper = new ObjectMapper();
-        MessageHeaders headers = accessor.getMessageHeaders();
-        Message<byte[]> message1 = MessageBuilder.createMessage(mapper.writeValueAsBytes(event), headers);
-        byte[] bytes = new StompEncoder().encode(message1);
-        TextMessage textMessage = new TextMessage(bytes);
 
-        send2Remote(session, textMessage);
+        // set custom properties in header
+        for (Map.Entry<String, String> custom : event.getExtensions().entrySet()) {
+            accessor.setNativeHeader(custom.getKey(), custom.getValue());
+        }
+
+        // set eventId in header
+        accessor.setNativeHeader("eventId", event.getEventId());
+
+        // payload == content
+        MessageHeaders headers = accessor.getMessageHeaders();
+        Message<byte[]> message = MessageBuilder.createMessage(event.getContent(), headers);
+        byte[] bytes = new StompEncoder().encode(message);
+
+        // send to remote
+        send2Remote(session, new TextMessage(bytes));
     }
 
     /**

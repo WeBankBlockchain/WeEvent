@@ -2,6 +2,7 @@ package com.webank.weevent.sdk.jms;
 
 
 import java.util.Enumeration;
+import java.util.Map;
 
 import javax.jms.BytesMessage;
 import javax.jms.Destination;
@@ -19,7 +20,20 @@ import lombok.extern.slf4j.Slf4j;
 public class WeEventBytesMessage implements BytesMessage {
     private byte[] bytes;
 
+    // custom properties in WeEvent.class
     private String eventId;
+    private Map<String, String> extensions;
+
+    // binding WeEventTopic
+    private WeEventTopic weEventTopic;
+
+    public Map<String, String> getExtensions() {
+        return this.extensions;
+    }
+
+    public void setExtensions(Map<String, String> extensions) {
+        this.extensions = extensions;
+    }
 
     // BytesMessage override methods
 
@@ -173,6 +187,12 @@ public class WeEventBytesMessage implements BytesMessage {
 
     // Message override methods
 
+
+    @Override
+    public void clearBody() throws JMSException {
+        this.bytes = null;
+    }
+
     @Override
     public String getJMSMessageID() throws JMSException {
         return this.eventId;
@@ -181,6 +201,21 @@ public class WeEventBytesMessage implements BytesMessage {
     @Override
     public void setJMSMessageID(String eventId) throws JMSException {
         this.eventId = eventId;
+    }
+
+    @Override
+    public Destination getJMSDestination() throws JMSException {
+        return this.weEventTopic;
+    }
+
+    @Override
+    public void setJMSDestination(Destination destination) throws JMSException {
+        if (destination instanceof WeEventTopic) {
+            this.weEventTopic = (WeEventTopic) destination;
+            return;
+        }
+
+        throw new JMSException(WeEventConnectionFactory.NotSupportTips);
     }
 
     @Override
@@ -220,16 +255,6 @@ public class WeEventBytesMessage implements BytesMessage {
 
     @Override
     public void setJMSReplyTo(Destination destination) throws JMSException {
-        throw new JMSException(WeEventConnectionFactory.NotSupportTips);
-    }
-
-    @Override
-    public Destination getJMSDestination() throws JMSException {
-        throw new JMSException(WeEventConnectionFactory.NotSupportTips);
-    }
-
-    @Override
-    public void setJMSDestination(Destination destination) throws JMSException {
         throw new JMSException(WeEventConnectionFactory.NotSupportTips);
     }
 
@@ -391,10 +416,5 @@ public class WeEventBytesMessage implements BytesMessage {
     @Override
     public void acknowledge() throws JMSException {
         throw new JMSException(WeEventConnectionFactory.NotSupportTips);
-    }
-
-    @Override
-    public void clearBody() throws JMSException {
-        this.bytes = null;
     }
 }
