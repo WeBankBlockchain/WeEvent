@@ -3,7 +3,7 @@
 <head>
     <title></title>
     <link rel="stylesheet" href="./css/main.css">
-    <!-- <link rel="stylesheet" href="./css/jquery-ui-change.css"> -->
+    <link rel="stylesheet" href="./css/jquery-ui-change.css">
     <script
             src="https://code.jquery.com/jquery-1.12.4.min.js"
             integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
@@ -17,8 +17,13 @@
 <body>
 <div class="box" id='box'>
     <div class='broker'>
-        <span>WeEvent Url</span> <input type="text" id='url' value="http://localhost:8080">
+        <span>WeEvent Url</span> <input type="text" id='url' value="http://localhost:7000/weevent/sockjs">
+        <!-- <span class='filed-title'>用户名:</span>
+        <input type="text" name="name" class="input-text checked login" id="user" >
+        <span class='filed-title'>密码:</span>
+        <input type="text" name="name" class="input-text checked login"  id="passWord"> -->
     </div>
+
     <section class="leftbox">
         <h2>Publish</h2>
         <div class="field connect-box">
@@ -30,17 +35,17 @@
             <div class="field ">
                 <span class='filed-title'><i class='dot'>*</i>Group:</span>
                 <input type="text" name="name" class="input-text checked" placeholder="Group" id="group" value="1">
-                <span class="warningbox">GroupId 不能为空</span>
+                <span class="warningbox">Empty GroupId</span>
             </div>
             <div class="field ">
                 <span class='filed-title'><i class='dot'>*</i>Topic:</span>
                 <input type="text" name="name" class="input-text checked" placeholder="Topic" id="topic">
-                <span class="warningbox">Topic 不能为空</span>
+                <span class="warningbox">Empty Topic</span>
             </div>
             <div class="field message">
                 <span class='filed-title content'><i class='dot'>*</i>Content:</span>
                 <textarea type="textarea" name="name" class="input-text checked" placeholder="Content" id="message"></textarea>
-                <span class="warningbox">Content 不能为空</span>
+                <span class="warningbox">Empty Content</span>
             </div>
             <div class='new-header'>
                 <span class='filed-title' style='width:130px'>Custom Header:</span> <span class='add-one' id='add-one'>+</span>
@@ -65,12 +70,12 @@
             <div class="field">
                 <span class='filed-title'><i class='dot'>*</i>Group:</span>
                 <input type="text" name="name" class="input-text checked" placeholder="group" id="sendBox-group" value="1">
-                <span class="warningbox">GroupId 不能为空</span>
+                <span class="warningbox">Empty GroupId</span>
             </div>
             <div class="field">
                 <span class='filed-title'><i class='dot'>*</i>Topic:</span>
                 <input type="text" name="name" class="input-text checked" placeholder="Topic" id="multiSubscribeTopic">
-                <span class="warningbox">Topic 不能为空</span>
+                <span class="warningbox">Empty Topic</span>
             </div>
             <div class="field sub-eventId">
                 <span class='filed-title'><i class='dot'>*</i>EventId:</span>
@@ -83,7 +88,7 @@
                 <input type="radio" id="start" name="drone" value="start" class='input_radio'>
                 <label for="start">from head</label>
                 <input type="text" name="name" class="input-text checked" placeholder="Last EventId" value='OFFSET_LAST' id="eventId" disabled>
-                <span class="warningbox">EventId 不能为空</span>
+                <span class="warningbox">Empty EventId</span>
             </div>
             <div class="field">
                 <span class='filed-title'>Tag:</span>
