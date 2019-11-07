@@ -1,7 +1,6 @@
 package com.webank.weevent.sdk.jms;
 
 
-import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -45,12 +44,15 @@ public class WeEventTopicSubscriber implements TopicSubscriber, CommandDispatche
 
     @Override
     public void dispatch(WeEventStompCommand command) {
-        BytesMessage bytesMessage = new WeEventBytesMessage();
+        WeEventBytesMessage message = new WeEventBytesMessage();
         try {
-            bytesMessage.writeObject(command.getEvent());
-            this.messageListener.onMessage(bytesMessage);
+            message.setJMSMessageID(command.getEvent().getEventId());
+            message.writeBytes(command.getEvent().getContent());
+            message.setExtensions(command.getEvent().getExtensions());
+            message.setJMSDestination(command.getTopic());
+            this.messageListener.onMessage(message);
         } catch (JMSException e) {
-            log.error("write WeEvent into BytesMessage failed");
+            log.error("write WeEvent into BytesMessage failed", e);
         }
     }
 
