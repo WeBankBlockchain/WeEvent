@@ -27,6 +27,7 @@
       :title="$t('userSet.resetPassWord')"
       :visible.sync="getPass"
       width='420px'
+      :close-on-click-modal='false'
     >
       <p class='input_title'>{{$t('userSet.enterUserName') + ' :'}}</p>
       <el-input v-model='userName'></el-input>
