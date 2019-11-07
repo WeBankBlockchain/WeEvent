@@ -8,7 +8,6 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-web")
 
-    runtime('mysql:mysql-connector-java')
 
     // spring boot with log4j2
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
@@ -16,17 +15,16 @@ dependencies {
     // avoid "Log4j appears to be running in a Servlet environment, but there's no log4j-web module available."
     implementation("org.apache.logging.log4j:log4j-web:2.11.2")
 
+    implementation("org.apache.commons:commons-dbcp2:2.6.0")
     implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:1.1.1")
+    implementation("org.mariadb.jdbc:mariadb-java-client")
+
 
     implementation("org.apache.tomcat:tomcat-jdbc:8.5.23");
 
-    implementation("log4j:log4j:1.2.17")
 
     //fastjson
-    implementation("com.alibaba:fastjson:1.2.47")
-
-    // redis
-    implementation("redis.clients:jedis:3.0.1")
+    implementation("com.alibaba:fastjson:1.2.58")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
