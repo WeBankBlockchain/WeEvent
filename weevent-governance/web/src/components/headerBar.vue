@@ -156,14 +156,10 @@ export default {
         // if groupId is not existed so set it
         // else use existed groupId
         vm.groupList = [].concat(res.data)
-        if (!localStorage.getItem('groupId')) {
-          vm.$nextTick(fun => {
-            vm.$store.commit('set_groupId', res.data[0])
-            localStorage.setItem('groupId', res.data[0])
-          })
-        } else {
-          vm.$store.commit('set_groupId', localStorage.getItem('groupId'))
-        }
+        vm.$nextTick(fun => {
+          vm.$store.commit('set_groupId', res.data[0])
+          localStorage.setItem('groupId', res.data[0])
+        })
       })
     },
     selectLang (e) {
