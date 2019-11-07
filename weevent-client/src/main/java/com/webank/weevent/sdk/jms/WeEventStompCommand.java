@@ -33,6 +33,7 @@ public class WeEventStompCommand {
     private final static int stompHeartBeat = 30;
 
     private String subscriptionId;
+    private WeEventTopic topic;
     private WeEvent event;
     private String headerId;
 
