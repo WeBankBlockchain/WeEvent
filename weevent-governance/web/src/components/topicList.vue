@@ -35,7 +35,10 @@
            <el-form-item :label="$t('tableCont.newBlockNumber')  + ' :'">
             <span>{{ props.row.detail.blockNumber }}</span>
           </el-form-item><br/>
-          <el-form-item :label="$t('tableCont.address')  + ' :'">
+          <el-form-item :label="$t('tableCont.lastTimestamp')  + ' :'">
+            <span>{{ props.row.detail.lastTimestamp }}</span>
+          </el-form-item><br/>
+          <el-form-item :label="$t('tableCont.address')  + ' :'" v-show="props.row.detail.topicAddress">
             <span>{{ props.row.detail.topicAddress }}</span>
           </el-form-item>
         </el-form>
@@ -107,7 +110,7 @@ export default {
       },
       rules: {
         name: [
-          { validator: name, trigger: 'blur' }
+          { required: true, validator: name, trigger: 'blur' }
         ]
       },
       creater: ''
@@ -130,7 +133,8 @@ export default {
           let det = {
             'topicName': '',
             'createdTimestamp': '',
-            'topicAddress': ''
+            'topicAddress': '',
+            'lastTimestamp': ''
           }
           listData.forEach(item => {
             vm.$set(item, 'detail', det)
@@ -155,6 +159,7 @@ export default {
       API.topicState(url).then(res => {
         let time = getDateDetail(res.data.createdTimestamp)
         res.data.createdTimestamp = time
+        res.data.lastTimestamp = getDateDetail(res.data.lastTimestamp)
         vm.$set(e, 'detail', res.data)
       })
     },
@@ -265,21 +270,19 @@ export default {
     if (sessionStorage.getItem('topic')) {
       var vm = this
       vm.tableData = []
-      if (sessionStorage.getItem('topic') !== '—') {
-        let url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + sessionStorage.getItem('topic')
-        API.topicInfo(url).then(res => {
-          let time = getDateDetail(res.data.createdTimestamp)
-          res.data.createdTimestamp = time
-          let item = {
-            topicName: res.data.topicName,
-            creater: '——',
-            createdTimestamp: time,
-            detail: {}
-          }
-          vm.tableData.push(item)
-          vm.total = 1
-        })
-      }
+      let url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + sessionStorage.getItem('topic')
+      API.topicInfo(url).then(res => {
+        let time = getDateDetail(res.data.createdTimestamp)
+        res.data.createdTimestamp = time
+        let item = {
+          topicName: res.data.topicName,
+          creater: '——',
+          createdTimestamp: time,
+          detail: {}
+        }
+        vm.tableData.push(item)
+        vm.total = 1
+      })
     } else {
       this.getLsitData()
     }

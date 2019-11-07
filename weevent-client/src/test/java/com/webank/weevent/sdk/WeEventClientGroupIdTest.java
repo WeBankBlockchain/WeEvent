@@ -1,15 +1,8 @@
-package com.webank.weevent.client.sdk;
+package com.webank.weevent.sdk;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.IWeEventClient;
-import com.webank.weevent.sdk.SendResult;
-import com.webank.weevent.sdk.TopicInfo;
-import com.webank.weevent.sdk.TopicPage;
-import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
@@ -34,18 +27,16 @@ public class WeEventClientGroupIdTest {
 
     private String topicName = "com.webank.weevent";
 
-    private String groupId = WeEvent.DEFAULT_GROUP_ID;
-
-    private String tag = "1.1.0";
-
-    private String format = "json";
-
     private IWeEventClient weEventClient;
 
     @Before
     public void before() throws Exception {
-        this.extensions.put("weevent-url", "https://github.com/WeBankFinTech/WeEvent");
-        this.weEventClient = IWeEventClient.build("http://localhost:8080/weevent", this.groupId);
+        log.info("=============================={}.{}==============================",
+                this.getClass().getSimpleName(),
+                this.testName.getMethodName());
+
+        this.extensions.put(WeEvent.WeEvent_TAG, "test");
+        this.weEventClient = IWeEventClient.build("http://localhost:7000/weevent", WeEvent.DEFAULT_GROUP_ID);
         this.weEventClient.open(this.topicName);
     }
 
@@ -59,7 +50,6 @@ public class WeEventClientGroupIdTest {
      */
     @Test
     public void testPublishGroupId() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
         // test groupId
         WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
         SendResult sendResult = this.weEventClient.publish(weEvent);
@@ -73,10 +63,10 @@ public class WeEventClientGroupIdTest {
      */
     @Test
     public void testPublish() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
         WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
         SendResult sendResult = this.weEventClient.publish(weEvent);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
+        Assert.assertFalse(sendResult.getEventId().isEmpty());
     }
 
     /**
@@ -84,7 +74,6 @@ public class WeEventClientGroupIdTest {
      */
     @Test
     public void testPublishEventId() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
         // test eventId
         WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
         SendResult sendResult = this.weEventClient.publish(weEvent);
@@ -100,10 +89,9 @@ public class WeEventClientGroupIdTest {
      */
     @Test
     public void testPublishExtensions() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
         // test extensions
         this.extensions.put(WeEvent.WeEvent_FORMAT, "json");
-        this.extensions.put(WeEvent.WeEvent_TAG, tag);
+        this.extensions.put(WeEvent.WeEvent_TAG, "test");
         WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
         SendResult sendResult = this.weEventClient.publish(weEvent);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
@@ -111,8 +99,8 @@ public class WeEventClientGroupIdTest {
         WeEvent event = this.weEventClient.getEvent(sendResult.getEventId());
         Assert.assertNotNull(event);
         Assert.assertNotNull(event.getExtensions());
-        Assert.assertEquals(this.tag, event.getExtensions().get(WeEvent.WeEvent_TAG));
-        Assert.assertEquals(this.format, event.getExtensions().get(WeEvent.WeEvent_FORMAT));
+        Assert.assertEquals("test", event.getExtensions().get(WeEvent.WeEvent_TAG));
+        Assert.assertEquals("json", event.getExtensions().get(WeEvent.WeEvent_FORMAT));
 
     }
 
@@ -121,7 +109,6 @@ public class WeEventClientGroupIdTest {
      */
     @Test(expected = BrokerException.class)
     public void testPublish001() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
         WeEvent weEvent = new WeEvent(this.topicName, null, null);
         this.weEventClient.publish(weEvent);
     }
@@ -131,7 +118,6 @@ public class WeEventClientGroupIdTest {
      */
     @Test(expected = BrokerException.class)
     public void testPublish002() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
         WeEvent weEvent = new WeEvent(null, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
         this.weEventClient.publish(weEvent);
     }
@@ -141,7 +127,6 @@ public class WeEventClientGroupIdTest {
      */
     @Test(expected = BrokerException.class)
     public void testPublish003() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
         WeEvent weEvent = new WeEvent("this topic is not exist", null, extensions);
         this.weEventClient.publish(weEvent);
     }
@@ -151,7 +136,6 @@ public class WeEventClientGroupIdTest {
      */
     @Test(expected = BrokerException.class)
     public void testPublish005() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
         // test extensions
         this.extensions = new HashMap<>();
         WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), extensions);
@@ -163,17 +147,20 @@ public class WeEventClientGroupIdTest {
      */
     @Test
     public void testSubscribe() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
         // create subscriber
         String subscriptionId = this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
-                System.out.println(event.toString());
+                log.info("onEvent: {}", event);
+
+                Assert.assertFalse(event.getTopic().isEmpty());
+                Assert.assertFalse(event.getEventId().isEmpty());
             }
 
             @Override
             public void onException(Throwable e) {
-                e.printStackTrace();
+                log.error("onException", e);
+                Assert.fail();
             }
         });
         Assert.assertFalse(subscriptionId.isEmpty());
@@ -185,7 +172,6 @@ public class WeEventClientGroupIdTest {
      */
     @Test
     public void testSubscribe01() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
         // create subscriber
         String subscriptionId = this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
             @Override
@@ -209,7 +195,6 @@ public class WeEventClientGroupIdTest {
      */
     @Test
     public void testSubscribeWildCard() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
         // create subscriber
         String subscriptionId = this.weEventClient.subscribe("com.webank.weevent/#", WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
             @Override
@@ -232,7 +217,6 @@ public class WeEventClientGroupIdTest {
      */
     @Test
     public void testUnSubscribe() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
         String subscriptionId = this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {

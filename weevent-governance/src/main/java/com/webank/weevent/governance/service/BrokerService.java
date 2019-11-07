@@ -51,8 +51,13 @@ public class BrokerService {
     private PermissionService permissionService;
 
     @Autowired
-    private CommonService commonService;
+    private TopicHistoricalService topicHistoricalService;
 
+    @Autowired
+    private RuleEngineService ruleEngineService;
+
+    @Autowired
+    private CommonService commonService;
 
     private final static String HTTP_GET_SUCCESS_CODE = "0";
 
@@ -83,20 +88,33 @@ public class BrokerService {
     public GovernanceResult addBroker(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
 
-        //check both broker and webase serverUrl
-        ErrorCode errorCode = checkServerByBrokerEntity(brokerEntity, request);
-        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-            throw new GovernanceException(errorCode);
-        }
+        try {
+            //check both broker and webase serverUrl
+            ErrorCode errorCode = checkServerByBrokerEntity(brokerEntity, request);
+            if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+                throw new GovernanceException(errorCode);
+            }
 
-        brokerMapper.addBroker(brokerEntity);
-        //create permissionEntityList
-        List<PermissionEntity> permissionEntityList = createPerMissionList(brokerEntity);
-        if (permissionEntityList.size() > 0) {
-            permissionMapper.batchInsert(permissionEntityList);
+            brokerMapper.addBroker(brokerEntity);
+            //create permissionEntityList
+            List<PermissionEntity> permissionEntityList = createPerMissionList(brokerEntity);
+            if (permissionEntityList.size() > 0) {
+                permissionMapper.batchInsert(permissionEntityList);
+                brokerMapper.addBroker(brokerEntity);
+            }
+            // Create a table based on the brokerId and groupId, start a rule engine
+            //determine if the processor's service is available
+            boolean exist = ruleEngineService.checkProcessorExist(request);
+            log.info("exist:{}", exist);
+            if (exist) {
+                log.info("processor exist");
+                topicHistoricalService.createRule(request, response, brokerEntity);
+            }
+            return GovernanceResult.ok(true);
+        } catch (Exception e) {
+            log.error("add broker fail", e);
+            throw new GovernanceException("add broker fail", e);
         }
-
-        return GovernanceResult.ok(true);
     }
 
     private List<PermissionEntity> createPerMissionList(BrokerEntity brokerEntity) {

@@ -1,9 +1,11 @@
 <template>
   <div class='rule_detail rule'>
     <div class='step'>
-      <p class='rule_title'>{{$t('ruleDetail.guideDetail')}}</p>
-      <el-button type='primary' size='mini' @click="createRule = !createRule">{{$t('common.edit')}}</el-button>
-      <p class='rule_name'>{{ruleItem.ruleName}}</p>
+      <!-- <p class='rule_title'>{{$t('ruleDetail.guideDetail')}}</p> -->
+      <p class='rule_name' style='font-size:18px'>
+        {{ruleItem.ruleName}}
+        <el-button type='primary' size='mini' @click="createRule = !createRule">{{$t('common.edit')}}</el-button>
+      </p>
       <p class='name'><span>{{$t('rule.dataType')}} :</span>{{ruleItem.payloadType === 1 ? 'JSON' : '' }}</p>
       <p class='name'><span>{{$t('rule.payloadMap')}} :</span>{{ruleItem.payloadMap}}</p>
     </div>
@@ -34,7 +36,6 @@
     <div class='step'>
       <p class='rule_title'>{{$t('ruleDetail.processData')}}</p>
       <el-button type='primary' size='mini' @click="createSQL = !createSQL">{{$t('rule.editRule')}}</el-button>
-      <el-button size='mini'>{{$t('ruleDetail.sqlDescription')}}</el-button>
       <div class='sql_content'>
         <div class='no_sql' v-show='!fullSQL'>
           <img src="../assets/image/icon_tips.svg" alt="">
@@ -49,35 +50,28 @@
     </div>
 
     <el-dialog :title="$t('rule.editRule')" :visible.sync="createSQL">
-      <div class='warning_part sql_part'>
-        <p>
-          <span>{{$t('ruleDetail.ruleSearchLetter')}}</span>
-          <!-- <span>复制语句</span> -->
-        </p>
-        <p>{{$t('ruleDetail.ruleSearchWarning')}}</p>
-      </div>
       <el-form :model="sqlOption" :rules="sqlCheck" ref='sql'>
-        <el-form-item :label="$t('ruleDetail.letter')  + ' :'">
-          <el-select v-model="sqlOption.selectField" size='small'>
-            <el-option :label="key" :value="key" v-for='(item, key, index) in columnName' :key='index'></el-option>
+        <el-form-item :label="$t('ruleDetail.dataCirculat')  + ' :'" prop='fromDestination'>
+          <el-select  v-model='sqlOption.fromDestination'  size='mini' @visible-change='selectShow' :placeholder="$t('common.choose')">
+            <el-option v-for='(item, index) in listTopic' :key='index' :label="item.topicName === '#' ? 'all': item.topicName" :value="item.topicName"></el-option>
+            <el-pagination
+                layout="prev, pager, next"
+                small
+                :current-page.sync="pageIndex"
+                :total="total">
+              </el-pagination>
           </el-select>
         </el-form-item>
-        <el-form-item :label="$t('ruleDetail.dataCirculat')  + ' :'" prop='fromDestination'>
-          <el-input v-model="sqlOption.fromDestination" size='small' autocomplete="off" :placeholder="$t('common.examples') + 'TopicName'"></el-input>
-        </el-form-item>
-        <el-form-item :label="$t('ruleDetail.abnormalData')  + ' :'" prop='toDestination'>
-          <el-input v-model="sqlOption.toDestination" size='small' autocomplete="off" :placeholder="$t('common.examples') + 'TopicName'"></el-input>
-        </el-form-item>
-        <el-form-item :label="$t('ruleDetail.condition')">
+        <el-form-item :label="$t('ruleDetail.condition') + ' :'">
           <div style='text-align:right'>
             <span class='el-icon-plus' @click='addConditionItem'></span>
           </div>
             <div class='conditionItem' v-for="(item, index) in sqlOption.ruleEngineConditionList" :key='index'>
-              <el-select v-model="item.connectionOperator" size='small'>
+                <el-select v-model="item.connectionOperator" size='small' v-show="index !== 0">
                   <el-option label="and" value="and"></el-option>
                   <el-option label="or" value="or"></el-option>
                 </el-select>
-                <span class='line'>-</span>
+                <span class='line' v-show="index !== 0">-</span>
                 <el-select v-model="item.columnName" size='small'>
                   <el-option :label="key" :value="key" v-for='(item, key, index) in columnName' :key='index'></el-option>
                 </el-select>
@@ -96,51 +90,60 @@
                 <p class='conditionaWarning'>{{$t('ruleDetail.completeLetter')}}</p>
             </div>
         </el-form-item>
+        <el-form-item :label="$t('ruleDetail.letter')  + ' :'"  :placeholder="$t('common.choose')" prop="selectField">
+          <el-select v-model="sqlOption.selectField" size='small' :placeholder="$t('common.choose')" multiple @change="selField">
+            <div v-show='JSON.stringify(columnName) !== "{}"' class='selAll'>
+              <el-checkbox v-model="selAll" @change='selChange'>{{$t('common.all')}}</el-checkbox>
+            </div>
+            <el-option :label="key" :value="key" v-for='(item, key, index) in columnName' :key='index'></el-option>
+            <el-option label="eventId" value="eventId" v-show='JSON.stringify(columnName) !== "{}"'></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item :label="$t('ruleDetail.selectOperation')  + ' :'" prop='conditionType'>
+          <el-select  v-model='sqlOption.conditionType' :placeholder="$t('ruleDetail.selectGuide')" size='mini' @change="selectType">
+            <el-option :label="$t('ruleDetail.toTopic')" value="1"></el-option>
+            <el-option :label="$t('ruleDetail.toDB')" value="2"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Topic :" v-show="sqlOption.conditionType === '1'" prop='toDestination'>
+          <el-select  v-model="sqlOption.toDestination" :placeholder="$t('ruleDetail.errorTopic')" size='mini' @visible-change='selectShow'>
+            <el-option v-for='(item, index) in listData' :key='index' :label="item.topicName" :value="item.topicName"></el-option>
+            <el-pagination
+                layout="prev, pager, next"
+                small
+                :current-page.sync="pageIndex"
+                :total="total">
+            </el-pagination>
+          </el-select>
+        </el-form-item>
+        <el-form-item :label="$t('ruleDetail.db')  + ' :'" v-show="sqlOption.conditionType === '2'" prop='ruleDataBaseId' >
+          <el-select  :placeholder="$t('ruleDetail.selectDB')" size='mini' name='options_dialog' v-model="sqlOption.ruleDataBaseId" v-show="dbList.length > 0">
+            <el-option v-for="(item, index) in dbList" :key='index' :value="item.id" :label="item.databaseName"></el-option>
+          </el-select>
+          <p class='no_dbList' v-show="dbList.length === 0">{{$t('ruleDetail.guideURL')}} <span @click="creatDB" >{{$t('ruleDetail.setGuide')}}</span></p>
+        </el-form-item>
+        <el-form-item :label="$t('ruleDetail.abnormalData')  + ' :'" prop='errorDestination'>
+          <el-select  v-model="sqlOption.errorDestination" size='mini' :clearable="true" @visible-change='selectShow' :placeholder="$t('common.choose')">
+            <el-option v-for='(item, index) in listData' :key='index' :label="item.topicName" :value="item.topicName"></el-option>
+            <el-pagination
+                layout="prev, pager, next"
+                small
+                :current-page.sync="pageIndex"
+                :total="total">
+            </el-pagination>
+          </el-select>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" size="small" @click='update("sql")'>{{$t('rule.commit')}}</el-button>
         <el-button  size="small" @click="createSQL = !createSQL">{{$t('common.cancel')}}</el-button>
       </div>
     </el-dialog>
-
-    <div class='step'>
-      <p class='rule_title'>{{$t('ruleDetail.forwardData')}}</p>
-      <el-button type='primary' size='mini' @click='option = !option'>{{$t('ruleDetail.forwardOption')}}</el-button>
-      <ul class='foward_list'>
-        <li class='foward_list_title'>{{$t('ruleDetail.dataDestination')}}</li>
-        <li class='no_content' v-show='!condition'>{{$t('common.noData')}}</li>
-        <li v-show='condition' :title='condition'>{{condition}}</li>
-      </ul>
-    </div>
-
-    <el-dialog :title="$t('rule.addOperation')" :visible.sync="option">
-      <el-form :model="options" :rules="optionsCheck" ref='options'>
-        <el-form-item :label="$t('ruleDetail.selectOperation')  + ' :'" prop='conditionType'>
-          <el-select  v-model='options.conditionType' :placeholder="$t('ruleDetail.selectGuide')" size='mini' @change="selectType">
-            <el-option :label="$t('ruleDetail.toTopic')" value="1"></el-option>
-            <el-option :label="$t('ruleDetail.toDB')" value="2"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="Topic :" v-show="options.conditionType === '1'" prop='errorDestination'>
-          <el-input v-model="options.errorDestination" size='small' autocomplete="off" :placeholder="$t('ruleDetail.errorTopic')"></el-input>
-        </el-form-item>
-        <el-form-item :label="$t('ruleDetail.db')  + ' :'" v-show="options.conditionType === '2'" prop='databaseUrl'>
-          <el-select  :placeholder="$t('ruleDetail.selectDB')" size='mini' name='options_dialog' v-model="options.databaseUrl" v-show="dbList.length > 0">
-            <el-option v-for="(item, index) in dbList" :key='index' :value="item.databaseUrl" :label="item.databaseName"></el-option>
-          </el-select>
-          <p class='no_dbList' v-show="dbList.length === 0">{{$t('ruleDetail.guideURL')}} <span @click="creatDB" >{{$t('ruleDetail.setGuide')}}</span></p>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" size="small" @click='update("options")'>{{$t('rule.commit')}}</el-button>
-        <el-button  size="small" @click='option = !option'>{{$t('common.cancel')}}</el-button>
-      </div>
-    </el-dialog>
   </div>
 </template>
 <script>
 import API from '../API/resource'
-export default{
+export default {
   data () {
     var ruleName = (rule, value, callback) => {
       if (value === '') {
@@ -167,10 +170,32 @@ export default{
         }
       }
     }
+    var errorDestination = (rule, value, callback) => {
+      if (!value) {
+        callback()
+      } else {
+        if (value === this.sqlOption.fromDestination) {
+          callback(new Error(this.$t('ruleDetail.cannotSame')))
+        } else {
+          callback()
+        }
+      }
+    }
+    var toDestination = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error(this.$t('common.choose')))
+      } else {
+        if (value === this.sqlOption.fromDestination) {
+          callback(new Error(this.$t('ruleDetail.cannotSame')))
+        } else {
+          callback()
+        }
+      }
+    }
     return {
+      selAll: false,
       createRule: false,
       createSQL: false,
-      option: false,
       ruleItem: {
         'id': '',
         'brokerId': '',
@@ -182,7 +207,7 @@ export default{
         'toDestination': '',
         'conditionField': '',
         'conditionType': '',
-        'databaseUrl': '',
+        'ruleDataBaseId': '',
         'errorDestination': '',
         'ruleEngineConditionList': []
       },
@@ -193,40 +218,39 @@ export default{
       },
       rules: {
         ruleName: [
-          { validator: ruleName, trigger: 'blur' }
+          { required: true, validator: ruleName, trigger: 'blur' }
         ],
         payloadMap: [
-          { validator: payloadMap, trigger: 'blur' }
+          { required: true, validator: payloadMap, trigger: 'blur' }
         ]
       },
       sqlOption: {
-        'selectField': '',
+        'selectField': [],
         'fromDestination': '',
         'toDestination': '',
-        'ruleEngineConditionList': []
+        'ruleEngineConditionList': [],
+        'conditionType': '',
+        'ruleDataBaseId': '',
+        'errorDestination': ''
       },
       sqlCheck: {
         fromDestination: [
-          { required: true, message: this.$t('ruleDetail.guideAddress'), trigger: 'blur' }
+          { required: true, message: this.$t('ruleDetail.guideAddress'), trigger: 'change' }
         ],
-        toDestination: [
-          { required: true, message: this.$t('ruleDetail.abnormalAddress'), trigger: 'blur' }
-        ]
-      },
-      options: {
-        'conditionType': '',
-        'databaseUrl': '',
-        'errorDestination': ''
-      },
-      optionsCheck: {
         conditionType: [
           { required: true, message: this.$t('common.choose'), trigger: 'blur' }
         ],
-        databaseUrl: [
-          { required: true, message: this.$t('common.choose'), trigger: 'blur' }
+        selectField: [
+          { required: true, message: this.$t('common.choose'), trigger: 'change' }
+        ],
+        ruleDataBaseId: [
+          { required: true, message: this.$t('ruleDetail.guideURL'), trigger: 'change' }
+        ],
+        toDestination: [
+          { required: true, validator: toDestination, trigger: 'change' }
         ],
         errorDestination: [
-          { required: true, message: this.$t('common.enter'), trigger: 'blur' }
+          { validator: errorDestination, trigger: 'change' }
         ]
       },
       dbList: [],
@@ -238,7 +262,12 @@ export default{
         'columnName': '',
         'conditionalOperator': '',
         'sqlCondition': ''
-      }]
+      }],
+      warning: '',
+      pageIndex: 1,
+      total: 0,
+      listData: [],
+      listTopic: []
     }
   },
   computed: {
@@ -247,6 +276,9 @@ export default{
     },
     groupId () {
       return this.$store.state.groupId
+    },
+    lang () {
+      return this.$store.state.lang
     }
   },
   watch: {
@@ -269,25 +301,32 @@ export default{
       if (!nVal) {
         let vm = this
         for (let key in vm.sqlOption) {
-          vm.sqlOption[key] = vm.ruleItem[key]
+          if (key === 'selectField') {
+            if (vm.ruleItem.selectField) {
+              vm.sqlOption.selectField = [].concat(vm.ruleItem.selectField.split(','))
+              let listColumnName = []
+              for (let key in vm.columnName) {
+                listColumnName.push(key)
+              }
+              if (vm.sqlOption.selectField.length === listColumnName.length + 1) {
+                vm.selAll = true
+              } else {
+                vm.selAll = false
+              }
+            }
+          } else {
+            if (key === 'ruleEngineConditionList') {
+              vm.sqlOption.ruleEngineConditionList = [].concat(vm.ruleItem.ruleEngineConditionList)
+            } else {
+              vm.sqlOption[key] = vm.ruleItem[key]
+            }
+          }
         }
         let war = document.getElementsByClassName('conditionaWarning')
         for (let i = 0; i < war.length; i++) {
           war[i].style.display = 'none'
         }
         vm.$refs.sql.resetFields()
-      }
-    },
-    option (nVal) {
-      if (!nVal) {
-        let vm = this
-        for (let key in vm.options) {
-          vm.options[key] = vm.ruleItem[key]
-          if (key === 'conditionType') {
-            vm.options[key] = vm.ruleItem[key].toString()
-          }
-        }
-        vm.$refs.options.resetFields()
       }
     },
     brokerId () {
@@ -299,6 +338,16 @@ export default{
       this.$store.commit('set_menu', [this.$t('sideBar.engine'), this.$t('sideBar.ruleMana')])
       this.$store.commit('set_active', '4-1')
       this.$router.push('./rule')
+    },
+    pageIndex (nVal) {
+      this.getLsitData()
+    },
+    lang () {
+      this.sqlCheck.fromDestination[0].message = this.$t('ruleDetail.guideAddress')
+      this.sqlCheck.conditionType[0].message = this.$t('common.choose')
+      this.sqlCheck.selectField[0].message = this.$t('common.choose')
+      this.sqlCheck.ruleDataBaseId[0].message = this.$t('ruleDetail.guideURL')
+      this.sqlCheck.toDestination[0].message = this.$t('common.choose')
     }
   },
   methods: {
@@ -326,23 +375,38 @@ export default{
             }
           }
           for (let key in vm.sqlOption) {
-            vm.sqlOption[key] = res.data.data[key]
-          }
-          for (let key in vm.options) {
-            vm.options[key] = res.data.data[key]
-            if (key === 'conditionType') {
-              if (res.data.data.conditionType || res.data.data.conditionType === 0) {
-                vm.options.conditionType = res.data.data.conditionType.toString()
+            if (key === 'selectField' || key === 'conditionType' || key === 'ruleEngineConditionList') {
+              if (res.data.data.selectField) {
+                vm.sqlOption.selectField = [].concat(res.data.data.selectField.split(','))
               }
+              if (key === 'conditionType') {
+                if (res.data.data.conditionType || res.data.data.conditionType === 0) {
+                  vm.sqlOption.conditionType = res.data.data.conditionType.toString()
+                }
+              }
+              if (key === 'ruleEngineConditionList') {
+                vm.sqlOption.ruleEngineConditionList = [].concat(res.data.data.ruleEngineConditionList)
+              }
+            } else {
+              vm.sqlOption[key] = res.data.data[key]
             }
           }
-          if (vm.options.conditionType === '1') {
-            vm.condition = vm.options.errorDestination
+          if (vm.sqlOption.conditionType === '1') {
+            vm.condition = vm.sqlOption.toDestination
           } else {
-            vm.condition = vm.options.databaseUrl
+            vm.condition = vm.sqlOption.ruleDataBaseId
           }
-          this.fullSQL = res.data.data.fullSQL
-          this.columnName = Object.assign({}, JSON.parse(res.data.data.payload))
+          vm.fullSQL = res.data.data.fullSQL
+          vm.columnName = Object.assign({}, JSON.parse(res.data.data.payload))
+          let listColumnName = []
+          for (let key in vm.columnName) {
+            listColumnName.push(key)
+          }
+          if (vm.sqlOption.selectField.length === listColumnName.length + 1) {
+            vm.selAll = true
+          } else {
+            vm.selAll = false
+          }
         }
       })
     },
@@ -355,10 +419,13 @@ export default{
     },
     selectType (e) {
       let vm = this
+      vm.$refs.sql.clearValidate('conditionType')
       if (e === '1') {
-        vm.options.databaseUrl = this.ruleItem.databaseUrl
+        vm.$refs.sql.clearValidate('toDestination')
+        vm.sqlOption.ruleDataBaseId = this.ruleItem.ruleDataBaseId
       } else {
-        vm.options.errorDestination = this.ruleItem.errorDestination
+        vm.$refs.sql.clearValidate('ruleDataBaseId')
+        vm.sqlOption.toDestination = this.ruleItem.toDestination
       }
     },
     creatDB () {
@@ -371,14 +438,49 @@ export default{
       let data = Object.assign({}, vm.ruleItem)
       vm.$refs[e].validate((valid) => {
         if (!valid) {
-          if (e === 'options') {
-            if (vm.options.conditionType === '1') {
-              if (vm.options.errorDestination === '') {
+          if (e === 'sql') {
+            let list = vm.sqlOption.ruleEngineConditionList
+            let hasEmpty = false
+            if (!vm.sqlOption.fromDestination) {
+              return
+            }
+            if (vm.sqlOption.selectField.length === 0) {
+              return
+            }
+            for (let i = 0; i < list.length; i++) {
+              for (let key1 in list[i]) {
+                let item = list[i]
+                if (item[key1] === '') {
+                  if (i === 0 && key1 === 'connectionOperator') {
+                    hasEmpty = false
+                  } else {
+                    hasEmpty = true
+                  }
+                  let war = document.getElementsByClassName('conditionaWarning')
+                  vm.warning = vm.$t('common.cancel')
+                  war[i].style.display = 'block'
+                }
+              }
+            }
+            if (hasEmpty) {
+              return
+            } else {
+              let war = document.getElementsByClassName('conditionaWarning')
+              for (let i = 0; i < war.length; i++) {
+                war[i].style.display = 'none'
+              }
+            }
+            if (vm.sqlOption.conditionType === '1') {
+              if (!vm.sqlOption.toDestination) {
                 return
+              } else {
+                vm.$refs.sql.clearValidate('ruleDataBaseId')
               }
             } else {
-              if (vm.options.databaseUrl === '') {
+              if (!vm.sqlOption.ruleDataBaseId) {
                 return
+              } else {
+                vm.$refs.sql.clearValidate('toDestination')
               }
             }
           } else {
@@ -401,8 +503,13 @@ export default{
               for (var key in list[i]) {
                 let item = list[i]
                 if (item[key] === '') {
-                  hasEmpty = true
+                  if (i === 0 && key === 'connectionOperator') {
+                    hasEmpty = false
+                  } else {
+                    hasEmpty = true
+                  }
                   let war = document.getElementsByClassName('conditionaWarning')
+                  vm.warning = vm.$t('common.cancel')
                   war[i].style.display = 'block'
                 }
               }
@@ -416,14 +523,12 @@ export default{
               war[i].style.display = 'none'
             }
           }
-
           for (let key in vm.sqlOption) {
-            data[key] = vm.sqlOption[key]
-          }
-        }
-        if (e === 'options') {
-          for (let key in vm.options) {
-            data[key] = vm.options[key]
+            if (key === 'selectField') {
+              data.selectField = vm.sqlOption.selectField.join(',')
+            } else {
+              data[key] = vm.sqlOption[key]
+            }
           }
         }
         API.ruleUpdate(data).then(res => {
@@ -434,7 +539,6 @@ export default{
             })
             vm.createRule = false
             vm.createSQL = false
-            vm.option = false
             vm.getDetail()
           } else {
             vm.$message({
@@ -458,11 +562,56 @@ export default{
     },
     remove (e) {
       this.sqlOption.ruleEngineConditionList.splice(e, 1)
+    },
+    getLsitData () {
+      let vm = this
+      let data = {
+        pageIndex: vm.pageIndex - 1,
+        pageSize: 10,
+        brokerId: Number(localStorage.getItem('brokerId'))
+      }
+      API.topicList(data).then(res => {
+        if (res.status === 200) {
+          vm.total = res.data.total
+          vm.listData = [].concat(res.data.topicInfoList)
+          vm.listTopic = [].concat(res.data.topicInfoList)
+          if (vm.pageIndex === 1) {
+            vm.listTopic.unshift({'topicName': '#'})
+          }
+        }
+      })
+    },
+    selectShow (e) {
+      if (e && this.pageIndex !== 1) {
+        this.pageIndex = 1
+        this.getLsitData()
+      }
+    },
+    selField (e) {
+      let list = []
+      for (let key in this.columnName) {
+        list.push(key)
+      }
+      if (e.length === list.length + 1) {
+        this.selAll = true
+      } else {
+        this.selAll = false
+      }
+    },
+    selChange (e) {
+      this.sqlOption.selectField = []
+      if (e) {
+        for (let key in this.columnName) {
+          this.sqlOption.selectField.push(key)
+        }
+        this.sqlOption.selectField.push('eventId')
+      }
     }
   },
   mounted () {
     this.getDetail()
     this.getDBLsit()
+    this.getLsitData()
   }
 }
 </script>

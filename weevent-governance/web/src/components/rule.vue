@@ -2,12 +2,11 @@
   <div class='rule'>
     <div class='step'>
         <p class='rule_title'>{{$t('rule.dataGuide')}}</p>
-        <p class='rule_descript'>{{$t('rule.creatRuleRemark')}}。<span class='useText'>{{$t('rule.useText')}}</span></p>
+        <p class='rule_descript'>{{$t('rule.creatRuleRemark')}}。</p>
         <div class='step_list'>
             <div class='step_list_item'>
                 <span class='num'>1</span>
                 <span class='item_name'>{{$t('rule.creatNewRule')}}</span>
-                <span class='creat_rule' @click='createRule = !createRule'>{{$t('rule.creatNow')}}</span>
             </div>
             <span class="el-icon-right"></span>
             <div class='step_list_item'>
@@ -22,11 +21,6 @@
             <span class="el-icon-right"></span>
             <div class='step_list_item'>
                 <span class='num'>4</span>
-                <span class='item_name'>{{$t('rule.checkRule')}}</span>
-            </div>
-            <span class="el-icon-right"></span>
-            <div class='step_list_item'>
-                <span class='num'>5</span>
                 <span class='item_name'>{{$t('rule.startRule')}}</span>
             </div>
         </div>
@@ -169,10 +163,10 @@ export default {
       },
       rules: {
         ruleName: [
-          { validator: ruleName, trigger: 'blur' }
+          { required: true, validator: ruleName, trigger: 'blur' }
         ],
         payloadMap: [
-          { validator: payloadMap, trigger: 'blur' }
+          { required: true, validator: payloadMap, trigger: 'blur' }
         ]
       }
     }
