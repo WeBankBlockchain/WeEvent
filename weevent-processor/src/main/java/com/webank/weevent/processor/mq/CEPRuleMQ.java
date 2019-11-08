@@ -36,22 +36,29 @@ public class CEPRuleMQ {
 
     public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException {
         // when is in run status. update the rule map
-
+        // update unsubscribe
+        String subId = subscriptionIdMap.get(rule.getId());
         if (1 == rule.getStatus()) {
-            ruleMap.put(rule.getId(), rule);
-            // update subscribe
-            subscribeMsg(rule, ruleMap);
-            log.info("start rule ,and subscribe rule:{}", rule.getId());
+            if (null != subId) {
+                IWeEventClient client = subscriptionClientMap.get(subId);
+                subscribeMsg(rule, ruleMap, client);
+            } else {
+                ruleMap.put(rule.getId(), rule);
+                // update subscribe
+                subscribeMsg(rule, ruleMap, null);
+                log.info("start rule ,and subscribe rule:{}", rule.getId());
+            }
         }
         if (0 == rule.getStatus() || 2 == rule.getStatus()) {
             log.info("stop,update,delete rule subscriptionIdMap.size:{}", subscriptionIdMap.size());
 
-            // update unsubscribe
-            String subId = subscriptionIdMap.get(rule.getId());
             log.info("stop,update,delete rule ,and unsubscribe,subId :{}", subId);
-            IWeEventClient client = subscriptionClientMap.get(subId);
-            boolean flag = client.unSubscribe(subId);
-            log.info("stop,update,delete rule ,and unsubscribe return {}",flag);
+            if (null != subId) {
+                IWeEventClient client = subscriptionClientMap.get(subId);
+                boolean flag = client.unSubscribe(subId);
+                log.info("stop,update,delete rule ,and unsubscribe return {}", flag);
+            }
+
         }
     }
 
@@ -73,9 +80,16 @@ public class CEPRuleMQ {
 
     }
 
-    private static void subscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) {
+    private static void subscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap, IWeEventClient clientOld) {
         try {
-            IWeEventClient client = getClient(rule);
+            IWeEventClient client;
+
+            if (null == clientOld) {
+                client = getClient(rule);
+            } else {
+                client = clientOld;
+            }
+
             // subscribe topic
             log.info("subscribe topic:{}", rule.getFromDestination());
             String subscriptionId;
@@ -126,13 +140,14 @@ public class CEPRuleMQ {
             }
             log.info("subscriptionIdMap:{},rule.getId() :{}--->subscriptionId:{}", subscriptionIdMap.size(), rule.getId(), subscriptionId);
             subscriptionIdMap.put(rule.getId(), subscriptionId);
-            subscriptionClientMap.put(subscriptionId,client);
+            subscriptionClientMap.put(subscriptionId, client);
             log.info("after add success subscriptionIdMap:{}", subscriptionIdMap.size());
 
         } catch (BrokerException e) {
             log.info("BrokerException{}", e.toString());
         }
     }
+
 
     public static void unSubscribeMsg(CEPRule rule, String subscriptionId) {
         try {
