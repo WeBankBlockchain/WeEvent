@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -289,10 +290,10 @@ public class RuleEngineService {
                     .append("groupId=").append(rule.getGroupId()).toString();
             ruleEngineEntity.setBrokerUrl(brokerUrl);
             log.info("brokerUrl:{}", brokerUrl);
-            if(rule.getStatus()==StatusEnum.NOT_STARTED.getCode()){
+            if (rule.getStatus() == StatusEnum.NOT_STARTED.getCode()) {
                 this.updateProcessRule(request, ruleEngineEntity, rule);
-            }else {
-                this.startProcessRule(request,ruleEngineEntity);
+            } else {
+                this.startProcessRule(request, ruleEngineEntity);
             }
 
             //delete old ruleEngineConditionEntity
@@ -406,28 +407,48 @@ public class RuleEngineService {
         String blank = " ";
         StringBuffer buffer = new StringBuffer(blank);
         int count = 0;
+        //All "=" convert to "=="
+        String conditionalOperator = convertTo(ruleEngineConditionList);
+
         for (RuleEngineConditionEntity entity : ruleEngineConditionList) {
+            conditionalOperator = conditionalOperator == null ? entity.getConditionalOperator() : conditionalOperator;
+
+            boolean realNumber = NumberValidationUtils.isRealNumber(entity.getSqlCondition());
+            String condtion = entity.getSqlCondition();
+            if (!realNumber) {
+                condtion = "\"" + condtion + "\"";
+            }
             if (count == 0) {
                 if ((entity.getConditionalOperator().trim().equals("=") || entity.getConditionalOperator().trim().equals("!=")) && ruleEngineConditionList.size() > 1) {
-                    buffer.append(blank).append("(").append(entity.getColumnName()).append(blank)
-                            .append(entity.getConditionalOperator()).append(blank).append(entity.getSqlCondition()).append(")").append(blank);
+                    buffer.append(blank).append("(").append(entity.getColumnName())
+                            .append(conditionalOperator).append(condtion).append(")").append(blank);
                 } else {
-                    buffer.append(blank).append(entity.getColumnName()).append(blank)
-                            .append(entity.getConditionalOperator()).append(blank).append(entity.getSqlCondition()).append(blank);
+                    buffer.append(blank).append(entity.getColumnName())
+                            .append(conditionalOperator).append(condtion);
                 }
             } else {
                 if (entity.getConditionalOperator().trim().equals("=") || entity.getConditionalOperator().trim().equals("!=")) {
-                    buffer.append(entity.getConnectionOperator()).append(blank).append("(").append(entity.getColumnName()).append(blank)
-                            .append(entity.getConditionalOperator()).append(blank).append(entity.getSqlCondition()).append(")").append(blank);
+                    buffer.append(entity.getConnectionOperator()).append(blank).append("(").append(entity.getColumnName())
+                            .append(conditionalOperator).append(condtion).append(")").append(blank);
                 } else {
-                    buffer.append(entity.getConnectionOperator()).append(blank).append(entity.getColumnName()).append(blank)
-                            .append(entity.getConditionalOperator()).append(blank).append(entity.getSqlCondition()).append(blank);
+                    buffer.append(entity.getConnectionOperator()).append(blank).append(entity.getColumnName())
+                            .append(conditionalOperator).append(condtion).append(blank);
                 }
             }
             count++;
         }
         return buffer.toString();
     }
+    private String convertTo(List<RuleEngineConditionEntity> ruleEngineConditionList){
+        //All "=" convert to "=="
+        Set<RuleEngineConditionEntity> collect = ruleEngineConditionList.stream().filter(it -> it.getConditionalOperator().trim().equals("=")).collect(Collectors.toSet());
+        String conditionalOperator = null;
+        if (collect.size() == ruleEngineConditionList.size()) {
+            conditionalOperator = "==";
+        }
+        return conditionalOperator;
+    }
+    
 
 
     @Transactional(rollbackFor = Throwable.class)
