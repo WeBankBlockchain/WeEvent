@@ -64,10 +64,10 @@ function set_global_param(){
     governance_enable=$(properties_get  "governance.enable")
     governance_port=$(properties_get "governance.port")
 
-    mysql_ip=$(properties_get "governance.mysql.ip")
-    mysql_port=$(properties_get  "governance.mysql.port")
-    mysql_user=$(properties_get "governance.mysql.user")
-    mysql_password=$(properties_get "governance.mysql.password")
+    mysql_ip=$(properties_get "mysql.ip")
+    mysql_port=$(properties_get  "mysql.port")
+    mysql_user=$(properties_get "mysql.user")
+    mysql_password=$(properties_get "mysql.password")
 
     processor_enable=$(properties_get  "processor.enable")
     processor_port=$(properties_get "processor.port")
