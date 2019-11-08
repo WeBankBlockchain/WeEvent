@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -29,6 +30,7 @@ import org.junit.Test;
  * @since 10/15/2019
  */
 @Slf4j
+@Ignore("Fabric is not default setting")
 public class FabricBroker4ConsumerTest extends JUnitTestBase {
     private final String topic2 = topicName + "1";
     private final String topic3 = topicName + "2";
@@ -75,7 +77,7 @@ public class FabricBroker4ConsumerTest extends JUnitTestBase {
         if (StringUtils.isBlank(this.lastEventId)) {
             String data = String.format("hello world! %s", System.currentTimeMillis());
             WeEvent weEvent = new WeEvent(this.topicName, data.getBytes());
-            SendResult sendResultDto = this.iProducer. publish(weEvent, this.channelName);
+            SendResult sendResultDto = this.iProducer.publish(weEvent, this.channelName);
             Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResultDto.getStatus());
             this.lastEventId = sendResultDto.getEventId();
             log.info("publish lastEventId: {}", this.lastEventId);
