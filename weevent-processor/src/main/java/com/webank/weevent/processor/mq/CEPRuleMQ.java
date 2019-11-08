@@ -39,10 +39,19 @@ public class CEPRuleMQ {
         // update unsubscribe
         String subId = subscriptionIdMap.get(rule.getId());
         if (1 == rule.getStatus()) {
-            if (null != subId) {
+            if (null != subId) {x
                 IWeEventClient client = subscriptionClientMap.get(subId);
+                // if they are equal
+                for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
+                    if (!(rule.getFromDestination().equals(entry.getValue().getFromDestination()))) {
+                        boolean flag = client.unSubscribe(subId);
+                        log.info("start rule ,and subscribe flag:{}", flag);
+                    }
+                }
+
                 subscribeMsg(rule, ruleMap, client);
-            } else {
+
+            } else { // 启动时
                 ruleMap.put(rule.getId(), rule);
                 // update subscribe
                 subscribeMsg(rule, ruleMap, null);
