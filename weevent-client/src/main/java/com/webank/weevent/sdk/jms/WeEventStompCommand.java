@@ -72,9 +72,9 @@ public class WeEventStompCommand {
         return encodeRaw(accessor);
     }
 
-    public String encodeDisConnect() {
+    public String encodeDisConnect(Long receiptId) {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.DISCONNECT);
-
+        accessor.setReceipt(Long.toString(receiptId));
         return encodeRaw(accessor);
     }
 
