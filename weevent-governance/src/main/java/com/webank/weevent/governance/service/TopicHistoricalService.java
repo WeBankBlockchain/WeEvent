@@ -189,7 +189,7 @@ public class TopicHistoricalService {
 
             String dataBaseUrl = new StringBuffer(defaultUrl).append("/").append(dbName).append(ConstantProperties.QUESTION_MARK).append("user=").append(user)
                     .append(ConstantProperties.AND_SYMBOL).append("password=").append(password).toString();
-            RuleDatabaseEntity ruleDatabaseEntity = initializationRuleDataBase(dbName, TOPIC_HISTORICAL, dataBaseUrl, brokerEntity.getUserId());
+            RuleDatabaseEntity ruleDatabaseEntity = initializationRuleDataBase(dbName + brokerEntity.getUserId(), TOPIC_HISTORICAL, dataBaseUrl, brokerEntity.getUserId());
             ruleDatabaseEntity = existRuleDataBase(ruleDatabaseEntity);
             if (ruleDatabaseEntity.getId() == null) {
                 ruleDatabaseMapper.addCirculationDatabase(ruleDatabaseEntity);
@@ -200,13 +200,14 @@ public class TopicHistoricalService {
             for (String groupId : groupList) {
                 //get new tableName
                 groupId = groupId.replaceAll("\"", "");
-                RuleEngineEntity ruleEngineEntity = initializationRule(TOPIC_HISTORICAL, brokerEntity, groupId, ruleDatabaseEntity.getId());
+                RuleEngineEntity ruleEngineEntity = initializationRule("SYSTEM" + "-" + brokerEntity.getId() + "-" + groupId,
+                        brokerEntity, groupId, ruleDatabaseEntity.getId());
                 ruleEngineMapper.addRuleEngine(ruleEngineEntity);
                 //built-in rule engine data and start
                 ruleEngineService.startRuleEngine(ruleEngineEntity, request, response);
             }
         } catch (Exception e) {
-            log.error("create table fail error,{}", e.getMessage());
+            log.error("create rule fail error,{}", e.getMessage());
             throw new GovernanceException(e.getMessage());
         }
     }
@@ -221,7 +222,7 @@ public class TopicHistoricalService {
         return ruleDatabaseEntity;
     }
 
-    private RuleEngineEntity initializationRule(String newTableName, BrokerEntity brokerEntity, String groupId, Integer dataBaseId) {
+    private RuleEngineEntity initializationRule(String ruleName, BrokerEntity brokerEntity, String groupId, Integer dataBaseId) {
         String selectField = "eventId,topicName,groupId,brokerId";
         Map<String, String> map = new HashMap<>();
         map.put("topicName", "*");
@@ -229,7 +230,7 @@ public class TopicHistoricalService {
         map.put("groupId", "*");
         map.put("eventId", "*");
         RuleEngineEntity ruleEngineEntity = new RuleEngineEntity();
-        ruleEngineEntity.setRuleName(newTableName);
+        ruleEngineEntity.setRuleName(ruleName);
         ruleEngineEntity.setBrokerId(brokerEntity.getId());
         ruleEngineEntity.setStatus(StatusEnum.NOT_STARTED.getCode());
         ruleEngineEntity.setUserId(brokerEntity.getUserId());
@@ -244,6 +245,7 @@ public class TopicHistoricalService {
         ruleEngineEntity.setConditionType(ConditionTypeEnum.DATABASE.getCode());
         ruleEngineEntity.setFromDestination("#");
         ruleEngineEntity.setIsVisible("2");
+        ruleEngineEntity.setOffSet("OFFSET_FIRST");
         return ruleEngineEntity;
     }
 
