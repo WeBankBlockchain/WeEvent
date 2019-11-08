@@ -289,10 +289,10 @@ public class RuleEngineService {
                     .append("groupId=").append(rule.getGroupId()).toString();
             ruleEngineEntity.setBrokerUrl(brokerUrl);
             log.info("brokerUrl:{}", brokerUrl);
-            if(rule.getStatus()==StatusEnum.NOT_STARTED.getCode()){
+            if (rule.getStatus() == StatusEnum.NOT_STARTED.getCode()) {
                 this.updateProcessRule(request, ruleEngineEntity, rule);
-            }else {
-                this.startProcessRule(request,ruleEngineEntity);
+            } else {
+                this.startProcessRule(request, ruleEngineEntity);
             }
 
             //delete old ruleEngineConditionEntity
@@ -407,21 +407,26 @@ public class RuleEngineService {
         StringBuffer buffer = new StringBuffer(blank);
         int count = 0;
         for (RuleEngineConditionEntity entity : ruleEngineConditionList) {
+            boolean realNumber = NumberValidationUtils.isRealNumber(entity.getSqlCondition());
+            String condtion = entity.getSqlCondition();
+            if (!realNumber) {
+                condtion = "\"" + condtion + "\"";
+            }
             if (count == 0) {
                 if ((entity.getConditionalOperator().trim().equals("=") || entity.getConditionalOperator().trim().equals("!=")) && ruleEngineConditionList.size() > 1) {
-                    buffer.append(blank).append("(").append(entity.getColumnName()).append(blank)
-                            .append(entity.getConditionalOperator()).append(blank).append(entity.getSqlCondition()).append(")").append(blank);
+                    buffer.append(blank).append("(").append(entity.getColumnName())
+                            .append(entity.getConditionalOperator()).append(condtion).append(")").append(blank);
                 } else {
-                    buffer.append(blank).append(entity.getColumnName()).append(blank)
-                            .append(entity.getConditionalOperator()).append(blank).append(entity.getSqlCondition()).append(blank);
+                    buffer.append(blank).append(entity.getColumnName())
+                            .append(entity.getConditionalOperator()).append(condtion);
                 }
             } else {
                 if (entity.getConditionalOperator().trim().equals("=") || entity.getConditionalOperator().trim().equals("!=")) {
-                    buffer.append(entity.getConnectionOperator()).append(blank).append("(").append(entity.getColumnName()).append(blank)
-                            .append(entity.getConditionalOperator()).append(blank).append(entity.getSqlCondition()).append(")").append(blank);
+                    buffer.append(entity.getConnectionOperator()).append(blank).append("(").append(entity.getColumnName())
+                            .append(entity.getConditionalOperator()).append(condtion).append(")").append(blank);
                 } else {
-                    buffer.append(entity.getConnectionOperator()).append(blank).append(entity.getColumnName()).append(blank)
-                            .append(entity.getConditionalOperator()).append(blank).append(entity.getSqlCondition()).append(blank);
+                    buffer.append(entity.getConnectionOperator()).append(blank).append(entity.getColumnName())
+                            .append(entity.getConditionalOperator()).append(condtion).append(blank);
                 }
             }
             count++;
