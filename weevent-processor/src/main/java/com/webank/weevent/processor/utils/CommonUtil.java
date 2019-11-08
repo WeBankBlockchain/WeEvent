@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.sdk.WeEvent;
 
 import com.alibaba.fastjson.JSONException;
@@ -28,7 +29,7 @@ public class CommonUtil {
      */
 
     public static Connection getConnection(String databaseUrl) {
-        String driver = "com.mysql.jdbc.Driver";
+        String driver = ProcessorApplication.processorConfig.getDataBaseDriver();
         try {
             Class.forName(driver);
             return DriverManager.getConnection(databaseUrl);
@@ -146,7 +147,7 @@ public class CommonUtil {
                 }
             }
         }
-        log.info("checkJson tag:{}", tag);
+        log.info("checkJson tag:{},content:{},objJson:{}", tag, content, objJson);
         return tag;
     }
 
