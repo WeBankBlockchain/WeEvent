@@ -1,5 +1,7 @@
 package com.webank.weevent.governance.service;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -58,10 +60,9 @@ public class TopicService {
 
     private final String SPLIT = "-";
 
-    public Boolean close(Integer brokerId, String topic, HttpServletRequest request, HttpServletResponse response)
+    public Boolean close(Integer brokerId, String topic, String groupId, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-        String groupId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_GROUP_ID);
         BrokerEntity brokerEntity = brokerService.getBroker(brokerId);
         if (brokerEntity == null) {
             return false;
@@ -72,17 +73,16 @@ public class TopicService {
         }
         CloseableHttpClient client = commonService.generateHttpClient(brokerEntity.getBrokerUrl());
         String url;
-        if (groupId == null) {
-            url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_CLOSE).append("?topic=").append(topic).toString();
-        } else {
-            url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_CLOSE).append("?topic=").append(topic)
-                    .append("&groupId=").append(groupId).toString();
-
-        }
-        log.info("url:{}", url);
-        HttpGet get = commonService.getMethod(url, request);
-
         try {
+            if (groupId == null) {
+                url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_CLOSE).append("?topic=").append(URLEncoder.encode(topic, "UTF-8")).
+                toString();
+            } else {
+                url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_CLOSE).append("?topic=").append(URLEncoder.encode(topic, "UTF-8"))
+                        .append("&groupId=").append(groupId).toString();
+            }
+            log.info("url:{}", url);
+            HttpGet get = commonService.getMethod(url, request);
             CloseableHttpResponse closeResponse = client.execute(get);
             String mes = EntityUtils.toString(closeResponse.getEntity());
             return (Boolean) JSON.parse(mes);
@@ -116,7 +116,7 @@ public class TopicService {
         if (groupId != null) {
             url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_LIST)
                     .append("?pageIndex=").append(pageIndex).append("&pageSize=").append(pageSize)
-                    .append("groupId=").append(groupId).toString();
+                    .append("&groupId=").append(groupId).toString();
         } else {
             url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_LIST)
                     .append("?pageIndex=").append(pageIndex).append("&pageSize=").append(pageSize).toString();
@@ -161,24 +161,22 @@ public class TopicService {
     public TopicEntity getTopicInfo(Integer brokerId, String topic, String groupId, HttpServletRequest request) throws GovernanceException {
         String accountId = this.cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
         BrokerEntity broker = this.brokerService.getBroker(brokerId);
-
         Boolean flag = permissionService.verifyPermissions(brokerId, accountId);
         if (broker == null || !flag) {
             log.error("get topicInfo failed, brokerId:{}, topic:{}, groupId:{}.", brokerId, topic, groupId);
             throw new GovernanceException(ErrorCode.ACCESS_DENIED);
         }
 
-        CloseableHttpClient client = commonService.generateHttpClient(broker.getBrokerUrl());
-        // get event broker url
-        String url = new StringBuffer(broker.getBrokerUrl()).append(ConstantProperties.BROKER_REST_STATE).append("?topic=")
-                .append(topic).toString();
-        if (!StringUtils.isBlank(groupId)) {
-            url = new StringBuffer(url).append("&groupId=").append(groupId).toString();
-        }
-
-        log.info("getTopicInfo url:{}", url);
-
         try {
+            CloseableHttpClient client = commonService.generateHttpClient(broker.getBrokerUrl());
+            // get event broker url
+            String url = new StringBuffer(broker.getBrokerUrl()).append(ConstantProperties.BROKER_REST_STATE).append("?topic=")
+                    .append(URLEncoder.encode(topic, "UTF-8")).toString();
+            if (!StringUtils.isBlank(groupId)) {
+                url = new StringBuffer(url).append("&groupId=").append(groupId).toString();
+            }
+
+            log.info("getTopicInfo url:{}", url);
             HttpGet get = commonService.getMethod(url, request);
             CloseableHttpResponse closeResponse = client.execute(get);
             String mes = EntityUtils.toString(closeResponse.getEntity());
@@ -201,10 +199,9 @@ public class TopicService {
     }
 
     @Transactional(rollbackFor = Throwable.class)
-    public GovernanceResult open(Integer brokerId, String topic, String creater, HttpServletRequest request,
+    public GovernanceResult open(Integer brokerId, String topic, String creater, String groupId, HttpServletRequest request,
                                  HttpServletResponse response) throws GovernanceException {
         String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-        String groupId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_GROUP_ID);
         BrokerEntity brokerEntity = brokerService.getBroker(brokerId);
         if (brokerEntity == null) {
             return null;
@@ -213,24 +210,30 @@ public class TopicService {
         if (!flag) {
             throw new GovernanceException(ErrorCode.ACCESS_DENIED);
         }
-        TopicEntity topicEntity = new TopicEntity();
-        topicEntity.setBrokerId(brokerId);
-        topicEntity.setTopicName(topic);
-        topicEntity.setCreater(creater);
-        topicEntity.setGroupId(groupId);
-        topicInfoMapper.openBrokeTopic(topicEntity);
-
-        CloseableHttpClient client = commonService.generateHttpClient(brokerEntity.getBrokerUrl());
-        String url;
-        if (groupId != null) {
-            url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_OPEN).append("?topic=").append(topic)
-                    .append("&groupId=").append(groupId).toString();
-        } else {
-            url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_OPEN).append("?topic=").append(topic).toString();
-        }
-        log.info("url: {}", url);
         String mes;
         try {
+            boolean exist = exist(topic, brokerEntity.getBrokerUrl(), groupId, request);
+            if (exist) {
+                log.info("");
+                throw new GovernanceException("the topic exist");
+            }
+
+            TopicEntity topicEntity = new TopicEntity();
+            topicEntity.setBrokerId(brokerId);
+            topicEntity.setTopicName(topic);
+            topicEntity.setCreater(creater);
+            topicEntity.setGroupId(groupId);
+            topicInfoMapper.openBrokeTopic(topicEntity);
+
+            CloseableHttpClient client = commonService.generateHttpClient(brokerEntity.getBrokerUrl());
+            String url;
+            if (groupId != null) {
+                url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_OPEN).append("?topic=").append(URLEncoder.encode(topic, "UTF-8"))
+                        .append("&groupId=").append(groupId).toString();
+            } else {
+                url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_OPEN).append("?topic=").append(URLEncoder.encode(topic, "UTF-8")).toString();
+            }
+            log.info("url: {}", url);
             HttpGet get = commonService.getMethod(url, request);
             CloseableHttpResponse closeResponse = client.execute(get);
             mes = EntityUtils.toString(closeResponse.getEntity());
@@ -251,9 +254,16 @@ public class TopicService {
     }
 
     @Transactional(rollbackFor = Throwable.class)
-    public boolean exist(String topic,String brokerUrl,String groupId,HttpServletRequest request) throws GovernanceException {
-        String url = new StringBuffer(brokerUrl).append(ConstantProperties.BROKER_REST_OPEN).append("?topic=").append(topic)
-                .append("&groupId=").append(groupId).toString();
+    public boolean exist(String topic, String brokerUrl, String groupId, HttpServletRequest request) throws GovernanceException, UnsupportedEncodingException {
+        String url = "";
+        if (groupId == null) {
+            url = new StringBuffer(brokerUrl).append(ConstantProperties.BROKER_REST_EXIST).append("?topic=").append(URLEncoder.encode(topic, "UTF-8"))
+                    .toString();
+        } else {
+            url = new StringBuffer(brokerUrl).append(ConstantProperties.BROKER_REST_EXIST).append("?topic=").append(URLEncoder.encode(topic, "UTF-8"))
+                    .append("&groupId=").append(groupId).toString();
+        }
+
         log.info("url: {}", url);
         String mes;
         try {

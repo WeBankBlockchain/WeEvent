@@ -69,7 +69,8 @@ CREATE TABLE t_rule_engine (
   `error_destination` VARCHAR(255) NULL DEFAULT NULL COMMENT 'error destination',
   `error_message` VARCHAR(255) NULL DEFAULT NULL COMMENT 'error message',
   `is_visible` VARCHAR(1) NOT NULL DEFAULT '1' COMMENT '1 visible ,2 invisible',
-   PRIMARY KEY (`id`)
+   PRIMARY KEY (`id`),
+   UNIQUE KEY ruleName(rule_name)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='t_rule_engine';
 
 CREATE TABLE t_rule_database (
@@ -104,5 +105,6 @@ CREATE TABLE t_topic_historical (
    `block_number` INT(11) NULL DEFAULT NULL COMMENT 'block number',
    `eventId` VARCHAR(64)  NOT NULL COMMENT 'event id',
    `brokerId` VARCHAR(64) NOT  NULL COMMENT 'broker id',
-  PRIMARY KEY (`id`)
+   PRIMARY KEY (`id`),
+   UNIQUE KEY brokerIdGroupIdEventId(brokerId,groupId,eventId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='t_topic_historical';
