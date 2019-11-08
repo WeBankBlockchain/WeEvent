@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -406,8 +407,15 @@ public class RuleEngineService {
         String blank = " ";
         StringBuffer buffer = new StringBuffer(blank);
         int count = 0;
+        //All "=" convert to "=="
+        Set<RuleEngineConditionEntity> collect = ruleEngineConditionList.stream().filter(it -> it.getConditionalOperator().trim().equals("=")).collect(Collectors.toSet());
+        String conditionalOperator = null;
+        if (collect.size() == ruleEngineConditionList.size()) {
+            conditionalOperator = "==";
+        }
         for (RuleEngineConditionEntity entity : ruleEngineConditionList) {
             boolean realNumber = NumberValidationUtils.isRealNumber(entity.getSqlCondition());
+            conditionalOperator = conditionalOperator == null ? entity.getConditionalOperator() : conditionalOperator;
             String condtion = entity.getSqlCondition();
             if (!realNumber) {
                 condtion = "\"" + condtion + "\"";
@@ -415,18 +423,18 @@ public class RuleEngineService {
             if (count == 0) {
                 if ((entity.getConditionalOperator().trim().equals("=") || entity.getConditionalOperator().trim().equals("!=")) && ruleEngineConditionList.size() > 1) {
                     buffer.append(blank).append("(").append(entity.getColumnName())
-                            .append(entity.getConditionalOperator()).append(condtion).append(")").append(blank);
+                            .append(conditionalOperator).append(condtion).append(")").append(blank);
                 } else {
                     buffer.append(blank).append(entity.getColumnName())
-                            .append(entity.getConditionalOperator()).append(condtion);
+                            .append(conditionalOperator).append(condtion);
                 }
             } else {
                 if (entity.getConditionalOperator().trim().equals("=") || entity.getConditionalOperator().trim().equals("!=")) {
                     buffer.append(entity.getConnectionOperator()).append(blank).append("(").append(entity.getColumnName())
-                            .append(entity.getConditionalOperator()).append(condtion).append(")").append(blank);
+                            .append(conditionalOperator).append(condtion).append(")").append(blank);
                 } else {
                     buffer.append(entity.getConnectionOperator()).append(blank).append(entity.getColumnName())
-                            .append(entity.getConditionalOperator()).append(condtion).append(blank);
+                            .append(conditionalOperator).append(condtion).append(blank);
                 }
             }
             count++;
