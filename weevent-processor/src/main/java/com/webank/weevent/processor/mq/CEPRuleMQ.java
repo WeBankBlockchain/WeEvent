@@ -30,10 +30,11 @@ import org.springframework.util.StringUtils;
 public class CEPRuleMQ {
     // <ruleId <--> subscriptionId>
     private static Map<String, String> subscriptionIdMap = new ConcurrentHashMap<>();
+    // <subscriptionId-->client session>
+    private static Map<String, IWeEventClient> subscriptionClientMap = new ConcurrentHashMap<>();
+
 
     public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException {
-        // unsubscribe old the topic
-        IWeEventClient client = getClient(rule);
         // when is in run status. update the rule map
 
         if (1 == rule.getStatus()) {
@@ -48,9 +49,9 @@ public class CEPRuleMQ {
             // update unsubscribe
             String subId = subscriptionIdMap.get(rule.getId());
             log.info("stop,update,delete rule ,and unsubscribe,subId :{}", subId);
-
-            client.unSubscribe(subId);
-            log.info("stop,update,delete rule ,and unsubscribe");
+            IWeEventClient client = subscriptionClientMap.get(subId);
+            boolean flag = client.unSubscribe(subId);
+            log.info("stop,update,delete rule ,and unsubscribe return {}",flag);
         }
     }
 
@@ -125,7 +126,7 @@ public class CEPRuleMQ {
             }
             log.info("subscriptionIdMap:{},rule.getId() :{}--->subscriptionId:{}", subscriptionIdMap.size(), rule.getId(), subscriptionId);
             subscriptionIdMap.put(rule.getId(), subscriptionId);
-
+            subscriptionClientMap.put(subscriptionId,client);
             log.info("after add success subscriptionIdMap:{}", subscriptionIdMap.size());
 
         } catch (BrokerException e) {
