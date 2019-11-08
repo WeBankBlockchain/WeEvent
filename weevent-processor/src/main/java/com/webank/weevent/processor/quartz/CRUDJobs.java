@@ -33,7 +33,24 @@ public class CRUDJobs implements Job {
 
             switch (type) {
                 case "startCEPRule":
-                    startCEPRule(context, jobName);
+                    startCEPRule(context, jobName, "startCEPRule");
+                    break;
+
+                case "deleteCEPRuleById":
+                    startCEPRule(context, jobName, "deleteCEPRuleById");
+                    break;
+
+                case "stopCEPRuleById":
+                    startCEPRule(context, jobName, "stopCEPRuleById");
+                    break;
+
+                case "updateCEPRuleById":
+                    startCEPRule(context, jobName, "updateCEPRuleById");
+
+                    break;
+
+                case "insert":
+                    startCEPRule(context, jobName, "insert");
                     break;
 
                 default:
@@ -44,7 +61,7 @@ public class CRUDJobs implements Job {
     }
 
     @SuppressWarnings("unchecked")
-    private static void startCEPRule(JobExecutionContext context, String jobName) {
+    private static void startCEPRule(JobExecutionContext context, String jobName, String type) {
         Object obj = context.getJobDetail().getJobDataMap().get("rule");
         // ruleMap
         Map<String, CEPRule> ruleMap = (HashMap) context.getJobDetail().getJobDataMap().get("ruleMap");
@@ -56,7 +73,7 @@ public class CRUDJobs implements Job {
                 if (1 == rule.getStatus() || 0 == rule.getStatus() || 2 == rule.getStatus()) {
                     CEPRuleCache.updateCEPRule(rule, ruleMap);
                 }
-                log.info("startCEPRule in job: {},rule:{}", jobName, JSONObject.toJSON(obj));
+                log.info("execute  job: {},rule:{},type:{}", jobName, JSONObject.toJSON(obj), type);
             }
         } catch (BrokerException e) {
             log.info("BrokerException:{}", e.toString());
