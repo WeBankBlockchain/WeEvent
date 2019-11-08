@@ -31,10 +31,10 @@ public class TopicController {
     private TopicService topicService;
 
     @RequestMapping(value = "/close")
-    public Boolean close(@RequestParam("brokerId") Integer brokerId, @RequestParam String topic,
+    public Boolean close(@RequestParam("brokerId") Integer brokerId, @RequestParam String topic, @RequestParam(required = false) String groupId,
                          HttpServletRequest request, HttpServletResponse response) throws GovernanceException {
-        log.info("close topic ,brokerId:{},topic:{}", brokerId, topic);
-        return topicService.close(brokerId, topic, request, response);
+        log.info("close topic ,brokerId:{},topic:{},groupId:{}", brokerId, topic, groupId);
+        return topicService.close(brokerId, topic, groupId, request, response);
 
     }
 
@@ -49,9 +49,9 @@ public class TopicController {
     @RequestMapping(value = "/openTopic")
     public GovernanceResult open(@RequestBody TopicCreateEntity topicCreateEntity, HttpServletRequest request,
                                  HttpServletResponse response) throws GovernanceException {
-        log.info("open topic creator:{} ,topic:{}",topicCreateEntity.getCreater(), topicCreateEntity.getTopic());
+        log.info("open topic creator:{} ,topic:{}", topicCreateEntity.getCreater(), topicCreateEntity.getTopic());
         return topicService.open(topicCreateEntity.getBrokerId(), topicCreateEntity.getTopic(),
-                topicCreateEntity.getCreater(), request, response);
+                topicCreateEntity.getCreater(), topicCreateEntity.getGroupId(), request, response);
     }
 
     @RequestMapping(value = "/topicInfo")
