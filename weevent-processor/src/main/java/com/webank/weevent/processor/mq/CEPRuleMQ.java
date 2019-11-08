@@ -35,17 +35,22 @@ public class CEPRuleMQ {
         // unsubscribe old the topic
         IWeEventClient client = getClient(rule);
         // when is in run status. update the rule map
+
         if (1 == rule.getStatus()) {
             ruleMap.put(rule.getId(), rule);
             // update subscribe
             subscribeMsg(rule, ruleMap);
-            log.info("start rule ,and subscribe rule:{}",rule.getId());
+            log.info("start rule ,and subscribe rule:{}", rule.getId());
         }
-        if (2 == rule.getStatus()) {
+        if (0 == rule.getStatus() || 2 == rule.getStatus()) {
+            log.info("stop,update,delete rule subscriptionIdMap.size:{}", subscriptionIdMap.size());
+
             // update unsubscribe
             String subId = subscriptionIdMap.get(rule.getId());
+            log.info("stop,update,delete rule ,and unsubscribe,subId :{}", subId);
+
             client.unSubscribe(subId);
-            log.info("delete rule ,and unsubscribe");
+            log.info("stop,update,delete rule ,and unsubscribe");
         }
     }
 
@@ -118,7 +123,11 @@ public class CEPRuleMQ {
                     }
                 });
             }
+            log.info("subscriptionIdMap:{},rule.getId() :{}--->subscriptionId:{}", subscriptionIdMap.size(), rule.getId(), subscriptionId);
             subscriptionIdMap.put(rule.getId(), subscriptionId);
+
+            log.info("after add success subscriptionIdMap:{}", subscriptionIdMap.size());
+
         } catch (BrokerException e) {
             log.info("BrokerException{}", e.toString());
         }
@@ -138,53 +147,53 @@ public class CEPRuleMQ {
         try {
             try (Connection conn = CommonUtil.getConnection(rule.getDatabaseUrl());) {
 
-            if (conn != null) {
-                // get the sql params
-                Map<String, String> urlParamMap = CommonUtil.uRLRequest(rule.getDatabaseUrl());
+                if (conn != null) {
+                    // get the sql params
+                    Map<String, String> urlParamMap = CommonUtil.uRLRequest(rule.getDatabaseUrl());
 
-                // get the insert sql
-                StringBuffer insertExpression = new StringBuffer("insert into ");
-                insertExpression.append(urlParamMap.get("tableName"));
-                insertExpression.append("(");
-                StringBuffer values = new StringBuffer(" values (");
+                    // get the insert sql
+                    StringBuffer insertExpression = new StringBuffer("insert into ");
+                    insertExpression.append(urlParamMap.get("tableName"));
+                    insertExpression.append("(");
+                    StringBuffer values = new StringBuffer(" values (");
 
-                // select key and value
-                Map<String, String> sqlvalue = CommonUtil.contactsql(rule.getBrokerId(), groupId, eventContent, rule.getSelectField(), rule.getPayload());
+                    // select key and value
+                    Map<String, String> sqlvalue = CommonUtil.contactsql(rule.getBrokerId(), groupId, eventContent, rule.getSelectField(), rule.getPayload());
 
-                // just the order key and need write in db
-                List<String> keys = CommonUtil.getAllKey(sqlvalue);
+                    // just the order key and need write in db
+                    List<String> keys = CommonUtil.getAllKey(sqlvalue);
 
-                // payload just like the table
-                for (int i = 0; i < keys.size(); i++) {
-                    if ((keys.size() - 1) == i) {
-                        // last key
-                        insertExpression.append(keys.get(i)).append(")");
-                        values.append("?)");
-                    } else {
+                    // payload just like the table
+                    for (int i = 0; i < keys.size(); i++) {
+                        if ((keys.size() - 1) == i) {
+                            // last key
+                            insertExpression.append(keys.get(i)).append(")");
+                            values.append("?)");
+                        } else {
 
-                        // concat the key
-                        insertExpression.append(keys.get(i)).append(",");
+                            // concat the key
+                            insertExpression.append(keys.get(i)).append(",");
 
-                        values.append("?,");
+                            values.append("?,");
+                        }
+
                     }
 
-                }
+                    StringBuffer query = insertExpression.append(values);
+                    log.info("query:{}", query);
+                    PreparedStatement preparedStmt = conn.prepareStatement(query.toString());
+                    for (int t = 0; t < keys.size(); t++) {
+                        preparedStmt.setString(t + 1, sqlvalue.get(keys.get(t)));
+                    }
+                    log.info("preparedStmt:{}", preparedStmt.toString());
+                    // execute the preparedstatement
+                    int res = preparedStmt.executeUpdate();
+                    if (res > 0) {
+                        System.out.println("insert db success!!!");
+                    }
+                    preparedStmt.close();
 
-                StringBuffer query = insertExpression.append(values);
-                log.info("query:{}", query);
-                PreparedStatement preparedStmt = conn.prepareStatement(query.toString());
-                for (int t = 0; t < keys.size(); t++) {
-                    preparedStmt.setString(t + 1, sqlvalue.get(keys.get(t)));
-                }
-                log.info("preparedStmt:{}", preparedStmt.toString());
-                // execute the preparedstatement
-                int res = preparedStmt.executeUpdate();
-                if (res > 0) {
-                    System.out.println("insert db success!!!");
-                }
-                preparedStmt.close();
-
-                conn.close();
+                    conn.close();
                 }
             }
         } catch (SQLException e) {
@@ -316,7 +325,7 @@ public class CEPRuleMQ {
                     context.set(key, event.get(key));
                 }
                 // check the expression ,if match then true
-                log.info("condition:{}",condition);
+                log.info("condition:{}", condition);
                 boolean checkFlag = (Boolean) jexl.createExpression(condition).evaluate(context);
                 log.info("payload:{},eventContent:{},condition:{},hit rule:{}", payload, eventContent, condition, checkFlag);
                 return checkFlag;
@@ -348,8 +357,7 @@ public class CEPRuleMQ {
             JSONObject event = JSONObject.parseObject(payload);
             String[] strs = condition.split("=");
             boolean flag = false;
-            if (strs.length == 2 && !(strs[0].contains("<") || strs[0].contains(">") || (strs[1].contains("<") || strs[1].contains(">"))))
-            {
+            if (strs.length == 2 && !(strs[0].contains("<") || strs[0].contains(">") || (strs[1].contains("<") || strs[1].contains(">")))) {
                 flag = true;
             }
             if (flag) {

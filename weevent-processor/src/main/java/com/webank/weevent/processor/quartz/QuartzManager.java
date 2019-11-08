@@ -52,20 +52,21 @@ public class QuartzManager {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public RetCode addModifyJob(String jobName, String jobGroupName, String triggerName, String triggerGroupName, Class jobClass, JobDataMap params) {
         try {
-            // get the whole rules
+            // get the all rules
             Iterator<JobKey> it = scheduler.getJobKeys(GroupMatcher.anyGroup()).iterator();
             List<CEPRule> ruleList = new ArrayList<>();
             Map<String, CEPRule> ruleMap = new HashMap<>();
-
+            CEPRule currentRule = (CEPRule) params.get("rule");
             while (it.hasNext()) {
                 JobKey jobKey = (JobKey) it.next();
                 if (null != (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
                     CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
                     // if the current is delete
                     if ((("deleteCEPRuleById".equals(params.get("type").toString()))) && (jobName.equals(rule.getId()))) {
-                        // update the status
+                        // update the delete status
                         rule.setStatus(2);
                         params.put("rule", rule);
+                        currentRule = rule;
                     } else {
                         ruleList.add(rule);
                         ruleMap.put(rule.getId(), rule);
@@ -74,17 +75,11 @@ public class QuartzManager {
                 }
 
             }
-            if (!("deleteCEPRuleById".equals(params.get("type").toString()))) {
-                // add current rule
-                CEPRule currentRule = (CEPRule) params.get("rule");
-                if (currentRule.getStatus().equals(1)) {
-                    ruleMap.put(currentRule.getId(), currentRule);
-                    ruleList.add(currentRule);
-                }
-            }
-
+            ruleMap.put(currentRule.getId(), currentRule);
+            ruleList.add(currentRule);
             params.put("ruleMap", ruleMap);
 
+            log.info("update the job  ruleMap:{},ruleList:{}", ruleMap.size(), ruleList.size());
             JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).storeDurably(true).build();
             // just do one time
             SimpleTrigger trigger = newTrigger()
@@ -102,6 +97,8 @@ public class QuartzManager {
                 scheduler.start();
             }
             if (scheduler.checkExists(JobKey.jobKey(jobName, jobGroupName))) {
+                log.info("update job:{} success", jobName);
+
                 return ConstantsHelper.SUCCESS;
             }
 
