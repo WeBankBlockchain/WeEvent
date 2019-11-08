@@ -39,7 +39,7 @@ public class CEPRuleMQ {
         // update unsubscribe
         String subId = subscriptionIdMap.get(rule.getId());
         if (1 == rule.getStatus()) {
-            if (null != subId) {x
+            if (null != subId) {
                 IWeEventClient client = subscriptionClientMap.get(subId);
                 // if they are equal
                 for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
