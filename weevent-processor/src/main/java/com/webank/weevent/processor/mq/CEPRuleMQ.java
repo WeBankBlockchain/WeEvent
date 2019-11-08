@@ -51,7 +51,7 @@ public class CEPRuleMQ {
 
                 subscribeMsg(rule, ruleMap, client);
 
-            } else { // 
+            } else { //
                 ruleMap.put(rule.getId(), rule);
                 // update subscribe
                 subscribeMsg(rule, ruleMap, null);
@@ -242,6 +242,10 @@ public class CEPRuleMQ {
 
         // match the rule and send message
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
+            // write the # topic to history db
+            if (entry.getValue().getFromDestination().equals("#")) {
+                sendMessageToDB(getGroupId(entry.getValue()), event, entry.getValue());
+            }
             if (!StringUtils.isEmpty(entry.getValue().getSelectField()) && !(StringUtils.isEmpty(entry.getValue().getPayload()))) {
 
                 log.info("check the josn and return fine !");
