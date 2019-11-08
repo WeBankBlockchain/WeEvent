@@ -30,19 +30,28 @@ import org.springframework.util.StringUtils;
 public class CEPRuleMQ {
     // <ruleId <--> subscriptionId>
     private static Map<String, String> subscriptionIdMap = new ConcurrentHashMap<>();
+    // <subscriptionId-->client session>
+    private static Map<String, IWeEventClient> subscriptionClientMap = new ConcurrentHashMap<>();
+
 
     public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException {
-        // unsubscribe old the topic
-        IWeEventClient client = getClient(rule);
         // when is in run status. update the rule map
+
         if (1 == rule.getStatus()) {
             ruleMap.put(rule.getId(), rule);
             // update subscribe
             subscribeMsg(rule, ruleMap);
+            log.info("start rule ,and subscribe rule:{}", rule.getId());
         }
-        String subId = subscriptionIdMap.get(rule.getId());
-        if (null == subId) {
-            client.unSubscribe(subId);
+        if (0 == rule.getStatus() || 2 == rule.getStatus()) {
+            log.info("stop,update,delete rule subscriptionIdMap.size:{}", subscriptionIdMap.size());
+
+            // update unsubscribe
+            String subId = subscriptionIdMap.get(rule.getId());
+            log.info("stop,update,delete rule ,and unsubscribe,subId :{}", subId);
+            IWeEventClient client = subscriptionClientMap.get(subId);
+            boolean flag = client.unSubscribe(subId);
+            log.info("stop,update,delete rule ,and unsubscribe return {}",flag);
         }
     }
 
@@ -69,28 +78,57 @@ public class CEPRuleMQ {
             IWeEventClient client = getClient(rule);
             // subscribe topic
             log.info("subscribe topic:{}", rule.getFromDestination());
-            String subscriptionId = client.subscribe(rule.getFromDestination(), WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
-                @Override
-                public void onEvent(WeEvent event) {
-                    try {
+            String subscriptionId;
+            if (StringUtils.isEmpty(rule.getOffSet())) {
+                subscriptionId = client.subscribe(rule.getFromDestination(), WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
+                    @Override
+                    public void onEvent(WeEvent event) {
+                        try {
 
-                        String content = new String(event.getContent());
-                        log.info("on event:{},content:{}", event.toString(), content);
+                            String content = new String(event.getContent());
+                            log.info("on event:{},content:{}", event.toString(), content);
 
-                        if (CommonUtil.checkValidJson(content)) {
-                            handleOnEvent(event, ruleMap);
+                            if (CommonUtil.checkValidJson(content)) {
+                                handleOnEvent(event, ruleMap);
+                            }
+                        } catch (JSONException e) {
+                            log.error(e.toString());
                         }
-                    } catch (JSONException e) {
-                        log.error(e.toString());
                     }
-                }
 
-                @Override
-                public void onException(Throwable e) {
-                    log.info("on event:{}", e.toString());
-                }
-            });
+                    @Override
+                    public void onException(Throwable e) {
+                        log.info("on event:{}", e.toString());
+                    }
+                });
+            } else {
+                subscriptionId = client.subscribe(rule.getFromDestination(), rule.getOffSet(), new IWeEventClient.EventListener() {
+                    @Override
+                    public void onEvent(WeEvent event) {
+                        try {
+
+                            String content = new String(event.getContent());
+                            log.info("on event:{},content:{}", event.toString(), content);
+
+                            if (CommonUtil.checkValidJson(content)) {
+                                handleOnEvent(event, ruleMap);
+                            }
+                        } catch (JSONException e) {
+                            log.error(e.toString());
+                        }
+                    }
+
+                    @Override
+                    public void onException(Throwable e) {
+                        log.info("on event:{}", e.toString());
+                    }
+                });
+            }
+            log.info("subscriptionIdMap:{},rule.getId() :{}--->subscriptionId:{}", subscriptionIdMap.size(), rule.getId(), subscriptionId);
             subscriptionIdMap.put(rule.getId(), subscriptionId);
+            subscriptionClientMap.put(subscriptionId,client);
+            log.info("after add success subscriptionIdMap:{}", subscriptionIdMap.size());
+
         } catch (BrokerException e) {
             log.info("BrokerException{}", e.toString());
         }
@@ -108,55 +146,56 @@ public class CEPRuleMQ {
 
     private static void sendMessageToDB(String groupId, WeEvent eventContent, CEPRule rule) {
         try {
-            Connection conn = CommonUtil.getConnection(rule.getDatabaseUrl());
+            try (Connection conn = CommonUtil.getConnection(rule.getDatabaseUrl());) {
 
-            if (conn != null) {
-                // get the sql params
-                Map<String, String> urlParamMap = CommonUtil.uRLRequest(rule.getDatabaseUrl());
+                if (conn != null) {
+                    // get the sql params
+                    Map<String, String> urlParamMap = CommonUtil.uRLRequest(rule.getDatabaseUrl());
 
-                // get the insert sql
-                StringBuffer insertExpression = new StringBuffer("insert into ");
-                insertExpression.append(urlParamMap.get("tableName"));
-                insertExpression.append("(");
-                StringBuffer values = new StringBuffer(" values (");
+                    // get the insert sql
+                    StringBuffer insertExpression = new StringBuffer("insert into ");
+                    insertExpression.append(urlParamMap.get("tableName"));
+                    insertExpression.append("(");
+                    StringBuffer values = new StringBuffer(" values (");
 
-                // select key and value
-                Map<String, String> sqlvalue = CommonUtil.contactsql(rule.getBrokerId(), groupId, eventContent, rule.getSelectField(), rule.getPayload());
+                    // select key and value
+                    Map<String, String> sqlvalue = CommonUtil.contactsql(rule.getBrokerId(), groupId, eventContent, rule.getSelectField(), rule.getPayload());
 
-                // just the order key and need write in db
-                List<String> keys = CommonUtil.getAllKey(sqlvalue);
+                    // just the order key and need write in db
+                    List<String> keys = CommonUtil.getAllKey(sqlvalue);
 
-                // payload just like the table
-                for (int i = 0; i < keys.size(); i++) {
-                    if ((keys.size() - 1) == i) {
-                        // last key
-                        insertExpression.append(keys.get(i)).append(")");
-                        values.append("?)");
-                    } else {
+                    // payload just like the table
+                    for (int i = 0; i < keys.size(); i++) {
+                        if ((keys.size() - 1) == i) {
+                            // last key
+                            insertExpression.append(keys.get(i)).append(")");
+                            values.append("?)");
+                        } else {
 
-                        // concat the key
-                        insertExpression.append(keys.get(i)).append(",");
+                            // concat the key
+                            insertExpression.append(keys.get(i)).append(",");
 
-                        values.append("?,");
+                            values.append("?,");
+                        }
+
                     }
 
-                }
+                    StringBuffer query = insertExpression.append(values);
+                    log.info("query:{}", query);
+                    PreparedStatement preparedStmt = conn.prepareStatement(query.toString());
+                    for (int t = 0; t < keys.size(); t++) {
+                        preparedStmt.setString(t + 1, sqlvalue.get(keys.get(t)));
+                    }
+                    log.info("preparedStmt:{}", preparedStmt.toString());
+                    // execute the preparedstatement
+                    int res = preparedStmt.executeUpdate();
+                    if (res > 0) {
+                        System.out.println("insert db success!!!");
+                    }
+                    preparedStmt.close();
 
-                StringBuffer query = insertExpression.append(values);
-                log.info("query:{}", query);
-                PreparedStatement preparedStmt = conn.prepareStatement(query.toString());
-                for (int t = 0; t < keys.size(); t++) {
-                    preparedStmt.setString(t + 1, sqlvalue.get(keys.get(t)));
+                    conn.close();
                 }
-                log.info("preparedStmt:{}", preparedStmt.toString());
-                // execute the preparedstatement
-                int res = preparedStmt.executeUpdate();
-                if (res > 0) {
-                    System.out.println("insert db success!!!");
-                }
-                preparedStmt.close();
-
-                conn.close();
             }
         } catch (SQLException e) {
             log.info(e.toString());
@@ -259,9 +298,7 @@ public class CEPRuleMQ {
         String[] strs = condition.split("=");
         if (strs.length == 2) {
             // event contain left key
-            String key = strs[0].replaceAll("\"", "").trim();
-            String value = strs[1].replaceAll("\"", "").trim();
-            if (event.containsKey(key) && event.get(key).toString().equals(value)) {
+            if (event.containsKey(strs[0]) && event.get(strs[0]).toString().equals(strs[1])) {
                 log.info("get the a=1 pattern {}", "true");
                 return true;
             } else {
@@ -289,14 +326,22 @@ public class CEPRuleMQ {
                     context.set(key, event.get(key));
                 }
                 // check the expression ,if match then true
+                log.info("condition:{}", condition);
                 boolean checkFlag = (Boolean) jexl.createExpression(condition).evaluate(context);
                 log.info("payload:{},eventContent:{},condition:{},hit rule:{}", payload, eventContent, condition, checkFlag);
                 return checkFlag;
             }
+            log.info("payload:{},eventContent:{},condition:{},hit rule:false", payload, eventContent, condition);
             return false;
         } catch (Exception e) {
-            log.info("eventMessage :{} contains =", eventMessage);
-            return handleTheEqual(eventMessage, condition);
+            if (handleTheEqual(eventMessage, condition)) {
+                log.info("single equal match");
+                return true;
+            } else {
+                log.info("error number");
+                return false;
+            }
+
         }
     }
 
