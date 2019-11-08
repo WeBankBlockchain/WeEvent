@@ -51,7 +51,7 @@ public class CEPRuleMQ {
 
                 subscribeMsg(rule, ruleMap, client);
 
-            } else { // 启动时
+            } else { // 
                 ruleMap.put(rule.getId(), rule);
                 // update subscribe
                 subscribeMsg(rule, ruleMap, null);
