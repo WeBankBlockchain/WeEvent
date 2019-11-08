@@ -269,9 +269,7 @@ public class RuleEngineService {
             rule.setId(ruleEngineEntity.getId());
             List<RuleEngineEntity> ruleEngines = ruleEngineMapper.getRuleEngines(rule);
             rule = ruleEngines.get(0);
-            if (rule.getStatus() != StatusEnum.NOT_STARTED.getCode()) {
-                throw new GovernanceException("Only disabled status can be updated");
-            }
+
             // check sql condition
             boolean flag = validationConditions(request, ruleEngineEntity);
             if (!flag) {
@@ -286,7 +284,16 @@ public class RuleEngineService {
             ruleEngineEntity.setStatus(rule.getStatus());
 
             //update process rule
-            this.updateProcessRule(request, ruleEngineEntity, rule);
+            BrokerEntity broker = brokerMapper.getBroker(rule.getBrokerId());
+            String brokerUrl = new StringBuffer(broker.getBrokerUrl()).append(ConstantProperties.QUESTION_MARK)
+                    .append("groupId=").append(rule.getGroupId()).toString();
+            ruleEngineEntity.setBrokerUrl(brokerUrl);
+            log.info("brokerUrl:{}", brokerUrl);
+            if(rule.getStatus()==StatusEnum.NOT_STARTED.getCode()){
+                this.updateProcessRule(request, ruleEngineEntity, rule);
+            }else {
+                this.startProcessRule(request,ruleEngineEntity);
+            }
 
             //delete old ruleEngineConditionEntity
             RuleEngineConditionEntity ruleEngineConditionEntity = new RuleEngineConditionEntity();
@@ -343,11 +350,7 @@ public class RuleEngineService {
     @SuppressWarnings("unchecked")
     private void updateProcessRule(HttpServletRequest request, RuleEngineEntity ruleEngineEntity, RuleEngineEntity oldRule) throws GovernanceException {
         try {
-            BrokerEntity broker = brokerMapper.getBroker(oldRule.getBrokerId());
-            String brokerUrl = new StringBuffer(broker.getBrokerUrl()).append(ConstantProperties.QUESTION_MARK)
-                    .append("groupId=").append(oldRule.getGroupId()).toString();
-            ruleEngineEntity.setBrokerUrl(brokerUrl);
-            log.info("brokerUrl:{}", brokerUrl);
+
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_UPDATE_CEP_RULE).toString();
             String jsonString = JSONObject.toJSONString(ruleEngineEntity);
             Map map = JSONObject.parseObject(jsonString, Map.class);
