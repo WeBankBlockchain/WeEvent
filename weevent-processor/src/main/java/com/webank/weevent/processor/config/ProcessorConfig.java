@@ -18,8 +18,8 @@ public class ProcessorConfig {
     @Value("${quartz.schedule.name:}")
     private String quartzScheduleName;
 
-    @Value("${quartz.schedule.cronexpression:}")
-    private String cronExpression;
+    @Value("${org.quartz.dataSource.WeEvent_processor.driver:}")
+    private String dataBaseDriver;
 
 
 }

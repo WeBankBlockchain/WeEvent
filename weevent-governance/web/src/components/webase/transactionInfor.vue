@@ -110,8 +110,10 @@ export default {
       if (sessionStorage.getItem('blockHash')) {
         url = url + '&transactionHash=' + sessionStorage.getItem('blockHash')
       }
+      this.tableData = []
+      this.total = 0
       API.transList(url).then(res => {
-        if (res.status === 200) {
+        if (res.data.code === 0) {
           let tableData = res.data.data.pageData
           tableData.forEach(e => {
             this.$set(e, 'logs', { 'address': '', 'topics': [], 'hasEvent': false })
@@ -156,16 +158,14 @@ export default {
   },
   watch: {
     brokerId () {
-      this.loading = true
-      setTimeout(fun => {
-        this.transList()
-      }, 1000)
+      this.$router.push('./blockInfor')
+      this.$store.commit('set_active', '1-2')
+      this.$store.commit('set_menu', [this.$t('sideBar.blockChainInfor'), this.$t('sideBar.transaction')])
     },
     groupId () {
-      this.loading = true
-      setTimeout(fun => {
-        this.transList()
-      }, 1000)
+      this.$router.push('./blockInfor')
+      this.$store.commit('set_active', '1-2')
+      this.$store.commit('set_menu', [this.$t('sideBar.blockChainInfor'), this.$t('sideBar.transaction')])
     }
   },
   destroyed () {
