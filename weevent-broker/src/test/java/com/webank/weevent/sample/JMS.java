@@ -4,8 +4,6 @@ import java.nio.charset.StandardCharsets;
 
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
 import javax.jms.Session;
 import javax.jms.Topic;
 import javax.jms.TopicConnection;
@@ -43,12 +41,10 @@ public class JMS {
 
         // create publisher
         TopicPublisher publisher = session.createPublisher(topic);
-        for (int i = 0; i < 10; i++) {
-            // send message
-            BytesMessage msg = session.createBytesMessage();
-            msg.writeBytes(("hello weevent: " + i).getBytes(StandardCharsets.UTF_8));
-            publisher.send(msg);
-        }
+        // send message
+        BytesMessage msg = session.createBytesMessage();
+        msg.writeBytes(("hello WeEvent").getBytes(StandardCharsets.UTF_8));
+        publisher.send(msg);
 
         System.out.print("send done.");
         connection.close();
@@ -74,16 +70,14 @@ public class JMS {
         TopicSubscriber subscriber = session.createSubscriber(topic);
 
         // create listener
-        subscriber.setMessageListener(new MessageListener() {
-            public void onMessage(Message message) {
-                BytesMessage msg = (BytesMessage) message;
-                try {
-                    byte[] data = new byte[(int) msg.getBodyLength()];
-                    msg.readBytes(data);
-                    System.out.println("received: " + new String(data, StandardCharsets.UTF_8));
-                } catch (JMSException e) {
-                    e.printStackTrace();
-                }
+        subscriber.setMessageListener(message -> {
+            BytesMessage msg = (BytesMessage) message;
+            try {
+                byte[] data = new byte[(int) msg.getBodyLength()];
+                msg.readBytes(data);
+                System.out.println("received: " + new String(data, StandardCharsets.UTF_8));
+            } catch (JMSException e) {
+                e.printStackTrace();
             }
         });
 
