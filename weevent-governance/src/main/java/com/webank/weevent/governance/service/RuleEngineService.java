@@ -440,7 +440,7 @@ public class RuleEngineService {
         ruleEngineEntity.setLastUpdate(new Date());
 
         //set selectFiled 、conditionField
-        List<RuleEngineConditionEntity> ruleEngineConditionList = ruleEngineEntity.getRuleEngineConditionList();
+        List<RuleEngineConditionEntity> ruleEngineConditionList = this.getRuleEngineConditionList(ruleEngineEntity);
         String conditionField = this.getConditionField(ruleEngineConditionList);
         log.info("condition:{}", conditionField);
         ruleEngineEntity.setConditionField(conditionField);
@@ -467,7 +467,7 @@ public class RuleEngineService {
             map.put("updatedTime", ruleEngineEntity.getLastUpdate());
             map.put("createdTime", oldRule.getCreateDate());
             //updateCEPRuleById
-            log.info("update rule begin====map:{}", JSONObject.toJSONString(map));
+            log.info("stop rule begin====map:{}", JSONObject.toJSONString(map));
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(map));
             //deal processor result
             int statusCode = closeResponse.getStatusLine().getStatusCode();
