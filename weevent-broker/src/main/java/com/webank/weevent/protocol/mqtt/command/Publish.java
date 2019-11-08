@@ -49,7 +49,7 @@ public class Publish {
             if (willmessage) {
                 extensions.put(WeEventConstants.EXTENSIONS_WILL_MESSAGE, WeEventConstants.EXTENSIONS_WILL_MESSAGE);
             }
-            SendResult sendResult = this.sendMessageToFisco(msg.variableHeader().topicName(), messageBytes, WeEvent.DEFAULT_GROUP_ID, extensions);
+            SendResult sendResult = this.sendMessageToFisco(msg.variableHeader().topicName(), messageBytes, "", extensions);
             if (sendResult.getStatus() == SendResult.SendResultStatus.SUCCESS) {
                 this.sendPubAckMessage(channel, msg.variableHeader().packetId());
             }
