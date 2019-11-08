@@ -37,7 +37,8 @@ allprojects {
 
     repositories {
         maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
-        maven { url "https://dl.bintray.com/ethereum/maven/" }
+        // "org.ethereum.solcJ-all-0.4.25"
+        // maven { url "https://dl.bintray.com/ethereum/maven/" }
         // maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         mavenLocal()
         mavenCentral()
