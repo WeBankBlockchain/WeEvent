@@ -216,13 +216,9 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      * groupId is null
      */
     @Test
-    public void testPublishGroupIdIsNull() {
-        try {
-            this.iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes()), null);
-            Assert.fail();
-        } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
-        }
+    public void testPublishGroupIdIsNull() throws BrokerException {
+        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes()), null);
+        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 
     /**
