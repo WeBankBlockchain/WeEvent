@@ -64,10 +64,10 @@ function set_global_param(){
     governance_enable=$(properties_get  "governance.enable")
     governance_port=$(properties_get "governance.port")
 
-    mysql_ip=$(properties_get "governance.mysql.ip")
-    mysql_port=$(properties_get  "governance.mysql.port")
-    mysql_user=$(properties_get "governance.mysql.user")
-    mysql_password=$(properties_get "governance.mysql.password")
+    mysql_ip=$(properties_get "mysql.ip")
+    mysql_port=$(properties_get  "mysql.port")
+    mysql_user=$(properties_get "mysql.user")
+    mysql_password=$(properties_get "mysql.password")
 
     processor_enable=$(properties_get  "processor.enable")
     processor_port=$(properties_get "processor.port")
@@ -106,7 +106,11 @@ function check_param(){
     check_port ${broker_port}
     check_port ${nginx_port}
     if [[ ${governance_enable} = "true" ]];then
+        check_port ${governance_port}
         check_telnet ${mysql_ip}:${mysql_port}
+    fi
+    if [[ ${processor_enable} = "true" ]];then
+        check_port ${processor_port}
     fi
     if [[ -d ${block_chain_node_path} ]]; then
         check_telnet ${block_chain_channel}
@@ -136,13 +140,17 @@ function install_module(){
 
     yellow_echo "install module nginx"
     cd ${current_path}/modules/nginx
-    ./install-nginx.sh --nginx_path ${out_path}/nginx --nginx_port ${nginx_port} --broker_port ${broker_port} --governance_port ${governance_port} &>> ${current_path}/install.log
+    ./install-nginx.sh --nginx_path ${out_path}/nginx --nginx_port ${nginx_port} --broker_port ${broker_port} --governance_port ${governance_port} --processor_port ${processor_port} &>> ${current_path}/install.log
     check_result "install nginx"
 
     if [[ ${governance_enable} = "true" ]];then
         yellow_echo "install module governance"
         cd ${current_path}/modules/governance
-        ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password}
+        if [[ ${processor_enable} = "true" ]];then
+            ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} --processor_port ${processor_port}
+        else
+            ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} --processor_port ""
+        fi
         check_result "install governance"
     fi
     if [[ ${processor_enable} = "true" ]];then

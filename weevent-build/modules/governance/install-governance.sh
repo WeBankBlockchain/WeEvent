@@ -52,7 +52,10 @@ function governance_setup() {
        sed -i "s/yyyy/${mysql_pwd}/" ${out_path}/conf/application-prod.properties
     fi
     echo "set mysql_pwd success"
-       
+
+    if [[ -n ${processor_port} ]];then
+       sed -i "/weevent.processor.url*/cweevent.processor.url=http://127.0.0.1:${processor_port}" ${out_path}/conf/application-prod.properties
+    fi
      
     # init db, create database and tables
     cd ${out_path}
@@ -83,6 +86,7 @@ mysql_port=""
 mysql_user=""
 mysql_pwd=""
 out_path=""
+processor_port=""
 current_path=$(pwd)
 echo "current path $current_path"
 
@@ -94,6 +98,7 @@ while [[ $# -ge 2 ]] ; do
         --mysql_port) para="$1 = $2;";mysql_port="$2";shift 2;;
         --mysql_user) para="$1 = $2;";mysql_user="$2";shift 2;;
         --mysql_pwd) para="$1 = $2;";mysql_pwd="$2";shift 2;;
+        --processor_port) para="$1 = $2;";processor_port="$2";shift 2;;
         *) echo "unknown parameter $1." ; exit 1 ; break;;
     esac
 done
