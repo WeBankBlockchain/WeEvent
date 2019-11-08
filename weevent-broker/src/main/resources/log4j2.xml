@@ -22,7 +22,7 @@
 
     <Loggers>
         <root level="info" includeLocation="true">
-            <appender-ref ref="fileAppender"/>
+            <appender-ref ref="console"/>
         </root>
     </Loggers>
 </Configuration>

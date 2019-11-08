@@ -13,6 +13,7 @@ import com.webank.weevent.sdk.TopicPage;
 import com.webank.weevent.sdk.WeEvent;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.googlecode.jsonrpc4j.ProxyUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,12 @@ public class JsonRpcTest extends JUnitTestBase {
         JsonRpcHttpClient client = new JsonRpcHttpClient(new URL(url));
         this.iBrokerRpc = ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);
         this.eventId = iBrokerRpc.publish(this.jsonTopic, this.content.getBytes()).getEventId();
+
+        client.setExceptionResolver(response -> {
+            log.error("Exception in json rpc invoke, {}", response.toString());
+            JsonNode error = response.get("error");
+            return new BrokerException(error.get("code").intValue(), error.get("message").textValue());
+        });
     }
 
     @Test
