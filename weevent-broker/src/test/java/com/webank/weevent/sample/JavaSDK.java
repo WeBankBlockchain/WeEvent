@@ -1,9 +1,6 @@
 package com.webank.weevent.sample;
 
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.SendResult;
@@ -20,25 +17,23 @@ public class JavaSDK {
 
         System.out.println("This is WeEvent Java SDK sample.");
         try {
-            String groupId = WeEvent.DEFAULT_GROUP_ID;
             // get client
-            IWeEventClient client = IWeEventClient.build("http://localhost:8080/weevent", groupId);
-            String topicName = "com.weevent.test";
+            IWeEventClient client = IWeEventClient.build("http://localhost:7000/weevent", WeEvent.DEFAULT_GROUP_ID);
 
             // ensure topic exist
+            String topicName = "com.weevent.test";
             client.open(topicName);
-            Map<String, String> extensions = new HashMap<>();
-            extensions.put(WeEvent.WeEvent_FORMAT, "json");
-            WeEvent weEvent = new WeEvent(topicName, "{\"hello\":\" wolrd\"}".getBytes(), extensions);
-            // publish an event to topic :"com.weevent.test"
+
+            // publish "hello world" to topic
+            WeEvent weEvent = new WeEvent(topicName, "hello WeEvent".getBytes());
             SendResult sendResult = client.publish(weEvent);
-            System.out.println(sendResult.toString());
+            System.out.println(sendResult);
 
             // subscribe topic
             String subscriptionId = client.subscribe(topicName, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
                 @Override
                 public void onEvent(WeEvent event) {
-                    System.out.println("received event: " + event.toString());
+                    System.out.println("received event: " + event);
                 }
 
                 @Override
