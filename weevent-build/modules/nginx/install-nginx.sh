@@ -51,7 +51,7 @@ function nginx_setup() {
 
     if  [[ -n ${processor_port} ]]; then
         processor_url="localhost:${processor_port}"
-        echo "set processor_url: $processor_url"
+        echo "set processor_url: localhost:${processor_port}"
         sed -i "s/localhost:7008/$processor_url/g" ${nginx_path}/conf/conf.d/http_rs_quickinstall.conf
     fi
     

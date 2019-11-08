@@ -55,7 +55,6 @@ function governance_setup() {
 
     if [[ -n ${processor_port} ]];then
        sed -i "/weevent.processor.url*/cweevent.processor.url=http://127.0.0.1:${processor_port}" ${out_path}/conf/application-prod.properties
-       sed -i "s/yyyy/${mysql_pwd}/" ${out_path}/conf/application-prod.properties
     fi
      
     # init db, create database and tables
