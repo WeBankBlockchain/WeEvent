@@ -269,7 +269,9 @@ public class RuleEngineService {
             rule.setId(ruleEngineEntity.getId());
             List<RuleEngineEntity> ruleEngines = ruleEngineMapper.getRuleEngines(rule);
             rule = ruleEngines.get(0);
-
+            if (rule.getStatus() != StatusEnum.NOT_STARTED.getCode()) {
+                throw new GovernanceException("Only disabled status can be updated");
+            }
             // check sql condition
             boolean flag = validationConditions(request, ruleEngineEntity);
             if (!flag) {
