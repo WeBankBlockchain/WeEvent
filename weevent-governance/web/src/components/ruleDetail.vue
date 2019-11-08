@@ -568,7 +568,8 @@ export default {
       let data = {
         pageIndex: vm.pageIndex - 1,
         pageSize: 10,
-        brokerId: Number(localStorage.getItem('brokerId'))
+        brokerId: Number(localStorage.getItem('brokerId')),
+        groupId: Number(localStorage.getItem('groupId'))
       }
       API.topicList(data).then(res => {
         if (res.status === 200) {
