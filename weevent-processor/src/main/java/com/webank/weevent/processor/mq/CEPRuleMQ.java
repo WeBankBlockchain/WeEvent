@@ -245,36 +245,39 @@ public class CEPRuleMQ {
             // write the # topic to history db
             if (entry.getValue().getFromDestination().equals("#")) {
                 sendMessageToDB(getGroupId(entry.getValue()), event, entry.getValue());
+                continue;
             }
-            if (!StringUtils.isEmpty(entry.getValue().getSelectField()) && !(StringUtils.isEmpty(entry.getValue().getPayload()))) {
 
-                log.info("check the josn and return fine !");
-                if (hitRuleEngine(entry.getValue().getPayload(), event, entry.getValue().getConditionField())) {
-                    try {
-                        // get the system parameter
-                        String groupId = getGroupId(entry.getValue());
-                        // parsing the payload && match the content,if true and hit it
-                        if (entry.getValue().getConditionType().equals(2)) {
-                            sendMessageToDB(groupId, event, entry.getValue());
+            if (StringUtils.isEmpty(entry.getValue().getSelectField()) || (StringUtils.isEmpty(entry.getValue().getPayload()))) {
+                continue;
+            }
+            log.info("check the josn and return fine !");
+            if (hitRuleEngine(entry.getValue().getPayload(), event, entry.getValue().getConditionField())) {
+                try {
+                    // get the system parameter
+                    String groupId = getGroupId(entry.getValue());
+                    // parsing the payload && match the content,if true and hit it
+                    if (entry.getValue().getConditionType().equals(2)) {
+                        sendMessageToDB(groupId, event, entry.getValue());
 
-                        } else if (entry.getValue().getConditionType().equals(1)) {
-                            // select the field and publish the message to the toDestination
-                            String eventContent = setWeEventContent(entry.getValue().getBrokerId(), groupId, event, entry.getValue().getSelectField(), entry.getValue().getPayload());
-                            log.info("publish select: {},eventContent:{}", entry.getValue().getSelectField(), eventContent);
+                    } else if (entry.getValue().getConditionType().equals(1)) {
+                        // select the field and publish the message to the toDestination
+                        String eventContent = setWeEventContent(entry.getValue().getBrokerId(), groupId, event, entry.getValue().getSelectField(), entry.getValue().getPayload());
+                        log.info("publish select: {},eventContent:{}", entry.getValue().getSelectField(), eventContent);
 
-                            // publish the message
-                            Map<String, String> extensions = new HashMap<>();
-                            extensions.put("weevent-type", "ifttt");
-                            WeEvent weEvent = new WeEvent(entry.getValue().getToDestination(), eventContent.getBytes(StandardCharsets.UTF_8), extensions);
-                            log.info("after hitRuleEngine weEvent event {}", weEvent.toString());
-                            IWeEventClient client = getClient(entry.getValue());
-                            client.publish(weEvent);
-                        }
-                    } catch (BrokerException e) {
-                        log.error(e.toString());
+                        // publish the message
+                        Map<String, String> extensions = new HashMap<>();
+                        extensions.put("weevent-type", "ifttt");
+                        WeEvent weEvent = new WeEvent(entry.getValue().getToDestination(), eventContent.getBytes(StandardCharsets.UTF_8), extensions);
+                        log.info("after hitRuleEngine weEvent event {}", weEvent.toString());
+                        IWeEventClient client = getClient(entry.getValue());
+                        client.publish(weEvent);
                     }
+                } catch (BrokerException e) {
+                    log.error(e.toString());
                 }
             }
+//            }
 
         }
 
