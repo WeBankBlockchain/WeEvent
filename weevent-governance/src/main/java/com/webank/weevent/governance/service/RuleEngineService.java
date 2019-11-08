@@ -427,19 +427,14 @@ public class RuleEngineService {
                             .append(conditionalOperator).append(condtion);
                 }
             } else {
-                if (entity.getConditionalOperator().trim().equals("=") || entity.getConditionalOperator().trim().equals("!=")) {
-                    buffer.append(entity.getConnectionOperator()).append(blank).append("(").append(entity.getColumnName())
-                            .append(conditionalOperator).append(condtion).append(")").append(blank);
-                } else {
-                    buffer.append(entity.getConnectionOperator()).append(blank).append(entity.getColumnName())
-                            .append(conditionalOperator).append(condtion).append(blank);
-                }
+                parsingCondition(entity,blank,buffer,conditionalOperator,condtion);
             }
             count++;
         }
         return buffer.toString();
     }
-    private String convertTo(List<RuleEngineConditionEntity> ruleEngineConditionList){
+
+    private String convertTo(List<RuleEngineConditionEntity> ruleEngineConditionList) {
         //All "=" convert to "=="
         Set<RuleEngineConditionEntity> collect = ruleEngineConditionList.stream().filter(it -> it.getConditionalOperator().trim().equals("=")).collect(Collectors.toSet());
         String conditionalOperator = null;
@@ -448,7 +443,16 @@ public class RuleEngineService {
         }
         return conditionalOperator;
     }
-    
+
+    private void parsingCondition(RuleEngineConditionEntity entity, String blank, StringBuffer buffer, String conditionalOperator, String condtion) {
+        if (entity.getConditionalOperator().trim().equals("=") || entity.getConditionalOperator().trim().equals("!=")) {
+            buffer.append(entity.getConnectionOperator()).append(blank).append("(").append(entity.getColumnName())
+                    .append(conditionalOperator).append(condtion).append(")").append(blank);
+        } else {
+            buffer.append(entity.getConnectionOperator()).append(blank).append(entity.getColumnName())
+                    .append(conditionalOperator).append(condtion).append(blank);
+        }
+    }
 
 
     @Transactional(rollbackFor = Throwable.class)
