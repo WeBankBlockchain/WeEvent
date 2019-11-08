@@ -289,7 +289,6 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
 
     @Override
     public Long getBlockHeight(String channelName) throws BrokerException {
-        this.validateChannelName(channelName);
         return fabricDelegate.getBlockHeight(channelName);
     }
 
@@ -300,7 +299,6 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
 
     @Override
     public List<WeEvent> loop(Long blockNum, String channelName) throws BrokerException {
-        this.validateChannelName(channelName);
         return fabricDelegate.loop(blockNum, channelName);
     }
 }
