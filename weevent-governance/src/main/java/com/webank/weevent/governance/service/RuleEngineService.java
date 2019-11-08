@@ -408,14 +408,12 @@ public class RuleEngineService {
         StringBuffer buffer = new StringBuffer(blank);
         int count = 0;
         //All "=" convert to "=="
-        Set<RuleEngineConditionEntity> collect = ruleEngineConditionList.stream().filter(it -> it.getConditionalOperator().trim().equals("=")).collect(Collectors.toSet());
-        String conditionalOperator = null;
-        if (collect.size() == ruleEngineConditionList.size()) {
-            conditionalOperator = "==";
-        }
+        String conditionalOperator = convertTo(ruleEngineConditionList);
+
         for (RuleEngineConditionEntity entity : ruleEngineConditionList) {
-            boolean realNumber = NumberValidationUtils.isRealNumber(entity.getSqlCondition());
             conditionalOperator = conditionalOperator == null ? entity.getConditionalOperator() : conditionalOperator;
+
+            boolean realNumber = NumberValidationUtils.isRealNumber(entity.getSqlCondition());
             String condtion = entity.getSqlCondition();
             if (!realNumber) {
                 condtion = "\"" + condtion + "\"";
@@ -441,6 +439,16 @@ public class RuleEngineService {
         }
         return buffer.toString();
     }
+    private String convertTo(List<RuleEngineConditionEntity> ruleEngineConditionList){
+        //All "=" convert to "=="
+        Set<RuleEngineConditionEntity> collect = ruleEngineConditionList.stream().filter(it -> it.getConditionalOperator().trim().equals("=")).collect(Collectors.toSet());
+        String conditionalOperator = null;
+        if (collect.size() == ruleEngineConditionList.size()) {
+            conditionalOperator = "==";
+        }
+        return conditionalOperator;
+    }
+    
 
 
     @Transactional(rollbackFor = Throwable.class)
