@@ -166,7 +166,7 @@ public class RuleEngineService {
             map.put("updatedTime", ruleEngineEntity.getLastUpdate());
             map.put("createdTime", ruleEngineEntity.getCreateDate());
 
-            log.info("add rule begin====map:{}",JSONObject.toJSONString(map));
+            log.info("add rule begin====map:{}", JSONObject.toJSONString(map));
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(map));
 
             //deal process result
@@ -352,7 +352,7 @@ public class RuleEngineService {
             map.put("updatedTime", ruleEngineEntity.getLastUpdate());
             map.put("createdTime", oldRule.getCreateDate());
             //updateCEPRuleById
-            log.info("update rule begin====map:{}",JSONObject.toJSONString(map));
+            log.info("update rule begin====map:{}", JSONObject.toJSONString(map));
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(map));
             //deal processor result
             int statusCode = closeResponse.getStatusLine().getStatusCode();
@@ -372,9 +372,6 @@ public class RuleEngineService {
         }
 
     }
-
-
-
 
 
     private String getConditionFieldDetail(List<RuleEngineConditionEntity> ruleEngineConditionList) {
@@ -406,7 +403,7 @@ public class RuleEngineService {
         int count = 0;
         for (RuleEngineConditionEntity entity : ruleEngineConditionList) {
             if (count == 0) {
-                if (entity.getConditionalOperator().equals("=") && ruleEngineConditionList.size() > 1) {
+                if ((entity.getConditionalOperator().trim().equals("=") || entity.getConditionalOperator().trim().equals("!=")) && ruleEngineConditionList.size() > 1) {
                     buffer.append(blank).append("(").append(entity.getColumnName()).append(blank)
                             .append(entity.getConditionalOperator()).append(blank).append(entity.getSqlCondition()).append(")").append(blank);
                 } else {
@@ -414,7 +411,7 @@ public class RuleEngineService {
                             .append(entity.getConditionalOperator()).append(blank).append(entity.getSqlCondition()).append(blank);
                 }
             } else {
-                if (entity.getConditionalOperator().equals("=")) {
+                if (entity.getConditionalOperator().trim().equals("=") || entity.getConditionalOperator().trim().equals("!=")) {
                     buffer.append(entity.getConnectionOperator()).append(blank).append("(").append(entity.getColumnName()).append(blank)
                             .append(entity.getConditionalOperator()).append(blank).append(entity.getSqlCondition()).append(")").append(blank);
                 } else {
@@ -470,7 +467,7 @@ public class RuleEngineService {
             map.put("updatedTime", ruleEngineEntity.getLastUpdate());
             map.put("createdTime", oldRule.getCreateDate());
             //updateCEPRuleById
-            log.info("update rule begin====map:{}",JSONObject.toJSONString(map));
+            log.info("update rule begin====map:{}", JSONObject.toJSONString(map));
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(map));
             //deal processor result
             int statusCode = closeResponse.getStatusLine().getStatusCode();
@@ -526,6 +523,7 @@ public class RuleEngineService {
             //Verify required fields
             this.checkStartRuleRequired(rule);
             //Start the rules engine
+            rule.setOffSet(ruleEngineEntity.getOffSet());
             this.startProcessRule(request, rule);
             //modify status
             RuleEngineEntity engineEntity = new RuleEngineEntity();
@@ -547,7 +545,7 @@ public class RuleEngineService {
             map.put("updatedTime", rule.getLastUpdate());
             map.put("createdTime", rule.getCreateDate());
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_START_CEP_RULE).toString();
-            log.info("start rule begin====map:{}",JSONObject.toJSONString(map));
+            log.info("start rule begin====map:{}", JSONObject.toJSONString(map));
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(map));
             int statusCode = closeResponse.getStatusLine().getStatusCode();
             if (200 != statusCode) {

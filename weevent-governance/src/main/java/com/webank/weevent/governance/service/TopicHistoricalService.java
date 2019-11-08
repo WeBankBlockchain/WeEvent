@@ -201,7 +201,7 @@ public class TopicHistoricalService {
                 //get new tableName
                 groupId = groupId.replaceAll("\"", "");
                 RuleEngineEntity ruleEngineEntity = initializationRule("SYSTEM" + "-" + brokerEntity.getId() + "-" + groupId,
-                                                                       brokerEntity, groupId, ruleDatabaseEntity.getId());
+                        brokerEntity, groupId, ruleDatabaseEntity.getId());
                 ruleEngineMapper.addRuleEngine(ruleEngineEntity);
                 //built-in rule engine data and start
                 ruleEngineService.startRuleEngine(ruleEngineEntity, request, response);
@@ -245,6 +245,7 @@ public class TopicHistoricalService {
         ruleEngineEntity.setConditionType(ConditionTypeEnum.DATABASE.getCode());
         ruleEngineEntity.setFromDestination("#");
         ruleEngineEntity.setIsVisible("2");
+        ruleEngineEntity.setOffSet("OFFSET_FIRST");
         return ruleEngineEntity;
     }
 
