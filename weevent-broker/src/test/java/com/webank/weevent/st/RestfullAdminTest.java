@@ -44,7 +44,7 @@ public class RestfullAdminTest extends JUnitTestBase {
     public void testListNodes() {
         ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "listNodes", ResponseData.class);
         log.info("listNodes, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
-        List<String> data = (ArrayList)rsp.getBody().getData();
+        List<String> data = (ArrayList<String>)rsp.getBody().getData();
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody().getCode() == 0);
         Assert.assertTrue(!data.isEmpty());
@@ -53,7 +53,7 @@ public class RestfullAdminTest extends JUnitTestBase {
     @Test
     public void testListSubscription() {
         ResponseEntity<ResponseData> rsponse = admin.getForEntity(url + "listNodes", ResponseData.class);
-        List<String> data = (ArrayList)rsponse.getBody().getData();
+        List<String> data = (ArrayList<String>)rsponse.getBody().getData();
         Assert.assertTrue(!data.isEmpty());
 
         ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "listSubscription?groupId={groupId}&nodeIp={nodeIp}", ResponseData.class, this.groupId, data.get(0));
