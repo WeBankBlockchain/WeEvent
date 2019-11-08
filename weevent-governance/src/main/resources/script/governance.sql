@@ -7,7 +7,7 @@ CREATE TABLE t_account(
   `username` VARCHAR(64) NOT NULL COMMENT 'username',
   `password` VARCHAR(256) NOT NULL COMMENT 'password`',
   PRIMARY KEY (`id`),
-   UNIQUE KEY rule_name(rule_name)
+  UNIQUE KEY rule_name(rule_name)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment 't_account';
 
 
