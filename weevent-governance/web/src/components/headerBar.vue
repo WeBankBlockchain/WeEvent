@@ -97,18 +97,9 @@ export default {
     },
     selecServers (e) {
       this.server = this.servers[e].name
-      let isConfigRule = this.servers[e].isConfigRule
       this.$store.commit('set_id', this.servers[e].id)
       this.$store.commit('setConfigRule', this.servers[e].isConfigRule)
       localStorage.setItem('brokerId', this.servers[e].id)
-      if (isConfigRule !== '1') {
-        let url = this.$route.path
-        if (url === '/rule' || url === '/ruleDetail' || url === '/dataBase' || url === '/transactionInfor') {
-          this.$store.commit('set_active', '1-1')
-          this.$store.commit('set_menu', [this.$t('sideBar.blockChainInfor'), this.$t('sideBar.overview')])
-          this.$router.push('./index')
-        }
-      }
     },
     selectGroup (e) {
       this.$store.commit('set_groupId', e)
