@@ -70,7 +70,7 @@ CREATE TABLE t_rule_engine (
   `error_message` VARCHAR(255) NULL DEFAULT NULL COMMENT 'error message',
   `is_visible` VARCHAR(1) NOT NULL DEFAULT '1' COMMENT '1 visible ,2 invisible',
    PRIMARY KEY (`id`),
-   UNIQUE KEY rule_name(rule_name)
+   UNIQUE KEY ruleName(rule_name)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='t_rule_engine';
 
 CREATE TABLE t_rule_database (
