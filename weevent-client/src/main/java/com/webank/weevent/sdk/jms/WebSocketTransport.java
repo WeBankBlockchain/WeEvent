@@ -187,11 +187,11 @@ public class WebSocketTransport extends WebSocketClient {
 
     public boolean stompDisconnect() throws JMSException {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
-        String req = stompCommand.encodeDisConnect();
+        Long asyncSeq = this.sequence.incrementAndGet();
+        String req = stompCommand.encodeDisConnect(asyncSeq);
+        this.sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
 
-        Long gid = Long.valueOf(WeEvent.DEFAULT_GROUP_ID);
-        this.sequence2Id.put(WeEvent.DEFAULT_GROUP_ID, gid);
-        Message stompResponse = this.stompRequest(req, gid);
+        Message stompResponse = this.stompRequest(req, asyncSeq);
         boolean flag = stompCommand.isError(stompResponse);
         if (flag) {
             this.connected = false;
@@ -204,14 +204,14 @@ public class WebSocketTransport extends WebSocketClient {
         if (bytesMessage instanceof WeEventBytesMessage) {
             WeEventBytesMessage message = (WeEventBytesMessage) bytesMessage;
 
-            Long asyncSeq = (this.sequence.incrementAndGet());
-            WeEventStompCommand stompCommand = new WeEventStompCommand();
             // read byte
             byte[] body = new byte[(int) message.getBodyLength()];
             message.readBytes(body);
             WeEvent weEvent = new WeEvent(topic.getTopicName(), body, message.getExtensions());
 
             // header id equal asyncSeq
+            WeEventStompCommand stompCommand = new WeEventStompCommand();
+            Long asyncSeq = (this.sequence.incrementAndGet());
             String req = stompCommand.encodeSend(asyncSeq, topic, weEvent);
             this.sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
 
@@ -243,10 +243,10 @@ public class WebSocketTransport extends WebSocketClient {
 
     // return subscriptionId
     public String stompSubscribe(WeEventTopic topic) throws JMSException {
-        Long asyncSeq = this.sequence.incrementAndGet();
-        this.sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
         WeEventStompCommand stompCommand = new WeEventStompCommand();
+        Long asyncSeq = this.sequence.incrementAndGet();
         String req = stompCommand.encodeSubscribe(topic, topic.getOffset(), asyncSeq);
+        this.sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
 
         Message stompResponse = this.stompRequest(req, asyncSeq);
         if (stompCommand.isError(stompResponse)) {
@@ -285,10 +285,10 @@ public class WebSocketTransport extends WebSocketClient {
     public boolean stompUnsubscribe(String subscriptionId) throws JMSException {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         String headerId = this.subscriptionId2ReceiptId.get(subscriptionId);
-
         String req = stompCommand.encodeUnSubscribe(subscriptionId, headerId);
         Long asyncSeq = this.sequence.incrementAndGet();
         this.sequence2Id.put(headerId, asyncSeq);
+
         Message stompResponse = this.stompRequest(req, asyncSeq);
         return !stompCommand.isError(stompResponse);
     }
