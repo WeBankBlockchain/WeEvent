@@ -57,7 +57,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     public boolean open(String topic, String groupIdStr) throws BrokerException {
         log.info("open topic: {} groupId: {}", topic, groupIdStr);
 
-        String groupId = generateGroupId(groupIdStr);
+        String groupId = selectGroupId(groupIdStr);
         this.validateGroupId(groupId);
         ParamCheckUtils.validateTopicName(topic);
         try {
@@ -76,7 +76,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
 
     @Override
     public boolean exist(String topic, String groupIdStr) throws BrokerException {
-        String groupId = generateGroupId(groupIdStr);
+        String groupId = selectGroupId(groupIdStr);
         this.validateGroupId(groupId);
         ParamCheckUtils.validateTopicName(topic);
         boolean result = fiscoBcosDelegate.isTopicExist(topic, Long.parseLong(groupId));
@@ -89,7 +89,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     public boolean close(String topic, String groupIdStr) throws BrokerException {
         log.info("close topic: {} groupId: {}", topic, groupIdStr);
 
-        String groupId = generateGroupId(groupIdStr);
+        String groupId = selectGroupId(groupIdStr);
         this.validateGroupId(groupId);
         ParamCheckUtils.validateTopicName(topic);
         if (exist(topic, groupId)) {
@@ -109,7 +109,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
         log.debug("list function input param, pageIndex: {} pageSize: {}", pageIndex, pageSize);
 
         ParamCheckUtils.validatePagIndexAndSize(pageIndex, pageSize);
-        String groupId = generateGroupId(groupIdStr);
+        String groupId = selectGroupId(groupIdStr);
         this.validateGroupId(groupId);
 
         Long groupIdLong = Long.parseLong(groupId);
@@ -133,7 +133,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
         // fetch target topic info in block chain
         log.debug("state function input param topic: {}", topic);
 
-        String groupId = generateGroupId(groupIdStr);
+        String groupId = selectGroupId(groupIdStr);
         this.validateGroupId(groupId);
         ParamCheckUtils.validateTopicName(topic);
 
@@ -144,7 +144,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     @Override
     public WeEvent getEvent(String eventId, String groupIdStr) throws BrokerException {
         log.debug("getEvent function input param eventId: {}", eventId);
-        String groupId = generateGroupId(groupIdStr);
+        String groupId = selectGroupId(groupIdStr);
         this.validateGroupId(groupId);
         return fiscoBcosDelegate.getEvent(eventId, Long.parseLong(groupId));
     }
@@ -160,14 +160,14 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
 
     @Override
     public GroupGeneral getGroupGeneral(String groupIdStr) throws BrokerException {
-        String groupId = generateGroupId(groupIdStr);
+        String groupId = selectGroupId(groupIdStr);
         this.validateGroupId(groupId);
         return fiscoBcosDelegate.getGroupGeneral(Long.valueOf(groupId));
     }
 
     @Override
     public ListPage<TbTransHash> queryTransList(QueryEntity queryEntity) throws BrokerException {
-        String groupId = generateGroupId(queryEntity.getGroupId());
+        String groupId = selectGroupId(queryEntity.getGroupId());
         this.validateGroupId(groupId);
         ParamCheckUtils.validatePagIndexAndSize(queryEntity.getPageNumber(), queryEntity.getPageSize());
         return fiscoBcosDelegate.queryTransList(Long.valueOf(groupId), queryEntity.getPkHash(), queryEntity.getBlockNumber(),
@@ -176,7 +176,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
 
     @Override
     public ListPage<TbBlock> queryBlockList(QueryEntity queryEntity) throws BrokerException {
-        String groupId = generateGroupId(queryEntity.getGroupId());
+        String groupId = selectGroupId(queryEntity.getGroupId());
         this.validateGroupId(groupId);
         ParamCheckUtils.validatePagIndexAndSize(queryEntity.getPageNumber(), queryEntity.getPageSize());
         return fiscoBcosDelegate.queryBlockList(Long.valueOf(groupId), queryEntity.getPkHash(), queryEntity.getBlockNumber(),
@@ -185,17 +185,13 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
 
     @Override
     public ListPage<TbNode> queryNodeList(QueryEntity queryEntity) throws BrokerException {
-        String groupId = generateGroupId(queryEntity.getGroupId());
+        String groupId = selectGroupId(queryEntity.getGroupId());
         this.validateGroupId(groupId);
         return fiscoBcosDelegate.queryNodeList(Long.valueOf(groupId));
     }
 
-    public String generateGroupId(String groupIdStr){
-        String groupId = groupIdStr;
-        if (StringUtils.isBlank(groupId)) {
-            groupId = WeEvent.DEFAULT_GROUP_ID;
-        }
-        return groupId;
+    public String selectGroupId(String groupId) {
+        return StringUtils.isBlank(groupId) ? WeEvent.DEFAULT_GROUP_ID : groupId;
     }
 
 }

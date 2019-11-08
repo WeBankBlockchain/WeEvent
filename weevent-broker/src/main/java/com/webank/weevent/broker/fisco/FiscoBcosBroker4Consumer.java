@@ -75,7 +75,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     public String subscribe(String topic, String groupIdStr, String offset,
                             @NonNull Map<SubscribeExt, String> ext,
                             @NonNull ConsumerListener listener) throws BrokerException {
-        String groupId = generateGroupId(groupIdStr);
+        String groupId = selectGroupId(groupIdStr);
         this.validateGroupId(groupId);
         ParamCheckUtils.validateOffset(offset);
 
@@ -112,7 +112,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             throw new BrokerException(ErrorCode.TOPIC_LIST_IS_NULL);
         }
 
-        String groupId = generateGroupId(groupIdStr);
+        String groupId = selectGroupId(groupIdStr);
         this.validateGroupId(groupId);
         ParamCheckUtils.validateOffset(offset);
 
@@ -256,7 +256,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
     @Override
     public synchronized Map<String, Object> listSubscription(String groupIdStr) throws BrokerException {
-        String groupId = generateGroupId(groupIdStr);
+        String groupId = selectGroupId(groupIdStr);
         this.validateGroupId(groupId);
         Map<String, Object> subscribeIdList = new HashMap<>();
         for (Map.Entry<String, Subscription> entry : this.subscriptions.entrySet()) {

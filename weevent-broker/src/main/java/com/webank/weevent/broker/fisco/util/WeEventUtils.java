@@ -40,17 +40,4 @@ public class WeEventUtils {
         return (new File(url.getPath())).getParentFile().getPath().concat(File.separator);
     }
 
-    public static String getDefaultGroupId() {
-        String groupId = null;
-        if (WeEventConstants.FISCO.equals(BrokerApplication.weEventConfig.getBlockChainType())) {
-            groupId = WeEvent.DEFAULT_GROUP_ID;
-        } else if (WeEventConstants.FABRIC.equals(BrokerApplication.weEventConfig.getBlockChainType())){
-            groupId = FabricDelegate.getChannelName();
-        } else {
-            log.error("error blockChain type!");
-        }
-        return groupId;
-    }
-
-
 }

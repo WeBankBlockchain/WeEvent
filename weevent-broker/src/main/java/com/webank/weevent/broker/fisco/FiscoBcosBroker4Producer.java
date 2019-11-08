@@ -28,7 +28,7 @@ public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IPr
     public SendResult publish(WeEvent event, String groupIdStr) throws BrokerException {
         log.debug("publish {} groupId: {}", event, groupIdStr);
 
-        String groupId = generateGroupId(groupIdStr);
+        String groupId = selectGroupId(groupIdStr);
         this.validateGroupId(groupId);
         ParamCheckUtils.validateEvent(event);
 
