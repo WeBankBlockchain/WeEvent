@@ -182,10 +182,14 @@ export default {
   watch: {
     brokerId () {
       if (localStorage.getItem('groupId')) {
+        this.pageNum = 1
+        this.ruleName = ''
         this.getRuleList()
       }
     },
     groupId () {
+      this.pageNum = 1
+      this.ruleName = ''
       this.getRuleList()
     },
     createRule (nVal) {
