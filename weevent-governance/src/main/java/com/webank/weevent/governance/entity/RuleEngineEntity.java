@@ -38,5 +38,7 @@ public class RuleEngineEntity extends RuleEngineBase {
 
     private String createDateStr;
 
+    private String offSet;
+
     private List<RuleEngineConditionEntity> ruleEngineConditionList = new ArrayList<>();
 }
