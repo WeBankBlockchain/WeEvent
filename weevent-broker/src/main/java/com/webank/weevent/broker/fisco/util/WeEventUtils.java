@@ -6,10 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.webank.weevent.BrokerApplication;
-import com.webank.weevent.broker.fabric.sdk.FabricDelegate;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
-import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,18 +36,5 @@ public class WeEventUtils {
         URL url = WeEventUtils.class.getClassLoader().getResource("weevent.properties");
         return (new File(url.getPath())).getParentFile().getPath().concat(File.separator);
     }
-
-    public static String getDefaultGroupId() {
-        String groupId = null;
-        if (WeEventConstants.FISCO.equals(BrokerApplication.weEventConfig.getBlockChainType())) {
-            groupId = WeEvent.DEFAULT_GROUP_ID;
-        } else if (WeEventConstants.FABRIC.equals(BrokerApplication.weEventConfig.getBlockChainType())){
-            groupId = FabricDelegate.getChannelName();
-        } else {
-            log.error("error blockChain type!");
-        }
-        return groupId;
-    }
-
 
 }
