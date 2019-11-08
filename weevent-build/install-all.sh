@@ -140,13 +140,13 @@ function install_module(){
 
     yellow_echo "install module nginx"
     cd ${current_path}/modules/nginx
-    ./install-nginx.sh --nginx_path ${out_path}/nginx --nginx_port ${nginx_port} --broker_port ${broker_port} --governance_port ${governance_port} &>> ${current_path}/install.log
+    ./install-nginx.sh --nginx_path ${out_path}/nginx --nginx_port ${nginx_port} --broker_port ${broker_port} --governance_port ${governance_port} --processor_port ${processor_port} &>> ${current_path}/install.log
     check_result "install nginx"
 
     if [[ ${governance_enable} = "true" ]];then
         yellow_echo "install module governance"
         cd ${current_path}/modules/governance
-        ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password}
+        ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} --processor_port ${processor_port}
         check_result "install governance"
     fi
     if [[ ${processor_enable} = "true" ]];then
