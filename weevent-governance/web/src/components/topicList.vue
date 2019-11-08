@@ -124,7 +124,8 @@ export default {
       let data = {
         pageIndex: vm.pageIndex - 1,
         pageSize: vm.pageSize,
-        brokerId: Number(localStorage.getItem('brokerId'))
+        brokerId: Number(localStorage.getItem('brokerId')),
+        groupId: Number(localStorage.getItem('groupId'))
       }
       API.topicList(data).then(res => {
         if (res.status === 200) {
@@ -155,7 +156,7 @@ export default {
     },
     readDetail (e) {
       var vm = this
-      let url = '?brokerId=' + localStorage.getItem('brokerId') + '&topic=' + e.topicName
+      let url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + e.topicName
       API.topicState(url).then(res => {
         let time = getDateDetail(res.data.createdTimestamp)
         res.data.createdTimestamp = time
@@ -201,6 +202,7 @@ export default {
             topic: vm.form.name,
             creater: localStorage.getItem('user'),
             brokerId: Number(localStorage.getItem('brokerId')),
+            groupId: Number(localStorage.getItem('groupId')),
             description: vm.form.describe
           }
           API.openTopic(data).then(res => {
@@ -294,11 +296,17 @@ export default {
     brokerId () {
       this.pageIndex = 1
       this.pageSize = 10
+      this.tableData = []
+      this.total = 0
+      this.topicName = ''
       this.refresh()
     },
     groupId () {
       this.pageIndex = 1
       this.pageSize = 10
+      this.tableData = []
+      this.total = 0
+      this.topicName = ''
       this.refresh()
     }
   },
