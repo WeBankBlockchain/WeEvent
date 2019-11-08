@@ -6,8 +6,7 @@ CREATE TABLE t_account(
   `email` VARCHAR(256) NOT NULL COMMENT 'email',
   `username` VARCHAR(64) NOT NULL COMMENT 'username',
   `password` VARCHAR(256) NOT NULL COMMENT 'password`',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY rule_name(rule_name)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment 't_account';
 
 
@@ -70,7 +69,8 @@ CREATE TABLE t_rule_engine (
   `error_destination` VARCHAR(255) NULL DEFAULT NULL COMMENT 'error destination',
   `error_message` VARCHAR(255) NULL DEFAULT NULL COMMENT 'error message',
   `is_visible` VARCHAR(1) NOT NULL DEFAULT '1' COMMENT '1 visible ,2 invisible',
-   PRIMARY KEY (`id`)
+   PRIMARY KEY (`id`),
+   UNIQUE KEY ruleName(rule_name)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='t_rule_engine';
 
 CREATE TABLE t_rule_database (
