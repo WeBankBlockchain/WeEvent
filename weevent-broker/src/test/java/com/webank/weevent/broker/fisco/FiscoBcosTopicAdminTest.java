@@ -179,13 +179,9 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * groupId is null
      */
     @Test
-    public void testOpenGroupIdIsNull() {
-        try {
-            this.iProducer.open(this.topicName, null);
-            Assert.fail();
-        } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
-        }
+    public void testOpenGroupIdIsNull() throws BrokerException {
+        boolean result = this.iProducer.open(this.topicName, null);
+        Assert.assertTrue(result);
     }
 
     /**
@@ -294,13 +290,9 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * groupId is null
      */
     @Test
-    public void testCloseGroupIdIsNull() {
-        try {
-            this.iProducer.close(this.topicName, null);
-            Assert.fail();
-        } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
-        }
+    public void testCloseGroupIdIsNull() throws BrokerException {
+        boolean result = this.iProducer.close(this.topicName, null);
+        Assert.assertTrue(result);
     }
 
     /**
@@ -405,13 +397,9 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * groupId is null
      */
     @Test
-    public void testExistGroupIdIsNull() {
-        try {
-            this.iProducer.exist(this.topicName, null);
-            Assert.fail();
-        } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
-        }
+    public void testExistGroupIdIsNull() throws BrokerException {
+        boolean exist = this.iProducer.exist(this.topicName, null);
+        Assert.assertTrue(exist);
     }
 
     /**
@@ -537,13 +525,9 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * groupId is null
      */
     @Test
-    public void testStateGroupIdIsNull() {
-        try {
-            this.iProducer.state(this.topicName, null);
-            Assert.fail();
-        } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
-        }
+    public void testStateGroupIdIsNull() throws BrokerException {
+        TopicInfo result = this.iProducer.state(this.topicName, null);
+        Assert.assertNotNull(result);
     }
 
     /**
@@ -693,13 +677,9 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * list test ,groupId is null
      */
     @Test
-    public void testListGroupIdIsNull() {
-        try {
-            this.iProducer.list(0, 10, null);
-            Assert.fail();
-        } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
-        }
+    public void testListGroupIdIsNull() throws BrokerException {
+        TopicPage result = this.iProducer.list(0, 10, null);
+        Assert.assertNotNull(result);
     }
 
     /**
@@ -820,13 +800,9 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * get event test,groupId is null
      */
     @Test
-    public void testGetEventGroupIdIsNull() {
-        try {
-            this.iProducer.getEvent(this.eventId, null);
-            Assert.fail();
-        } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
-        }
+    public void testGetEventGroupIdIsNull() throws BrokerException {
+        WeEvent event = this.iProducer.getEvent(this.eventId, null);
+        Assert.assertNotNull(event);
     }
 
     /**

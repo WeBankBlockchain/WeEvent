@@ -52,7 +52,7 @@ public class BrokerRpc implements IBrokerRpc {
                               @JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException {
         log.info("topic:{} contentLength:{} extensions:{}", topic, content.length, JSON.toJSONString(extensions));
 
-        return this.producer.publish(new WeEvent(topic, content, extensions), WeEvent.DEFAULT_GROUP_ID);
+        return this.producer.publish(new WeEvent(topic, content, extensions), "");
     }
 
     @Override
@@ -60,7 +60,7 @@ public class BrokerRpc implements IBrokerRpc {
                               @JsonRpcParam(value = "content") byte[] content) throws BrokerException {
         log.info("topic:{} content.length:{}", topic, content.length);
 
-        return this.producer.publish(new WeEvent(topic, content, new HashMap<>()), WeEvent.DEFAULT_GROUP_ID);
+        return this.producer.publish(new WeEvent(topic, content, new HashMap<>()), "");
     }
 
     @Override
@@ -84,7 +84,7 @@ public class BrokerRpc implements IBrokerRpc {
     public WeEvent getEvent(@JsonRpcParam(value = "eventId") String eventId) throws BrokerException {
         log.info("eventId:{}", eventId);
 
-        return this.producer.getEvent(eventId, WeEvent.DEFAULT_GROUP_ID);
+        return this.producer.getEvent(eventId, "");
     }
 
     @Override
@@ -99,7 +99,7 @@ public class BrokerRpc implements IBrokerRpc {
     public boolean open(@JsonRpcParam(value = "topic") String topic) throws BrokerException {
         log.info("topic:{}", topic);
 
-        return this.producer.open(topic, WeEvent.DEFAULT_GROUP_ID);
+        return this.producer.open(topic, "");
     }
 
     @Override
@@ -114,7 +114,7 @@ public class BrokerRpc implements IBrokerRpc {
     public boolean close(@JsonRpcParam(value = "topic") String topic) throws BrokerException {
         log.info("topic:{}", topic);
 
-        return this.producer.close(topic, WeEvent.DEFAULT_GROUP_ID);
+        return this.producer.close(topic, "");
     }
 
     @Override
@@ -129,7 +129,7 @@ public class BrokerRpc implements IBrokerRpc {
     public boolean exist(@JsonRpcParam(value = "topic") String topic) throws BrokerException {
         log.info("topic:{} groupId", topic);
 
-        return this.producer.exist(topic, WeEvent.DEFAULT_GROUP_ID);
+        return this.producer.exist(topic, "");
     }
 
     @Override
@@ -146,7 +146,7 @@ public class BrokerRpc implements IBrokerRpc {
                           @JsonRpcParam(value = "pageSize") Integer pageSize) throws BrokerException {
         log.info("pageIndex:{} pageSize:{}", pageIndex, pageSize);
 
-        return this.producer.list(pageIndex, pageSize, WeEvent.DEFAULT_GROUP_ID);
+        return this.producer.list(pageIndex, pageSize, "");
     }
 
     @Override
@@ -161,7 +161,7 @@ public class BrokerRpc implements IBrokerRpc {
     public TopicInfo state(@JsonRpcParam(value = "topic") String topic) throws BrokerException {
         log.info("topic:{}", topic);
 
-        return this.producer.state(topic, WeEvent.DEFAULT_GROUP_ID);
+        return this.producer.state(topic, "");
     }
 
     @Override

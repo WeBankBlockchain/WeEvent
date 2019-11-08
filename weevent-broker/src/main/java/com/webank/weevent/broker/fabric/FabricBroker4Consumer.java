@@ -69,6 +69,7 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
     public String subscribe(String topic, String channelName, String offset,
                             @NonNull Map<SubscribeExt, String> ext,
                             @NonNull ConsumerListener listener) throws BrokerException {
+        this.validateChannelName(channelName);
         ParamCheckUtils.validateOffset(offset);
         // topic pattern
         if (Subscription.isTopicPattern(topic)) {
@@ -103,7 +104,7 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
             throw new BrokerException(ErrorCode.TOPIC_LIST_IS_NULL);
         }
 
-        ParamCheckUtils.validateChannelName(channelName, fabricDelegate.listChannel());
+        this.validateChannelName(channelName);
         ParamCheckUtils.validateOffset(offset);
 
         if (isEventId(offset)) {
