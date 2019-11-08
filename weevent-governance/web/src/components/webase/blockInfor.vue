@@ -113,12 +113,16 @@ export default {
   watch: {
     brokerId () {
       this.loading = true
+      this.pageIndex = 1
+      this.tableData = []
       setTimeout(fun => {
         this.blockList()
       }, 1000)
     },
     groupId (nVal) {
       this.loading = true
+      this.pageIndex = 1
+      this.tableData = []
       setTimeout(fun => {
         this.blockList()
       }, 1000)

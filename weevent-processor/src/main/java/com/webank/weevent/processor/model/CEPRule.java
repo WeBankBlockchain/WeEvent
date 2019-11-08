@@ -42,7 +42,9 @@ public class CEPRule implements Serializable {
 
     private String userId;
 
-    public CEPRule(String id, String ruleName, String fromDestination, String brokerUrl, String payload, Integer payloadType, String selectField, String conditionField, Integer conditionType, String toDestination, String databaseUrl, Date createdTime, Integer status, String errorDestination, String errorCode, String errorMessage, Date updatedTime, String brokerId, String userId) {
+    private String offSet;
+
+    public CEPRule(String id, String ruleName, String fromDestination, String brokerUrl, String payload, Integer payloadType, String selectField, String conditionField, Integer conditionType, String toDestination, String databaseUrl, Date createdTime, Integer status, String errorDestination, String errorCode, String errorMessage, Date updatedTime, String brokerId, String userId, String offSet) {
         this.id = id;
         this.ruleName = ruleName;
         this.fromDestination = fromDestination;
@@ -62,6 +64,7 @@ public class CEPRule implements Serializable {
         this.updatedTime = updatedTime;
         this.brokerId = brokerId;
         this.userId = userId;
+        this.offSet = offSet;
     }
 
     public CEPRule() {
@@ -218,5 +221,14 @@ public class CEPRule implements Serializable {
 
     public void setUserId(String userId) {
         this.userId = userId == null ? null : userId.trim();
+    }
+
+
+    public String getOffSet() {
+        return offSet;
+    }
+
+    public void setOffSet(String offSet) {
+        this.offSet = offSet;
     }
 }
