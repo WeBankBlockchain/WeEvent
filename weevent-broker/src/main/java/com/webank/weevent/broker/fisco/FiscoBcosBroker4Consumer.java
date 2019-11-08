@@ -72,9 +72,10 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
     // topic may be a topic pattern
     @Override
-    public String subscribe(String topic, String groupId, String offset,
+    public String subscribe(String topic, String groupIdStr, String offset,
                             @NonNull Map<SubscribeExt, String> ext,
                             @NonNull ConsumerListener listener) throws BrokerException {
+        String groupId = selectGroupId(groupIdStr);
         this.validateGroupId(groupId);
         ParamCheckUtils.validateOffset(offset);
 
@@ -103,7 +104,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     }
 
     @Override
-    public String subscribe(String[] topics, String groupId, String offset,
+    public String subscribe(String[] topics, String groupIdStr, String offset,
                             @NonNull Map<SubscribeExt, String> ext,
                             @NonNull ConsumerListener listener) throws BrokerException {
         // check params
@@ -111,6 +112,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
             throw new BrokerException(ErrorCode.TOPIC_LIST_IS_NULL);
         }
 
+        String groupId = selectGroupId(groupIdStr);
         this.validateGroupId(groupId);
         ParamCheckUtils.validateOffset(offset);
 
@@ -253,7 +255,8 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     }
 
     @Override
-    public synchronized Map<String, Object> listSubscription(String groupId) throws BrokerException {
+    public synchronized Map<String, Object> listSubscription(String groupIdStr) throws BrokerException {
+        String groupId = selectGroupId(groupIdStr);
         this.validateGroupId(groupId);
         Map<String, Object> subscribeIdList = new HashMap<>();
         for (Map.Entry<String, Subscription> entry : this.subscriptions.entrySet()) {
