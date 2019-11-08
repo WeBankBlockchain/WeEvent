@@ -36,8 +36,8 @@ import org.springframework.web.socket.sockjs.client.WebSocketTransport;
  */
 @Slf4j
 public class Stomp {
-    private final static String brokerStomp = "ws://localhost:8080/weevent/stomp";
-    private final static String brokerSockJS = "ws://localhost:8080/weevent/sockjs";
+    private final static String brokerStomp = "ws://localhost:7000/weevent/stomp";
+    private final static String brokerSockJS = "ws://localhost:7000/weevent/sockjs";
     private final static String topic = "com.weevent.test";
 
     private ThreadPoolTaskScheduler taskScheduler;
@@ -73,10 +73,8 @@ public class Stomp {
                 log.info("subscribe topic, {}", topic);
                 StompHeaders header = new StompHeaders();
                 header.setDestination(topic);
-                header.set("eventId", "2cf24dba-59-1124");
+                header.set("eventId", WeEvent.OFFSET_LAST);
                 header.set("groupId", WeEvent.DEFAULT_GROUP_ID);
-                // extension params
-                header.set("weevent-format", "json");
 
                 StompSession.Subscription subscription = session.subscribe(header, new StompFrameHandler() {
                     @Override
@@ -94,10 +92,8 @@ public class Stomp {
                 // subscription.unsubscribe() when needed
 
                 log.info("send event to topic, {}", topic);
-                for (int i = 0; i < 10; i++) {
-                    StompSession.Receiptable receiptable = session.send(topic, "hello world, from web socket:" + i);
-                    log.info("send result, receipt id: {}", receiptable.getReceiptId());
-                }
+                StompSession.Receiptable receipt = session.send(topic, "hello WeEvent from web socket");
+                log.info("send result, receipt id: {}", receipt.getReceiptId());
             }
 
             @Override
@@ -126,11 +122,11 @@ public class Stomp {
 
                         isConnected = true;
                     } catch (Exception e) {
-                        log.error("exception, {}", exception);
+                        log.error("exception", exception);
                     }
                 } else {
                     log.info("connection error, {}", session.getSessionId());
-                    log.error("exception, {}", exception);
+                    log.error("exception", exception);
                 }
             }
 
@@ -165,10 +161,9 @@ public class Stomp {
                 // auto subscribe when connected
                 StompHeaders header = new StompHeaders();
                 header.setDestination(topic);
-                header.set("eventId", "2cf24dba-59-1124");
+                header.set("eventId", WeEvent.OFFSET_LAST);
                 header.set("groupId", WeEvent.DEFAULT_GROUP_ID);
-                // extension params
-                header.set("weevent-format", "json");
+
                 StompSession.Subscription subscription = session.subscribe(header, new StompFrameHandler() {
                     @Override
                     public Type getPayloadType(StompHeaders headers) {
@@ -183,16 +178,14 @@ public class Stomp {
                 log.info("subscribe result, subscription id: {}", subscription.getSubscriptionId());
                 // subscription.unsubscribe() when needed
 
-                for (int i = 0; i < 10; i++) {
-                    StompSession.Receiptable receiptable = session.send(header, "hello world, from sock js:" + i);
-                    log.info("send result, receipt id: {}", receiptable.getReceiptId());
-                }
+                StompSession.Receiptable receipt = session.send(header, "hello WeEvent from sock js");
+                log.info("send result, receipt id: {}", receipt.getReceiptId());
             }
 
             @Override
             public void handleException(StompSession session, StompCommand command, StompHeaders headers, byte[] payload, Throwable exception) {
                 log.info("connection exception, {} {}", session.getSessionId(), command);
-                log.error("exception, {}", exception);
+                log.error("exception", exception);
             }
 
             @Override
@@ -223,11 +216,11 @@ public class Stomp {
 
                         isConnected = true;
                     } catch (Exception e) {
-                        log.error("exception, {}", exception);
+                        log.error("exception", exception);
                     }
                 } else {
                     log.info("connection error, {}", session.getSessionId());
-                    log.error("exception, {}", exception);
+                    log.error("exception", exception);
                 }
             }
 
