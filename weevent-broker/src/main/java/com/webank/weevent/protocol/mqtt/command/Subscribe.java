@@ -75,7 +75,7 @@ public class Subscribe {
             }
             String subscriptionId = "";
             try {
-                String groupId = WeEventUtils.getDefaultGroupId();
+                String groupId = "";
                 subscriptionId = this.iConsumer.subscribe(topicFilter,
                         groupId,
                         WeEvent.OFFSET_LAST,
