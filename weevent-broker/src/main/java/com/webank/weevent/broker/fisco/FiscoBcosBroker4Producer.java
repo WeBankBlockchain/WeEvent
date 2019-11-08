@@ -25,11 +25,12 @@ public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IPr
     }
 
     @Override
-    public SendResult publish(WeEvent event, String groupId) throws BrokerException {
-        log.debug("publish {} groupId: {}", event, groupId);
+    public SendResult publish(WeEvent event, String groupIdStr) throws BrokerException {
+        log.debug("publish {} groupId: {}", event, groupIdStr);
 
-        ParamCheckUtils.validateEvent(event);
+        String groupId = selectGroupId(groupIdStr);
         this.validateGroupId(groupId);
+        ParamCheckUtils.validateEvent(event);
 
         // publishEvent support async operator in callback
         SendResult sendResult = fiscoBcosDelegate.publishEvent(event.getTopic(),
