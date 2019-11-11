@@ -220,6 +220,8 @@ public class AdminRest extends RestHA {
         responseData.setCode(ErrorCode.SUCCESS.getCode());
         responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
         ListPage<TbNode> tbNodeListPage = this.consumer.queryNodeList(queryEntity);
+        tbNodeListPage.setPageIndex(pageNumber);
+        tbNodeListPage.setPageSize(pageSize);
         responseData.setData(tbNodeListPage);
         return responseData;
     }
