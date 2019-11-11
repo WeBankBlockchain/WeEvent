@@ -246,6 +246,7 @@ public class TopicHistoricalService {
         ruleEngineEntity.setFromDestination("#");
         ruleEngineEntity.setIsVisible("2");
         ruleEngineEntity.setOffSet("OFFSET_FIRST");
+        ruleEngineEntity.setSystemTag("1");
         return ruleEngineEntity;
     }
 

@@ -40,5 +40,8 @@ public class RuleEngineEntity extends RuleEngineBase {
 
     private String offSet;
 
+    // 1 means the system is built in
+    private String systemTag;
+
     private List<RuleEngineConditionEntity> ruleEngineConditionList = new ArrayList<>();
 }

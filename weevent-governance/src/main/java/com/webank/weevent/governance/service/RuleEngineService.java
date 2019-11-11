@@ -524,6 +524,7 @@ public class RuleEngineService {
             this.checkStartRuleRequired(rule);
             //Start the rules engine
             rule.setOffSet(ruleEngineEntity.getOffSet());
+            rule.setSystemTag(ruleEngineEntity.getSystemTag());
             this.startProcessRule(request, rule);
             //modify status
             RuleEngineEntity engineEntity = new RuleEngineEntity();
