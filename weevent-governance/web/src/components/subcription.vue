@@ -11,7 +11,6 @@
     element-loading-spinner='el-icon-loading'
     :element-loading-text="$t('common.loading')"
     element-loading-background='rgba(256,256,256,0.8)'
-    @row-click='checkDetail'
     style="width: 100%">
     <el-table-column
       :label="$t('tableCont.machine')"
@@ -27,6 +26,9 @@
     <el-table-column
       :label="$t('tableCont.subscribeId')"
       prop='subscribeId'>
+      <template  slot-scope="scope">
+        <a :title='scope.row.subscribeId' style='cursor:pointer;color:#006cff;text-overflow: ellipsis;white-space: nowrap' @click='checkDetail(scope.row)'>{{scope.row.subscribeId}}</a>
+      </template>
     </el-table-column>
     <el-table-column
      width='120'
@@ -165,9 +167,7 @@ export default {
       }, 1000)
     },
     checkDetail (e) {
-      console.log(e)
       if (e.topicName === '#') {
-        console.log('a')
         sessionStorage.removeItem('topic')
       } else {
         sessionStorage.setItem('topic', e.topicName)
