@@ -414,7 +414,7 @@ public class RuleEngineService {
             }
             if (count == 0) {
                 buffer.append(blank).append(entity.getColumnName())
-                        .append(entity.getConditionalOperator()).append(condtion);
+                        .append(entity.getConditionalOperator()).append(condtion).append(blank);
 
             } else {
                 buffer.append(entity.getConnectionOperator()).append(blank).append(entity.getColumnName())
