@@ -82,7 +82,7 @@
                   <el-option label="<" value="<"></el-option>
                   <el-option label="<=" value="<="></el-option>
                   <el-option label="!=" value="!="></el-option>
-                  <el-option label="=" value="="></el-option>
+                  <el-option label="==" value="=="></el-option>
                 </el-select>
                 <span class='line'>-</span>
                 <el-input size='small' v-model.trim="item.sqlCondition" autocomplete="off"></el-input>
