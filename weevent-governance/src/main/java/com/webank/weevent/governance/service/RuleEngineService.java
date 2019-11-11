@@ -413,21 +413,12 @@ public class RuleEngineService {
                 condtion = "\"" + condtion + "\"";
             }
             if (count == 0) {
-                if ((entity.getConditionalOperator().trim().equals("==") || entity.getConditionalOperator().trim().equals("!=")) && ruleEngineConditionList.size() > 1) {
-                    buffer.append(blank).append("(").append(entity.getColumnName())
-                            .append(entity.getConditionalOperator()).append(condtion).append(")").append(blank);
-                } else {
-                    buffer.append(blank).append(entity.getColumnName())
-                            .append(entity.getConditionalOperator()).append(condtion);
-                }
+                buffer.append(blank).append(entity.getColumnName())
+                        .append(entity.getConditionalOperator()).append(condtion);
+
             } else {
-                if (entity.getConditionalOperator().trim().equals("==") || entity.getConditionalOperator().trim().equals("!=")) {
-                    buffer.append(entity.getConnectionOperator()).append(blank).append("(").append(entity.getColumnName())
-                            .append(entity.getConditionalOperator()).append(condtion).append(")").append(blank);
-                } else {
-                    buffer.append(entity.getConnectionOperator()).append(blank).append(entity.getColumnName())
-                            .append(entity.getConditionalOperator()).append(condtion).append(blank);
-                }
+                buffer.append(entity.getConnectionOperator()).append(blank).append(entity.getColumnName())
+                        .append(entity.getConditionalOperator()).append(condtion).append(blank);
             }
             count++;
         }
