@@ -43,7 +43,6 @@
         <el-table
             :data="ruleList"
             style="width: 100%"
-            height='400'
             >
             <el-table-column
             prop="ruleName"
