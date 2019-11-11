@@ -1,6 +1,5 @@
 package com.webank.weevent.sdk.jsonrpc;
 
-import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.sdk.BrokerException;
@@ -69,7 +68,4 @@ public interface IBrokerRpc {
     default WeEvent getEvent(String eventId) throws BrokerException {
         return null;
     }
-
-    List<String> listGroup() throws BrokerException;
-
 }

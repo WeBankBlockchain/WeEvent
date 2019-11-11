@@ -117,11 +117,4 @@ public class BrokerRest implements IBrokerRpc {
 
         return this.producer.state(topic, groupId);
     }
-
-    @Override
-    @RequestMapping(path = "/listGroup")
-    public List<String> listGroup() throws BrokerException {
-
-        return this.producer.listGroupId();
-    }
 }

@@ -52,6 +52,12 @@ public class AdminRest extends RestHA {
         this.buildInfo = buildInfo;
     }
 
+    @RequestMapping(path = "/listGroup")
+    public List<String> listGroup() throws BrokerException {
+
+        return this.consumer.listGroupId();
+    }
+
     @RequestMapping(path = "/listNodes")
     public ResponseData<List<String>> listNodes() throws BrokerException {
         log.info("query node list");
