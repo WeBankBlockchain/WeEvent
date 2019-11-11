@@ -40,7 +40,7 @@ public class ConstantProperties {
     public static final String BROKER_TRANS_LIST = "/transaction/transList";
     public static final String BROKER_BLOCK_LIST = "/block/blockList";
     public static final String BROKER_NODE_LIST = "/node/nodeList";
-    public static final String REST_LIST_SUBSCRIPTION = "/admin/listGroup";
+    public static final String REST_LIST_SUBSCRIPTION = "/rest/listGroup";
 
 
     //broker url end ===========================================================
