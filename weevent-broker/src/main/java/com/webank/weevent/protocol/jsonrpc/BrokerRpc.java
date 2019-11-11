@@ -1,7 +1,6 @@
 package com.webank.weevent.protocol.jsonrpc;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.broker.plugin.IProducer;
@@ -14,6 +13,7 @@ import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 
 import com.alibaba.fastjson.JSON;
 import com.googlecode.jsonrpc4j.JsonRpcParam;
+import com.googlecode.jsonrpc4j.JsonRpcService;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
  * @since 2018/11/21
  */
 @Slf4j
+@JsonRpcService("/jsonrpc")
 @AutoJsonRpcServiceImpl
 @Component
 public class BrokerRpc implements IBrokerRpc {
@@ -163,10 +164,4 @@ public class BrokerRpc implements IBrokerRpc {
 
         return this.producer.state(topic, "");
     }
-
-    @Override
-    public List<String> listGroup() throws BrokerException {
-        return this.producer.listGroupId();
-    }
-
 }
