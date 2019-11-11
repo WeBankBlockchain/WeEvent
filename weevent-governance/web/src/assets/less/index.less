@@ -594,8 +594,12 @@ html,body,#app{
     position: relative;
     .selectOptions{
       padding:30px;
-      .optionTitle{
+      display: flex;
+      div{
         margin-right: 20px;
+        .optionTitle{
+          margin-right: 20px;
+        }
       }
     }
     .statisticsCharts{
@@ -672,11 +676,12 @@ html,body,#app{
     }
   }
   .rule_list{
-    position: absolute;
-    top:316px;
-    left:24px;
-    right:24px;
-    bottom:24px;
+    // position: absolute;
+    // top:316px;
+    // left:24px;
+    // right:24px;
+    // bottom:24px;
+    margin-top:24px;
     
     .control_part{
       display: flex;
@@ -1110,6 +1115,5 @@ html,body,#app{
         width:100%;
       }
     }
-  }
-   
+  } 
 }
