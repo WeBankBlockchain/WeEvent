@@ -13,6 +13,7 @@ import com.webank.weevent.sdk.WeEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -23,6 +24,7 @@ import org.junit.Test;
  * @since 10/15/2019
  */
 @Slf4j
+@Ignore("Fabric is not default setting")
 public class FabricBroker4ProducerTest extends JUnitTestBase {
     private IProducer iProducer;
 

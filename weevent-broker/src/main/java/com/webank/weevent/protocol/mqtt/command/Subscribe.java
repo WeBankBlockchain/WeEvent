@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
-import com.webank.weevent.broker.fisco.util.WeEventUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.protocol.mqtt.store.IMessageIdStore;
 import com.webank.weevent.protocol.mqtt.store.ISessionStore;
@@ -75,7 +74,7 @@ public class Subscribe {
             }
             String subscriptionId = "";
             try {
-                String groupId = WeEventUtils.getDefaultGroupId();
+                String groupId = "";
                 subscriptionId = this.iConsumer.subscribe(topicFilter,
                         groupId,
                         WeEvent.OFFSET_LAST,

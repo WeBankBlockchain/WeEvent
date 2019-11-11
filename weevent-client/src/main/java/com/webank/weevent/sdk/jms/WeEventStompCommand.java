@@ -72,9 +72,9 @@ public class WeEventStompCommand {
         return encodeRaw(accessor);
     }
 
-    public String encodeDisConnect() {
+    public String encodeDisConnect(Long receiptId) {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.DISCONNECT);
-
+        accessor.setReceipt(Long.toString(receiptId));
         return encodeRaw(accessor);
     }
 
@@ -122,8 +122,10 @@ public class WeEventStompCommand {
         if (!StringUtils.isBlank(topic.getGroupId())) {
             accessor.setNativeHeader("groupId", topic.getGroupId());
         }
-        for (Map.Entry<String, String> entry : weEvent.getExtensions().entrySet()) {
-            accessor.setNativeHeader(entry.getKey(), entry.getValue());
+        if (weEvent.getExtensions() != null) {
+            for (Map.Entry<String, String> entry : weEvent.getExtensions().entrySet()) {
+                accessor.setNativeHeader(entry.getKey(), entry.getValue());
+            }
         }
         return encodeRaw(accessor, weEvent.getContent());
     }
