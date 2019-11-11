@@ -726,7 +726,7 @@ public class RuleEngineService {
             throw new GovernanceException("conditional row field cannot be empty");
         }
         //check number
-        if (!"=".equals(conditionEntity.getConditionalOperator()) && !"!=".equals(conditionEntity.getConditionalOperator())) {
+        if (!"==".equals(conditionEntity.getConditionalOperator()) && !"!=".equals(conditionEntity.getConditionalOperator())) {
             boolean matches = NumberValidationUtils.isRealNumber(conditionEntity.getSqlCondition());
             if (!matches) {
                 throw new GovernanceException("sqlCondition is not number");
