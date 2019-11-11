@@ -58,21 +58,21 @@ public class WeEventClient implements IWeEventClient {
     WeEventClient() throws BrokerException {
         buildRpc(defaultJsonRpcUrl);
         buildJms(WeEventConnectionFactory.defaultBrokerUrl, "", "");
-        this.groupId = WeEvent.DEFAULT_GROUP_ID;
+        this.groupId = "";
     }
 
     WeEventClient(String brokerUrl) throws BrokerException {
         validateParam(brokerUrl);
         buildRpc(brokerUrl + "/jsonrpc");
         buildJms(getStompUrl(brokerUrl), "", "");
-        this.groupId = WeEvent.DEFAULT_GROUP_ID;
+        this.groupId = "";
     }
 
     WeEventClient(String brokerUrl, String groupId) throws BrokerException {
         validateParam(brokerUrl);
         buildRpc(brokerUrl + "/jsonrpc");
         buildJms(getStompUrl(brokerUrl), "", "");
-        initGroupId(groupId);
+        this.groupId = groupId;
     }
 
     WeEventClient(String brokerUrl, String groupId, String userName, String password) throws BrokerException {
@@ -80,7 +80,7 @@ public class WeEventClient implements IWeEventClient {
         validateUser(userName, password);
         buildRpc(brokerUrl + "/jsonrpc");
         buildJms(getStompUrl(brokerUrl), userName, password);
-        initGroupId(groupId);
+        this.groupId = groupId;
     }
 
     @Override
@@ -347,15 +347,6 @@ public class WeEventClient implements IWeEventClient {
     private static void validateWeEvent(WeEvent weEvent) throws BrokerException {
         validateParam(weEvent.getTopic());
         validateArrayParam(weEvent.getContent());
-        validateExtensions(weEvent.getExtensions());
-
-    }
-
-    private static void validateExtensions(Map<String, String> extensions) throws BrokerException {
-        if (extensions == null || extensions.isEmpty()) {
-            throw new BrokerException(ErrorCode.PARAM_ISNULL);
-        }
-
     }
 
     private static void validateParam(String param) throws BrokerException {
@@ -385,14 +376,6 @@ public class WeEventClient implements IWeEventClient {
             return new BrokerException(e.getMessage());
         } else {
             return new BrokerException(Integer.parseInt(e.getErrorCode()), e.getMessage());
-        }
-    }
-
-    private void initGroupId(String groupId) {
-        if (StringUtils.isBlank(groupId)) {
-            this.groupId = WeEvent.DEFAULT_GROUP_ID;
-        } else {
-            this.groupId = groupId;
         }
     }
 }
