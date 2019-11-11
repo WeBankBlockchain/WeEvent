@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -407,11 +406,8 @@ public class RuleEngineService {
         String blank = " ";
         StringBuffer buffer = new StringBuffer(blank);
         int count = 0;
-        //All "=" convert to "=="
-        String conditionalOperator = convertTo(ruleEngineConditionList);
-
         for (RuleEngineConditionEntity entity : ruleEngineConditionList) {
-            conditionalOperator = conditionalOperator == null ? entity.getConditionalOperator() : conditionalOperator;
+            String conditionalOperator = entity.getConditionalOperator().equals("=") ? "==" : entity.getConditionalOperator();
 
             boolean realNumber = NumberValidationUtils.isRealNumber(entity.getSqlCondition());
             String condtion = entity.getSqlCondition();
@@ -439,17 +435,6 @@ public class RuleEngineService {
         }
         return buffer.toString();
     }
-    private String convertTo(List<RuleEngineConditionEntity> ruleEngineConditionList){
-        //All "=" convert to "=="
-        Set<RuleEngineConditionEntity> collect = ruleEngineConditionList.stream().filter(it -> it.getConditionalOperator().trim().equals("=")).collect(Collectors.toSet());
-        String conditionalOperator = null;
-        if (collect.size() == ruleEngineConditionList.size()) {
-            conditionalOperator = "==";
-        }
-        return conditionalOperator;
-    }
-    
-
 
     @Transactional(rollbackFor = Throwable.class)
     public boolean updateRuleEngineStatus(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response)
