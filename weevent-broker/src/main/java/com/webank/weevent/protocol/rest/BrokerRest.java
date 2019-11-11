@@ -14,7 +14,6 @@ import com.webank.weevent.sdk.TopicPage;
 import com.webank.weevent.sdk.WeEvent;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 
-import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,15 +42,13 @@ public class BrokerRest implements IBrokerRpc {
 
     @RequestMapping(path = "/publish")
     public SendResult publish(@RequestParam Map<String, String> eventData) throws BrokerException {
-        log.info("inputs: {}", JSON.toJSONString(eventData));
-
         if (!eventData.containsKey(WeEventConstants.EVENT_TOPIC)
                 || !eventData.containsKey(WeEventConstants.EVENT_CONTENT)) {
             log.error("miss param");
             throw new BrokerException(ErrorCode.URL_INVALID_FORMAT);
         }
 
-        log.debug("topic: {}, content.length: {}",
+        log.info("topic: {}, content.length: {}",
                 eventData.get(WeEventConstants.EVENT_TOPIC),
                 eventData.get(WeEventConstants.EVENT_CONTENT).getBytes().length);
 
@@ -119,12 +116,5 @@ public class BrokerRest implements IBrokerRpc {
         log.info("topic:{} groupId:{}", topic, groupId);
 
         return this.producer.state(topic, groupId);
-    }
-
-    @Override
-    @RequestMapping(path = "/listGroup")
-    public List<String> listGroup() throws BrokerException {
-
-        return this.producer.listGroupId();
     }
 }
