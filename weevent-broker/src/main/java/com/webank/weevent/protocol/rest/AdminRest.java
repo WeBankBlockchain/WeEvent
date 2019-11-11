@@ -1,7 +1,6 @@
 package com.webank.weevent.protocol.rest;
 
 import java.math.BigInteger;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,7 +54,8 @@ public class AdminRest extends RestHA {
 
     @RequestMapping(path = "/listNodes")
     public ResponseData<List<String>> listNodes() throws BrokerException {
-        log.info("query node list.");
+        log.info("query node list");
+
         ResponseData<List<String>> responseData = new ResponseData<>();
         List<String> nodesInfo = new ArrayList<>();
         if (this.masterJob.getClient() == null) {
@@ -82,6 +82,7 @@ public class AdminRest extends RestHA {
     public ResponseData<Map<String, Object>> listSubscription(@RequestParam(name = "nodeIp") String nodeIp,
                                                               @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         log.info("groupId:{}, nodeIp:{}", groupId, nodeIp);
+
         ResponseData<Map<String, Object>> responseData = new ResponseData<>();
         if (StringUtils.isBlank(nodeIp)) {
             log.error("node ipList is null.");
@@ -122,6 +123,8 @@ public class AdminRest extends RestHA {
 
     @RequestMapping(path = "/innerListSubscription")
     public Map<String, Object> innerListSubscription(@RequestParam(name = "groupId") String groupId) throws BrokerException {
+        log.info("groupId:{}", groupId);
+
         return this.consumer.listSubscription(groupId);
     }
 
@@ -138,10 +141,9 @@ public class AdminRest extends RestHA {
      */
     @RequestMapping(path = "/group/general")
     public ResponseData<GroupGeneral> getGroupGeneral(@RequestParam(value = "groupId", required = false) String groupId) throws BrokerException {
-        ResponseData<GroupGeneral> responseData = new ResponseData<>();
-        Instant startTime = Instant.now();
-        log.info("start getGroupGeneral startTime:{} groupId:{}", startTime.toEpochMilli(), groupId);
+        log.info("groupId:{}", groupId);
 
+        ResponseData<GroupGeneral> responseData = new ResponseData<>();
         GroupGeneral groupGeneral = this.consumer.getGroupGeneral(groupId);
         responseData.setCode(ErrorCode.SUCCESS.getCode());
         responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
@@ -160,11 +162,7 @@ public class AdminRest extends RestHA {
                                                               @RequestParam(value = "transactionHash", required = false) String transHash,
                                                               @RequestParam(value = "blockNumber", required = false) BigInteger blockNumber)
             throws BrokerException {
-        Instant startTime = Instant.now();
-        log.info(
-                "start queryTransList startTime:{} groupId:{} pageNumber:{} pageSize:{} "
-                        + "pkHash:{} blockNumber:{}",
-                startTime.toEpochMilli(), groupId, pageNumber, pageSize, transHash, blockNumber);
+        log.info("groupId:{} pageNumber:{} pageSize:{} pkHash:{} blockNumber:{}", groupId, pageNumber, pageSize, transHash, blockNumber);
 
         ResponseData<ListPage<TbTransHash>> responseData = new ResponseData<>();
         QueryEntity queryEntity = new QueryEntity(groupId, pageNumber, pageSize, transHash, blockNumber);
@@ -187,11 +185,7 @@ public class AdminRest extends RestHA {
                                                           @RequestParam(value = "pkHash", required = false) String pkHash,
                                                           @RequestParam(value = "blockNumber", required = false) BigInteger blockNumber)
             throws BrokerException {
-        Instant startTime = Instant.now();
-        log.info(
-                "start queryBlockList startTime:{} groupId:{} pageNumber:{} pageSize:{} "
-                        + "pkHash:{} blockNumber:{}",
-                startTime.toEpochMilli(), groupId, pageNumber, pageSize, pkHash, blockNumber);
+        log.info("groupId:{} pageNumber:{} pageSize:{} pkHash:{} blockNumber:{}", groupId, pageNumber, pageSize, pkHash, blockNumber);
 
         ResponseData<ListPage<TbBlock>> responseData = new ResponseData<>();
         QueryEntity queryEntity = new QueryEntity(groupId, pageNumber, pageSize, pkHash, blockNumber);
@@ -212,10 +206,7 @@ public class AdminRest extends RestHA {
                                                         @RequestParam("pageSize") Integer pageSize,
                                                         @RequestParam(value = "nodeName", required = false) String nodeName)
             throws BrokerException {
-        Instant startTime = Instant.now();
-        log.info(
-                "start queryNodeList startTime:{} groupId:{}  pageNumber:{} pageSize:{} nodeName:{}",
-                startTime.toEpochMilli(), groupId, pageNumber, pageSize, nodeName);
+        log.info("groupId:{}  pageNumber:{} pageSize:{} nodeName:{}", groupId, pageNumber, pageSize, nodeName);
 
         QueryEntity queryEntity = new QueryEntity(groupId, pageNumber, pageSize, null, null);
         queryEntity.setNodeName(nodeName);

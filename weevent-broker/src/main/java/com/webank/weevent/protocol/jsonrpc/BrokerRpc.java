@@ -14,6 +14,7 @@ import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 
 import com.alibaba.fastjson.JSON;
 import com.googlecode.jsonrpc4j.JsonRpcParam;
+import com.googlecode.jsonrpc4j.JsonRpcService;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Component;
  * @since 2018/11/21
  */
 @Slf4j
+@JsonRpcService("/jsonrpc")
 @AutoJsonRpcServiceImpl
 @Component
 public class BrokerRpc implements IBrokerRpc {
