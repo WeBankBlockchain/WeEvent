@@ -42,9 +42,14 @@ public class CEPRule implements Serializable {
 
     private String userId;
 
+    private String groupId;
+
+
+    private String systemTag;
+
     private String offSet;
 
-    public CEPRule(String id, String ruleName, String fromDestination, String brokerUrl, String payload, Integer payloadType, String selectField, String conditionField, Integer conditionType, String toDestination, String databaseUrl, Date createdTime, Integer status, String errorDestination, String errorCode, String errorMessage, Date updatedTime, String brokerId, String userId, String offSet) {
+    public CEPRule(String id, String ruleName, String fromDestination, String brokerUrl, String payload, Integer payloadType, String selectField, String conditionField, Integer conditionType, String toDestination, String databaseUrl, Date createdTime, Integer status, String errorDestination, String errorCode, String errorMessage, Date updatedTime, String brokerId, String userId, String groupId, String systemTag, String offSet) {
         this.id = id;
         this.ruleName = ruleName;
         this.fromDestination = fromDestination;
@@ -64,6 +69,8 @@ public class CEPRule implements Serializable {
         this.updatedTime = updatedTime;
         this.brokerId = brokerId;
         this.userId = userId;
+        this.groupId = groupId;
+        this.systemTag = systemTag;
         this.offSet = offSet;
     }
 
@@ -223,6 +230,21 @@ public class CEPRule implements Serializable {
         this.userId = userId == null ? null : userId.trim();
     }
 
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
+    }
+
+    public String getSystemTag() {
+        return systemTag;
+    }
+
+    public void setSystemTag(String systemTag) {
+        this.systemTag = systemTag;
+    }
 
     public String getOffSet() {
         return offSet;
