@@ -5,9 +5,17 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PostConstruct;
 
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.utils.CommonUtil;
@@ -19,6 +27,7 @@ import com.webank.weevent.sdk.WeEvent;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
+import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlContext;
@@ -32,6 +41,17 @@ public class CEPRuleMQ {
     private static Map<String, String> subscriptionIdMap = new ConcurrentHashMap<>();
     // <subscriptionId-->client session>
     private static Map<String, IWeEventClient> subscriptionClientMap = new ConcurrentHashMap<>();
+
+    private static Queue<Pair<WeEvent, CEPRule>> systemMessageQueue = new LinkedList<Pair<WeEvent, CEPRule>>();
+
+    private static ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+
+    @PostConstruct
+    public void init() {
+        // get all rule
+        log.info("start dBThread ...");
+        executorService.scheduleWithFixedDelay(new CEPRuleMQ.DBThread(), 1, 1, TimeUnit.SECONDS);
+    }
 
     public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException {
         // when is in run status. update the rule map
@@ -214,6 +234,8 @@ public class CEPRuleMQ {
                     int res = preparedStmt.executeUpdate();
                     if (res > 0) {
                         log.info("insert db success!!!");
+
+                        System.out.print("insert db success!!!");
                     }
                     preparedStmt.close();
 
@@ -233,10 +255,12 @@ public class CEPRuleMQ {
         // match the rule and send message
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
             // write the # topic to history db
-            if (entry.getValue().getSystemTag().equals("1") && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2)) {
+            if ("1".equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2)) {
 
                 log.info("system insert db:{}", entry.getValue().getId());
                 sendMessageToDB(entry.getValue().getGroupId(), event, entry.getValue());
+                Pair<WeEvent, CEPRule> messagePair = new Pair<>(event, entry.getValue());
+                systemMessageQueue.add(messagePair);
 
             } else {
 
@@ -265,6 +289,8 @@ public class CEPRuleMQ {
                             extensions.put("weevent-type", "ifttt");
                             WeEvent weEvent = new WeEvent(entry.getValue().getToDestination(), eventContent.getBytes(StandardCharsets.UTF_8), extensions);
                             log.info("after hitRuleEngine weEvent event {}", weEvent.toString());
+                            System.out.print("after hitRuleEngine weEvent event {}" + weEvent.toString());
+
                             IWeEventClient client = getClient(entry.getValue());
                             client.publish(weEvent);
                         }
@@ -389,24 +415,24 @@ public class CEPRuleMQ {
                 // event contain left key
                 if (event.containsKey(strs[0])) {
                     if (event.get(strs[0]) instanceof String) {
-                        log.info("{}", "true1");
+                        log.info("{}", "true");
                         return ConstantsHelper.SUCCESS;
 
                     } else {
                         if (event.get(strs[0]) instanceof Number) {
                             if (strs[1].matches("[0-9]+")) {
-                                log.info("{}", "true2");
+                                log.info("{}", "true");
                                 return ConstantsHelper.SUCCESS;
 
                             } else {
-                                log.info("{}", "false 1");
+                                log.info("{}", "false");
                                 return ConstantsHelper.FAIL;
 
                             }
                         }
                     }
                 } else {
-                    log.info("{}", "false 2");
+                    log.info("{}", "false");
                     return ConstantsHelper.FAIL;
                 }
             } else {
@@ -422,5 +448,23 @@ public class CEPRuleMQ {
         return ConstantsHelper.FAIL;
     }
 
+    private static class DBThread implements Runnable {
+//        private CEPRuleMQ cepMQ;
+//
+//        public DBThread(CEPRuleMQ cepMQ) {
+//            this.cepMQ = cepMQ;
+//        }
+
+        public void run() {
+            Pair<WeEvent, CEPRule> item = systemMessageQueue.poll();
+            if (null != item) {
+                log.info("auto redo thread enter,system insert db:{}", item.getValue().getId());
+                //  send to  the db
+                sendMessageToDB(item.getValue().getGroupId(), item.getKey(), item.getValue());
+            }
+
+            log.info("auto redo thread exit");
+        }
+    }
 }
 
