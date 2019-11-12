@@ -415,24 +415,20 @@ public class CEPRuleMQ {
                 // event contain left key
                 if (event.containsKey(strs[0])) {
                     if (event.get(strs[0]) instanceof String) {
-                        log.info("{}", "true");
                         return ConstantsHelper.SUCCESS;
 
                     } else {
                         if (event.get(strs[0]) instanceof Number) {
                             if (strs[1].matches("[0-9]+")) {
-                                log.info("{}", "true");
                                 return ConstantsHelper.SUCCESS;
 
                             } else {
-                                log.info("{}", "false");
                                 return ConstantsHelper.FAIL;
 
                             }
                         }
                     }
                 } else {
-                    log.info("{}", "false");
                     return ConstantsHelper.FAIL;
                 }
             } else {
@@ -449,14 +445,11 @@ public class CEPRuleMQ {
     }
 
     private static class DBThread implements Runnable {
-//        private CEPRuleMQ cepMQ;
-//
-//        public DBThread(CEPRuleMQ cepMQ) {
-//            this.cepMQ = cepMQ;
-//        }
 
         public void run() {
+
             Pair<WeEvent, CEPRule> item = systemMessageQueue.poll();
+
             if (null != item) {
                 log.info("auto redo thread enter,system insert db:{}", item.getValue().getId());
                 //  send to  the db
