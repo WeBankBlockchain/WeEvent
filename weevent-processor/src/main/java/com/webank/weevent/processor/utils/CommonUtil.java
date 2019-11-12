@@ -196,13 +196,13 @@ public class CommonUtil {
             eventContent = JSONObject.parseObject(content);
             sqlOrder = generateSqlOrder(brokerId, groupId, eventId, topicName, result, eventContent, table);
         } else {
-            sqlOrder = generateSqlOrder(brokerId, groupId, eventId, topicName, result, content, table);
+            sqlOrder = generateSqlOrder(brokerId, groupId, eventId, topicName, result);
         }
 
         return sqlOrder;
     }
-
-    private static Map<String, String> generateSqlOrder(String brokerId, String groupId, String eventId, String topicName, List<String> result, String eventContent, JSONObject table) {
+    // for the system tag
+    private static Map<String, String> generateSqlOrder(String brokerId, String groupId, String eventId, String topicName, List<String> result) {
         Map<String, String> sql = new HashMap<>();
         Map<String, String> sqlOrder = new HashMap<>();
         boolean eventIdFlag = false;
