@@ -127,8 +127,10 @@ public class CEPRuleMQ {
                             String content = new String(event.getContent());
                             log.info("on event:{},content:{}", event.toString(), content);
 
-                            if (CommonUtil.checkValidJson(content)) {
+                            if ("json".equals(event.getExtensions().get("weevent-format")) && CommonUtil.checkValidJson(content)) {
                                 handleOnEvent(event, ruleMap);
+                            } else {
+                                handleOnEventOtherPattern(event, ruleMap);
                             }
                         } catch (JSONException e) {
                             log.error(e.toString());
@@ -149,8 +151,10 @@ public class CEPRuleMQ {
                             String content = new String(event.getContent());
                             log.info("on event:{},content:{}", event.toString(), content);
 
-                            if (CommonUtil.checkValidJson(content)) {
+                            if ("json".equals(event.getExtensions().get("weevent-format")) && CommonUtil.checkValidJson(content)) {
                                 handleOnEvent(event, ruleMap);
+                            } else {
+                                handleOnEventOtherPattern(event, ruleMap);
                             }
                         } catch (JSONException e) {
                             log.error(e.toString());
@@ -243,6 +247,21 @@ public class CEPRuleMQ {
 
     }
 
+    private static void handleOnEventOtherPattern(WeEvent event, Map<String, CEPRule> ruleMap) {
+        log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
+
+        // match the rule and send message
+        for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
+            // write the # topic to history db
+            if ("1".equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2)) {
+
+                log.info("system insert db:{}", entry.getValue().getId());
+                Pair<WeEvent, CEPRule> messagePair = new Pair<>(event, entry.getValue());
+                systemMessageQueue.add(messagePair);
+
+            }
+        }
+    }
 
     private static void handleOnEvent(WeEvent event, Map<String, CEPRule> ruleMap) {
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
@@ -282,7 +301,7 @@ public class CEPRuleMQ {
                             Map<String, String> extensions = new HashMap<>();
                             extensions.put("weevent-type", "ifttt");
                             WeEvent weEvent = new WeEvent(entry.getValue().getToDestination(), eventContent.getBytes(StandardCharsets.UTF_8), extensions);
-                            log.info("after hitRuleEngine weEvent event {}", weEvent.toString());
+                            log.info("after hitRuleEngine weEvent  groupId: {}, event:{}", groupId, weEvent.toString());
                             IWeEventClient client = getClient(entry.getValue());
                             client.publish(weEvent);
                         }
