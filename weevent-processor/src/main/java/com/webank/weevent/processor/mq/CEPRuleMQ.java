@@ -5,10 +5,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -255,7 +253,6 @@ public class CEPRuleMQ {
             if ("1".equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2)) {
 
                 log.info("system insert db:{}", entry.getValue().getId());
-//                sendMessageToDB(entry.getValue().getGroupId(), event, entry.getValue());
                 Pair<WeEvent, CEPRule> messagePair = new Pair<>(event, entry.getValue());
                 systemMessageQueue.add(messagePair);
 
