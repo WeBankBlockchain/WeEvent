@@ -32,8 +32,6 @@ public class CEPRuleMQ {
     private static Map<String, String> subscriptionIdMap = new ConcurrentHashMap<>();
     // <subscriptionId-->client session>
     private static Map<String, IWeEventClient> subscriptionClientMap = new ConcurrentHashMap<>();
-    ;
-
 
     public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException {
         // when is in run status. update the rule map
@@ -82,7 +80,7 @@ public class CEPRuleMQ {
             if (null != groupId) {
                 client = IWeEventClient.build(baseUrl, groupId);
             } else {
-                client = IWeEventClient.build(baseUrl);
+                client = IWeEventClient.build(baseUrl, "");
             }
             return client;
         } catch (BrokerException e) {
@@ -229,14 +227,6 @@ public class CEPRuleMQ {
 
     }
 
-    private static String getGroupId(CEPRule rule) {
-        // get the groupId
-        String groupId = rule.getGroupId();
-        if (null != groupId) {
-            return groupId;
-        }
-        return "";
-    }
 
     private static void handleOnEvent(WeEvent event, Map<String, CEPRule> ruleMap) {
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
@@ -244,10 +234,10 @@ public class CEPRuleMQ {
         // match the rule and send message
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
             // write the # topic to history db
-            if (entry.getValue().getSystemTag().equals("1") && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2)) {
+            if (entry.getValue().getSystemTag().equals("2") && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2)) {
 
                 log.info("system insert db:{}", entry.getValue().getId());
-                sendMessageToDB(getGroupId(entry.getValue()), event, entry.getValue());
+                sendMessageToDB(entry.getValue().getGroupId(), event, entry.getValue());
 
             } else {
 
@@ -285,7 +275,6 @@ public class CEPRuleMQ {
                 }
             }
         }
-
     }
 
     private static String setWeEventContent(String brokerId, String groupId, WeEvent eventMessage, String selectField, String payload) {
