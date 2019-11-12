@@ -234,8 +234,6 @@ public class CEPRuleMQ {
                     int res = preparedStmt.executeUpdate();
                     if (res > 0) {
                         log.info("insert db success!!!");
-
-                        System.out.print("insert db success!!!");
                     }
                     preparedStmt.close();
 
@@ -289,8 +287,6 @@ public class CEPRuleMQ {
                             extensions.put("weevent-type", "ifttt");
                             WeEvent weEvent = new WeEvent(entry.getValue().getToDestination(), eventContent.getBytes(StandardCharsets.UTF_8), extensions);
                             log.info("after hitRuleEngine weEvent event {}", weEvent.toString());
-                            System.out.print("after hitRuleEngine weEvent event {}" + weEvent.toString());
-
                             IWeEventClient client = getClient(entry.getValue());
                             client.publish(weEvent);
                         }
