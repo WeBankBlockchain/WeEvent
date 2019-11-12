@@ -451,7 +451,7 @@ public class CEPRuleMQ {
                         sendMessageToDB(item.getValue().getGroupId(), item.getKey(), item.getValue());
                     }
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    log.info(e.toString());
                 }
             }
         }
