@@ -244,7 +244,7 @@ public class TopicHistoricalService {
         ruleEngineEntity.setPayloadType(PayloadEnum.JSON.getCode());
         ruleEngineEntity.setConditionType(ConditionTypeEnum.DATABASE.getCode());
         ruleEngineEntity.setFromDestination("#");
-        ruleEngineEntity.setIsVisible("2");
+        ruleEngineEntity.setSystemTag("1");
         ruleEngineEntity.setOffSet("OFFSET_FIRST");
         return ruleEngineEntity;
     }
