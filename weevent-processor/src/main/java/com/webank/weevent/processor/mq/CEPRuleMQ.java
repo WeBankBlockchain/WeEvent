@@ -10,9 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
@@ -43,13 +40,13 @@ public class CEPRuleMQ {
     // Pair<key, value>--><WeEvent, CEPRule>
     private static Queue<Pair<WeEvent, CEPRule>> systemMessageQueue = new LinkedList<Pair<WeEvent, CEPRule>>();
 
-    private static ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+    private static CEPRuleMQ.DBThread dbThread = new CEPRuleMQ.DBThread();
 
     @PostConstruct
     public void init() {
         // get all rule
         log.info("start dBThread ...");
-        executorService.scheduleWithFixedDelay(new CEPRuleMQ.DBThread(), 1, 1, TimeUnit.SECONDS);
+        new Thread(dbThread).start();
     }
 
     public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException {
@@ -188,7 +185,7 @@ public class CEPRuleMQ {
 
     private static void sendMessageToDB(String groupId, WeEvent eventContent, CEPRule rule) {
         try {
-            try (Connection conn = CommonUtil.getConnection(rule.getDatabaseUrl());) {
+            try (Connection conn = CommonUtil.getConnection(rule.getDatabaseUrl())) {
 
                 if (conn != null) {
                     // get the sql params
@@ -255,7 +252,7 @@ public class CEPRuleMQ {
             if ("1".equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2)) {
 
                 log.info("system insert db:{}", entry.getValue().getId());
-                sendMessageToDB(entry.getValue().getGroupId(), event, entry.getValue());
+//                sendMessageToDB(entry.getValue().getGroupId(), event, entry.getValue());
                 Pair<WeEvent, CEPRule> messagePair = new Pair<>(event, entry.getValue());
                 systemMessageQueue.add(messagePair);
 
@@ -442,16 +439,25 @@ public class CEPRuleMQ {
     private static class DBThread implements Runnable {
 
         public void run() {
+            while (true) {
+                // if the quene is null,then the thread sleep 1s
+                if (systemMessageQueue.size() == 0) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
 
-            Pair<WeEvent, CEPRule> item = systemMessageQueue.poll();
+                Pair<WeEvent, CEPRule> item = systemMessageQueue.poll();
 
-            if (null != item) {
-                log.info("auto redo thread enter,system insert db:{}", item.getValue().getId());
-                //  send to  the db
-                sendMessageToDB(item.getValue().getGroupId(), item.getKey(), item.getValue());
+                if (null != item) {
+                    log.info("auto redo thread enter,system insert db:{}", item.getValue().getId());
+                    //  send to  the db
+                    sendMessageToDB(item.getValue().getGroupId(), item.getKey(), item.getValue());
+                }
+                
             }
-
-            log.info("auto redo thread exit");
         }
     }
 }
