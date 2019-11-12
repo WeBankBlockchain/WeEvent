@@ -9,12 +9,11 @@
         <result column="brokerId" property="brokerId" jdbcType="INTEGER"/>
         <result column="topicName" property="topicName" jdbcType="VARCHAR"/>
         <result column="groupId" property="groupId" jdbcType="VARCHAR"/>
-        <result column="block_number" property="blockNumber" jdbcType="INTEGER"/>
         <result column="eventId" property="eventId" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,create_date,last_update, brokerId,topicName, groupId, block_number, eventId
+        id,create_date,last_update, brokerId,topicName, groupId, eventId
     </sql>
 
 
@@ -80,8 +79,8 @@
 
     <insert id="addHistoricalData" parameterType="com.webank.weevent.governance.entity.TopicTopicHistoricalEntity"
             useGeneratedKeys="true" keyProperty="id">
-        insert into  t_topic_historical(brokerId, topicName, groupId, block_number, eventId)
-        values (#{brokerId}, #{topicName}, #{groupId}, #{blockNumber}, #{eventId})
+        insert into  t_topic_historical(brokerId, topicName, groupId, eventId)
+        values (#{brokerId}, #{topicName}, #{groupId}, #{eventId})
     </insert>
 
 
