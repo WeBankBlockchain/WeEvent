@@ -1,9 +1,9 @@
 package com.webank.weevent.broker.fisco;
 
 import java.math.BigInteger;
-import java.util.List;
 
 import com.webank.weevent.JUnitTestBase;
+import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
 import com.webank.weevent.protocol.rest.entity.QueryEntity;
@@ -179,13 +179,9 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * groupId is null
      */
     @Test
-    public void testOpenGroupIdIsNull() {
-        try {
-            this.iProducer.open(this.topicName, null);
-            Assert.fail();
-        } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
-        }
+    public void testOpenGroupIdIsNull() throws BrokerException {
+        boolean result = this.iProducer.open(this.topicName, null);
+        Assert.assertTrue(result);
     }
 
     /**
@@ -197,7 +193,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
             this.iProducer.open(this.topicName, "sdfsg");
             Assert.fail();
         } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
+            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
         }
     }
 
@@ -294,13 +290,9 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * groupId is null
      */
     @Test
-    public void testCloseGroupIdIsNull() {
-        try {
-            this.iProducer.close(this.topicName, null);
-            Assert.fail();
-        } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
-        }
+    public void testCloseGroupIdIsNull() throws BrokerException {
+        boolean result = this.iProducer.close(this.topicName, null);
+        Assert.assertTrue(result);
     }
 
     /**
@@ -312,7 +304,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
             this.iProducer.close(this.topicName, "sdfsg");
             Assert.fail();
         } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
+            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
         }
     }
 
@@ -405,13 +397,9 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * groupId is null
      */
     @Test
-    public void testExistGroupIdIsNull() {
-        try {
-            this.iProducer.exist(this.topicName, null);
-            Assert.fail();
-        } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
-        }
+    public void testExistGroupIdIsNull() throws BrokerException {
+        boolean exist = this.iProducer.exist(this.topicName, null);
+        Assert.assertTrue(exist);
     }
 
     /**
@@ -423,7 +411,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
             this.iProducer.exist(this.topicName, "sdfsg");
             Assert.fail();
         } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
+            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
         }
     }
 
@@ -537,13 +525,9 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * groupId is null
      */
     @Test
-    public void testStateGroupIdIsNull() {
-        try {
-            this.iProducer.state(this.topicName, null);
-            Assert.fail();
-        } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
-        }
+    public void testStateGroupIdIsNull() throws BrokerException {
+        TopicInfo result = this.iProducer.state(this.topicName, null);
+        Assert.assertNotNull(result);
     }
 
     /**
@@ -555,7 +539,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
             this.iProducer.state(this.topicName, "abc");
             Assert.fail();
         } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
+            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
         }
     }
 
@@ -693,13 +677,9 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * list test ,groupId is null
      */
     @Test
-    public void testListGroupIdIsNull() {
-        try {
-            this.iProducer.list(0, 10, null);
-            Assert.fail();
-        } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
-        }
+    public void testListGroupIdIsNull() throws BrokerException {
+        TopicPage result = this.iProducer.list(0, 10, null);
+        Assert.assertNotNull(result);
     }
 
     /**
@@ -711,7 +691,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
             this.iProducer.list(0, 10, "sdfsg");
             Assert.fail();
         } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
+            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
         }
     }
 
@@ -820,13 +800,9 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
      * get event test,groupId is null
      */
     @Test
-    public void testGetEventGroupIdIsNull() {
-        try {
-            this.iProducer.getEvent(this.eventId, null);
-            Assert.fail();
-        } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
-        }
+    public void testGetEventGroupIdIsNull() throws BrokerException {
+        WeEvent event = this.iProducer.getEvent(this.eventId, null);
+        Assert.assertNotNull(event);
     }
 
     /**
@@ -838,7 +814,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
             this.iProducer.getEvent(this.eventId, "sfdsfs");
             Assert.fail();
         } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.EVENT_GROUP_ID_INVALID.getCode(), e.getCode());
+            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
         }
     }
 
@@ -873,7 +849,9 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
     public void queryTransList() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.groupId);
-        List<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
+        queryEntity.setPageNumber(1);
+        queryEntity.setPageSize(10);
+        ListPage<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
 
         Assert.assertNotNull(tbTransHashes);
     }
@@ -886,12 +864,14 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
     public void queryTransListBlockNumber() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.groupId);
+        queryEntity.setPageSize(10);
+        queryEntity.setPageNumber(1);
         queryEntity.setBlockNumber(blockNumber);
-        List<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
+        ListPage<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
 
         Assert.assertNotNull(tbTransHashes);
-        Assert.assertTrue(tbTransHashes.size() > 0);
-        Assert.assertEquals(tbTransHashes.get(0).getBlockNumber().toString(), this.blockNumber.toString());
+        Assert.assertTrue(tbTransHashes.getTotal() > 0);
+        Assert.assertEquals(tbTransHashes.getPageData().get(0).getBlockNumber().toString(), this.blockNumber.toString());
     }
 
 
@@ -902,15 +882,11 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
     public void queryTransListTranHash() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.groupId);
-        queryEntity.setBlockNumber(blockNumber);
-        List<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
+        queryEntity.setBlockNumber(new BigInteger("5000"));
+        queryEntity.setPageNumber(2);
+        queryEntity.setPageSize(10);
+        ListPage<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
         Assert.assertNotNull(tbTransHashes);
-
-        queryEntity.setBlockNumber(null);
-        queryEntity.setPkHash(tbTransHashes.get(0).getTransHash());
-        tbTransHashes = this.iProducer.queryTransList(queryEntity);
-        Assert.assertNotNull(tbTransHashes);
-        Assert.assertTrue(tbTransHashes.size() > 0);
     }
 
     /**
@@ -919,10 +895,12 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
     @Test
     public void queryBlockList() throws BrokerException {
         this.queryEntity = new QueryEntity();
+        queryEntity.setPageSize(10);
+        queryEntity.setPageNumber(10);
         queryEntity.setGroupId(this.groupId);
-        List<TbBlock> tbBlocks = this.iProducer.queryBlockList(queryEntity);
+        ListPage<TbBlock> tbBlocks = this.iProducer.queryBlockList(queryEntity);
         Assert.assertNotNull(tbBlocks);
-        Assert.assertTrue(tbBlocks.size() > 0);
+        Assert.assertTrue(tbBlocks.getTotal() > 0);
     }
 
     /**
@@ -933,11 +911,13 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.groupId);
         queryEntity.setBlockNumber(blockNumber);
-        List<TbBlock> tbBlocks = this.iProducer.queryBlockList(queryEntity);
+        queryEntity.setPageSize(10);
+        queryEntity.setPageNumber(1);
+        ListPage<TbBlock> tbBlocks = this.iProducer.queryBlockList(queryEntity);
 
         Assert.assertNotNull(tbBlocks);
-        Assert.assertTrue(tbBlocks.size() > 0);
-        Assert.assertEquals(tbBlocks.get(0).getBlockNumber().toString(), this.blockNumber.toString());
+        Assert.assertTrue(tbBlocks.getTotal() > 0);
+        Assert.assertEquals(tbBlocks.getPageData().get(0).getBlockNumber().toString(), this.blockNumber.toString());
     }
 
     /**
@@ -948,16 +928,12 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.groupId);
         queryEntity.setBlockNumber(blockNumber);
+        queryEntity.setPageSize(10);
+        queryEntity.setPageNumber(1);
 
-        List<TbBlock> tbBlocks = this.iProducer.queryBlockList(queryEntity);
+        ListPage<TbBlock> tbBlocks = this.iProducer.queryBlockList(queryEntity);
         Assert.assertNotNull(tbBlocks);
-        Assert.assertTrue(tbBlocks.size() > 0);
-
-        queryEntity.setBlockNumber(null);
-        queryEntity.setPkHash(tbBlocks.get(0).getPkHash());
-        tbBlocks = this.iProducer.queryBlockList(queryEntity);
-        Assert.assertNotNull(tbBlocks);
-        Assert.assertTrue(tbBlocks.size() > 0);
+        Assert.assertTrue(tbBlocks.getTotal() > 0);
     }
 
     /**
@@ -967,9 +943,9 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
     public void queryNodeList() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.groupId);
-        List<TbNode> tbNodes = this.iProducer.queryNodeList(queryEntity);
+        ListPage<TbNode> tbNodes = this.iProducer.queryNodeList(queryEntity);
         Assert.assertNotNull(tbNodes);
-        Assert.assertTrue(tbNodes.size() > 0);
+        Assert.assertTrue(tbNodes.getTotal() > 0);
     }
 
 

@@ -100,12 +100,6 @@ public class ParamCheckUtils {
     }
 
     public static void validateGroupId(String groupId, List<String> groups) throws BrokerException {
-        try {
-            Long.parseLong(groupId);
-        } catch (Exception e) {
-            throw new BrokerException(ErrorCode.EVENT_GROUP_ID_INVALID);
-        }
-
         if (!groups.contains(groupId)) {
             throw new BrokerException(ErrorCode.WEB3SDK_UNKNOWN_GROUP);
         }
@@ -144,6 +138,15 @@ public class ParamCheckUtils {
             if (!extension.getKey().startsWith(WeEventConstants.EXTENSIONS_PREFIX_CHAR)) {
                 throw new BrokerException(ErrorCode.EVENT_EXTENSIONS_KEY_INVALID);
             }
+        }
+    }
+
+    public static void validatePagIndexAndSize(Integer pageIndex, Integer pageSize) throws BrokerException {
+        if (pageIndex == null || pageIndex < 0) {
+            throw new BrokerException(ErrorCode.TOPIC_PAGE_INDEX_INVALID);
+        }
+        if (pageSize == null || pageSize <= 0 || pageSize > 100) {
+            throw new BrokerException(ErrorCode.TOPIC_PAGE_SIZE_INVALID);
         }
     }
 }

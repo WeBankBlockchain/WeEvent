@@ -40,7 +40,7 @@ public class ConstantProperties {
     public static final String BROKER_TRANS_LIST = "/transaction/transList";
     public static final String BROKER_BLOCK_LIST = "/block/blockList";
     public static final String BROKER_NODE_LIST = "/node/nodeList";
-    public static final String REST_LIST_SUBSCRIPTION = "/rest/listGroup";
+    public static final String REST_LIST_SUBSCRIPTION = "/admin/listGroup";
 
 
     //broker url end ===========================================================
@@ -52,6 +52,7 @@ public class ConstantProperties {
     public final static String PROCESSOR_UPDATE_CEP_RULE = "/processor/updateCEPRuleById";
     public final static String PROCESSOR_CHECK_WHERE_CONDITION = "/processor/checkWhereCondition";
     public final static String PROCESSOR_START_CEP_RULE = "/processor/startCEPRule";
+    public final static String PROCESSOR_STOP_CEP_RULE = "/processor/stopCEPRuleById";
 
 
     //process url end ===========================================================

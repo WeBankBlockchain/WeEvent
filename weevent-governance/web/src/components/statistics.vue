@@ -2,28 +2,32 @@
   <div class='statistics'>
     <div class='dataContent'>
       <div class='selectOptions'>
-        <span class='optionTitle'>{{$t('tableCont.chooseTopic')}}</span>
-        <el-select v-model="topic" multiple :placeholder="$t('common.choose')" @visible-change="selectChange" collapse-tags size="small">
-          <el-option
-            v-for="(item, index) in topicList"
-            :key="index"
-            :label="item"
-            :value="item"
-            >
-          </el-option>
-        </el-select>
-        <span class='optionTitle' style='margin-left:20px'>{{$t('tableCont.chooseTime')}}</span>
-        <el-date-picker
-          size="small"
-          type="daterange"
-          value-format="timestamp"
-          v-model='selectTime'
-          @change="getTime"
-          :picker-options="pickerOptions"
-          range-separator="-"
-          :start-placeholder="$t('tableCont.beginTime')"
-          :end-placeholder="$t('tableCont.endTime')">
-        </el-date-picker>
+        <div>
+          <span class='optionTitle'>{{$t('tableCont.chooseTopic')}}</span>
+          <el-select v-model="topic" multiple @visible-change="selectChange" collapse-tags size="small">
+            <el-option
+              v-for="(item, index) in topicList"
+              :key="index"
+              :label="item"
+              :value="item"
+              >
+            </el-option>
+          </el-select>
+        </div>
+        <div>
+          <span class='optionTitle'>{{$t('tableCont.chooseTime')}}</span>
+          <el-date-picker
+            size="small"
+            type="daterange"
+            value-format="timestamp"
+            v-model='selectTime'
+            @change="getTime"
+            :picker-options="pickerOptions"
+            range-separator="-"
+            :start-placeholder="$t('tableCont.beginTime')"
+            :end-placeholder="$t('tableCont.endTime')">
+          </el-date-picker>
+        </div>
       </div>
       <div class='statisticsCharts'>
         <div class='chart' id='chart'></div>
@@ -36,7 +40,7 @@ import Highcharts from 'highcharts/highstock'
 import { getLastWeek, getTimeList } from '../utils/formatTime'
 import API from '../API/resource.js'
 require('highcharts/modules/no-data-to-display.js')(Highcharts)
-export default{
+export default {
   data () {
     return {
       pickerOptions: {
@@ -181,11 +185,10 @@ export default{
       this.beginDate(true)
     },
     lang () {
+      this.option.lang.noData = this.$t('common.noData')
       if (this.option.series.length === 0) {
-        this.option.lang.noData = this.$t('common.noData')
         Highcharts.chart('chart', this.option).showNoData()
       } else {
-        this.option.lang.noData = this.$t('common.noData')
         Highcharts.chart('chart', this.option)
       }
     }

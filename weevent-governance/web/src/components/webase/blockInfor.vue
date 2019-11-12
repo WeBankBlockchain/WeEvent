@@ -42,10 +42,8 @@
     </el-table>
     <el-pagination
       @current-change="indexChange"
-      @size-change='sizeChange'
       :current-page="pageIndex"
-      :page-sizes="[10, 20, 30, 50]"
-      layout="sizes,total, prev, pager, next, jumper"
+      layout="total, prev, pager, next, jumper"
       :total="total">
     </el-pagination>
   </div>
@@ -59,18 +57,12 @@ export default {
       search_name: '',
       tableData: [],
       pageIndex: 1,
-      pageSize: 10,
       total: 0
     }
   },
   methods: {
     indexChange (e) {
       this.pageIndex = e
-      this.blockList()
-    },
-    sizeChange (e) {
-      this.pageSize = e
-      this.pageIndex = 1
       this.blockList()
     },
     onCopy () {
@@ -81,7 +73,7 @@ export default {
     },
     blockList () {
       this.loading = true
-      let url = '/' + localStorage.getItem('groupId') + '/' + this.pageIndex + '/' + this.pageSize + '?brokerId=' + localStorage.getItem('brokerId')
+      let url = '/' + localStorage.getItem('groupId') + '/' + this.pageIndex + '/10?brokerId=' + localStorage.getItem('brokerId')
       if (this.search_name.length < 10 && this.search_name.length > 0) {
         url = url + '&blockNumber=' + this.search_name
       } else if (this.search_name.length >= 10) {
@@ -89,8 +81,8 @@ export default {
       }
       API.blockList(url).then(res => {
         if (res.status === 200) {
-          this.tableData = res.data.data
-          this.total = res.data.totalCount
+          this.tableData = res.data.data.pageData.reverse()
+          this.total = res.data.data.total
         }
       })
       this.loading = false
@@ -121,12 +113,16 @@ export default {
   watch: {
     brokerId () {
       this.loading = true
+      this.pageIndex = 1
+      this.tableData = []
       setTimeout(fun => {
         this.blockList()
       }, 1000)
     },
     groupId (nVal) {
       this.loading = true
+      this.pageIndex = 1
+      this.tableData = []
       setTimeout(fun => {
         this.blockList()
       }, 1000)

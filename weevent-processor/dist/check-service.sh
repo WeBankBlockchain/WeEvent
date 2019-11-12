@@ -16,11 +16,11 @@ function check_processor(){
         exit 1
     fi
 
-    curl -s "http://127.0.0.1:${port}/weevent/processor/getCEPRuleListByPage?currPage=1&pageSize=10" | grep 302000 >>/dev/null
-    if [[ $? -eq 0 ]];then
-        yellow_echo "processor service is ok"
+    curl -s  -d 'payload={\"a\":\"1\"}&condition=a<10' http://127.0.0.1:${port}/processor/checkWhereCondition | grep "errorCode" >>/dev/null
+     if [[ $? -eq 0 ]];then
+        echo "processor service is ok"
     else
-        yellow_echo "processor service is error"
+        echo "processor service is error"
     fi
  }
 

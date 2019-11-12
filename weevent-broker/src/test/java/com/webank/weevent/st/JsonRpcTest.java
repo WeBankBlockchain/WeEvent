@@ -13,6 +13,7 @@ import com.webank.weevent.sdk.TopicPage;
 import com.webank.weevent.sdk.WeEvent;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.googlecode.jsonrpc4j.ProxyUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,12 @@ public class JsonRpcTest extends JUnitTestBase {
         JsonRpcHttpClient client = new JsonRpcHttpClient(new URL(url));
         this.iBrokerRpc = ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);
         this.eventId = iBrokerRpc.publish(this.jsonTopic, this.content.getBytes()).getEventId();
+
+        client.setExceptionResolver(response -> {
+            log.error("Exception in json rpc invoke, {}", response.toString());
+            JsonNode error = response.get("error");
+            return new BrokerException(error.get("code").intValue(), error.get("message").textValue());
+        });
     }
 
     @Test
@@ -87,14 +94,14 @@ public class JsonRpcTest extends JUnitTestBase {
     public void testStateNoGroupId() throws BrokerException {
         TopicInfo state = iBrokerRpc.state(this.jsonTopic);
         log.info("state : " + state);
-        Assert.assertNotNull(state.getTopicAddress());
+        Assert.assertNotNull(state.getCreatedTimestamp());
     }
 
     @Test
     public void testStateWithGroupId() throws BrokerException {
         TopicInfo state = iBrokerRpc.state(this.jsonTopic, this.groupId);
         log.info("state : " + state);
-        Assert.assertNotNull(state.getTopicAddress());
+        Assert.assertNotNull(state.getCreatedTimestamp());
     }
 
     @Test
@@ -128,8 +135,8 @@ public class JsonRpcTest extends JUnitTestBase {
     @Test
     public void testPublishNoGroupId() throws BrokerException {
         Map<String, String> ext = new HashMap<>();
-        ext.put("json rpc ext test1", "json rpc ext value1");
-        ext.put("json rpc ext test2", "json rpc ext value2");
+        ext.put("weevent-jsonrpctest1", "json rpc ext value1");
+        ext.put("weevent-jsonrpctest2", "json rpc ext value2");
         SendResult publish = iBrokerRpc.publish(this.jsonTopic, this.content.getBytes(), ext);
         log.info("publish: " + publish);
         Assert.assertNotNull(publish.getEventId());
@@ -138,8 +145,8 @@ public class JsonRpcTest extends JUnitTestBase {
     @Test
     public void testPublishWithGroupId() throws BrokerException {
         Map<String, String> ext = new HashMap<>();
-        ext.put("json rpc ext test1", "json rpc ext value1");
-        ext.put("json rpc ext test2", "json rpc ext value2");
+        ext.put("weevent-jsonrpctest1", "json rpc ext value1");
+        ext.put("weevent-jsonrpctest2", "json rpc ext value2");
         SendResult publish = iBrokerRpc.publish(this.jsonTopic, this.groupId, this.content.getBytes(), ext);
         log.info("publish: " + publish);
         Assert.assertNotNull(publish.getEventId());
@@ -166,17 +173,22 @@ public class JsonRpcTest extends JUnitTestBase {
     }
 
     @Test
-    public void testPublishExtEq1K() throws BrokerException {
+    public void testPublishExtEq1K() {
         Map<String, String> ext = get1KMap();
-        SendResult publish = iBrokerRpc.publish(this.jsonTopic, this.groupId, this.content.getBytes(), ext);
-        log.info("publish: " + publish);
-        Assert.assertNotNull(publish.getEventId());
+        try {
+            SendResult publish = iBrokerRpc.publish(this.jsonTopic, this.groupId, this.content.getBytes(), ext);
+            log.info("publish: " + publish);
+            Assert.assertNotNull(publish.getEventId());
+        } catch (BrokerException e) {
+            log.info(e.getMessage());
+            Assert.assertEquals(ErrorCode.EVENT_EXTENSIONS_EXCEEDS_MAX_LENGTH.getCodeDesc(), e.getMessage());
+        }
     }
 
     @Test
     public void testPublishExtGt1K() {
         Map<String, String> ext = get1KMap();
-        ext.put("key2", "value2");
+        ext.put("weevent-key2", "value2");
         try {
             SendResult publish = iBrokerRpc.publish(this.jsonTopic, this.groupId, this.content.getBytes(), ext);
             Assert.assertNull(publish);
@@ -218,7 +230,7 @@ public class JsonRpcTest extends JUnitTestBase {
             valueStr.append("abcdefghij");
         }
         valueStr.append("abcdefd");
-        map.put("key1", valueStr.toString());
+        map.put("weevent-key1", valueStr.toString());
         return map;
     }
 

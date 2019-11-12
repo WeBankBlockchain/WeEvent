@@ -38,14 +38,13 @@
         </el-table>
       </div>
     </div>
-    <el-dialog :title="title" :visible.sync="showLog">
+    <el-dialog :title="title" :visible.sync="showLog" :close-on-click-modal='false'>
       <el-form :model="form" :rules="rules" ref='form'>
         <el-form-item :label="$t('common.name') + ' :'" prop='name'>
           <el-input v-model.trim="form.name" autocomplete="off" :placeholder="$t('serverSet.namePlaceholder')"></el-input>
         </el-form-item>
         <el-form-item :label="$t('serverSet.brokerURLAddress') + ' :'" prop='brokerUrl'>
           <el-input v-model.trim="form.brokerUrl" autocomplete="off"  :placeholder="$t('serverSet.borkerPlaceholder')"></el-input>
-          <!-- <p class='version' v-show="showVersion">{{$t('header.version') + ':'}}<span v-for='(item, key, index) in version' :key='index'>{{item}}</span></p> -->
           <p class='version' v-show="version" v-html="version"></p>
         </el-form-item>
         <el-form-item :label="$t('serverSet.webaseURLAddress') + ' :'" prop='webaseUrl'>
@@ -82,7 +81,7 @@ export default {
   data () {
     var checkName = (rule, value, callback) => {
       if (value === '') {
-        callback(new Error(this.$t('userSet.enterUserName')))
+        callback(new Error(this.$t('serverSet.noServerName')))
       } else {
         let regex = /^[0-9A-Za-z]{1,20}$/
         if (regex.exec(value)) {
@@ -109,6 +108,8 @@ export default {
           } else {
             callback(new Error(this.$t('serverSet.errorAddress')))
           }
+        }).catch(e => {
+          callback(new Error(this.$t('serverSet.errorAddress')))
         })
       }
     }
@@ -125,7 +126,7 @@ export default {
         //   if (res.data === 'SUCCESS') {
         //     callback()
         //   } else {
-        //     callback('服务地址错误,服务无法连接')
+        //     callback('error')
         //   }
         // })
         callback()
@@ -149,10 +150,10 @@ export default {
       brokerId: '',
       rules: {
         name: [
-          { validator: checkName, trigger: 'blur' }
+          { required: true, validator: checkName, trigger: 'blur' }
         ],
         brokerUrl: [
-          { validator: checkBroker, trigger: 'blur' }
+          { required: true, validator: checkBroker, trigger: 'blur' }
         ],
         webaseUrl: [
           { validator: checkWeBase, trigger: 'blur' }

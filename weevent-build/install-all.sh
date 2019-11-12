@@ -58,16 +58,16 @@ function set_global_param(){
         block_chain_node_path=$(realpath -m ${block_chain_node_path})
     fi
     nginx_port=$(properties_get "nginx.port")
-    
+
     broker_port=$(properties_get "broker.port")
-    
+
     governance_enable=$(properties_get  "governance.enable")
     governance_port=$(properties_get "governance.port")
 
-    mysql_ip=$(properties_get "governance.mysql.ip")
-    mysql_port=$(properties_get  "governance.mysql.port")
-    mysql_user=$(properties_get "governance.mysql.user")
-    mysql_password=$(properties_get "governance.mysql.password")
+    mysql_ip=$(properties_get "mysql.ip")
+    mysql_port=$(properties_get  "mysql.port")
+    mysql_user=$(properties_get "mysql.user")
+    mysql_password=$(properties_get "mysql.password")
 
     processor_enable=$(properties_get  "processor.enable")
     processor_port=$(properties_get "processor.port")
@@ -77,7 +77,7 @@ function check_port(){
     lsof -i:${1}
     if [[ $? -eq 1 ]];then
         echo "$1 port is okay"
-    else 
+    else
         echo "$1 port is in used"
         exit 1
     fi
@@ -106,7 +106,11 @@ function check_param(){
     check_port ${broker_port}
     check_port ${nginx_port}
     if [[ ${governance_enable} = "true" ]];then
+        check_port ${governance_port}
         check_telnet ${mysql_ip}:${mysql_port}
+    fi
+    if [[ ${processor_enable} = "true" ]];then
+        check_port ${processor_port}
     fi
     if [[ -d ${block_chain_node_path} ]]; then
         check_telnet ${block_chain_channel}
@@ -136,19 +140,23 @@ function install_module(){
 
     yellow_echo "install module nginx"
     cd ${current_path}/modules/nginx
-    ./install-nginx.sh --nginx_path ${out_path}/nginx --nginx_port ${nginx_port} --broker_port ${broker_port} --governance_port ${governance_port} &>> ${current_path}/install.log
+    ./install-nginx.sh --nginx_path ${out_path}/nginx --nginx_port ${nginx_port} --broker_port ${broker_port} --governance_port ${governance_port} --processor_port ${processor_port} &>> ${current_path}/install.log
     check_result "install nginx"
 
     if [[ ${governance_enable} = "true" ]];then
         yellow_echo "install module governance"
         cd ${current_path}/modules/governance
-        ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} &>> ${current_path}/install.log
+        if [[ ${processor_enable} = "true" ]];then
+            ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} --processor_port ${processor_port}
+        else
+            ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} --processor_port ""
+        fi
         check_result "install governance"
     fi
     if [[ ${processor_enable} = "true" ]];then
         yellow_echo "install module processor"
         cd ${current_path}/modules/processor
-        ./install-processor.sh --out_path ${out_path}/processor --server_port ${processor_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} &>> ${current_path}/install.log
+        ./install-processor.sh --out_path ${out_path}/processor --server_port ${processor_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password}
         check_result "install processor"
     fi
 
@@ -157,7 +165,7 @@ function install_module(){
 function config_java_home(){
     if [[ -e ${current_path}/modules/broker/broker.sh ]];then
         sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/broker/broker.sh
-    fi   
+    fi
     if [[ -e ${current_path}/modules/broker/deploy-topic-control.sh ]];then
         sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/broker/deploy-topic-control.sh
     fi
@@ -166,7 +174,7 @@ function config_java_home(){
     fi
     if [[ -e ${current_path}/modules/governance/governance.sh ]];then
         sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/governance/governance.sh
-    fi 
+    fi
     if [[ -e ${current_path}/modules/governance/init-governance.sh ]];then
         sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/governance/init-governance.sh
     fi
@@ -206,7 +214,7 @@ function main(){
 
     # set the check service port
     update_server_port
-    
+
     # set the JAVA_HOME
     config_java_home
 

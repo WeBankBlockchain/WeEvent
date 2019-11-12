@@ -27,6 +27,7 @@
       :title="$t('userSet.resetPassWord')"
       :visible.sync="getPass"
       width='420px'
+      :close-on-click-modal='false'
     >
       <p class='input_title'>{{$t('userSet.enterUserName') + ' :'}}</p>
       <el-input v-model='userName'></el-input>
@@ -122,7 +123,7 @@ export default {
               type: 'warning',
               message: this.$t('userSet.noUser')
             })
-          } else if (res.data.code === 100102) {
+          } else if (res.data.status === 100107 || res.data.status === 100102) {
             this.$message({
               type: 'warning',
               message: this.$t('userSet.sendMailFail')

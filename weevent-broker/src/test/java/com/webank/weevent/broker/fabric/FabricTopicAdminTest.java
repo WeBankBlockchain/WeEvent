@@ -1,9 +1,9 @@
 package com.webank.weevent.broker.fabric;
 
 import java.math.BigInteger;
-import java.util.List;
 
 import com.webank.weevent.JUnitTestBase;
+import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
 import com.webank.weevent.protocol.rest.entity.QueryEntity;
@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -31,6 +32,7 @@ import org.junit.Test;
  * @since 10/15/2019
  */
 @Slf4j
+@Ignore("Fabric is not default setting")
 public class FabricTopicAdminTest extends JUnitTestBase {
     private IProducer iProducer;
     private String eventId = "";
@@ -637,7 +639,7 @@ public class FabricTopicAdminTest extends JUnitTestBase {
             Assert.assertEquals(ErrorCode.FABRICSDK_CHANNEL_NAME_INVALID.getCode(), e.getCode());
         }
     }
-    
+
 
     /**
      * channelName not Exist
@@ -797,28 +799,14 @@ public class FabricTopicAdminTest extends JUnitTestBase {
     public void queryTransList() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.channelName);
-        List<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
+        queryEntity.setPageSize(10);
+        queryEntity.setPageNumber(1);
+        queryEntity.setBlockNumber(new BigInteger("10"));
+        ListPage<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
 
         Assert.assertNotNull(tbTransHashes);
-        Assert.assertTrue(tbTransHashes.size() > 0);
+        Assert.assertTrue(tbTransHashes.getTotal() > 0);
     }
-
-
-    /**
-     * test queryTransList with blockNumber
-     */
-    @Test
-    public void queryTransListBlockNumber() throws BrokerException {
-        this.queryEntity = new QueryEntity();
-        queryEntity.setGroupId(this.channelName);
-        queryEntity.setBlockNumber(blockNumber);
-        List<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
-
-        Assert.assertNotNull(tbTransHashes);
-        Assert.assertTrue(tbTransHashes.size() > 0);
-        Assert.assertEquals(tbTransHashes.get(0).getBlockNumber().toString(), this.blockNumber.toString());
-    }
-
 
     /**
      * test queryTransList with tranHash
@@ -828,14 +816,16 @@ public class FabricTopicAdminTest extends JUnitTestBase {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.channelName);
         queryEntity.setBlockNumber(blockNumber);
-        List<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
+        queryEntity.setPageSize(10);
+        queryEntity.setPageNumber(1);
+        ListPage<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
         Assert.assertNotNull(tbTransHashes);
 
         queryEntity.setBlockNumber(null);
-        queryEntity.setPkHash(tbTransHashes.get(0).getTransHash());
+        queryEntity.setPkHash(tbTransHashes.getPageData().get(0).getTransHash());
         tbTransHashes = this.iProducer.queryTransList(queryEntity);
         Assert.assertNotNull(tbTransHashes);
-        Assert.assertTrue(tbTransHashes.size() > 0);
+        Assert.assertTrue(tbTransHashes.getTotal() > 0);
     }
 
     /**
@@ -845,14 +835,10 @@ public class FabricTopicAdminTest extends JUnitTestBase {
     public void queryTransListTranHash1() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.channelName);
-        List<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
+        queryEntity.setPageSize(10);
+        queryEntity.setPageNumber(1);
+        ListPage<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
         Assert.assertNotNull(tbTransHashes);
-
-        queryEntity.setBlockNumber(null);
-        queryEntity.setPkHash(tbTransHashes.get(0).getTransHash());
-        tbTransHashes = this.iProducer.queryTransList(queryEntity);
-        Assert.assertNotNull(tbTransHashes);
-        Assert.assertTrue(tbTransHashes.size() > 0);
     }
 
     /**
@@ -862,9 +848,11 @@ public class FabricTopicAdminTest extends JUnitTestBase {
     public void queryBlockList() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.channelName);
-        List<TbBlock> tbBlocks = this.iProducer.queryBlockList(queryEntity);
+        queryEntity.setPageSize(10);
+        queryEntity.setPageNumber(1);
+        ListPage<TbBlock> tbBlocks = this.iProducer.queryBlockList(queryEntity);
         Assert.assertNotNull(tbBlocks);
-        Assert.assertTrue(tbBlocks.size() > 0);
+        Assert.assertTrue(tbBlocks.getTotal() > 0);
     }
 
     /**
@@ -875,11 +863,13 @@ public class FabricTopicAdminTest extends JUnitTestBase {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.channelName);
         queryEntity.setBlockNumber(blockNumber);
-        List<TbBlock> tbBlocks = this.iProducer.queryBlockList(queryEntity);
+        queryEntity.setPageSize(10);
+        queryEntity.setPageNumber(1);
+        ListPage<TbBlock> tbBlocks = this.iProducer.queryBlockList(queryEntity);
 
         Assert.assertNotNull(tbBlocks);
-        Assert.assertTrue(tbBlocks.size() > 0);
-        Assert.assertEquals(tbBlocks.get(0).getBlockNumber().toString(), this.blockNumber.toString());
+        Assert.assertTrue(tbBlocks.getTotal() > 0);
+        Assert.assertEquals(tbBlocks.getPageData().get(0).getBlockNumber().toString(), this.blockNumber.toString());
     }
 
     /**
@@ -890,16 +880,18 @@ public class FabricTopicAdminTest extends JUnitTestBase {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.channelName);
         queryEntity.setBlockNumber(blockNumber);
+        queryEntity.setPageSize(10);
+        queryEntity.setPageNumber(1);
 
-        List<TbBlock> tbBlocks = this.iProducer.queryBlockList(queryEntity);
+        ListPage<TbBlock> tbBlocks = this.iProducer.queryBlockList(queryEntity);
         Assert.assertNotNull(tbBlocks);
-        Assert.assertTrue(tbBlocks.size() > 0);
+        Assert.assertTrue(tbBlocks.getTotal() > 0);
 
         queryEntity.setBlockNumber(null);
-        queryEntity.setPkHash(tbBlocks.get(0).getPkHash());
+        queryEntity.setPkHash(tbBlocks.getPageData().get(0).getPkHash());
         tbBlocks = this.iProducer.queryBlockList(queryEntity);
         Assert.assertNotNull(tbBlocks);
-        Assert.assertTrue(tbBlocks.size() > 0);
+        Assert.assertTrue(tbBlocks.getTotal() > 0);
     }
 
     /**
@@ -909,9 +901,11 @@ public class FabricTopicAdminTest extends JUnitTestBase {
     public void queryNodeList() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.channelName);
-        List<TbNode> tbNodes = this.iProducer.queryNodeList(queryEntity);
+        queryEntity.setPageSize(10);
+        queryEntity.setPageNumber(1);
+        ListPage<TbNode> tbNodes = this.iProducer.queryNodeList(queryEntity);
         Assert.assertNotNull(tbNodes);
-        Assert.assertTrue(tbNodes.size() > 0);
+        Assert.assertTrue(tbNodes.getTotal() > 0);
     }
 
 

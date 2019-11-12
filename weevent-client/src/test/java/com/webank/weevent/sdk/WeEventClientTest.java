@@ -1,16 +1,8 @@
-package com.webank.weevent.client.sdk;
+package com.webank.weevent.sdk;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.ErrorCode;
-import com.webank.weevent.sdk.IWeEventClient;
-import com.webank.weevent.sdk.SendResult;
-import com.webank.weevent.sdk.TopicInfo;
-import com.webank.weevent.sdk.TopicPage;
-import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
@@ -19,8 +11,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-
-import static java.lang.Thread.sleep;
 
 /**
  * WeEventClient Tester.
@@ -43,8 +33,12 @@ public class WeEventClientTest {
 
     @Before
     public void before() throws Exception {
-        this.extensions.put("weevent-url", "https://github.com/WeBankFinTech/WeEvent");
-        this.weEventClient = IWeEventClient.build("http://localhost:8080/weevent");
+        log.info("=============================={}.{}==============================",
+                this.getClass().getSimpleName(),
+                this.testName.getMethodName());
+
+        this.extensions.put(WeEvent.WeEvent_TAG, "test");
+        this.weEventClient = IWeEventClient.build("http://localhost:7000/weevent");
         this.weEventClient.open(this.topicName);
     }
 
@@ -59,31 +53,33 @@ public class WeEventClientTest {
      */
     @Test
     public void testPublish() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
         WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
         SendResult sendResult = this.weEventClient.publish(weEvent);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
+        Assert.assertFalse(sendResult.getEventId().isEmpty());
     }
 
     @Test
     public void testSubscribe() throws Exception {
-        log.info("===================={}", this.testName.getMethodName());
         // create subscriber
         String subscribeId = this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
-                System.out.println("onEvent:" + event.toString());
-                log.info("onEvent:" + event.toString());
+                log.info("onEvent: {}", event.toString());
+
+                Assert.assertFalse(event.getTopic().isEmpty());
+                Assert.assertFalse(event.getEventId().isEmpty());
             }
 
             @Override
             public void onException(Throwable e) {
-                e.printStackTrace();
+                log.error("onException", e);
+                Assert.fail();
             }
         });
 
         Assert.assertFalse(subscribeId.isEmpty());
-        sleep(10000);
+        Thread.sleep(10000);
     }
 
     /**
@@ -107,6 +103,19 @@ public class WeEventClientTest {
     public void testOpen() throws Exception {
         boolean result = this.weEventClient.open(this.topicName);
         Assert.assertTrue(result);
+    }
+
+    /**
+     * Method: open(String topic)
+     */
+    @Test
+    public void testOpenChinese() throws Exception {
+        try {
+            this.weEventClient.open("中文");
+            Assert.fail();
+        } catch (BrokerException e) {
+            Assert.assertEquals(e.getCode(), ErrorCode.TOPIC_CONTAIN_INVALID_CHAR.getCode());
+        }
     }
 
     /**

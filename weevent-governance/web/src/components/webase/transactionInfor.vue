@@ -72,10 +72,8 @@
     </el-table>
     <el-pagination
       @current-change="indexChange"
-      @size-change='sizeChange'
       :current-page="pageIndex"
-      :page-sizes="[10, 20, 30, 50]"
-      layout="sizes,total, prev, pager, next, jumper"
+      layout="total, prev, pager, next, jumper"
       :total="total">
     </el-pagination>
   </div>
@@ -89,18 +87,12 @@ export default {
       search_name: '',
       tableData: [],
       pageIndex: 1,
-      pageSize: 10,
       total: 0
     }
   },
   methods: {
     indexChange (e) {
       this.pageIndex = e
-      this.transList()
-    },
-    sizeChange (e) {
-      this.pageSize = e
-      this.pageIndex = 1
       this.transList()
     },
     onCopy () {
@@ -114,18 +106,20 @@ export default {
     },
     transList () {
       this.loading = true
-      let url = '/' + localStorage.getItem('groupId') + '/' + this.pageIndex + '/' + this.pageSize + '?brokerId=' + localStorage.getItem('brokerId')
+      let url = '/' + localStorage.getItem('groupId') + '/' + this.pageIndex + '/10?brokerId=' + localStorage.getItem('brokerId')
       if (sessionStorage.getItem('blockHash')) {
         url = url + '&transactionHash=' + sessionStorage.getItem('blockHash')
       }
+      this.tableData = []
+      this.total = 0
       API.transList(url).then(res => {
-        if (res.status === 200) {
-          let tableData = res.data.data
+        if (res.data.code === 0) {
+          let tableData = res.data.data.pageData
           tableData.forEach(e => {
             this.$set(e, 'logs', { 'address': '', 'topics': [], 'hasEvent': false })
           })
           this.tableData = tableData
-          this.total = res.data.totalCount
+          this.total = res.data.data.total
         }
       })
       this.loading = false
@@ -164,16 +158,14 @@ export default {
   },
   watch: {
     brokerId () {
-      this.loading = true
-      setTimeout(fun => {
-        this.transList()
-      }, 1000)
+      this.$router.push('./blockInfor')
+      this.$store.commit('set_active', '1-2')
+      this.$store.commit('set_menu', [this.$t('sideBar.blockChainInfor'), this.$t('sideBar.transaction')])
     },
     groupId () {
-      this.loading = true
-      setTimeout(fun => {
-        this.transList()
-      }, 1000)
+      this.$router.push('./blockInfor')
+      this.$store.commit('set_active', '1-2')
+      this.$store.commit('set_menu', [this.$t('sideBar.blockChainInfor'), this.$t('sideBar.transaction')])
     }
   },
   destroyed () {

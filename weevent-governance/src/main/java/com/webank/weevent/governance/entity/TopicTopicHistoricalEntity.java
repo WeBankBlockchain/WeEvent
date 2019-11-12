@@ -23,4 +23,6 @@ public class TopicTopicHistoricalEntity extends TopicHistoricalBase {
 
     private List<String> topicList;
 
+    private String tableName;
+
 }

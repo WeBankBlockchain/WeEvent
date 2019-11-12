@@ -2,12 +2,11 @@
   <div class='rule'>
     <div class='step'>
         <p class='rule_title'>{{$t('rule.dataGuide')}}</p>
-        <p class='rule_descript'>{{$t('rule.creatRuleRemark')}}。<span class='useText'>{{$t('rule.useText')}}</span></p>
+        <p class='rule_descript'>{{$t('rule.creatRuleRemark')}}。</p>
         <div class='step_list'>
             <div class='step_list_item'>
                 <span class='num'>1</span>
                 <span class='item_name'>{{$t('rule.creatNewRule')}}</span>
-                <span class='creat_rule' @click='createRule = !createRule'>{{$t('rule.creatNow')}}</span>
             </div>
             <span class="el-icon-right"></span>
             <div class='step_list_item'>
@@ -22,11 +21,6 @@
             <span class="el-icon-right"></span>
             <div class='step_list_item'>
                 <span class='num'>4</span>
-                <span class='item_name'>{{$t('rule.checkRule')}}</span>
-            </div>
-            <span class="el-icon-right"></span>
-            <div class='step_list_item'>
-                <span class='num'>5</span>
                 <span class='item_name'>{{$t('rule.startRule')}}</span>
             </div>
         </div>
@@ -49,7 +43,6 @@
         <el-table
             :data="ruleList"
             style="width: 100%"
-            height='400'
             >
             <el-table-column
             prop="ruleName"
@@ -100,7 +93,7 @@
           >
         </el-pagination>
     </div>
-    <el-dialog :title="$t('rule.creatRule')" :visible.sync="createRule">
+    <el-dialog :title="$t('rule.creatRule')" :visible.sync="createRule" :close-on-click-modal='false'>
       <div class='warning_part'>
         <img src="../assets/image/icon_tips.svg" alt="">
         <p>{{$t('rule.creatRuleRemark')}}</p>
@@ -169,10 +162,10 @@ export default {
       },
       rules: {
         ruleName: [
-          { validator: ruleName, trigger: 'blur' }
+          { required: true, validator: ruleName, trigger: 'blur' }
         ],
         payloadMap: [
-          { validator: payloadMap, trigger: 'blur' }
+          { required: true, validator: payloadMap, trigger: 'blur' }
         ]
       }
     }
@@ -188,10 +181,14 @@ export default {
   watch: {
     brokerId () {
       if (localStorage.getItem('groupId')) {
+        this.pageNum = 1
+        this.ruleName = ''
         this.getRuleList()
       }
     },
     groupId () {
+      this.pageNum = 1
+      this.ruleName = ''
       this.getRuleList()
     },
     createRule (nVal) {

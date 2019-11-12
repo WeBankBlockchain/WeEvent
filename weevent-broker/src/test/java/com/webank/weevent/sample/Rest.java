@@ -15,20 +15,22 @@ public class Rest {
         try {
             SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
             RestTemplate rest = new RestTemplate(requestFactory);
+
             // ensure topic exist "com.weevent.test"
-            Boolean result = rest.getForEntity("http://localhost:8080/weevent/rest/open?topic={}&groupId={}",
+            String topic = "com.weevent.test";
+            Boolean result = rest.getForEntity("http://localhost:7000/weevent/rest/open?topic={topic}&groupId={groupId}",
                     Boolean.class,
-                    "com.weevent.test",
+                    topic,
                     WeEvent.DEFAULT_GROUP_ID).getBody();
             System.out.println(result);
+
             // publish event to topic "com.weevent.test"
-            SendResult sendResult = rest.getForEntity("http://localhost:8080/weevent/rest/publish?topic={}&groupId={}&content={}",
+            SendResult sendResult = rest.getForEntity("http://localhost:7000/weevent/rest/publish?topic={topic}&groupId={groupId}&content={content}",
                     SendResult.class,
-                    "com.weevent.test",
+                    topic,
                     WeEvent.DEFAULT_GROUP_ID,
-                    "hello weevent".getBytes(StandardCharsets.UTF_8)).getBody();
-            System.out.println(sendResult.getStatus());
-            System.out.println(sendResult.getEventId());
+                    "hello WeEvent".getBytes(StandardCharsets.UTF_8)).getBody();
+            System.out.println(sendResult);
         } catch (RestClientException e) {
             e.printStackTrace();
         }

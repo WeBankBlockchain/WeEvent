@@ -6,9 +6,11 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(callSuper = false)
 public class TopicCreateEntity extends TopicBase {
 
     private String topic;
+
+    private String groupId;
 
 }

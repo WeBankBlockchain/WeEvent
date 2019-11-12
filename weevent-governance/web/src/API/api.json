@@ -11,7 +11,7 @@
   },
   "listGroup": {
     "method": "get",
-    "url": "weevent-governance/weevent/rest/listGroup"
+    "url": "weevent-governance/weevent/admin/listGroup"
   },
   "loginOut": {
     "method": "get",
@@ -28,6 +28,10 @@
   "subscription": {
     "method": "get",
     "url": "weevent-governance/weevent/admin/listSubscription"
+  },
+  "getNodes": {
+    "method": "get",
+    "url": "weevent-governance/weevent/admin/listNodes"
   },
   "addServer": {
     "method": "post",
@@ -132,5 +136,9 @@
   "historicalData": {
     "method": "post",
     "url": "weevent-governance/historicalData/list"
+  },
+  "eventList": {
+    "method": "post",
+    "url": "weevent-governance/historicalData/eventList"
   }
 }
