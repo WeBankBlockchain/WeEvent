@@ -68,7 +68,7 @@ CREATE TABLE t_rule_engine (
   `rule_database_id` INT(11) NULL DEFAULT NULL COMMENT 'rule database id',
   `error_destination` VARCHAR(255) NULL DEFAULT NULL COMMENT 'error destination',
   `error_message` VARCHAR(255) NULL DEFAULT NULL COMMENT 'error message',
-  `is_visible` VARCHAR(1) NOT NULL DEFAULT '1' COMMENT '1 visible ,2 invisible',
+  `system_tag` VARCHAR(1) NOT NULL DEFAULT '2' COMMENT '1  means system,2 means user add',
    PRIMARY KEY (`id`),
    UNIQUE KEY ruleName(rule_name)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='t_rule_engine';
