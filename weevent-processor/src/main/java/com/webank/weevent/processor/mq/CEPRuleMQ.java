@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -41,7 +40,7 @@ public class CEPRuleMQ {
     private static Map<String, String> subscriptionIdMap = new ConcurrentHashMap<>();
     // <subscriptionId-->client session>
     private static Map<String, IWeEventClient> subscriptionClientMap = new ConcurrentHashMap<>();
-
+    // Pair<key, value>--><WeEvent, CEPRule>
     private static Queue<Pair<WeEvent, CEPRule>> systemMessageQueue = new LinkedList<Pair<WeEvent, CEPRule>>();
 
     private static ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
