@@ -67,7 +67,7 @@ public class RuleEngineService {
     @Autowired
     private BrokerMapper brokerMapper;
 
-    @Value("${weevent.processor.url:(http://localhost:7008)}")
+    @Value("${weevent.processor.url:http://127.0.0.1:7008}")
     private String processorUrl;
 
     @Autowired
@@ -95,7 +95,7 @@ public class RuleEngineService {
             if (accountId == null || !accountId.equals(ruleEngineEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
-            ruleEngineEntity.setIsVisible("1");
+            ruleEngineEntity.setSystemTag("2");
             int count = ruleEngineMapper.countRuleEngine(ruleEngineEntity);
             ruleEngineEntity.setTotalCount(count);
             List<RuleEngineEntity> ruleEngineEntities = null;
@@ -127,7 +127,7 @@ public class RuleEngineService {
             if (accountId == null || !accountId.equals(ruleEngineEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
-            ruleEngineEntity.setIsVisible("1");
+            ruleEngineEntity.setSystemTag("2");
             ruleEngineEntity.setStatus(StatusEnum.NOT_STARTED.getCode());
             String payload = JSONObject.toJSON(ruleEngineEntity.getPayloadMap()).toString();
             ruleEngineEntity.setPayload(payload);
@@ -392,7 +392,7 @@ public class RuleEngineService {
                         .append(entity.getConditionalOperator().toUpperCase()).append(blank).append(entity.getSqlCondition()).append(blank);
             } else {
                 buffer.append(entity.getConnectionOperator().toUpperCase()).append(blank).append(entity.getColumnName()).append(blank)
-                        .append(entity.getConditionalOperator().toUpperCase()).append(blank).append(entity.getSqlCondition().toUpperCase()).append(blank);
+                        .append(entity.getConditionalOperator().toUpperCase()).append(blank).append(entity.getSqlCondition()).append(blank);
             }
             count++;
         }
@@ -524,6 +524,7 @@ public class RuleEngineService {
             this.checkStartRuleRequired(rule);
             //Start the rules engine
             rule.setOffSet(ruleEngineEntity.getOffSet());
+            rule.setSystemTag(ruleEngineEntity.getSystemTag());
             this.startProcessRule(request, rule);
             //modify status
             RuleEngineEntity engineEntity = new RuleEngineEntity();
@@ -690,7 +691,7 @@ public class RuleEngineService {
         rule.setUserId(ruleEngineEntity.getUserId());
         rule.setBrokerId(ruleEngineEntity.getBrokerId());
         rule.setRuleName(ruleEngineEntity.getRuleName());
-        rule.setIsVisible("1");
+        rule.setSystemTag("2");
         List<RuleEngineEntity> ruleEngines = ruleEngineMapper.getRuleEngines(rule);
         if (CollectionUtils.isEmpty(ruleEngines)) {
             return true;
@@ -776,7 +777,7 @@ public class RuleEngineService {
 
     }
 
-    public boolean checkProcessorExist(HttpServletRequest request) throws GovernanceException {
+    public boolean checkProcessorExist(HttpServletRequest request){
         try {
             String payload = "{\\\"a\\\":1,\\\"b\\\":\\\"test\\\",\\\"c\\\":10}";
             String condition = "\"c<100\"";
