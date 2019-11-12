@@ -245,15 +245,15 @@ public class CEPRuleMQ {
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
             // write the # topic to history db
             if (entry.getValue().getSystemTag().equals("1") && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2)) {
-                log.info("system insert db:{}", entry.getValue().getId());
 
+                log.info("system insert db:{}", entry.getValue().getId());
                 sendMessageToDB(getGroupId(entry.getValue()), event, entry.getValue());
 
             } else {
+
                 if (StringUtils.isEmpty(entry.getValue().getSelectField()) || (StringUtils.isEmpty(entry.getValue().getPayload()))) {
                     continue;
                 }
-                log.info("check the josn and return fine !");
                 if (hitRuleEngine(entry.getValue().getPayload(), event, entry.getValue().getConditionField())) {
                     try {
                         // get the system parameter
