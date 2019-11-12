@@ -81,9 +81,10 @@ public class QuartzManager {
 
             log.info("update the job  ruleMap:{},ruleList:{}", ruleMap.size(), ruleList.size());
             JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).storeDurably(true).build();
+
             // just do one time
             SimpleTrigger trigger = newTrigger()
-                    .withIdentity(new Date().toString(), triggerGroupName)
+                    .withIdentity(new Date().toString().concat(currentRule.getId()), triggerGroupName)
                     .startNow()
                     .withSchedule(simpleSchedule())
                     .forJob(jobName, jobGroupName)
@@ -105,7 +106,7 @@ public class QuartzManager {
             return ConstantsHelper.FAIL;
         } catch (Exception e) {
             log.error("e:{}", e.toString());
-            return ConstantsHelper.FAIL;
+            return RetCode.mark(0, e.toString());
         }
     }
 
