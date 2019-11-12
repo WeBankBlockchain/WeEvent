@@ -33,7 +33,6 @@ public class CEPRuleMQ {
     // <subscriptionId-->client session>
     private static Map<String, IWeEventClient> subscriptionClientMap = new ConcurrentHashMap<>();
 
-
     public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException {
         // when is in run status. update the rule map
         // update unsubscribe
@@ -73,13 +72,14 @@ public class CEPRuleMQ {
 
     private static IWeEventClient getClient(CEPRule rule) {
         try {
-            Map<String, String> mapRequest = CommonUtil.uRLRequest(rule.getBrokerUrl());
             String baseUrl = CommonUtil.urlPage(rule.getBrokerUrl());
+            // set group id
+            String groupId = rule.getGroupId();
             IWeEventClient client;
-            if (null != mapRequest.get("groupId")) {
-                client = IWeEventClient.build(baseUrl, mapRequest.get("groupId"));
+            if (null != groupId) {
+                client = IWeEventClient.build(baseUrl, groupId);
             } else {
-                client = IWeEventClient.build(baseUrl);
+                client = IWeEventClient.build(baseUrl, "");
             }
             return client;
         } catch (BrokerException e) {
@@ -107,7 +107,6 @@ public class CEPRuleMQ {
                     @Override
                     public void onEvent(WeEvent event) {
                         try {
-
                             String content = new String(event.getContent());
                             log.info("on event:{},content:{}", event.toString(), content);
 
@@ -147,7 +146,7 @@ public class CEPRuleMQ {
                     }
                 });
             }
-            log.info("subscriptionIdMap:{},rule.getId() :{}--->subscriptionId:{}", subscriptionIdMap.size(), rule.getId(), subscriptionId);
+            log.info("subscriptionIdMap:{},rule.getId() :{} getFromDestination:{}--->subscriptionId:{}", subscriptionIdMap.size(), rule.getId(), rule.getFromDestination(), subscriptionId);
             subscriptionIdMap.put(rule.getId(), subscriptionId);
             subscriptionClientMap.put(subscriptionId, client);
             log.info("after add success subscriptionIdMap:{}", subscriptionIdMap.size());
@@ -214,7 +213,7 @@ public class CEPRuleMQ {
                     // execute the preparedstatement
                     int res = preparedStmt.executeUpdate();
                     if (res > 0) {
-                        System.out.println("insert db success!!!");
+                        log.info("insert db success!!!");
                     }
                     preparedStmt.close();
 
@@ -227,15 +226,6 @@ public class CEPRuleMQ {
 
     }
 
-    private static String getGroupId(CEPRule rule) {
-        // get the groupId
-        String groupId = "";
-        Map<String, String> mapRequest = CommonUtil.uRLRequest(rule.getBrokerUrl());
-        if (null != mapRequest.get("groupId")) {
-            groupId = mapRequest.get("groupId");
-        }
-        return groupId;
-    }
 
     private static void handleOnEvent(WeEvent event, Map<String, CEPRule> ruleMap) {
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
@@ -243,44 +233,47 @@ public class CEPRuleMQ {
         // match the rule and send message
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
             // write the # topic to history db
-            if (entry.getValue().getFromDestination().equals("#")) {
-                sendMessageToDB(getGroupId(entry.getValue()), event, entry.getValue());
-                continue;
-            }
+            if (entry.getValue().getSystemTag().equals("1") && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2)) {
 
-            if (StringUtils.isEmpty(entry.getValue().getSelectField()) || (StringUtils.isEmpty(entry.getValue().getPayload()))) {
-                continue;
-            }
-            log.info("check the josn and return fine !");
-            if (hitRuleEngine(entry.getValue().getPayload(), event, entry.getValue().getConditionField())) {
-                try {
-                    // get the system parameter
-                    String groupId = getGroupId(entry.getValue());
-                    // parsing the payload && match the content,if true and hit it
-                    if (entry.getValue().getConditionType().equals(2)) {
-                        sendMessageToDB(groupId, event, entry.getValue());
+                log.info("system insert db:{}", entry.getValue().getId());
+                sendMessageToDB(entry.getValue().getGroupId(), event, entry.getValue());
 
-                    } else if (entry.getValue().getConditionType().equals(1)) {
-                        // select the field and publish the message to the toDestination
-                        String eventContent = setWeEventContent(entry.getValue().getBrokerId(), groupId, event, entry.getValue().getSelectField(), entry.getValue().getPayload());
-                        log.info("publish select: {},eventContent:{}", entry.getValue().getSelectField(), eventContent);
+            } else {
 
-                        // publish the message
-                        Map<String, String> extensions = new HashMap<>();
-                        extensions.put("weevent-type", "ifttt");
-                        WeEvent weEvent = new WeEvent(entry.getValue().getToDestination(), eventContent.getBytes(StandardCharsets.UTF_8), extensions);
-                        log.info("after hitRuleEngine weEvent event {}", weEvent.toString());
-                        IWeEventClient client = getClient(entry.getValue());
-                        client.publish(weEvent);
+                if (StringUtils.isEmpty(entry.getValue().getSelectField()) || (StringUtils.isEmpty(entry.getValue().getPayload()))) {
+                    continue;
+                }
+                if (hitRuleEngine(entry.getValue().getPayload(), event, entry.getValue().getConditionField())) {
+                    try {
+                        // get the system parameter
+                        String groupId = entry.getValue().getGroupId();
+                        // parsing the payload && match the content,if true and hit it
+                        if (entry.getValue().getConditionType().equals(2)) {
+                            log.info("entry ! {}", entry.getValue().toString());
+
+                            log.info("event hit the db and insert! {}", event.toString());
+
+                            sendMessageToDB(groupId, event, entry.getValue());
+
+                        } else if (entry.getValue().getConditionType().equals(1)) {
+                            // select the field and publish the message to the toDestination
+                            String eventContent = setWeEventContent(entry.getValue().getBrokerId(), groupId, event, entry.getValue().getSelectField(), entry.getValue().getPayload());
+                            log.info("publish select: {},eventContent:{}", entry.getValue().getSelectField(), eventContent);
+
+                            // publish the message
+                            Map<String, String> extensions = new HashMap<>();
+                            extensions.put("weevent-type", "ifttt");
+                            WeEvent weEvent = new WeEvent(entry.getValue().getToDestination(), eventContent.getBytes(StandardCharsets.UTF_8), extensions);
+                            log.info("after hitRuleEngine weEvent event {}", weEvent.toString());
+                            IWeEventClient client = getClient(entry.getValue());
+                            client.publish(weEvent);
+                        }
+                    } catch (BrokerException e) {
+                        log.error(e.toString());
                     }
-                } catch (BrokerException e) {
-                    log.error(e.toString());
                 }
             }
-//            }
-
         }
-
     }
 
     private static String setWeEventContent(String brokerId, String groupId, WeEvent eventMessage, String selectField, String payload) {
