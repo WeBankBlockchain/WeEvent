@@ -102,7 +102,6 @@ CREATE TABLE t_topic_historical (
    `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update date',
    `topicName` VARCHAR(128) NOT NULL COMMENT 'topic name',
    `groupId` VARCHAR(64) NOT NULL COMMENT 'group id',
-   `block_number` INT(11) NULL DEFAULT NULL COMMENT 'block number',
    `eventId` VARCHAR(64)  NOT NULL COMMENT 'event id',
    `brokerId` VARCHAR(64) NOT  NULL COMMENT 'broker id',
    PRIMARY KEY (`id`),
