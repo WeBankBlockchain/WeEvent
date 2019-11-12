@@ -201,45 +201,28 @@ public class CommonUtil {
 
         return sqlOrder;
     }
+
     // for the system tag
     private static Map<String, String> generateSqlOrder(String brokerId, String groupId, String eventId, String topicName, List<String> result) {
-        Map<String, String> sql = new HashMap<>();
-        Map<String, String> sqlOrder = new HashMap<>();
-        boolean eventIdFlag = false;
-        boolean topicNameFlag = false;
-        boolean brokerIdFlag = false;
-        boolean groupIdFlag = false;
 
+        Map<String, String> sqlOrder = new HashMap<>();
         // get all select field and value, and the select field must in eventContent.
         for (String key : result) {
-            sql.put(key, null);
             // set the flag
             if (ConstantsHelper.EVENT_ID.equals(key)) {
-                eventIdFlag = true;
+                sqlOrder.put(ConstantsHelper.EVENT_ID, eventId);
             }
             if (ConstantsHelper.TOPIC_NAME.equals(key)) {
-                topicNameFlag = true;
+                sqlOrder.put(ConstantsHelper.TOPIC_NAME, topicName);
             }
             if (ConstantsHelper.BROKER_ID.equals(key)) {
-                brokerIdFlag = true;
+                sqlOrder.put(ConstantsHelper.BROKER_ID, brokerId);
             }
             if (ConstantsHelper.GROUP_ID.equals(key)) {
-                groupIdFlag = true;
+                sqlOrder.put(ConstantsHelper.GROUP_ID, groupId);
             }
         }
-        // if user need eventId, add the event id
-        if (eventIdFlag) {
-            sqlOrder.put(ConstantsHelper.EVENT_ID, eventId);
-        }
-        if (topicNameFlag) {
-            sqlOrder.put(ConstantsHelper.TOPIC_NAME, topicName);
-        }
-        if (brokerIdFlag) {
-            sqlOrder.put(ConstantsHelper.BROKER_ID, brokerId);
-        }
-        if (groupIdFlag) {
-            sqlOrder.put(ConstantsHelper.GROUP_ID, groupId);
-        }
+
         return sqlOrder;
     }
 

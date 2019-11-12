@@ -130,7 +130,7 @@ public class CEPRuleMQ {
                             if ("json".equals(event.getExtensions().get("weevent-format")) && CommonUtil.checkValidJson(content)) {
                                 handleOnEvent(event, ruleMap);
                             } else {
-                                handleOnEventSystem(event, ruleMap);
+                                handleOnEventOtherPattern(event, ruleMap);
                             }
                         } catch (JSONException e) {
                             log.error(e.toString());
@@ -154,7 +154,7 @@ public class CEPRuleMQ {
                             if ("json".equals(event.getExtensions().get("weevent-format")) && CommonUtil.checkValidJson(content)) {
                                 handleOnEvent(event, ruleMap);
                             } else {
-                                handleOnEventSystem(event, ruleMap);
+                                handleOnEventOtherPattern(event, ruleMap);
                             }
                         } catch (JSONException e) {
                             log.error(e.toString());
@@ -247,7 +247,7 @@ public class CEPRuleMQ {
 
     }
 
-    private static void handleOnEventSystem(WeEvent event, Map<String, CEPRule> ruleMap) {
+    private static void handleOnEventOtherPattern(WeEvent event, Map<String, CEPRule> ruleMap) {
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
 
         // match the rule and send message
@@ -301,7 +301,7 @@ public class CEPRuleMQ {
                             Map<String, String> extensions = new HashMap<>();
                             extensions.put("weevent-type", "ifttt");
                             WeEvent weEvent = new WeEvent(entry.getValue().getToDestination(), eventContent.getBytes(StandardCharsets.UTF_8), extensions);
-                            log.info("after hitRuleEngine weEvent event {}", weEvent.toString());
+                            log.info("after hitRuleEngine weEvent  groupId: {}, event:{}", groupId, weEvent.toString());
                             IWeEventClient client = getClient(entry.getValue());
                             client.publish(weEvent);
                         }
