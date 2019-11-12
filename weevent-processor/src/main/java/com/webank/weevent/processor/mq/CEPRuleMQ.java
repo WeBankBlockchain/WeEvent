@@ -7,7 +7,12 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PostConstruct;
 
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.utils.CommonUtil;
@@ -19,6 +24,7 @@ import com.webank.weevent.sdk.WeEvent;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
+import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlContext;
@@ -32,6 +38,17 @@ public class CEPRuleMQ {
     private static Map<String, String> subscriptionIdMap = new ConcurrentHashMap<>();
     // <subscriptionId-->client session>
     private static Map<String, IWeEventClient> subscriptionClientMap = new ConcurrentHashMap<>();
+    // Pair<key, value>--><WeEvent, CEPRule>
+    private static BlockingDeque<Pair<WeEvent, CEPRule>> systemMessageQueue = new LinkedBlockingDeque<>();
+
+    private static CEPRuleMQ.DBThread dbThread = new CEPRuleMQ.DBThread();
+
+    @PostConstruct
+    public void init() {
+        // get all rule
+        log.info("start dBThread ...");
+        new Thread(dbThread).start();
+    }
 
     public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException {
         // when is in run status. update the rule map
@@ -169,7 +186,7 @@ public class CEPRuleMQ {
 
     private static void sendMessageToDB(String groupId, WeEvent eventContent, CEPRule rule) {
         try {
-            try (Connection conn = CommonUtil.getConnection(rule.getDatabaseUrl());) {
+            try (Connection conn = CommonUtil.getConnection(rule.getDatabaseUrl())) {
 
                 if (conn != null) {
                     // get the sql params
@@ -233,10 +250,11 @@ public class CEPRuleMQ {
         // match the rule and send message
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
             // write the # topic to history db
-            if (entry.getValue().getSystemTag().equals("1") && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2)) {
+            if ("1".equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2)) {
 
                 log.info("system insert db:{}", entry.getValue().getId());
-                sendMessageToDB(entry.getValue().getGroupId(), event, entry.getValue());
+                Pair<WeEvent, CEPRule> messagePair = new Pair<>(event, entry.getValue());
+                systemMessageQueue.add(messagePair);
 
             } else {
 
@@ -389,24 +407,20 @@ public class CEPRuleMQ {
                 // event contain left key
                 if (event.containsKey(strs[0])) {
                     if (event.get(strs[0]) instanceof String) {
-                        log.info("{}", "true1");
                         return ConstantsHelper.SUCCESS;
 
                     } else {
                         if (event.get(strs[0]) instanceof Number) {
                             if (strs[1].matches("[0-9]+")) {
-                                log.info("{}", "true2");
                                 return ConstantsHelper.SUCCESS;
 
                             } else {
-                                log.info("{}", "false 1");
                                 return ConstantsHelper.FAIL;
 
                             }
                         }
                     }
                 } else {
-                    log.info("{}", "false 2");
                     return ConstantsHelper.FAIL;
                 }
             } else {
@@ -422,5 +436,25 @@ public class CEPRuleMQ {
         return ConstantsHelper.FAIL;
     }
 
+    private static class DBThread implements Runnable {
+
+        public void run() {
+            while (true) {
+                try {
+                    // if the quene is null,then the thread sleep 1s
+                    long ideaTime = 1000L;
+                    Pair<WeEvent, CEPRule> item = systemMessageQueue.poll(ideaTime, TimeUnit.MILLISECONDS);
+
+                    if (null != item) {
+                        log.info("auto redo thread enter,system insert db:{}", item.getValue().getId());
+                        //  send to  the db
+                        sendMessageToDB(item.getValue().getGroupId(), item.getKey(), item.getValue());
+                    }
+                } catch (InterruptedException e) {
+                    log.info(e.toString());
+                }
+            }
+        }
+    }
 }
 
