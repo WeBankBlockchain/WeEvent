@@ -24,23 +24,23 @@
         <result column="error_message" property="errorMessage" jdbcType="VARCHAR"/>
         <result column="status" property="status" jdbcType="INTEGER"/>
         <result column="group_id" property="groupId" jdbcType="VARCHAR"/>
-        <result column="is_visible" property="isVisible" jdbcType="VARCHAR"/>
+        <result column="system_tag" property="systemTag" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id,create_date,last_update, rule_name,payload_type,payload,broker_id,cep_id,broker_url,user_id,
          from_destination,to_destination,select_field,condition_field,condition_type,
-         rule_database_id,error_destination,error_message,status,group_id,is_visible
+         rule_database_id,error_destination,error_message,status,group_id,system_tag
     </sql>
 
     <insert id="addRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
             useGeneratedKeys="true" keyProperty="id">
         insert into t_rule_engine(rule_name, payload_type, payload, broker_id, broker_url, user_id, cep_id,
                                   from_destination, to_destination, select_field,
-                                  condition_field, condition_type, status, group_id, error_message,rule_database_id,is_visible)
+                                  condition_field, condition_type, status, group_id, error_message,rule_database_id,system_tag)
         values (#{ruleName}, #{payloadType}, #{payload}, #{brokerId}, #{brokerUrl}, #{userId}, #{cepId},
                 #{fromDestination}, #{toDestination}, #{selectField},
-                #{conditionField}, #{conditionType}, #{status}, #{groupId}, #{errorMessage},#{ruleDataBaseId},#{isVisible})
+                #{conditionField}, #{conditionType}, #{status}, #{groupId}, #{errorMessage},#{ruleDataBaseId},#{systemTag})
     </insert>
 
     <select id="getRuleEngines" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
@@ -71,8 +71,8 @@
         <if test="ruleEngineEntity.ruleName != null and ruleEngineEntity.ruleName!=''">
             and rule_name = #{ruleEngineEntity.ruleName,jdbcType=VARCHAR}
         </if>
-        <if test="ruleEngineEntity.isVisible != null and ruleEngineEntity.isVisible!=''">
-            and is_visible = #{ruleEngineEntity.isVisible,jdbcType=VARCHAR}
+        <if test="ruleEngineEntity.systemTag != null and ruleEngineEntity.systemTag!=''">
+            and system_tag = #{ruleEngineEntity.systemTag,jdbcType=VARCHAR}
         </if>
         <if test="startIndex != null and endIndex!=null">
             limit #{startIndex},#{endIndex}
@@ -95,8 +95,8 @@
         <if test="ruleName != null and  ruleName!=''">
             and rule_name = #{ruleName,jdbcType=VARCHAR}
         </if>
-        <if test="isVisible != null">
-            and is_visible = #{isVisible,jdbcType=VARCHAR}
+        <if test="systemTag != null">
+            and system_tag = #{systemTag,jdbcType=VARCHAR}
         </if>
     </sql>
 
