@@ -16,8 +16,6 @@ public class TopicHistoricalBase extends BaseEntity {
 
     private String groupId;
 
-    private Integer blockNumber;
-
     private String eventId;
 
 }
