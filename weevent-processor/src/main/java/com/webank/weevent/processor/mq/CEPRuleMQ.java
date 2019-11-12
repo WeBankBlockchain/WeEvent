@@ -9,7 +9,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
@@ -38,7 +41,7 @@ public class CEPRuleMQ {
     // <subscriptionId-->client session>
     private static Map<String, IWeEventClient> subscriptionClientMap = new ConcurrentHashMap<>();
     // Pair<key, value>--><WeEvent, CEPRule>
-    private static Queue<Pair<WeEvent, CEPRule>> systemMessageQueue = new LinkedList<>();
+    private static BlockingDeque<Pair<WeEvent, CEPRule>> systemMessageQueue = new LinkedBlockingDeque<>();
 
     private static CEPRuleMQ.DBThread dbThread = new CEPRuleMQ.DBThread();
 
@@ -440,23 +443,19 @@ public class CEPRuleMQ {
 
         public void run() {
             while (true) {
-                // if the quene is null,then the thread sleep 1s
-                if (systemMessageQueue.size() == 0) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                try {
+                    // if the quene is null,then the thread sleep 1s
+                    long ideaTime = 1000L;
+                    Pair<WeEvent, CEPRule> item = systemMessageQueue.poll(ideaTime, TimeUnit.MILLISECONDS);
+
+                    if (null != item) {
+                        log.info("auto redo thread enter,system insert db:{}", item.getValue().getId());
+                        //  send to  the db
+                        sendMessageToDB(item.getValue().getGroupId(), item.getKey(), item.getValue());
                     }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-
-                Pair<WeEvent, CEPRule> item = systemMessageQueue.poll();
-
-                if (null != item) {
-                    log.info("auto redo thread enter,system insert db:{}", item.getValue().getId());
-                    //  send to  the db
-                    sendMessageToDB(item.getValue().getGroupId(), item.getKey(), item.getValue());
-                }
-
             }
         }
     }
