@@ -140,7 +140,6 @@ public class CEPRuleController {
         // set the original instance
         jobmap.put("instance", ProcessorApplication.processorConfig.getSchedulerInstanceName());
         return quartzManager.addModifyJob(id, "rule", "rule", "rule-trigger", CRUDJobs.class, jobmap);
-
     }
 
     private RetCode deleteJob(String id) {
