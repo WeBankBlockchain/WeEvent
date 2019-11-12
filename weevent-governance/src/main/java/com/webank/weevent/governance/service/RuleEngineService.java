@@ -218,7 +218,7 @@ public class RuleEngineService {
     }
 
 
-    private void deleteProcessRule(HttpServletRequest request, RuleEngineEntity engineEntity) throws GovernanceException {
+    public void deleteProcessRule(HttpServletRequest request, RuleEngineEntity engineEntity) throws GovernanceException {
         try {
             BrokerEntity broker = brokerService.getBroker(engineEntity.getBrokerId());
             String brokerUrl = broker.getBrokerUrl();
