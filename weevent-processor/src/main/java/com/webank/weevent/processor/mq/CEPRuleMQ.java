@@ -213,7 +213,7 @@ public class CEPRuleMQ {
                     // execute the preparedstatement
                     int res = preparedStmt.executeUpdate();
                     if (res > 0) {
-                        System.out.println("insert db success!!!");
+                        log.info("insert db success!!!");
                     }
                     preparedStmt.close();
 
