@@ -234,7 +234,7 @@ public class CEPRuleMQ {
         // match the rule and send message
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
             // write the # topic to history db
-            if (entry.getValue().getSystemTag().equals("2") && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2)) {
+            if (entry.getValue().getSystemTag().equals("1") && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2)) {
 
                 log.info("system insert db:{}", entry.getValue().getId());
                 sendMessageToDB(entry.getValue().getGroupId(), event, entry.getValue());
