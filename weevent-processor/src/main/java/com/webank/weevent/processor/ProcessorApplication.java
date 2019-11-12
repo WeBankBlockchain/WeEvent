@@ -2,6 +2,7 @@ package com.webank.weevent.processor;
 
 import com.webank.weevent.processor.cache.CEPRuleCache;
 import com.webank.weevent.processor.config.ProcessorConfig;
+import com.webank.weevent.processor.mq.CEPRuleMQ;
 
 import lombok.extern.slf4j.Slf4j;
 import org.mybatis.spring.annotation.MapperScan;
@@ -63,6 +64,12 @@ public class ProcessorApplication {
     public CEPRuleCache cEPRuleCache() {
         log.info("cEPRuleCache....");
         return new CEPRuleCache();
+    }
+
+    @Bean
+    public CEPRuleMQ cEPRuleMQ() {
+        log.info("CEPRuleMQ....");
+        return new CEPRuleMQ();
     }
 }
 

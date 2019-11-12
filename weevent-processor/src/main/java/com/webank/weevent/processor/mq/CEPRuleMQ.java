@@ -38,7 +38,7 @@ public class CEPRuleMQ {
     // <subscriptionId-->client session>
     private static Map<String, IWeEventClient> subscriptionClientMap = new ConcurrentHashMap<>();
     // Pair<key, value>--><WeEvent, CEPRule>
-    private static Queue<Pair<WeEvent, CEPRule>> systemMessageQueue = new LinkedList<Pair<WeEvent, CEPRule>>();
+    private static Queue<Pair<WeEvent, CEPRule>> systemMessageQueue = new LinkedList<>();
 
     private static CEPRuleMQ.DBThread dbThread = new CEPRuleMQ.DBThread();
 
@@ -456,7 +456,7 @@ public class CEPRuleMQ {
                     //  send to  the db
                     sendMessageToDB(item.getValue().getGroupId(), item.getKey(), item.getValue());
                 }
-                
+
             }
         }
     }
