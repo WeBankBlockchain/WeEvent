@@ -72,7 +72,6 @@ public class CEPRuleMQ {
 
     private static IWeEventClient getClient(CEPRule rule) {
         try {
-            Map<String, String> mapRequest = CommonUtil.uRLRequest(rule.getBrokerUrl());
             String baseUrl = CommonUtil.urlPage(rule.getBrokerUrl());
             // set group id
             String groupId = rule.getGroupId();
