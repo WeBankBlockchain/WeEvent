@@ -10,7 +10,7 @@ function check_governance(){
         exit 1        
     fi
     
-    port=$(grep "port" ${current_path}/conf/application-prod.properties| head -1 | awk -F':' '{print $NF}' | sed s/[[:space:]]//g)
+    port=$(grep "port" ${current_path}/conf/application-prod.properties| head -1 | awk -F'=' '{print $NF}' | sed s/[[:space:]]//g)
     if [[ $? -ne 0 ]];then
         echo "get governance port fail"
         exit 1
