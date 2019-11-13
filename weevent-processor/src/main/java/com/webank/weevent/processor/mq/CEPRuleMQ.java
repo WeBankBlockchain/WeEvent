@@ -299,6 +299,7 @@ public class CEPRuleMQ {
                     continue;
                 }
                 String eventMessage = new String(event.getContent());
+                // ifttt messge can not hit again
                 if ("ifttt".equals(JSONObject.parseObject(eventMessage).get("weevent-type"))) {
                     continue;
                 }
