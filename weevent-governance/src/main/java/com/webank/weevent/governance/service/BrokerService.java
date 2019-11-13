@@ -100,7 +100,7 @@ public class BrokerService {
         //checkBrokerUrlRepeat
         boolean repeat = checkBrokerUrlRepeat(brokerEntity);
         if (!repeat) {
-            throw new GovernanceException(ErrorCode.BROKER_REPEAT);
+           return new GovernanceResult(ErrorCode.BROKER_REPEAT);
         }
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             throw new GovernanceException(errorCode);
