@@ -156,10 +156,7 @@ public class RuleEngineService {
         try {
             //insert processor rule
             BrokerEntity broker = brokerMapper.getBroker(ruleEngineEntity.getBrokerId());
-            String brokerUrl = new StringBuffer(broker.getBrokerUrl()).append(ConstantProperties.QUESTION_MARK)
-                    .append("groupId=").append(ruleEngineEntity.getGroupId()).toString();
-            ruleEngineEntity.setBrokerUrl(brokerUrl);
-            log.info("brokerUrl:{}", brokerUrl);
+            ruleEngineEntity.setBrokerUrl(broker.getBrokerUrl());
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_INSERT).toString();
             String jsonString = JSONObject.toJSONString(ruleEngineEntity);
             Map map = JSONObject.parseObject(jsonString, Map.class);
@@ -221,7 +218,6 @@ public class RuleEngineService {
     public void deleteProcessRule(HttpServletRequest request, RuleEngineEntity engineEntity) throws GovernanceException {
         try {
             BrokerEntity broker = brokerService.getBroker(engineEntity.getBrokerId());
-            String brokerUrl = broker.getBrokerUrl();
             String deleteUrl = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_DELETE_CEP_RULE).append(ConstantProperties.QUESTION_MARK)
                     .append("id=").append(engineEntity.getId()).toString();
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, deleteUrl);
@@ -285,10 +281,7 @@ public class RuleEngineService {
 
             //update process rule
             BrokerEntity broker = brokerMapper.getBroker(rule.getBrokerId());
-            String brokerUrl = new StringBuffer(broker.getBrokerUrl()).append(ConstantProperties.QUESTION_MARK)
-                    .append("groupId=").append(rule.getGroupId()).toString();
-            ruleEngineEntity.setBrokerUrl(brokerUrl);
-            log.info("brokerUrl:{}", brokerUrl);
+            ruleEngineEntity.setBrokerUrl(broker.getBrokerUrl());
             if (rule.getStatus() == StatusEnum.NOT_STARTED.getCode()) {
                 this.updateProcessRule(request, ruleEngineEntity, rule);
             } else {
@@ -457,10 +450,7 @@ public class RuleEngineService {
     private void stopProcessRule(HttpServletRequest request, RuleEngineEntity ruleEngineEntity, RuleEngineEntity oldRule) throws GovernanceException {
         try {
             BrokerEntity broker = brokerMapper.getBroker(oldRule.getBrokerId());
-            String brokerUrl = new StringBuffer(broker.getBrokerUrl()).append(ConstantProperties.QUESTION_MARK)
-                    .append("groupId=").append(oldRule.getGroupId()).toString();
-            ruleEngineEntity.setBrokerUrl(brokerUrl);
-            log.info("brokerUrl:{}", brokerUrl);
+            ruleEngineEntity.setBrokerUrl(broker.getBrokerUrl());
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_STOP_CEP_RULE).toString();
             String jsonString = JSONObject.toJSONString(ruleEngineEntity);
             Map map = JSONObject.parseObject(jsonString, Map.class);
@@ -509,9 +499,7 @@ public class RuleEngineService {
             log.info("condition:{}", conditionField);
 
             BrokerEntity broker = brokerMapper.getBroker(rule.getBrokerId());
-            String brokerUrl = new StringBuffer(broker.getBrokerUrl()).append(ConstantProperties.QUESTION_MARK)
-                    .append("groupId=").append(rule.getGroupId()).toString();
-            rule.setBrokerUrl(brokerUrl);
+            rule.setBrokerUrl(broker.getBrokerUrl());
             rule.setStatus(StatusEnum.RUNNING.getCode());
             rule.setLastUpdate(new Date());
             //set dataBaseUrl
@@ -777,7 +765,7 @@ public class RuleEngineService {
 
     }
 
-    public boolean checkProcessorExist(HttpServletRequest request){
+    public boolean checkProcessorExist(HttpServletRequest request) {
         try {
             String payload = "{\\\"a\\\":1,\\\"b\\\":\\\"test\\\",\\\"c\\\":10}";
             String condition = "\"c<100\"";
