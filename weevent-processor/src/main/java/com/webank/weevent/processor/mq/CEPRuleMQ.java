@@ -40,6 +40,8 @@ public class CEPRuleMQ {
     private static Map<String, IWeEventClient> subscriptionClientMap = new ConcurrentHashMap<>();
     // Pair<key, value>--><WeEvent, CEPRule>
     private static BlockingDeque<Pair<WeEvent, CEPRule>> systemMessageQueue = new LinkedBlockingDeque<>();
+    // client --><brokerurl,groupId>
+    private static Map<IWeEventClient, Pair<String, String>> clientGroupMap = new ConcurrentHashMap<>();
 
     private static CEPRuleMQ.DBThread dbThread = new CEPRuleMQ.DBThread();
 
@@ -95,8 +97,12 @@ public class CEPRuleMQ {
             IWeEventClient client;
             if (null != groupId) {
                 client = IWeEventClient.build(baseUrl, groupId);
+                Pair<String, String> brokerMessage = new Pair<>(baseUrl, groupId);
+                clientGroupMap.put(client, brokerMessage);
             } else {
                 client = IWeEventClient.build(baseUrl, "");
+                Pair<String, String> brokerMessage = new Pair<>(baseUrl, "");
+                clientGroupMap.put(client, brokerMessage);
             }
             return client;
         } catch (BrokerException e) {
@@ -128,9 +134,9 @@ public class CEPRuleMQ {
                             log.info("on event:{},content:{}", event.toString(), content);
 
                             if ("json".equals(event.getExtensions().get("weevent-format")) && CommonUtil.checkValidJson(content)) {
-                                handleOnEvent(event, ruleMap);
+                                handleOnEvent(client, event, ruleMap);
                             } else {
-                                handleOnEventOtherPattern(event, ruleMap);
+                                handleOnEventOtherPattern(client, event, ruleMap);
                             }
                         } catch (JSONException e) {
                             log.error(e.toString());
@@ -152,9 +158,9 @@ public class CEPRuleMQ {
                             log.info("on event:{},content:{}", event.toString(), content);
 
                             if ("json".equals(event.getExtensions().get("weevent-format")) && CommonUtil.checkValidJson(content)) {
-                                handleOnEvent(event, ruleMap);
+                                handleOnEvent(client, event, ruleMap);
                             } else {
-                                handleOnEventOtherPattern(event, ruleMap);
+                                handleOnEventOtherPattern(client, event, ruleMap);
                             }
                         } catch (JSONException e) {
                             log.error(e.toString());
@@ -247,11 +253,17 @@ public class CEPRuleMQ {
 
     }
 
-    private static void handleOnEventOtherPattern(WeEvent event, Map<String, CEPRule> ruleMap) {
+    private static void handleOnEventOtherPattern(IWeEventClient client, WeEvent event, Map<String, CEPRule> ruleMap) {
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
 
         // match the rule and send message
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
+
+            log.info("group:{},client:brokerUrl:{},rule:brokerUr{}", clientGroupMap.get(client).getValue().equals(entry.getValue().getGroupId()), clientGroupMap.get(client).getKey(), CommonUtil.urlPage(entry.getValue().getBrokerUrl()));
+            // check the broker and groupid
+            if (!(clientGroupMap.get(client).getValue().equals(entry.getValue().getGroupId()) && clientGroupMap.get(client).getKey().equals(CommonUtil.urlPage(entry.getValue().getBrokerUrl())))) {
+                continue;
+            }
             // write the # topic to history db
             if ("1".equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2)) {
 
@@ -263,11 +275,18 @@ public class CEPRuleMQ {
         }
     }
 
-    private static void handleOnEvent(WeEvent event, Map<String, CEPRule> ruleMap) {
+    private static void handleOnEvent(IWeEventClient client, WeEvent event, Map<String, CEPRule> ruleMap) {
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
 
         // match the rule and send message
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
+
+            log.info("group:{},client:brokerUrl:{},rule:brokerUr{}", clientGroupMap.get(client).getValue().equals(entry.getValue().getGroupId()), clientGroupMap.get(client).getKey(), CommonUtil.urlPage(entry.getValue().getBrokerUrl()));
+            // check the broker and groupid
+            if (!(clientGroupMap.get(client).getValue().equals(entry.getValue().getGroupId()) && clientGroupMap.get(client).getKey().equals(CommonUtil.urlPage(entry.getValue().getBrokerUrl())))) {
+                continue;
+            }
+
             // write the # topic to history db
             if ("1".equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2)) {
 
@@ -286,9 +305,9 @@ public class CEPRuleMQ {
                         String groupId = entry.getValue().getGroupId();
                         // parsing the payload && match the content,if true and hit it
                         if (entry.getValue().getConditionType().equals(2)) {
-                            log.info("entry ! {}", entry.getValue().toString());
+                            log.info("entry: {}", entry.getValue().toString());
 
-                            log.info("event hit the db and insert! {}", event.toString());
+                            log.info("event hit the db and insert: {}", event.toString());
 
                             sendMessageToDB(groupId, event, entry.getValue());
 
@@ -302,8 +321,8 @@ public class CEPRuleMQ {
                             extensions.put("weevent-type", "ifttt");
                             WeEvent weEvent = new WeEvent(entry.getValue().getToDestination(), eventContent.getBytes(StandardCharsets.UTF_8), extensions);
                             log.info("after hitRuleEngine weEvent  groupId: {}, event:{}", groupId, weEvent.toString());
-                            IWeEventClient client = getClient(entry.getValue());
-                            client.publish(weEvent);
+                            IWeEventClient toDestinationClient = getClient(entry.getValue());
+                            toDestinationClient.publish(weEvent);
                         }
                     } catch (BrokerException e) {
                         log.error(e.toString());
