@@ -94,13 +94,18 @@ public class BrokerService {
     public GovernanceResult addBroker(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
 
-        try {
-            //check both broker and webase serverUrl
-            ErrorCode errorCode = checkServerByBrokerEntity(brokerEntity, request);
-            if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-                throw new GovernanceException(errorCode);
-            }
 
+        //check both broker and webase serverUrl
+        ErrorCode errorCode = checkServerByBrokerEntity(brokerEntity, request);
+        //checkBrokerUrlRepeat
+        boolean repeat = checkBrokerUrlRepeat(brokerEntity);
+        if (!repeat) {
+           return new GovernanceResult(ErrorCode.BROKER_REPEAT);
+        }
+        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+            throw new GovernanceException(errorCode);
+        }
+        try {
             brokerMapper.addBroker(brokerEntity);
             //create permissionEntityList
             List<PermissionEntity> permissionEntityList = createPerMissionList(brokerEntity);
@@ -119,8 +124,21 @@ public class BrokerService {
             return GovernanceResult.ok(true);
         } catch (Exception e) {
             log.error("add broker fail", e);
-            throw new GovernanceException("add broker fail", e);
+            throw new GovernanceException("add broker fail" + e.getMessage());
         }
+    }
+
+    private boolean checkBrokerUrlRepeat(BrokerEntity brokerEntity) {
+        BrokerEntity broker = new BrokerEntity();
+        broker.setBrokerUrl(brokerEntity.getBrokerUrl().trim());
+        List<BrokerEntity> brokerEntities = brokerMapper.brokerList(broker);
+        if (CollectionUtils.isEmpty(brokerEntities)) {
+            return true;
+        }
+        if (brokerEntities.size() > 1) {
+            return false;
+        }
+        return brokerEntity.getId() != null && brokerEntities.get(0).getId().intValue() == brokerEntity.getId().intValue();
     }
 
     private List<PermissionEntity> createPerMissionList(BrokerEntity brokerEntity) {
@@ -175,7 +193,11 @@ public class BrokerService {
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             throw new GovernanceException(errorCode);
         }
-
+        //checkBrokerUrlRepeat
+        boolean repeat = checkBrokerUrlRepeat(brokerEntity);
+        if (!repeat) {
+            return new GovernanceResult(ErrorCode.BROKER_REPEAT);
+        }
         brokerMapper.updateBroker(brokerEntity);
         //delete old permission
         permissionMapper.deletePermission(brokerEntity.getId());
