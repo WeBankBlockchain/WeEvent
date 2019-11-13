@@ -138,10 +138,7 @@ public class BrokerService {
         if (brokerEntities.size() > 1) {
             return false;
         }
-        if (brokerEntity.getId() != null && brokerEntities.get(0).getId().intValue() == brokerEntity.getId().intValue()) {
-            return true;
-        }
-        return false;
+        return brokerEntity.getId() != null && brokerEntities.get(0).getId().intValue() == brokerEntity.getId().intValue();
     }
 
     private List<PermissionEntity> createPerMissionList(BrokerEntity brokerEntity) {

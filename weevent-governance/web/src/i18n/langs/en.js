@@ -56,7 +56,8 @@ module.exports = {
     'errorServer': 'Invalid server name',
     'noServerName': 'Empty server name',
     'emptyPort': 'Invalid server URL',
-    'errorAddress': 'Can not connect to server'
+    'errorAddress': 'Can not connect to server',
+    'exitBrokerURL': 'Broker server is already existed, If the service is under another account, you can apply for access authorization from that user!'
   },
   userSet: {
     'userName': 'Account',
