@@ -32,5 +32,9 @@ public class BrokerBase extends BaseEntity {
      */
     private String isConfigRule;
 
+    public void setBrokerUrl(String brokerUrl) {
+        this.brokerUrl = brokerUrl == null ? null : brokerUrl.trim();
+    }
+
 
 }
