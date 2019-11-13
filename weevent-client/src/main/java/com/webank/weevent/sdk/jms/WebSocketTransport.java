@@ -73,22 +73,21 @@ public class WebSocketTransport extends WebSocketClient {
     private boolean connectFlag = false;
 
     class ResponseFuture implements Future<Message> {
-        private Long key;
-        private CountDownLatch latch;
+        private CountDownLatch latch = new CountDownLatch(1);
 
+        private Long key;
         private Message response;
 
         ResponseFuture(Long key) {
             this.key = key;
-            this.latch = new CountDownLatch(1);
-
             futures.put(this.key, this);
         }
 
         public void setResponse(Message response) {
-            this.latch.countDown();
             this.response = response;
             futures.remove(this.key);
+
+            this.latch.countDown();
         }
 
         @Override
@@ -117,12 +116,14 @@ public class WebSocketTransport extends WebSocketClient {
         @Override
         public Message get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
             if (latch.await(timeout, unit)) {
-                if (this.response == null) {
-                    throw new TimeoutException();
-                } else {
+                if (this.response != null) {
                     return this.response;
+                } else {
+                    log.error("empty response");
+                    throw new TimeoutException();
                 }
             } else {
+                log.error("empty response");
                 throw new TimeoutException();
             }
         }
@@ -156,14 +157,14 @@ public class WebSocketTransport extends WebSocketClient {
             ResponseFuture response = new ResponseFuture(asyncSeq);
 
             // .send(String text) is Text Message, .send(byte[] data) is Binary Message
-            log.debug("STOMP POST text: {}", req);
+            log.debug("STOMP post text: {}", req);
             this.send(req);
             return response.get(this.timeout, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            log.error("stomp command invoke failed", e);
+            log.error("stomp command invoke Interrupted, seq: " + asyncSeq, e);
             throw WeEventConnectionFactory.error2JMSException(ErrorCode.SDK_JMS_EXCEPTION_STOMP_EXECUTE);
         } catch (TimeoutException e) {
-            log.error("stomp command invoke timeout", e);
+            log.error("stomp command invoke timeout, seq: " + asyncSeq, e);
             throw WeEventConnectionFactory.error2JMSException(ErrorCode.SDK_JMS_EXCEPTION_STOMP_TIMEOUT);
         }
     }
@@ -356,7 +357,7 @@ public class WebSocketTransport extends WebSocketClient {
     @SuppressWarnings("unchecked")
     private void handleMessageFrame(Message<byte[]> stompMsg) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(stompMsg);
-        log.info("accessor:{}", accessor.toString());
+        log.info("accessor: {}", accessor.toString());
 
         String messageId = getHeadersValue(accessor, "message-id");
         String subscriptionId = getHeadersValue(accessor, "subscription-id");
@@ -486,7 +487,7 @@ public class WebSocketTransport extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
-        log.info("in onMessage");
+        log.debug("received message");
 
         if (this.topicConnection == null) {
             log.info("topic Connection is null");
