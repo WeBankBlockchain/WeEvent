@@ -219,6 +219,11 @@ export default {
               message: this.$t('common.addSuccess')
             })
             this.getServer()
+          } else if (res.data.status === 100108) {
+            this.$message({
+              type: 'warning',
+              message: this.$t('serverSet.exitBrokerURL')
+            })
           } else {
             this.$message({
               type: 'warning',
@@ -259,6 +264,11 @@ export default {
               message: this.$t('common.editSuccess')
             })
             this.getServer()
+          } else if (res.data.status === 100108) {
+            this.$message({
+              type: 'warning',
+              message: this.$t('serverSet.exitBrokerURL')
+            })
           } else {
             this.$message({
               type: 'warning',
