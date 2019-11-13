@@ -199,7 +199,7 @@ public class BrokerService {
         //checkBrokerUrlRepeat
         boolean repeat = checkBrokerUrlRepeat(brokerEntity);
         if (!repeat) {
-            throw new GovernanceException(ErrorCode.BROKER_REPEAT);
+            return new GovernanceResult(ErrorCode.BROKER_REPEAT);
         }
         brokerMapper.updateBroker(brokerEntity);
         //delete old permission
