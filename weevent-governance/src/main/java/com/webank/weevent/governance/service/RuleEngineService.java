@@ -156,9 +156,7 @@ public class RuleEngineService {
         try {
             //insert processor rule
             BrokerEntity broker = brokerMapper.getBroker(ruleEngineEntity.getBrokerId());
-            String brokerUrl = broker.getBrokerUrl();
-            ruleEngineEntity.setBrokerUrl(brokerUrl);
-            log.info("brokerUrl:{}", brokerUrl);
+            ruleEngineEntity.setBrokerUrl(broker.getBrokerUrl());
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_INSERT).toString();
             String jsonString = JSONObject.toJSONString(ruleEngineEntity);
             Map map = JSONObject.parseObject(jsonString, Map.class);
@@ -283,9 +281,7 @@ public class RuleEngineService {
 
             //update process rule
             BrokerEntity broker = brokerMapper.getBroker(rule.getBrokerId());
-            String brokerUrl = broker.getBrokerUrl();
             ruleEngineEntity.setBrokerUrl(broker.getBrokerUrl());
-            log.info("brokerUrl:{}", brokerUrl);
             if (rule.getStatus() == StatusEnum.NOT_STARTED.getCode()) {
                 this.updateProcessRule(request, ruleEngineEntity, rule);
             } else {
@@ -454,9 +450,7 @@ public class RuleEngineService {
     private void stopProcessRule(HttpServletRequest request, RuleEngineEntity ruleEngineEntity, RuleEngineEntity oldRule) throws GovernanceException {
         try {
             BrokerEntity broker = brokerMapper.getBroker(oldRule.getBrokerId());
-            String brokerUrl = broker.getBrokerUrl();
-            ruleEngineEntity.setBrokerUrl(brokerUrl);
-            log.info("brokerUrl:{}", brokerUrl);
+            ruleEngineEntity.setBrokerUrl(broker.getBrokerUrl());
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_STOP_CEP_RULE).toString();
             String jsonString = JSONObject.toJSONString(ruleEngineEntity);
             Map map = JSONObject.parseObject(jsonString, Map.class);
@@ -505,8 +499,7 @@ public class RuleEngineService {
             log.info("condition:{}", conditionField);
 
             BrokerEntity broker = brokerMapper.getBroker(rule.getBrokerId());
-            String brokerUrl = broker.getBrokerUrl();
-            rule.setBrokerUrl(brokerUrl);
+            rule.setBrokerUrl(broker.getBrokerUrl());
             rule.setStatus(StatusEnum.RUNNING.getCode());
             rule.setLastUpdate(new Date());
             //set dataBaseUrl
