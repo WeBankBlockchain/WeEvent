@@ -289,7 +289,6 @@ public class CEPRuleMQ {
 
             // write the # topic to history db
             if ("1".equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2)) {
-
                 log.info("system insert db:{}", entry.getValue().getId());
                 Pair<WeEvent, CEPRule> messagePair = new Pair<>(event, entry.getValue());
                 systemMessageQueue.add(messagePair);
@@ -299,6 +298,11 @@ public class CEPRuleMQ {
                 if (StringUtils.isEmpty(entry.getValue().getSelectField()) || (StringUtils.isEmpty(entry.getValue().getPayload()))) {
                     continue;
                 }
+                String eventMessage = new String(event.getContent());
+                if ("ifttt".equals(JSONObject.parseObject(eventMessage).get("weevent-type"))) {
+                    continue;
+                }
+
                 if (hitRuleEngine(entry.getValue().getPayload(), event, entry.getValue().getConditionField())) {
                     try {
                         // get the system parameter
