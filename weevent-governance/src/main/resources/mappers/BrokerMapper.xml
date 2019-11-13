@@ -18,6 +18,22 @@
         id,create_date,last_update, user_id, name, broker_url, webase_url,is_config_rule
     </sql>
 
+    <select id="brokerList" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from t_broker
+        where is_delete=0
+        <if test="brokerUrl != null">
+            and broker_url = #{brokerUrl}
+        </if>
+        <if test="id != null">
+            and id = #{id}
+        </if>
+        <if test="name != null">
+            and name = #{name}
+        </if>
+    </select>
+
     <select id="getBroker" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
