@@ -3,7 +3,6 @@ package com.webank.weevent.governance.controller;
 import javax.servlet.http.HttpServletRequest;
 
 import com.webank.weevent.governance.exception.GovernanceException;
-import com.webank.weevent.governance.result.GovernanceResult;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
