@@ -46,12 +46,13 @@ public class WebSocketTransportFactory {
                 throw WeEventConnectionFactory.error2JMSException(ErrorCode.URL_CONNECT_FAILED);
             }
 
+            log.info("connect to remote success, {}", uri.toString());
             return client;
         } catch (BrokerException e) {
             log.error("connect to remote failed, {}", uri.toString());
             throw WeEventConnectionFactory.exp2JMSException(e);
         } catch (InterruptedException e) {
-            log.error("interrupted while connecting");
+            log.error("interrupted while connecting, {}", uri.toString());
             Thread.currentThread().interrupt();
             throw WeEventConnectionFactory.error2JMSException(ErrorCode.URL_CONNECT_FAILED);
         }

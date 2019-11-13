@@ -93,7 +93,7 @@ public class WeEventConnectionFactory implements ConnectionFactory, QueueConnect
 
     private void setBrokerUri(URI uri) {
         this.brokerUri = uri;
-        this.timeout = 5;
+        this.timeout = 10;
     }
 
     private URI createUri(String url) throws JMSException {
