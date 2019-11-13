@@ -2,6 +2,8 @@ package com.webank.weevent.governance.result;
 
 import java.util.List;
 
+import com.webank.weevent.governance.code.ErrorCode;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
@@ -52,6 +54,12 @@ public class GovernanceResult {
         this.data = data;
     }
 
+    public GovernanceResult(ErrorCode errorCode) {
+        this.status = errorCode.getCode();
+        this.msg = errorCode.getCodeDesc();
+        this.data = null;
+    }
+
     public GovernanceResult(Object data) {
         this.status = 200;
         this.msg = "OK";
@@ -59,11 +67,8 @@ public class GovernanceResult {
     }
 
     /**
-     * 
-     * @param jsonData
-     *            jsondat
-     * @param clazz
-     *            object type
+     * @param jsonData jsondat
+     * @param clazz object type
      * @return
      */
     public static GovernanceResult formatToPojo(String jsonData, Class<?> clazz) {
@@ -89,7 +94,7 @@ public class GovernanceResult {
 
     /**
      * no object class covert
-     * 
+     *
      * @param json
      * @return
      */
@@ -104,9 +109,8 @@ public class GovernanceResult {
 
     /**
      * Object is list covert
-     * 
-     * @param jsonData
-     *            jsondata
+     *
+     * @param jsonData jsondata
      * @param clazz
      * @return
      */
