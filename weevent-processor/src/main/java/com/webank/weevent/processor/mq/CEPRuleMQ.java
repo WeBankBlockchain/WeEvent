@@ -321,8 +321,8 @@ public class CEPRuleMQ {
                             extensions.put("weevent-type", "ifttt");
                             WeEvent weEvent = new WeEvent(entry.getValue().getToDestination(), eventContent.getBytes(StandardCharsets.UTF_8), extensions);
                             log.info("after hitRuleEngine weEvent  groupId: {}, event:{}", groupId, weEvent.toString());
-                            IWeEventClient toClient = getClient(entry.getValue());
-                            toClient.publish(weEvent);
+                            IWeEventClient toDestinationClient = getClient(entry.getValue());
+                            toDestinationClient.publish(weEvent);
                         }
                     } catch (BrokerException e) {
                         log.error(e.toString());
