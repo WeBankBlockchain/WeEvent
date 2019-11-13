@@ -58,7 +58,7 @@ module.exports = {
     'emptyPort': '服务端口不能为空',
     'noServerName': '服务名不能为空',
     'errorAddress': '服务地址错误,无法连接!',
-    'exitBrokerURL': 'Broker服务已存在, 若该服务在其他账户下, 可以向该用户申请访问授权!'
+    'exitBrokerURL': 'Broker服务已存在, 若该服务在其他账户下, 可以向该用户申请访问授权'
   },
   userSet: {
     'userName': '用户名',
