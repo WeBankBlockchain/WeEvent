@@ -8,7 +8,7 @@ const con = require('../../config/config.js')
 class BaseModule {
   constructor () {
     this.$http = axios.create({
-      timeout: 15 * 1000,
+      timeout: 5 * 1000,
       withCredentials: true
     })
 
