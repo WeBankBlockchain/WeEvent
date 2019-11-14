@@ -285,6 +285,8 @@ public class RuleEngineService {
             if (rule.getStatus() == StatusEnum.NOT_STARTED.getCode()) {
                 this.updateProcessRule(request, ruleEngineEntity, rule);
             } else {
+                ruleEngineEntity.setGroupId(rule.getGroupId());
+                ruleEngineEntity.setSystemTag("2");
                 this.startProcessRule(request, ruleEngineEntity);
             }
 
