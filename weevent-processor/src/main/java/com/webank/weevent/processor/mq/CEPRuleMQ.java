@@ -83,6 +83,10 @@ public class CEPRuleMQ {
             if (null != subId) {
                 IWeEventClient client = subscriptionClientMap.get(subId);
                 boolean flag = client.unSubscribe(subId);
+                subscriptionIdMap.remove(rule.getId());
+                clientGroupMap.remove(subscriptionClientMap.get(subId));
+                subscriptionClientMap.remove(subId);
+
                 log.info("stop,update,delete rule ,and unsubscribe return {}", flag);
             }
 
@@ -281,9 +285,14 @@ public class CEPRuleMQ {
         // match the rule and send message
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
 
-            log.info("group:{},client:brokerUrl:{},rule:brokerUr{}", clientGroupMap.get(client).getValue().equals(entry.getValue().getGroupId()), clientGroupMap.get(client).getKey(), CommonUtil.urlPage(entry.getValue().getBrokerUrl()));
+            if (StringUtils.isEmpty(subscriptionIdMap.get(entry.getValue().getId()))) {
+                continue;
+            }
+
+            log.info("client:{}group:{},client:brokerUrl:{},rule:brokerUr{}", subscriptionClientMap.get(subscriptionIdMap.get(entry.getValue().getId())).equals(client), clientGroupMap.get(client).getValue().equals(entry.getValue().getGroupId()), clientGroupMap.get(client).getKey(), CommonUtil.urlPage(entry.getValue().getBrokerUrl()));
             // check the broker and groupid
-            if (!(clientGroupMap.get(client).getValue().equals(entry.getValue().getGroupId()) && clientGroupMap.get(client).getKey().equals(CommonUtil.urlPage(entry.getValue().getBrokerUrl())))) {
+
+            if (!(subscriptionClientMap.get(subscriptionIdMap.get(entry.getValue().getId())).equals(client) && clientGroupMap.get(client).getValue().equals(entry.getValue().getGroupId()) && clientGroupMap.get(client).getKey().equals(CommonUtil.urlPage(entry.getValue().getBrokerUrl())))) {
                 continue;
             }
 
