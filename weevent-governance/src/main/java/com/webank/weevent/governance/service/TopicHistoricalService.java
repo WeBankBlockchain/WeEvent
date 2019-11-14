@@ -3,7 +3,6 @@ package com.webank.weevent.governance.service;
 import java.io.FileInputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -259,8 +258,14 @@ public class TopicHistoricalService {
             if (StringUtil.isBlank(mes)) {
                 throw new GovernanceException("group is empty");
             }
-            String[] split = mes.replace("[", "").replace("]", "").split(",");
-            groupList = Arrays.asList(split);
+            JSONObject jsonObject = JSONObject.parseObject(mes);
+            if ("0".equals(jsonObject.get("code").toString())) {
+                Object data = jsonObject.get("data");
+                groupList = (List) data;
+            } else {
+                throw new GovernanceException(jsonObject.get("message").toString());
+            }
+
             return groupList;
         } catch (Exception e) {
             log.error("get group list fail", e);
