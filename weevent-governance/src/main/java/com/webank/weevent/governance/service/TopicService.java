@@ -76,7 +76,7 @@ public class TopicService {
         try {
             if (groupId == null) {
                 url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_CLOSE).append("?topic=").append(URLEncoder.encode(topic, "UTF-8")).
-                toString();
+                        toString();
             } else {
                 url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_CLOSE).append("?topic=").append(URLEncoder.encode(topic, "UTF-8"))
                         .append("&groupId=").append(groupId).toString();
@@ -214,10 +214,9 @@ public class TopicService {
         try {
             boolean exist = exist(topic, brokerEntity.getBrokerUrl(), groupId, request);
             if (exist) {
-                log.info("");
-                throw new GovernanceException("the topic exist");
+                log.info("topic already exists,topic{}", topic);
+                return new GovernanceResult(ErrorCode.TOPIC_EXISTS);
             }
-
             TopicEntity topicEntity = new TopicEntity();
             topicEntity.setBrokerId(brokerId);
             topicEntity.setTopicName(topic);
