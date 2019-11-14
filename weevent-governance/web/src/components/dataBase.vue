@@ -150,7 +150,7 @@ export default {
               } else {
                 vm.$message({
                   type: 'warning',
-                  message: this.$t('common.operFail')
+                  message: res.data.message
                 })
               }
               vm.showlog = false
@@ -167,7 +167,7 @@ export default {
               } else {
                 vm.$message({
                   type: 'warning',
-                  message: this.$t('common.operFail')
+                  message: res.data.message
                 })
               }
               vm.showlog = false
@@ -206,7 +206,7 @@ export default {
           } else {
             vm.$message({
               type: 'warning',
-              message: vm.$t('common.operFail')
+              message: res.data.message
             })
           }
           vm.showlog = false
