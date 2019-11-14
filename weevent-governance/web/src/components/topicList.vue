@@ -4,7 +4,7 @@
     <el-button type='primary' size='small' icon='el-icon-plus' @click='addNewOne'>{{$t('common.add')}}</el-button>
     <div class='search_part'>
       <el-input v-model.trim='topicName'
-        :placeholder="$t('tableCont.searchTpoic')"
+        :placeholder="$t('tableCont.searchTopic')"
         size='small'
         clearable
       ></el-input>
@@ -212,10 +212,15 @@ export default {
                 message: this.$t('common.addSuccess')
               })
               vm.refresh()
+            } else if (res.data.status === 100109) {
+              vm.$message({
+                type: 'error',
+                message: this.$t('tableCont.exitTopic')
+              })
             } else {
               vm.$message({
                 type: 'error',
-                message: this.$t('common.addFail')
+                message: res.data.message
               })
             }
             vm.dialogFormVisible = false

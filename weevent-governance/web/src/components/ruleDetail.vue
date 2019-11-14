@@ -543,7 +543,7 @@ export default {
           } else {
             vm.$message({
               type: 'warning',
-              message: vm.$t('common.operFail')
+              message: res.data.message
             })
           }
         })
@@ -576,9 +576,6 @@ export default {
           vm.total = res.data.total
           vm.listData = [].concat(res.data.topicInfoList)
           vm.listTopic = [].concat(res.data.topicInfoList)
-          if (vm.pageIndex === 1) {
-            vm.listTopic.unshift({'topicName': '#'})
-          }
         }
       })
     },
