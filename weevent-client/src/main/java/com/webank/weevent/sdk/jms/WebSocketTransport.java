@@ -70,6 +70,7 @@ public class WebSocketTransport extends WebSocketClient {
 
     private Pair<String, String> account;
 
+    // is reconnect thread already exist
     private boolean connectFlag = false;
 
     class ResponseFuture implements Future<Message> {
