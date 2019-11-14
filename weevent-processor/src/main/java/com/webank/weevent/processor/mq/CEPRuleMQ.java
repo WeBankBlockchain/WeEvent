@@ -83,9 +83,11 @@ public class CEPRuleMQ {
             if (null != subId) {
                 IWeEventClient client = subscriptionClientMap.get(subId);
                 boolean flag = client.unSubscribe(subId);
-                subscriptionIdMap.remove(rule.getId());
-                clientGroupMap.remove(subscriptionClientMap.get(subId));
-                subscriptionClientMap.remove(subId);
+                if (!StringUtils.isEmpty(subscriptionClientMap.get(subId))) {
+                    clientGroupMap.remove(subscriptionClientMap.get(subId));
+                    subscriptionIdMap.remove(rule.getId());
+                    subscriptionClientMap.remove(subId);
+                }
 
                 log.info("stop,update,delete rule ,and unsubscribe return {}", flag);
             }
@@ -285,9 +287,10 @@ public class CEPRuleMQ {
         // match the rule and send message
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
 
-            if (StringUtils.isEmpty(subscriptionIdMap.get(entry.getValue().getId()))) {
+            if (StringUtils.isEmpty(subscriptionIdMap.get(entry.getValue().getId())) || StringUtils.isEmpty(subscriptionClientMap.get(subscriptionIdMap.get(entry.getValue().getId())))) {
                 continue;
             }
+
 
             log.info("client:{}group:{},client:brokerUrl:{},rule:brokerUr{}", subscriptionClientMap.get(subscriptionIdMap.get(entry.getValue().getId())).equals(client), clientGroupMap.get(client).getValue().equals(entry.getValue().getGroupId()), clientGroupMap.get(client).getKey(), CommonUtil.urlPage(entry.getValue().getBrokerUrl()));
             // check the broker and groupid
@@ -296,8 +299,9 @@ public class CEPRuleMQ {
                 continue;
             }
 
-            // write the # topic to history db
-            if ("1".equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2)) {
+            // write the # topic to history db  or ifttt message
+            String eventMessage = new String(event.getContent());
+            if (("ifttt".equals(JSONObject.parseObject(eventMessage).get("weevent-type"))) || ("1".equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2))) {
                 log.info("system insert db:{}", entry.getValue().getId());
                 Pair<WeEvent, CEPRule> messagePair = new Pair<>(event, entry.getValue());
                 systemMessageQueue.add(messagePair);
@@ -305,11 +309,6 @@ public class CEPRuleMQ {
             } else {
 
                 if (StringUtils.isEmpty(entry.getValue().getSelectField()) || (StringUtils.isEmpty(entry.getValue().getPayload()))) {
-                    continue;
-                }
-                String eventMessage = new String(event.getContent());
-                // ifttt messge can not hit again
-                if ("ifttt".equals(JSONObject.parseObject(eventMessage).get("weevent-type"))) {
                     continue;
                 }
 
