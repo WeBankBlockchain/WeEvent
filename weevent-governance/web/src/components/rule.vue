@@ -262,7 +262,7 @@ export default {
         } else {
           this.$message({
             type: 'warning',
-            message: this.$t('rule.startFail')
+            message: res.data.message
           })
         }
       })
@@ -284,7 +284,7 @@ export default {
         } else {
           this.$message({
             type: 'warning',
-            message: this.$t('common.operFail')
+            message: res.data.message
           })
         }
       })
@@ -311,7 +311,7 @@ export default {
           } else {
             vm.$message({
               type: 'warning',
-              message: vm.$t('common.operFail')
+              message: res.data.message
             })
           }
         })
@@ -344,7 +344,7 @@ export default {
             } else {
               this.$message({
                 type: 'warning',
-                message: this.$t('rule.creatFail')
+                message: res.data.message
               })
             }
             vm.createRule = false

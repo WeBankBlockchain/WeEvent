@@ -58,7 +58,10 @@ export default {
         yAxis: {
           title: '',
           max: '10',
-          lineWidth: 2
+          lineWidth: 2,
+          labels: {
+            step: 2
+          }
         },
         xAxis: {
           categories: []
@@ -90,6 +93,28 @@ export default {
     }
   },
   methods: {
+    getTopic () {
+      let vm = this
+      let data = {
+        'beginDate': vm.selectTime[0],
+        'endDate': vm.selectTime[1],
+        'topicList': [],
+        'groupId': localStorage.getItem('groupId'),
+        'brokerId': localStorage.getItem('brokerId'),
+        'userId': localStorage.getItem('userId')
+      }
+      API.historicalData(data).then(res => {
+        if (res.data.status === 200) {
+          let resData = res.data.data
+          vm.topicList = []
+          for (var key in resData) {
+            vm.topicList.push(key)
+          }
+        } else {
+          vm.topicList = []
+        }
+      })
+    },
     beginDate (e) {
       let vm = this
       let data = {
@@ -100,6 +125,7 @@ export default {
         'brokerId': localStorage.getItem('brokerId'),
         'userId': localStorage.getItem('userId')
       }
+      vm.getTopic()
       API.historicalData(data).then(res => {
         if (res.data.status === 200) {
           let resData = res.data.data
@@ -109,19 +135,20 @@ export default {
           }
           let topic = []
           vm.option.series = []
-          if (e) {
-            vm.topicList = []
-          }
           for (var key in resData) {
-            if (e) {
-              vm.topicList.push(key)
-            }
-            topic.push(key)
             let item = {
               'name': key,
               'data': resData[key]
             }
-            vm.option.series.push(item)
+            if (e) {
+              if (vm.option.series.length < 5) {
+                topic.push(key)
+                vm.option.series.push(item)
+              }
+            } else {
+              topic.push(key)
+              vm.option.series.push(item)
+            }
           }
           let max = 10
           vm.option.series.forEach(x => {
@@ -129,9 +156,12 @@ export default {
               max = y > max ? y : max
             })
           })
+          max = Math.ceil(max / 10) * 10 - 5
           vm.option.yAxis.max = max
           vm.topic = [].concat(topic)
-          Highcharts.chart('chart', vm.option)
+          setTimeout(fun => {
+            Highcharts.chart('chart', vm.option)
+          }, 500)
         } else {
           vm.$message({
             type: 'warning',
