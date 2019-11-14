@@ -146,11 +146,14 @@ export default {
       API.listGroup('?brokerId=' + localStorage.getItem('brokerId')).then(res => {
         // if groupId is not existed so set it
         // else use existed groupId
-        vm.groupList = [].concat(res.data)
-        vm.$nextTick(fun => {
-          vm.$store.commit('set_groupId', res.data[0])
-          localStorage.setItem('groupId', res.data[0])
-        })
+        vm.groupList = []
+        if (res.data.code === 0) {
+          vm.groupList = [].concat(res.data.data)
+          vm.$nextTick(fun => {
+            vm.$store.commit('set_groupId', res.data.data[0])
+            localStorage.setItem('groupId', res.data.data[0])
+          })
+        }
       })
     },
     selectLang (e) {
