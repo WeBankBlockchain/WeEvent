@@ -307,7 +307,7 @@ public class CEPRuleMQ {
 
             // write the # topic to history db  or ifttt message
             String eventMessage = new String(event.getContent());
-            if (("ifttt".equals(JSONObject.parseObject(eventMessage).get("weevent-type"))) || ("1".equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2))) {
+            if ("1".equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2)) {
                 log.info("system insert db:{}", entry.getValue().getId());
                 Pair<WeEvent, CEPRule> messagePair = new Pair<>(event, entry.getValue());
                 systemMessageQueue.add(messagePair);
