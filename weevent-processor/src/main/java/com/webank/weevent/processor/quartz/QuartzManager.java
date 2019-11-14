@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 
+import javax.annotation.PostConstruct;
+
+import com.webank.weevent.processor.cache.CEPRuleCache;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.RetCode;
@@ -36,8 +39,39 @@ public class QuartzManager {
 
     private static Scheduler scheduler;
 
+    @PostConstruct
+    public void init() {
+        try {
+            // get all rule
+            Iterator<JobKey> it = this.scheduler.getJobKeys(GroupMatcher.anyGroup()).iterator();
+            Map<String, CEPRule> ruleMap = new HashMap<>();
+            while (it.hasNext()) {
+                JobKey jobKey = (JobKey) it.next();
+                if (null != (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
+                    CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
+                    // if the current is delete
+                    ruleMap.put(rule.getId(), rule);
+                    log.info("{}", jobKey);
+                    if (rule.getStatus().equals(1)) {
+                        ruleMap.put(rule.getId(), rule);
+                    }
+                }
+
+            }
+            log.info("rule size:{} ...", ruleMap.size());
+            log.info("start subscribe ...");
+            for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
+                CEPRuleCache.updateCEPRule(entry.getValue(), ruleMap);
+            }
+
+        } catch (Exception e) {
+            log.error("e:{}", e.toString());
+        }
+    }
+
     public QuartzManager(Scheduler scheduler) {
         this.scheduler = scheduler;
+
     }
 
     /**
