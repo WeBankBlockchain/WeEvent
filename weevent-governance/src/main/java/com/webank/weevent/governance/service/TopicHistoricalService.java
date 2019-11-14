@@ -248,8 +248,8 @@ public class TopicHistoricalService {
         return ruleEngineEntity;
     }
 
-    private List<String> getGroupList(HttpServletRequest request, BrokerEntity brokerEntity) throws GovernanceException {
-        List<String> groupList;
+    private List getGroupList(HttpServletRequest request, BrokerEntity brokerEntity) throws GovernanceException {
+        List groupList;
         String url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.REST_LIST_SUBSCRIPTION).toString();
         try {
             log.info("url:{}", url);
@@ -259,8 +259,8 @@ public class TopicHistoricalService {
                 throw new GovernanceException("group is empty");
             }
             JSONObject jsonObject = JSONObject.parseObject(mes);
-            if ("0".equals(jsonObject.get("code").toString())) {
-                Object data = jsonObject.get("data");
+            Object data = jsonObject.get("data");
+            if ("0".equals(jsonObject.get("code").toString()) && data instanceof List) {
                 groupList = (List) data;
             } else {
                 throw new GovernanceException(jsonObject.get("message").toString());
