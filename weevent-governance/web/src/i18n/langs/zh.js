@@ -58,7 +58,7 @@ module.exports = {
     'emptyPort': '服务端口不能为空',
     'noServerName': '服务名不能为空',
     'errorAddress': '服务地址错误,无法连接!',
-    'exitBrokerURL': 'Broker服务已存在, 若该服务在其他账户下, 可以向该用户申请访问授权'
+    'exitBrokerURL': 'Broker服务已存在, 若该服务在其他账户下, 可以向该用户申请访问授权!'
   },
   userSet: {
     'userName': '用户名',
@@ -129,7 +129,8 @@ module.exports = {
     'run': '运行',
     'stop': '停止',
     'getDataError': '数据请求出错',
-    'searchTpoic': '请输入topic',
+    'searchTopic': '请输入topic',
+    'exitTopic': 'Topic已存在',
     'sequenceNumber': '已发布事件数',
     'newBlockNumber': '最新事件块高',
     'address': 'Topic合约地址',
