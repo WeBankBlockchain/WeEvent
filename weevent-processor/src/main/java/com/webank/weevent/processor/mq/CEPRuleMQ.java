@@ -306,7 +306,6 @@ public class CEPRuleMQ {
             }
 
             // write the # topic to history db  or ifttt message
-            String eventMessage = new String(event.getContent());
             if ("1".equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2)) {
                 log.info("system insert db:{}", entry.getValue().getId());
                 Pair<WeEvent, CEPRule> messagePair = new Pair<>(event, entry.getValue());
@@ -337,7 +336,6 @@ public class CEPRuleMQ {
 
                             // publish the message
                             Map<String, String> extensions = new HashMap<>();
-                            extensions.put("weevent-type", "ifttt");
                             WeEvent weEvent = new WeEvent(entry.getValue().getToDestination(), eventContent.getBytes(StandardCharsets.UTF_8), extensions);
                             log.info("after hitRuleEngine weEvent  groupId: {}, event:{}", groupId, weEvent.toString());
                             IWeEventClient toDestinationClient = getClient(entry.getValue());
