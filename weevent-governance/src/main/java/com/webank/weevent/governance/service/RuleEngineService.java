@@ -669,8 +669,8 @@ public class RuleEngineService {
         if (ruleEngineEntity.getPayloadMap().isEmpty()) {
             throw new GovernanceException("rule description is empty");
         }
-        if (ruleEngineEntity.getPayload() != null && ruleEngineEntity.getPayload().length() > 100) {
-            throw new GovernanceException("rule description length cannot exceed 100");
+        if (ruleEngineEntity.getPayload() != null && ruleEngineEntity.getPayload().length() > 4000) {
+            throw new GovernanceException("rule description length cannot exceed 4000");
         }
 
     }

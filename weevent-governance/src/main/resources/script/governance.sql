@@ -52,7 +52,7 @@ CREATE TABLE t_rule_engine (
   `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update date',
   `rule_name` VARCHAR(128) NOT  NULL   COMMENT 'rule name',
   `payload_type` INT(4)  NULL DEFAULT NULL COMMENT '1 means JASON, 2 means binary',
-  `payload` VARCHAR(255)  NULL DEFAULT NULL COMMENT 'message payload',
+  `payload` VARCHAR(4096)  NULL DEFAULT NULL COMMENT 'message payload',
   `broker_id` INT(11) not NULL COMMENT 'broker id',
   `cep_id` VARCHAR(64) NULL COMMENT 'complex event processing id',
   `user_id` INT(11) not NULL COMMENT 'user id',
