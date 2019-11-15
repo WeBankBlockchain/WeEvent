@@ -810,14 +810,14 @@ public class RuleEngineService {
             return true;
         }
         ruleTopicList.add(ruleEngineEntity);
-        Map<String, Set<String>> map = new HashMap<>();
+        Map<String, Set<String>> topicMap = new HashMap<>();
 
         for (RuleEngineEntity engineEntity : ruleTopicList) {
-            map.merge(engineEntity.getFromDestination(), new HashSet<>(Collections.singleton(engineEntity.getToDestination())), (a, b) -> commonService.mergeSet(a, b));
+            topicMap.merge(engineEntity.getFromDestination(), new HashSet<>(Collections.singleton(engineEntity.getToDestination())), (a, b) -> commonService.mergeSet(a, b));
         }
-        Set<String> set = map.keySet();
-        return dagDetectUtil.checkLoop(map, set);
+        return dagDetectUtil.checkLoop(topicMap);
     }
+
 
 
 }
