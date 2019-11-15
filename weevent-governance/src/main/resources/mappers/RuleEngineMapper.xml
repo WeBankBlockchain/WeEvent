@@ -100,6 +100,13 @@
         </if>
     </sql>
 
+    <select id="getRuleTopicList" resultMap="BaseResultMap">
+        select distinct from_destination,to_destination
+        from t_rule_engine
+        where status != 2 and condition_type=1
+        <include refid="ruleEngineWhere"/>
+    </select>
+
     <update id="updateRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity">
         update t_rule_engine
         set rule_name=#{ruleName},

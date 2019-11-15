@@ -3,6 +3,7 @@ package com.webank.weevent.governance.service;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,6 +30,7 @@ import com.webank.weevent.governance.mapper.RuleEngineConditionMapper;
 import com.webank.weevent.governance.mapper.RuleEngineMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.utils.CookiesTools;
+import com.webank.weevent.governance.utils.DAGDetectUtil;
 import com.webank.weevent.governance.utils.NumberValidationUtils;
 
 import com.alibaba.fastjson.JSONObject;
@@ -66,6 +68,7 @@ public class RuleEngineService {
 
     @Autowired
     private BrokerMapper brokerMapper;
+
 
     @Value("${weevent.processor.url:http://127.0.0.1:7008}")
     private String processorUrl;
@@ -271,6 +274,10 @@ public class RuleEngineService {
             if (!flag) {
                 throw new GovernanceException("conditional is illegal");
             }
+            flag = verifyInfiniteLoop(ruleEngineEntity);
+            if (!flag) {
+                throw new GovernanceException("update rule failed, detected DAG loop at topic [" + ruleEngineEntity.getFromDestination() + "]");
+            }
             RuleDatabaseEntity ruleDataBase = getRuleDataBase(ruleEngineEntity.getRuleDataBaseId());
             if (ruleDataBase != null) {
                 ruleEngineEntity.setDatabaseUrl(ruleDataBase.getDatabaseUrl() + "&tableName=" + ruleDataBase.getTableName());
@@ -308,7 +315,8 @@ public class RuleEngineService {
                 ruleEngineConditionMapper.batchInsert(ruleEngineConditionList);
             }
             return ruleEngineMapper.updateRuleEngine(ruleEngineEntity);
-        } catch (Exception e) {
+        } catch (
+                Exception e) {
             log.error("update ruleEngine fail", e);
             throw new GovernanceException("update ruleEngine fail", e);
         }
@@ -788,5 +796,29 @@ public class RuleEngineService {
     private RuleDatabaseEntity getRuleDataBase(Integer id) {
         return ruleDatabaseMapper.getRuleDataBaseById(id);
     }
+
+    private boolean verifyInfiniteLoop(RuleEngineEntity ruleEngineEntity) {
+        if (!ConditionTypeEnum.TOPIC.getCode().equals(ruleEngineEntity.getConditionType())) {
+            return true;
+        }
+        RuleEngineEntity rule = new RuleEngineEntity();
+        rule.setGroupId(ruleEngineEntity.getGroupId());
+        rule.setBrokerId(ruleEngineEntity.getBrokerId());
+
+        //query all historical rules according to brokerId groupId
+        List<RuleEngineEntity> ruleTopicList = ruleEngineMapper.getRuleTopicList(rule);
+        if (CollectionUtils.isEmpty(ruleTopicList)) {
+            return true;
+        }
+        ruleTopicList.add(ruleEngineEntity);
+        Map<String, Set<String>> map = new HashMap<>();
+
+        for (RuleEngineEntity engineEntity : ruleTopicList) {
+            map.merge(engineEntity.getFromDestination(), new HashSet<>(Collections.singleton(engineEntity.getToDestination())), (a, b) -> commonService.mergeSet(a, b));
+        }
+        Set<String> set = map.keySet();
+        return DAGDetectUtil.checkLoop(map, set);
+    }
+
 
 }
