@@ -138,7 +138,8 @@ public class CEPRuleMQ {
                         try {
                             String content = new String(event.getContent());
                             log.info("on event:{},content:{}", event.toString(), content);
-
+                            
+                            // check the content
                             if (CommonUtil.checkValidJson(content)) {
                                 handleOnEvent(client, event, ruleMap);
                             } else {
@@ -162,8 +163,8 @@ public class CEPRuleMQ {
 
                             String content = new String(event.getContent());
                             log.info("on event:{},content:{}", event.toString(), content);
-
-                            if ("json".equals(event.getExtensions().get("weevent-format")) && CommonUtil.checkValidJson(content)) {
+                            // check the content
+                            if (CommonUtil.checkValidJson(content)) {
                                 handleOnEvent(client, event, ruleMap);
                             } else {
                                 handleOnEventOtherPattern(client, event, ruleMap);
