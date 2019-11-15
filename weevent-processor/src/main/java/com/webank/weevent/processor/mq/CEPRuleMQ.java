@@ -4,7 +4,6 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingDeque;
@@ -83,6 +82,12 @@ public class CEPRuleMQ {
             if (null != subId) {
                 IWeEventClient client = subscriptionClientMap.get(subId);
                 boolean flag = client.unSubscribe(subId);
+                if (!StringUtils.isEmpty(subscriptionClientMap.get(subId))) {
+                    clientGroupMap.remove(subscriptionClientMap.get(subId));
+                    subscriptionIdMap.remove(rule.getId());
+                    subscriptionClientMap.remove(subId);
+                }
+
                 log.info("stop,update,delete rule ,and unsubscribe return {}", flag);
             }
 
@@ -133,7 +138,9 @@ public class CEPRuleMQ {
                             String content = new String(event.getContent());
                             log.info("on event:{},content:{}", event.toString(), content);
 
-                            if ("json".equals(event.getExtensions().get("weevent-format")) && CommonUtil.checkValidJson(content)) {
+
+                            // check the content
+                            if (JSONObject.isValid(content)) {
                                 handleOnEvent(client, event, ruleMap);
                             } else {
                                 handleOnEventOtherPattern(client, event, ruleMap);
@@ -156,8 +163,8 @@ public class CEPRuleMQ {
 
                             String content = new String(event.getContent());
                             log.info("on event:{},content:{}", event.toString(), content);
-
-                            if ("json".equals(event.getExtensions().get("weevent-format")) && CommonUtil.checkValidJson(content)) {
+                            // check the content
+                            if (JSONObject.isValid(content)) {
                                 handleOnEvent(client, event, ruleMap);
                             } else {
                                 handleOnEventOtherPattern(client, event, ruleMap);
@@ -240,7 +247,7 @@ public class CEPRuleMQ {
                     // execute the preparedstatement
                     int res = preparedStmt.executeUpdate();
                     if (res > 0) {
-                        log.info("insert db success!!!");
+                        log.info("insert db success...");
                     }
                     preparedStmt.close();
 
@@ -275,21 +282,32 @@ public class CEPRuleMQ {
         }
     }
 
+    private static boolean checkTheInput(Map.Entry<String, CEPRule> entry, IWeEventClient client) {
+        if (StringUtils.isEmpty(subscriptionIdMap.get(entry.getValue().getId())) || StringUtils.isEmpty(subscriptionClientMap.get(subscriptionIdMap.get(entry.getValue().getId())))) {
+            return true;
+        }
+
+
+        log.info("client:{}group:{},client:brokerUrl:{},rule:brokerUr{}", subscriptionClientMap.get(subscriptionIdMap.get(entry.getValue().getId())).equals(client), clientGroupMap.get(client).getValue().equals(entry.getValue().getGroupId()), clientGroupMap.get(client).getKey(), CommonUtil.urlPage(entry.getValue().getBrokerUrl()));
+        // check the broker and groupid
+        return (!(subscriptionClientMap.get(subscriptionIdMap.get(entry.getValue().getId())).equals(client) && clientGroupMap.get(client).getValue().equals(entry.getValue().getGroupId()) && clientGroupMap.get(client).getKey().equals(CommonUtil.urlPage(entry.getValue().getBrokerUrl()))));
+
+    }
+
+
     private static void handleOnEvent(IWeEventClient client, WeEvent event, Map<String, CEPRule> ruleMap) {
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
 
         // match the rule and send message
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
 
-            log.info("group:{},client:brokerUrl:{},rule:brokerUr{}", clientGroupMap.get(client).getValue().equals(entry.getValue().getGroupId()), clientGroupMap.get(client).getKey(), CommonUtil.urlPage(entry.getValue().getBrokerUrl()));
-            // check the broker and groupid
-            if (!(clientGroupMap.get(client).getValue().equals(entry.getValue().getGroupId()) && clientGroupMap.get(client).getKey().equals(CommonUtil.urlPage(entry.getValue().getBrokerUrl())))) {
+            // che the parameter
+            if (checkTheInput(entry, client)) {
                 continue;
             }
 
-            // write the # topic to history db
+            // write the # topic to history db  or ifttt message
             if ("1".equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2)) {
-
                 log.info("system insert db:{}", entry.getValue().getId());
                 Pair<WeEvent, CEPRule> messagePair = new Pair<>(event, entry.getValue());
                 systemMessageQueue.add(messagePair);
@@ -299,6 +317,7 @@ public class CEPRuleMQ {
                 if (StringUtils.isEmpty(entry.getValue().getSelectField()) || (StringUtils.isEmpty(entry.getValue().getPayload()))) {
                     continue;
                 }
+
                 if (hitRuleEngine(entry.getValue().getPayload(), event, entry.getValue().getConditionField())) {
                     try {
                         // get the system parameter
@@ -317,9 +336,7 @@ public class CEPRuleMQ {
                             log.info("publish select: {},eventContent:{}", entry.getValue().getSelectField(), eventContent);
 
                             // publish the message
-                            Map<String, String> extensions = new HashMap<>();
-                            extensions.put("weevent-type", "ifttt");
-                            WeEvent weEvent = new WeEvent(entry.getValue().getToDestination(), eventContent.getBytes(StandardCharsets.UTF_8), extensions);
+                            WeEvent weEvent = new WeEvent(entry.getValue().getToDestination(), eventContent.getBytes(StandardCharsets.UTF_8), event.getExtensions());
                             log.info("after hitRuleEngine weEvent  groupId: {}, event:{}", groupId, weEvent.toString());
                             IWeEventClient toDestinationClient = getClient(entry.getValue());
                             toDestinationClient.publish(weEvent);

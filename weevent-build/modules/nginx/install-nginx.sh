@@ -32,6 +32,7 @@ function nginx_setup() {
 
     sed -i "s/443/$nginx_port/g" ${nginx_path}/conf/conf.d/https.conf
     sed -i "s/8080/$nginx_port/g" ${nginx_path}/conf/conf.d/http_quickinstall.conf
+    sed -i "s/nobody/${USER}/g" ${nginx_path}/conf/nginx.conf
 
     if [[ "$ssl" = "true" ]]; then
         sed -i "s/http.conf/https.conf/g" ${nginx_path}/conf/nginx.conf
