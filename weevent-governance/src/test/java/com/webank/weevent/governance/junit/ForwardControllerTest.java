@@ -6,7 +6,6 @@ import javax.servlet.http.Cookie;
 
 import com.webank.weevent.governance.JUnitTestBase;
 import com.webank.weevent.governance.properties.ConstantProperties;
-import com.webank.weevent.governance.service.CommonService;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
