@@ -127,6 +127,7 @@ function check_result(){
         yellow_echo "$1 success"
     else
         yellow_echo "$1 failed, exit"
+        yellow_echo "see the install log for details in ${current_path}/install.log"
         exit 1
    fi
 }
