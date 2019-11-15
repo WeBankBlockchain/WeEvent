@@ -1,20 +1,15 @@
 package com.webank.weevent.governance.utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-import org.springframework.stereotype.Component;
-
 @SuppressWarnings("unchecked")
 public class DAGDetectUtil {
 
-    @SuppressWarnings("unchecked")
     public static boolean checkLoop(Map<String, Set<String>> map, Set<String> topicSet) {
         Map start = createNode("start");
         Map<String, Map> nodeMap = new HashMap<>();
@@ -33,7 +28,6 @@ public class DAGDetectUtil {
         return checkChild(start);
     }
 
-    @SuppressWarnings("unchecked")
     private static Map createNode(String name) {
         HashMap node = new HashMap();
         node.put("topic", name);
