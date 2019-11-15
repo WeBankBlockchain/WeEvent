@@ -7,11 +7,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
+import org.springframework.stereotype.Component;
+
 @SuppressWarnings("unchecked")
+@Component
 public class DAGDetectUtil {
     private static Stack<String> stack = new Stack<>();
 
-    public static boolean checkLoop(Map<String, Set<String>> map, Set<String> topicSet) {
+    public boolean checkLoop(Map<String, Set<String>> map, Set<String> topicSet) {
         Map start = createNode("start");
         Map<String, Map> nodeMap = new HashMap<>();
         topicSet.forEach(it -> {
@@ -21,7 +24,7 @@ public class DAGDetectUtil {
         });
         map.forEach((k, v) -> {
             v.forEach(it -> {
-                if (nodeMap.get(it) != null) {
+                if (nodeMap.containsKey(it)) {
                     ((List) nodeMap.get(k).get("child")).add(nodeMap.get(it));
                 }
             });
@@ -29,7 +32,7 @@ public class DAGDetectUtil {
         return checkChild(start);
     }
 
-    private static Map createNode(String name) {
+    private Map createNode(String name) {
         HashMap node = new HashMap();
         node.put("topic", name);
         node.put("child", new ArrayList());
@@ -37,7 +40,7 @@ public class DAGDetectUtil {
     }
 
 
-    private static boolean checkChild(Map cursor) {
+    private boolean checkChild(Map cursor) {
         if (stack.contains(cursor.get("topic"))) {
             stack = new Stack<>();
             return false;

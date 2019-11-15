@@ -26,6 +26,8 @@ public class RuleEngineBase extends BaseEntity {
 
     private Integer brokerId;
 
+    private String cepId;
+
     private String fromDestination;
 
     private String toDestination;

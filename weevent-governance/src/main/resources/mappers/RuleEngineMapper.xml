@@ -23,11 +23,12 @@
         <result column="error_message" property="errorMessage" jdbcType="VARCHAR"/>
         <result column="status" property="status" jdbcType="INTEGER"/>
         <result column="group_id" property="groupId" jdbcType="VARCHAR"/>
+        <result column="cep_id" property="cepId" jdbcType="VARCHAR"/>
         <result column="system_tag" property="systemTag" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,create_date,last_update, rule_name,payload_type,payload,broker_id,broker_url,user_id,
+        id,create_date,last_update, rule_name,payload_type,payload,broker_id,broker_url,user_id,cep_id,
          from_destination,to_destination,select_field,condition_field,condition_type,
          rule_database_id,error_destination,error_message,status,group_id,system_tag
     </sql>
@@ -36,10 +37,10 @@
             useGeneratedKeys="true" keyProperty="id">
         insert into t_rule_engine(rule_name, payload_type, payload, broker_id, broker_url, user_id,
                                   from_destination, to_destination, select_field,
-                                  condition_field, condition_type, status, group_id, error_message,rule_database_id,system_tag)
+                                  condition_field, condition_type, status, group_id, error_message,rule_database_id,system_tag,cep_id)
         values (#{ruleName}, #{payloadType}, #{payload}, #{brokerId}, #{brokerUrl}, #{userId},
                 #{fromDestination}, #{toDestination}, #{selectField},
-                #{conditionField}, #{conditionType}, #{status}, #{groupId}, #{errorMessage},#{ruleDataBaseId},#{systemTag})
+                #{conditionField}, #{conditionType}, #{status}, #{groupId}, #{errorMessage},#{ruleDataBaseId},#{systemTag},#{cepId})
     </insert>
 
     <select id="getRuleEngines" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
@@ -124,7 +125,8 @@
             to_destination=#{toDestination},
             rule_database_id=#{ruleDataBaseId},
             error_destination=#{errorDestination},
-            error_message=#{errorMessage}
+            error_message=#{errorMessage},
+            cep_id=#{cepId}
         where id = #{id,jdbcType=INTEGER}
           and status != 2
     </update>

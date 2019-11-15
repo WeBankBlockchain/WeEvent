@@ -69,6 +69,9 @@ public class RuleEngineService {
     @Autowired
     private BrokerMapper brokerMapper;
 
+    @Autowired
+    private DAGDetectUtil dagDetectUtil;
+
 
     @Value("${weevent.processor.url:http://127.0.0.1:7008}")
     private String processorUrl;
@@ -315,8 +318,7 @@ public class RuleEngineService {
                 ruleEngineConditionMapper.batchInsert(ruleEngineConditionList);
             }
             return ruleEngineMapper.updateRuleEngine(ruleEngineEntity);
-        } catch (
-                Exception e) {
+        } catch (Exception e) {
             log.error("update ruleEngine fail", e);
             throw new GovernanceException("update ruleEngine fail", e);
         }
@@ -669,8 +671,8 @@ public class RuleEngineService {
         if (ruleEngineEntity.getPayloadMap().isEmpty()) {
             throw new GovernanceException("rule description is empty");
         }
-        if (ruleEngineEntity.getPayload() != null && ruleEngineEntity.getPayload().length() > 4000) {
-            throw new GovernanceException("rule description length cannot exceed 4000");
+        if (ruleEngineEntity.getPayload() != null && ruleEngineEntity.getPayload().length() > 4096) {
+            throw new GovernanceException("rule description length cannot exceed 4096");
         }
 
     }
@@ -814,7 +816,7 @@ public class RuleEngineService {
             map.merge(engineEntity.getFromDestination(), new HashSet<>(Collections.singleton(engineEntity.getToDestination())), (a, b) -> commonService.mergeSet(a, b));
         }
         Set<String> set = map.keySet();
-        return DAGDetectUtil.checkLoop(map, set);
+        return dagDetectUtil.checkLoop(map, set);
     }
 
 
