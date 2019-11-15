@@ -12,8 +12,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -85,7 +87,6 @@ public class CommonService implements AutoCloseable {
     public CloseableHttpResponse getCloseResponse(HttpServletRequest req, String newUrl, String jsonString) throws ServletException {
         CloseableHttpResponse closeResponse;
         try {
-
             log.info("url {}", newUrl);
             CloseableHttpClient client = this.generateHttpClient(newUrl);
             if (req.getMethod().equals(METHOD_TYPE)) {
@@ -274,6 +275,13 @@ public class CommonService implements AutoCloseable {
         }
 
         return strAllParam;
+    }
+
+    public Set<String> mergeSet(Set<String> list1, Set<String> list2) {
+        Set<String> set = new HashSet<>();
+        set.addAll(list1);
+        set.addAll(list2);
+        return set;
     }
 
 

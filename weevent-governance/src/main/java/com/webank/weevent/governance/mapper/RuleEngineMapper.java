@@ -24,10 +24,14 @@ public interface RuleEngineMapper {
     // update RuleEngineEntity
     Boolean updateRuleEngine(RuleEngineEntity ruleEngineEntity);
 
+    List<RuleEngineEntity> getRuleTopicList(RuleEngineEntity ruleEngineEntity);
+
     Boolean updateRuleEngineStatus(RuleEngineEntity ruleEngineEntity);
 
     int countRuleEngine(RuleEngineEntity ruleEngineEntity);
 
     RuleEngineEntity getRuleById(Integer id);
+
+    List<RuleEngineEntity> checkRuleNameRepeat(RuleEngineEntity ruleEngineEntity);
 
 }
