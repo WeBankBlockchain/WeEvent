@@ -11,7 +11,6 @@
         <result column="payload" property="payload" jdbcType="VARCHAR"/>
         <result column="user_id" property="userId" jdbcType="INTEGER"/>
         <result column="broker_id" property="brokerId" jdbcType="INTEGER"/>
-        <result column="cep_id" property="cepId" jdbcType="VARCHAR"/>
         <result column="broker_url" property="brokerUrl" jdbcType="VARCHAR"/>
         <result column="from_destination" property="fromDestination" jdbcType="VARCHAR"/>
         <result column="to_destination" property="toDestination" jdbcType="VARCHAR"/>
@@ -28,17 +27,17 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,create_date,last_update, rule_name,payload_type,payload,broker_id,cep_id,broker_url,user_id,
+        id,create_date,last_update, rule_name,payload_type,payload,broker_id,broker_url,user_id,
          from_destination,to_destination,select_field,condition_field,condition_type,
          rule_database_id,error_destination,error_message,status,group_id,system_tag
     </sql>
 
     <insert id="addRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
             useGeneratedKeys="true" keyProperty="id">
-        insert into t_rule_engine(rule_name, payload_type, payload, broker_id, broker_url, user_id, cep_id,
+        insert into t_rule_engine(rule_name, payload_type, payload, broker_id, broker_url, user_id,
                                   from_destination, to_destination, select_field,
                                   condition_field, condition_type, status, group_id, error_message,rule_database_id,system_tag)
-        values (#{ruleName}, #{payloadType}, #{payload}, #{brokerId}, #{brokerUrl}, #{userId}, #{cepId},
+        values (#{ruleName}, #{payloadType}, #{payload}, #{brokerId}, #{brokerUrl}, #{userId},
                 #{fromDestination}, #{toDestination}, #{selectField},
                 #{conditionField}, #{conditionType}, #{status}, #{groupId}, #{errorMessage},#{ruleDataBaseId},#{systemTag})
     </insert>
