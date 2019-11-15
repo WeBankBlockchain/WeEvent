@@ -139,7 +139,7 @@ public class CEPRuleMQ {
                             String content = new String(event.getContent());
                             log.info("on event:{},content:{}", event.toString(), content);
 
-                            if ("json".equals(event.getExtensions().get("weevent-format")) && CommonUtil.checkValidJson(content)) {
+                            if (CommonUtil.checkValidJson(content)) {
                                 handleOnEvent(client, event, ruleMap);
                             } else {
                                 handleOnEventOtherPattern(client, event, ruleMap);
@@ -246,7 +246,7 @@ public class CEPRuleMQ {
                     // execute the preparedstatement
                     int res = preparedStmt.executeUpdate();
                     if (res > 0) {
-                        log.info("insert db success!!!");
+                        log.info("insert db success...");
                     }
                     preparedStmt.close();
 
