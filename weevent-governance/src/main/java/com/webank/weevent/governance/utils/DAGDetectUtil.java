@@ -9,6 +9,7 @@ import java.util.Stack;
 
 @SuppressWarnings("unchecked")
 public class DAGDetectUtil {
+    private static Stack<String> stack = new Stack<>();
 
     public static boolean checkLoop(Map<String, Set<String>> map, Set<String> topicSet) {
         Map start = createNode("start");
@@ -35,7 +36,6 @@ public class DAGDetectUtil {
         return node;
     }
 
-    private static Stack<String> stack = new Stack<>();
 
     private static boolean checkChild(Map cursor) {
         if (stack.contains(cursor.get("topic"))) {
