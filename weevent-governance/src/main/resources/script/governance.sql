@@ -59,7 +59,7 @@ CREATE TABLE t_rule_engine (
   `broker_url` VARCHAR(255) NULL DEFAULT NULL COMMENT 'broker url',
   `from_destination` VARCHAR(64)  NULL DEFAULT NULL COMMENT  'message origin',
   `to_destination` VARCHAR(64)  NULL DEFAULT NULL COMMENT  'message reached',
-  `select_field` VARCHAR(255) NULL DEFAULT NULL COMMENT 'selected field',
+  `select_field` VARCHAR(4096) NULL DEFAULT NULL COMMENT 'selected field',
   `condition_field` VARCHAR(255) NULL DEFAULT NULL COMMENT 'condition field',
   `condition_type` INT(2) NULL DEFAULT NULL COMMENT 'condition type',
   `status` INT(2)  NULL DEFAULT null COMMENT '0 means not started, 1 means running,2 means is deleted',
