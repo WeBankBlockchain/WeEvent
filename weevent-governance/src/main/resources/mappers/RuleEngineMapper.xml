@@ -106,6 +106,13 @@
         <include refid="ruleEngineWhere"/>
     </select>
 
+    <select id="checkRuleNameRepeat" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from t_rule_engine where rule_name=#{ruleName}
+    </select>
+
     <update id="updateRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity">
         update t_rule_engine
         set rule_name=#{ruleName},

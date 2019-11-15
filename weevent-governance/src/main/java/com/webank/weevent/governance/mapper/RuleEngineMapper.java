@@ -32,4 +32,6 @@ public interface RuleEngineMapper {
 
     RuleEngineEntity getRuleById(Integer id);
 
+    List<RuleEngineEntity> checkRuleNameRepeat(RuleEngineEntity ruleEngineEntity);
+
 }

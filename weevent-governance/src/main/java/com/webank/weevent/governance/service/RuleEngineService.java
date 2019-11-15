@@ -685,12 +685,9 @@ public class RuleEngineService {
     //check name repeat
     private boolean checkRuleNameRepeat(RuleEngineEntity ruleEngineEntity) {
         RuleEngineEntity rule = new RuleEngineEntity();
-        rule.setGroupId(ruleEngineEntity.getGroupId());
-        rule.setUserId(ruleEngineEntity.getUserId());
-        rule.setBrokerId(ruleEngineEntity.getBrokerId());
         rule.setRuleName(ruleEngineEntity.getRuleName());
         rule.setSystemTag("2");
-        List<RuleEngineEntity> ruleEngines = ruleEngineMapper.getRuleEngines(rule);
+        List<RuleEngineEntity> ruleEngines = ruleEngineMapper.checkRuleNameRepeat(rule);
         if (CollectionUtils.isEmpty(ruleEngines)) {
             return true;
         }
