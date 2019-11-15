@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @SuppressWarnings("unchecked")
 @Component
 public class DAGDetectUtil {
-    private static Stack<String> stack = new Stack<>();
+    private  Stack<String> stack = new Stack<>();
 
     public boolean checkLoop(Map<String, Set<String>> map, Set<String> topicSet) {
         Map start = createNode("start");
