@@ -138,9 +138,10 @@ public class CEPRuleMQ {
                         try {
                             String content = new String(event.getContent());
                             log.info("on event:{},content:{}", event.toString(), content);
-                            
+
+
                             // check the content
-                            if (CommonUtil.checkValidJson(content)) {
+                            if (JSONObject.isValid(content)) {
                                 handleOnEvent(client, event, ruleMap);
                             } else {
                                 handleOnEventOtherPattern(client, event, ruleMap);
@@ -164,7 +165,7 @@ public class CEPRuleMQ {
                             String content = new String(event.getContent());
                             log.info("on event:{},content:{}", event.toString(), content);
                             // check the content
-                            if (CommonUtil.checkValidJson(content)) {
+                            if (JSONObject.isValid(content)) {
                                 handleOnEvent(client, event, ruleMap);
                             } else {
                                 handleOnEventOtherPattern(client, event, ruleMap);
@@ -336,8 +337,7 @@ public class CEPRuleMQ {
                             log.info("publish select: {},eventContent:{}", entry.getValue().getSelectField(), eventContent);
 
                             // publish the message
-                            Map<String, String> extensions = new HashMap<>();
-                            WeEvent weEvent = new WeEvent(entry.getValue().getToDestination(), eventContent.getBytes(StandardCharsets.UTF_8), extensions);
+                            WeEvent weEvent = new WeEvent(entry.getValue().getToDestination(), eventContent.getBytes(StandardCharsets.UTF_8), event.getExtensions());
                             log.info("after hitRuleEngine weEvent  groupId: {}, event:{}", groupId, weEvent.toString());
                             IWeEventClient toDestinationClient = getClient(entry.getValue());
                             toDestinationClient.publish(weEvent);
