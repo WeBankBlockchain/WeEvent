@@ -140,8 +140,8 @@ public class CommonUtil {
             List<String> objJsonKeys = getKeys(objJson);
 
             for (String contentKey : contentKeys) {
-                //&& (!ConstantsHelper.EVENT_ID.equals(contentKey))
-                if (!objJsonKeys.contains(contentKey)) {
+
+                if (!((objJsonKeys.contains(contentKey)) || "eventId".equals(contentKey))) {
                     tag = false;
                     break;
                 }
