@@ -277,12 +277,6 @@ public class CommonService implements AutoCloseable {
         return strAllParam;
     }
 
-    public Set<String> mergeSet(Set<String> set1, Set<String> set2) {
-        HashSet<String> topicSet = new HashSet<>(set1);
-        topicSet.addAll(set2);
-        return topicSet;
-    }
-
 
     @Override
     public void close() throws Exception {
