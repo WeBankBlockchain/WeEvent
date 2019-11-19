@@ -3,7 +3,6 @@ package com.webank.weevent.governance.service;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -810,13 +810,8 @@ public class RuleEngineService {
             return true;
         }
         ruleTopicList.add(ruleEngineEntity);
-        Map<String, Set<String>> map = new HashMap<>();
-
-        for (RuleEngineEntity engineEntity : ruleTopicList) {
-            map.merge(engineEntity.getFromDestination(), new HashSet<>(Collections.singleton(engineEntity.getToDestination())), (a, b) -> commonService.mergeSet(a, b));
-        }
-        Set<String> set = map.keySet();
-        return dagDetectUtil.checkLoop(map, set);
+        Map<String, Set<String>> topicMap = ruleTopicList.stream().collect(Collectors.groupingBy(RuleEngineEntity::getFromDestination, Collectors.mapping(RuleEngineEntity::getToDestination, Collectors.toSet())));
+        return dagDetectUtil.checkLoop(topicMap);
     }
 
 
