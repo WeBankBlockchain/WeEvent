@@ -162,6 +162,7 @@ public class TopicHistoricalService {
         return dateList;
     }
 
+    @SuppressWarnings("unchecked")
     public void createRule(HttpServletRequest request, HttpServletResponse response, BrokerEntity brokerEntity) throws GovernanceException {
         String goalUrl = "";
         String user = "";
