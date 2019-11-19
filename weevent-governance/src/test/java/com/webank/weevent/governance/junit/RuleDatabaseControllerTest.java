@@ -48,9 +48,10 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
     }
 
     @Test
-    public void testAddCirculationDatabase() throws Exception {
-        String content = "{\"databaseUrl\":\"jdbc:mysql://127.0.0.1:3306/governance?user=root&password=123456&useUnicode=true&characterEncoding=utf-8&useSSL=false\"," +
-                "\"userId\":"+this.userId+",\"brokerId\":\"1\"}";
+    public void testAddRuleDatabase() throws Exception {
+        String content = "{\"dataSourceName\":\"test\",\"databaseName\":\"governance\",\"ip\":\"127.0.0.1\",\"port\":\"3306\"," +
+                "\"userName\":\"root\",\"password\":\"123456\",\"tableName\":\"t_rule_database\",\"optionalParameter\":\"useUnicode=true&characterEncoding=utf-8&useSSL=false\"," +
+                "\"userId\":" + this.userId + ",\"brokerId\":\"1\",\"systemTag\":\"2\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/circulationDatabase/add").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
@@ -59,7 +60,7 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
     }
 
     @Test
-    public void testGetCirculationDatabases() throws Exception {
+    public void testGetRuleDatabases() throws Exception {
         String content = "{\"id\":\"1\",\"userId\":\"1\"}";
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/circulationDatabase/list").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content))
                 .andReturn();
@@ -71,9 +72,10 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
     }
 
     @Test
-    public void testUpdateCirculationDatabase() throws Exception {
-        String content = "{\"id\":\"1\",\"userId\":\"1\"," +
-                "\"databaseUrl\":\"jdbc:mysql://127.0.0.1:3306/governance?user=root&password=123456&useUnicode=true&characterEncoding=utf-8&useSSL=false\"}";
+    public void testUpdateRuleDatabase() throws Exception {
+        String content = "{\"id\":\"1\",\"dataSourceName\":\"test123\",\"databaseName\":\"governance\",\"ip\":\"127.0.0.1\",\"port\":\"3306\"," +
+                "\"userName\":\"root\",\"password\":\"123456\",\"tableName\":\"t_rule_database\",\"optionalParameter\":\"useUnicode=true&characterEncoding=utf-8&useSSL=false\"," +
+                "\"userId\":" + this.userId + ",\"brokerId\":\"1\",\"systemTag\":\"2\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/circulationDatabase/update").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
@@ -82,7 +84,7 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
     }
 
     @Test
-    public void testDeleteCirculationDatabase() throws Exception {
+    public void testDeleteRuleDatabase() throws Exception {
         String content = "{\"id\":\"1\",\"userId\":\"1\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/circulationDatabase/delete").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content))
                 .andReturn().getResponse();

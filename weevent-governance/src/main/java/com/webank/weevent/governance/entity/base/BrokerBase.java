@@ -27,11 +27,6 @@ public class BrokerBase extends BaseEntity {
 
     private Integer isDelete;
 
-    /**
-     * 1 means configured ,2 means not configured
-     */
-    private String isConfigRule;
-
     public void setBrokerUrl(String brokerUrl) {
         this.brokerUrl = brokerUrl == null ? null : brokerUrl.trim();
     }

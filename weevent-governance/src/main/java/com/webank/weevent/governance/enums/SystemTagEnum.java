@@ -1,14 +1,14 @@
 package com.webank.weevent.governance.enums;
 
-public enum IsConfigRuleEnum {
+public enum SystemTagEnum {
 
-    CONFIGURED("1", "configured"),
-    NOT_CONFIGURED("2", "not configured");
+    BUILT_IN_SYSTEM("1", "built in system"),
+    USER_ADDED("2", "user added");
 
     private String code;
     private String value;
 
-    IsConfigRuleEnum(String code, String value) {
+    SystemTagEnum(String code, String value) {
         this.code = code;
         this.value = value;
     }
@@ -30,7 +30,7 @@ public enum IsConfigRuleEnum {
     }
 
     public String getValueByCode(String code) {
-        for (IsConfigRuleEnum isDeleteEnum : IsConfigRuleEnum.values()) {
+        for (SystemTagEnum isDeleteEnum : SystemTagEnum.values()) {
             if (isDeleteEnum.code.equals(code)) {
                 return isDeleteEnum.value;
             }

@@ -198,19 +198,8 @@ public class CommonService implements AutoCloseable {
     }
 
 
-    public void checkDataBaseUrl(String dataBaseUrl, String tableName) throws GovernanceException {
-        if (StringUtil.isBlank(dataBaseUrl)) {
-            return;
-        }
-        Map<String, String> stringStringMap = uRLRequest(dataBaseUrl);
-        String defaultUrl = dataBaseUrl.substring(0, dataBaseUrl.indexOf(ConstantProperties.QUESTION_MARK));
-        String user = stringStringMap.get("user");
-        String password = stringStringMap.get("password");
-        // first use database
-        int first = dataBaseUrl.lastIndexOf("/");
-        int end = dataBaseUrl.indexOf("?");
-        String dbName = dataBaseUrl.substring(first + 1, end);
-        try (Connection conn = DriverManager.getConnection(defaultUrl, user, password);
+    public void checkDataBaseUrl(String dataBaseUrl, String tableName, String user, String password, String dbName) throws GovernanceException {
+        try (Connection conn = DriverManager.getConnection(dataBaseUrl, user, password);
              Statement stat = conn.createStatement()) {
             if (conn != null) {
                 log.info("database connect success,dataBaseUrl:{}", dataBaseUrl);

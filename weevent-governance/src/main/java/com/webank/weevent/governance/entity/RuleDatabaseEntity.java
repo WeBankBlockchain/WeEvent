@@ -14,4 +14,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 public class RuleDatabaseEntity extends RuleDatabaseBase {
 
+    private String databaseUrl;
+
 }

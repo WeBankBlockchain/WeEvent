@@ -29,37 +29,36 @@ public class RuleDatabaseController {
     @Autowired
     private RuleDatabaseService ruleDatabaseService;
 
-    // get all circulationDatabaseEntity service
     @PostMapping("/list")
-    public GovernanceResult getCirculationDatabases(HttpServletRequest request, @RequestBody RuleDatabaseEntity ruleDatabaseEntity) throws GovernanceException {
-        log.info("get circulationDatabaseEntity:{}", ruleDatabaseEntity);
-        List<RuleDatabaseEntity> circulationDatabases = ruleDatabaseService.circulationDatabaseList(request, ruleDatabaseEntity);
+    public GovernanceResult getRuleDataBaseList(HttpServletRequest request, @RequestBody RuleDatabaseEntity ruleDatabaseEntity) throws GovernanceException {
+        log.info("getRuleDataBaseList:{}", ruleDatabaseEntity);
+        List<RuleDatabaseEntity> ruleDatabases = ruleDatabaseService.getRuleDataBaseList(request, ruleDatabaseEntity);
 
-        return new GovernanceResult(circulationDatabases);
+        return new GovernanceResult(ruleDatabases);
     }
 
-    // add circulationDatabaseEntity
+    // add ruleDatabase
     @PostMapping("/add")
-    public GovernanceResult addCirculationDatabase(@Valid @RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request,
-                                                   HttpServletResponse response) throws GovernanceException {
-        log.info("add  circulationDatabaseEntity service into db :{}", ruleDatabaseEntity);
-        RuleDatabaseEntity rule = ruleDatabaseService.addCirculationDatabase(ruleDatabaseEntity, request, response);
+    public GovernanceResult addRuleDatabase(@Valid @RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request,
+                                            HttpServletResponse response) throws GovernanceException {
+        log.info("add  ruleDatabaseEntity service into db :{}", ruleDatabaseEntity);
+        RuleDatabaseEntity rule = ruleDatabaseService.addRuleDatabase(ruleDatabaseEntity, request, response);
         return new GovernanceResult(rule);
     }
 
     @PostMapping("/update")
-    public GovernanceResult updateCirculationDatabase(@RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request,
-                                                      HttpServletResponse response) throws GovernanceException {
-        log.info("update  circulationDatabaseEntity service ,circulationDatabaseEntity:{}", ruleDatabaseEntity);
-        boolean flag = ruleDatabaseService.updateCirculationDatabase(ruleDatabaseEntity, request, response);
+    public GovernanceResult updateRuleDatabase(@RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request,
+                                               HttpServletResponse response) throws GovernanceException {
+        log.info("update  ruleDatabaseEntity service ,RuleDatabaseEntity:{}", ruleDatabaseEntity);
+        boolean flag = ruleDatabaseService.updateRuleDatabase(ruleDatabaseEntity, request, response);
         return new GovernanceResult(flag);
     }
 
 
     @PostMapping("/delete")
-    public GovernanceResult deleteCirculationDatabase(@RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
-        log.info("delete  circulationDatabaseEntity service ,id:{}", ruleDatabaseEntity.getId());
-        boolean flag = ruleDatabaseService.deleteCirculationDatabase(ruleDatabaseEntity, request);
+    public GovernanceResult deleteRuleDatabase(@RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
+        log.info("delete  ruleDatabaseEntity service ,id:{}", ruleDatabaseEntity.getId());
+        boolean flag = ruleDatabaseService.deleteRuleDatabase(ruleDatabaseEntity, request);
         return new GovernanceResult(flag);
     }
 }

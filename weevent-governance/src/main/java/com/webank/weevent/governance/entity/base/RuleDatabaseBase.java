@@ -16,16 +16,24 @@ public class RuleDatabaseBase extends BaseEntity {
 
     private Integer brokerId;
 
-    private String databaseUrl;
+    private String ip;
+
+    private String port;
+
+    private String userName;
+
+    private String password;
 
     private String databaseName;
 
+    private String optionalParameter;
+
+    private String dataSourceName;
+
     private String tableName;
 
-    /**
-     * 1 visible ,2 invisible
-     */
-    private String isVisible;
+    // 1 means the system
+    private String systemTag;
 
 
 }
