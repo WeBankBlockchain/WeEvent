@@ -14,7 +14,8 @@ import org.springframework.stereotype.Component;
 public class DAGDetectUtil {
     private  Stack<String> stack = new Stack<>();
 
-    public boolean checkLoop(Map<String, Set<String>> map, Set<String> topicSet) {
+    public boolean checkLoop(Map<String, Set<String>> map) {
+        Set<String> topicSet = map.keySet();
         Map start = createNode("start");
         Map<String, Map> nodeMap = new HashMap<>();
         topicSet.forEach(it -> {
@@ -42,7 +43,6 @@ public class DAGDetectUtil {
 
     private boolean checkChild(Map cursor) {
         if (stack.contains(cursor.get("topic"))) {
-            stack = new Stack<>();
             return false;
         }
         stack.push((String) cursor.get("topic"));
