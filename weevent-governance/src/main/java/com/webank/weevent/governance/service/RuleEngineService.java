@@ -134,7 +134,7 @@ public class RuleEngineService {
             if (accountId == null || !accountId.equals(ruleEngineEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
-            ruleEngineEntity.setSystemTag(SystemTagEnum.USER_ADDED.getValue());
+            ruleEngineEntity.setSystemTag(SystemTagEnum.USER_ADDED.getCode());
             ruleEngineEntity.setStatus(StatusEnum.NOT_STARTED.getCode());
             String payload = JSONObject.toJSON(ruleEngineEntity.getPayloadMap()).toString();
             ruleEngineEntity.setPayload(payload);
@@ -688,7 +688,7 @@ public class RuleEngineService {
     private boolean checkRuleNameRepeat(RuleEngineEntity ruleEngineEntity) {
         RuleEngineEntity rule = new RuleEngineEntity();
         rule.setRuleName(ruleEngineEntity.getRuleName());
-        rule.setSystemTag(SystemTagEnum.USER_ADDED.getValue());
+        rule.setSystemTag(SystemTagEnum.USER_ADDED.getCode());
         List<RuleEngineEntity> ruleEngines = ruleEngineMapper.checkRuleNameRepeat(rule);
         if (CollectionUtils.isEmpty(ruleEngines)) {
             return true;

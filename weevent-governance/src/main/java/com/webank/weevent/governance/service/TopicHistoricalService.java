@@ -22,6 +22,7 @@ import com.webank.weevent.governance.entity.TopicTopicHistoricalEntity;
 import com.webank.weevent.governance.enums.ConditionTypeEnum;
 import com.webank.weevent.governance.enums.PayloadEnum;
 import com.webank.weevent.governance.enums.StatusEnum;
+import com.webank.weevent.governance.enums.SystemTagEnum;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.RuleDatabaseMapper;
 import com.webank.weevent.governance.mapper.RuleEngineMapper;
@@ -192,7 +193,7 @@ public class TopicHistoricalService {
             RuleDatabaseEntity ruleDatabaseEntity = initializationRuleDataBase(dbName + brokerEntity.getUserId(), TOPIC_HISTORICAL, dataBaseUrl, brokerEntity.getUserId());
             ruleDatabaseEntity = existRuleDataBase(ruleDatabaseEntity);
             if (ruleDatabaseEntity.getId() == null) {
-                ruleDatabaseMapper.addCirculationDatabase(ruleDatabaseEntity);
+                ruleDatabaseMapper.addRuleDatabase(ruleDatabaseEntity);
             }
 
             //Request broker to get all groups
@@ -218,7 +219,7 @@ public class TopicHistoricalService {
         ruleDatabaseEntity.setUserId(userId);
         ruleDatabaseEntity.setTableName(newTableName);
         ruleDatabaseEntity.setDatabaseUrl(dataBaseUrl);
-        ruleDatabaseEntity.setIsVisible("2");
+        ruleDatabaseEntity.setSystemTag(SystemTagEnum.BUILT_IN_SYSTEM.getCode());
         return ruleDatabaseEntity;
     }
 
@@ -285,7 +286,7 @@ public class TopicHistoricalService {
     }
 
     private RuleDatabaseEntity existRuleDataBase(RuleDatabaseEntity ruleDatabaseEntity) {
-        List<RuleDatabaseEntity> ruleDatabaseEntities = ruleDatabaseMapper.circulationDatabaseList(ruleDatabaseEntity);
+        List<RuleDatabaseEntity> ruleDatabaseEntities = ruleDatabaseMapper.getRuleDataBaseList(ruleDatabaseEntity);
         if (CollectionUtils.isEmpty(ruleDatabaseEntities)) {
             return ruleDatabaseEntity;
         }
