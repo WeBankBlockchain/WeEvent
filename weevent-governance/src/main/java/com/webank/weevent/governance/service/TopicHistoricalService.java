@@ -113,7 +113,7 @@ public class TopicHistoricalService {
             });
             return returnMap;
         } catch (Exception e) {
-            log.info("get historicalDataEntity fail", e);
+            log.error("get historicalDataEntity fail", e);
             throw new GovernanceException("get historicalDataEntity fail", e);
         }
 
@@ -135,7 +135,7 @@ public class TopicHistoricalService {
             }
             return historicalEntities;
         } catch (Exception e) {
-            log.info("get eventList fail", e);
+            log.error("get eventList fail", e);
             throw new GovernanceException("get eventList fail", e);
         }
 
