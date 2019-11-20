@@ -12,10 +12,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -275,12 +273,6 @@ public class CommonService implements AutoCloseable {
         }
 
         return strAllParam;
-    }
-
-    public Set<String> mergeSet(Set<String> set1, Set<String> set2) {
-        HashSet<String> topicSet = new HashSet<>(set1);
-        topicSet.addAll(set2);
-        return topicSet;
     }
 
 
