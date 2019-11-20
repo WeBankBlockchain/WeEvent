@@ -23,6 +23,7 @@ import com.webank.weevent.governance.entity.RuleEngineEntity;
 import com.webank.weevent.governance.enums.ConditionTypeEnum;
 import com.webank.weevent.governance.enums.PayloadEnum;
 import com.webank.weevent.governance.enums.StatusEnum;
+import com.webank.weevent.governance.enums.SystemTagEnum;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.BrokerMapper;
 import com.webank.weevent.governance.mapper.RuleDatabaseMapper;
@@ -133,7 +134,7 @@ public class RuleEngineService {
             if (accountId == null || !accountId.equals(ruleEngineEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
-            ruleEngineEntity.setSystemTag("2");
+            ruleEngineEntity.setSystemTag(SystemTagEnum.USER_ADDED.getValue());
             ruleEngineEntity.setStatus(StatusEnum.NOT_STARTED.getCode());
             String payload = JSONObject.toJSON(ruleEngineEntity.getPayloadMap()).toString();
             ruleEngineEntity.setPayload(payload);
@@ -142,7 +143,6 @@ public class RuleEngineService {
             }
             ruleEngineEntity.setCreateDate(new Date());
             ruleEngineEntity.setLastUpdate(new Date());
-            ruleEngineEntity.setErrorMessage(this.ERROR_MSG);
 
             //check rule
             this.checkRule(ruleEngineEntity);
@@ -505,7 +505,6 @@ public class RuleEngineService {
 
             //set required fields
             rule = ruleEngines.get(0);
-            rule.setErrorMessage(ERROR_MSG);
             String conditionField = getConditionField(this.getRuleEngineConditionList(rule));
             rule.setConditionField(conditionField);
             log.info("condition:{}", conditionField);
@@ -555,6 +554,7 @@ public class RuleEngineService {
             }
             //deal processor result
             String mes = EntityUtils.toString(closeResponse.getEntity());
+            log.info("start rule end====result:{}", mes);
             JSONObject jsonObject = JSONObject.parseObject(mes);
             Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
             String msg = jsonObject.get("errorMsg").toString();
@@ -688,7 +688,7 @@ public class RuleEngineService {
     private boolean checkRuleNameRepeat(RuleEngineEntity ruleEngineEntity) {
         RuleEngineEntity rule = new RuleEngineEntity();
         rule.setRuleName(ruleEngineEntity.getRuleName());
-        rule.setSystemTag("2");
+        rule.setSystemTag(SystemTagEnum.USER_ADDED.getValue());
         List<RuleEngineEntity> ruleEngines = ruleEngineMapper.checkRuleNameRepeat(rule);
         if (CollectionUtils.isEmpty(ruleEngines)) {
             return true;
