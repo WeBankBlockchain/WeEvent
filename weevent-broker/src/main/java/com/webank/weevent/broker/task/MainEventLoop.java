@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
@@ -14,7 +15,6 @@ import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * Detect new event from target group.
@@ -24,8 +24,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 @Slf4j
 public class MainEventLoop extends StoppableTask {
-    // daemon thread pool
-    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
+    // daemon Executor
+    private Executor executor;
 
     // block chain
     private IBlockChain blockChain;
@@ -48,9 +48,9 @@ public class MainEventLoop extends StoppableTask {
     // new block notified
     private BlockingDeque<Long> blockNotifyQueue;
 
-    public MainEventLoop(ThreadPoolTaskExecutor threadPoolTaskExecutor, IBlockChain blockChain, String groupId) throws BrokerException {
+    public MainEventLoop(Executor executor, IBlockChain blockChain, String groupId) throws BrokerException {
         super("main-event-loop-" + groupId);
-        this.threadPoolTaskExecutor = threadPoolTaskExecutor;
+        this.executor = executor;
         this.blockChain = blockChain;
         this.groupId = groupId;
 
@@ -71,7 +71,7 @@ public class MainEventLoop extends StoppableTask {
     }
 
     public synchronized void doStart() {
-        this.threadPoolTaskExecutor.execute(this);
+        this.executor.execute(this);
     }
 
     public synchronized void doStop() {
@@ -94,7 +94,7 @@ public class MainEventLoop extends StoppableTask {
     }
 
     public synchronized void addSubscription(Subscription subscription) {
-        subscription.doStart(this.threadPoolTaskExecutor);
+        subscription.doStart(this.executor);
 
         this.subscriptions.put(subscription.getUuid(), subscription);
         if (subscription.getHistoryEventLoop() == null) {

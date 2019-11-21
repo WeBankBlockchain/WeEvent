@@ -3,6 +3,7 @@ package com.webank.weevent.broker.fabric.sdk;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.BrokerApplication;
@@ -66,7 +67,7 @@ public class FabricDelegate {
         initRedisService();
     }
 
-    public SendResult publishEvent(String topicName, String channelName, String eventContent, String extensions) throws BrokerException {
+    public CompletableFuture<SendResult> publishEvent(String topicName, String channelName, String eventContent, String extensions) throws BrokerException {
 
         return this.fabricMap.get(channelName).publishEvent(topicName, eventContent, extensions);
     }
