@@ -2,9 +2,14 @@ package com.webank.weevent.protocol.jsonrpc;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
+import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.TopicPage;
@@ -37,6 +42,21 @@ public class BrokerRpc implements IBrokerRpc {
         this.producer = producer;
     }
 
+    private SendResult publishInner(WeEvent event, String groupId) throws BrokerException {
+        try {
+            return this.producer.publish(event, groupId).get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("publishWeEvent failed due to transaction execution error.", e);
+            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (TimeoutException e) {
+            log.error("publishWeEvent failed due to transaction execution timeout.", e);
+            SendResult sendResult = new SendResult();
+            sendResult.setTopic(event.getTopic());
+            sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
+            return sendResult;
+        }
+    }
+
     @Override
     public SendResult publish(@JsonRpcParam(value = "topic") String topic,
                               @JsonRpcParam(value = "groupId") String groupId,
@@ -44,7 +64,7 @@ public class BrokerRpc implements IBrokerRpc {
                               @JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException {
         log.info("topic:{} groupId:{} content.length:{} extensions:{}", topic, groupId, content.length, JSON.toJSONString(extensions));
 
-        return this.producer.publish(new WeEvent(topic, content, extensions), groupId);
+        return this.publishInner(new WeEvent(topic, content, extensions), groupId);
     }
 
     @Override
@@ -53,7 +73,7 @@ public class BrokerRpc implements IBrokerRpc {
                               @JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException {
         log.info("topic:{} contentLength:{} extensions:{}", topic, content.length, JSON.toJSONString(extensions));
 
-        return this.producer.publish(new WeEvent(topic, content, extensions), "");
+        return this.publishInner(new WeEvent(topic, content, extensions), "");
     }
 
     @Override
@@ -61,7 +81,7 @@ public class BrokerRpc implements IBrokerRpc {
                               @JsonRpcParam(value = "content") byte[] content) throws BrokerException {
         log.info("topic:{} content.length:{}", topic, content.length);
 
-        return this.producer.publish(new WeEvent(topic, content, new HashMap<>()), "");
+        return this.publishInner(new WeEvent(topic, content, new HashMap<>()), "");
     }
 
     @Override
@@ -70,7 +90,7 @@ public class BrokerRpc implements IBrokerRpc {
                               @JsonRpcParam(value = "content") byte[] content) throws BrokerException {
         log.info("topic:{} groupId:{} content.length:{}", topic, groupId, content.length);
 
-        return this.producer.publish(new WeEvent(topic, content, new HashMap<>()), groupId);
+        return this.publishInner(new WeEvent(topic, content, new HashMap<>()), groupId);
     }
 
     @Override
