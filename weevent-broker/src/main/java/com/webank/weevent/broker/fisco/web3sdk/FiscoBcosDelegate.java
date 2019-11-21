@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.BrokerApplication;
@@ -99,7 +100,7 @@ public class FiscoBcosDelegate {
     public static ThreadPoolTaskExecutor initThreadPool(FiscoConfig fiscoConfig) {
         // init thread pool
         ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
-        pool.setThreadNamePrefix("web3sdk_");
+        pool.setThreadNamePrefix("web3sdk-");
         pool.setCorePoolSize(fiscoConfig.getWeb3sdkCorePoolSize());
         pool.setMaxPoolSize(fiscoConfig.getWeb3sdkMaxPoolSize());
         // queue conflict with thread pool scale up, forbid it
@@ -130,7 +131,7 @@ public class FiscoBcosDelegate {
         if (fiscoConfig.getVersion().startsWith(WeEventConstants.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             log.info("Notice: FISCO-BCOS's version is 1.x");
 
-            // set web3sdk.Async thread pool
+            // set web3sdk.Async thread pool, special thread for sendAsync
             new org.bcos.web3j.utils.Async(threadPool);
 
             FiscoBcos fiscoBcos = new FiscoBcos(fiscoConfig);
@@ -140,7 +141,7 @@ public class FiscoBcosDelegate {
         } else if (fiscoConfig.getVersion().startsWith(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {
             log.info("Notice: FISCO-BCOS's version is 2.x");
 
-            // set web3sdk.Async thread pool
+            // set web3sdk.Async thread pool, special thread for sendAsync
             new org.fisco.bcos.web3j.utils.Async(threadPool);
 
             // 1 is always exist
@@ -267,7 +268,7 @@ public class FiscoBcosDelegate {
         }
     }
 
-    public SendResult publishEvent(String topicName, Long groupId, String eventContent, String extensions) throws BrokerException {
+    public CompletableFuture<SendResult> publishEvent(String topicName, Long groupId, String eventContent, String extensions) throws BrokerException {
         checkVersion(groupId);
 
         if (this.fiscoBcos != null) {
