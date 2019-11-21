@@ -44,7 +44,6 @@ import org.bcos.web3j.protocol.core.methods.response.EthBlockNumber;
 import org.bcos.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.bcos.web3j.tx.Contract;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * Wrapper of Web3SDK 1.x function.
@@ -64,7 +63,7 @@ public class Web3SDKWrapper {
      *
      * @return Web3j
      */
-    public static Web3j initWeb3j(FiscoConfig fiscoConfig, ThreadPoolTaskExecutor poolTaskExecutor) throws BrokerException {
+    public static Web3j initWeb3j(FiscoConfig fiscoConfig) throws BrokerException {
         // init web3j with given group id
         try {
             log.info("begin to initialize web3sdk");
@@ -92,7 +91,9 @@ public class Web3SDKWrapper {
             ConcurrentHashMap<String, ChannelConnections> keyID2connections = new ConcurrentHashMap<>();
             keyID2connections.put(fiscoConfig.getOrgId(), channelConnections);
             service.setAllChannelConnections(keyID2connections);
-            service.setThreadPool(poolTaskExecutor);
+
+            // special thread for TransactionSucCallback.onResponse, callback from IO thread directly if not setting
+            //service.setThreadPool(poolTaskExecutor);
             service.run();
 
             ChannelEthereumService channelEthereumService = new ChannelEthereumService();
@@ -105,7 +106,7 @@ public class Web3SDKWrapper {
                     .get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS).getWeb3ClientVersion();
             if (StringUtils.isBlank(nodeVersion)
                     || !nodeVersion.contains(WeEventConstants.FISCO_BCOS_1_X_VERSION_PREFIX)) {
-                log.error("init web3sdk failed, dismatch fisco version in node: {}", nodeVersion);
+                log.error("init web3sdk failed, mismatch FISCO-BCOS version in node: {}", nodeVersion);
                 throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
             }
 
