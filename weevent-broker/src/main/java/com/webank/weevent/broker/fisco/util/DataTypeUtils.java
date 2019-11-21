@@ -6,6 +6,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.sdk.BrokerException;
@@ -23,6 +24,7 @@ import org.bouncycastle.util.encoders.Hex;
 public final class DataTypeUtils {
 
     private static String STRING_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static Map<String, String> topicHashMap = new ConcurrentHashMap<>();
 
     /**
      * encode eventId
@@ -49,15 +51,22 @@ public final class DataTypeUtils {
      * @return substring left 4bit hash data to hex encode
      */
     public static String genTopicNameHash(String topicName) {
-        String encodeData = "";
+        if (topicHashMap.containsKey(topicName)) {
+            return topicHashMap.get(topicName);
+        }
+
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             byte[] messageDigest = md.digest(topicName.getBytes());
-            encodeData = new String(Hex.encode(messageDigest)).substring(0, WeEventConstants.TOPIC_NAME_ENCODE_LENGTH);
+            String hash = new String(Hex.encode(messageDigest)).substring(0, WeEventConstants.TOPIC_NAME_ENCODE_LENGTH);
+            topicHashMap.put(topicName, hash);
+
+            log.info("topic name hash: {} <-> {}", topicName, hash);
+            return hash;
         } catch (NoSuchAlgorithmException e) {
             log.error("NoSuchAlgorithmException:{}", e.getMessage());
+            return "";
         }
-        return encodeData;
     }
 
     /**
