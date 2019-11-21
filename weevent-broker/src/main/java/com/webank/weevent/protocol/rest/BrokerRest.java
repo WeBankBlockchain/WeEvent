@@ -1,7 +1,7 @@
 package com.webank.weevent.protocol.rest;
 
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.util.WeEventUtils;
@@ -41,7 +41,7 @@ public class BrokerRest implements IBrokerRpc {
     }
 
     @RequestMapping(path = "/publish")
-    public SendResult publish(@RequestParam Map<String, String> eventData) throws BrokerException {
+    public CompletableFuture<SendResult> publish(@RequestParam Map<String, String> eventData) throws BrokerException {
         if (!eventData.containsKey(WeEventConstants.EVENT_TOPIC)
                 || !eventData.containsKey(WeEventConstants.EVENT_CONTENT)) {
             log.error("miss param");
@@ -52,8 +52,9 @@ public class BrokerRest implements IBrokerRpc {
                 eventData.get(WeEventConstants.EVENT_TOPIC),
                 eventData.get(WeEventConstants.EVENT_CONTENT).getBytes().length);
 
-        Map<String, String> extensions = WeEventUtils.getExtensions(eventData);
-        WeEvent event = new WeEvent(eventData.get(WeEventConstants.EVENT_TOPIC), eventData.get(WeEventConstants.EVENT_CONTENT).getBytes(), extensions);
+        WeEvent event = new WeEvent(eventData.get(WeEventConstants.EVENT_TOPIC),
+                eventData.get(WeEventConstants.EVENT_CONTENT).getBytes(),
+                WeEventUtils.getExtensions(eventData));
 
         // get group id
         String groupId = "";

@@ -1,6 +1,7 @@
 package com.webank.weevent.broker.fisco;
 
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
 
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.plugin.IProducer;
@@ -25,7 +26,7 @@ public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IPr
     }
 
     @Override
-    public SendResult publish(WeEvent event, String groupIdStr) throws BrokerException {
+    public CompletableFuture<SendResult> publish(WeEvent event, String groupIdStr) throws BrokerException {
         log.debug("publish {} groupId: {}", event, groupIdStr);
 
         String groupId = selectGroupId(groupIdStr);
@@ -33,12 +34,9 @@ public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IPr
         ParamCheckUtils.validateEvent(event);
 
         // publishEvent support async operator in callback
-        SendResult sendResult = fiscoBcosDelegate.publishEvent(event.getTopic(),
+        return fiscoBcosDelegate.publishEvent(event.getTopic(),
                 Long.parseLong(groupId),
                 new String(event.getContent(), StandardCharsets.UTF_8),
                 JSON.toJSONString(event.getExtensions()));
-
-        log.info("publish result: {}", sendResult);
-        return sendResult;
     }
 }
