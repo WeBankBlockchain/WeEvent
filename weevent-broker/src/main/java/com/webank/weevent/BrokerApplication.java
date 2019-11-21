@@ -2,6 +2,7 @@ package com.webank.weevent;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,11 +19,14 @@ import com.googlecode.jsonrpc4j.ErrorResolver;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImplExporter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.coyote.http11.Http11NioProtocol;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.ApplicationPidFileWriter;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
@@ -156,6 +160,23 @@ public class BrokerApplication {
         }
     }
 
+
+    // tomcat configuration
+    @Bean
+    public ConfigurableServletWebServerFactory configurableServletWebServerFactory() {
+        log.info("custom TomcatServletWebServerFactory");
+
+        TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory();
+        // it's "org.apache.coyote.http11.Http11NioProtocol"
+        factory.setProtocol(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
+        factory.addConnectorCustomizers((connector) -> {
+                    Http11NioProtocol http11NioProtocol = (Http11NioProtocol) connector.getProtocolHandler();
+                    http11NioProtocol.setMaxKeepAliveRequests(10000);
+                }
+        );
+        return factory;
+    }
+
     //support CORS
     @Bean
     public WebMvcConfigurer webMvcConfigurer() {
@@ -255,16 +276,16 @@ public class BrokerApplication {
     }
 
     // daemon thread pool
-    @Bean(name = "weevent_daemon_task_executor")
-    public static ThreadPoolTaskExecutor getThreadPoolTaskExecutor() {
+    @Bean
+    public static Executor taskExecutor() {
         ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
-        pool.setThreadNamePrefix("weevent_daemon_");
+        pool.setThreadNamePrefix("weevent-executor-");
         // run in thread immediately, no blocking queue
         pool.setQueueCapacity(0);
         pool.setDaemon(true);
         pool.initialize();
 
-        log.info("init weevent daemon thread pool");
+        log.info("init daemon thread pool");
         return pool;
     }
 }
