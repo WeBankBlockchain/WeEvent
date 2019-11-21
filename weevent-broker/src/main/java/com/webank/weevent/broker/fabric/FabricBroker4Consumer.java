@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.dto.SubscriptionInfo;
@@ -21,7 +22,7 @@ import com.webank.weevent.sdk.WeEvent;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
 /**
  * @author websterchen
  * @version v1.1
@@ -40,9 +41,9 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
     private Map<String, MainEventLoop> mainEventLoops = new ConcurrentHashMap<>();
 
     /**
-     * daemon thread pool
+     * daemon Executor
      */
-    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
+    private Executor executor;
 
     /**
      * Whether the Consumer has started
@@ -56,7 +57,9 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
 
     public FabricBroker4Consumer() {
         super();
-        this.threadPoolTaskExecutor = (ThreadPoolTaskExecutor) BrokerApplication.applicationContext.getBean("weevent_daemon_task_executor");
+
+        // spring default Executor
+        this.executor = BrokerApplication.applicationContext.getBean("taskExecutor", Executor.class);
         this.idleTime = fabricConfig.getConsumerIdleTime();
     }
 
@@ -214,7 +217,7 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
         Map<String, Object> subscribeIdList = new HashMap<>();
         for (Map.Entry<String, Subscription> entry : this.subscriptions.entrySet()) {
             Subscription subscription = entry.getValue();
-            if (!channnelName.equals(subscription.getGroupId())){
+            if (!channnelName.equals(subscription.getGroupId())) {
                 continue;
             }
 
@@ -257,7 +260,7 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
 
         // load MainEventLoop with configuration
         for (String channelName : fabricDelegate.listChannel()) {
-            MainEventLoop mainEventLoop = new MainEventLoop(this.threadPoolTaskExecutor, this, channelName);
+            MainEventLoop mainEventLoop = new MainEventLoop(this.executor, this, channelName);
             mainEventLoop.doStart();
             this.mainEventLoops.put(channelName, mainEventLoop);
         }
