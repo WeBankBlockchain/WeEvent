@@ -69,8 +69,9 @@ CREATE TABLE t_rule_engine (
   `error_destination` VARCHAR(255) NULL DEFAULT NULL COMMENT 'error destination',
   `error_message` VARCHAR(255) NULL DEFAULT NULL COMMENT 'error message',
   `system_tag` VARCHAR(1) NOT NULL DEFAULT '2' COMMENT '1  means system,2 means user add',
+  `is_delete` VARCHAR(64) NOT NULL DEFAULT  '0' COMMENT '0 means not deleted ,others means deleted',
    PRIMARY KEY (`id`),
-   UNIQUE KEY ruleName(rule_name)
+   UNIQUE KEY ruleNameIsDelete(rule_name,is_delete)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='t_rule_engine';
 
 CREATE TABLE t_rule_database (

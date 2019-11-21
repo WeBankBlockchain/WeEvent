@@ -214,6 +214,7 @@ public class RuleEngineService {
             ruleEngineConditionEntity.setRuleId(ruleEngineEntity.getId());
             ruleEngineConditionMapper.deleteRuleEngineCondition(ruleEngineConditionEntity);
             //delete RuleEngine
+            ruleEngineEntity.setIsDelete(String.valueOf(new Date().getTime()));
             return ruleEngineMapper.deleteRuleEngine(ruleEngineEntity);
         } catch (Exception e) {
             log.error("delete ruleEngineEntity fail", e);

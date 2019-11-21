@@ -57,4 +57,6 @@ public class RuleEngineBase extends BaseEntity {
 
     // 2 means the system
     private String systemTag;
+    //0 means not deleted ,others means deleted
+    private String isDelete;
 }
