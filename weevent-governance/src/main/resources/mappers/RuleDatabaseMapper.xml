@@ -11,17 +11,17 @@
         <result column="broker_id" property="brokerId" jdbcType="INTEGER"/>
         <result column="ip" property="ip" jdbcType="VARCHAR"/>
         <result column="port" property="port" jdbcType="VARCHAR"/>
-        <result column="user_name" property="userName" jdbcType="VARCHAR"/>
+        <result column="username" property="username" jdbcType="VARCHAR"/>
         <result column="password" property="password" jdbcType="VARCHAR"/>
         <result column="database_name" property="databaseName" jdbcType="VARCHAR"/>
         <result column="optional_parameter" property="optionalParameter" jdbcType="VARCHAR"/>
-        <result column="datasource_name" property="dataSourceName" jdbcType="VARCHAR"/>
+        <result column="datasource_name" property="datasourceName" jdbcType="VARCHAR"/>
         <result column="table_name" property="tableName" jdbcType="VARCHAR"/>
         <result column="system_tag" property="systemTag" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,create_date,last_update,user_id,broker_id,datasource_name,ip,port,user_name,
+        id,create_date,last_update,user_id,broker_id,datasource_name,ip,port,username,
         password,database_name,optional_parameter,table_name,database_name,system_tag
     </sql>
 
@@ -69,11 +69,11 @@
             parameterType="com.webank.weevent.governance.entity.RuleDatabaseEntity">
         update t_rule_database
         set
-            datasource_name=#{dataSourceName},
+            datasource_name=#{datasourceName},
             ip=#{ip},
             port=#{port},
             database_name=#{databaseName},
-            userName=#{userName},
+            username=#{username},
             password=#{password},
             optional_parameter=#{optionalParameter},
             table_name=#{tableName}
@@ -83,9 +83,9 @@
 
     <insert id="addRuleDatabase" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO t_rule_database(`user_id`, `broker_id`,  `database_name`, `table_name`,`system_tag`,
-        `datasource_name`, `ip`,  `port`, `userName`,`password`, `optional_parameter`)
+        `datasource_name`, `ip`,  `port`, `username`,`password`, `optional_parameter`)
         VALUES (#{userId}, #{brokerId}, #{databaseName}, #{tableName},#{systemTag},
-        #{datasourceName}, #{ip}, #{port}, #{userName},#{password},#{optionalParameter})
+        #{datasourceName}, #{ip}, #{port}, #{username},#{password},#{optionalParameter})
     </insert>
 
     <select id="countRuleDatabase" resultType="int">

@@ -38,7 +38,7 @@ public class RuleDatabaseService {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
             List<RuleDatabaseEntity> ruleDatabaseEntityList;
-            ruleDatabaseEntity.setSystemTag(SystemTagEnum.USER_ADDED.getValue());
+            ruleDatabaseEntity.setSystemTag(SystemTagEnum.USER_ADDED.getCode());
             ruleDatabaseEntityList = ruleDatabaseMapper.getRuleDataBaseList(ruleDatabaseEntity);
             return ruleDatabaseEntityList;
         } catch (Exception e) {
@@ -58,18 +58,14 @@ public class RuleDatabaseService {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
             //check dbUrl
-            commonService.checkDataBaseUrl(getDataBaseUrl(ruleDatabaseEntity), ruleDatabaseEntity.getTableName(),ruleDatabaseEntity.getUserName(),ruleDatabaseEntity.getPassword(),ruleDatabaseEntity.getDatabaseName());
-            ruleDatabaseEntity.setSystemTag(SystemTagEnum.USER_ADDED.getValue());
+            commonService.checkDataBaseUrl(commonService.getDataBaseUrl(ruleDatabaseEntity), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword(), ruleDatabaseEntity.getDatabaseName());
+            ruleDatabaseEntity.setSystemTag(SystemTagEnum.USER_ADDED.getCode());
             ruleDatabaseMapper.addRuleDatabase(ruleDatabaseEntity);
             return ruleDatabaseEntity;
         } catch (Exception e) {
             log.error("add ruleDatabaseEntity fail", e);
             throw new GovernanceException("add ruleDatabaseEntity fail ", e);
         }
-    }
-
-    private String getDataBaseUrl(RuleDatabaseEntity ruleDatabaseEntity) {
-      return "jdbc:mysql//" + ruleDatabaseEntity.getIp() + ":" + ruleDatabaseEntity.getPort() + "/" + ruleDatabaseEntity.getDatabaseName();
     }
 
     @Transactional(rollbackFor = Throwable.class)
@@ -95,7 +91,7 @@ public class RuleDatabaseService {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
             //check databaseUrl
-            commonService.checkDataBaseUrl(getDataBaseUrl(ruleDatabaseEntity), ruleDatabaseEntity.getTableName(),ruleDatabaseEntity.getUserName(),ruleDatabaseEntity.getPassword(),ruleDatabaseEntity.getDatabaseName());
+            commonService.checkDataBaseUrl(commonService.getDataBaseUrl(ruleDatabaseEntity), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword(), ruleDatabaseEntity.getDatabaseName());
             return ruleDatabaseMapper.updateRuleDatabase(ruleDatabaseEntity);
         } catch (Exception e) {
             log.error("update ruleDatabase fail", e);

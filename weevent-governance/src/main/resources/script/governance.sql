@@ -78,7 +78,7 @@ CREATE TABLE t_rule_database (
   `ip` VARCHAR(32) NOT NULL COMMENT '数据库ip',
   `port` VARCHAR(8) NOT NULL COMMENT '数据库端口',
   `database_name` VARCHAR(32) NOT NULL COMMENT '数据库名称',
-  `userName` VARCHAR(16) NOT NULL COMMENT '数据库用户名',
+  `username` VARCHAR(16) NOT NULL COMMENT '数据库用户名',
   `password` VARCHAR(128) NOT NULL COMMENT '数据库密码',
   `table_name` VARCHAR(32) NOT NULL COMMENT '表格名称',
   `optional_parameter` VARCHAR(256) DEFAULT NULL COMMENT '数据库可选参数',

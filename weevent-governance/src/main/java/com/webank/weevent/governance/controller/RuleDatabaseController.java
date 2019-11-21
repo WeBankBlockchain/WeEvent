@@ -14,6 +14,7 @@ import com.webank.weevent.governance.service.RuleDatabaseService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,7 +32,7 @@ public class RuleDatabaseController {
 
     @PostMapping("/list")
     public GovernanceResult getRuleDataBaseList(HttpServletRequest request, @RequestBody RuleDatabaseEntity ruleDatabaseEntity) throws GovernanceException {
-        log.info("getRuleDataBaseList:{}", ruleDatabaseEntity);
+        log.info("getRuleDataBaseList,userId:{}", ruleDatabaseEntity.getUserId());
         List<RuleDatabaseEntity> ruleDatabases = ruleDatabaseService.getRuleDataBaseList(request, ruleDatabaseEntity);
 
         return new GovernanceResult(ruleDatabases);
@@ -47,9 +48,9 @@ public class RuleDatabaseController {
     }
 
     @PostMapping("/update")
-    public GovernanceResult updateRuleDatabase(@RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request,
+    public GovernanceResult updateRuleDatabase(@Validated @RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request,
                                                HttpServletResponse response) throws GovernanceException {
-        log.info("update  ruleDatabaseEntity service ,RuleDatabaseEntity:{}", ruleDatabaseEntity);
+        log.info("update  ruleDatabaseEntity service ,id:{}", ruleDatabaseEntity.getId());
         boolean flag = ruleDatabaseService.updateRuleDatabase(ruleDatabaseEntity, request, response);
         return new GovernanceResult(flag);
     }

@@ -38,6 +38,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.helper.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -69,6 +70,16 @@ public class TopicHistoricalService {
     private final static String simpleDateFormat = "YYYY-MM-dd";
 
     private final static String TOPIC_HISTORICAL = "t_topic_historical";
+
+    @Value("${spring.datasource.url}")
+    private String dataBaseUrl;
+
+    @Value("${spring.datasource.username}")
+    private String dataBaseUserName;
+
+    @Value("${spring.datasource.password}")
+    private String dataBasePassword;
+
 
     public Map<String, List<Integer>> historicalDataList(TopicTopicHistoricalEntity topicHistoricalEntity, HttpServletRequest httpRequest,
                                                          HttpServletResponse httpResponse) throws GovernanceException {
@@ -165,36 +176,20 @@ public class TopicHistoricalService {
 
     @SuppressWarnings("unchecked")
     public void createRule(HttpServletRequest request, HttpServletResponse response, BrokerEntity brokerEntity) throws GovernanceException {
-        String goalUrl = "";
-        String user = "";
-        String password = "";
+        String goalUrl = dataBaseUrl;
+        String user = dataBaseUserName;
+        String password = dataBasePassword;
         String dbName;
         try {
-            Properties properties = new Properties();
-            //get active files
-            String activeFile = getActiveFile();
-            //Read the configuration file to get the database information
-            URL url = TopicHistoricalService.class.getClassLoader().getResource(activeFile);
-            if (url != null) {
-                properties.load(new FileInputStream(url.getFile()));
-                goalUrl = properties.getProperty("spring.datasource.url");
-                user = properties.getProperty("spring.datasource.username");
-                password = properties.getProperty("spring.datasource.password");
-            }
-            // first use dbself database
             int first = goalUrl.lastIndexOf("/");
             int end = goalUrl.lastIndexOf("?");
             dbName = goalUrl.substring(first + 1, end);
             // get mysql default url like jdbc:mysql://127.0.0.1:3306
-            String defaultUrl = goalUrl.substring(0, first);
-
-            String dataBaseUrl = new StringBuffer(defaultUrl).append("/").append(dbName).append(ConstantProperties.QUESTION_MARK).append("user=").append(user)
-                    .append(ConstantProperties.AND_SYMBOL).append("password=").append(password).toString();
-            RuleDatabaseEntity ruleDatabaseEntity = initializationRuleDataBase(dbName + brokerEntity.getUserId(), TOPIC_HISTORICAL, dataBaseUrl, brokerEntity.getUserId());
-            ruleDatabaseEntity = existRuleDataBase(ruleDatabaseEntity);
-            if (ruleDatabaseEntity.getId() == null) {
-                ruleDatabaseMapper.addRuleDatabase(ruleDatabaseEntity);
-            }
+            Map<String, String> urlMap = commonService.uRLRequest(goalUrl);
+            RuleDatabaseEntity ruleDatabaseEntity = new RuleDatabaseEntity(brokerEntity.getUserId(), brokerEntity.getId(), urlMap.get("ip"), urlMap.get("port"), user, password,
+                    dbName, urlMap.get("optionalParameter"), dbName + brokerEntity.getUserId(), TOPIC_HISTORICAL,
+                    SystemTagEnum.BUILT_IN_SYSTEM.getCode());
+            ruleDatabaseMapper.addRuleDatabase(ruleDatabaseEntity);
 
             //Request broker to get all groups
             List<String> groupList = getGroupList(request, brokerEntity);
@@ -211,16 +206,6 @@ public class TopicHistoricalService {
             log.error("create rule fail error,{}", e.getMessage());
             throw new GovernanceException(e.getMessage());
         }
-    }
-
-    private RuleDatabaseEntity initializationRuleDataBase(String newDbName, String newTableName, String dataBaseUrl, Integer userId) {
-        RuleDatabaseEntity ruleDatabaseEntity = new RuleDatabaseEntity();
-        ruleDatabaseEntity.setDatabaseName(newDbName);
-        ruleDatabaseEntity.setUserId(userId);
-        ruleDatabaseEntity.setTableName(newTableName);
-        ruleDatabaseEntity.setDatabaseUrl(dataBaseUrl);
-        ruleDatabaseEntity.setSystemTag(SystemTagEnum.BUILT_IN_SYSTEM.getCode());
-        return ruleDatabaseEntity;
     }
 
     private RuleEngineEntity initializationRule(String ruleName, BrokerEntity brokerEntity, String groupId, Integer dataBaseId) {
@@ -273,25 +258,5 @@ public class TopicHistoricalService {
             log.error("get group list fail", e);
             throw new GovernanceException("get group list fail", e);
         }
-
-
     }
-
-    private String getActiveFile() throws Exception {
-        URL url = TopicHistoricalService.class.getClassLoader().getResource("application.properties");
-        Properties properties = new Properties();
-        properties.load(new FileInputStream(url.getFile()));
-        String active = properties.getProperty("spring.profiles.active");
-        return new StringBuffer("application").append("-").append(active).append(".properties").toString();
-    }
-
-    private RuleDatabaseEntity existRuleDataBase(RuleDatabaseEntity ruleDatabaseEntity) {
-        List<RuleDatabaseEntity> ruleDatabaseEntities = ruleDatabaseMapper.getRuleDataBaseList(ruleDatabaseEntity);
-        if (CollectionUtils.isEmpty(ruleDatabaseEntities)) {
-            return ruleDatabaseEntity;
-        }
-        return ruleDatabaseEntities.get(0);
-    }
-
-
 }

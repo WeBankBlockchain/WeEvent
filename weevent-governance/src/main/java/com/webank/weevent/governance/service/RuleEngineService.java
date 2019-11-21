@@ -281,11 +281,9 @@ public class RuleEngineService {
             if (!flag) {
                 throw new GovernanceException("update rule failed, detected DAG loop at topic [" + ruleEngineEntity.getFromDestination() + "]");
             }
-            RuleDatabaseEntity ruleDataBase = getRuleDataBase(ruleEngineEntity.getRuleDataBaseId());
-            if (ruleDataBase != null) {
-                ruleEngineEntity.setDatabaseUrl(ruleDataBase.getDatabaseUrl() + "&tableName=" + ruleDataBase.getTableName());
-                log.info("dataBaseUrl:{}", ruleEngineEntity.getDatabaseUrl());
-            }
+            //set ruleDataBaseUrl
+            setRuleDataBaseUrl(ruleEngineEntity);
+            //verify source topic and destination topic, errorTopic is different
             checkSourceDestinationTopic(ruleEngineEntity);
             ruleEngineEntity.setStatus(rule.getStatus());
 
@@ -449,11 +447,8 @@ public class RuleEngineService {
         String conditionField = this.getConditionField(ruleEngineConditionList);
         log.info("condition:{}", conditionField);
         ruleEngineEntity.setConditionField(conditionField);
-        RuleDatabaseEntity ruleDataBase = getRuleDataBase(ruleEngineEntity.getRuleDataBaseId());
-        if (ruleDataBase != null) {
-            ruleEngineEntity.setDatabaseUrl(ruleDataBase.getDatabaseUrl() + "&tableName=" + ruleDataBase.getTableName());
-            log.info("dataBaseUrl:{}", ruleEngineEntity.getDatabaseUrl());
-        }
+        //set ruleDataBaseUrl
+        setRuleDataBaseUrl(ruleEngineEntity);
         this.stopProcessRule(request, ruleEngineEntity, rule);
         return ruleEngineMapper.updateRuleEngineStatus(ruleEngineEntity);
     }
@@ -502,7 +497,6 @@ public class RuleEngineService {
             if (CollectionUtils.isEmpty(ruleEngines)) {
                 throw new GovernanceException("the data is not non-start state");
             }
-
             //set required fields
             rule = ruleEngines.get(0);
             String conditionField = getConditionField(this.getRuleEngineConditionList(rule));
@@ -514,11 +508,8 @@ public class RuleEngineService {
             rule.setStatus(StatusEnum.RUNNING.getCode());
             rule.setLastUpdate(new Date());
             //set dataBaseUrl
-            RuleDatabaseEntity ruleDataBase = getRuleDataBase(rule.getRuleDataBaseId());
-            if (ruleDataBase != null) {
-                rule.setDatabaseUrl(ruleDataBase.getDatabaseUrl() + "&tableName=" + ruleDataBase.getTableName());
-                log.info("dataBaseUrl:{}", ruleEngineEntity.getDatabaseUrl());
-            }
+            setRuleDataBaseUrl(rule);
+
             //Verify required fields
             this.checkStartRuleRequired(rule);
             //Start the rules engine
@@ -792,8 +783,20 @@ public class RuleEngineService {
         }
     }
 
-    private RuleDatabaseEntity getRuleDataBase(Integer id) {
-        return ruleDatabaseMapper.getRuleDataBaseById(id);
+    private void setRuleDataBaseUrl(RuleEngineEntity rule) {
+        if (rule.getRuleDataBaseId() == null) {
+            return;
+        }
+        RuleDatabaseEntity ruleDataBase = ruleDatabaseMapper.getRuleDataBaseById(rule.getRuleDataBaseId());
+        if (ruleDataBase != null) {
+            String dbUrl = commonService.getDataBaseUrl(ruleDataBase) + "?user=" + ruleDataBase.getUsername() + "&password=" + ruleDataBase.getPassword() +
+                    "tableName=" + ruleDataBase.getTableName();
+            if (!StringUtil.isBlank(ruleDataBase.getOptionalParameter())) {
+                dbUrl = dbUrl + "&" + ruleDataBase.getOptionalParameter();
+            }
+            rule.setDatabaseUrl(dbUrl);
+            log.info("dataBaseUrl:{}", rule.getDatabaseUrl());
+        }
     }
 
     private boolean verifyInfiniteLoop(RuleEngineEntity ruleEngineEntity) {
