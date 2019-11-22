@@ -37,7 +37,7 @@ public class GovernanceResult {
     }
 
     public static GovernanceResult ok() {
-        return new GovernanceResult(null);
+        return new GovernanceResult(200,"OK",null);
     }
 
     public GovernanceResult() {

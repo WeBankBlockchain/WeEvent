@@ -6,7 +6,7 @@
         <result column="id" property="id" jdbcType="INTEGER"/>
         <result column="create_date" property="createDate" jdbcType="TIMESTAMP"/>
         <result column="last_update" property="lastUpdate" jdbcType="TIMESTAMP"/>
-        <result column="is_delete" property="isDelete" jdbcType="INTEGER"/>
+        <result column="delete_at" property="deleteAt" jdbcType="INTEGER"/>
         <result column="username" property="username" jdbcType="VARCHAR"/>
         <result column="password" property="password" jdbcType="VARCHAR"/>
         <result column="email" property="email" jdbcType="VARCHAR"/>
@@ -20,7 +20,7 @@
         select
         <include refid="Base_Column_List"/>
         from t_account
-        where is_delete=0
+        where delete_at=0
         <if test="id != null">
             and id = #{id}
         </if>
@@ -60,7 +60,7 @@
 
     <delete id="deleteAccount" parameterType="java.lang.Integer">
         update t_account
-        set is_delete=1
+        set delete_at=unix_timestamp(now())
         where id = #{id,jdbcType=INTEGER}
     </delete>
 

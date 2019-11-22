@@ -25,7 +25,7 @@ public class BrokerBase extends BaseEntity {
 
     private String webaseUrl;
 
-    private Integer isDelete;
+    private String deleteAt;
 
     /**
      * 1 means configured ,2 means not configured
