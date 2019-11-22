@@ -96,19 +96,25 @@ public class RuleEngineService {
     @SuppressWarnings("unchecked")
     public List<RuleEngineEntity> getRuleEngines(HttpServletRequest request, RuleEngineEntity ruleEngineEntity) throws GovernanceException {
         try {
+            long start = System.nanoTime();
             String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
 
             if (accountId == null || !accountId.equals(ruleEngineEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
             ruleEngineEntity.setSystemTag("2");
+            log.info("count begin==");
             int count = ruleEngineMapper.countRuleEngine(ruleEngineEntity);
+            log.info("count  end==");
+
             ruleEngineEntity.setTotalCount(count);
             List<RuleEngineEntity> ruleEngineEntities = null;
             if (count > 0) {
                 int startIndex = (ruleEngineEntity.getPageNumber() - 1) * ruleEngineEntity.getPageSize();
                 int endIndex = ruleEngineEntity.getPageNumber() * ruleEngineEntity.getPageSize();
+                log.info("list begin");
                 ruleEngineEntities = ruleEngineMapper.getRuleEnginePage(ruleEngineEntity, startIndex, endIndex);
+                log.info("list  time");
 
                 for (RuleEngineEntity it : ruleEngineEntities) {
                     it.setCreateDateStr(simpleDateFormat.format(it.getCreateDate()));
@@ -116,6 +122,7 @@ public class RuleEngineService {
                     it.setPayloadMap(payload == null ? new HashMap<>() : JSONObject.parseObject(payload, Map.class));
                 }
             }
+            log.info("get ruleEngines end time:{}s", (System.nanoTime() - start) / 1000);
             return ruleEngineEntities;
         } catch (Exception e) {
             log.error("get ruleEngines fail", e);
@@ -129,6 +136,8 @@ public class RuleEngineService {
     public RuleEngineEntity addRuleEngine(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         try {
+            long start = System.nanoTime();
+            log.info("add rule begin====");
             String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
             if (accountId == null || !accountId.equals(ruleEngineEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
@@ -147,9 +156,13 @@ public class RuleEngineService {
             //check rule
             this.checkRule(ruleEngineEntity);
             //insert ruleEngine
+            log.info("db insert start");
             ruleEngineMapper.addRuleEngine(ruleEngineEntity);
+            log.info("db insert  end");
+
             //insert processor
             this.addProcessRule(request, ruleEngineEntity);
+            log.info("add end, time :{}s", (System.nanoTime() - start) / 1000);
             return ruleEngineEntity;
         } catch (Exception e) {
             log.error("add ruleEngineEntity fail", e);
@@ -169,8 +182,10 @@ public class RuleEngineService {
             map.put("updatedTime", ruleEngineEntity.getLastUpdate());
             map.put("createdTime", ruleEngineEntity.getCreateDate());
 
-            log.info("add rule begin====map:{}", JSONObject.toJSONString(map));
+            long start = System.nanoTime();
+            log.info("process add rule begin====map:{}", JSONObject.toJSONString(map));
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(map));
+            log.info("process add rule end====time:{}", (System.nanoTime() - start) / 1000);
 
             //deal process result
             int statusCode = closeResponse.getStatusLine().getStatusCode();
@@ -179,7 +194,8 @@ public class RuleEngineService {
                 throw new GovernanceException(ErrorCode.PROCESS_CONNECT_ERROR);
             }
             String mes = EntityUtils.toString(closeResponse.getEntity());
-            log.info("add rule end====result:{}", mes);
+            log.info("processor add rule end====result:{}", mes);
+
             JSONObject jsonObject = JSONObject.parseObject(mes);
             Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
             if (PROCESSOR_SUCCESS_CODE != code) {
@@ -196,6 +212,7 @@ public class RuleEngineService {
     @Transactional(rollbackFor = Throwable.class)
     public boolean deleteRuleEngine(RuleEngineEntity ruleEngineEntity, HttpServletRequest request) throws GovernanceException {
         try {
+            long start = System.nanoTime();
             authCheck(ruleEngineEntity, request);
             List<RuleEngineEntity> ruleEngines = ruleEngineMapper.getRuleEngines(ruleEngineEntity);
             if (CollectionUtils.isEmpty(ruleEngines)) {
@@ -214,8 +231,9 @@ public class RuleEngineService {
             ruleEngineConditionEntity.setRuleId(ruleEngineEntity.getId());
             ruleEngineConditionMapper.deleteRuleEngineCondition(ruleEngineConditionEntity);
             //delete RuleEngine
-            ruleEngineEntity.setIsDelete(String.valueOf(new Date().getTime()));
-            return ruleEngineMapper.deleteRuleEngine(ruleEngineEntity);
+            Boolean flag = ruleEngineMapper.deleteRuleEngine(ruleEngineEntity);
+            log.info("delete end, time :{}s", (System.nanoTime() - start) / 1000);
+            return flag;
         } catch (Exception e) {
             log.error("delete ruleEngineEntity fail", e);
             throw new GovernanceException("delete ruleEngineEntity fail ", e);
@@ -227,8 +245,9 @@ public class RuleEngineService {
         try {
             String deleteUrl = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_DELETE_CEP_RULE).append(ConstantProperties.QUESTION_MARK)
                     .append("id=").append(engineEntity.getId()).toString();
+            log.info("processor delete  begin");
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, deleteUrl);
-
+            log.info("processor delete  begin");
             //deal processor result
             int statusCode = closeResponse.getStatusLine().getStatusCode();
             if (200 != statusCode) {
@@ -236,7 +255,7 @@ public class RuleEngineService {
                 throw new GovernanceException(ErrorCode.PROCESS_CONNECT_ERROR);
             }
             String mes = EntityUtils.toString(closeResponse.getEntity());
-            log.info("delete rule end====result:{}", mes);
+            log.info("delete rule result:{}", mes);
             JSONObject jsonObject = JSONObject.parseObject(mes);
             Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
             if (PROCESSOR_SUCCESS_CODE != code) {
@@ -254,6 +273,7 @@ public class RuleEngineService {
     public boolean updateRuleEngine(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         try {
+            long start = System.nanoTime();
             this.authCheck(ruleEngineEntity, request);
             //check rule
             this.checkRule(ruleEngineEntity);
@@ -319,7 +339,9 @@ public class RuleEngineService {
                 //insert new data
                 ruleEngineConditionMapper.batchInsert(ruleEngineConditionList);
             }
-            return ruleEngineMapper.updateRuleEngine(ruleEngineEntity);
+            flag = ruleEngineMapper.updateRuleEngine(ruleEngineEntity);
+            log.info("update end,time:{}s", (System.nanoTime() - start) / 1000);
+            return flag;
         } catch (Exception e) {
             log.error("update ruleEngine fail", e);
             throw new GovernanceException("update ruleEngine fail", e);
@@ -436,6 +458,7 @@ public class RuleEngineService {
     @Transactional(rollbackFor = Throwable.class)
     public boolean updateRuleEngineStatus(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
+        long start = System.nanoTime();
         authCheck(ruleEngineEntity, request);
         RuleEngineEntity rule = new RuleEngineEntity();
         rule.setId(ruleEngineEntity.getId());
@@ -458,7 +481,9 @@ public class RuleEngineService {
             log.info("dataBaseUrl:{}", ruleEngineEntity.getDatabaseUrl());
         }
         this.stopProcessRule(request, ruleEngineEntity, rule);
-        return ruleEngineMapper.updateRuleEngineStatus(ruleEngineEntity);
+        Boolean flag = ruleEngineMapper.updateRuleEngineStatus(ruleEngineEntity);
+        log.info("update status end,time:{}s", (System.nanoTime() - start) / 1000);
+        return flag;
     }
 
     @SuppressWarnings("unchecked")
@@ -499,6 +524,7 @@ public class RuleEngineService {
             throws GovernanceException {
         RuleEngineEntity rule = new RuleEngineEntity();
         try {
+            long start = System.nanoTime();
             //query by id and status
             rule.setId(ruleEngineEntity.getId());
             rule.setStatus(StatusEnum.NOT_STARTED.getCode());
@@ -535,7 +561,9 @@ public class RuleEngineService {
             engineEntity.setId(rule.getId());
             engineEntity.setStatus(StatusEnum.RUNNING.getCode());
             engineEntity.setLastUpdate(rule.getLastUpdate());
-            return ruleEngineMapper.updateRuleEngineStatus(engineEntity);
+            Boolean flag = ruleEngineMapper.updateRuleEngineStatus(engineEntity);
+            log.info("start ruleEngine end,time:{}s", (System.nanoTime() - start) / 1000);
+            return flag;
         } catch (Exception e) {
             log.error("start ruleEngine fail", e);
             throw new GovernanceException("start ruleEngine fail", e);
