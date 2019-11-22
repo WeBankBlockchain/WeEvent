@@ -24,7 +24,7 @@
         from t_topic where delete_at=0
         <if test="topicNameList != null and topicNameList.size()>0">
             AND topic_name in
-            <foreach collection="topicNameList" index="topic" open="(" separator="," close=")">
+            <foreach collection="topicNameList" item="topic" open="(" separator="," close=")">
                 #{topic}
             </foreach>
         </if>
