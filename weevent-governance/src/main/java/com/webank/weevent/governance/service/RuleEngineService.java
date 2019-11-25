@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,6 +30,7 @@ import com.webank.weevent.governance.mapper.RuleEngineConditionMapper;
 import com.webank.weevent.governance.mapper.RuleEngineMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.utils.CookiesTools;
+import com.webank.weevent.governance.utils.DAGDetectUtil;
 import com.webank.weevent.governance.utils.NumberValidationUtils;
 
 import com.alibaba.fastjson.JSONObject;
@@ -66,6 +68,10 @@ public class RuleEngineService {
 
     @Autowired
     private BrokerMapper brokerMapper;
+
+    @Autowired
+    private DAGDetectUtil dagDetectUtil;
+
 
     @Value("${weevent.processor.url:http://127.0.0.1:7008}")
     private String processorUrl;
@@ -270,6 +276,10 @@ public class RuleEngineService {
             boolean flag = validationConditions(request, ruleEngineEntity);
             if (!flag) {
                 throw new GovernanceException("conditional is illegal");
+            }
+            flag = verifyInfiniteLoop(ruleEngineEntity);
+            if (!flag) {
+                throw new GovernanceException("update rule failed, detected DAG loop at topic [" + ruleEngineEntity.getFromDestination() + "]");
             }
             RuleDatabaseEntity ruleDataBase = getRuleDataBase(ruleEngineEntity.getRuleDataBaseId());
             if (ruleDataBase != null) {
@@ -661,8 +671,8 @@ public class RuleEngineService {
         if (ruleEngineEntity.getPayloadMap().isEmpty()) {
             throw new GovernanceException("rule description is empty");
         }
-        if (ruleEngineEntity.getPayload() != null && ruleEngineEntity.getPayload().length() > 100) {
-            throw new GovernanceException("rule description length cannot exceed 100");
+        if (ruleEngineEntity.getPayload() != null && ruleEngineEntity.getPayload().length() > 4096) {
+            throw new GovernanceException("rule description length cannot exceed 4096");
         }
 
     }
@@ -677,12 +687,9 @@ public class RuleEngineService {
     //check name repeat
     private boolean checkRuleNameRepeat(RuleEngineEntity ruleEngineEntity) {
         RuleEngineEntity rule = new RuleEngineEntity();
-        rule.setGroupId(ruleEngineEntity.getGroupId());
-        rule.setUserId(ruleEngineEntity.getUserId());
-        rule.setBrokerId(ruleEngineEntity.getBrokerId());
         rule.setRuleName(ruleEngineEntity.getRuleName());
         rule.setSystemTag("2");
-        List<RuleEngineEntity> ruleEngines = ruleEngineMapper.getRuleEngines(rule);
+        List<RuleEngineEntity> ruleEngines = ruleEngineMapper.checkRuleNameRepeat(rule);
         if (CollectionUtils.isEmpty(ruleEngines)) {
             return true;
         }
@@ -788,5 +795,24 @@ public class RuleEngineService {
     private RuleDatabaseEntity getRuleDataBase(Integer id) {
         return ruleDatabaseMapper.getRuleDataBaseById(id);
     }
+
+    private boolean verifyInfiniteLoop(RuleEngineEntity ruleEngineEntity) {
+        if (!ConditionTypeEnum.TOPIC.getCode().equals(ruleEngineEntity.getConditionType())) {
+            return true;
+        }
+        RuleEngineEntity rule = new RuleEngineEntity();
+        rule.setGroupId(ruleEngineEntity.getGroupId());
+        rule.setBrokerId(ruleEngineEntity.getBrokerId());
+
+        //query all historical rules according to brokerId groupId
+        List<RuleEngineEntity> ruleTopicList = ruleEngineMapper.getRuleTopicList(rule);
+        if (CollectionUtils.isEmpty(ruleTopicList)) {
+            return true;
+        }
+        ruleTopicList.add(ruleEngineEntity);
+        Map<String, Set<String>> topicMap = ruleTopicList.stream().collect(Collectors.groupingBy(RuleEngineEntity::getFromDestination, Collectors.mapping(RuleEngineEntity::getToDestination, Collectors.toSet())));
+        return dagDetectUtil.checkLoop(topicMap);
+    }
+
 
 }

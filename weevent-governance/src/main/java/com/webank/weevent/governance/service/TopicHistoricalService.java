@@ -3,7 +3,6 @@ package com.webank.weevent.governance.service;
 import java.io.FileInputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -163,6 +162,7 @@ public class TopicHistoricalService {
         return dateList;
     }
 
+    @SuppressWarnings("unchecked")
     public void createRule(HttpServletRequest request, HttpServletResponse response, BrokerEntity brokerEntity) throws GovernanceException {
         String goalUrl = "";
         String user = "";
@@ -249,8 +249,8 @@ public class TopicHistoricalService {
         return ruleEngineEntity;
     }
 
-    private List<String> getGroupList(HttpServletRequest request, BrokerEntity brokerEntity) throws GovernanceException {
-        List<String> groupList;
+    private List getGroupList(HttpServletRequest request, BrokerEntity brokerEntity) throws GovernanceException {
+        List groupList;
         String url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.REST_LIST_SUBSCRIPTION).toString();
         try {
             log.info("url:{}", url);
@@ -259,8 +259,14 @@ public class TopicHistoricalService {
             if (StringUtil.isBlank(mes)) {
                 throw new GovernanceException("group is empty");
             }
-            String[] split = mes.replace("[", "").replace("]", "").split(",");
-            groupList = Arrays.asList(split);
+            JSONObject jsonObject = JSONObject.parseObject(mes);
+            Object data = jsonObject.get("data");
+            if ("0".equals(jsonObject.get("code").toString()) && data instanceof List) {
+                groupList = (List) data;
+            } else {
+                throw new GovernanceException(jsonObject.get("message").toString());
+            }
+
             return groupList;
         } catch (Exception e) {
             log.error("get group list fail", e);

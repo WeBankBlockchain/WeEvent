@@ -85,7 +85,6 @@ public class CommonService implements AutoCloseable {
     public CloseableHttpResponse getCloseResponse(HttpServletRequest req, String newUrl, String jsonString) throws ServletException {
         CloseableHttpResponse closeResponse;
         try {
-
             log.info("url {}", newUrl);
             CloseableHttpClient client = this.generateHttpClient(newUrl);
             if (req.getMethod().equals(METHOD_TYPE)) {
