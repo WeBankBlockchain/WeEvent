@@ -75,6 +75,37 @@ public class QuartzManager {
     }
 
     /**
+     * get the ruled etails
+     *
+     * @param id job id
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public CEPRule selectJobById(String id) {
+        try {
+            // get the all rules
+            Iterator<JobKey> it = scheduler.getJobKeys(GroupMatcher.anyGroup()).iterator();
+
+            while (it.hasNext()) {
+                JobKey jobKey = (JobKey) it.next();
+                if (null != (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
+                    CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
+                    // match the right rule
+                    if (id.equals(rule.getId())) {
+                        return rule;
+                    } else {
+                        return null;
+                    }
+                }
+
+            }
+            return null;
+        } catch (Exception e) {
+            log.error("e:{}", e.toString());
+            return null;
+        }
+    }
+
+    /**
      * add job and modify
      *
      * @param jobName job name
