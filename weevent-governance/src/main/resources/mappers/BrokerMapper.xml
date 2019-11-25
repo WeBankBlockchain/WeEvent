@@ -6,7 +6,7 @@
         <result column="id" property="id" jdbcType="INTEGER"/>
         <result column="create_date" property="createDate" jdbcType="TIMESTAMP"/>
         <result column="last_update" property="lastUpdate" jdbcType="TIMESTAMP"/>
-        <result column="is_delete" property="isDelete" jdbcType="INTEGER"/>
+        <result column="delete_at" property="deleteAt" jdbcType="INTEGER"/>
         <result column="user_id" property="userId" jdbcType="INTEGER"/>
         <result column="name" property="name" jdbcType="VARCHAR"/>
         <result column="broker_url" property="brokerUrl" jdbcType="VARCHAR"/>
@@ -22,7 +22,7 @@
         select
         <include refid="Base_Column_List"/>
         from t_broker
-        where is_delete=0
+        where delete_at=0
         <if test="brokerUrl != null">
             and broker_url = #{brokerUrl}
         </if>
@@ -37,13 +37,13 @@
     <select id="getBroker" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from t_broker where id=#{id} and is_delete=0
+        from t_broker where id=#{id} and delete_at=0
     </select>
 
     <select id="getBrokers" resultMap="BaseResultMap">
         select distinct
         <include refid="Base_Column_List"/>
-        from t_broker where is_delete=0 and (user_id=#{userId}
+        from t_broker where delete_at=0 and (user_id=#{userId}
         or id in
         (select distinct ps.broker_id from t_permission ps where ps.user_id = #{userId})
         )
@@ -67,14 +67,14 @@
 
     <delete id="deleteBroker">
         update t_broker
-        set is_delete=1
+        set delete_at=unix_timestamp(now())
         where id = #{id}
     </delete>
 
     <select id="countBroker" resultType="int">
         select count(1)
         from t_broker
-        where is_delete = 0
+        where delete_at = 0
     </select>
 
 
