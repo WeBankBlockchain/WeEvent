@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -81,7 +82,7 @@ public class Fabric {
             ChaincodeID chaincodeID = FabricSDKWrapper.getChainCodeID(fabricConfig.getTopicControllerName(), fabricConfig.getTopicControllerVersion());
             TransactionInfo transactionInfo = FabricSDKWrapper.executeTransaction(hfClient, channel, chaincodeID, false,
                     "getTopicInfo", fabricConfig.getTransactionTimeout(), topicName);
-            if (ErrorCode.SUCCESS.getCode() != transactionInfo.getCode()){
+            if (ErrorCode.SUCCESS.getCode() != transactionInfo.getCode()) {
                 throw new BrokerException(transactionInfo.getCode(), transactionInfo.getMessage());
             }
             TopicInfo topicInfo = JSONObject.parseObject(transactionInfo.getPayLoad(), TopicInfo.class);
@@ -101,10 +102,10 @@ public class Fabric {
         try {
             ChaincodeID chaincodeID = FabricSDKWrapper.getChainCodeID(fabricConfig.getTopicControllerName(),
                     fabricConfig.getTopicControllerVersion());
-            TransactionInfo transactionInfo = FabricSDKWrapper.executeTransaction(hfClient, channel, chaincodeID, true,"addTopicInfo",
-                    fabricConfig.getTransactionTimeout(), topicName, getTimestamp(System.currentTimeMillis()),fabricConfig.getTopicVerison());
-            if (ErrorCode.SUCCESS.getCode() != transactionInfo.getCode()){
-                if (WeEventConstants.TOPIC_ALREADY_EXIST.equals(transactionInfo.getMessage())){
+            TransactionInfo transactionInfo = FabricSDKWrapper.executeTransaction(hfClient, channel, chaincodeID, true, "addTopicInfo",
+                    fabricConfig.getTransactionTimeout(), topicName, getTimestamp(System.currentTimeMillis()), fabricConfig.getTopicVerison());
+            if (ErrorCode.SUCCESS.getCode() != transactionInfo.getCode()) {
+                if (WeEventConstants.TOPIC_ALREADY_EXIST.equals(transactionInfo.getMessage())) {
                     throw new BrokerException(ErrorCode.TOPIC_ALREADY_EXIST);
                 }
                 throw new BrokerException(transactionInfo.getCode(), transactionInfo.getMessage());
@@ -124,7 +125,7 @@ public class Fabric {
             ChaincodeID chaincodeID = FabricSDKWrapper.getChainCodeID(fabricConfig.getTopicControllerName(),
                     fabricConfig.getTopicControllerVersion());
             TransactionInfo transactionInfo = FabricSDKWrapper.executeTransaction(hfClient, channel, chaincodeID, false,
-                    "isTopicExist", fabricConfig.getTransactionTimeout(),topicName);
+                    "isTopicExist", fabricConfig.getTransactionTimeout(), topicName);
 
             return ErrorCode.SUCCESS.getCode() == transactionInfo.getCode();
         } catch (InterruptedException | ProposalException | ExecutionException | InvalidArgumentException exception) {
@@ -144,11 +145,12 @@ public class Fabric {
             TransactionInfo transactionInfo = FabricSDKWrapper.executeTransaction(hfClient, channel, chaincodeID, false,
                     "listTopicName", fabricConfig.getTransactionTimeout(), String.valueOf(pageIndex), String.valueOf(pageSize));
 
-            if (ErrorCode.SUCCESS.getCode() != transactionInfo.getCode()){
+            if (ErrorCode.SUCCESS.getCode() != transactionInfo.getCode()) {
                 throw new BrokerException(transactionInfo.getCode(), transactionInfo.getMessage());
             }
 
-            ListPage<String> listPage = JSON.parseObject(transactionInfo.getPayLoad(), new TypeReference<ListPage<String>>(){});
+            ListPage<String> listPage = JSON.parseObject(transactionInfo.getPayLoad(), new TypeReference<ListPage<String>>() {
+            });
             topicPage.setPageIndex(pageIndex);
             topicPage.setPageSize(listPage.getPageSize());
             topicPage.setTotal(listPage.getTotal());
@@ -182,26 +184,38 @@ public class Fabric {
 
     }
 
-    public SendResult publishEvent(String topicName, String eventContent, String extensions) throws BrokerException {
+    public CompletableFuture<SendResult> publishEvent(String topicName, String eventContent, String extensions) throws BrokerException {
         if (!isTopicExist(topicName)) {
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
         }
 
         SendResult sendResult = new SendResult();
+        sendResult.setTopic(topicName);
         try {
             ChaincodeID chaincodeID = getChaincodeID(fabricConfig);
-            TransactionInfo transactionInfo = FabricSDKWrapper.executeTransaction(hfClient, channel, chaincodeID, true, "publish", fabricConfig.getTransactionTimeout(), topicName, eventContent, extensions);
-            sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
-            sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, transactionInfo.getBlockNumber().intValue(), Integer.parseInt(transactionInfo.getPayLoad())));
-            sendResult.setTopic(topicName);
-            return sendResult;
+            return FabricSDKWrapper.executeTransactionAsync(hfClient,
+                    channel,
+                    chaincodeID,
+                    true,
+                    "publish",
+                    topicName,
+                    eventContent,
+                    extensions).thenApply(transactionInfo -> {
+                sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+                sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, transactionInfo.getBlockNumber().intValue(), Integer.parseInt(transactionInfo.getPayLoad())));
+                sendResult.setTopic(topicName);
+                return sendResult;
+            });
         } catch (InterruptedException | ProposalException | ExecutionException | InvalidArgumentException exception) {
             log.error("publish event failed due to transaction execution error.", exception);
             throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (TimeoutException timeout) {
             log.error("publish event failed due to transaction execution timeout.", timeout);
+
             sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
-            return sendResult;
+            CompletableFuture<SendResult> completableFuture = new CompletableFuture<>();
+            completableFuture.complete(sendResult);
+            return completableFuture;
         }
     }
 
