@@ -7,10 +7,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.util.WeEventUtils;
+import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
@@ -382,7 +386,21 @@ public class BrokerStomp extends TextWebSocketHandler {
             log.error("producer start failed");
         }
 
-        SendResult sendResult = this.iproducer.publish(event, groupId);
+        SendResult sendResult;
+        try {
+            sendResult = this.iproducer.publish(event, groupId).get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("publishWeEvent failed due to transaction execution error.", e);
+            sendResult = new SendResult();
+            sendResult.setTopic(event.getTopic());
+            sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+        } catch (TimeoutException e) {
+            log.error("publishWeEvent failed due to transaction execution timeout.", e);
+            sendResult = new SendResult();
+            sendResult.setTopic(event.getTopic());
+            sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
+        }
+
         log.info("publish result, {}", sendResult);
         if (sendResult.getStatus() != SendResult.SendResultStatus.SUCCESS) {
             log.error("producer publish failed");

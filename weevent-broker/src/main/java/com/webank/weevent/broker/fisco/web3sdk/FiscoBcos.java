@@ -1,8 +1,10 @@
 package com.webank.weevent.broker.fisco.web3sdk;
 
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -25,6 +27,8 @@ import com.webank.weevent.sdk.WeEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bcos.channel.client.TransactionSucCallback;
+import org.bcos.channel.dto.EthereumResponse;
 import org.bcos.web3j.abi.datatypes.Address;
 import org.bcos.web3j.abi.datatypes.DynamicArray;
 import org.bcos.web3j.abi.datatypes.Type;
@@ -32,6 +36,7 @@ import org.bcos.web3j.abi.datatypes.Utf8String;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.bcos.web3j.crypto.Credentials;
+import org.bcos.web3j.protocol.ObjectMapperFactory;
 import org.bcos.web3j.protocol.Web3j;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.bcos.web3j.tx.Contract;
@@ -66,7 +71,7 @@ public class FiscoBcos {
     public void init() throws BrokerException {
         if (this.topicController == null) {
             this.credentials = Web3SDKWrapper.getCredentials(this.fiscoConfig);
-            this.web3j = Web3SDKWrapper.initWeb3j(this.fiscoConfig, FiscoBcosDelegate.threadPool);
+            this.web3j = Web3SDKWrapper.initWeb3j(this.fiscoConfig);
 
             String address = Web3SDKWrapper.getAddress(this.web3j, this.credentials, this.fiscoConfig.getProxyAddress());
             if (StringUtils.isBlank(address)) {
@@ -259,34 +264,67 @@ public class FiscoBcos {
         throw new BrokerException(ErrorCode.EVENT_ID_NOT_EXIST);
     }
 
-    public SendResult publishEvent(String topicName, String eventContent, String extensions) throws BrokerException {
+    static class WeEventTransactionCallback extends TransactionSucCallback {
+        private String topicName;
+
+        public CompletableFuture<SendResult> future = new CompletableFuture<>();
+
+        WeEventTransactionCallback(String topicName) {
+            this.topicName = topicName;
+        }
+
+        @Override
+        public void onResponse(EthereumResponse response) {
+            SendResult sendResult = new SendResult();
+            sendResult.setTopic(this.topicName);
+
+            // success
+            if (response.getErrorCode() == 0) {
+                TransactionReceipt receipt;
+                try {
+                    receipt = ObjectMapperFactory.getObjectMapper().readValue(response.getContent(), TransactionReceipt.class);
+                } catch (IOException e) {
+                    log.error("publish failed due to transaction execution error. {}", response.getErrorMessage());
+                    sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+                    this.future.complete(sendResult);
+                    return;
+                }
+
+                List<Topic.LogWeEventEventResponse> event = Topic.getLogWeEventEvents(receipt);
+                if (CollectionUtils.isNotEmpty(event)) {
+                    sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+                    sendResult.setEventId(DataTypeUtils.encodeEventId(this.topicName, Web3SDKWrapper.uint256ToInt(event.get(0).eventBlockNumer), Web3SDKWrapper.uint256ToInt(event.get(0).eventSeq)));
+                } else {
+                    log.error("empty Topic.LogWeEventEventResponse");
+                    sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+                }
+            } else { // error
+                if (response.getErrorCode() == 102) {
+                    log.error("publish failed due to transaction execution timeout. {}", response.getErrorMessage());
+                    sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
+                } else {
+                    log.error("publish failed due to transaction execution error. {}", response.getErrorMessage());
+                    sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+                }
+            }
+
+            log.info("publish result: {}", sendResult);
+            this.future.complete(sendResult);
+        }
+    }
+
+    public CompletableFuture<SendResult> publishEvent(String topicName, String eventContent, String extensions) throws BrokerException {
         Topic topic = getTopic(topicName);
         if (topic == null) {
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
         }
 
-        SendResult sendResult = new SendResult();
-        try {
-            TransactionReceipt transactionReceipt = topic.publishWeEvent(new Utf8String(topicName),
-                    new Utf8String(eventContent), new Utf8String(extensions)).get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-            List<Topic.LogWeEventEventResponse> event = Topic.getLogWeEventEvents(transactionReceipt);
-            if (CollectionUtils.isNotEmpty(event)) {
-                sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
-                sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, Web3SDKWrapper.uint256ToInt(event.get(0).eventBlockNumer), Web3SDKWrapper.uint256ToInt(event.get(0).eventSeq)));
-                sendResult.setTopic(topicName);
-                return sendResult;
-            } else {
-                sendResult.setStatus(SendResult.SendResultStatus.ERROR);
-                return sendResult;
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            log.error("publish event failed due to transaction execution error.", e);
-            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        } catch (TimeoutException e) {
-            log.error("publish event failed due to transaction execution timeout.", e);
-            sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
-            return sendResult;
-        }
+        log.info("publish async...");
+        WeEventTransactionCallback weEventTransactionCallback = new WeEventTransactionCallback(topicName);
+        topic.publishWeEvent(new Utf8String(topicName),
+                new Utf8String(eventContent), new Utf8String(extensions),
+                weEventTransactionCallback);
+        return weEventTransactionCallback.future;
     }
 
     /**
