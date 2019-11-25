@@ -63,7 +63,6 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tx.Contract;
 import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * Wrapper of Web3SDK 2.x function.
@@ -118,7 +117,7 @@ public class Web3SDK2Wrapper {
      * @param groupId group id
      * @return Web3j
      */
-    public static Web3j initWeb3j(Long groupId, FiscoConfig fiscoConfig, ThreadPoolTaskExecutor poolTaskExecutor) throws BrokerException {
+    public static Web3j initWeb3j(Long groupId, FiscoConfig fiscoConfig) throws BrokerException {
         // init web3j with given group id
         try {
             log.info("begin to initialize web3sdk, group id: {}", groupId);
@@ -146,7 +145,8 @@ public class Web3SDK2Wrapper {
             connectionsConfig.setAllChannelConnections(Arrays.asList(channelConnections));
 
             service.setAllChannelConnections(connectionsConfig);
-            service.setThreadPool(poolTaskExecutor);
+            // special thread for TransactionSucCallback.onResponse, callback from IO thread directly if not setting
+            //service.setThreadPool(poolTaskExecutor);
             service.run();
 
             ChannelEthereumService channelEthereumService = new ChannelEthereumService();
@@ -600,17 +600,17 @@ public class Web3SDK2Wrapper {
             } else {
                 BigInteger blockNum = web3j.getBlockNumber().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS).getBlockNumber();
 
-                if (pageIndex < 1 || (pageIndex-1) * pageSize > blockNum.longValue()) {
+                if (pageIndex < 1 || (pageIndex - 1) * pageSize > blockNum.longValue()) {
                     log.error("pageIndex error.");
                     throw new BrokerException("pageIndex error.");
                 }
-                Integer blockSize = (blockNum.longValue() <= pageIndex * pageSize) ? (Integer.valueOf(blockNum.toString()) - ((pageIndex-1) * pageSize)) : pageSize;
-                long blockNumberIndex = (pageIndex-1) * pageSize + 1;
+                Integer blockSize = (blockNum.longValue() <= pageIndex * pageSize) ? (Integer.valueOf(blockNum.toString()) - ((pageIndex - 1) * pageSize)) : pageSize;
+                long blockNumberIndex = (pageIndex - 1) * pageSize + 1;
 
                 List<Long> blockNums = new ArrayList<>();
                 for (int i = 0; i < blockSize; i++) {
                     blockNums.add(blockNumberIndex);
-                    blockNumberIndex ++;
+                    blockNumberIndex++;
                 }
                 blcokCount = blockNum.intValue();
                 tbBlocks = getTbBlock(web3j, blockNums);
@@ -700,7 +700,7 @@ public class Web3SDK2Wrapper {
     private static Map<String, Map<String, String>> getNodeViews(Web3j web3j) throws IOException {
         JSONArray consensusStatusArr = JSONObject.parseArray(web3j.getConsensusStatus().sendForReturnString());
         Map<String, Map<String, String>> nodeviews = new HashMap<>();
-        for (int i =0; i < consensusStatusArr.size(); i++){
+        for (int i = 0; i < consensusStatusArr.size(); i++) {
             Object jsonObj = consensusStatusArr.get(i);
             if (jsonObj instanceof JSONArray) {
                 convertJSONArrayToList(nodeviews, (JSONArray) jsonObj);
@@ -763,7 +763,7 @@ public class Web3SDK2Wrapper {
 
     private static int checkNodeActive(String nodeId, List<String> nodeIds) {
         // 1 means node active; 0 means inactive
-        return nodeIds.contains(nodeId)? 1 : 0;
+        return nodeIds.contains(nodeId) ? 1 : 0;
     }
 
     private static CopyOnWriteArrayList<TbBlock> getTbBlock(Web3j web3j, List<Long> blockNums) throws ExecutionException, InterruptedException {
@@ -772,12 +772,12 @@ public class Web3SDK2Wrapper {
         CopyOnWriteArrayList<TbBlock> tbBlocks = new CopyOnWriteArrayList<>();
         for (int i = 0; i < blockNums.size(); i++) {
             long blockNumber = blockNums.get(i);
-            CompletableFuture<List<TbBlock>> future = CompletableFuture.supplyAsync(() ->{
+            CompletableFuture<List<TbBlock>> future = CompletableFuture.supplyAsync(() -> {
                 BcosBlock bcosBlock = null;
                 try {
                     bcosBlock = web3j.getBlockByNumber(new DefaultBlockParameterNumber(blockNumber), true)
                             .sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-                } catch (InterruptedException |ExecutionException |TimeoutException e) {
+                } catch (InterruptedException | ExecutionException | TimeoutException e) {
                     log.error("query block by blockNumber failed. e:", e);
                     return null;
                 }
