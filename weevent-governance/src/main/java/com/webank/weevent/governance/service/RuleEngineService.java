@@ -103,6 +103,7 @@ public class RuleEngineService {
             }
             ruleEngineEntity.setSystemTag("2");
             int count = ruleEngineMapper.countRuleEngine(ruleEngineEntity);
+
             ruleEngineEntity.setTotalCount(count);
             List<RuleEngineEntity> ruleEngineEntities = null;
             if (count > 0) {
@@ -129,6 +130,7 @@ public class RuleEngineService {
     public RuleEngineEntity addRuleEngine(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         try {
+            long start = System.nanoTime();
             String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
             if (accountId == null || !accountId.equals(ruleEngineEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
@@ -148,8 +150,10 @@ public class RuleEngineService {
             this.checkRule(ruleEngineEntity);
             //insert ruleEngine
             ruleEngineMapper.addRuleEngine(ruleEngineEntity);
+
             //insert processor
             this.addProcessRule(request, ruleEngineEntity);
+            log.info("add end, time :{}s", (System.nanoTime() - start) / 1000);
             return ruleEngineEntity;
         } catch (Exception e) {
             log.error("add ruleEngineEntity fail", e);
@@ -169,8 +173,10 @@ public class RuleEngineService {
             map.put("updatedTime", ruleEngineEntity.getLastUpdate());
             map.put("createdTime", ruleEngineEntity.getCreateDate());
 
-            log.info("add rule begin====map:{}", JSONObject.toJSONString(map));
+            log.info("process add rule begin====map:{}", JSONObject.toJSONString(map));
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(map));
+            String mes = EntityUtils.toString(closeResponse.getEntity());
+            log.info("processor add rule result====result:{}", mes);
 
             //deal process result
             int statusCode = closeResponse.getStatusLine().getStatusCode();
@@ -178,7 +184,7 @@ public class RuleEngineService {
                 log.error(ErrorCode.PROCESS_CONNECT_ERROR.getCodeDesc());
                 throw new GovernanceException(ErrorCode.PROCESS_CONNECT_ERROR);
             }
-            String mes = EntityUtils.toString(closeResponse.getEntity());
+
             JSONObject jsonObject = JSONObject.parseObject(mes);
             Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
             if (PROCESSOR_SUCCESS_CODE != code) {
@@ -195,6 +201,7 @@ public class RuleEngineService {
     @Transactional(rollbackFor = Throwable.class)
     public boolean deleteRuleEngine(RuleEngineEntity ruleEngineEntity, HttpServletRequest request) throws GovernanceException {
         try {
+            long start = System.nanoTime();
             authCheck(ruleEngineEntity, request);
             List<RuleEngineEntity> ruleEngines = ruleEngineMapper.getRuleEngines(ruleEngineEntity);
             if (CollectionUtils.isEmpty(ruleEngines)) {
@@ -213,7 +220,9 @@ public class RuleEngineService {
             ruleEngineConditionEntity.setRuleId(ruleEngineEntity.getId());
             ruleEngineConditionMapper.deleteRuleEngineCondition(ruleEngineConditionEntity);
             //delete RuleEngine
-            return ruleEngineMapper.deleteRuleEngine(ruleEngineEntity);
+            Boolean flag = ruleEngineMapper.deleteRuleEngine(ruleEngineEntity);
+            log.info("delete end, time :{}s", (System.nanoTime() - start) / 1000);
+            return flag;
         } catch (Exception e) {
             log.error("delete ruleEngineEntity fail", e);
             throw new GovernanceException("delete ruleEngineEntity fail ", e);
@@ -223,18 +232,19 @@ public class RuleEngineService {
 
     public void deleteProcessRule(HttpServletRequest request, RuleEngineEntity engineEntity) throws GovernanceException {
         try {
-            BrokerEntity broker = brokerService.getBroker(engineEntity.getBrokerId());
             String deleteUrl = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_DELETE_CEP_RULE).append(ConstantProperties.QUESTION_MARK)
                     .append("id=").append(engineEntity.getId()).toString();
+            log.info("processor delete  begin");
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, deleteUrl);
-
+            String mes = EntityUtils.toString(closeResponse.getEntity());
+            log.info("delete rule result:{}", mes);
             //deal processor result
             int statusCode = closeResponse.getStatusLine().getStatusCode();
             if (200 != statusCode) {
                 log.error(ErrorCode.PROCESS_CONNECT_ERROR.getCodeDesc());
                 throw new GovernanceException(ErrorCode.PROCESS_CONNECT_ERROR);
             }
-            String mes = EntityUtils.toString(closeResponse.getEntity());
+
             JSONObject jsonObject = JSONObject.parseObject(mes);
             Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
             if (PROCESSOR_SUCCESS_CODE != code) {
@@ -252,6 +262,7 @@ public class RuleEngineService {
     public boolean updateRuleEngine(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         try {
+            long start = System.nanoTime();
             this.authCheck(ruleEngineEntity, request);
             //check rule
             this.checkRule(ruleEngineEntity);
@@ -317,7 +328,9 @@ public class RuleEngineService {
                 //insert new data
                 ruleEngineConditionMapper.batchInsert(ruleEngineConditionList);
             }
-            return ruleEngineMapper.updateRuleEngine(ruleEngineEntity);
+            flag = ruleEngineMapper.updateRuleEngine(ruleEngineEntity);
+            log.info("update ruleEngine end");
+            return flag;
         } catch (Exception e) {
             log.error("update ruleEngine fail", e);
             throw new GovernanceException("update ruleEngine fail", e);
@@ -364,12 +377,13 @@ public class RuleEngineService {
             //updateCEPRuleById
             log.info("update rule begin====map:{}", JSONObject.toJSONString(map));
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(map));
+            String updateMes = EntityUtils.toString(closeResponse.getEntity());
+            log.info("update rule end====result:{}", updateMes);
             //deal processor result
             int statusCode = closeResponse.getStatusLine().getStatusCode();
             if (200 != statusCode) {
                 throw new GovernanceException(ErrorCode.PROCESS_CONNECT_ERROR);
             }
-            String updateMes = EntityUtils.toString(closeResponse.getEntity());
             JSONObject jsonObject = JSONObject.parseObject(updateMes);
             Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
             if (PROCESSOR_SUCCESS_CODE != code) {
@@ -455,7 +469,9 @@ public class RuleEngineService {
             log.info("dataBaseUrl:{}", ruleEngineEntity.getDatabaseUrl());
         }
         this.stopProcessRule(request, ruleEngineEntity, rule);
-        return ruleEngineMapper.updateRuleEngineStatus(ruleEngineEntity);
+        Boolean flag = ruleEngineMapper.updateRuleEngineStatus(ruleEngineEntity);
+        log.info("update status end");
+        return flag;
     }
 
     @SuppressWarnings("unchecked")
@@ -471,13 +487,15 @@ public class RuleEngineService {
             //updateCEPRuleById
             log.info("stop rule begin====map:{}", JSONObject.toJSONString(map));
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(map));
+            String stopMsg = EntityUtils.toString(closeResponse.getEntity());
+            log.info("stop rule end====result:{}", stopMsg);
             //deal processor result
             int statusCode = closeResponse.getStatusLine().getStatusCode();
             if (200 != statusCode) {
                 throw new GovernanceException(ErrorCode.PROCESS_CONNECT_ERROR);
             }
-            String updateMes = EntityUtils.toString(closeResponse.getEntity());
-            JSONObject jsonObject = JSONObject.parseObject(updateMes);
+
+            JSONObject jsonObject = JSONObject.parseObject(stopMsg);
             Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
             if (PROCESSOR_SUCCESS_CODE != code) {
                 String msg = jsonObject.get("errorMsg").toString();
@@ -531,7 +549,9 @@ public class RuleEngineService {
             engineEntity.setId(rule.getId());
             engineEntity.setStatus(StatusEnum.RUNNING.getCode());
             engineEntity.setLastUpdate(rule.getLastUpdate());
-            return ruleEngineMapper.updateRuleEngineStatus(engineEntity);
+            Boolean flag = ruleEngineMapper.updateRuleEngineStatus(engineEntity);
+            log.info("start ruleEngine end");
+            return flag;
         } catch (Exception e) {
             log.error("start ruleEngine fail", e);
             throw new GovernanceException("start ruleEngine fail", e);
@@ -548,13 +568,15 @@ public class RuleEngineService {
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_START_CEP_RULE).toString();
             log.info("start rule begin====map:{}", JSONObject.toJSONString(map));
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(map));
+            //deal processor result
+            String mes = EntityUtils.toString(closeResponse.getEntity());
+            log.info("start rule end====result:{}", mes);
             int statusCode = closeResponse.getStatusLine().getStatusCode();
             if (200 != statusCode) {
                 log.error(ErrorCode.PROCESS_CONNECT_ERROR.getCodeDesc());
                 throw new GovernanceException(ErrorCode.PROCESS_CONNECT_ERROR);
             }
-            //deal processor result
-            String mes = EntityUtils.toString(closeResponse.getEntity());
+
             JSONObject jsonObject = JSONObject.parseObject(mes);
             Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
             String msg = jsonObject.get("errorMsg").toString();
