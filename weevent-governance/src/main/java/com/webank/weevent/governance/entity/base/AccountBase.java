@@ -25,7 +25,7 @@ public class AccountBase extends BaseEntity {
 
     private String oldPassword;
 
-    private Integer isDelete;
+    private String deleteAt;
 
     private Integer brokerId;
 
