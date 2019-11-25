@@ -79,7 +79,7 @@ public class CEPRuleController {
     public BaseRspEntity deleteCEPRuleById(@RequestParam(name = "id") String id) {
 
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
-        createJob(id,"deleteCEPRuleById");
+        createJob(id, "deleteCEPRuleById");
         RetCode ret = deleteJob(id);
 
         if (!(1 == ret.getErrorCode())) { //fail
@@ -88,6 +88,22 @@ public class CEPRuleController {
         }
 
         log.info("cepRule:{}", JSONArray.toJSON(ret));
+        return resEntity;
+    }
+
+    @RequestMapping(value = "/getCEPRuleById", method = RequestMethod.GET)
+    @ResponseBody
+    public BaseRspEntity getCEPRuleById(@RequestParam(name = "id") String id) {
+
+        BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
+        CEPRule cepRule = getRuleById(id);
+
+        if (null == cepRule) { //fail
+            resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
+            resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());
+        } else { // set rule
+            resEntity.setData(cepRule);
+        }
         return resEntity;
     }
 
@@ -140,6 +156,10 @@ public class CEPRuleController {
         // set the original instance
         jobmap.put("instance", ProcessorApplication.processorConfig.getSchedulerInstanceName());
         return quartzManager.addModifyJob(id, "rule", "rule", "rule-trigger", CRUDJobs.class, jobmap);
+    }
+
+    private CEPRule getRuleById(String id) {
+        return quartzManager.selectJobById(id);
     }
 
     private RetCode deleteJob(String id) {

@@ -39,6 +39,15 @@ public class ServiceTest {
 
 
     @Test
+    public void getRuleDetails() throws Exception {
+        String url = "/getCEPRuleById";
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON).param("id", "10321254");
+        MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
+        log.info("result:{}", result.getResponse().getContentAsString());
+        assertEquals(200, result.getResponse().getStatus());
+    }
+
+    @Test
     public void startCEPRule() throws Exception {
         String url = "/startCEPRule";
         String cEPrule = " {\n" +
@@ -58,6 +67,10 @@ public class ServiceTest {
                 "        \"errorDestination\": null,\n" +
                 "        \"errorCode\": null,\n" +
                 "        \"errorMessage\": null,\n" +
+                "        \"brokerId\": \"1\",\n" +
+                "        \"userId\": \"1\",\n" +
+                "        \"groupId\": \"1\",\n" +
+                "        \"systemTag\": \"0\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -87,6 +100,10 @@ public class ServiceTest {
                 "        \"errorDestination\": null,\n" +
                 "        \"errorCode\": null,\n" +
                 "        \"errorMessage\": null,\n" +
+                "        \"brokerId\": \"1\",\n" +
+                "        \"userId\": \"1\",\n" +
+                "        \"groupId\": \"1\",\n" +
+                "        \"systemTag\": \"0\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
 
@@ -126,6 +143,10 @@ public class ServiceTest {
                 "        \"errorDestination\": null,\n" +
                 "        \"errorCode\": null,\n" +
                 "        \"errorMessage\": null,\n" +
+                "        \"brokerId\": \"1\",\n" +
+                "        \"userId\": \"1\",\n" +
+                "        \"groupId\": \"1\",\n" +
+                "        \"systemTag\": \"0\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
 
@@ -241,6 +262,8 @@ public class ServiceTest {
                 "        \"errorMessage\": null,\n" +
                 "        \"brokerId\": \"1\",\n" +
                 "        \"userId\": \"1\",\n" +
+                "        \"groupId\": \"1\",\n" +
+                "        \"systemTag\": \"0\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -272,6 +295,8 @@ public class ServiceTest {
                 "        \"errorMessage\": null,\n" +
                 "        \"brokerId\": \"1\",\n" +
                 "        \"userId\": \"1\",\n" +
+                "        \"groupId\": \"1\",\n" +
+                "        \"systemTag\": \"0\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -304,6 +329,8 @@ public class ServiceTest {
                 "        \"errorMessage\": null,\n" +
                 "        \"brokerId\": \"1\",\n" +
                 "        \"userId\": \"1\",\n" +
+                "        \"groupId\": \"1\",\n" +
+                "        \"systemTag\": \"0\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -335,6 +362,8 @@ public class ServiceTest {
                 "        \"errorMessage\": null,\n" +
                 "        \"brokerId\": \"1\",\n" +
                 "        \"userId\": \"1\",\n" +
+                "        \"groupId\": \"1\",\n" +
+                "        \"systemTag\": \"0\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -366,6 +395,8 @@ public class ServiceTest {
                 "        \"errorMessage\": null,\n" +
                 "        \"brokerId\": \"1\",\n" +
                 "        \"userId\": \"1\",\n" +
+                "        \"groupId\": \"1\",\n" +
+                "        \"systemTag\": \"0\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -397,6 +428,8 @@ public class ServiceTest {
                 "        \"errorMessage\": null,\n" +
                 "        \"brokerId\": \"1\",\n" +
                 "        \"userId\": \"1\",\n" +
+                "        \"groupId\": \"1\",\n" +
+                "        \"systemTag\": \"0\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -428,6 +461,8 @@ public class ServiceTest {
                 "        \"errorMessage\": null,\n" +
                 "        \"brokerId\": \"1\",\n" +
                 "        \"userId\": \"1\",\n" +
+                "        \"groupId\": \"1\",\n" +
+                "        \"systemTag\": \"0\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -460,6 +495,8 @@ public class ServiceTest {
                 "        \"errorMessage\": null,\n" +
                 "        \"brokerId\": \"1\",\n" +
                 "        \"userId\": \"1\",\n" +
+                "        \"groupId\": \"1\",\n" +
+                "        \"systemTag\": \"0\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -491,6 +528,8 @@ public class ServiceTest {
                 "        \"errorMessage\": null,\n" +
                 "        \"brokerId\": \"1\",\n" +
                 "        \"userId\": \"1\",\n" +
+                "        \"groupId\": \"1\",\n" +
+                "        \"systemTag\": \"0\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -522,6 +561,8 @@ public class ServiceTest {
                 "        \"errorMessage\": null,\n" +
                 "        \"brokerId\": \"1\",\n" +
                 "        \"userId\": \"1\",\n" +
+                "        \"groupId\": \"1\",\n" +
+                "        \"systemTag\": \"0\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -560,6 +601,8 @@ public class ServiceTest {
                 "        \"errorMessage\": null,\n" +
                 "        \"brokerId\": \"1\",\n" +
                 "        \"userId\": \"1\",\n" +
+                "        \"groupId\": \"1\",\n" +
+                "        \"systemTag\": \"0\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
 
@@ -594,6 +637,8 @@ public class ServiceTest {
                 "        \"errorMessage\": null,\n" +
                 "        \"brokerId\": \"1\",\n" +
                 "        \"userId\": \"1\",\n" +
+                "        \"groupId\": \"1\",\n" +
+                "        \"systemTag\": \"0\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -625,6 +670,8 @@ public class ServiceTest {
                 "        \"errorMessage\": null,\n" +
                 "        \"brokerId\": \"1\",\n" +
                 "        \"userId\": \"1\",\n" +
+                "        \"groupId\": \"1\",\n" +
+                "        \"systemTag\": \"0\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -657,6 +704,8 @@ public class ServiceTest {
                 "        \"errorMessage\": null,\n" +
                 "        \"brokerId\": \"1\",\n" +
                 "        \"userId\": \"1\",\n" +
+                "        \"groupId\": \"1\",\n" +
+                "        \"systemTag\": \"0\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -689,6 +738,8 @@ public class ServiceTest {
                 "        \"errorMessage\": null,\n" +
                 "        \"brokerId\": \"1\",\n" +
                 "        \"userId\": \"1\",\n" +
+                "        \"groupId\": \"1\",\n" +
+                "        \"systemTag\": \"0\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
