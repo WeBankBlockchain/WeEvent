@@ -2,8 +2,12 @@ package com.webank.weevent.protocol.mqtt.command;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.SendResult;
@@ -65,10 +69,20 @@ public class Publish {
 
     private SendResult sendMessageToFisco(String topic, byte[] messageBytes, String groupId, Map<String, String> extensions) {
         SendResult sendResult = new SendResult();
+        sendResult.setTopic(topic);
+
         try {
             //this.iproducer.open(topic, groupId);
             if (this.iproducer.exist(topic, groupId)) {
-                sendResult = this.iproducer.publish(new WeEvent(topic, messageBytes, extensions), groupId);
+                try {
+                    sendResult = this.iproducer.publish(new WeEvent(topic, messageBytes, extensions), groupId).get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException | ExecutionException e) {
+                    log.error("publishWeEvent failed due to transaction execution error.", e);
+                    sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+                } catch (TimeoutException e) {
+                    log.error("publishWeEvent failed due to transaction execution timeout.", e);
+                    sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
+                }
             } else {
                 sendResult.setStatus(SendResult.SendResultStatus.ERROR);
                 log.error("topic is not exist");
