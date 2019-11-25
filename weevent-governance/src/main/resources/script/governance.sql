@@ -2,7 +2,7 @@ CREATE TABLE t_account(
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
   `create_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create date',
   `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP comment 'update date',
-  `is_delete` INT(1) NOT NULL DEFAULT  0 COMMENT '0 means not deleted 1 means deleted',
+  `delete_at`VARCHAR(64) NOT NULL DEFAULT  0 COMMENT '0 means not deleted others means deleted',
   `email` VARCHAR(256) NOT NULL COMMENT 'email',
   `username` VARCHAR(64) NOT NULL COMMENT 'username',
   `password` VARCHAR(256) NOT NULL COMMENT 'password`',
@@ -14,20 +14,21 @@ CREATE TABLE t_broker (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
   `create_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create date',
   `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP comment 'update date',
-  `is_delete` INT(1) NOT NULL DEFAULT  0 COMMENT '0 means not deleted 1 means deleted',
+  `delete_at` VARCHAR(64) NOT NULL DEFAULT  0 COMMENT '0 means not deleted others means deleted',
   `is_config_rule` INT(1)  NULL DEFAULT  NULL COMMENT '1 means configured ,2 means not configured',
   `user_id` INT(11) NOT NULL  COMMENT 'user id',
   `name` VARCHAR(256) NOT NULL COMMENT 'name',
   `broker_url` VARCHAR(256) DEFAULT NULL COMMENT 'broker url',
   `webase_url` VARCHAR(256) DEFAULT NULL COMMENT 'webase url',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY brokerUrlDeleteAt(broker_url,delete_at)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment 't_broker';
 
 CREATE TABLE  t_topic (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
   `create_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create date',
   `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP comment 'update date',
-  `is_delete` INT(1) NOT NULL DEFAULT  0 COMMENT '0 means not deleted 1 means deleted',
+  `delete_at` VARCHAR(64) NOT NULL DEFAULT  0 COMMENT '0 means not deleted others means deleted',
   `topic_name` VARCHAR(256) NOT NULL COMMENT 'topic name',
   `creater` VARCHAR(256) DEFAULT NULL COMMENT 'creator',
   `broker_id` INT(11) NOT NULL COMMENT 'broker id',
@@ -69,8 +70,9 @@ CREATE TABLE t_rule_engine (
   `error_destination` VARCHAR(255) NULL DEFAULT NULL COMMENT 'error destination',
   `error_message` VARCHAR(255) NULL DEFAULT NULL COMMENT 'error message',
   `system_tag` VARCHAR(1) NOT NULL DEFAULT '2' COMMENT '1  means system,2 means user add',
+  `delete_at` VARCHAR(64) NOT NULL DEFAULT  '0' COMMENT '0 means not deleted ,others means deleted',
    PRIMARY KEY (`id`),
-   UNIQUE KEY ruleName(rule_name)
+   UNIQUE KEY ruleNameDeleteAt(rule_name,delete_at)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='t_rule_engine';
 
 CREATE TABLE t_rule_database (
