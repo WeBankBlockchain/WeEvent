@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
@@ -20,7 +21,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * One topic subscription.
@@ -220,10 +220,10 @@ public class Subscription {
         this.notifyTask.push(topicEvents);
     }
 
-    public synchronized void doStart(ThreadPoolTaskExecutor threadPoolTaskExecutor) {
-        threadPoolTaskExecutor.execute(this.notifyTask);
+    public synchronized void doStart(Executor executor) {
+        executor.execute(this.notifyTask);
         if (this.historyEventLoop != null) {
-            threadPoolTaskExecutor.execute(this.historyEventLoop);
+            executor.execute(this.historyEventLoop);
         }
     }
 
