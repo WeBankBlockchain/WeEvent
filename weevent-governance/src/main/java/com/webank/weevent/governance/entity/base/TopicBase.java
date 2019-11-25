@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper=false)
 public class TopicBase extends BaseEntity {
 
-    private Integer isDelete;
+    private String deleteAt;
 
     private Integer brokerId;
 
