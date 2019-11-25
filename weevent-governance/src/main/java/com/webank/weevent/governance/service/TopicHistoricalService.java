@@ -14,7 +14,7 @@ import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.weevent.governance.code.ConstantCode;
+import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.entity.RuleDatabaseEntity;
 import com.webank.weevent.governance.entity.RuleEngineEntity;
@@ -87,7 +87,7 @@ public class TopicHistoricalService {
             String accountId = cookiesTools.getCookieValueByName(httpRequest, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
             Boolean flag = permissionService.verifyPermissions(topicHistoricalEntity.getBrokerId(), accountId);
             if (!flag) {
-                throw new GovernanceException(ConstantCode.ACCESS_DENIED.getMsg());
+                throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
             Map<String, List<Integer>> returnMap = new HashMap<>();
 
@@ -125,7 +125,7 @@ public class TopicHistoricalService {
             });
             return returnMap;
         } catch (Exception e) {
-            log.info("get historicalDataEntity fail", e);
+            log.error("get historicalDataEntity fail", e);
             throw new GovernanceException("get historicalDataEntity fail", e);
         }
 
@@ -136,7 +136,7 @@ public class TopicHistoricalService {
             String accountId = cookiesTools.getCookieValueByName(httpRequest, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
             Boolean flag = permissionService.verifyPermissions(topicHistoricalEntity.getBrokerId(), accountId);
             if (!flag) {
-                throw new GovernanceException(ConstantCode.ACCESS_DENIED.getMsg());
+                throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
             List<TopicTopicHistoricalEntity> historicalEntities = topicHistoricalMapper.eventList(topicHistoricalEntity);
             if (CollectionUtils.isEmpty(historicalEntities)) {
@@ -147,7 +147,7 @@ public class TopicHistoricalService {
             }
             return historicalEntities;
         } catch (Exception e) {
-            log.info("get eventList fail", e);
+            log.error("get eventList fail", e);
             throw new GovernanceException("get eventList fail", e);
         }
 

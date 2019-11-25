@@ -2,7 +2,7 @@ CREATE TABLE t_account(
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '主键 id',
   `create_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
   `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改日期',
-  `is_delete` VARCHAR(64) NOT NULL DEFAULT  0 COMMENT '0未删除 1已经删除',
+  `delete_at`VARCHAR(64) NOT NULL DEFAULT  0 COMMENT ''0 means not deleted others means deleted'',
   `email` VARCHAR(256) NOT NULL COMMENT '邮箱',
   `username` VARCHAR(64) NOT NULL COMMENT '用户名',
   `password` VARCHAR(256) NOT NULL COMMENT '密码`',
@@ -14,7 +14,7 @@ CREATE TABLE t_broker (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '主键 id',
   `create_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
   `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改日期',
-  `is_delete` VARCHAR(64) NOT NULL DEFAULT  0 COMMENT '0未删除 1 已经删除',
+  `delete_at` VARCHAR(64) NOT NULL DEFAULT  0 COMMENT ''0 means not deleted others means deleted'',
   `user_id` INT(11) NOT NULL  COMMENT 'user 主键id',
   `name` VARCHAR(256) NOT NULL COMMENT 'broker 名称',
   `broker_url` VARCHAR(256) DEFAULT NULL COMMENT 'broker url',
@@ -23,15 +23,15 @@ CREATE TABLE t_broker (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment 'broker配置表';
 
 CREATE TABLE  t_topic (
-  `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '主键 id',
-  `create_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
-  `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改日期',
-  `is_delete` VARCHAR(64) NOT NULL DEFAULT  0 COMMENT '0未删除 1 已经删除',
-  `topic_name` VARCHAR(256) NOT NULL COMMENT '主题名称',
-  `creater` VARCHAR(256) DEFAULT NULL COMMENT '创建人',
-  `broker_id` INT(11) NOT NULL COMMENT 'broker 主键id',
-  `group_id` VARCHAR(64) DEFAULT NULL COMMENT '群组 id',
-  `description` VARCHAR(256)  NULL  DEFAULT NULL COMMENT '主题描述',
+  `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
+  `create_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create date',
+  `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP comment 'update date',
+  `delete_at` VARCHAR(64) NOT NULL DEFAULT  0 COMMENT '0 means not deleted others means deleted',
+  `topic_name` VARCHAR(256) NOT NULL COMMENT 'topic name',
+  `creater` VARCHAR(256) DEFAULT NULL COMMENT 'creator',
+  `broker_id` INT(11) NOT NULL COMMENT 'broker id',
+  `group_id` VARCHAR(64) DEFAULT NULL COMMENT 'group id',
+  `description` VARCHAR(256)  NULL  DEFAULT NULL COMMENT 'description',
    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment '主题表';
 
@@ -66,6 +66,7 @@ CREATE TABLE t_rule_engine (
   `rule_database_id` INT(11) NULL DEFAULT NULL COMMENT '数据源 主键id',
   `error_destination` VARCHAR(255) NULL DEFAULT NULL COMMENT '失败流转目的地',
   `system_tag` VARCHAR(1) NOT NULL DEFAULT '1' COMMENT '1 系统内置 ,2 用户新增',
+  `delete_at` VARCHAR(64) NOT NULL DEFAULT  '0' COMMENT '0 means not deleted ,others means deleted',
    PRIMARY KEY (`id`),
    UNIQUE KEY ruleName(rule_name)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='规则引擎表';
@@ -108,4 +109,4 @@ CREATE TABLE t_topic_historical (
    `brokerId` VARCHAR(64) NOT  NULL COMMENT 'broker 主键id',
    PRIMARY KEY (`id`),
    UNIQUE KEY brokerIdGroupIdEventId(brokerId,groupId,eventId)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='历史数据表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='主题历史数据表';

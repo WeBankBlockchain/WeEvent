@@ -53,7 +53,7 @@
             resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from t_rule_engine where status!=2
+        from t_rule_engine where status!=2 and delete_at=0
         <if test="ruleEngineEntity.id != null">
             and id = #{ruleEngineEntity.id,jdbcType=INTEGER}
         </if>
@@ -109,7 +109,7 @@
             resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from t_rule_engine where rule_name=#{ruleName}
+        from t_rule_engine where rule_name=#{ruleName} and delete_at=0
     </select>
 
     <update id="updateRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity">
@@ -136,7 +136,7 @@
 
     <delete id="deleteRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity">
         update t_rule_engine
-        set status=2
+        set status=2 , delete_at=unix_timestamp(now())
         where id = #{id}
     </delete>
 

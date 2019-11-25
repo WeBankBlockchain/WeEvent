@@ -25,7 +25,7 @@ public class BrokerBase extends BaseEntity {
 
     private String webaseUrl;
 
-    private Integer isDelete;
+    private String deleteAt;
 
     public void setBrokerUrl(String brokerUrl) {
         this.brokerUrl = brokerUrl == null ? null : brokerUrl.trim();
