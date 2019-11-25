@@ -131,6 +131,13 @@ public class CommonUtil {
         return true;
     }
 
+    /**
+     * check event keys is belong to the payload
+     *
+     * @param content event content
+     * @param objJson payload
+     * @return if event is belong to payload,then return true
+     */
     public static boolean checkJson(String content, String objJson) {
         boolean tag = true;
         //parsing and match
@@ -140,7 +147,7 @@ public class CommonUtil {
             List<String> objJsonKeys = getKeys(objJson);
 
             for (String contentKey : contentKeys) {
-
+                // event id is system parameter
                 if (!((objJsonKeys.contains(contentKey)) || "eventId".equals(contentKey))) {
                     tag = false;
                     break;
@@ -192,7 +199,7 @@ public class CommonUtil {
         JSONObject table = JSONObject.parseObject(payload);
         JSONObject eventContent;
         Map<String, String> sqlOrder;
-        if ("json".equals(eventMessage.getExtensions().get("weevent-format")) && CommonUtil.checkValidJson(content)) {
+        if (CommonUtil.checkValidJson(content)) {
             eventContent = JSONObject.parseObject(content);
             sqlOrder = generateSqlOrder(brokerId, groupId, eventId, topicName, result, eventContent, table);
         } else {
@@ -281,6 +288,3 @@ public class CommonUtil {
     }
 
 }
-
-
-
