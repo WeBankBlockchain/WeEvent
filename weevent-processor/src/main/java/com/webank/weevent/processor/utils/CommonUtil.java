@@ -1,7 +1,6 @@
 package com.webank.weevent.processor.utils;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,12 +8,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.sdk.WeEvent;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.util.StringUtils;
 
 @Slf4j
@@ -27,21 +26,41 @@ public class CommonUtil {
      * @param databaseUrl data bae url
      * @return connection
      */
-
-    public static Connection getConnection(String databaseUrl) {
-        String driver = ProcessorApplication.processorConfig.getDataBaseDriver();
+    public static Connection getDbcpConnection(String databaseUrl) {
         try {
-            Class.forName(driver);
-            return DriverManager.getConnection(databaseUrl);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
+            int MAX_IDLE = 20;
+            int MinIdle = 8;
+            long MAX_WAIT_Millis = 5000;
+            int MAX_TOTAl = 5;
+            int INITIAL_SIZE = 10;
+            int RemoveAbandonedTimeout = 180;
+            final boolean TOBESTNORROW = true;
+            BasicDataSource ds = new BasicDataSource();
+
+            Map<String, String> requestUrlMap = uRLRequest(databaseUrl);
+            // check all parameter
+            if (!(requestUrlMap.containsKey("user") && requestUrlMap.containsKey("password") && (null != urlPage(databaseUrl)))) {
+                return null;
+            }
+            // set all parameter
+            ds.setDriverClassName("org.mariadb.jdbc.Driver");
+            ds.setUrl(urlPage(databaseUrl));
+            ds.setUsername(requestUrlMap.get("user"));
+            ds.setPassword(requestUrlMap.get("password"));
+            ds.setMaxTotal(MAX_TOTAl);
+            ds.setInitialSize(INITIAL_SIZE);
+            ds.setMinIdle(MinIdle);
+            ds.setMaxIdle(MAX_IDLE);
+            ds.setMaxWaitMillis(MAX_WAIT_Millis);
+            ds.setTestOnBorrow(TOBESTNORROW);
+            ds.setRemoveAbandonedTimeout(RemoveAbandonedTimeout);
+            return ds.getConnection();
+
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
         }
     }
-
 
     public static String urlPage(String url) {
         String page = null;

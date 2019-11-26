@@ -21,7 +21,6 @@ import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.WeEvent;
 
-import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
@@ -60,9 +59,11 @@ public class CEPRuleMQ {
                 IWeEventClient client = subscriptionClientMap.get(subId);
                 // if they are equal
                 for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
+//                    if (!(rule.getFromDestination().equals(entry.getValue().getFromDestination()))) {
                     // use the old subscribe id
                     subscribeMsg(rule, ruleMap, client, subId);
                     break;
+//                    }
                 }
 
             } else {
@@ -164,7 +165,7 @@ public class CEPRuleMQ {
 
     private static void sendMessageToDB(String groupId, WeEvent eventContent, CEPRule rule) {
         try {
-            try (Connection conn = CommonUtil.getConnection(rule.getDatabaseUrl())) {
+            try (Connection conn = CommonUtil.getDbcpConnection(rule.getDatabaseUrl())) {
 
                 if (conn != null) {
                     // get the sql params
