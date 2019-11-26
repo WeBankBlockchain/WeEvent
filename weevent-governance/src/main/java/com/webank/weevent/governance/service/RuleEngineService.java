@@ -150,7 +150,7 @@ public class RuleEngineService {
             ruleEngineMapper.addRuleEngine(ruleEngineEntity);
             //insert processor
             this.addProcessRule(request, ruleEngineEntity);
-            log.info("add end, time :{}s", (System.nanoTime() - start) / 1000);
+            log.info("add end, time");
             return ruleEngineEntity;
         } catch (Exception e) {
             log.error("add ruleEngineEntity fail", e);
@@ -217,7 +217,7 @@ public class RuleEngineService {
             ruleEngineConditionMapper.deleteRuleEngineCondition(ruleEngineConditionEntity);
             //delete RuleEngine
             Boolean flag = ruleEngineMapper.deleteRuleEngine(ruleEngineEntity);
-            log.info("delete end, time :{}s", (System.nanoTime() - start) / 1000);
+            log.info("delete end");
             return flag;
         } catch (Exception e) {
             log.error("delete ruleEngineEntity fail", e);
