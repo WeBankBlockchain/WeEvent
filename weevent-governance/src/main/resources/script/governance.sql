@@ -2,7 +2,7 @@ CREATE TABLE t_account(
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
   `create_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create date',
   `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP comment 'update date',
-  `is_delete` INT(1) NOT NULL DEFAULT  0 COMMENT '0 means not deleted 1 means deleted',
+  `delete_at`VARCHAR(64) NOT NULL DEFAULT  0 COMMENT '0 means not deleted others means deleted',
   `email` VARCHAR(256) NOT NULL COMMENT 'email',
   `username` VARCHAR(64) NOT NULL COMMENT 'username',
   `password` VARCHAR(256) NOT NULL COMMENT 'password`',
@@ -14,20 +14,21 @@ CREATE TABLE t_broker (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
   `create_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create date',
   `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP comment 'update date',
-  `is_delete` INT(1) NOT NULL DEFAULT  0 COMMENT '0 means not deleted 1 means deleted',
+  `delete_at` VARCHAR(64) NOT NULL DEFAULT  0 COMMENT '0 means not deleted others means deleted',
   `is_config_rule` INT(1)  NULL DEFAULT  NULL COMMENT '1 means configured ,2 means not configured',
   `user_id` INT(11) NOT NULL  COMMENT 'user id',
   `name` VARCHAR(256) NOT NULL COMMENT 'name',
   `broker_url` VARCHAR(256) DEFAULT NULL COMMENT 'broker url',
   `webase_url` VARCHAR(256) DEFAULT NULL COMMENT 'webase url',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY brokerUrlDeleteAt(broker_url,delete_at)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment 't_broker';
 
 CREATE TABLE  t_topic (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
   `create_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create date',
   `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP comment 'update date',
-  `is_delete` INT(1) NOT NULL DEFAULT  0 COMMENT '0 means not deleted 1 means deleted',
+  `delete_at` VARCHAR(64) NOT NULL DEFAULT  0 COMMENT '0 means not deleted others means deleted',
   `topic_name` VARCHAR(256) NOT NULL COMMENT 'topic name',
   `creater` VARCHAR(256) DEFAULT NULL COMMENT 'creator',
   `broker_id` INT(11) NOT NULL COMMENT 'broker id',
@@ -52,16 +53,16 @@ CREATE TABLE t_rule_engine (
   `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update date',
   `rule_name` VARCHAR(128) NOT  NULL   COMMENT 'rule name',
   `payload_type` INT(4)  NULL DEFAULT NULL COMMENT '1 means JASON, 2 means binary',
-  `payload` VARCHAR(255)  NULL DEFAULT NULL COMMENT 'message payload',
+  `payload` VARCHAR(4096)  NULL DEFAULT NULL COMMENT 'message payload',
   `broker_id` INT(11) not NULL COMMENT 'broker id',
-  `cep_id` VARCHAR(64) NULL COMMENT 'complex event processing id',
   `user_id` INT(11) not NULL COMMENT 'user id',
   `group_id` VARCHAR(64) not NULL COMMENT 'group id',
+  `cep_id` VARCHAR(64) NULL COMMENT 'complex event processing id',
   `broker_url` VARCHAR(255) NULL DEFAULT NULL COMMENT 'broker url',
   `from_destination` VARCHAR(64)  NULL DEFAULT NULL COMMENT  'message origin',
   `to_destination` VARCHAR(64)  NULL DEFAULT NULL COMMENT  'message reached',
-  `select_field` VARCHAR(255) NULL DEFAULT NULL COMMENT 'selected field',
-  `condition_field` VARCHAR(255) NULL DEFAULT NULL COMMENT 'condition field',
+  `select_field` VARCHAR(4096) NULL DEFAULT NULL COMMENT 'selected field',
+  `condition_field` VARCHAR(4096) NULL DEFAULT NULL COMMENT 'condition field',
   `condition_type` INT(2) NULL DEFAULT NULL COMMENT 'condition type',
   `status` INT(2)  NULL DEFAULT null COMMENT '0 means not started, 1 means running,2 means is deleted',
   `database_url` VARCHAR(255) NULL DEFAULT NULL COMMENT 'database url',
@@ -69,8 +70,9 @@ CREATE TABLE t_rule_engine (
   `error_destination` VARCHAR(255) NULL DEFAULT NULL COMMENT 'error destination',
   `error_message` VARCHAR(255) NULL DEFAULT NULL COMMENT 'error message',
   `system_tag` VARCHAR(1) NOT NULL DEFAULT '2' COMMENT '1  means system,2 means user add',
+  `delete_at` VARCHAR(64) NOT NULL DEFAULT  '0' COMMENT '0 means not deleted ,others means deleted',
    PRIMARY KEY (`id`),
-   UNIQUE KEY ruleName(rule_name)
+   UNIQUE KEY ruleNameDeleteAt(rule_name,delete_at)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='t_rule_engine';
 
 CREATE TABLE t_rule_database (
