@@ -3,7 +3,7 @@ package com.webank.weevent.governance.filter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
-import com.webank.weevent.governance.filter.util.JsoupUtil;
+import com.webank.weevent.governance.utils.JsoupUtil;
 
 import org.apache.commons.lang3.StringUtils;
 

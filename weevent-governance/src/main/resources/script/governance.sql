@@ -19,7 +19,8 @@ CREATE TABLE t_broker (
   `name` VARCHAR(256) NOT NULL COMMENT '名称',
   `broker_url` VARCHAR(256) DEFAULT NULL COMMENT 'broker url',
   `webase_url` VARCHAR(256) DEFAULT NULL COMMENT 'webase url',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY brokerUrlDeleteAt(broker_url,delete_at)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment 'broker配置表';
 
 CREATE TABLE  t_topic (
@@ -68,7 +69,7 @@ CREATE TABLE t_rule_engine (
   `system_tag` VARCHAR(1) NOT NULL DEFAULT '1' COMMENT '1 系统内置 ,2 用户新增',
   `delete_at`VARCHAR(64) NOT NULL DEFAULT  0 COMMENT '0 表示 未删除, 时间戳 表示 已经被删除',
    PRIMARY KEY (`id`),
-   UNIQUE KEY ruleName(rule_name)
+   UNIQUE KEY ruleNameDeleteAt(rule_name,delete_at)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='规则引擎表';
 
 CREATE TABLE t_rule_database (
