@@ -60,11 +60,9 @@ public class CEPRuleMQ {
                 IWeEventClient client = subscriptionClientMap.get(subId);
                 // if they are equal
                 for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
-//                    if (!(rule.getFromDestination().equals(entry.getValue().getFromDestination()))) {
                     // use the old subscribe id
                     subscribeMsg(rule, ruleMap, client, subId);
                     break;
-//                    }
                 }
 
             } else {
@@ -470,4 +468,3 @@ public class CEPRuleMQ {
         }
     }
 }
-
