@@ -1,13 +1,18 @@
 package com.webank.weevent.processor.utils;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weevent.processor.ProcessorApplication;
+import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.sdk.WeEvent;
 
 import com.alibaba.fastjson.JSONException;
@@ -26,6 +31,22 @@ public class CommonUtil {
      * @param databaseUrl data bae url
      * @return connection
      */
+
+    public static Connection getConnection(String databaseUrl) {
+        String driver = ProcessorApplication.processorConfig.getDataBaseDriver();
+        try {
+            Class.forName(driver);
+            return DriverManager.getConnection(databaseUrl);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
     public static Connection getDbcpConnection(String databaseUrl) {
         try {
             int MAX_IDLE = 20;
@@ -306,4 +327,13 @@ public class CommonUtil {
         return sqlOrder;
     }
 
+    public static boolean compareMessage(Map<String, CEPRule> ruleMap, List<CEPRule> ruleList) {
+        for (int i = 0; i < ruleList.size(); i++) {
+            if (ruleList.get(i).getId().equals(ruleMap.get(ruleList.get(i).getId()))&&ruleList.get(i).getFromDestination().equals(ruleMap.get(ruleList.get(i).getFromDestination()))) {
+                return true;
+            }
+
+        }
+        return false;
+    }
 }

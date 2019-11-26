@@ -21,6 +21,7 @@ import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.WeEvent;
 
+import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +51,7 @@ public class CEPRuleMQ {
         new Thread(dbThread).start();
     }
 
-    public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException {
+    public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap, List<CEPRule> ruleList) throws BrokerException {
         // when is in run status. update the rule map
         // update unsubscribe
         String subId = subscriptionIdMap.get(rule.getId());
@@ -59,11 +60,15 @@ public class CEPRuleMQ {
                 IWeEventClient client = subscriptionClientMap.get(subId);
                 // if they are equal
                 for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
-//                    if (!(rule.getFromDestination().equals(entry.getValue().getFromDestination()))) {
-                    // use the old subscribe id
-                    subscribeMsg(rule, ruleMap, client, subId);
-                    break;
-//                    }
+
+                    // ruleList have all message and ruleMap has latest message
+                    // check the FromDestination whether is or not,
+                    if (!(CommonUtil.compareMessage(ruleMap,ruleList))) {
+                        boolean flag = client.unSubscribe(subId);
+                        subscribeMsg(rule, ruleMap, client, subId);
+                        log.info("start rule ,and subscribe flag:{}", flag);
+                        break;
+                    }
                 }
 
             } else {
@@ -469,3 +474,4 @@ public class CEPRuleMQ {
         }
     }
 }
+
