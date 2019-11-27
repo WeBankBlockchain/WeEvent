@@ -42,6 +42,41 @@ public class CommonUtil {
         }
     }
 
+    public static Connection getDbcpConnection(String databaseUrl) {
+        try {
+            int MAX_IDLE = 20;
+            int MinIdle = 8;
+            long MAX_WAIT_Millis = 5000;
+            int MAX_TOTAl = 5;
+            int INITIAL_SIZE = 10;
+            int RemoveAbandonedTimeout = 180;
+            final boolean TOBESTNORROW = true;
+            BasicDataSource ds = new BasicDataSource();
+
+            Map<String, String> requestUrlMap = uRLRequest(databaseUrl);
+            // check all parameter
+            if (!(requestUrlMap.containsKey("user") && requestUrlMap.containsKey("password") && (null != urlPage(databaseUrl)))) {
+                return null;
+            }
+            // set all parameter
+            ds.setDriverClassName("org.mariadb.jdbc.Driver");
+            ds.setUrl(urlPage(databaseUrl));
+            ds.setUsername(requestUrlMap.get("user"));
+            ds.setPassword(requestUrlMap.get("password"));
+            ds.setMaxTotal(MAX_TOTAl);
+            ds.setInitialSize(INITIAL_SIZE);
+            ds.setMinIdle(MinIdle);
+            ds.setMaxIdle(MAX_IDLE);
+            ds.setMaxWaitMillis(MAX_WAIT_Millis);
+            ds.setTestOnBorrow(TOBESTNORROW);
+            ds.setRemoveAbandonedTimeout(RemoveAbandonedTimeout);
+            return ds.getConnection();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
     public static String urlPage(String url) {
         String page = null;
@@ -192,7 +227,7 @@ public class CommonUtil {
         JSONObject table = JSONObject.parseObject(payload);
         JSONObject eventContent;
         Map<String, String> sqlOrder;
-        if ("json".equals(eventMessage.getExtensions().get("weevent-format")) && CommonUtil.checkValidJson(content)) {
+        if (CommonUtil.checkValidJson(content)) {
             eventContent = JSONObject.parseObject(content);
             sqlOrder = generateSqlOrder(brokerId, groupId, eventId, topicName, result, eventContent, table);
         } else {
