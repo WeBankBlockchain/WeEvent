@@ -327,9 +327,9 @@ public class CommonUtil {
         return sqlOrder;
     }
 
-    public static boolean compareMessage(Map<String, CEPRule> ruleMap, List<CEPRule> ruleList) {
+    public static boolean compareMessage(CEPRule rule, List<CEPRule> ruleList) {
         for (int i = 0; i < ruleList.size(); i++) {
-            if (ruleList.get(i).getId().equals(ruleMap.get(ruleList.get(i).getId()))&&ruleList.get(i).getFromDestination().equals(ruleMap.get(ruleList.get(i).getFromDestination()))) {
+            if ((ruleList.get(i).getId().equals(rule.getId())) && (ruleList.get(i).getFromDestination().equals(rule.getFromDestination()))) {
                 return true;
             }
 

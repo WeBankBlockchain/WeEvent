@@ -21,7 +21,6 @@ import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.WeEvent;
 
-import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
@@ -63,10 +62,12 @@ public class CEPRuleMQ {
 
                     // ruleList have all message and ruleMap has latest message
                     // check the FromDestination whether is or not,
-                    if (!(CommonUtil.compareMessage(ruleMap,ruleList))) {
+                    if (!(CommonUtil.compareMessage(rule, ruleList))) {
                         boolean flag = client.unSubscribe(subId);
-                        subscribeMsg(rule, ruleMap, client, subId);
                         log.info("start rule ,and subscribe flag:{}", flag);
+                        if (flag) {
+                            subscribeMsg(rule, ruleMap, client, subId);
+                        }
                         break;
                     }
                 }
