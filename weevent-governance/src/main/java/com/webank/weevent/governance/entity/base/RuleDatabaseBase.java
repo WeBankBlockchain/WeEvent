@@ -4,6 +4,7 @@ import javax.validation.constraints.NotBlank;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.validator.constraints.Length;
 
 /**
  * CirculationDatabaseBase class
@@ -28,6 +29,7 @@ public class RuleDatabaseBase extends BaseEntity {
     @NotBlank
     private String databaseName;
 
+    @Length(max = 256)
     private String optionalParameter;
     @NotBlank
     private String datasourceName;

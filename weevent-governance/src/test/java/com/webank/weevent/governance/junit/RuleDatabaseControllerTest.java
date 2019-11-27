@@ -61,7 +61,7 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
 
     @Test
     public void testGetRuleDatabases() throws Exception {
-        String content = "{\"id\":\"1\",\"brokerId\":\"1\",\"userId\":\"1\"}";
+        String content = "{\"brokerId\":\"1\",\"userId\":\"1\"}";
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/circulationDatabase/list").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content))
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
