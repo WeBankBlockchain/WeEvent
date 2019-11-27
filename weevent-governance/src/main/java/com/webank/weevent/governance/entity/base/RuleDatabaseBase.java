@@ -43,8 +43,9 @@ public class RuleDatabaseBase extends BaseEntity {
     }
 
 
-    public RuleDatabaseBase(Integer userId, Integer brokerId, String ip, String port,
-                            String username, String password, String databaseName,
+    public RuleDatabaseBase(Integer userId, Integer brokerId,
+                            String ip, String port, String username,
+                            String password, String databaseName,
                             String optionalParameter, String datasourceName,
                             String tableName, String systemTag) {
         this.userId = userId;

@@ -84,7 +84,7 @@ CREATE TABLE t_rule_database (
   `table_name` VARCHAR(32) NOT NULL COMMENT '表格名称',
   `optional_parameter` VARCHAR(256) DEFAULT NULL COMMENT '数据库可选参数',
   `broker_id` VARCHAR(256) DEFAULT NULL COMMENT 'broker主键id',
-  `user_id` VARCHAR(256) DEFAULT NULL COMMENT 'user 主键id',
+  `user_id` VARCHAR(256) DEFAULT NULL COMMENT 'user主键id',
   `system_tag` VARCHAR(1) NOT NULL DEFAULT '1' COMMENT '1 系统内置 ,2 用户新增',
   `create_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
   `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改日期',
