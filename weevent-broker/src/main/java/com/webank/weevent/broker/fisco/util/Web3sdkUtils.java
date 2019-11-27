@@ -65,11 +65,11 @@ public class Web3sdkUtils {
             }
 
             if (fiscoConfig.getVersion().startsWith(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {    // 2.0x
-                if (!deployV2Contract(fiscoConfig, taskExecutor)) {
+                if (!deployV2Contract(fiscoConfig)) {
                     systemExit(1);
                 }
             } else if (fiscoConfig.getVersion().startsWith(WeEventConstants.FISCO_BCOS_1_X_VERSION_PREFIX)) {    // 1.x
-                if (!deployV1Contract(fiscoConfig, taskExecutor)) {
+                if (!deployV1Contract(fiscoConfig)) {
                     systemExit(1);
                 }
             } else {
@@ -85,20 +85,20 @@ public class Web3sdkUtils {
         systemExit(0);
     }
 
-    private static boolean deployV2Contract(FiscoConfig fiscoConfig, ThreadPoolTaskExecutor taskExecutor) throws BrokerException {
+    private static boolean deployV2Contract(FiscoConfig fiscoConfig) throws BrokerException {
         org.fisco.bcos.web3j.crypto.Credentials credentials = Web3SDK2Wrapper.getCredentials(fiscoConfig);
 
         Map<Long, org.fisco.bcos.web3j.protocol.Web3j> groups = new HashMap<>();
         // 1 is always exist
         Long defaultGroup = Long.valueOf(WeEvent.DEFAULT_GROUP_ID);
-        org.fisco.bcos.web3j.protocol.Web3j defaultWeb3j = Web3SDK2Wrapper.initWeb3j(defaultGroup, fiscoConfig, taskExecutor);
+        org.fisco.bcos.web3j.protocol.Web3j defaultWeb3j = Web3SDK2Wrapper.initWeb3j(defaultGroup, fiscoConfig);
         groups.put(defaultGroup, defaultWeb3j);
 
         List<String> groupIds = Web3SDK2Wrapper.listGroupId(defaultWeb3j);
         groupIds.remove(WeEvent.DEFAULT_GROUP_ID);
         for (String groupId : groupIds) {
             Long gid = Long.valueOf(groupId);
-            org.fisco.bcos.web3j.protocol.Web3j web3j = Web3SDK2Wrapper.initWeb3j(gid, fiscoConfig, taskExecutor);
+            org.fisco.bcos.web3j.protocol.Web3j web3j = Web3SDK2Wrapper.initWeb3j(gid, fiscoConfig);
             groups.put(gid, web3j);
         }
         log.info("all group in nodes: {}", groups.keySet());
@@ -181,9 +181,9 @@ public class Web3sdkUtils {
         return result;
     }
 
-    private static boolean deployV1Contract(FiscoConfig fiscoConfig, ThreadPoolTaskExecutor taskExecutor) throws BrokerException {
+    private static boolean deployV1Contract(FiscoConfig fiscoConfig) throws BrokerException {
         org.bcos.web3j.crypto.Credentials credentials = Web3SDKWrapper.getCredentials(fiscoConfig);
-        org.bcos.web3j.protocol.Web3j web3j = Web3SDKWrapper.initWeb3j(fiscoConfig, taskExecutor);
+        org.bcos.web3j.protocol.Web3j web3j = Web3SDKWrapper.initWeb3j(fiscoConfig);
 
         // check exist first
         String original = Web3SDKWrapper.getAddress(web3j, credentials, fiscoConfig.getProxyAddress());

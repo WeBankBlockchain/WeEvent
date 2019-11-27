@@ -38,7 +38,7 @@ module.exports = {
     'noData': '暂无数据',
     'enter': '请填写',
     'reqException': '数据请求异常',
-    'timeOut': '请求超时,请稍后重试',
+    'timeOut': '请求超时，请稍后重试',
     'all': '全选'
   },
   serverSet: {
@@ -47,7 +47,7 @@ module.exports = {
     'addServer': '新增服务',
     'editServer': '编辑服务信息',
     'brokerURLAddress': 'Broker 地址',
-    'webaseURLAddress': 'Webase 地址',
+    'webaseURLAddress': 'WeBASE 地址',
     'authorized': '授权用户',
     'ruleEngine': '配置规则引擎',
     'namePlaceholder': '请输入服务名称(1-20位字母数字下划线)',
@@ -57,8 +57,8 @@ module.exports = {
     'errorServer': '服务名格式错误',
     'emptyPort': '服务端口不能为空',
     'noServerName': '服务名不能为空',
-    'errorAddress': '服务地址错误,无法连接!',
-    'exitBrokerURL': 'Broker服务已存在, 若该服务在其他账户下, 可以向该用户申请访问授权!'
+    'errorAddress': '服务地址错误,无法连接',
+    'exitBrokerURL': 'Broker服务已存在, 请向所属用户申请访问授权'
   },
   userSet: {
     'userName': '用户名',
@@ -71,7 +71,7 @@ module.exports = {
     'enterPassWord': '请输入密码',
     'enterAgain': '再次输入',
     'modify': '修改',
-    'hasAccount': '已有帐号,登录',
+    'hasAccount': '已有帐号，登录',
     'registered': '注册',
     'regSuccess': '注册成功',
     'regFail': '注册失败',
@@ -89,7 +89,7 @@ module.exports = {
     'forgetPassWord': '忘记密码？',
     'login': '登录',
     'resetPassWord': '重置密码',
-    'mailWarning': '请注意，重置密码的链接将会发送到帐号绑定的邮箱!',
+    'mailWarning': '请注意，重置密码的链接将会发送到帐号绑定的邮箱',
     'noUser': '用户名不存在',
     'sendMailFail': '发送邮件失败',
     'sendMailSuccess': '邮件已发送至绑定邮箱'
@@ -113,7 +113,7 @@ module.exports = {
     'nodeNum': '节点数量',
     'blockNum': '区块数量',
     'transactionNum': '交易数量',
-    'lastWeek': '所选时间内发生的事件数',
+    'lastWeek': '历史发布事件数',
     'essential': '关键监控指标'
   },
   tableCont: {
@@ -137,7 +137,7 @@ module.exports = {
     'creater': '创建人',
     'addTopic': '新增 Topic',
     'noName': '名称不能为空',
-    'noMore': '名称长度不能超过 64 个字符',
+    'noMore': '名称长度不能超过64个字符',
     'errorTopicName': 'topic名称格式错误',
     'chooseTopic': '选择主题',
     'chooseTime': '选择时间',
@@ -176,7 +176,7 @@ module.exports = {
     'stop': '停止',
     'read': '查看',
     'delete': '删除',
-    'creatRuleRemark': '数据流转类型的规则可以对设备上报的数据进行简单处理,并将处理后的数据流转到其他Topic,支持JSON数据格式',
+    'creatRuleRemark': '数据流转类型的规则可以对设备上报的数据进行简单处理，并将处理后的数据流转到其他Topic，支持JSON数据格式',
     'dataType': '数据格式',
     'enterPayload': '请输入规则描述',
     'commit': '提交',
@@ -184,7 +184,7 @@ module.exports = {
     'isStart': '已启动',
     'startFail': '启动失败',
     'isStop': '已停止',
-    'isDelete': '确认删除?',
+    'isDelete': '确认删除？',
     'deleteRule': '删除规则',
     'hasDelete': '已删除',
     'creatSuccess': '创建成功',
@@ -193,20 +193,31 @@ module.exports = {
     'addAddress': '新增地址',
     'enterDB': '请填写DB地址',
     'JDBCname': '数据源名称',
+    'JDBCIP': '数据源IP',
+    'JDBCport': '数据源端口',
+    'JDBCDatabaseName': '数据源库名',
+    'JDBCusername': '数据源用户名',
+    'JDBCpassword': '数据源密码',
     'tableName': '表名',
-    'enterJDBCname': '请输入数据源名称',
+    'optionalParameter': '可选参数',
+    'enterJDBCname': '请填写数据源名称',
+    'enterJDBCIP': '请填写数据源IP',
+    'enterJDBCport': '请填写数据源端口',
+    'enterJDBCDatabaseName': '请填写数据源库名',
+    'enterJDBCusername': '请填写数据源用户名',
+    'enterJDBCpassword': '请填写数据源密码',
     'enterTableName': '请填写表名',
     'enditAddress': '修改地址',
-    'deleteAddress': '删除该地址?'
+    'deleteAddress': '删除该地址？'
   },
   ruleDetail: {
     'guideDetail': '数据详情',
     'editRule': '编辑规则',
     'processData': '规则详情',
     'sqlDescription': '规则语法说明',
-    'noRule': '您还没有编写规则语句处理数据,',
+    'noRule': '您还没有编写规则语句处理数据，',
     'ruleSearchLetter': '规则查询语句',
-    'ruleSearchWarning': '选择下方选项后,语句将自动生成',
+    'ruleSearchWarning': '选择下方选项后，语句将自动生成',
     'letter': '提取字段',
     'dataCirculat': '数据来源',
     'abnormalData': '异常流转',
@@ -223,10 +234,10 @@ module.exports = {
     'errorTopic': '请选择 Topic',
     'db': '数据库',
     'selectDB': '请选择数据库',
-    'guideURL': '还未配置数据流转路径,',
+    'guideURL': '还未配置数据流转路径，',
     'setGuide': '前往配置',
     'guideAddress': '数据流转地址必须填写',
     'abnormalAddress': '异常流转地址必须填写',
-    'cannotSame': "不能和 '数据来源' 相同"
+    'cannotSame': '[数据目的]不能和[数据来源]相同'
   }
 }

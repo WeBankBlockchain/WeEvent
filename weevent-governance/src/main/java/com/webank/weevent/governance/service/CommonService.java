@@ -28,6 +28,7 @@ import com.webank.weevent.governance.utils.SpringContextUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -38,6 +39,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.helper.StringUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -51,6 +53,15 @@ public class CommonService implements AutoCloseable {
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String METHOD_TYPE = "GET";
     public static final String FORMAT_TYPE = "json";
+
+    @Value("${http.client.connection-request-timeout:3000}")
+    private int connectionRequestTimeout;
+
+    @Value("${http.client.connection-request-timeout:3000}")
+    private int connectionTimeout;
+
+    @Value("${http.client.socket-timeout:3000}")
+    private int socketTimeout;
 
 
     public CloseableHttpResponse getCloseResponse(HttpServletRequest req, String newUrl) throws ServletException {
@@ -98,7 +109,9 @@ public class CommonService implements AutoCloseable {
                 String nex = enumeration.nextElement();
                 builder.setParameter(nex, request.getParameter(nex));
             }
-            return new HttpGet(builder.build());
+            HttpGet httpGet = new HttpGet(builder.build());
+            httpGet.setConfig(getRequestConfig());
+            return httpGet;
         } catch (URISyntaxException e) {
             log.error("build url method fail,error:{}", e.getMessage());
             throw new GovernanceException(ErrorCode.BUILD_URL_METHOD);
@@ -124,6 +137,7 @@ public class CommonService implements AutoCloseable {
         HttpPost httpPost = new HttpPost(uri);
         httpPost.setHeader(CONTENT_TYPE, request.getHeader(CONTENT_TYPE));
         httpPost.setEntity(entity);
+        httpPost.setConfig(getRequestConfig());
         return httpPost;
     }
 
@@ -214,6 +228,14 @@ public class CommonService implements AutoCloseable {
             log.error("database url is error", e);
             throw new GovernanceException("database url is error", e);
         }
+    }
+
+    private RequestConfig getRequestConfig() {
+        return RequestConfig.custom()
+                .setConnectTimeout(connectionTimeout)
+                .setSocketTimeout(socketTimeout)
+                .setConnectionRequestTimeout(connectionRequestTimeout)
+                .build();
     }
 
 

@@ -1,6 +1,8 @@
 package com.webank.weevent.broker.plugin;
 
 
+import java.util.concurrent.CompletableFuture;
+
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.sdk.BrokerException;
@@ -95,11 +97,11 @@ public interface IProducer extends IEventTopic {
     boolean shutdownProducer();
 
     /**
-     * Publish a event in synchronous way.
+     * Publish a event in asynchronous way.
      *
      * @param event the event
      * @return SendResult SendResult
      * @throws BrokerException BrokerException
      */
-    SendResult publish(WeEvent event, String groupId) throws BrokerException;
+    CompletableFuture<SendResult> publish(WeEvent event, String groupId) throws BrokerException;
 }

@@ -3,7 +3,6 @@ package com.webank.weevent.governance.service;
 import java.io.FileInputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -15,7 +14,7 @@ import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.weevent.governance.code.ConstantCode;
+import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.entity.RuleDatabaseEntity;
 import com.webank.weevent.governance.entity.RuleEngineEntity;
@@ -76,7 +75,7 @@ public class TopicHistoricalService {
             String accountId = cookiesTools.getCookieValueByName(httpRequest, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
             Boolean flag = permissionService.verifyPermissions(topicHistoricalEntity.getBrokerId(), accountId);
             if (!flag) {
-                throw new GovernanceException(ConstantCode.ACCESS_DENIED.getMsg());
+                throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
             Map<String, List<Integer>> returnMap = new HashMap<>();
 
@@ -114,7 +113,7 @@ public class TopicHistoricalService {
             });
             return returnMap;
         } catch (Exception e) {
-            log.info("get historicalDataEntity fail", e);
+            log.error("get historicalDataEntity fail", e);
             throw new GovernanceException("get historicalDataEntity fail", e);
         }
 
@@ -125,7 +124,7 @@ public class TopicHistoricalService {
             String accountId = cookiesTools.getCookieValueByName(httpRequest, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
             Boolean flag = permissionService.verifyPermissions(topicHistoricalEntity.getBrokerId(), accountId);
             if (!flag) {
-                throw new GovernanceException(ConstantCode.ACCESS_DENIED.getMsg());
+                throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
             List<TopicTopicHistoricalEntity> historicalEntities = topicHistoricalMapper.eventList(topicHistoricalEntity);
             if (CollectionUtils.isEmpty(historicalEntities)) {
@@ -136,7 +135,7 @@ public class TopicHistoricalService {
             }
             return historicalEntities;
         } catch (Exception e) {
-            log.info("get eventList fail", e);
+            log.error("get eventList fail", e);
             throw new GovernanceException("get eventList fail", e);
         }
 
@@ -163,6 +162,7 @@ public class TopicHistoricalService {
         return dateList;
     }
 
+    @SuppressWarnings("unchecked")
     public void createRule(HttpServletRequest request, HttpServletResponse response, BrokerEntity brokerEntity) throws GovernanceException {
         String goalUrl = "";
         String user = "";
@@ -249,8 +249,8 @@ public class TopicHistoricalService {
         return ruleEngineEntity;
     }
 
-    private List<String> getGroupList(HttpServletRequest request, BrokerEntity brokerEntity) throws GovernanceException {
-        List<String> groupList;
+    private List getGroupList(HttpServletRequest request, BrokerEntity brokerEntity) throws GovernanceException {
+        List groupList;
         String url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.REST_LIST_SUBSCRIPTION).toString();
         try {
             log.info("url:{}", url);
@@ -259,8 +259,14 @@ public class TopicHistoricalService {
             if (StringUtil.isBlank(mes)) {
                 throw new GovernanceException("group is empty");
             }
-            String[] split = mes.replace("[", "").replace("]", "").split(",");
-            groupList = Arrays.asList(split);
+            JSONObject jsonObject = JSONObject.parseObject(mes);
+            Object data = jsonObject.get("data");
+            if ("0".equals(jsonObject.get("code").toString()) && data instanceof List) {
+                groupList = (List) data;
+            } else {
+                throw new GovernanceException(jsonObject.get("message").toString());
+            }
+
             return groupList;
         } catch (Exception e) {
             log.error("get group list fail", e);
