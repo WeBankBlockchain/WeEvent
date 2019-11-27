@@ -102,7 +102,7 @@ public class RuleEngineService {
             if (accountId == null || !accountId.equals(ruleEngineEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
-            ruleEngineEntity.setSystemTag("2");
+            ruleEngineEntity.setSystemTag(SystemTagEnum.USER_ADDED.getCode());
             int count = ruleEngineMapper.countRuleEngine(ruleEngineEntity);
             ruleEngineEntity.setTotalCount(count);
             List<RuleEngineEntity> ruleEngineEntities = null;
@@ -300,7 +300,7 @@ public class RuleEngineService {
                 this.updateProcessRule(request, ruleEngineEntity, rule);
             } else {
                 ruleEngineEntity.setGroupId(rule.getGroupId());
-                ruleEngineEntity.setSystemTag("2");
+                ruleEngineEntity.setSystemTag(SystemTagEnum.USER_ADDED.getCode());
                 this.startProcessRule(request, ruleEngineEntity);
             }
 
