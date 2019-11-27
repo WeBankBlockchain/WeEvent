@@ -186,8 +186,8 @@ public class TopicHistoricalService {
             dbName = goalUrl.substring(first + 1, end);
             // get mysql default url like jdbc:mysql://127.0.0.1:3306
             Map<String, String> urlMap = commonService.uRLRequest(goalUrl);
-            RuleDatabaseEntity ruleDatabaseEntity = new RuleDatabaseEntity(brokerEntity.getUserId(), brokerEntity.getId(), urlMap.get("ip"), urlMap.get("port"), user, password,
-                    dbName, urlMap.get("optionalParameter"), dbName + brokerEntity.getUserId(), TOPIC_HISTORICAL,
+            RuleDatabaseEntity ruleDatabaseEntity = new RuleDatabaseEntity(brokerEntity.getUserId(), brokerEntity.getId(), user, password,
+                    dbName + brokerEntity.getUserId(), urlMap.get("optionalParameter"), urlMap.get("dataBaseUrl"), TOPIC_HISTORICAL,
                     SystemTagEnum.BUILT_IN_SYSTEM.getCode());
             ruleDatabaseMapper.addRuleDatabase(ruleDatabaseEntity);
 

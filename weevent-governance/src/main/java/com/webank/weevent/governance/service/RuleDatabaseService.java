@@ -42,7 +42,7 @@ public class RuleDatabaseService {
             ruleDatabaseEntity.setSystemTag(SystemTagEnum.USER_ADDED.getCode());
             ruleDatabaseEntityList = ruleDatabaseMapper.getRuleDataBaseList(ruleDatabaseEntity);
             ruleDatabaseEntityList.forEach(ruleDataBase -> {
-                String dataBaseUrl = commonService.getDataBaseUrl(ruleDataBase);
+                String dataBaseUrl = ruleDataBase.getDatabaseUrl();
                 if (StringUtil.isBlank(ruleDataBase.getOptionalParameter())) {
                     ruleDataBase.setDatabaseUrl(dataBaseUrl);
                 } else {
@@ -67,7 +67,7 @@ public class RuleDatabaseService {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
             //check dbUrl
-            commonService.checkDataBaseUrl(commonService.getDataBaseUrl(ruleDatabaseEntity), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword(), ruleDatabaseEntity.getDatabaseName());
+            commonService.checkDataBaseUrl(ruleDatabaseEntity);
             ruleDatabaseEntity.setSystemTag(SystemTagEnum.USER_ADDED.getCode());
             ruleDatabaseMapper.addRuleDatabase(ruleDatabaseEntity);
             return ruleDatabaseEntity;
@@ -100,12 +100,22 @@ public class RuleDatabaseService {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
             //check databaseUrl
-            commonService.checkDataBaseUrl(commonService.getDataBaseUrl(ruleDatabaseEntity), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword(), ruleDatabaseEntity.getDatabaseName());
+            commonService.checkDataBaseUrl(ruleDatabaseEntity);
             return ruleDatabaseMapper.updateRuleDatabase(ruleDatabaseEntity);
         } catch (Exception e) {
             log.error("update ruleDatabase fail", e);
             throw new GovernanceException("update ruleDatabase fail", e);
         }
 
+    }
+
+    public boolean checkRuleDataBaseUrl(RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
+        try{
+            commonService.checkDataBaseUrl(ruleDatabaseEntity);
+            return true;
+        }catch (Exception e){
+            log.error("database url is incorrect", e);
+            throw new GovernanceException("database url is incorrect", e);
+        }
     }
 }

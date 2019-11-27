@@ -805,7 +805,7 @@ public class RuleEngineService {
         }
         RuleDatabaseEntity ruleDataBase = ruleDatabaseMapper.getRuleDataBaseById(rule.getRuleDataBaseId());
         if (ruleDataBase != null) {
-            String dbUrl = commonService.getDataBaseUrl(ruleDataBase) + "?user=" + ruleDataBase.getUsername() + "&password=" + ruleDataBase.getPassword() +
+            String dbUrl = ruleDataBase.getDatabaseUrl() + "?user=" + ruleDataBase.getUsername() + "&password=" + ruleDataBase.getPassword() +
                     "tableName=" + ruleDataBase.getTableName();
             if (!StringUtil.isBlank(ruleDataBase.getOptionalParameter())) {
                 dbUrl = dbUrl + "&" + ruleDataBase.getOptionalParameter();

@@ -63,9 +63,6 @@ public class CommonService implements AutoCloseable {
     @Value("${http.client.socket-timeout:3000}")
     private int socketTimeout;
 
-    @Value("${spring.datasource.url}")
-    private String dataBaseUrl;
-
     public CloseableHttpResponse getCloseResponse(HttpServletRequest req, String newUrl) throws ServletException {
         CloseableHttpResponse closeResponse;
         try {
@@ -200,26 +197,21 @@ public class CommonService implements AutoCloseable {
     }
 
 
-    public void checkDataBaseUrl(String dataBaseUrl, String tableName, String user, String password, String dbName) throws GovernanceException {
-        try (Connection conn = DriverManager.getConnection(dataBaseUrl, user, password);
+    public void checkDataBaseUrl(RuleDatabaseEntity ruleDatabaseEntity) throws GovernanceException {
+        String dataBaseUrl = ruleDatabaseEntity.getDatabaseUrl();
+        if (!StringUtil.isBlank(ruleDatabaseEntity.getOptionalParameter())) {
+            dataBaseUrl = ruleDatabaseEntity.getDatabaseUrl() + "?" + ruleDatabaseEntity.getOptionalParameter();
+        }
+        try (Connection conn = DriverManager.getConnection(dataBaseUrl, ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword());
              Statement stat = conn.createStatement()) {
-            if (conn == null) {
+            if (stat == null) {
                 log.info("database connect fail,dataBaseUrl:{}", dataBaseUrl);
                 throw new GovernanceException("database connect success,dataBaseUrl:" + dataBaseUrl);
             }
             log.info("database connect success,dataBaseUrl:{}", dataBaseUrl);
-            if (!StringUtil.isBlank(tableName)) {
-                String querySql = "SELECT t.table_name FROM information_schema.TABLES t WHERE t.TABLE_SCHEMA =" + "\"" + dbName + "\" AND t.table_name=\"" + tableName + "\"";
-                ResultSet resultSet = stat.executeQuery(querySql);
-                while (resultSet.next()) {
-                    String name = resultSet.getString(1);
-                    if (!tableName.equals(name)) {
-                        log.error("table: {}  is not exist!", tableName);
-                        throw new GovernanceException("table " + tableName + " is not exist!");
-                    }
-                }
-            }
-
+            String tableName = ruleDatabaseEntity.getTableName();
+            String querySql = "SELECT * FROM " + tableName + " LIMIT 0,1";
+            stat.executeQuery(querySql);
         } catch (Exception e) {
             log.error("database url is error", e);
             throw new GovernanceException("database url is error", e);
@@ -243,14 +235,7 @@ public class CommonService implements AutoCloseable {
             return mapRequest;
         }
         mapRequest.put("optionalParameter", strUrlParam);
-        String jdbcType = URL.substring(0, URL.indexOf("//") + 2);
-        int first = URL.indexOf("/") + 2;
-        int end = URL.lastIndexOf("/");
-        String substring = URL.substring(first, end);
-        String[] split = substring.split(":");
-        mapRequest.put("jdbcType", jdbcType);
-        mapRequest.put("ip", split[0]);
-        mapRequest.put("port", split[1]);
+        mapRequest.put("dataBaseUrl", URL.split("[?]")[0]);
         return mapRequest;
     }
 
@@ -263,12 +248,6 @@ public class CommonService implements AutoCloseable {
 
         return strAllParam;
     }
-
-    public String getDataBaseUrl(RuleDatabaseEntity ruleDatabaseEntity) {
-        Map<String, String> urlMap = uRLRequest(dataBaseUrl);
-        return urlMap.get("jdbcType") + ruleDatabaseEntity.getIp() + ":" + ruleDatabaseEntity.getPort() + "/" + ruleDatabaseEntity.getDatabaseName();
-    }
-
 
 
     @Override

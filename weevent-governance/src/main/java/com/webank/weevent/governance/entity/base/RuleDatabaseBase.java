@@ -19,20 +19,16 @@ public class RuleDatabaseBase extends BaseEntity {
 
     private Integer brokerId;
     @NotBlank
-    private String ip;
-    @NotBlank
-    private String port;
+    private String databaseUrl;
     @NotBlank
     private String username;
     @NotBlank
     private String password;
     @NotBlank
-    private String databaseName;
+    private String datasourceName;
 
     @Length(max = 256)
     private String optionalParameter;
-    @NotBlank
-    private String datasourceName;
     @NotBlank
     private String tableName;
 
@@ -44,19 +40,16 @@ public class RuleDatabaseBase extends BaseEntity {
 
 
     public RuleDatabaseBase(Integer userId, Integer brokerId,
-                            String ip, String port, String username,
-                            String password, String databaseName,
-                            String optionalParameter, String datasourceName,
-                            String tableName, String systemTag) {
+                            String username, String password,
+                            String datasourceName, String optionalParameter,
+                            String databaseUrl, String tableName, String systemTag) {
         this.userId = userId;
         this.brokerId = brokerId;
-        this.ip = ip;
-        this.port = port;
         this.username = username;
         this.password = password;
-        this.databaseName = databaseName;
-        this.optionalParameter = optionalParameter;
         this.datasourceName = datasourceName;
+        this.optionalParameter = optionalParameter;
+        this.databaseUrl = databaseUrl;
         this.tableName = tableName;
         this.systemTag = systemTag;
     }
