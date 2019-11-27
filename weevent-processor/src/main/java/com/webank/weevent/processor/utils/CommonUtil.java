@@ -15,6 +15,7 @@ import com.webank.weevent.sdk.WeEvent;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.util.StringUtils;
 
 @Slf4j
