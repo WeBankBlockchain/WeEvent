@@ -57,18 +57,13 @@ public class CEPRuleMQ {
         if (1 == rule.getStatus()) {
             if (null != subId) {
                 IWeEventClient client = subscriptionClientMap.get(subId);
-                // if they are equal
-                for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
-
-                    // ruleList have all message and ruleMap has latest message
-                    // check the FromDestination whether is or not,
-                    if (!(CommonUtil.compareMessage(rule, ruleList))) {
-                        boolean flag = client.unSubscribe(subId);
-                        log.info("start rule ,and subscribe flag:{}", flag);
-                        if (flag) {
-                            subscribeMsg(rule, ruleMap, client, subId);
-                        }
-                        break;
+                // ruleList have all message and ruleMap has latest message
+                // check the FromDestination whether is or not,
+                if (!(CommonUtil.compareMessage(rule, ruleList))) {
+                    boolean flag = client.unSubscribe(subId);
+                    log.info("start rule ,and subscribe flag:{}", flag);
+                    if (flag) {
+                        subscribeMsg(rule, ruleMap, client, subId);
                     }
                 }
 
@@ -132,7 +127,7 @@ public class CEPRuleMQ {
             }
             // subscribe topic
             String subscriptionId;
-            ExtendEventLister eventLister = new ExtendEventLister(rule, client, ruleMap);
+            ExtendEventLister eventLister = new ExtendEventLister(client, ruleMap);
             if (null != subId) {
                 log.info("update use old subId:{}", subId);
                 if (StringUtils.isEmpty(rule.getOffSet())) {

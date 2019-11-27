@@ -17,7 +17,7 @@ public class ExtendEventLister implements EventListener {
     private Map<String, CEPRule> ruleMap;
 
 
-    ExtendEventLister(CEPRule rule, IWeEventClient client, Map<String, CEPRule> ruleMap) {
+    ExtendEventLister(IWeEventClient client, Map<String, CEPRule> ruleMap) {
         this.client = client;
         this.ruleMap = ruleMap;
 
