@@ -2,9 +2,7 @@ package com.webank.weevent.broker.fisco;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import com.webank.weevent.JUnitTestBase;
 import com.webank.weevent.broker.plugin.IProducer;
