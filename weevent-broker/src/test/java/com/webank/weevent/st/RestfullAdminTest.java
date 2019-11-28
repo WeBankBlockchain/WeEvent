@@ -101,9 +101,10 @@ public class RestfullAdminTest extends JUnitTestBase {
 
     @Test
     public void testListGroupId() {
-        ResponseEntity<List> rsp = admin.getForEntity(url + "listGroup", List.class);
+        ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "listGroup", ResponseData.class);
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
-        Assert.assertTrue(!rsp.getBody().isEmpty());
+        Assert.assertTrue(rsp.getBody().getCode() == 0);
+        Assert.assertTrue(rsp.getBody().getData() != null);
     }
 
 
