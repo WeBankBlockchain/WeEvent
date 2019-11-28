@@ -87,12 +87,8 @@ public class RuleEngineService {
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd hh:mm:ss");
 
 
-    @Autowired
-    private BrokerService brokerService;
 
     private static final int PROCESSOR_SUCCESS_CODE = 0;
-
-    private final String ERROR_MSG = "success";
 
     @SuppressWarnings("unchecked")
     public List<RuleEngineEntity> getRuleEngines(HttpServletRequest request, RuleEngineEntity ruleEngineEntity) throws GovernanceException {

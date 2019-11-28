@@ -5,6 +5,7 @@ import java.util.Date;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import com.webank.weevent.governance.entity.base.TopicBase;
 
@@ -17,9 +18,11 @@ import lombok.EqualsAndHashCode;
  * @since 2019/02/11
  */
 @Data
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(callSuper = false)
 @Entity
-@Table(name = "t_topic")
+@Table(name = "t_topic",
+        uniqueConstraints = {@UniqueConstraint(name = "topicNameBrokerGroupDelete",
+                columnNames = {"topic_name", "broker_id", "group_id", "delete_at"})})
 public class TopicEntity extends TopicBase {
 
     @Transient

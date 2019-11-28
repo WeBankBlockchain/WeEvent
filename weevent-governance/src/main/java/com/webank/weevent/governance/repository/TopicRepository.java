@@ -11,6 +11,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TopicRepository extends JpaRepository<TopicEntity, Long> {
 
-    List<TopicEntity> getCreator(@Param("brokerId") Integer brokerId, @Param("groupId") String groupId, @Param("topicNameList") List<String> topicNameList);
+  //  List<TopicEntity> getCreator(@Param("brokerId") Integer brokerId, @Param("groupId") String groupId, @Param("topicNameList") List<String> topicNameList);
 
 }

@@ -17,14 +17,8 @@ public interface PermissionMapper{
 
     List<PermissionEntity> permissionList(@Param("permissionEntity") PermissionEntity permissionEntity);
 
-    void batchDelete(@Param("permissionEntity") PermissionEntity permissionEntity);
-
-    void batchInsert(@Param("permissionEntityList")List<PermissionEntity> permissionEntityList);
-
 
     void deletePermission(@Param("brokerId") Integer brokerId);
-
-    void updatePermission(@Param("permissionEntity") PermissionEntity permissionEntity);
 
     List<Integer> findUserIdByBrokerId(Integer brokerId);
 

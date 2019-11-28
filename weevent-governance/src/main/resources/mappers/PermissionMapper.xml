@@ -33,35 +33,11 @@
         </if>
     </select>
 
-    <delete id="batchDelete" parameterType="com.webank.weevent.governance.entity.PermissionEntity">
-        delete from t_permission
-        where id in
-        <foreach collection="permissionEntity.userIdList" item="item" index="index" separator="," open="(" close=")">
-            #{item}
-        </foreach>
-    </delete>
-
     <delete id="deletePermission" parameterType="java.lang.Integer">
         delete
         from t_permission
         where broker_id = #{brokerId}
     </delete>
-
-    <update id="updatePermission" parameterType="com.webank.weevent.governance.entity.PermissionEntity">
-        update t_permission
-        set user_id=#{permissionEntity.userId},
-            broker_id=#{permissionEntity.brokerId}
-        where id = #{id,jdbcType=INTEGER}
-    </update>
-
-
-    <insert id="batchInsert">
-        INSERT INTO t_permission(`user_id`,`broker_id`)
-        VALUES
-        <foreach collection="permissionEntityList" item="permissionEntity" separator=",">
-            (#{permissionEntity.userId},#{permissionEntity.brokerId})
-        </foreach>
-    </insert>
 
     <select id="findUserIdByBrokerId" resultType="integer">
         select distinct user_id as userId

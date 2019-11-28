@@ -11,11 +11,13 @@ import com.webank.weevent.governance.enums.SystemTagEnum;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.RuleDatabaseMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
+import com.webank.weevent.governance.repository.RuleDatabaseRepository;
 import com.webank.weevent.governance.utils.CookiesTools;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.helper.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +32,9 @@ public class RuleDatabaseService {
     private CookiesTools cookiesTools;
 
     @Autowired
+    private RuleDatabaseRepository ruleDatabaseRepository;
+
+    @Autowired
     private RuleDatabaseMapper ruleDatabaseMapper;
 
     public List<RuleDatabaseEntity> getRuleDataBaseList(HttpServletRequest request, RuleDatabaseEntity ruleDatabaseEntity) throws GovernanceException {
@@ -40,6 +45,7 @@ public class RuleDatabaseService {
             }
             List<RuleDatabaseEntity> ruleDatabaseEntityList;
             ruleDatabaseEntity.setSystemTag(SystemTagEnum.USER_ADDED.getCode());
+
             ruleDatabaseEntityList = ruleDatabaseMapper.getRuleDataBaseList(ruleDatabaseEntity);
             ruleDatabaseEntityList.forEach(ruleDataBase -> {
                 String dataBaseUrl = ruleDataBase.getDatabaseUrl();
@@ -69,7 +75,7 @@ public class RuleDatabaseService {
             //check dbUrl
             commonService.checkDataBaseUrl(ruleDatabaseEntity);
             ruleDatabaseEntity.setSystemTag(SystemTagEnum.USER_ADDED.getCode());
-            ruleDatabaseMapper.addRuleDatabase(ruleDatabaseEntity);
+            ruleDatabaseRepository.save(ruleDatabaseEntity);
             return ruleDatabaseEntity;
         } catch (Exception e) {
             log.error("add ruleDatabaseEntity fail", e);
@@ -84,7 +90,8 @@ public class RuleDatabaseService {
             if (accountId == null || !accountId.equals(ruleDatabaseEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
-            return ruleDatabaseMapper.deleteRuleDatabase(ruleDatabaseEntity);
+            ruleDatabaseRepository.delete(ruleDatabaseEntity);
+            return true;
         } catch (Exception e) {
             log.error("delete ruleDatabaseEntity fail", e);
             throw new GovernanceException("delete ruleDatabaseEntity fail ", e);
@@ -101,7 +108,8 @@ public class RuleDatabaseService {
             }
             //check databaseUrl
             commonService.checkDataBaseUrl(ruleDatabaseEntity);
-            return ruleDatabaseMapper.updateRuleDatabase(ruleDatabaseEntity);
+            ruleDatabaseRepository.save(ruleDatabaseEntity);
+            return true;
         } catch (Exception e) {
             log.error("update ruleDatabase fail", e);
             throw new GovernanceException("update ruleDatabase fail", e);
@@ -110,10 +118,10 @@ public class RuleDatabaseService {
     }
 
     public boolean checkRuleDataBaseUrl(RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
-        try{
+        try {
             commonService.checkDataBaseUrl(ruleDatabaseEntity);
             return true;
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("database url is incorrect", e);
             throw new GovernanceException("database url is incorrect", e);
         }

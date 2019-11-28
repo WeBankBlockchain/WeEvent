@@ -64,15 +64,16 @@
         </if>
     </insert>
 
-    <delete id="deleteTopicInfo" parameterType="java.lang.Integer">
+
+    <delete id="deleteTopicInfo">
         update t_topic
-        set delete_at=unix_timestamp(now())
+        set delete_at=#{deleteAt}
         where id = #{id}
     </delete>
 
-    <delete id="deleteByBrokerId" parameterType="java.lang.Integer">
+    <delete id="deleteByBrokerId" >
         update t_topic
-        set delete_at=unix_timestamp(now())
+        set delete_at=#{deleteAt}
         where broker_id = #{brokerId}
     </delete>
 

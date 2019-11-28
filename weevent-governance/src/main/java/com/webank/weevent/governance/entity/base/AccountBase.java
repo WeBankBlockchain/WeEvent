@@ -13,7 +13,7 @@ import lombok.EqualsAndHashCode;
  * @since 2019/10/15
  */
 @Data
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(callSuper = false)
 @MappedSuperclass
 public class AccountBase extends BaseEntity {
 
@@ -33,10 +33,6 @@ public class AccountBase extends BaseEntity {
     private String oldPassword;
 
     @Column(name = "delete_at")
-    private String deleteAt;
-
-    @Column(name = "broker_id")
-    private Integer brokerId;
-
+    private String deleteAt = "0";
 
 }

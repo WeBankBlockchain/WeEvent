@@ -23,6 +23,9 @@ import lombok.EqualsAndHashCode;
 public class AccountEntity extends AccountBase {
 
     @Transient
+    private Integer brokerId;
+
+    @Transient
     private List<Integer> permissionIdList;
 
 

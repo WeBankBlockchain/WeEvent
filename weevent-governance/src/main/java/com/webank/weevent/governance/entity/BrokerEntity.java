@@ -3,8 +3,10 @@ package com.webank.weevent.governance.entity;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import com.webank.weevent.governance.entity.base.BrokerBase;
 
@@ -19,9 +21,10 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@Table(name = "t_broker")
+@Table(name = "t_broker",
+        uniqueConstraints = {@UniqueConstraint(name = "brokerUrlDeleteAt",
+                                                columnNames = {"broker_url", "delete_at"})})
 public class BrokerEntity extends BrokerBase {
-
 
     @Transient
     private List<Integer> userIdList;

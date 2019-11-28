@@ -5,6 +5,7 @@ import java.util.List;
 import com.webank.weevent.governance.entity.BrokerEntity;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface BrokerMapper {
@@ -17,15 +18,8 @@ public interface BrokerMapper {
     // get Brokers
     List<BrokerEntity> getBrokers(Integer userId);
 
-    // add BrokerEntity
-    Boolean addBroker(BrokerEntity brokerEntity);
 
     // delete BrokerEntity
-    Boolean deleteBroker(Integer id);
-
-    // update BrokerEntity
-    Boolean updateBroker(BrokerEntity brokerEntity);
-
-    int countBroker();
+    Boolean deleteBroker(@Param("id") Integer id, @Param("deleteAt") String deleteAt);
 
 }

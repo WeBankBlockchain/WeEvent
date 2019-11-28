@@ -49,31 +49,12 @@
 
     </select>
 
-    <insert id="addBroker" parameterType="com.webank.weevent.governance.entity.BrokerEntity"
-            useGeneratedKeys="true" keyProperty="id">
-        insert into t_broker(name, broker_url, webase_url, user_id)
-        values (#{name}, #{brokerUrl}, #{webaseUrl}, #{userId})
-    </insert>
-
-    <update id="updateBroker" parameterType="com.webank.weevent.governance.entity.BrokerEntity">
-        update t_broker
-        set name=#{name},
-            broker_url=#{brokerUrl},
-            webase_url=#{webaseUrl}
-        where id = #{id,jdbcType=INTEGER}
-    </update>
 
     <delete id="deleteBroker">
         update t_broker
-        set delete_at=unix_timestamp(now())
+        set delete_at=#{deleteAt}
         where id = #{id}
     </delete>
-
-    <select id="countBroker" resultType="int">
-        select count(1)
-        from t_broker
-        where delete_at = 0
-    </select>
 
 
 </mapper>

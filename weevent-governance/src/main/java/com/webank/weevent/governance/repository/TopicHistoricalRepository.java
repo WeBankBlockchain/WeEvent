@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 public interface TopicHistoricalRepository extends JpaRepository<TopicHistoricalEntity,Long> {
 
 
-    List<TopicHistoricalEntity> historicalDataList(TopicHistoricalEntity topicHistoricalEntity);
+   // List<TopicHistoricalEntity> historicalDataList(TopicHistoricalEntity topicHistoricalEntity);
 
-    List<TopicHistoricalEntity> eventList(TopicHistoricalEntity topicHistoricalEntity);
+    //List<TopicHistoricalEntity> eventList(TopicHistoricalEntity topicHistoricalEntity);
 }

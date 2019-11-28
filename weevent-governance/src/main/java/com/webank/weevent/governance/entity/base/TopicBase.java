@@ -32,6 +32,6 @@ public class TopicBase extends BaseEntity {
     private String description;
 
     @Column(name = "delete_at")
-    private String deleteAt;
+    private String deleteAt = "0";
 
 }

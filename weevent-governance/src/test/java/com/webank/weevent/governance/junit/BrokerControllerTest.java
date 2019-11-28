@@ -38,7 +38,6 @@ public class BrokerControllerTest extends JUnitTestBase {
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
         this.cookie = new Cookie(ConstantProperties.COOKIE_MGR_ACCOUNT_ID, "1");
-
     }
 
     @Before
@@ -50,7 +49,7 @@ public class BrokerControllerTest extends JUnitTestBase {
 
     @Test
     public void testAddBroker() throws Exception {
-        String content = "{\"name\":\"broker2\",\"brokerUrl\":\"http://127.0.0.1:7000/weevent\",\"webaseUrl\":\"http://127.0.0.1:7000/weevent\",\"userId\":\"1\"}";
+        String content = "{\"name\":\"broker2\",\"brokerUrl\":\"http://10.107.105.228:8111/weevent\",\"userId\":\"1\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
@@ -59,25 +58,18 @@ public class BrokerControllerTest extends JUnitTestBase {
 
     @Test
     public void testUpdateBroker() throws Exception {
-        String content = "{\"id\":\"1\",\"name\":\"broker1\",\"brokerUrl\":\"http://127.0.0.1:7000/weevent\",\"webaseUrl\":\"http://127.0.0.1:8080/webase-node-mgr\",\"userId\":\"1\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.put("/broker").contentType(MediaType.APPLICATION_JSON_UTF8).content(content)).andReturn().getResponse();
+        String content = "{\"id\":\"1\",\"name\":\"broker1\",\"brokerUrl\":\"http://10.107.105.228:8111/weevent\",\"userId\":\"1\"}";
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/update").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         Assert.assertTrue(response.getContentAsString().contains("true"));
 
     }
 
-    @Test
-    public void testDeleteBroker() throws Exception {
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.delete("/broker/3").contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andReturn().getResponse();
-        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Assert.assertTrue(response.getContentAsString().contains("true"));
-    }
 
     @Test
     public void testGetBroker() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/broker/1").contentType(MediaType.APPLICATION_JSON_UTF8)).andReturn();
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/broker/1").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie)).andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         String contentAsString = response.getContentAsString();
@@ -88,7 +80,7 @@ public class BrokerControllerTest extends JUnitTestBase {
 
     @Test
     public void testGetBrokers() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/broker/list?userId=1").contentType(MediaType.APPLICATION_JSON_UTF8))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/broker/list?userId=1").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie))
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
 
@@ -97,5 +89,14 @@ public class BrokerControllerTest extends JUnitTestBase {
         Assert.assertNotNull(contentAsString);
         List<BrokerEntity> brokerEntities = JSONObject.parseArray(contentAsString, BrokerEntity.class);
         Assert.assertEquals(brokerEntities.get(0).getUserId().toString(), "1");
+    }
+
+    @Test
+    public void testDeleteBroker() throws Exception {
+        String content = "{\"id\":\"1\",\"userId\":\"1\"}";
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/delete").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
+                .andReturn().getResponse();
+        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        Assert.assertTrue(response.getContentAsString().contains("true"));
     }
 }

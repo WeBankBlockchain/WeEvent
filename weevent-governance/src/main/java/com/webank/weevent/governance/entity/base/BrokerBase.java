@@ -19,7 +19,7 @@ import org.hibernate.validator.constraints.URL;
 public class BrokerBase extends BaseEntity {
 
     @Min(1)
-    @Column(name="user_id")
+    @Column(name = "user_id")
     private Integer userId;
 
     @Column(name = "name")
@@ -33,7 +33,7 @@ public class BrokerBase extends BaseEntity {
     private String webaseUrl;
 
     @Column(name = "delete_at")
-    private String deleteAt;
+    private String deleteAt = "0";
 
     public void setBrokerUrl(String brokerUrl) {
         this.brokerUrl = brokerUrl == null ? null : brokerUrl.trim();

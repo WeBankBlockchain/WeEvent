@@ -16,12 +16,12 @@ import lombok.EqualsAndHashCode;
 @MappedSuperclass
 public class RuleEngineBase extends BaseEntity {
 
-    @Column(name = "ruleName")
+    @Column(name = "rule_name")
     private String ruleName;
+
     /**
      * Type, the current default is json
      */
-
     @Column(name = "payload_type")
     private Integer payloadType;
 
@@ -78,5 +78,5 @@ public class RuleEngineBase extends BaseEntity {
 
     //0 means not deleted ,others means deleted
     @Column(name = "delete_at")
-    private String deleteAt;
+    private String deleteAt = "0";
 }

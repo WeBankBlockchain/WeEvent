@@ -1,6 +1,7 @@
 package com.webank.weevent.governance.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +18,9 @@ import com.webank.weevent.governance.mapper.PermissionMapper;
 import com.webank.weevent.governance.mapper.RuleEngineMapper;
 import com.webank.weevent.governance.mapper.TopicInfoMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
+import com.webank.weevent.governance.repository.BrokerRepository;
+import com.webank.weevent.governance.repository.PermissionRepository;
+import com.webank.weevent.governance.repository.RuleEngineRepository;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.utils.CookiesTools;
 
@@ -29,6 +33,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +56,9 @@ public class BrokerService {
     private PermissionMapper permissionMapper;
 
     @Autowired
+    private PermissionRepository permissionRepository;
+
+    @Autowired
     private PermissionService permissionService;
 
     @Autowired
@@ -60,10 +68,13 @@ public class BrokerService {
     private RuleEngineService ruleEngineService;
 
     @Autowired
-    private RuleEngineMapper ruleEngineMapper;
+    private RuleEngineRepository ruleEngineRepository;
 
     @Autowired
     private CommonService commonService;
+
+    @Autowired
+    private BrokerRepository brokerRepository;
 
     private final static String HTTP_GET_SUCCESS_CODE = "0";
 
@@ -100,18 +111,17 @@ public class BrokerService {
         //checkBrokerUrlRepeat
         boolean repeat = checkBrokerUrlRepeat(brokerEntity);
         if (!repeat) {
-           return new GovernanceResult(ErrorCode.BROKER_REPEAT);
+            return new GovernanceResult(ErrorCode.BROKER_REPEAT);
         }
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             throw new GovernanceException(errorCode);
         }
         try {
-            brokerMapper.addBroker(brokerEntity);
+            brokerRepository.save(brokerEntity);
             //create permissionEntityList
             List<PermissionEntity> permissionEntityList = createPerMissionList(brokerEntity);
             if (permissionEntityList.size() > 0) {
-                permissionMapper.batchInsert(permissionEntityList);
-                brokerMapper.addBroker(brokerEntity);
+                permissionRepository.saveAll(permissionEntityList);
             }
             // Create a table based on the brokerId and groupId, start a rule engine
             //determine if the processor's service is available
@@ -163,7 +173,8 @@ public class BrokerService {
         //delete processor rule
         RuleEngineEntity ruleEngineEntity = new RuleEngineEntity();
         ruleEngineEntity.setBrokerId(brokerEntity.getId());
-        List<RuleEngineEntity> ruleEngines = ruleEngineMapper.getRuleEngines(ruleEngineEntity);
+        Example<RuleEngineEntity> ruleEngineEntityExample = Example.of(ruleEngineEntity);
+        List<RuleEngineEntity> ruleEngines = ruleEngineRepository.findAll(ruleEngineEntityExample);
         boolean exist = ruleEngineService.checkProcessorExist(request);
         log.info("exist:{}", exist);
         try {
@@ -172,8 +183,8 @@ public class BrokerService {
                     ruleEngineService.deleteProcessRule(request, ruleEngine);
                 }
             }
-            topicInfoMapper.deleteByBrokerId(brokerEntity.getId());
-            brokerMapper.deleteBroker(brokerEntity.getId());
+            topicInfoMapper.deleteByBrokerId(brokerEntity.getId(), String.valueOf(new Date().getTime()));
+            brokerMapper.deleteBroker(brokerEntity.getId(), String.valueOf(new Date().getTime()));
             permissionMapper.deletePermission(brokerEntity.getId());
         } catch (Exception e) {
             log.info("delete broker fail", e);
@@ -198,13 +209,13 @@ public class BrokerService {
         if (!repeat) {
             return new GovernanceResult(ErrorCode.BROKER_REPEAT);
         }
-        brokerMapper.updateBroker(brokerEntity);
+        brokerRepository.save(brokerEntity);
         //delete old permission
         permissionMapper.deletePermission(brokerEntity.getId());
         //create new permission
         List<PermissionEntity> perMissionList = createPerMissionList(brokerEntity);
         if (perMissionList.size() > 0) {
-            permissionMapper.batchInsert(perMissionList);
+           permissionRepository.saveAll(perMissionList);
         }
         return GovernanceResult.ok(true);
     }

@@ -28,6 +28,8 @@ import com.webank.weevent.governance.mapper.RuleDatabaseMapper;
 import com.webank.weevent.governance.mapper.RuleEngineMapper;
 import com.webank.weevent.governance.mapper.TopicHistoricalMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
+import com.webank.weevent.governance.repository.RuleDatabaseRepository;
+import com.webank.weevent.governance.repository.RuleEngineRepository;
 import com.webank.weevent.governance.utils.CookiesTools;
 
 import com.alibaba.fastjson.JSONObject;
@@ -62,10 +64,10 @@ public class TopicHistoricalService {
     private RuleEngineService ruleEngineService;
 
     @Autowired
-    private RuleEngineMapper ruleEngineMapper;
+    private RuleEngineRepository ruleEngineRepository;
 
     @Autowired
-    private RuleDatabaseMapper ruleDatabaseMapper;
+    private RuleDatabaseRepository ruleDatabaseRepository;
 
     private final static String simpleDateFormat = "YYYY-MM-dd";
 
@@ -189,7 +191,7 @@ public class TopicHistoricalService {
             RuleDatabaseEntity ruleDatabaseEntity = new RuleDatabaseEntity(brokerEntity.getUserId(), brokerEntity.getId(), user, password,
                     dbName + brokerEntity.getUserId(), urlMap.get("optionalParameter"), urlMap.get("dataBaseUrl"), TOPIC_HISTORICAL,
                     SystemTagEnum.BUILT_IN_SYSTEM.getCode());
-            ruleDatabaseMapper.addRuleDatabase(ruleDatabaseEntity);
+            ruleDatabaseRepository.save(ruleDatabaseEntity);
 
             //Request broker to get all groups
             List<String> groupList = getGroupList(request, brokerEntity);
@@ -198,7 +200,7 @@ public class TopicHistoricalService {
                 groupId = groupId.replaceAll("\"", "");
                 RuleEngineEntity ruleEngineEntity = initializationRule("SYSTEM" + "-" + brokerEntity.getId() + "-" + groupId,
                         brokerEntity, groupId, ruleDatabaseEntity.getId());
-                ruleEngineMapper.addRuleEngine(ruleEngineEntity);
+                ruleEngineRepository.save(ruleEngineEntity);
                 //built-in rule engine data and start
                 ruleEngineService.startRuleEngine(ruleEngineEntity, request, response);
             }

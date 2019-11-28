@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PermissionRepository extends JpaRepository<PermissionEntity, Long> {
 
-    void deletePermissionByBrokerId(Integer brokerId);
+  //  void deletePermissionByBrokerId(Integer brokerId);
 
     List<Integer> findUserIdByBrokerId(Integer brokerId);
 

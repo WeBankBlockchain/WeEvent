@@ -41,7 +41,7 @@ public class AccountControllerTest extends JUnitTestBase {
 
     @Test
     public void testRegister() throws Exception {
-        String content = "{\"username\":\"zjy06\",\"email\":\"admin@test.com\",\"password\":\"123456\"}";
+        String content = "{\"username\":\"zjy05\",\"email\":\"admin@test.com\",\"password\":\"123456\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/user/register").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
@@ -54,7 +54,7 @@ public class AccountControllerTest extends JUnitTestBase {
 
     @Test
     public void testAccountList() throws Exception {
-        String content = "{\"userId\":\"1\"}";
+        String content = "{\"userId\":\"2\"}";
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/user/accountList").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
