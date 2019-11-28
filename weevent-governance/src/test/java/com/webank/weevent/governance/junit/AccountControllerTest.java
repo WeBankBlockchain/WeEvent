@@ -40,43 +40,8 @@ public class AccountControllerTest extends JUnitTestBase {
     }
 
     @Test
-    public void testGetUserId() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/user/getUserId?username=zjy05").contentType(MediaType.APPLICATION_JSON_UTF8)).andReturn();
-        MockHttpServletResponse response = mvcResult.getResponse();
-        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        JSONObject jsonObject = JSONObject.parseObject(response.getContentAsString());
-        Assert.assertNotNull(jsonObject);
-        Assert.assertEquals(jsonObject.get("status").toString(), "200");
-    }
-
-    @Test
-    public void testForgetPassword() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/user/forget?username=zjy05").contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andReturn();
-        MockHttpServletResponse response = mvcResult.getResponse();
-        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        JSONObject jsonObject = JSONObject.parseObject(response.getContentAsString());
-        Assert.assertNotNull(jsonObject);
-        Assert.assertEquals(jsonObject.get("status").toString(), "200");
-
-    }
-
-    @Test
-    public void testUpdatePassword() throws Exception {
-        String content = "{\"username\":\"zjy05\",\"oldPassword\":\"12345226\",\"password\":\"1232245226\"}";
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/user/update").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
-                .andReturn();
-        MockHttpServletResponse response = mvcResult.getResponse();
-        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        JSONObject jsonObject = JSONObject.parseObject(response.getContentAsString());
-        Assert.assertNotNull(jsonObject);
-        Assert.assertEquals(jsonObject.get("status").toString(), "200");
-
-    }
-
-    @Test
     public void testRegister() throws Exception {
-        String content = "{\"username\":\"zjy05\",\"email\":\"zjyxxx@sohu.com\",\"password\":\"123456\"}";
+        String content = "{\"username\":\"zjy06\",\"email\":\"admin@test.com\",\"password\":\"123456\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/user/register").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
@@ -97,6 +62,41 @@ public class AccountControllerTest extends JUnitTestBase {
         Assert.assertTrue(response.getContentAsString().contains("200"));
 
     }
+
+    @Test
+    public void testGetUserId() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/user/getUserId?username=zjy05").contentType(MediaType.APPLICATION_JSON_UTF8)).andReturn();
+        MockHttpServletResponse response = mvcResult.getResponse();
+        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        JSONObject jsonObject = JSONObject.parseObject(response.getContentAsString());
+        Assert.assertNotNull(jsonObject);
+        Assert.assertEquals(jsonObject.get("status").toString(), "200");
+    }
+
+    @Test
+    public void testUpdatePassword() throws Exception {
+        String content = "{\"username\":\"zjy05\",\"oldPassword\":\"123456\",\"password\":\"1232245226\"}";
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/user/update").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
+                .andReturn();
+        MockHttpServletResponse response = mvcResult.getResponse();
+        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        JSONObject jsonObject = JSONObject.parseObject(response.getContentAsString());
+        Assert.assertNotNull(jsonObject);
+        Assert.assertEquals(jsonObject.get("status").toString(), "200");
+
+    }
+
+    @Test
+    public void testForgetPasswordException() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/user/forget?username=zjy05").contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andReturn();
+        MockHttpServletResponse response = mvcResult.getResponse();
+        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        JSONObject jsonObject = JSONObject.parseObject(response.getContentAsString());
+        Assert.assertNotNull(jsonObject);
+        Assert.assertEquals(jsonObject.get("code").toString(), "100102");
+    }
+
 
 
 }

@@ -32,7 +32,7 @@ public class InitialDb implements AutoCloseable {
         String dbName;
         try {
             Properties properties = new Properties();
-            URL url = InitialDb.class.getClassLoader().getResource("application-prod.properties");
+            URL url = InitialDb.class.getClassLoader().getResource("application-dev.properties");
             if (url != null) {
                 properties.load(new FileInputStream(url.getFile()));
                 goalUrl = properties.getProperty("spring.datasource.url");

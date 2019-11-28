@@ -1,16 +1,17 @@
-package com.webank.weevent.governance.mapper;
+package com.webank.weevent.governance.repository;
 
 import java.util.List;
 
 import com.webank.weevent.governance.entity.TopicHistoricalEntity;
 
-import org.apache.ibatis.annotations.Mapper;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-@Mapper
-public interface TopicHistoricalMapper {
+@Repository
+public interface TopicHistoricalRepository extends JpaRepository<TopicHistoricalEntity,Long> {
+
 
     List<TopicHistoricalEntity> historicalDataList(TopicHistoricalEntity topicHistoricalEntity);
 
     List<TopicHistoricalEntity> eventList(TopicHistoricalEntity topicHistoricalEntity);
-
 }

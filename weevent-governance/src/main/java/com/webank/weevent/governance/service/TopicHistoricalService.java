@@ -18,7 +18,7 @@ import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.entity.RuleDatabaseEntity;
 import com.webank.weevent.governance.entity.RuleEngineEntity;
-import com.webank.weevent.governance.entity.TopicTopicHistoricalEntity;
+import com.webank.weevent.governance.entity.TopicHistoricalEntity;
 import com.webank.weevent.governance.enums.ConditionTypeEnum;
 import com.webank.weevent.governance.enums.PayloadEnum;
 import com.webank.weevent.governance.enums.StatusEnum;
@@ -81,7 +81,7 @@ public class TopicHistoricalService {
     private String dataBasePassword;
 
 
-    public Map<String, List<Integer>> historicalDataList(TopicTopicHistoricalEntity topicHistoricalEntity, HttpServletRequest httpRequest,
+    public Map<String, List<Integer>> historicalDataList(TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest httpRequest,
                                                          HttpServletResponse httpResponse) throws GovernanceException {
         try {
             String accountId = cookiesTools.getCookieValueByName(httpRequest, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
@@ -91,7 +91,7 @@ public class TopicHistoricalService {
             }
             Map<String, List<Integer>> returnMap = new HashMap<>();
 
-            List<TopicTopicHistoricalEntity> historicalDataEntities = topicHistoricalMapper.historicalDataList(topicHistoricalEntity);
+            List<TopicHistoricalEntity> historicalDataEntities = topicHistoricalMapper.historicalDataList(topicHistoricalEntity);
             if (CollectionUtils.isEmpty(historicalDataEntities)) {
                 return null;
             }
@@ -104,7 +104,7 @@ public class TopicHistoricalService {
             topicHistoricalEntity.setBeginDate(DateUtils.parseDate(DateFormatUtils.format(beginDate, simpleDateFormat), simpleDateFormat));
             topicHistoricalEntity.setEndDate(DateUtils.parseDate(DateFormatUtils.format(endDate, simpleDateFormat), simpleDateFormat));
             //deal data
-            Map<String, List<TopicTopicHistoricalEntity>> map = new HashMap<>();
+            Map<String, List<TopicHistoricalEntity>> map = new HashMap<>();
             historicalDataEntities.forEach(it -> {
                 map.merge(it.getTopicName(), new ArrayList<>(Collections.singletonList(it)), this::mergeCollection);
             });
@@ -113,7 +113,7 @@ public class TopicHistoricalService {
 
             map.forEach((k, v) -> {
                 Map<String, Integer> eventCountMap = new HashMap<>();
-                for (TopicTopicHistoricalEntity dataEntity : v) {
+                for (TopicHistoricalEntity dataEntity : v) {
                     eventCountMap.put(DateFormatUtils.format(dataEntity.getCreateDate(), simpleDateFormat), dataEntity.getEventCount());
                 }
                 List<Integer> integerList = new ArrayList<>();
@@ -131,18 +131,18 @@ public class TopicHistoricalService {
 
     }
 
-    public List<TopicTopicHistoricalEntity> eventList(TopicTopicHistoricalEntity topicHistoricalEntity, HttpServletRequest httpRequest) throws GovernanceException {
+    public List<TopicHistoricalEntity> eventList(TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest httpRequest) throws GovernanceException {
         try {
             String accountId = cookiesTools.getCookieValueByName(httpRequest, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
             Boolean flag = permissionService.verifyPermissions(topicHistoricalEntity.getBrokerId(), accountId);
             if (!flag) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
-            List<TopicTopicHistoricalEntity> historicalEntities = topicHistoricalMapper.eventList(topicHistoricalEntity);
+            List<TopicHistoricalEntity> historicalEntities = topicHistoricalMapper.eventList(topicHistoricalEntity);
             if (CollectionUtils.isEmpty(historicalEntities)) {
                 return historicalEntities;
             }
-            for (TopicTopicHistoricalEntity entity : historicalEntities) {
+            for (TopicHistoricalEntity entity : historicalEntities) {
                 entity.setCreateDateStr(DateFormatUtils.format(entity.getCreateDate(), simpleDateFormat));
             }
             return historicalEntities;
@@ -153,8 +153,8 @@ public class TopicHistoricalService {
 
     }
 
-    private List<TopicTopicHistoricalEntity> mergeCollection(List<TopicTopicHistoricalEntity> a, List<TopicTopicHistoricalEntity> b) {
-        List<TopicTopicHistoricalEntity> list = new ArrayList<>();
+    private List<TopicHistoricalEntity> mergeCollection(List<TopicHistoricalEntity> a, List<TopicHistoricalEntity> b) {
+        List<TopicHistoricalEntity> list = new ArrayList<>();
         list.addAll(a);
         list.addAll(b);
         return list;

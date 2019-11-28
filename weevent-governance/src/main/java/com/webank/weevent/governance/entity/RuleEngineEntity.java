@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import com.webank.weevent.governance.entity.base.RuleEngineBase;
 
 import lombok.Data;
@@ -17,30 +21,41 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
+@Entity
+@Table(name = "t_rule_engine")
 public class RuleEngineEntity extends RuleEngineBase {
 
 
+    @Transient
     private Map<String, Object> payloadMap = new HashMap<>();
 
-    private String conditionField;
-
+    @Transient
     private String brokerUrl;
 
+    @Transient
     private String fullSQL;
 
+    @Transient
     private Integer pageSize;
 
+    @Transient
     private Integer pageNumber;
 
+    @Transient
     private Integer startIndex;
 
+    @Transient
     private Integer endIndex;
 
+    @Transient
     private Integer totalCount;
 
+    @Transient
     private String createDateStr;
 
+    @Transient
     private String offSet;
 
+    @Transient
     private List<RuleEngineConditionEntity> ruleEngineConditionList = new ArrayList<>();
 }

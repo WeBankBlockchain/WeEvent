@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.webank.weevent.governance.mapper.TopicHistoricalMapper">
 
-    <resultMap id="BaseResultMap" type="com.webank.weevent.governance.entity.TopicTopicHistoricalEntity">
+    <resultMap id="BaseResultMap" type="com.webank.weevent.governance.entity.TopicHistoricalEntity">
         <result column="id" property="id" jdbcType="INTEGER"/>
         <result column="create_date" property="createDate" jdbcType="TIMESTAMP"/>
         <result column="last_update" property="lastUpdate" jdbcType="TIMESTAMP"/>
@@ -77,7 +77,7 @@
         GROUP BY DATE_FORMAT(create_date,"%Y-%m-%d")
     </select>
 
-    <insert id="addHistoricalData" parameterType="com.webank.weevent.governance.entity.TopicTopicHistoricalEntity"
+    <insert id="addHistoricalData" parameterType="com.webank.weevent.governance.entity.TopicHistoricalEntity"
             useGeneratedKeys="true" keyProperty="id">
         insert into  t_topic_historical(brokerId, topicName, groupId, eventId)
         values (#{brokerId}, #{topicName}, #{groupId}, #{eventId})

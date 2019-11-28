@@ -1,5 +1,7 @@
 package com.webank.weevent.governance.entity.base;
 
+import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.Min;
 
 import lombok.Data;
@@ -13,18 +15,24 @@ import org.hibernate.validator.constraints.URL;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
+@MappedSuperclass
 public class BrokerBase extends BaseEntity {
 
     @Min(1)
+    @Column(name="user_id")
     private Integer userId;
 
+    @Column(name = "name")
     private String name;
 
     @URL
+    @Column(name = "broker_url")
     private String brokerUrl;
 
+    @Column(name = "webase_url")
     private String webaseUrl;
 
+    @Column(name = "delete_at")
     private String deleteAt;
 
     public void setBrokerUrl(String brokerUrl) {
