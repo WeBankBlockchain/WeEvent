@@ -30,7 +30,7 @@ public class CommonUtil {
      */
 
     public static Connection getConnection(String databaseUrl) {
-        String driver = ProcessorApplication.processorConfig.getDataBaseDriver();
+        String driver = "org.mariadb.jdbc.Driver";
         try {
             Class.forName(driver);
             return DriverManager.getConnection(databaseUrl);

@@ -14,22 +14,4 @@ public class ProcessorConfig {
 
     @Value("${org.quartz.scheduler.instanceName:}")
     private String schedulerInstanceName;
-
-    @Value("${quartz.schedule.name:}")
-    private String quartzScheduleName;
-
-    @Value("${org.quartz.dataSource.WeEvent_processor.driver:}")
-    private String dataBaseDriver;
-
-    @Value("${org.quartz.dataSource.WeEvent_processor.URL}")
-    private String dataSourceUrl;
-
-    @Value("${org.quartz.dataSource.WeEvent_processor.user}")
-    private String dataSourceUser;
-
-    @Value("${org.quartz.dataSource.WeEvent_processor.password}")
-    private String dataSourcePassword;
-
-    @Value("${org.quartz.dataSource.WeEvent_processor.driver}")
-    private String dataSourceDriver;
 }
