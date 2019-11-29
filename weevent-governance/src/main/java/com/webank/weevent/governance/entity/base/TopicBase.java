@@ -31,7 +31,8 @@ public class TopicBase extends BaseEntity {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "delete_at")
+    //0 means not deleted ,others means deleted
+    @Column(name = "delete_at",nullable = false)
     private String deleteAt = "0";
 
 }

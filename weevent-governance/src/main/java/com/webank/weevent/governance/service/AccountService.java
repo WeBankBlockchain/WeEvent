@@ -72,9 +72,9 @@ public class AccountService {
         }
         // excute select
 
-        List<AccountEntity> list = accountRepository.findAllByUsername(accountEntity.getUsername());
+        List<AccountEntity> list = accountRepository.findAllByUsernameAndDeleteAt(accountEntity.getUsername(), "0");
         // is list contain data
-        if (list != null && list.size() > 0) {
+        if (!CollectionUtils.isEmpty(list)) {
             // if list contain data return false
             return GovernanceResult.ok(false);
         }
@@ -119,7 +119,7 @@ public class AccountService {
         // check oldPassword is correct
         String oldPassword = user.getOldPassword();
 
-        List<AccountEntity> accountEntityList = accountRepository.findAllByUsername(user.getUsername());
+        List<AccountEntity> accountEntityList = accountRepository.findAllByUsernameAndDeleteAt(user.getUsername(), "0");
         if (CollectionUtils.isEmpty(accountEntityList)) {
             return GovernanceResult.build(400, "username is not exist");
         }
@@ -131,7 +131,6 @@ public class AccountService {
         String password = passwordEncoder.encode(user.getPassword());
         oldPassword = passwordEncoder.encode(user.getOldPassword());
         storeUser.setPassword(password);
-        storeUser.setLastUpdate(new Date());
         storeUser.setOldPassword(oldPassword);
         accountRepository.save(storeUser);
         return GovernanceResult.ok();
@@ -144,7 +143,7 @@ public class AccountService {
             return GovernanceResult.build(400, "username not exists");
         }
         // get user by username
-        List<AccountEntity> accountList = accountRepository.findAllByUsername(username);
+        List<AccountEntity> accountList = accountRepository.findAllByUsernameAndDeleteAt(username, "0");
         AccountEntity user = accountList.get(0);
         if (StringUtil.isBlank(user.getEmail())) {
             throw new GovernanceException(ErrorCode.NO_MAILBOX_CONFIGURED);
@@ -183,11 +182,10 @@ public class AccountService {
 
     public AccountEntity queryByUsername(String username) {
         // execute select
-        List<AccountEntity> list = accountRepository.findAllByUsername(username);
-        if (list.size() > 0) {
+        List<AccountEntity> list = accountRepository.findAllByUsernameAndDeleteAt(username, "0");
+        if (!CollectionUtils.isEmpty(list)) {
             // get user info
-            AccountEntity user = list.get(0);
-            return user;
+            return list.get(0);
         }
         return null;
     }

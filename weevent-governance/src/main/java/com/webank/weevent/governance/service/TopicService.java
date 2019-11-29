@@ -19,6 +19,7 @@ import com.webank.weevent.governance.entity.TopicPageEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.TopicInfoMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
+import com.webank.weevent.governance.repository.TopicRepository;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.utils.CookiesTools;
 
@@ -45,6 +46,9 @@ public class TopicService {
 
     @Autowired
     private TopicInfoMapper topicInfoMapper;
+
+    @Autowired
+    private TopicRepository topicRepository;
 
     @Autowired
     private BrokerService brokerService;
@@ -85,6 +89,7 @@ public class TopicService {
             HttpGet get = commonService.getMethod(url, request);
             CloseableHttpResponse closeResponse = client.execute(get);
             String mes = EntityUtils.toString(closeResponse.getEntity());
+
             return (Boolean) JSON.parse(mes);
         } catch (Exception e) {
             log.error("close topic fail,topic :{},error:{}", topic, e.getMessage());
@@ -222,7 +227,7 @@ public class TopicService {
             topicEntity.setTopicName(topic);
             topicEntity.setCreater(creater);
             topicEntity.setGroupId(groupId);
-            topicInfoMapper.openBrokeTopic(topicEntity);
+            topicRepository.save(topicEntity);
 
             CloseableHttpClient client = commonService.generateHttpClient(brokerEntity.getBrokerUrl());
             String url;

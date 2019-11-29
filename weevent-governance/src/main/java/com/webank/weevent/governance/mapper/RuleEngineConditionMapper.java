@@ -13,11 +13,7 @@ public interface RuleEngineConditionMapper {
 
     List<RuleEngineConditionEntity> ruleEngineConditionList(RuleEngineConditionEntity ruleEngineConditionEntity);
 
-    int addRuleEngineCondition(RuleEngineConditionEntity ruleEngineConditionEntity);
-
     int deleteRuleEngineCondition(RuleEngineConditionEntity ruleEngineConditionEntity);
-
-    void batchInsert(@Param("ruleEngineConditionList") List<RuleEngineConditionEntity> ruleEngineConditionEntities);
 
 
 }

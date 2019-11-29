@@ -49,7 +49,7 @@ public class BrokerControllerTest extends JUnitTestBase {
 
     @Test
     public void testAddBroker() throws Exception {
-        String content = "{\"name\":\"broker2\",\"brokerUrl\":\"http://10.107.105.228:8111/weevent\",\"userId\":\"1\"}";
+        String content = "{\"name\":\"broker2\",\"brokerUrl\":\"http://129.204.225.235:8080/weevent\",\"userId\":\"1\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
@@ -58,7 +58,7 @@ public class BrokerControllerTest extends JUnitTestBase {
 
     @Test
     public void testUpdateBroker() throws Exception {
-        String content = "{\"id\":\"1\",\"name\":\"broker1\",\"brokerUrl\":\"http://10.107.105.228:8111/weevent\",\"userId\":\"1\"}";
+        String content = "{\"id\":\"1\",\"name\":\"broker1\",\"brokerUrl\":\"http://129.204.225.235:8080/weevent\",\"userId\":\"1\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/update").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);

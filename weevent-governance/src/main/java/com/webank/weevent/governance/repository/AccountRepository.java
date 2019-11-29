@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AccountRepository extends JpaRepository<AccountEntity, Long> {
 
-    List<AccountEntity> findAllByUsername(String username);
+    List<AccountEntity> findAllByUsernameAndDeleteAt(String username,String deleteAt);
 
 }

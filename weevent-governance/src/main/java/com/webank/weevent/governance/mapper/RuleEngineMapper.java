@@ -26,7 +26,7 @@ public interface RuleEngineMapper {
 
     List<RuleEngineEntity> getRuleTopicList(RuleEngineEntity ruleEngineEntity);
 
-    Boolean updateRuleEngineStatus(RuleEngineEntity ruleEngineEntity);
+  //  Boolean updateRuleEngineStatus(RuleEngineEntity ruleEngineEntity);
 
     int countRuleEngine(RuleEngineEntity ruleEngineEntity);
 

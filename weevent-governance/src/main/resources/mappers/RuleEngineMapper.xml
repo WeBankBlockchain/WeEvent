@@ -126,16 +126,10 @@
           and status != 2
     </update>
 
-    <update id="updateRuleEngineStatus" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity">
-        update t_rule_engine
-        set status=#{status}
-        where id = #{id,jdbcType=INTEGER}
-    </update>
-
 
     <delete id="deleteRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity">
         update t_rule_engine
-        set status=2 , delete_at=unix_timestamp(now())
+        set status=2 , delete_at=#{deleteAt}
         where id = #{id}
     </delete>
 

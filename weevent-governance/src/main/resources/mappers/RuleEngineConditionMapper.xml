@@ -28,20 +28,6 @@
         </if>
 
     </select>
-    <insert id="batchInsert" parameterType="com.webank.weevent.governance.entity.RuleEngineConditionEntity">
-        insert into t_rule_engine_condition(rule_id, sql_condition_json)
-        VALUES
-        <foreach collection="ruleEngineConditionList" item="ruleEngineCondition" separator=",">
-            (#{ruleEngineCondition.ruleId}, #{ruleEngineCondition.sqlConditionJson})
-        </foreach>
-    </insert>
-
-
-    <insert id="addRuleEngineCondition" parameterType="com.webank.weevent.governance.entity.RuleEngineConditionEntity"
-            useGeneratedKeys="true" keyProperty="id">
-        insert into t_rule_engine_condition(rule_id, sql_condition_json)
-        values (#{ruleId}, #{sqlConditionJson})
-    </insert>
 
     <delete id="deleteRuleEngineCondition"
             parameterType="com.webank.weevent.governance.entity.RuleEngineConditionEntity">

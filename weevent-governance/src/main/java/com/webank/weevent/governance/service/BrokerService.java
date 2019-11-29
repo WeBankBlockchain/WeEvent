@@ -104,18 +104,17 @@ public class BrokerService {
     @Transactional(rollbackFor = Throwable.class)
     public GovernanceResult addBroker(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
-
-
         //check both broker and webase serverUrl
         ErrorCode errorCode = checkServerByBrokerEntity(brokerEntity, request);
+        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+            throw new GovernanceException(errorCode);
+        }
         //checkBrokerUrlRepeat
         boolean repeat = checkBrokerUrlRepeat(brokerEntity);
         if (!repeat) {
             return new GovernanceResult(ErrorCode.BROKER_REPEAT);
         }
-        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-            throw new GovernanceException(errorCode);
-        }
+
         try {
             brokerRepository.save(brokerEntity);
             //create permissionEntityList

@@ -77,24 +77,4 @@
         GROUP BY DATE_FORMAT(create_date,"%Y-%m-%d")
     </select>
 
-    <insert id="addHistoricalData" parameterType="com.webank.weevent.governance.entity.TopicHistoricalEntity"
-            useGeneratedKeys="true" keyProperty="id">
-        insert into  t_topic_historical(brokerId, topicName, groupId, eventId)
-        values (#{brokerId}, #{topicName}, #{groupId}, #{eventId})
-    </insert>
-
-
-    <delete id="deleteHistoricalData">
-        delete
-        from  t_topic_historical
-        where id = #{id}
-    </delete>
-
-    <select id="countHistoricalData" resultType="int">
-        select count(1)
-        from  t_topic_historical
-        where 1 = 1
-    </select>
-
-
 </mapper>

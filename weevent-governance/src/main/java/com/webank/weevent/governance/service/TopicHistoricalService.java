@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -106,10 +107,7 @@ public class TopicHistoricalService {
             topicHistoricalEntity.setBeginDate(DateUtils.parseDate(DateFormatUtils.format(beginDate, simpleDateFormat), simpleDateFormat));
             topicHistoricalEntity.setEndDate(DateUtils.parseDate(DateFormatUtils.format(endDate, simpleDateFormat), simpleDateFormat));
             //deal data
-            Map<String, List<TopicHistoricalEntity>> map = new HashMap<>();
-            historicalDataEntities.forEach(it -> {
-                map.merge(it.getTopicName(), new ArrayList<>(Collections.singletonList(it)), this::mergeCollection);
-            });
+            Map<String, List<TopicHistoricalEntity>> map = historicalDataEntities.stream().collect(Collectors.groupingBy(TopicHistoricalEntity::getTopicName));
             List<String> listDate;
             listDate = listDate(topicHistoricalEntity.getBeginDate(), topicHistoricalEntity.getEndDate());
 
@@ -153,13 +151,6 @@ public class TopicHistoricalService {
             throw new GovernanceException("get eventList fail", e);
         }
 
-    }
-
-    private List<TopicHistoricalEntity> mergeCollection(List<TopicHistoricalEntity> a, List<TopicHistoricalEntity> b) {
-        List<TopicHistoricalEntity> list = new ArrayList<>();
-        list.addAll(a);
-        list.addAll(b);
-        return list;
     }
 
     private List<String> listDate(Date beginDate, Date endDate) {

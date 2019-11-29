@@ -12,6 +12,7 @@ import com.webank.weevent.governance.entity.base.BrokerBase;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * BrokerEntity class
@@ -20,6 +21,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
+@ToString
 @Entity
 @Table(name = "t_broker",
         uniqueConstraints = {@UniqueConstraint(name = "brokerUrlDeleteAt",
