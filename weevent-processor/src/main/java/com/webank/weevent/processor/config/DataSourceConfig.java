@@ -39,7 +39,7 @@ public class DataSourceConfig {
 
             log.info("create ds:{}", ds);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.info("exception:", e.toString());
         }
     }
 

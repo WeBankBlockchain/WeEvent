@@ -4,7 +4,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.processor.config.DataSourceConfig;
 
 import org.quartz.Scheduler;
