@@ -23,12 +23,8 @@ public class DataSourceConfig {
     static {
         try {
             Properties applicationProperties = getProperties("application.properties");
-            String currentApplication = "";
-            if ("dev".equals(applicationProperties.get("spring.profiles.active"))) {
-                currentApplication = "application-dev.properties";
-            } else {
-                currentApplication = "application-prod.properties";
-            }
+            String currentApplication = "application-${suffix}.properties".replace("${suffix}", applicationProperties.get("spring.profiles.active").toString());
+
             Properties currentApplicationProperties = getProperties(currentApplication);
 
             ds = BasicDataSourceFactory.createDataSource(currentApplicationProperties);
@@ -56,7 +52,7 @@ public class DataSourceConfig {
             con = ds.getConnection();
             log.info("get DataSource connection:{}", con);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info("exception:", e.toString());
         }
         return con;
     }
@@ -69,7 +65,8 @@ public class DataSourceConfig {
             properties.load(stream);
             return properties;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.info("exception:", e.toString());
+            return null;
         }
     }
 }
