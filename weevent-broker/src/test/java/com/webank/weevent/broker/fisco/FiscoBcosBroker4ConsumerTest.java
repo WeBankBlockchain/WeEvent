@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import com.webank.weevent.JUnitTestBase;
 import com.webank.weevent.broker.plugin.IConsumer;
@@ -75,7 +76,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
         if (StringUtils.isBlank(this.lastEventId)) {
             String data = String.format("hello world! %s", System.currentTimeMillis());
             WeEvent weEvent = new WeEvent(this.topicName, data.getBytes());
-            SendResult sendResultDto = this.iProducer.publish(weEvent, this.groupId);
+            SendResult sendResultDto = this.iProducer.publish(weEvent, this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
             Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResultDto.getStatus());
             this.lastEventId = sendResultDto.getEventId();
             log.info("publish lastEventId: {}", this.lastEventId);
@@ -327,8 +328,8 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
         String result = this.iConsumer.subscribe(this.topicName, this.groupId, this.lastEventId, this.ext, listener);
         Assert.assertFalse(result.isEmpty());
 
-        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS,
-                this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.groupId).getStatus());
+        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
+        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
 
         Thread.sleep(this.wait3s);
 
@@ -342,8 +343,8 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
         String result = this.iConsumer.subscribe(this.topicName, this.groupId, WeEvent.OFFSET_FIRST, this.ext, listener);
         Assert.assertFalse(result.isEmpty());
 
-        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS,
-                this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.groupId).getStatus());
+        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
+        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
         Thread.sleep(wait3s * 10);
 
         Assert.assertFalse(listener.notifiedEvents.isEmpty());
@@ -356,8 +357,8 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
         Assert.assertFalse(result.isEmpty());
 
         log.info("lastEventId: {}", this.lastEventId);
-        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS,
-                this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.groupId).getStatus());
+        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
+        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
         Thread.sleep(wait3s);
 
         Assert.assertFalse(listener.notifiedEvents.isEmpty());
@@ -462,7 +463,8 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
         SendResult sendResult = this.iProducer
                 .publish(new WeEvent(this.topicName,
-                        String.format("我是中文. %s", System.currentTimeMillis()).getBytes(StandardCharsets.UTF_8)), this.groupId);
+                        String.format("我是中文. %s", System.currentTimeMillis()).getBytes(StandardCharsets.UTF_8)), this.groupId)
+                .get(transactionTimeout, TimeUnit.MILLISECONDS);
 
         Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
         Thread.sleep(wait3s);
@@ -655,8 +657,8 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
         Map<String, String> ext = new HashMap<>();
         ext.put(WeEvent.WeEvent_TAG, "publish_tag");
         WeEvent event = new WeEvent(this.topicName, "hello world.".getBytes(), ext);
-        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS,
-                this.iProducer.publish(event, this.groupId).getStatus());
+        SendResult sendResult = this.iProducer.publish(event, this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
+        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
 
         Thread.sleep(this.wait3s);
 
@@ -677,8 +679,8 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
         Map<String, String> ext = new HashMap<>();
         ext.put(WeEvent.WeEvent_TAG, tag);
         WeEvent event = new WeEvent(this.topicName, "hello world.".getBytes(), ext);
-        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS,
-                this.iProducer.publish(event, this.groupId).getStatus());
+        SendResult sendResult = this.iProducer.publish(event, this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
+        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
 
         Thread.sleep(this.wait3s);
 
