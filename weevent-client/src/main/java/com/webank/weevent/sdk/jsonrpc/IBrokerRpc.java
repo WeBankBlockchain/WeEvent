@@ -16,19 +16,11 @@ import com.webank.weevent.sdk.WeEvent;
  */
 public interface IBrokerRpc {
     // Interface for producer.
-    default SendResult publish(String topic, String groupId, byte[] content, Map<String, String> extensions) throws BrokerException {
-        return null;
-    }
-
-    default SendResult publish(String topic, byte[] content, Map<String, String> extensions) throws BrokerException {
-        return null;
-    }
-
     default SendResult publish(String topic, byte[] content) throws BrokerException {
         return null;
     }
 
-    default SendResult publish(String topic, String groupId, byte[] content) throws BrokerException {
+    default SendResult publish(String topic, String groupId, byte[] content, Map<String, String> extensions) throws BrokerException {
         return null;
     }
 
