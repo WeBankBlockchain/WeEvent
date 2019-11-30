@@ -1,6 +1,7 @@
 package com.webank.weevent.broker.fisco;
 
 import java.math.BigInteger;
+import java.util.concurrent.TimeUnit;
 
 import com.webank.weevent.JUnitTestBase;
 import com.webank.weevent.broker.fisco.dto.ListPage;
@@ -49,7 +50,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
         Assert.assertNotNull(this.iProducer);
         this.iProducer.startProducer();
 
-        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.groupId);
+        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
         Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
         this.eventId = sendResult.getEventId();
     }
