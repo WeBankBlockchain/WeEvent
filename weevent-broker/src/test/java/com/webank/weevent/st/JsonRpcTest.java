@@ -127,7 +127,9 @@ public class JsonRpcTest extends JUnitTestBase {
 
     @Test
     public void testPublishWithGroupIdNoExt() throws BrokerException {
-        SendResult publish = iBrokerRpc.publish(this.jsonTopic, this.groupId, this.content.getBytes());
+        Map<String, String> ext = new HashMap<>();
+        ext.put("weevent-jsonrpctest1", "json rpc ext value1");
+        SendResult publish = iBrokerRpc.publish(this.jsonTopic, this.groupId, this.content.getBytes(), ext);
         log.info("publish: " + publish);
         Assert.assertNotNull(publish.getEventId());
     }
@@ -137,7 +139,7 @@ public class JsonRpcTest extends JUnitTestBase {
         Map<String, String> ext = new HashMap<>();
         ext.put("weevent-jsonrpctest1", "json rpc ext value1");
         ext.put("weevent-jsonrpctest2", "json rpc ext value2");
-        SendResult publish = iBrokerRpc.publish(this.jsonTopic, this.content.getBytes(), ext);
+        SendResult publish = iBrokerRpc.publish(this.jsonTopic, this.content.getBytes());
         log.info("publish: " + publish);
         Assert.assertNotNull(publish.getEventId());
     }
