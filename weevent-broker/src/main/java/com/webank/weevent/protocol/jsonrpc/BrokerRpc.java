@@ -59,25 +59,6 @@ public class BrokerRpc implements IBrokerRpc {
 
     @Override
     public SendResult publish(@JsonRpcParam(value = "topic") String topic,
-                              @JsonRpcParam(value = "groupId") String groupId,
-                              @JsonRpcParam(value = "content") byte[] content,
-                              @JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException {
-        log.info("topic:{} groupId:{} content.length:{} extensions:{}", topic, groupId, content.length, JSON.toJSONString(extensions));
-
-        return this.publishInner(new WeEvent(topic, content, extensions), groupId);
-    }
-
-    @Override
-    public SendResult publish(@JsonRpcParam(value = "topic") String topic,
-                              @JsonRpcParam(value = "content") byte[] content,
-                              @JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException {
-        log.info("topic:{} contentLength:{} extensions:{}", topic, content.length, JSON.toJSONString(extensions));
-
-        return this.publishInner(new WeEvent(topic, content, extensions), "");
-    }
-
-    @Override
-    public SendResult publish(@JsonRpcParam(value = "topic") String topic,
                               @JsonRpcParam(value = "content") byte[] content) throws BrokerException {
         log.info("topic:{} content.length:{}", topic, content.length);
 
@@ -87,10 +68,11 @@ public class BrokerRpc implements IBrokerRpc {
     @Override
     public SendResult publish(@JsonRpcParam(value = "topic") String topic,
                               @JsonRpcParam(value = "groupId") String groupId,
-                              @JsonRpcParam(value = "content") byte[] content) throws BrokerException {
-        log.info("topic:{} groupId:{} content.length:{}", topic, groupId, content.length);
+                              @JsonRpcParam(value = "content") byte[] content,
+                              @JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException {
+        log.info("topic:{} groupId:{} content.length:{} extensions:{}", topic, groupId, content.length, JSON.toJSONString(extensions));
 
-        return this.publishInner(new WeEvent(topic, content, new HashMap<>()), groupId);
+        return this.publishInner(new WeEvent(topic, content, extensions), groupId);
     }
 
     @Override
