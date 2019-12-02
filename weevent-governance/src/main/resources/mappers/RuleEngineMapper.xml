@@ -69,8 +69,8 @@
         <if test="ruleEngineEntity.ruleName != null and ruleEngineEntity.ruleName!=''">
             and rule_name = #{ruleEngineEntity.ruleName,jdbcType=VARCHAR}
         </if>
-        <if test="ruleEngineEntity.systemTag != null and ruleEngineEntity.systemTag!=''">
-            and system_tag = #{ruleEngineEntity.systemTag,jdbcType=VARCHAR}
+        <if test="ruleEngineEntity.systemTag != null">
+            and system_tag = #{ruleEngineEntity.systemTag}
         </if>
         <if test="startIndex != null and endIndex!=null">
             limit #{startIndex},#{endIndex}
@@ -94,7 +94,7 @@
             and rule_name = #{ruleName,jdbcType=VARCHAR}
         </if>
         <if test="systemTag != null">
-            and system_tag = #{systemTag,jdbcType=VARCHAR}
+            and system_tag = #{systemTag}
         </if>
     </sql>
 

@@ -47,7 +47,7 @@
             and broker_id = #{brokerId,jdbcType=INTEGER}
         </if>
         <if test="systemTag != null">
-            and system_tag = #{systemTag,jdbcType=VARCHAR}
+            and system_tag = #{systemTag}
         </if>
     </select>
 
@@ -107,7 +107,7 @@
             and broker_id = #{brokerId,jdbcType=INTEGER}
         </if>
         <if test="systemTag != null">
-            and system_tag = #{systemTag,jdbcType=VARCHAR}
+            and system_tag = #{systemTag}
         </if>
     </select>
 </mapper>
