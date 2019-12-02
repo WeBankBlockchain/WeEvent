@@ -34,19 +34,16 @@ public class RuleDatabaseService {
     @Autowired
     private RuleDatabaseRepository ruleDatabaseRepository;
 
-    @Autowired
-    private RuleDatabaseMapper ruleDatabaseMapper;
-
     public List<RuleDatabaseEntity> getRuleDataBaseList(HttpServletRequest request, RuleDatabaseEntity ruleDatabaseEntity) throws GovernanceException {
         try {
             String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
             if (accountId == null || !accountId.equals(ruleDatabaseEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
-            List<RuleDatabaseEntity> ruleDatabaseEntityList;
             ruleDatabaseEntity.setSystemTag(SystemTagEnum.USER_ADDED.getCode());
 
-            ruleDatabaseEntityList = ruleDatabaseMapper.getRuleDataBaseList(ruleDatabaseEntity);
+            Example<RuleDatabaseEntity> entityExample = Example.of(ruleDatabaseEntity);
+            List<RuleDatabaseEntity> ruleDatabaseEntityList = ruleDatabaseRepository.findAll(entityExample);
             ruleDatabaseEntityList.forEach(ruleDataBase -> {
                 String dataBaseUrl = ruleDataBase.getDatabaseUrl();
                 if (StringUtil.isBlank(ruleDataBase.getOptionalParameter())) {

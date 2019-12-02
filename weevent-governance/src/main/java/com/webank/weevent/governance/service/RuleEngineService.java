@@ -146,7 +146,7 @@ public class RuleEngineService {
             this.checkRule(ruleEngineEntity);
             //insert ruleEngine
             ruleEngineRepository.save(ruleEngineEntity);
-            log.info("add end, time");
+            log.info("add end");
             return ruleEngineEntity;
         } catch (Exception e) {
             log.error("add ruleEngineEntity fail", e);
