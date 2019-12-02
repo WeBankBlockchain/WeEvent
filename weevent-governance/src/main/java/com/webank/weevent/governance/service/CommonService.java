@@ -63,6 +63,9 @@ public class CommonService implements AutoCloseable {
     @Value("${http.client.socket-timeout:3000}")
     private int socketTimeout;
 
+    @Value("${spring.datasource.url}")
+    private String dataBaseUrl;
+
     public CloseableHttpResponse getCloseResponse(HttpServletRequest req, String newUrl) throws ServletException {
         CloseableHttpResponse closeResponse;
         try {
@@ -196,21 +199,15 @@ public class CommonService implements AutoCloseable {
         out.write(mes.getBytes());
     }
 
-
-    public void checkDataBaseUrl(RuleDatabaseEntity ruleDatabaseEntity) throws GovernanceException {
-        String dataBaseUrl = ruleDatabaseEntity.getDatabaseUrl();
-        if (!StringUtil.isBlank(ruleDatabaseEntity.getOptionalParameter())) {
-            dataBaseUrl = ruleDatabaseEntity.getDatabaseUrl() + "?" + ruleDatabaseEntity.getOptionalParameter();
-        }
-        try (Connection conn = DriverManager.getConnection(dataBaseUrl, ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword());
+    public void checkDataBaseUrl(String dataBaseUrl, String tableName, String user, String password) throws GovernanceException {
+        try (Connection conn = DriverManager.getConnection(dataBaseUrl, user, password);
              Statement stat = conn.createStatement()) {
             if (stat == null) {
                 log.info("database connect fail,dataBaseUrl:{}", dataBaseUrl);
                 throw new GovernanceException("database connect success,dataBaseUrl:" + dataBaseUrl);
             }
             log.info("database connect success,dataBaseUrl:{}", dataBaseUrl);
-            String tableName = ruleDatabaseEntity.getTableName();
-            String querySql = "SELECT * FROM " + tableName + " LIMIT 0,1";
+            String querySql = "SELECT 1 FROM " + tableName + " LIMIT 1";
             stat.executeQuery(querySql);
         } catch (Exception e) {
             log.error("database url is error", e);
@@ -235,8 +232,21 @@ public class CommonService implements AutoCloseable {
             return mapRequest;
         }
         mapRequest.put("optionalParameter", strUrlParam);
-        mapRequest.put("dataBaseUrl", URL.split("[?]")[0]);
+        String jdbcType = URL.substring(0, URL.indexOf("//") + 2);
+        int first = URL.indexOf("/") + 2;
+        int end = URL.lastIndexOf("/");
+        String substring = URL.substring(first, end);
+        String[] split = substring.split(":");
+        mapRequest.put("jdbcType", jdbcType);
+        mapRequest.put("ip", split[0]);
+        mapRequest.put("port", split[1]);
         return mapRequest;
+    }
+
+
+    public String getDataBaseUrl(RuleDatabaseEntity ruleDatabaseEntity) {
+        Map<String, String> urlMap = uRLRequest(dataBaseUrl);
+        return urlMap.get("jdbcType") + ruleDatabaseEntity.getIp() + ":" + ruleDatabaseEntity.getPort() + "/" + ruleDatabaseEntity.getDatabaseName();
     }
 
     private static String truncateUrlPage(String strURL) {

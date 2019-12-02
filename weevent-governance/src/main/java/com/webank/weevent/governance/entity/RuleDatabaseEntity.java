@@ -14,6 +14,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 public class RuleDatabaseEntity extends RuleDatabaseBase {
 
+    private String  databaseUrl;
 
     public RuleDatabaseEntity() {
     }
@@ -23,11 +24,12 @@ public class RuleDatabaseEntity extends RuleDatabaseBase {
         return super.toString();
     }
 
+
     public RuleDatabaseEntity(Integer userId, Integer brokerId,
-                              String username, String password,
-                              String datasourceName, String optionalParameter,
-                              String databaseUrl, String tableName,
-                              String systemTag) {
-        super(userId, brokerId, username, password, datasourceName, optionalParameter, databaseUrl, tableName, systemTag);
+                              String ip, String port, String username,
+                              String password, String databaseName,
+                              String optionalParameter, String datasourceName,
+                              String tableName, Boolean systemTag) {
+        super(userId, brokerId, ip, port, username, password, databaseName, optionalParameter, datasourceName, tableName, systemTag);
     }
 }

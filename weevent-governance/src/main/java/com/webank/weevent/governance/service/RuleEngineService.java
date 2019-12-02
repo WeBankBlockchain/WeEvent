@@ -23,7 +23,6 @@ import com.webank.weevent.governance.entity.RuleEngineEntity;
 import com.webank.weevent.governance.enums.ConditionTypeEnum;
 import com.webank.weevent.governance.enums.PayloadEnum;
 import com.webank.weevent.governance.enums.StatusEnum;
-import com.webank.weevent.governance.enums.SystemTagEnum;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.BrokerMapper;
 import com.webank.weevent.governance.mapper.RuleDatabaseMapper;
@@ -102,7 +101,7 @@ public class RuleEngineService {
             if (accountId == null || !accountId.equals(ruleEngineEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
-            ruleEngineEntity.setSystemTag(SystemTagEnum.USER_ADDED.getCode());
+            ruleEngineEntity.setSystemTag(false);
             int count = ruleEngineMapper.countRuleEngine(ruleEngineEntity);
             ruleEngineEntity.setTotalCount(count);
             List<RuleEngineEntity> ruleEngineEntities = null;
@@ -134,7 +133,7 @@ public class RuleEngineService {
             if (accountId == null || !accountId.equals(ruleEngineEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
-            ruleEngineEntity.setSystemTag(SystemTagEnum.USER_ADDED.getCode());
+            ruleEngineEntity.setSystemTag(false);
             ruleEngineEntity.setStatus(StatusEnum.NOT_STARTED.getCode());
             String payload = JSONObject.toJSON(ruleEngineEntity.getPayloadMap()).toString();
             ruleEngineEntity.setPayload(payload);
@@ -300,7 +299,7 @@ public class RuleEngineService {
                 this.updateProcessRule(request, ruleEngineEntity, rule);
             } else {
                 ruleEngineEntity.setGroupId(rule.getGroupId());
-                ruleEngineEntity.setSystemTag(SystemTagEnum.USER_ADDED.getCode());
+                ruleEngineEntity.setSystemTag(false);
                 this.startProcessRule(request, ruleEngineEntity);
             }
 
@@ -552,6 +551,7 @@ public class RuleEngineService {
             map.put("createdTime", rule.getCreateDate());
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_START_CEP_RULE).toString();
             log.info("start rule begin====map:{}", JSONObject.toJSONString(map));
+            map.put("systemTag", rule.getSystemTag() ? "1" : "0");
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(map));
             //deal processor result
             String mes = EntityUtils.toString(closeResponse.getEntity());
@@ -695,7 +695,7 @@ public class RuleEngineService {
     private boolean checkRuleNameRepeat(RuleEngineEntity ruleEngineEntity) {
         RuleEngineEntity rule = new RuleEngineEntity();
         rule.setRuleName(ruleEngineEntity.getRuleName());
-        rule.setSystemTag(SystemTagEnum.USER_ADDED.getCode());
+        rule.setSystemTag(false);
         List<RuleEngineEntity> ruleEngines = ruleEngineMapper.checkRuleNameRepeat(rule);
         if (CollectionUtils.isEmpty(ruleEngines)) {
             return true;

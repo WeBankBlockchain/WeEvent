@@ -1,7 +1,5 @@
 package com.webank.weevent.governance.service;
 
-import java.io.FileInputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -9,7 +7,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,7 +19,6 @@ import com.webank.weevent.governance.entity.TopicTopicHistoricalEntity;
 import com.webank.weevent.governance.enums.ConditionTypeEnum;
 import com.webank.weevent.governance.enums.PayloadEnum;
 import com.webank.weevent.governance.enums.StatusEnum;
-import com.webank.weevent.governance.enums.SystemTagEnum;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.RuleDatabaseMapper;
 import com.webank.weevent.governance.mapper.RuleEngineMapper;
@@ -186,9 +182,8 @@ public class TopicHistoricalService {
             dbName = goalUrl.substring(first + 1, end);
             // get mysql default url like jdbc:mysql://127.0.0.1:3306
             Map<String, String> urlMap = commonService.uRLRequest(goalUrl);
-            RuleDatabaseEntity ruleDatabaseEntity = new RuleDatabaseEntity(brokerEntity.getUserId(), brokerEntity.getId(), user, password,
-                    dbName + brokerEntity.getUserId(), urlMap.get("optionalParameter"), urlMap.get("dataBaseUrl"), TOPIC_HISTORICAL,
-                    SystemTagEnum.BUILT_IN_SYSTEM.getCode());
+            RuleDatabaseEntity ruleDatabaseEntity = new RuleDatabaseEntity(brokerEntity.getUserId(), brokerEntity.getId(), urlMap.get("ip"), urlMap.get("port"),
+                    user, password, dbName, urlMap.get("optionalParameter"), "SYSTEM-" + dbName, TOPIC_HISTORICAL, true);
             ruleDatabaseMapper.addRuleDatabase(ruleDatabaseEntity);
 
             //Request broker to get all groups
@@ -196,7 +191,7 @@ public class TopicHistoricalService {
             for (String groupId : groupList) {
                 //get new tableName
                 groupId = groupId.replaceAll("\"", "");
-                RuleEngineEntity ruleEngineEntity = initializationRule("SYSTEM" + "-" + brokerEntity.getId() + "-" + groupId,
+                RuleEngineEntity ruleEngineEntity = initializationRule("SYSTEM-"  + brokerEntity.getId() + "-" + groupId,
                         brokerEntity, groupId, ruleDatabaseEntity.getId());
                 ruleEngineMapper.addRuleEngine(ruleEngineEntity);
                 //built-in rule engine data and start
@@ -230,7 +225,7 @@ public class TopicHistoricalService {
         ruleEngineEntity.setPayloadType(PayloadEnum.JSON.getCode());
         ruleEngineEntity.setConditionType(ConditionTypeEnum.DATABASE.getCode());
         ruleEngineEntity.setFromDestination("#");
-        ruleEngineEntity.setSystemTag("1");
+        ruleEngineEntity.setSystemTag(true);
         ruleEngineEntity.setOffSet("OFFSET_FIRST");
         return ruleEngineEntity;
     }

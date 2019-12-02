@@ -33,6 +33,7 @@ public class RuleDatabaseController {
     @PostMapping("/list")
     public GovernanceResult getRuleDataBaseList(HttpServletRequest request, @RequestBody RuleDatabaseEntity ruleDatabaseEntity) throws GovernanceException {
         log.info("getRuleDataBaseList,userId:{}", ruleDatabaseEntity.getUserId());
+        String s = ruleDatabaseEntity.toString();
         List<RuleDatabaseEntity> ruleDatabases = ruleDatabaseService.getRuleDataBaseList(request, ruleDatabaseEntity);
 
         return new GovernanceResult(ruleDatabases);
@@ -65,7 +66,7 @@ public class RuleDatabaseController {
     @PostMapping("/checkDataBaseUrl")
     public GovernanceResult checkDataBaseUrl(@Validated @RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
         log.info("checkDataBaseUrl service ,ruleDatabaseEntity:{}", ruleDatabaseEntity);
-        boolean flag = ruleDatabaseService.checkRuleDataBaseUrl(ruleDatabaseEntity, request);
-        return new GovernanceResult(flag);
+        ruleDatabaseService.checkRuleDataBaseUrl(ruleDatabaseEntity, request);
+        return new GovernanceResult(true);
     }
 }

@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.Length;
 
 /**
- * CirculationDatabaseBase class
+ * RuleDatabaseBase class
  *
  * @since 2019/10/15
  */
@@ -19,37 +19,44 @@ public class RuleDatabaseBase extends BaseEntity {
 
     private Integer brokerId;
     @NotBlank
-    private String databaseUrl;
+    private String ip;
+    @NotBlank
+    private String port;
     @NotBlank
     private String username;
     @NotBlank
     private String password;
     @NotBlank
-    private String datasourceName;
+    private String databaseName;
 
     @Length(max = 256)
     private String optionalParameter;
     @NotBlank
+    private String datasourceName;
+    @NotBlank
     private String tableName;
 
     // 1 means the system
-    private String systemTag;
+    private Boolean systemTag;
 
     public RuleDatabaseBase() {
     }
 
 
     public RuleDatabaseBase(Integer userId, Integer brokerId,
-                            String username, String password,
-                            String datasourceName, String optionalParameter,
-                            String databaseUrl, String tableName, String systemTag) {
+                            String ip, String port, String username,
+                            String password, String databaseName,
+                            String optionalParameter, String datasourceName,
+                            String tableName, Boolean systemTag) {
         this.userId = userId;
         this.brokerId = brokerId;
+        this.ip = ip;
+        this.port = port;
         this.username = username;
         this.password = password;
-        this.datasourceName = datasourceName;
+        this.databaseName = databaseName;
         this.optionalParameter = optionalParameter;
-        this.databaseUrl = databaseUrl;
+        this.datasourceName = datasourceName;
         this.tableName = tableName;
         this.systemTag = systemTag;
     }
