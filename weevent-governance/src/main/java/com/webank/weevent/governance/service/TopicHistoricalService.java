@@ -1,15 +1,11 @@
 package com.webank.weevent.governance.service;
 
-import java.io.FileInputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,8 +21,6 @@ import com.webank.weevent.governance.enums.PayloadEnum;
 import com.webank.weevent.governance.enums.StatusEnum;
 import com.webank.weevent.governance.enums.SystemTagEnum;
 import com.webank.weevent.governance.exception.GovernanceException;
-import com.webank.weevent.governance.mapper.RuleDatabaseMapper;
-import com.webank.weevent.governance.mapper.RuleEngineMapper;
 import com.webank.weevent.governance.mapper.TopicHistoricalMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.repository.RuleDatabaseRepository;

@@ -12,8 +12,6 @@ public interface TopicInfoMapper {
 
     List<TopicEntity> getCreator(@Param("brokerId") Integer brokerId,@Param("groupId") String groupId, @Param("topicNameList") List<String> topicNameList);
 
-    Boolean openBrokeTopic(@Param("topicEntity") TopicEntity topicEntity);
-
     //delete brokerService first delete topicInfo 
     Boolean deleteTopicInfo(@Param("id") Integer Id,@Param("deleteAt") String deleteAt);
 

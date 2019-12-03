@@ -9,7 +9,6 @@ import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.RuleDatabaseEntity;
 import com.webank.weevent.governance.enums.SystemTagEnum;
 import com.webank.weevent.governance.exception.GovernanceException;
-import com.webank.weevent.governance.mapper.RuleDatabaseMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.repository.RuleDatabaseRepository;
 import com.webank.weevent.governance.utils.CookiesTools;

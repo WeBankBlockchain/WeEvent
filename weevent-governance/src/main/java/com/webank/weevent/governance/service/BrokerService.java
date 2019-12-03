@@ -11,11 +11,10 @@ import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.entity.PermissionEntity;
 import com.webank.weevent.governance.entity.RuleEngineEntity;
+import com.webank.weevent.governance.enums.DeleteAtEnum;
 import com.webank.weevent.governance.enums.IsCreatorEnum;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.BrokerMapper;
-import com.webank.weevent.governance.mapper.PermissionMapper;
-import com.webank.weevent.governance.mapper.RuleEngineMapper;
 import com.webank.weevent.governance.mapper.TopicInfoMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.repository.BrokerRepository;
@@ -51,9 +50,6 @@ public class BrokerService {
 
     @Autowired
     private TopicInfoMapper topicInfoMapper;
-
-    @Autowired
-    private PermissionMapper permissionMapper;
 
     @Autowired
     private PermissionRepository permissionRepository;
@@ -98,7 +94,7 @@ public class BrokerService {
     }
 
     public BrokerEntity getBroker(Integer id) {
-        return brokerMapper.getBroker(id);
+        return brokerRepository.findByIdAndDeleteAt(id, DeleteAtEnum.NOT_DELETED.getCode());
     }
 
     @Transactional(rollbackFor = Throwable.class)
@@ -140,7 +136,9 @@ public class BrokerService {
     private boolean checkBrokerUrlRepeat(BrokerEntity brokerEntity) {
         BrokerEntity broker = new BrokerEntity();
         broker.setBrokerUrl(brokerEntity.getBrokerUrl().trim());
-        List<BrokerEntity> brokerEntities = brokerMapper.brokerList(broker);
+        Example<BrokerEntity> example = Example.of(broker);
+        List<BrokerEntity> brokerEntities = brokerRepository.findAll(example);
+
         if (CollectionUtils.isEmpty(brokerEntities)) {
             return true;
         }
@@ -183,8 +181,8 @@ public class BrokerService {
                 }
             }
             topicInfoMapper.deleteByBrokerId(brokerEntity.getId(), String.valueOf(new Date().getTime()));
-            brokerMapper.deleteBroker(brokerEntity.getId(), String.valueOf(new Date().getTime()));
-            permissionMapper.deletePermission(brokerEntity.getId());
+            brokerRepository.deleteById(brokerEntity.getId(), String.valueOf(new Date().getTime()));
+            permissionRepository.deletePermissionByBrokerId(brokerEntity.getId());
         } catch (Exception e) {
             log.info("delete broker fail", e);
             throw new GovernanceException("delete broker fail" + e.getMessage());
@@ -210,7 +208,7 @@ public class BrokerService {
         }
         brokerRepository.save(brokerEntity);
         //delete old permission
-        permissionMapper.deletePermission(brokerEntity.getId());
+        permissionRepository.deletePermissionByBrokerId(brokerEntity.getId());
         //create new permission
         List<PermissionEntity> perMissionList = createPerMissionList(brokerEntity);
         if (perMissionList.size() > 0) {

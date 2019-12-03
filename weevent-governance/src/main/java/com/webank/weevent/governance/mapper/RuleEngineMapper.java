@@ -15,8 +15,6 @@ public interface RuleEngineMapper {
 
     List<RuleEngineEntity> getRuleEnginePage(@Param("ruleEngineEntity") RuleEngineEntity ruleEngineEntity, @Param("startIndex") Integer startIndex, @Param("endIndex") Integer endIndex);
 
-    // add RuleEngineEntity
-    Boolean addRuleEngine(RuleEngineEntity ruleEngineEntity);
 
     // delete RuleEngineEntity
     Boolean deleteRuleEngine(RuleEngineEntity ruleEngineEntity);
@@ -26,11 +24,7 @@ public interface RuleEngineMapper {
 
     List<RuleEngineEntity> getRuleTopicList(RuleEngineEntity ruleEngineEntity);
 
-  //  Boolean updateRuleEngineStatus(RuleEngineEntity ruleEngineEntity);
-
     int countRuleEngine(RuleEngineEntity ruleEngineEntity);
-
-    RuleEngineEntity getRuleById(Integer id);
 
     List<RuleEngineEntity> checkRuleNameRepeat(RuleEngineEntity ruleEngineEntity);
 

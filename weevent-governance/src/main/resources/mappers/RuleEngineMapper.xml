@@ -30,15 +30,6 @@
          rule_database_id,error_destination,status,group_id,system_tag
     </sql>
 
-    <insert id="addRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
-            useGeneratedKeys="true" keyProperty="id">
-        insert into t_rule_engine(rule_name, payload_type, payload, broker_id, user_id,
-                                  from_destination, to_destination, select_field,
-                                   condition_type, status, group_id,rule_database_id,system_tag,cep_id)
-        values (#{ruleName}, #{payloadType}, #{payload}, #{brokerId}, #{brokerUrl}, #{userId},
-                #{fromDestination}, #{toDestination}, #{selectField},
-                #{conditionType}, #{status}, #{groupId},#{ruleDataBaseId},#{systemTag},#{cepId})
-    </insert>
 
     <select id="getRuleEngines" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
             resultMap="BaseResultMap">
@@ -128,22 +119,13 @@
 
 
     <delete id="deleteRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity">
-        update t_rule_engine
-        set status=2 , delete_at=#{deleteAt}
-        where id = #{id}
+        update t_rule_engine  set status=2 , delete_at=#{deleteAt} where id = #{id}
     </delete>
 
     <select id="countRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
             resultType="int">
-        select count(1) from t_rule_engine
-        where status!=2
+        select count(1) from t_rule_engine where status!=2
         <include refid="ruleEngineWhere"/>
     </select>
 
-    <select id="getRuleById" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from t_rule_database
-        where id=#{id}
-    </select>
 </mapper>

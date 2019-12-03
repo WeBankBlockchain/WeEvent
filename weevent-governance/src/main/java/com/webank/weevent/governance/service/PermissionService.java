@@ -6,10 +6,11 @@ import java.util.stream.Collectors;
 import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.entity.PermissionEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
-import com.webank.weevent.governance.mapper.PermissionMapper;
+import com.webank.weevent.governance.repository.PermissionRepository;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 /**
@@ -22,16 +23,19 @@ public class PermissionService {
     @Autowired
     private PermissionMapper permissionMapper;
 
+    @Autowired
+    private PermissionRepository permissionRepository;
+
     public List<PermissionEntity> permissionList(AccountEntity accountEntity) throws GovernanceException {
         PermissionEntity permissionEntity = new PermissionEntity();
         permissionEntity.setBrokerId(accountEntity.getBrokerId());
         // execute select
-        List<PermissionEntity> permissionEntities = permissionMapper.permissionList(permissionEntity);
-        return permissionEntities;
+        Example<PermissionEntity> entityExample = Example.of(permissionEntity);
+        return permissionRepository.findAll(entityExample);
     }
 
     public Boolean verifyPermissions(Integer brokerId, String userId) {
-        List<Integer> userIds = permissionMapper.findUserIdByBrokerId(brokerId);
+        List<Integer> userIds = permissionRepository.findUserIdByBrokerId(brokerId);
         if (CollectionUtils.isEmpty(userIds)) {
             return false;
         }

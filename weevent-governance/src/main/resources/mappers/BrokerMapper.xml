@@ -17,44 +17,13 @@
         id,create_date,last_update, user_id, name, broker_url, webase_url
     </sql>
 
-    <select id="brokerList" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from t_broker
-        where delete_at=0
-        <if test="brokerUrl != null">
-            and broker_url = #{brokerUrl}
-        </if>
-        <if test="id != null">
-            and id = #{id}
-        </if>
-        <if test="name != null">
-            and name = #{name}
-        </if>
-    </select>
-
-    <select id="getBroker" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from t_broker where id=#{id} and delete_at=0
-    </select>
 
     <select id="getBrokers" resultMap="BaseResultMap">
-        select distinct
-        <include refid="Base_Column_List"/>
+        select distinct id,create_date,last_update, user_id, name, broker_url, webase_url
         from t_broker where delete_at=0 and (user_id=#{userId}
-        or id in
-        (select distinct ps.broker_id from t_permission ps where ps.user_id = #{userId})
-        )
-
+        or id in(select distinct ps.broker_id from t_permission ps where ps.user_id = #{userId}))
     </select>
 
-
-    <delete id="deleteBroker">
-        update t_broker
-        set delete_at=#{deleteAt}
-        where id = #{id}
-    </delete>
 
 
 </mapper>

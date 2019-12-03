@@ -35,34 +35,7 @@
             AND group_id = #{groupId}
         </if>
     </select>
-
-    <insert id="openBrokeTopic" parameterType="com.webank.weevent.governance.entity.TopicEntity">
-        <selectKey keyProperty="count" resultType="int" order="BEFORE">
-            select count(*) from t_topic
-            where broker_id=#{topicEntity.brokerId}
-            and topic_name =
-            #{topicEntity.topicName}
-            and topic_name = #{topicEntity.groupId}
-            and delete_at=0
-        </selectKey>
-        <if test="count > 0">
-            update t_topic
-            <set>
-                <if test="topicEntity.creater != null">
-                    creater= #{topicEntity.creater}
-                </if>
-            </set>
-            <where>
-                topic_name = #{topicEntity.topicName} and broker_id=#{topicEntity.brokerId}
-                and group_id = #{topicEntity.groupId} and delete_at=0
-            </where>
-        </if>
-        <if test="count==0">
-            insert into t_topic(broker_id,topic_name,group_id,creater,description) values
-            (#{topicEntity.brokerId},#{topicEntity.topicName},#{topicEntity.groupId},
-            #{topicEntity.creater},#{topicEntity.description})
-        </if>
-    </insert>
+    
 
 
     <delete id="deleteTopicInfo">

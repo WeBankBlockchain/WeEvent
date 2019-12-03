@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.AccountEntity;
+import com.webank.weevent.governance.enums.DeleteAtEnum;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.repository.AccountRepository;
@@ -72,7 +73,7 @@ public class AccountService {
         }
         // excute select
 
-        List<AccountEntity> list = accountRepository.findAllByUsernameAndDeleteAt(accountEntity.getUsername(), "0");
+        List<AccountEntity> list = this.findAllByUsernameAndDeleteAt(accountEntity.getUsername());
         // is list contain data
         if (!CollectionUtils.isEmpty(list)) {
             // if list contain data return false
@@ -119,7 +120,7 @@ public class AccountService {
         // check oldPassword is correct
         String oldPassword = user.getOldPassword();
 
-        List<AccountEntity> accountEntityList = accountRepository.findAllByUsernameAndDeleteAt(user.getUsername(), "0");
+        List<AccountEntity> accountEntityList = this.findAllByUsernameAndDeleteAt(user.getUsername());
         if (CollectionUtils.isEmpty(accountEntityList)) {
             return GovernanceResult.build(400, "username is not exist");
         }
@@ -143,7 +144,7 @@ public class AccountService {
             return GovernanceResult.build(400, "username not exists");
         }
         // get user by username
-        List<AccountEntity> accountList = accountRepository.findAllByUsernameAndDeleteAt(username, "0");
+        List<AccountEntity> accountList = this.findAllByUsernameAndDeleteAt(username);
         AccountEntity user = accountList.get(0);
         if (StringUtil.isBlank(user.getEmail())) {
             throw new GovernanceException(ErrorCode.NO_MAILBOX_CONFIGURED);
@@ -182,7 +183,7 @@ public class AccountService {
 
     public AccountEntity queryByUsername(String username) {
         // execute select
-        List<AccountEntity> list = accountRepository.findAllByUsernameAndDeleteAt(username, "0");
+        List<AccountEntity> list = this.findAllByUsernameAndDeleteAt(username);
         if (!CollectionUtils.isEmpty(list)) {
             // get user info
             return list.get(0);
@@ -199,6 +200,10 @@ public class AccountService {
         list = list.stream().filter(it -> !it.getId().toString().equals(accountId)).collect(Collectors.toList());
         list.forEach(it -> it.setPassword(null));
         return list;
+    }
+
+    private List<AccountEntity> findAllByUsernameAndDeleteAt(String userName) {
+        return accountRepository.findAllByUsernameAndDeleteAt(userName, DeleteAtEnum.NOT_DELETED.getCode());
     }
 
 
