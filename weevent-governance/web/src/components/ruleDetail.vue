@@ -118,7 +118,7 @@
         </el-form-item>
         <el-form-item :label="$t('ruleDetail.db')  + ' :'" v-show="sqlOption.conditionType === '2'" prop='ruleDataBaseId' >
           <el-select  :placeholder="$t('ruleDetail.selectDB')" size='mini' name='options_dialog' v-model="sqlOption.ruleDataBaseId" v-show="dbList.length > 0">
-            <el-option v-for="(item, index) in dbList" :key='index' :value="item.id" :label="item.databaseName"></el-option>
+            <el-option v-for="(item, index) in dbList" :key='index' :value="item.id" :label="item.datasourceName"></el-option>
           </el-select>
           <p class='no_dbList' v-show="dbList.length === 0">{{$t('ruleDetail.guideURL')}} <span @click="creatDB" >{{$t('ruleDetail.setGuide')}}</span></p>
         </el-form-item>
