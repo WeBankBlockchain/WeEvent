@@ -22,6 +22,8 @@ public class RuleEngineEntity extends RuleEngineBase {
 
     private Map<String, Object> payloadMap = new HashMap<>();
 
+    private String conditionField;
+
     private String brokerUrl;
 
     private String fullSQL;
