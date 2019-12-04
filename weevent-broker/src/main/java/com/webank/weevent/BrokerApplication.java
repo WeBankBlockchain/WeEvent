@@ -160,20 +160,32 @@ public class BrokerApplication {
         }
     }
 
-
-    // tomcat configuration
+    // tomcat configuration to enhance performance
     @Bean
     public ConfigurableServletWebServerFactory configurableServletWebServerFactory() {
         log.info("custom TomcatServletWebServerFactory");
 
         TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory();
-        // it's "org.apache.coyote.http11.Http11NioProtocol"
         factory.setProtocol(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
+
         factory.addConnectorCustomizers((connector) -> {
+                    // default max connections = 10000
+                    // default connection timeout = 20000
+                    // default max accept count = 100
+                    // default max worker thread = 200
+                    connector.setEnableLookups(false);
+                    connector.setAllowTrace(false);
+
                     Http11NioProtocol http11NioProtocol = (Http11NioProtocol) connector.getProtocolHandler();
+                    http11NioProtocol.setAcceptorThreadCount(Math.max(1, Runtime.getRuntime().availableProcessors() / 2));
+                    http11NioProtocol.setPollerThreadCount(Math.max(1, Runtime.getRuntime().availableProcessors() / 2));
+                    http11NioProtocol.setKeepAliveTimeout(60000);
                     http11NioProtocol.setMaxKeepAliveRequests(10000);
+                    http11NioProtocol.setDisableUploadTimeout(true);
+                    http11NioProtocol.setTcpNoDelay(true);
                 }
         );
+
         return factory;
     }
 
