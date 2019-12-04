@@ -9,16 +9,23 @@
         <result column="last_update" property="lastUpdate" jdbcType="TIMESTAMP"/>
         <result column="user_id" property="userId" jdbcType="INTEGER"/>
         <result column="broker_id" property="brokerId" jdbcType="INTEGER"/>
-        <result column="database_url" property="databaseUrl" jdbcType="VARCHAR"/>
+        <result column="ip" property="ip" jdbcType="VARCHAR"/>
+        <result column="port" property="port" jdbcType="VARCHAR"/>
+        <result column="username" property="username" jdbcType="VARCHAR"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
         <result column="database_name" property="databaseName" jdbcType="VARCHAR"/>
+        <result column="optional_parameter" property="optionalParameter" jdbcType="VARCHAR"/>
+        <result column="datasource_name" property="datasourceName" jdbcType="VARCHAR"/>
         <result column="table_name" property="tableName" jdbcType="VARCHAR"/>
+        <result column="system_tag" property="systemTag" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,create_date,last_update,user_id,broker_id,database_url,database_name,table_name
+        id,create_date,last_update,user_id,broker_id,datasource_name,ip,port,username,
+        password,database_name,optional_parameter,table_name,database_name,system_tag
     </sql>
 
-    <select id="circulationDatabaseList" resultMap="BaseResultMap"
+    <select id="getRuleDataBaseList" resultMap="BaseResultMap"
             parameterType="com.webank.weevent.governance.entity.RuleDatabaseEntity">
         select
         <include refid="Base_Column_List"/>
@@ -39,11 +46,8 @@
         <if test="brokerId != null">
             and broker_id = #{brokerId,jdbcType=INTEGER}
         </if>
-        <if test="databaseUrl != null">
-            and database_url = #{databaseUrl,jdbcType=VARCHAR}
-        </if>
-        <if test="isVisible != null">
-            and is_visible = #{isVisible,jdbcType=VARCHAR}
+        <if test="systemTag != null">
+            and system_tag = #{systemTag}
         </if>
     </select>
 
@@ -54,37 +58,37 @@
         where id=#{id}
     </select>
 
-    <delete id="deleteCirculationDatabase"
+    <delete id="deleteRuleDatabase"
             parameterType="com.webank.weevent.governance.entity.RuleDatabaseEntity">
         delete
         from t_rule_database
         where id = #{id}
     </delete>
 
-    <update id="updateCirculationDatabase"
+    <update id="updateRuleDatabase"
             parameterType="com.webank.weevent.governance.entity.RuleDatabaseEntity">
         update t_rule_database
-        set database_url=#{databaseUrl},
+        set
+            datasource_name=#{datasourceName},
+            ip=#{ip},
+            port=#{port},
             database_name=#{databaseName},
+            username=#{username},
+            password=#{password},
+            optional_parameter=#{optionalParameter},
             table_name=#{tableName}
         where id = #{id,jdbcType=INTEGER}
     </update>
 
 
-    <insert id="addCirculationDatabase" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO t_rule_database(`user_id`, `broker_id`, `database_url`, `database_name`, `table_name`,`is_visible`)
-        VALUES (#{userId}, #{brokerId}, #{databaseUrl}, #{databaseName}, #{tableName},#{isVisible})
+    <insert id="addRuleDatabase" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_rule_database(`user_id`, `broker_id`,  `database_name`, `table_name`,`system_tag`,
+        `datasource_name`, `ip`,  `port`, `username`,`password`, `optional_parameter`)
+        VALUES (#{userId}, #{brokerId}, #{databaseName}, #{tableName},#{systemTag},
+        #{datasourceName}, #{ip}, #{port}, #{username},#{password},#{optionalParameter})
     </insert>
 
-    <insert id="batchInsert">
-        INSERT INTO t_rule_database(`user_id`,`broker_id`,`database_url`,`database_name`, `table_name`)
-        VALUES
-        <foreach collection="circulationDatabaseList" item="circulationDatabase" separator=",">
-            (#{circulationDatabase.userId},#{circulationDatabase.brokerId},#{circulationDatabase.databaseUrl},#{circulationDatabase.databaseName},#{circulationDatabase.tableName})
-        </foreach>
-    </insert>
-
-    <select id="countCirculationDatabase" resultType="int">
+    <select id="countRuleDatabase" resultType="int">
         select count(*) from t_rule_database
         where 1=1
         <if test="id != null">
@@ -102,11 +106,8 @@
         <if test="brokerId != null">
             and broker_id = #{brokerId,jdbcType=INTEGER}
         </if>
-        <if test="databaseUrl != null">
-            and database_url = #{databaseUrl,jdbcType=VARCHAR}
-        </if>
-        <if test="isVisible != null">
-            and is_visible = #{isVisible,jdbcType=VARCHAR}
+        <if test="systemTag != null">
+            and system_tag = #{systemTag}
         </if>
     </select>
 </mapper>
