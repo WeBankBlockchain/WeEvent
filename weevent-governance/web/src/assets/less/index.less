@@ -875,6 +875,50 @@ html,body,#app{
 
 }
 
+.dataBase{
+  .el-dialog__wrapper{
+    .el-dialog--center{
+      .el-dialog__body{
+        position: relative;
+        .collectWarning{
+          position: absolute;
+          bottom:0;
+        }
+        .el-form{
+          .el-form-item__error{
+            left:auto;
+            right:0;
+          }
+          .JDBCinfor{
+            .el-form-item{
+              .el-form-item__label{
+                width:17%;
+              }
+              .el-input{
+                width:83%;
+              }
+            }
+            padding-left:10px;
+            .JDBCTitle{
+              margin-left:-10px;
+              margin-bottom: 15px;
+              overflow: hidden;
+              line-height: 32px;
+              i{
+                color:#F56C6C;
+              }
+              .el-button{
+                float:right;
+              }
+            }
+          }
+        }
+      }
+
+    }
+  }
+}
+
 .el-select-dropdown__list{
   width:auto;
   max-width: 534px;
