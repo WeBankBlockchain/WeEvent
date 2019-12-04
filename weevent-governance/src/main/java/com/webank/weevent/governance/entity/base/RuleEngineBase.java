@@ -34,8 +34,6 @@ public class RuleEngineBase extends BaseEntity {
 
     private String selectField;
 
-    private String conditionField;
-
     /**
      * Trigger condition type, 1 identifies topic,
      * 2 identifies flow to relational database
@@ -53,10 +51,8 @@ public class RuleEngineBase extends BaseEntity {
 
     private String errorDestination;
 
-    private String errorMessage;
-
-    // 2 means the system
-    private String systemTag;
+    // 1 means the system
+    private Boolean systemTag;
     //0 means not deleted ,others means deleted
     private String deleteAt;
 }
