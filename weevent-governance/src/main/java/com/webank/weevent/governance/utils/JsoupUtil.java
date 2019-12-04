@@ -1,4 +1,4 @@
-package com.webank.weevent.governance.filter.util;
+package com.webank.weevent.governance.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
