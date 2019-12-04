@@ -99,6 +99,11 @@ export default{
           vm.$set(vm.option.yAxis, 'max', max)
         }
         setTimeout(fun => {
+          Highcharts.setOptions({
+            lang: {
+              thousandsSep: ','
+            }
+          })
           Highcharts.chart('chart', vm.option)
         }, 500)
       })

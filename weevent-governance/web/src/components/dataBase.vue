@@ -1,5 +1,5 @@
 <template>
-<div class='event-table topic'>
+<div class='event-table topic dataBase'>
   <div class='refresh'>
     <el-button type='primary' size='small' icon='el-icon-plus' @click='showlog = !showlog'>{{$t('common.add')}}</el-button>
   </div>
@@ -13,7 +13,7 @@
     >
     <el-table-column
       :label="$t('rule.JDBCname')"
-      prop="databaseName"
+      prop="datasourceName"
       width='200'>
     </el-table-column>
     <el-table-column
@@ -23,7 +23,10 @@
     </el-table-column>
     <el-table-column
       :label="$t('rule.ruleDataBaseId')"
-      prop="databaseUrl">
+    >
+      <template slot-scope="scope">
+        <a :title='scope.row.databaseUrl'>{{scope.row.databaseUrl}}</a>
+      </template>
     </el-table-column>
     <el-table-column
       :label="$t('common.action')"
@@ -34,21 +37,46 @@
       </template>
     </el-table-column>
   </el-table>
-  <el-dialog :title="title" :visible.sync="showlog" center width='450px' :close-on-click-modal='false'>
+  <el-dialog :title="title" :visible.sync="showlog" center width='650px' :close-on-click-modal='false'>
     <el-form :model="form" :rules="rules" ref='form'>
-      <el-form-item :label="$t('rule.JDBCname')" prop='databaseName'>
-        <el-input v-model.trim="form.databaseName" autocomplete="off"></el-input>
+      <el-form-item :label="$t('rule.JDBCname')" prop='datasourceName'>
+        <el-input v-model.trim="form.datasourceName" autocomplete="off"></el-input>
       </el-form-item>
-
-      <el-form-item :label="$t('rule.ruleDataBaseId')" prop='url'>
-        <el-input v-model.trim="form.url" type='textarea' :rows='4' autocomplete="off" :placeholder="$t('common.examples') + 'jdbc:mysql://127.0.0.1:3306/governance?user=root&password=123456&useUnicode=true&characterEncoding=utf-8&useSSL=false'"></el-input>
-      </el-form-item>
+      <div class='JDBCinfor'>
+        <div class='JDBCTitle'><i>*</i> {{$t('rule.JDBCinfor')}}
+         <el-button type='primary' size='small' @click='checkJDBC'>{{$t('rule.checkJDBC')}}</el-button>
+        </div>
+        <el-form-item :label="$t('rule.JDBCIP')" prop='ip'>
+          <el-input v-model.trim="form.ip" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item :label="$t('rule.JDBCport')" prop='port'>
+          <el-input v-model.trim="form.port" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item :label="$t('rule.JDBCusername')" prop='username'>
+          <el-input v-model.trim="form.username"  autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item :label="$t('rule.JDBCpassword')" prop='password'>
+          <el-input v-model.trim="form.password"  autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item :label="$t('rule.JDBCDatabaseName')" prop='databaseName'>
+          <el-input v-model.trim="form.databaseName" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item :label="$t('rule.optionalParameter')">
+          <el-input v-model.trim="form.optionalParameter"  autocomplete="off"></el-input>
+        </el-form-item>
+      </div>
       <el-form-item :label="$t('rule.tableName')" prop='tableName'>
         <el-input v-model.trim="form.tableName" autocomplete="off"></el-input>
       </el-form-item>
     </el-form>
+    <p style='color:#67c23a' class='collectWarning' v-show="connectSuccess">
+      {{$t('rule.connectSuccess')}}
+    </p>
+    <p style='color:#F56C6C' class='collectWarning' v-show="connectFailed">
+      {{$t('rule.connectFailed')}}
+    </p>
     <div slot="footer" class="dialog-footer">
-      <el-button type="primary" @click='addURL'>{{$t('common.ok')}}</el-button>
+      <el-button type="primary" @click='addURL' :disabled="!JDBCCheck">{{$t('common.ok')}}</el-button>
       <el-button @click="showlog = false">{{$t('common.cancel')}}</el-button>
     </div>
   </el-dialog>
@@ -58,16 +86,44 @@
 import API from '../API/resource.js'
 export default {
   data () {
-    var url = (rule, value, callback) => {
+    var datasourceName = (rule, value, callback) => {
       if (value === '') {
-        callback(new Error(this.$t('rule.enterDB')))
+        callback(new Error(this.$t('rule.enterJDBCname')))
+      } else {
+        callback()
+      }
+    }
+    var ip = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error(this.$t('rule.enterJDBCIP')))
+      } else {
+        callback()
+      }
+    }
+    var port = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error(this.$t('rule.enterJDBCport')))
+      } else {
+        callback()
+      }
+    }
+    var username = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error(this.$t('rule.enterJDBCusername')))
+      } else {
+        callback()
+      }
+    }
+    var password = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error(this.$t('rule.enterJDBCpassword')))
       } else {
         callback()
       }
     }
     var databaseName = (rule, value, callback) => {
       if (value === '') {
-        callback(new Error(this.$t('rule.enterJDBCname')))
+        callback(new Error(this.$t('rule.enterJDBCDatabaseName')))
       } else {
         callback()
       }
@@ -86,18 +142,38 @@ export default {
       tableData: [],
       id: '',
       type: 1,
-      title: this.$t('rule.addAddress'),
+      title: this.$t('rule.addJDBCAddress'),
       form: {
+        datasourceName: '',
         databaseName: '',
-        url: '',
-        tableName: ''
+        ip: '',
+        port: '',
+        username: '',
+        password: '',
+        tableName: '',
+        optionalParameter: ''
       },
+      JDBCCheck: false,
+      connectSuccess: false,
+      connectFailed: false,
       rules: {
+        datasourceName: [
+          { required: true, validator: datasourceName, trigger: 'blur' }
+        ],
         databaseName: [
           { required: true, validator: databaseName, trigger: 'blur' }
         ],
-        url: [
-          { required: true, validator: url, trigger: 'blur' }
+        ip: [
+          { required: true, validator: ip, trigger: 'blur' }
+        ],
+        port: [
+          { required: true, validator: port, trigger: 'blur' }
+        ],
+        username: [
+          { required: true, validator: username, trigger: 'blur' }
+        ],
+        password: [
+          { required: true, validator: password, trigger: 'blur' }
         ],
         tableName: [
           { required: true, validator: tableName, trigger: 'blur' }
@@ -109,15 +185,31 @@ export default {
     showlog (nVal) {
       if (!nVal) {
         let data = {
+          datasourceName: '',
           databaseName: '',
+          ip: '',
+          port: '',
+          username: '',
+          password: '',
           tableName: '',
-          url: ''
+          optionalParameter: ''
         }
         this.form = Object.assign({}, data)
         this.type = 1
-        this.title = this.$t('rule.addAddress')
+        this.JDBCCheck = false
+        this.connectSuccess = false
+        this.connectFailed = false
+        this.title = this.$t('rule.addJDBCAddress')
         this.$refs.form.resetFields()
       }
+    },
+    form: {
+      handler (nVal) {
+        this.JDBCCheck = false
+        this.connectSuccess = false
+        this.connectFailed = false
+      },
+      deep: true
     }
   },
   methods: {
@@ -132,9 +224,14 @@ export default {
       let vm = this
       vm.$refs.form.validate((valid) => {
         let data = {
-          'databaseUrl': vm.form.url,
+          'datasourceName': vm.form.datasourceName,
           'databaseName': vm.form.databaseName,
+          'ip': vm.form.ip,
+          'port': vm.form.port,
+          'username': vm.form.username,
+          'password': vm.form.password,
           'tableName': vm.form.tableName,
+          'optionalParameter': vm.form.optionalParameter,
           'userId': localStorage.getItem('userId')
         }
         if (valid) {
@@ -179,10 +276,15 @@ export default {
     update (e) {
       this.showlog = true
       this.id = e.id
+      this.form.datasourceName = e.datasourceName
       this.form.databaseName = e.databaseName
+      this.form.ip = e.ip
+      this.form.port = e.port
+      this.form.username = e.username
+      this.form.password = e.password
       this.form.tableName = e.tableName
-      this.form.url = e.databaseUrl
-      this.title = this.$t('rule.enditAddress')
+      this.form.optionalParameter = e.optionalParameter
+      this.title = this.$t('rule.editJDBCAddress')
       this.type = 2
     },
     deleteItem (e) {
@@ -213,6 +315,34 @@ export default {
         })
       }).catch(() => {
         vm.showlog = false
+      })
+    },
+    checkJDBC () {
+      let vm = this
+      vm.$refs.form.validate((valid) => {
+        let data = {
+          'datasourceName': vm.form.datasourceName,
+          'databaseName': vm.form.databaseName,
+          'ip': vm.form.ip,
+          'port': vm.form.port,
+          'username': vm.form.username,
+          'password': vm.form.password,
+          'tableName': vm.form.tableName,
+          'optionalParameter': vm.form.optionalParameter,
+          'userId': localStorage.getItem('userId')
+        }
+        if (valid) {
+          API.checkJDBC(data).then(res => {
+            if (res.data.status === 200) {
+              vm.JDBCCheck = true
+              this.connectSuccess = true
+              this.connectFailed = false
+            } else {
+              this.connectSuccess = false
+              this.connectFailed = true
+            }
+          })
+        }
       })
     }
   },

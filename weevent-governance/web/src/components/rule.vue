@@ -336,11 +336,14 @@ export default {
           }
           API.ruleAdd(data).then(res => {
             if (res.data.status === 200) {
-              this.getRuleList()
+              // this.getRuleList()
               this.$message({
                 type: 'success',
                 message: this.$t('rule.creatSuccess')
               })
+              sessionStorage.setItem('ruleId', res.data.data.id)
+              this.$store.commit('set_menu', [this.$t('sideBar.engine'), this.$t('sideBar.ruleMana'), this.$t('sideBar.ruleDetail')])
+              this.$router.push('./ruleDetail')
             } else {
               this.$message({
                 type: 'warning',
