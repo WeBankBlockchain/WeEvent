@@ -11,11 +11,10 @@
         <result column="name" property="name" jdbcType="VARCHAR"/>
         <result column="broker_url" property="brokerUrl" jdbcType="VARCHAR"/>
         <result column="webase_url" property="webaseUrl" jdbcType="VARCHAR"/>
-        <result column="is_config_rule" property="isConfigRule" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,create_date,last_update, user_id, name, broker_url, webase_url,is_config_rule
+        id,create_date,last_update, user_id, name, broker_url, webase_url
     </sql>
 
     <select id="brokerList" resultMap="BaseResultMap">
@@ -52,16 +51,15 @@
 
     <insert id="addBroker" parameterType="com.webank.weevent.governance.entity.BrokerEntity"
             useGeneratedKeys="true" keyProperty="id">
-        insert into t_broker(name, broker_url, webase_url, user_id, is_config_rule)
-        values (#{name}, #{brokerUrl}, #{webaseUrl}, #{userId}, #{isConfigRule})
+        insert into t_broker(name, broker_url, webase_url, user_id)
+        values (#{name}, #{brokerUrl}, #{webaseUrl}, #{userId})
     </insert>
 
     <update id="updateBroker" parameterType="com.webank.weevent.governance.entity.BrokerEntity">
         update t_broker
         set name=#{name},
             broker_url=#{brokerUrl},
-            webase_url=#{webaseUrl},
-            is_config_rule=#{isConfigRule}
+            webase_url=#{webaseUrl}
         where id = #{id,jdbcType=INTEGER}
     </update>
 
