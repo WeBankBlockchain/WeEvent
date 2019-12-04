@@ -11,22 +11,20 @@ import org.apache.ibatis.annotations.Param;
 public interface RuleDatabaseMapper {
 
     // get circulationDatabaseList
-    List<RuleDatabaseEntity> circulationDatabaseList(RuleDatabaseEntity ruleDatabaseEntity);
+    List<RuleDatabaseEntity> getRuleDataBaseList(RuleDatabaseEntity ruleDatabaseEntity);
 
     RuleDatabaseEntity getRuleDataBaseById(Integer id);
 
 
     // add circulationDatabaseEntity
-    Boolean addCirculationDatabase(RuleDatabaseEntity ruleDatabaseEntity);
-
-    void batchInsert(@Param("circulationDatabaseList") List<RuleDatabaseEntity> circulationDatabaseEntities);
+    Boolean addRuleDatabase(RuleDatabaseEntity ruleDatabaseEntity);
 
     // delete circulationDatabaseEntity
-    Boolean deleteCirculationDatabase(RuleDatabaseEntity ruleDatabaseEntity);
+    Boolean deleteRuleDatabase(RuleDatabaseEntity ruleDatabaseEntity);
 
     // update circulationDatabaseEntity
-    Boolean updateCirculationDatabase(RuleDatabaseEntity ruleDatabaseEntity);
+    Boolean updateRuleDatabase(RuleDatabaseEntity ruleDatabaseEntity);
 
     //count circulationDatabaseEntity
-    int countCirculationDatabase(RuleDatabaseEntity ruleDatabaseEntity);
+    int countRuleDatabase(RuleDatabaseEntity ruleDatabaseEntity);
 }
