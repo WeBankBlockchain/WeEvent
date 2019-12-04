@@ -17,6 +17,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import com.webank.weevent.broker.fabric.config.FabricConfig;
 import com.webank.weevent.broker.fabric.dto.TransactionInfo;
@@ -436,13 +437,10 @@ public class FabricSDKWrapper {
         tbBlock.setBlockNumber(blockNumber);
     }
 
-    private static CopyOnWriteArrayList<TbBlock> getTbBlocKList(Channel channel, List<Long> blockNums, BlockchainInfo blockchainInfo) throws ExecutionException, InterruptedException {
-
-        CompletableFuture<List<TbBlock>>[] completableFutureArr = new CompletableFuture[blockNums.size()];
-        CopyOnWriteArrayList<TbBlock> tbBlocks = new CopyOnWriteArrayList<>();
-        for (int i = 0; i < blockNums.size(); i++) {
-            long blockNumber = blockNums.get(i);
-            CompletableFuture<List<TbBlock>> future = CompletableFuture.supplyAsync(() -> {
+    private static List<TbBlock> getTbBlocKList(Channel channel, List<Long> blockNums, BlockchainInfo blockchainInfo) throws ExecutionException, InterruptedException {
+        List<CompletableFuture<TbBlock>> futureList = new ArrayList<>();
+        for (long blockNumber : blockNums) {
+            CompletableFuture<TbBlock> future = CompletableFuture.supplyAsync(() -> {
                 TbBlock tbBlock = new TbBlock();
                 try {
                     BlockInfo blockInfo = channel.queryBlockByNumber(blockNumber);
@@ -461,17 +459,15 @@ public class FabricSDKWrapper {
                     log.error("query block by blockNumber failed, e:", e);
                     return null;
                 }
-                tbBlocks.add(tbBlock);
-                return tbBlocks;
+
+                return tbBlock;
             });
 
-            completableFutureArr[i] = future;
+            futureList.add(future);
         }
 
-        CompletableFuture<Void> combindFuture = CompletableFuture.allOf(completableFutureArr);
-        combindFuture.get();
-
-        return tbBlocks;
+        return CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0]))
+                .thenApply(v -> futureList.stream().map(CompletableFuture::join).collect(Collectors.toList())).get();
     }
 
     public static ListPage<TbNode> queryNodeList(FabricConfig fabricConfig,
