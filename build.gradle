@@ -35,6 +35,10 @@ allprojects {
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
 
+    compileJava {
+        options.compilerArgs << "-Xlint:unchecked"
+    }
+
     repositories {
         maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
         // "org.ethereum.solcJ-all-0.4.25"
