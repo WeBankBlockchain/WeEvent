@@ -17,7 +17,7 @@ server_name=$(basename $0|awk -F"." '{print $1}')
 pid_file=./logs/${server_name}.pid
 current_pid=
 #operating system total physical memory, unit MB.
-max_total_memory=1024
+max_total_memory=2048
 
 get_pid(){
     if [[ -e ${pid_file} ]]; then
@@ -35,7 +35,7 @@ start(){
 
     total_memory=$(free -m | grep "Mem" | awk '{ print $2 }')
     if [[ "${total_memory}" -ge "${max_total_memory}" ]];then
-        JAVA_OPTS+=" -XX:TieredStopAtLevel=1 -Xms512m -XX:NewSize=512m"
+        JAVA_OPTS+=" -XX:TieredStopAtLevel=1 -Xms1024m -XX:NewSize=1024m -XX:MetaspaceSize=128M"
     fi
     
     nohup ${JAVA_HOME}/bin/java ${JAVA_OPTS} ${APP_PARAMS} >/dev/null 2>&1 &
