@@ -18,7 +18,8 @@
     :element-loading-text="$t('common.loading')"
     element-loading-background='rgba(256,256,256,0.8)'
     style="width: 100%"
-    @expand-change='readDetail'
+    @row-click='rowClick'
+    ref='table'
     >
     <el-table-column type="expand">
       <template slot-scope="props">
@@ -258,6 +259,9 @@ export default {
         vm.pageSize = 10
         vm.getLsitData()
       }
+    },
+    rowClick (e) {
+      console.log(this.$refs.table)
     }
   },
   mounted () {
