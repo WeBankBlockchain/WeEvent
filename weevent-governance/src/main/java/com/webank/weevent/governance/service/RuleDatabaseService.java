@@ -41,7 +41,7 @@ public class RuleDatabaseService {
             ruleDatabaseEntity.setSystemTag(false);
             ruleDatabaseEntityList = ruleDatabaseMapper.getRuleDataBaseList(ruleDatabaseEntity);
             ruleDatabaseEntityList.forEach(ruleDataBase -> {
-                String dataBaseUrl = ruleDataBase.getDatabaseUrl();
+                String dataBaseUrl = commonService.getDataBaseUrl(ruleDataBase);
                 if (StringUtil.isBlank(ruleDataBase.getOptionalParameter())) {
                     ruleDataBase.setDatabaseUrl(dataBaseUrl);
                 } else {
