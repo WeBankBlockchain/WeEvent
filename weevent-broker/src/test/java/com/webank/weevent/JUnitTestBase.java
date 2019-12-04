@@ -27,6 +27,7 @@ public class JUnitTestBase {
     protected String groupId = WeEvent.DEFAULT_GROUP_ID;
     protected String channelName = "mychannel";
     protected String topicName = "com.weevent.test";
+    protected long transactionTimeout = 30000;
 
     @Value("${server.port}")
     public String listenPort;
