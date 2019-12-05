@@ -30,15 +30,6 @@
          rule_database_id,error_destination,status,group_id,system_tag
     </sql>
 
-    <insert id="addRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
-            useGeneratedKeys="true" keyProperty="id">
-        insert into t_rule_engine(rule_name, payload_type, payload, broker_id, broker_url, user_id,
-                                  from_destination, to_destination, select_field,
-                                   condition_type, status, group_id,rule_database_id,system_tag,cep_id)
-        values (#{ruleName}, #{payloadType}, #{payload}, #{brokerId}, #{brokerUrl}, #{userId},
-                #{fromDestination}, #{toDestination}, #{selectField},
-                #{conditionType}, #{status}, #{groupId},#{ruleDataBaseId},#{systemTag},#{cepId})
-    </insert>
 
     <select id="getRuleEngines" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
             resultMap="BaseResultMap">

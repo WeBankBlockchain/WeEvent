@@ -14,7 +14,6 @@ import com.webank.weevent.governance.entity.RuleEngineEntity;
 import com.webank.weevent.governance.enums.DeleteAtEnum;
 import com.webank.weevent.governance.enums.IsCreatorEnum;
 import com.webank.weevent.governance.exception.GovernanceException;
-import com.webank.weevent.governance.mapper.TopicInfoMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.repository.BrokerRepository;
 import com.webank.weevent.governance.repository.PermissionRepository;
@@ -49,8 +48,6 @@ public class BrokerService {
     @Autowired
     private BrokerRepository brokerRepository;
 
-    @Autowired
-    private TopicInfoMapper topicInfoMapper;
 
     @Autowired
     private TopicRepository topicRepository;
