@@ -24,7 +24,6 @@ import com.webank.weevent.governance.enums.ConditionTypeEnum;
 import com.webank.weevent.governance.enums.DeleteAtEnum;
 import com.webank.weevent.governance.enums.PayloadEnum;
 import com.webank.weevent.governance.enums.StatusEnum;
-import com.webank.weevent.governance.enums.SystemTagEnum;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.RuleEngineMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
@@ -100,7 +99,7 @@ public class RuleEngineService {
             if (accountId == null || !accountId.equals(ruleEngineEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
-            ruleEngineEntity.setSystemTag(SystemTagEnum.USER_ADDED.getCode());
+            ruleEngineEntity.setSystemTag(false);
             int count = ruleEngineMapper.countRuleEngine(ruleEngineEntity);
             ruleEngineEntity.setTotalCount(count);
             List<RuleEngineEntity> ruleEngineEntities = null;
@@ -132,18 +131,23 @@ public class RuleEngineService {
             if (accountId == null || !accountId.equals(ruleEngineEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
-            ruleEngineEntity.setSystemTag(SystemTagEnum.USER_ADDED.getCode());
+            ruleEngineEntity.setSystemTag(false);
             ruleEngineEntity.setStatus(StatusEnum.NOT_STARTED.getCode());
             String payload = JSONObject.toJSON(ruleEngineEntity.getPayloadMap()).toString();
             ruleEngineEntity.setPayload(payload);
             if (ruleEngineEntity.getPayloadType() == null || ruleEngineEntity.getPayloadType() == 0) {
                 ruleEngineEntity.setPayloadType(PayloadEnum.JSON.getCode());
             }
+            ruleEngineEntity.setCreateDate(new Date());
+            ruleEngineEntity.setLastUpdate(new Date());
+
             //check rule
             this.checkRule(ruleEngineEntity);
             //insert ruleEngine
-            ruleEngineRepository.save(ruleEngineEntity);
-            log.info("add end");
+            ruleEngineMapper.addRuleEngine(ruleEngineEntity);
+            //insert processor
+            this.addProcessRule(request, ruleEngineEntity);
+            log.info("add end, time");
             return ruleEngineEntity;
         } catch (Exception e) {
             log.error("add ruleEngineEntity fail", e);
@@ -225,6 +229,7 @@ public class RuleEngineService {
             List<RuleEngineConditionEntity> ruleEngineConditionList = ruleEngineEntity.getRuleEngineConditionList();
             String conditionField = this.getConditionField(ruleEngineConditionList);
             log.info("condition:{}", conditionField);
+
             ruleEngineEntity.setConditionField(conditionField);
 
             RuleEngineEntity rule = new RuleEngineEntity();
@@ -254,7 +259,7 @@ public class RuleEngineService {
                 this.updateProcessRule(request, ruleEngineEntity, rule);
             } else {
                 ruleEngineEntity.setGroupId(rule.getGroupId());
-                ruleEngineEntity.setSystemTag(SystemTagEnum.USER_ADDED.getCode());
+                ruleEngineEntity.setSystemTag("2");
                 this.startProcessRule(request, ruleEngineEntity);
             }
 
@@ -395,7 +400,6 @@ public class RuleEngineService {
         authCheck(ruleEngineEntity, request);
         RuleEngineEntity rule = ruleEngineRepository.findById(ruleEngineEntity.getId());
         BeanUtils.copyProperties(rule, ruleEngineEntity, "status");
-
         //set payload
         String payload = JSONObject.toJSON(ruleEngineEntity.getPayloadMap()).toString();
         ruleEngineEntity.setPayload(payload);
@@ -502,6 +506,7 @@ public class RuleEngineService {
             map.put("createdTime", rule.getCreateDate());
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_START_CEP_RULE).toString();
             log.info("start rule begin====map:{}", JSONObject.toJSONString(map));
+            map.put("systemTag", rule.getSystemTag() ? "1" : "0");
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(map));
             //deal processor result
             String mes = EntityUtils.toString(closeResponse.getEntity());
@@ -644,7 +649,7 @@ public class RuleEngineService {
     private boolean checkRuleNameRepeat(RuleEngineEntity ruleEngineEntity) {
         RuleEngineEntity rule = new RuleEngineEntity();
         rule.setRuleName(ruleEngineEntity.getRuleName());
-        rule.setSystemTag(SystemTagEnum.USER_ADDED.getCode());
+        rule.setSystemTag(false);
         rule.setDeleteAt(DeleteAtEnum.NOT_DELETED.getCode());
         Example<RuleEngineEntity> example = Example.of(rule);
         List<RuleEngineEntity> ruleEngines = ruleEngineRepository.findAll(example);

@@ -35,6 +35,8 @@ public class RuleEngineEntity extends RuleEngineBase {
     private Map<String, Object> payloadMap = new HashMap<>();
 
     @Transient
+    private String conditionField;
+
     private String brokerUrl;
 
     @Transient

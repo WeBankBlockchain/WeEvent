@@ -74,7 +74,7 @@ public class RuleEngineBase extends BaseEntity {
 
     // 1 means the system
     @Column(name = "system_tag")
-    private String systemTag;
+    private Boolean systemTag;
 
     //0 means not deleted ,others means deleted
     @Column(name = "delete_at")

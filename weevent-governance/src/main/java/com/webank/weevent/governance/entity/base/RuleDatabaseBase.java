@@ -25,8 +25,16 @@ public class RuleDatabaseBase extends BaseEntity {
     private Integer brokerId;
 
     @NotBlank
-    @Column(name = "database_url")
-    private String databaseUrl;
+    @Column(name = "ip")
+    private String ip;
+
+    @NotBlank
+    @Column(name = "port")
+    private String port;
+
+    @NotBlank
+    @Column(name = "database_name")
+    private String databaseName;
 
     @NotBlank
     @Column(name = "username")
@@ -50,23 +58,50 @@ public class RuleDatabaseBase extends BaseEntity {
 
     // 1 means the system
     @Column(name = "system_tag")
-    private String systemTag;
+    private Boolean systemTag;
 
     public RuleDatabaseBase() {
     }
 
 
     public RuleDatabaseBase(Integer userId, Integer brokerId,
-                            String username, String password,
-                            String datasourceName, String optionalParameter,
-                            String databaseUrl, String tableName, String systemTag) {
+                            String ip, String port, String username,
+                            String password, String databaseName,
+                            String optionalParameter, String datasourceName,
+                            String tableName, Boolean systemTag) {
         this.userId = userId;
         this.brokerId = brokerId;
+        this.ip = ip;
+        this.port = port;
         this.username = username;
         this.password = password;
-        this.datasourceName = datasourceName;
+        this.databaseName = databaseName;
         this.optionalParameter = optionalParameter;
-        this.databaseUrl = databaseUrl;
+        this.datasourceName = datasourceName;
+        this.tableName = tableName;
+        this.systemTag = systemTag;
+    }
+    // 1 means the system
+    private Boolean systemTag;
+
+    public RuleDatabaseBase() {
+    }
+
+
+    public RuleDatabaseBase(Integer userId, Integer brokerId,
+                            String ip, String port, String username,
+                            String password, String databaseName,
+                            String optionalParameter, String datasourceName,
+                            String tableName, Boolean systemTag) {
+        this.userId = userId;
+        this.brokerId = brokerId;
+        this.ip = ip;
+        this.port = port;
+        this.username = username;
+        this.password = password;
+        this.databaseName = databaseName;
+        this.optionalParameter = optionalParameter;
+        this.datasourceName = datasourceName;
         this.tableName = tableName;
         this.systemTag = systemTag;
     }
