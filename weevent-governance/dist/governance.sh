@@ -10,7 +10,7 @@ fi
 ###############################################################################
 # The following is common logic for start a java application. DO NOT EDIT IT SOLELY.
 ###############################################################################
-JAVA_OPTS="-Xverify:none -XX:+DisableExplicitGC"
+JAVA_OPTS="-Xverify:none -XX:+DisableExplicitGC -XX:TieredStopAtLevel=1 -XX:+UseConcMarkSweepGC -XX:+UseCMSCompactAtFullCollection"
 
 
 server_name=$(basename $0|awk -F"." '{print $1}')
@@ -35,7 +35,7 @@ start(){
 
     total_memory=$(free -m | grep "Mem" | awk '{ print $2 }')
     if [[ "${total_memory}" -ge "${max_total_memory}" ]];then
-        JAVA_OPTS+=" -XX:TieredStopAtLevel=1 -Xms1024m -XX:NewSize=1024m -XX:MetaspaceSize=128M"
+        JAVA_OPTS+=" -Xms2048m -Xmx2048m -Xmn1024m -XX:MetaspaceSize=128M"
     fi
     
     nohup ${JAVA_HOME}/bin/java ${JAVA_OPTS} ${APP_PARAMS} >/dev/null 2>&1 &
