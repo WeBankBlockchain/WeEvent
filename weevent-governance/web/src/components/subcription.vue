@@ -78,6 +78,11 @@ export default {
       API.getNodes(url).then(res => {
         if (res.data.code === 0) {
           this.nodeList = [].concat(res.data.data)
+          if (this.nodeList.length > 0) {
+            this.nodes = []
+            this.nodes.push(this.nodeList[0])
+            this.subscription()
+          }
         } else {
           this.$message({
             type: 'warning',
