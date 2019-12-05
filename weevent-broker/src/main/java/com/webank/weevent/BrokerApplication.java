@@ -177,8 +177,6 @@ public class BrokerApplication {
                     connector.setAllowTrace(false);
 
                     Http11NioProtocol http11NioProtocol = (Http11NioProtocol) connector.getProtocolHandler();
-                    http11NioProtocol.setAcceptorThreadCount(Math.max(1, Runtime.getRuntime().availableProcessors() / 2));
-                    http11NioProtocol.setPollerThreadCount(Math.max(1, Runtime.getRuntime().availableProcessors() / 2));
                     http11NioProtocol.setKeepAliveTimeout(60000);
                     http11NioProtocol.setMaxKeepAliveRequests(10000);
                     http11NioProtocol.setDisableUploadTimeout(true);
