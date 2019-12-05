@@ -1,16 +1,17 @@
+apply from: "${project.rootDir}/config.gradle"
 apply plugin: "org.springframework.boot"
 apply plugin: "io.spring.dependency-management"
 
 dependencies {
     implementation project(path: ":weevent-client")
-    implementation("org.springframework.boot:spring-boot-starter-websocket")
-    implementation("org.springframework.integration:spring-integration-mqtt")
-    implementation("org.springframework.integration:spring-integration-stream")
-    implementation("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.3")
-    implementation("org.springframework.boot:spring-boot-starter-log4j2")
+    implementation("org.springframework.boot:spring-boot-starter-websocket:${springBoot2Version}")
+    implementation("org.springframework.integration:spring-integration-mqtt:${mqtt2Version}")
+    implementation("org.springframework.integration:spring-integration-stream:${stream2Version}")
+    implementation("com.github.briandilley.jsonrpc4j:jsonrpc4j:${jsonrpc4j2Version}")
+    implementation("org.springframework.boot:spring-boot-starter-log4j2:${springBoot2Version}")
     // avoid "Log4j appears to be running in a Servlet environment, but there's no log4j-web module available."
     implementation("com.alibaba:fastjson:1.2.58")
-    implementation("commons-io:commons-io:2.4")
+    implementation("commons-io:commons-io:${commonsIo2Version}")
 }
 
 bootJar {

@@ -1,6 +1,7 @@
 println("Notice: current gradle version is " + gradle.gradleVersion + ", WeEvent support gradle version in [4.10, 5.0)")
 
 buildscript {
+    apply from: "${project.rootDir}/config.gradle"
     repositories {
         maven {
             url "http://maven.aliyun.com/nexus/content/groups/public/"
@@ -12,13 +13,13 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.0.RELEASE")
-        classpath("gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.1.0")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBoot2Version}")
+        classpath("gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:${gradleGitProperties2Version}")
     }
 }
 
 List lombok = [
-        "org.projectlombok:lombok:1.16.14"
+        "org.projectlombok:lombok:${lombok2Version}"
 ]
 
 allprojects {
@@ -78,9 +79,9 @@ allprojects {
 
         resolutionStrategy {
             // fix security bug
-            force "com.alibaba:fastjson:1.2.58"
+            force "com.alibaba:fastjson:${fastjson2Version}"
             // force use netty 4.1
-            force "io.netty:netty-all:4.1.15.Final"
+            force "io.netty:netty-all:${netty2Version}"
         }
     }
 
@@ -90,14 +91,14 @@ allprojects {
         annotationProcessor(lombok)
 
         // apache commons
-        implementation("org.apache.commons:commons-lang3:3.6")
-        implementation("org.apache.commons:commons-collections4:4.1")
+        implementation("org.apache.commons:commons-lang3:${commons2Version.lang3}")
+        implementation("org.apache.commons:commons-collections4:${commons2Version.collections4}")
 
-        // self4j logger
-        implementation("org.slf4j:slf4j-api:1.7.26")
+        // slf4j logger
+        implementation("org.slf4j:slf4j-api:${slf4j2Version}")
 
         // junit test
-        testImplementation("junit:junit:4.12")
+        testImplementation("junit:junit:${junit2Version}")
         testCompileOnly(lombok)
         testAnnotationProcessor(lombok)
     }

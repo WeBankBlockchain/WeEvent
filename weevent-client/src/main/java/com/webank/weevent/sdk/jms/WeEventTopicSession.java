@@ -2,6 +2,7 @@ package com.webank.weevent.sdk.jms;
 
 
 import java.io.Serializable;
+import java.util.Iterator;
 
 import javax.jms.BytesMessage;
 import javax.jms.Destination;
@@ -45,8 +46,8 @@ public class WeEventTopicSession implements TopicSession {
 
     }
 
-    public void stop() {
-        this.topicConnection.removeSession(this);
+    public void stop(Iterator<WeEventTopicSession> it) {
+        this.topicConnection.removeSession(it);
     }
 
     public void publish(WeEventTopic topic, BytesMessage bytesMessage) throws JMSException {

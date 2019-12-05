@@ -1,43 +1,44 @@
+apply from: "${project.rootDir}/config.gradle"
 apply plugin: "org.springframework.boot"
 apply plugin: "io.spring.dependency-management"
 apply plugin: "com.gorylenko.gradle-git-properties"
 
 dependencies {
     // spring boot
-    implementation("org.springframework.boot:spring-boot-starter")
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.data:spring-data-commons:2.2.0.RELEASE")
+    implementation("org.springframework.boot:spring-boot-starter:${springBoot2Version}")
+    implementation("org.springframework.boot:spring-boot-starter-web:${springBoot2Version}")
+    implementation("org.springframework.data:spring-data-commons:${springDataCommons2Version}")
 
     // spring boot with log4j2
-    implementation("org.springframework.boot:spring-boot-starter-log4j2")
+    implementation("org.springframework.boot:spring-boot-starter-log4j2:${springBoot2Version}")
     // avoid "Log4j appears to be running in a Servlet environment, but there's no log4j-web module available."
-    implementation("org.apache.logging.log4j:log4j-web:2.11.2")
+    implementation("org.apache.logging.log4j:log4j-web:${logging2Version.log4j_web}")
 
     // restful and json rpc support http base authorization
-    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-security:${springBoot2Version}")
 
     // stomp
-    implementation("org.springframework.boot:spring-boot-starter-websocket")
+    implementation("org.springframework.boot:spring-boot-starter-websocket:${springBoot2Version}")
 
     // mqtt
-    implementation("org.springframework.integration:spring-integration-mqtt")
+    implementation("org.springframework.integration:spring-integration-mqtt:${mqtt2Version}")
 
     // json rpc, https://mvnrepository.com/artifact/com.github.briandilley.jsonrpc4j/jsonrpc4j
-    implementation("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.3")
+    implementation("com.github.briandilley.jsonrpc4j:jsonrpc4j:${jsonrpc4j2Version}")
 
     // zookeeper 3.5.5 is first stable version support netty 4.1
-    implementation("org.apache.zookeeper:zookeeper:3.5.5") {
+    implementation("org.apache.zookeeper:zookeeper:${zookeeper2Version}") {
         exclude group: "org.slf4j", module: "slf4j-log4j12"
     }
     // curator prefer zookeeper 3.5
     // http://curator.apache.org/zk-compatibility.html
-    implementation("org.apache.curator:curator-recipes:4.2.0")
+    implementation("org.apache.curator:curator-recipes:${curator2Version}")
 
     // redis
-    implementation("redis.clients:jedis:3.0.0")
+    implementation("redis.clients:jedis:${redis2Version}")
 
     // web3sdk for FISCO-BCOS 2.0
-    implementation("org.fisco-bcos:web3sdk:2.1.1") {
+    implementation("org.fisco-bcos:web3sdk:${web3sdk2version.fiscoV2}") {
         // conflict with io.netty:netty-all:4.1.15.Final in web3sdk 1.3
         // io.netty:netty-tcnative-boringssl-static:2.0.20.Final crash
         exclude group: "io.netty"
@@ -45,22 +46,22 @@ dependencies {
         exclude group: "org.ethereum", module: "solcJ-all"
     }
     // web3sdk for FISCO-BCOS 1.3
-    implementation("org.fisco-bcos:web3sdk-weevent:1.2.5") {
+    implementation("org.fisco-bcos:web3sdk-weevent:${web3sdk2version.fiscoV1}") {
         exclude group: "org.slf4j", module: "slf4j-log4j12"
         exclude group: "org.springframework"
     }
 
     // fabric 1.4.4
-    implementation("org.hyperledger.fabric-sdk-java:fabric-sdk-java:1.4.4")
+    implementation("org.hyperledger.fabric-sdk-java:fabric-sdk-java:${fabric2Version}")
 
     // depend project
     implementation project(path: ":weevent-client")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBoot2Version}")
     // JMS sample
-    testImplementation("javax.jms:jms:1.1")
+    testImplementation("javax.jms:jms:${jms2Version}")
     // mock
-    testImplementation("org.jmockit:jmockit:1.9")
+    testImplementation("org.jmockit:jmockit:${mock2Version}")
 }
 
 gitProperties {
