@@ -192,7 +192,7 @@ public class CommonUtil {
         JSONObject table = JSONObject.parseObject(payload);
         JSONObject eventContent;
         Map<String, String> sqlOrder;
-        if ("json".equals(eventMessage.getExtensions().get("weevent-format")) && CommonUtil.checkValidJson(content)) {
+        if (CommonUtil.checkValidJson(content)) {
             eventContent = JSONObject.parseObject(content);
             sqlOrder = generateSqlOrder(brokerId, groupId, eventId, topicName, result, eventContent, table);
         } else {
