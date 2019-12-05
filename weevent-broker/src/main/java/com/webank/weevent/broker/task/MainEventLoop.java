@@ -238,7 +238,9 @@ public class MainEventLoop extends StoppableTask {
 
     private void dealOneBlock(Long currentBlock) throws BrokerException {
         // merge history if needed
-        this.mergeHistory();
+        if (!this.historySubscriptionIds.isEmpty()) {
+            this.mergeHistory();
+        }
 
         // no need to fetch event if no subscription
         if (!this.mainSubscriptionIds.isEmpty()) {
