@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.RuleDatabaseEntity;
-import com.webank.weevent.governance.enums.SystemTagEnum;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.repository.RuleDatabaseRepository;
@@ -39,22 +38,9 @@ public class RuleDatabaseService {
             if (accountId == null || !accountId.equals(ruleDatabaseEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
-            ruleDatabaseEntity.setSystemTag(SystemTagEnum.USER_ADDED.getCode());
-
+            ruleDatabaseEntity.setSystemTag(false);
             Example<RuleDatabaseEntity> entityExample = Example.of(ruleDatabaseEntity);
             List<RuleDatabaseEntity> ruleDatabaseEntityList = ruleDatabaseRepository.findAll(entityExample);
-            ruleDatabaseEntityList.forEach(ruleDataBase -> {
-                String dataBaseUrl = ruleDataBase.getDatabaseUrl();
-                if (StringUtil.isBlank(ruleDataBase.getOptionalParameter())) {
-                    ruleDataBase.setDatabaseUrl(dataBaseUrl);
-                } else {
-                    ruleDataBase.setDatabaseUrl(dataBaseUrl + "?" + ruleDataBase.getOptionalParameter());
-                }
-            });
-            return ruleDatabaseEntityList;
-            List<RuleDatabaseEntity> ruleDatabaseEntityList;
-            ruleDatabaseEntity.setSystemTag(false);
-            ruleDatabaseEntityList = ruleDatabaseMapper.getRuleDataBaseList(ruleDatabaseEntity);
             ruleDatabaseEntityList.forEach(ruleDataBase -> {
                 String dataBaseUrl = commonService.getDataBaseUrl(ruleDataBase);
                 if (StringUtil.isBlank(ruleDataBase.getOptionalParameter())) {
@@ -81,9 +67,9 @@ public class RuleDatabaseService {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
             //check dbUrl
-            commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseUrl(),ruleDatabaseEntity.getTableName());
-            ruleDatabaseEntity.setIsVisible("1");
-            ruleDatabaseMapper.addCirculationDatabase(ruleDatabaseEntity);
+            commonService.checkDataBaseUrl(commonService.getDataBaseUrl(ruleDatabaseEntity), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword());
+            ruleDatabaseEntity.setSystemTag(false);
+            ruleDatabaseRepository.save(ruleDatabaseEntity);
             return ruleDatabaseEntity;
         } catch (Exception e) {
             log.error("add ruleDatabaseEntity fail", e);
@@ -115,7 +101,7 @@ public class RuleDatabaseService {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
             //check databaseUrl
-            commonService.checkDataBaseUrl(ruleDatabaseEntity);
+            commonService.checkDataBaseUrl(commonService.getDataBaseUrl(ruleDatabaseEntity), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword());
             ruleDatabaseRepository.save(ruleDatabaseEntity);
             return true;
         } catch (Exception e) {

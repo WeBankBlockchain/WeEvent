@@ -62,10 +62,11 @@ public class RuleDatabaseController {
         boolean flag = ruleDatabaseService.deleteRuleDatabase(ruleDatabaseEntity, request);
         return new GovernanceResult(flag);
     }
+
     @PostMapping("/checkDataBaseUrl")
     public GovernanceResult checkDataBaseUrl(@Validated @RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
         log.info("checkDataBaseUrl service ,ruleDatabaseEntity:{}", ruleDatabaseEntity);
-        boolean flag = ruleDatabaseService.checkRuleDataBaseUrl(ruleDatabaseEntity, request);
-        return new GovernanceResult(flag);
+        ruleDatabaseService.checkRuleDataBaseUrl(ruleDatabaseEntity, request);
+        return new GovernanceResult(true);
     }
 }

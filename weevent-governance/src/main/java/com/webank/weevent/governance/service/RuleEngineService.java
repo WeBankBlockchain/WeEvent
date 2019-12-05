@@ -144,10 +144,8 @@ public class RuleEngineService {
             //check rule
             this.checkRule(ruleEngineEntity);
             //insert ruleEngine
-            ruleEngineMapper.addRuleEngine(ruleEngineEntity);
-            //insert processor
-            this.addProcessRule(request, ruleEngineEntity);
-            log.info("add end, time");
+            ruleEngineRepository.save(ruleEngineEntity);
+            log.info("add end");
             return ruleEngineEntity;
         } catch (Exception e) {
             log.error("add ruleEngineEntity fail", e);
@@ -175,7 +173,7 @@ public class RuleEngineService {
             //delete RuleEngineCondition
             ruleEngineConditionRepository.deleteRuleEngineCondition(ruleEngineEntity.getId());
             //delete RuleEngine
-            ruleEngineRepository.deleteRuleEngine(ruleEngineEntity.getId(),String.valueOf(new Date().getTime()));
+            ruleEngineRepository.deleteRuleEngine(ruleEngineEntity.getId(), String.valueOf(new Date().getTime()));
             log.info("delete end");
             return true;
         } catch (Exception e) {
@@ -259,7 +257,7 @@ public class RuleEngineService {
                 this.updateProcessRule(request, ruleEngineEntity, rule);
             } else {
                 ruleEngineEntity.setGroupId(rule.getGroupId());
-                ruleEngineEntity.setSystemTag("2");
+                ruleEngineEntity.setSystemTag(false);
                 this.startProcessRule(request, ruleEngineEntity);
             }
 
@@ -773,7 +771,7 @@ public class RuleEngineService {
             return true;
         }
         //query all historical rules according to brokerId groupId
-        List<RuleEngineEntity> ruleTopicList = ruleEngineRepository.getRuleTopicList(ruleEngineEntity.getBrokerId(),ruleEngineEntity.getGroupId());
+        List<RuleEngineEntity> ruleTopicList = ruleEngineRepository.getRuleTopicList(ruleEngineEntity.getBrokerId(), ruleEngineEntity.getGroupId());
         if (CollectionUtils.isEmpty(ruleTopicList)) {
             return true;
         }

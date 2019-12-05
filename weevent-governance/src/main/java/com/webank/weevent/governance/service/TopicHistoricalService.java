@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -177,7 +178,7 @@ public class TopicHistoricalService {
             Map<String, String> urlMap = commonService.uRLRequest(goalUrl);
             RuleDatabaseEntity ruleDatabaseEntity = new RuleDatabaseEntity(brokerEntity.getUserId(), brokerEntity.getId(), urlMap.get("ip"), urlMap.get("port"),
                     user, password, dbName, urlMap.get("optionalParameter"), "SYSTEM-" + dbName, TOPIC_HISTORICAL, true);
-            ruleDatabaseMapper.addRuleDatabase(ruleDatabaseEntity);
+            ruleDatabaseRepository.save(ruleDatabaseEntity);
 
             //Request broker to get all groups
             List<String> groupList = getGroupList(request, brokerEntity);
