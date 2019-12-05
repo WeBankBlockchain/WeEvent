@@ -17,7 +17,7 @@ public interface PermissionRepository extends JpaRepository<PermissionEntity, Lo
     @Transactional
     @Modifying
     @Query(value = "delete from t_permission where broker_id =:brokerId", nativeQuery = true)
-    int deletePermissionByBrokerId(@Param("brokerId") Integer brokerId);
+    void deletePermissionByBrokerId(@Param("brokerId") Integer brokerId);
 
     @Query(value = "  select distinct user_id as userId from t_broker where id =:brokerId and delete_at = 0 union select distinct user_id as userId " +
             "from t_permission  where broker_id  =:brokerId", nativeQuery = true)

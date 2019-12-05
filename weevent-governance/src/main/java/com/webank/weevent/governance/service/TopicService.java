@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +17,8 @@ import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.entity.TopicEntity;
 import com.webank.weevent.governance.entity.TopicPage;
 import com.webank.weevent.governance.entity.TopicPageEntity;
+import com.webank.weevent.governance.enums.DeleteAtEnum;
 import com.webank.weevent.governance.exception.GovernanceException;
-import com.webank.weevent.governance.mapper.TopicInfoMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.repository.TopicRepository;
 import com.webank.weevent.governance.result.GovernanceResult;
@@ -44,8 +45,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class TopicService {
 
-    @Autowired
-    private TopicInfoMapper topicInfoMapper;
 
     @Autowired
     private TopicRepository topicRepository;
@@ -89,7 +88,7 @@ public class TopicService {
             HttpGet get = commonService.getMethod(url, request);
             CloseableHttpResponse closeResponse = client.execute(get);
             String mes = EntityUtils.toString(closeResponse.getEntity());
-
+            topicRepository.deleteTopicInfo(topic, String.valueOf(new Date().getTime()), brokerId, groupId);
             return (Boolean) JSON.parse(mes);
         } catch (Exception e) {
             log.error("close topic fail,topic :{},error:{}", topic, e.getMessage());
@@ -143,7 +142,7 @@ public class TopicService {
             topicEntityList.forEach(it -> {
                 topicNameList.add(it.getTopicName());
             });
-            List<TopicEntity> topicEntities = topicInfoMapper.getCreator(brokerId, groupId, topicNameList);
+            List<TopicEntity> topicEntities = topicRepository.findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(brokerId, groupId, topicNameList, DeleteAtEnum.NOT_DELETED.getCode());
             if (CollectionUtils.isEmpty(topicEntities)) {
                 return result;
             }
@@ -190,7 +189,7 @@ public class TopicService {
 
             if (result != null) {
                 // get creator from database
-                List<TopicEntity> creators = this.topicInfoMapper.getCreator(brokerId, groupId, new ArrayList<>(Collections.singletonList(topic)));
+                List<TopicEntity> creators = topicRepository.findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(brokerId, groupId, new ArrayList<>(Collections.singletonList(topic)),DeleteAtEnum.NOT_DELETED.getCode());
                 if (CollectionUtils.isNotEmpty(creators)) {
                     result.setCreater(creators.get(0).getCreater());
                 }

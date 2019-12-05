@@ -14,12 +14,12 @@ import com.webank.weevent.governance.entity.RuleEngineEntity;
 import com.webank.weevent.governance.enums.DeleteAtEnum;
 import com.webank.weevent.governance.enums.IsCreatorEnum;
 import com.webank.weevent.governance.exception.GovernanceException;
-import com.webank.weevent.governance.mapper.BrokerMapper;
 import com.webank.weevent.governance.mapper.TopicInfoMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.repository.BrokerRepository;
 import com.webank.weevent.governance.repository.PermissionRepository;
 import com.webank.weevent.governance.repository.RuleEngineRepository;
+import com.webank.weevent.governance.repository.TopicRepository;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.utils.CookiesTools;
 
@@ -45,11 +45,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class BrokerService {
 
+
     @Autowired
-    private BrokerMapper brokerMapper;
+    private BrokerRepository brokerRepository;
 
     @Autowired
     private TopicInfoMapper topicInfoMapper;
+
+    @Autowired
+    private TopicRepository topicRepository;
 
     @Autowired
     private PermissionRepository permissionRepository;
@@ -69,8 +73,6 @@ public class BrokerService {
     @Autowired
     private CommonService commonService;
 
-    @Autowired
-    private BrokerRepository brokerRepository;
 
     private final static String HTTP_GET_SUCCESS_CODE = "0";
 
@@ -81,7 +83,7 @@ public class BrokerService {
 
     public List<BrokerEntity> getBrokers(HttpServletRequest request) {
         String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-        List<BrokerEntity> brokerEntityList = brokerMapper.getBrokers(Integer.parseInt(accountId));
+        List<BrokerEntity> brokerEntityList = brokerRepository.findAllByUserId(Integer.parseInt(accountId));
         //Set the identity of the creation and authorization
         brokerEntityList.forEach(brokerEntity -> {
             if (accountId.equals(brokerEntity.getUserId().toString())) {
@@ -180,7 +182,7 @@ public class BrokerService {
                     ruleEngineService.deleteProcessRule(request, ruleEngine);
                 }
             }
-            topicInfoMapper.deleteByBrokerId(brokerEntity.getId(), String.valueOf(new Date().getTime()));
+            topicRepository.deleteByBrokerId(brokerEntity.getId(), String.valueOf(new Date().getTime()));
             brokerRepository.deleteById(brokerEntity.getId(), String.valueOf(new Date().getTime()));
             permissionRepository.deletePermissionByBrokerId(brokerEntity.getId());
         } catch (Exception e) {
@@ -212,7 +214,7 @@ public class BrokerService {
         //create new permission
         List<PermissionEntity> perMissionList = createPerMissionList(brokerEntity);
         if (perMissionList.size() > 0) {
-           permissionRepository.saveAll(perMissionList);
+            permissionRepository.saveAll(perMissionList);
         }
         return GovernanceResult.ok(true);
     }

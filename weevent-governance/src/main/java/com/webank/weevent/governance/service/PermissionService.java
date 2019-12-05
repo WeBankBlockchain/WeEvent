@@ -21,12 +21,9 @@ import org.springframework.stereotype.Service;
 public class PermissionService {
 
     @Autowired
-    private PermissionMapper permissionMapper;
-
-    @Autowired
     private PermissionRepository permissionRepository;
 
-    public List<PermissionEntity> permissionList(AccountEntity accountEntity) throws GovernanceException {
+    public List<PermissionEntity> permissionList(AccountEntity accountEntity) {
         PermissionEntity permissionEntity = new PermissionEntity();
         permissionEntity.setBrokerId(accountEntity.getBrokerId());
         // execute select

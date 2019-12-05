@@ -18,12 +18,6 @@
     </sql>
 
 
-    <select id="getBrokers" resultMap="BaseResultMap">
-        select distinct id,create_date,last_update, user_id, name, broker_url, webase_url
-        from t_broker where delete_at=0 and (user_id=#{userId}
-        or id in(select distinct ps.broker_id from t_permission ps where ps.user_id = #{userId}))
-    </select>
-
 
 
 </mapper>
