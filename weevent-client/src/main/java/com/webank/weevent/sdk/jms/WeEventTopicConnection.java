@@ -59,7 +59,7 @@ public class WeEventTopicConnection implements TopicConnection, CommandDispatche
 
     public void checkConnected() throws JMSException {
         if (!this.transport.isConnected()) {
-            throw new JMSException("connecttion is breakdown");
+            throw new JMSException("connection is breakdown");
         }
     }
 
