@@ -54,7 +54,6 @@ export default {
   data () {
     return {
       loading: false,
-      search_name: '',
       tableData: [],
       pageIndex: 1,
       total: 0
@@ -71,14 +70,27 @@ export default {
         message: this.$t('tableCont.copySuccess')
       })
     },
+    getLastData () {
+      this.loading = true
+      let url = '/' + localStorage.getItem('groupId') + '/' + this.pageIndex + '/10?brokerId=' + localStorage.getItem('brokerId')
+      API.blockList(url).then(res => {
+        if (res.status === 200) {
+          this.total = res.data.data.total
+          let last = Math.ceil(res.data.data.total / 10)
+          this.pageIndex = last
+          let url = '/' + localStorage.getItem('groupId') + '/' + last + '/10?brokerId=' + localStorage.getItem('brokerId')
+          API.blockList(url).then(res => {
+            if (res.status === 200) {
+              this.tableData = res.data.data.pageData.reverse()
+            }
+          })
+        }
+      })
+      this.loading = false
+    },
     blockList () {
       this.loading = true
       let url = '/' + localStorage.getItem('groupId') + '/' + this.pageIndex + '/10?brokerId=' + localStorage.getItem('brokerId')
-      if (this.search_name.length < 10 && this.search_name.length > 0) {
-        url = url + '&blockNumber=' + this.search_name
-      } else if (this.search_name.length >= 10) {
-        url = url + '&pkHash=' + this.search_name
-      }
       API.blockList(url).then(res => {
         if (res.status === 200) {
           this.tableData = res.data.data.pageData.reverse()
@@ -92,15 +104,10 @@ export default {
       this.$store.commit('set_active', '1-2')
       this.$store.commit('set_menu', [this.$t('sideBar.blockChainInfor'), this.$t('sideBar.transaction'), this.$t('sideBar.transactionDetial')])
       this.$router.push('./transactionInfor')
-    },
-    search () {
-      this.pageIndex = 1
-      this.total = 0
-      this.blockList()
     }
   },
   mounted () {
-    this.blockList()
+    this.getLastData()
   },
   computed: {
     brokerId () {
@@ -113,18 +120,16 @@ export default {
   watch: {
     brokerId () {
       this.loading = true
-      this.pageIndex = 1
       this.tableData = []
       setTimeout(fun => {
-        this.blockList()
+        this.getLastData()
       }, 1000)
     },
     groupId (nVal) {
       this.loading = true
-      this.pageIndex = 1
       this.tableData = []
       setTimeout(fun => {
-        this.blockList()
+        this.getLastData()
       }, 1000)
     }
   }
