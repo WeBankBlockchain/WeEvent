@@ -42,5 +42,7 @@ public class RuleEngineEntity extends RuleEngineBase {
 
     private String offSet;
 
+    private String tableName;
+
     private List<RuleEngineConditionEntity> ruleEngineConditionList = new ArrayList<>();
 }
