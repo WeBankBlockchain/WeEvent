@@ -475,12 +475,14 @@ export default {
                 return
               } else {
                 vm.$refs.sql.clearValidate('ruleDataBaseId')
+                vm.sqlOption.ruleDataBaseId = ''
               }
             } else {
               if (!vm.sqlOption.ruleDataBaseId) {
                 return
               } else {
                 vm.$refs.sql.clearValidate('toDestination')
+                vm.sqlOption.toDestination = ''
               }
             }
           } else {
@@ -522,6 +524,11 @@ export default {
             for (let i = 0; i < war.length; i++) {
               war[i].style.display = 'none'
             }
+          }
+          if (vm.sqlOption.conditionType === '1') {
+            vm.sqlOption.ruleDataBaseId = ''
+          } else {
+            vm.sqlOption.toDestination = ''
           }
           for (let key in vm.sqlOption) {
             if (key === 'selectField') {
