@@ -18,7 +18,7 @@ dependencies {
     // persist databaseA
     implementation("org.apache.commons:commons-dbcp2:${apacheCommonsVersion.dbcp2}")
     implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:${mybatisVersion}")
-    implementation("org.mariadb.jdbc:mariadb-java-client:${mariadbVersion}")
+    implementation("org.mariadb.jdbc:mariadb-java-client:${mariadbClientVersion}")
 
     // jsoup
     implementation("org.jsoup:jsoup:${jsoupVersion}")

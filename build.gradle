@@ -55,20 +55,16 @@ ext{
     jmsVersion = "1.1"
     // Jmock
     jmockVersion = "1.9"
-
     // mybatis-spring-boot-starter
     mybatisVersion = "1.3.2"
-    // mariadb
-    mariadbVersion = "2.3.0"
+    // mariadb-java-client
+    mariadbClientVersion = "2.3.0"
     // jsoup
     jsoupVersion = "1.9.2"
     // fastjson
     fastjsonVersion = "1.2.60"
-
     // quartz
     quartzVersion = "2.2.1"
-    // jsonrpc4j
-    jsonrpc4jVersion = "1.5.3"
     // Java-WebSocket
     WebSocketVersion = "1.4.0"
 }
