@@ -13,6 +13,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Slf4j
@@ -21,6 +22,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class ProcessorApplication {
     public static ProcessorConfig processorConfig;
     public static ApplicationContext applicationContext;
+    public static Environment environment;
 
     @Autowired
     public void setContext(ApplicationContext context) {
@@ -38,6 +40,11 @@ public class ProcessorApplication {
     @Autowired
     public void setProcessorConfig(ProcessorConfig config) {
         processorConfig = config;
+    }
+
+    @Autowired
+    public void setEnvironment(org.springframework.core.env.Environment env) {
+        environment = env;
     }
 
     private static void exit() {
