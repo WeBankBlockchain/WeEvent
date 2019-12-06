@@ -43,7 +43,10 @@ export default{
         yAxis: {
           title: '',
           max: '20',
-          lineWidth: 2
+          lineWidth: 2,
+          labels: {
+            step: 2
+          }
         },
         xAxis: {
           categories: []
