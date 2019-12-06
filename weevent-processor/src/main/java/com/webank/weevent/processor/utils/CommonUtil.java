@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.sdk.WeEvent;
@@ -19,7 +20,7 @@ import org.springframework.util.StringUtils;
 
 @Slf4j
 public class CommonUtil {
-
+    private static Map<String, BasicDataSource> dsMap = new ConcurrentHashMap<>();
 
     /**
      * check the database url
@@ -29,27 +30,31 @@ public class CommonUtil {
      */
     public static Connection getDbcpConnection(String databaseUrl) {
         try {
-            BasicDataSource ds = new BasicDataSource();
-
             Map<String, String> requestUrlMap = uRLRequest(databaseUrl);
             // check all parameter
             if (!requestUrlMap.containsKey("user") || !requestUrlMap.containsKey("password") || StringUtils.isEmpty(urlPage(databaseUrl))) {
                 return null;
             }
-            // set all parameter
-            ds.setDriverClassName(ProcessorApplication.environment.getProperty("spring.datasource.driverClassName"));
-            ds.setUrl(urlPage(databaseUrl));
-            ds.setUsername(requestUrlMap.get("user"));
-            ds.setPassword(requestUrlMap.get("password"));
+            // use the cache
+            if (dsMap.containsKey(databaseUrl)) {
+                // use the old connection
+                return dsMap.get(databaseUrl).getConnection();
+            } else {
+                BasicDataSource ds = new BasicDataSource();
+                dsMap.put(databaseUrl, ds);
+                ds.setDriverClassName(ProcessorApplication.environment.getProperty("spring.datasource.driverClassName"));
+                ds.setUrl(urlPage(databaseUrl));
+                ds.setUsername(requestUrlMap.get("user"));
+                ds.setPassword(requestUrlMap.get("password"));
 
-            ds.setInitialSize(Integer.valueOf(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.initial-size")));
-            ds.setMinIdle(Integer.valueOf(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.min-idle")));
-            ds.setMaxWaitMillis(Integer.valueOf(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.max-wait-millis")));
+                ds.setInitialSize(Integer.valueOf(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.initial-size")));
+                ds.setMinIdle(Integer.valueOf(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.min-idle")));
+                ds.setMaxWaitMillis(Integer.valueOf(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.max-wait-millis")));
 
-            return ds.getConnection();
-
+                return ds.getConnection();
+            }
         } catch (SQLException e) {
-            log.error("e:{}",e.toString());
+            log.error("e:{}", e.toString());
             return null;
         }
     }
