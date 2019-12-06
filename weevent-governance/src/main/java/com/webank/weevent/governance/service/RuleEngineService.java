@@ -804,12 +804,12 @@ public class RuleEngineService {
         }
         RuleDatabaseEntity ruleDataBase = ruleDatabaseMapper.getRuleDataBaseById(rule.getRuleDataBaseId());
         if (ruleDataBase != null) {
-            String dbUrl = commonService.getDataBaseUrl(ruleDataBase) + "?user=" + ruleDataBase.getUsername() + "&password=" + ruleDataBase.getPassword() +
-                    "&tableName=" + ruleDataBase.getTableName();
+            String dbUrl = commonService.getDataBaseUrl(ruleDataBase) + "?user=" + ruleDataBase.getUsername() + "&password=" + ruleDataBase.getPassword();
             if (!StringUtil.isBlank(ruleDataBase.getOptionalParameter())) {
                 dbUrl = dbUrl + "&" + ruleDataBase.getOptionalParameter();
             }
             rule.setDatabaseUrl(dbUrl);
+            rule.setTableName(ruleDataBase.getTableName());
             log.info("dataBaseUrl:{}", rule.getDatabaseUrl());
         }
     }
