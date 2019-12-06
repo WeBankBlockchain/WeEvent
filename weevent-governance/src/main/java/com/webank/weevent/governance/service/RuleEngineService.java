@@ -276,9 +276,11 @@ public class RuleEngineService {
                 //insert new data
                 ruleEngineConditionRepository.saveAll(ruleEngineConditionList);
             }
-            flag = ruleEngineMapper.updateRuleEngine(ruleEngineEntity);
+            BeanUtils.copyProperties(rule, ruleEngineEntity, "ruleName", "payload", "selectField", "conditionType",
+                    "fromDestination", "toDestination", "ruleDataBaseId", "errorDestination");
+            ruleEngineRepository.save(ruleEngineEntity);
             log.info("update ruleEngine end");
-            return flag;
+            return true;
         } catch (Exception e) {
             log.error("update ruleEngine fail", e);
             throw new GovernanceException("update ruleEngine fail", e);
@@ -483,7 +485,6 @@ public class RuleEngineService {
             this.checkStartRuleRequired(rule);
             //Start the rules engine
             rule.setOffSet(ruleEngineEntity.getOffSet());
-            rule.setSystemTag(ruleEngineEntity.getSystemTag());
             this.startProcessRule(request, rule);
             //modify status
             ruleEngineRepository.save(rule);
@@ -503,8 +504,8 @@ public class RuleEngineService {
             map.put("updatedTime", rule.getLastUpdate());
             map.put("createdTime", rule.getCreateDate());
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_START_CEP_RULE).toString();
-            log.info("start rule begin====map:{}", JSONObject.toJSONString(map));
             map.put("systemTag", rule.getSystemTag() ? "1" : "0");
+            log.info("start rule begin====map:{}", JSONObject.toJSONString(map));
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JSONObject.toJSONString(map));
             //deal processor result
             String mes = EntityUtils.toString(closeResponse.getEntity());
@@ -756,8 +757,8 @@ public class RuleEngineService {
         }
         RuleDatabaseEntity ruleDataBase = ruleDatabaseRepository.findById(rule.getRuleDataBaseId());
         if (ruleDataBase != null) {
-            String dbUrl = ruleDataBase.getDatabaseUrl() + "?user=" + ruleDataBase.getUsername() + "&password=" + ruleDataBase.getPassword() +
-                    "tableName=" + ruleDataBase.getTableName();
+            String dbUrl = commonService.getDataBaseUrl(ruleDataBase) + "?user=" + ruleDataBase.getUsername() + "&password=" + ruleDataBase.getPassword() +
+                    "&tableName=" + ruleDataBase.getTableName();
             if (!StringUtil.isBlank(ruleDataBase.getOptionalParameter())) {
                 dbUrl = dbUrl + "&" + ruleDataBase.getOptionalParameter();
             }

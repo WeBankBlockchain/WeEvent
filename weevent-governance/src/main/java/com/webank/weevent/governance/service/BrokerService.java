@@ -14,6 +14,7 @@ import com.webank.weevent.governance.entity.RuleEngineEntity;
 import com.webank.weevent.governance.enums.DeleteAtEnum;
 import com.webank.weevent.governance.enums.IsCreatorEnum;
 import com.webank.weevent.governance.exception.GovernanceException;
+import com.webank.weevent.governance.mapper.BrokerMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.repository.BrokerRepository;
 import com.webank.weevent.governance.repository.PermissionRepository;
@@ -48,6 +49,9 @@ public class BrokerService {
     @Autowired
     private BrokerRepository brokerRepository;
 
+    @Autowired
+    private BrokerMapper brokerMapper;
+
 
     @Autowired
     private TopicRepository topicRepository;
@@ -80,7 +84,7 @@ public class BrokerService {
 
     public List<BrokerEntity> getBrokers(HttpServletRequest request) {
         String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-        List<BrokerEntity> brokerEntityList = brokerRepository.findAllByUserId(Integer.parseInt(accountId));
+        List<BrokerEntity> brokerEntityList = brokerMapper.getBrokers(Integer.parseInt(accountId));
         //Set the identity of the creation and authorization
         brokerEntityList.forEach(brokerEntity -> {
             if (accountId.equals(brokerEntity.getUserId().toString())) {

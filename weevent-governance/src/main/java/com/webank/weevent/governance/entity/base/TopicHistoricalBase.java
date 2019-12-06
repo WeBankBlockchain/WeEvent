@@ -13,16 +13,16 @@ import lombok.EqualsAndHashCode;
 public class TopicHistoricalBase extends BaseEntity {
 
 
-    @Column(name = "brokerId")
+    @Column(name = "brokerId", columnDefinition = "int(11)")
     private Integer brokerId;
 
-    @Column(name = "topicName")
+    @Column(name = "topicName", columnDefinition = "varchar(128)")
     private String topicName;
 
-    @Column(name = "groupId")
+    @Column(name = "groupId", columnDefinition = "varchar(64)")
     private String groupId;
 
-    @Column(name = "eventId")
+    @Column(name = "eventId", columnDefinition = "varchar(64)")
     private String eventId;
 
 }

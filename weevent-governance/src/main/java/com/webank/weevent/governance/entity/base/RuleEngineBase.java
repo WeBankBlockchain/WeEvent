@@ -16,7 +16,7 @@ import lombok.EqualsAndHashCode;
 @MappedSuperclass
 public class RuleEngineBase extends BaseEntity {
 
-    @Column(name = "rule_name")
+    @Column(name = "rule_name", columnDefinition = "varchar(128)")
     private String ruleName;
 
     /**
@@ -77,6 +77,6 @@ public class RuleEngineBase extends BaseEntity {
     private Boolean systemTag;
 
     //0 means not deleted ,others means deleted
-    @Column(name = "delete_at")
+    @Column(name = "delete_at", columnDefinition = "varchar(64)")
     private String deleteAt = "0";
 }

@@ -26,14 +26,14 @@ public class BrokerBase extends BaseEntity {
     private String name;
 
     @URL
-    @Column(name = "broker_url")
+    @Column(name = "broker_url", columnDefinition = "varchar(64)")
     private String brokerUrl;
 
     @Column(name = "webase_url")
     private String webaseUrl;
 
     //0 means not deleted ,others means deleted
-    @Column(name = "delete_at",nullable = false)
+    @Column(name = "delete_at",nullable = false, columnDefinition = "varchar(64)")
     private String deleteAt = "0";
 
     public void setBrokerUrl(String brokerUrl) {

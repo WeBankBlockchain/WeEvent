@@ -16,13 +16,13 @@ import lombok.EqualsAndHashCode;
 @MappedSuperclass
 public class TopicBase extends BaseEntity {
 
-    @Column(name = "broker_id")
+    @Column(name = "broker_id", columnDefinition = "int(11)")
     private Integer brokerId;
 
-    @Column(name = "group_id")
+    @Column(name = "group_id", columnDefinition = "varchar(64)")
     private String groupId;
 
-    @Column(name = "topic_name")
+    @Column(name = "topic_name", columnDefinition = "varchar(128)")
     private String topicName;
 
     @Column(name = "creater")
@@ -32,7 +32,7 @@ public class TopicBase extends BaseEntity {
     private String description;
 
     //0 means not deleted ,others means deleted
-    @Column(name = "delete_at",nullable = false)
+    @Column(name = "delete_at",nullable = false, columnDefinition = "varchar(32)")
     private String deleteAt = "0";
 
 }

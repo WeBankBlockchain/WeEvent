@@ -22,15 +22,11 @@ public class AccountBase extends BaseEntity {
     @Column(name = "username")
     private String username;
 
-    @NotBlank
-    @Column(name = "password")
-    private String password;
-
     @Column(name = "email")
     private String email;
 
-    @Column(name = "old_password")
-    private String oldPassword;
+    @Column(name = "password")
+    private String password;
 
     //0 means not deleted ,others means deleted
     @Column(name = "delete_at",nullable = false)

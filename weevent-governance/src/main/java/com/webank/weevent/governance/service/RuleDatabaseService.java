@@ -100,6 +100,7 @@ public class RuleDatabaseService {
             if (accountId == null || !accountId.equals(ruleDatabaseEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
+            ruleDatabaseEntity.setSystemTag(false);
             //check databaseUrl
             commonService.checkDataBaseUrl(commonService.getDataBaseUrl(ruleDatabaseEntity), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword());
             ruleDatabaseRepository.save(ruleDatabaseEntity);
