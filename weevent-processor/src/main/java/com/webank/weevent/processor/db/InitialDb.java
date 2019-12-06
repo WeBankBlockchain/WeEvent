@@ -37,7 +37,7 @@ public class InitialDb implements AutoCloseable {
                 goalUrl = properties.getProperty("spring.datasource.url");
                 user = properties.getProperty("spring.datasource.username");
                 password = properties.getProperty("spring.datasource.password");
-                driverName = properties.getProperty("spring.datasource.driver-class-name");
+                driverName = properties.getProperty("spring.datasource.driverClassName");
             }
         } catch (Exception e) {
             log.error("read database properties error,{}", e.getMessage());
