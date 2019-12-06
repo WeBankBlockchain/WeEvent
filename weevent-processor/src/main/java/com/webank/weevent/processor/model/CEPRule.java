@@ -51,4 +51,6 @@ public class CEPRule implements Serializable {
     private String systemTag;
 
     private String offSet;
+
+    private String tableName;
 }
