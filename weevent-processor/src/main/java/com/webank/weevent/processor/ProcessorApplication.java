@@ -1,22 +1,18 @@
 package com.webank.weevent.processor;
 
-import javax.sql.DataSource;
 
 import com.webank.weevent.processor.cache.CEPRuleCache;
 import com.webank.weevent.processor.config.ProcessorConfig;
 import com.webank.weevent.processor.mq.CEPRuleMQ;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.ApplicationPidFileWriter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Slf4j
@@ -57,29 +53,6 @@ public class ProcessorApplication {
             System.exit(1);
         }
     }
-
-    // private Enviroment env;
-    @Bean
-    @Primary
-    @ConfigurationProperties(prefix = "spring.datasource")
-    public static DataSource getDs() {
-        try {
-
-            BasicDataSource ds = new BasicDataSource();
-            ds.setDriverClassName(environment.getProperty("spring.datasource.driverClassName"));
-            ds.setUrl(environment.getProperty("spring.datasource.url"));
-            ds.setPassword(environment.getProperty("spring.datasource.password"));
-            ds.setUsername(environment.getProperty("spring.datasource.username"));
-
-            log.info("create ds:{}", ds);
-            return ds;
-        } catch (Exception e) {
-            log.error("exception:", e.toString());
-            exit();
-        }
-        return null;
-    }
-
 
     @Bean(name = "processor_daemon_task_executor")
     public static ThreadPoolTaskExecutor getThreadPoolTaskExecutor() {

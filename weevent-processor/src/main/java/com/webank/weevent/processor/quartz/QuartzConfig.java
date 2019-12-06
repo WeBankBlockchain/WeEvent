@@ -52,7 +52,7 @@ public class QuartzConfig {
                 factory.setQuartzProperties(quartzPropertie);
 
                 // use Spring datasource
-                factory.setDataSource((DataSource) ProcessorApplication.applicationContext.getBean("getDs"));
+                factory.setDataSource((DataSource) ProcessorApplication.applicationContext.getBean(DataSource.class));
                 factory.setJobFactory(jobFactory);
 
                 in.close();
