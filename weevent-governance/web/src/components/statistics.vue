@@ -156,10 +156,14 @@ export default {
               max = y > max ? y : max
             })
           })
-          max = Math.ceil(max / 10) * 10 - 5
           vm.option.yAxis.max = max
           vm.topic = [].concat(topic)
           setTimeout(fun => {
+            Highcharts.setOptions({
+              lang: {
+                thousandsSep: ','
+              }
+            })
             Highcharts.chart('chart', vm.option)
           }, 500)
         } else {

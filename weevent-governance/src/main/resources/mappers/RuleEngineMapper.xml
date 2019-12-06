@@ -15,12 +15,10 @@
         <result column="from_destination" property="fromDestination" jdbcType="VARCHAR"/>
         <result column="to_destination" property="toDestination" jdbcType="VARCHAR"/>
         <result column="select_field" property="selectField" jdbcType="VARCHAR"/>
-        <result column="condition_field" property="conditionField" jdbcType="VARCHAR"/>
         <result column="condition_type" property="conditionType" jdbcType="INTEGER"/>
         <result column="database_url" property="databaseUrl" jdbcType="VARCHAR"/>
         <result column="rule_database_id" property="ruleDataBaseId" jdbcType="INTEGER"/>
         <result column="error_destination" property="errorDestination" jdbcType="VARCHAR"/>
-        <result column="error_message" property="errorMessage" jdbcType="VARCHAR"/>
         <result column="status" property="status" jdbcType="INTEGER"/>
         <result column="group_id" property="groupId" jdbcType="VARCHAR"/>
         <result column="cep_id" property="cepId" jdbcType="VARCHAR"/>
@@ -29,18 +27,18 @@
 
     <sql id="Base_Column_List">
         id,create_date,last_update, rule_name,payload_type,payload,broker_id,broker_url,user_id,cep_id,
-         from_destination,to_destination,select_field,condition_field,condition_type,
-         rule_database_id,error_destination,error_message,status,group_id,system_tag
+         from_destination,to_destination,select_field,condition_type,
+         rule_database_id,error_destination,status,group_id,system_tag
     </sql>
 
     <insert id="addRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
             useGeneratedKeys="true" keyProperty="id">
         insert into t_rule_engine(rule_name, payload_type, payload, broker_id, broker_url, user_id,
                                   from_destination, to_destination, select_field,
-                                  condition_field, condition_type, status, group_id, error_message,rule_database_id,system_tag,cep_id)
+                                   condition_type, status, group_id,rule_database_id,system_tag,cep_id)
         values (#{ruleName}, #{payloadType}, #{payload}, #{brokerId}, #{brokerUrl}, #{userId},
                 #{fromDestination}, #{toDestination}, #{selectField},
-                #{conditionField}, #{conditionType}, #{status}, #{groupId}, #{errorMessage},#{ruleDataBaseId},#{systemTag},#{cepId})
+                #{conditionType}, #{status}, #{groupId},#{ruleDataBaseId},#{systemTag},#{cepId})
     </insert>
 
     <select id="getRuleEngines" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
@@ -71,8 +69,8 @@
         <if test="ruleEngineEntity.ruleName != null and ruleEngineEntity.ruleName!=''">
             and rule_name = #{ruleEngineEntity.ruleName,jdbcType=VARCHAR}
         </if>
-        <if test="ruleEngineEntity.systemTag != null and ruleEngineEntity.systemTag!=''">
-            and system_tag = #{ruleEngineEntity.systemTag,jdbcType=VARCHAR}
+        <if test="ruleEngineEntity.systemTag != null">
+            and system_tag = #{ruleEngineEntity.systemTag}
         </if>
         <if test="startIndex != null and endIndex!=null">
             limit #{startIndex},#{endIndex}
@@ -96,7 +94,7 @@
             and rule_name = #{ruleName,jdbcType=VARCHAR}
         </if>
         <if test="systemTag != null">
-            and system_tag = #{systemTag,jdbcType=VARCHAR}
+            and system_tag = #{systemTag}
         </if>
     </sql>
 
@@ -119,13 +117,11 @@
         set rule_name=#{ruleName},
             payload=#{payload},
             select_field=#{selectField},
-            condition_field=#{conditionField},
             condition_type=#{conditionType},
             from_destination=#{fromDestination},
             to_destination=#{toDestination},
             rule_database_id=#{ruleDataBaseId},
             error_destination=#{errorDestination},
-            error_message=#{errorMessage},
             cep_id=#{cepId}
         where id = #{id,jdbcType=INTEGER}
           and status != 2

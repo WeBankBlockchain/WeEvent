@@ -134,12 +134,13 @@ public class WeEventClientGroupIdTest {
     /**
      * test  extensions
      */
-    @Test(expected = BrokerException.class)
+    @Test
     public void testPublish005() throws Exception {
         // test extensions
         this.extensions = new HashMap<>();
         WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), extensions);
-        this.weEventClient.publish(weEvent);
+        SendResult result = this.weEventClient.publish(weEvent);
+        Assert.assertNotNull(result);
     }
 
     /**
