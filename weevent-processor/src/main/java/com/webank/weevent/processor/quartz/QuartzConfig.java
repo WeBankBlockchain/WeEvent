@@ -4,6 +4,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import javax.sql.DataSource;
+
+import com.webank.weevent.processor.ProcessorApplication;
+
 import org.quartz.Scheduler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,8 +48,13 @@ public class QuartzConfig {
                 quartzPropertie.setProperty("org.quartz.jobStore.misfireThreshold", "25000");
                 quartzPropertie.setProperty("org.quartz.jobStore.clusterCheckinInterval", "20000");
 
+
                 factory.setQuartzProperties(quartzPropertie);
+
+                // use Spring datasource
+                factory.setDataSource((DataSource) ProcessorApplication.applicationContext.getBean(DataSource.class));
                 factory.setJobFactory(jobFactory);
+
                 in.close();
             }
 
