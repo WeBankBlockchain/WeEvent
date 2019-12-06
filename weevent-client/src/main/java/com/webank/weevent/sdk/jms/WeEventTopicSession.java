@@ -25,6 +25,7 @@ import javax.jms.TopicSession;
 import javax.jms.TopicSubscriber;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * WeEvent JMS TopicSession.
@@ -33,6 +34,7 @@ import lombok.Data;
  * @since 2019/03/25
  */
 @Data
+@Slf4j
 public class WeEventTopicSession implements TopicSession {
     private WeEventTopicConnection topicConnection;
 
@@ -46,7 +48,7 @@ public class WeEventTopicSession implements TopicSession {
     }
 
     public void stop() {
-        this.topicConnection.removeSession(this);
+        log.info("stop topic session");
     }
 
     public void publish(WeEventTopic topic, BytesMessage bytesMessage) throws JMSException {
