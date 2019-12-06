@@ -21,7 +21,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class ProcessorApplication {
     public static ProcessorConfig processorConfig;
     public static ApplicationContext applicationContext;
-    public static org.springframework.core.env.Environment environment;
 
     @Autowired
     public void setContext(ApplicationContext context) {
@@ -39,11 +38,6 @@ public class ProcessorApplication {
     @Autowired
     public void setProcessorConfig(ProcessorConfig config) {
         processorConfig = config;
-    }
-
-    @Autowired
-    public void setEnvironment(org.springframework.core.env.Environment env) {
-        environment = env;
     }
 
     private static void exit() {
