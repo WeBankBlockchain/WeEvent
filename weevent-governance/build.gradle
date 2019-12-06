@@ -1,4 +1,3 @@
-apply from: "${project.rootDir}/config.gradle"
 apply plugin: "org.springframework.boot"
 apply plugin: "io.spring.dependency-management"
 
@@ -10,25 +9,25 @@ dependencies {
     // spring boot with log4j2
     implementation("org.springframework.boot:spring-boot-starter-log4j2:${springBoot2Version}")
     // avoid "Log4j appears to be running in a Servlet environment, but there's no log4j-web module available."
-    implementation("org.apache.logging.log4j:log4j-web:${logging2Version.log4j_web}")
+    implementation("org.apache.logging.log4j:log4j-web:${log4jVersion}")
 
     // account login
     implementation("org.springframework.boot:spring-boot-starter-security:${springBoot2Version}")
     implementation("org.springframework.boot:spring-boot-starter-mail:${springBoot2Version}")
 
     // persist databaseA
-    implementation("org.apache.commons:commons-dbcp2:${commons2Version.dbcp2}")
-    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:${mybatis2Version}")
-    implementation("org.mariadb.jdbc:mariadb-java-client:${mariadb2Version}")
+    implementation("org.apache.commons:commons-dbcp2:${apacheCommonsVersion.dbcp2}")
+    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:${mybatisVersion}")
+    implementation("org.mariadb.jdbc:mariadb-java-client:${mariadbVersion}")
 
     // jsoup
-    implementation("org.jsoup:jsoup:${jsoup2Version}")
+    implementation("org.jsoup:jsoup:${jsoupVersion}")
 
     // fast json
-    implementation("com.alibaba:fastjson:1.2.58")
+    implementation("com.alibaba:fastjson:${fastjsonVersion}")
 
     // forward backend
-    implementation("org.apache.httpcomponents:httpclient:${httpclient2Version}")
+    implementation("org.apache.httpcomponents:httpclient:${httpclientVersion}")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBoot2Version}")
 }

@@ -1,11 +1,10 @@
-apply from: "${project.rootDir}/config.gradle"
 
 dependencies {
     compile project(path: ":weevent-client")
     // https://mvnrepository.com/artifact/org.apache.jmeter/ApacheJMeter_java
-    implementation("org.apache.jmeter:ApacheJMeter_java:${jmeter2Version}")
+    implementation("org.apache.jmeter:ApacheJMeter_java:${jmeterVersion}")
     // https://mvnrepository.com/artifact/org.apache.jmeter/ApacheJMeter_core
-    implementation("org.apache.jmeter:ApacheJMeter_core:${jmeter2Version}")
+    implementation("org.apache.jmeter:ApacheJMeter_core:${jmeterVersion}")
 }
 
 jar {

@@ -3,7 +3,6 @@ package com.webank.weevent.sdk.jms;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -54,13 +53,13 @@ public class WeEventTopicConnection implements TopicConnection, CommandDispatche
         this.sessions.add(session);
     }
 
-    public void removeSession(Iterator<WeEventTopicSession> it) {
-        it.remove();
+    public void removeSession(WeEventTopicSession session) {
+        this.sessions.remove(session);
     }
 
     public void checkConnected() throws JMSException {
         if (!this.transport.isConnected()) {
-            throw new JMSException("connecttion is breakdown");
+            throw new JMSException("connection is breakdown");
         }
     }
 
@@ -168,10 +167,8 @@ public class WeEventTopicConnection implements TopicConnection, CommandDispatche
     public void stop() throws JMSException {
         doStop();
 
-        Iterator<WeEventTopicSession> it = this.sessions.iterator();
-        while (it.hasNext()) {
-            WeEventTopicSession s = it.next();
-            s.stop(it);
+        for (WeEventTopicSession s : this.sessions) {
+            s.stop();
         }
     }
 

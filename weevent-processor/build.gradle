@@ -1,4 +1,3 @@
-apply from: "${project.rootDir}/config.gradle"
 apply plugin: "org.springframework.boot"
 apply plugin: "io.spring.dependency-management"
 
@@ -14,28 +13,28 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-log4j2:${springBoot2Version}")
 
     // avoid "Log4j appears to be running in a Servlet environment, but there's no log4j-web module available."
-    implementation("org.apache.logging.log4j:log4j-web:${logging2Version.log4j_web}")
+    implementation("org.apache.logging.log4j:log4j-web:${log4jVersion}")
 
-    implementation("org.apache.commons:commons-dbcp2:${commons2Version.dbcp2}")
-    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:${mybatis2Version}")
-    implementation("org.mariadb.jdbc:mariadb-java-client:${mariadb2Version}")
+    implementation("org.apache.commons:commons-dbcp2:${apacheCommonsVersion.dbcp2}")
+    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:${mybatisVersion}")
+    implementation("org.mariadb.jdbc:mariadb-java-client:${mariadbVersion}")
 
 
-    implementation("org.apache.tomcat:tomcat-jdbc:${tomcat2Version}")
+    implementation("org.apache.tomcat:tomcat-jdbc:${tomcatVersion}")
 
 
     //fastjson
-    implementation("com.alibaba:fastjson:1.2.58")
+    implementation("com.alibaba:fastjson:${fastjsonVersion}")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBoot2Version}")
 
-    implementation("org.apache.commons:commons-pool2:${commons2Version.pool2}")
+    implementation("org.apache.commons:commons-pool2:${apacheCommonsVersion.pool2}")
 
-    implementation("org.apache.commons:commons-jexl3:${commons2Version.jexl3}")
+    implementation("org.apache.commons:commons-jexl3:${apacheCommonsVersion.jexl3}")
 
-    implementation("org.springframework:spring-context-support:${spring2Version.context_support}")
+    implementation("org.springframework:spring-context-support:${spring5Version}")
     // https://mvnrepository.com/artifact/org.quartz-scheduler/quartz
-    implementation("org.quartz-scheduler:quartz:${quartz2Version}")
+    implementation("org.quartz-scheduler:quartz:${quartzVersion}")
 }
 
 bootJar {
@@ -64,7 +63,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "gradle.plugin.com.arenagod.gradle:mybatis-generator-plugin:${mybatisGeneratorPlugin2Version}"
+        classpath "gradle.plugin.com.arenagod.gradle:mybatis-generator-plugin:1.4"
     }
 }
 

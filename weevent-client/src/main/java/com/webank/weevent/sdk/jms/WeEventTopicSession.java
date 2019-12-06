@@ -2,7 +2,6 @@ package com.webank.weevent.sdk.jms;
 
 
 import java.io.Serializable;
-import java.util.Iterator;
 
 import javax.jms.BytesMessage;
 import javax.jms.Destination;
@@ -26,6 +25,7 @@ import javax.jms.TopicSession;
 import javax.jms.TopicSubscriber;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * WeEvent JMS TopicSession.
@@ -34,6 +34,7 @@ import lombok.Data;
  * @since 2019/03/25
  */
 @Data
+@Slf4j
 public class WeEventTopicSession implements TopicSession {
     private WeEventTopicConnection topicConnection;
 
@@ -46,8 +47,8 @@ public class WeEventTopicSession implements TopicSession {
 
     }
 
-    public void stop(Iterator<WeEventTopicSession> it) {
-        this.topicConnection.removeSession(it);
+    public void stop() {
+        log.info("stop topic session");
     }
 
     public void publish(WeEventTopic topic, BytesMessage bytesMessage) throws JMSException {
