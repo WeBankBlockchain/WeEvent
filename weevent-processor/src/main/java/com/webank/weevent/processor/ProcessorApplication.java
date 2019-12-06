@@ -75,7 +75,8 @@ public class ProcessorApplication {
 
             log.info("create ds:{}", ds);
         } catch (Exception e) {
-            log.info("exception:", e.toString());
+            log.error("exception:", e.toString());
+            exit();
         }
         return ds;
     }
