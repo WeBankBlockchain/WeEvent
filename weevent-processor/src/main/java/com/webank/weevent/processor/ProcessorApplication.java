@@ -27,8 +27,6 @@ public class ProcessorApplication {
     public static ApplicationContext applicationContext;
     public static org.springframework.core.env.Environment environment;
 
-    public static DataSource ds;
-
     @Autowired
     public void setContext(ApplicationContext context) {
         applicationContext = context;
@@ -67,18 +65,19 @@ public class ProcessorApplication {
     public static DataSource getDs() {
         try {
 
-            ds = new BasicDataSource();
-            ((BasicDataSource) ds).setDriverClassName(environment.getProperty("spring.datasource.driverClassName"));
-            ((BasicDataSource) ds).setUrl(environment.getProperty("spring.datasource.url"));
-            ((BasicDataSource) ds).setPassword(environment.getProperty("spring.datasource.password"));
-            ((BasicDataSource) ds).setUsername(environment.getProperty("spring.datasource.username"));
+            BasicDataSource ds = new BasicDataSource();
+            ds.setDriverClassName(environment.getProperty("spring.datasource.driverClassName"));
+            ds.setUrl(environment.getProperty("spring.datasource.url"));
+            ds.setPassword(environment.getProperty("spring.datasource.password"));
+            ds.setUsername(environment.getProperty("spring.datasource.username"));
 
             log.info("create ds:{}", ds);
+            return ds;
         } catch (Exception e) {
             log.error("exception:", e.toString());
             exit();
+            return null;
         }
-        return ds;
     }
 
 

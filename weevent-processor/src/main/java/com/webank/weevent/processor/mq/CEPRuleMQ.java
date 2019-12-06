@@ -211,7 +211,7 @@ public class CEPRuleMQ {
 
                     // get the insert sql
                     StringBuffer insertExpression = new StringBuffer("insert into ");
-                    insertExpression.append(urlParamMap.get("tableName"));
+                    insertExpression.append(rule.getTableName());
                     insertExpression.append("(");
                     StringBuffer values = new StringBuffer(" values (");
 

@@ -4,6 +4,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import javax.sql.DataSource;
+
 import com.webank.weevent.processor.ProcessorApplication;
 
 import org.quartz.Scheduler;
@@ -50,7 +52,7 @@ public class QuartzConfig {
                 factory.setQuartzProperties(quartzPropertie);
 
                 // use Spring datasource
-                factory.setDataSource(ProcessorApplication.getDs());
+                factory.setDataSource((DataSource) ProcessorApplication.applicationContext.getBean("getDs"));
                 factory.setJobFactory(jobFactory);
 
                 in.close();
