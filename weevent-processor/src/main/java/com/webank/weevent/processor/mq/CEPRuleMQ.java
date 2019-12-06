@@ -203,7 +203,7 @@ public class CEPRuleMQ {
 
     private static void sendMessageToDB(String groupId, WeEvent eventContent, CEPRule rule) {
         try {
-            try (Connection conn = CommonUtil.getConnection(rule.getDatabaseUrl())) {
+            try (Connection conn = CommonUtil.getDbcpConnection(rule.getDatabaseUrl())) {
 
                 if (conn != null) {
                     // get the sql params
@@ -211,7 +211,7 @@ public class CEPRuleMQ {
 
                     // get the insert sql
                     StringBuffer insertExpression = new StringBuffer("insert into ");
-                    insertExpression.append(urlParamMap.get("tableName"));
+                    insertExpression.append(rule.getTableName());
                     insertExpression.append("(");
                     StringBuffer values = new StringBuffer(" values (");
 
