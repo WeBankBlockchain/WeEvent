@@ -1,7 +1,6 @@
 package com.webank.weevent.processor.utils;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,30 +27,8 @@ public class CommonUtil {
      * @param databaseUrl data bae url
      * @return connection
      */
-
-    public static Connection getConnection(String databaseUrl) {
-        String driver = "org.mariadb.jdbc.Driver";
-        try {
-            Class.forName(driver);
-            return DriverManager.getConnection(databaseUrl);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     public static Connection getDbcpConnection(String databaseUrl) {
         try {
-            int MAX_IDLE = 20;
-            int MinIdle = 8;
-            long MAX_WAIT_Millis = 5000;
-            int MAX_TOTAl = 5;
-            int INITIAL_SIZE = 10;
-            int RemoveAbandonedTimeout = 180;
-            final boolean TOBESTNORROW = true;
             BasicDataSource ds = new BasicDataSource();
 
             Map<String, String> requestUrlMap = uRLRequest(databaseUrl);
@@ -60,17 +37,15 @@ public class CommonUtil {
                 return null;
             }
             // set all parameter
-            ds.setDriverClassName("org.mariadb.jdbc.Driver");
+            ds.setDriverClassName(ProcessorApplication.environment.getProperty("spring.datasource.driverClassName"));
             ds.setUrl(urlPage(databaseUrl));
             ds.setUsername(requestUrlMap.get("user"));
             ds.setPassword(requestUrlMap.get("password"));
-            ds.setMaxTotal(MAX_TOTAl);
-            ds.setInitialSize(INITIAL_SIZE);
-            ds.setMinIdle(MinIdle);
-            ds.setMaxIdle(MAX_IDLE);
-            ds.setMaxWaitMillis(MAX_WAIT_Millis);
-            ds.setTestOnBorrow(TOBESTNORROW);
-            ds.setRemoveAbandonedTimeout(RemoveAbandonedTimeout);
+
+            ds.setInitialSize(Integer.valueOf(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.initial-size")));
+            ds.setMinIdle(Integer.valueOf(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.min-idle")));
+            ds.setMaxWaitMillis(Integer.valueOf(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.max-wait-millis")));
+
             return ds.getConnection();
 
         } catch (SQLException e) {
