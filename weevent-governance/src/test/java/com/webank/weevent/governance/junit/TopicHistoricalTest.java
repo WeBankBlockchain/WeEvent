@@ -8,6 +8,7 @@ import com.webank.weevent.governance.result.GovernanceResult;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpStatus;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,6 +44,15 @@ public class TopicHistoricalTest extends JUnitTestBase {
                 this.testName.getMethodName());
     }
 
+    @Test
+    public void testBroker001() throws Exception {
+        String content = "{\"name\":\"broker2\",\"brokerUrl\":\"http://127.0.0.1:8111/weevent\",\"userId\":\"1\"}";
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
+                .andReturn().getResponse();
+        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        Assert.assertTrue(response.getContentAsString().contains("true"));
+    }
+
 
     @Test
     public void testHistoricalDataList() throws Exception {
@@ -66,6 +76,15 @@ public class TopicHistoricalTest extends JUnitTestBase {
         Assert.assertNotNull(result);
         GovernanceResult governanceResult = JSONObject.parseObject(result, GovernanceResult.class);
         Assert.assertEquals(governanceResult.getStatus().toString(), "200");
+    }
+
+    @Test
+    public void testBroker002() throws Exception {
+        String content = "{\"id\":\"1\",\"userId\":\"1\"}";
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/delete").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
+                .andReturn().getResponse();
+        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        Assert.assertTrue(response.getContentAsString().contains("true"));
     }
 
 }

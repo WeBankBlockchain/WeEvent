@@ -161,7 +161,7 @@ public class AccountService {
     public GovernanceResult getUserId(String username) {
         // get user by username
         AccountEntity user = this.queryByUsername(username);
-        Integer userId = user.getId();
+        Integer userId = user == null ? null : user.getId();
         return GovernanceResult.ok(userId);
     }
 
@@ -191,7 +191,7 @@ public class AccountService {
         return null;
     }
 
-    public List<AccountEntity> accountEntityList(HttpServletRequest request, AccountEntity accountEntity) throws GovernanceException {
+    public List<AccountEntity> accountEntityList(HttpServletRequest request, AccountEntity accountEntity) {
         // execute select
         String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
         Example<AccountEntity> entityExample = Example.of(accountEntity);
@@ -200,6 +200,11 @@ public class AccountService {
         list = list.stream().filter(it -> !it.getId().toString().equals(accountId)).collect(Collectors.toList());
         list.forEach(it -> it.setPassword(null));
         return list;
+    }
+
+    public void deleteUser(HttpServletRequest request, AccountEntity accountEntity) {
+        // execute select
+        accountRepository.deleteByUserName(accountEntity.getUsername(), String.valueOf(new Date().getTime()));
     }
 
     private List<AccountEntity> findAllByUsernameAndDeleteAt(String userName) {

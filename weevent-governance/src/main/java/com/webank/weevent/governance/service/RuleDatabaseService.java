@@ -78,14 +78,17 @@ public class RuleDatabaseService {
     }
 
     @Transactional(rollbackFor = Throwable.class)
-    public boolean deleteRuleDatabase(RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
+    public void deleteRuleDatabase(RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
         try {
             String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
             if (accountId == null || !accountId.equals(ruleDatabaseEntity.getUserId().toString())) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
-            ruleDatabaseRepository.delete(ruleDatabaseEntity);
-            return true;
+            RuleDatabaseEntity databaseEntity = ruleDatabaseRepository.findById(ruleDatabaseEntity.getId());
+            if (databaseEntity == null) {
+                return;
+            }
+            ruleDatabaseRepository.delete(databaseEntity);
         } catch (Exception e) {
             log.error("delete ruleDatabaseEntity fail", e);
             throw new GovernanceException("delete ruleDatabaseEntity fail ", e);

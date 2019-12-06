@@ -93,7 +93,7 @@ public class BrokerControllerTest extends JUnitTestBase {
 
     @Test
     public void testDeleteBroker() throws Exception {
-        String content = "{\"id\":\"999\",\"userId\":\"1\"}";
+        String content = "{\"id\":\"1\",\"userId\":\"1\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/delete").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);

@@ -26,7 +26,6 @@ public class AccountControllerTest extends JUnitTestBase {
     private MockMvc mockMvc;
 
 
-
     @Before
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
@@ -54,8 +53,7 @@ public class AccountControllerTest extends JUnitTestBase {
 
     @Test
     public void testAccountList() throws Exception {
-        String content = "{\"userId\":\"2\"}";
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/user/accountList").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/user/accountList").contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
@@ -73,6 +71,7 @@ public class AccountControllerTest extends JUnitTestBase {
         Assert.assertEquals(jsonObject.get("status").toString(), "200");
     }
 
+
     @Test
     public void testUpdatePassword() throws Exception {
         String content = "{\"username\":\"zjy05\",\"oldPassword\":\"123456\",\"password\":\"1232245226\"}";
@@ -87,16 +86,16 @@ public class AccountControllerTest extends JUnitTestBase {
     }
 
     @Test
-    public void testForgetPasswordException() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/user/forget?username=zjy05").contentType(MediaType.APPLICATION_JSON_UTF8))
+    public void testDelete() throws Exception {
+        String content = "{\"username\":\"zjy05\"}";
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/user/delete").content(content).contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         JSONObject jsonObject = JSONObject.parseObject(response.getContentAsString());
         Assert.assertNotNull(jsonObject);
-        Assert.assertEquals(jsonObject.get("code").toString(), "100102");
+        Assert.assertEquals(jsonObject.get("data").toString(), "true");
     }
-
 
 
 }

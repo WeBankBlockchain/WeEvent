@@ -59,8 +59,8 @@ public class RuleDatabaseController {
     @PostMapping("/delete")
     public GovernanceResult deleteRuleDatabase(@RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
         log.info("delete  ruleDatabaseEntity service ,id:{}", ruleDatabaseEntity.getId());
-        boolean flag = ruleDatabaseService.deleteRuleDatabase(ruleDatabaseEntity, request);
-        return new GovernanceResult(flag);
+        ruleDatabaseService.deleteRuleDatabase(ruleDatabaseEntity, request);
+        return new GovernanceResult(true);
     }
 
     @PostMapping("/checkDataBaseUrl")
