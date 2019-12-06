@@ -33,7 +33,7 @@ public class CommonUtil {
 
             Map<String, String> requestUrlMap = uRLRequest(databaseUrl);
             // check all parameter
-            if (!(requestUrlMap.containsKey("user") && requestUrlMap.containsKey("password") && (null != urlPage(databaseUrl)))) {
+            if (!requestUrlMap.containsKey("user") || !requestUrlMap.containsKey("password") || StringUtils.isEmpty(urlPage(databaseUrl))) {
                 return null;
             }
             // set all parameter
@@ -49,7 +49,7 @@ public class CommonUtil {
             return ds.getConnection();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("e:{}",e.toString());
             return null;
         }
     }

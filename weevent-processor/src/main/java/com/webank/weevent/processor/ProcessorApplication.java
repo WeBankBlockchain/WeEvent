@@ -76,8 +76,8 @@ public class ProcessorApplication {
         } catch (Exception e) {
             log.error("exception:", e.toString());
             exit();
-            return null;
         }
+        return null;
     }
 
 
