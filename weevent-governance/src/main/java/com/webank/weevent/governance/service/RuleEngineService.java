@@ -757,12 +757,14 @@ public class RuleEngineService {
         }
         RuleDatabaseEntity ruleDataBase = ruleDatabaseRepository.findById(rule.getRuleDataBaseId());
         if (ruleDataBase != null) {
+            String dbUrl = commonService.getDataBaseUrl(ruleDataBase) + "?user=" + ruleDataBase.getUsername() + "&password=" + ruleDataBase.getPassword();
             String dbUrl = commonService.getDataBaseUrl(ruleDataBase) + "?user=" + ruleDataBase.getUsername() + "&password=" + ruleDataBase.getPassword() +
                     "&tableName=" + ruleDataBase.getTableName();
             if (!StringUtil.isBlank(ruleDataBase.getOptionalParameter())) {
                 dbUrl = dbUrl + "&" + ruleDataBase.getOptionalParameter();
             }
             rule.setDatabaseUrl(dbUrl);
+            rule.setTableName(ruleDataBase.getTableName());
             log.info("dataBaseUrl:{}", rule.getDatabaseUrl());
         }
     }

@@ -64,5 +64,8 @@ public class RuleEngineEntity extends RuleEngineBase {
     private String offSet;
 
     @Transient
+    private String tableName;
+
+    @Transient
     private List<RuleEngineConditionEntity> ruleEngineConditionList = new ArrayList<>();
 }
