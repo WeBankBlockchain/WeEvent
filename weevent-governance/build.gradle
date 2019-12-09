@@ -32,10 +32,10 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBoot2Version}")
 
     //jpa
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa:${springBoot2Version}")
 
     //h2
-    implementation("com.h2database:h2:1.4.196")
+    implementation("com.h2database:h2:${h2Version}")
 
 }
 

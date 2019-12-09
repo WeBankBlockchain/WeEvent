@@ -11,7 +11,4 @@ public interface RuleDatabaseRepository extends JpaRepository<RuleDatabaseEntity
 
     RuleDatabaseEntity findById(Integer id);
 
-    // delete ruleDatabaseEntity
- //   Boolean deleteRuleDatabase(RuleDatabaseEntity ruleDatabaseEntity);
-
 }

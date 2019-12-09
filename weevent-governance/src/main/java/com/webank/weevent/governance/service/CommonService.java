@@ -232,12 +232,10 @@ public class CommonService implements AutoCloseable {
             return mapRequest;
         }
         mapRequest.put("optionalParameter", strUrlParam);
-        String jdbcType = URL.substring(0, URL.indexOf("//") + 2);
         int first = URL.indexOf("/") + 2;
         int end = URL.lastIndexOf("/");
         String substring = URL.substring(first, end);
         String[] split = substring.split(":");
-        mapRequest.put("jdbcType", jdbcType);
         mapRequest.put("ip", split[0]);
         mapRequest.put("port", split[1]);
         return mapRequest;
