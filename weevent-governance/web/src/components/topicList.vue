@@ -19,6 +19,7 @@
     element-loading-background='rgba(256,256,256,0.8)'
     style="width: 100%"
     @row-click='rowClick'
+    @expand-change='readDetail'
     ref='table'
     >
     <el-table-column type="expand">
@@ -119,6 +120,47 @@ export default {
   },
   methods: {
     // 数据获取
+    getLastPage () {
+      let vm = this
+      vm.loading = true
+      let data = {
+        pageIndex: 0,
+        pageSize: vm.pageSize,
+        brokerId: Number(localStorage.getItem('brokerId')),
+        groupId: Number(localStorage.getItem('groupId'))
+      }
+      API.topicList(data).then(res => {
+        if (res.status === 200) {
+          vm.total = res.data.total
+          let last = Math.ceil(res.data.total / vm.pageSize)
+          this.pageIndex = last
+          let data = {
+            pageIndex: last - 1,
+            pageSize: vm.pageSize,
+            brokerId: Number(localStorage.getItem('brokerId')),
+            groupId: Number(localStorage.getItem('groupId'))
+          }
+          API.topicList(data).then(res => {
+            if (res.status === 200) {
+              let listData = res.data.topicInfoList.reverse()
+              let det = {
+                'topicName': '',
+                'createdTimestamp': '',
+                'topicAddress': '',
+                'lastTimestamp': ''
+              }
+              listData.forEach(item => {
+                vm.$set(item, 'detail', det)
+              })
+              vm.tableData = [].concat(listData)
+            }
+          })
+        }
+        vm.loading = false
+      }).catch(e => {
+        vm.loading = false
+      })
+    },
     getLsitData () {
       let vm = this
       vm.loading = true
@@ -131,7 +173,7 @@ export default {
       API.topicList(data).then(res => {
         if (res.status === 200) {
           vm.total = res.data.total
-          let listData = res.data.topicInfoList
+          let listData = res.data.topicInfoList.reverse()
           let det = {
             'topicName': '',
             'createdTimestamp': '',
@@ -152,7 +194,7 @@ export default {
       sessionStorage.removeItem('topic')
       this.loading = true
       setTimeout(fun => {
-        this.getLsitData()
+        this.getLastPage()
       }, 1000)
     },
     readDetail (e) {
@@ -171,7 +213,7 @@ export default {
     },
     sizeChange (e) {
       this.pageSize = e
-      this.getLsitData()
+      this.getLastPage()
     },
     // check formart
     checkName (e) {
@@ -255,13 +297,12 @@ export default {
           vm.total = 1
         })
       } else {
-        vm.vmpageIndex = 1
-        vm.pageSize = 10
-        vm.getLsitData()
+        vm.getLastPage()
       }
     },
     rowClick (e) {
-      console.log(this.$refs.table)
+      this.$refs.table.toggleRowExpansion(e)
+      this.readDetail(e)
     }
   },
   mounted () {
@@ -283,7 +324,7 @@ export default {
         vm.total = 1
       })
     } else {
-      this.getLsitData()
+      this.getLastPage()
     }
   },
   computed: {
@@ -303,18 +344,12 @@ export default {
       }
     },
     brokerId () {
-      this.pageIndex = 1
-      this.pageSize = 10
       this.tableData = []
-      this.total = 0
       this.topicName = ''
       this.refresh()
     },
     groupId () {
-      this.pageIndex = 1
-      this.pageSize = 10
       this.tableData = []
-      this.total = 0
       this.topicName = ''
       this.refresh()
     }
