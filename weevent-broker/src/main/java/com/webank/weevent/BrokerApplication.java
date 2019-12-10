@@ -13,6 +13,7 @@ import com.webank.weevent.broker.ha.MasterJob;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.WeEvent;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.googlecode.jsonrpc4j.ErrorResolver;
@@ -23,6 +24,7 @@ import org.apache.coyote.http11.Http11NioProtocol;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
@@ -30,14 +32,15 @@ import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerF
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.Protocol;
 
 /**
  * @author websterchen
@@ -258,24 +261,27 @@ public class BrokerApplication {
 
     //redis
     @Bean
-    @ConditionalOnProperty(prefix = "redis.server", name = {"ip", "port"})
-    public static RedisService getRedisService() {
-        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
-        JedisPool jedisPool = new JedisPool(jedisPoolConfig,
-                weEventConfig.getRedisServerIp(),
-                weEventConfig.getRedisServerPort(),
-                Protocol.DEFAULT_TIMEOUT,
-                weEventConfig.getRedisServerPassword());
+    @ConditionalOnProperty(prefix = "spring.redis", name = {"host", "port"})
+    @ConditionalOnMissingBean(name="redisTemplate")
+    public static RedisService getRedisService(LettuceConnectionFactory redisConnectionFactory) {
         try {
-            if (jedisPool.getResource() != null) {
-                jedisPool.getResource().ping();
-            }
+            // test Redis connection
+            redisConnectionFactory.validateConnection();
         } catch (Exception e) {
-            log.error("init redis error", e);
+            log.error("Unable to connect to Redis, ", e);
             exit();
         }
+
+        RedisTemplate<String, List<WeEvent>> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        redisTemplate.setEnableTransactionSupport(true);
+        redisTemplate.afterPropertiesSet();
+
         RedisService redisService = new RedisService();
-        redisService.setJedisPool(jedisPool);
+        redisService.setRedisTemplate(redisTemplate);
+
         return redisService;
     }
 
