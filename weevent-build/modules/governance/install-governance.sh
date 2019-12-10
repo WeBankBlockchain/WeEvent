@@ -14,7 +14,7 @@ function governance_setup() {
         echo "set server_port failed"
         exit 1
     else
-       sed -i "/server.port*/cserver.port=${server_port}" $application_properties
+       sed -i "/server.port*/cserver.port=${server_port}" ${application_properties}
     fi
     echo "set server_port success"
 
@@ -23,7 +23,7 @@ function governance_setup() {
         echo "set mysql_ip failed"
         exit 1
     else
-       sed -i "s/127.0.0.1:3306/${mysql_ip}:3306/" $application_properties
+       sed -i "s/127.0.0.1:3306/${mysql_ip}:3306/" ${application_properties}
     fi
     echo "set mysql_ip success"
      
@@ -32,7 +32,7 @@ function governance_setup() {
         echo "set mysql_port failed"
         exit 1
     else
-       sed -i "s/3306/${mysql_port}/" $application_properties
+       sed -i "s/3306/${mysql_port}/" ${application_properties}
     fi
     echo "set mysql_port success"
 
@@ -41,7 +41,7 @@ function governance_setup() {
         echo "set mysql_user failed"
         exit 1
     else
-       sed -i "s/xxxx/${mysql_user}/" $application_properties
+       sed -i "s/xxxx/${mysql_user}/" ${application_properties}
     fi
     echo "set mysql_user success"
   
@@ -50,12 +50,12 @@ function governance_setup() {
         echo "set mysql_pwd failed"
         exit 1
     else
-       sed -i "s/yyyy/${mysql_pwd}/" $application_properties
+       sed -i "s/yyyy/${mysql_pwd}/" ${application_properties}
     fi
     echo "set mysql_pwd success"
 
     if [[ -n ${processor_port} ]];then
-       sed -i "/weevent.processor.url*/cweevent.processor.url=http://127.0.0.1:${processor_port}" $application_properties
+       sed -i "/weevent.processor.url*/cweevent.processor.url=http://127.0.0.1:${processor_port}" ${application_properties}
     fi
      
     # init db, create database and tables
