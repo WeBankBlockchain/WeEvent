@@ -204,7 +204,7 @@ public class AccountService {
 
     public void deleteUser(HttpServletRequest request, AccountEntity accountEntity) {
         // execute select
-        accountRepository.deleteByUserName(accountEntity.getUsername(), String.valueOf(new Date().getTime()));
+        accountRepository.deleteByUserName(accountEntity.getUsername(), new Date().getTime());
     }
 
     private List<AccountEntity> findAllByUsernameAndDeleteAt(String userName) {

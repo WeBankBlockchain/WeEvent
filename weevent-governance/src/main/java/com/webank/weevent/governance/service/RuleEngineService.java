@@ -173,7 +173,7 @@ public class RuleEngineService {
             //delete RuleEngineCondition
             ruleEngineConditionRepository.deleteRuleEngineCondition(ruleEngineEntity.getId());
             //delete RuleEngine
-            ruleEngineRepository.deleteRuleEngine(ruleEngineEntity.getId(), String.valueOf(new Date().getTime()));
+            ruleEngineRepository.deleteRuleEngine(ruleEngineEntity.getId(), new Date().getTime());
             log.info("delete end");
             return true;
         } catch (Exception e) {
@@ -752,6 +752,9 @@ public class RuleEngineService {
     }
 
     private void setRuleDataBaseUrl(RuleEngineEntity rule) {
+        rule.setRuleDataBaseId(null);
+        rule.setDatabaseUrl("jdbc:h2:~/WeEvent_governance?user=root&password=123456");
+        rule.setTableName("TOPIC_HISTORICAL");
         if (rule.getRuleDataBaseId() == null) {
             return;
         }

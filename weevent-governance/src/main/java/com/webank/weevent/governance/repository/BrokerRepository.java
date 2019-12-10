@@ -14,12 +14,18 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface BrokerRepository extends JpaRepository<BrokerEntity, Long> {
 
-    BrokerEntity findByIdAndDeleteAt(Integer id, String deleteAt);
+    BrokerEntity findByIdAndDeleteAt(Integer id, Long deleteAt);
+
 
     @Transactional
     @Modifying
     @Query(value = "update t_broker set delete_at=:deleteAt where id =:id", nativeQuery = true)
-    void deleteById(@Param("id") Integer id, @Param("deleteAt") String deleteAt);
+    void deleteById(@Param("id") Integer id, @Param("deleteAt") Long deleteAt);
+
+    @Transactional
+    @Modifying
+    @Query(value = "update t_broker set delete_at=:deleteAt where broker_url =:brokerUrl", nativeQuery = true)
+    void deleteByBrokerUrl(@Param("brokerUrl") String brokerUrl, @Param("deleteAt") Long deleteAt);
 
 
 }

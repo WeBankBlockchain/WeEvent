@@ -238,6 +238,7 @@ public class CommonService implements AutoCloseable {
         String[] split = substring.split(":");
         mapRequest.put("ip", split[0]);
         mapRequest.put("port", split[1]);
+        mapRequest.put("jdbcType","jdbc:mysql://");
         return mapRequest;
     }
 

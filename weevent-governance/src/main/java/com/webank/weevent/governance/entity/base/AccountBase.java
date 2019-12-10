@@ -29,6 +29,6 @@ public class AccountBase extends BaseEntity {
     private String password;
 
     //0 means not deleted ,others means deleted
-    @Column(name = "delete_at",nullable = false)
-    private String deleteAt = "0";
+    @Column(name = "delete_at",nullable = false, columnDefinition = "BIGINT(16)")
+    private Long deleteAt = 0L;
 }

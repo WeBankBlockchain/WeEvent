@@ -58,4 +58,46 @@ public class ForwardControllerTest extends JUnitTestBase {
         Assert.assertEquals(0, code);
         Assert.assertTrue(data instanceof List);
     }
+
+    @Test
+    public void testGroupList34() throws Exception {
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.get("/weevent/" + "admin" + "/" + "listGroup").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie))
+                .andReturn().getResponse();
+        String contentAsString = response.getContentAsString();
+        Assert.assertEquals(response.getStatus(), 200);
+        Assert.assertNotNull(contentAsString);
+        JSONObject jsonObject = JSONObject.parseObject(contentAsString);
+        Object code = jsonObject.get("code");
+        Object data = jsonObject.get("data");
+        Assert.assertEquals(0, code);
+        Assert.assertTrue(data instanceof List);
+    }
+
+    @Test
+    public void testGroupList341() throws Exception {
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.get("/weevent/" + "admin" + "/" + "listGroup").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie))
+                .andReturn().getResponse();
+        String contentAsString = response.getContentAsString();
+        Assert.assertEquals(response.getStatus(), 200);
+        Assert.assertNotNull(contentAsString);
+        JSONObject jsonObject = JSONObject.parseObject(contentAsString);
+        Object code = jsonObject.get("code");
+        Object data = jsonObject.get("data");
+        Assert.assertEquals(0, code);
+        Assert.assertTrue(data instanceof List);
+    }
+
+    @Test
+    public void testGroupList12() throws Exception {
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.get("/weevent/" + "admin" + "/" + "listGroup").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie))
+                .andReturn().getResponse();
+        String contentAsString = response.getContentAsString();
+        Assert.assertEquals(response.getStatus(), 200);
+        Assert.assertNotNull(contentAsString);
+        JSONObject jsonObject = JSONObject.parseObject(contentAsString);
+        Object code = jsonObject.get("code");
+        Object data = jsonObject.get("data");
+        Assert.assertEquals(0, code);
+        Assert.assertTrue(data instanceof List);
+    }
 }

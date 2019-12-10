@@ -32,7 +32,7 @@ public class TopicBase extends BaseEntity {
     private String description;
 
     //0 means not deleted ,others means deleted
-    @Column(name = "delete_at",nullable = false, columnDefinition = "varchar(32)")
-    private String deleteAt = "0";
+    @Column(name = "delete_at",nullable = false, columnDefinition = "BIGINT(16)")
+    private Long deleteAt = 0L;
 
 }

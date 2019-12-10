@@ -33,8 +33,8 @@ public class BrokerBase extends BaseEntity {
     private String webaseUrl;
 
     //0 means not deleted ,others means deleted
-    @Column(name = "delete_at",nullable = false, columnDefinition = "varchar(64)")
-    private String deleteAt = "0";
+    @Column(name = "delete_at",nullable = false, columnDefinition = "BIGINT(16)")
+    private Long deleteAt = 0L;
 
     public void setBrokerUrl(String brokerUrl) {
         this.brokerUrl = brokerUrl == null ? null : brokerUrl.trim();

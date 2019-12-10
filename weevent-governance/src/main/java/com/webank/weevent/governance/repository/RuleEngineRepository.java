@@ -20,7 +20,7 @@ public interface RuleEngineRepository extends JpaRepository<RuleEngineEntity, Lo
     @Transactional
     @Modifying
     @Query(value = "update t_rule_engine  set status=2 , delete_at=:deleteAt where id =:id", nativeQuery = true)
-    void deleteRuleEngine(@Param("id") Integer id, @Param("deleteAt") String deleteAt);
+    void deleteRuleEngine(@Param("id") Integer id, @Param("deleteAt") Long deleteAt);
 
 
     @Query(value = "select distinct from_destination as fromDestination,to_destination as toDestination from t_rule_engine" +

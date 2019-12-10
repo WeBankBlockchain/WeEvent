@@ -45,16 +45,6 @@ public class TopicHistoricalTest extends JUnitTestBase {
     }
 
     @Test
-    public void testBroker001() throws Exception {
-        String content = "{\"name\":\"broker2\",\"brokerUrl\":\"http://127.0.0.1:8111/weevent\",\"userId\":\"1\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
-                .andReturn().getResponse();
-        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Assert.assertTrue(response.getContentAsString().contains("true"));
-    }
-
-
-    @Test
     public void testHistoricalDataList() throws Exception {
         String content = "{\"groupId\":\"1\",\"userId\":\"1\",\"brokerId\":\"1\",\"beginDate\":\"2019-10-08\",\"endDate\":\"2019-10-15\"}";
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/historicalData/list")
@@ -78,13 +68,5 @@ public class TopicHistoricalTest extends JUnitTestBase {
         Assert.assertEquals(governanceResult.getStatus().toString(), "200");
     }
 
-    @Test
-    public void testBroker002() throws Exception {
-        String content = "{\"id\":\"1\",\"userId\":\"1\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/delete").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
-                .andReturn().getResponse();
-        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Assert.assertTrue(response.getContentAsString().contains("true"));
-    }
 
 }

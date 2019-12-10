@@ -94,7 +94,7 @@ public class AccountControllerTest extends JUnitTestBase {
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         JSONObject jsonObject = JSONObject.parseObject(response.getContentAsString());
         Assert.assertNotNull(jsonObject);
-        Assert.assertEquals(jsonObject.get("data").toString(), "true");
+        Assert.assertEquals(jsonObject.get("status").toString(), "200");
     }
 
 

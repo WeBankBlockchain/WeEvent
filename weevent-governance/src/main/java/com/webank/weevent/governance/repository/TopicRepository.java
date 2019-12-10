@@ -15,17 +15,17 @@ import org.springframework.transaction.annotation.Transactional;
 public interface TopicRepository extends JpaRepository<TopicEntity, Long> {
 
     //find topic by brokerId、groupId、topicNameList
-    List<TopicEntity> findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(Integer brokerId, String groupId, List<String> topicNameList, String deleteAt);
+    List<TopicEntity> findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(Integer brokerId, String groupId, List<String> topicNameList, Long deleteAt);
 
     //delete  topic by groupId and brokerId
     @Transactional
     @Modifying
     @Query(value = "update t_topic set delete_at=:deleteAt where topic_name =:topicName and broker_id=:brokerId and group_id=:groupId", nativeQuery = true)
-    void deleteTopicInfo(@Param("topicName") String topicName, @Param("deleteAt") String deleteAt, @Param("brokerId") Integer brokerId, @Param("groupId") String groupId);
+    void deleteTopicInfo(@Param("topicName") String topicName, @Param("deleteAt") Long deleteAt, @Param("brokerId") Integer brokerId, @Param("groupId") String groupId);
 
     //delete  topic by brokerId
     @Transactional
     @Modifying
     @Query(value = "update t_topic set delete_at=:deleteAt  where broker_id =:brokerId", nativeQuery = true)
-    void deleteByBrokerId(@Param("brokerId") Integer brokerId, @Param("deleteAt") String deleteAt);
+    void deleteByBrokerId(@Param("brokerId") Integer brokerId, @Param("deleteAt") Long deleteAt);
 }

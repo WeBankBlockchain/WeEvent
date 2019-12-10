@@ -129,7 +129,7 @@ public class BrokerService {
                 log.info("processor exist");
                 topicHistoricalService.createRule(request, response, brokerEntity);
             }
-            return GovernanceResult.ok(true);
+            return GovernanceResult.ok(brokerEntity.getId());
         } catch (Exception e) {
             log.error("add broker fail", e);
             throw new GovernanceException("add broker fail" + e.getMessage());
@@ -183,8 +183,8 @@ public class BrokerService {
                     ruleEngineService.deleteProcessRule(request, ruleEngine);
                 }
             }
-            topicRepository.deleteByBrokerId(brokerEntity.getId(), String.valueOf(new Date().getTime()));
-            brokerRepository.deleteById(brokerEntity.getId(), String.valueOf(new Date().getTime()));
+            topicRepository.deleteByBrokerId(brokerEntity.getId(), new Date().getTime());
+            brokerRepository.deleteById(brokerEntity.getId(), new Date().getTime());
             permissionRepository.deletePermissionByBrokerId(brokerEntity.getId());
         } catch (Exception e) {
             log.info("delete broker fail", e);
@@ -317,5 +317,9 @@ public class BrokerService {
             log.error("get version fail,error:", e);
             throw new GovernanceException("get version fail,error:{}");
         }
+    }
+
+    public void deleteByBrokerUrl(String brokerUrl){
+        brokerRepository.deleteByBrokerUrl(brokerUrl,System.currentTimeMillis());
     }
 }

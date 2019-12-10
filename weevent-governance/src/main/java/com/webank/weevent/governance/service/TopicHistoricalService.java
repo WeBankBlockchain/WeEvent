@@ -167,22 +167,22 @@ public class TopicHistoricalService {
         String password = dataBasePassword;
         String dbName;
         try {
-            int first = goalUrl.lastIndexOf("/");
+/*            int first = goalUrl.lastIndexOf("/");
             int end = goalUrl.lastIndexOf("?");
             dbName = goalUrl.substring(first + 1, end);
             // get mysql default url like jdbc:mysql://127.0.0.1:3306
-            Map<String, String> urlMap = commonService.uRLRequest(goalUrl);
-            RuleDatabaseEntity ruleDatabaseEntity = new RuleDatabaseEntity(brokerEntity.getUserId(), brokerEntity.getId(), urlMap.get("ip"), urlMap.get("port"),
+            Map<String, String> urlMap = commonService.uRLRequest(goalUrl);*/
+          /*  RuleDatabaseEntity ruleDatabaseEntity = new RuleDatabaseEntity(brokerEntity.getUserId(), brokerEntity.getId(), urlMap.get("ip"), urlMap.get("port"),
                     user, password, dbName, urlMap.get("optionalParameter"), "SYSTEM-" + dbName, TOPIC_HISTORICAL, true);
             ruleDatabaseRepository.save(ruleDatabaseEntity);
-
+*/
             //Request broker to get all groups
             List<String> groupList = getGroupList(request, brokerEntity);
             for (String groupId : groupList) {
                 //get new tableName
                 groupId = groupId.replaceAll("\"", "");
                 RuleEngineEntity ruleEngineEntity = initializationRule("SYSTEM-"  + brokerEntity.getId() + "-" + groupId,
-                        brokerEntity, groupId, ruleDatabaseEntity.getId());
+                        brokerEntity, groupId, 111);
                 ruleEngineRepository.save(ruleEngineEntity);
                 //built-in rule engine data and start
                 ruleEngineService.startRuleEngine(ruleEngineEntity, request, response);

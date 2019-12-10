@@ -88,7 +88,7 @@ public class TopicService {
             HttpGet get = commonService.getMethod(url, request);
             CloseableHttpResponse closeResponse = client.execute(get);
             String mes = EntityUtils.toString(closeResponse.getEntity());
-            topicRepository.deleteTopicInfo(topic, String.valueOf(new Date().getTime()), brokerId, groupId);
+            topicRepository.deleteTopicInfo(topic, new Date().getTime(), brokerId, groupId);
             return (Boolean) JSON.parse(mes);
         } catch (Exception e) {
             log.error("close topic fail,topic :{},error:{}", topic, e.getMessage());
@@ -189,7 +189,7 @@ public class TopicService {
 
             if (result != null) {
                 // get creator from database
-                List<TopicEntity> creators = topicRepository.findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(brokerId, groupId, new ArrayList<>(Collections.singletonList(topic)),DeleteAtEnum.NOT_DELETED.getCode());
+                List<TopicEntity> creators = topicRepository.findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(brokerId, groupId, new ArrayList<>(Collections.singletonList(topic)), DeleteAtEnum.NOT_DELETED.getCode());
                 if (CollectionUtils.isNotEmpty(creators)) {
                     result.setCreater(creators.get(0).getCreater());
                 }

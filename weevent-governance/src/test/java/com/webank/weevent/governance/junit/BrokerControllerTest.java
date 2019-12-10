@@ -1,13 +1,15 @@
 package com.webank.weevent.governance.junit;
 
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.Cookie;
 
 import com.webank.weevent.governance.JUnitTestBase;
-import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.properties.ConstantProperties;
+import com.webank.weevent.governance.result.GovernanceResult;
+import com.webank.weevent.governance.service.BrokerService;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -34,10 +36,13 @@ public class BrokerControllerTest extends JUnitTestBase {
 
     private Cookie cookie;
 
+    private Map<String, Integer> brokerIdMap = new HashMap<>();
+
     @Before
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
         this.cookie = new Cookie(ConstantProperties.COOKIE_MGR_ACCOUNT_ID, "1");
+        brokerIdMap.put("brokerId", 1);
     }
 
     @Before
@@ -47,56 +52,69 @@ public class BrokerControllerTest extends JUnitTestBase {
                 this.testName.getMethodName());
     }
 
+    //add broker
     @Test
-    public void testAddBroker() throws Exception {
-        String content = "{\"name\":\"broker2\",\"brokerUrl\":\"http://129.204.225.235:8080/weevent\",\"userId\":\"1\"}";
+    public void testBroker001() throws Exception {
+        String content = "{\"name\":\"broker2\",\"brokerUrl\":\"http://127.0.0.1:7000/weevent\",\"userId\":\"1\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Assert.assertTrue(response.getContentAsString().contains("true"));
+        GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(), GovernanceResult.class);
+        brokerIdMap.put("brokerId", (Integer) governanceResult.getData());
+        Assert.assertEquals(governanceResult.getStatus().toString(), "200");
     }
 
+    //update broker
     @Test
-    public void testUpdateBroker() throws Exception {
-        String content = "{\"id\":\"1\",\"name\":\"broker1\",\"brokerUrl\":\"http://129.204.225.235:8080/weevent\",\"userId\":\"1\"}";
+    public void testBroker002() throws Exception {
+        String content = "{\"id\":" + this.brokerIdMap.get("brokerId") + ",\"name\":\"broker1\",\"brokerUrl\":\"http://127.0.0.1:7000/weevent\",\"userId\":\"1\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/update").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content)).andReturn().getResponse();
-
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Assert.assertTrue(response.getContentAsString().contains("true"));
 
     }
 
 
+    // get broker by id
     @Test
-    public void testGetBroker() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/broker/1").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie)).andReturn();
+    public void testBroker003() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/broker/" + this.brokerIdMap.get("brokerId")).contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie)).andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         String contentAsString = response.getContentAsString();
         Assert.assertNotNull(contentAsString);
-        JSONObject jsonObject = JSONObject.parseObject(contentAsString);
-        Assert.assertEquals(jsonObject.get("id").toString(), "1");
     }
 
+    // get broker by userId
     @Test
-    public void testGetBrokers() throws Exception {
+    public void testBroker004() throws Exception {
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/broker/list?userId=1").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie))
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
-
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         String contentAsString = response.getContentAsString();
         Assert.assertNotNull(contentAsString);
-        List<BrokerEntity> brokerEntities = JSONObject.parseArray(contentAsString, BrokerEntity.class);
-        Assert.assertEquals(brokerEntities.get(0).getUserId().toString(), "1");
     }
 
+
+    //delete broker by id
     @Test
-    public void testDeleteBroker() throws Exception {
-        String content = "{\"id\":\"1\",\"userId\":\"1\"}";
+    public void testBroker005() throws Exception {
+        String content = "{\"id\":" + this.brokerIdMap.get("brokerId") + ",\"userId\":\"1\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/delete").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Assert.assertTrue(response.getContentAsString().contains("true"));
+        JSONObject jsonObject = JSONObject.parseObject(response.getContentAsString());
+        Assert.assertEquals(jsonObject.get("status").toString(), "200");
     }
+
+/*    @Test
+    public void testBroker006() throws Exception {
+        String content = "{\"id\":" + this.brokerId + ",\"userId\":\"1\"}";
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/delete").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
+                .andReturn().getResponse();
+        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        JSONObject jsonObject = JSONObject.parseObject(response.getContentAsString());
+        Assert.assertEquals(jsonObject.get("status").toString(), "200");
+    }*/
+
 }
