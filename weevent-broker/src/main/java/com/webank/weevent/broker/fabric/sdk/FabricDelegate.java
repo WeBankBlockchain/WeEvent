@@ -8,7 +8,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fabric.config.FabricConfig;
-import com.webank.weevent.broker.fisco.RedisService;
 import com.webank.weevent.broker.fisco.util.LRUCache;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.SendResult;
@@ -16,7 +15,8 @@ import com.webank.weevent.sdk.WeEvent;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeansException;
+import org.springframework.data.redis.core.RedisTemplate;
 
 /**
  * @author websterchen
@@ -29,7 +29,7 @@ public class FabricDelegate {
     private Map<String, Fabric> fabricMap;
 
     // block data cached in redis
-    private static RedisService redisService;
+    private static RedisTemplate<String, List<WeEvent>> redisTemplate;
 
     // block data cached in local memory
     private static LRUCache<String, List<WeEvent>> blockCache;
@@ -41,13 +41,10 @@ public class FabricDelegate {
     }
 
     private void initRedisService() {
-        if (redisService == null) {
-            // load redis service if needed
-            String redisServerIp = BrokerApplication.weEventConfig.getRedisServerIp();
-            Integer redisServerPort = BrokerApplication.weEventConfig.getRedisServerPort();
-            if (StringUtils.isNotBlank(redisServerIp) && redisServerPort > 0) {
-                redisService = BrokerApplication.applicationContext.getBean(RedisService.class);
-            }
+        try {
+            redisTemplate = BrokerApplication.applicationContext.getBean("springRedisTemplate", RedisTemplate.class);
+        } catch (BeansException e) {
+            log.info("No redis service is configured");
         }
 
         if (blockCache == null) {
