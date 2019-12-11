@@ -22,15 +22,6 @@ public class WeEventConfig {
     @Value("${ip.check.white-table:}")
     private String ipWhiteTable;
 
-    @Value("${redis.server.ip:}")
-    private String redisServerIp;
-
-    @Value("${redis.server.password:}")
-    private String redisServerPassword;
-
-    @Value("${redis.server.port:6379}")
-    private Integer redisServerPort;
-
     @Value("${lru.cache.capacity:65536}")
     private Integer maxCapacity;
 
