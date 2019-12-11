@@ -6,6 +6,7 @@ dependencies {
     // spring boot
     implementation("org.springframework.boot:spring-boot-starter:${springBoot2Version}")
     implementation("org.springframework.boot:spring-boot-starter-web:${springBoot2Version}")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis:${springBoot2Version}")
     implementation("org.springframework.data:spring-data-commons:${springDataCommonsVersion}")
 
     // spring boot with log4j2
@@ -32,9 +33,6 @@ dependencies {
     // curator prefer zookeeper 3.5
     // http://curator.apache.org/zk-compatibility.html
     implementation("org.apache.curator:curator-recipes:${curatorVersion}")
-
-    // redis
-    implementation("redis.clients:jedis:${redisVersion}")
 
     // web3sdk for FISCO-BCOS 2.0
     implementation("org.fisco-bcos:web3sdk:${web3sdkVersion.fiscoV2}") {
