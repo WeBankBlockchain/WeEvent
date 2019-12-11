@@ -1,11 +1,11 @@
 codecov:
-  token: test
+  token: $CODECOV_TOKEN
 
 coverage:
   status:
     project:
       default:
-        target: 65%
+        target: 60%
         threshold: null
         if_not_found: success
     patch:
