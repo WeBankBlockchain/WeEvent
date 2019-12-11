@@ -92,7 +92,7 @@ public class TopicService {
             return (Boolean) JSON.parse(mes);
         } catch (Exception e) {
             log.error("close topic fail,topic :{},error:{}", topic, e.getMessage());
-            throw new GovernanceException(ErrorCode.BROKER_CONNECT_ERROR);
+            throw new GovernanceException("close topic fail",e);
         }
     }
 
