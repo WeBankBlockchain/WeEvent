@@ -298,7 +298,7 @@ public class FiscoBcosDelegate {
             if (blockCache != null && blockCache.containsKey(key)) {
                 return blockCache.get(key);
             }
-            if (redisTemplate != null && redisTemplate.hasKey(key)) {
+            if (redisTemplate != null) {
                 return redisTemplate.opsForValue().get(key);
             }
         } catch (Exception e) {
