@@ -132,6 +132,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -166,6 +167,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -198,6 +200,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -221,7 +224,7 @@ public class ServiceTest {
                 "        \"conditionField\": \"c<20 and a>10\",\n" +
                 "        \"conditionType\": 2,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -231,6 +234,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -253,7 +257,7 @@ public class ServiceTest {
                 "        \"conditionField\": \"c<20 and a==10\",\n" +
                 "        \"conditionType\": 2,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -263,6 +267,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -285,7 +290,7 @@ public class ServiceTest {
                 "        \"conditionField\": \"c<20 or a==10\",\n" +
                 "        \"conditionType\": 2,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -295,6 +300,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -317,7 +323,7 @@ public class ServiceTest {
                 "        \"conditionField\": \"c>20\",\n" +
                 "        \"conditionType\": 2,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -327,6 +333,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -349,7 +356,7 @@ public class ServiceTest {
                 "        \"conditionField\": \"\",\n" +
                 "        \"conditionType\": 2,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -359,6 +366,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -381,7 +389,7 @@ public class ServiceTest {
                 "        \"conditionField\": \"c<20\",\n" +
                 "        \"conditionType\": 2,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -391,6 +399,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -414,7 +423,7 @@ public class ServiceTest {
                 "        \"conditionField\": \"c>20\",\n" +
                 "        \"conditionType\": 1,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -424,6 +433,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -446,7 +456,7 @@ public class ServiceTest {
                 "        \"conditionField\": \"\",\n" +
                 "        \"conditionType\": 1,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -456,6 +466,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -478,7 +489,7 @@ public class ServiceTest {
                 "        \"conditionField\": \"\",\n" +
                 "        \"conditionType\": 1,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -488,6 +499,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -510,7 +522,7 @@ public class ServiceTest {
                 "        \"conditionField\": \"c<19\",\n" +
                 "        \"conditionType\": 2,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -520,6 +532,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -542,7 +555,7 @@ public class ServiceTest {
                 "        \"conditionField\": \"c<19\",\n" +
                 "        \"conditionType\": 1,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -552,6 +565,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -574,7 +588,7 @@ public class ServiceTest {
                 "        \"conditionField\": \"c<20\",\n" +
                 "        \"conditionType\": 1,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -584,6 +598,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -603,7 +618,7 @@ public class ServiceTest {
                 "        \"conditionField\": \"c<10\",\n" +
                 "        \"conditionType\": 2,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -613,6 +628,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder2 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule2);
@@ -635,7 +651,7 @@ public class ServiceTest {
                 "        \"conditionField\": \"c<20\",\n" +
                 "        \"conditionType\": 1,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -645,6 +661,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -667,7 +684,7 @@ public class ServiceTest {
                 "        \"conditionField\": \"c==10\",\n" +
                 "        \"conditionType\": 1,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -677,6 +694,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder2 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -700,7 +718,7 @@ public class ServiceTest {
                 "        \"conditionField\": \"c<20\",\n" +
                 "        \"conditionType\": 2,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -710,6 +728,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -732,7 +751,7 @@ public class ServiceTest {
                 "        \"conditionField\": \"c==10\",\n" +
                 "        \"conditionType\": 1,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -742,6 +761,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -764,7 +784,7 @@ public class ServiceTest {
                 "        \"conditionField\": \"c==10\",\n" +
                 "        \"conditionType\": 1,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -774,6 +794,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
 
@@ -798,7 +819,7 @@ public class ServiceTest {
                 "        \"conditionField\": \"c==10 and a>10 or a<1\",\n" +
                 "        \"conditionType\": 1,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -808,6 +829,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -830,7 +852,7 @@ public class ServiceTest {
                 "        \"conditionField\": \"c==10 and a>10\",\n" +
                 "        \"conditionType\": 1,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -840,6 +862,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -862,7 +885,7 @@ public class ServiceTest {
                 "        \"conditionField\": \"c==10 or a>10 or a<1\",\n" +
                 "        \"conditionType\": 2,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -872,6 +895,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
@@ -894,7 +918,7 @@ public class ServiceTest {
                 "        \"conditionField\": \"c==10 and a>10\",\n" +
                 "        \"conditionType\": 2,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -904,6 +928,7 @@ public class ServiceTest {
                 "        \"userId\": \"1\",\n" +
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
         RequestBuilder requestBuilder1 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
