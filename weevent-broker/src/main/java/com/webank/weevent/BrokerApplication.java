@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.broker.config.WeEventConfig;
-import com.webank.weevent.broker.fisco.RedisService;
 import com.webank.weevent.broker.ha.MasterJob;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
@@ -24,7 +23,6 @@ import org.apache.coyote.http11.Http11NioProtocol;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
@@ -260,10 +258,9 @@ public class BrokerApplication {
     }
 
     //redis
-    @Bean
+    @Bean(name = "springRedisTemplate")
     @ConditionalOnProperty(prefix = "spring.redis", name = {"host", "port"})
-    @ConditionalOnMissingBean(name="redisTemplate")
-    public static RedisService getRedisService(LettuceConnectionFactory redisConnectionFactory) {
+    public static RedisTemplate<String, List<WeEvent>> redisTemplate(LettuceConnectionFactory redisConnectionFactory) {
         try {
             // test Redis connection
             redisConnectionFactory.validateConnection();
@@ -276,13 +273,9 @@ public class BrokerApplication {
         redisTemplate.setConnectionFactory(redisConnectionFactory);
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-        redisTemplate.setEnableTransactionSupport(true);
         redisTemplate.afterPropertiesSet();
 
-        RedisService redisService = new RedisService();
-        redisService.setRedisTemplate(redisTemplate);
-
-        return redisService;
+        return redisTemplate;
     }
 
     //ha

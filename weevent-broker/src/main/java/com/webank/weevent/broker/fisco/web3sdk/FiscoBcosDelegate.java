@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.config.FiscoConfig;
-import com.webank.weevent.broker.fisco.RedisService;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.LRUCache;
@@ -27,6 +26,8 @@ import com.webank.weevent.sdk.WeEvent;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeansException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
@@ -55,7 +56,7 @@ public class FiscoBcosDelegate {
     public static ThreadPoolTaskExecutor threadPool;
 
     // block data cached in redis
-    private static RedisService redisService;
+    private static RedisTemplate<String, List<WeEvent>> redisTemplate;
 
     // block data cached in local memory
     private static LRUCache<String, List<WeEvent>> blockCache;
@@ -75,15 +76,11 @@ public class FiscoBcosDelegate {
     }
 
     private void initRedisService() {
-        if (redisService == null) {
-            // load redis service if needed
-            String redisServerIp = BrokerApplication.weEventConfig.getRedisServerIp();
-            Integer redisServerPort = BrokerApplication.weEventConfig.getRedisServerPort();
-            if (StringUtils.isNotBlank(redisServerIp) && redisServerPort > 0) {
-                log.info("init redis service");
 
-                redisService = BrokerApplication.applicationContext.getBean(RedisService.class);
-            }
+        try {
+            redisTemplate = BrokerApplication.applicationContext.getBean("springRedisTemplate", RedisTemplate.class);
+        } catch (BeansException e) {
+            log.info("No redis service is configured");
         }
 
         if (blockCache == null) {
@@ -301,8 +298,8 @@ public class FiscoBcosDelegate {
             if (blockCache != null && blockCache.containsKey(key)) {
                 return blockCache.get(key);
             }
-            if (redisService != null && redisService.isEventsExistInRedis(key)) {
-                return redisService.readEventsFromRedis(key);
+            if (redisTemplate != null && redisTemplate.hasKey(key)) {
+                return redisTemplate.opsForValue().get(key);
             }
         } catch (Exception e) {
             log.error("Exception happened while read events from redis server", e);
@@ -317,8 +314,8 @@ public class FiscoBcosDelegate {
                 if (blockCache != null) {
                     blockCache.putIfAbsent(key, events);
                 }
-                if (redisService != null) {
-                    redisService.writeEventsToRedis(key, events);
+                if (redisTemplate != null) {
+                    redisTemplate.opsForValue().set(key, events);
                 }
             }
         } catch (Exception e) {

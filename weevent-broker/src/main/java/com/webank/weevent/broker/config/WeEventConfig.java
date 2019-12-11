@@ -22,20 +22,8 @@ public class WeEventConfig {
     @Value("${ip.check.white-table:}")
     private String ipWhiteTable;
 
-    @Value("${spring.redis.host:}")
-    private String redisServerIp;
-
-    @Value("${spring.redis.password:}")
-    private String redisServerPassword;
-
-    @Value("${spring.redis.port:6379}")
-    private Integer redisServerPort;
-
     @Value("${lru.cache.capacity:65536}")
     private Integer maxCapacity;
-
-    @Value("${spring.redis.timeout:5000}")
-    private Integer redisServerTimeout;
 
     @Value("${cgi.subscribe.notify.timeout:5000}")
     private Integer cgi_notify_timeout;
