@@ -32,6 +32,12 @@ public class TopicHistoricalEntity extends TopicHistoricalBase {
     private Date endDate;
 
     @Transient
+    private String beginDateStr;
+
+    @Transient
+    private String endDateStr;
+
+    @Transient
     private String createDateStr;
 
     @Transient
@@ -39,5 +45,7 @@ public class TopicHistoricalEntity extends TopicHistoricalBase {
 
     @Transient
     private String tableName;
+
+
 
 }

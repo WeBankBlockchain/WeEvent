@@ -42,7 +42,7 @@ public class RuleDatabaseService {
             Example<RuleDatabaseEntity> entityExample = Example.of(ruleDatabaseEntity);
             List<RuleDatabaseEntity> ruleDatabaseEntityList = ruleDatabaseRepository.findAll(entityExample);
             ruleDatabaseEntityList.forEach(ruleDataBase -> {
-                String dataBaseUrl = commonService.getDataBaseUrl(ruleDataBase);
+                String dataBaseUrl = ruleDataBase.getDatabaseUrl();
                 if (StringUtil.isBlank(ruleDataBase.getOptionalParameter())) {
                     ruleDataBase.setDatabaseUrl(dataBaseUrl);
                 } else {
@@ -67,7 +67,7 @@ public class RuleDatabaseService {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
             //check dbUrl
-            commonService.checkDataBaseUrl(commonService.getDataBaseUrl(ruleDatabaseEntity), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword());
+            commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseUrl(), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword());
             ruleDatabaseEntity.setSystemTag(false);
             ruleDatabaseRepository.save(ruleDatabaseEntity);
             return ruleDatabaseEntity;
@@ -105,7 +105,7 @@ public class RuleDatabaseService {
             }
             ruleDatabaseEntity.setSystemTag(false);
             //check databaseUrl
-            commonService.checkDataBaseUrl(commonService.getDataBaseUrl(ruleDatabaseEntity), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword());
+            commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseUrl(), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword());
             ruleDatabaseRepository.save(ruleDatabaseEntity);
             return true;
         } catch (Exception e) {
@@ -117,7 +117,7 @@ public class RuleDatabaseService {
 
     public void checkRuleDataBaseUrl(RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
         try {
-            commonService.checkDataBaseUrl(commonService.getDataBaseUrl(ruleDatabaseEntity), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(),
+            commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseUrl(), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(),
                     ruleDatabaseEntity.getPassword());
         } catch (Exception e) {
             log.error("database url is incorrect", e);

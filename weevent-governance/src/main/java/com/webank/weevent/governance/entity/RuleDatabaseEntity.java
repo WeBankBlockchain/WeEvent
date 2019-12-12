@@ -2,12 +2,14 @@ package com.webank.weevent.governance.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
 
 import com.webank.weevent.governance.entity.base.RuleDatabaseBase;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.hibernate.validator.constraints.Length;
 
 /**
  * RuleDatabaseEntity class
@@ -20,22 +22,15 @@ import lombok.ToString;
 @Table(name = "t_rule_database")
 public class RuleDatabaseEntity extends RuleDatabaseBase {
 
-    private String  databaseUrl;
-
-    public RuleDatabaseEntity() {
-    }
-
-    @Override
-    public String toString() {
-        return super.toString();
-    }
 
 
     public RuleDatabaseEntity(Integer userId, Integer brokerId,
-                              String ip, String port, String username,
-                              String password, String databaseName,
-                              String optionalParameter, String datasourceName,
-                              String tableName, Boolean systemTag) {
-        super(userId, brokerId, ip, port, username, password, databaseName, optionalParameter, datasourceName, tableName, systemTag);
+                              @NotBlank String databaseUrl, @NotBlank String username,
+                              @NotBlank String password, @NotBlank String datasourceName,
+                              @Length(max = 256) String optionalParameter,
+                              @NotBlank String tableName, Boolean systemTag) {
+        super(userId, brokerId, databaseUrl, username, password, datasourceName, optionalParameter, tableName, systemTag);
     }
+
+
 }

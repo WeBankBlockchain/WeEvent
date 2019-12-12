@@ -69,7 +69,7 @@ public class TopicHistoricalTest extends JUnitTestBase {
 
     @Test
     public void testHistoricalDataList() throws Exception {
-        String content = "{\"groupId\":\"1\",\"userId\":\"1\",\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\",\"beginDate\":\"2019-10-08\",\"endDate\":\"2019-10-15\"}";
+        String content = "{\"groupId\":\"1\",\"userId\":\"1\",\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\",\"beginDate\":\"2019-12-08\",\"endDate\":\"2099-12-15\"}";
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/historicalData/list")
                 .contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
@@ -81,7 +81,7 @@ public class TopicHistoricalTest extends JUnitTestBase {
 
     @Test
     public void testEventList() throws Exception {
-        String content = "{\"groupId\":\"1\",\"userId\":\"1\",\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\",\"beginDate\":\"2019-10-08\",\"endDate\":\"2019-11-15\"}";
+        String content = "{\"groupId\":\"1\",\"userId\":\"1\",\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\",\"beginDate\":\"2019-12-08\",\"endDate\":\"2099-12-15\"}";
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/historicalData/eventList")
                 .contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();

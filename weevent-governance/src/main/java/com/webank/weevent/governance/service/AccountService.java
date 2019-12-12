@@ -184,7 +184,7 @@ public class AccountService {
     public AccountEntity queryByUsername(String username) {
         // execute select
         List<AccountEntity> list = this.findAllByUsernameAndDeleteAt(username);
-        if (!CollectionUtils.isEmpty(list)) {
+        if (!list.isEmpty()) {
             // get user info
             return list.get(0);
         }

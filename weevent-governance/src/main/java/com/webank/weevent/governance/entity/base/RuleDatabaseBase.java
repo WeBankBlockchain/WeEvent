@@ -25,16 +25,8 @@ public class RuleDatabaseBase extends BaseEntity {
     private Integer brokerId;
 
     @NotBlank
-    @Column(name = "ip")
-    private String ip;
-
-    @NotBlank
-    @Column(name = "port")
-    private String port;
-
-    @NotBlank
-    @Column(name = "database_name")
-    private String databaseName;
+    @Column(name = "database_url")
+    private String databaseUrl;
 
     @NotBlank
     @Column(name = "username")
@@ -65,22 +57,20 @@ public class RuleDatabaseBase extends BaseEntity {
 
 
     public RuleDatabaseBase(Integer userId, Integer brokerId,
-                            String ip, String port, String username,
-                            String password, String databaseName,
-                            String optionalParameter, String datasourceName,
-                            String tableName, Boolean systemTag) {
+                            @NotBlank String databaseUrl,
+                            @NotBlank String username,
+                            @NotBlank String password,
+                            @NotBlank String datasourceName,
+                            @Length(max = 256) String optionalParameter,
+                            @NotBlank String tableName, Boolean systemTag) {
         this.userId = userId;
         this.brokerId = brokerId;
-        this.ip = ip;
-        this.port = port;
+        this.databaseUrl = databaseUrl;
         this.username = username;
         this.password = password;
-        this.databaseName = databaseName;
-        this.optionalParameter = optionalParameter;
         this.datasourceName = datasourceName;
+        this.optionalParameter = optionalParameter;
         this.tableName = tableName;
         this.systemTag = systemTag;
     }
-
-
 }

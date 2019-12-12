@@ -227,25 +227,22 @@ public class CommonService implements AutoCloseable {
     public static Map<String, String> uRLRequest(String URL) {
         Map<String, String> mapRequest = new HashMap<>();
 
-        String strUrlParam = truncateUrlPage(URL);
-        if (strUrlParam == null) {
+        if (StringUtil.isBlank(URL)) {
             return mapRequest;
         }
-        mapRequest.put("optionalParameter", strUrlParam);
-        int first = URL.indexOf("/") + 2;
-        int end = URL.lastIndexOf("/");
-        String substring = URL.substring(first, end);
-        String[] split = substring.split(":");
-        mapRequest.put("ip", split[0]);
-        mapRequest.put("port", split[1]);
-        mapRequest.put("jdbcType","jdbc:mysql://");
+        String[] arrSplit = URL.split("[?]");
+        mapRequest.put("dataBaseUrl", arrSplit[0]);
+        if (arrSplit.length == 1) {
+            String dbName = URL.substring(URL.indexOf("/"));
+            mapRequest.put("dbName", dbName);
+            return mapRequest;
+        }
+        int first = URL.lastIndexOf("/");
+        int end = URL.lastIndexOf("?");
+        String dbName = URL.substring(first + 1, end);
+        mapRequest.put("optionalParameter", arrSplit[1]);
+        mapRequest.put("dbName", dbName);
         return mapRequest;
-    }
-
-
-    public String getDataBaseUrl(RuleDatabaseEntity ruleDatabaseEntity) {
-        Map<String, String> urlMap = uRLRequest(dataBaseUrl);
-        return urlMap.get("jdbcType") + ruleDatabaseEntity.getIp() + ":" + ruleDatabaseEntity.getPort() + "/" + ruleDatabaseEntity.getDatabaseName();
     }
 
     private static String truncateUrlPage(String strURL) {

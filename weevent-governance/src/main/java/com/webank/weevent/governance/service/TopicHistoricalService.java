@@ -29,14 +29,12 @@ import com.webank.weevent.governance.utils.CookiesTools;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.helper.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service
 @Slf4j
@@ -85,20 +83,19 @@ public class TopicHistoricalService {
             if (!flag) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
-            Map<String, List<Integer>> returnMap = new HashMap<>();
-
-            List<TopicHistoricalEntity> historicalDataEntities = topicHistoricalMapper.historicalDataList(topicHistoricalEntity);
-            if (CollectionUtils.isEmpty(historicalDataEntities)) {
-                return null;
-            }
             if (topicHistoricalEntity.getBeginDate() == null || topicHistoricalEntity.getEndDate() == null) {
                 throw new GovernanceException("beginDate or endDate is empty");
             }
-            Date beginDate = topicHistoricalEntity.getBeginDate();
-            Date endDate = topicHistoricalEntity.getEndDate();
 
-            topicHistoricalEntity.setBeginDate(DateUtils.parseDate(DateFormatUtils.format(beginDate, simpleDateFormat), simpleDateFormat));
-            topicHistoricalEntity.setEndDate(DateUtils.parseDate(DateFormatUtils.format(endDate, simpleDateFormat), simpleDateFormat));
+            Map<String, List<Integer>> returnMap = new HashMap<>();
+            topicHistoricalEntity.setBeginDateStr(DateFormatUtils.format(topicHistoricalEntity.getBeginDate(), simpleDateFormat));
+            topicHistoricalEntity.setEndDateStr(DateFormatUtils.format(topicHistoricalEntity.getEndDate(), simpleDateFormat));
+            List<TopicHistoricalEntity> historicalDataEntities = topicHistoricalMapper.historicalDataList(topicHistoricalEntity);
+
+            if (historicalDataEntities.isEmpty()) {
+                return null;
+            }
+
             //deal data
             Map<String, List<TopicHistoricalEntity>> map = historicalDataEntities.stream().collect(Collectors.groupingBy(TopicHistoricalEntity::getTopicName));
             List<String> listDate;
@@ -106,8 +103,11 @@ public class TopicHistoricalService {
 
             map.forEach((k, v) -> {
                 Map<String, Integer> eventCountMap = new HashMap<>();
+                //format createDate
+                v.forEach(it -> it.setCreateDateStr(DateFormatUtils.format(it.getCreateDate(), simpleDateFormat)));
+                Map<String, List<TopicHistoricalEntity>> dateTopicMap = v.stream().collect(Collectors.groupingBy(TopicHistoricalEntity::getCreateDateStr));
                 for (TopicHistoricalEntity dataEntity : v) {
-                    eventCountMap.put(DateFormatUtils.format(dataEntity.getCreateDate(), simpleDateFormat), dataEntity.getEventCount());
+                    eventCountMap.put(dataEntity.getCreateDateStr(), dateTopicMap.get(dataEntity.getCreateDateStr()).size());
                 }
                 List<Integer> integerList = new ArrayList<>();
                 for (String date : listDate) {
@@ -124,6 +124,7 @@ public class TopicHistoricalService {
 
     }
 
+
     public List<TopicHistoricalEntity> eventList(TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest httpRequest) throws GovernanceException {
         try {
             String accountId = cookiesTools.getCookieValueByName(httpRequest, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
@@ -131,13 +132,22 @@ public class TopicHistoricalService {
             if (!flag) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
+            topicHistoricalEntity.setBeginDateStr(DateFormatUtils.format(topicHistoricalEntity.getBeginDate(), simpleDateFormat));
+            topicHistoricalEntity.setEndDateStr(DateFormatUtils.format(topicHistoricalEntity.getEndDate(), simpleDateFormat));
             List<TopicHistoricalEntity> historicalEntities = topicHistoricalMapper.eventList(topicHistoricalEntity);
-            if (CollectionUtils.isEmpty(historicalEntities)) {
+            if (historicalEntities.isEmpty()) {
                 return historicalEntities;
             }
-            for (TopicHistoricalEntity entity : historicalEntities) {
-                entity.setCreateDateStr(DateFormatUtils.format(entity.getCreateDate(), simpleDateFormat));
-            }
+
+            historicalEntities.forEach(it -> it.setCreateDateStr(DateFormatUtils.format(it.getCreateDate(), simpleDateFormat)));
+            Map<String, List<TopicHistoricalEntity>> dateMap = historicalEntities.stream().collect(Collectors.groupingBy(TopicHistoricalEntity::getCreateDateStr));
+            historicalEntities.clear();
+            dateMap.forEach((k, v) -> {
+                TopicHistoricalEntity historicalEntity = new TopicHistoricalEntity();
+                historicalEntity.setCreateDateStr(k);
+                historicalEntity.setEventCount(v.size());
+                historicalEntities.add(historicalEntity);
+            });
             return historicalEntities;
         } catch (Exception e) {
             log.error("get eventList fail", e);
@@ -167,21 +177,21 @@ public class TopicHistoricalService {
         String password = dataBasePassword;
         String dbName;
         try {
-/*            int first = goalUrl.lastIndexOf("/");
+            int first = goalUrl.lastIndexOf("/");
             int end = goalUrl.lastIndexOf("?");
             dbName = goalUrl.substring(first + 1, end);
             // get mysql default url like jdbc:mysql://127.0.0.1:3306
-            Map<String, String> urlMap = commonService.uRLRequest(goalUrl);*/
-          /*  RuleDatabaseEntity ruleDatabaseEntity = new RuleDatabaseEntity(brokerEntity.getUserId(), brokerEntity.getId(), urlMap.get("ip"), urlMap.get("port"),
-                    user, password, dbName, urlMap.get("optionalParameter"), "SYSTEM-" + dbName, TOPIC_HISTORICAL, true);
+            Map<String, String> urlMap = commonService.uRLRequest(goalUrl);
+            RuleDatabaseEntity ruleDatabaseEntity = new RuleDatabaseEntity(brokerEntity.getUserId(), brokerEntity.getId(), urlMap.get("dataBaseUrl"),
+                    user, password, "SYSTEM-" + dbName, urlMap.get("optionalParameter"), TOPIC_HISTORICAL, true);
             ruleDatabaseRepository.save(ruleDatabaseEntity);
-*/
+
             //Request broker to get all groups
             List<String> groupList = getGroupList(request, brokerEntity);
             for (String groupId : groupList) {
                 //get new tableName
                 groupId = groupId.replaceAll("\"", "");
-                RuleEngineEntity ruleEngineEntity = initializationRule("SYSTEM-"  + brokerEntity.getId() + "-" + groupId,
+                RuleEngineEntity ruleEngineEntity = initializationRule("SYSTEM-" + brokerEntity.getId() + "-" + groupId,
                         brokerEntity, groupId, 111);
                 ruleEngineRepository.save(ruleEngineEntity);
                 //built-in rule engine data and start

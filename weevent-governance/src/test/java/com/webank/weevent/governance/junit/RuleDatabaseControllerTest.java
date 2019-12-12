@@ -69,8 +69,8 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
 
     @Test
     public void testAddRuleDatabase() throws Exception {
-        String content = "{\"datasourceName\":\"test123\",\"ip\":\"127.0.0.1\",\"port\":\"3306\",\"databaseName\":\"WeEvent_governance\"," +
-                "\"username\":\"root\",\"password\":\"123456\",\"tableName\":\"t_rule_database\",\"optionalParameter\":\"useUnicode=true&characterEncoding=utf-8&useSSL=false\"," +
+        String content = "{\"datasourceName\":\"test123\",\"databaseUrl\":\"jdbc:h2:~/WeEvent_governance\"," +
+                "\"username\":\"root\",\"password\":\"123456\",\"tableName\":\"t_rule_database\"," +
                 "\"userId\":" + this.userId + ",\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\",\"systemTag\":\"false\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/circulationDatabase/add").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
                 .andReturn().getResponse();
@@ -93,8 +93,8 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
 
     @Test
     public void testUpdateRuleDatabase() throws Exception {
-        String content = "{\"id\":\"1\",\"datasourceName\":\"test123\",\"ip\":\"127.0.0.1\",\"port\":\"3306\",\"databaseName\":\"WeEvent_governance\"," +
-                "\"username\":\"root\",\"password\":\"123456\",\"tableName\":\"t_rule_database\",\"optionalParameter\":\"useUnicode=true&characterEncoding=utf-8&useSSL=false\"," +
+        String content = "{\"id\":\"1\",\"datasourceName\":\"test123\",\"databaseUrl\":\"jdbc:h2:~/WeEvent_governance\"," +
+                "\"username\":\"root\",\"password\":\"123456\",\"tableName\":\"t_rule_database\"," +
                 "\"userId\":" + this.userId + ",\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\",\"systemTag\":\"false\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/circulationDatabase/update").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn().getResponse();
 
@@ -115,8 +115,8 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
 
     @Test
     public void testCheckDataBaseUrl() throws Exception {
-        String content = "{\"datasourceName\":\"test123\",\"ip\":\"127.0.0.1\",\"port\":\"3306\",\"databaseName\":\"WeEvent_governance\"," +
-                "\"username\":\"root\",\"password\":\"123456\",\"tableName\":\"t_rule_database\",\"optionalParameter\":\"useUnicode=true&characterEncoding=utf-8&useSSL=false\"," +
+        String content = "{\"datasourceName\":\"test123\",\"databaseUrl\":\"jdbc:h2:~/WeEvent_governance\"," +
+                "\"username\":\"root\",\"password\":\"123456\",\"tableName\":\"t_rule_database\"," +
                 "\"userId\":" + this.userId + ",\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/circulationDatabase/checkDataBaseUrl").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn().getResponse();
 

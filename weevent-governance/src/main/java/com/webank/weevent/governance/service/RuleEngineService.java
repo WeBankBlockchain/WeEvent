@@ -163,9 +163,6 @@ public class RuleEngineService {
                 throw new GovernanceException("the data is deleted ");
             }
             RuleEngineEntity engineEntity = ruleEngines.get(0);
-            if (engineEntity.getStatus() != StatusEnum.NOT_STARTED.getCode()) {
-                throw new GovernanceException("only unstarted data can be deleted");
-            }
             ruleEngineEntity.setStatus(StatusEnum.IS_DELETED.getCode());
 
             //delete processor rule
@@ -185,6 +182,9 @@ public class RuleEngineService {
 
     public void deleteProcessRule(HttpServletRequest request, RuleEngineEntity engineEntity) throws GovernanceException {
         try {
+            if (!this.checkProcessorExist(request)) {
+                return;
+            }
             String deleteUrl = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_DELETE_CEP_RULE).append(ConstantProperties.QUESTION_MARK)
                     .append("id=").append(engineEntity.getId()).toString();
             log.info("processor delete  begin");
@@ -318,7 +318,9 @@ public class RuleEngineService {
     @SuppressWarnings("unchecked")
     private void updateProcessRule(HttpServletRequest request, RuleEngineEntity ruleEngineEntity, RuleEngineEntity oldRule) throws GovernanceException {
         try {
-
+            if (!this.checkProcessorExist(request)) {
+                return;
+            }
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_UPDATE_CEP_RULE).toString();
             String jsonString = JSONObject.toJSONString(ruleEngineEntity);
             Map map = JSONObject.parseObject(jsonString, Map.class);
@@ -425,6 +427,9 @@ public class RuleEngineService {
     @SuppressWarnings("unchecked")
     private void stopProcessRule(HttpServletRequest request, RuleEngineEntity ruleEngineEntity, RuleEngineEntity oldRule) throws GovernanceException {
         try {
+            if (!this.checkProcessorExist(request)) {
+                return;
+            }
             BrokerEntity broker = brokerService.getBroker(oldRule.getBrokerId());
             ruleEngineEntity.setBrokerUrl(broker.getBrokerUrl());
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_STOP_CEP_RULE).toString();
@@ -499,6 +504,9 @@ public class RuleEngineService {
     @SuppressWarnings("unchecked")
     private void startProcessRule(HttpServletRequest request, RuleEngineEntity rule) throws GovernanceException {
         try {
+            if (!this.checkProcessorExist(request)) {
+                return;
+            }
             String jsonString = JSONObject.toJSONString(rule);
             Map map = JSONObject.parseObject(jsonString, Map.class);
             map.put("updatedTime", rule.getLastUpdate());
@@ -760,7 +768,7 @@ public class RuleEngineService {
         }
         RuleDatabaseEntity ruleDataBase = ruleDatabaseRepository.findById(rule.getRuleDataBaseId());
         if (ruleDataBase != null) {
-            String dbUrl = commonService.getDataBaseUrl(ruleDataBase) + "?user=" + ruleDataBase.getUsername() + "&password=" + ruleDataBase.getPassword() +
+            String dbUrl = ruleDataBase.getDatabaseUrl() + "?user=" + ruleDataBase.getUsername() + "&password=" + ruleDataBase.getPassword() +
                     "&tableName=" + ruleDataBase.getTableName();
             if (!StringUtil.isBlank(ruleDataBase.getOptionalParameter())) {
                 dbUrl = dbUrl + "&" + ruleDataBase.getOptionalParameter();

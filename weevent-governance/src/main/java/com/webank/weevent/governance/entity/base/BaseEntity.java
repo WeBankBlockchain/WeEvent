@@ -3,7 +3,6 @@ package com.webank.weevent.governance.entity.base;
 import java.util.Date;
 
 import javax.persistence.Column;
-import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,10 +12,6 @@ import javax.persistence.TemporalType;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
  * BaseEntity class
@@ -24,7 +19,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
  * @since 2019/10/15
  */
 @Data
-@ToString
 @EqualsAndHashCode(callSuper = false)
 @MappedSuperclass
 public class BaseEntity {

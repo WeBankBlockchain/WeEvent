@@ -40,4 +40,5 @@ public class TopicEntity extends TopicBase {
     @Transient
     private Long blockNumber;
 
+
 }
