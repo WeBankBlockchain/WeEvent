@@ -3,7 +3,6 @@ package com.webank.weevent.governance.entity;
 import java.util.List;
 
 import javax.persistence.Entity;
-import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
