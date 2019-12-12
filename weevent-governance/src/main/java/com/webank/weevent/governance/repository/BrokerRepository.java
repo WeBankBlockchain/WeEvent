@@ -1,7 +1,5 @@
 package com.webank.weevent.governance.repository;
 
-import java.util.List;
-
 import com.webank.weevent.governance.entity.BrokerEntity;
 
 import org.apache.ibatis.annotations.Param;
