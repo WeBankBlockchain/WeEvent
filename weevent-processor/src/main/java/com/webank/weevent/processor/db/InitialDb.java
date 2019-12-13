@@ -55,7 +55,7 @@ public class InitialDb implements AutoCloseable {
         List<String> tableSqlList = readCEPSql(databaseType);
         try (Connection conn = DriverManager.getConnection(defaultUrl, user, password);
              Statement stat = conn.createStatement()) {
-            String h2QuerySql = "SELECT count(1) FROM information_schema.SCHEMATA where CATALOG_NAME=" + "'" + dbName + "1'";
+            String h2QuerySql = "SELECT count(1) FROM information_schema.SCHEMATA where CATALOG_NAME=" + "'" + dbName + "'";
             String mysqlQuerySql = "SELECT count(1) FROM information_schema.SCHEMATA where SCHEMA_NAME=" + "'" + dbName + "'";
             String querySql = flag ? mysqlQuerySql : h2QuerySql;
             ResultSet resultSet = stat.executeQuery(querySql);
