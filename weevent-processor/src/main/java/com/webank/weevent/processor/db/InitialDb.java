@@ -28,6 +28,7 @@ public class InitialDb implements AutoCloseable {
         String user = "";
         String password = "";
         String driverName = "";
+        String databaseType = "";
         String dbName;
         try {
             Properties properties = new Properties();
@@ -38,34 +39,39 @@ public class InitialDb implements AutoCloseable {
                 user = properties.getProperty("spring.datasource.username");
                 password = properties.getProperty("spring.datasource.password");
                 driverName = properties.getProperty("spring.datasource.driverClassName");
+                databaseType = properties.getProperty("spring.jpa.database").toLowerCase();
             }
         } catch (Exception e) {
             log.error("read database properties error,{}", e.getMessage());
         }
-
+        boolean flag = databaseType.equals("mysql");
         // first use dbself database
         int first = goalUrl.lastIndexOf("/") + 1;
         dbName = goalUrl.substring(first);
         // get mysql default url like jdbc:mysql://127.0.0.1:3306
-        String defaultUrl = goalUrl.substring(0, first - 1);
+        String defaultUrl = flag ? goalUrl.substring(0,first) : goalUrl;
         Class.forName(driverName);
 
-        List<String> tableSqlList = readCEPSql();
+        List<String> tableSqlList = readCEPSql(databaseType);
         try (Connection conn = DriverManager.getConnection(defaultUrl, user, password);
              Statement stat = conn.createStatement()) {
-            String querySql = "SELECT count(1) FROM information_schema.SCHEMATA where SCHEMA_NAME=" + "'" + dbName + "'";
+            String h2QuerySql = "SELECT count(1) FROM information_schema.SCHEMATA where CATALOG_NAME=" + "'" + dbName + "1'";
+            String mysqlQuerySql = "SELECT count(1) FROM information_schema.SCHEMATA where SCHEMA_NAME=" + "'" + dbName + "'";
+            String querySql = flag ? mysqlQuerySql : h2QuerySql;
             ResultSet resultSet = stat.executeQuery(querySql);
             while (resultSet.next()) {
                 int num = resultSet.getInt(1);
-                if (num == 1) {
+                if (num >= 1) {
                     log.error("database {} {}", dbName, " is exist!");
                     throw new BrokerException("database " + dbName + " is exist!");
                 }
             }
-            String dbSql = "create database " + dbName + " default character set utf8 collate utf8_general_ci;";
-            tableSqlList.add(0, dbSql);
+            String dbSql = "create database " + dbName + ";";
             String useDataBase = "use " + dbName + ";";
-            tableSqlList.add(1, useDataBase);
+            if (flag) {
+                tableSqlList.add(0, dbSql);
+                tableSqlList.add(1, useDataBase);
+            }
             for (String sql : tableSqlList) {
                 stat.executeUpdate(sql);
             }
@@ -76,8 +82,8 @@ public class InitialDb implements AutoCloseable {
         }
     }
 
-    private static List<String> readCEPSql() throws IOException {
-        InputStream resourceAsStream = InitialDb.class.getResourceAsStream("/cep_rule.sql");
+    private static List<String> readCEPSql(String dataBaseType) throws IOException {
+        InputStream resourceAsStream = InitialDb.class.getResourceAsStream("/cep_rule_" + dataBaseType + ".sql");
         StringBuffer sqlBuffer = new StringBuffer();
         List<String> sqlList = new ArrayList<>();
         byte[] buff = new byte[1024];
