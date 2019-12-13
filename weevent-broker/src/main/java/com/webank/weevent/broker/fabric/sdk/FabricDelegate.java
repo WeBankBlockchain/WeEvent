@@ -40,6 +40,7 @@ public class FabricDelegate {
         this.fabricMap = new ConcurrentHashMap<>();
     }
 
+    @SuppressWarnings("unchecked")
     private void initRedisService() {
         try {
             redisTemplate = BrokerApplication.applicationContext.getBean("springRedisTemplate", RedisTemplate.class);

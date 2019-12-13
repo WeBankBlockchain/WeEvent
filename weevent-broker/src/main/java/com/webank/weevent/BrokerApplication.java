@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.broker.config.WeEventConfig;
+import com.webank.weevent.broker.fabric.sdk.FabricDelegate;
+import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.ha.MasterJob;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
@@ -296,5 +298,19 @@ public class BrokerApplication {
 
         log.info("init daemon thread pool");
         return pool;
+    }
+
+    // FiscoBcosDelegate
+    @Bean
+    @ConditionalOnProperty(prefix = "broker.blockchain", name = "type", havingValue = "fisco")
+    public static FiscoBcosDelegate getFiscoBcosDelegate() {
+        return new FiscoBcosDelegate();
+    }
+
+    // FabricDelegate
+    @Bean
+    @ConditionalOnProperty(prefix = "broker.blockchain", name = "type", havingValue = "fabric")
+    public static FabricDelegate getFabricDelegate() {
+        return new FabricDelegate();
     }
 }

@@ -39,7 +39,7 @@ public class FabricTopicAdmin implements IEventTopic {
             BrokerApplication.exit();
         }
         try {
-            fabricDelegate = new FabricDelegate();
+            fabricDelegate = BrokerApplication.applicationContext.getBean(FabricDelegate.class);
             fabricDelegate.initProxy(fabricConfig);
         } catch (BrokerException e) {
             log.error("init Fabric failed", e);

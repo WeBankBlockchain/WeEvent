@@ -75,8 +75,8 @@ public class FiscoBcosDelegate {
         void onEvent(Long groupId, Long blockHeight);
     }
 
+    @SuppressWarnings("unchecked")
     private void initRedisService() {
-
         try {
             redisTemplate = BrokerApplication.applicationContext.getBean("springRedisTemplate", RedisTemplate.class);
         } catch (BeansException e) {

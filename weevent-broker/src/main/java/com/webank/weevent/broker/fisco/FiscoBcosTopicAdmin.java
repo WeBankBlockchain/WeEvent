@@ -45,7 +45,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
         fiscoConfig = config;
 
         try {
-            fiscoBcosDelegate = new FiscoBcosDelegate();
+            fiscoBcosDelegate = BrokerApplication.applicationContext.getBean(FiscoBcosDelegate.class);
             fiscoBcosDelegate.initProxy(fiscoConfig);
         } catch (BrokerException e) {
             log.error("init FISCO-BCOS failed", e);
