@@ -300,11 +300,7 @@ public class CommonUtil {
     public static boolean compareMessage(CEPRule rule, List<CEPRule> ruleList) {
         for (int i = 0; i < ruleList.size(); i++) {
             if (ruleList.get(i).getId().equals(rule.getId())) {
-                if (ruleList.get(i).getFromDestination().equals(rule.getFromDestination())) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return ruleList.get(i).getFromDestination().equals(rule.getFromDestination());
             }
 
         }
