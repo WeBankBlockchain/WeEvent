@@ -11,6 +11,7 @@ import com.webank.weevent.sdk.WeEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -23,6 +24,7 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 @Slf4j
+@Ignore("FiscoV1 is not default setting")
 @RunWith(MySpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = BrokerApplication.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class RestfulFiscoV1Test {

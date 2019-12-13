@@ -817,6 +817,7 @@ public class ServiceTest {
                 "        \"payloadType\":1,\n" +
                 "        \"selectField\": \"a,eventId,topicName,brokerId,groupId\",\n" +
                 "        \"conditionField\": \"c==10 and a>10 or a<1\",\n" +
+<<<<<<< HEAD
                 "        \"conditionType\": 1,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
                 "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
@@ -850,6 +851,8 @@ public class ServiceTest {
                 "        \"payloadType\":1,\n" +
                 "        \"selectField\": \"a,eventId,topicName,brokerId,groupId\",\n" +
                 "        \"conditionField\": \"c==10 and a>10\",\n" +
+=======
+>>>>>>> 0b2a28063c10af286b95cf1e154d128ec375207a
                 "        \"conditionType\": 1,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
                 "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412\",\n" +
@@ -931,6 +934,105 @@ public class ServiceTest {
                 "        \"tableName\": \"fromIfttt\",\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
+<<<<<<< HEAD
+=======
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
+        MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
+        log.info("result:{}", result.getResponse().getContentAsString());
+        assertEquals(200, result.getResponse().getStatus());
+    }
+
+    @Test
+    public void conditionConplexToTopic2() throws Exception {
+        String url = "/startCEPRule";
+        String cEPrule = " {\n" +
+                " \t\t\"id\":110415481,\n" +
+                "        \"ruleName\": \"air3\",\n" +
+                "        \"fromDestination\": \"from.com.webank.weevent\",\n" +
+                "        \"brokerUrl\": \"http://127.0.0.1:7000/weevent?groupId=1\",\n" +
+                "        \"payload\":\"{\\\"a\\\":1,\\\"b\\\":\\\"test\\\",\\\"c\\\":10}\",\n" +
+                "        \"payloadType\":1,\n" +
+                "        \"selectField\": \"a,eventId,topicName,brokerId,groupId\",\n" +
+                "        \"conditionField\": \"c==10 and a>10\",\n" +
+                "        \"conditionType\": 1,\n" +
+                "        \"toDestination\": \"to.com.webank.weevent\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
+                "        \"status\": 1,\n" +
+                "        \"errorDestination\": null,\n" +
+                "        \"errorCode\": null,\n" +
+                "        \"errorMessage\": null,\n" +
+                "        \"brokerId\": \"1\",\n" +
+                "        \"userId\": \"1\",\n" +
+                "        \"groupId\": \"1\",\n" +
+                "        \"systemTag\": \"0\",\n" +
+                "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
+                "    }";
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
+        MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
+        log.info("result:{}", result.getResponse().getContentAsString());
+        assertEquals(200, result.getResponse().getStatus());
+    }
+
+    @Test
+    public void conditionConplexToDB() throws Exception {
+        String url = "/startCEPRule";
+        String cEPrule = " {\n" +
+                " \t\t\"id\":110415481,\n" +
+                "        \"ruleName\": \"air3\",\n" +
+                "        \"fromDestination\": \"from.com.webank.weevent\",\n" +
+                "        \"brokerUrl\": \"http://127.0.0.1:7000/weevent?groupId=1\",\n" +
+                "        \"payload\":\"{\\\"a\\\":1,\\\"b\\\":\\\"test\\\",\\\"c\\\":10}\",\n" +
+                "        \"payloadType\":1,\n" +
+                "        \"selectField\": \"a,eventId,topicName,brokerId,groupId\",\n" +
+                "        \"conditionField\": \"c==10 or a>10 or a<1\",\n" +
+                "        \"conditionType\": 2,\n" +
+                "        \"toDestination\": \"to.com.webank.weevent\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
+                "        \"status\": 1,\n" +
+                "        \"errorDestination\": null,\n" +
+                "        \"errorCode\": null,\n" +
+                "        \"errorMessage\": null,\n" +
+                "        \"brokerId\": \"1\",\n" +
+                "        \"userId\": \"1\",\n" +
+                "        \"groupId\": \"1\",\n" +
+                "        \"systemTag\": \"0\",\n" +
+                "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
+                "    }";
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
+        MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
+        log.info("result:{}", result.getResponse().getContentAsString());
+        assertEquals(200, result.getResponse().getStatus());
+    }
+
+    @Test
+    public void conditionConplexToDB2() throws Exception {
+        String url = "/startCEPRule";
+        String cEPrule = " {\n" +
+                " \t\t\"id\":110415481,\n" +
+                "        \"ruleName\": \"air3\",\n" +
+                "        \"fromDestination\": \"from.com.webank.weevent\",\n" +
+                "        \"brokerUrl\": \"http://127.0.0.1:7000/weevent?groupId=1\",\n" +
+                "        \"payload\":\"{\\\"a\\\":1,\\\"b\\\":\\\"test\\\",\\\"c\\\":10}\",\n" +
+                "        \"payloadType\":1,\n" +
+                "        \"selectField\": \"a,eventId,topicName,brokerId,groupId\",\n" +
+                "        \"conditionField\": \"c==10 and a>10\",\n" +
+                "        \"conditionType\": 2,\n" +
+                "        \"toDestination\": \"to.com.webank.weevent\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
+                "        \"status\": 1,\n" +
+                "        \"errorDestination\": null,\n" +
+                "        \"errorCode\": null,\n" +
+                "        \"errorMessage\": null,\n" +
+                "        \"brokerId\": \"1\",\n" +
+                "        \"userId\": \"1\",\n" +
+                "        \"groupId\": \"1\",\n" +
+                "        \"systemTag\": \"0\",\n" +
+                "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
+                "    }";
+>>>>>>> 0b2a28063c10af286b95cf1e154d128ec375207a
         RequestBuilder requestBuilder1 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
         MvcResult result = mockMvc.perform(requestBuilder1).andDo(print()).andReturn();
         log.info("result:{}", result.getResponse().getContentAsString());
