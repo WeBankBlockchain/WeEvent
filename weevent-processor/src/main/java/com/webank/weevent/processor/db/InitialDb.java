@@ -44,12 +44,12 @@ public class InitialDb implements AutoCloseable {
         } catch (Exception e) {
             log.error("read database properties error,{}", e.getMessage());
         }
-        boolean flag = databaseType.equals("mysql");
+        boolean flag = ("mysql").equals(databaseType);
         // first use dbself database
         int first = goalUrl.lastIndexOf("/") + 1;
         dbName = goalUrl.substring(first);
         // get mysql default url like jdbc:mysql://127.0.0.1:3306
-        String defaultUrl = flag ? goalUrl.substring(0,first) : goalUrl;
+        String defaultUrl = flag ? goalUrl.substring(0, first) : goalUrl;
         Class.forName(driverName);
 
         List<String> tableSqlList = readCEPSql(databaseType);
