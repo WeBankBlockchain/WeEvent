@@ -56,7 +56,7 @@ ext{
     // mybatis-spring-boot-starter
     mybatisVersion = "1.3.2"
     //h2
-    h2Version="1.4.196"
+    h2Version = "1.4.196"
     // mariadb-java-client
     mariadbClientVersion = "2.3.0"
     // jsoup
@@ -64,7 +64,7 @@ ext{
     // fastjson
     fastjsonVersion = "1.2.60"
     // quartz
-    quartzVersion = "2.2.1"
+    quartzVersion = "2.3.0"
     // Java-WebSocket
     WebSocketVersion = "1.4.0"
 }
