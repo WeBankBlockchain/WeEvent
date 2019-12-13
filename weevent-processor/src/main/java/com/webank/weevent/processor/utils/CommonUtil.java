@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.processor.ProcessorApplication;
+import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.sdk.WeEvent;
 
 import com.alibaba.fastjson.JSONException;
@@ -296,7 +297,19 @@ public class CommonUtil {
         return sqlOrder;
     }
 
-}
+    public static boolean compareMessage(CEPRule rule, List<CEPRule> ruleList) {
+        for (int i = 0; i < ruleList.size(); i++) {
+            if (ruleList.get(i).getId().equals(rule.getId())) {
+                if (ruleList.get(i).getFromDestination().equals(rule.getFromDestination())) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
 
+        }
+        return false;
+    }
+}
 
 

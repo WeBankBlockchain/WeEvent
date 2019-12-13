@@ -51,27 +51,28 @@ public class CEPRuleMQ {
         new Thread(dbThread).start();
     }
 
-    public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException {
+    public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap, List<CEPRule> ruleList) throws BrokerException {
         // when is in run status. update the rule map
         // update unsubscribe
         String subId = subscriptionIdMap.get(rule.getId());
         if (1 == rule.getStatus()) {
             if (null != subId) {
                 IWeEventClient client = subscriptionClientMap.get(subId);
-                // if they are equal
-                for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
-                    if (!(rule.getFromDestination().equals(entry.getValue().getFromDestination()))) {
-                        boolean flag = client.unSubscribe(subId);
-                        log.info("start rule ,and subscribe flag:{}", flag);
+                // ruleList have all message and ruleMap has latest message
+                // check the FromDestination whether is or not,
+                if (!(CommonUtil.compareMessage(rule, ruleList))) {
+                    log.info("start old rule ,and subscribe subId:{}", subId);
+                    boolean flag = client.unSubscribe(subId);
+                    log.info("start rule ,and subscribe flag:{}", flag);
+                    if (flag) {
+                        subscribeMsg(rule, ruleMap, client, subId);
                     }
                 }
-
-                subscribeMsg(rule, ruleMap, client);
 
             } else {
                 ruleMap.put(rule.getId(), rule);
                 // update subscribe
-                subscribeMsg(rule, ruleMap, null);
+                subscribeMsg(rule, ruleMap, null, null);
                 log.info("start rule ,and subscribe rule:{}", rule.getId());
             }
         }
@@ -117,7 +118,7 @@ public class CEPRuleMQ {
 
     }
 
-    private static void subscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap, IWeEventClient clientOld) {
+    private static void subscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap, IWeEventClient clientOld, String subId) {
         try {
             IWeEventClient client;
 
@@ -126,65 +127,29 @@ public class CEPRuleMQ {
             } else {
                 client = clientOld;
             }
-
             // subscribe topic
-            log.info("subscribe topic:{}", rule.getFromDestination());
             String subscriptionId;
-            if (StringUtils.isEmpty(rule.getOffSet())) {
-                subscriptionId = client.subscribe(rule.getFromDestination(), WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
-                    @Override
-                    public void onEvent(WeEvent event) {
-                        try {
-                            String content = new String(event.getContent());
-                            log.info("on event:{},content:{}", event.toString(), content);
-
-
-                            // check the content
-                            if (JSONObject.isValid(content)) {
-                                handleOnEvent(client, event, ruleMap);
-                            } else {
-                                handleOnEventOtherPattern(client, event, ruleMap);
-                            }
-                        } catch (JSONException e) {
-                            log.error(e.toString());
-                        }
-                    }
-
-                    @Override
-                    public void onException(Throwable e) {
-                        log.info("on event:{}", e.toString());
-                    }
-                });
+            ExtendEventLister eventLister = new ExtendEventLister(client, ruleMap);
+            if (null != subId) {
+                log.info("update use old subId:{}", subId);
+                if (StringUtils.isEmpty(rule.getOffSet())) {
+                    // if empty,get the new
+                    subscriptionId = client.subscribe(rule.getFromDestination(), WeEvent.OFFSET_LAST, subId, eventLister);
+                } else {
+                    subscriptionId = client.subscribe(rule.getFromDestination(), rule.getOffSet(), subId, eventLister);
+                }
             } else {
-                subscriptionId = client.subscribe(rule.getFromDestination(), rule.getOffSet(), new IWeEventClient.EventListener() {
-                    @Override
-                    public void onEvent(WeEvent event) {
-                        try {
-
-                            String content = new String(event.getContent());
-                            log.info("on event:{},content:{}", event.toString(), content);
-                            // check the content
-                            if (JSONObject.isValid(content)) {
-                                handleOnEvent(client, event, ruleMap);
-                            } else {
-                                handleOnEventOtherPattern(client, event, ruleMap);
-                            }
-                        } catch (JSONException e) {
-                            log.error(e.toString());
-                        }
-                    }
-
-                    @Override
-                    public void onException(Throwable e) {
-                        log.info("on event:{}", e.toString());
-                    }
-                });
+                if (StringUtils.isEmpty(rule.getOffSet())) {
+                    // if empty,get the new
+                    subscriptionId = client.subscribe(rule.getFromDestination(), WeEvent.OFFSET_LAST, eventLister);
+                } else {
+                    subscriptionId = client.subscribe(rule.getFromDestination(), rule.getOffSet(), eventLister);
+                }
             }
+
             log.info("subscriptionIdMap:{},rule.getId() :{} getFromDestination:{}--->subscriptionId:{}", subscriptionIdMap.size(), rule.getId(), rule.getFromDestination(), subscriptionId);
             subscriptionIdMap.put(rule.getId(), subscriptionId);
             subscriptionClientMap.put(subscriptionId, client);
-            log.info("after add success subscriptionIdMap:{}", subscriptionIdMap.size());
-
         } catch (BrokerException e) {
             log.info("BrokerException{}", e.toString());
         }
@@ -220,7 +185,7 @@ public class CEPRuleMQ {
 
                     // just the order key and need write in db
                     List<String> keys = CommonUtil.getAllKey(sqlvalue);
-
+                    log.info("keys:{}", keys.size());
                     // payload just like the table
                     for (int i = 0; i < keys.size(); i++) {
                         if ((keys.size() - 1) == i) {
@@ -238,7 +203,6 @@ public class CEPRuleMQ {
                     }
 
                     StringBuffer query = insertExpression.append(values);
-                    log.info("query:{}", query);
                     PreparedStatement preparedStmt = conn.prepareStatement(query.toString());
                     for (int t = 0; t < keys.size(); t++) {
                         preparedStmt.setString(t + 1, sqlvalue.get(keys.get(t)));
@@ -260,13 +224,9 @@ public class CEPRuleMQ {
 
     }
 
-    private static void handleOnEventOtherPattern(IWeEventClient client, WeEvent event, Map<String, CEPRule> ruleMap) {
-        log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
-
+    public static void handleOnEventOtherPattern(IWeEventClient client, WeEvent event, Map<String, CEPRule> ruleMap) {
         // match the rule and send message
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
-
-            log.info("group:{},client:brokerUrl:{},rule:brokerUr{}", clientGroupMap.get(client).getValue().equals(entry.getValue().getGroupId()), clientGroupMap.get(client).getKey(), CommonUtil.urlPage(entry.getValue().getBrokerUrl()));
             // check the broker and groupid
             if (!(clientGroupMap.get(client).getValue().equals(entry.getValue().getGroupId()) && clientGroupMap.get(client).getKey().equals(CommonUtil.urlPage(entry.getValue().getBrokerUrl())))) {
                 continue;
@@ -274,7 +234,6 @@ public class CEPRuleMQ {
             // write the # topic to history db
             if ("1".equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2)) {
 
-                log.info("system insert db:{}", entry.getValue().getId());
                 Pair<WeEvent, CEPRule> messagePair = new Pair<>(event, entry.getValue());
                 systemMessageQueue.add(messagePair);
 
@@ -288,14 +247,14 @@ public class CEPRuleMQ {
         }
 
 
-        log.info("client:{}group:{},client:brokerUrl:{},rule:brokerUr{}", subscriptionClientMap.get(subscriptionIdMap.get(entry.getValue().getId())).equals(client), clientGroupMap.get(client).getValue().equals(entry.getValue().getGroupId()), clientGroupMap.get(client).getKey(), CommonUtil.urlPage(entry.getValue().getBrokerUrl()));
+        log.debug("client:{}group:{},client:brokerUrl:{},rule:brokerUr{}", subscriptionClientMap.get(subscriptionIdMap.get(entry.getValue().getId())).equals(client), clientGroupMap.get(client).getValue().equals(entry.getValue().getGroupId()), clientGroupMap.get(client).getKey(), CommonUtil.urlPage(entry.getValue().getBrokerUrl()));
         // check the broker and groupid
         return (!(subscriptionClientMap.get(subscriptionIdMap.get(entry.getValue().getId())).equals(client) && clientGroupMap.get(client).getValue().equals(entry.getValue().getGroupId()) && clientGroupMap.get(client).getKey().equals(CommonUtil.urlPage(entry.getValue().getBrokerUrl()))));
 
     }
 
 
-    private static void handleOnEvent(IWeEventClient client, WeEvent event, Map<String, CEPRule> ruleMap) {
+    public static void handleOnEvent(IWeEventClient client, WeEvent event, Map<String, CEPRule> ruleMap) {
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
 
         // match the rule and send message
@@ -414,6 +373,7 @@ public class CEPRuleMQ {
                 // if the confition is empty, just return all message
                 return true;
             } else if (CommonUtil.checkJson(eventContent, payload)) {
+                // all event keys
                 List<String> eventContentKeys = CommonUtil.getKeys(payload);
                 JSONObject event = JSONObject.parseObject(eventContent);
                 JexlEngine jexl = new JexlBuilder().create();
