@@ -1,11 +1,11 @@
 codecov:
-  token: 4a3996bd-c91a-4f1d-a99e-3db2b79c0597
+  token: $CODECOV_TOKEN
 
 coverage:
   status:
     project:
       default:
-        target: 65%
+        target: 60%
         threshold: null
         if_not_found: success
     patch:
