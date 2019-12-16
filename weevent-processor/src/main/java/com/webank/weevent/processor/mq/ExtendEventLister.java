@@ -1,8 +1,5 @@
 package com.webank.weevent.processor.mq;
 
-import java.util.Map;
-
-import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.utils.CommonUtil;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.IWeEventClient.EventListener;
