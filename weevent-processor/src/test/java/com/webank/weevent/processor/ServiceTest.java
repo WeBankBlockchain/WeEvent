@@ -938,7 +938,7 @@ public class ServiceTest {
     }
 
     @Test
-    public void conditionConplexToTopic2() throws Exception {
+    public void conditionConplexToTopic4() throws Exception {
         String url = "/startCEPRule";
         String cEPrule = " {\n" +
                 " \t\t\"id\":110415481,\n" +
@@ -965,7 +965,6 @@ public class ServiceTest {
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -1002,7 +1001,7 @@ public class ServiceTest {
     }
 
     @Test
-    public void conditionConplexToDB2() throws Exception {
+    public void conditionConplexToDB5() throws Exception {
         String url = "/startCEPRule";
         String cEPrule = " {\n" +
                 " \t\t\"id\":110415481,\n" +
@@ -1029,7 +1028,6 @@ public class ServiceTest {
                 "    }";
         RequestBuilder requestBuilder1 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
         MvcResult result = mockMvc.perform(requestBuilder1).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -1040,7 +1038,6 @@ public class ServiceTest {
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON).param("id", "11041548");
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -1050,7 +1047,6 @@ public class ServiceTest {
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON).param("id", "111");
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -1060,7 +1056,6 @@ public class ServiceTest {
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).param("id", "11041548");
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 }
