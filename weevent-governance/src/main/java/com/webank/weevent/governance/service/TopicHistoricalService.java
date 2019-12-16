@@ -68,6 +68,9 @@ public class TopicHistoricalService {
     @Value("${spring.datasource.url}")
     private String dataBaseUrl;
 
+    @Value("${spring.jpa.database}")
+    private String databaseType;
+
     @Value("${spring.datasource.username}")
     private String dataBaseUserName;
 
@@ -176,10 +179,11 @@ public class TopicHistoricalService {
         String user = dataBaseUserName;
         String password = dataBasePassword;
         String dbName;
+        boolean flag = ("mysql").equals(databaseType);
         try {
             int first = goalUrl.lastIndexOf("/");
             int end = goalUrl.lastIndexOf("?");
-            dbName = goalUrl.substring(first + 1, end);
+            dbName = flag ? goalUrl.substring(first + 1, end) : goalUrl.substring(first+1);
             // get mysql default url like jdbc:mysql://127.0.0.1:3306
             Map<String, String> urlMap = commonService.uRLRequest(goalUrl);
             RuleDatabaseEntity ruleDatabaseEntity = new RuleDatabaseEntity(brokerEntity.getUserId(), brokerEntity.getId(), urlMap.get("dataBaseUrl"),

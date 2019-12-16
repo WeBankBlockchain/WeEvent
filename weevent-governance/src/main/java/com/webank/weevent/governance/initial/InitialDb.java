@@ -58,20 +58,18 @@ public class InitialDb implements AutoCloseable {
         List<String> tableSqlList = readSql(databaseType);
         try (Connection conn = DriverManager.getConnection(defaultUrl, user, password);
              Statement stat = conn.createStatement()) {
-            String h2QuerySql = "SELECT count(1) FROM information_schema.SCHEMATA where CATALOG_NAME=" + "'" + dbName + "'";
-            String mysqlQuerySql = "SELECT count(1) FROM information_schema.SCHEMATA where SCHEMA_NAME=" + "'" + dbName + "'";
-            String querySql = flag ? mysqlQuerySql : h2QuerySql;
-            ResultSet resultSet = stat.executeQuery(querySql);
-            while (resultSet.next()) {
-                int num = resultSet.getInt(1);
-                if (num >= 1) {
-                    log.error("database {} {}", dbName, " is exist!");
-                    throw new GovernanceException("database " + dbName + " is exist!");
-                }
-            }
-            String dbSql = "create database " + dbName + ";";
-            String useDataBase = "use " + dbName + ";";
+            String querySql = "SELECT count(1) FROM information_schema.SCHEMATA where SCHEMA_NAME=" + "'" + dbName + "'";
             if (flag) {
+                ResultSet resultSet = stat.executeQuery(querySql);
+                while (resultSet.next()) {
+                    int num = resultSet.getInt(1);
+                    if (num == 1) {
+                        log.error("database {} {}", dbName, " is exist!");
+                        throw new GovernanceException("database " + dbName + " is exist!");
+                    }
+                }
+                String dbSql = "create database " + dbName + ";";
+                String useDataBase = "use " + dbName + ";";
                 tableSqlList.add(0, dbSql);
                 tableSqlList.add(1, useDataBase);
             }
