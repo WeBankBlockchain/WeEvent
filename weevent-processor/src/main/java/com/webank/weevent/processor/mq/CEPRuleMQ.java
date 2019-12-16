@@ -21,7 +21,6 @@ import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.WeEvent;
 
-import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +43,8 @@ public class CEPRuleMQ {
 
     private static CEPRuleMQ.DBThread dbThread = new CEPRuleMQ.DBThread();
 
+    private static Map<String, CEPRule> ruleMap = new ConcurrentHashMap<>();
+
     @PostConstruct
     public void init() {
         // get all rule
@@ -51,10 +52,12 @@ public class CEPRuleMQ {
         new Thread(dbThread).start();
     }
 
-    public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap, List<CEPRule> ruleList) throws BrokerException {
+    public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> LatestRuleMap, List<CEPRule> ruleList) throws BrokerException {
         // when is in run status. update the rule map
         // update unsubscribe
         String subId = subscriptionIdMap.get(rule.getId());
+        // update the ruleMap
+        ruleMap = LatestRuleMap;
         if (1 == rule.getStatus()) {
             if (null != subId) {
                 IWeEventClient client = subscriptionClientMap.get(subId);
@@ -65,14 +68,14 @@ public class CEPRuleMQ {
                     boolean flag = client.unSubscribe(subId);
                     log.info("start rule ,and subscribe flag:{}", flag);
                     if (flag) {
-                        subscribeMsg(rule, ruleMap, client, subId);
+                        subscribeMsg(rule, client, subId);
                     }
                 }
 
             } else {
                 ruleMap.put(rule.getId(), rule);
                 // update subscribe
-                subscribeMsg(rule, ruleMap, null, null);
+                subscribeMsg(rule, null, null);
                 log.info("start rule ,and subscribe rule:{}", rule.getId());
             }
         }
@@ -118,7 +121,7 @@ public class CEPRuleMQ {
 
     }
 
-    private static void subscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap, IWeEventClient clientOld, String subId) {
+    private static void subscribeMsg(CEPRule rule, IWeEventClient clientOld, String subId) {
         try {
             IWeEventClient client;
 
@@ -129,7 +132,7 @@ public class CEPRuleMQ {
             }
             // subscribe topic
             String subscriptionId;
-            ExtendEventLister eventLister = new ExtendEventLister(client, ruleMap);
+            ExtendEventLister eventLister = new ExtendEventLister(client);
             if (null != subId) {
                 log.info("update use old subId:{}", subId);
                 if (StringUtils.isEmpty(rule.getOffSet())) {
@@ -224,7 +227,7 @@ public class CEPRuleMQ {
 
     }
 
-    public static void handleOnEventOtherPattern(IWeEventClient client, WeEvent event, Map<String, CEPRule> ruleMap) {
+    public static void handleOnEventOtherPattern(IWeEventClient client, WeEvent event) {
         // match the rule and send message
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
             // check the broker and groupid
@@ -254,7 +257,7 @@ public class CEPRuleMQ {
     }
 
 
-    public static void handleOnEvent(IWeEventClient client, WeEvent event, Map<String, CEPRule> ruleMap) {
+    public static void handleOnEvent(IWeEventClient client, WeEvent event) {
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
 
         // match the rule and send message

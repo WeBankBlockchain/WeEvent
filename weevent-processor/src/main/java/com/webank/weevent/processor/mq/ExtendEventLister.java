@@ -14,13 +14,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ExtendEventLister implements EventListener {
     private IWeEventClient client;
-    private Map<String, CEPRule> ruleMap;
 
 
-    ExtendEventLister(IWeEventClient client, Map<String, CEPRule> ruleMap) {
+    ExtendEventLister(IWeEventClient client) {
         this.client = client;
-        this.ruleMap = ruleMap;
-
     }
 
     @Override
@@ -30,9 +27,9 @@ public class ExtendEventLister implements EventListener {
             log.info("on event:{},content:{}", event.toString(), content);
 
             if (CommonUtil.checkValidJson(content)) {
-                CEPRuleMQ.handleOnEvent(client, event, ruleMap);
+                CEPRuleMQ.handleOnEvent(client, event);
             } else {
-                CEPRuleMQ.handleOnEventOtherPattern(client, event, ruleMap);
+                CEPRuleMQ.handleOnEventOtherPattern(client, event);
             }
         } catch (JSONException e) {
             log.error(e.toString());
