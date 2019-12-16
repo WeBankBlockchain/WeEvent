@@ -41,7 +41,6 @@ public class ServiceTest {
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON).param("payload", "{\"a\":1,\"b\":\"test\",\"c\":10}").param("condition", "c<10");
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -52,7 +51,6 @@ public class ServiceTest {
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON).param("payload", "{\"a\":1,\"b\":\"test\",\"c\":10}").param("condition", "c<10 and (c=\"test\")");
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -62,7 +60,6 @@ public class ServiceTest {
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON).param("payload", "{\"a\":1,\"b\":\"test\",\"c\":10}").param("condition", "c<10 and (c==\"10\")");
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -72,7 +69,6 @@ public class ServiceTest {
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON).param("payload", "{\"a\":1,\"b\":\"test\",\"c\":10}").param("condition", "c==10");
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -82,7 +78,6 @@ public class ServiceTest {
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON).param("payload", "{\"a\":1,\"b\":\"test\",\"c\":10}").param("condition", "b==\"10\"");
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -92,7 +87,6 @@ public class ServiceTest {
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON).param("payload", "{\"a\":1,\"b\":\"test\",\"c\":10}").param("condition", "a<10 and b>10");
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -102,7 +96,6 @@ public class ServiceTest {
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON).param("payload", "{\"a\":1,\"b\":\"test\",\"c\":10}").param("condition", "c<test");
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
 
     }
@@ -137,7 +130,6 @@ public class ServiceTest {
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -172,7 +164,6 @@ public class ServiceTest {
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -205,7 +196,6 @@ public class ServiceTest {
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -272,7 +262,6 @@ public class ServiceTest {
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -305,7 +294,6 @@ public class ServiceTest {
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -338,7 +326,6 @@ public class ServiceTest {
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -404,7 +391,6 @@ public class ServiceTest {
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -471,7 +457,6 @@ public class ServiceTest {
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -504,7 +489,6 @@ public class ServiceTest {
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -537,7 +521,6 @@ public class ServiceTest {
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -603,7 +586,6 @@ public class ServiceTest {
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
 
 
@@ -633,7 +615,6 @@ public class ServiceTest {
                 "    }";
         RequestBuilder requestBuilder2 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule2);
         MvcResult result2 = mockMvc.perform(requestBuilder2).andDo(print()).andReturn();
-        log.info("result:{}", result2.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -666,7 +647,6 @@ public class ServiceTest {
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -699,7 +679,6 @@ public class ServiceTest {
                 "    }";
         RequestBuilder requestBuilder2 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
         MvcResult result2 = mockMvc.perform(requestBuilder2).andDo(print()).andReturn();
-        log.info("result:{}", result2.getResponse().getContentAsString());
         assertEquals(200, result2.getResponse().getStatus());
     }
 
@@ -733,7 +712,6 @@ public class ServiceTest {
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -800,7 +778,6 @@ public class ServiceTest {
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -834,7 +811,6 @@ public class ServiceTest {
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -900,7 +876,6 @@ public class ServiceTest {
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -933,7 +908,6 @@ public class ServiceTest {
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
@@ -969,7 +943,7 @@ public class ServiceTest {
     }
 
     @Test
-    public void conditionConplexToDB() throws Exception {
+    public void conditionConplexToDB1() throws Exception {
         String url = "/startCEPRule";
         String cEPrule = " {\n" +
                 " \t\t\"id\":110415481,\n" +
@@ -996,7 +970,6 @@ public class ServiceTest {
                 "    }";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule);
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
 
