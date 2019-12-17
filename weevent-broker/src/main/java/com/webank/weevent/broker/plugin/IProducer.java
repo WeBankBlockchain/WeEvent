@@ -3,8 +3,6 @@ package com.webank.weevent.broker.plugin;
 
 import java.util.concurrent.CompletableFuture;
 
-import com.webank.weevent.BrokerApplication;
-import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
@@ -46,41 +44,6 @@ import com.webank.weevent.sdk.WeEvent;
  * @since 2018/11/02
  */
 public interface IProducer extends IEventTopic {
-
-    static IProducer build() {
-        if (WeEventConstants.FABRIC.equals(BrokerApplication.weEventConfig.getBlockChainType())) {
-            return build(WeEventConstants.FABRIC);
-        }
-        return build(WeEventConstants.FISCO);
-    }
-
-    /**
-     * Factory method, build a IProducer run in agent model.
-     * <p>
-     * Please setup a event agent first with tools @see.
-     *
-     * @param blockChain "fisco" or "fabric"
-     * @return IProducer
-     */
-    static IProducer build(String blockChain) {
-        // Use reflect to decouple block chain implement.
-        try {
-            switch (blockChain) {
-                case WeEventConstants.FISCO:
-                    Class<?> fisco = Class.forName("com.webank.weevent.broker.fisco.FiscoBcosBroker4Producer");
-                    return (IProducer) fisco.newInstance();
-
-                case WeEventConstants.FABRIC:
-                    Class<?> fabric = Class.forName("com.webank.weevent.broker.fabric.FabricBroker4Producer");
-                    return (IProducer) fabric.newInstance();
-                default:
-                    return null;
-            }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            return null;
-        }
-    }
-
     /**
      * Start a producer channel.
      *
