@@ -33,12 +33,12 @@ public class BaseEntity {
 
     @org.hibernate.annotations.CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "create_date",updatable = false)
+    @Column(name = "create_date", updatable = false, columnDefinition = "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP")
     private Date createDate;
 
     @org.hibernate.annotations.UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "last_update")
+    @Column(name = "last_update", columnDefinition = "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP")
     private Date lastUpdate;
 
 

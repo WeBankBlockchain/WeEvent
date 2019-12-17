@@ -31,5 +31,6 @@ public class RuleDatabaseEntity extends RuleDatabaseBase {
         super(userId, brokerId, databaseUrl, username, password, datasourceName, optionalParameter, tableName, systemTag);
     }
 
-
+    public RuleDatabaseEntity() {
+    }
 }

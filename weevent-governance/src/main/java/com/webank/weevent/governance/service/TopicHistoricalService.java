@@ -196,7 +196,7 @@ public class TopicHistoricalService {
                 //get new tableName
                 groupId = groupId.replaceAll("\"", "");
                 RuleEngineEntity ruleEngineEntity = initializationRule("SYSTEM-" + brokerEntity.getId() + "-" + groupId,
-                        brokerEntity, groupId, 111);
+                        brokerEntity, groupId, ruleDatabaseEntity.getId());
                 ruleEngineRepository.save(ruleEngineEntity);
                 //built-in rule engine data and start
                 ruleEngineService.startRuleEngine(ruleEngineEntity, request, response);

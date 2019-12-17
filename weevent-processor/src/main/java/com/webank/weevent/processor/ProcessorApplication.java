@@ -6,6 +6,7 @@ import com.webank.weevent.processor.config.ProcessorConfig;
 import com.webank.weevent.processor.mq.CEPRuleMQ;
 
 import lombok.extern.slf4j.Slf4j;
+import org.h2.tools.Server;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -29,12 +30,19 @@ public class ProcessorApplication {
         applicationContext = context;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        startH2();
         log.info("start processor success");
         SpringApplication app = new SpringApplication(ProcessorApplication.class);
         app.addListeners(new ApplicationPidFileWriter());
         app.run(args);
         log.info("start processor success");
+    }
+
+    private static void startH2() throws Exception {
+        Server server = Server.createTcpServer(new String[]{"-tcp", "-tcpAllowOthers", "-tcpPort", "7083"}).start();
+        String status = server.getStatus();
+        log.info("h2 status:{}", status);
     }
 
     @Autowired

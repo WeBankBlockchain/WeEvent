@@ -232,16 +232,9 @@ public class CommonService implements AutoCloseable {
         }
         String[] arrSplit = URL.split("[?]");
         mapRequest.put("dataBaseUrl", arrSplit[0]);
-        if (arrSplit.length == 1) {
-            String dbName = URL.substring(URL.indexOf("/"));
-            mapRequest.put("dbName", dbName);
-            return mapRequest;
+        if(arrSplit.length>1){
+            mapRequest.put("optionalParameter", arrSplit[1]);
         }
-        int first = URL.lastIndexOf("/");
-        int end = URL.lastIndexOf("?");
-        String dbName = URL.substring(first + 1, end);
-        mapRequest.put("optionalParameter", arrSplit[1]);
-        mapRequest.put("dbName", dbName);
         return mapRequest;
     }
 

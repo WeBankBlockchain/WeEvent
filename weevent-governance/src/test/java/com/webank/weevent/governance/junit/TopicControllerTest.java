@@ -115,6 +115,7 @@ public class TopicControllerTest extends JUnitTestBase {
     }
 
 
+    @Test
     public void testTopicClose() throws Exception {
         String url = "/topic/close?brokerId=" + brokerIdMap.get("brokerId") + "&topic=com.weevent.rest&groupId=1";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie))

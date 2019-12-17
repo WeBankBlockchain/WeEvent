@@ -34,7 +34,6 @@ public class RuleDatabaseController {
     public GovernanceResult getRuleDataBaseList(HttpServletRequest request, @RequestBody RuleDatabaseEntity ruleDatabaseEntity) throws GovernanceException {
         log.info("getRuleDataBaseList,userId:{}", ruleDatabaseEntity.getUserId());
         List<RuleDatabaseEntity> ruleDatabases = ruleDatabaseService.getRuleDataBaseList(request, ruleDatabaseEntity);
-
         return new GovernanceResult(ruleDatabases);
     }
 
@@ -51,8 +50,8 @@ public class RuleDatabaseController {
     public GovernanceResult updateRuleDatabase(@Validated @RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request,
                                                HttpServletResponse response) throws GovernanceException {
         log.info("update  ruleDatabaseEntity service ,id:{}", ruleDatabaseEntity.getId());
-        boolean flag = ruleDatabaseService.updateRuleDatabase(ruleDatabaseEntity, request, response);
-        return new GovernanceResult(flag);
+        ruleDatabaseService.updateRuleDatabase(ruleDatabaseEntity, request, response);
+        return new GovernanceResult(true);
     }
 
 

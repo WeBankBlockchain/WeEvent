@@ -209,6 +209,7 @@ public class BrokerService {
         if (!repeat) {
             return new GovernanceResult(ErrorCode.BROKER_REPEAT);
         }
+        brokerEntity.setLastUpdate(new Date());
         brokerRepository.save(brokerEntity);
         //delete old permission
         permissionRepository.deletePermissionByBrokerId(brokerEntity.getId());

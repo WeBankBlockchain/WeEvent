@@ -1,5 +1,6 @@
 package com.webank.weevent.governance.service;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -96,7 +97,7 @@ public class RuleDatabaseService {
     }
 
     @Transactional(rollbackFor = Throwable.class)
-    public boolean updateRuleDatabase(RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request, HttpServletResponse response)
+    public void updateRuleDatabase(RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         try {
             String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
@@ -106,8 +107,8 @@ public class RuleDatabaseService {
             ruleDatabaseEntity.setSystemTag(false);
             //check databaseUrl
             commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseUrl(), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword());
+            ruleDatabaseEntity.setLastUpdate(new Date());
             ruleDatabaseRepository.save(ruleDatabaseEntity);
-            return true;
         } catch (Exception e) {
             log.error("update ruleDatabase fail", e);
             throw new GovernanceException("update ruleDatabase fail", e);

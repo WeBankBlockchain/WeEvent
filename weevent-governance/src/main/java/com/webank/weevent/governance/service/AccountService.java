@@ -52,7 +52,6 @@ public class AccountService {
                 accountEntity = new AccountEntity();
                 accountEntity.setUsername("admin");
                 accountEntity.setPassword(passwordEncoder.encode("123456"));
-                accountEntity.setLastUpdate(new Date());
                 accountEntity.setEmail("admin@xxx.com");
                 accountRepository.save(accountEntity);
             }
@@ -98,7 +97,6 @@ public class AccountService {
             return GovernanceResult.build(400, "password is too short");
         }
 
-        user.setLastUpdate(new Date());
         // secret
         String storePassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(storePassword);
@@ -130,9 +128,7 @@ public class AccountService {
         }
 
         String password = passwordEncoder.encode(user.getPassword());
-        oldPassword = passwordEncoder.encode(user.getOldPassword());
         storeUser.setPassword(password);
-        storeUser.setOldPassword(oldPassword);
         accountRepository.save(storeUser);
         return GovernanceResult.ok();
     }
@@ -175,7 +171,6 @@ public class AccountService {
         String password = passwordEncoder.encode(user.getPassword());
         storeUser.setPassword(password);
         storeUser.setLastUpdate(new Date());
-
         accountRepository.save(storeUser);
         return GovernanceResult.ok(true);
     }
