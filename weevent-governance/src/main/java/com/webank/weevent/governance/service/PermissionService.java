@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.entity.PermissionEntity;
-import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.repository.PermissionRepository;
 
 import org.apache.commons.collections4.CollectionUtils;

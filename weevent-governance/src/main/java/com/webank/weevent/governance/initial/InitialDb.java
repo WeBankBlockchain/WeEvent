@@ -17,6 +17,7 @@ import java.util.Properties;
 import com.webank.weevent.governance.exception.GovernanceException;
 
 import lombok.extern.slf4j.Slf4j;
+import org.h2.tools.Server;
 
 /**
  * tool to initdb
@@ -24,7 +25,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class InitialDb implements AutoCloseable {
 
+    private Server server;
+
     public static void main(String[] args) throws Exception {
+        InitialDb initialDb = new InitialDb();
+        initialDb.startH2();
+        initialDb.createDataBase();
+        initialDb.stopH2();
+    }
+
+    private void createDataBase() throws Exception {
         String goalUrl = "";
         String user = "";
         String password = "";
@@ -50,7 +60,7 @@ public class InitialDb implements AutoCloseable {
         // first use dbself database
         int first = goalUrl.lastIndexOf("/");
         int end = goalUrl.lastIndexOf("?");
-        dbName = flag ? goalUrl.substring(first + 1, end) : goalUrl.substring(first);
+        dbName = flag ? goalUrl.substring(first + 1, end) : goalUrl.substring(first + 1);
         // get mysql default url like jdbc:mysql://127.0.0.1:3306
         String defaultUrl = flag ? goalUrl.substring(0, first) : goalUrl;
         Class.forName(driverName);
@@ -78,9 +88,20 @@ public class InitialDb implements AutoCloseable {
             }
             log.info("create database {} {}", dbName, " success!");
         } catch (SQLException e) {
+            this.server.stop();
             log.error("create database fail,message: {}", e.getMessage());
             throw e;
         }
+    }
+
+    private void startH2() throws Exception {
+        this.server = Server.createTcpServer(new String[]{"-tcp", "-tcpAllowOthers", "-tcpPort", "7082"}).start();
+        log.info("start h2 server success");
+    }
+
+    private void stopH2() throws Exception {
+        this.server.stop();
+        log.info("stop h2 server success");
     }
 
     private static List<String> readSql(String dataBaseType) throws IOException {
@@ -103,6 +124,7 @@ public class InitialDb implements AutoCloseable {
         }
         return sqlList;
     }
+
 
     @Override
     public void close() throws Exception {

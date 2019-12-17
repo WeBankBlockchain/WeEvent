@@ -16,6 +16,7 @@ import java.util.Properties;
 import com.webank.weevent.sdk.BrokerException;
 
 import lombok.extern.slf4j.Slf4j;
+import org.h2.tools.Server;
 
 /**
  * init db tool
@@ -23,7 +24,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class InitialDb implements AutoCloseable {
 
+    private Server server;
+
     public static void main(String[] args) throws Exception {
+        InitialDb initialDb = new InitialDb();
+        initialDb.startH2();
+        initialDb.createDataBase();
+        initialDb.stopH2();
+    }
+
+    private void createDataBase() throws Exception {
         String goalUrl = "";
         String user = "";
         String password = "";
@@ -32,7 +42,7 @@ public class InitialDb implements AutoCloseable {
         String dbName;
         try {
             Properties properties = new Properties();
-            URL url = InitialDb.class.getClassLoader().getResource("application-prod.properties");
+            URL url = InitialDb.class.getClassLoader().getResource("application-dev.properties");
             if (url != null) {
                 properties.load(new FileInputStream(url.getFile()));
                 goalUrl = properties.getProperty("spring.datasource.url");
@@ -75,9 +85,21 @@ public class InitialDb implements AutoCloseable {
             }
             log.info("create database {} {}", dbName, " success!");
         } catch (Exception e) {
+            this.server.stop();
             log.error("create database fail,message: {}", e.getMessage());
             throw new BrokerException(e.getMessage());
         }
+    }
+
+    private void startH2() throws Exception {
+        this.server = Server.createTcpServer(new String[]{"-tcp", "-tcpAllowOthers", "-tcpPort", "7083"}).start();
+        log.info("start h2 server success");
+    }
+
+    private void stopH2() throws Exception {
+        this.server.stop();
+        log.info("stop h2 server success");
+
     }
 
     private static List<String> readCEPSql(String dataBaseType) throws IOException {

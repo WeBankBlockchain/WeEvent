@@ -7,7 +7,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -21,7 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.code.ErrorCode;
-import com.webank.weevent.governance.entity.RuleDatabaseEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.utils.SpringContextUtil;
 
@@ -236,16 +234,6 @@ public class CommonService implements AutoCloseable {
             mapRequest.put("optionalParameter", arrSplit[1]);
         }
         return mapRequest;
-    }
-
-    private static String truncateUrlPage(String strURL) {
-        String strAllParam = null;
-        String[] arrSplit = strURL.split("[?]");
-        if ((strURL.length() > 1) && (arrSplit.length) > 1 && (arrSplit[1] != null)) {
-            strAllParam = arrSplit[1];
-        }
-
-        return strAllParam;
     }
 
 

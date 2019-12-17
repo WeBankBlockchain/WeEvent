@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.entity.PermissionEntity;
-import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.service.PermissionService;
 

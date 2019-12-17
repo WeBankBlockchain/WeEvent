@@ -53,6 +53,7 @@ public class AccountControllerTest extends JUnitTestBase {
 
     @Test
     public void testRegisterException001() throws Exception {
+
         String content = "{\"username\":\"zjy05\",\"email\":\"admin@test.com\",\"password\":\"123456\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/user/register").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
                 .andReturn().getResponse();
@@ -133,7 +134,6 @@ public class AccountControllerTest extends JUnitTestBase {
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        JSONObject jsonObject = JSONObject.parseObject(response.getContentAsString());
         GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(), GovernanceResult.class);
         Assert.assertEquals("400", governanceResult.getStatus().toString());
     }
@@ -156,7 +156,6 @@ public class AccountControllerTest extends JUnitTestBase {
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        JSONObject jsonObject = JSONObject.parseObject(response.getContentAsString());
         GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(), GovernanceResult.class);
         Assert.assertEquals("400", governanceResult.getStatus().toString());
     }
@@ -175,7 +174,7 @@ public class AccountControllerTest extends JUnitTestBase {
 
     @After
     public void after() throws Exception {
-       testDelete();
+        testDelete();
     }
 
 

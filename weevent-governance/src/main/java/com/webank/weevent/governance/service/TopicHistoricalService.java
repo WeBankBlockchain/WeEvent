@@ -91,8 +91,8 @@ public class TopicHistoricalService {
             }
 
             Map<String, List<Integer>> returnMap = new HashMap<>();
-            topicHistoricalEntity.setBeginDateStr(DateFormatUtils.format(topicHistoricalEntity.getBeginDate(), simpleDateFormat));
-            topicHistoricalEntity.setEndDateStr(DateFormatUtils.format(topicHistoricalEntity.getEndDate(), simpleDateFormat));
+            topicHistoricalEntity.setBeginDateStr(DateFormatUtils.format(topicHistoricalEntity.getBeginDate(), simpleDateFormat) + " 00:00:00");
+            topicHistoricalEntity.setEndDateStr(DateFormatUtils.format(topicHistoricalEntity.getEndDate(), simpleDateFormat) + " 23:59:59");
             List<TopicHistoricalEntity> historicalDataEntities = topicHistoricalMapper.historicalDataList(topicHistoricalEntity);
 
             if (historicalDataEntities.isEmpty()) {
@@ -135,8 +135,8 @@ public class TopicHistoricalService {
             if (!flag) {
                 throw new GovernanceException(ErrorCode.ACCESS_DENIED);
             }
-            topicHistoricalEntity.setBeginDateStr(DateFormatUtils.format(topicHistoricalEntity.getBeginDate(), simpleDateFormat));
-            topicHistoricalEntity.setEndDateStr(DateFormatUtils.format(topicHistoricalEntity.getEndDate(), simpleDateFormat));
+            topicHistoricalEntity.setBeginDateStr(DateFormatUtils.format(topicHistoricalEntity.getBeginDate(), simpleDateFormat) + " 00:00:00");
+            topicHistoricalEntity.setEndDateStr(DateFormatUtils.format(topicHistoricalEntity.getEndDate(), simpleDateFormat) + " 23:59:59");
             List<TopicHistoricalEntity> historicalEntities = topicHistoricalMapper.eventList(topicHistoricalEntity);
             if (historicalEntities.isEmpty()) {
                 return historicalEntities;
@@ -183,7 +183,7 @@ public class TopicHistoricalService {
         try {
             int first = goalUrl.lastIndexOf("/");
             int end = goalUrl.lastIndexOf("?");
-            dbName = flag ? goalUrl.substring(first + 1, end) : goalUrl.substring(first+1);
+            dbName = flag ? goalUrl.substring(first + 1, end) : goalUrl.substring(first + 1);
             // get mysql default url like jdbc:mysql://127.0.0.1:3306
             Map<String, String> urlMap = commonService.uRLRequest(goalUrl);
             RuleDatabaseEntity ruleDatabaseEntity = new RuleDatabaseEntity(brokerEntity.getUserId(), brokerEntity.getId(), urlMap.get("dataBaseUrl"),
