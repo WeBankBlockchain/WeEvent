@@ -11,7 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fabric.config.FabricConfig;
 import com.webank.weevent.broker.fabric.dto.TransactionInfo;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
@@ -59,13 +58,13 @@ public class Fabric {
         this.fabricConfig = fabricConfig;
     }
 
-    public void init(String channelName) {
+    public void init(String channelName) throws BrokerException {
         try {
             this.hfClient = FabricSDKWrapper.initializeClient(this.fabricConfig);
             this.channel = FabricSDKWrapper.initializeChannel(hfClient, channelName, this.fabricConfig);
         } catch (Exception e) {
             log.error("init fabric failed", e);
-            BrokerApplication.exit();
+            throw new BrokerException("init fabric failed");
         }
     }
 
