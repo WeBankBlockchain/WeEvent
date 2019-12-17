@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.JUnitTestBase;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
@@ -37,7 +38,7 @@ public class FabricBroker4ProducerTest extends JUnitTestBase {
         this.getClass().getSimpleName(),
         this.testName.getMethodName());
 
-        this.iProducer = IProducer.build();
+        this.iProducer = BrokerApplication.applicationContext.getBean("iProducer", IProducer.class);
         Assert.assertNotNull(this.iProducer);
         this.iProducer.startProducer();
         Assert.assertTrue(this.iProducer.open(this.topicName, this.channelName));

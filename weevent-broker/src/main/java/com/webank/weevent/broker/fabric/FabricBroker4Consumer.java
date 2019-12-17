@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
 import com.webank.weevent.BrokerApplication;
+import com.webank.weevent.broker.fabric.sdk.FabricDelegate;
 import com.webank.weevent.broker.fisco.dto.SubscriptionInfo;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
@@ -55,12 +56,12 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
      */
     private int idleTime;
 
-    public FabricBroker4Consumer() {
-        super();
+    public FabricBroker4Consumer(FabricDelegate fabricDelegate) {
+        super(fabricDelegate);
 
         // spring default Executor
         this.executor = BrokerApplication.applicationContext.getBean("taskExecutor", Executor.class);
-        this.idleTime = fabricConfig.getConsumerIdleTime();
+        this.idleTime = fabricDelegate.getFabricConfig().getConsumerIdleTime();
     }
 
     private static boolean isEventId(String offset) {
@@ -182,7 +183,7 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
                 tag,
                 listener);
         subscription.setIdleTime(this.idleTime);
-        subscription.setMergeBlock(fabricConfig.getConsumerHistoryMergeBlock());
+        subscription.setMergeBlock(fabricDelegate.getFabricConfig().getConsumerHistoryMergeBlock());
         subscription.setInterfaceType(interfaceType);
         subscription.setRemoteIp(remoteIp);
 
