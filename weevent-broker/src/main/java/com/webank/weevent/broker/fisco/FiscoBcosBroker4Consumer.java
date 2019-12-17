@@ -58,8 +58,8 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
      */
     private int idleTime;
 
-    public FiscoBcosBroker4Consumer() {
-        super();
+    public FiscoBcosBroker4Consumer(FiscoBcosDelegate fiscoBcosDelegate) {
+        super(fiscoBcosDelegate);
 
         // spring default Executor
         this.executor = BrokerApplication.applicationContext.getBean("taskExecutor", Executor.class);

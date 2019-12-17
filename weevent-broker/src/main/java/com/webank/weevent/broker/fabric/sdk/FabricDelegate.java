@@ -36,6 +36,9 @@ public class FabricDelegate {
 
     private static List<String> channels = new ArrayList<>();
 
+    // fabricConfig
+    public static FabricConfig fabricConfig;
+
     public FabricDelegate() {
         this.fabricMap = new ConcurrentHashMap<>();
     }
@@ -57,11 +60,12 @@ public class FabricDelegate {
         }
     }
 
-    public void initProxy(FabricConfig fabricConfig) throws BrokerException {
-        Fabric fabric = new Fabric(fabricConfig);
-        fabric.init(fabricConfig.getChannelName());
-        fabricMap.put(fabricConfig.getChannelName(), fabric);
-        channels = FabricSDKWrapper.listChannelName(fabricConfig);
+    public void initProxy(FabricConfig config) throws BrokerException {
+        fabricConfig = config;
+        Fabric fabric = new Fabric(config);
+        fabric.init(config.getChannelName());
+        fabricMap.put(config.getChannelName(), fabric);
+        channels = FabricSDKWrapper.listChannelName(config);
         initRedisService();
     }
 

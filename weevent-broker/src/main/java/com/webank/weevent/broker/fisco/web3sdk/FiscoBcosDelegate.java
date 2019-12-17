@@ -64,6 +64,9 @@ public class FiscoBcosDelegate {
     // groupId list
     private List<String> groupIdList = new ArrayList<>();
 
+    // fiscoConfig
+    public static FiscoConfig fiscoConfig;
+
     /**
      * notify from web3sdk2.x when new block mined
      */
@@ -112,30 +115,31 @@ public class FiscoBcosDelegate {
         return pool;
     }
 
-    public void initProxy(FiscoConfig fiscoConfig) throws BrokerException {
-        threadPool = initThreadPool(fiscoConfig);
-        timeout = fiscoConfig.getWeb3sdkTimeout();
+    public void initProxy(FiscoConfig config) throws BrokerException {
+        fiscoConfig = config;
+        threadPool = initThreadPool(config);
+        timeout = config.getWeb3sdkTimeout();
 
-        if (StringUtils.isBlank(fiscoConfig.getVersion())) {
+        if (StringUtils.isBlank(config.getVersion())) {
             log.error("the fisco version in fisco.properties is null");
             throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
         }
-        if (StringUtils.isBlank(fiscoConfig.getNodes())) {
+        if (StringUtils.isBlank(config.getNodes())) {
             log.error("the fisco nodes in fisco.properties is null");
             throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
         }
 
-        if (fiscoConfig.getVersion().startsWith(WeEventConstants.FISCO_BCOS_1_X_VERSION_PREFIX)) {
+        if (config.getVersion().startsWith(WeEventConstants.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             log.info("Notice: FISCO-BCOS's version is 1.x");
 
             // set web3sdk.Async thread pool, special thread for sendAsync
             new org.bcos.web3j.utils.Async(threadPool);
 
-            FiscoBcos fiscoBcos = new FiscoBcos(fiscoConfig);
+            FiscoBcos fiscoBcos = new FiscoBcos(config);
             fiscoBcos.init();
 
             this.fiscoBcos = fiscoBcos;
-        } else if (fiscoConfig.getVersion().startsWith(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {
+        } else if (config.getVersion().startsWith(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {
             log.info("Notice: FISCO-BCOS's version is 2.x");
 
             // set web3sdk.Async thread pool, special thread for sendAsync
@@ -143,7 +147,7 @@ public class FiscoBcosDelegate {
 
             // 1 is always exist
             Long defaultGId = Long.valueOf(WeEvent.DEFAULT_GROUP_ID);
-            FiscoBcos2 defaultFiscoBcos2 = new FiscoBcos2(fiscoConfig);
+            FiscoBcos2 defaultFiscoBcos2 = new FiscoBcos2(config);
             defaultFiscoBcos2.init(defaultGId);
             this.fiscoBcos2Map.put(defaultGId, defaultFiscoBcos2);
             // this call need default group has been initialized
@@ -153,7 +157,7 @@ public class FiscoBcosDelegate {
             groups.remove(WeEvent.DEFAULT_GROUP_ID);
             for (String groupId : groups) {
                 Long gid = Long.valueOf(groupId);
-                FiscoBcos2 fiscoBcos2 = new FiscoBcos2(fiscoConfig);
+                FiscoBcos2 fiscoBcos2 = new FiscoBcos2(config);
                 fiscoBcos2.init(gid);
                 this.fiscoBcos2Map.put(gid, fiscoBcos2);
             }

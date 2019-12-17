@@ -266,9 +266,11 @@ public class BrokerApplication {
         String blockChain = BrokerApplication.weEventConfig.getBlockChainType();
         switch (blockChain) {
             case WeEventConstants.FISCO:
-                return new FiscoBcosBroker4Consumer();
+                FiscoBcosDelegate fiscoBcosDelegate = BrokerApplication.applicationContext.getBean(FiscoBcosDelegate.class);
+                return new FiscoBcosBroker4Consumer(fiscoBcosDelegate);
             case WeEventConstants.FABRIC:
-                return new FabricBroker4Consumer();
+                FabricDelegate fabricDelegate = BrokerApplication.applicationContext.getBean(FabricDelegate.class);
+                return new FabricBroker4Consumer(fabricDelegate);
             default:
                 throw new BrokerException("Invalid chain type");
         }
@@ -280,9 +282,11 @@ public class BrokerApplication {
         String blockChain = BrokerApplication.weEventConfig.getBlockChainType();
         switch (blockChain) {
             case WeEventConstants.FISCO:
-                return new FiscoBcosBroker4Producer();
+                FiscoBcosDelegate fiscoBcosDelegate = BrokerApplication.applicationContext.getBean(FiscoBcosDelegate.class);
+                return new FiscoBcosBroker4Producer(fiscoBcosDelegate);
             case WeEventConstants.FABRIC:
-                return new FabricBroker4Producer();
+                FabricDelegate fabricDelegate = BrokerApplication.applicationContext.getBean(FabricDelegate.class);
+                return new FabricBroker4Producer(fabricDelegate);
             default:
                 throw new BrokerException("Invalid chain type");
         }
