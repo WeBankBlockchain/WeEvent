@@ -33,18 +33,13 @@ public class FabricTopicAdmin implements IEventTopic {
     protected static FabricConfig fabricConfig;
 
     static {
-        fabricConfig = new FabricConfig();
-        if (!fabricConfig.load()) {
+        FabricConfig config = new FabricConfig();
+        if (!config.load()) {
             log.error("load Fabric configuration failed");
             BrokerApplication.exit();
         }
-        try {
-            fabricDelegate = BrokerApplication.applicationContext.getBean(FabricDelegate.class);
-            fabricDelegate.initProxy(fabricConfig);
-        } catch (BrokerException e) {
-            log.error("init Fabric failed", e);
-            BrokerApplication.exit();
-        }
+        fabricConfig = config;
+        fabricDelegate = BrokerApplication.applicationContext.getBean(FabricDelegate.class);
     }
 
     @Override
