@@ -7,7 +7,16 @@ import java.util.concurrent.Executor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.config.WeEventConfig;
+import com.webank.weevent.broker.fabric.FabricBroker4Consumer;
+import com.webank.weevent.broker.fabric.FabricBroker4Producer;
+import com.webank.weevent.broker.fabric.config.FabricConfig;
+import com.webank.weevent.broker.fabric.sdk.FabricDelegate;
+import com.webank.weevent.broker.fisco.FiscoBcosBroker4Consumer;
+import com.webank.weevent.broker.fisco.FiscoBcosBroker4Producer;
+import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.ha.MasterJob;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
@@ -153,14 +162,6 @@ public class BrokerApplication {
         environment = env;
     }
 
-    public static void exit() {
-        if (applicationContext != null) {
-            System.exit(SpringApplication.exit(applicationContext));
-        } else {
-            System.exit(1);
-        }
-    }
-
     // tomcat configuration to enhance performance
     @Bean
     public ConfigurableServletWebServerFactory configurableServletWebServerFactory() {
@@ -188,7 +189,7 @@ public class BrokerApplication {
         return factory;
     }
 
-    //support CORS
+    // support CORS
     @Bean
     public WebMvcConfigurer webMvcConfigurer() {
         return new WebMvcConfigurer() {
@@ -222,51 +223,82 @@ public class BrokerApplication {
         return exporter;
     }
 
-    //IProducer
+    // FiscoBcosDelegate
     @Bean
-    public static IProducer iProducer() {
-        try {
-            IProducer iProducer = IProducer.build();
-            iProducer.startProducer();
-            return iProducer;
-        } catch (BrokerException e) {
-            log.error("start producer error");
-            exit();
+    @ConditionalOnProperty(prefix = "broker.blockchain", name = "type", havingValue = "fisco")
+    public static FiscoBcosDelegate fiscoBcosDelegate() throws BrokerException {
+        FiscoConfig fiscoConfig = new FiscoConfig();
+        if (!fiscoConfig.load()) {
+            throw new BrokerException("load FISCO-BCOS configuration failed");
         }
-        return null;
+        FiscoBcosDelegate fiscoBcosDelegate = new FiscoBcosDelegate();
+        fiscoBcosDelegate.initProxy(fiscoConfig);
+
+        return fiscoBcosDelegate;
     }
 
-    //IConsumer
+    // FabricDelegate
     @Bean
-    public static IConsumer iConsumer() {
-
-        try {
-            IConsumer iConsumer = IConsumer.build();
-            iConsumer.startConsumer();
-            return iConsumer;
-        } catch (BrokerException e) {
-            log.error("start consumer error");
-            exit();
+    @ConditionalOnProperty(prefix = "broker.blockchain", name = "type", havingValue = "fabric")
+    public static FabricDelegate fabricDelegate() throws BrokerException {
+        FabricConfig fabricConfig = new FabricConfig();
+        if (!fabricConfig.load()) {
+            throw new BrokerException("load Fabric configuration failed");
         }
-        return null;
+        FabricDelegate fabricDelegate = new FabricDelegate();
+        fabricDelegate.initProxy(fabricConfig);
+
+        return fabricDelegate;
     }
 
-    //http filter
+    // IConsumer
+    @Bean
+    public static IConsumer iConsumer() throws BrokerException {
+        String blockChain = BrokerApplication.weEventConfig.getBlockChainType();
+        switch (blockChain) {
+            case WeEventConstants.FISCO:
+                FiscoBcosDelegate fiscoBcosDelegate = BrokerApplication.applicationContext.getBean(FiscoBcosDelegate.class);
+                return new FiscoBcosBroker4Consumer(fiscoBcosDelegate);
+            case WeEventConstants.FABRIC:
+                FabricDelegate fabricDelegate = BrokerApplication.applicationContext.getBean(FabricDelegate.class);
+                return new FabricBroker4Consumer(fabricDelegate);
+            default:
+                throw new BrokerException("Invalid chain type");
+        }
+    }
+
+    // IProducer
+    @Bean
+    public static IProducer iProducer() throws BrokerException {
+        String blockChain = BrokerApplication.weEventConfig.getBlockChainType();
+        switch (blockChain) {
+            case WeEventConstants.FISCO:
+                FiscoBcosDelegate fiscoBcosDelegate = BrokerApplication.applicationContext.getBean(FiscoBcosDelegate.class);
+                return new FiscoBcosBroker4Producer(fiscoBcosDelegate);
+            case WeEventConstants.FABRIC:
+                FabricDelegate fabricDelegate = BrokerApplication.applicationContext.getBean(FabricDelegate.class);
+                return new FabricBroker4Producer(fabricDelegate);
+            default:
+                throw new BrokerException("Invalid chain type");
+        }
+    }
+
+    // http filter
     @Bean
     public static HttpInterceptorConfig interceptorConfig() {
         return new HttpInterceptorConfig();
     }
 
-    //redis
+    // redis
     @Bean(name = "springRedisTemplate")
     @ConditionalOnProperty(prefix = "spring.redis", name = {"host", "port"})
-    public static RedisTemplate<String, List<WeEvent>> redisTemplate(LettuceConnectionFactory redisConnectionFactory) {
+    public static RedisTemplate<String, List<WeEvent>> redisTemplate(LettuceConnectionFactory redisConnectionFactory) throws BrokerException {
         try {
             // test Redis connection
             redisConnectionFactory.validateConnection();
         } catch (Exception e) {
-            log.error("Unable to connect to Redis, ", e);
-            exit();
+            log.error("Unable to connect to Redis. ", e);
+            throw new BrokerException("Unable to connect to Redis");
         }
 
         RedisTemplate<String, List<WeEvent>> redisTemplate = new RedisTemplate<>();
@@ -278,7 +310,7 @@ public class BrokerApplication {
         return redisTemplate;
     }
 
-    //ha
+    // ha
     @Bean
     public static MasterJob getMasterJob() {
         return new MasterJob();
