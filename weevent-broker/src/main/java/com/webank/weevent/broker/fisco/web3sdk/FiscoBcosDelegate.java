@@ -23,6 +23,7 @@ import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.WeEvent;
 
+import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +43,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  * @since 2019/04/28
  */
 @Slf4j
+@Data
 public class FiscoBcosDelegate {
     // access to version 1.x
     private FiscoBcos fiscoBcos;
@@ -65,7 +67,7 @@ public class FiscoBcosDelegate {
     private List<String> groupIdList = new ArrayList<>();
 
     // fiscoConfig
-    public static FiscoConfig fiscoConfig;
+    private FiscoConfig fiscoConfig;
 
     /**
      * notify from web3sdk2.x when new block mined

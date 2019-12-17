@@ -162,14 +162,6 @@ public class BrokerApplication {
         environment = env;
     }
 
-    public static void exit() {
-        if (applicationContext != null) {
-            System.exit(SpringApplication.exit(applicationContext));
-        } else {
-            System.exit(1);
-        }
-    }
-
     // tomcat configuration to enhance performance
     @Bean
     public ConfigurableServletWebServerFactory configurableServletWebServerFactory() {
@@ -237,7 +229,7 @@ public class BrokerApplication {
     public static FiscoBcosDelegate fiscoBcosDelegate() throws BrokerException {
         FiscoConfig fiscoConfig = new FiscoConfig();
         if (!fiscoConfig.load()) {
-            throw new BrokerException("init FISCO-BCOS failed");
+            throw new BrokerException("load FISCO-BCOS configuration failed");
         }
         FiscoBcosDelegate fiscoBcosDelegate = new FiscoBcosDelegate();
         fiscoBcosDelegate.initProxy(fiscoConfig);
@@ -251,8 +243,7 @@ public class BrokerApplication {
     public static FabricDelegate fabricDelegate() throws BrokerException {
         FabricConfig fabricConfig = new FabricConfig();
         if (!fabricConfig.load()) {
-            log.error("load Fabric configuration failed");
-            BrokerApplication.exit();
+            throw new BrokerException("load Fabric configuration failed");
         }
         FabricDelegate fabricDelegate = new FabricDelegate();
         fabricDelegate.initProxy(fabricConfig);

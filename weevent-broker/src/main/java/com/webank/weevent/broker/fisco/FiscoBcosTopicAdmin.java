@@ -2,7 +2,6 @@ package com.webank.weevent.broker.fisco;
 
 import java.util.List;
 
-import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
@@ -29,17 +28,12 @@ import org.apache.commons.lang3.StringUtils;
  */
 @Slf4j
 public class FiscoBcosTopicAdmin implements IEventTopic {
-    // FISCO-BCOS config
-    protected FiscoConfig fiscoConfig;
 
     // FISCO-BCOS handler
     protected FiscoBcosDelegate fiscoBcosDelegate;
 
     public FiscoBcosTopicAdmin(FiscoBcosDelegate fiscoBcosDelegate){
-        if (fiscoConfig == null || fiscoBcosDelegate ==null) {
-            this.fiscoConfig = FiscoBcosDelegate.fiscoConfig;
-            this.fiscoBcosDelegate = fiscoBcosDelegate;
-        }
+        this.fiscoBcosDelegate = fiscoBcosDelegate;
     }
 
     @Override

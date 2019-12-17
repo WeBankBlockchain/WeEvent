@@ -37,7 +37,7 @@ public class FabricDelegate {
     private static List<String> channels = new ArrayList<>();
 
     // fabricConfig
-    public static FabricConfig fabricConfig;
+    private FabricConfig fabricConfig;
 
     public FabricDelegate() {
         this.fabricMap = new ConcurrentHashMap<>();

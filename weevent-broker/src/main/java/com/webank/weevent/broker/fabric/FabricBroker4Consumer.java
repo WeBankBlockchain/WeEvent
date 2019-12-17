@@ -61,7 +61,7 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
 
         // spring default Executor
         this.executor = BrokerApplication.applicationContext.getBean("taskExecutor", Executor.class);
-        this.idleTime = fabricConfig.getConsumerIdleTime();
+        this.idleTime = fabricDelegate.getFabricConfig().getConsumerIdleTime();
     }
 
     private static boolean isEventId(String offset) {
@@ -183,7 +183,7 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
                 tag,
                 listener);
         subscription.setIdleTime(this.idleTime);
-        subscription.setMergeBlock(fabricConfig.getConsumerHistoryMergeBlock());
+        subscription.setMergeBlock(fabricDelegate.getFabricConfig().getConsumerHistoryMergeBlock());
         subscription.setInterfaceType(interfaceType);
         subscription.setRemoteIp(remoteIp);
 

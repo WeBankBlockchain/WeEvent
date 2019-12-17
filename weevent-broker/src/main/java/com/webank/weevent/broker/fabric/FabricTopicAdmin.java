@@ -2,7 +2,6 @@ package com.webank.weevent.broker.fabric;
 
 import java.util.List;
 
-import com.webank.weevent.broker.fabric.config.FabricConfig;
 import com.webank.weevent.broker.fabric.sdk.FabricDelegate;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
@@ -29,13 +28,9 @@ import org.apache.commons.lang3.StringUtils;
 @Slf4j
 public class FabricTopicAdmin implements IEventTopic {
     protected FabricDelegate fabricDelegate;
-    protected FabricConfig fabricConfig;
 
     public FabricTopicAdmin(FabricDelegate fabricDelegate) {
-        if (fabricConfig == null || fabricDelegate == null) {
-            this.fabricConfig = FabricDelegate.fabricConfig;
-            this.fabricDelegate = fabricDelegate;
-        }
+        this.fabricDelegate = fabricDelegate;
     }
 
     @Override
