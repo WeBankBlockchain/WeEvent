@@ -2,6 +2,7 @@ package com.webank.weevent.broker.plugin;
 
 import java.util.concurrent.TimeUnit;
 
+import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.JUnitTestBase;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
@@ -29,7 +30,7 @@ public class IProducerTest extends JUnitTestBase {
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
-        this.iProducer = IProducer.build();
+        this.iProducer = BrokerApplication.applicationContext.getBean("iProducer", IProducer.class);
         Assert.assertNotNull(this.iProducer);
         Assert.assertTrue(this.iProducer.open(this.topicName, this.groupId));
     }
