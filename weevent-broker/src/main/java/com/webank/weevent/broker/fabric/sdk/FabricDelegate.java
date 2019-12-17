@@ -61,7 +61,7 @@ public class FabricDelegate {
     }
 
     public void initProxy(FabricConfig config) throws BrokerException {
-        fabricConfig = config;
+        this.fabricConfig = config;
         Fabric fabric = new Fabric(config);
         fabric.init(config.getChannelName());
         fabricMap.put(config.getChannelName(), fabric);

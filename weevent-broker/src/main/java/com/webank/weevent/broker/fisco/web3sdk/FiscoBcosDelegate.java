@@ -118,7 +118,7 @@ public class FiscoBcosDelegate {
     }
 
     public void initProxy(FiscoConfig config) throws BrokerException {
-        fiscoConfig = config;
+        this.fiscoConfig = config;
         threadPool = initThreadPool(config);
         timeout = config.getWeb3sdkTimeout();
 
