@@ -3,6 +3,7 @@ package com.webank.weevent.broker.fabric;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 
+import com.webank.weevent.broker.fabric.sdk.FabricDelegate;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
@@ -19,6 +20,10 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class FabricBroker4Producer extends FabricTopicAdmin implements IProducer {
+    public FabricBroker4Producer(FabricDelegate fabricDelegate) {
+        super(fabricDelegate);
+    }
+
     @Override
     public boolean startProducer() throws BrokerException {
         return true;
