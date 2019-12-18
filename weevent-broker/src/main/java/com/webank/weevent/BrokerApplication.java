@@ -7,12 +7,21 @@ import java.util.concurrent.Executor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.config.WeEventConfig;
-import com.webank.weevent.broker.fisco.RedisService;
+import com.webank.weevent.broker.fabric.FabricBroker4Consumer;
+import com.webank.weevent.broker.fabric.FabricBroker4Producer;
+import com.webank.weevent.broker.fabric.config.FabricConfig;
+import com.webank.weevent.broker.fabric.sdk.FabricDelegate;
+import com.webank.weevent.broker.fisco.FiscoBcosBroker4Consumer;
+import com.webank.weevent.broker.fisco.FiscoBcosBroker4Producer;
+import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.ha.MasterJob;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.WeEvent;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.googlecode.jsonrpc4j.ErrorResolver;
@@ -30,14 +39,15 @@ import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerF
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.Protocol;
 
 /**
  * @author websterchen
@@ -152,32 +162,34 @@ public class BrokerApplication {
         environment = env;
     }
 
-    public static void exit() {
-        if (applicationContext != null) {
-            System.exit(SpringApplication.exit(applicationContext));
-        } else {
-            System.exit(1);
-        }
-    }
-
-
-    // tomcat configuration
+    // tomcat configuration to enhance performance
     @Bean
     public ConfigurableServletWebServerFactory configurableServletWebServerFactory() {
         log.info("custom TomcatServletWebServerFactory");
 
         TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory();
-        // it's "org.apache.coyote.http11.Http11NioProtocol"
         factory.setProtocol(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
+
         factory.addConnectorCustomizers((connector) -> {
+                    // default max connections = 10000
+                    // default connection timeout = 20000
+                    // default max accept count = 100
+                    // default max worker thread = 200
+                    connector.setEnableLookups(false);
+                    connector.setAllowTrace(false);
+
                     Http11NioProtocol http11NioProtocol = (Http11NioProtocol) connector.getProtocolHandler();
+                    http11NioProtocol.setKeepAliveTimeout(60000);
                     http11NioProtocol.setMaxKeepAliveRequests(10000);
+                    http11NioProtocol.setDisableUploadTimeout(true);
+                    http11NioProtocol.setTcpNoDelay(true);
                 }
         );
+
         return factory;
     }
 
-    //support CORS
+    // support CORS
     @Bean
     public WebMvcConfigurer webMvcConfigurer() {
         return new WebMvcConfigurer() {
@@ -211,65 +223,94 @@ public class BrokerApplication {
         return exporter;
     }
 
-    //IProducer
+    // FiscoBcosDelegate
     @Bean
-    public static IProducer iProducer() {
-        try {
-            IProducer iProducer = IProducer.build();
-            iProducer.startProducer();
-            return iProducer;
-        } catch (BrokerException e) {
-            log.error("start producer error");
-            exit();
+    @ConditionalOnProperty(prefix = "broker.blockchain", name = "type", havingValue = "fisco")
+    public static FiscoBcosDelegate fiscoBcosDelegate() throws BrokerException {
+        FiscoConfig fiscoConfig = new FiscoConfig();
+        if (!fiscoConfig.load()) {
+            throw new BrokerException("load FISCO-BCOS configuration failed");
         }
-        return null;
+        FiscoBcosDelegate fiscoBcosDelegate = new FiscoBcosDelegate();
+        fiscoBcosDelegate.initProxy(fiscoConfig);
+
+        return fiscoBcosDelegate;
     }
 
-    //IConsumer
+    // FabricDelegate
     @Bean
-    public static IConsumer iConsumer() {
-
-        try {
-            IConsumer iConsumer = IConsumer.build();
-            iConsumer.startConsumer();
-            return iConsumer;
-        } catch (BrokerException e) {
-            log.error("start consumer error");
-            exit();
+    @ConditionalOnProperty(prefix = "broker.blockchain", name = "type", havingValue = "fabric")
+    public static FabricDelegate fabricDelegate() throws BrokerException {
+        FabricConfig fabricConfig = new FabricConfig();
+        if (!fabricConfig.load()) {
+            throw new BrokerException("load Fabric configuration failed");
         }
-        return null;
+        FabricDelegate fabricDelegate = new FabricDelegate();
+        fabricDelegate.initProxy(fabricConfig);
+
+        return fabricDelegate;
     }
 
-    //http filter
+    // IConsumer
+    @Bean
+    public static IConsumer iConsumer() throws BrokerException {
+        String blockChain = BrokerApplication.weEventConfig.getBlockChainType();
+        switch (blockChain) {
+            case WeEventConstants.FISCO:
+                FiscoBcosDelegate fiscoBcosDelegate = BrokerApplication.applicationContext.getBean(FiscoBcosDelegate.class);
+                return new FiscoBcosBroker4Consumer(fiscoBcosDelegate);
+            case WeEventConstants.FABRIC:
+                FabricDelegate fabricDelegate = BrokerApplication.applicationContext.getBean(FabricDelegate.class);
+                return new FabricBroker4Consumer(fabricDelegate);
+            default:
+                throw new BrokerException("Invalid chain type");
+        }
+    }
+
+    // IProducer
+    @Bean
+    public static IProducer iProducer() throws BrokerException {
+        String blockChain = BrokerApplication.weEventConfig.getBlockChainType();
+        switch (blockChain) {
+            case WeEventConstants.FISCO:
+                FiscoBcosDelegate fiscoBcosDelegate = BrokerApplication.applicationContext.getBean(FiscoBcosDelegate.class);
+                return new FiscoBcosBroker4Producer(fiscoBcosDelegate);
+            case WeEventConstants.FABRIC:
+                FabricDelegate fabricDelegate = BrokerApplication.applicationContext.getBean(FabricDelegate.class);
+                return new FabricBroker4Producer(fabricDelegate);
+            default:
+                throw new BrokerException("Invalid chain type");
+        }
+    }
+
+    // http filter
     @Bean
     public static HttpInterceptorConfig interceptorConfig() {
         return new HttpInterceptorConfig();
     }
 
-    //redis
-    @Bean
-    @ConditionalOnProperty(prefix = "redis.server", name = {"ip", "port"})
-    public static RedisService getRedisService() {
-        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
-        JedisPool jedisPool = new JedisPool(jedisPoolConfig,
-                weEventConfig.getRedisServerIp(),
-                weEventConfig.getRedisServerPort(),
-                Protocol.DEFAULT_TIMEOUT,
-                weEventConfig.getRedisServerPassword());
+    // redis
+    @Bean(name = "springRedisTemplate")
+    @ConditionalOnProperty(prefix = "spring.redis", name = {"host", "port"})
+    public static RedisTemplate<String, List<WeEvent>> redisTemplate(LettuceConnectionFactory redisConnectionFactory) throws BrokerException {
         try {
-            if (jedisPool.getResource() != null) {
-                jedisPool.getResource().ping();
-            }
+            // test Redis connection
+            redisConnectionFactory.validateConnection();
         } catch (Exception e) {
-            log.error("init redis error", e);
-            exit();
+            log.error("Unable to connect to Redis. ", e);
+            throw new BrokerException("Unable to connect to Redis");
         }
-        RedisService redisService = new RedisService();
-        redisService.setJedisPool(jedisPool);
-        return redisService;
+
+        RedisTemplate<String, List<WeEvent>> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        redisTemplate.afterPropertiesSet();
+
+        return redisTemplate;
     }
 
-    //ha
+    // ha
     @Bean
     public static MasterJob getMasterJob() {
         return new MasterJob();

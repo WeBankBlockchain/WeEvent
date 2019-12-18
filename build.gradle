@@ -1,5 +1,74 @@
 println("Notice: current gradle version is " + gradle.gradleVersion + ", WeEvent support gradle version in [4.10, 5.0)")
 
+ext{
+    // ----- org.springframework -----
+    // spring boot
+    springBoot2Version = "2.1.0.RELEASE"
+    // spring
+    spring5Version = "5.1.0.RELEASE"
+    // data.spring-data-commons
+    springDataCommonsVersion = "2.1.0.RELEASE"
+
+    // ----- org.apache -----
+    // zookeeper
+    zookeeperVersion = "3.5.5"
+    // curator.recipes
+    curatorVersion = "4.2.0"
+    // httpclient
+    httpclientVersion = "4.5.6"
+    // tomcat
+    tomcatVersion = "8.5.23"
+    // commons
+    apacheCommonsVersion = [
+            lang3 : "3.6",
+            jexl3 : "3.1",
+            pool2 : "2.7.0",
+            collections4 : "4.1",
+            dbcp2 : "2.6.0",
+            commonsIo : "2.4"
+    ]
+    // logging.log4j
+    log4jVersion = "2.11.1"
+    // jmeter
+    jmeterVersion = "5.0"
+
+    // org.fisco-bcos.web3sdk
+    web3sdkVersion = [
+            fiscoV1 : "1.2.5",
+            fiscoV2 : "2.2.0.120500-SNAPSHOT"
+    ]
+    // fabric
+    fabricVersion = "1.4.4"
+    // org slf4j
+    slf4jVersion = "1.7.26"
+    // lombok
+    lombokVersion = "1.16.14"
+    // junit
+    junitVersion = "4.12"
+    // netty-all
+    nettyVersion = "4.1.15.Final"
+    // jsonrpc
+    jsonrpc4jVersion = "1.5.3"
+    // JMS
+    jmsVersion = "1.1"
+    // Jmock
+    jmockVersion = "1.9"
+    // mybatis-spring-boot-starter
+    mybatisVersion = "1.3.2"
+    //h2
+    h2Version = "1.4.196"
+    // mariadb-java-client
+    mariadbClientVersion = "2.3.0"
+    // jsoup
+    jsoupVersion = "1.9.2"
+    // fastjson
+    fastjsonVersion = "1.2.60"
+    // quartz
+    quartzVersion = "2.3.0"
+    // Java-WebSocket
+    WebSocketVersion = "1.4.0"
+}
+
 buildscript {
     repositories {
         maven {
@@ -18,7 +87,7 @@ buildscript {
 }
 
 List lombok = [
-        "org.projectlombok:lombok:1.16.14"
+        "org.projectlombok:lombok:${lombokVersion}"
 ]
 
 allprojects {
@@ -35,11 +104,15 @@ allprojects {
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
 
+    compileJava {
+        options.compilerArgs << "-Xlint:unchecked"
+    }
+
     repositories {
         maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
         // "org.ethereum.solcJ-all-0.4.25"
         // maven { url "https://dl.bintray.com/ethereum/maven/" }
-        // maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         mavenLocal()
         mavenCentral()
     }
@@ -78,9 +151,9 @@ allprojects {
 
         resolutionStrategy {
             // fix security bug
-            force "com.alibaba:fastjson:1.2.58"
+            force "com.alibaba:fastjson:${fastjsonVersion}"
             // force use netty 4.1
-            force "io.netty:netty-all:4.1.15.Final"
+            force "io.netty:netty-all:${nettyVersion}"
         }
     }
 
@@ -90,14 +163,14 @@ allprojects {
         annotationProcessor(lombok)
 
         // apache commons
-        implementation("org.apache.commons:commons-lang3:3.6")
-        implementation("org.apache.commons:commons-collections4:4.1")
+        implementation("org.apache.commons:commons-lang3:${apacheCommonsVersion.lang3}")
+        implementation("org.apache.commons:commons-collections4:${apacheCommonsVersion.collections4}")
 
-        // self4j logger
-        implementation("org.slf4j:slf4j-api:1.7.26")
+        // slf4j logger
+        implementation("org.slf4j:slf4j-api:${slf4jVersion}")
 
         // junit test
-        testImplementation("junit:junit:4.12")
+        testImplementation("junit:junit:${junitVersion}")
         testCompileOnly(lombok)
         testAnnotationProcessor(lombok)
     }

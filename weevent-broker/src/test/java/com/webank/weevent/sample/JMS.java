@@ -44,7 +44,7 @@ public class JMS {
         // send message
         BytesMessage msg = session.createBytesMessage();
         msg.writeBytes(("hello WeEvent").getBytes(StandardCharsets.UTF_8));
-        publisher.send(msg);
+        publisher.publish(msg);
 
         System.out.print("send done.");
         connection.close();

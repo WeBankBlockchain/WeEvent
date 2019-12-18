@@ -9,9 +9,10 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.AccountEntity;
+import com.webank.weevent.governance.enums.DeleteAtEnum;
 import com.webank.weevent.governance.exception.GovernanceException;
-import com.webank.weevent.governance.mapper.AccountMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
+import com.webank.weevent.governance.repository.AccountRepository;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.utils.CookiesTools;
 
@@ -19,15 +20,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.helper.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @Slf4j
 public class AccountService {
 
-    @Autowired
-    private AccountMapper accountMapper;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -39,6 +40,9 @@ public class AccountService {
     @Autowired
     private CookiesTools cookiesTools;
 
+    @Autowired
+    private AccountRepository accountRepository;
+
     @PostConstruct
     public void init() throws GovernanceException {
         try {
@@ -48,9 +52,8 @@ public class AccountService {
                 accountEntity = new AccountEntity();
                 accountEntity.setUsername("admin");
                 accountEntity.setPassword(passwordEncoder.encode("123456"));
-                accountEntity.setLastUpdate(new Date());
                 accountEntity.setEmail("admin@xxx.com");
-                accountMapper.insertAccount(accountEntity);
+                accountRepository.save(accountEntity);
             }
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -68,9 +71,10 @@ public class AccountService {
             return GovernanceResult.build(400, "data type error");
         }
         // excute select
-        List<AccountEntity> list = accountMapper.accountList(accountEntity);
+
+        List<AccountEntity> list = this.findAllByUsernameAndDeleteAt(accountEntity.getUsername());
         // is list contain data
-        if (list != null && list.size() > 0) {
+        if (!CollectionUtils.isEmpty(list)) {
             // if list contain data return false
             return GovernanceResult.ok(false);
         }
@@ -81,7 +85,7 @@ public class AccountService {
     public GovernanceResult register(AccountEntity user) {
         // data criteral
         if (StringUtils.isBlank(user.getUsername()) || StringUtils.isBlank(user.getPassword())) {
-            return GovernanceResult.build(400, "user data incomplete，regist fail");
+            return GovernanceResult.build(400, "user data incomplete，register fail");
         }
         // check username exist
         GovernanceResult result = checkData(user.getUsername(), 1);
@@ -93,12 +97,11 @@ public class AccountService {
             return GovernanceResult.build(400, "password is too short");
         }
 
-        user.setLastUpdate(new Date());
         // secret
         String storePassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(storePassword);
         // insert user into database
-        accountMapper.insertAccount(user);
+        accountRepository.save(user);
         // return true
         return GovernanceResult.ok();
     }
@@ -115,16 +118,18 @@ public class AccountService {
         // check oldPassword is correct
         String oldPassword = user.getOldPassword();
 
-        AccountEntity storeUser = this.queryByUsername(user.getUsername());
+        List<AccountEntity> accountEntityList = this.findAllByUsernameAndDeleteAt(user.getUsername());
+        if (CollectionUtils.isEmpty(accountEntityList)) {
+            return GovernanceResult.build(400, "username is not exist");
+        }
+        AccountEntity storeUser = accountEntityList.get(0);
         if (!passwordEncoder.matches(oldPassword, storeUser.getPassword())) {
             return GovernanceResult.build(400, "old password is incorrect");
         }
 
         String password = passwordEncoder.encode(user.getPassword());
         storeUser.setPassword(password);
-        storeUser.setLastUpdate(new Date());
-
-        accountMapper.updateAccount(storeUser);
+        accountRepository.save(storeUser);
         return GovernanceResult.ok();
     }
 
@@ -135,7 +140,8 @@ public class AccountService {
             return GovernanceResult.build(400, "username not exists");
         }
         // get user by username
-        AccountEntity user = this.queryByUsername(username);
+        List<AccountEntity> accountList = this.findAllByUsernameAndDeleteAt(username);
+        AccountEntity user = accountList.get(0);
         if (StringUtil.isBlank(user.getEmail())) {
             throw new GovernanceException(ErrorCode.NO_MAILBOX_CONFIGURED);
         }
@@ -151,7 +157,7 @@ public class AccountService {
     public GovernanceResult getUserId(String username) {
         // get user by username
         AccountEntity user = this.queryByUsername(username);
-        Integer userId = user.getId();
+        Integer userId = user == null ? null : user.getId();
         return GovernanceResult.ok(userId);
     }
 
@@ -165,33 +171,39 @@ public class AccountService {
         String password = passwordEncoder.encode(user.getPassword());
         storeUser.setPassword(password);
         storeUser.setLastUpdate(new Date());
-
-        accountMapper.updateAccount(storeUser);
+        accountRepository.save(storeUser);
         return GovernanceResult.ok(true);
     }
 
 
     public AccountEntity queryByUsername(String username) {
-        AccountEntity accountEntity = new AccountEntity();
-        accountEntity.setUsername(username);
         // execute select
-        List<AccountEntity> list = accountMapper.accountList(accountEntity);
-        if (list.size() > 0) {
+        List<AccountEntity> list = this.findAllByUsernameAndDeleteAt(username);
+        if (!list.isEmpty()) {
             // get user info
-            AccountEntity user = list.get(0);
-            return user;
+            return list.get(0);
         }
         return null;
     }
 
-    public List<AccountEntity> accountEntityList(HttpServletRequest request, AccountEntity accountEntity) throws GovernanceException {
+    public List<AccountEntity> accountEntityList(HttpServletRequest request, AccountEntity accountEntity) {
         // execute select
         String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-        List<AccountEntity> list = accountMapper.accountList(accountEntity);
+        Example<AccountEntity> entityExample = Example.of(accountEntity);
+        List<AccountEntity> list = accountRepository.findAll(entityExample);
         //filter current user
         list = list.stream().filter(it -> !it.getId().toString().equals(accountId)).collect(Collectors.toList());
         list.forEach(it -> it.setPassword(null));
         return list;
+    }
+
+    public void deleteUser(HttpServletRequest request, AccountEntity accountEntity) {
+        // execute select
+        accountRepository.deleteByUserName(accountEntity.getUsername(), new Date().getTime());
+    }
+
+    private List<AccountEntity> findAllByUsernameAndDeleteAt(String userName) {
+        return accountRepository.findAllByUsernameAndDeleteAt(userName, DeleteAtEnum.NOT_DELETED.getCode());
     }
 
 

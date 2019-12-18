@@ -1,7 +1,9 @@
 package com.webank.weevent.broker.fisco;
 
 import java.math.BigInteger;
+import java.util.concurrent.TimeUnit;
 
+import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.JUnitTestBase;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.plugin.IProducer;
@@ -45,11 +47,11 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
-        this.iProducer = IProducer.build();
+        this.iProducer = BrokerApplication.applicationContext.getBean("iProducer", IProducer.class);
         Assert.assertNotNull(this.iProducer);
         this.iProducer.startProducer();
 
-        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.groupId);
+        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
         Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
         this.eventId = sendResult.getEventId();
     }
@@ -882,8 +884,8 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
     public void queryTransListTranHash() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.groupId);
-        queryEntity.setBlockNumber(new BigInteger("5000"));
-        queryEntity.setPageNumber(2);
+        queryEntity.setBlockNumber(new BigInteger("1"));
+        queryEntity.setPageNumber(1);
         queryEntity.setPageSize(10);
         ListPage<TbTransHash> tbTransHashes = this.iProducer.queryTransList(queryEntity);
         Assert.assertNotNull(tbTransHashes);

@@ -34,6 +34,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.fisco.bcos.channel.client.TransactionSucCallback;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.web3j.protocol.channel.StatusCode;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tuples.generated.Tuple1;
 import org.fisco.bcos.web3j.tuples.generated.Tuple3;
@@ -284,10 +285,12 @@ public class FiscoBcos2 {
                         result.getValue1().intValue()));
             } else { // error
                 if ("Transaction receipt timeout.".equals(receipt.getStatus())) {
-                    log.error("publish event failed due to transaction execution timeout. {}", receipt.getMessage());
+                    log.error("publish event failed due to transaction execution timeout. {}",
+                            StatusCode.getStatusMessage(receipt.getStatus(), receipt.getMessage()));
                     sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
                 } else {
-                    log.error("publish event failed due to transaction execution error. {}", receipt.getMessage());
+                    log.error("publish event failed due to transaction execution error. {}",
+                            StatusCode.getStatusMessage(receipt.getStatus(), receipt.getMessage()));
                     sendResult.setStatus(SendResult.SendResultStatus.ERROR);
                 }
             }

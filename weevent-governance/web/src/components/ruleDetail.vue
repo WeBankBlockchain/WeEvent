@@ -118,7 +118,7 @@
         </el-form-item>
         <el-form-item :label="$t('ruleDetail.db')  + ' :'" v-show="sqlOption.conditionType === '2'" prop='ruleDataBaseId' >
           <el-select  :placeholder="$t('ruleDetail.selectDB')" size='mini' name='options_dialog' v-model="sqlOption.ruleDataBaseId" v-show="dbList.length > 0">
-            <el-option v-for="(item, index) in dbList" :key='index' :value="item.id" :label="item.databaseName"></el-option>
+            <el-option v-for="(item, index) in dbList" :key='index' :value="item.id" :label="item.datasourceName"></el-option>
           </el-select>
           <p class='no_dbList' v-show="dbList.length === 0">{{$t('ruleDetail.guideURL')}} <span @click="creatDB" >{{$t('ruleDetail.setGuide')}}</span></p>
         </el-form-item>
@@ -475,12 +475,14 @@ export default {
                 return
               } else {
                 vm.$refs.sql.clearValidate('ruleDataBaseId')
+                vm.sqlOption.ruleDataBaseId = ''
               }
             } else {
               if (!vm.sqlOption.ruleDataBaseId) {
                 return
               } else {
                 vm.$refs.sql.clearValidate('toDestination')
+                vm.sqlOption.toDestination = ''
               }
             }
           } else {
@@ -522,6 +524,11 @@ export default {
             for (let i = 0; i < war.length; i++) {
               war[i].style.display = 'none'
             }
+          }
+          if (vm.sqlOption.conditionType === '1') {
+            vm.sqlOption.ruleDataBaseId = ''
+          } else {
+            vm.sqlOption.toDestination = ''
           }
           for (let key in vm.sqlOption) {
             if (key === 'selectField') {

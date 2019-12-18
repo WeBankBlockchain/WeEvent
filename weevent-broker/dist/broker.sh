@@ -9,34 +9,17 @@ if [[ -z ${JAVA_HOME} ]];then
    exit 1
 fi
 
-#check java jdk, not support openjdk 1.8 in CentOS
-function check_java_jdk(){
-    ${JAVA_HOME}/bin/java -version >>/dev/null 2>&1
-    if [[ $? -ne 0 ]];then
-        echo "not installed JDK"
-        exit 1
-    fi
-    java_version=$(${JAVA_HOME}/bin/java -version 2>&1 |awk 'NR==1{ gsub(/"/,""); print $3 }' | awk -F[.] '{print $1$2}')
-    system_version=$(grep "=" /etc/os-release | head -1 | awk -F'[= "]' '{print $3}')
-    openjdk=$(${JAVA_HOME}/bin/java -version 2>&1 |awk 'NR==1{ gsub(/"/,""); print $1 }')
-    if [[ ${java_version} -le 18 && "${system_version}" == "CentOS" && "${openjdk}" == "openjdk" ]];then
-        echo "in CentOS, OpenJDK's version must be 1.9 or greater"
-        exit 1
-    fi
-}
-check_java_jdk
-
 ###############################################################################
 # The following is common logic for start a java application. DO NOT EDIT IT SOLELY.
 ###############################################################################
-JAVA_OPTS="-Xverify:none -XX:+DisableExplicitGC"
+JAVA_OPTS="-Xverify:none -XX:+DisableExplicitGC -XX:TieredStopAtLevel=1 -XX:+UseConcMarkSweepGC -XX:+UseCMSCompactAtFullCollection"
 
 
 server_name=$(basename $0|awk -F"." '{print $1}')
 pid_file=./logs/${server_name}.pid
 current_pid=
 #operating system total physical memory, unit MB.
-max_total_memory=1024
+max_total_memory=2048
 
 get_pid(){
     if [[ -e ${pid_file} ]]; then
@@ -54,7 +37,7 @@ start(){
 
     total_memory=$(free -m | grep "Mem" | awk '{ print $2 }')
     if [[ "${total_memory}" -ge "${max_total_memory}" ]];then
-        JAVA_OPTS+=" -XX:TieredStopAtLevel=1 -Xms512m -XX:NewSize=512m"
+        JAVA_OPTS+=" -Xms2048m -Xmx2048m -Xmn1024m -XX:MetaspaceSize=128M"
     fi
     
     nohup ${JAVA_HOME}/bin/java ${JAVA_OPTS} ${APP_PARAMS} >/dev/null 2>&1 &

@@ -2,7 +2,11 @@ package com.webank.weevent.broker.fabric;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
+import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.JUnitTestBase;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
@@ -34,7 +38,7 @@ public class FabricBroker4ProducerTest extends JUnitTestBase {
         this.getClass().getSimpleName(),
         this.testName.getMethodName());
 
-        this.iProducer = IProducer.build();
+        this.iProducer = BrokerApplication.applicationContext.getBean("iProducer", IProducer.class);
         Assert.assertNotNull(this.iProducer);
         this.iProducer.startProducer();
         Assert.assertTrue(this.iProducer.open(this.topicName, this.channelName));
@@ -61,7 +65,7 @@ public class FabricBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishEvent() throws Exception {
-        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.channelName);
+        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.channelName).get(transactionTimeout, TimeUnit.MILLISECONDS);
         Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
     }
 
@@ -70,7 +74,7 @@ public class FabricBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishTopicExists() throws Exception {
-        SendResult dto = this.iProducer.publish(new WeEvent(this.topicName, "中文消息.".getBytes()), this.channelName);
+        SendResult dto = this.iProducer.publish(new WeEvent(this.topicName, "中文消息.".getBytes()), this.channelName).get(transactionTimeout, TimeUnit.MILLISECONDS);
         Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, dto.getStatus());
     }
 
@@ -78,9 +82,9 @@ public class FabricBroker4ProducerTest extends JUnitTestBase {
      * test extensions is null
      */
     @Test
-    public void testPublishExtIsNull() {
+    public void testPublishExtIsNull() throws InterruptedException, ExecutionException, TimeoutException {
         try {
-            SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), null), this.channelName);
+            SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), null), this.channelName).get(transactionTimeout, TimeUnit.MILLISECONDS);
             Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
         } catch (BrokerException e) {
             Assert.assertEquals(ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCode(), e.getCode());
@@ -91,12 +95,12 @@ public class FabricBroker4ProducerTest extends JUnitTestBase {
      * extensions contain multiple key and value ,key start with 'weevent-'
      */
     @Test
-    public void testPublishExtContainMulKey() throws BrokerException {
+    public void testPublishExtContainMulKey() throws Exception {
         Map<String, String> ext = new HashMap<>();
         ext.put("weevent-test", "test value");
         ext.put("weevent-test2", "test value2");
         ext.put("weevent-test3", "test value3");
-        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), ext), this.channelName);
+        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), ext), this.channelName).get(transactionTimeout, TimeUnit.MILLISECONDS);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 
@@ -275,7 +279,7 @@ public class FabricBroker4ProducerTest extends JUnitTestBase {
     public void testPublishTag() throws Exception {
         Map<String, String> ext = new HashMap<>();
         ext.put(WeEvent.WeEvent_TAG, "create");
-        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello tag: create".getBytes(), ext), this.channelName);
+        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello tag: create".getBytes(), ext), this.channelName).get(transactionTimeout, TimeUnit.MILLISECONDS);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 }

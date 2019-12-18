@@ -7,7 +7,8 @@
       element-loading-spinner='el-icon-loading'
       :element-loading-text="$t('common.loading')"
       element-loading-background='rgba(256,256,256,0.8)'
-      @expand-change='readDetail'
+      @row-click='rowClick'
+      ref='table'
     >
       <el-table-column type='expand'>
         <template slot-scope='props'>
@@ -101,9 +102,6 @@ export default {
         message: this.$t('tableCont.copySuccess')
       })
     },
-    detail (e) {
-      // this.$alert(e, '错误信息')
-    },
     transList () {
       this.loading = true
       let url = '/' + localStorage.getItem('groupId') + '/' + this.pageIndex + '/10?brokerId=' + localStorage.getItem('brokerId')
@@ -124,25 +122,8 @@ export default {
       })
       this.loading = false
     },
-    readDetail (e) {
-      let url = '/' + localStorage.getItem('groupId') + '/' + e.blockNumber + '?brokerId=' + localStorage.getItem('brokerId')
-      let index = this.tableData.indexOf(e)
-      API.blockByNumber(url).then(res => {
-        if (res.status === 200) {
-          let hash = res.data.data.transactions[0].hash
-          this.getEvent(hash, index)
-        }
-      })
-    },
-    getEvent (e, i) {
-      let url = '/' + localStorage.getItem('groupId') + '/' + e + '?brokerId=' + localStorage.getItem('brokerId')
-      API.getEvent(url).then(res => {
-        if (res.status === 200 && res.status.code === 0) {
-          this.tableData[i].logs.address = res.data.data.logs[0].address
-          this.tableData[i].logs.topics = [].concat(res.data.data.logs[0].topics)
-          this.tableData[i].logs.hasEvent = true
-        }
-      })
+    rowClick (e) {
+      this.$refs.table.toggleRowExpansion(e)
     }
   },
   mounted () {

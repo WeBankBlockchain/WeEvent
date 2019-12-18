@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.JUnitTestBase;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
@@ -66,8 +68,8 @@ public class FabricBroker4ConsumerTest extends JUnitTestBase {
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
-        this.iProducer = IProducer.build();
-        this.iConsumer = IConsumer.build();
+        this.iConsumer = BrokerApplication.applicationContext.getBean("iConsumer", IConsumer.class);
+        this.iProducer = BrokerApplication.applicationContext.getBean("iProducer", IProducer.class);
         Assert.assertTrue(this.iProducer.startProducer());
         Assert.assertTrue(this.iConsumer.startConsumer());
         Assert.assertTrue(this.iProducer.open(this.topicName, this.channelName));
@@ -77,7 +79,7 @@ public class FabricBroker4ConsumerTest extends JUnitTestBase {
         if (StringUtils.isBlank(this.lastEventId)) {
             String data = String.format("hello world! %s", System.currentTimeMillis());
             WeEvent weEvent = new WeEvent(this.topicName, data.getBytes());
-            SendResult sendResultDto = this.iProducer.publish(weEvent, this.channelName);
+            SendResult sendResultDto = this.iProducer.publish(weEvent, this.channelName).get(transactionTimeout, TimeUnit.MILLISECONDS);
             Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResultDto.getStatus());
             this.lastEventId = sendResultDto.getEventId();
             log.info("publish lastEventId: {}", this.lastEventId);
@@ -320,8 +322,8 @@ public class FabricBroker4ConsumerTest extends JUnitTestBase {
         String result = this.iConsumer.subscribe(this.topicName, this.channelName, this.lastEventId, this.ext, listener);
         Assert.assertFalse(result.isEmpty());
 
-        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS,
-                this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.channelName).getStatus());
+        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.channelName).get(transactionTimeout, TimeUnit.MILLISECONDS);
+        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
 
         Thread.sleep(this.wait3s);
 
@@ -335,8 +337,8 @@ public class FabricBroker4ConsumerTest extends JUnitTestBase {
         String result = this.iConsumer.subscribe(this.topicName, this.channelName, WeEvent.OFFSET_FIRST, this.ext, listener);
         Assert.assertFalse(result.isEmpty());
 
-        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS,
-                this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.channelName).getStatus());
+        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.channelName).get(transactionTimeout, TimeUnit.MILLISECONDS);
+        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
         Thread.sleep(wait3s * 10);
 
         Assert.assertFalse(listener.notifiedEvents.isEmpty());
@@ -349,8 +351,8 @@ public class FabricBroker4ConsumerTest extends JUnitTestBase {
         Assert.assertFalse(result.isEmpty());
 
         log.info("lastEventId: {}", this.lastEventId);
-        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS,
-                this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.channelName).getStatus());
+        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.channelName).get(transactionTimeout, TimeUnit.MILLISECONDS);
+        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
         Thread.sleep(wait3s);
 
         Assert.assertFalse(listener.notifiedEvents.isEmpty());
@@ -455,7 +457,8 @@ public class FabricBroker4ConsumerTest extends JUnitTestBase {
 
         SendResult sendResult = this.iProducer
                 .publish(new WeEvent(this.topicName,
-                        String.format("我是中文. %s", System.currentTimeMillis()).getBytes(StandardCharsets.UTF_8)), this.channelName);
+                        String.format("我是中文. %s", System.currentTimeMillis()).getBytes(StandardCharsets.UTF_8)), this.channelName)
+                .get(transactionTimeout, TimeUnit.MILLISECONDS);
 
         Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
         Thread.sleep(wait3s);
@@ -638,8 +641,8 @@ public class FabricBroker4ConsumerTest extends JUnitTestBase {
         Map<String, String> ext = new HashMap<>();
         ext.put(WeEvent.WeEvent_TAG, "publish_tag");
         WeEvent event = new WeEvent(this.topicName, "hello world.".getBytes(), ext);
-        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS,
-                this.iProducer.publish(event, this.channelName).getStatus());
+        SendResult sendResult = this.iProducer.publish(event, this.channelName).get(transactionTimeout, TimeUnit.MILLISECONDS);
+        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
 
         Thread.sleep(this.wait3s);
 
@@ -660,8 +663,8 @@ public class FabricBroker4ConsumerTest extends JUnitTestBase {
         Map<String, String> ext = new HashMap<>();
         ext.put(WeEvent.WeEvent_TAG, tag);
         WeEvent event = new WeEvent(this.topicName, "hello world.".getBytes(), ext);
-        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS,
-                this.iProducer.publish(event, this.channelName).getStatus());
+        SendResult sendResult = this.iProducer.publish(event, this.channelName).get(transactionTimeout, TimeUnit.MILLISECONDS);
+        Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
 
         Thread.sleep(this.wait3s);
 

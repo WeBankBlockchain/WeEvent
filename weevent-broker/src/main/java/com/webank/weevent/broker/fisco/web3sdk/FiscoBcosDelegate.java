@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.config.FiscoConfig;
-import com.webank.weevent.broker.fisco.RedisService;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.LRUCache;
@@ -27,6 +26,8 @@ import com.webank.weevent.sdk.WeEvent;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeansException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
@@ -55,13 +56,16 @@ public class FiscoBcosDelegate {
     public static ThreadPoolTaskExecutor threadPool;
 
     // block data cached in redis
-    private static RedisService redisService;
+    private static RedisTemplate<String, List<WeEvent>> redisTemplate;
 
     // block data cached in local memory
     private static LRUCache<String, List<WeEvent>> blockCache;
 
     // groupId list
     private List<String> groupIdList = new ArrayList<>();
+
+    // fiscoConfig
+    private FiscoConfig fiscoConfig;
 
     /**
      * notify from web3sdk2.x when new block mined
@@ -74,16 +78,12 @@ public class FiscoBcosDelegate {
         void onEvent(Long groupId, Long blockHeight);
     }
 
+    @SuppressWarnings("unchecked")
     private void initRedisService() {
-        if (redisService == null) {
-            // load redis service if needed
-            String redisServerIp = BrokerApplication.weEventConfig.getRedisServerIp();
-            Integer redisServerPort = BrokerApplication.weEventConfig.getRedisServerPort();
-            if (StringUtils.isNotBlank(redisServerIp) && redisServerPort > 0) {
-                log.info("init redis service");
-
-                redisService = BrokerApplication.applicationContext.getBean(RedisService.class);
-            }
+        try {
+            redisTemplate = BrokerApplication.applicationContext.getBean("springRedisTemplate", RedisTemplate.class);
+        } catch (BeansException e) {
+            log.info("No redis service is configured");
         }
 
         if (blockCache == null) {
@@ -115,30 +115,31 @@ public class FiscoBcosDelegate {
         return pool;
     }
 
-    public void initProxy(FiscoConfig fiscoConfig) throws BrokerException {
-        threadPool = initThreadPool(fiscoConfig);
-        timeout = fiscoConfig.getWeb3sdkTimeout();
+    public void initProxy(FiscoConfig config) throws BrokerException {
+        this.fiscoConfig = config;
+        threadPool = initThreadPool(config);
+        timeout = config.getWeb3sdkTimeout();
 
-        if (StringUtils.isBlank(fiscoConfig.getVersion())) {
+        if (StringUtils.isBlank(config.getVersion())) {
             log.error("the fisco version in fisco.properties is null");
             throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
         }
-        if (StringUtils.isBlank(fiscoConfig.getNodes())) {
+        if (StringUtils.isBlank(config.getNodes())) {
             log.error("the fisco nodes in fisco.properties is null");
             throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
         }
 
-        if (fiscoConfig.getVersion().startsWith(WeEventConstants.FISCO_BCOS_1_X_VERSION_PREFIX)) {
+        if (config.getVersion().startsWith(WeEventConstants.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             log.info("Notice: FISCO-BCOS's version is 1.x");
 
             // set web3sdk.Async thread pool, special thread for sendAsync
             new org.bcos.web3j.utils.Async(threadPool);
 
-            FiscoBcos fiscoBcos = new FiscoBcos(fiscoConfig);
+            FiscoBcos fiscoBcos = new FiscoBcos(config);
             fiscoBcos.init();
 
             this.fiscoBcos = fiscoBcos;
-        } else if (fiscoConfig.getVersion().startsWith(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {
+        } else if (config.getVersion().startsWith(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {
             log.info("Notice: FISCO-BCOS's version is 2.x");
 
             // set web3sdk.Async thread pool, special thread for sendAsync
@@ -146,7 +147,7 @@ public class FiscoBcosDelegate {
 
             // 1 is always exist
             Long defaultGId = Long.valueOf(WeEvent.DEFAULT_GROUP_ID);
-            FiscoBcos2 defaultFiscoBcos2 = new FiscoBcos2(fiscoConfig);
+            FiscoBcos2 defaultFiscoBcos2 = new FiscoBcos2(config);
             defaultFiscoBcos2.init(defaultGId);
             this.fiscoBcos2Map.put(defaultGId, defaultFiscoBcos2);
             // this call need default group has been initialized
@@ -156,7 +157,7 @@ public class FiscoBcosDelegate {
             groups.remove(WeEvent.DEFAULT_GROUP_ID);
             for (String groupId : groups) {
                 Long gid = Long.valueOf(groupId);
-                FiscoBcos2 fiscoBcos2 = new FiscoBcos2(fiscoConfig);
+                FiscoBcos2 fiscoBcos2 = new FiscoBcos2(config);
                 fiscoBcos2.init(gid);
                 this.fiscoBcos2Map.put(gid, fiscoBcos2);
             }
@@ -301,8 +302,8 @@ public class FiscoBcosDelegate {
             if (blockCache != null && blockCache.containsKey(key)) {
                 return blockCache.get(key);
             }
-            if (redisService != null && redisService.isEventsExistInRedis(key)) {
-                return redisService.readEventsFromRedis(key);
+            if (redisTemplate != null) {
+                return redisTemplate.opsForValue().get(key);
             }
         } catch (Exception e) {
             log.error("Exception happened while read events from redis server", e);
@@ -317,8 +318,8 @@ public class FiscoBcosDelegate {
                 if (blockCache != null) {
                     blockCache.putIfAbsent(key, events);
                 }
-                if (redisService != null) {
-                    redisService.writeEventsToRedis(key, events);
+                if (redisTemplate != null) {
+                    redisTemplate.opsForValue().set(key, events);
                 }
             }
         } catch (Exception e) {
@@ -401,6 +402,10 @@ public class FiscoBcosDelegate {
         } else {
             return this.fiscoBcos2Map.get(groupId).queryNodeList();
         }
+    }
+
+    public FiscoConfig getFiscoConfig() {
+        return this.fiscoConfig;
     }
 
 }

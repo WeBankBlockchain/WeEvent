@@ -3,18 +3,18 @@ apply plugin: "signing"
 
 dependencies {
     // json rpc
-    implementation("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.3")
+    implementation("com.github.briandilley.jsonrpc4j:jsonrpc4j:${jsonrpc4jVersion}")
 
     // jms
-    implementation("javax.jms:jms:1.1")
+    implementation("javax.jms:jms:${jmsVersion}")
 
     // stomp, see https://github.com/TooTallNate/Java-WebSocket
-    implementation("org.java-websocket:Java-WebSocket:1.4.0")
-    implementation("org.springframework.data:spring-data-commons:2.2.0.RELEASE")
-    implementation("org.springframework:spring-messaging:5.1.6.RELEASE")
+    implementation("org.java-websocket:Java-WebSocket:${WebSocketVersion}")
+    implementation("org.springframework.data:spring-data-commons:${springDataCommonsVersion}")
+    implementation("org.springframework:spring-messaging:${spring5Version}")
 
     // event-client.log for test
-    testImplementation("org.apache.logging.log4j:log4j-slf4j-impl:2.11.1")
+    testImplementation("org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}")
 }
 
 jar {

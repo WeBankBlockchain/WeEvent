@@ -5,7 +5,7 @@ CREATE TABLE t_account(
   `password` VARCHAR(256) NOT NULL COMMENT '密码`',
   `create_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
   `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改日期',
-  `delete_at`VARCHAR(64) NOT NULL DEFAULT  0 COMMENT '0 表示 未删除, 时间戳 表示 已经被删除',
+  `delete_at` BIGINT(16) NOT NULL DEFAULT  0 COMMENT '0 表示 未删除, 时间戳 表示 已经被删除',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment '用户表';
 
@@ -18,9 +18,8 @@ CREATE TABLE t_broker (
   `webase_url` VARCHAR(256) DEFAULT NULL COMMENT 'webase url',
   `create_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
   `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改日期',
-  `delete_at`VARCHAR(64) NOT NULL DEFAULT  0 COMMENT '0 表示 未删除, 时间戳 表示 已经被删除',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY brokerUrlDeleteAt(broker_url,delete_at)
+  `delete_at` BIGINT(16) NOT NULL DEFAULT  0 COMMENT '0 表示 未删除, 时间戳 表示 已经被删除',
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment 'broker配置表';
 
 CREATE TABLE  t_topic (
@@ -32,9 +31,8 @@ CREATE TABLE  t_topic (
   `description` VARCHAR(256)  NULL  DEFAULT NULL COMMENT '主题描述',
   `create_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
   `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP comment '修改日期',
-  `delete_at`VARCHAR(64) NOT NULL DEFAULT  0 COMMENT '0 表示 未删除, 时间戳 表示 已经被删除',
-   PRIMARY KEY (`id`),
-   UNIQUE KEY topicNameBrokerGroupDelete(topic_name,broker_id,group_id,delete_at)
+  `delete_at` BIGINT(16) NOT NULL DEFAULT  0 COMMENT '0 表示 未删除, 时间戳 表示 已经被删除',
+   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment '主题表';
 
 
@@ -68,9 +66,8 @@ CREATE TABLE t_rule_engine (
   `system_tag` VARCHAR(1) NOT NULL DEFAULT '1' COMMENT '1 系统内置 ,2 用户新增',
   `create_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
   `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改日期',
-  `delete_at`VARCHAR(64) NOT NULL DEFAULT  0 COMMENT '0 表示 未删除, 时间戳 表示 已经被删除',
-   PRIMARY KEY (`id`),
-   UNIQUE KEY ruleNameDeleteAt(rule_name,delete_at)
+  `delete_at` BIGINT(16) NOT NULL DEFAULT  0 COMMENT '0 表示 未删除, 时间戳 表示 已经被删除',
+   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='规则引擎表';
 
 CREATE TABLE t_rule_database (
@@ -107,6 +104,11 @@ CREATE TABLE t_topic_historical (
    `brokerId` VARCHAR(64) NOT  NULL COMMENT 'broker主键id',
    `create_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
    `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改日期',
-   PRIMARY KEY (`id`),
-   UNIQUE KEY brokerIdGroupIdEventId(brokerId,groupId,eventId)
+   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='主题历史数据表';
+
+
+ALTER TABLE t_broker ADD CONSTRAINT brokerUrlDeleteAt UNIQUE (broker_url, delete_at) ;
+ALTER TABLE t_rule_engine ADD CONSTRAINT ruleNameDeleteAt UNIQUE (rule_name, delete_at);
+ALTER TABLE t_topic ADD CONSTRAINT topicNameBrokerGroupDelete UNIQUE (topic_name,broker_id,group_id,delete_at);
+ALTER TABLE t_topic_historical ADD CONSTRAINT brokerIdGroupIdEventId UNIQUE (brokerId, groupId, eventId);

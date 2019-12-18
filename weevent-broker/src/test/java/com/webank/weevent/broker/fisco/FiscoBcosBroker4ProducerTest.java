@@ -2,7 +2,9 @@ package com.webank.weevent.broker.fisco;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.JUnitTestBase;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
@@ -33,7 +35,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
-        this.iProducer = IProducer.build();
+        this.iProducer = BrokerApplication.applicationContext.getBean("iProducer", IProducer.class);
         Assert.assertNotNull(this.iProducer);
         this.iProducer.startProducer();
         Assert.assertTrue(this.iProducer.open(this.topicName, this.groupId));
@@ -60,7 +62,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishEvent() throws Exception {
-        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.groupId);
+        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
         Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
     }
 
@@ -69,7 +71,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishTopicExists() throws Exception {
-        SendResult dto = this.iProducer.publish(new WeEvent(this.topicName, "中文消息.".getBytes()), this.groupId);
+        SendResult dto = this.iProducer.publish(new WeEvent(this.topicName, "中文消息.".getBytes()), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
         Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, dto.getStatus());
     }
 
@@ -77,9 +79,9 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      * test extensions is null
      */
     @Test
-    public void testPublishExtIsNull() {
+    public void testPublishExtIsNull() throws Exception {
         try {
-            SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), null), this.groupId);
+            SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), null), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
             Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
         } catch (BrokerException e) {
             Assert.assertEquals(ErrorCode.EVENT_EXTENSIONS_IS_NUll.getCode(), e.getCode());
@@ -90,12 +92,13 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      * extensions contain multiple key and value ,key start with 'weevent-'
      */
     @Test
-    public void testPublishExtContainMulKey() throws BrokerException {
+    public void testPublishExtContainMulKey() throws Exception {
         Map<String, String> ext = new HashMap<>();
         ext.put("weevent-test", "test value");
         ext.put("weevent-test2", "test value2");
         ext.put("weevent-test3", "test value3");
-        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), ext), this.groupId);
+        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes(), ext), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
+
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 
@@ -216,8 +219,8 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      * groupId is null
      */
     @Test
-    public void testPublishGroupIdIsNull() throws BrokerException {
-        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes()), null);
+    public void testPublishGroupIdIsNull() throws Exception {
+        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "this is only test message".getBytes()), null).get(transactionTimeout, TimeUnit.MILLISECONDS);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 
@@ -283,7 +286,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
     public void testPublishTag() throws Exception {
         Map<String, String> ext = new HashMap<>();
         ext.put(WeEvent.WeEvent_TAG, "create");
-        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello tag: create".getBytes(), ext), this.groupId);
+        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello tag: create".getBytes(), ext), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 }

@@ -1,20 +1,24 @@
 package com.webank.weevent.governance.junit;
 
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import javax.servlet.http.Cookie;
 
 import com.webank.weevent.governance.JUnitTestBase;
-import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.result.GovernanceResult;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
@@ -34,6 +38,11 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
 
     private String userId = "1";
 
+    @Value("${weevent.url:http://127.0.0.1:7000/weevent}")
+    private String brokerUrl;
+
+    private Map<String, Integer> brokerIdMap = new ConcurrentHashMap<>();
+
     @Before
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
@@ -41,17 +50,28 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
     }
 
     @Before
-    public void before() {
+    public void before() throws Exception {
         log.info("=============================={}.{}==============================",
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
+        addBroker();
+    }
+
+    //add broker
+    public void addBroker() throws Exception {
+        String content = "{\"name\":\"broker2\",\"brokerUrl\":\"" + this.brokerUrl + "\",\"userId\":\"1\"}";
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
+                .andReturn().getResponse();
+        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(), GovernanceResult.class);
+        brokerIdMap.put("brokerId", (Integer) governanceResult.getData());
     }
 
     @Test
     public void testAddRuleDatabase() throws Exception {
-        String content = "{\"datasourceName\":\"test123\",\"databaseUrl\":\"jdbc:mysql://127.0.0.1:3306/WeEvent_governance\"," +
-                "\"username\":\"root\",\"password\":\"123456\",\"tableName\":\"t_rule_database\",\"optionalParameter\":\"useUnicode=true&characterEncoding=utf-8&useSSL=false\"," +
-                "\"userId\":" + this.userId + ",\"brokerId\":\"1\",\"systemTag\":\"2\"}";
+        String content = "{\"datasourceName\":\"test123\",\"databaseUrl\":\"jdbc:h2:~/WeEvent_governance\"," +
+                "\"username\":\"root\",\"password\":\"123456\",\"tableName\":\"t_rule_database\"," +
+                "\"userId\":" + this.userId + ",\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\",\"systemTag\":\"false\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/circulationDatabase/add").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
@@ -73,9 +93,9 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
 
     @Test
     public void testUpdateRuleDatabase() throws Exception {
-        String content = "{\"id\":\"1\",\"datasourceName\":\"test123\",\"databaseUrl\":\"jdbc:mysql://127.0.0.1:3306/WeEvent_governance\"," +
-                "\"username\":\"root\",\"password\":\"123456\",\"tableName\":\"t_rule_database\",\"optionalParameter\":\"useUnicode=true&characterEncoding=utf-8&useSSL=false\"," +
-                "\"userId\":" + this.userId + ",\"brokerId\":\"1\",\"systemTag\":\"2\"}";
+        String content = "{\"id\":\"1\",\"datasourceName\":\"test123\",\"databaseUrl\":\"jdbc:h2:~/WeEvent_governance\"," +
+                "\"username\":\"root\",\"password\":\"123456\",\"tableName\":\"t_rule_database\"," +
+                "\"userId\":" + this.userId + ",\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\",\"systemTag\":\"false\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/circulationDatabase/update").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
@@ -85,7 +105,7 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
 
     @Test
     public void testDeleteRuleDatabase() throws Exception {
-        String content = "{\"id\":\"1\",\"brokerId\":\"1\",\"userId\":\"1\"}";
+        String content = "{\"id\":\"1\",\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\",\"userId\":\"1\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/circulationDatabase/delete").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
@@ -95,9 +115,9 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
 
     @Test
     public void testCheckDataBaseUrl() throws Exception {
-        String content = "{\"id\":\"1\",\"datasourceName\":\"test123\",\"databaseUrl\":\"jdbc:mysql://127.0.0.1:3306/WeEvent_governance\"," +
-                "\"username\":\"root\",\"password\":\"123456\",\"tableName\":\"t_rule_database\",\"optionalParameter\":\"useUnicode=true&characterEncoding=utf-8&useSSL=false\"," +
-                "\"userId\":" + this.userId + ",\"brokerId\":\"1\",\"systemTag\":\"2\"}";
+        String content = "{\"datasourceName\":\"test123\",\"databaseUrl\":\"jdbc:h2:~/WeEvent_governance\"," +
+                "\"username\":\"root\",\"password\":\"123456\",\"tableName\":\"t_rule_database\"," +
+                "\"userId\":" + this.userId + ",\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/circulationDatabase/checkDataBaseUrl").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
@@ -105,5 +125,19 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
         Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
     }
 
+    //delete broker by id
+    public void deleteBroker() throws Exception {
+        String content = "{\"id\":" + this.brokerIdMap.get("brokerId") + ",\"userId\":\"1\"}";
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/delete").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
+                .andReturn().getResponse();
+        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        JSONObject jsonObject = JSONObject.parseObject(response.getContentAsString());
+        Assert.assertEquals(jsonObject.get("status").toString(), "200");
+    }
 
+
+    @After
+    public void after() throws Exception {
+        deleteBroker();
+    }
 }

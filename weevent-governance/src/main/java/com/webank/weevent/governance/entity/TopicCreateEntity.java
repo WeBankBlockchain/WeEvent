@@ -13,4 +13,6 @@ public class TopicCreateEntity extends TopicBase {
 
     private String groupId;
 
+
+
 }
