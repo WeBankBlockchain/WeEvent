@@ -73,7 +73,9 @@ CREATE TABLE t_rule_engine (
 CREATE TABLE t_rule_database (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `datasource_name` VARCHAR(256) NOT NULL COMMENT '数据源名称',
-  `database_url` VARCHAR(128) NOT NULL COMMENT '数据库url',
+  `ip` VARCHAR(32) NOT NULL COMMENT '数据库ip',
+  `port` VARCHAR(8) NOT NULL COMMENT '数据库端口',
+  `database_name` VARCHAR(32) NOT NULL COMMENT '数据库名称',
   `username` VARCHAR(16) NOT NULL COMMENT '数据库用户名',
   `password` VARCHAR(128) NOT NULL COMMENT '数据库密码',
   `table_name` VARCHAR(32) NOT NULL COMMENT '表格名称',
