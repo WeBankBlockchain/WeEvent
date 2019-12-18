@@ -58,4 +58,5 @@ public class ForwardControllerTest extends JUnitTestBase {
         Assert.assertEquals(0, code);
         Assert.assertTrue(data instanceof List);
     }
+
 }

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.webank.weevent.governance.mapper.TopicHistoricalMapper">
 
-    <resultMap id="BaseResultMap" type="com.webank.weevent.governance.entity.TopicTopicHistoricalEntity">
+    <resultMap id="BaseResultMap" type="com.webank.weevent.governance.entity.TopicHistoricalEntity">
         <result column="id" property="id" jdbcType="INTEGER"/>
         <result column="create_date" property="createDate" jdbcType="TIMESTAMP"/>
         <result column="last_update" property="lastUpdate" jdbcType="TIMESTAMP"/>
@@ -19,14 +19,14 @@
 
     <select id="historicalDataList" resultMap="BaseResultMap">
         SELECT
-        topicName,DATE_FORMAT(create_date,"%Y-%m-%d")as create_date ,count(eventId) as eventCount
-        from  t_topic_historical
+        topicName,create_date,eventId
+        from t_topic_historical
         WHERE 1=1
         <if test="beginDate != null">
-            AND DATE_FORMAT(create_date,"%Y-%m-%d")&gt;=DATE_FORMAT(#{beginDate},"%Y-%m-%d")
+            AND create_date &gt;= #{beginDateStr}
         </if>
         <if test="endDate != null">
-            AND DATE_FORMAT(create_date,"%Y-%m-%d")&lt;=DATE_FORMAT(#{endDate},"%Y-%m-%d")
+            AND create_date &lt;= #{endDateStr}
         </if>
         <if test="topicName != null">
             AND topicName=#{topicName}
@@ -44,19 +44,18 @@
                 #{topic}
             </foreach>
         </if>
-        GROUP BY topicName,DATE_FORMAT(create_date,"%Y-%m-%d")
     </select>
 
     <select id="eventList" resultMap="BaseResultMap">
         SELECT
-        DATE_FORMAT(create_date,"%Y-%m-%d")as create_date ,count(eventId) as eventCount
-        from  t_topic_historical
+        create_date,eventId
+        from t_topic_historical
         WHERE 1=1
         <if test="beginDate != null">
-            AND DATE_FORMAT(create_date,"%Y-%m-%d")&gt;=DATE_FORMAT(#{beginDate},"%Y-%m-%d")
+            AND create_date &gt;= #{beginDateStr}
         </if>
         <if test="endDate != null">
-            AND DATE_FORMAT(create_date,"%Y-%m-%d")&lt;=DATE_FORMAT(#{endDate},"%Y-%m-%d")
+            AND create_date &lt;= #{endDateStr}
         </if>
         <if test="topicName != null">
             AND topicName=#{topicName}
@@ -74,27 +73,6 @@
                 #{topic}
             </foreach>
         </if>
-        GROUP BY DATE_FORMAT(create_date,"%Y-%m-%d")
     </select>
-
-    <insert id="addHistoricalData" parameterType="com.webank.weevent.governance.entity.TopicTopicHistoricalEntity"
-            useGeneratedKeys="true" keyProperty="id">
-        insert into  t_topic_historical(brokerId, topicName, groupId, eventId)
-        values (#{brokerId}, #{topicName}, #{groupId}, #{eventId})
-    </insert>
-
-
-    <delete id="deleteHistoricalData">
-        delete
-        from  t_topic_historical
-        where id = #{id}
-    </delete>
-
-    <select id="countHistoricalData" resultType="int">
-        select count(1)
-        from  t_topic_historical
-        where 1 = 1
-    </select>
-
 
 </mapper>
