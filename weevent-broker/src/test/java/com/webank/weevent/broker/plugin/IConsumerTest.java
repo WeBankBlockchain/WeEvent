@@ -1,5 +1,6 @@
 package com.webank.weevent.broker.plugin;
 
+import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.JUnitTestBase;
 
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,7 @@ public class IConsumerTest extends JUnitTestBase {
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
-        this.iConsumer = IConsumer.build();
+        this.iConsumer = BrokerApplication.applicationContext.getBean("iConsumer", IConsumer.class);
     }
 
     @After
