@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.h2.tools.Server;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.ApplicationPidFileWriter;
@@ -25,6 +26,9 @@ public class ProcessorApplication {
     public static ApplicationContext applicationContext;
     public static Environment environment;
 
+    @Value("${spring.jpa.database:h2}")
+    private static String databaseType;
+
     @Autowired
     public void setContext(ApplicationContext context) {
         applicationContext = context;
@@ -40,6 +44,9 @@ public class ProcessorApplication {
     }
 
     private static void startH2() throws Exception {
+        if (!"h2".equals(databaseType.toLowerCase())) {
+            return;
+        }
         Server server = Server.createTcpServer(new String[]{"-tcp", "-tcpAllowOthers", "-tcpPort", "7083"}).start();
         String status = server.getStatus();
         log.info("h2 status:{}", status);
