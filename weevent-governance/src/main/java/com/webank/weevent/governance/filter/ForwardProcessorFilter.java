@@ -26,7 +26,7 @@ public class ForwardProcessorFilter implements Filter {
     @Autowired
     private CommonService commonService;
 
-    @Value("${weevent.processor.url}")
+    @Value("${weevent.processor.url:http://127.0.0.1:7008}")
     private String weeventProcessorUrl;
 
     @Override
@@ -38,7 +38,7 @@ public class ForwardProcessorFilter implements Filter {
         // get tail of processor url
         String subStrUrl = originUrl.substring(originUrl.indexOf("/processor/") + "/processor".length());
         // get complete forward processor url
-        String newUrl = weeventProcessorUrl + subStrUrl;
+        String newUrl = weeventProcessorUrl + "/processor" + subStrUrl;
         // get client according url
         CloseableHttpResponse closeResponse = commonService.getCloseResponse(req, newUrl);
         commonService.writeResponse(closeResponse, res);
