@@ -1,5 +1,8 @@
 package com.webank.weevent.governance.entity;
 
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
 import com.webank.weevent.governance.entity.base.PermissionBase;
 
 import lombok.Data;
@@ -11,10 +14,8 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
+@Entity
+@Table(name = "t_permission")
 public class PermissionEntity extends PermissionBase {
-
-    private Integer userId;
-
-    private Integer brokerId;
 
 }

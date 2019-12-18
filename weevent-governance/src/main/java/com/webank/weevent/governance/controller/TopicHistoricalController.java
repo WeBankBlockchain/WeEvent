@@ -7,7 +7,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.weevent.governance.entity.TopicTopicHistoricalEntity;
+import com.webank.weevent.governance.entity.TopicHistoricalEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.service.TopicHistoricalService;
@@ -30,7 +30,7 @@ public class TopicHistoricalController {
     private TopicHistoricalService topicHistoricalService;
 
     @PostMapping("/list")
-    public GovernanceResult historicalDataList(@RequestBody TopicTopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request,
+    public GovernanceResult historicalDataList(@RequestBody TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request,
                                                HttpServletResponse response) throws GovernanceException {
         log.info("get  historicalDataEntity:{} ", topicHistoricalEntity);
         Map<String, List<Integer>> returnMap = topicHistoricalService.historicalDataList(topicHistoricalEntity, request, response);
@@ -38,10 +38,10 @@ public class TopicHistoricalController {
     }
 
     @PostMapping("/eventList")
-    public GovernanceResult eventList(@RequestBody TopicTopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request,
+    public GovernanceResult eventList(@RequestBody TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request,
                                       HttpServletResponse response) throws GovernanceException {
         log.info("get  eventList:{} ", topicHistoricalEntity);
-        List<TopicTopicHistoricalEntity> topicTopicHistoricalEntities = topicHistoricalService.eventList(topicHistoricalEntity, request);
+        List<TopicHistoricalEntity> topicTopicHistoricalEntities = topicHistoricalService.eventList(topicHistoricalEntity, request);
         return new GovernanceResult(topicTopicHistoricalEntities);
     }
 

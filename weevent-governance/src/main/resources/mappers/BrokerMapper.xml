@@ -17,28 +17,6 @@
         id,create_date,last_update, user_id, name, broker_url, webase_url
     </sql>
 
-    <select id="brokerList" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from t_broker
-        where delete_at=0
-        <if test="brokerUrl != null">
-            and broker_url = #{brokerUrl}
-        </if>
-        <if test="id != null">
-            and id = #{id}
-        </if>
-        <if test="name != null">
-            and name = #{name}
-        </if>
-    </select>
-
-    <select id="getBroker" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from t_broker where id=#{id} and delete_at=0
-    </select>
-
     <select id="getBrokers" resultMap="BaseResultMap">
         select distinct
         <include refid="Base_Column_List"/>
@@ -49,31 +27,7 @@
 
     </select>
 
-    <insert id="addBroker" parameterType="com.webank.weevent.governance.entity.BrokerEntity"
-            useGeneratedKeys="true" keyProperty="id">
-        insert into t_broker(name, broker_url, webase_url, user_id)
-        values (#{name}, #{brokerUrl}, #{webaseUrl}, #{userId})
-    </insert>
 
-    <update id="updateBroker" parameterType="com.webank.weevent.governance.entity.BrokerEntity">
-        update t_broker
-        set name=#{name},
-            broker_url=#{brokerUrl},
-            webase_url=#{webaseUrl}
-        where id = #{id,jdbcType=INTEGER}
-    </update>
-
-    <delete id="deleteBroker">
-        update t_broker
-        set delete_at=unix_timestamp(now())
-        where id = #{id}
-    </delete>
-
-    <select id="countBroker" resultType="int">
-        select count(1)
-        from t_broker
-        where delete_at = 0
-    </select>
 
 
 </mapper>

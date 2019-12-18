@@ -7,16 +7,15 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import com.webank.weevent.governance.exception.GovernanceException;
-
 import lombok.extern.slf4j.Slf4j;
+import org.h2.tools.Server;
+import org.springframework.util.Assert;
 
 /**
  * tool to initdb
@@ -24,62 +23,61 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class InitialDb implements AutoCloseable {
 
+    private Server server;
+    private String user;
+    private String password;
+    private String dbName;
+    private static String databaseType = "h2";
+    private static Properties properties;
+
+
     public static void main(String[] args) throws Exception {
-        String goalUrl = "";
-        String user = "";
-        String password = "";
-        String driverName = "";
-        String dbName;
+        InitialDb initialDb = new InitialDb();
+        properties = initialDb.getProperties();
+        databaseType = properties.getProperty("spring.jpa.database").toLowerCase();
+        initialDb.startH2();
+        initialDb.createDataBase();
+        initialDb.stopH2();
+    }
+
+
+    private void createDataBase() throws Exception {
         try {
-            Properties properties = new Properties();
-            URL url = InitialDb.class.getClassLoader().getResource("application-prod.properties");
-            if (url != null) {
-                properties.load(new FileInputStream(url.getFile()));
-                goalUrl = properties.getProperty("spring.datasource.url");
-                user = properties.getProperty("spring.datasource.username");
-                password = properties.getProperty("spring.datasource.password");
-                driverName = properties.getProperty("spring.datasource.driver-class-name");
-            }
+            String goalUrl = properties.getProperty("spring.datasource.url");
+            this.user = properties.getProperty("spring.datasource.username");
+            this.password = properties.getProperty("spring.datasource.password");
+            String driverName = properties.getProperty("spring.datasource.driver-class-name");
+            boolean flag = ("mysql").equals(databaseType);
+            // first use dbself database
+            int first = goalUrl.lastIndexOf("/");
+            int end = goalUrl.lastIndexOf("?");
+            this.dbName = flag ? goalUrl.substring(first + 1, end) : goalUrl.substring(first + 1);
+            // get mysql default url like jdbc:mysql://127.0.0.1:3306
+            String defaultUrl = flag ? goalUrl.substring(0, first) : goalUrl;
+
+            Class.forName(driverName);
+
+            List<String> tableSqlList = readSql();
+
+            runScript(defaultUrl, flag, tableSqlList);
         } catch (Exception e) {
-            log.error("read database properties error,{}", e.getMessage());
-        }
-
-        // first use dbself database
-        int first = goalUrl.lastIndexOf("/");
-        int end = goalUrl.lastIndexOf("?");
-        dbName = goalUrl.substring(first + 1, end);
-        // get mysql default url like jdbc:mysql://127.0.0.1:3306
-        String defaultUrl = goalUrl.substring(0, first);
-        Class.forName(driverName);
-
-        List<String> tableSqlList = readSql();
-        try (Connection conn = DriverManager.getConnection(defaultUrl, user, password);
-             Statement stat = conn.createStatement()) {
-            String querySql = "SELECT count(1) FROM information_schema.SCHEMATA where SCHEMA_NAME=" + "'" + dbName + "'";
-            ResultSet resultSet = stat.executeQuery(querySql);
-            while (resultSet.next()) {
-                int num = resultSet.getInt(1);
-                if (num == 1) {
-                    log.error("database {} {}", dbName, " is exist!");
-                    throw new GovernanceException("database " + dbName + " is exist!");
-                }
-            }
-            String dbSql = "create database " + dbName + " default character set utf8 collate utf8_general_ci;";
-            tableSqlList.add(0, dbSql);
-            String useDataBase = "use " + dbName + ";";
-            tableSqlList.add(1, useDataBase);
-            for (String sql : tableSqlList) {
-                stat.executeUpdate(sql);
-            }
-            log.info("create database {} {}", dbName, " success!");
-        } catch (SQLException e) {
-            log.error("create database fail,message: {}", e.getMessage());
+            stopH2();
+            log.error("create database error,{}", e.getMessage());
             throw e;
         }
+
+    }
+
+    private Properties getProperties() throws Exception {
+        Properties properties = new Properties();
+        URL url = InitialDb.class.getClassLoader().getResource("application-prod.properties");
+        Assert.notNull(url, "url is empty");
+        properties.load(new FileInputStream(url.getFile()));
+        return properties;
     }
 
     private static List<String> readSql() throws IOException {
-        InputStream resourceAsStream = InitialDb.class.getResourceAsStream("/script/governance.sql");//配置文件路径
+        InputStream resourceAsStream = InitialDb.class.getResourceAsStream("/script/governance_" + databaseType + ".sql");
         StringBuffer sqlBuffer = new StringBuffer();
         List<String> sqlList = new ArrayList<>();
         byte[] buff = new byte[1024];
@@ -98,6 +96,42 @@ public class InitialDb implements AutoCloseable {
         }
         return sqlList;
     }
+
+    private void runScript(String defaultUrl, Boolean flag, List<String> tableSqlList) throws Exception {
+        try (Connection conn = DriverManager.getConnection(defaultUrl, this.user, this.password);
+             Statement stat = conn.createStatement()) {
+            if (flag) {
+                String dbSql = "CREATE DATABASE IF NOT EXISTS " + this.dbName + " DEFAULT CHARACTER SET UTF8 COLLATE UTF8_GENERAL_CI;";
+                String useDataBase = "USE " + this.dbName + ";";
+                tableSqlList.add(0, dbSql);
+                tableSqlList.add(1, useDataBase);
+            }
+            for (String sql : tableSqlList) {
+                stat.executeUpdate(sql);
+            }
+            log.info("create database {} {}", this.dbName, " success!");
+        } catch (SQLException e) {
+            log.error("execute sql fail,message: {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    private void startH2() throws Exception {
+        if (!"h2".equals(databaseType)) {
+            return;
+        }
+        this.server = Server.createTcpServer(new String[]{"-tcp", "-tcpAllowOthers", "-tcpPort", "7082"}).start();
+        log.info("start h2 server success");
+    }
+
+    private void stopH2() throws Exception {
+        if (!"h2".equals(databaseType)) {
+            return;
+        }
+        this.server.stop();
+        log.info("stop h2 server success");
+    }
+
 
     @Override
     public void close() throws Exception {
