@@ -50,6 +50,7 @@ public class DAGDetectUtil {
         if (childs != null) {
             for (Object child : childs) {
                 if (!checkChild((Map) child)) {
+                    stack.pop();
                     return false;
                 }
             }
