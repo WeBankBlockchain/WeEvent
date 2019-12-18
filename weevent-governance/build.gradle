@@ -24,7 +24,12 @@ dependencies {
     implementation("org.jsoup:jsoup:${jsoupVersion}")
 
     // fast json
-    implementation("com.alibaba:fastjson:${fastjsonVersion}")
+  //  implementation("com.alibaba:fastjson:${fastjsonVersion}")
+    //jacksonCore
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.10.0")
+    implementation("com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.10.0")
+
+    //
 
     // forward backend
     implementation("org.apache.httpcomponents:httpclient:${httpclientVersion}")
