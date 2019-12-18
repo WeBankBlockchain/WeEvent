@@ -36,7 +36,7 @@ public class ForwardProcessorFilter implements Filter {
         HttpServletResponse res = (HttpServletResponse) response;
         String originUrl = req.getRequestURI();
         // get tail of processor url
-        String subStrUrl = originUrl.substring(originUrl.indexOf("/processor/") + "/weevent".length());
+        String subStrUrl = originUrl.substring(originUrl.indexOf("/processor/") + "/processor".length());
         // get complete forward processor url
         String newUrl = weeventProcessorUrl + subStrUrl;
         // get client according url
