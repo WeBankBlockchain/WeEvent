@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.entity.PermissionEntity;
-import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.service.PermissionService;
 
@@ -24,12 +23,11 @@ public class PermissionController {
     private PermissionService permissionService;
 
     /**
-     * @description Query all authorized users of a broker data
+     *
      */
     @PostMapping("/permissionList")
-    public GovernanceResult permissionList(@RequestBody AccountEntity accountEntity) throws GovernanceException {
+    public GovernanceResult permissionList(@RequestBody AccountEntity accountEntity) {
         List<PermissionEntity> accountEntities = permissionService.permissionList(accountEntity);
-        GovernanceResult governanceResult = new GovernanceResult(accountEntities);
-        return governanceResult;
+        return new GovernanceResult(accountEntities);
     }
 }

@@ -2,6 +2,7 @@ package com.webank.weevent.governance.junit;
 
 import com.webank.weevent.governance.JUnitTestBase;
 
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.junit.Assert;
@@ -43,7 +44,9 @@ public class PermissionControllerTest extends JUnitTestBase {
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/permission/permissionList").contentType(MediaType.APPLICATION_JSON_UTF8).content(content)).andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Assert.assertTrue(response.getContentAsString().contains("true"));
+
+        JSONObject jsonObject = JSONObject.parseObject(response.getContentAsString());
+        Assert.assertEquals(jsonObject.get("status").toString(),"200");
     }
 
 
