@@ -34,26 +34,22 @@ public class AccountController {
 
     @RequestMapping("/check/{param}/{type}")
     public GovernanceResult checkData(@PathVariable String param, @PathVariable Integer type) {
-        GovernanceResult governanceResult = accountService.checkData(param, type);
-        return governanceResult;
+        return accountService.checkData(param, type);
     }
 
     @PostMapping(value = "/register")
     public GovernanceResult register(@Valid @RequestBody AccountEntity user, BindingResult result) {
-        GovernanceResult governanceResult = accountService.register(user);
-        return governanceResult;
+        return accountService.register(user);
     }
 
     @PostMapping(value = "/update")
     public GovernanceResult updatePassword(@RequestBody AccountEntity user) {
-        GovernanceResult governanceResult = accountService.updatePassword(user);
-        return governanceResult;
+        return accountService.updatePassword(user);
     }
 
     @PostMapping(value = "/reset")
     public GovernanceResult resetPassword(@RequestBody AccountEntity user) {
-        GovernanceResult governanceResult = accountService.resetPassword(user);
-        return governanceResult;
+        return accountService.resetPassword(user);
     }
 
     @GetMapping("/forget")
@@ -64,20 +60,17 @@ public class AccountController {
         String emailSendUrl = url.substring(0, index + "weevent-governance".length());
         emailSendUrl = emailSendUrl + "/#/reset?username=" + username;
         System.out.println(emailSendUrl);
-        GovernanceResult governanceResult = accountService.forgetPassword(username, emailSendUrl);
-        return governanceResult;
+        return accountService.forgetPassword(username, emailSendUrl);
     }
 
     @GetMapping("/getUserId")
     public GovernanceResult getUserId(@RequestParam String username) {
-        GovernanceResult governanceResult = accountService.getUserId(username);
-        return governanceResult;
+        return accountService.getUserId(username);
     }
 
     @RequestMapping("/require")
     public BaseResponse authRequire() {
-        BaseResponse baseResponse = new BaseResponse(ConstantCode.USER_NOT_LOGGED_IN);
-        return baseResponse;
+        return new BaseResponse(ConstantCode.USER_NOT_LOGGED_IN);
     }
 
     /**
@@ -87,8 +80,17 @@ public class AccountController {
     public GovernanceResult accountEntityList(AccountEntity accountEntity, HttpServletRequest request,
                                               HttpServletResponse response) throws GovernanceException {
         List<AccountEntity> accountEntities = accountService.accountEntityList(request, accountEntity);
-        GovernanceResult governanceResult = new GovernanceResult(accountEntities);
-        return governanceResult;
+        return new GovernanceResult(accountEntities);
+    }
+
+    /**
+     * delete user by id
+     */
+    @RequestMapping("/delete")
+    public GovernanceResult deleteUser(@RequestBody AccountEntity accountEntity, HttpServletRequest request,
+                                       HttpServletResponse response) throws GovernanceException {
+        accountService.deleteUser(request, accountEntity);
+        return new GovernanceResult(true);
     }
 
 
