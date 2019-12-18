@@ -7,7 +7,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -21,7 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.code.ErrorCode;
-import com.webank.weevent.governance.entity.RuleDatabaseEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.utils.SpringContextUtil;
 
@@ -227,36 +225,15 @@ public class CommonService implements AutoCloseable {
     public static Map<String, String> uRLRequest(String URL) {
         Map<String, String> mapRequest = new HashMap<>();
 
-        String strUrlParam = truncateUrlPage(URL);
-        if (strUrlParam == null) {
+        if (StringUtil.isBlank(URL)) {
             return mapRequest;
         }
-        mapRequest.put("optionalParameter", strUrlParam);
-        String jdbcType = URL.substring(0, URL.indexOf("//") + 2);
-        int first = URL.indexOf("/") + 2;
-        int end = URL.lastIndexOf("/");
-        String substring = URL.substring(first, end);
-        String[] split = substring.split(":");
-        mapRequest.put("jdbcType", jdbcType);
-        mapRequest.put("ip", split[0]);
-        mapRequest.put("port", split[1]);
-        return mapRequest;
-    }
-
-
-    public String getDataBaseUrl(RuleDatabaseEntity ruleDatabaseEntity) {
-        Map<String, String> urlMap = uRLRequest(dataBaseUrl);
-        return urlMap.get("jdbcType") + ruleDatabaseEntity.getIp() + ":" + ruleDatabaseEntity.getPort() + "/" + ruleDatabaseEntity.getDatabaseName();
-    }
-
-    private static String truncateUrlPage(String strURL) {
-        String strAllParam = null;
-        String[] arrSplit = strURL.split("[?]");
-        if ((strURL.length() > 1) && (arrSplit.length) > 1 && (arrSplit[1] != null)) {
-            strAllParam = arrSplit[1];
+        String[] arrSplit = URL.split("[?]");
+        mapRequest.put("dataBaseUrl", arrSplit[0]);
+        if(arrSplit.length>1){
+            mapRequest.put("optionalParameter", arrSplit[1]);
         }
-
-        return strAllParam;
+        return mapRequest;
     }
 
 

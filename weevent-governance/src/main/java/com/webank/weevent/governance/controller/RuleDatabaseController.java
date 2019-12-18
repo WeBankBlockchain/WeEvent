@@ -33,9 +33,7 @@ public class RuleDatabaseController {
     @PostMapping("/list")
     public GovernanceResult getRuleDataBaseList(HttpServletRequest request, @RequestBody RuleDatabaseEntity ruleDatabaseEntity) throws GovernanceException {
         log.info("getRuleDataBaseList,userId:{}", ruleDatabaseEntity.getUserId());
-        String s = ruleDatabaseEntity.toString();
         List<RuleDatabaseEntity> ruleDatabases = ruleDatabaseService.getRuleDataBaseList(request, ruleDatabaseEntity);
-
         return new GovernanceResult(ruleDatabases);
     }
 
@@ -52,17 +50,18 @@ public class RuleDatabaseController {
     public GovernanceResult updateRuleDatabase(@Validated @RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request,
                                                HttpServletResponse response) throws GovernanceException {
         log.info("update  ruleDatabaseEntity service ,id:{}", ruleDatabaseEntity.getId());
-        boolean flag = ruleDatabaseService.updateRuleDatabase(ruleDatabaseEntity, request, response);
-        return new GovernanceResult(flag);
+        ruleDatabaseService.updateRuleDatabase(ruleDatabaseEntity, request, response);
+        return new GovernanceResult(true);
     }
 
 
     @PostMapping("/delete")
     public GovernanceResult deleteRuleDatabase(@RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
         log.info("delete  ruleDatabaseEntity service ,id:{}", ruleDatabaseEntity.getId());
-        boolean flag = ruleDatabaseService.deleteRuleDatabase(ruleDatabaseEntity, request);
-        return new GovernanceResult(flag);
+        ruleDatabaseService.deleteRuleDatabase(ruleDatabaseEntity, request);
+        return new GovernanceResult(true);
     }
+
     @PostMapping("/checkDataBaseUrl")
     public GovernanceResult checkDataBaseUrl(@Validated @RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
         log.info("checkDataBaseUrl service ,ruleDatabaseEntity:{}", ruleDatabaseEntity);

@@ -11,7 +11,6 @@
         <result column="payload" property="payload" jdbcType="VARCHAR"/>
         <result column="user_id" property="userId" jdbcType="INTEGER"/>
         <result column="broker_id" property="brokerId" jdbcType="INTEGER"/>
-        <result column="broker_url" property="brokerUrl" jdbcType="VARCHAR"/>
         <result column="from_destination" property="fromDestination" jdbcType="VARCHAR"/>
         <result column="to_destination" property="toDestination" jdbcType="VARCHAR"/>
         <result column="select_field" property="selectField" jdbcType="VARCHAR"/>
@@ -26,20 +25,11 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,create_date,last_update, rule_name,payload_type,payload,broker_id,broker_url,user_id,cep_id,
+        id,create_date,last_update, rule_name,payload_type,payload,broker_id,user_id,cep_id,
          from_destination,to_destination,select_field,condition_type,
          rule_database_id,error_destination,status,group_id,system_tag
     </sql>
 
-    <insert id="addRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
-            useGeneratedKeys="true" keyProperty="id">
-        insert into t_rule_engine(rule_name, payload_type, payload, broker_id, broker_url, user_id,
-                                  from_destination, to_destination, select_field,
-                                   condition_type, status, group_id,rule_database_id,system_tag,cep_id)
-        values (#{ruleName}, #{payloadType}, #{payload}, #{brokerId}, #{brokerUrl}, #{userId},
-                #{fromDestination}, #{toDestination}, #{selectField},
-                #{conditionType}, #{status}, #{groupId},#{ruleDataBaseId},#{systemTag},#{cepId})
-    </insert>
 
     <select id="getRuleEngines" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
             resultMap="BaseResultMap">
@@ -98,20 +88,6 @@
         </if>
     </sql>
 
-    <select id="getRuleTopicList" resultMap="BaseResultMap">
-        select distinct from_destination,to_destination
-        from t_rule_engine
-        where status != 2 and condition_type=1
-        <include refid="ruleEngineWhere"/>
-    </select>
-
-    <select id="checkRuleNameRepeat" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
-            resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from t_rule_engine where rule_name=#{ruleName} and delete_at=0
-    </select>
-
     <update id="updateRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity">
         update t_rule_engine
         set rule_name=#{ruleName},
@@ -127,18 +103,6 @@
           and status != 2
     </update>
 
-    <update id="updateRuleEngineStatus" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity">
-        update t_rule_engine
-        set status=#{status}
-        where id = #{id,jdbcType=INTEGER}
-    </update>
-
-
-    <delete id="deleteRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity">
-        update t_rule_engine
-        set status=2 , delete_at=unix_timestamp(now())
-        where id = #{id}
-    </delete>
 
     <select id="countRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
             resultType="int">
@@ -147,10 +111,4 @@
         <include refid="ruleEngineWhere"/>
     </select>
 
-    <select id="getRuleById" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from t_rule_database
-        where id=#{id}
-    </select>
 </mapper>
