@@ -58,12 +58,12 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
      */
     private int idleTime;
 
-    public FiscoBcosBroker4Consumer() {
-        super();
+    public FiscoBcosBroker4Consumer(FiscoBcosDelegate fiscoBcosDelegate) {
+        super(fiscoBcosDelegate);
 
         // spring default Executor
         this.executor = BrokerApplication.applicationContext.getBean("taskExecutor", Executor.class);
-        this.idleTime = fiscoConfig.getConsumerIdleTime();
+        this.idleTime = fiscoBcosDelegate.getFiscoConfig().getConsumerIdleTime();
         fiscoBcosDelegate.setListener(this);
     }
 
@@ -187,7 +187,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                 offset,
                 tag,
                 listener);
-        subscription.setMergeBlock(fiscoConfig.getConsumerHistoryMergeBlock());
+        subscription.setMergeBlock(fiscoBcosDelegate.getFiscoConfig().getConsumerHistoryMergeBlock());
         subscription.setInterfaceType(interfaceType);
         subscription.setRemoteIp(remoteIp);
 
