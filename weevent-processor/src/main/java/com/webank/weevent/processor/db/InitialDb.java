@@ -72,8 +72,10 @@ public class InitialDb implements AutoCloseable {
         return properties;
     }
 
-    private static List<String> readSql(String dataBaseType) throws IOException {
-        InputStream resourceAsStream = InitialDb.class.getResourceAsStream("/script/governance_" + dataBaseType + ".sql");
+
+
+    private static List<String> readCEPSql() throws IOException {
+        InputStream resourceAsStream = InitialDb.class.getResourceAsStream("/cep_rule_" + databaseType + ".sql");
         StringBuffer sqlBuffer = new StringBuffer();
         List<String> sqlList = new ArrayList<>();
         byte[] buff = new byte[1024];
@@ -125,28 +127,6 @@ public class InitialDb implements AutoCloseable {
         }
         this.server.stop();
         log.info("stop h2 server success");
-    }
-
-
-    private static List<String> readCEPSql() throws IOException {
-        InputStream resourceAsStream = InitialDb.class.getResourceAsStream("/cep_rule_" + databaseType + ".sql");
-        StringBuffer sqlBuffer = new StringBuffer();
-        List<String> sqlList = new ArrayList<>();
-        byte[] buff = new byte[1024];
-        int byteRead = 0;
-        while ((byteRead = resourceAsStream.read(buff)) != -1) {
-            sqlBuffer.append(new String(buff, 0, byteRead, Charset.defaultCharset()));
-        }
-        String[] sqlArr = sqlBuffer.toString().split("(;\\s*\\r\\n)|(;\\s*\\n)");
-
-        for (int i = 0; i < sqlArr.length; i++) {
-            String sql = sqlArr[i].replaceAll("--.*", "").trim();
-            if (!("").equals(sql)) {
-                sqlList.add(sql);
-            }
-            resourceAsStream.close();
-        }
-        return sqlList;
     }
 
     @Override
