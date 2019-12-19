@@ -66,7 +66,9 @@ public class CEPRuleMQ {
         Map<String, StatisticRule> statisticRuleMap = new HashMap<>();
         Map<String, String> userRuleMap = new HashMap<>();
 
-        int systemAmount = 0, userAmount = 0, runAmount = 0;
+        int systemAmount = 0;
+        int userAmount = 0;
+        int runAmount = 0;
 
         // get all rule details
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
