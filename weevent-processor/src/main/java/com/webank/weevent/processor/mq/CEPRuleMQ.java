@@ -379,7 +379,7 @@ public class CEPRuleMQ {
                     continue;
                 }
 
-                if (hitRuleEngine(entry.getValue().getPayload(), event, entry.getValue().getConditionField())) {
+                if (hitRuleEngine(entry.getValue(), event)) {
                     try {
                         // update the  statistic weevent
                         rule.setHitTimes(rule.getHitTimes() + 1);
@@ -477,7 +477,11 @@ public class CEPRuleMQ {
         return false;
     }
 
-    private static boolean hitRuleEngine(String payload, WeEvent eventMessage, String condition) {
+    private static boolean hitRuleEngine(CEPRule rule, WeEvent eventMessage) {
+        // String payload, WeEvent eventMessage, String condition
+        String payload = rule.getPayload();
+        String condition = rule.getConditionField();
+        String[][] systemFunctionMessage = rule.getSystemFunctionMessage();
         try {
             String eventContent = new String(eventMessage.getContent());
             // all parameter must be the same
@@ -495,6 +499,9 @@ public class CEPRuleMQ {
                 }
                 // check the expression ,if match then true
                 log.info("condition:{}", condition);
+                if (rule.getSystemFunctionMessage().length != 0) {
+                    condition = CommonUtil.analysisSystemFunction(systemFunctionMessage, payload, condition);
+                }
                 boolean checkFlag = (Boolean) jexl.createExpression(condition).evaluate(context);
                 log.info("payload:{},eventContent:{},condition:{},hit rule:{}", payload, eventContent, condition, checkFlag);
                 return checkFlag;
