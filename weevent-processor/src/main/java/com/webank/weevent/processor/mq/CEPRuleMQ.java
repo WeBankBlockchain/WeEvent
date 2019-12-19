@@ -48,7 +48,7 @@ public class CEPRuleMQ {
 
     private static CEPRuleMQ.DBThread dbThread = new CEPRuleMQ.DBThread();
 
-    public static StatisticWeEvent statisticWeEvent = new StatisticWeEvent();
+    private static StatisticWeEvent statisticWeEvent = new StatisticWeEvent();
 
     @PostConstruct
     public void init() {
