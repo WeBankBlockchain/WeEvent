@@ -602,7 +602,7 @@ public class RuleEngineService {
         }
         //get sql
         RuleEngineEntity engineEntity = ruleEngines.get(0);
-        try{
+        try {
             String payload = engineEntity.getPayload();
             engineEntity.setPayloadMap(payload == null ? new HashMap<>() : JsonUtil.parseObject(payload, Map.class));
             RuleEngineConditionEntity ruleEngineConditionEntity = new RuleEngineConditionEntity();
@@ -614,9 +614,9 @@ public class RuleEngineService {
             String fullSql = parsingDetailSQL(engineEntity);
             engineEntity.setFullSQL(fullSql);
             return engineEntity;
-        }catch (Exception e){
-            log.error("get rule detail fail",e);
-            throw new GovernanceException("");
+        } catch (Exception e) {
+            log.error("get rule detail fail", e);
+            throw new GovernanceException("get rule detail fail", e);
         }
 
     }
