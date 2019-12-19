@@ -605,6 +605,7 @@ public class CEPRuleMQ {
 
                 default:
                     log.info("other type:{}", type);
+                    break;
             }
         }
 
