@@ -62,7 +62,6 @@ public class CEPRuleMQ {
         return statisticWeEvent;
     }
 
-    // TODO:
     private static StatisticWeEvent statistic(Map<String, CEPRule> ruleMap) {
         Map<String, StatisticRule> statisticRuleMap = new HashMap<>();
         Map<String, String> userRuleMap = new HashMap<>();
