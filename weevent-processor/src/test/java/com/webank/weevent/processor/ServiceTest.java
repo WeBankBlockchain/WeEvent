@@ -942,6 +942,7 @@ public class ServiceTest {
         log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
+
     @Test
     public void getWeEventCollection() throws Exception {
         String url = "/startCEPRule";
@@ -974,12 +975,45 @@ public class ServiceTest {
         assertEquals(200, result3.getResponse().getStatus());
         Thread.sleep(100000);
 
-        String url1 = "/getWeEventCollection";
+        String url1 = "/statistic";
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url1).contentType(MediaType.APPLICATION_JSON);
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
         log.info("result:{}", result);
         assertEquals(200, result.getResponse().getStatus());
         Thread.sleep(10000);
+    }
+
+    @Test
+    public void systemFunctionCase1() throws Exception {
+        String url = "/startCEPRule";
+        String cEPrule3 = " {\n" +
+                " \t\t\"id\":1104154821,\n" +
+                "        \"ruleName\": \"air3\",\n" +
+                "        \"fromDestination\": \"from.com.webank.weevent\",\n" +
+                "        \"brokerUrl\": \"http://127.0.0.1:7000/weevent\",\n" +
+                "        \"payload\":\"{\\\"a\\\":1,\\\"b\\\":\\\"test\\\",\\\"c\\\":10}\",\n" +
+                "        \"payloadType\":1,\n" +
+                "        \"selectField\": \"a,eventId,topicName,brokerId,groupId\",\n" +
+                "        \"conditionField\": \"c<10\",\n" +
+                "        \"conditionType\": 2,\n" +
+                "        \"toDestination\": \"to.com.webank.weevent\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
+                "        \"status\": 1,\n" +
+                "        \"errorDestination\": null,\n" +
+                "        \"errorCode\": null,\n" +
+                "        \"errorMessage\": null,\n" +
+                "        \"brokerId\": \"1\",\n" +
+                "        \"userId\": \"1\",\n" +
+                "        \"groupId\": \"1\",\n" +
+                "        \"systemTag\": \"0\",\n" +
+                "        \"tableName\": \"fromIfttt\",\n" +
+                "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
+                "    }";
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule3);
+        MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
+        assertEquals(200, result3.getResponse().getStatus());
+        Thread.sleep(100000);
     }
 }

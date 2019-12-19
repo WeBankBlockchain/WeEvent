@@ -95,12 +95,12 @@ public class CEPRuleController {
         return resEntity;
     }
 
-    @RequestMapping(value = "/getWeEventCollection", method = RequestMethod.GET)
+    @RequestMapping(value = "/statistic", method = RequestMethod.GET)
     @ResponseBody
-    public BaseRspEntity getWeEventCollecttion() {
+    public BaseRspEntity statistic() {
 
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
-        StatisticWeEvent getWeEventCollecttion = statisticRuleService.getWeEventCollection();
+        StatisticWeEvent getWeEventCollecttion = statisticRuleService.getStatisticWeEvent();
 
         if (null == getWeEventCollecttion) { //fail
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());

@@ -11,6 +11,7 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 
@@ -59,41 +60,6 @@ public class CEPRuleMQ {
 
     public static StatisticWeEvent getStatisticWeEvent() {
         log.info("getStatisticWeEvent:{}", statisticWeEvent);
-        return statisticWeEvent;
-    }
-
-    private static StatisticWeEvent statistic(Map<String, CEPRule> ruleMap) {
-        Map<String, StatisticRule> statisticRuleMap = new HashMap<>();
-        Map<String, String> userRuleMap = new HashMap<>();
-
-        int systemAmount = 0;
-        int userAmount = 0;
-        int runAmount = 0;
-
-        // get all rule details
-        for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
-            CEPRule rule = entry.getValue();
-            StatisticRule statisticRule = new StatisticRule();
-            statisticRule.setId(rule.getId());
-            statisticRule.setStartTime(rule.getCreatedTime());
-            statisticRuleMap.put(rule.getId(), statisticRule);
-            userRuleMap.put(rule.getUserId(), rule.getId());
-            if ("1".equals(rule.getSystemTag())) {
-                systemAmount++;
-            } else {
-                userAmount++;
-            }
-            if ("1".equals(rule.getStatus())) {
-                runAmount++;
-            }
-
-
-        }
-        statisticWeEvent.setUserAmount(userRuleMap.size());
-        statisticWeEvent.setSystemAmount(systemAmount);
-        statisticWeEvent.setUserAmount(userAmount);
-        statisticWeEvent.setRunAmount(runAmount);
-        statisticWeEvent.setStatisticRuleMap(statisticRuleMap);
         return statisticWeEvent;
     }
 
@@ -185,13 +151,14 @@ public class CEPRuleMQ {
                             String content = new String(event.getContent());
                             log.info("on event:{},content:{}", event.toString(), content);
 
-
+                            Pair<String, String> type;
                             // check the content
                             if (JSONObject.isValid(content)) {
-                                handleOnEvent(client, event, ruleMap);
+                                type = handleOnEvent(client, event, ruleMap);
                             } else {
-                                handleOnEventOtherPattern(client, event, ruleMap);
+                                type = handleOnEventOtherPattern(client, event, ruleMap);
                             }
+                            statisticOrderType(type);
                         } catch (JSONException e) {
                             log.error(e.toString());
                         }
@@ -210,12 +177,14 @@ public class CEPRuleMQ {
 
                             String content = new String(event.getContent());
                             log.info("on event:{},content:{}", event.toString(), content);
+                            Pair<String, String> type;
                             // check the content
                             if (JSONObject.isValid(content)) {
-                                handleOnEvent(client, event, ruleMap);
+                                type = handleOnEvent(client, event, ruleMap);
                             } else {
-                                handleOnEventOtherPattern(client, event, ruleMap);
+                                type = handleOnEventOtherPattern(client, event, ruleMap);
                             }
+                            statisticOrderType(type);
                         } catch (JSONException e) {
                             log.error(e.toString());
                         }
@@ -248,7 +217,7 @@ public class CEPRuleMQ {
         }
     }
 
-    private static void sendMessageToDB(String groupId, WeEvent eventContent, CEPRule rule) {
+    private static String sendMessageToDB(String groupId, WeEvent eventContent, CEPRule rule) {
         try {
             try (Connection conn = CommonUtil.getDbcpConnection(rule.getDatabaseUrl())) {
 
@@ -293,26 +262,27 @@ public class CEPRuleMQ {
                     log.info("preparedStmt:{}", preparedStmt.toString());
                     // execute the preparedstatement
                     int res = preparedStmt.executeUpdate();
-                    StatisticRule statisticRule = statisticWeEvent.getStatisticRuleMap().get(rule.getId());
-                    if (res > 0) {
-                        statisticRule.setWriteDBSuccess(statisticRule.getWriteDBSuccess() + 1);
-                        log.info("insert db success...");
-                    } else {
-                        statisticRule.setWriteDBFail(statisticRule.getWriteDBFail() + 1);
-                    }
-                    preparedStmt.close();
 
+                    preparedStmt.close();
                     conn.close();
+
+                    if (res > 0) {
+                        log.info("insert db success...");
+                        return ConstantsHelper.WRITE_DB_SUCCESS;
+                    } else {
+                        return ConstantsHelper.WRITE_DB_FAIL;
+                    }
                 }
             }
         } catch (SQLException e) {
             statisticWeEvent.getStatisticRuleMap().get(rule.getId()).setLastFailReason(e.toString());
             log.info(e.toString());
+            return ConstantsHelper.LAST_FAIL_REASON;
         }
-
+        return "";
     }
 
-    private static void handleOnEventOtherPattern(IWeEventClient client, WeEvent event, Map<String, CEPRule> ruleMap) {
+    private static Pair<String, String> handleOnEventOtherPattern(IWeEventClient client, WeEvent event, Map<String, CEPRule> ruleMap) {
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
 
         // match the rule and send message
@@ -333,9 +303,12 @@ public class CEPRuleMQ {
                 Pair<WeEvent, CEPRule> messagePair = new Pair<>(event, entry.getValue());
                 systemMessageQueue.add(messagePair);
                 // update the  statistic weevent
-                rule.setHitTimes(rule.getHitTimes() + 1);
+                return new Pair<>(ConstantsHelper.HIT_TIMES, entry.getValue().getId());
+            } else {
+                return new Pair<>(ConstantsHelper.NOT_HIT_TIMES, entry.getValue().getId());
             }
         }
+        return new Pair<>(ConstantsHelper.OTHER, "");
     }
 
     private static boolean checkTheInput(Map.Entry<String, CEPRule> entry, IWeEventClient client) {
@@ -351,17 +324,14 @@ public class CEPRuleMQ {
     }
 
 
-    private static void handleOnEvent(IWeEventClient client, WeEvent event, Map<String, CEPRule> ruleMap) {
+    private static Pair<String, String> handleOnEvent(IWeEventClient client, WeEvent event, Map<String, CEPRule> ruleMap) {
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
-
         // match the rule and send message
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
             StatisticRule rule = statisticWeEvent.getStatisticRuleMap().get(entry.getValue().getId());
 
             // che the parameter
             if (checkTheInput(entry, client)) {
-                // update the  statistic weevent
-                rule.setNotHitTimes(rule.getNotHitTimes() + 1);
                 continue;
             }
 
@@ -370,14 +340,12 @@ public class CEPRuleMQ {
                 log.info("system insert db:{}", entry.getValue().getId());
                 Pair<WeEvent, CEPRule> messagePair = new Pair<>(event, entry.getValue());
                 systemMessageQueue.add(messagePair);
-                // update the  statistic weevent
-                rule.setHitTimes(rule.getHitTimes() + 1);
+
+                return new Pair<>(ConstantsHelper.HIT_TIMES, entry.getValue().getId());
 
             } else {
 
                 if (StringUtils.isEmpty(entry.getValue().getSelectField()) || (StringUtils.isEmpty(entry.getValue().getPayload()))) {
-                    // update the  statistic weevent
-                    rule.setNotHitTimes(rule.getNotHitTimes() + 1);
                     continue;
                 }
 
@@ -393,7 +361,8 @@ public class CEPRuleMQ {
 
                             log.info("event hit the db and insert: {}", event.toString());
 
-                            sendMessageToDB(groupId, event, entry.getValue());
+                            String result = sendMessageToDB(groupId, event, entry.getValue());
+                            return new Pair<>(result, entry.getValue().getId());
 
                         } else if (entry.getValue().getConditionType().equals(1)) {
                             // select the field and publish the message to the toDestination
@@ -408,18 +377,21 @@ public class CEPRuleMQ {
 
                             // update the  statistic weevent
                             if ("SUCCESS".equals(result.getStatus())) {
-                                rule.setPublishEventSuccess(rule.getPublishEventSuccess() + 1);
+                                return new Pair<>(ConstantsHelper.PUBLISH_EVENT_SUCCESS, entry.getValue().getId());
                             } else {
-                                rule.setPublishEventFail(rule.getWriteDBFail() + 1);
+                                return new Pair<>(ConstantsHelper.PUBLISH_EVENT_FAIL, entry.getValue().getId());
                             }
                         }
                     } catch (BrokerException e) {
-                        rule.setLastFailReason(e.toString());
                         log.error(e.toString());
+                        return new Pair<>(ConstantsHelper.LAST_FAIL_REASON, entry.getValue().getId());
                     }
+                } else {
+                    return new Pair<>(ConstantsHelper.NOT_HIT_TIMES, entry.getValue().getId());
                 }
             }
         }
+        return new Pair<>(ConstantsHelper.OTHER, "");
     }
 
     private static String setWeEventContent(String brokerId, String groupId, WeEvent eventMessage, String selectField, String payload) {
@@ -562,6 +534,85 @@ public class CEPRuleMQ {
             return ConstantsHelper.FAIL;
         }
         return ConstantsHelper.FAIL;
+    }
+
+    private static StatisticWeEvent statistic(Map<String, CEPRule> ruleMap) {
+        Map<String, StatisticRule> statisticRuleMap = new HashMap<>();
+        Map<String, String> userRuleMap = new HashMap<>();
+
+        int systemAmount = 0;
+        int userAmount = 0;
+        int runAmount = 0;
+
+        // get all rule details
+        for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
+            CEPRule rule = entry.getValue();
+            StatisticRule statisticRule = new StatisticRule();
+            statisticRule.setId(rule.getId());
+            statisticRule.setStartTime(rule.getCreatedTime());
+            statisticRuleMap.put(rule.getId(), statisticRule);
+            userRuleMap.put(rule.getUserId(), rule.getId());
+            if ("1".equals(rule.getSystemTag())) {
+                systemAmount++;
+            } else {
+                userAmount++;
+            }
+            if ("1".equals(rule.getStatus())) {
+                runAmount++;
+            }
+
+
+        }
+        statisticWeEvent.setUserAmount(userRuleMap.size());
+        statisticWeEvent.setSystemAmount(systemAmount);
+        statisticWeEvent.setUserAmount(userAmount);
+        statisticWeEvent.setRunAmount(runAmount);
+        statisticWeEvent.setStatisticRuleMap(statisticRuleMap);
+        return statisticWeEvent;
+    }
+
+    private static void statisticOrderType(Pair<String, String> type) {
+        if (!("".equals(type.getValue()))) {
+            for (Map.Entry<String, StatisticRule> entry : statisticWeEvent.getStatisticRuleMap().entrySet()) {
+                StatisticRule statisticRule = statisticWeEvent.getStatisticRuleMap().get(type.getValue());
+                switch (type.getKey()) {
+                    case ConstantsHelper.HIT_TIMES:
+                        statisticRule.setHitTimes(increase(statisticRule.getHitTimes()));
+                        break;
+
+                    case ConstantsHelper.NOT_HIT_TIMES:
+                        statisticRule.setNotHitTimes(increase(statisticRule.getNotHitTimes()));
+                        break;
+
+                    case ConstantsHelper.WRITE_DB_SUCCESS:
+                        statisticRule.setWriteDBSuccess(increase(statisticRule.getWriteDBSuccess()));
+                        break;
+
+                    case ConstantsHelper.WRITE_DB_FAIL:
+                        statisticRule.setWriteDBFail(increase(statisticRule.getWriteDBFail()));
+                        break;
+
+                    case ConstantsHelper.PUBLISH_EVENT_SUCCESS:
+                        statisticRule.setPublishEventSuccess(increase(statisticRule.getPublishEventSuccess()));
+                        break;
+
+                    case ConstantsHelper.PUBLISH_EVENT_FAIL:
+                        statisticRule.setPublishEventFail(increase(statisticRule.getPublishEventFail()));
+                        break;
+
+                    case ConstantsHelper.LAST_FAIL_REASON:
+                        statisticRule.setLastFailReason(statisticRule.getLastFailReason());
+                        break;
+
+                    default:
+                        log.info("other type:{}", type);
+                }
+            }
+        }
+    }
+
+    private static int increase(int number) {
+        return new AtomicInteger(number).getAndIncrement();
     }
 
     private static class DBThread implements Runnable {

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class StatisticRuleService {
-    public StatisticWeEvent getWeEventCollection() {
+    public StatisticWeEvent getStatisticWeEvent() {
         return CEPRuleMQ.getStatisticWeEvent();
     }
 }
