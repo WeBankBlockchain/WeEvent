@@ -573,42 +573,41 @@ public class CEPRuleMQ {
 
     private static void statisticOrderType(Pair<String, String> type) {
         if (!("".equals(type.getValue()))) {
-            for (Map.Entry<String, StatisticRule> entry : statisticWeEvent.getStatisticRuleMap().entrySet()) {
-                StatisticRule statisticRule = statisticWeEvent.getStatisticRuleMap().get(type.getValue());
-                switch (type.getKey()) {
-                    case ConstantsHelper.HIT_TIMES:
-                        statisticRule.setHitTimes(increase(statisticRule.getHitTimes()));
-                        break;
+            StatisticRule statisticRule = statisticWeEvent.getStatisticRuleMap().get(type.getValue());
+            switch (type.getKey()) {
+                case ConstantsHelper.HIT_TIMES:
+                    statisticRule.setHitTimes(increase(statisticRule.getHitTimes()));
+                    break;
 
-                    case ConstantsHelper.NOT_HIT_TIMES:
-                        statisticRule.setNotHitTimes(increase(statisticRule.getNotHitTimes()));
-                        break;
+                case ConstantsHelper.NOT_HIT_TIMES:
+                    statisticRule.setNotHitTimes(increase(statisticRule.getNotHitTimes()));
+                    break;
 
-                    case ConstantsHelper.WRITE_DB_SUCCESS:
-                        statisticRule.setWriteDBSuccess(increase(statisticRule.getWriteDBSuccess()));
-                        break;
+                case ConstantsHelper.WRITE_DB_SUCCESS:
+                    statisticRule.setWriteDBSuccess(increase(statisticRule.getWriteDBSuccess()));
+                    break;
 
-                    case ConstantsHelper.WRITE_DB_FAIL:
-                        statisticRule.setWriteDBFail(increase(statisticRule.getWriteDBFail()));
-                        break;
+                case ConstantsHelper.WRITE_DB_FAIL:
+                    statisticRule.setWriteDBFail(increase(statisticRule.getWriteDBFail()));
+                    break;
 
-                    case ConstantsHelper.PUBLISH_EVENT_SUCCESS:
-                        statisticRule.setPublishEventSuccess(increase(statisticRule.getPublishEventSuccess()));
-                        break;
+                case ConstantsHelper.PUBLISH_EVENT_SUCCESS:
+                    statisticRule.setPublishEventSuccess(increase(statisticRule.getPublishEventSuccess()));
+                    break;
 
-                    case ConstantsHelper.PUBLISH_EVENT_FAIL:
-                        statisticRule.setPublishEventFail(increase(statisticRule.getPublishEventFail()));
-                        break;
+                case ConstantsHelper.PUBLISH_EVENT_FAIL:
+                    statisticRule.setPublishEventFail(increase(statisticRule.getPublishEventFail()));
+                    break;
 
-                    case ConstantsHelper.LAST_FAIL_REASON:
-                        statisticRule.setLastFailReason(statisticRule.getLastFailReason());
-                        break;
+                case ConstantsHelper.LAST_FAIL_REASON:
+                    statisticRule.setLastFailReason(statisticRule.getLastFailReason());
+                    break;
 
-                    default:
-                        log.info("other type:{}", type);
-                }
+                default:
+                    log.info("other type:{}", type);
             }
         }
+
     }
 
     private static int increase(int number) {
