@@ -3,9 +3,11 @@ package com.webank.weevent.processor.controller;
 import javax.validation.Valid;
 
 import com.webank.weevent.processor.ProcessorApplication;
+import com.webank.weevent.processor.model.StatisticWeEvent;
 import com.webank.weevent.processor.mq.CEPRuleMQ;
 import com.webank.weevent.processor.quartz.CRUDJobs;
 import com.webank.weevent.processor.quartz.QuartzManager;
+import com.webank.weevent.processor.service.StatisticRuleService;
 import com.webank.weevent.processor.utils.BaseRspEntity;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.utils.ConstantsHelper;
@@ -26,6 +28,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class CEPRuleController {
 
+    @Autowired
+    private StatisticRuleService statisticRuleService;
     @Autowired
     private QuartzManager quartzManager;
 
@@ -91,18 +95,18 @@ public class CEPRuleController {
         return resEntity;
     }
 
-    @RequestMapping(value = "/getCEPRuleById", method = RequestMethod.GET)
+    @RequestMapping(value = "/getWeEventCollection", method = RequestMethod.GET)
     @ResponseBody
-    public BaseRspEntity getCEPRuleById(@RequestParam(name = "id") String id) {
+    public BaseRspEntity getWeEventCollecttion() {
 
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
-        CEPRule cepRule = getRuleById(id);
+        StatisticWeEvent getWeEventCollecttion = statisticRuleService.getWeEventCollection();
 
-        if (null == cepRule) { //fail
+        if (null == getWeEventCollecttion) { //fail
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
             resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());
         } else { // set rule
-            resEntity.setData(cepRule);
+            resEntity.setData(getWeEventCollecttion);
         }
         return resEntity;
     }
