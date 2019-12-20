@@ -12,6 +12,8 @@ import javax.annotation.PostConstruct;
 
 import com.webank.weevent.processor.cache.CEPRuleCache;
 import com.webank.weevent.processor.model.CEPRule;
+import com.webank.weevent.processor.model.StatisticRule;
+import com.webank.weevent.processor.model.StatisticWeEvent;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.RetCode;
 
@@ -27,6 +29,7 @@ import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
+import org.quartz.impl.jdbcjobstore.StdJDBCDelegate;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.stereotype.Service;
 
@@ -74,36 +77,6 @@ public class QuartzManager {
 
     }
 
-    /**
-     * get the ruled etails
-     *
-     * @param id job id
-     */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public CEPRule selectJobById(String id) {
-        try {
-            // get the all rules
-            Iterator<JobKey> it = scheduler.getJobKeys(GroupMatcher.anyGroup()).iterator();
-
-            while (it.hasNext()) {
-                JobKey jobKey = (JobKey) it.next();
-                if (null != (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
-                    CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
-                    // match the right rule
-                    if (id.equals(rule.getId())) {
-                        return rule;
-                    } else {
-                        return null;
-                    }
-                }
-
-            }
-            return null;
-        } catch (Exception e) {
-            log.error("e:{}", e.toString());
-            return null;
-        }
-    }
 
     /**
      * add job and modify
@@ -143,8 +116,8 @@ public class QuartzManager {
             ruleMap.put(currentRule.getId(), currentRule);
             ruleList.add(currentRule);
             params.put("ruleMap", ruleMap);
-
             log.info("update the job  ruleMap:{},ruleList:{}", ruleMap.size(), ruleList.size());
+
             JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).storeDurably(true).build();
 
             // just do one time
@@ -264,4 +237,58 @@ public class QuartzManager {
         }
     }
 
+    /**
+     * get the statistic jobs
+     */
+    public StatisticWeEvent getStatisticJobs(StatisticWeEvent statisticWeEvent, String brokerId) {
+        Map<String, StatisticRule> statisticRuleMap = statisticWeEvent.getStatisticRuleMap();
+
+        try {
+            // get the all rules
+            Iterator<JobKey> it = scheduler.getJobKeys(GroupMatcher.anyGroup()).iterator();
+            Map<String, String> userRuleMap = new HashMap<>();
+
+            int systemAmount = 0;
+            int userAmount = 0;
+            int runAmount = 0;
+
+            while (it.hasNext()) {
+                JobKey jobKey = (JobKey) it.next();
+                if (null != (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
+                    CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
+                    // match the right rule
+                    if (brokerId.equals(rule.getBrokerId())) {
+                        if (!statisticRuleMap.containsKey(rule.getId())) {
+                            StatisticRule statisticRule = new StatisticRule();
+                            statisticRule.setId(rule.getId());
+                            statisticRule.setBrokerId(rule.getBrokerId());
+                            statisticRule.setRuleName(rule.getRuleName());
+                            statisticRule.setStatus(rule.getStatus());
+                            statisticRule.setStartTime(rule.getCreatedTime());
+                            statisticRuleMap.put(rule.getId(), statisticRule);
+                        }
+                        // statistic
+                        if ("1".equals(rule.getSystemTag())) {
+                            systemAmount++;
+                        } else {
+                            userAmount++;
+                        }
+                        if ("1".equals(rule.getStatus())) {
+                            runAmount++;
+                        }
+                    }
+                }
+
+            }
+            statisticWeEvent.setUserAmount(userRuleMap.size());
+            statisticWeEvent.setSystemAmount(systemAmount);
+            statisticWeEvent.setUserAmount(userAmount);
+            statisticWeEvent.setRunAmount(runAmount);
+            statisticWeEvent.setStatisticRuleMap(statisticRuleMap);
+            return statisticWeEvent;
+        } catch (Exception e) {
+            log.error("e:{}", e.toString());
+            return null;
+        }
+    }
 }

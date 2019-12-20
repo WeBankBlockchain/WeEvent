@@ -58,11 +58,6 @@ public class CEPRuleMQ {
         new Thread(dbThread).start();
     }
 
-    public static StatisticWeEvent getStatisticWeEvent() {
-        log.info("getStatisticWeEvent:{}", statisticWeEvent);
-        return statisticWeEvent;
-    }
-
     public static void updateSubscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException {
         // when is in run status. update the rule map
         // update unsubscribe
@@ -537,37 +532,28 @@ public class CEPRuleMQ {
         return ConstantsHelper.FAIL;
     }
 
+    public static StatisticWeEvent getStatisticWeEvent() {
+        log.info("getStatisticWeEvent:{}", statisticWeEvent);
+        return statisticWeEvent;
+    }
+
     private static StatisticWeEvent statistic(Map<String, CEPRule> ruleMap) {
         Map<String, StatisticRule> statisticRuleMap = new HashMap<>();
-        Map<String, String> userRuleMap = new HashMap<>();
-
-        int systemAmount = 0;
-        int userAmount = 0;
-        int runAmount = 0;
 
         // get all rule details
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
             CEPRule rule = entry.getValue();
             StatisticRule statisticRule = new StatisticRule();
             statisticRule.setId(rule.getId());
+            statisticRule.setBrokerId(rule.getBrokerId());
+            statisticRule.setRuleName(rule.getRuleName());
+            statisticRule.setStatus(rule.getStatus());
             statisticRule.setStartTime(rule.getCreatedTime());
             statisticRuleMap.put(rule.getId(), statisticRule);
-            userRuleMap.put(rule.getUserId(), rule.getId());
-            if ("1".equals(rule.getSystemTag())) {
-                systemAmount++;
-            } else {
-                userAmount++;
-            }
-            if ("1".equals(rule.getStatus())) {
-                runAmount++;
-            }
 
 
         }
-        statisticWeEvent.setUserAmount(userRuleMap.size());
-        statisticWeEvent.setSystemAmount(systemAmount);
-        statisticWeEvent.setUserAmount(userAmount);
-        statisticWeEvent.setRunAmount(runAmount);
+
         statisticWeEvent.setStatisticRuleMap(statisticRuleMap);
         return statisticWeEvent;
     }

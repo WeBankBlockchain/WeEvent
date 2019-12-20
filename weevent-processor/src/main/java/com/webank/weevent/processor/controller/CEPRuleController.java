@@ -97,10 +97,10 @@ public class CEPRuleController {
 
     @RequestMapping(value = "/statistic", method = RequestMethod.GET)
     @ResponseBody
-    public BaseRspEntity statistic() {
+    public BaseRspEntity statistic(@RequestParam(name = "brokerId") String brokerId) {
 
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
-        StatisticWeEvent getWeEventCollecttion = statisticRuleService.getStatisticWeEvent();
+        StatisticWeEvent getWeEventCollecttion = statisticRuleService.getStatisticWeEvent(brokerId);
 
         if (null == getWeEventCollecttion) { //fail
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
