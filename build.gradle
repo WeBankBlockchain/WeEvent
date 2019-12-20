@@ -67,7 +67,7 @@ ext {
     quartzVersion = "2.3.0"
     // Java-WebSocket
     WebSocketVersion = "1.4.0"
-
+    // jackSon
     jackSonVerion = "2.10.0";
 }
 

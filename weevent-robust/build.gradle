@@ -9,7 +9,11 @@ dependencies {
     implementation("com.github.briandilley.jsonrpc4j:jsonrpc4j:${jsonrpc4jVersion}")
     implementation("org.springframework.boot:spring-boot-starter-log4j2:${springBoot2Version}")
     // avoid "Log4j appears to be running in a Servlet environment, but there's no log4j-web module available."
-    implementation("com.alibaba:fastjson:${fastjsonVersion}")
+    //jacksonCore
+    implementation("com.fasterxml.jackson.core:jackson-databind:${jackSonVerion}")
+    implementation("com.fasterxml.jackson.module:jackson-module-jaxb-annotations:${jackSonVerion}")
+    implementation("com.fasterxml.jackson.core:jackson-core:${jackSonVerion}")
+
     implementation("commons-io:commons-io:${apacheCommonsVersion.commonsIo}")
 }
 

@@ -1,8 +1,8 @@
 package com.webank.weevent.governance;
 
+import com.webank.weevent.governance.utils.H2ServerUtil;
+
 import lombok.extern.slf4j.Slf4j;
-import org.h2.tools.Server;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.ApplicationPidFileWriter;
@@ -18,24 +18,13 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class GovernanceApplication {
 
-    @Value("${spring.jpa.database:h2}")
-    private static String databaseType;
-
     public static void main(String[] args) throws Exception {
-        startH2();
+        H2ServerUtil.startH2();
         SpringApplication app = new SpringApplication(GovernanceApplication.class);
         app.addListeners(new ApplicationPidFileWriter());
         app.run(args);
         log.info("Start Governance success");
     }
 
-    private static void startH2() throws Exception {
-        if (!"h2".equals(databaseType.toLowerCase())) {
-            return;
-        }
-        Server server = Server.createTcpServer(new String[]{"-tcp", "-tcpAllowOthers", "-tcpPort", "7082"}).start();
-        String status = server.getStatus();
-        log.info("h2 status:{}", status);
-    }
 
 }

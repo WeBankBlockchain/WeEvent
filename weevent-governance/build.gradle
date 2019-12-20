@@ -26,8 +26,7 @@ dependencies {
     //jacksonCore
     implementation("com.fasterxml.jackson.core:jackson-databind:${jackSonVerion}")
     implementation("com.fasterxml.jackson.module:jackson-module-jaxb-annotations:${jackSonVerion}")
-
-    //
+    implementation("com.fasterxml.jackson.core:jackson-core:${jackSonVerion}")
 
     // forward backend
     implementation("org.apache.httpcomponents:httpclient:${httpclientVersion}")

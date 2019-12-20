@@ -405,8 +405,6 @@ public class RuleEngineService {
         BeanUtils.copyProperties(rule, ruleEngineEntity, "status");
         try {
             //set payload
-            String payload = JsonUtil.toJSONString(ruleEngineEntity.getPayloadMap());
-            ruleEngineEntity.setPayload(payload);
             ruleEngineEntity.setLastUpdate(new Date());
 
             //set selectFiled 、conditionField
@@ -420,7 +418,6 @@ public class RuleEngineService {
 
             //stop process
             this.stopProcessRule(request, ruleEngineEntity, rule);
-
             ruleEngineRepository.save(ruleEngineEntity);
             log.info("update status end");
             return true;

@@ -1,5 +1,7 @@
 package com.webank.weevent.processor.controller;
 
+import java.io.IOException;
+
 import javax.validation.Valid;
 
 import com.webank.weevent.processor.ProcessorApplication;
@@ -9,9 +11,9 @@ import com.webank.weevent.processor.quartz.QuartzManager;
 import com.webank.weevent.processor.utils.BaseRspEntity;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.utils.ConstantsHelper;
+import com.webank.weevent.processor.utils.JsonUtil;
 import com.webank.weevent.processor.utils.RetCode;
 
-import com.alibaba.fastjson.JSONArray;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobDataMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +78,7 @@ public class CEPRuleController {
 
     @RequestMapping(value = "/deleteCEPRuleById", method = RequestMethod.POST)
     @ResponseBody
-    public BaseRspEntity deleteCEPRuleById(@RequestParam(name = "id") String id) {
+    public BaseRspEntity deleteCEPRuleById(@RequestParam(name = "id") String id) throws IOException {
 
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         createJob(id, "deleteCEPRuleById");
@@ -87,7 +89,7 @@ public class CEPRuleController {
             resEntity.setErrorMsg(ret.getErrorMsg());
         }
 
-        log.info("cepRule:{}", JSONArray.toJSON(ret));
+        log.info("cepRule:{}", JsonUtil.toJSONString(ret));
         return resEntity;
     }
 
@@ -110,7 +112,7 @@ public class CEPRuleController {
 
     @RequestMapping(value = "/startCEPRule", method = RequestMethod.POST)
     @ResponseBody
-    public BaseRspEntity startCEPRule(@Valid @RequestBody CEPRule rule) {
+    public BaseRspEntity startCEPRule(@Valid @RequestBody CEPRule rule) throws IOException {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = createJob(rule, "startCEPRule");
 
@@ -118,13 +120,13 @@ public class CEPRuleController {
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
             resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());
         }
-        log.info("cepRule:{}", JSONArray.toJSON(ret));
+        log.info("cepRule:{}", JsonUtil.toJSONString(ret));
         return resEntity;
     }
 
     @RequestMapping(value = "/checkWhereCondition")
     @ResponseBody
-    public BaseRspEntity checkWhereCondition(@RequestParam(name = "payload") String payload, @RequestParam(name = "condition") String condition) {
+    public BaseRspEntity checkWhereCondition(@RequestParam(name = "payload") String payload, @RequestParam(name = "condition") String condition) throws IOException {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = CEPRuleMQ.checkCondition(payload, condition);
 
@@ -133,7 +135,7 @@ public class CEPRuleController {
             resEntity.setErrorMsg(ret.getErrorMsg());
         }
 
-        log.info("ret:{}", JSONArray.toJSON(ret));
+        log.info("cepRule:{}", JsonUtil.toJSONString(ret));
         return resEntity;
     }
 

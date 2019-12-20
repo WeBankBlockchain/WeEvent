@@ -1,9 +1,11 @@
 package com.webank.weevent.processor.mq;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingDeque;
@@ -16,13 +18,12 @@ import javax.annotation.PostConstruct;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.utils.CommonUtil;
 import com.webank.weevent.processor.utils.ConstantsHelper;
+import com.webank.weevent.processor.utils.JsonUtil;
 import com.webank.weevent.processor.utils.RetCode;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.WeEvent;
 
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.jexl3.JexlBuilder;
@@ -32,6 +33,7 @@ import org.apache.commons.jexl3.MapContext;
 import org.springframework.util.StringUtils;
 
 @Slf4j
+
 public class CEPRuleMQ {
     // <ruleId <--> subscriptionId>
     private static Map<String, String> subscriptionIdMap = new ConcurrentHashMap<>();
@@ -140,12 +142,12 @@ public class CEPRuleMQ {
 
 
                             // check the content
-                            if (JSONObject.isValid(content)) {
+                            if (JsonUtil.isValid(content)) {
                                 handleOnEvent(client, event, ruleMap);
                             } else {
                                 handleOnEventOtherPattern(client, event, ruleMap);
                             }
-                        } catch (JSONException e) {
+                        } catch (Exception e) {
                             log.error(e.toString());
                         }
                     }
@@ -164,12 +166,12 @@ public class CEPRuleMQ {
                             String content = new String(event.getContent());
                             log.info("on event:{},content:{}", event.toString(), content);
                             // check the content
-                            if (JSONObject.isValid(content)) {
+                            if (JsonUtil.isValid(content)) {
                                 handleOnEvent(client, event, ruleMap);
                             } else {
                                 handleOnEventOtherPattern(client, event, ruleMap);
                             }
-                        } catch (JSONException e) {
+                        } catch (Exception e) {
                             log.error(e.toString());
                         }
                     }
@@ -254,7 +256,7 @@ public class CEPRuleMQ {
                     conn.close();
                 }
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             log.info(e.toString());
         }
 
@@ -295,7 +297,7 @@ public class CEPRuleMQ {
     }
 
 
-    private static void handleOnEvent(IWeEventClient client, WeEvent event, Map<String, CEPRule> ruleMap) {
+    private static void handleOnEvent(IWeEventClient client, WeEvent event, Map<String, CEPRule> ruleMap) throws IOException {
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
 
         // match the rule and send message
@@ -349,13 +351,13 @@ public class CEPRuleMQ {
         }
     }
 
-    private static String setWeEventContent(String brokerId, String groupId, WeEvent eventMessage, String selectField, String payload) {
+    private static String setWeEventContent(String brokerId, String groupId, WeEvent eventMessage, String selectField, String payload) throws IOException {
         String content = new String(eventMessage.getContent());
-        JSONObject eventContent = JSONObject.parseObject(content);
-        JSONObject payloadContent = JSONObject.parseObject(payload);
+        Map eventContent = JsonUtil.parseObject(content, Map.class);
+        Map<String, Object> payloadContent = JsonUtil.parseObjectToMap(payload);
 
         // match the table
-        JSONObject iftttContent = new JSONObject();
+        Map<String,Object> iftttContent = new HashMap<>();
         // check the star and get all parameters
         if ("*".equals(selectField)) {
             for (Map.Entry<String, Object> entry : payloadContent.entrySet()) {
@@ -389,9 +391,9 @@ public class CEPRuleMQ {
         return iftttContent.toString();
     }
 
-    private static boolean handleTheEqual(WeEvent eventMessage, String condition) {
+    private static boolean handleTheEqual(WeEvent eventMessage, String condition) throws IOException {
         String eventContent = new String(eventMessage.getContent());
-        JSONObject event = JSONObject.parseObject(eventContent);
+        Map event = JsonUtil.parseObject(eventContent, Map.class);
         String[] strs = condition.split("=");
         if (strs.length == 2) {
             // event contain left key
@@ -406,7 +408,7 @@ public class CEPRuleMQ {
         return false;
     }
 
-    private static boolean hitRuleEngine(String payload, WeEvent eventMessage, String condition) {
+    private static boolean hitRuleEngine(String payload, WeEvent eventMessage, String condition) throws IOException {
         try {
             String eventContent = new String(eventMessage.getContent());
             // all parameter must be the same
@@ -415,7 +417,7 @@ public class CEPRuleMQ {
                 return true;
             } else if (CommonUtil.checkJson(eventContent, payload)) {
                 List<String> eventContentKeys = CommonUtil.getKeys(payload);
-                JSONObject event = JSONObject.parseObject(eventContent);
+                Map event = JsonUtil.parseObject(eventContent, Map.class);
                 JexlEngine jexl = new JexlBuilder().create();
 
                 JexlContext context = new MapContext();
@@ -445,14 +447,14 @@ public class CEPRuleMQ {
     public static RetCode checkCondition(String payload, String condition) {
         try {
             List<String> payloadContentKeys = CommonUtil.getKeys(payload);
-            JSONObject payloadJson = JSONObject.parseObject(payload);
+            Map payloadJson = JsonUtil.parseObject(payload, Map.class);
             JexlEngine jexl = new JexlBuilder().create();
 
             JexlContext context = new MapContext();
             for (String key : payloadContentKeys) {
                 context.set(key, payloadJson.get(key));
             }
-            JSONObject event = JSONObject.parseObject(payload);
+            Map event = JsonUtil.parseObject(payload, Map.class);
             String[] strs = condition.split("=");
             boolean flag = false;
             if (strs.length == 2 && !(strs[0].contains("<") || strs[0].contains(">") || (strs[1].contains("<") || strs[1].contains(">")))) {

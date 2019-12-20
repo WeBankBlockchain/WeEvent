@@ -1,6 +1,8 @@
-package com.webank.weevent.governance.utils;
+package com.webank.weevent.processor.utils;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -35,4 +37,29 @@ public class JsonUtil {
             throw new IOException("conversion of Json failed", e);
         }
     }
+
+    public static Map<String, Object> parseObjectToMap(String data) throws IOException {
+        Assert.hasText(data, "data without text");
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(data, new HashMap<String, Object>().getClass());
+        } catch (Exception e) {
+            log.error("conversion of Json failed", e);
+            throw new IOException("conversion of Json failed", e);
+        }
+    }
+
+
+    public static boolean isValid(String data) {
+        Assert.hasText(data, "data without text");
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.readTree(data);
+            return true;
+        } catch (JsonProcessingException e) {
+            return false;
+        }
+    }
+
+
 }

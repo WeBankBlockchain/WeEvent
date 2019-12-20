@@ -23,8 +23,10 @@ dependencies {
     implementation("org.apache.tomcat:tomcat-jdbc:${tomcatVersion}")
 
 
-    //fastjson
-    implementation("com.alibaba:fastjson:${fastjsonVersion}")
+    //jacksonCore
+    implementation("com.fasterxml.jackson.core:jackson-databind:${jackSonVerion}")
+    implementation("com.fasterxml.jackson.module:jackson-module-jaxb-annotations:${jackSonVerion}")
+    implementation("com.fasterxml.jackson.core:jackson-core:${jackSonVerion}")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBoot2Version}")
 
