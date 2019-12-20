@@ -968,8 +968,10 @@ public class ServiceTest {
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
                 "        \"tableName\": \"fromIfttt\",\n" +
+                "        \"systemFunctionMessage\": null,\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
+
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule3);
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result3.getResponse().getStatus());
@@ -977,7 +979,7 @@ public class ServiceTest {
 
         String url1 = "/statistic";
 
-        RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url1).contentType(MediaType.APPLICATION_JSON);
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url1).contentType(MediaType.APPLICATION_JSON).param("brokerId", "1");
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
         log.info("result:{}", result);
         assertEquals(200, result.getResponse().getStatus());
@@ -985,7 +987,8 @@ public class ServiceTest {
     }
 
     @Test
-    public void systemFunctionCase1() throws Exception {
+    public void multiHitRule1() throws Exception {
+        String[][] arr = {{"0", "15", "substring", "a,11"}, {"26", "37", "concat", "b,a"}};
         String url = "/startCEPRule";
         String cEPrule3 = " {\n" +
                 " \t\t\"id\":1104154821,\n" +
@@ -1009,11 +1012,21 @@ public class ServiceTest {
                 "        \"groupId\": \"1\",\n" +
                 "        \"systemTag\": \"0\",\n" +
                 "        \"tableName\": \"fromIfttt\",\n" +
+                "        \"systemFunctionMessage\": arr,\n" +
                 "        \"updatedTime\": \"2019-08-23T18:09:16.000+0000\"\n" +
                 "    }";
+
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule3);
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result3.getResponse().getStatus());
         Thread.sleep(100000);
+
+        String url1 = "/statistic";
+
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url1).contentType(MediaType.APPLICATION_JSON).param("brokerId", "1");
+        MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
+        log.info("result:{}", result);
+        assertEquals(200, result.getResponse().getStatus());
+        Thread.sleep(10000);
     }
 }
