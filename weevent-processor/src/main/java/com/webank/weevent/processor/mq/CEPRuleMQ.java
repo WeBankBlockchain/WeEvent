@@ -499,8 +499,10 @@ public class CEPRuleMQ {
                 }
                 // check the expression ,if match then true
                 log.info("condition:{}", condition);
-                if (rule.getSystemFunctionMessage().length != 0) {
-                    condition = CommonUtil.analysisSystemFunction(systemFunctionMessage, payload, condition);
+                if (null != rule.getSystemFunctionMessage()) {
+                    if (0 != rule.getSystemFunctionMessage().length) {
+                        condition = CommonUtil.analysisSystemFunction(systemFunctionMessage, payload, condition);
+                    }
                 }
                 boolean checkFlag = (Boolean) jexl.createExpression(condition).evaluate(context);
                 log.info("payload:{},eventContent:{},condition:{},hit rule:{}", payload, eventContent, condition, checkFlag);
