@@ -73,25 +73,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
-/**
- * spring boot start test
- *
- * @since 2018/12/18
- */
-@Slf4j
-@SpringBootApplication
-@EnableTransactionManagement
-public class GovernanceApplication {
-
-    public static void main(String[] args) throws Exception {
-        H2ServerUtil.startH2();
-        SpringApplication app = new SpringApplication(GovernanceApplication.class);
-        app.addListeners(new ApplicationPidFileWriter());
-        app.run(args);
-        log.info("Start Governance success");
-    }
-}
-
 
 @Configuration
 class WeeventConfiguration {
@@ -473,5 +454,24 @@ class HttpsClientRequestFactory extends SimpleClientHttpRequestFactory {
             ((SSLSocket) socket).setEnabledProtocols(new String[]{"TLSv1"});
             return socket;
         }
+    }
+}
+
+/**
+ * spring boot start test
+ *
+ * @since 2018/12/18
+ */
+@Slf4j
+@SpringBootApplication
+@EnableTransactionManagement
+public class GovernanceApplication {
+
+    public static void main(String[] args) throws Exception {
+        H2ServerUtil.startH2();
+        SpringApplication app = new SpringApplication(GovernanceApplication.class);
+        app.addListeners(new ApplicationPidFileWriter());
+        app.run(args);
+        log.info("Start Governance success");
     }
 }
