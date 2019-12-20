@@ -67,4 +67,19 @@ public class ConstantsHelper {
     public static final String TOPIC_NAME = "topicName";
     public static final String BROKER_ID = "brokerId";
     public static final String GROUP_ID = "groupId";
+    public static final String NOW = "now";
+    public static final String CURRENT_DATE = "currentDate";
+    public static final String CURRENT_TIME = "currentTime";
+
+
+    public static final String HIT_TIMES = "HIT_TIMES";
+    public static final String NOT_HIT_TIMES = "NOT_HIT_TIMES";
+
+    public static final String LAST_FAIL_REASON = "LAST_FAIL_REASON";
+    public static final String PUBLISH_EVENT_SUCCESS = "PUBLISH_EVENT_SUCCESS";
+    public static final String PUBLISH_EVENT_FAIL = "PUBLISH_EVENT_FAIL";
+
+    public static final String WRITE_DB_SUCCESS = "WRITE_DB_SUCCESS";
+    public static final String WRITE_DB_FAIL = "WRITE_DB_FAIL";
+    public static final String OTHER = "OTHER";
 }
