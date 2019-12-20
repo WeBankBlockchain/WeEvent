@@ -2,7 +2,9 @@ package com.webank.weevent.governance;
 
 import java.util.concurrent.TimeUnit;
 
+import org.junit.Assert;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TestName;
 import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
@@ -26,4 +28,9 @@ public class JUnitTestBase {
     public TestName testName = new TestName();
     @Rule
     public Timeout timeout = new Timeout(120, TimeUnit.SECONDS);
+
+    @Test
+    public void testBuild() {
+        Assert.assertTrue(true);
+    }
 }
