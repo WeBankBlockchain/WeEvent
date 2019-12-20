@@ -237,17 +237,18 @@ public class CommonUtil {
                 sql.put(key, eventContent.get(key).toString());
             }
             // set the flag
-            if (ConstantsHelper.EVENT_ID.equals(key)) {
-                eventIdFlag = true;
-            }
-            if (ConstantsHelper.TOPIC_NAME.equals(key)) {
-                topicNameFlag = true;
-            }
-            if (ConstantsHelper.BROKER_ID.equals(key)) {
-                brokerIdFlag = true;
-            }
-            if (ConstantsHelper.GROUP_ID.equals(key)) {
-                groupIdFlag = true;
+            switch (key) {
+                case ConstantsHelper.EVENT_ID:
+                    eventIdFlag = true;
+                case ConstantsHelper.TOPIC_NAME:
+                    topicNameFlag = true;
+                case ConstantsHelper.BROKER_ID:
+                    brokerIdFlag = true;
+                case ConstantsHelper.GROUP_ID:
+                    groupIdFlag = true;
+                default:
+                    break;
+
             }
         }
 
