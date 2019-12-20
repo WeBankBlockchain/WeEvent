@@ -7,7 +7,7 @@ ext{
     // spring
     spring5Version = "5.1.0.RELEASE"
     // data.spring-data-commons
-    springDataCommonsVersion = "2.2.0.RELEASE"
+    springDataCommonsVersion = "2.1.0.RELEASE"
 
     // ----- org.apache -----
     // zookeeper
@@ -49,14 +49,14 @@ ext{
     nettyVersion = "4.1.15.Final"
     // jsonrpc
     jsonrpc4jVersion = "1.5.3"
-    // redis
-    redisVersion = "3.0.0"
     // JMS
     jmsVersion = "1.1"
     // Jmock
     jmockVersion = "1.9"
     // mybatis-spring-boot-starter
     mybatisVersion = "1.3.2"
+    //h2
+    h2Version = "1.4.196"
     // mariadb-java-client
     mariadbClientVersion = "2.3.0"
     // jsoup
@@ -64,7 +64,7 @@ ext{
     // fastjson
     fastjsonVersion = "1.2.60"
     // quartz
-    quartzVersion = "2.2.1"
+    quartzVersion = "2.3.0"
     // Java-WebSocket
     WebSocketVersion = "1.4.0"
 }
