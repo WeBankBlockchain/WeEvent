@@ -240,12 +240,16 @@ public class CommonUtil {
             switch (key) {
                 case ConstantsHelper.EVENT_ID:
                     eventIdFlag = true;
+                    break;
                 case ConstantsHelper.TOPIC_NAME:
                     topicNameFlag = true;
+                    break;
                 case ConstantsHelper.BROKER_ID:
                     brokerIdFlag = true;
+                    break;
                 case ConstantsHelper.GROUP_ID:
                     groupIdFlag = true;
+                    break;
                 default:
                     break;
 
