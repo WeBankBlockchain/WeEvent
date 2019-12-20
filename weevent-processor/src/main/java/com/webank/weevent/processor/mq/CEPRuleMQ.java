@@ -185,7 +185,6 @@ public class CEPRuleMQ {
                                 type = handleOnEventOtherPattern(client, event, ruleMap);
                             }
                             statisticOrderType(type);
-                        } catch (JSONException e) {
                         } catch (Exception e) {
                             log.error(e.toString());
                         }
@@ -275,9 +274,8 @@ public class CEPRuleMQ {
                     }
                 }
             }
-        } catch (SQLException e) {
-            statisticWeEvent.getStatisticRuleMap().get(rule.getId()).setLastFailReason(e.toString());
         } catch (SQLException | IOException e) {
+            statisticWeEvent.getStatisticRuleMap().get(rule.getId()).setLastFailReason(e.toString());
             log.info(e.toString());
             return ConstantsHelper.LAST_FAIL_REASON;
         }
