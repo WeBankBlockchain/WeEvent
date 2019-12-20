@@ -68,7 +68,7 @@ ext {
     // Java-WebSocket
     WebSocketVersion = "1.4.0"
     // jackSon
-    jackSonVerion = "2.10.0";
+    jackSonVersion = "2.10.0";
 }
 
 buildscript {

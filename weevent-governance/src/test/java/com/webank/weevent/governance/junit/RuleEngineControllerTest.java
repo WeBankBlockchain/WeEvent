@@ -76,7 +76,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
         Object data = governanceResult.getData();
-        RuleEngineEntity engineEntity = JsonUtil.parseObject(data.toString(), RuleEngineEntity.class);
+        RuleEngineEntity engineEntity = JsonUtil.parseObject(JsonUtil.toJSONString(data), RuleEngineEntity.class);
         ruleMap.put("ruleId", engineEntity.getId());
         Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
     }

@@ -9,10 +9,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.util.encoders.Hex;
@@ -25,6 +29,7 @@ public final class DataTypeUtils {
 
     private static String STRING_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static Map<String, String> topicHashMap = new ConcurrentHashMap<>();
+    private static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     /**
      * encode eventId
@@ -142,7 +147,7 @@ public final class DataTypeUtils {
         }
 
         try {
-            return (Map<String, String>) JSON.parse(json);
+            return OBJECT_MAPPER.readValue(json, Map.class);
         } catch (Exception e) {
             log.error("parse extensions failed");
             return null;
@@ -178,4 +183,58 @@ public final class DataTypeUtils {
         return new SimpleDateFormat(STRING_DATE_FORMAT);
     }
 
+    /**
+     * convert object to String
+     * @param object
+     * @return json data
+     * @throws BrokerException
+     */
+    public static String object2Json(Object object) throws BrokerException {
+        try {
+            return OBJECT_MAPPER.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            log.error("convert object to String failed ", e);
+            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
+        }
+    }
+
+    /**
+     * convert jsonString to object
+     * @param jsonString json data
+     * @param valueType
+     * @param <T>
+     * @return Object
+     * @throws BrokerException
+     */
+    public static <T> T json2Object(String jsonString, Class<T> valueType) throws BrokerException {
+        try {
+            OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            return OBJECT_MAPPER.readValue(jsonString, valueType);
+        } catch (JsonProcessingException e) {
+            log.error("convert jsonString to object failed ", e);
+            throw new BrokerException(ErrorCode.JSON_DECODE_EXCEPTION);
+        }
+    }
+
+    /**
+     * convert jsonString to ListPage<T>
+     * @param jsonString json data
+     * @param tclass T which in ListPage<T>
+     * @param <T> ListPage
+     * @return ListPage<T>
+     * @throws BrokerException
+     */
+    public static <T> ListPage<T> json2ListPage(String jsonString, Class tclass) throws BrokerException {
+        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        JavaType javaType = OBJECT_MAPPER.getTypeFactory().constructParametricType(ListPage.class, tclass);
+        ListPage<T> listPage = null;
+        try {
+            listPage = OBJECT_MAPPER.readValue(jsonString, javaType);
+        } catch (JsonProcessingException e) {
+            log.error("convert jsonString to object failed ", e);
+            throw new BrokerException(ErrorCode.JSON_DECODE_EXCEPTION);
+        }
+
+        return listPage;
+    }
 }

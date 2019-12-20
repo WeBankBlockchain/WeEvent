@@ -24,9 +24,8 @@ dependencies {
 
 
     //jacksonCore
-    implementation("com.fasterxml.jackson.core:jackson-databind:${jackSonVerion}")
-    implementation("com.fasterxml.jackson.module:jackson-module-jaxb-annotations:${jackSonVerion}")
-    implementation("com.fasterxml.jackson.core:jackson-core:${jackSonVerion}")
+    implementation("com.fasterxml.jackson.core:jackson-databind:${jackSonVersion}")
+    implementation("com.fasterxml.jackson.core:jackson-core:${jackSonVersion}")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBoot2Version}")
 

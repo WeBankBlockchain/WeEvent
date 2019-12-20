@@ -51,6 +51,10 @@ dependencies {
     // fabric 1.4.4
     implementation("org.hyperledger.fabric-sdk-java:fabric-sdk-java:${fabricVersion}")
 
+    // JackSon
+    implementation("com.fasterxml.jackson.core:jackson-databind:${jackSonVersion}")
+    implementation("com.fasterxml.jackson.core:jackson-core:${jackSonVersion}")
+
     // depend project
     implementation project(path: ":weevent-client")
 
