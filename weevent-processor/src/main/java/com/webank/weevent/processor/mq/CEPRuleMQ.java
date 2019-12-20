@@ -317,8 +317,8 @@ public class CEPRuleMQ {
         }
 
 
-        log.debug("client:{}group:{},client:brokerUrl:{},rule:brokerUr{}", subscriptionClientMap.get(subscriptionIdMap.get(entry.getValue().getId())).equals(client), clientGroupMap.get(client).getValue().equals(entry.getValue().getGroupId()), clientGroupMap.get(client).getKey(), CommonUtil.urlPage(entry.getValue().getBrokerUrl()));
-        // check the broker and groupid
+        log.debug("client:{},group:{},client:brokerUrl:{},rule:brokerUr{}", subscriptionClientMap.get(subscriptionIdMap.get(entry.getValue().getId())).equals(client), clientGroupMap.get(client).getValue().equals(entry.getValue().getGroupId()), clientGroupMap.get(client).getKey(), CommonUtil.urlPage(entry.getValue().getBrokerUrl()));
+        // check the broker and group id
         return (!(subscriptionClientMap.get(subscriptionIdMap.get(entry.getValue().getId())).equals(client) && clientGroupMap.get(client).getValue().equals(entry.getValue().getGroupId()) && clientGroupMap.get(client).getKey().equals(CommonUtil.urlPage(entry.getValue().getBrokerUrl()))));
 
     }
@@ -330,7 +330,7 @@ public class CEPRuleMQ {
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
             StatisticRule rule = statisticWeEvent.getStatisticRuleMap().get(entry.getValue().getId());
 
-            // che the parameter
+            // check the parameter
             if (checkTheInput(entry, client)) {
                 continue;
             }
@@ -409,6 +409,7 @@ public class CEPRuleMQ {
                 }
             }
         }
+
         // get all fields
         String[] result = selectField.split(",");
         // event content must contain the select message
