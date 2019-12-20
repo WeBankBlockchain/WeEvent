@@ -162,10 +162,6 @@ public class CEPRuleController {
         return quartzManager.addModifyJob(id, "rule", "rule", "rule-trigger", CRUDJobs.class, jobmap);
     }
 
-    private CEPRule getRuleById(String id) {
-        return quartzManager.selectJobById(id);
-    }
-
     private RetCode deleteJob(String id) {
         return quartzManager.removeJob(id, "rule", "rule", "rule-trigger");
 
