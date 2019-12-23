@@ -2,21 +2,29 @@ package com.webank.weevent.processor.utils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.processor.ProcessorApplication;
+import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.sdk.WeEvent;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.util.StringUtils;
+
 
 @Slf4j
 public class CommonUtil {
@@ -68,39 +76,39 @@ public class CommonUtil {
             page = arrSplit[0];
         }
 
-        return page;
-    }
+                return page;
+            }
 
 
-    private static String truncateUrlPage(String strURL) {
-        String strAllParam = null;
-        String[] arrSplit = strURL.split("[?]");
-        if ((strURL.length() > 1) && (arrSplit.length) > 1 && (arrSplit[1] != null)) {
-            strAllParam = arrSplit[1];
-        }
+            private static String truncateUrlPage(String strURL) {
+                String strAllParam = null;
+                String[] arrSplit = strURL.split("[?]");
+                if ((strURL.length() > 1) && (arrSplit.length) > 1 && (arrSplit[1] != null)) {
+                    strAllParam = arrSplit[1];
+                }
 
-        return strAllParam;
-    }
+                return strAllParam;
+            }
 
 
-    public static Map<String, String> uRLRequest(String URL) {
-        Map<String, String> mapRequest = new HashMap<String, String>();
+            public static Map<String, String> uRLRequest(String URL) {
+                Map<String, String> mapRequest = new HashMap<String, String>();
 
-        String[] arrSplit = null;
+                String[] arrSplit = null;
 
-        String strUrlParam = truncateUrlPage(URL);
-        if (strUrlParam == null) {
-            return mapRequest;
-        }
-        arrSplit = strUrlParam.split("[&]");
-        for (String strSplit : arrSplit) {
-            String[] arrSplitEqual = null;
-            arrSplitEqual = strSplit.split("[=]");
+                String strUrlParam = truncateUrlPage(URL);
+                if (strUrlParam == null) {
+                    return mapRequest;
+                }
+                arrSplit = strUrlParam.split("[&]");
+                for (String strSplit : arrSplit) {
+                    String[] arrSplitEqual = null;
+                    arrSplitEqual = strSplit.split("[=]");
 
-            if (arrSplitEqual.length > 1) {
-                mapRequest.put(arrSplitEqual[0], arrSplitEqual[1]);
+                    if (arrSplitEqual.length > 1) {
+                        mapRequest.put(arrSplitEqual[0], arrSplitEqual[1]);
 
-            } else {
+                    } else {
                 if (!arrSplitEqual[0].equals("")) {
                     mapRequest.put(arrSplitEqual[0], "");
                 }
@@ -156,7 +164,6 @@ public class CommonUtil {
             List<String> objJsonKeys = getKeys(objJson);
 
             for (String contentKey : contentKeys) {
-
                 if (!((objJsonKeys.contains(contentKey)) || "eventId".equals(contentKey))) {
                     tag = false;
                     break;
@@ -167,6 +174,12 @@ public class CommonUtil {
         return tag;
     }
 
+    /**
+     * get map all key
+     *
+     * @param map map
+     * @return key list
+     */
     public static List<String> getAllKey(Map<String, String> map) {
         List<String> keys = new ArrayList<>();
         Iterator it = map.entrySet().iterator();
@@ -242,33 +255,81 @@ public class CommonUtil {
         return sqlOrder;
     }
 
+    public static Map<String, Boolean> setFlag(Map<String, Boolean> map, String key) {
+        // set the flag
+        if (ConstantsHelper.EVENT_ID.equals(key)) {
+            map.put(ConstantsHelper.EVENT_ID, true);
+        }
+        if (ConstantsHelper.TOPIC_NAME.equals(key)) {
+            map.put(ConstantsHelper.TOPIC_NAME, true);
+        }
+        if (ConstantsHelper.BROKER_ID.equals(key)) {
+            map.put(ConstantsHelper.BROKER_ID, true);
+        }
+        if (ConstantsHelper.GROUP_ID.equals(key)) {
+            map.put(ConstantsHelper.GROUP_ID, true);
+        }
+        if (ConstantsHelper.NOW.equals(key)) {
+            map.put(ConstantsHelper.NOW, true);
+        }
+        if (ConstantsHelper.CURRENT_DATE.equals(key)) {
+            map.put(ConstantsHelper.CURRENT_DATE, true);
+        }
+        if (ConstantsHelper.CURRENT_TIME.equals(key)) {
+            map.put(ConstantsHelper.CURRENT_TIME, true);
+        }
+        return map;
+    }
+
+    public static Map<String, String> contactSqlAccordingOrder(Map<String, Boolean> map, Map<String, String> sqlOrder, String brokerId, String groupId, String eventId, String topicName) {
+        // set the flag
+        for (Map.Entry<String, Boolean> entry : map.entrySet()) {
+            // if true,then add it
+            if (entry.getValue()) {
+                if (ConstantsHelper.EVENT_ID.equals(entry.getKey())) {
+                    sqlOrder.put(ConstantsHelper.EVENT_ID, eventId);
+                }
+                if (ConstantsHelper.TOPIC_NAME.equals(entry.getKey())) {
+                    sqlOrder.put(ConstantsHelper.TOPIC_NAME, topicName);
+                }
+                if (ConstantsHelper.BROKER_ID.equals(entry.getKey())) {
+                    sqlOrder.put(ConstantsHelper.BROKER_ID, brokerId);
+                }
+                if (ConstantsHelper.GROUP_ID.equals(entry.getKey())) {
+                    sqlOrder.put(ConstantsHelper.GROUP_ID, groupId);
+                }
+                if (ConstantsHelper.NOW.equals(entry.getKey())) {
+                    sqlOrder.put(ConstantsHelper.NOW, String.valueOf(new Date().getTime()));
+                }
+                if (ConstantsHelper.CURRENT_TIME.equals(entry.getKey())) {
+                    Date date = new Date();
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                    sqlOrder.put(ConstantsHelper.CURRENT_TIME, sdf.format(date));
+                }
+                if (ConstantsHelper.CURRENT_DATE.equals(entry.getKey())) {
+                    Date date = new Date();
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+                    sqlOrder.put(ConstantsHelper.CURRENT_DATE, sdf.format(date));
+                }
+            }
+        }
+        return sqlOrder;
+    }
+
+
     private static Map<String, String> generateSqlOrder(String brokerId, String groupId, String eventId, String topicName, List<String> result, JSONObject eventContent, JSONObject table) {
         Map<String, String> sql = new HashMap<>();
         Map<String, String> sqlOrder = new HashMap<>();
-        boolean eventIdFlag = false;
-        boolean topicNameFlag = false;
-        boolean brokerIdFlag = false;
-        boolean groupIdFlag = false;
+        // <key-->flag>
+        LinkedHashMap<String, Boolean> tags = new LinkedHashMap<>();
 
-        // get all select field and value, and the select field must in eventContent.
+        // get all select field and value, and the select field must in eventContent, except the system parameter.
         for (String key : result) {
             sql.put(key, null);
             if (eventContent.containsKey(key)) {
                 sql.put(key, eventContent.get(key).toString());
             }
-            // set the flag
-            if (ConstantsHelper.EVENT_ID.equals(key)) {
-                eventIdFlag = true;
-            }
-            if (ConstantsHelper.TOPIC_NAME.equals(key)) {
-                topicNameFlag = true;
-            }
-            if (ConstantsHelper.BROKER_ID.equals(key)) {
-                brokerIdFlag = true;
-            }
-            if (ConstantsHelper.GROUP_ID.equals(key)) {
-                groupIdFlag = true;
-            }
+            setFlag(tags, key);
         }
 
         // keep the right order
@@ -280,23 +341,157 @@ public class CommonUtil {
             }
         }
 
-        // if user need eventId, add the event id
-        if (eventIdFlag) {
-            sqlOrder.put(ConstantsHelper.EVENT_ID, eventId);
-        }
-        if (topicNameFlag) {
-            sqlOrder.put(ConstantsHelper.TOPIC_NAME, topicName);
-        }
-        if (brokerIdFlag) {
-            sqlOrder.put(ConstantsHelper.BROKER_ID, brokerId);
-        }
-        if (groupIdFlag) {
-            sqlOrder.put(ConstantsHelper.GROUP_ID, groupId);
-        }
+        // add the system parameter
+        sqlOrder = contactSqlAccordingOrder(tags, sqlOrder, brokerId, groupId, eventId, topicName);
+
         return sqlOrder;
     }
 
-}
+    public static boolean compareMessage(CEPRule rule, List<CEPRule> ruleList) {
+        for (int i = 0; i < ruleList.size(); i++) {
+            if (ruleList.get(i).getId().equals(rule.getId())) {
+                return ruleList.get(i).getFromDestination().equals(rule.getFromDestination());
+            }
 
+        }
+        return false;
+    }
+
+
+    /**
+     * count the position, for version 1.2 abs��ceil��floor��round
+     *
+     * @param conditionField original condition message
+     * @param sb condition buffer
+     * @return amount
+     */
+    private static int changePosition(String conditionField, String sb) {
+        int changePosition = 0;
+        if (conditionField.length() > sb.length()) {
+            changePosition = conditionField.length() - sb.length();
+        }
+        return changePosition;
+    }
+
+    public static String[][] stringConvertArray(String s) {
+        String[] s1 = s.replaceAll("],", "]#").split("#");
+        String[][] arr = new String[s1.length][];
+        for (int i = 0; i < arr.length; i++) {
+            String[] s2 = s1[i].split(",");
+            arr[i] = new String[s2.length];
+            for (int j = 0; j < s2.length; j++) {
+                arr[i][j] = s2[j].replaceAll("\\[|\\]", "").replace("\"", "").trim();
+            }
+        }
+        return arr;
+    }
+
+    public static String analysisSystemFunction(String[][] systemFunctionMessage, String payload, String conditionField) {
+        Map maps = (Map) JSON.parse(payload);
+        Map<String, Object> payloadMap = new ConcurrentHashMap<>();
+        for (Object map : maps.entrySet()) {
+            System.out.println(((Map.Entry) map).getKey() + "     " + ((Map.Entry) map).getValue());
+            payloadMap.put((String) ((Map.Entry) map).getKey(), ((Map.Entry) map).getValue());
+        }
+        return replaceCondition(systemFunctionMessage, conditionField, payloadMap);
+    }
+
+
+    /**
+     * @param arr enhance function message
+     * @param conditionField original condition details
+     * @param payload payload
+     * @return condition
+     */
+    public static String replaceCondition(String[][] arr, String conditionField, Map payload) {
+        StringBuilder sb = new StringBuilder(conditionField);
+        int changePosition = 0;
+
+        for (int i = 0; i < arr.length; i++) {
+            String type = arr[i][2];
+            // end position
+            // int endPosition = Math.addExact(Math.addExact(Integer.valueOf(arr[i][0]), arr[i][1].length()), arr[i][3].length()) + 2;
+            String[] strArray;
+            String left = arr[i][3], middle = "", right = "";
+
+            if (arr[i].length == 5) {
+                left = arr[i][3];
+                right = arr[i][4];
+            } else if (arr[i].length == 6) { // multi parameter
+                left = arr[i][3];
+                middle = arr[i][4];
+                right = arr[i][5];
+            }
+
+            String replaceContent = "";
+            switch (type) {
+                case "abs":
+                    sb.replace(Integer.valueOf(arr[i][0]), Integer.valueOf(arr[i][1]), String.valueOf(Math.abs((Integer) payload.get(arr[i][3]))));
+                    changePosition = changePosition(conditionField, sb.toString());
+
+                    break;
+
+                case "ceil":
+
+                    sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, String.valueOf(Math.ceil((Integer) payload.get(arr[i][3]))));
+                    changePosition = changePosition(conditionField, sb.toString());
+
+                    break;
+
+                case "floor":
+                    log.info("sb:{}", sb);
+                    //  String test = "10<21 and c>10 or 1111==\"1111\" and floor(b)>10";
+
+                    //new StringBuilder(test).replace(34, 44, "10");
+                    sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, String.valueOf(Math.floor((Integer) payload.get(arr[i][3]))));
+                    changePosition = changePosition(conditionField, sb.toString());
+
+                    break;
+
+                case "round":
+
+                    sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, String.valueOf(Math.round(Math.round((Integer) payload.get(arr[i][3])))));
+                    changePosition = changePosition(conditionField, sb.toString());
+
+                    break;
+                case "substring":
+                    if (!"".equals(middle)) {
+                        replaceContent = "\"" + payload.get(left).toString().substring(Integer.valueOf(middle), Integer.valueOf(right)) + "\"";
+                        sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, replaceContent);
+                    } else {
+                        replaceContent = "\"" + payload.get(left).toString().substring(Integer.valueOf(right)) + "\"";
+                        sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, replaceContent);
+                    }
+
+                    changePosition = changePosition(conditionField, sb.toString());
+
+                    break;
+                case "concat":
+                    replaceContent = "\"" + payload.get(left).toString().concat(payload.get(right).toString()) + "\"";
+                    sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, replaceContent);
+                    changePosition = changePosition(conditionField, sb.toString());
+
+                    break;
+                case "trim":
+                    replaceContent = "\"" + payload.get(left).toString().trim() + "\"";
+                    sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, replaceContent);
+                    changePosition = changePosition(conditionField, sb.toString());
+
+                    break;
+                case "lcase":
+                    replaceContent = "\"" + payload.get(left).toString().toLowerCase() + "\"";
+                    sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, replaceContent);
+                    changePosition = changePosition(conditionField, sb.toString());
+
+                    break;
+                default:
+                    log.info("conditionField:{}", conditionField);
+            }
+        }
+        log.info("sb:{}", sb);
+        return sb.toString();
+
+    }
+}
 
 

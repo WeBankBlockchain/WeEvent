@@ -481,7 +481,7 @@ public class CEPRuleMQ {
         // String payload, WeEvent eventMessage, String condition
         String payload = rule.getPayload();
         String condition = rule.getConditionField();
-        String[][] systemFunctionMessage = rule.getSystemFunctionMessage();
+        String[][] systemFunctionMessage = CommonUtil.stringConvertArray(rule.getSystemFunctionMessage());
         try {
             String eventContent = new String(eventMessage.getContent());
             // all parameter must be the same
@@ -499,11 +499,13 @@ public class CEPRuleMQ {
                 }
                 // check the expression ,if match then true
                 log.info("condition:{}", condition);
-                if (null != rule.getSystemFunctionMessage()) {
-                    if (0 != rule.getSystemFunctionMessage().length) {
-                        condition = CommonUtil.analysisSystemFunction(systemFunctionMessage, payload, condition);
+                if (!StringUtils.isEmpty(rule.getSystemFunctionMessage())) {
+                    String[][] systemFunctionDetail = CommonUtil.stringConvertArray(rule.getSystemFunctionMessage());
+                    if (0 != systemFunctionDetail.length) {
+                        condition = CommonUtil.analysisSystemFunction(systemFunctionMessage, eventContent, condition);
                     }
                 }
+
                 boolean checkFlag = (Boolean) jexl.createExpression(condition).evaluate(context);
                 log.info("payload:{},eventContent:{},condition:{},hit rule:{}", payload, eventContent, condition, checkFlag);
                 return checkFlag;
