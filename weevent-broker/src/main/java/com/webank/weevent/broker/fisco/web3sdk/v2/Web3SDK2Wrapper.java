@@ -669,17 +669,16 @@ public class Web3SDK2Wrapper {
             // get blockNum from each nodes
             Map<String, Map<String, String>> nodeBlockNums = getBlockNums(web3j);
 
-            sealerList.forEach(sealerNodeId -> {
+            for (String sealerNodeId : sealerList) {
                 TbNode tbNode = generateTbNode(nodeViews, nodeBlockNums, sealerNodeId, nodeIds);
                 tbNode.setNodeType(WeEventConstants.NODE_TYPE_SEALER);
                 tbNodes.add(tbNode);
-            });
-            observerList.forEach(observerNodeId -> {
+            }
+            for (String observerNodeId : observerList) {
                 TbNode tbNode = generateTbNode(nodeViews, nodeBlockNums, observerNodeId, nodeIds);
                 tbNode.setNodeType(WeEventConstants.NODE_TYPE_OBSERVER);
                 tbNodes.add(tbNode);
-            });
-
+            }
 
             tbNodeListPage.setPageData(tbNodes);
             tbNodeListPage.setTotal(tbNodes.size());

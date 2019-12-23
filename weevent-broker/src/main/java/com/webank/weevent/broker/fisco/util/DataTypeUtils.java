@@ -13,10 +13,12 @@ import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.MapLikeType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.util.encoders.Hex;
@@ -30,7 +32,12 @@ public final class DataTypeUtils {
     private static String STRING_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static Map<String, String> topicHashMap = new ConcurrentHashMap<>();
     private static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
+    static {
+        // Include.NON_NULL Property is NULL and not serialized
+        OBJECT_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        //Do not convert inconsistent fields
+        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
     /**
      * encode eventId
      *
@@ -140,14 +147,13 @@ public final class DataTypeUtils {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static Map<String, String> json2Map(String json) {
         if (StringUtils.isBlank(json)) {
             return null;
         }
-
         try {
-            return OBJECT_MAPPER.readValue(json, Map.class);
+            MapLikeType mapLikeType = OBJECT_MAPPER.getTypeFactory().constructMapLikeType(Map.class, String.class, String.class);
+            return OBJECT_MAPPER.readValue(json, mapLikeType);
         } catch (Exception e) {
             log.error("parse extensions failed");
             return null;

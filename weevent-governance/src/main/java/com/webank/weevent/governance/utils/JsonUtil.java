@@ -2,6 +2,7 @@ package com.webank.weevent.governance.utils;
 
 import java.io.IOException;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,10 +14,18 @@ import org.springframework.util.Assert;
 public class JsonUtil {
 
 
+    private static ObjectMapper objectMapper = new ObjectMapper();
+
+    static {
+        // Include.NON_NULL Property is NULL and not serialized
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        //Do not convert inconsistent fields
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
+
     public static <T> String toJSONString(T data) throws IOException {
         Assert.notNull(data, "data is null");
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.writeValueAsString(data);
         } catch (JsonProcessingException e) {
             log.error("conversion of Json failed", e);
@@ -27,8 +36,6 @@ public class JsonUtil {
     public static <T> T parseObject(String data, Class<T> tClass) throws IOException {
         Assert.hasText(data, "data without text");
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             return objectMapper.readValue(data, tClass);
         } catch (JsonProcessingException e) {
             log.error("conversion of Json failed", e);

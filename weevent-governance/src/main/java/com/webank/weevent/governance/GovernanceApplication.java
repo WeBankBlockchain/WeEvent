@@ -21,6 +21,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import com.webank.weevent.governance.filter.ForwardBrokerFilter;
+import com.webank.weevent.governance.filter.ForwardProcessorFilter;
 import com.webank.weevent.governance.filter.ForwardWebaseFilter;
 import com.webank.weevent.governance.filter.UserAuthFilter;
 import com.webank.weevent.governance.filter.XssFilter;
@@ -56,7 +57,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -384,8 +384,6 @@ class HttpsClientRequestFactory extends SimpleClientHttpRequestFactory {
 @EnableTransactionManagement
 public class GovernanceApplication {
 
-    @Autowired
-    private ApplicationContext applicationContext;
 
     public static void main(String[] args) throws Exception {
         H2ServerUtil.startH2();
@@ -427,6 +425,9 @@ public class GovernanceApplication {
 
     @Autowired
     private UserAuthFilter userAuthFilter;
+
+    @Autowired
+    private ForwardProcessorFilter forwardProcessorFilter;
 
     @Bean
     public ClientHttpRequestFactory httpsClientRequestFactory() {
@@ -483,5 +484,17 @@ public class GovernanceApplication {
         filterRegistrationBean.addUrlPatterns("/weevent-governance/webase-node-mgr/*");
         return filterRegistrationBean;
     }
+
+
+    @Bean
+    public FilterRegistrationBean<ForwardProcessorFilter> forwardProcessorRegistrationBean() {
+        FilterRegistrationBean<ForwardProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+        filterRegistrationBean.setFilter(forwardProcessorFilter);
+        filterRegistrationBean.setOrder(5);
+        filterRegistrationBean.setEnabled(true);
+        filterRegistrationBean.addUrlPatterns("/weevent-governance/processor/*");
+        return filterRegistrationBean;
+    }
+
 
 }
