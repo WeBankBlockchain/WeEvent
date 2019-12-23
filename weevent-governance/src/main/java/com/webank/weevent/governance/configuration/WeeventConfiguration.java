@@ -1,5 +1,6 @@
 package com.webank.weevent.governance.configuration;
 
+import com.webank.weevent.governance.filter.ForwardProcessorFilter;
 import com.webank.weevent.governance.filter.ForwardWebaseFilter;
 import com.webank.weevent.governance.filter.UserAuthFilter;
 import com.webank.weevent.governance.filter.ForwardBrokerFilter;
@@ -29,6 +30,9 @@ public class WeeventConfiguration {
 
     @Autowired
     private ForwardWebaseFilter forwardWebaseFilter;
+
+    @Autowired
+    private ForwardProcessorFilter forwardProcessorFilter;
 
     @Autowired
     private UserAuthFilter userAuthFilter;
@@ -86,6 +90,16 @@ public class WeeventConfiguration {
         filterRegistrationBean.setOrder(4);
         filterRegistrationBean.setEnabled(true);
         filterRegistrationBean.addUrlPatterns("/weevent-governance/webase-node-mgr/*");
+        return filterRegistrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<ForwardProcessorFilter> forwardProcessorRegistrationBean() {
+        FilterRegistrationBean<ForwardProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+        filterRegistrationBean.setFilter(forwardProcessorFilter);
+        filterRegistrationBean.setOrder(5);
+        filterRegistrationBean.setEnabled(true);
+        filterRegistrationBean.addUrlPatterns("/weevent-governance/processor/*");
         return filterRegistrationBean;
     }
 
