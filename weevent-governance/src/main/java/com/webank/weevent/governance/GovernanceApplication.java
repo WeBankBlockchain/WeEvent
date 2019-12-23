@@ -75,6 +75,249 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
 
+/**
+ * spring boot start test
+ *
+ * @since 2018/12/18
+ */
+@Slf4j
+@SpringBootApplication
+@EnableWebSecurity
+@EnableTransactionManagement
+public class GovernanceApplication {
+
+
+    public static void main(String[] args) throws Exception {
+        H2ServerUtil.startH2();
+        SpringApplication app = new SpringApplication(GovernanceApplication.class);
+        app.addListeners(new ApplicationPidFileWriter());
+        app.run(args);
+        log.info("Start Governance success");
+    }
+
+    public GovernanceApplication() {
+        cm = new PoolingHttpClientConnectionManager();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public BrowerSecurityConfig initBrowerSecurityConfig() {
+        return new BrowerSecurityConfig();
+    }
+
+    @Bean
+    public HttpsClientRequestFactory initHttpsClientRequestFactory() {
+        return new HttpsClientRequestFactory();
+    }
+
+
+    //WeeventConfiguration
+    @Value("${https.read-timeout:3000}")
+    private int readTimeout;
+
+    @Value("${https.connect-timeout:3000}")
+    private int connectTimeOut;
+
+    @Autowired
+    private ForwardBrokerFilter forwardBrokerFilter;
+
+    @Autowired
+    private ForwardWebaseFilter forwardWebaseFilter;
+
+    @Autowired
+    private UserAuthFilter userAuthFilter;
+
+    @Autowired
+    private ForwardProcessorFilter forwardProcessorFilter;
+
+    @Bean
+    public ClientHttpRequestFactory httpsClientRequestFactory() {
+        HttpsClientRequestFactory factory = new HttpsClientRequestFactory();
+        factory.setReadTimeout(readTimeout);// ms
+        factory.setConnectTimeout(connectTimeOut);// ms
+        return factory;
+    }
+
+    @Bean
+    public ServletRegistrationBean<DispatcherServlet> weeventGovernanceServletBean(WebApplicationContext wac) {
+        DispatcherServlet ds = new DispatcherServlet(wac);
+        ServletRegistrationBean<DispatcherServlet> bean = new ServletRegistrationBean<>(ds, "/weevent-governance/*");
+        bean.setName("weeventGovernance");
+        return bean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<UserAuthFilter> userAuthFilterRegistrationBean() {
+        FilterRegistrationBean<UserAuthFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+        filterRegistrationBean.setFilter(userAuthFilter);
+        filterRegistrationBean.setOrder(1);
+        filterRegistrationBean.setEnabled(true);
+        filterRegistrationBean.addUrlPatterns("/weevent-governance/*");
+        return filterRegistrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<XssFilter> xssFilterRegistrationBean() {
+        FilterRegistrationBean<XssFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+        filterRegistrationBean.setFilter(new XssFilter());
+        filterRegistrationBean.setOrder(2);
+        filterRegistrationBean.setEnabled(true);
+        filterRegistrationBean.addUrlPatterns("/weevent-governance/topic/*");
+        return filterRegistrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<ForwardBrokerFilter> httpForwardFilterRegistrationBean() {
+        FilterRegistrationBean<ForwardBrokerFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+        filterRegistrationBean.setFilter(forwardBrokerFilter);
+        filterRegistrationBean.setOrder(3);
+        filterRegistrationBean.setEnabled(true);
+        filterRegistrationBean.addUrlPatterns("/weevent-governance/weevent/*");
+        return filterRegistrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<ForwardWebaseFilter> forwardWebaseFilterRegistrationBean() {
+        FilterRegistrationBean<ForwardWebaseFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+        filterRegistrationBean.setFilter(forwardWebaseFilter);
+        filterRegistrationBean.setOrder(4);
+        filterRegistrationBean.setEnabled(true);
+        filterRegistrationBean.addUrlPatterns("/weevent-governance/webase-node-mgr/*");
+        return filterRegistrationBean;
+    }
+
+
+    @Bean
+    public FilterRegistrationBean<ForwardProcessorFilter> forwardProcessorRegistrationBean() {
+        FilterRegistrationBean<ForwardProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+        filterRegistrationBean.setFilter(forwardProcessorFilter);
+        filterRegistrationBean.setOrder(5);
+        filterRegistrationBean.setEnabled(true);
+        filterRegistrationBean.addUrlPatterns("/weevent-governance/processor/*");
+        return filterRegistrationBean;
+    }
+
+
+    //connectionManager
+    // max connect
+    @Value("${http.client.max-total:200}")
+    private int maxTotal;
+
+    @Value("${http.client.max-per-route:500}")
+    private int maxPerRoute;
+
+    @Value("${http.client.connection-request-timeout:3000}")
+    private int connectionRequestTimeout;
+
+    @Value("${http.client.connection-timeout:3000}")
+    private int connectionTimeout;
+
+    @Value("${http.client.socket-timeout:5000}")
+    private int socketTimeout;
+
+    private PoolingHttpClientConnectionManager cm;
+
+    /**
+     * reconnet str
+     */
+    private HttpRequestRetryHandler retryHandler = (exception, executionCount, context) -> {
+        if (executionCount >= 3) {
+            // Do not retry if over max retry count
+            return false;
+        }
+        if (exception instanceof InterruptedIOException) {
+            // Timeout
+            return false;
+        }
+        if (exception instanceof UnknownHostException) {
+            // Unknown host
+            return false;
+        }
+        if (exception instanceof ConnectTimeoutException) {
+            // Connection refused
+            return false;
+        }
+        if (exception instanceof SSLException) {
+            // SSL handshake exception
+            return false;
+        }
+
+        HttpClientContext clientContext = HttpClientContext.adapt(context);
+        HttpRequest request = clientContext.getRequest();
+        return !(request instanceof HttpEntityEnclosingRequest);
+    };
+
+    /**
+     * config connect parameter
+     */
+    private RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(connectionRequestTimeout)
+            .setConnectTimeout(connectionTimeout).setSocketTimeout(socketTimeout).build();
+
+
+    @Scope("prototype")
+    @Bean("httpClient")
+    public CloseableHttpClient getHttpClient() {
+        cm.setMaxTotal(maxTotal);
+        cm.setDefaultMaxPerRoute(maxPerRoute);
+        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm)
+                .setDefaultRequestConfig(requestConfig).setRetryHandler(retryHandler).build();
+        return httpClient;
+    }
+
+    @Scope("prototype")
+    @Bean("httpsClient")
+    public CloseableHttpClient getHttpsClient() {
+        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+                .register("http", PlainConnectionSocketFactory.INSTANCE).register("https", trustAllHttpsCertificates())
+                .build();
+        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(
+                socketFactoryRegistry);
+        CloseableHttpClient httpsClient = HttpClients.custom().setConnectionManager(connectionManager)
+                .setDefaultRequestConfig(requestConfig).setRetryHandler(retryHandler).build();
+        return httpsClient;
+    }
+
+    private SSLConnectionSocketFactory trustAllHttpsCertificates() {
+        SSLConnectionSocketFactory socketFactory = null;
+        TrustManager[] trustAllCerts = new TrustManager[1];
+        TrustManager tm = null;
+        // TrustManager tm1 = this.miTM;
+        trustAllCerts[0] = tm;
+        SSLContext sc = null;
+        try {
+            sc = SSLContext.getInstance("TLS");// sc = SSLContext.getInstance("TLS")
+            sc.init(null, trustAllCerts, null);
+            socketFactory = new SSLConnectionSocketFactory(sc, NoopHostnameVerifier.INSTANCE);
+            // HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+            log.error(e.getMessage());
+        }
+        return socketFactory;
+    }
+
+    private class miTM implements TrustManager, X509TrustManager {
+
+        public X509Certificate[] getAcceptedIssuers() {
+            return null;
+        }
+
+        public void checkServerTrusted(X509Certificate[] certs, String authType) {
+            // don't check
+        }
+
+        public void checkClientTrusted(X509Certificate[] certs, String authType) {
+            // don't check
+        }
+    }
+
+
+}
+
+
 class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -138,128 +381,6 @@ class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailService).passwordEncoder(new BCryptPasswordEncoder());
-    }
-}
-
-/**
- * http connect pool cofigure
- */
-@Slf4j
-@Configuration
-class ConnectionManager {
-
-    // max connect
-    @Value("${http.client.max-total:200}")
-    private int maxTotal;
-
-    @Value("${http.client.max-per-route:500}")
-    private int maxPerRoute;
-
-    @Value("${http.client.connection-request-timeout:3000}")
-    private int connectionRequestTimeout;
-
-    @Value("${http.client.connection-timeout:3000}")
-    private int connectionTimeout;
-
-    @Value("${http.client.socket-timeout:5000}")
-    private int socketTimeout;
-
-    private PoolingHttpClientConnectionManager cm;
-
-    /**
-     * reconnet str
-     */
-    private HttpRequestRetryHandler retryHandler = (exception, executionCount, context) -> {
-        if (executionCount >= 3) {
-            // Do not retry if over max retry count
-            return false;
-        }
-        if (exception instanceof InterruptedIOException) {
-            // Timeout
-            return false;
-        }
-        if (exception instanceof UnknownHostException) {
-            // Unknown host
-            return false;
-        }
-        if (exception instanceof ConnectTimeoutException) {
-            // Connection refused
-            return false;
-        }
-        if (exception instanceof SSLException) {
-            // SSL handshake exception
-            return false;
-        }
-
-        HttpClientContext clientContext = HttpClientContext.adapt(context);
-        HttpRequest request = clientContext.getRequest();
-        return !(request instanceof HttpEntityEnclosingRequest);
-    };
-
-    /**
-     * config connect parameter
-     */
-    private RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(connectionRequestTimeout)
-            .setConnectTimeout(connectionTimeout).setSocketTimeout(socketTimeout).build();
-
-    public ConnectionManager() {
-        cm = new PoolingHttpClientConnectionManager();
-    }
-
-    @Scope("prototype")
-    @Bean("httpClient")
-    public CloseableHttpClient getHttpClient() {
-        cm.setMaxTotal(maxTotal);
-        cm.setDefaultMaxPerRoute(maxPerRoute);
-        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm)
-                .setDefaultRequestConfig(requestConfig).setRetryHandler(retryHandler).build();
-        return httpClient;
-    }
-
-    @Scope("prototype")
-    @Bean("httpsClient")
-    public CloseableHttpClient getHttpsClient() {
-        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-                .register("http", PlainConnectionSocketFactory.INSTANCE).register("https", trustAllHttpsCertificates())
-                .build();
-        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(
-                socketFactoryRegistry);
-        CloseableHttpClient httpsClient = HttpClients.custom().setConnectionManager(connectionManager)
-                .setDefaultRequestConfig(requestConfig).setRetryHandler(retryHandler).build();
-        return httpsClient;
-    }
-
-    private SSLConnectionSocketFactory trustAllHttpsCertificates() {
-        SSLConnectionSocketFactory socketFactory = null;
-        TrustManager[] trustAllCerts = new TrustManager[1];
-        TrustManager tm = null;
-        // TrustManager tm1 = this.miTM;
-        trustAllCerts[0] = tm;
-        SSLContext sc = null;
-        try {
-            sc = SSLContext.getInstance("TLS");// sc = SSLContext.getInstance("TLS")
-            sc.init(null, trustAllCerts, null);
-            socketFactory = new SSLConnectionSocketFactory(sc, NoopHostnameVerifier.INSTANCE);
-            // HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        } catch (NoSuchAlgorithmException | KeyManagementException e) {
-            log.error(e.getMessage());
-        }
-        return socketFactory;
-    }
-
-    private class miTM implements TrustManager, X509TrustManager {
-
-        public X509Certificate[] getAcceptedIssuers() {
-            return null;
-        }
-
-        public void checkServerTrusted(X509Certificate[] certs, String authType) {
-            // don't check
-        }
-
-        public void checkClientTrusted(X509Certificate[] certs, String authType) {
-            // don't check
-        }
     }
 }
 
@@ -373,128 +494,3 @@ class HttpsClientRequestFactory extends SimpleClientHttpRequestFactory {
     }
 }
 
-/**
- * spring boot start test
- *
- * @since 2018/12/18
- */
-@Slf4j
-@SpringBootApplication
-@EnableWebSecurity
-@EnableTransactionManagement
-public class GovernanceApplication {
-
-
-    public static void main(String[] args) throws Exception {
-        H2ServerUtil.startH2();
-        SpringApplication app = new SpringApplication(GovernanceApplication.class);
-        app.addListeners(new ApplicationPidFileWriter());
-        app.run(args);
-        log.info("Start Governance success");
-    }
-
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public BrowerSecurityConfig initBrowerSecurityConfig() {
-        return new BrowerSecurityConfig();
-    }
-
-    @Bean
-    public HttpsClientRequestFactory initHttpsClientRequestFactory() {
-        return new HttpsClientRequestFactory();
-    }
-
-
-    //WeeventConfiguration
-    @Value("${https.read-timeout:3000}")
-    private int readTimeout;
-
-    @Value("${https.connect-timeout:3000}")
-    private int connectTimeOut;
-
-    @Autowired
-    private ForwardBrokerFilter forwardBrokerFilter;
-
-    @Autowired
-    private ForwardWebaseFilter forwardWebaseFilter;
-
-    @Autowired
-    private UserAuthFilter userAuthFilter;
-
-    @Autowired
-    private ForwardProcessorFilter forwardProcessorFilter;
-
-    @Bean
-    public ClientHttpRequestFactory httpsClientRequestFactory() {
-        HttpsClientRequestFactory factory = new HttpsClientRequestFactory();
-        factory.setReadTimeout(readTimeout);// ms
-        factory.setConnectTimeout(connectTimeOut);// ms
-        return factory;
-    }
-
-    @Bean
-    public ServletRegistrationBean<DispatcherServlet> weeventGovernanceServletBean(WebApplicationContext wac) {
-        DispatcherServlet ds = new DispatcherServlet(wac);
-        ServletRegistrationBean<DispatcherServlet> bean = new ServletRegistrationBean<>(ds, "/weevent-governance/*");
-        bean.setName("weeventGovernance");
-        return bean;
-    }
-
-    @Bean
-    public FilterRegistrationBean<UserAuthFilter> userAuthFilterRegistrationBean() {
-        FilterRegistrationBean<UserAuthFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(userAuthFilter);
-        filterRegistrationBean.setOrder(1);
-        filterRegistrationBean.setEnabled(true);
-        filterRegistrationBean.addUrlPatterns("/weevent-governance/*");
-        return filterRegistrationBean;
-    }
-
-    @Bean
-    public FilterRegistrationBean<XssFilter> xssFilterRegistrationBean() {
-        FilterRegistrationBean<XssFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(new XssFilter());
-        filterRegistrationBean.setOrder(2);
-        filterRegistrationBean.setEnabled(true);
-        filterRegistrationBean.addUrlPatterns("/weevent-governance/topic/*");
-        return filterRegistrationBean;
-    }
-
-    @Bean
-    public FilterRegistrationBean<ForwardBrokerFilter> httpForwardFilterRegistrationBean() {
-        FilterRegistrationBean<ForwardBrokerFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(forwardBrokerFilter);
-        filterRegistrationBean.setOrder(3);
-        filterRegistrationBean.setEnabled(true);
-        filterRegistrationBean.addUrlPatterns("/weevent-governance/weevent/*");
-        return filterRegistrationBean;
-    }
-
-    @Bean
-    public FilterRegistrationBean<ForwardWebaseFilter> forwardWebaseFilterRegistrationBean() {
-        FilterRegistrationBean<ForwardWebaseFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(forwardWebaseFilter);
-        filterRegistrationBean.setOrder(4);
-        filterRegistrationBean.setEnabled(true);
-        filterRegistrationBean.addUrlPatterns("/weevent-governance/webase-node-mgr/*");
-        return filterRegistrationBean;
-    }
-
-
-    @Bean
-    public FilterRegistrationBean<ForwardProcessorFilter> forwardProcessorRegistrationBean() {
-        FilterRegistrationBean<ForwardProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(forwardProcessorFilter);
-        filterRegistrationBean.setOrder(5);
-        filterRegistrationBean.setEnabled(true);
-        filterRegistrationBean.addUrlPatterns("/weevent-governance/processor/*");
-        return filterRegistrationBean;
-    }
-
-
-}
