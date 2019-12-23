@@ -56,6 +56,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -74,84 +75,6 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
 
-@Configuration
-class WeeventConfiguration {
-
-    @Value("${https.read-timeout:3000}")
-    private int readTimeout;
-
-    @Value("${https.connect-timeout:3000}")
-    private int connectTimeOut;
-
-    @Autowired
-    private ForwardBrokerFilter forwardBrokerFilter;
-
-    @Autowired
-    private ForwardWebaseFilter forwardWebaseFilter;
-
-    @Autowired
-    private UserAuthFilter userAuthFilter;
-
-    @Bean
-    public ClientHttpRequestFactory httpsClientRequestFactory() {
-        HttpsClientRequestFactory factory = new HttpsClientRequestFactory();
-        factory.setReadTimeout(readTimeout);// ms
-        factory.setConnectTimeout(connectTimeOut);// ms
-        return factory;
-    }
-
-    @Bean
-    public ServletRegistrationBean<DispatcherServlet> weeventGovernanceServletBean(WebApplicationContext wac) {
-        DispatcherServlet ds = new DispatcherServlet(wac);
-        ServletRegistrationBean<DispatcherServlet> bean = new ServletRegistrationBean<>(ds, "/weevent-governance/*");
-        bean.setName("weeventGovernance");
-        return bean;
-    }
-
-    @Bean
-    public FilterRegistrationBean<UserAuthFilter> userAuthFilterRegistrationBean() {
-        FilterRegistrationBean<UserAuthFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(userAuthFilter);
-        filterRegistrationBean.setOrder(1);
-        filterRegistrationBean.setEnabled(true);
-        filterRegistrationBean.addUrlPatterns("/weevent-governance/*");
-        return filterRegistrationBean;
-    }
-
-    @Bean
-    public FilterRegistrationBean<XssFilter> xssFilterRegistrationBean() {
-        FilterRegistrationBean<XssFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(new XssFilter());
-        filterRegistrationBean.setOrder(2);
-        filterRegistrationBean.setEnabled(true);
-        filterRegistrationBean.addUrlPatterns("/weevent-governance/topic/*");
-        return filterRegistrationBean;
-    }
-
-    @Bean
-    public FilterRegistrationBean<ForwardBrokerFilter> httpForwardFilterRegistrationBean() {
-        FilterRegistrationBean<ForwardBrokerFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(forwardBrokerFilter);
-        filterRegistrationBean.setOrder(3);
-        filterRegistrationBean.setEnabled(true);
-        filterRegistrationBean.addUrlPatterns("/weevent-governance/weevent/*");
-        return filterRegistrationBean;
-    }
-
-    @Bean
-    public FilterRegistrationBean<ForwardWebaseFilter> forwardWebaseFilterRegistrationBean() {
-        FilterRegistrationBean<ForwardWebaseFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(forwardWebaseFilter);
-        filterRegistrationBean.setOrder(4);
-        filterRegistrationBean.setEnabled(true);
-        filterRegistrationBean.addUrlPatterns("/weevent-governance/webase-node-mgr/*");
-        return filterRegistrationBean;
-    }
-
-}
-
-@Configuration
-@EnableWebSecurity
 class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -206,11 +129,6 @@ class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll();
     }
 
-    // BrowerSecurityConfig
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 
     @Override
     public void configure(WebSecurity web) throws Exception {
@@ -219,15 +137,15 @@ class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailService).passwordEncoder(passwordEncoder());
+        auth.userDetailsService(userDetailService).passwordEncoder(new BCryptPasswordEncoder());
     }
 }
 
 /**
  * http connect pool cofigure
  */
-@Configuration
 @Slf4j
+@Configuration
 class ConnectionManager {
 
     // max connect
@@ -315,7 +233,7 @@ class ConnectionManager {
         SSLConnectionSocketFactory socketFactory = null;
         TrustManager[] trustAllCerts = new TrustManager[1];
         TrustManager tm = null;
-       // TrustManager tm1 = this.miTM;
+        // TrustManager tm1 = this.miTM;
         trustAllCerts[0] = tm;
         SSLContext sc = null;
         try {
@@ -323,9 +241,7 @@ class ConnectionManager {
             sc.init(null, trustAllCerts, null);
             socketFactory = new SSLConnectionSocketFactory(sc, NoopHostnameVerifier.INSTANCE);
             // HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        } catch (NoSuchAlgorithmException e) {
-            log.error(e.getMessage());
-        } catch (KeyManagementException e) {
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
             log.error(e.getMessage());
         }
         return socketFactory;
@@ -464,8 +380,12 @@ class HttpsClientRequestFactory extends SimpleClientHttpRequestFactory {
  */
 @Slf4j
 @SpringBootApplication
+@EnableWebSecurity
 @EnableTransactionManagement
 public class GovernanceApplication {
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     public static void main(String[] args) throws Exception {
         H2ServerUtil.startH2();
@@ -474,4 +394,94 @@ public class GovernanceApplication {
         app.run(args);
         log.info("Start Governance success");
     }
+
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public BrowerSecurityConfig initBrowerSecurityConfig() {
+        return new BrowerSecurityConfig();
+    }
+
+    @Bean
+    public HttpsClientRequestFactory initHttpsClientRequestFactory() {
+        return new HttpsClientRequestFactory();
+    }
+
+
+    //WeeventConfiguration
+    @Value("${https.read-timeout:3000}")
+    private int readTimeout;
+
+    @Value("${https.connect-timeout:3000}")
+    private int connectTimeOut;
+
+    @Autowired
+    private ForwardBrokerFilter forwardBrokerFilter;
+
+    @Autowired
+    private ForwardWebaseFilter forwardWebaseFilter;
+
+    @Autowired
+    private UserAuthFilter userAuthFilter;
+
+    @Bean
+    public ClientHttpRequestFactory httpsClientRequestFactory() {
+        HttpsClientRequestFactory factory = new HttpsClientRequestFactory();
+        factory.setReadTimeout(readTimeout);// ms
+        factory.setConnectTimeout(connectTimeOut);// ms
+        return factory;
+    }
+
+    @Bean
+    public ServletRegistrationBean<DispatcherServlet> weeventGovernanceServletBean(WebApplicationContext wac) {
+        DispatcherServlet ds = new DispatcherServlet(wac);
+        ServletRegistrationBean<DispatcherServlet> bean = new ServletRegistrationBean<>(ds, "/weevent-governance/*");
+        bean.setName("weeventGovernance");
+        return bean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<UserAuthFilter> userAuthFilterRegistrationBean() {
+        FilterRegistrationBean<UserAuthFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+        filterRegistrationBean.setFilter(userAuthFilter);
+        filterRegistrationBean.setOrder(1);
+        filterRegistrationBean.setEnabled(true);
+        filterRegistrationBean.addUrlPatterns("/weevent-governance/*");
+        return filterRegistrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<XssFilter> xssFilterRegistrationBean() {
+        FilterRegistrationBean<XssFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+        filterRegistrationBean.setFilter(new XssFilter());
+        filterRegistrationBean.setOrder(2);
+        filterRegistrationBean.setEnabled(true);
+        filterRegistrationBean.addUrlPatterns("/weevent-governance/topic/*");
+        return filterRegistrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<ForwardBrokerFilter> httpForwardFilterRegistrationBean() {
+        FilterRegistrationBean<ForwardBrokerFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+        filterRegistrationBean.setFilter(forwardBrokerFilter);
+        filterRegistrationBean.setOrder(3);
+        filterRegistrationBean.setEnabled(true);
+        filterRegistrationBean.addUrlPatterns("/weevent-governance/weevent/*");
+        return filterRegistrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<ForwardWebaseFilter> forwardWebaseFilterRegistrationBean() {
+        FilterRegistrationBean<ForwardWebaseFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+        filterRegistrationBean.setFilter(forwardWebaseFilter);
+        filterRegistrationBean.setOrder(4);
+        filterRegistrationBean.setEnabled(true);
+        filterRegistrationBean.addUrlPatterns("/weevent-governance/webase-node-mgr/*");
+        return filterRegistrationBean;
+    }
+
 }
