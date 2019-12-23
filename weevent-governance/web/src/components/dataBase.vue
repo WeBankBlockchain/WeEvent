@@ -46,20 +46,14 @@
         <div class='JDBCTitle'><i>*</i> {{$t('rule.JDBCinfor')}}
          <el-button type='primary' size='small' @click='checkJDBC'>{{$t('rule.checkJDBC')}}</el-button>
         </div>
-        <el-form-item :label="$t('rule.JDBCIP')" prop='ip'>
-          <el-input v-model.trim="form.ip" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item :label="$t('rule.JDBCport')" prop='port'>
-          <el-input v-model.trim="form.port" autocomplete="off"></el-input>
+        <el-form-item :label="$t('rule.JDBCdatabaseUrl')" prop='databaseUrl'>
+          <el-input v-model.trim="form.databaseUrl"  autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item :label="$t('rule.JDBCusername')" prop='username'>
           <el-input v-model.trim="form.username"  autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item :label="$t('rule.JDBCpassword')" prop='password'>
           <el-input v-model.trim="form.password"  autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item :label="$t('rule.JDBCDatabaseName')" prop='databaseName'>
-          <el-input v-model.trim="form.databaseName" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item :label="$t('rule.optionalParameter')">
           <el-input v-model.trim="form.optionalParameter"  autocomplete="off"></el-input>
@@ -93,20 +87,6 @@ export default {
         callback()
       }
     }
-    var ip = (rule, value, callback) => {
-      if (value === '') {
-        callback(new Error(this.$t('rule.enterJDBCIP')))
-      } else {
-        callback()
-      }
-    }
-    var port = (rule, value, callback) => {
-      if (value === '') {
-        callback(new Error(this.$t('rule.enterJDBCport')))
-      } else {
-        callback()
-      }
-    }
     var username = (rule, value, callback) => {
       if (value === '') {
         callback(new Error(this.$t('rule.enterJDBCusername')))
@@ -121,9 +101,9 @@ export default {
         callback()
       }
     }
-    var databaseName = (rule, value, callback) => {
+    var databaseUrl = (rule, value, callback) => {
       if (value === '') {
-        callback(new Error(this.$t('rule.enterJDBCDatabaseName')))
+        callback(new Error(this.$t('rule.enterJDBCDatabaseUrl')))
       } else {
         callback()
       }
@@ -145,9 +125,7 @@ export default {
       title: this.$t('rule.addJDBCAddress'),
       form: {
         datasourceName: '',
-        databaseName: '',
-        ip: '',
-        port: '',
+        databaseUrl: '',
         username: '',
         password: '',
         tableName: '',
@@ -160,14 +138,8 @@ export default {
         datasourceName: [
           { required: true, validator: datasourceName, trigger: 'blur' }
         ],
-        databaseName: [
-          { required: true, validator: databaseName, trigger: 'blur' }
-        ],
-        ip: [
-          { required: true, validator: ip, trigger: 'blur' }
-        ],
-        port: [
-          { required: true, validator: port, trigger: 'blur' }
+        databaseUrl: [
+          { required: true, validator: databaseUrl, trigger: 'blur' }
         ],
         username: [
           { required: true, validator: username, trigger: 'blur' }
@@ -186,7 +158,7 @@ export default {
       if (!nVal) {
         let data = {
           datasourceName: '',
-          databaseName: '',
+          databaseUrl: '',
           ip: '',
           port: '',
           username: '',
@@ -225,9 +197,7 @@ export default {
       vm.$refs.form.validate((valid) => {
         let data = {
           'datasourceName': vm.form.datasourceName,
-          'databaseName': vm.form.databaseName,
-          'ip': vm.form.ip,
-          'port': vm.form.port,
+          'databaseUrl': vm.form.databaseUrl,
           'username': vm.form.username,
           'password': vm.form.password,
           'tableName': vm.form.tableName,
@@ -277,9 +247,7 @@ export default {
       this.showlog = true
       this.id = e.id
       this.form.datasourceName = e.datasourceName
-      this.form.databaseName = e.databaseName
-      this.form.ip = e.ip
-      this.form.port = e.port
+      this.form.databaseUrl = e.databaseUrl
       this.form.username = e.username
       this.form.password = e.password
       this.form.tableName = e.tableName
@@ -322,9 +290,7 @@ export default {
       vm.$refs.form.validate((valid) => {
         let data = {
           'datasourceName': vm.form.datasourceName,
-          'databaseName': vm.form.databaseName,
-          'ip': vm.form.ip,
-          'port': vm.form.port,
+          'databaseUrl': vm.form.databaseUrl,
           'username': vm.form.username,
           'password': vm.form.password,
           'tableName': vm.form.tableName,
