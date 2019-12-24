@@ -1,5 +1,6 @@
 package com.webank.weevent.robust.service;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 
@@ -23,7 +24,7 @@ public class MqttBridge implements MessageHandler {
         Map map = null;
         try {
             map = objectMapper.readValue(payload.toString(), Map.class);
-        } catch (JsonProcessingException e) {
+        } catch (IOException e) {
             log.error("json conversion failed",e);
             e.printStackTrace();
         }

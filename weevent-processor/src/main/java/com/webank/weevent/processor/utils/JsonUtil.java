@@ -56,13 +56,13 @@ public class JsonUtil {
     }
 
 
-    public static boolean isValid(String data) {
+    public static boolean isValid(String data)  {
         Assert.hasText(data, "data without text");
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.readTree(data);
             return true;
-        } catch (JsonProcessingException e) {
+        } catch (IOException e) {
             return false;
         }
     }

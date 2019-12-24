@@ -23,10 +23,6 @@ dependencies {
     implementation("org.apache.tomcat:tomcat-jdbc:${tomcatVersion}")
 
 
-    //jacksonCore
-    implementation("com.fasterxml.jackson.core:jackson-databind:${jackSonVersion}")
-    implementation("com.fasterxml.jackson.core:jackson-core:${jackSonVersion}")
-
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBoot2Version}")
 
     implementation("org.apache.commons:commons-pool2:${apacheCommonsVersion.pool2}")

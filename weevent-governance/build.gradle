@@ -23,10 +23,6 @@ dependencies {
     // jsoup
     implementation("org.jsoup:jsoup:${jsoupVersion}")
 
-    //jacksonCore
-    implementation("com.fasterxml.jackson.core:jackson-databind:${jackSonVersion}")
-    implementation("com.fasterxml.jackson.core:jackson-core:${jackSonVersion}")
-
     // forward backend
     implementation("org.apache.httpcomponents:httpclient:${httpclientVersion}")
 
