@@ -58,7 +58,6 @@ import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -278,7 +277,6 @@ public class GovernanceApplication {
      */
     private RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(connectionRequestTimeout)
             .setConnectTimeout(connectionTimeout).setSocketTimeout(socketTimeout).build();
-
 
 
     private SSLConnectionSocketFactory trustAllHttpsCertificates() {
