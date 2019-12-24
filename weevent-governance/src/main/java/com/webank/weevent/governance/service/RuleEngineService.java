@@ -753,7 +753,7 @@ public class RuleEngineService {
 
     public boolean checkProcessorExist(HttpServletRequest request) {
         try {
-            String payload = "{\\\"a\\\":1,\\\"b\\\":\\\"test\\\",\\\"c\\\":10}";
+            String payload = "{\"a\":\"1\",\"b\":\"test\",\"c\":\"10\"}";
             String condition = "\"c<100\"";
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_CHECK_WHERE_CONDITION)
                     .append(ConstantProperties.QUESTION_MARK).append("payload=").append(URLEncoder.encode(payload, "UTF-8"))
