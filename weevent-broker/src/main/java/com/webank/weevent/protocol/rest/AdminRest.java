@@ -9,6 +9,7 @@ import java.util.Map;
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.config.BuildInfo;
 import com.webank.weevent.broker.fisco.dto.ListPage;
+import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.util.SystemInfoUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
@@ -19,7 +20,6 @@ import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 
-import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,8 +114,8 @@ public class AdminRest extends RestHA {
                         log.info("url:{}", url);
 
                         ResponseEntity<String> rsp = rest.getForEntity(url, String.class);
-                        log.debug("innerListSubscription:{}", JSON.parse(rsp.getBody()));
-                        nodesInfo.put(nodeIp, JSON.parse(rsp.getBody()));
+                        log.debug("innerListSubscription:{}", DataTypeUtils.json2Object(rsp.getBody(), Object.class));
+                        nodesInfo.put(nodeIp, DataTypeUtils.json2Object(rsp.getBody(), Object.class));
                     }
                 }
             } catch (Exception e) {

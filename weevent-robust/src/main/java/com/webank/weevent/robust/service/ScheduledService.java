@@ -21,7 +21,7 @@ import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 
-import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -286,7 +286,14 @@ public class ScheduledService implements AutoCloseable {
                         if (topicSubscribeMap.get(EVENT_ID) != null && topicSubscribeMap.get(STOMP_TOPIC) != null) {
                             countTimes(stompReceiveMap, getFormatTime(new Date()));
                         }
-                        Map map = JSONObject.parseObject(payload.toString(), Map.class);
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        Map map = null;
+                        try {
+                            map = objectMapper.readValue(payload.toString(), Map.class);
+                        } catch (IOException e) {
+                            log.error("json conversion failed", e);
+                            e.printStackTrace();
+                        }
                         if (map.get(EVENT_ID) != null) {
                             String eventId = map.get("eventId").toString();
                             topicSubscribeMap.put(EVENT_ID, eventId);

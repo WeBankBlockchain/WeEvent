@@ -1,6 +1,6 @@
 println("Notice: current gradle version is " + gradle.gradleVersion + ", WeEvent support gradle version in [4.10, 5.0)")
 
-ext{
+ext {
     // ----- org.springframework -----
     // spring boot
     springBoot2Version = "2.1.0.RELEASE"
@@ -20,12 +20,12 @@ ext{
     tomcatVersion = "8.5.23"
     // commons
     apacheCommonsVersion = [
-            lang3 : "3.6",
-            jexl3 : "3.1",
-            pool2 : "2.7.0",
-            collections4 : "4.1",
-            dbcp2 : "2.6.0",
-            commonsIo : "2.4"
+            lang3       : "3.6",
+            jexl3       : "3.1",
+            pool2       : "2.7.0",
+            collections4: "4.1",
+            dbcp2       : "2.6.0",
+            commonsIo   : "2.4"
     ]
     // logging.log4j
     log4jVersion = "2.11.1"
@@ -34,8 +34,8 @@ ext{
 
     // org.fisco-bcos.web3sdk
     web3sdkVersion = [
-            fiscoV1 : "1.2.5",
-            fiscoV2 : "2.2.0.120500-SNAPSHOT"
+            fiscoV1: "1.2.5",
+            fiscoV2: "2.2.0.120500-SNAPSHOT"
     ]
     // fabric
     fabricVersion = "1.4.4"
