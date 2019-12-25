@@ -1,9 +1,11 @@
 package com.webank.weevent.governance.junit;
 
+import java.util.Map;
+
 import com.webank.weevent.governance.JUnitTestBase;
 import com.webank.weevent.governance.result.GovernanceResult;
+import com.webank.weevent.governance.utils.JsonUtil;
 
-import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.junit.After;
@@ -58,7 +60,7 @@ public class AccountControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/user/register").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(), GovernanceResult.class);
+        GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
         Assert.assertEquals("400", governanceResult.getStatus().toString());
     }
 
@@ -68,7 +70,7 @@ public class AccountControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/user/register").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(), GovernanceResult.class);
+        GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
         Assert.assertEquals("400", governanceResult.getStatus().toString());
     }
 
@@ -78,7 +80,7 @@ public class AccountControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/user/register").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(), GovernanceResult.class);
+        GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
         Assert.assertEquals("400", governanceResult.getStatus().toString());
     }
 
@@ -88,7 +90,7 @@ public class AccountControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/user/register").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(), GovernanceResult.class);
+        GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
         Assert.assertEquals("400", governanceResult.getStatus().toString());
     }
 
@@ -108,7 +110,7 @@ public class AccountControllerTest extends JUnitTestBase {
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/user/getUserId?username=zjy05").contentType(MediaType.APPLICATION_JSON_UTF8)).andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        JSONObject jsonObject = JSONObject.parseObject(response.getContentAsString());
+        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(), Map.class);
         Assert.assertNotNull(jsonObject);
         Assert.assertEquals(jsonObject.get("status").toString(), "200");
     }
@@ -121,7 +123,7 @@ public class AccountControllerTest extends JUnitTestBase {
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        JSONObject jsonObject = JSONObject.parseObject(response.getContentAsString());
+        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(), Map.class);
         Assert.assertNotNull(jsonObject);
         Assert.assertEquals(jsonObject.get("status").toString(), "200");
 
@@ -134,7 +136,7 @@ public class AccountControllerTest extends JUnitTestBase {
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(), GovernanceResult.class);
+        GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
         Assert.assertEquals("400", governanceResult.getStatus().toString());
     }
 
@@ -145,7 +147,7 @@ public class AccountControllerTest extends JUnitTestBase {
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(), GovernanceResult.class);
+        GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
         Assert.assertEquals("400", governanceResult.getStatus().toString());
     }
 
@@ -156,7 +158,7 @@ public class AccountControllerTest extends JUnitTestBase {
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(), GovernanceResult.class);
+        GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
         Assert.assertEquals("400", governanceResult.getStatus().toString());
     }
 
@@ -167,7 +169,7 @@ public class AccountControllerTest extends JUnitTestBase {
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        JSONObject jsonObject = JSONObject.parseObject(response.getContentAsString());
+        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(), Map.class);
         Assert.assertNotNull(jsonObject);
         Assert.assertEquals(jsonObject.get("status").toString(), "200");
     }

@@ -3,6 +3,7 @@ package com.webank.weevent.governance.service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,8 +23,8 @@ import com.webank.weevent.governance.repository.RuleEngineRepository;
 import com.webank.weevent.governance.repository.TopicRepository;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.utils.CookiesTools;
+import com.webank.weevent.governance.utils.JsonUtil;
 
-import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -290,12 +291,12 @@ public class BrokerService {
         // get one of broker urls
         headUrl = headUrl + afterUrl;
         HttpGet get = commonService.getMethod(headUrl, request);
-        JSONObject jsonObject;
+        Map jsonObject;
 
         try {
             CloseableHttpResponse response = client.execute(get);
             String responseResult = EntityUtils.toString(response.getEntity());
-            jsonObject = JSONObject.parseObject(responseResult);
+            jsonObject = JsonUtil.parseObject(responseResult, Map.class);
         } catch (Exception e) {
             log.error("url {}, connect fail,error:{}", headUrl, e.getMessage());
             throw new GovernanceException("url:{}" + headUrl + " connect fail", e);
@@ -312,8 +313,8 @@ public class BrokerService {
         try {
             CloseableHttpResponse versionResponse = commonService.getCloseResponse(request, versionUrl);
             String mes = EntityUtils.toString(versionResponse.getEntity());
-            JSONObject jsonObject = JSONObject.parseObject(mes);
-            return jsonObject.get("weEventVersion") == null ? null : jsonObject.get("weEventVersion").toString();
+            Map map = JsonUtil.parseObject(mes, Map.class);
+            return map.get("weEventVersion") == null ? null : map.get("weEventVersion").toString();
         } catch (Exception e) {
             log.error("get version fail,error:", e);
             throw new GovernanceException("get version fail,error:{}");
