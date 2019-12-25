@@ -1,6 +1,6 @@
 package com.webank.weevent.governance.service;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,8 +23,8 @@ import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.repository.TopicRepository;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.utils.CookiesTools;
+import com.webank.weevent.governance.utils.JsonUtil;
 
-import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -89,10 +89,10 @@ public class TopicService {
             CloseableHttpResponse closeResponse = client.execute(get);
             String mes = EntityUtils.toString(closeResponse.getEntity());
             topicRepository.deleteTopicInfo(topic, new Date().getTime(), brokerId, groupId);
-            return (Boolean) JSON.parse(mes);
+            return JsonUtil.parseObject(mes, Boolean.class);
         } catch (Exception e) {
             log.error("close topic fail,topic :{},error:{}", topic, e.getMessage());
-            throw new GovernanceException("close topic fail",e);
+            throw new GovernanceException("close topic fail", e);
         }
     }
 
@@ -131,8 +131,7 @@ public class TopicService {
         try {
             CloseableHttpResponse closeResponse = client.execute(get);
             String mes = EntityUtils.toString(closeResponse.getEntity());
-            JSON json = JSON.parseObject(mes);
-            result = JSON.toJavaObject(json, TopicPage.class);
+            result = JsonUtil.parseObject(mes, TopicPage.class);
             if (result == null || CollectionUtils.isEmpty(result.getTopicInfoList())) {
                 return result;
             }
@@ -184,9 +183,7 @@ public class TopicService {
             HttpGet get = commonService.getMethod(url, request);
             CloseableHttpResponse closeResponse = client.execute(get);
             String mes = EntityUtils.toString(closeResponse.getEntity());
-            JSON json = JSON.parseObject(mes);
-            TopicEntity result = JSON.toJavaObject(json, TopicEntity.class);
-
+            TopicEntity result = JsonUtil.parseObject(mes, TopicEntity.class);
             if (result != null) {
                 // get creator from database
                 List<TopicEntity> creators = topicRepository.findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(brokerId, groupId, new ArrayList<>(Collections.singletonList(topic)), DeleteAtEnum.NOT_DELETED.getCode());
@@ -240,24 +237,15 @@ public class TopicService {
             HttpGet get = commonService.getMethod(url, request);
             CloseableHttpResponse closeResponse = client.execute(get);
             mes = EntityUtils.toString(closeResponse.getEntity());
+            return new GovernanceResult(JsonUtil.parseObject(mes,Map.class));
         } catch (Exception e) {
-            log.error("broker connect error,error:{}", e.getMessage());
-            throw new GovernanceException(ErrorCode.BROKER_CONNECT_ERROR);
-        }
-        try {
-            Boolean result = (Boolean) JSON.parse(mes);
-            return new GovernanceResult(result);
-        } catch (Exception e) {
-            log.error("parse json fail,error:{}", e.getMessage());
-            JSON json = JSON.parseObject(mes);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> result = JSON.toJavaObject(json, Map.class);
-            throw new GovernanceException((Integer) (result.get("code")), result.get("message").toString());
+            log.error("open topic fail,error:{}", e.getMessage());
+            throw new GovernanceException("open topic fail,error",e);
         }
     }
 
     @Transactional(rollbackFor = Throwable.class)
-    public boolean exist(String topic, String brokerUrl, String groupId, HttpServletRequest request) throws GovernanceException, UnsupportedEncodingException {
+    public boolean exist(String topic, String brokerUrl, String groupId, HttpServletRequest request) throws GovernanceException, IOException {
         String url = "";
         if (groupId == null) {
             url = new StringBuffer(brokerUrl).append(ConstantProperties.BROKER_REST_EXIST).append("?topic=").append(URLEncoder.encode(topic, "UTF-8"))
@@ -279,12 +267,10 @@ public class TopicService {
             throw new GovernanceException(ErrorCode.BROKER_CONNECT_ERROR);
         }
         try {
-            return (Boolean) JSON.parse(mes);
+            return JsonUtil.parseObject(mes, Boolean.class);
         } catch (Exception e) {
             log.error("parse json fail,error:{}", e.getMessage());
-            JSON json = JSON.parseObject(mes);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> result = JSON.toJavaObject(json, Map.class);
+            Map result = JsonUtil.parseObject(mes, Map.class);
             throw new GovernanceException((Integer) (result.get("code")), result.get("message").toString());
         }
     }
