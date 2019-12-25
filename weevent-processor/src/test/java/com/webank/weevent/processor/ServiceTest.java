@@ -647,4 +647,28 @@ public class ServiceTest {
         log.info("result3:{}", result3);
     }
 
+    //:TODO add delete test
+    @Test
+    public void deleteTheRule() throws Exception {
+        String arr = "";
+        String url = "/startCEPRule";
+        rule.setFromDestination("from.com.webank.weevent");
+        rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
+        rule.setSelectField("a,eventId,topicName,brokerId,groupId,now,currentDate,currentTime");
+        rule.setConditionField("c==10 and a>10");
+        rule.setToDestination("to.com.webank.weevent");
+        rule.setSystemFunctionMessage(arr);
+        rule.setConditionType(2);
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JSONObject.toJSON(rule).toString());
+        MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
+        assertEquals(200, result.getResponse().getStatus());
+        log.info("result3:{}", result);
+
+        String url2 = "/deleteCEPRuleById";
+        RequestBuilder requestBuilder2 = MockMvcRequestBuilders.post(url2).contentType(MediaType.APPLICATION_JSON).param("id", rule.getId());
+        MvcResult result2 = mockMvc.perform(requestBuilder2).andDo(print()).andReturn();
+        log.info("result:{}", result2.getResponse().getContentAsString());
+        assertEquals(200, result.getResponse().getStatus());
+    }
+
 }
