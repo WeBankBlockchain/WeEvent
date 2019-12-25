@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.protocol.mqtt.store.IMessageIdStore;
 import com.webank.weevent.protocol.mqtt.store.ISessionStore;
@@ -15,7 +16,6 @@ import com.webank.weevent.protocol.mqtt.store.dto.SubscribeStore;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.WeEvent;
 
-import com.alibaba.fastjson.JSON;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttFixedHeader;
@@ -83,8 +83,12 @@ public class Subscribe {
                             @Override
                             public void onEvent(String subscriptionId, WeEvent event) {
                                 log.info("consumer onEvent, subscriptionId: {} event: {}", subscriptionId, event);
-                                // send to subscribe
-                                sendPublishMessage(topicFilter, mqttQoS, JSON.toJSON(event).toString().getBytes(), false, false);
+                                try {
+                                    // send to subscribe
+                                    sendPublishMessage(topicFilter, mqttQoS, DataTypeUtils.object2Json(event).getBytes(), false, false);
+                                } catch (BrokerException e) {
+                                    log.error("send publish message failed due to convert object to jsonString error", e);
+                                }
                             }
 
                             @Override
