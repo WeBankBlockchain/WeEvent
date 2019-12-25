@@ -89,10 +89,6 @@ public enum ErrorCode {
 
     SDK_JMS_EXCEPTION_STOMP_TIMEOUT(101004, "stomp command invoke timeout"),
 
-    SDK_JMS_EXCEPTION_JSON_ENCODE(101005, "encode WeEvent to json failed"),
-
-    SDK_JMS_EXCEPTION_JSON_DECODE(101006, "decode WeEvent from json failed"),
-
     SDK_JMS_EXCEPTION(101010, "jms exception"),
 
     USER_PASSWORD_ISBLANK(101011, "stomp password is blank"),
@@ -140,15 +136,19 @@ public enum ErrorCode {
 
     SUBSCRIPTION_NOTIFY_QUEUE_FULL(200212, "onEvent is blocked too long, notify queue is full"),
 
-    FABRICSDK_CHANNEL_NAME_INVALID(200213, "Fabric 1.4x, channel name invalid"),
-
     UNKNOWN_SOLIDITY_VERSION(200213, "unknown contract version"),
 
     WEB3SDK_RPC_ERROR(200214, "we3sdk's rpc failed"),
 
-    FABRICSDK_GETBLOCKINFO_ERROR(200214, "Fabric 1.4x, get blockInfo error"),
+    JSON_ENCODE_EXCEPTION(200215, "encode Object to json failed"),
 
-    FABRICSDK_CHAINCODE_INVOKE_FAILED(200216, "Fabric 1.4x, execute chaincode invoke failed"),
+    JSON_DECODE_EXCEPTION(200216, "decode Object from json failed"),
+
+    FABRICSDK_CHANNEL_NAME_INVALID(200300, "Fabric 1.4x, channel name invalid"),
+
+    FABRICSDK_GETBLOCKINFO_ERROR(200301, "Fabric 1.4x, get blockInfo error"),
+
+    FABRICSDK_CHAINCODE_INVOKE_FAILED(200302, "Fabric 1.4x, execute chaincode invoke failed"),
     ;
 
     /**

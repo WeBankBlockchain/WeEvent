@@ -1,8 +1,10 @@
 package com.webank.weevent.processor.utils;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -12,8 +14,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.sdk.WeEvent;
 
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.util.StringUtils;
@@ -113,38 +113,20 @@ public class CommonUtil {
     public static List<String> getKeys(String objJson) {
         List<String> keys = new ArrayList<>();
         try {
-            if (checkValidJson(objJson)) {
-                for (Map.Entry<String, Object> entry : JSONObject.parseObject(objJson).entrySet()) {
+            Map<String, Object> map = JsonUtil.parseObjectToMap(objJson);
+            if (JsonUtil.isValid(objJson)) {
+                for (Map.Entry<String, Object> entry : map.entrySet()) {
                     keys.add(entry.getKey());
                 }
             } else {
                 keys = null;
             }
 
-        } catch (JSONException e) {
+        } catch (IOException e) {
             keys = null;
             log.info("json get key error");
         }
         return keys;
-    }
-
-    /**
-     * check valid json string
-     *
-     * @param test json string
-     * @return true or false
-     */
-    public final static boolean checkValidJson(String test) {
-        try {
-            JSONObject.parseObject(test);
-        } catch (JSONException ex) {
-            try {
-                JSONObject.parseArray(test);
-            } catch (JSONException ex1) {
-                return false;
-            }
-        }
-        return true;
     }
 
     public static boolean checkJson(String content, String objJson) {
@@ -177,12 +159,12 @@ public class CommonUtil {
         return keys;
     }
 
-    private static List<String> getSelectFieldList(String selectFields, String payload) {
+    private static List<String> getSelectFieldList(String selectFields, String payload) throws IOException {
         List<String> result = new ArrayList<>();
         // if select is equal * ,then select all fields.
         if ("*".equals(selectFields)) {
             String selectFieldsTemp = payload;
-            Iterator it = JSONObject.parseObject(selectFieldsTemp).entrySet().iterator();
+            Iterator it = JsonUtil.parseObject(selectFieldsTemp, Map.class).entrySet().iterator();
 
             while (it.hasNext()) {
                 Map.Entry entry = (Map.Entry) it.next();
@@ -191,25 +173,23 @@ public class CommonUtil {
 
         } else {
             String[] array = selectFields.split(",");
-            for (String s : array) {
-                result.add(s);
-            }
+            result.addAll(Arrays.asList(array));
         }
         return result;
     }
 
-    public static Map<String, String> contactsql(String brokerId, String groupId, WeEvent eventMessage, String selectFields, String payload) {
+    public static Map<String, String> contactsql(String brokerId, String groupId, WeEvent eventMessage, String selectFields, String payload) throws IOException {
         String content = new String(eventMessage.getContent());
         String eventId = eventMessage.getEventId();
         String topicName = eventMessage.getTopic();
 
         // get select field
         List<String> result = getSelectFieldList(selectFields, payload);
-        JSONObject table = JSONObject.parseObject(payload);
-        JSONObject eventContent;
+        Map<String, Object> table = JsonUtil.parseObjectToMap(payload);
+        Map eventContent;
         Map<String, String> sqlOrder;
-        if (CommonUtil.checkValidJson(content)) {
-            eventContent = JSONObject.parseObject(content);
+        if (JsonUtil.isValid(content)) {
+            eventContent = JsonUtil.parseObject(content, Map.class);
             sqlOrder = generateSqlOrder(brokerId, groupId, eventId, topicName, result, eventContent, table);
         } else {
             sqlOrder = generateSqlOrder(brokerId, groupId, eventId, topicName, result);
@@ -225,24 +205,29 @@ public class CommonUtil {
         // get all select field and value, and the select field must in eventContent.
         for (String key : result) {
             // set the flag
-            if (ConstantsHelper.EVENT_ID.equals(key)) {
-                sqlOrder.put(ConstantsHelper.EVENT_ID, eventId);
-            }
-            if (ConstantsHelper.TOPIC_NAME.equals(key)) {
-                sqlOrder.put(ConstantsHelper.TOPIC_NAME, topicName);
-            }
-            if (ConstantsHelper.BROKER_ID.equals(key)) {
-                sqlOrder.put(ConstantsHelper.BROKER_ID, brokerId);
-            }
-            if (ConstantsHelper.GROUP_ID.equals(key)) {
-                sqlOrder.put(ConstantsHelper.GROUP_ID, groupId);
+            switch (key) {
+                case ConstantsHelper.EVENT_ID:
+                    sqlOrder.put(ConstantsHelper.EVENT_ID, eventId);
+                    break;
+                case ConstantsHelper.TOPIC_NAME:
+                    sqlOrder.put(ConstantsHelper.TOPIC_NAME, topicName);
+                    break;
+                case ConstantsHelper.BROKER_ID:
+                    sqlOrder.put(ConstantsHelper.BROKER_ID, brokerId);
+                    break;
+                case ConstantsHelper.GROUP_ID:
+                    sqlOrder.put(ConstantsHelper.GROUP_ID, groupId);
+                    break;
+                default:
+                    break;
+
             }
         }
 
         return sqlOrder;
     }
 
-    private static Map<String, String> generateSqlOrder(String brokerId, String groupId, String eventId, String topicName, List<String> result, JSONObject eventContent, JSONObject table) {
+    private static Map<String, String> generateSqlOrder(String brokerId, String groupId, String eventId, String topicName, List<String> result, Map eventContent, Map<String, Object> table) {
         Map<String, String> sql = new HashMap<>();
         Map<String, String> sqlOrder = new HashMap<>();
         boolean eventIdFlag = false;
@@ -257,17 +242,22 @@ public class CommonUtil {
                 sql.put(key, eventContent.get(key).toString());
             }
             // set the flag
-            if (ConstantsHelper.EVENT_ID.equals(key)) {
-                eventIdFlag = true;
-            }
-            if (ConstantsHelper.TOPIC_NAME.equals(key)) {
-                topicNameFlag = true;
-            }
-            if (ConstantsHelper.BROKER_ID.equals(key)) {
-                brokerIdFlag = true;
-            }
-            if (ConstantsHelper.GROUP_ID.equals(key)) {
-                groupIdFlag = true;
+            switch (key) {
+                case ConstantsHelper.EVENT_ID:
+                    eventIdFlag = true;
+                    break;
+                case ConstantsHelper.TOPIC_NAME:
+                    topicNameFlag = true;
+                    break;
+                case ConstantsHelper.BROKER_ID:
+                    brokerIdFlag = true;
+                    break;
+                case ConstantsHelper.GROUP_ID:
+                    groupIdFlag = true;
+                    break;
+                default:
+                    break;
+
             }
         }
 
