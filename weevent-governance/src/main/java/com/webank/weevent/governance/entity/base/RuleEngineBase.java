@@ -71,6 +71,8 @@ public class RuleEngineBase extends BaseEntity {
     @Column(name = "error_destination")
     private String errorDestination;
 
+    @Column(name="function_array_str")
+    private String functionArrayStr;
 
     // 1 means the system
     @Column(name = "system_tag")

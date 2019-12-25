@@ -1,5 +1,7 @@
 package com.webank.weevent.governance.entity;
 
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -30,6 +32,15 @@ public class RuleEngineConditionEntity extends RuleEngineConditionBase {
     private String columnName;
 
     @Transient
+    private String columnMark;
+
+    @Transient
     private String sqlCondition;
+
+    @Transient
+    private String functionType;
+
+    @Transient
+    private List<RuleEngineConditionEntity> children;
 
 }
