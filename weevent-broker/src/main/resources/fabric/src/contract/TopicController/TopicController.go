@@ -1,6 +1,7 @@
 package main
 import(
     "fmt"
+    "time"
     "strconv"
     "encoding/json"
     "github.com/hyperledger/fabric/core/chaincode/shim"
@@ -14,15 +15,15 @@ type TopicController struct {
 
 //TopicInfo Data
 type TopicInfo struct {
-    CreatedTimestamp string `json:"createdTimestamp"`
-    Version  string `json:"version"`
+    CreatedTimestamp int64 `json:"createdTimestamp"`
+    Version string `json:"version"`
     Topic string `json:"topicName"`
 }
 
 //ListTopicName Data
 type ListTopicName struct {
     Total int `json:"total"`
-    Size  string `json:"pageSize"`
+    Size int `json:"pageSize"`
     TopicList []string `json:"pageData"`
 }
 
@@ -94,10 +95,10 @@ func (t *TopicController) addTopicInfo(stub shim.ChaincodeStubInterface,args[] s
     }
     var topicInfo TopicInfo
     topicInfo.Topic = args[0]
-    topicInfo.CreatedTimestamp = args[1]
-    topicInfo.Version = args[2]
+    topicInfo.CreatedTimestamp = (time.Now().UnixNano() / 1e6)
+    topicInfo.Version = args[1]
     topicIndex = append(topicIndex,args[0])
-    topicMap[args[0]] = topicInfo;//args[0]:topicName args[1]:timestamp args[2]:
+    topicMap[args[0]] = topicInfo;//args[0]:topicName args[1]:version
     return shim.Success([]byte("addTopicInfo success"))
 }
 
@@ -155,7 +156,7 @@ func (t *TopicController) listTopicName(stub shim.ChaincodeStubInterface,args[] 
     }
     var listTopicName ListTopicName
     listTopicName.Total = total
-    listTopicName.Size = strconv.Itoa(size)
+    listTopicName.Size = size
     listTopicName.TopicList = topicList
 
     listTopicNameJSON, err := json.Marshal(listTopicName)

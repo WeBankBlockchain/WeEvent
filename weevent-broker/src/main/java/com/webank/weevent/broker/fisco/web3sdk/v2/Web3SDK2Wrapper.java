@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
@@ -30,8 +29,8 @@ import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -83,7 +82,7 @@ public class Web3SDK2Wrapper {
     public final static String NODE_ID = "nodeId";
     public final static String PEERS = "peers";
     public final static String VIEW = "view";
-
+    private static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     // static gas provider
     public static final ContractGasProvider gasProvider = new ContractGasProvider() {
@@ -680,44 +679,39 @@ public class Web3SDK2Wrapper {
     }
 
     private static Map<String, Map<String, String>> getNodeViews(Web3j web3j) throws IOException {
-        JSONArray consensusStatusArr = JSONObject.parseArray(web3j.getConsensusStatus().sendForReturnString());
+        JsonNode jsonNode = OBJECT_MAPPER.readTree(web3j.getConsensusStatus().sendForReturnString());
         Map<String, Map<String, String>> nodeViews = new HashMap<>();
-        for (Object jsonObj : consensusStatusArr) {
-            if (jsonObj instanceof JSONArray) {
-                convertJSONArrayToList(nodeViews, (JSONArray) jsonObj);
+        for (JsonNode node : jsonNode) {
+            if(node.isArray()) {
+                convertJsonArrayToList(nodeViews, node);
             }
         }
         return nodeViews;
     }
 
     private static Map<String, Map<String, String>> getBlockNums(Web3j web3j) throws IOException {
-        JSONObject syncStatusArr = JSONObject.parseObject(web3j.getSyncStatus().sendForReturnString());
+        JsonNode jsonObj = OBJECT_MAPPER.readTree(web3j.getSyncStatus().sendForReturnString());
         Map<String, Map<String, String>> nodeBlockNums = new HashMap<>();
-        Set<String> set = syncStatusArr.keySet();
+
         Map<String, String> map = new HashMap<>();
-        for (String s : set) {
-            if (BLOCK_NUMBER.equals(s) || NODE_ID.equals(s)) {
-                map.put(s, syncStatusArr.getString(s));
+        jsonObj.fields().forEachRemaining(entry -> {
+            if (BLOCK_NUMBER.equals(entry.getKey()) || NODE_ID.equals(entry.getKey())) {
+                map.put(entry.getKey(), entry.getValue().asText());
             }
-            if (PEERS.equals(s)) {
-                String peersListStr = syncStatusArr.getString(s);
-                JSONArray peersListJSONArray = JSONObject.parseArray(peersListStr);
-                convertJSONArrayToList(nodeBlockNums, peersListJSONArray);
+            if (PEERS.equals(entry.getKey())) {
+                convertJsonArrayToList(nodeBlockNums, entry.getValue());
             }
-        }
-        nodeBlockNums.put(syncStatusArr.getString(NODE_ID), map);
+        });
+        nodeBlockNums.put(jsonObj.get(NODE_ID).asText(), map);
         return nodeBlockNums;
     }
 
-    private static void convertJSONArrayToList(Map<String, Map<String, String>> map, JSONArray jsonObj) {
-        for (Object object : jsonObj) {
-            if (object instanceof JSONObject) {
-                Set<String> keySet = ((JSONObject) object).keySet();
+    private static void convertJsonArrayToList(Map<String, Map<String, String>> map, JsonNode jsonArray) {
+        for (JsonNode jsonObj : jsonArray) {
+            if (jsonObj.isObject()) {
                 Map<String, String> objMap = new HashMap<>();
-                for (String key : keySet) {
-                    objMap.put(key, ((JSONObject) object).getString(key));
-                }
-                map.put(objMap.get(NODE_ID), objMap);
+                jsonObj.fields().forEachRemaining(entry -> objMap.put(entry.getKey(), entry.getValue().asText()));
+                map.put(jsonObj.get(NODE_ID).asText(), objMap);
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.webank.weevent.processor.quartz;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -8,9 +9,9 @@ import java.util.Map;
 import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.processor.cache.CEPRuleCache;
 import com.webank.weevent.processor.model.CEPRule;
+import com.webank.weevent.processor.utils.JsonUtil;
 import com.webank.weevent.sdk.BrokerException;
 
-import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -73,9 +74,9 @@ public class CRUDJobs implements Job {
                 if (1 == rule.getStatus() || 0 == rule.getStatus() || 2 == rule.getStatus()) {
                     CEPRuleCache.updateCEPRule(rule, ruleMap);
                 }
-                log.info("execute  job: {},rule:{},type:{}", jobName, JSONObject.toJSON(obj), type);
+                log.info("execute  job: {},rule:{},type:{}", jobName, JsonUtil.toJSONString(obj), type);
             }
-        } catch (BrokerException e) {
+        } catch (BrokerException | IOException e) {
             log.info("BrokerException:{}", e.toString());
         }
 

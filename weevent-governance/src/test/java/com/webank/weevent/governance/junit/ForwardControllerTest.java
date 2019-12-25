@@ -1,13 +1,14 @@
 package com.webank.weevent.governance.junit;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.Cookie;
 
 import com.webank.weevent.governance.JUnitTestBase;
 import com.webank.weevent.governance.properties.ConstantProperties;
+import com.webank.weevent.governance.utils.JsonUtil;
 
-import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
@@ -52,7 +53,7 @@ public class ForwardControllerTest extends JUnitTestBase {
         String contentAsString = response.getContentAsString();
         Assert.assertEquals(response.getStatus(), 200);
         Assert.assertNotNull(contentAsString);
-        JSONObject jsonObject = JSONObject.parseObject(contentAsString);
+        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(),Map.class);
         Object code = jsonObject.get("code");
         Object data = jsonObject.get("data");
         Assert.assertEquals(0, code);
