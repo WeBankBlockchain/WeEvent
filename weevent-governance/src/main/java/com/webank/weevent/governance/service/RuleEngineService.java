@@ -223,10 +223,19 @@ public class RuleEngineService {
             String payload = JsonUtil.toJSONString(ruleEngineEntity.getPayloadMap());
             ruleEngineEntity.setPayload(payload);
             ruleEngineEntity.setLastUpdate(new Date());
-            List<String> functionArray = ruleEngineEntity.getFunctionArray();
-            ruleEngineEntity.setFunctionArrayStr(functionArray == null ? null : JsonUtil.toJSONString(functionArray));
 
-            RuleEngineEntity rule = ruleEngineRepository.findByIdAndDeleteAt(ruleEngineEntity.getId(), DeleteAtEnum.NOT_DELETED.getCode());
+            //set selectFiled 、conditionField
+            List<RuleEngineConditionEntity> ruleEngineConditionList = ruleEngineEntity.getRuleEngineConditionList();
+            String conditionField = this.getConditionField(ruleEngineConditionList);
+            log.info("condition:{}", conditionField);
+
+            ruleEngineEntity.setConditionField(conditionField);
+
+            RuleEngineEntity rule = new RuleEngineEntity();
+            rule.setId(ruleEngineEntity.getId());
+            List<RuleEngineEntity> ruleEngines = ruleEngineMapper.getRuleEngines(rule);
+            rule = ruleEngines.get(0);
+
             // check sql condition
             boolean flag = validationConditions(request, ruleEngineEntity);
             if (!flag) {
@@ -234,7 +243,7 @@ public class RuleEngineService {
             }
             flag = verifyInfiniteLoop(ruleEngineEntity);
             if (!flag) {
-                throw new GovernanceException("update rule failed, detected DAG loop at topic [" + ruleEngineEntity.getToDestination() + "]");
+                throw new GovernanceException("update rule failed, detected DAG loop at topic [" + ruleEngineEntity.getFromDestination() + "]");
             }
             //set ruleDataBaseUrl
             setRuleDataBaseUrl(ruleEngineEntity);
@@ -256,7 +265,6 @@ public class RuleEngineService {
             //delete old ruleEngineConditionEntity
             ruleEngineConditionRepository.deleteRuleEngineCondition(ruleEngineEntity.getId());
 
-            List<RuleEngineConditionEntity> ruleEngineConditionList = ruleEngineEntity.getRuleConditionList();
             //check ruleEngineConditionEntity
             if (!CollectionUtils.isEmpty(ruleEngineConditionList)) {
                 //insert ruleEngineCondition
@@ -300,14 +308,11 @@ public class RuleEngineService {
     }
 
     private String getSqlJson(RuleEngineConditionEntity engineConditionEntity) throws IOException {
-        Map<String, Object> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>();
         map.put("connectionOperator", engineConditionEntity.getConnectionOperator());
         map.put("columnName", engineConditionEntity.getColumnName());
         map.put("conditionalOperator", engineConditionEntity.getConditionalOperator());
         map.put("sqlCondition", engineConditionEntity.getSqlCondition());
-        map.put("columnMark", engineConditionEntity.getColumnMark());
-        map.put("functionType", engineConditionEntity.getFunctionTyp());
-        map.put("children", engineConditionEntity.getChildren());
         return JsonUtil.toJSONString(map);
     }
 
@@ -346,7 +351,7 @@ public class RuleEngineService {
     }
 
 
-/*    private String getConditionFieldDetail(List<RuleEngineConditionEntity> ruleEngineConditionList) {
+    private String getConditionFieldDetail(List<RuleEngineConditionEntity> ruleEngineConditionList) {
         if (CollectionUtils.isEmpty(ruleEngineConditionList)) {
             return null;
         }
@@ -364,9 +369,8 @@ public class RuleEngineService {
             count++;
         }
         return buffer.toString();
-    }*/
+    }
 
-/*
     private String getConditionField(List<RuleEngineConditionEntity> ruleEngineConditionList) {
         if (CollectionUtils.isEmpty(ruleEngineConditionList)) {
             return null;
@@ -392,17 +396,22 @@ public class RuleEngineService {
         }
         return buffer.toString();
     }
-*/
 
     @Transactional(rollbackFor = Throwable.class)
     public boolean updateRuleEngineStatus(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         authCheck(ruleEngineEntity, request);
-        RuleEngineEntity rule = ruleEngineRepository.findByIdAndDeleteAt(ruleEngineEntity.getId(), DeleteAtEnum.NOT_DELETED.getCode());
+        RuleEngineEntity rule = ruleEngineRepository.findByIdAndDeleteAt(ruleEngineEntity.getId(),DeleteAtEnum.NOT_DELETED.getCode());
         BeanUtils.copyProperties(rule, ruleEngineEntity, "status");
         try {
             //set payload
             ruleEngineEntity.setLastUpdate(new Date());
+
+            //set selectFiled 、conditionField
+            List<RuleEngineConditionEntity> ruleEngineConditionList = this.getRuleEngineConditionList(ruleEngineEntity);
+            String conditionField = this.getConditionField(ruleEngineConditionList);
+            log.info("condition:{}", conditionField);
+            ruleEngineEntity.setConditionField(conditionField);
 
             //set ruleDataBaseUrl
             setRuleDataBaseUrl(ruleEngineEntity);
@@ -469,7 +478,11 @@ public class RuleEngineService {
             if (CollectionUtils.isEmpty(ruleEngines)) {
                 throw new GovernanceException("the data is not non-start state");
             }
+            //set required fields
             rule = ruleEngines.get(0);
+            String conditionField = getConditionField(this.getRuleEngineConditionList(rule));
+            rule.setConditionField(conditionField);
+            log.info("condition:{}", conditionField);
 
             BrokerEntity broker = brokerService.getBroker(rule.getBrokerId());
             rule.setBrokerUrl(broker.getBrokerUrl());
@@ -480,7 +493,6 @@ public class RuleEngineService {
 
             //Verify required fields
             this.checkStartRuleRequired(rule);
-
             //Start the rules engine
             rule.setOffSet(ruleEngineEntity.getOffSet());
             this.startProcessRule(request, rule);
@@ -500,7 +512,6 @@ public class RuleEngineService {
             if (!this.checkProcessorExist(request)) {
                 return;
             }
-            rule.setFunctionArray(JsonUtil.json2List(rule.getFunctionArrayStr(), List.class));
             String jsonString = JsonUtil.toJSONString(rule);
             Map map = JsonUtil.parseObject(jsonString, Map.class);
             map.put("updatedTime", rule.getLastUpdate());
@@ -575,21 +586,28 @@ public class RuleEngineService {
 
     @SuppressWarnings("unchecked")
     public RuleEngineEntity getRuleEngineDetail(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response) throws GovernanceException {
-        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-        Boolean flag = permissionService.verifyPermissions(ruleEngineEntity.getBrokerId(), accountId);
+        String accountid = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
+        Boolean flag = permissionService.verifyPermissions(ruleEngineEntity.getBrokerId(), accountid);
         if (!flag) {
             throw new GovernanceException(ErrorCode.ACCESS_DENIED);
         }
-        RuleEngineEntity engineEntity = ruleEngineRepository.findByIdAndDeleteAt(ruleEngineEntity.getId(), DeleteAtEnum.NOT_DELETED.getCode());
-        if (engineEntity == null) {
+        RuleEngineEntity rule = new RuleEngineEntity();
+        rule.setId(ruleEngineEntity.getId());
+        List<RuleEngineEntity> ruleEngines = ruleEngineMapper.getRuleEngines(rule);
+        if (CollectionUtils.isEmpty(ruleEngines)) {
             return null;
         }
+        //get sql
+        RuleEngineEntity engineEntity = ruleEngines.get(0);
         try {
             String payload = engineEntity.getPayload();
             engineEntity.setPayloadMap(payload == null ? new HashMap<>() : JsonUtil.parseObject(payload, Map.class));
+            RuleEngineConditionEntity ruleEngineConditionEntity = new RuleEngineConditionEntity();
+            ruleEngineConditionEntity.setRuleId(engineEntity.getId());
             //get ruleEngineConditionList
             List<RuleEngineConditionEntity> ruleEngineConditionEntities = this.getRuleEngineConditionList(engineEntity);
-            engineEntity.setRuleConditionList(ruleEngineConditionEntities);
+            engineEntity.setRuleEngineConditionList(ruleEngineConditionEntities == null ? new ArrayList<>() : ruleEngineConditionEntities);
+            engineEntity.setConditionField(this.getConditionFieldDetail(ruleEngineConditionEntities));
             String fullSql = parsingDetailSQL(engineEntity);
             engineEntity.setFullSQL(fullSql);
             return engineEntity;
@@ -697,15 +715,13 @@ public class RuleEngineService {
                 engineConditionEntity.setConnectionOperator(entity.getConnectionOperator());
                 engineConditionEntity.setColumnName(entity.getColumnName());
                 engineConditionEntity.setSqlCondition(entity.getSqlCondition());
-                engineConditionEntity.setColumnMark(entity.getColumnMark());
-                engineConditionEntity.setChildren(entity.getChildren());
             }
         }
         return ruleEngineConditionEntities;
     }
 
     public boolean validationConditions(HttpServletRequest request, RuleEngineEntity ruleEngineEntity) throws GovernanceException {
-        if (StringUtil.isBlank(ruleEngineEntity.getConditionField()) || !checkProcessorExist(request)) {
+        if (StringUtil.isBlank(ruleEngineEntity.getConditionField())) {
             return true;
         }
         try {
@@ -737,7 +753,7 @@ public class RuleEngineService {
 
     public boolean checkProcessorExist(HttpServletRequest request) {
         try {
-            String payload = "{\"a\":\"1\",\"b\":\"test\",\"c\":\"10\"}";
+            String payload = "{\\\"a\\\":1,\\\"b\\\":\\\"test\\\",\\\"c\\\":10}";
             String condition = "\"c<100\"";
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_CHECK_WHERE_CONDITION)
                     .append(ConstantProperties.QUESTION_MARK).append("payload=").append(URLEncoder.encode(payload, "UTF-8"))
