@@ -57,6 +57,8 @@ CREATE TABLE t_rule_engine (
   `broker_url` VARCHAR(255) NULL DEFAULT NULL COMMENT 'broker url',
   `from_destination` VARCHAR(64)  NULL DEFAULT NULL COMMENT  '数据来源',
   `to_destination` VARCHAR(64)  NULL DEFAULT NULL COMMENT  '数据目的',
+  `function_array_str` VARCHAR(1024)  NULL DEFAULT NULL COMMENT  '函数数组字符串',
+  `condition_field` VARCHAR(4096)  NULL DEFAULT NULL COMMENT  '过滤条件',
   `select_field` VARCHAR(4096) NULL DEFAULT NULL COMMENT '选择字段',
   `condition_type` INT(2) NULL DEFAULT NULL COMMENT '数据流转类型',
   `status` INT(2)  NULL DEFAULT null COMMENT '0 未启动, 1 运行,2 已经删除',
