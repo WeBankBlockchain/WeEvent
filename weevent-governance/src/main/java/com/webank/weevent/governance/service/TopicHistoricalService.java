@@ -1,5 +1,6 @@
 package com.webank.weevent.governance.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -25,8 +26,8 @@ import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.repository.RuleDatabaseRepository;
 import com.webank.weevent.governance.repository.RuleEngineRepository;
 import com.webank.weevent.governance.utils.CookiesTools;
+import com.webank.weevent.governance.utils.JsonUtil;
 
-import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -207,7 +208,7 @@ public class TopicHistoricalService {
         }
     }
 
-    private RuleEngineEntity initializationRule(String ruleName, BrokerEntity brokerEntity, String groupId, Integer dataBaseId) {
+    private RuleEngineEntity initializationRule(String ruleName, BrokerEntity brokerEntity, String groupId, Integer dataBaseId) throws IOException {
         String selectField = "eventId,topicName,groupId,brokerId";
         Map<String, String> map = new HashMap<>();
         map.put("topicName", "*");
@@ -224,7 +225,7 @@ public class TopicHistoricalService {
         ruleEngineEntity.setLastUpdate(new Date());
         ruleEngineEntity.setBrokerUrl(brokerEntity.getBrokerUrl() + "?groupId=" + groupId);
         ruleEngineEntity.setSelectField(selectField);
-        ruleEngineEntity.setPayload(JSONObject.toJSONString(map));
+        ruleEngineEntity.setPayload(JsonUtil.toJSONString(map));
         ruleEngineEntity.setRuleDataBaseId(dataBaseId);
         ruleEngineEntity.setPayloadType(PayloadEnum.JSON.getCode());
         ruleEngineEntity.setConditionType(ConditionTypeEnum.DATABASE.getCode());
@@ -244,7 +245,7 @@ public class TopicHistoricalService {
             if (StringUtil.isBlank(mes)) {
                 throw new GovernanceException("group is empty");
             }
-            JSONObject jsonObject = JSONObject.parseObject(mes);
+            Map jsonObject = JsonUtil.parseObject(mes,Map.class);
             Object data = jsonObject.get("data");
             if ("0".equals(jsonObject.get("code").toString()) && data instanceof List) {
                 groupList = (List) data;

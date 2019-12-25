@@ -23,9 +23,6 @@ dependencies {
     implementation("org.apache.tomcat:tomcat-jdbc:${tomcatVersion}")
 
 
-    //fastjson
-    implementation("com.alibaba:fastjson:${fastjsonVersion}")
-
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBoot2Version}")
 
     implementation("org.apache.commons:commons-pool2:${apacheCommonsVersion.pool2}")
