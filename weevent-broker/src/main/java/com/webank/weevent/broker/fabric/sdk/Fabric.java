@@ -1,8 +1,6 @@
 package com.webank.weevent.broker.fabric.sdk;
 
 import java.math.BigInteger;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,9 +26,6 @@ import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.TopicPage;
 import com.webank.weevent.sdk.WeEvent;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.DecoderException;
@@ -84,7 +79,7 @@ public class Fabric {
             if (ErrorCode.SUCCESS.getCode() != transactionInfo.getCode()) {
                 throw new BrokerException(transactionInfo.getCode(), transactionInfo.getMessage());
             }
-            TopicInfo topicInfo = JSONObject.parseObject(transactionInfo.getPayLoad(), TopicInfo.class);
+            TopicInfo topicInfo = DataTypeUtils.json2Object(transactionInfo.getPayLoad(), TopicInfo.class);
 
             this.topicInfo.put(topicName, topicInfo);
             return topicInfo;
@@ -102,7 +97,7 @@ public class Fabric {
             ChaincodeID chaincodeID = FabricSDKWrapper.getChainCodeID(fabricConfig.getTopicControllerName(),
                     fabricConfig.getTopicControllerVersion());
             TransactionInfo transactionInfo = FabricSDKWrapper.executeTransaction(hfClient, channel, chaincodeID, true, "addTopicInfo",
-                    fabricConfig.getTransactionTimeout(), topicName, getTimestamp(System.currentTimeMillis()), fabricConfig.getTopicVerison());
+                    fabricConfig.getTransactionTimeout(), topicName, fabricConfig.getTopicVerison());
             if (ErrorCode.SUCCESS.getCode() != transactionInfo.getCode()) {
                 if (WeEventConstants.TOPIC_ALREADY_EXIST.equals(transactionInfo.getMessage())) {
                     throw new BrokerException(ErrorCode.TOPIC_ALREADY_EXIST);
@@ -148,8 +143,7 @@ public class Fabric {
                 throw new BrokerException(transactionInfo.getCode(), transactionInfo.getMessage());
             }
 
-            ListPage<String> listPage = JSON.parseObject(transactionInfo.getPayLoad(), new TypeReference<ListPage<String>>() {
-            });
+            ListPage<String> listPage = DataTypeUtils.json2ListPage(transactionInfo.getPayLoad(), String.class);
             topicPage.setPageIndex(pageIndex);
             topicPage.setPageSize(listPage.getPageSize());
             topicPage.setTotal(listPage.getTotal());
@@ -249,19 +243,6 @@ public class Fabric {
             log.error("getEvent error:{}", e);
         }
         return weEventList;
-    }
-
-    /**
-     * Gets the ISO 8601 timestamp.
-     *
-     * @param date the date
-     * @return the ISO 8601 timestamp
-     */
-    private static String getTimestamp(long date) {
-        // TimeZone tz = TimeZone.getTimeZone("Asia/Shanghai");
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        // df.setTimeZone(tz);
-        return df.format(date);
     }
 
     public GroupGeneral getGroupGeneral() throws BrokerException {

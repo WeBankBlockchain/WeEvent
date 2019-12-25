@@ -15,8 +15,8 @@ import com.webank.weevent.governance.entity.BaseResponse;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.service.PermissionService;
 import com.webank.weevent.governance.utils.CookiesTools;
+import com.webank.weevent.governance.utils.JsonUtil;
 
-import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -44,7 +44,7 @@ public class UserAuthFilter implements Filter {
                 if (!flag) {
                     BaseResponse baseResponse = new BaseResponse(ConstantCode.ACCESS_DENIED);
                     response.setContentType("application/json;charset=UTF-8");
-                    response.getWriter().write(JSON.toJSONString(baseResponse));
+                    response.getWriter().write(JsonUtil.toJSONString(baseResponse));
                     return;
                 }
             }
