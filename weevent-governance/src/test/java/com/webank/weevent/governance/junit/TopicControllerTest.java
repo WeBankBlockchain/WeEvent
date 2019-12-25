@@ -11,9 +11,8 @@ import com.webank.weevent.governance.entity.TopicEntity;
 import com.webank.weevent.governance.entity.TopicPage;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.result.GovernanceResult;
+import com.webank.weevent.governance.utils.JsonUtil;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.http.HttpStatus;
@@ -68,7 +67,7 @@ public class TopicControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(), GovernanceResult.class);
+        GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
         brokerIdMap.put("brokerId", (Integer) governanceResult.getData());
         Assert.assertEquals(governanceResult.getStatus().toString(),"200");
     }
@@ -87,7 +86,7 @@ public class TopicControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/topic/openTopic").contentType(MediaType.APPLICATION_JSON_UTF8).content(content).cookie(cookie))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JSONObject.parseObject(response.getContentAsString(),GovernanceResult.class);
+        GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(),GovernanceResult.class);
         Assert.assertEquals(governanceResult.getStatus().toString(),"100109");
     }
 
@@ -98,7 +97,7 @@ public class TopicControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mvcResult.getResponse();
         String result = response.getContentAsString();
         Assert.assertNotNull(result);
-        TopicPage topicPage = JSON.parseObject(result, TopicPage.class);
+        TopicPage topicPage = JsonUtil.parseObject(result, TopicPage.class);
         List<TopicEntity> topicInfoList = topicPage.getTopicInfoList();
         Assert.assertTrue(CollectionUtils.isNotEmpty(topicInfoList));
     }
@@ -110,7 +109,7 @@ public class TopicControllerTest extends JUnitTestBase {
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         Assert.assertNotNull(response.getContentAsString());
-        TopicEntity topicEntity = JSONObject.parseObject(response.getContentAsString(), TopicEntity.class);
+        TopicEntity topicEntity = JsonUtil.parseObject(response.getContentAsString(), TopicEntity.class);
         Assert.assertEquals(topicEntity.getTopicName(),"com.weevent.rest");
     }
 
@@ -131,7 +130,7 @@ public class TopicControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/delete").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        JSONObject jsonObject = JSONObject.parseObject(response.getContentAsString());
+        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(),Map.class);
         Assert.assertEquals(jsonObject.get("status").toString(), "200");
     }
 
