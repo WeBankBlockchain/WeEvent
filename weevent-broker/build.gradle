@@ -80,7 +80,7 @@ bootJar {
             into "dist/conf"
         }
         copy {
-            from configurations.runtimeClasspathfisco.properties
+            from configurations.runtimeClasspath
             into "dist/lib"
         }
     }
