@@ -58,7 +58,6 @@ import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -86,6 +85,42 @@ import org.springframework.web.servlet.DispatcherServlet;
 @EnableTransactionManagement
 public class GovernanceApplication {
 
+    @Value("${https.read-timeout:3000}")
+    private int readTimeout;
+
+    @Value("${https.connect-timeout:3000}")
+    private int connectTimeOut;
+
+    // max connect
+    @Value("${http.client.max-total:200}")
+    private int maxTotal;
+
+    @Value("${http.client.max-per-route:500}")
+    private int maxPerRoute;
+
+    @Value("${http.client.connection-request-timeout:3000}")
+    private int connectionRequestTimeout;
+
+    @Value("${http.client.connection-timeout:3000}")
+    private int connectionTimeout;
+
+    @Value("${http.client.socket-timeout:5000}")
+    private int socketTimeout;
+
+    @Autowired
+    private ForwardBrokerFilter forwardBrokerFilter;
+
+    @Autowired
+    private ForwardWebaseFilter forwardWebaseFilter;
+
+    @Autowired
+    private UserAuthFilter userAuthFilter;
+
+    @Autowired
+    private ForwardProcessorFilter forwardProcessorFilter;
+
+    private PoolingHttpClientConnectionManager cm;
+
 
     public static void main(String[] args) throws Exception {
         H2ServerUtil.startH2();
@@ -94,6 +129,7 @@ public class GovernanceApplication {
         app.run(args);
         log.info("Start Governance success");
     }
+
 
     public GovernanceApplication() {
         cm = new PoolingHttpClientConnectionManager();
@@ -114,25 +150,6 @@ public class GovernanceApplication {
         return new HttpsClientRequestFactory();
     }
 
-
-    //WeeventConfiguration
-    @Value("${https.read-timeout:3000}")
-    private int readTimeout;
-
-    @Value("${https.connect-timeout:3000}")
-    private int connectTimeOut;
-
-    @Autowired
-    private ForwardBrokerFilter forwardBrokerFilter;
-
-    @Autowired
-    private ForwardWebaseFilter forwardWebaseFilter;
-
-    @Autowired
-    private UserAuthFilter userAuthFilter;
-
-    @Autowired
-    private ForwardProcessorFilter forwardProcessorFilter;
 
     @Bean
     public ClientHttpRequestFactory httpsClientRequestFactory() {
@@ -202,24 +219,28 @@ public class GovernanceApplication {
     }
 
 
-    //connectionManager
-    // max connect
-    @Value("${http.client.max-total:200}")
-    private int maxTotal;
+    @Scope("prototype")
+    @Bean("httpClient")
+    public CloseableHttpClient getHttpClient() {
+        cm.setMaxTotal(maxTotal);
+        cm.setDefaultMaxPerRoute(maxPerRoute);
+        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm)
+                .setDefaultRequestConfig(requestConfig).setRetryHandler(retryHandler).build();
+        return httpClient;
+    }
 
-    @Value("${http.client.max-per-route:500}")
-    private int maxPerRoute;
-
-    @Value("${http.client.connection-request-timeout:3000}")
-    private int connectionRequestTimeout;
-
-    @Value("${http.client.connection-timeout:3000}")
-    private int connectionTimeout;
-
-    @Value("${http.client.socket-timeout:5000}")
-    private int socketTimeout;
-
-    private PoolingHttpClientConnectionManager cm;
+    @Scope("prototype")
+    @Bean("httpsClient")
+    public CloseableHttpClient getHttpsClient() {
+        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+                .register("http", PlainConnectionSocketFactory.INSTANCE).register("https", trustAllHttpsCertificates())
+                .build();
+        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(
+                socketFactoryRegistry);
+        CloseableHttpClient httpsClient = HttpClients.custom().setConnectionManager(connectionManager)
+                .setDefaultRequestConfig(requestConfig).setRetryHandler(retryHandler).build();
+        return httpsClient;
+    }
 
     /**
      * reconnet str
@@ -258,29 +279,6 @@ public class GovernanceApplication {
             .setConnectTimeout(connectionTimeout).setSocketTimeout(socketTimeout).build();
 
 
-    @Scope("prototype")
-    @Bean("httpClient")
-    public CloseableHttpClient getHttpClient() {
-        cm.setMaxTotal(maxTotal);
-        cm.setDefaultMaxPerRoute(maxPerRoute);
-        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm)
-                .setDefaultRequestConfig(requestConfig).setRetryHandler(retryHandler).build();
-        return httpClient;
-    }
-
-    @Scope("prototype")
-    @Bean("httpsClient")
-    public CloseableHttpClient getHttpsClient() {
-        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-                .register("http", PlainConnectionSocketFactory.INSTANCE).register("https", trustAllHttpsCertificates())
-                .build();
-        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(
-                socketFactoryRegistry);
-        CloseableHttpClient httpsClient = HttpClients.custom().setConnectionManager(connectionManager)
-                .setDefaultRequestConfig(requestConfig).setRetryHandler(retryHandler).build();
-        return httpsClient;
-    }
-
     private SSLConnectionSocketFactory trustAllHttpsCertificates() {
         SSLConnectionSocketFactory socketFactory = null;
         TrustManager[] trustAllCerts = new TrustManager[1];
@@ -313,10 +311,7 @@ public class GovernanceApplication {
             // don't check
         }
     }
-
-
 }
-
 
 class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
 

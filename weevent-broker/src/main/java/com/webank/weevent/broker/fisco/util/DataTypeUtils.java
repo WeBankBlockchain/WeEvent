@@ -1,5 +1,6 @@
 package com.webank.weevent.broker.fisco.util;
 
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
@@ -216,7 +217,7 @@ public final class DataTypeUtils {
         try {
             OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             return OBJECT_MAPPER.readValue(jsonString, valueType);
-        } catch (JsonProcessingException e) {
+        } catch (IOException e) {
             log.error("convert jsonString to object failed ", e);
             throw new BrokerException(ErrorCode.JSON_DECODE_EXCEPTION);
         }
@@ -236,7 +237,7 @@ public final class DataTypeUtils {
         ListPage<T> listPage = null;
         try {
             listPage = OBJECT_MAPPER.readValue(jsonString, javaType);
-        } catch (JsonProcessingException e) {
+        } catch (IOException e) {
             log.error("convert jsonString to object failed ", e);
             throw new BrokerException(ErrorCode.JSON_DECODE_EXCEPTION);
         }
