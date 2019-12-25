@@ -9,9 +9,9 @@ import org.springframework.beans.factory.annotation.Value;
 @Data
 public class StatisticRule implements Serializable {
     private String id;
-    private  String brokerId;
+    private String brokerId;
     private String ruleName;
-    private  int status;
+    private int status;
     private Date startTime;
 
     @Value("0")
@@ -19,13 +19,11 @@ public class StatisticRule implements Serializable {
     @Value("0")
     private int notHitTimes;
     @Value("0")
-    private int publishEventSuccess;
+    private int dataFlowSuccess;
     @Value("0")
-    private int publishEventFail;
+    private int dataFlowFail;
     @Value("0")
-    private int writeDBSuccess;
-    @Value("0")
-    private int writeDBFail;
+    private int destinationType;
     @Value("")
     private String lastFailReason;
 }

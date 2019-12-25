@@ -240,7 +240,7 @@ public class QuartzManager {
     /**
      * get the statistic jobs
      */
-    public StatisticWeEvent getStatisticJobs(StatisticWeEvent statisticWeEvent, String brokerId) {
+    public StatisticWeEvent getStatisticJobs(StatisticWeEvent statisticWeEvent, List<String> brokerIds) {
         Map<String, StatisticRule> statisticRuleMap = statisticWeEvent.getStatisticRuleMap();
 
         try {
@@ -257,24 +257,27 @@ public class QuartzManager {
                 if (null != (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
                     CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
                     // match the right rule
-                    if (brokerId.equals(rule.getBrokerId())) {
-                        if (!statisticRuleMap.containsKey(rule.getId())) {
-                            StatisticRule statisticRule = new StatisticRule();
-                            statisticRule.setId(rule.getId());
-                            statisticRule.setBrokerId(rule.getBrokerId());
-                            statisticRule.setRuleName(rule.getRuleName());
-                            statisticRule.setStatus(rule.getStatus());
-                            statisticRule.setStartTime(rule.getCreatedTime());
-                            statisticRuleMap.put(rule.getId(), statisticRule);
-                        }
-                        // statistic
-                        if ("1".equals(rule.getSystemTag())) {
-                            systemAmount++;
-                        } else {
-                            userAmount++;
-                        }
-                        if ("1".equals(rule.getStatus())) {
-                            runAmount++;
+                    for (String brokerId : brokerIds) {
+                        if (brokerId.equals(rule.getId())) {
+                            if (!statisticRuleMap.containsKey(rule.getId())) {
+                                StatisticRule statisticRule = new StatisticRule();
+                                statisticRule.setId(rule.getId());
+                                statisticRule.setBrokerId(rule.getBrokerId());
+                                statisticRule.setRuleName(rule.getRuleName());
+                                statisticRule.setStatus(rule.getStatus());
+                                statisticRule.setStartTime(rule.getCreatedTime());
+                                statisticRule.setDestinationType(rule.getConditionType());
+                                statisticRuleMap.put(rule.getId(), statisticRule);
+                            }
+                            // statistic
+                            if ("1".equals(rule.getSystemTag())) {
+                                systemAmount++;
+                            } else {
+                                userAmount++;
+                            }
+                            if ("1".equals(rule.getStatus())) {
+                                runAmount++;
+                            }
                         }
                     }
                 }

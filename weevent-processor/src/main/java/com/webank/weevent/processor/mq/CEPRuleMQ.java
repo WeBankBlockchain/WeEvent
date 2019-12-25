@@ -549,6 +549,7 @@ public class CEPRuleMQ {
             statisticRule.setRuleName(rule.getRuleName());
             statisticRule.setStatus(rule.getStatus());
             statisticRule.setStartTime(rule.getCreatedTime());
+            statisticRule.setDestinationType(rule.getConditionType());
             statisticRuleMap.put(rule.getId(), statisticRule);
 
 
@@ -564,6 +565,7 @@ public class CEPRuleMQ {
             switch (type.getKey()) {
                 case ConstantsHelper.HIT_TIMES:
                     statisticRule.setHitTimes(increase(statisticRule.getHitTimes()));
+
                     break;
 
                 case ConstantsHelper.NOT_HIT_TIMES:
@@ -571,19 +573,19 @@ public class CEPRuleMQ {
                     break;
 
                 case ConstantsHelper.WRITE_DB_SUCCESS:
-                    statisticRule.setWriteDBSuccess(increase(statisticRule.getWriteDBSuccess()));
+                    statisticRule.setDataFlowSuccess(increase(statisticRule.getDataFlowSuccess()));
                     break;
 
                 case ConstantsHelper.WRITE_DB_FAIL:
-                    statisticRule.setWriteDBFail(increase(statisticRule.getWriteDBFail()));
+                    statisticRule.setDataFlowFail(increase(statisticRule.getDataFlowFail()));
                     break;
 
                 case ConstantsHelper.PUBLISH_EVENT_SUCCESS:
-                    statisticRule.setPublishEventSuccess(increase(statisticRule.getPublishEventSuccess()));
+                    statisticRule.setDataFlowSuccess(increase(statisticRule.getDataFlowSuccess()));
                     break;
 
                 case ConstantsHelper.PUBLISH_EVENT_FAIL:
-                    statisticRule.setPublishEventFail(increase(statisticRule.getPublishEventFail()));
+                    statisticRule.setDataFlowFail(increase(statisticRule.getDataFlowFail()));
                     break;
 
                 case ConstantsHelper.LAST_FAIL_REASON:
@@ -599,7 +601,7 @@ public class CEPRuleMQ {
     }
 
     private static int increase(int number) {
-        return new AtomicInteger(number).getAndIncrement();
+        return (new AtomicInteger(number)).incrementAndGet();
     }
 
     private static class DBThread implements Runnable {

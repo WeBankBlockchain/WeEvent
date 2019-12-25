@@ -1,6 +1,7 @@
 package com.webank.weevent.processor.service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.processor.model.CEPRule;
@@ -21,7 +22,7 @@ public class StatisticRuleService {
     @Autowired
     private CEPRuleMQ cEPRuleMQ;
 
-    public StatisticWeEvent getStatisticWeEvent(String brokerId) {
+    public StatisticWeEvent getStatisticWeEvent(List<String> idList) {
         StatisticWeEvent statisticWeEvent = cEPRuleMQ.getStatisticWeEvent();
         Map<String, StatisticRule> statisticRuleMap = new HashMap<>();
 
@@ -29,12 +30,15 @@ public class StatisticRuleService {
         for (Map.Entry<String, StatisticRule> entry : statisticWeEvent.getStatisticRuleMap().entrySet()) {
             StatisticRule rule = entry.getValue();
             // check the brokerId
-            if (brokerId.equals(rule.getBrokerId())) {
-                statisticRuleMap.put(rule.getId(), rule);
+            for (String id : idList) {
+                if (id.equals(rule.getId())) {
+                    statisticRuleMap.put(rule.getId(), rule);
+                }
             }
+
         }
         statisticWeEvent.setStatisticRuleMap(statisticRuleMap);
-        StatisticWeEvent statisticJobs = quartzManager.getStatisticJobs(statisticWeEvent, brokerId);
+        StatisticWeEvent statisticJobs = quartzManager.getStatisticJobs(statisticWeEvent, idList);
         return statisticJobs;
     }
 }

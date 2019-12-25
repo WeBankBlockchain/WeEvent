@@ -1,5 +1,7 @@
 package com.webank.weevent.processor.controller;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import com.webank.weevent.processor.ProcessorApplication;
@@ -97,10 +99,10 @@ public class CEPRuleController {
 
     @RequestMapping(value = "/statistic", method = RequestMethod.GET)
     @ResponseBody
-    public BaseRspEntity statistic(@RequestParam(name = "brokerId") String brokerId) {
+    public BaseRspEntity statistic(@RequestBody List<String> idList) {
 
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
-        StatisticWeEvent getWeEventCollecttion = statisticRuleService.getStatisticWeEvent(brokerId);
+        StatisticWeEvent getWeEventCollecttion = statisticRuleService.getStatisticWeEvent(idList);
 
         if (null == getWeEventCollecttion) { //fail
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
