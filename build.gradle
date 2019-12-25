@@ -67,8 +67,6 @@ ext {
     quartzVersion = "2.3.0"
     // Java-WebSocket
     WebSocketVersion = "1.4.0"
-    // jackSon
-    jackSonVersion = "2.10.0";
 }
 
 buildscript {
