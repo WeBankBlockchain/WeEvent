@@ -3,6 +3,7 @@ package com.webank.weevent.governance.handler;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -13,9 +14,9 @@ import com.webank.weevent.governance.entity.BaseResponse;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.service.AccountService;
 import com.webank.weevent.governance.utils.CookiesTools;
+import com.webank.weevent.governance.utils.JsonUtil;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -32,14 +33,15 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     @Autowired
     private CookiesTools cookiesTools;
 
+    @SneakyThrows
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-            Authentication authentication) throws IOException, ServletException {
+                                        Authentication authentication) throws IOException, ServletException {
         log.debug("login success");
 
         Object obj = authentication.getPrincipal();
-        JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(obj));
-        String username = jsonObject.getString("username");
+        Map map = JsonUtil.parseObject(JsonUtil.toJSONString(obj), Map.class);
+        String username = (String) map.get("username");
         // response accountEntity info
         AccountEntity accountEntity = accountService.queryByUsername(username);
         Map<String, Object> rsp = new HashMap<>();
@@ -60,7 +62,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         cookiesTools.addCookie(request, response, ConstantProperties.COOKIE_MGR_ACCOUNT_ID, userId.toString());
         cookiesTools.addCookie(request, response, ConstantProperties.COOKIE_JSESSIONID, request.getSession().getId());
 
-        String backStr = JSON.toJSONString(baseResponse);
+        String backStr = JsonUtil.toJSONString(baseResponse);
         log.debug("login backInfo:{}", backStr);
 
         response.setContentType("application/json;charset=UTF-8");
