@@ -205,17 +205,22 @@ public class CommonUtil {
         // get all select field and value, and the select field must in eventContent.
         for (String key : result) {
             // set the flag
-            if (ConstantsHelper.EVENT_ID.equals(key)) {
-                sqlOrder.put(ConstantsHelper.EVENT_ID, eventId);
-            }
-            if (ConstantsHelper.TOPIC_NAME.equals(key)) {
-                sqlOrder.put(ConstantsHelper.TOPIC_NAME, topicName);
-            }
-            if (ConstantsHelper.BROKER_ID.equals(key)) {
-                sqlOrder.put(ConstantsHelper.BROKER_ID, brokerId);
-            }
-            if (ConstantsHelper.GROUP_ID.equals(key)) {
-                sqlOrder.put(ConstantsHelper.GROUP_ID, groupId);
+            switch (key) {
+                case ConstantsHelper.EVENT_ID:
+                    sqlOrder.put(ConstantsHelper.EVENT_ID, eventId);
+                    break;
+                case ConstantsHelper.TOPIC_NAME:
+                    sqlOrder.put(ConstantsHelper.TOPIC_NAME, topicName);
+                    break;
+                case ConstantsHelper.BROKER_ID:
+                    sqlOrder.put(ConstantsHelper.BROKER_ID, brokerId);
+                    break;
+                case ConstantsHelper.GROUP_ID:
+                    sqlOrder.put(ConstantsHelper.GROUP_ID, groupId);
+                    break;
+                default:
+                    break;
+
             }
         }
 
