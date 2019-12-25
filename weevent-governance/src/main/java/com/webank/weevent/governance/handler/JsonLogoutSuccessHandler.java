@@ -1,6 +1,7 @@
 package com.webank.weevent.governance.handler;
 
 import java.io.IOException;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -8,8 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.webank.weevent.governance.code.ConstantCode;
 import com.webank.weevent.governance.entity.BaseResponse;
 import com.webank.weevent.governance.utils.CookiesTools;
+import com.webank.weevent.governance.utils.JsonUtil;
 
-import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -36,7 +37,7 @@ public class JsonLogoutSuccessHandler implements LogoutSuccessHandler {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
 
         response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(JSON.toJSONString(baseResponse));
+        response.getWriter().write(JsonUtil.toJSONString(baseResponse));
     }
 
 }

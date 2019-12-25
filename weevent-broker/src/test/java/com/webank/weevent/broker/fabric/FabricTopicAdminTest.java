@@ -76,7 +76,7 @@ public class FabricTopicAdminTest extends JUnitTestBase {
 
     @Test
     public void testList() throws Exception {
-        TopicPage topicPage = this.iProducer.list(1, 10, this.channelName);
+        TopicPage topicPage = this.iProducer.list(0, 10, this.channelName);
         Assert.assertTrue(topicPage.getTotal() > 0);
     }
 
