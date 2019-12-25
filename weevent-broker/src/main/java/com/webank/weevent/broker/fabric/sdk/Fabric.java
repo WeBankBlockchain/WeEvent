@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -37,6 +38,7 @@ import org.apache.commons.codec.DecoderException;
 import org.hyperledger.fabric.sdk.ChaincodeID;
 import org.hyperledger.fabric.sdk.Channel;
 import org.hyperledger.fabric.sdk.HFClient;
+import org.hyperledger.fabric.sdk.Peer;
 import org.hyperledger.fabric.sdk.exception.InvalidArgumentException;
 import org.hyperledger.fabric.sdk.exception.ProposalException;
 
@@ -49,8 +51,11 @@ import org.hyperledger.fabric.sdk.exception.ProposalException;
 public class Fabric {
     //config
     private FabricConfig fabricConfig;
-    private static HFClient hfClient = null;
-    private static Channel channel = null;
+    private static HFClient hfClient;
+    private static Channel channel;
+    // ChaincodeID
+    private static ChaincodeID topicChaincodeID;
+    private static ChaincodeID topicControllerChaincodeID;
     // topic info list in local memory
     private Map<String, TopicInfo> topicInfo = new ConcurrentHashMap<>();
 
@@ -60,8 +65,11 @@ public class Fabric {
 
     public void init(String channelName) throws BrokerException {
         try {
-            this.hfClient = FabricSDKWrapper.initializeClient(this.fabricConfig);
-            this.channel = FabricSDKWrapper.initializeChannel(hfClient, channelName, this.fabricConfig);
+            hfClient = FabricSDKWrapper.initializeClient(this.fabricConfig);
+            channel = FabricSDKWrapper.initializeChannel(hfClient, channelName, this.fabricConfig);
+            topicControllerChaincodeID = FabricSDKWrapper
+                    .getChainCodeID(fabricConfig.getTopicControllerName(), fabricConfig.getTopicControllerVersion());
+            topicChaincodeID = getTopicChaincodeID(fabricConfig, topicControllerChaincodeID);
         } catch (Exception e) {
             log.error("init fabric failed", e);
             throw new BrokerException("init fabric failed");
@@ -78,8 +86,7 @@ public class Fabric {
         }
 
         try {
-            ChaincodeID chaincodeID = FabricSDKWrapper.getChainCodeID(fabricConfig.getTopicControllerName(), fabricConfig.getTopicControllerVersion());
-            TransactionInfo transactionInfo = FabricSDKWrapper.executeTransaction(hfClient, channel, chaincodeID, false,
+            TransactionInfo transactionInfo = FabricSDKWrapper.executeTransaction(hfClient, channel, topicControllerChaincodeID, false,
                     "getTopicInfo", fabricConfig.getTransactionTimeout(), topicName);
             if (ErrorCode.SUCCESS.getCode() != transactionInfo.getCode()) {
                 throw new BrokerException(transactionInfo.getCode(), transactionInfo.getMessage());
@@ -99,9 +106,7 @@ public class Fabric {
 
     public boolean createTopic(String topicName) throws BrokerException {
         try {
-            ChaincodeID chaincodeID = FabricSDKWrapper.getChainCodeID(fabricConfig.getTopicControllerName(),
-                    fabricConfig.getTopicControllerVersion());
-            TransactionInfo transactionInfo = FabricSDKWrapper.executeTransaction(hfClient, channel, chaincodeID, true, "addTopicInfo",
+            TransactionInfo transactionInfo = FabricSDKWrapper.executeTransaction(hfClient, channel, topicControllerChaincodeID, true, "addTopicInfo",
                     fabricConfig.getTransactionTimeout(), topicName, getTimestamp(System.currentTimeMillis()), fabricConfig.getTopicVerison());
             if (ErrorCode.SUCCESS.getCode() != transactionInfo.getCode()) {
                 if (WeEventConstants.TOPIC_ALREADY_EXIST.equals(transactionInfo.getMessage())) {
@@ -121,9 +126,7 @@ public class Fabric {
 
     public boolean isTopicExist(String topicName) throws BrokerException {
         try {
-            ChaincodeID chaincodeID = FabricSDKWrapper.getChainCodeID(fabricConfig.getTopicControllerName(),
-                    fabricConfig.getTopicControllerVersion());
-            TransactionInfo transactionInfo = FabricSDKWrapper.executeTransaction(hfClient, channel, chaincodeID, false,
+            TransactionInfo transactionInfo = FabricSDKWrapper.executeTransaction(hfClient, channel, topicControllerChaincodeID, false,
                     "isTopicExist", fabricConfig.getTransactionTimeout(), topicName);
 
             return ErrorCode.SUCCESS.getCode() == transactionInfo.getCode();
@@ -139,9 +142,7 @@ public class Fabric {
     public TopicPage listTopicName(Integer pageIndex, Integer pageSize) throws BrokerException {
         TopicPage topicPage = new TopicPage();
         try {
-            ChaincodeID chaincodeID = FabricSDKWrapper.getChainCodeID(fabricConfig.getTopicControllerName(),
-                    fabricConfig.getTopicControllerVersion());
-            TransactionInfo transactionInfo = FabricSDKWrapper.executeTransaction(hfClient, channel, chaincodeID, false,
+            TransactionInfo transactionInfo = FabricSDKWrapper.executeTransaction(hfClient, channel, topicControllerChaincodeID, false,
                     "listTopicName", fabricConfig.getTransactionTimeout(), String.valueOf(pageIndex), String.valueOf(pageSize));
 
             if (ErrorCode.SUCCESS.getCode() != transactionInfo.getCode()) {
@@ -159,10 +160,10 @@ public class Fabric {
 
             return topicPage;
         } catch (InterruptedException | ProposalException | ExecutionException | InvalidArgumentException exception) {
-            log.error("list topicName failed due to transaction execution error.{}", exception);
+            log.error("list topicName failed due to transaction execution error", exception);
             throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (TimeoutException timeout) {
-            log.error("list topicName failed due to transaction execution timeout. {}", timeout);
+            log.error("list topicName failed due to transaction execution timeout", timeout);
             throw new BrokerException(ErrorCode.TRANSACTION_TIMEOUT);
         }
     }
@@ -183,7 +184,7 @@ public class Fabric {
 
     }
 
-    public CompletableFuture<SendResult> publishEvent(String topicName, String eventContent, String extensions) throws BrokerException {
+    CompletableFuture<SendResult> publishEvent(String topicName, String eventContent, String extensions) throws BrokerException {
         if (!isTopicExist(topicName)) {
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
         }
@@ -191,10 +192,9 @@ public class Fabric {
         SendResult sendResult = new SendResult();
         sendResult.setTopic(topicName);
         try {
-            ChaincodeID chaincodeID = getChaincodeID(fabricConfig);
             return FabricSDKWrapper.executeTransactionAsync(hfClient,
                     channel,
-                    chaincodeID,
+                    topicChaincodeID,
                     true,
                     "publish",
                     topicName,
@@ -205,23 +205,15 @@ public class Fabric {
                 sendResult.setTopic(topicName);
                 return sendResult;
             });
-        } catch (InterruptedException | ProposalException | ExecutionException | InvalidArgumentException exception) {
+        } catch (ProposalException | InvalidArgumentException exception) {
             log.error("publish event failed due to transaction execution error.", exception);
             throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        } catch (TimeoutException timeout) {
-            log.error("publish event failed due to transaction execution timeout.", timeout);
-
-            sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
-            CompletableFuture<SendResult> completableFuture = new CompletableFuture<>();
-            completableFuture.complete(sendResult);
-            return completableFuture;
         }
     }
 
-    private static ChaincodeID getChaincodeID(FabricConfig fabricConfig) throws InvalidArgumentException, ProposalException, InterruptedException, ExecutionException, TimeoutException {
-        ChaincodeID chaincodeID = FabricSDKWrapper.getChainCodeID(fabricConfig.getTopicControllerName(), fabricConfig.getTopicControllerVersion());
-        String topicContractName = FabricSDKWrapper.executeTransaction(hfClient, channel, chaincodeID, false, "getTopicContractName", fabricConfig.getTransactionTimeout()).getPayLoad();
-        String topicContractVersion = FabricSDKWrapper.executeTransaction(hfClient, channel, chaincodeID, false, "getTopicContractVersion", fabricConfig.getTransactionTimeout()).getPayLoad();
+    private static ChaincodeID getTopicChaincodeID(FabricConfig fabricConfig, ChaincodeID topicControllerChaincodeID) throws InvalidArgumentException, ProposalException, InterruptedException, ExecutionException, TimeoutException {
+        String topicContractName = FabricSDKWrapper.executeTransaction(hfClient, channel, topicControllerChaincodeID, false, "getTopicContractName", fabricConfig.getTransactionTimeout()).getPayLoad();
+        String topicContractVersion = FabricSDKWrapper.executeTransaction(hfClient, channel, topicControllerChaincodeID, false, "getTopicContractVersion", fabricConfig.getTransactionTimeout()).getPayLoad();
 
         return FabricSDKWrapper.getChainCodeID(topicContractName, topicContractVersion);
     }
@@ -230,7 +222,7 @@ public class Fabric {
         try {
             return channel.queryBlockchainInfo().getHeight() - 1;
         } catch (Exception e) {
-            log.error("get block height error:{}", e);
+            log.error("get block height error", e);
             throw new BrokerException(ErrorCode.GET_BLOCK_HEIGHT_ERROR);
         }
     }
@@ -241,12 +233,12 @@ public class Fabric {
      * @param blockNum the blockNum
      * @return java.lang.Integer null if net error
      */
-    public List<WeEvent> loop(Long blockNum) throws BrokerException {
+    public List<WeEvent> loop(Long blockNum) {
         List<WeEvent> weEventList = new ArrayList<>();
         try {
             weEventList = FabricSDKWrapper.getBlockChainInfo(channel, blockNum);
         } catch (Exception e) {
-            log.error("getEvent error:{}", e);
+            log.error("getEvent error", e);
         }
         return weEventList;
     }
@@ -269,7 +261,7 @@ public class Fabric {
         try {
             return FabricSDKWrapper.getGroupGeneral(channel);
         } catch (ProposalException | InvalidArgumentException e) {
-            log.error("get group general error:{}", e);
+            log.error("get group general error", e);
             throw new BrokerException(ErrorCode.FABRICSDK_GETBLOCKINFO_ERROR);
         }
     }
@@ -279,7 +271,7 @@ public class Fabric {
         try {
             return FabricSDKWrapper.queryTransList(fabricConfig, channel, blockNumber, blockHash, pageIndex, pageSize);
         } catch (InvalidArgumentException | ProposalException | DecoderException e) {
-            log.error("query trans list by transHash and blockNum error:{}", e);
+            log.error("query trans list by transHash and blockNum error", e);
             throw new BrokerException(ErrorCode.FABRICSDK_GETBLOCKINFO_ERROR);
         }
     }
@@ -289,7 +281,7 @@ public class Fabric {
         try {
             return FabricSDKWrapper.queryBlockList(fabricConfig, channel, blockNumber, blockHash, pageIndex, pageSize);
         } catch (InvalidArgumentException | ProposalException | ExecutionException | InterruptedException | DecoderException | InvalidProtocolBufferException e) {
-            log.error("query block list by transHash and blockNum error:{}", e);
+            log.error("query block list by transHash and blockNum error", e);
             throw new BrokerException(ErrorCode.FABRICSDK_GETBLOCKINFO_ERROR);
         }
     }
@@ -299,8 +291,19 @@ public class Fabric {
         try {
             return FabricSDKWrapper.queryNodeList(fabricConfig, channel, pageIndex, pageSize);
         } catch (InvalidArgumentException | ProposalException e) {
-            log.error("query node list by transHash and blockNum error:{}", e);
+            log.error("query node list by transHash and blockNum error", e);
             throw new BrokerException(ErrorCode.FABRICSDK_GETBLOCKINFO_ERROR);
+        }
+    }
+
+    List<String> listChannelName(FabricConfig fabricConfig) throws BrokerException {
+        try {
+            Peer peer = FabricSDKWrapper.getPeer(hfClient, fabricConfig);
+            Set<String> channels = hfClient.queryChannels(peer);
+            return new ArrayList<>(channels);
+        } catch (Exception e) {
+            log.error("get channel name list failed , e: ", e);
+            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
         }
     }
 }

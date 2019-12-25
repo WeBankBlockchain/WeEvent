@@ -63,7 +63,7 @@ public class FabricDelegate {
         Fabric fabric = new Fabric(config);
         fabric.init(config.getChannelName());
         fabricMap.put(config.getChannelName(), fabric);
-        channels = FabricSDKWrapper.listChannelName(config);
+        channels = fabric.listChannelName(config);
         initRedisService();
     }
 
@@ -80,7 +80,7 @@ public class FabricDelegate {
         return this.fabricMap.get(channelName).getBlockHeight();
     }
 
-    public List<WeEvent> loop(Long blockNum, String channelName) throws BrokerException {
+    public List<WeEvent> loop(Long blockNum, String channelName) {
         return this.fabricMap.get(channelName).loop(blockNum);
     }
 
