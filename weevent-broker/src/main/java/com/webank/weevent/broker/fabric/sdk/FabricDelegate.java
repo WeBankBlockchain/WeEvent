@@ -81,7 +81,23 @@ public class FabricDelegate {
     }
 
     public List<WeEvent> loop(Long blockNum, String channelName) {
-        return this.fabricMap.get(channelName).loop(blockNum);
+        List<WeEvent> events = new ArrayList<>();
+        if (blockNum <= 0) {
+            return events;
+        }
+
+        // try to get data from local cache and redis
+        String key = getRedisKey(blockNum, channelName);
+        events = getFromCache(key);
+        // redis data may be dirty
+        if (events != null) {
+            return events;
+        }
+        events = this.fabricMap.get(channelName).loop(blockNum);
+
+        //write events list to redis server
+        setCache(key, events);
+        return events;
     }
 
     public static String getChannelName() {
@@ -94,6 +110,40 @@ public class FabricDelegate {
 
     public FabricConfig getFabricConfig() {
         return this.fabricConfig;
+    }
+
+    private String getRedisKey(Long blockNum, String channelName) {
+        return channelName.concat(Long.toString(blockNum));
+    }
+
+    private List<WeEvent> getFromCache(String key) {
+        try {
+            if (blockCache != null && blockCache.containsKey(key)) {
+                return blockCache.get(key);
+            }
+            if (redisTemplate != null) {
+                return redisTemplate.opsForValue().get(key);
+            }
+        } catch (Exception e) {
+            log.error("Exception happened while read events from redis server", e);
+        }
+
+        return null;
+    }
+
+    private void setCache(String key, List<WeEvent> events) {
+        try {
+            if (events != null) {
+                if (blockCache != null) {
+                    blockCache.putIfAbsent(key, events);
+                }
+                if (redisTemplate != null) {
+                    redisTemplate.opsForValue().set(key, events);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Exception happened while write events to redis server", e);
+        }
     }
 
 }
