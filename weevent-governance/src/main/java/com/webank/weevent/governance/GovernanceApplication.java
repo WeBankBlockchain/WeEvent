@@ -119,6 +119,28 @@ public class GovernanceApplication {
     @Autowired
     private ForwardProcessorFilter forwardProcessorFilter;
 
+    //browerSecurity
+    @Autowired
+    private AccountDetailsService userDetailService;
+
+    @Qualifier(value = "loginSuccessHandler")
+    @Autowired
+    private AuthenticationSuccessHandler loginSuccessHandler;
+
+    @Qualifier(value = "loginFailHandler")
+    @Autowired
+    private LoginFailHandler loginfailHandler;
+
+    @Autowired
+    private JsonAuthenticationEntryPoint jsonAuthenticationEntryPoint;
+
+    @Autowired
+    private JsonAccessDeniedHandler jsonAccessDeniedHandler;
+
+    @Autowired
+    private JsonLogoutSuccessHandler jsonLogoutSuccessHandler;
+
+
     private PoolingHttpClientConnectionManager cm;
 
 
@@ -141,19 +163,56 @@ public class GovernanceApplication {
     }
 
     @Bean
-    public BrowerSecurityConfig initBrowerSecurityConfig() {
-        return new BrowerSecurityConfig();
-    }
+    public WebSecurityConfigurerAdapter initBrowerSecurityConfig() {
+        WebSecurityConfigurerAdapter webSecurityConfigurerAdapter = new WebSecurityConfigurerAdapter() {
+            @Override
+            protected void configure(HttpSecurity http) throws Exception {
+                http.exceptionHandling().accessDeniedHandler(jsonAccessDeniedHandler);
 
-    @Bean
-    public HttpsClientRequestFactory initHttpsClientRequestFactory() {
-        return new HttpsClientRequestFactory();
-    }
+                http.formLogin() // define user login page
+                        .loginPage("/user/require")
+                        .loginProcessingUrl("/user/login")
+                        .usernameParameter("username")
+                        .passwordParameter("password")
+                        .permitAll()
+                        .successHandler(loginSuccessHandler) // if login success
+                        .failureHandler(loginfailHandler) // if login fail
+                        .and()
+                        .authorizeRequests()
+                        .antMatchers("/user/**", "/", "/static/**", "/weevent-governance/user/**")
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated()
+                        .and()
+                        .csrf()
+                        .disable()
+                        .httpBasic()
+                        .authenticationEntryPoint(jsonAuthenticationEntryPoint)
+                        .and()
+                        .logout()
+                        .logoutUrl("/user/logout")
+                        .deleteCookies(ConstantProperties.COOKIE_JSESSIONID, ConstantProperties.COOKIE_MGR_ACCOUNT)
+                        .logoutSuccessHandler(jsonLogoutSuccessHandler)
+                        .permitAll();
+            }
 
+            @Override
+            protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+                auth.userDetailsService(userDetailService).passwordEncoder(new BCryptPasswordEncoder());
+            }
+
+            @Override
+            public void configure(WebSecurity web) throws Exception {
+                web.ignoring().antMatchers("/static/**");
+            }
+
+        };
+        return webSecurityConfigurerAdapter;
+    }
 
     @Bean
     public ClientHttpRequestFactory httpsClientRequestFactory() {
-        HttpsClientRequestFactory factory = new HttpsClientRequestFactory();
+        SimpleClientHttpRequestFactory factory = initHttpsFactory();
         factory.setReadTimeout(readTimeout);// ms
         factory.setConnectTimeout(connectTimeOut);// ms
         return factory;
@@ -311,125 +370,62 @@ public class GovernanceApplication {
             // don't check
         }
     }
-}
-
-class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
-
-    @Autowired
-    private AccountDetailsService userDetailService;
-
-    @Qualifier(value = "loginSuccessHandler")
-    @Autowired
-    private AuthenticationSuccessHandler loginSuccessHandler;
-
-    @Qualifier(value = "loginFailHandler")
-    @Autowired
-    private LoginFailHandler loginfailHandler;
-
-    @Autowired
-    private JsonAuthenticationEntryPoint jsonAuthenticationEntryPoint;
-
-    @Autowired
-    private JsonAccessDeniedHandler jsonAccessDeniedHandler;
-
-    @Autowired
-    private JsonLogoutSuccessHandler jsonLogoutSuccessHandler;
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-
-        http.exceptionHandling().accessDeniedHandler(jsonAccessDeniedHandler);
-
-        http.formLogin() // define user login page
-                .loginPage("/user/require")
-                .loginProcessingUrl("/user/login")
-                .usernameParameter("username")
-                .passwordParameter("password")
-                .permitAll()
-                .successHandler(loginSuccessHandler) // if login success
-                .failureHandler(loginfailHandler) // if login fail
-                .and()
-                .authorizeRequests()
-                .antMatchers("/user/**", "/", "/static/**", "/weevent-governance/user/**")
-                .permitAll()
-                .anyRequest()
-                .authenticated()
-                .and()
-                .csrf()
-                .disable()
-                .httpBasic()
-                .authenticationEntryPoint(jsonAuthenticationEntryPoint)
-                .and()
-                .logout()
-                .logoutUrl("/user/logout")
-                .deleteCookies(ConstantProperties.COOKIE_JSESSIONID, ConstantProperties.COOKIE_MGR_ACCOUNT)
-                .logoutSuccessHandler(jsonLogoutSuccessHandler)
-                .permitAll();
-    }
 
 
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/static/**");
-    }
+    @Bean
+    public SimpleClientHttpRequestFactory initHttpsFactory() {
+        SimpleClientHttpRequestFactory simpleClientHttpRequestFactory = new SimpleClientHttpRequestFactory() {
+            @Override
+            protected void prepareConnection(HttpURLConnection connection, String httpMethod) throws IOException {
+                try {
+                    if (!(connection instanceof HttpsURLConnection)) {
+                        throw new RuntimeException("An instance of HttpsURLConnection is expected");
+                    }
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailService).passwordEncoder(new BCryptPasswordEncoder());
-    }
-}
+                    HttpsURLConnection httpsConnection = (HttpsURLConnection) connection;
 
+                    TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
+                        @Override
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return null;
+                        }
 
-@Slf4j
-class HttpsClientRequestFactory extends SimpleClientHttpRequestFactory {
+                        @Override
+                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                        }
 
-    @Override
-    protected void prepareConnection(HttpURLConnection connection, String httpMethod) {
-        try {
-            if (!(connection instanceof HttpsURLConnection)) {
-                throw new RuntimeException("An instance of HttpsURLConnection is expected");
+                        @Override
+                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                        }
+
+                    }};
+
+                    SSLContext sslContext = SSLContext.getInstance("TLS");
+                    sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+                    httpsConnection.setSSLSocketFactory(new MyCustomSSLSocketFactory(sslContext.getSocketFactory()));
+
+                    httpsConnection.setHostnameVerifier(new HostnameVerifier() {
+                        @Override
+                        public boolean verify(String s, SSLSession sslSession) {
+                            return true;
+                        }
+                    });
+
+                    super.prepareConnection(httpsConnection, httpMethod);
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                }
             }
 
-            HttpsURLConnection httpsConnection = (HttpsURLConnection) connection;
 
-            TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
-                @Override
-                public X509Certificate[] getAcceptedIssuers() {
-                    return null;
-                }
-
-                @Override
-                public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                }
-
-                @Override
-                public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                }
-
-            }};
-
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-            httpsConnection.setSSLSocketFactory(new MyCustomSSLSocketFactory(sslContext.getSocketFactory()));
-
-            httpsConnection.setHostnameVerifier(new HostnameVerifier() {
-                @Override
-                public boolean verify(String s, SSLSession sslSession) {
-                    return true;
-                }
-            });
-
-            super.prepareConnection(httpsConnection, httpMethod);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
+        };
+        return simpleClientHttpRequestFactory;
     }
 
     /**
-     * We need to invoke sslSocket.setEnabledProtocols(new String[] {"SSLv3"});
+     *  We need to invoke sslSocket.setEnabledProtocols(new String[] {"SSLv3"});
      */
-    private static class MyCustomSSLSocketFactory extends SSLSocketFactory {
-
+    class MyCustomSSLSocketFactory extends SSLSocketFactory {
         private final SSLSocketFactory delegate;
 
         public MyCustomSSLSocketFactory(SSLSocketFactory delegate) {
