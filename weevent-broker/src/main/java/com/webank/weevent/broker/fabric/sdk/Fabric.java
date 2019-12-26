@@ -178,7 +178,7 @@ public class Fabric {
 
     }
 
-    CompletableFuture<SendResult> publishEvent(String topicName, String eventContent, String extensions) throws BrokerException {
+    public CompletableFuture<SendResult> publishEvent(String topicName, String eventContent, String extensions) throws BrokerException {
         if (!isTopicExist(topicName)) {
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
         }
@@ -277,7 +277,7 @@ public class Fabric {
         }
     }
 
-    List<String> listChannelName(FabricConfig fabricConfig) throws BrokerException {
+    public List<String> listChannelName(FabricConfig fabricConfig) throws BrokerException {
         try {
             Peer peer = FabricSDKWrapper.getPeer(hfClient, fabricConfig);
             Set<String> channels = hfClient.queryChannels(peer);
