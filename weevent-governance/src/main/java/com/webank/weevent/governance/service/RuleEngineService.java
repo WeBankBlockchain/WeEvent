@@ -223,8 +223,6 @@ public class RuleEngineService {
             String payload = JsonUtil.toJSONString(ruleEngineEntity.getPayloadMap());
             ruleEngineEntity.setPayload(payload);
             ruleEngineEntity.setLastUpdate(new Date());
-            String functionArrayStr = ruleEngineEntity.getFunctionArray() == null ? null : JsonUtil.toJSONString(ruleEngineEntity.getFunctionArray());
-            ruleEngineEntity.setFunctionArrayStr(functionArrayStr);
             // check sql condition
             boolean flag = validationConditions(request, ruleEngineEntity);
             if (!flag) {
@@ -269,7 +267,7 @@ public class RuleEngineService {
                 ruleEngineConditionRepository.saveAll(ruleEngineConditionList);
             }
             BeanUtils.copyProperties(rule, ruleEngineEntity, "ruleName", "payload", "selectField", "conditionType",
-                    "fromDestination", "toDestination", "ruleDataBaseId", "errorDestination","functionArrayStr","conditionField");
+                    "fromDestination", "toDestination", "ruleDataBaseId", "errorDestination", "functionArray", "conditionField");
             ruleEngineRepository.save(ruleEngineEntity);
             log.info("update ruleEngine end");
             return true;
@@ -302,7 +300,7 @@ public class RuleEngineService {
         RuleEngineConditionEntity conditionEntity = new RuleEngineConditionEntity();
         conditionEntity.setConnectionOperator(engineConditionEntity.getConnectionOperator());
         conditionEntity.setColumnName(engineConditionEntity.getColumnName());
-        conditionEntity.setConnectionOperator(engineConditionEntity.getConditionalOperator());
+        conditionEntity.setConditionalOperator(engineConditionEntity.getConditionalOperator());
         conditionEntity.setSqlCondition(engineConditionEntity.getSqlCondition());
         conditionEntity.setChildren(engineConditionEntity.getChildren());
         conditionEntity.setColumnMark(engineConditionEntity.getColumnMark());
@@ -344,51 +342,6 @@ public class RuleEngineService {
     }
 
 
-    private String getConditionFieldDetail(List<RuleEngineConditionEntity> ruleEngineConditionList) {
-        if (CollectionUtils.isEmpty(ruleEngineConditionList)) {
-            return null;
-        }
-        String blank = " ";
-        StringBuffer buffer = new StringBuffer(blank);
-        int count = 0;
-        for (RuleEngineConditionEntity entity : ruleEngineConditionList) {
-            if (count == 0) {
-                buffer.append(blank).append(entity.getColumnName()).append(blank)
-                        .append(entity.getConditionalOperator().toUpperCase()).append(blank).append(entity.getSqlCondition()).append(blank);
-            } else {
-                buffer.append(entity.getConnectionOperator().toUpperCase()).append(blank).append(entity.getColumnName()).append(blank)
-                        .append(entity.getConditionalOperator().toUpperCase()).append(blank).append(entity.getSqlCondition()).append(blank);
-            }
-            count++;
-        }
-        return buffer.toString();
-    }
-
-    private String getConditionField(List<RuleEngineConditionEntity> ruleEngineConditionList) {
-        if (CollectionUtils.isEmpty(ruleEngineConditionList)) {
-            return null;
-        }
-        String blank = " ";
-        StringBuffer buffer = new StringBuffer(blank);
-        int count = 0;
-        for (RuleEngineConditionEntity entity : ruleEngineConditionList) {
-            boolean realNumber = NumberValidationUtils.isRealNumber(entity.getSqlCondition());
-            String condtion = entity.getSqlCondition();
-            if (!realNumber) {
-                condtion = "\"" + condtion + "\"";
-            }
-            if (count == 0) {
-                buffer.append(blank).append(entity.getColumnName())
-                        .append(entity.getConditionalOperator()).append(condtion).append(blank);
-
-            } else {
-                buffer.append(entity.getConnectionOperator()).append(blank).append(entity.getColumnName())
-                        .append(entity.getConditionalOperator()).append(condtion).append(blank);
-            }
-            count++;
-        }
-        return buffer.toString();
-    }
 
     @Transactional(rollbackFor = Throwable.class)
     public boolean updateRuleEngineStatus(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response)
@@ -684,11 +637,12 @@ public class RuleEngineService {
 
     private List<RuleEngineConditionEntity> getRuleEngineConditionList(RuleEngineEntity rule) throws IOException {
         List<RuleEngineConditionEntity> ruleEngineConditionEntities = ruleEngineConditionRepository.findAllByRuleId(rule.getId());
-        if (!CollectionUtils.isEmpty(ruleEngineConditionEntities)) {
-            for (RuleEngineConditionEntity engineConditionEntity : ruleEngineConditionEntities) {
-                RuleEngineConditionEntity entity = JsonUtil.parseObject(engineConditionEntity.getSqlConditionJson(), RuleEngineConditionEntity.class);
-                BeanUtils.copyProperties(engineConditionEntity, entity);
-            }
+        if (CollectionUtils.isEmpty(ruleEngineConditionEntities)) {
+            return new ArrayList<>();
+        }
+        for (RuleEngineConditionEntity engineConditionEntity : ruleEngineConditionEntities) {
+            RuleEngineConditionEntity entity = JsonUtil.parseObject(engineConditionEntity.getSqlConditionJson(), RuleEngineConditionEntity.class);
+            BeanUtils.copyProperties(entity, engineConditionEntity);
         }
         return ruleEngineConditionEntities;
     }

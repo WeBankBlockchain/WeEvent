@@ -62,7 +62,7 @@ create TABLE t_account (
 	delete_at BIGINT NOT NULL,
 	error_destination VARCHAR (255),
 	from_destination VARCHAR (255),
-	function_array_str VARCHAR (1024),
+	function_array VARCHAR (1024),
 	group_id VARCHAR (255),
 	payload VARCHAR (255),
 	payload_type INTEGER,
