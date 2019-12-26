@@ -149,7 +149,7 @@ public class FabricSDKWrapper {
 
     public static BlockEvent.TransactionEvent sendTransaction(Channel channel, Collection<ProposalResponse> propResp, Long transactionTimeout) throws InvalidArgumentException, InterruptedException, ExecutionException, TimeoutException {
         List<ProposalResponse> successful = new LinkedList<>();
-        List<ProposalResponse> failed = new LinkedList<ProposalResponse>();
+        List<ProposalResponse> failed = new LinkedList<>();
         for (ProposalResponse response : propResp) {
             if (response.getStatus() == ProposalResponse.Status.SUCCESS) {
                 String payload = new String(response.getChaincodeActionResponsePayload());
