@@ -212,7 +212,7 @@ public class GovernanceApplication {
 
     @Bean
     public ClientHttpRequestFactory httpsClientRequestFactory() {
-        SimpleClientHttpRequestFactory factory = initHttpsClientRequestFactory();
+        SimpleClientHttpRequestFactory factory = initHttpsFactory();
         factory.setReadTimeout(readTimeout);// ms
         factory.setConnectTimeout(connectTimeOut);// ms
         return factory;
@@ -373,7 +373,7 @@ public class GovernanceApplication {
 
 
     @Bean
-    public SimpleClientHttpRequestFactory initHttpsClientRequestFactory() {
+    public SimpleClientHttpRequestFactory initHttpsFactory() {
         SimpleClientHttpRequestFactory simpleClientHttpRequestFactory = new SimpleClientHttpRequestFactory() {
             @Override
             protected void prepareConnection(HttpURLConnection connection, String httpMethod) throws IOException {
