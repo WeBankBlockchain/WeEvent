@@ -35,4 +35,7 @@ public class BrokerEntity extends BrokerBase {
      */
     @Transient
     private String isCreator;
+
+    @Transient
+    private List<Integer> ruleIdList;
 }

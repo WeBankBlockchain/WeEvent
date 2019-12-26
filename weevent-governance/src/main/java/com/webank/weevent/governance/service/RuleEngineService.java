@@ -304,6 +304,7 @@ public class RuleEngineService {
         conditionEntity.setSqlCondition(engineConditionEntity.getSqlCondition());
         conditionEntity.setChildren(engineConditionEntity.getChildren());
         conditionEntity.setColumnMark(engineConditionEntity.getColumnMark());
+        conditionEntity.setFunctionType(engineConditionEntity.getFunctionType());
         return JsonUtil.toJSONString(conditionEntity);
     }
 
@@ -340,7 +341,6 @@ public class RuleEngineService {
         }
 
     }
-
 
 
     @Transactional(rollbackFor = Throwable.class)
@@ -643,6 +643,7 @@ public class RuleEngineService {
         for (RuleEngineConditionEntity engineConditionEntity : ruleEngineConditionEntities) {
             RuleEngineConditionEntity entity = JsonUtil.parseObject(engineConditionEntity.getSqlConditionJson(), RuleEngineConditionEntity.class);
             BeanUtils.copyProperties(entity, engineConditionEntity);
+            engineConditionEntity.setChildren(engineConditionEntity.getChildren() == null ? new ArrayList<>() : engineConditionEntity.getChildren());
         }
         return ruleEngineConditionEntities;
     }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -88,6 +89,9 @@ public class BrokerService {
         List<BrokerEntity> brokerEntityList = brokerMapper.getBrokers(Integer.parseInt(accountId));
         //Set the identity of the creation and authorization
         brokerEntityList.forEach(brokerEntity -> {
+            List<RuleEngineEntity> ruleEngineEntityList = ruleEngineRepository.findAllByBrokerIdAndSystemTagAndDeleteAt(brokerEntity.getId(), true, DeleteAtEnum.NOT_DELETED.getCode());
+            List<Integer> integerList = ruleEngineEntityList.stream().map(RuleEngineEntity::getId).collect(Collectors.toList());
+            brokerEntity.setRuleIdList(integerList);
             if (accountId.equals(brokerEntity.getUserId().toString())) {
                 brokerEntity.setIsCreator(IsCreatorEnum.CREATOR.getCode());
             } else {
@@ -171,12 +175,18 @@ public class BrokerService {
     @Transactional(rollbackFor = Throwable.class)
     public GovernanceResult deleteBroker(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
         authCheck(brokerEntity, request);
+        //delete processor rule
+        RuleEngineEntity ruleEngineEntity = new RuleEngineEntity();
+        ruleEngineEntity.setBrokerId(brokerEntity.getId());
+        Example<RuleEngineEntity> ruleEngineEntityExample = Example.of(ruleEngineEntity);
+        List<RuleEngineEntity> ruleEngines = ruleEngineRepository.findAll(ruleEngineEntityExample);
+        boolean exist = ruleEngineService.checkProcessorExist(request);
+        log.info("exist:{}", exist);
         try {
-            //delete rule
-            boolean exist = ruleEngineService.checkProcessorExist(request);
-            log.info("exist:{}", exist);
-            if (exist) {
-                deleteRule(brokerEntity, request);
+            if (CollectionUtils.isNotEmpty(ruleEngines) && exist) {
+                for (RuleEngineEntity ruleEngine : ruleEngines) {
+                    ruleEngineService.deleteProcessRule(request, ruleEngine);
+                }
             }
             topicRepository.deleteByBrokerId(brokerEntity.getId(), new Date().getTime());
             brokerRepository.deleteById(brokerEntity.getId(), new Date().getTime());
@@ -205,13 +215,6 @@ public class BrokerService {
             return new GovernanceResult(ErrorCode.BROKER_REPEAT);
         }
         brokerEntity.setLastUpdate(new Date());
-        /**
-         * Determine if it is the original URL.
-         * If it is, do not perform rules.
-         * If it is not delete the original rule, create and start a new rule
-         */
-        modifyRule(brokerEntity, request, response);
-        //save broker
         brokerRepository.save(brokerEntity);
         //delete old permission
         permissionRepository.deletePermissionByBrokerId(brokerEntity.getId());
@@ -221,23 +224,6 @@ public class BrokerService {
             permissionRepository.saveAll(perMissionList);
         }
         return GovernanceResult.ok(true);
-    }
-
-    private void modifyRule(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response) throws GovernanceException {
-        BrokerEntity oldBroker = brokerRepository.findByIdAndDeleteAt(brokerEntity.getId(), DeleteAtEnum.NOT_DELETED.getCode());
-        if (brokerEntity.getBrokerUrl().equals(oldBroker.getBrokerUrl())) {
-            return;
-        }
-        boolean exist = ruleEngineService.checkProcessorExist(request);
-        log.info("exist:{}", exist);
-        if (!exist) {
-            return;
-        }
-        //delete old rule
-        deleteRule(brokerEntity, request);
-        //add new rule
-        topicHistoricalService.createRule(request, response, brokerEntity);
-
     }
 
     private ErrorCode checkServerByBrokerEntity(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
@@ -339,19 +325,7 @@ public class BrokerService {
         }
     }
 
-    private void deleteRule(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
-        try {
-            List<RuleEngineEntity> ruleEngines = ruleEngineRepository.findAllByBrokerIdAndDeleteAt(brokerEntity.getId(), DeleteAtEnum.NOT_DELETED.getCode());
-            if (CollectionUtils.isNotEmpty(ruleEngines)) {
-                for (RuleEngineEntity ruleEngine : ruleEngines) {
-                    ruleEngineService.deleteProcessRule(request, ruleEngine);
-                    ruleEngineRepository.deleteRuleEngine(ruleEngine.getId(), System.currentTimeMillis());
-                }
-            }
-        } catch (Exception e) {
-            log.error("delet`e rule fail", e);
-            throw new GovernanceException("delete rule fail", e);
-        }
+    public void deleteByBrokerUrl(String brokerUrl) {
+        brokerRepository.deleteByBrokerUrl(brokerUrl, System.currentTimeMillis());
     }
-
 }
