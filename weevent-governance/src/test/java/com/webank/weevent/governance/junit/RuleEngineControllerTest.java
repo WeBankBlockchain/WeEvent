@@ -55,7 +55,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
         addBroker();
-          testAddRuleEngine();
+        testAddRuleEngine();
     }
 
     //add broker
@@ -88,7 +88,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/add").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(), Map.class);
+        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(),Map.class);
         Assert.assertEquals(jsonObject.get("code").toString(), "-1");
     }
 
@@ -119,13 +119,10 @@ public class RuleEngineControllerTest extends JUnitTestBase {
 
     @Test
     public void testUpdateRuleEngine() throws Exception {
-        String[][] str = new String[][]{{"0", "abs", "a"}, {"22", "trim", "b"}};
-        String t = JsonUtil.toJSONString(str);
         String content = "{\"id\":\"" + ruleMap.get("ruleId") + "\",\"ruleName\":\"temperature-alarm6616\",\"payloadType\":\"1\"," +
                 "\"payloadMap\":{\"temperate\":30,\"humidity\":0.5},\"brokerId\":\"" + this.ruleMap.get("brokerId") + "\"," +
-                "\"fromDestination\":\"com.weevent.stomp\",\"toDestination\":\"com.weevent.test\"," +
-                "\"selectField\":\"temperate\",\"conditionField\":\"abs(a)<21 and c>10 or trim(b)\"," +
-                " \"functionArray\": " + t + ",\"conditionType\":\"1\"}";
+                "\"fromDestination\":\"com.weevent.stomp\",\"toDestination\":\"com.weevent.test\",\"com.weevent.mqtt\":\"test\"," +
+                "\"selectField\":\"temperate\",\"conditionField\":\"temperate>38\",\"conditionType\":\"1\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/update").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
@@ -142,7 +139,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/update").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(), Map.class);
+        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(),Map.class);
         Assert.assertEquals(jsonObject.get("code").toString(), "-1");
     }
 
@@ -156,7 +153,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/update").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(), Map.class);
+        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(),Map.class);
         Assert.assertEquals(jsonObject.get("code").toString(), "-1");
     }
 
@@ -188,14 +185,14 @@ public class RuleEngineControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/delete").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(), Map.class);
+        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(),Map.class);
         Assert.assertEquals(jsonObject.get("status").toString(), "200");
     }
 
 
     @After
     public void after() throws Exception {
-        //  testDeleteRuleEngine();
+        testDeleteRuleEngine();
         deleteBroker();
 
     }
