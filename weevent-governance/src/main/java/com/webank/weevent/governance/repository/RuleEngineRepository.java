@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface RuleEngineRepository extends JpaRepository<RuleEngineEntity, Long> {
 
-    RuleEngineEntity findByIdAndDeleteAt(Integer id, Long deleteAt);
+    RuleEngineEntity findById(Integer id);
 
     List<RuleEngineEntity> findAllByBrokerIdAndDeleteAt(Integer brokerId, Long deleteAt);
 

@@ -401,7 +401,7 @@ public class RuleEngineService {
     public boolean updateRuleEngineStatus(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         authCheck(ruleEngineEntity, request);
-        RuleEngineEntity rule = ruleEngineRepository.findByIdAndDeleteAt(ruleEngineEntity.getId(),DeleteAtEnum.NOT_DELETED.getCode());
+        RuleEngineEntity rule = ruleEngineRepository.findById(ruleEngineEntity.getId());
         BeanUtils.copyProperties(rule, ruleEngineEntity, "status");
         try {
             //set payload
