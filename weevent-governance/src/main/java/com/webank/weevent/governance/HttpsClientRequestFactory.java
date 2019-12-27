@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 
 @Slf4j
-class HttpsClientRequestFactory extends SimpleClientHttpRequestFactory {
+public class HttpsClientRequestFactory extends SimpleClientHttpRequestFactory {
 
     @Override
     protected void prepareConnection(HttpURLConnection connection, String httpMethod) {
