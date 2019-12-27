@@ -97,7 +97,7 @@ public class FabricTopicAdmin implements IEventTopic {
     }
 
     @Override
-    public List<String> listGroupId() throws BrokerException {
+    public List<String> listGroupId() {
 
         return fabricDelegate.listChannel();
     }
