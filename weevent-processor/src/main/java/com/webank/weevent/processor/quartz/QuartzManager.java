@@ -268,18 +268,16 @@ public class QuartzManager {
                     }
 
                     // match the right rule
-                    for (int i = 0; i < idList.size(); i++) {
-                        if (idList.get(i).equals(rule.getId())) {
-                            if (!statisticRuleMap.containsKey(rule.getId())) {
-                                StatisticRule statisticRule = new StatisticRule();
-                                statisticRule.setId(rule.getId());
-                                statisticRule.setBrokerId(rule.getBrokerId());
-                                statisticRule.setRuleName(rule.getRuleName());
-                                statisticRule.setStatus(rule.getStatus());
-                                statisticRule.setStartTime(rule.getCreatedTime());
-                                statisticRule.setDestinationType(rule.getConditionType());
-                                statisticRuleMap.put(rule.getId(), statisticRule);
-                            }
+                    if (idList.contains(rule.getId())) {
+                        if (!statisticRuleMap.containsKey(rule.getId())) {
+                            StatisticRule statisticRule = new StatisticRule();
+                            statisticRule.setId(rule.getId());
+                            statisticRule.setBrokerId(rule.getBrokerId());
+                            statisticRule.setRuleName(rule.getRuleName());
+                            statisticRule.setStatus(rule.getStatus());
+                            statisticRule.setStartTime(rule.getCreatedTime());
+                            statisticRule.setDestinationType(rule.getConditionType());
+                            statisticRuleMap.put(rule.getId(), statisticRule);
                         }
                     }
                 }

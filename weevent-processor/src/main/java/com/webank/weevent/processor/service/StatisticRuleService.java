@@ -35,12 +35,9 @@ public class StatisticRuleService {
             }
 
             // check the id
-            for (int i = 0; i < idList.size(); i++) {
-                if (idList.get(i).equals(rule.getId())) {
-                    statisticRuleMap.put(rule.getId(), rule);
-                }
+            if (idList.contains(rule.getId())) {
+                statisticRuleMap.put(rule.getId(), rule);
             }
-
         }
         statisticWeEvent.setStatisticRuleMap(statisticRuleMap);
         StatisticWeEvent statisticJobs = quartzManager.getStatisticJobs(statisticWeEvent, idList);
