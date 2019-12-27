@@ -100,10 +100,6 @@ public class CEPRuleController {
     public BaseRspEntity statistic(@RequestParam List<String> idList) {
 
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
-        // check the id list
-        if (0 == idList.size()) {
-            return resEntity;
-        }
         StatisticWeEvent getWeEventCollecttion = statisticRuleService.getStatisticWeEvent(idList);
         if (null == getWeEventCollecttion) { //fail
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
