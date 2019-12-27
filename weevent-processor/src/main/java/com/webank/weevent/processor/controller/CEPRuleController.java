@@ -15,7 +15,6 @@ import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.RetCode;
 
-import com.alibaba.fastjson.JSONArray;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobDataMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,13 +92,12 @@ public class CEPRuleController {
             resEntity.setErrorMsg(ret.getErrorMsg());
         }
 
-        log.info("cepRule:{}", JSONArray.toJSON(ret));
         return resEntity;
     }
 
     @RequestMapping(value = "/statistic", method = RequestMethod.GET)
     @ResponseBody
-    public BaseRspEntity statistic(@RequestBody List<String> idList) {
+    public BaseRspEntity statistic(@RequestParam List<String> idList) {
 
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         StatisticWeEvent getWeEventCollecttion = statisticRuleService.getStatisticWeEvent(idList);
@@ -124,7 +122,6 @@ public class CEPRuleController {
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
             resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());
         }
-        log.info("cepRule:{}", JSONArray.toJSON(ret));
         return resEntity;
     }
 
@@ -139,7 +136,6 @@ public class CEPRuleController {
             resEntity.setErrorMsg(ret.getErrorMsg());
         }
 
-        log.info("ret:{}", JSONArray.toJSON(ret));
         return resEntity;
     }
 

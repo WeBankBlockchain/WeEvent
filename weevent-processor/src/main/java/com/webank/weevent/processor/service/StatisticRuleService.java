@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.model.StatisticRule;
 import com.webank.weevent.processor.model.StatisticWeEvent;
 import com.webank.weevent.processor.mq.CEPRuleMQ;
@@ -30,8 +29,8 @@ public class StatisticRuleService {
         for (Map.Entry<String, StatisticRule> entry : statisticWeEvent.getStatisticRuleMap().entrySet()) {
             StatisticRule rule = entry.getValue();
             // check the brokerId
-            for (String id : idList) {
-                if (id.equals(rule.getId())) {
+            for (int i = 0; i < idList.size(); i++) {
+                if (idList.get(i).equals(rule.getId())) {
                     statisticRuleMap.put(rule.getId(), rule);
                 }
             }

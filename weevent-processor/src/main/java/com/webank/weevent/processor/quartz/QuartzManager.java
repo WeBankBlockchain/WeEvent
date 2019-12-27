@@ -240,7 +240,7 @@ public class QuartzManager {
     /**
      * get the statistic jobs
      */
-    public StatisticWeEvent getStatisticJobs(StatisticWeEvent statisticWeEvent, List<String> brokerIds) {
+    public StatisticWeEvent getStatisticJobs(StatisticWeEvent statisticWeEvent, List<String> idList) {
         Map<String, StatisticRule> statisticRuleMap = statisticWeEvent.getStatisticRuleMap();
 
         try {
@@ -257,8 +257,8 @@ public class QuartzManager {
                 if (null != (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
                     CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
                     // match the right rule
-                    for (String brokerId : brokerIds) {
-                        if (brokerId.equals(rule.getId())) {
+                    for (int i = 0; i < idList.size(); i++) {
+                        if (idList.get(i).equals(rule.getId())) {
                             if (!statisticRuleMap.containsKey(rule.getId())) {
                                 StatisticRule statisticRule = new StatisticRule();
                                 statisticRule.setId(rule.getId());
@@ -281,7 +281,6 @@ public class QuartzManager {
                         }
                     }
                 }
-
             }
             statisticWeEvent.setUserAmount(userRuleMap.size());
             statisticWeEvent.setSystemAmount(systemAmount);
