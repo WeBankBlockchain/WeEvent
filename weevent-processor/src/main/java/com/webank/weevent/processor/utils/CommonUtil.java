@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.sdk.WeEvent;
@@ -176,6 +177,10 @@ public class CommonUtil {
             result.addAll(Arrays.asList(array));
         }
         return result;
+    }
+
+    public static int increase(int number) {
+        return (new AtomicInteger(number)).incrementAndGet();
     }
 
     public static Map<String, String> contactsql(String brokerId, String groupId, WeEvent eventMessage, String selectFields, String payload) throws IOException {

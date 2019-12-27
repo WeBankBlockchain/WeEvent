@@ -34,6 +34,7 @@ import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.MapContext;
+import org.omg.CORBA.COMM_FAILURE;
 import org.springframework.util.StringUtils;
 
 @Slf4j
@@ -563,28 +564,28 @@ public class CEPRuleMQ {
             StatisticRule statisticRule = statisticWeEvent.getStatisticRuleMap().get(type.getValue());
             switch (type.getKey()) {
                 case ConstantsHelper.HIT_TIMES:
-                    statisticRule.setHitTimes(increase(statisticRule.getHitTimes()));
+                    statisticRule.setHitTimes(CommonUtil.increase(statisticRule.getHitTimes()));
 
                     break;
 
                 case ConstantsHelper.NOT_HIT_TIMES:
-                    statisticRule.setNotHitTimes(increase(statisticRule.getNotHitTimes()));
+                    statisticRule.setNotHitTimes(CommonUtil.increase(statisticRule.getNotHitTimes()));
                     break;
 
                 case ConstantsHelper.WRITE_DB_SUCCESS:
-                    statisticRule.setDataFlowSuccess(increase(statisticRule.getDataFlowSuccess()));
+                    statisticRule.setDataFlowSuccess(CommonUtil.increase(statisticRule.getDataFlowSuccess()));
                     break;
 
                 case ConstantsHelper.WRITE_DB_FAIL:
-                    statisticRule.setDataFlowFail(increase(statisticRule.getDataFlowFail()));
+                    statisticRule.setDataFlowFail(CommonUtil.increase(statisticRule.getDataFlowFail()));
                     break;
 
                 case ConstantsHelper.PUBLISH_EVENT_SUCCESS:
-                    statisticRule.setDataFlowSuccess(increase(statisticRule.getDataFlowSuccess()));
+                    statisticRule.setDataFlowSuccess(CommonUtil.increase(statisticRule.getDataFlowSuccess()));
                     break;
 
                 case ConstantsHelper.PUBLISH_EVENT_FAIL:
-                    statisticRule.setDataFlowFail(increase(statisticRule.getDataFlowFail()));
+                    statisticRule.setDataFlowFail(CommonUtil.increase(statisticRule.getDataFlowFail()));
                     break;
 
                 case ConstantsHelper.LAST_FAIL_REASON:
@@ -597,10 +598,6 @@ public class CEPRuleMQ {
             }
         }
 
-    }
-
-    private static int increase(int number) {
-        return (new AtomicInteger(number)).incrementAndGet();
     }
 
 

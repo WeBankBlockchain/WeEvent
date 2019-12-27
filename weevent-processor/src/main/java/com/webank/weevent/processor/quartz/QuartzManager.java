@@ -14,6 +14,7 @@ import com.webank.weevent.processor.cache.CEPRuleCache;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.model.StatisticRule;
 import com.webank.weevent.processor.model.StatisticWeEvent;
+import com.webank.weevent.processor.utils.CommonUtil;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.RetCode;
 
@@ -255,6 +256,17 @@ public class QuartzManager {
                 JobKey jobKey = (JobKey) it.next();
                 if (null != (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
                     CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
+
+                    // statistic
+                    if ("1".equals(rule.getSystemTag())) {
+                        systemAmount = CommonUtil.increase(systemAmount);
+                    } else {
+                        userAmount = CommonUtil.increase(userAmount);
+                    }
+                    if ("1".equals(rule.getStatus())) {
+                        runAmount = CommonUtil.increase(runAmount);
+                    }
+
                     // match the right rule
                     for (int i = 0; i < idList.size(); i++) {
                         if (idList.get(i).equals(rule.getId())) {
@@ -268,20 +280,10 @@ public class QuartzManager {
                                 statisticRule.setDestinationType(rule.getConditionType());
                                 statisticRuleMap.put(rule.getId(), statisticRule);
                             }
-                            // statistic
-                            if ("1".equals(rule.getSystemTag())) {
-                                systemAmount++;
-                            } else {
-                                userAmount++;
-                            }
-                            if ("1".equals(rule.getStatus())) {
-                                runAmount++;
-                            }
                         }
                     }
                 }
             }
-            statisticWeEvent.setUserAmount(userRuleMap.size());
             statisticWeEvent.setSystemAmount(systemAmount);
             statisticWeEvent.setUserAmount(userAmount);
             statisticWeEvent.setRunAmount(runAmount);

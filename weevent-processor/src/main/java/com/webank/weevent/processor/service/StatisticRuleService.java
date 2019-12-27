@@ -24,13 +24,16 @@ public class StatisticRuleService {
     public StatisticWeEvent getStatisticWeEvent(List<String> idList) {
         StatisticWeEvent statisticWeEvent = cEPRuleMQ.getStatisticWeEvent();
         Map<String, StatisticRule> statisticRuleMap = new HashMap<>();
-        // check the id list
-        if (0 == idList.size()) {
-            statisticWeEvent.setStatisticRuleMap(statisticRuleMap);
-            return statisticWeEvent;
-        }
+
         for (Map.Entry<String, StatisticRule> entry : statisticWeEvent.getStatisticRuleMap().entrySet()) {
             StatisticRule rule = entry.getValue();
+
+            // check the id list
+            if (0 == idList.size()) {
+                statisticWeEvent.setStatisticRuleMap(statisticRuleMap);
+                break;
+            }
+
             // check the id
             for (int i = 0; i < idList.size(); i++) {
                 if (idList.get(i).equals(rule.getId())) {
