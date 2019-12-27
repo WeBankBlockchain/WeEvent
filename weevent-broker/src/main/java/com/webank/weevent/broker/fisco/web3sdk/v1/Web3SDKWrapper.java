@@ -312,8 +312,8 @@ public class Web3SDKWrapper {
             Long blockHeight = blockNumber.getBlockNumber().longValue();
             log.debug("current block height: {}", blockHeight);
             return blockHeight;
-        } catch (InterruptedException | ExecutionException | TimeoutException | RuntimeException e) {
-            log.error("get block height failed due to InterruptedException|ExecutionException|TimeoutException|RuntimeException", e);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            log.error("get block height failed due to InterruptedException|ExecutionException|TimeoutException", e);
             throw new BrokerException(ErrorCode.GET_BLOCK_HEIGHT_ERROR);
         }
     }
@@ -370,9 +370,6 @@ public class Web3SDKWrapper {
         } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
             log.error("loop block failed due to ExecutionException|TimeoutException|NullPointerException|InterruptedException", e);
-            return null;
-        } catch (RuntimeException e) {
-            log.error("loop block failed due to RuntimeException", e);
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
     }
