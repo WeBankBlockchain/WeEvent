@@ -52,6 +52,9 @@ public class RuleEngineBase extends BaseEntity {
     @Column(name = "condition_field")
     private String conditionField;
 
+    @Column(name = "condition_field_json")
+    private String conditionFieldJson;
+
     /**
      * Trigger condition type, 1 identifies topic,
      * 2 identifies flow to relational database

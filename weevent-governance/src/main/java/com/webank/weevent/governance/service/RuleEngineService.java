@@ -1,6 +1,5 @@
 package com.webank.weevent.governance.service;
 
-import java.io.IOException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -19,7 +18,6 @@ import javax.servlet.http.HttpServletResponse;
 import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.entity.RuleDatabaseEntity;
-import com.webank.weevent.governance.entity.RuleEngineConditionEntity;
 import com.webank.weevent.governance.entity.RuleEngineEntity;
 import com.webank.weevent.governance.enums.ConditionTypeEnum;
 import com.webank.weevent.governance.enums.DeleteAtEnum;
@@ -29,7 +27,6 @@ import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.RuleEngineMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.repository.RuleDatabaseRepository;
-import com.webank.weevent.governance.repository.RuleEngineConditionRepository;
 import com.webank.weevent.governance.repository.RuleEngineRepository;
 import com.webank.weevent.governance.utils.CookiesTools;
 import com.webank.weevent.governance.utils.DAGDetectUtil;
@@ -81,9 +78,6 @@ public class RuleEngineService {
 
     @Value("${weevent.processor.url:http://127.0.0.1:7008}")
     private String processorUrl;
-
-    @Autowired
-    private RuleEngineConditionRepository ruleEngineConditionRepository;
 
     @Autowired
     private RuleDatabaseRepository ruleDatabaseRepository;
@@ -168,8 +162,6 @@ public class RuleEngineService {
 
             //delete processor rule
             this.deleteProcessRule(request, engineEntity);
-            //delete RuleEngineCondition
-            ruleEngineConditionRepository.deleteRuleEngineCondition(ruleEngineEntity.getId());
             //delete RuleEngine
             ruleEngineRepository.deleteRuleEngine(ruleEngineEntity.getId(), new Date().getTime());
             log.info("delete end");
@@ -250,22 +242,6 @@ public class RuleEngineService {
                 this.startProcessRule(request, ruleEngineEntity);
             }
 
-            //delete old ruleEngineConditionEntity
-            ruleEngineConditionRepository.deleteRuleEngineCondition(ruleEngineEntity.getId());
-
-            //check ruleEngineConditionEntity
-            List<RuleEngineConditionEntity> ruleEngineConditionList = ruleEngineEntity.getRuleConditionList();
-            if (!CollectionUtils.isEmpty(ruleEngineConditionList)) {
-                //insert ruleEngineCondition
-                for (RuleEngineConditionEntity engineConditionEntity : ruleEngineConditionList) {
-                    engineConditionEntity.setRuleId(ruleEngineEntity.getId());
-                    checkSqlCondition(engineConditionEntity);
-                    //get sql json
-                    engineConditionEntity.setSqlConditionJson(getSqlJson(engineConditionEntity));
-                }
-                //insert new data
-                ruleEngineConditionRepository.saveAll(ruleEngineConditionList);
-            }
             BeanUtils.copyProperties(rule, ruleEngineEntity, "ruleName", "payload", "selectField", "conditionType",
                     "fromDestination", "toDestination", "ruleDataBaseId", "errorDestination", "functionArray", "conditionField");
             ruleEngineRepository.save(ruleEngineEntity);
@@ -294,18 +270,6 @@ public class RuleEngineService {
         if (topicSet.size() < list.size()) {
             throw new GovernanceException("source topic 、destination topic and error topic cannot be the same");
         }
-    }
-
-    private String getSqlJson(RuleEngineConditionEntity engineConditionEntity) throws IOException {
-        RuleEngineConditionEntity conditionEntity = new RuleEngineConditionEntity();
-        conditionEntity.setConnectionOperator(engineConditionEntity.getConnectionOperator());
-        conditionEntity.setColumnName(engineConditionEntity.getColumnName());
-        conditionEntity.setConditionalOperator(engineConditionEntity.getConditionalOperator());
-        conditionEntity.setSqlCondition(engineConditionEntity.getSqlCondition());
-        conditionEntity.setChildren(engineConditionEntity.getChildren());
-        conditionEntity.setColumnMark(engineConditionEntity.getColumnMark());
-        conditionEntity.setFunctionType(engineConditionEntity.getFunctionType());
-        return JsonUtil.toJSONString(conditionEntity);
     }
 
     @SuppressWarnings("unchecked")
@@ -535,8 +499,6 @@ public class RuleEngineService {
             String payload = engineEntity.getPayload();
             engineEntity.setPayloadMap(payload == null ? new HashMap<>() : JsonUtil.parseObject(payload, Map.class));
             //get ruleEngineConditionList
-            List<RuleEngineConditionEntity> ruleEngineConditionEntities = this.getRuleEngineConditionList(engineEntity);
-            engineEntity.setRuleConditionList(ruleEngineConditionEntities);
             String fullSql = parsingDetailSQL(engineEntity);
             engineEntity.setFullSQL(fullSql);
             return engineEntity;
@@ -552,8 +514,6 @@ public class RuleEngineService {
         if (StringUtil.isBlank(engineEntity.getFromDestination())) {
             return null;
         }
-        RuleEngineConditionEntity ruleEngineConditionEntity = new RuleEngineConditionEntity();
-        ruleEngineConditionEntity.setRuleId(engineEntity.getId());
         //get ruleEngineConditionList
         String selectField = StringUtil.isBlank(engineEntity.getSelectField()) ? ConstantProperties.ASTERISK : engineEntity.getSelectField();
         buffer.append("SELECT ").append(selectField).append(" FROM").append(" ").append(engineEntity.getFromDestination());
@@ -614,38 +574,8 @@ public class RuleEngineService {
             throw new GovernanceException(ErrorCode.ACCESS_DENIED);
         }
     }
-
-    private void checkSqlCondition(RuleEngineConditionEntity conditionEntity) throws GovernanceException {
-        //check  empty
-        boolean flag = StringUtil.isBlank(conditionEntity.getColumnName())
-                || StringUtil.isBlank(conditionEntity.getConditionalOperator()) || StringUtil.isBlank(conditionEntity.getSqlCondition());
-        if (flag) {
-            throw new GovernanceException("conditional row field cannot be empty");
-        }
-        //check number
-        if (!"==".equals(conditionEntity.getConditionalOperator()) && !"!=".equals(conditionEntity.getConditionalOperator())) {
-            boolean matches = NumberValidationUtils.isRealNumber(conditionEntity.getSqlCondition());
-            if (!matches) {
-                throw new GovernanceException("sqlCondition is not number");
-            }
-        }
-    }
-
     private String getProcessorUrl() {
         return processorUrl;
-    }
-
-    private List<RuleEngineConditionEntity> getRuleEngineConditionList(RuleEngineEntity rule) throws IOException {
-        List<RuleEngineConditionEntity> ruleEngineConditionEntities = ruleEngineConditionRepository.findAllByRuleId(rule.getId());
-        if (CollectionUtils.isEmpty(ruleEngineConditionEntities)) {
-            return new ArrayList<>();
-        }
-        for (RuleEngineConditionEntity engineConditionEntity : ruleEngineConditionEntities) {
-            RuleEngineConditionEntity entity = JsonUtil.parseObject(engineConditionEntity.getSqlConditionJson(), RuleEngineConditionEntity.class);
-            BeanUtils.copyProperties(entity, engineConditionEntity);
-            engineConditionEntity.setChildren(engineConditionEntity.getChildren() == null ? new ArrayList<>() : engineConditionEntity.getChildren());
-        }
-        return ruleEngineConditionEntities;
     }
 
     public boolean validationConditions(HttpServletRequest request, RuleEngineEntity ruleEngineEntity) throws GovernanceException {

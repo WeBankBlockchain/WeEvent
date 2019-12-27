@@ -15,6 +15,8 @@
         <result column="to_destination" property="toDestination" jdbcType="VARCHAR"/>
         <result column="select_field" property="selectField" jdbcType="VARCHAR"/>
         <result column="condition_type" property="conditionType" jdbcType="INTEGER"/>
+        <result column="condition_field" property="conditionField" jdbcType="VARCHAR"/>
+        <result column="condition_field_json" property="conditionFieldJson" jdbcType="VARCHAR"/>
         <result column="database_url" property="databaseUrl" jdbcType="VARCHAR"/>
         <result column="rule_database_id" property="ruleDataBaseId" jdbcType="INTEGER"/>
         <result column="error_destination" property="errorDestination" jdbcType="VARCHAR"/>
@@ -26,7 +28,7 @@
 
     <sql id="Base_Column_List">
         id,create_date,last_update, rule_name,payload_type,payload,broker_id,user_id,cep_id,
-        from_destination,to_destination,select_field,condition_type,
+        from_destination,to_destination,select_field,condition_type,condition_field,condition_field_json,
         rule_database_id,error_destination,status,group_id,system_tag,function_array
     </sql>
 
@@ -87,21 +89,6 @@
             and system_tag = #{systemTag}
         </if>
     </sql>
-
-    <update id="updateRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity">
-        update t_rule_engine
-        set rule_name=#{ruleName},
-            payload=#{payload},
-            select_field=#{selectField},
-            condition_type=#{conditionType},
-            from_destination=#{fromDestination},
-            to_destination=#{toDestination},
-            rule_database_id=#{ruleDataBaseId},
-            error_destination=#{errorDestination},
-            cep_id=#{cepId}
-        where id = #{id,jdbcType=INTEGER}
-          and status != 2
-    </update>
 
 
     <select id="countRuleEngine" parameterType="com.webank.weevent.governance.entity.RuleEngineEntity"
