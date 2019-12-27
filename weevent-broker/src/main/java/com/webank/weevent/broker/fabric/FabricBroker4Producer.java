@@ -4,13 +4,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 
 import com.webank.weevent.broker.fabric.sdk.FabricDelegate;
+import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
 
-import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -25,7 +25,7 @@ public class FabricBroker4Producer extends FabricTopicAdmin implements IProducer
     }
 
     @Override
-    public boolean startProducer() throws BrokerException {
+    public boolean startProducer() {
         return true;
     }
 
@@ -43,6 +43,6 @@ public class FabricBroker4Producer extends FabricTopicAdmin implements IProducer
         return fabricDelegate.publishEvent(event.getTopic(),
                 channelName,
                 new String(event.getContent(), StandardCharsets.UTF_8),
-                JSON.toJSONString(event.getExtensions()));
+                DataTypeUtils.object2Json(event.getExtensions()));
     }
 }

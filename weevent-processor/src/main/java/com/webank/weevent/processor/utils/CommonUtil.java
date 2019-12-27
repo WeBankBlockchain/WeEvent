@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -172,9 +173,7 @@ public class CommonUtil {
 
         } else {
             String[] array = selectFields.split(",");
-            for (String s : array) {
-                result.add(s);
-            }
+            result.addAll(Arrays.asList(array));
         }
         return result;
     }
@@ -206,17 +205,22 @@ public class CommonUtil {
         // get all select field and value, and the select field must in eventContent.
         for (String key : result) {
             // set the flag
-            if (ConstantsHelper.EVENT_ID.equals(key)) {
-                sqlOrder.put(ConstantsHelper.EVENT_ID, eventId);
-            }
-            if (ConstantsHelper.TOPIC_NAME.equals(key)) {
-                sqlOrder.put(ConstantsHelper.TOPIC_NAME, topicName);
-            }
-            if (ConstantsHelper.BROKER_ID.equals(key)) {
-                sqlOrder.put(ConstantsHelper.BROKER_ID, brokerId);
-            }
-            if (ConstantsHelper.GROUP_ID.equals(key)) {
-                sqlOrder.put(ConstantsHelper.GROUP_ID, groupId);
+            switch (key) {
+                case ConstantsHelper.EVENT_ID:
+                    sqlOrder.put(ConstantsHelper.EVENT_ID, eventId);
+                    break;
+                case ConstantsHelper.TOPIC_NAME:
+                    sqlOrder.put(ConstantsHelper.TOPIC_NAME, topicName);
+                    break;
+                case ConstantsHelper.BROKER_ID:
+                    sqlOrder.put(ConstantsHelper.BROKER_ID, brokerId);
+                    break;
+                case ConstantsHelper.GROUP_ID:
+                    sqlOrder.put(ConstantsHelper.GROUP_ID, groupId);
+                    break;
+                default:
+                    break;
+
             }
         }
 
@@ -238,17 +242,22 @@ public class CommonUtil {
                 sql.put(key, eventContent.get(key).toString());
             }
             // set the flag
-            if (ConstantsHelper.EVENT_ID.equals(key)) {
-                eventIdFlag = true;
-            }
-            if (ConstantsHelper.TOPIC_NAME.equals(key)) {
-                topicNameFlag = true;
-            }
-            if (ConstantsHelper.BROKER_ID.equals(key)) {
-                brokerIdFlag = true;
-            }
-            if (ConstantsHelper.GROUP_ID.equals(key)) {
-                groupIdFlag = true;
+            switch (key) {
+                case ConstantsHelper.EVENT_ID:
+                    eventIdFlag = true;
+                    break;
+                case ConstantsHelper.TOPIC_NAME:
+                    topicNameFlag = true;
+                    break;
+                case ConstantsHelper.BROKER_ID:
+                    brokerIdFlag = true;
+                    break;
+                case ConstantsHelper.GROUP_ID:
+                    groupIdFlag = true;
+                    break;
+                default:
+                    break;
+
             }
         }
 

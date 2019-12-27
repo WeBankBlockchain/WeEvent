@@ -991,20 +991,19 @@ public class ServiceTest {
 
     @Test
     public void multiHitRule1() throws Exception {
-//        String[][] arr = {{"0", "15", "substring", "a,11"}, {"26", "37", "concat", "b,a"}};
         String url = "/startCEPRule";
         String cEPrule3 = " {\n" +
-                " \t\t\"id\":1104154821,\n" +
+                " \t\t\"id\":1104154821111,\n" +
                 "        \"ruleName\": \"air3\",\n" +
                 "        \"fromDestination\": \"from.com.webank.weevent\",\n" +
-                "        \"brokerUrl\": \"http://122.51.93.181:7000/weevent\",\n" +
+                "        \"brokerUrl\": \"http://127.0.0.1:7000/weevent\",\n" +
                 "        \"payload\":\"{\\\"a\\\":1,\\\"b\\\":\\\"test\\\",\\\"c\\\":10}\",\n" +
                 "        \"payloadType\":1,\n" +
                 "        \"selectField\": \"a,eventId,topicName,brokerId,groupId\",\n" +
                 "        \"conditionField\": \"c<10\",\n" +
                 "        \"conditionType\": 2,\n" +
                 "        \"toDestination\": \"to.com.webank.weevent\",\n" +
-                "        \"databaseUrl\": \"jdbc:mysql://129.204.225.235:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
+                "        \"databaseUrl\": \"jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=007412&tableName=fromIfttt\",\n" +
                 "        \"createdTime\": \"2019-08-23T18:09:16.000+0000\",\n" +
                 "        \"status\": 1,\n" +
                 "        \"errorDestination\": null,\n" +
@@ -1022,18 +1021,17 @@ public class ServiceTest {
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule3);
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result3.getResponse().getStatus());
-        Thread.sleep(100000);
+        Thread.sleep(10000);
+
 
         String url1 = "/statistic";
-        List<String> idList = new ArrayList<>();
-        idList.add("1104154821");
-        RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url1).contentType(MediaType.APPLICATION_JSON).content(idList.toString());
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url1).contentType(MediaType.APPLICATION_JSON).param("idList", "1104154821111");
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
         log.info("result:{}", result);
         assertEquals(200, result.getResponse().getStatus());
-        Thread.sleep(100000);
+        Thread.sleep(10000);
 
-        RequestBuilder requestBuilder2 = MockMvcRequestBuilders.get(url1).contentType(MediaType.APPLICATION_JSON).content(idList.toString());
+        RequestBuilder requestBuilder2 = MockMvcRequestBuilders.get(url1).contentType(MediaType.APPLICATION_JSON).param("idList", "1104154821");
         MvcResult result2 = mockMvc.perform(requestBuilder2).andDo(print()).andReturn();
         log.info("result:{}", result3);
         assertEquals(200, result2.getResponse().getStatus());

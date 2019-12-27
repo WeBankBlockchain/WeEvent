@@ -1,6 +1,7 @@
 package com.webank.weevent.processor.controller;
 
 import java.util.List;
+import java.io.IOException;
 
 import javax.validation.Valid;
 
@@ -81,7 +82,7 @@ public class CEPRuleController {
 
     @RequestMapping(value = "/deleteCEPRuleById", method = RequestMethod.POST)
     @ResponseBody
-    public BaseRspEntity deleteCEPRuleById(@RequestParam(name = "id") String id) {
+    public BaseRspEntity deleteCEPRuleById(@RequestParam(name = "id") String id) throws IOException {
 
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         createJob(id, "deleteCEPRuleById");
@@ -91,7 +92,6 @@ public class CEPRuleController {
             resEntity.setErrorCode(ret.getErrorCode());
             resEntity.setErrorMsg(ret.getErrorMsg());
         }
-
         return resEntity;
     }
 
@@ -114,7 +114,7 @@ public class CEPRuleController {
 
     @RequestMapping(value = "/startCEPRule", method = RequestMethod.POST)
     @ResponseBody
-    public BaseRspEntity startCEPRule(@Valid @RequestBody CEPRule rule) {
+    public BaseRspEntity startCEPRule(@Valid @RequestBody CEPRule rule) throws IOException {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = createJob(rule, "startCEPRule");
 
@@ -127,7 +127,7 @@ public class CEPRuleController {
 
     @RequestMapping(value = "/checkWhereCondition")
     @ResponseBody
-    public BaseRspEntity checkWhereCondition(@RequestParam(name = "payload") String payload, @RequestParam(name = "condition") String condition) {
+    public BaseRspEntity checkWhereCondition(@RequestParam(name = "payload") String payload, @RequestParam(name = "condition") String condition) throws IOException {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = CEPRuleMQ.checkCondition(payload, condition);
 
