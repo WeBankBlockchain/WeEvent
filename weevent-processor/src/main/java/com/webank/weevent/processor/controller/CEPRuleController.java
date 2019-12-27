@@ -17,6 +17,7 @@ import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.RetCode;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobDataMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -100,8 +101,11 @@ public class CEPRuleController {
     public BaseRspEntity statistic(@RequestParam List<String> idList) {
 
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
+        // check the id list
+        if (0 == idList.size()) {
+            return resEntity;
+        }
         StatisticWeEvent getWeEventCollecttion = statisticRuleService.getStatisticWeEvent(idList);
-
         if (null == getWeEventCollecttion) { //fail
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
             resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());
