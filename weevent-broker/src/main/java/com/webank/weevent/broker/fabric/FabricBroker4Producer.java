@@ -25,7 +25,7 @@ public class FabricBroker4Producer extends FabricTopicAdmin implements IProducer
     }
 
     @Override
-    public boolean startProducer() throws BrokerException {
+    public boolean startProducer() {
         return true;
     }
 
