@@ -412,8 +412,8 @@ public class Web3SDK2Wrapper {
             Long blockHeight = blockNumber.getBlockNumber().longValue();
             log.debug("current block height: {}", blockHeight);
             return blockHeight;
-        } catch (InterruptedException | ExecutionException | TimeoutException | RuntimeException e) {
-            log.error("get block height failed due to InterruptedException|ExecutionException|TimeoutException|RuntimeException", e);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            log.error("get block height failed due to InterruptedException|ExecutionException|TimeoutException", e);
             throw new BrokerException(ErrorCode.GET_BLOCK_HEIGHT_ERROR);
         }
     }
@@ -472,14 +472,8 @@ public class Web3SDK2Wrapper {
             }
 
             return events;
-        } catch (TimeoutException e) {
-            log.error("loop block failed due to timeout", e);
-            return null;
-        } catch (ExecutionException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
+        } catch (ExecutionException | NullPointerException | InterruptedException |TimeoutException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
-            log.error("loop block failed due to web3sdk rpc error", e);
-            return null;
-        } catch (RuntimeException e) {
             log.error("loop block failed due to web3sdk rpc error", e);
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
@@ -504,9 +498,6 @@ public class Web3SDK2Wrapper {
             return groupGeneral;
         } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
-            log.error("get group general failed due to web3sdk rpc error", e);
-            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
-        } catch (RuntimeException e) {
             log.error("get group general failed due to web3sdk rpc error", e);
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
@@ -540,9 +531,6 @@ public class Web3SDK2Wrapper {
             return tbTransHashListPage;
         } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
-            log.error("query transaction failed due to web3sdk rpc error", e);
-            throw new BrokerException("query transaction failed due to RuntimeException", e);
-        } catch (RuntimeException e) {
             log.error("query transaction failed due to web3sdk rpc error", e);
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
