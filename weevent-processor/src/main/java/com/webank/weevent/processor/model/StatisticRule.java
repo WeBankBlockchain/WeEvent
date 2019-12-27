@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.Date;
 
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
 
 @Data
 public class StatisticRule implements Serializable {
@@ -14,16 +13,10 @@ public class StatisticRule implements Serializable {
     private int status;
     private Date startTime;
 
-    @Value("0")
-    private int hitTimes;
-    @Value("0")
-    private int notHitTimes;
-    @Value("0")
-    private int dataFlowSuccess;
-    @Value("0")
-    private int dataFlowFail;
-    @Value("0")
-    private int destinationType;
-    @Value("")
-    private String lastFailReason;
+    private int hitTimes = 0;
+    private int notHitTimes = 0;
+    private int dataFlowSuccess = 0;
+    private int dataFlowFail = 0;
+    private int destinationType = 0;
+    private String lastFailReason = "";
 }
