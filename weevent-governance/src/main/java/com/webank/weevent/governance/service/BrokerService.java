@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.entity.PermissionEntity;
+import com.webank.weevent.governance.entity.RuleDatabaseEntity;
 import com.webank.weevent.governance.entity.RuleEngineEntity;
 import com.webank.weevent.governance.enums.DeleteAtEnum;
 import com.webank.weevent.governance.enums.IsCreatorEnum;
@@ -20,7 +21,9 @@ import com.webank.weevent.governance.mapper.BrokerMapper;
 import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.repository.BrokerRepository;
 import com.webank.weevent.governance.repository.PermissionRepository;
+import com.webank.weevent.governance.repository.RuleDatabaseRepository;
 import com.webank.weevent.governance.repository.RuleEngineRepository;
+import com.webank.weevent.governance.repository.TopicHistoricalRepository;
 import com.webank.weevent.governance.repository.TopicRepository;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.utils.CookiesTools;
@@ -59,6 +62,9 @@ public class BrokerService {
     private TopicRepository topicRepository;
 
     @Autowired
+    private TopicHistoricalRepository topicHistoricalRepository;
+
+    @Autowired
     private PermissionRepository permissionRepository;
 
     @Autowired
@@ -66,6 +72,9 @@ public class BrokerService {
 
     @Autowired
     private TopicHistoricalService topicHistoricalService;
+
+    @Autowired
+    private RuleDatabaseRepository ruleDatabaseRepository;
 
     @Autowired
     private RuleEngineService ruleEngineService;
@@ -175,22 +184,10 @@ public class BrokerService {
     @Transactional(rollbackFor = Throwable.class)
     public GovernanceResult deleteBroker(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
         authCheck(brokerEntity, request);
-        //delete processor rule
-        RuleEngineEntity ruleEngineEntity = new RuleEngineEntity();
-        ruleEngineEntity.setBrokerId(brokerEntity.getId());
-        Example<RuleEngineEntity> ruleEngineEntityExample = Example.of(ruleEngineEntity);
-        List<RuleEngineEntity> ruleEngines = ruleEngineRepository.findAll(ruleEngineEntityExample);
-        boolean exist = ruleEngineService.checkProcessorExist(request);
-        log.info("exist:{}", exist);
         try {
-            if (CollectionUtils.isNotEmpty(ruleEngines) && exist) {
-                for (RuleEngineEntity ruleEngine : ruleEngines) {
-                    ruleEngineService.deleteProcessRule(request, ruleEngine);
-                }
-            }
-            topicRepository.deleteByBrokerId(brokerEntity.getId(), new Date().getTime());
+
+            deleteOldData(brokerEntity, request);
             brokerRepository.deleteById(brokerEntity.getId(), new Date().getTime());
-            permissionRepository.deletePermissionByBrokerId(brokerEntity.getId());
         } catch (Exception e) {
             log.info("delete broker fail", e);
             throw new GovernanceException("delete broker fail" + e.getMessage());
@@ -215,6 +212,13 @@ public class BrokerService {
             return new GovernanceResult(ErrorCode.BROKER_REPEAT);
         }
         brokerEntity.setLastUpdate(new Date());
+        /**
+         * Determine if it is the original URL.
+         * If it is, do not perform rules.
+         * If it is not delete the original rule, create and start a new rule
+         */
+        modifyRule(brokerEntity, request, response);
+        //save broker
         brokerRepository.save(brokerEntity);
         //delete old permission
         permissionRepository.deletePermissionByBrokerId(brokerEntity.getId());
@@ -224,6 +228,18 @@ public class BrokerService {
             permissionRepository.saveAll(perMissionList);
         }
         return GovernanceResult.ok(true);
+    }
+
+    private void modifyRule(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response) throws GovernanceException {
+        BrokerEntity oldBroker = brokerRepository.findByIdAndDeleteAt(brokerEntity.getId(), DeleteAtEnum.NOT_DELETED.getCode());
+        if (brokerEntity.getBrokerUrl().equals(oldBroker.getBrokerUrl())) {
+            return;
+        }
+        //delete old rule
+        deleteOldData(brokerEntity, request);
+        //add new rule
+        topicHistoricalService.createRule(request, response, brokerEntity);
+
     }
 
     private ErrorCode checkServerByBrokerEntity(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
@@ -325,7 +341,36 @@ public class BrokerService {
         }
     }
 
-    public void deleteByBrokerUrl(String brokerUrl) {
-        brokerRepository.deleteByBrokerUrl(brokerUrl, System.currentTimeMillis());
+    private void deleteOldData(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
+        //delete rule
+        boolean exist = ruleEngineService.checkProcessorExist(request);
+        log.info("exist:{}", exist);
+        if (exist) {
+            deleteRule(brokerEntity, request);
+        }
+        topicRepository.deleteByBrokerId(brokerEntity.getId(), new Date().getTime());
+        permissionRepository.deletePermissionByBrokerId(brokerEntity.getId());
+        topicHistoricalRepository.deleteTopicHistoricalByBrokerId(brokerEntity.getId());
+
+        List<RuleEngineEntity> ruleEngineEntityList = ruleEngineRepository.findAllByBrokerIdAndDeleteAt(brokerEntity.getId(), DeleteAtEnum.NOT_DELETED.getCode());
+        ruleEngineEntityList.forEach(it -> ruleEngineRepository.deleteRuleEngine(it.getId(), new Date().getTime()));
+
+        List<RuleDatabaseEntity> databaseEntityList = ruleDatabaseRepository.findAllByBrokerIdAndSystemTag(brokerEntity.getId(), true);
+        ruleDatabaseRepository.deleteAll(databaseEntityList);
     }
+
+    private void deleteRule(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
+        try {
+            List<RuleEngineEntity> ruleEngines = ruleEngineRepository.findAllByBrokerIdAndDeleteAt(brokerEntity.getId(), DeleteAtEnum.NOT_DELETED.getCode());
+            if (CollectionUtils.isNotEmpty(ruleEngines)) {
+                for (RuleEngineEntity ruleEngine : ruleEngines) {
+                    ruleEngineService.deleteProcessRule(request, ruleEngine);
+                }
+            }
+        } catch (Exception e) {
+            log.error("delete rule fail", e);
+            throw new GovernanceException("delete rule fail", e);
+        }
+    }
+
 }
