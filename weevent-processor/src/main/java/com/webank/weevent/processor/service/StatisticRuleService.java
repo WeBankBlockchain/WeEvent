@@ -25,10 +25,9 @@ public class StatisticRuleService {
         StatisticWeEvent statisticWeEvent = cEPRuleMQ.getStatisticWeEvent();
         Map<String, StatisticRule> statisticRuleMap = new HashMap<>();
 
-        // TODO:
         for (Map.Entry<String, StatisticRule> entry : statisticWeEvent.getStatisticRuleMap().entrySet()) {
             StatisticRule rule = entry.getValue();
-            // check the brokerId
+            // check the id
             for (int i = 0; i < idList.size(); i++) {
                 if (idList.get(i).equals(rule.getId())) {
                     statisticRuleMap.put(rule.getId(), rule);
