@@ -12,8 +12,4 @@ public class StatisticWeEvent implements Serializable {
     private Integer userAmount;
     private Integer runAmount;
     private Map<String, StatisticRule> statisticRuleMap;
-
-    public int increase(int number) {
-        return (new AtomicInteger(number)).incrementAndGet();
-    }
 }
