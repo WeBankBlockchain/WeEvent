@@ -246,7 +246,6 @@ public class QuartzManager {
         try {
             // get the all rules
             Iterator<JobKey> it = scheduler.getJobKeys(GroupMatcher.anyGroup()).iterator();
-            Map<String, String> userRuleMap = new HashMap<>();
 
             int systemAmount = 0;
             int userAmount = 0;
