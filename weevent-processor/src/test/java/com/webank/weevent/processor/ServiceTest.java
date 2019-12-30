@@ -1,7 +1,6 @@
 package com.webank.weevent.processor;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -976,15 +975,12 @@ public class ServiceTest {
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule3);
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result3.getResponse().getStatus());
-        Thread.sleep(100000);
 
         String url1 = "/statistic";
-
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url1).contentType(MediaType.APPLICATION_JSON).param("brokerId", "1");
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
         log.info("result:{}", result);
         assertEquals(200, result.getResponse().getStatus());
-        Thread.sleep(10000);
     }
 
     @Test
@@ -1019,21 +1015,17 @@ public class ServiceTest {
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(cEPrule3);
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result3.getResponse().getStatus());
-        Thread.sleep(10000);
-
 
         String url1 = "/statistic";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url1).contentType(MediaType.APPLICATION_JSON).param("idList", "1104154821111");
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
         log.info("result:{}", result);
         assertEquals(200, result.getResponse().getStatus());
-        Thread.sleep(10000);
 
         RequestBuilder requestBuilder2 = MockMvcRequestBuilders.get(url1).contentType(MediaType.APPLICATION_JSON).param("idList", "1104154821");
         MvcResult result2 = mockMvc.perform(requestBuilder2).andDo(print()).andReturn();
         log.info("result:{}", result3);
         assertEquals(200, result2.getResponse().getStatus());
-        Thread.sleep(100000);
     }
 
     @Test
@@ -1042,16 +1034,12 @@ public class ServiceTest {
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url1).contentType(MediaType.APPLICATION_JSON).param("idList", "");
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
         log.info("result:{}", result.getResponse().getContentAsString());
-
-
         assertEquals(200, result.getResponse().getStatus());
 
         String url2 = "/statistic";
         RequestBuilder requestBuilder2 = MockMvcRequestBuilders.get(url2).contentType(MediaType.APPLICATION_JSON).param("idList", "1104154821111");
         MvcResult result2 = mockMvc.perform(requestBuilder2).andDo(print()).andReturn();
         log.info("result:{}", result2.getResponse().getContentAsString());
-
-
         assertEquals(200, result2.getResponse().getStatus());
     }
 
