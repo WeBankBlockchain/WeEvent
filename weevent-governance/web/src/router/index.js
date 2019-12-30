@@ -17,6 +17,7 @@ import transactionInfor from '../components/webase/transactionInfor'
 import servers from '../components/servers'
 import dataBase from '../components/dataBase'
 import statistics from '../components/statistics'
+import ruleStatic from '../components/ruleStatic'
 
 Vue.use(Router)
 
@@ -72,6 +73,10 @@ export default new Router({
       path: '/servers',
       name: 'servers',
       component: servers
+    }, {
+      path: '/ruleStatic',
+      name: 'ruleStatic',
+      component: ruleStatic
     }, {
       path: '/login',
       name: 'login',
