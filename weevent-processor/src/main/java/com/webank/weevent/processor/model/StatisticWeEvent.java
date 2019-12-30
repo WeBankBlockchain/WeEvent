@@ -2,7 +2,6 @@ package com.webank.weevent.processor.model;
 
 import java.io.Serializable;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import lombok.Data;
 
