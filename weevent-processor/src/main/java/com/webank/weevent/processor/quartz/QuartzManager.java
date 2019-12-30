@@ -267,7 +267,7 @@ public class QuartzManager {
                     }
 
                     // match the right rule
-                    if (idList.contains(rule.getId()) && (!statisticRuleMap.containsKey(rule.getId()))) {
+                    if ((!statisticRuleMap.containsKey(rule.getId())) && idList.contains(rule.getId())) {
                         StatisticRule statisticRule = new StatisticRule();
                         statisticRule.setId(rule.getId());
                         statisticRule.setBrokerId(rule.getBrokerId());
