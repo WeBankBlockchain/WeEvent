@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -97,6 +98,9 @@ public class BrokerService {
         List<BrokerEntity> brokerEntityList = brokerMapper.getBrokers(Integer.parseInt(accountId));
         //Set the identity of the creation and authorization
         brokerEntityList.forEach(brokerEntity -> {
+            List<RuleEngineEntity> ruleEngineEntityList = ruleEngineRepository.findAllByBrokerIdAndSystemTagAndDeleteAt(brokerEntity.getId(), true, DeleteAtEnum.NOT_DELETED.getCode());
+            List<Integer> integerList = ruleEngineEntityList.stream().map(RuleEngineEntity::getId).collect(Collectors.toList());
+            brokerEntity.setRuleIdList(integerList);
             if (accountId.equals(brokerEntity.getUserId().toString())) {
                 brokerEntity.setIsCreator(IsCreatorEnum.CREATOR.getCode());
             } else {
