@@ -48,7 +48,7 @@ public class ServiceTest {
         rule.setConditionField("abs(a)<21 or floor(c)>10");
         rule.setToDestination("to.com.webank.weevent");
         rule.setDatabaseUrl("jdbc:mysql://129.204.225.235:3306/fromIfttt?user=test&password=007412");
-        rule.setBrokerUrl("http://127.0.0.1:7000/weevent");
+        rule.setBrokerUrl("http://122.51.93.181:7000/weevent");
         rule.setCreatedTime(new Date());
         rule.setStatus(1);
         rule.setUserId("1");
@@ -288,7 +288,6 @@ public class ServiceTest {
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
-        Thread.sleep(1000000);
     }
 
     @Test
@@ -308,7 +307,6 @@ public class ServiceTest {
     @Test
     public void startAndUpdate() throws Exception {
         String arr = "";
-        String url = "/startCEPRule";
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,b");
         rule.setConditionField("c<10");
@@ -347,7 +345,6 @@ public class ServiceTest {
     @Test
     public void selectSystemFieldToTopic() throws Exception {
         String arr = "";
-        String url = "/startCEPRule";
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
         rule.setConditionField("c<20");
@@ -378,7 +375,6 @@ public class ServiceTest {
     @Test
     public void conditionEqualToTopic() throws Exception {
         String arr = "";
-        String url = "/startCEPRule";
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
         rule.setConditionField("c==10");
@@ -424,7 +420,6 @@ public class ServiceTest {
     @Test
     public void conditionConplexToDB() throws Exception {
         String arr = "";
-        String url = "/startCEPRule";
         rule.setFromDestination("from.com.webank.weevent");
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
@@ -441,7 +436,6 @@ public class ServiceTest {
     @Test
     public void conditionConplexToDB2() throws Exception {
         String arr = "";
-        String url = "/startCEPRule";
         rule.setFromDestination("from.com.webank.weevent");
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
@@ -459,7 +453,6 @@ public class ServiceTest {
     @Test
     public void nowSystemToDB() throws Exception {
         String arr = "";
-        String url = "/startCEPRule";
         rule.setFromDestination("from.com.webank.weevent");
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,now");
@@ -489,7 +482,6 @@ public class ServiceTest {
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
-        Thread.sleep(1000000);
     }
 
     @Test
@@ -560,7 +552,6 @@ public class ServiceTest {
     @Test
     public void absHitRule() throws Exception {
         String arr = "[[\"0\", \"6\", \"floor\", \"c\"]]";
-        String url = "/startCEPRule";
         rule.setFromDestination("from.com.webank.weevent");
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
@@ -571,7 +562,6 @@ public class ServiceTest {
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JSONObject.toJSON(rule).toString());
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3);
-        Thread.sleep(1000000);
     }
 
     @Test
@@ -587,13 +577,12 @@ public class ServiceTest {
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JSONObject.toJSON(rule).toString());
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
-        log.info("result3:{}", result3);
+        log.info("result3:{}", result3.getResponse().getContentAsString());
     }
 
     @Test
     public void floorHitRule1() throws Exception {
         String arr = "[[\"0\", \"8\", \"floor\", \"c\"]]";
-        String url = "/startCEPRule";
         rule.setId("1111");
         rule.setRuleName("test");
         rule.setBrokerId("1");
@@ -614,12 +603,11 @@ public class ServiceTest {
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JSONObject.toJSON(rule).toString());
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
-        log.info("result3:{}", result3);
+        log.info("result3:{}", result3.getResponse().getContentAsString());
     }
 
     @Test
     public void ceilAbsFloorHitRule() throws Exception {
-        String url = "/startCEPRule";
         String arr = "[[\"16\", \"24\", \"floor\", \"b\"], [\"1\", \"7\", \"abs\", \"a\"], [\"49\", \"56\", \"ceil\", \"c\"]]";
         rule.setPayload("{\"a\":1,\"b\":10,\"c\":10,\"d\":10,\"e\":10}");
         rule.setId("201912231453");
@@ -629,9 +617,24 @@ public class ServiceTest {
 
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JSONObject.toJSON(rule).toString());
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
-        log.info("result3:{}", result3);
+        log.info("result3:{}", result3.getResponse().getContentAsString());
+        assertEquals(200, result3.getResponse().getStatus());
     }
 
+    @Test
+    public void ceilAbsFloorHitRule2() throws Exception {
+        String arr = "[[\"16\", \"24\", \"floor\", \"b\"], [\"1\", \"7\", \"abs\", \"a\"], [\"49\", \"56\", \"ceil\", \"c\"]]";
+        rule.setPayload("{\"a\":1,\"b\":10,\"c\":10,\"d\":10,\"e\":10}");
+        rule.setId("201912231453");
+        rule.setConditionField("(abs(a)>=20 or (floor(b)!=222.2 and d<=111)) and ceil(c)<=111 and e!=33");
+        rule.setSystemFunctionMessage(arr);
+        rule.setConditionType(1);
+
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JSONObject.toJSON(rule).toString());
+        MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
+        log.info("result3:{}", result3.getResponse().getContentAsString());
+        assertEquals(200, result3.getResponse().getStatus());
+    }
 
     @Test
     public void absFloorHitRule() throws Exception {
@@ -644,14 +647,14 @@ public class ServiceTest {
 
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JSONObject.toJSON(rule).toString());
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
-        log.info("result3:{}", result3);
+        log.info("result3:{}", result3.getResponse().getContentAsString());
+        assertEquals(200, result3.getResponse().getStatus());
     }
 
     //:TODO add delete test
     @Test
     public void deleteTheRule() throws Exception {
         String arr = "";
-        String url = "/startCEPRule";
         rule.setFromDestination("from.com.webank.weevent");
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,topicName,brokerId,groupId,now,currentDate,currentTime");
@@ -661,8 +664,8 @@ public class ServiceTest {
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JSONObject.toJSON(rule).toString());
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
+        log.info("result3:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
-        log.info("result3:{}", result);
 
         String url2 = "/deleteCEPRuleById";
         RequestBuilder requestBuilder2 = MockMvcRequestBuilders.post(url2).contentType(MediaType.APPLICATION_JSON).param("id", rule.getId());
@@ -671,4 +674,56 @@ public class ServiceTest {
         assertEquals(200, result.getResponse().getStatus());
     }
 
+    @Test
+    public void stringContactHitRule() throws Exception {
+        String arr = "[[\"0\", \"18\", \"substring\", \"a,11,12\"], [\"28\", \"39\", \"concat\", \"b,a\"]]";
+        rule.setPayload("{\"a\":\"12345678901234567\",\"b\":\"12345678901234567\",\"c\":10,\"d\":10,\"e\":10}");
+
+        rule.setSelectField("a");
+        rule.setConditionField("a.substring(11,12)==\"2\" and b.concat(a)!=\"1234567890123456712345678901234567\"");
+        rule.setSystemFunctionMessage(arr);
+        rule.setConditionType(2);
+        rule.setId("20191230");
+
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JSONObject.toJSON(rule).toString());
+        MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
+        log.info("result3:{}", result3.getResponse().getContentAsString());
+        assertEquals(200, result3.getResponse().getStatus());
+        Thread.sleep(100000);
+    }
+
+    @Test
+    public void stringContactHitRule2() throws Exception {
+        String arr = "[[\"0\", \"18\", \"substring\", \"a,11,12\"], [\"28\", \"39\", \"concat\", \"b,a\"]]";
+        rule.setPayload("{\"a\":\"12345678901234567\",\"b\":\"12345678901234567\",\"c\":10,\"d\":10,\"e\":10}");
+
+        rule.setSelectField("a");
+        rule.setConditionField("a.substring(11,12)==\"2\" and b.concat(a)==\"1234567890123456712345678901234567\"");
+        rule.setSystemFunctionMessage(arr);
+        rule.setConditionType(2);
+        rule.setId("20191230");
+
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JSONObject.toJSON(rule).toString());
+        MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
+        log.info("result3:{}", result3.getResponse().getContentAsString());
+        assertEquals(200, result3.getResponse().getStatus());
+        Thread.sleep(100000);
+    }
+
+    @Test
+    public void absMultiHitRule() throws Exception {
+        String arr = "[[\"12\",\"18\",\"abs\",\"c\"],[\"29\",\"35\",\"abs\",\"d\"]]";
+        rule.setPayload("{\"a\":\"12345678901234567\",\"b\":20,\"c\":10,\"d\":10}");
+        rule.setSelectField("a");
+        rule.setConditionField("(b>=11 and (abs(c)!=22)) and abs(d)<=33");
+        rule.setSystemFunctionMessage(arr);
+        rule.setConditionType(2);
+        rule.setId("20191230");
+
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JSONObject.toJSON(rule).toString());
+        MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
+        log.info("result3:{}", result3.getResponse().getContentAsString());
+        assertEquals(200, result3.getResponse().getStatus());
+        Thread.sleep(100000);
+    }
 }
