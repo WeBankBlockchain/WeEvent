@@ -1,5 +1,6 @@
 package com.webank.weevent.processor.controller;
 
+import java.util.List;
 import java.io.IOException;
 
 import javax.validation.Valid;
@@ -13,7 +14,6 @@ import com.webank.weevent.processor.service.StatisticRuleService;
 import com.webank.weevent.processor.utils.BaseRspEntity;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.utils.ConstantsHelper;
-import com.webank.weevent.processor.utils.JsonUtil;
 import com.webank.weevent.processor.utils.RetCode;
 
 import lombok.extern.slf4j.Slf4j;
@@ -92,18 +92,15 @@ public class CEPRuleController {
             resEntity.setErrorCode(ret.getErrorCode());
             resEntity.setErrorMsg(ret.getErrorMsg());
         }
-
-        log.info("cepRule:{}", JsonUtil.toJSONString(ret));
         return resEntity;
     }
 
     @RequestMapping(value = "/statistic", method = RequestMethod.GET)
     @ResponseBody
-    public BaseRspEntity statistic() {
+    public BaseRspEntity statistic(@RequestParam List<String> idList) {
 
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
-        StatisticWeEvent getWeEventCollecttion = statisticRuleService.getStatisticWeEvent();
-
+        StatisticWeEvent getWeEventCollecttion = statisticRuleService.getStatisticWeEvent(idList);
         if (null == getWeEventCollecttion) { //fail
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
             resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());
@@ -124,7 +121,6 @@ public class CEPRuleController {
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
             resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());
         }
-        log.info("cepRule:{}", JsonUtil.toJSONString(ret));
         return resEntity;
     }
 
@@ -139,7 +135,6 @@ public class CEPRuleController {
             resEntity.setErrorMsg(ret.getErrorMsg());
         }
 
-        log.info("cepRule:{}", JsonUtil.toJSONString(ret));
         return resEntity;
     }
 
