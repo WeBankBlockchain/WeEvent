@@ -26,8 +26,8 @@ public class ProcessorApplication {
     public static ApplicationContext applicationContext;
     public static Environment environment;
 
-    @Value("${spring.jpa.database:h2}")
-    private static String databaseType;
+//    @Value("${spring.jpa.database:h2}")
+//    private static String databaseType;
 
     @Autowired
     public void setContext(ApplicationContext context) {
@@ -35,7 +35,7 @@ public class ProcessorApplication {
     }
 
     public static void main(String[] args) throws Exception {
-        startH2();
+//        startH2();
         log.info("start processor success");
         SpringApplication app = new SpringApplication(ProcessorApplication.class);
         app.addListeners(new ApplicationPidFileWriter());
@@ -43,14 +43,14 @@ public class ProcessorApplication {
         log.info("start processor success");
     }
 
-    private static void startH2() throws Exception {
-        if (!"h2".equals(databaseType.toLowerCase())) {
-            return;
-        }
-        Server server = Server.createTcpServer(new String[]{"-tcp", "-tcpAllowOthers", "-tcpPort", "7083"}).start();
-        String status = server.getStatus();
-        log.info("h2 status:{}", status);
-    }
+//    private static void startH2() throws Exception {
+//        if (!"h2".equals(databaseType.toLowerCase())) {
+//            return;
+//        }
+//        Server server = Server.createTcpServer(new String[]{"-tcp", "-tcpAllowOthers", "-tcpPort", "7083"}).start();
+//        String status = server.getStatus();
+//        log.info("h2 status:{}", status);
+//    }
 
     @Autowired
     public void setProcessorConfig(ProcessorConfig config) {

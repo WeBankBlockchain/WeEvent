@@ -1,5 +1,6 @@
 package com.webank.weevent.processor.utils;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -11,16 +12,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.sdk.WeEvent;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.util.StringUtils;
@@ -76,39 +74,39 @@ public class CommonUtil {
             page = arrSplit[0];
         }
 
-                return page;
-            }
+        return page;
+    }
 
 
-            private static String truncateUrlPage(String strURL) {
-                String strAllParam = null;
-                String[] arrSplit = strURL.split("[?]");
-                if ((strURL.length() > 1) && (arrSplit.length) > 1 && (arrSplit[1] != null)) {
-                    strAllParam = arrSplit[1];
-                }
+    private static String truncateUrlPage(String strURL) {
+        String strAllParam = null;
+        String[] arrSplit = strURL.split("[?]");
+        if ((strURL.length() > 1) && (arrSplit.length) > 1 && (arrSplit[1] != null)) {
+            strAllParam = arrSplit[1];
+        }
 
-                return strAllParam;
-            }
+        return strAllParam;
+    }
 
 
-            public static Map<String, String> uRLRequest(String URL) {
-                Map<String, String> mapRequest = new HashMap<String, String>();
+    public static Map<String, String> uRLRequest(String URL) {
+        Map<String, String> mapRequest = new HashMap<String, String>();
 
-                String[] arrSplit = null;
+        String[] arrSplit = null;
 
-                String strUrlParam = truncateUrlPage(URL);
-                if (strUrlParam == null) {
-                    return mapRequest;
-                }
-                arrSplit = strUrlParam.split("[&]");
-                for (String strSplit : arrSplit) {
-                    String[] arrSplitEqual = null;
-                    arrSplitEqual = strSplit.split("[=]");
+        String strUrlParam = truncateUrlPage(URL);
+        if (strUrlParam == null) {
+            return mapRequest;
+        }
+        arrSplit = strUrlParam.split("[&]");
+        for (String strSplit : arrSplit) {
+            String[] arrSplitEqual = null;
+            arrSplitEqual = strSplit.split("[=]");
 
-                    if (arrSplitEqual.length > 1) {
-                        mapRequest.put(arrSplitEqual[0], arrSplitEqual[1]);
+            if (arrSplitEqual.length > 1) {
+                mapRequest.put(arrSplitEqual[0], arrSplitEqual[1]);
 
-                    } else {
+            } else {
                 if (!arrSplitEqual[0].equals("")) {
                     mapRequest.put(arrSplitEqual[0], "");
                 }
@@ -121,39 +119,22 @@ public class CommonUtil {
     public static List<String> getKeys(String objJson) {
         List<String> keys = new ArrayList<>();
         try {
-            if (checkValidJson(objJson)) {
-                for (Map.Entry<String, Object> entry : JSONObject.parseObject(objJson).entrySet()) {
+            Map<String, Object> map = JsonUtil.parseObjectToMap(objJson);
+            if (JsonUtil.isValid(objJson)) {
+                for (Map.Entry<String, Object> entry : map.entrySet()) {
                     keys.add(entry.getKey());
                 }
             } else {
                 keys = null;
             }
 
-        } catch (JSONException e) {
+        } catch (IOException e) {
             keys = null;
             log.info("json get key error");
         }
         return keys;
     }
 
-    /**
-     * check valid json string
-     *
-     * @param test json string
-     * @return true or false
-     */
-    public final static boolean checkValidJson(String test) {
-        try {
-            JSONObject.parseObject(test);
-        } catch (JSONException ex) {
-            try {
-                JSONObject.parseArray(test);
-            } catch (JSONException ex1) {
-                return false;
-            }
-        }
-        return true;
-    }
 
     public static boolean checkJson(String content, String objJson) {
         boolean tag = true;
@@ -190,12 +171,12 @@ public class CommonUtil {
         return keys;
     }
 
-    private static List<String> getSelectFieldList(String selectFields, String payload) {
+    private static List<String> getSelectFieldList(String selectFields, String payload) throws IOException {
         List<String> result = new ArrayList<>();
         // if select is equal * ,then select all fields.
         if ("*".equals(selectFields)) {
             String selectFieldsTemp = payload;
-            Iterator it = JSONObject.parseObject(selectFieldsTemp).entrySet().iterator();
+            Iterator it = JsonUtil.parseObject(selectFieldsTemp, Map.class).entrySet().iterator();
 
             while (it.hasNext()) {
                 Map.Entry entry = (Map.Entry) it.next();
@@ -211,21 +192,24 @@ public class CommonUtil {
         return result;
     }
 
-    public static Map<String, String> contactsql(String brokerId, String groupId, WeEvent eventMessage, String selectFields, String payload) {
+    public static int increase(int number) {
+        return (new AtomicInteger(number)).incrementAndGet();
+    }
+
+    public static Map<String, String> contactsql(CEPRule rule, WeEvent eventMessage) throws IOException {
         String content = new String(eventMessage.getContent());
-        String eventId = eventMessage.getEventId();
-        String topicName = eventMessage.getTopic();
 
         // get select field
-        List<String> result = getSelectFieldList(selectFields, payload);
-        JSONObject table = JSONObject.parseObject(payload);
-        JSONObject eventContent;
+        List<String> result = getSelectFieldList(rule.getSelectField(), rule.getPayload());
+        Map<String, Object> table = JsonUtil.parseObjectToMap(rule.getPayload());
+        Map eventContent;
         Map<String, String> sqlOrder;
-        if (CommonUtil.checkValidJson(content)) {
-            eventContent = JSONObject.parseObject(content);
-            sqlOrder = generateSqlOrder(brokerId, groupId, eventId, topicName, result, eventContent, table);
+
+        if (JsonUtil.isValid(content)) {
+            eventContent = JsonUtil.parseObject(content, Map.class);
+            sqlOrder = generateSqlOrder(rule.getBrokerId(), rule.getGroupId(), eventMessage.getEventId(), eventMessage.getTopic(), result, eventContent, table);
         } else {
-            sqlOrder = generateSqlOrder(brokerId, groupId, eventId, topicName, result);
+            sqlOrder = generateSqlOrder(rule.getBrokerId(), rule.getGroupId(), eventMessage.getEventId(), eventMessage.getTopic(), result);
         }
 
         return sqlOrder;
@@ -238,86 +222,158 @@ public class CommonUtil {
         // get all select field and value, and the select field must in eventContent.
         for (String key : result) {
             // set the flag
-            if (ConstantsHelper.EVENT_ID.equals(key)) {
-                sqlOrder.put(ConstantsHelper.EVENT_ID, eventId);
-            }
-            if (ConstantsHelper.TOPIC_NAME.equals(key)) {
-                sqlOrder.put(ConstantsHelper.TOPIC_NAME, topicName);
-            }
-            if (ConstantsHelper.BROKER_ID.equals(key)) {
-                sqlOrder.put(ConstantsHelper.BROKER_ID, brokerId);
-            }
-            if (ConstantsHelper.GROUP_ID.equals(key)) {
-                sqlOrder.put(ConstantsHelper.GROUP_ID, groupId);
+            switch (key) {
+                case ConstantsHelper.EVENT_ID:
+                    sqlOrder.put(ConstantsHelper.EVENT_ID, eventId);
+                    break;
+                case ConstantsHelper.TOPIC_NAME:
+                    sqlOrder.put(ConstantsHelper.TOPIC_NAME, topicName);
+                    break;
+                case ConstantsHelper.BROKER_ID:
+                    sqlOrder.put(ConstantsHelper.BROKER_ID, brokerId);
+                    break;
+                case ConstantsHelper.GROUP_ID:
+                    sqlOrder.put(ConstantsHelper.GROUP_ID, groupId);
+                    break;
+                default:
+                    break;
+
             }
         }
 
         return sqlOrder;
     }
 
-    public static Map<String, Boolean> setFlag(Map<String, Boolean> map, String key) {
+    public static LinkedHashMap<String, Boolean> setFlag(LinkedHashMap<String, Boolean> map, String key) {
         // set the flag
-        if (ConstantsHelper.EVENT_ID.equals(key)) {
-            map.put(ConstantsHelper.EVENT_ID, true);
-        }
-        if (ConstantsHelper.TOPIC_NAME.equals(key)) {
-            map.put(ConstantsHelper.TOPIC_NAME, true);
-        }
-        if (ConstantsHelper.BROKER_ID.equals(key)) {
-            map.put(ConstantsHelper.BROKER_ID, true);
-        }
-        if (ConstantsHelper.GROUP_ID.equals(key)) {
-            map.put(ConstantsHelper.GROUP_ID, true);
-        }
-        if (ConstantsHelper.NOW.equals(key)) {
-            map.put(ConstantsHelper.NOW, true);
-        }
-        if (ConstantsHelper.CURRENT_DATE.equals(key)) {
-            map.put(ConstantsHelper.CURRENT_DATE, true);
-        }
-        if (ConstantsHelper.CURRENT_TIME.equals(key)) {
-            map.put(ConstantsHelper.CURRENT_TIME, true);
+        switch (key) {
+            case ConstantsHelper.EVENT_ID:
+                map.put(ConstantsHelper.EVENT_ID, true);
+
+                break;
+            case ConstantsHelper.TOPIC_NAME:
+                map.put(ConstantsHelper.TOPIC_NAME, true);
+
+                break;
+            case ConstantsHelper.BROKER_ID:
+                map.put(ConstantsHelper.BROKER_ID, true);
+
+                break;
+            case ConstantsHelper.GROUP_ID:
+                map.put(ConstantsHelper.GROUP_ID, true);
+
+                break;
+            case ConstantsHelper.NOW:
+                map.put(ConstantsHelper.NOW, true);
+
+                break;
+            case ConstantsHelper.CURRENT_TIME:
+                map.put(ConstantsHelper.CURRENT_DATE, true);
+
+                break;
+            case ConstantsHelper.CURRENT_DATE:
+                map.put(ConstantsHelper.CURRENT_TIME, true);
+
+                break;
+            default:
+                log.info("error:{}", key);
         }
         return map;
     }
+
+
+    public static String setWeEventContent(String brokerId, String groupId, WeEvent eventMessage, String selectField, String payload) throws IOException {
+        String content = new String(eventMessage.getContent());
+        Map eventContent = JsonUtil.parseObject(content, Map.class);
+        Map<String, Object> payloadContent = JsonUtil.parseObjectToMap(payload);
+
+        // match the table
+        Map<String, Object> iftttContent = new HashMap<>();
+        // check the star and get all parameters
+        if ("*".equals(selectField)) {
+            for (Map.Entry<String, Object> entry : payloadContent.entrySet()) {
+                if (eventContent.containsKey(entry.getKey())) {
+                    iftttContent.put(entry.getKey(), eventContent.get(entry.getKey()));
+                }
+            }
+        }
+        // get all fields
+        String[] result = selectField.split(",");
+        // event content must contain the select message
+        for (String item : result) {
+            if (eventContent.containsKey(item)) {
+                iftttContent.put(item, eventContent.get(item));
+            }
+
+            switch (item) {
+                case ConstantsHelper.EVENT_ID:
+                    iftttContent.put(item, eventMessage.getEventId());
+
+                    break;
+
+                case ConstantsHelper.TOPIC_NAME:
+                    iftttContent.put(item, eventMessage.getTopic());
+
+                    break;
+                case ConstantsHelper.BROKER_ID:
+                    iftttContent.put(item, brokerId);
+
+                    break;
+                case ConstantsHelper.GROUP_ID:
+                    iftttContent.put(item, groupId);
+
+                    break;
+            }
+        }
+
+        return iftttContent.toString();
+    }
+
 
     public static Map<String, String> contactSqlAccordingOrder(Map<String, Boolean> map, Map<String, String> sqlOrder, String brokerId, String groupId, String eventId, String topicName) {
         // set the flag
         for (Map.Entry<String, Boolean> entry : map.entrySet()) {
             // if true,then add it
-            if (entry.getValue()) {
-                if (ConstantsHelper.EVENT_ID.equals(entry.getKey())) {
+            switch (entry.getKey()) {
+                case ConstantsHelper.EVENT_ID:
                     sqlOrder.put(ConstantsHelper.EVENT_ID, eventId);
-                }
-                if (ConstantsHelper.TOPIC_NAME.equals(entry.getKey())) {
+
+                    break;
+                case ConstantsHelper.TOPIC_NAME:
                     sqlOrder.put(ConstantsHelper.TOPIC_NAME, topicName);
-                }
-                if (ConstantsHelper.BROKER_ID.equals(entry.getKey())) {
+
+                    break;
+                case ConstantsHelper.BROKER_ID:
                     sqlOrder.put(ConstantsHelper.BROKER_ID, brokerId);
-                }
-                if (ConstantsHelper.GROUP_ID.equals(entry.getKey())) {
+
+                    break;
+                case ConstantsHelper.GROUP_ID:
                     sqlOrder.put(ConstantsHelper.GROUP_ID, groupId);
-                }
-                if (ConstantsHelper.NOW.equals(entry.getKey())) {
+
+                    break;
+                case ConstantsHelper.NOW:
                     sqlOrder.put(ConstantsHelper.NOW, String.valueOf(new Date().getTime()));
-                }
-                if (ConstantsHelper.CURRENT_TIME.equals(entry.getKey())) {
-                    Date date = new Date();
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                    sqlOrder.put(ConstantsHelper.CURRENT_TIME, sdf.format(date));
-                }
-                if (ConstantsHelper.CURRENT_DATE.equals(entry.getKey())) {
-                    Date date = new Date();
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
-                    sqlOrder.put(ConstantsHelper.CURRENT_DATE, sdf.format(date));
-                }
+
+                    break;
+                case ConstantsHelper.CURRENT_TIME:
+                    SimpleDateFormat sdfTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                    sqlOrder.put(ConstantsHelper.CURRENT_TIME, sdfTime.format(new Date()));
+
+                    break;
+                case ConstantsHelper.CURRENT_DATE:
+                    SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy/MM/dd");
+                    sqlOrder.put(ConstantsHelper.CURRENT_DATE, sdfDate.format(new Date()));
+
+                    break;
+                default:
+                    log.info("error:{}", entry.getKey());
             }
         }
         return sqlOrder;
     }
 
 
-    private static Map<String, String> generateSqlOrder(String brokerId, String groupId, String eventId, String topicName, List<String> result, JSONObject eventContent, JSONObject table) {
+    private static Map<String, String> generateSqlOrder(String brokerId, String groupId, String eventId, String topicName, List<String> result, Map eventContent, Map<String, Object> table) {
         Map<String, String> sql = new HashMap<>();
         Map<String, String> sqlOrder = new HashMap<>();
         // <key-->flag>
@@ -329,7 +385,7 @@ public class CommonUtil {
             if (eventContent.containsKey(key)) {
                 sql.put(key, eventContent.get(key).toString());
             }
-            setFlag(tags, key);
+            tags = setFlag(tags, key);
         }
 
         // keep the right order
@@ -410,8 +466,6 @@ public class CommonUtil {
         for (int i = 0; i < arr.length; i++) {
             String type = arr[i][2];
             // end position
-            // int endPosition = Math.addExact(Math.addExact(Integer.valueOf(arr[i][0]), arr[i][1].length()), arr[i][3].length()) + 2;
-            String[] strArray;
             String left = arr[i][3], middle = "", right = "";
 
             if (arr[i].length == 5) {
@@ -426,7 +480,7 @@ public class CommonUtil {
             String replaceContent = "";
             switch (type) {
                 case "abs":
-                    sb.replace(Integer.valueOf(arr[i][0]), Integer.valueOf(arr[i][1]), String.valueOf(Math.abs((Integer) payload.get(arr[i][3]))));
+                    sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, String.valueOf(Math.abs((Integer) payload.get(arr[i][3]))));
                     changePosition = changePosition(conditionField, sb.toString());
 
                     break;
@@ -440,9 +494,7 @@ public class CommonUtil {
 
                 case "floor":
                     log.info("sb:{}", sb);
-                    //  String test = "10<21 and c>10 or 1111==\"1111\" and floor(b)>10";
 
-                    //new StringBuilder(test).replace(34, 44, "10");
                     sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, String.valueOf(Math.floor((Integer) payload.get(arr[i][3]))));
                     changePosition = changePosition(conditionField, sb.toString());
 
