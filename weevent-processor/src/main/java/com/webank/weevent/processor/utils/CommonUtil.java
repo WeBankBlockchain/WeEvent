@@ -207,32 +207,6 @@ public class CommonUtil {
         return sqlOrder;
     }
 
-//    public static Map<String, String> contactsql(CEPRule rule, WeEvent eventMessage) throws IOException {
-//        String content = new String(eventMessage.getContent());
-//
-//        // get select field
-//        List<String> result = getSelectFieldList(selectFields, payload);
-//        Map<String, Object> table = JsonUtil.parseObjectToMap(payload);
-//        Map eventContent;
-//        Map<String, String> sqlOrder;
-//        if (JsonUtil.isValid(content)) {
-//            eventContent = JsonUtil.parseObject(content, Map.class);
-//            sqlOrder = generateSqlOrder(brokerId, groupId, eventId, topicName, result, eventContent, table);
-//            List<String> result = getSelectFieldList(rule.getSelectField(), rule.getPayload());
-//            Map<String, Object> table = JsonUtil.parseObjectToMap(rule.getPayload());
-//            Map eventContent;
-//            Map<String, String> sqlOrder;
-//
-//            if (JsonUtil.isValid(content)) {
-//                eventContent = JsonUtil.parseObject(content, Map.class);
-//                sqlOrder = generateSqlOrder(rule.getBrokerId(), rule.getGroupId(), eventMessage.getEventId(), eventMessage.getTopic(), result, eventContent, table);
-//            } else {
-//                sqlOrder = generateSqlOrder(rule.getBrokerId(), rule.getGroupId(), eventMessage.getEventId(), eventMessage.getTopic(), result);
-//            }
-//
-//            return sqlOrder;
-//        }
-
     // for the system tag
     private static Map<String, String> generateSqlOrder(String brokerId, String groupId, String eventId, String
             topicName, List<String> result) {
