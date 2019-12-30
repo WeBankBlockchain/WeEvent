@@ -17,8 +17,6 @@ import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.entity.PermissionEntity;
 import com.webank.weevent.governance.entity.RuleDatabaseEntity;
 import com.webank.weevent.governance.entity.RuleEngineEntity;
-import com.webank.weevent.governance.enums.DeleteAtEnum;
-import com.webank.weevent.governance.enums.IsCreatorEnum;
 import com.webank.weevent.governance.mapper.BrokerMapper;
 import com.webank.weevent.governance.repository.BrokerRepository;
 import com.webank.weevent.governance.repository.PermissionRepository;
@@ -97,20 +95,20 @@ public class BrokerService {
         List<BrokerEntity> brokerEntityList = brokerMapper.getBrokers(Integer.parseInt(accountId));
         //Set the identity of the creation and authorization
         brokerEntityList.forEach(brokerEntity -> {
-            List<RuleEngineEntity> ruleEngineEntityList = ruleEngineRepository.findAllByBrokerIdAndSystemTagAndDeleteAt(brokerEntity.getId(), true, DeleteAtEnum.NOT_DELETED.getCode());
+            List<RuleEngineEntity> ruleEngineEntityList = ruleEngineRepository.findAllByBrokerIdAndSystemTagAndDeleteAt(brokerEntity.getId(), true, ConstantProperties.NOT_DELETED);
             List<Integer> integerList = ruleEngineEntityList.stream().map(RuleEngineEntity::getId).collect(Collectors.toList());
             brokerEntity.setRuleIdList(integerList);
             if (accountId.equals(brokerEntity.getUserId().toString())) {
-                brokerEntity.setIsCreator(IsCreatorEnum.CREATOR.getCode());
+                brokerEntity.setIsCreator(ConstantProperties.CREATOR);
             } else {
-                brokerEntity.setIsCreator(IsCreatorEnum.AUTHORIZED.getCode());
+                brokerEntity.setIsCreator(ConstantProperties.AUTHORIZED);
             }
         });
         return brokerEntityList;
     }
 
     public BrokerEntity getBroker(Integer id) {
-        return brokerRepository.findByIdAndDeleteAt(id, DeleteAtEnum.NOT_DELETED.getCode());
+        return brokerRepository.findByIdAndDeleteAt(id, ConstantProperties.NOT_DELETED);
     }
 
     @Transactional(rollbackFor = Throwable.class)
@@ -227,7 +225,7 @@ public class BrokerService {
     }
 
     private void modifyRule(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response) throws GovernanceException {
-        BrokerEntity oldBroker = brokerRepository.findByIdAndDeleteAt(brokerEntity.getId(), DeleteAtEnum.NOT_DELETED.getCode());
+        BrokerEntity oldBroker = brokerRepository.findByIdAndDeleteAt(brokerEntity.getId(), ConstantProperties.NOT_DELETED);
         if (brokerEntity.getBrokerUrl().equals(oldBroker.getBrokerUrl())) {
             return;
         }
@@ -335,7 +333,7 @@ public class BrokerService {
         permissionRepository.deletePermissionByBrokerId(brokerEntity.getId());
         topicHistoricalRepository.deleteTopicHistoricalByBrokerId(brokerEntity.getId());
 
-        List<RuleEngineEntity> ruleEngineEntityList = ruleEngineRepository.findAllByBrokerIdAndDeleteAt(brokerEntity.getId(), DeleteAtEnum.NOT_DELETED.getCode());
+        List<RuleEngineEntity> ruleEngineEntityList = ruleEngineRepository.findAllByBrokerIdAndDeleteAt(brokerEntity.getId(), ConstantProperties.NOT_DELETED);
         ruleEngineEntityList.forEach(it -> ruleEngineRepository.deleteRuleEngine(it.getId(), new Date().getTime()));
 
         List<RuleDatabaseEntity> databaseEntityList = ruleDatabaseRepository.findAllByBrokerIdAndSystemTag(brokerEntity.getId(), true);
@@ -344,7 +342,7 @@ public class BrokerService {
 
     private void deleteRule(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
         try {
-            List<RuleEngineEntity> ruleEngines = ruleEngineRepository.findAllByBrokerIdAndDeleteAt(brokerEntity.getId(), DeleteAtEnum.NOT_DELETED.getCode());
+            List<RuleEngineEntity> ruleEngines = ruleEngineRepository.findAllByBrokerIdAndDeleteAt(brokerEntity.getId(), ConstantProperties.NOT_DELETED);
             if (CollectionUtils.isNotEmpty(ruleEngines)) {
                 for (RuleEngineEntity ruleEngine : ruleEngines) {
                     ruleEngineService.deleteProcessRule(request, ruleEngine);
