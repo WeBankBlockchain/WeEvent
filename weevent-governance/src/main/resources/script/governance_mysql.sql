@@ -57,7 +57,10 @@ CREATE TABLE t_rule_engine (
   `broker_url` VARCHAR(255) NULL DEFAULT NULL COMMENT 'broker url',
   `from_destination` VARCHAR(64)  NULL DEFAULT NULL COMMENT  '数据来源',
   `to_destination` VARCHAR(64)  NULL DEFAULT NULL COMMENT  '数据目的',
-  `select_field` VARCHAR(4096) NULL DEFAULT NULL COMMENT '选择字段',
+  `function_array` VARCHAR(1024)  NULL DEFAULT NULL COMMENT  '函数数组字符串',
+  `condition_field` VARCHAR(4096)  NULL DEFAULT NULL COMMENT  '过滤条件',
+  `condition_field_json` VARCHAR(4096)  NULL DEFAULT NULL COMMENT  '过滤条件Json',
+  `select_field` VARCHAR(4096) NULL DEFAULT NULL COMMENT  '选择字段',
   `condition_type` INT(2) NULL DEFAULT NULL COMMENT '数据流转类型',
   `status` INT(2)  NULL DEFAULT null COMMENT '0 未启动, 1 运行,2 已经删除',
   `database_url` VARCHAR(255) NULL DEFAULT NULL COMMENT '数据库 url',
@@ -85,16 +88,6 @@ CREATE TABLE t_rule_database (
   `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改日期',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='数据源配置表';
-
-CREATE TABLE t_rule_engine_condition (
-  `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '主键id',
-  `rule_id` INT(64) DEFAULT NULL COMMENT '规则id',
-  `sql_condition_json` VARCHAR(512) DEFAULT NULL COMMENT '命中条件',
-  `create_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
-  `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改日期',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='规则引擎条件表';
-
 
 CREATE TABLE t_topic_historical (
    `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '主键id',
