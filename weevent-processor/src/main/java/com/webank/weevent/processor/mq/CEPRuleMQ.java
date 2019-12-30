@@ -562,28 +562,22 @@ public class CEPRuleMQ {
             StatisticRule statisticRule = statisticWeEvent.getStatisticRuleMap().get(type.getValue());
             switch (type.getKey()) {
                 case ConstantsHelper.HIT_TIMES:
-                    statisticRule.setHitTimes(CommonUtil.increase(statisticRule.getHitTimes()));
+                    statisticRule.setHitTimes(statisticRule.getHitTimes() + 1);
 
                     break;
 
                 case ConstantsHelper.NOT_HIT_TIMES:
-                    statisticRule.setNotHitTimes(CommonUtil.increase(statisticRule.getNotHitTimes()));
+                    statisticRule.setNotHitTimes(statisticRule.getNotHitTimes() + 1);
                     break;
 
                 case ConstantsHelper.WRITE_DB_SUCCESS:
-                    statisticRule.setDataFlowSuccess(CommonUtil.increase(statisticRule.getDataFlowSuccess()));
+                case ConstantsHelper.PUBLISH_EVENT_SUCCESS:
+                    statisticRule.setDataFlowSuccess(statisticRule.getDataFlowSuccess() + 1);
                     break;
 
                 case ConstantsHelper.WRITE_DB_FAIL:
-                    statisticRule.setDataFlowFail(CommonUtil.increase(statisticRule.getDataFlowFail()));
-                    break;
-
-                case ConstantsHelper.PUBLISH_EVENT_SUCCESS:
-                    statisticRule.setDataFlowSuccess(CommonUtil.increase(statisticRule.getDataFlowSuccess()));
-                    break;
-
                 case ConstantsHelper.PUBLISH_EVENT_FAIL:
-                    statisticRule.setDataFlowFail(CommonUtil.increase(statisticRule.getDataFlowFail()));
+                    statisticRule.setDataFlowFail(statisticRule.getDataFlowFail() + 1);
                     break;
 
                 case ConstantsHelper.LAST_FAIL_REASON:
@@ -597,7 +591,6 @@ public class CEPRuleMQ {
         }
 
     }
-
 
     private static class DBThread implements Runnable {
 

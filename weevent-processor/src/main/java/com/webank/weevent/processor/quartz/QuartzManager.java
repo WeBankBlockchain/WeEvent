@@ -258,12 +258,12 @@ public class QuartzManager {
 
                     // statistic
                     if ("1".equals(rule.getSystemTag())) {
-                        systemAmount = CommonUtil.increase(systemAmount);
+                        systemAmount = systemAmount + 1;
                     } else {
-                        userAmount = CommonUtil.increase(userAmount);
+                        userAmount = userAmount + 1;
                     }
                     if ("1".equals(rule.getStatus())) {
-                        runAmount = CommonUtil.increase(runAmount);
+                        runAmount = runAmount + 1;
                     }
 
                     // match the right rule

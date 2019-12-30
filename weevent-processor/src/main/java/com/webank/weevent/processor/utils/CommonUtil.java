@@ -179,10 +179,6 @@ public class CommonUtil {
         return result;
     }
 
-    public static int increase(int number) {
-        return (new AtomicInteger(number)).incrementAndGet();
-    }
-
     public static Map<String, String> contactsql(String brokerId, String groupId, WeEvent eventMessage, String selectFields, String payload) throws IOException {
         String content = new String(eventMessage.getContent());
         String eventId = eventMessage.getEventId();
