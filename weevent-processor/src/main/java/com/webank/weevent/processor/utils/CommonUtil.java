@@ -316,6 +316,8 @@ public class CommonUtil {
                     iftttContent.put(item, groupId);
 
                     break;
+                default:
+                    log.info("item:{}", item);
             }
         }
 
@@ -410,7 +412,7 @@ public class CommonUtil {
 
 
     /**
-     * count the position, for version 1.2 abs��ceil��floor��round
+     * count the position, for version 1.2 abs and ceil and floor and round
      *
      * @param conditionField original condition message
      * @param sb condition buffer
