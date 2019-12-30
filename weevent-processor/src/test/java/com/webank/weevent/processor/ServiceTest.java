@@ -549,6 +549,7 @@ public class ServiceTest {
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getStatus());
+        assertEquals(200, result3.getResponse().getStatus());
     }
 
     @Test
@@ -565,6 +566,7 @@ public class ServiceTest {
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getContentAsString());
+        assertEquals(200, result3.getResponse().getStatus());
     }
 
     @Test
@@ -591,6 +593,7 @@ public class ServiceTest {
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getContentAsString());
+        assertEquals(200, result3.getResponse().getStatus());
     }
 
     @Test
