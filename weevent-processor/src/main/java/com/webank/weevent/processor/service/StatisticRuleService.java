@@ -31,14 +31,12 @@ public class StatisticRuleService {
         } else {
             for (String id : idList) {
                 // check the id
-                if (statisticWeEvent.getStatisticRuleMap().containsKey(id)) {
-                    StatisticRule rule = statisticWeEvent.getStatisticRuleMap().get(id);
-                    statisticRuleMap.put(rule.getId(), rule);
+                if (!statisticWeEvent.getStatisticRuleMap().containsKey(id)) {
+                    statisticWeEvent.getStatisticRuleMap().remove(id);
                 }
             }
         }
 
-        statisticWeEvent.setStatisticRuleMap(statisticRuleMap);
         StatisticWeEvent statisticJobs = quartzManager.getStatisticJobs(statisticWeEvent, idList);
         return statisticJobs;
     }
