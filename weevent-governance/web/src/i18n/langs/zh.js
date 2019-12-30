@@ -247,5 +247,20 @@ module.exports = {
     'guideAddress': '数据流转地址必须填写',
     'abnormalAddress': '异常流转地址必须填写',
     'cannotSame': '[数据目的]不能和[数据来源]相同'
+  },
+  ruleStatic: {
+    'readRule': '查看规则',
+    'readInsideRule': '查看系统规则',
+    'systemRules': '系统规则',
+    'ruleName': '规则名称',
+    'hitTimes': '命中次数',
+    'notHitTimes': '未命中次数',
+    'successTimes': '发布成功次数',
+    'failTimes': '发布失败次数',
+    'startTime': '启动时间',
+    'readFailRecord': '最后错误详情',
+    'lastRecord': '最后一次失败记录',
+    'runningStatus': '运行状态',
+    'destinationType': '流转目标类型'
   }
 }
