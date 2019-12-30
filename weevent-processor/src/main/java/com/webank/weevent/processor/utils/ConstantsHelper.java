@@ -67,11 +67,10 @@ public class ConstantsHelper {
     public static final String TOPIC_NAME = "topicName";
     public static final String BROKER_ID = "brokerId";
     public static final String GROUP_ID = "groupId";
+
     public static final String NOW = "now";
     public static final String CURRENT_DATE = "currentDate";
     public static final String CURRENT_TIME = "currentTime";
-
-
     public static final String HIT_TIMES = "HIT_TIMES";
     public static final String NOT_HIT_TIMES = "NOT_HIT_TIMES";
 

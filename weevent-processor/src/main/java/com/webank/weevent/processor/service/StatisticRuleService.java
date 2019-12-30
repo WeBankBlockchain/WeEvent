@@ -25,21 +25,18 @@ public class StatisticRuleService {
         StatisticWeEvent statisticWeEvent = cEPRuleMQ.getStatisticWeEvent();
         Map<String, StatisticRule> statisticRuleMap = new HashMap<>();
 
-        for (Map.Entry<String, StatisticRule> entry : statisticWeEvent.getStatisticRuleMap().entrySet()) {
-            StatisticRule rule = entry.getValue();
-
-            // check the id list
-            if (0 == idList.size()) {
-                statisticWeEvent.setStatisticRuleMap(statisticRuleMap);
-                break;
-            }
-
-            // check the id
-            if (idList.contains(rule.getId())) {
-                statisticRuleMap.put(rule.getId(), rule);
+        // check the id list
+        if (null == idList || 0 == idList.size()) {
+            statisticWeEvent.setStatisticRuleMap(statisticRuleMap);
+        } else {
+            for (String id : idList) {
+                // check the id
+                if (!statisticWeEvent.getStatisticRuleMap().containsKey(id)) {
+                    statisticWeEvent.getStatisticRuleMap().remove(id);
+                }
             }
         }
-        statisticWeEvent.setStatisticRuleMap(statisticRuleMap);
+
         StatisticWeEvent statisticJobs = quartzManager.getStatisticJobs(statisticWeEvent, idList);
         return statisticJobs;
     }

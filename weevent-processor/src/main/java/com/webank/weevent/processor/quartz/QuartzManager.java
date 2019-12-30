@@ -6,15 +6,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-
 import javax.annotation.PostConstruct;
 
 import com.webank.weevent.processor.cache.CEPRuleCache;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.model.StatisticRule;
 import com.webank.weevent.processor.model.StatisticWeEvent;
-import com.webank.weevent.processor.utils.CommonUtil;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.RetCode;
 
@@ -253,21 +250,21 @@ public class QuartzManager {
 
             while (it.hasNext()) {
                 JobKey jobKey = (JobKey) it.next();
-                if (null != (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
+                if (null != scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
                     CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
 
                     // statistic
                     if ("1".equals(rule.getSystemTag())) {
-                        systemAmount = CommonUtil.increase(systemAmount);
+                        systemAmount = systemAmount + 1;
                     } else {
-                        userAmount = CommonUtil.increase(userAmount);
+                        userAmount = userAmount + 1;
                     }
                     if ("1".equals(rule.getStatus())) {
-                        runAmount = CommonUtil.increase(runAmount);
+                        runAmount = runAmount + 1;
                     }
 
                     // match the right rule
-                    if (idList.contains(rule.getId()) && (!statisticRuleMap.containsKey(rule.getId()))) {
+                    if ((!statisticRuleMap.containsKey(rule.getId())) && idList.contains(rule.getId())) {
                         StatisticRule statisticRule = new StatisticRule();
                         statisticRule.setId(rule.getId());
                         statisticRule.setBrokerId(rule.getBrokerId());
