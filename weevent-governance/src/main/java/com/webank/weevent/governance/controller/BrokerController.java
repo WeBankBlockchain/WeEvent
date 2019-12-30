@@ -14,6 +14,7 @@ import com.webank.weevent.governance.service.BrokerService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,9 +35,9 @@ public class BrokerController {
 
     // get all broker service
     @GetMapping("/list")
-    public List<BrokerEntity> getAllBrokers(HttpServletRequest request) {
+    public List<BrokerEntity> getAllBrokers(HttpServletRequest request, @CookieValue("MGR_ACCOUNT_ID") String accountId) {
         log.info("get all brokers ");
-        return brokerService.getBrokers(request);
+        return brokerService.getBrokers(request, accountId);
     }
 
     // get broker service by id

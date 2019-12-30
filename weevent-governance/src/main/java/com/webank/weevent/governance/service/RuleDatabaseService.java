@@ -6,10 +6,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.RuleDatabaseEntity;
 import com.webank.weevent.governance.exception.GovernanceException;
-import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.repository.RuleDatabaseRepository;
 import com.webank.weevent.governance.utils.CookiesTools;
 
@@ -35,10 +33,6 @@ public class RuleDatabaseService {
 
     public List<RuleDatabaseEntity> getRuleDataBaseList(HttpServletRequest request, RuleDatabaseEntity ruleDatabaseEntity) throws GovernanceException {
         try {
-            String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-            if (accountId == null || !accountId.equals(ruleDatabaseEntity.getUserId().toString())) {
-                throw new GovernanceException(ErrorCode.ACCESS_DENIED);
-            }
             ruleDatabaseEntity.setSystemTag(false);
             Example<RuleDatabaseEntity> entityExample = Example.of(ruleDatabaseEntity);
             List<RuleDatabaseEntity> ruleDatabaseEntityList = ruleDatabaseRepository.findAll(entityExample);
@@ -63,10 +57,6 @@ public class RuleDatabaseService {
     public RuleDatabaseEntity addRuleDatabase(RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         try {
-            String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-            if (accountId == null || !accountId.equals(ruleDatabaseEntity.getUserId().toString())) {
-                throw new GovernanceException(ErrorCode.ACCESS_DENIED);
-            }
             //check dbUrl
             commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseUrl(), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword());
             ruleDatabaseEntity.setSystemTag(false);
@@ -81,10 +71,6 @@ public class RuleDatabaseService {
     @Transactional(rollbackFor = Throwable.class)
     public void deleteRuleDatabase(RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
         try {
-            String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-            if (accountId == null || !accountId.equals(ruleDatabaseEntity.getUserId().toString())) {
-                throw new GovernanceException(ErrorCode.ACCESS_DENIED);
-            }
             RuleDatabaseEntity databaseEntity = ruleDatabaseRepository.findById(ruleDatabaseEntity.getId());
             if (databaseEntity == null) {
                 return;
@@ -100,10 +86,6 @@ public class RuleDatabaseService {
     public void updateRuleDatabase(RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         try {
-            String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-            if (accountId == null || !accountId.equals(ruleDatabaseEntity.getUserId().toString())) {
-                throw new GovernanceException(ErrorCode.ACCESS_DENIED);
-            }
             ruleDatabaseEntity.setSystemTag(false);
             //check databaseUrl
             commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseUrl(), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword());

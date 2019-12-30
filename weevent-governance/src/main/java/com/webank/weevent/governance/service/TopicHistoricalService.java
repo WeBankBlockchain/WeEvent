@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.entity.RuleDatabaseEntity;
 import com.webank.weevent.governance.entity.RuleEngineEntity;
@@ -82,11 +81,6 @@ public class TopicHistoricalService {
     public Map<String, List<Integer>> historicalDataList(TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest httpRequest,
                                                          HttpServletResponse httpResponse) throws GovernanceException {
         try {
-            String accountId = cookiesTools.getCookieValueByName(httpRequest, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-            Boolean flag = permissionService.verifyPermissions(topicHistoricalEntity.getBrokerId(), accountId);
-            if (!flag) {
-                throw new GovernanceException(ErrorCode.ACCESS_DENIED);
-            }
             if (topicHistoricalEntity.getBeginDate() == null || topicHistoricalEntity.getEndDate() == null) {
                 throw new GovernanceException("beginDate or endDate is empty");
             }
@@ -131,11 +125,6 @@ public class TopicHistoricalService {
 
     public List<TopicHistoricalEntity> eventList(TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest httpRequest) throws GovernanceException {
         try {
-            String accountId = cookiesTools.getCookieValueByName(httpRequest, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-            Boolean flag = permissionService.verifyPermissions(topicHistoricalEntity.getBrokerId(), accountId);
-            if (!flag) {
-                throw new GovernanceException(ErrorCode.ACCESS_DENIED);
-            }
             topicHistoricalEntity.setBeginDateStr(DateFormatUtils.format(topicHistoricalEntity.getBeginDate(), simpleDateFormat) + " 00:00:00");
             topicHistoricalEntity.setEndDateStr(DateFormatUtils.format(topicHistoricalEntity.getEndDate(), simpleDateFormat) + " 23:59:59");
             List<TopicHistoricalEntity> historicalEntities = topicHistoricalMapper.eventList(topicHistoricalEntity);
@@ -245,7 +234,7 @@ public class TopicHistoricalService {
             if (StringUtil.isBlank(mes)) {
                 throw new GovernanceException("group is empty");
             }
-            Map jsonObject = JsonUtil.parseObject(mes,Map.class);
+            Map jsonObject = JsonUtil.parseObject(mes, Map.class);
             Object data = jsonObject.get("data");
             if ("0".equals(jsonObject.get("code").toString()) && data instanceof List) {
                 groupList = (List) data;

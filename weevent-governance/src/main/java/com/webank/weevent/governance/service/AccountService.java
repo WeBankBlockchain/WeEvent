@@ -11,7 +11,6 @@ import com.webank.weevent.governance.code.ErrorCode;
 import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.enums.DeleteAtEnum;
 import com.webank.weevent.governance.exception.GovernanceException;
-import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.repository.AccountRepository;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.utils.CookiesTools;
@@ -186,9 +185,8 @@ public class AccountService {
         return null;
     }
 
-    public List<AccountEntity> accountEntityList(HttpServletRequest request, AccountEntity accountEntity) {
+    public List<AccountEntity> accountEntityList(HttpServletRequest request, AccountEntity accountEntity, String accountId) {
         // execute select
-        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
         Example<AccountEntity> entityExample = Example.of(accountEntity);
         List<AccountEntity> list = accountRepository.findAll(entityExample);
         //filter current user

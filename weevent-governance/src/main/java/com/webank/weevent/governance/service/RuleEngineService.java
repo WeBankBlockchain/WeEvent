@@ -31,7 +31,6 @@ import com.webank.weevent.governance.repository.RuleEngineRepository;
 import com.webank.weevent.governance.utils.CookiesTools;
 import com.webank.weevent.governance.utils.DAGDetectUtil;
 import com.webank.weevent.governance.utils.JsonUtil;
-import com.webank.weevent.governance.utils.NumberValidationUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -89,11 +88,6 @@ public class RuleEngineService {
     @SuppressWarnings("unchecked")
     public List<RuleEngineEntity> getRuleEngines(HttpServletRequest request, RuleEngineEntity ruleEngineEntity) throws GovernanceException {
         try {
-            String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-
-            if (accountId == null || !accountId.equals(ruleEngineEntity.getUserId().toString())) {
-                throw new GovernanceException(ErrorCode.ACCESS_DENIED);
-            }
             ruleEngineEntity.setSystemTag(false);
             int count = ruleEngineMapper.countRuleEngine(ruleEngineEntity);
             ruleEngineEntity.setTotalCount(count);
@@ -122,10 +116,6 @@ public class RuleEngineService {
     public RuleEngineEntity addRuleEngine(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         try {
-            String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-            if (accountId == null || !accountId.equals(ruleEngineEntity.getUserId().toString())) {
-                throw new GovernanceException(ErrorCode.ACCESS_DENIED);
-            }
             ruleEngineEntity.setSystemTag(false);
             ruleEngineEntity.setStatus(StatusEnum.NOT_STARTED.getCode());
             String payload = JsonUtil.toJSONString(ruleEngineEntity.getPayloadMap());
@@ -152,7 +142,6 @@ public class RuleEngineService {
     @Transactional(rollbackFor = Throwable.class)
     public boolean deleteRuleEngine(RuleEngineEntity ruleEngineEntity, HttpServletRequest request) throws GovernanceException {
         try {
-            authCheck(ruleEngineEntity, request);
             List<RuleEngineEntity> ruleEngines = ruleEngineMapper.getRuleEngines(ruleEngineEntity);
             if (CollectionUtils.isEmpty(ruleEngines)) {
                 throw new GovernanceException("the data is deleted ");
@@ -208,7 +197,6 @@ public class RuleEngineService {
     public boolean updateRuleEngine(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         try {
-            this.authCheck(ruleEngineEntity, request);
             //check rule
             this.checkRule(ruleEngineEntity);
             //set payload
@@ -310,7 +298,6 @@ public class RuleEngineService {
     @Transactional(rollbackFor = Throwable.class)
     public boolean updateRuleEngineStatus(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
-        authCheck(ruleEngineEntity, request);
         RuleEngineEntity rule = ruleEngineRepository.findById(ruleEngineEntity.getId());
         BeanUtils.copyProperties(rule, ruleEngineEntity, "status");
         try {
@@ -486,11 +473,6 @@ public class RuleEngineService {
 
     @SuppressWarnings("unchecked")
     public RuleEngineEntity getRuleEngineDetail(RuleEngineEntity ruleEngineEntity, HttpServletRequest request, HttpServletResponse response) throws GovernanceException {
-        String accountid = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-        Boolean flag = permissionService.verifyPermissions(ruleEngineEntity.getBrokerId(), accountid);
-        if (!flag) {
-            throw new GovernanceException(ErrorCode.ACCESS_DENIED);
-        }
         RuleEngineEntity engineEntity = ruleEngineRepository.findById(ruleEngineEntity.getId());
         if (engineEntity == null) {
             return null;
@@ -567,13 +549,6 @@ public class RuleEngineService {
         return false;
     }
 
-    private void authCheck(RuleEngineEntity ruleEngineEntity, HttpServletRequest request) throws GovernanceException {
-        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-        Boolean flag = permissionService.verifyPermissions(ruleEngineEntity.getBrokerId(), accountId);
-        if (!flag) {
-            throw new GovernanceException(ErrorCode.ACCESS_DENIED);
-        }
-    }
     private String getProcessorUrl() {
         return processorUrl;
     }

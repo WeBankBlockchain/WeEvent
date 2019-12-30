@@ -65,14 +65,9 @@ public class TopicService {
 
     public Boolean close(Integer brokerId, String topic, String groupId, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
-        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
         BrokerEntity brokerEntity = brokerService.getBroker(brokerId);
         if (brokerEntity == null) {
             return false;
-        }
-        Boolean flag = permissionService.verifyPermissions(brokerId, accountId);
-        if (!flag) {
-            throw new GovernanceException(ErrorCode.ACCESS_DENIED);
         }
         CloseableHttpClient client = commonService.generateHttpClient(brokerEntity.getBrokerUrl());
         String url;
@@ -102,12 +97,7 @@ public class TopicService {
         Integer pageIndex = topicPageEntity.getPageIndex();
         Integer pageSize = topicPageEntity.getPageSize();
         String groupId = topicPageEntity.getGroupId();
-        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
         BrokerEntity brokerEntity = brokerService.getBroker(brokerId);
-        Boolean flag = permissionService.verifyPermissions(brokerId, accountId);
-        if (!flag) {
-            throw new GovernanceException(ErrorCode.ACCESS_DENIED);
-        }
         TopicPage result = new TopicPage();
         result.setPageIndex(pageIndex);
         result.setPageSize(pageSize);
@@ -162,12 +152,10 @@ public class TopicService {
     }
 
     public TopicEntity getTopicInfo(Integer brokerId, String topic, String groupId, HttpServletRequest request) throws GovernanceException {
-        String accountId = this.cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
         BrokerEntity broker = this.brokerService.getBroker(brokerId);
-        Boolean flag = permissionService.verifyPermissions(brokerId, accountId);
-        if (broker == null || !flag) {
+        if (broker == null) {
             log.error("get topicInfo failed, brokerId:{}, topic:{}, groupId:{}.", brokerId, topic, groupId);
-            throw new GovernanceException(ErrorCode.ACCESS_DENIED);
+            throw new GovernanceException("broker is not exists");
         }
 
         try {
@@ -202,14 +190,9 @@ public class TopicService {
     @Transactional(rollbackFor = Throwable.class)
     public GovernanceResult open(Integer brokerId, String topic, String creater, String groupId, HttpServletRequest request,
                                  HttpServletResponse response) throws GovernanceException {
-        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
         BrokerEntity brokerEntity = brokerService.getBroker(brokerId);
         if (brokerEntity == null) {
             return null;
-        }
-        Boolean flag = permissionService.verifyPermissions(brokerId, accountId);
-        if (!flag) {
-            throw new GovernanceException(ErrorCode.ACCESS_DENIED);
         }
         String mes;
         try {
@@ -240,7 +223,7 @@ public class TopicService {
             return new GovernanceResult(Boolean.valueOf(mes));
         } catch (Exception e) {
             log.error("open topic fail,error:{}", e.getMessage());
-            throw new GovernanceException("open topic fail,error",e);
+            throw new GovernanceException("open topic fail,error", e);
         }
     }
 

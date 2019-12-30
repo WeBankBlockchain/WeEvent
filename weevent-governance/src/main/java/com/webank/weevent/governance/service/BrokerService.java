@@ -93,8 +93,7 @@ public class BrokerService {
     @Autowired
     private CookiesTools cookiesTools;
 
-    public List<BrokerEntity> getBrokers(HttpServletRequest request) {
-        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
+    public List<BrokerEntity> getBrokers(HttpServletRequest request, String accountId) {
         List<BrokerEntity> brokerEntityList = brokerMapper.getBrokers(Integer.parseInt(accountId));
         //Set the identity of the creation and authorization
         brokerEntityList.forEach(brokerEntity -> {
@@ -183,7 +182,6 @@ public class BrokerService {
 
     @Transactional(rollbackFor = Throwable.class)
     public GovernanceResult deleteBroker(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
-        authCheck(brokerEntity, request);
         try {
 
             deleteOldData(brokerEntity, request);
@@ -199,8 +197,6 @@ public class BrokerService {
     @Transactional(rollbackFor = Throwable.class)
     public GovernanceResult updateBroker(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
-        authCheck(brokerEntity, request);
-
         //check both broker and webase serverUrl
         ErrorCode errorCode = checkServerByBrokerEntity(brokerEntity, request);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
@@ -254,14 +250,6 @@ public class BrokerService {
         return check(brokerEntity, request);
     }
 
-    private void authCheck(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
-        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-        Boolean flag = permissionService.verifyPermissions(brokerEntity.getId(), accountId);
-        if (!flag) {
-            throw new GovernanceException(ErrorCode.ACCESS_DENIED);
-        }
-    }
-
     public ErrorCode checkServerByUrl(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
         //check broker or webase serverUrl
         if (StringUtils.isBlank(brokerEntity.getBrokerUrl()) && StringUtils.isBlank(brokerEntity.getWebaseUrl())) {
@@ -275,11 +263,6 @@ public class BrokerService {
     }
 
     private ErrorCode check(BrokerEntity brokerEntity, HttpServletRequest request) {
-        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-        if (accountId == null || !accountId.equals(brokerEntity.getUserId().toString())) {
-            return ErrorCode.ACCESS_DENIED;
-        }
-
         if (!StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
             String brokerServerUrl = brokerEntity.getBrokerUrl();
             log.info("check Broker server, url:{}", brokerServerUrl);

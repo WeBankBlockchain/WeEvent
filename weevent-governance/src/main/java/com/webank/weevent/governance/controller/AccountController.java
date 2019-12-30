@@ -15,6 +15,7 @@ import com.webank.weevent.governance.service.AccountService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -77,9 +78,9 @@ public class AccountController {
      * Query all account except themselves
      */
     @RequestMapping("/accountList")
-    public GovernanceResult accountEntityList(AccountEntity accountEntity, HttpServletRequest request,
+    public GovernanceResult accountEntityList(AccountEntity accountEntity, @CookieValue("MGR_ACCOUNT_ID") String accountId, HttpServletRequest request,
                                               HttpServletResponse response) throws GovernanceException {
-        List<AccountEntity> accountEntities = accountService.accountEntityList(request, accountEntity);
+        List<AccountEntity> accountEntities = accountService.accountEntityList(request, accountEntity,accountId);
         return new GovernanceResult(accountEntities);
     }
 

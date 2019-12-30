@@ -2,7 +2,10 @@ package com.webank.weevent.governance.junit;
 
 import java.util.Map;
 
+import javax.servlet.http.Cookie;
+
 import com.webank.weevent.governance.JUnitTestBase;
+import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.utils.JsonUtil;
 
@@ -29,10 +32,13 @@ public class AccountControllerTest extends JUnitTestBase {
 
     private MockMvc mockMvc;
 
+    private Cookie cookie;
 
     @Before
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+        this.cookie = new Cookie(ConstantProperties.COOKIE_MGR_ACCOUNT_ID, "1");
+
     }
 
     @Before
@@ -97,7 +103,7 @@ public class AccountControllerTest extends JUnitTestBase {
 
     @Test
     public void testAccountList() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/user/accountList").contentType(MediaType.APPLICATION_JSON_UTF8))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/user/accountList").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie))
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
