@@ -253,7 +253,7 @@ public class QuartzManager {
 
             while (it.hasNext()) {
                 JobKey jobKey = (JobKey) it.next();
-                if (null != (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
+                if (null != scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
                     CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
 
                     // statistic
