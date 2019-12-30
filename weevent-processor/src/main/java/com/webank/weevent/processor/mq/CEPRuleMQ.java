@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
-import com.webank.weevent.processor.statistic.StatisticCEPRule;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.model.StatisticRule;
 import com.webank.weevent.processor.model.StatisticWeEvent;
@@ -21,6 +20,7 @@ import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.DataBaseUtil;
 import com.webank.weevent.processor.utils.JsonUtil;
 import com.webank.weevent.processor.utils.RetCode;
+import com.webank.weevent.processor.utils.StatisticCEPRuleUtil;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.SendResult;
@@ -61,7 +61,7 @@ public class CEPRuleMQ {
         // when is in run status. update the rule map
         // update unsubscribe
         String subId = subscriptionIdMap.get(rule.getId());
-        statisticWeEvent = StatisticCEPRule.statistic(statisticWeEvent, ruleMap);
+        statisticWeEvent = StatisticCEPRuleUtil.statistic(statisticWeEvent, ruleMap);
         if (1 == rule.getStatus()) {
             if (null != subId) {
                 IWeEventClient client = subscriptionClientMap.get(subId);
@@ -152,7 +152,7 @@ public class CEPRuleMQ {
                             } else {
                                 type = handleOnEventOtherPattern(client, event, ruleMap);
                             }
-                            statisticWeEvent = StatisticCEPRule.statisticOrderType(statisticWeEvent, type);
+                            statisticWeEvent = StatisticCEPRuleUtil.statisticOrderType(statisticWeEvent, type);
                         } catch (Exception e) {
                             log.error(e.toString());
                         }
@@ -178,7 +178,7 @@ public class CEPRuleMQ {
                             } else {
                                 type = handleOnEventOtherPattern(client, event, ruleMap);
                             }
-                            statisticWeEvent = StatisticCEPRule.statisticOrderType(statisticWeEvent, type);
+                            statisticWeEvent = StatisticCEPRuleUtil.statisticOrderType(statisticWeEvent, type);
                         } catch (Exception e) {
                             log.error(e.toString());
                         }
