@@ -15,8 +15,6 @@ public interface RuleEngineMapper {
 
     List<RuleEngineEntity> getRuleEnginePage(@Param("ruleEngineEntity") RuleEngineEntity ruleEngineEntity, @Param("startIndex") Integer startIndex, @Param("endIndex") Integer endIndex);
 
-    // update RuleEngineEntity
-    Boolean updateRuleEngine(RuleEngineEntity ruleEngineEntity);
 
     int countRuleEngine(RuleEngineEntity ruleEngineEntity);
 

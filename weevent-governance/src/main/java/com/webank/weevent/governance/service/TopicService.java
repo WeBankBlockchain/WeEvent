@@ -237,7 +237,7 @@ public class TopicService {
             HttpGet get = commonService.getMethod(url, request);
             CloseableHttpResponse closeResponse = client.execute(get);
             mes = EntityUtils.toString(closeResponse.getEntity());
-            return new GovernanceResult(JsonUtil.parseObject(mes,Map.class));
+            return new GovernanceResult(Boolean.valueOf(mes));
         } catch (Exception e) {
             log.error("open topic fail,error:{}", e.getMessage());
             throw new GovernanceException("open topic fail,error",e);
