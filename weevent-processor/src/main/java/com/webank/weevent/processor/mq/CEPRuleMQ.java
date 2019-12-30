@@ -441,11 +441,6 @@ public class CEPRuleMQ {
         return ConstantsHelper.FAIL;
     }
 
-    /**
-     * get statistic weevent
-     *
-     * @return
-     */
     public static StatisticWeEvent getStatisticWeEvent() {
         log.info("getStatisticWeEvent:{}", statisticWeEvent);
         return statisticWeEvent;

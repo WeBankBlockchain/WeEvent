@@ -145,7 +145,6 @@ public class ServiceTest {
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
-        Thread.sleep(1000000);
     }
 
 
@@ -160,7 +159,6 @@ public class ServiceTest {
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
-        Thread.sleep(1000000);
     }
 
     @Test
@@ -174,7 +172,6 @@ public class ServiceTest {
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
-        Thread.sleep(1000000);
     }
 
     @Test
@@ -188,7 +185,6 @@ public class ServiceTest {
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
-        Thread.sleep(1000000);
     }
 
     @Test
@@ -216,7 +212,6 @@ public class ServiceTest {
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
-        Thread.sleep(1000000);
     }
 
     @Test
@@ -230,7 +225,6 @@ public class ServiceTest {
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
-        Thread.sleep(1000000);
     }
 
 
@@ -259,7 +253,6 @@ public class ServiceTest {
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
-        Thread.sleep(1000000);
     }
 
     @Test
@@ -273,7 +266,6 @@ public class ServiceTest {
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
-        Thread.sleep(1000000);
     }
 
 
@@ -301,7 +293,6 @@ public class ServiceTest {
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
-        Thread.sleep(1000000);
     }
 
     @Test
@@ -322,7 +313,6 @@ public class ServiceTest {
         RequestBuilder requestBuilder2 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result2 = mockMvc.perform(requestBuilder2).andDo(print()).andReturn();
         assertEquals(200, result2.getResponse().getStatus());
-        Thread.sleep(1000000);
     }
 
     @Test
@@ -338,7 +328,6 @@ public class ServiceTest {
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
-        Thread.sleep(1000000);
     }
 
 
@@ -447,7 +436,6 @@ public class ServiceTest {
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
-        Thread.sleep(1000000);
     }
 
     @Test
@@ -515,7 +503,7 @@ public class ServiceTest {
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
-        log.info("result3:{}", result);
+        log.info("result3:{}", result.getResponse().getContentAsString());
     }
 
     @Test
@@ -560,7 +548,7 @@ public class ServiceTest {
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
-        log.info("result3:{}", result3);
+        log.info("result3:{}", result3.getResponse().getStatus());
     }
 
     @Test
@@ -650,7 +638,6 @@ public class ServiceTest {
         assertEquals(200, result3.getResponse().getStatus());
     }
 
-    //:TODO add delete test
     @Test
     public void deleteTheRule() throws Exception {
         String arr = "";
@@ -688,7 +675,6 @@ public class ServiceTest {
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getContentAsString());
         assertEquals(200, result3.getResponse().getStatus());
-        Thread.sleep(100000);
     }
 
     @Test
@@ -706,7 +692,6 @@ public class ServiceTest {
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getContentAsString());
         assertEquals(200, result3.getResponse().getStatus());
-        Thread.sleep(100000);
     }
 
     @Test
@@ -723,7 +708,6 @@ public class ServiceTest {
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getContentAsString());
         assertEquals(200, result3.getResponse().getStatus());
-        Thread.sleep(100000);
     }
 
     @Test
@@ -740,21 +724,17 @@ public class ServiceTest {
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getContentAsString());
         assertEquals(200, result3.getResponse().getStatus());
-        Thread.sleep(100000);
-
 
         String url1 = "/statistic";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url1).contentType(MediaType.APPLICATION_JSON).param("idList", "1104154821111");
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
         log.info("result:{}", result);
         assertEquals(200, result.getResponse().getStatus());
-        Thread.sleep(10000);
 
         RequestBuilder requestBuilder2 = MockMvcRequestBuilders.get(url1).contentType(MediaType.APPLICATION_JSON).param("idList", "1104154821");
         MvcResult result2 = mockMvc.perform(requestBuilder2).andDo(print()).andReturn();
         log.info("result:{}", result3);
         assertEquals(200, result2.getResponse().getStatus());
-        Thread.sleep(100000);
     }
 
     @Test
@@ -763,17 +743,12 @@ public class ServiceTest {
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url1).contentType(MediaType.APPLICATION_JSON).param("idList", "");
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
         log.info("result:{}", result.getResponse().getContentAsString());
-
-
         assertEquals(200, result.getResponse().getStatus());
 
         String url2 = "/statistic";
         RequestBuilder requestBuilder2 = MockMvcRequestBuilders.get(url2).contentType(MediaType.APPLICATION_JSON).param("idList", "1104154821111");
         MvcResult result2 = mockMvc.perform(requestBuilder2).andDo(print()).andReturn();
         log.info("result:{}", result2.getResponse().getContentAsString());
-
-
         assertEquals(200, result2.getResponse().getStatus());
     }
-
 }
