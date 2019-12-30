@@ -249,5 +249,20 @@ module.exports = {
     'guideAddress': 'Empty database',
     'abnormalAddress': 'Empty error database',
     'cannotSame': 'Cannot same with Streaming Target'
+  },
+  ruleStatic: {
+    'readRule': 'Read Rules',
+    'readInsideRule': 'System Rules',
+    'systemRules': 'System Rules',
+    'ruleName': 'Rule Name',
+    'hitTimes': 'Hit Times',
+    'notHitTimes': 'Hit Failed Times',
+    'successTimes': 'Successful Times',
+    'failTimes': 'Failed Times',
+    'startTime': 'Start Time',
+    'readFailRecord': 'Read Record',
+    'lastRecord': 'Last Time',
+    'runningStatus': 'Running Status',
+    'destinationType': 'Destination Type'
   }
 }

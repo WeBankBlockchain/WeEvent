@@ -148,7 +148,7 @@ html,body,#app{
       color:@gray_text;
       padding-top:15px;
       i{
-        color:#ca0021;
+        color:@warning;
         font-weight: bolder;
         padding:5px;
       }
@@ -444,7 +444,7 @@ html,body,#app{
   }
 
   .event-table{
-    height:95%;
+    height:80%;
     background:#fff;
     padding:20px;
     padding-bottom:50px;
@@ -737,7 +737,7 @@ html,body,#app{
   }
   .el-dialog__wrapper{
     .el-dialog{
-      width:600px;
+      width:700px;
       .el-dialog__header{
         border-bottom:1px solid @table_border-color;
         .el-dialog__title{
@@ -786,6 +786,18 @@ html,body,#app{
           }
         }
       }
+    }
+  }
+}
+
+.rule_detial_infor {
+  p {
+    padding-bottom:5px;
+    &:last-child{
+      padding-bottom: 0;
+    }
+    span{
+      margin-right:10px
     }
   }
 }
@@ -872,8 +884,51 @@ html,body,#app{
   .el-dialog__body .el-form .el-form-item .el-form-item__content .el-select{
     width:100%;
   }
-
 }
+
+#tree {
+  .tree{
+    overflow: hidden;
+    .tree{
+      float: right;
+      width:97%;
+    }
+  }
+  .tree_content {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    .line{
+      margin: 0 5px;
+    }
+    .el-cascader {
+      .el-input{
+        width:90px;
+      }
+    }
+    .item_option{
+      color:@blue;
+      margin-left:8px;
+      font-size: 20px;
+      &:hover{
+        color:@dig_border_blue;
+      }
+    }
+    .warning{
+      bottom:-30px;
+      left:14px;
+      position: absolute;
+      color:@warning;
+      font-size: 12px;
+      display: none;
+    }
+  }    
+}
+
+
+
 
 .dataBase{
   .el-dialog__wrapper{
@@ -1031,7 +1086,7 @@ html,body,#app{
 }
 
 .servers{
-  max-width:1000px;
+  max-width:1500px;
   margin:auto;
   height: 100%;
   .top_part{
@@ -1043,7 +1098,7 @@ html,body,#app{
     box-shadow: 0 2px 2px #ddd;
   }
   .headerBar{
-    width:1000px;
+    max-width:1500px;
     margin:auto;
     padding:0 20px;
     .el-dropdown{
@@ -1079,6 +1134,32 @@ html,body,#app{
       padding:10px;
       cursor: pointer;
     }
+    .ruleStatic {
+      background: #FFF;
+      padding:20px;
+      min-height:600px;
+      .rule_total_cont {
+        display: flex;
+        .staticBox {
+          height:60px;
+          line-height: 60px;
+          margin-right:50px;
+          .staticTitle{
+            font-family: 'arial';
+            color: #98a7b9;
+            font-size: 20px;
+            margin-right:20px;
+          }
+        }
+      }
+      .el-table__header-wrapper .el-table__header .has-gutter tr th{
+        background:@light_gray;
+        text-align: center
+      }
+      .el-table__body-wrapper table tbody tr td  {
+        text-align: center
+      }
+    }
     .table_part{
       background:#fff;
       padding:20px;
@@ -1095,7 +1176,7 @@ html,body,#app{
     color:@bg_blue;
   }
   .el-dialog{
-    width:600px;
+    width:650px;
     .el-dialog__body{
       .el-form{
         .el-form-item{
@@ -1108,6 +1189,12 @@ html,body,#app{
       }
     }
   }
+}
+
+.el-popover__reference{
+  color:@blue;
+  cursor: pointer;
+  font-size: 18px;
 }
 
 .version{
