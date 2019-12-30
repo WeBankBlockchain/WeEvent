@@ -201,14 +201,14 @@ public class CommonUtil {
             eventContent = JsonUtil.parseObject(content, Map.class);
             sqlOrder = generateSqlOrder(rule.getBrokerId(), rule.getGroupId(), eventMessage.getEventId(), eventMessage.getTopic(), result, eventContent, table);
         } else {
-            sqlOrder = generateSqlOrder(rule.getBrokerId(), rule.getGroupId(), eventMessage.getEventId(), eventMessage.getTopic(), result);
+            sqlOrder = generateSystemSqlOrder(rule.getBrokerId(), rule.getGroupId(), eventMessage.getEventId(), eventMessage.getTopic(), result);
         }
 
         return sqlOrder;
     }
 
     // for the system tag
-    private static Map<String, String> generateSqlOrder(String brokerId, String groupId, String eventId, String
+    private static Map<String, String> generateSystemSqlOrder(String brokerId, String groupId, String eventId, String
             topicName, List<String> result) {
 
         Map<String, String> sqlOrder = new HashMap<>();
