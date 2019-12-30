@@ -135,6 +135,9 @@ class ResoruceService extends BaseModel {
   checkJDBC (data) {
     return this.request(api.checkJDBC, data)
   }
+  ruleStatic (data) {
+    return this.request(api.ruleStatic, data)
+  }
 }
 
 export default new ResoruceService()

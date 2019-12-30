@@ -70,8 +70,23 @@
             width='110'
             >
               <template  slot-scope="scope">
-                <span v-show="scope.row.status === 1"><i class='isActive'></i>{{$t('rule.run')}}</span>
-                <span v-show="scope.row.status === 0"><i class='notActive'></i>{{$t('rule.notRun')}}</span>
+                <el-popover
+                  placement="top"
+                  trigger="hover"
+                  @show='readRuleDetial(scope.row)'
+                  >
+                  <div class='rule_detial_infor'>
+                    <p><span>{{$t('ruleStatic.hitTimes')}} :</span>{{ruleStatic.hitTimes}}</p>
+                    <p><span>{{$t('ruleStatic.notHitTimes')}} :</span>{{ruleStatic.notHitTimes}}</p>
+                    <p><span>{{$t('ruleStatic.successTimes')}} :</span>{{ruleStatic.dataFlowSuccess}}</p>
+                    <p><span>{{$t('ruleStatic.failTimes')}} :</span>{{ruleStatic.dataFlowFail}}</p>
+                    <p><span>{{$t('ruleStatic.runningStatus')}} :</span>{{ruleStatic.status === 0? $t('rule.notRun') : $t('rule.run')}}</p>
+                  </div>
+                  <div slot="reference">
+                    <span v-show="scope.row.status === 1" style='font-size:14px'><i class='isActive'></i>{{$t('rule.start')}}</span>
+                    <span v-show="scope.row.status === 0" style='font-size:14px'><i class='notActive'></i>{{$t('rule.stop')}}</span>
+                  </div>
+                </el-popover>
               </template>
             </el-table-column>
             <el-table-column
@@ -160,6 +175,7 @@ export default {
         'payloadMap': '',
         'conditionType': '1'
       },
+      ruleStatic: {},
       rules: {
         ruleName: [
           { required: true, validator: ruleName, trigger: 'blur' }
@@ -354,6 +370,19 @@ export default {
           })
         } else {
           return false
+        }
+      })
+    },
+    readRuleDetial (e) {
+      let vm = this
+      let id = e.id
+      let str = '?idList=' + id
+      API.ruleStatic(str).then(res => {
+        if (res.data.errorCode === 0) {
+          let list = res.data.data.statisticRuleMap
+          for (let key in list) {
+            vm.ruleStatic = list[key]
+          }
         }
       })
     }
