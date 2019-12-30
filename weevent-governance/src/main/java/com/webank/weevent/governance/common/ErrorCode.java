@@ -1,6 +1,6 @@
 package com.webank.weevent.governance.common;
 
-public enum ErrorCode_bak {
+public enum ErrorCode {
 
     SUCCESS(0, "success"),
     BROKER_CONNECT_ERROR(100100, "broker connect error!"),
@@ -33,7 +33,7 @@ public enum ErrorCode_bak {
      * @param code The ErrorCode
      * @param codeDesc The ErrorCode Description
      */
-    ErrorCode_bak(int code, String codeDesc) {
+    ErrorCode(int code, String codeDesc) {
         this.code = code;
         this.codeDesc = codeDesc;
     }

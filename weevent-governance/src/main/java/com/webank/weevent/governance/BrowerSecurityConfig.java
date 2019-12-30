@@ -1,10 +1,10 @@
 package com.webank.weevent.governance;
 
+import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.handler.JsonAccessDeniedHandler;
 import com.webank.weevent.governance.handler.JsonAuthenticationEntryPoint;
 import com.webank.weevent.governance.handler.JsonLogoutSuccessHandler;
 import com.webank.weevent.governance.handler.LoginFailHandler;
-import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.service.AccountDetailsService;
 
 import org.springframework.beans.factory.annotation.Autowired;

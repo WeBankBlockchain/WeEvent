@@ -7,9 +7,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.Cookie;
 
 import com.webank.weevent.governance.JUnitTestBase;
+import com.webank.weevent.governance.common.ConstantProperties;
+import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.RuleEngineEntity;
-import com.webank.weevent.governance.properties.ConstantProperties;
-import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.utils.JsonUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -88,7 +88,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/add").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(),Map.class);
+        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(), Map.class);
         Assert.assertEquals(jsonObject.get("code").toString(), "-1");
     }
 
@@ -139,7 +139,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/update").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(),Map.class);
+        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(), Map.class);
         Assert.assertEquals(jsonObject.get("code").toString(), "-1");
     }
 
@@ -153,7 +153,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/update").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(),Map.class);
+        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(), Map.class);
         Assert.assertEquals(jsonObject.get("code").toString(), "-1");
     }
 
@@ -185,7 +185,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/delete").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(),Map.class);
+        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(), Map.class);
         Assert.assertEquals(jsonObject.get("status").toString(), "200");
     }
 

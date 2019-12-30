@@ -6,8 +6,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.Cookie;
 
 import com.webank.weevent.governance.JUnitTestBase;
-import com.webank.weevent.governance.properties.ConstantProperties;
-import com.webank.weevent.governance.result.GovernanceResult;
+import com.webank.weevent.governance.common.ConstantProperties;
+import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.utils.JsonUtil;
 
 import lombok.extern.slf4j.Slf4j;

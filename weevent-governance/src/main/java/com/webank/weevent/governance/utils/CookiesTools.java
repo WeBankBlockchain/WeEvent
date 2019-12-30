@@ -2,11 +2,12 @@ package com.webank.weevent.governance.utils;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.weevent.governance.properties.ConstantProperties;
+import com.webank.weevent.governance.common.ConstantProperties;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +56,7 @@ public class CookiesTools {
      * set cookie value.
      */
     private void addCookie(HttpServletRequest request, HttpServletResponse response, String name, String value,
-            int maxAge, String path) {
+                           int maxAge, String path) {
         String realValue = value.replace("\r", "").replace("\n", "");
         if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(realValue)) {
             Cookie cookie = getCookieByName(request, name);

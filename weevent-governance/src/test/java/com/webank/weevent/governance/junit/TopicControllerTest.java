@@ -7,10 +7,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.Cookie;
 
 import com.webank.weevent.governance.JUnitTestBase;
+import com.webank.weevent.governance.common.ConstantProperties;
+import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.TopicEntity;
 import com.webank.weevent.governance.entity.TopicPage;
-import com.webank.weevent.governance.properties.ConstantProperties;
-import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.utils.JsonUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -69,7 +69,7 @@ public class TopicControllerTest extends JUnitTestBase {
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
         brokerIdMap.put("brokerId", (Integer) governanceResult.getData());
-        Assert.assertEquals(governanceResult.getStatus().toString(),"200");
+        Assert.assertEquals(governanceResult.getStatus().toString(), "200");
     }
 
 
@@ -86,8 +86,8 @@ public class TopicControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/topic/openTopic").contentType(MediaType.APPLICATION_JSON_UTF8).content(content).cookie(cookie))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(),GovernanceResult.class);
-        Assert.assertEquals(governanceResult.getStatus().toString(),"100109");
+        GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
+        Assert.assertEquals(governanceResult.getStatus().toString(), "100109");
     }
 
     @Test
@@ -110,7 +110,7 @@ public class TopicControllerTest extends JUnitTestBase {
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         Assert.assertNotNull(response.getContentAsString());
         TopicEntity topicEntity = JsonUtil.parseObject(response.getContentAsString(), TopicEntity.class);
-        Assert.assertEquals(topicEntity.getTopicName(),"com.weevent.rest");
+        Assert.assertEquals(topicEntity.getTopicName(), "com.weevent.rest");
     }
 
 
@@ -121,7 +121,7 @@ public class TopicControllerTest extends JUnitTestBase {
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         String contentAsString = response.getContentAsString();
-        Assert.assertEquals(Boolean.valueOf(contentAsString),true);
+        Assert.assertEquals(Boolean.valueOf(contentAsString), true);
     }
 
     //delete broker by id
@@ -130,7 +130,7 @@ public class TopicControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/delete").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(),Map.class);
+        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(), Map.class);
         Assert.assertEquals(jsonObject.get("status").toString(), "200");
     }
 

@@ -1,6 +1,6 @@
 package com.webank.weevent.governance.entity;
 
-import com.webank.weevent.governance.code.RetCode;
+import com.webank.weevent.governance.common.RetCode;
 
 import lombok.Data;
 

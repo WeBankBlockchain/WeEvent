@@ -9,16 +9,16 @@ import org.springframework.stereotype.Component;
  */
 @Data
 @Component
-@ConfigurationProperties(prefix = ConstantProperties_bak.CONSTANT_PREFIX)
-public class ConstantProperties_bak {
+@ConfigurationProperties(prefix = ConstantProperties.CONSTANT_PREFIX)
+public class ConstantProperties {
 
     // constant
     public static final String CONSTANT_PREFIX = "constant";
     public static final String COOKIE_JSESSIONID = "JSESSIONID"; // cookie key---session
-    public static final String COOKIE_MGR_ACCOUNT = "GOVERNANCE_MGR_ACCOUNT_C"; // cookie key---account
-    public static final String COOKIE_MGR_ACCOUNT_ID = "GOVERNANCE_MGR_ACCOUNT_ID";//cookie---account id
-    public static final String COOKIE_GROUP_ID = "GOVERNANCE_GROUP_ID";//cookie---group id
-    public static final String SESSION_MGR_ACCOUNT = "GOVERNANCE_MGR_ACCOUNT_S"; // session key---account
+    public static final String COOKIE_MGR_ACCOUNT = "MGR_ACCOUNT_C"; // cookie key---account
+    public static final String COOKIE_MGR_ACCOUNT_ID = "MGR_ACCOUNT_ID";//cookie---account id
+    public static final String COOKIE_GROUP_ID = "GROUP_ID";//cookie---group id
+    public static final String SESSION_MGR_ACCOUNT = "MGR_ACCOUNT_S"; // session key---account
 
     public static final String QUESTION_MARK = "?";
     public static final String AND_SYMBOL = "&";

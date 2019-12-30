@@ -6,11 +6,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.webank.weevent.governance.code.ConstantCode;
+import com.webank.weevent.governance.common.ConstantCode;
+import com.webank.weevent.governance.common.GovernanceException;
+import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.entity.BaseResponse;
-import com.webank.weevent.governance.exception.GovernanceException;
-import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.service.AccountService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,7 +80,7 @@ public class AccountController {
     @RequestMapping("/accountList")
     public GovernanceResult accountEntityList(AccountEntity accountEntity, @CookieValue("MGR_ACCOUNT_ID") String accountId, HttpServletRequest request,
                                               HttpServletResponse response) throws GovernanceException {
-        List<AccountEntity> accountEntities = accountService.accountEntityList(request, accountEntity,accountId);
+        List<AccountEntity> accountEntities = accountService.accountEntityList(request, accountEntity, accountId);
         return new GovernanceResult(accountEntities);
     }
 

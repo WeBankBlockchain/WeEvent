@@ -10,9 +10,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import com.webank.weevent.governance.code.ConstantCode;
+import com.webank.weevent.governance.common.ConstantCode;
+import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.entity.BaseResponse;
-import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.service.PermissionService;
 import com.webank.weevent.governance.utils.CookiesTools;
 import com.webank.weevent.governance.utils.JsonUtil;

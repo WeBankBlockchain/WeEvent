@@ -10,8 +10,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.entity.BrokerEntity;
-import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.service.BrokerService;
 import com.webank.weevent.governance.service.CommonService;
 

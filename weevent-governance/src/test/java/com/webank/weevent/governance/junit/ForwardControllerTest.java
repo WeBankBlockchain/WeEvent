@@ -6,7 +6,7 @@ import java.util.Map;
 import javax.servlet.http.Cookie;
 
 import com.webank.weevent.governance.JUnitTestBase;
-import com.webank.weevent.governance.properties.ConstantProperties;
+import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.utils.JsonUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +53,7 @@ public class ForwardControllerTest extends JUnitTestBase {
         String contentAsString = response.getContentAsString();
         Assert.assertEquals(response.getStatus(), 200);
         Assert.assertNotNull(contentAsString);
-        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(),Map.class);
+        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(), Map.class);
         Object code = jsonObject.get("code");
         Object data = jsonObject.get("data");
         Assert.assertEquals(0, code);
