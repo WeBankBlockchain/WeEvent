@@ -26,17 +26,18 @@ public class StatisticRuleService {
         Map<String, StatisticRule> statisticRuleMap = new HashMap<>();
 
         // check the id list
-        if (null == idList && 0 == idList.size()) {
+        if (null == idList || 0 == idList.size()) {
             statisticWeEvent.setStatisticRuleMap(statisticRuleMap);
         } else {
-            for (Map.Entry<String, StatisticRule> entry : statisticWeEvent.getStatisticRuleMap().entrySet()) {
-                StatisticRule rule = entry.getValue();
+            for (String id : idList) {
                 // check the id
-                if (idList.contains(rule.getId())) {
+                if (statisticWeEvent.getStatisticRuleMap().containsKey(id)) {
+                    StatisticRule rule = statisticWeEvent.getStatisticRuleMap().get(id);
                     statisticRuleMap.put(rule.getId(), rule);
                 }
             }
         }
+
         statisticWeEvent.setStatisticRuleMap(statisticRuleMap);
         StatisticWeEvent statisticJobs = quartzManager.getStatisticJobs(statisticWeEvent, idList);
         return statisticJobs;
