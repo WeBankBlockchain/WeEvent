@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
-import com.webank.weevent.processor.Statistic.StatisticCEPRule;
+import com.webank.weevent.processor.statistic.StatisticCEPRule;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.model.StatisticRule;
 import com.webank.weevent.processor.model.StatisticWeEvent;

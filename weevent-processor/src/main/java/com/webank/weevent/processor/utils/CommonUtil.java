@@ -269,6 +269,7 @@ public class CommonUtil {
                 break;
             default:
                 log.info("error:{}", key);
+                break;
         }
         return map;
     }
@@ -318,6 +319,7 @@ public class CommonUtil {
                     break;
                 default:
                     log.info("item:{}", item);
+                    break;
             }
         }
 
@@ -364,6 +366,7 @@ public class CommonUtil {
                     break;
                 default:
                     log.info("error:{}", entry.getKey());
+                    break;
             }
         }
         return sqlOrder;
@@ -464,7 +467,9 @@ public class CommonUtil {
         for (int i = 0; i < arr.length; i++) {
             String type = arr[i][2];
             // end position
-            String left = arr[i][3], middle = "", right = "";
+            String left = arr[i][3];
+            String middle = "";
+            String right = "";
 
             if (arr[i].length == 5) {
                 left = arr[i][3];
@@ -536,6 +541,7 @@ public class CommonUtil {
                     break;
                 default:
                     log.info("conditionField:{}", conditionField);
+                    break;
             }
         }
         log.info("sb:{}", sb);

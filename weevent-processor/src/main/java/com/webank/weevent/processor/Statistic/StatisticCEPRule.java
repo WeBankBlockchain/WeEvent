@@ -1,4 +1,4 @@
-package com.webank.weevent.processor.Statistic;
+package com.webank.weevent.processor.statistic;
 
 import java.util.HashMap;
 import java.util.Map;
