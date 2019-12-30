@@ -243,7 +243,7 @@ public class RuleEngineService {
             }
 
             BeanUtils.copyProperties(rule, ruleEngineEntity, "ruleName", "payload", "selectField", "conditionType",
-                    "fromDestination", "toDestination", "ruleDataBaseId", "errorDestination", "functionArray", "conditionField");
+                    "fromDestination", "toDestination", "ruleDataBaseId", "errorDestination", "functionArray", "conditionField", "conditionFieldJson");
             ruleEngineRepository.save(ruleEngineEntity);
             log.info("update ruleEngine end");
             return true;

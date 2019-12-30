@@ -24,6 +24,7 @@
         <result column="group_id" property="groupId" jdbcType="VARCHAR"/>
         <result column="cep_id" property="cepId" jdbcType="VARCHAR"/>
         <result column="function_array" property="functionArray" jdbcType="VARCHAR"/>
+        <result column="system_tag" property="systemTag" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
