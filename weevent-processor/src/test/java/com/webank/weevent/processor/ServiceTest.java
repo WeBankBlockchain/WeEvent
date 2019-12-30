@@ -1,6 +1,7 @@
 package com.webank.weevent.processor;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -1034,4 +1035,24 @@ public class ServiceTest {
         assertEquals(200, result2.getResponse().getStatus());
         Thread.sleep(100000);
     }
+
+    @Test
+    public void statistic1() throws Exception {
+        String url1 = "/statistic";
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url1).contentType(MediaType.APPLICATION_JSON).param("idList", "");
+        MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
+        log.info("result:{}", result.getResponse().getContentAsString());
+
+
+        assertEquals(200, result.getResponse().getStatus());
+
+        String url2 = "/statistic";
+        RequestBuilder requestBuilder2 = MockMvcRequestBuilders.get(url2).contentType(MediaType.APPLICATION_JSON).param("idList", "1104154821111");
+        MvcResult result2 = mockMvc.perform(requestBuilder2).andDo(print()).andReturn();
+        log.info("result:{}", result2.getResponse().getContentAsString());
+
+
+        assertEquals(200, result2.getResponse().getStatus());
+    }
+
 }
