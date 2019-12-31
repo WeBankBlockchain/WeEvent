@@ -36,7 +36,7 @@ public class ServiceTest {
 
 
     @Before
-    public void setup() {
+    public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
         rule.setId("1111");
         rule.setRuleName("test");
