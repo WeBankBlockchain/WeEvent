@@ -24,42 +24,36 @@ const checkRule = (e) => {
         } else {
           if (item.functionType) {
             if (['abs', 'ceil', 'floor', 'round'].indexOf(item.functionType) !== -1) {
-              try {
-                let fun = Math[item.functionType]
-                let operator = item.conditionalOperator
-                let val = item.sqlCondition
-                let patrn = /^(-)?\d+(\.\d+)?$/
-                if (patrn.exec(val) == null) {
-                  // data type error - not a number
-                  pass = false
-                  warning = i18n.messages[lang].ruleCheck.notNumber
-                  console.log('data type error - not a number')
-                } else {
-                  if (item.functionType === 'ceil' || item.functionType === 'floor' || item.functionType === 'round') {
-                    // data error - not an integer
-                    if (operator === '==') {
-                      if (fun(val) !== Number(val)) {
-                        pass = false
-                        warning = i18n.messages[lang].ruleCheck.inputInteger
-                        console.log('data error - not an integer')
-                      }
-                    }
-                  }
-                  // data error - not a natural number
-                  if (item.functionType === 'abs') {
-                    if (operator === '<' || operator === '<=' || operator === '==') {
-                      if (Number(val) < 0) {
-                        pass = false
-                        warning = i18n.messages[lang].ruleCheck.bigger
-                        console.log('not a natural number')
-                      }
+              let fun = Math[item.functionType]
+              let operator = item.conditionalOperator
+              let val = item.sqlCondition
+              let patrn = /^(-)?\d+(\.\d+)?$/
+              if (patrn.exec(val) == null) {
+                // data type error - not a number
+                pass = false
+                warning = i18n.messages[lang].ruleCheck.notNumber
+                console.log('data type error - not a number')
+              } else {
+                if (item.functionType === 'ceil' || item.functionType === 'floor' || item.functionType === 'round') {
+                  // data error - not an integer
+                  if (operator === '==') {
+                    if (fun(val) !== Number(val)) {
+                      pass = false
+                      warning = i18n.messages[lang].ruleCheck.inputInteger
+                      console.log('data error - not an integer')
                     }
                   }
                 }
-              } catch (error) {
-                // error
-                pass = false
-                console.log('fun is error')
+                // data error - not a natural number
+                if (item.functionType === 'abs') {
+                  if (operator === '<' || operator === '<=' || operator === '==') {
+                    if (Number(val) < 0) {
+                      pass = false
+                      warning = i18n.messages[lang].ruleCheck.bigger
+                      console.log('not a natural number')
+                    }
+                  }
+                }
               }
             }
             if (['substring', 'concat', 'trim', 'lcase'].indexOf(item.functionType) !== -1) {
@@ -124,6 +118,5 @@ const checkRule = (e) => {
   }
   return pass
 }
-export {
-  checkRule
-}
+
+export { checkRule }
