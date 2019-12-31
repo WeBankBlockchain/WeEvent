@@ -262,5 +262,14 @@ module.exports = {
     'lastRecord': '最后一次失败记录',
     'runningStatus': '运行状态',
     'destinationType': '流转目标类型'
+  },
+  ruleCheck: {
+    'inputRule': '请填写完整的条件语句',
+    'notNumber': '填写的数据不是数字类型',
+    'inputInteger': '方法异常，请填写整数类型',
+    'bigger': '输入值请大于0',
+    'inputString': '填写的数据类型错误-字符串类型请用双引号包裹',
+    'errorParameter': '该函数的参数错误',
+    'errorIndex': '该函数的下标不是整数类型'
   }
 }
