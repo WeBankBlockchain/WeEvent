@@ -49,16 +49,18 @@ public class BrokerController {
 
     // get brokerEntity service by id
     @PostMapping("/add")
-    public GovernanceResult addBroker(@Valid @RequestBody BrokerEntity brokerEntity, HttpServletRequest request,
+    public GovernanceResult addBroker(@Valid @RequestBody BrokerEntity brokerEntity, @CookieValue("MGR_ACCOUNT_ID") Integer accountId, HttpServletRequest request,
                                       HttpServletResponse response) throws GovernanceException {
         log.info("add  brokerEntity service into db brokerEntity :{} ", brokerEntity);
+        brokerEntity.setUserId(accountId);
         return brokerService.addBroker(brokerEntity, request, response);
     }
 
     @PostMapping("/update")
-    public GovernanceResult updateBroker(@RequestBody BrokerEntity brokerEntity, HttpServletRequest request,
+    public GovernanceResult updateBroker(@RequestBody BrokerEntity brokerEntity, @CookieValue("MGR_ACCOUNT_ID") Integer accountId, HttpServletRequest request,
                                          HttpServletResponse response) throws GovernanceException {
         log.info("update  brokerEntity service ,brokerEntity:{} ", brokerEntity);
+        brokerEntity.setUserId(accountId);
         return brokerService.updateBroker(brokerEntity, request, response);
     }
 

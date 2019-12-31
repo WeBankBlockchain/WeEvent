@@ -13,6 +13,7 @@ import com.webank.weevent.governance.service.RuleEngineService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,10 +32,10 @@ public class RuleEngineController {
 
     // get  ruleEngine list
     @PostMapping("/list")
-    public GovernanceResult getRuleEngines(HttpServletRequest request, @RequestBody RuleEngineEntity ruleEngineEntity) throws GovernanceException {
+    public GovernanceResult getRuleEngines(HttpServletRequest request, @RequestBody RuleEngineEntity ruleEngineEntity, @CookieValue("MGR_ACCOUNT_ID") Integer accountId) throws GovernanceException {
         log.info("get ruleEngines , ruleEngineEntity :{}", ruleEngineEntity);
+        ruleEngineEntity.setUserId(accountId);
         List<RuleEngineEntity> ruleEngines = ruleEngineService.getRuleEngines(request, ruleEngineEntity);
-
         GovernanceResult governanceResult = new GovernanceResult(ruleEngines);
         governanceResult.setTotalCount(ruleEngineEntity.getTotalCount());
         return governanceResult;
@@ -42,48 +43,54 @@ public class RuleEngineController {
 
     // add RuleEngineEntity
     @PostMapping("/add")
-    public GovernanceResult addRuleEngine(@Valid @RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request,
+    public GovernanceResult addRuleEngine(@Valid @RequestBody RuleEngineEntity ruleEngineEntity, @CookieValue("MGR_ACCOUNT_ID") Integer accountId, HttpServletRequest request,
                                           HttpServletResponse response) throws GovernanceException {
         log.info("add  ruleEngineEntity service into db :{}", ruleEngineEntity);
+        ruleEngineEntity.setUserId(accountId);
         RuleEngineEntity rule = ruleEngineService.addRuleEngine(ruleEngineEntity, request, response);
         return new GovernanceResult(rule);
     }
 
     @PostMapping("/update")
-    public GovernanceResult updateRuleEngine(@RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request,
+    public GovernanceResult updateRuleEngine(@RequestBody RuleEngineEntity ruleEngineEntity, @CookieValue("MGR_ACCOUNT_ID") Integer accountId, HttpServletRequest request,
                                              HttpServletResponse response) throws GovernanceException {
         log.info("update  ruleEngineEntity service ,ruleEngineEntity:{}", ruleEngineEntity);
+        ruleEngineEntity.setUserId(accountId);
         boolean flag = ruleEngineService.updateRuleEngine(ruleEngineEntity, request, response);
         return new GovernanceResult(flag);
     }
 
     @PostMapping("/updateStatus")
-    public GovernanceResult updateRuleEngineStatus(@RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request,
+    public GovernanceResult updateRuleEngineStatus(@RequestBody RuleEngineEntity ruleEngineEntity, @CookieValue("MGR_ACCOUNT_ID") Integer accountId, HttpServletRequest request,
                                                    HttpServletResponse response) throws GovernanceException {
         log.info("update  ruleEngineStatus service ,status:{}", ruleEngineEntity.getStatus());
+        ruleEngineEntity.setUserId(accountId);
         boolean flag = ruleEngineService.updateRuleEngineStatus(ruleEngineEntity, request, response);
         return new GovernanceResult(flag);
     }
 
     @PostMapping("/delete")
-    public GovernanceResult deleteBroker(@RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request) throws GovernanceException {
+    public GovernanceResult deleteBroker(@RequestBody RuleEngineEntity ruleEngineEntity, @CookieValue("MGR_ACCOUNT_ID") Integer accountId, HttpServletRequest request) throws GovernanceException {
         log.info("delete  ruleEngineEntity service ,id:{}", ruleEngineEntity.getId());
+        ruleEngineEntity.setUserId(accountId);
         boolean flag = ruleEngineService.deleteRuleEngine(ruleEngineEntity, request);
         return new GovernanceResult(flag);
     }
 
     @PostMapping("/start")
-    public GovernanceResult startRuleEngine(@RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request,
+    public GovernanceResult startRuleEngine(@RequestBody RuleEngineEntity ruleEngineEntity, @CookieValue("MGR_ACCOUNT_ID") Integer accountId, HttpServletRequest request,
                                             HttpServletResponse response) throws GovernanceException {
         log.info("update  ruleEngineStatus service ,ruleEngineEntity:{}", ruleEngineEntity);
+        ruleEngineEntity.setUserId(accountId);
         boolean flag = ruleEngineService.startRuleEngine(ruleEngineEntity, request, response);
         return new GovernanceResult(flag);
     }
 
     @PostMapping("/detail")
-    public GovernanceResult getRuleEngineDetail(@RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request,
+    public GovernanceResult getRuleEngineDetail(@RequestBody RuleEngineEntity ruleEngineEntity, @CookieValue("MGR_ACCOUNT_ID") Integer accountId, HttpServletRequest request,
                                                 HttpServletResponse response) throws GovernanceException {
         log.info("get ruleEngineDetail service ,status:{}", ruleEngineEntity.getStatus());
+        ruleEngineEntity.setUserId(accountId);
         RuleEngineEntity ruleEngineDetail = ruleEngineService.getRuleEngineDetail(ruleEngineEntity, request, response);
         return new GovernanceResult(ruleEngineDetail);
     }
