@@ -215,18 +215,18 @@ public class CommonUtil {
         // get all select field and value, and the select field must in eventContent.
         for (String key : result) {
             // set the flag
-            switch (key) {
-                case ConstantsHelper.EVENT_ID:
-                    sqlOrder.put(ConstantsHelper.EVENT_ID, eventId);
+            switch (SystemFields.valueOf(key)) {
+                case EVENT_ID:
+                    sqlOrder.put(SystemFields.EVENT_ID.getField(), eventId);
                     break;
-                case ConstantsHelper.TOPIC_NAME:
-                    sqlOrder.put(ConstantsHelper.TOPIC_NAME, topicName);
+                case TOPIC_NAME:
+                    sqlOrder.put(SystemFields.TOPIC_NAME.getField(), topicName);
                     break;
-                case ConstantsHelper.BROKER_ID:
-                    sqlOrder.put(ConstantsHelper.BROKER_ID, brokerId);
+                case BROKER_ID:
+                    sqlOrder.put(SystemFields.BROKER_ID.getField(), brokerId);
                     break;
-                case ConstantsHelper.GROUP_ID:
-                    sqlOrder.put(ConstantsHelper.GROUP_ID, groupId);
+                case GROUP_ID:
+                    sqlOrder.put(SystemFields.GROUP_ID.getField(), groupId);
                     break;
                 default:
                     break;
@@ -238,33 +238,33 @@ public class CommonUtil {
 
     public static LinkedHashMap<String, Boolean> setFlag(LinkedHashMap<String, Boolean> map, String key) {
         // set the flag
-        switch (key) {
-            case ConstantsHelper.EVENT_ID:
-                map.put(ConstantsHelper.EVENT_ID, true);
+        switch (SystemFields.valueOf(key)) {
+            case EVENT_ID:
+                map.put(SystemFields.EVENT_ID.getField(), true);
 
                 break;
-            case ConstantsHelper.TOPIC_NAME:
-                map.put(ConstantsHelper.TOPIC_NAME, true);
+            case TOPIC_NAME:
+                map.put(SystemFields.TOPIC_NAME.getField(), true);
 
                 break;
-            case ConstantsHelper.BROKER_ID:
-                map.put(ConstantsHelper.BROKER_ID, true);
+            case BROKER_ID:
+                map.put(SystemFields.BROKER_ID.getField(), true);
 
                 break;
-            case ConstantsHelper.GROUP_ID:
-                map.put(ConstantsHelper.GROUP_ID, true);
+            case GROUP_ID:
+                map.put(SystemFields.GROUP_ID.getField(), true);
 
                 break;
-            case ConstantsHelper.NOW:
-                map.put(ConstantsHelper.NOW, true);
+            case NOW:
+                map.put(SystemFields.NOW.getField(), true);
 
                 break;
-            case ConstantsHelper.CURRENT_TIME:
-                map.put(ConstantsHelper.CURRENT_DATE, true);
+            case CURRENT_TIME:
+                map.put(SystemFields.CURRENT_DATE.getField(), true);
 
                 break;
-            case ConstantsHelper.CURRENT_DATE:
-                map.put(ConstantsHelper.CURRENT_TIME, true);
+            case CURRENT_DATE:
+                map.put(SystemFields.CURRENT_TIME.getField(), true);
 
                 break;
             default:
@@ -299,24 +299,23 @@ public class CommonUtil {
                 iftttContent.put(item, eventContent.get(item));
             }
 
-            switch (item) {
-                case ConstantsHelper.EVENT_ID:
+            switch (SystemFields.valueOf(item)) {
+                case EVENT_ID:
                     iftttContent.put(item, eventMessage.getEventId());
-
                     break;
 
-                case ConstantsHelper.TOPIC_NAME:
+                case TOPIC_NAME:
                     iftttContent.put(item, eventMessage.getTopic());
-
                     break;
-                case ConstantsHelper.BROKER_ID:
+
+                case BROKER_ID:
                     iftttContent.put(item, brokerId);
-
                     break;
-                case ConstantsHelper.GROUP_ID:
+
+                case GROUP_ID:
                     iftttContent.put(item, groupId);
-
                     break;
+
                 default:
                     log.info("item:{}", item);
                     break;
@@ -333,35 +332,35 @@ public class CommonUtil {
         // set the flag
         for (Map.Entry<String, Boolean> entry : map.entrySet()) {
             // if true,then add it
-            switch (entry.getKey()) {
-                case ConstantsHelper.EVENT_ID:
-                    sqlOrder.put(ConstantsHelper.EVENT_ID, eventId);
+            switch (SystemFields.valueOf(entry.getKey())) {
+                case EVENT_ID:
+                    sqlOrder.put(SystemFields.EVENT_ID.getField(), eventId);
 
                     break;
-                case ConstantsHelper.TOPIC_NAME:
-                    sqlOrder.put(ConstantsHelper.TOPIC_NAME, topicName);
+                case TOPIC_NAME:
+                    sqlOrder.put(SystemFields.TOPIC_NAME.getField(), topicName);
 
                     break;
-                case ConstantsHelper.BROKER_ID:
-                    sqlOrder.put(ConstantsHelper.BROKER_ID, brokerId);
+                case BROKER_ID:
+                    sqlOrder.put(SystemFields.BROKER_ID.getField(), brokerId);
 
                     break;
-                case ConstantsHelper.GROUP_ID:
-                    sqlOrder.put(ConstantsHelper.GROUP_ID, groupId);
+                case GROUP_ID:
+                    sqlOrder.put(SystemFields.GROUP_ID.getField(), groupId);
 
                     break;
-                case ConstantsHelper.NOW:
-                    sqlOrder.put(ConstantsHelper.NOW, String.valueOf(new Date().getTime()));
+                case NOW:
+                    sqlOrder.put(SystemFields.NOW.getField(), String.valueOf(new Date().getTime()));
 
                     break;
-                case ConstantsHelper.CURRENT_TIME:
+                case CURRENT_TIME:
                     SimpleDateFormat sdfTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                    sqlOrder.put(ConstantsHelper.CURRENT_TIME, sdfTime.format(new Date()));
+                    sqlOrder.put(SystemFields.CURRENT_TIME.getField(), sdfTime.format(new Date()));
 
                     break;
-                case ConstantsHelper.CURRENT_DATE:
+                case CURRENT_DATE:
                     SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy/MM/dd");
-                    sqlOrder.put(ConstantsHelper.CURRENT_DATE, sdfDate.format(new Date()));
+                    sqlOrder.put(SystemFields.CURRENT_DATE.getField(), sdfDate.format(new Date()));
 
                     break;
                 default:
@@ -408,7 +407,6 @@ public class CommonUtil {
             if (ruleList.get(i).getId().equals(rule.getId())) {
                 return ruleList.get(i).getFromDestination().equals(rule.getFromDestination());
             }
-
         }
         return false;
     }
