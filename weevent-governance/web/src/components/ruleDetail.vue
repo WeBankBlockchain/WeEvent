@@ -45,10 +45,8 @@
         <div class='sql_lession' v-show='fullSQL'>
           {{this.fullSQL}}
         </div>
-        <div class='sql'></div>
       </div>
     </div>
-
     <el-dialog :title="$t('rule.editRule')" :visible.sync="createSQL" :close-on-click-modal='false'>
       <el-form :model="sqlOption" :rules="sqlCheck" ref='sql'>
         <el-form-item :label="$t('ruleDetail.dataCirculat')  + ' :'" prop='fromDestination'>
@@ -66,29 +64,7 @@
           <div style='text-align:right'>
             <span class='el-icon-plus' @click='addConditionItem'></span>
           </div>
-            <div class='conditionItem' v-for="(item, index) in sqlOption.ruleEngineConditionList" :key='index'>
-                <el-select v-model="item.connectionOperator" size='small' v-show="index !== 0">
-                  <el-option label="and" value="and"></el-option>
-                  <el-option label="or" value="or"></el-option>
-                </el-select>
-                <span class='line' v-show="index !== 0">-</span>
-                <el-select v-model="item.columnName" size='small'>
-                  <el-option :label="key" :value="key" v-for='(item, key, index) in columnName' :key='index'></el-option>
-                </el-select>
-                <span class='line'>-</span>
-                <el-select v-model="item.conditionalOperator" size='small'>
-                  <el-option label=">" value=">"></el-option>
-                  <el-option label=">=" value=">="></el-option>
-                  <el-option label="<" value="<"></el-option>
-                  <el-option label="<=" value="<="></el-option>
-                  <el-option label="!=" value="!="></el-option>
-                  <el-option label="==" value="=="></el-option>
-                </el-select>
-                <span class='line'>-</span>
-                <el-input size='small' v-model.trim="item.sqlCondition" autocomplete="off"></el-input>
-                <span class='el-icon-remove-outline' @click='remove(index)'></span>
-                <p class='conditionaWarning'>{{$t('ruleDetail.completeLetter')}}</p>
-            </div>
+          <tree :treeData='sqlOption.conditionFieldJson' :nodeIndex='"0"' :columnList='columnName'></tree>
         </el-form-item>
         <el-form-item :label="$t('ruleDetail.letter')  + ' :'"  :placeholder="$t('common.choose')" prop="selectField">
           <el-select v-model="sqlOption.selectField" size='small' :placeholder="$t('common.choose')" multiple @change="selField">
@@ -143,6 +119,8 @@
 </template>
 <script>
 import API from '../API/resource'
+import tree from './tree.vue'
+import {checkRule} from '../utils/checkRule'
 export default {
   data () {
     var ruleName = (rule, value, callback) => {
@@ -209,7 +187,8 @@ export default {
         'conditionType': '',
         'ruleDataBaseId': '',
         'errorDestination': '',
-        'ruleEngineConditionList': []
+        'conditionFieldJson': [],
+        'functionArray': ''
       },
       rule: {
         'ruleName': '',
@@ -228,10 +207,12 @@ export default {
         'selectField': [],
         'fromDestination': '',
         'toDestination': '',
-        'ruleEngineConditionList': [],
+        'conditionFieldJson': [],
         'conditionType': '',
         'ruleDataBaseId': '',
-        'errorDestination': ''
+        'errorDestination': '',
+        'functionArray': '',
+        'conditionField': ''
       },
       sqlCheck: {
         fromDestination: [
@@ -257,19 +238,18 @@ export default {
       condition: '',
       columnName: {},
       fullSQL: '',
-      conditionList: [{
-        'connectionOperator': '',
-        'columnName': '',
-        'conditionalOperator': '',
-        'sqlCondition': ''
-      }],
       warning: '',
       pageIndex: 1,
       total: 0,
       listData: [],
-      listTopic: []
+      listTopic: [],
+      ruleLetter: [],
+      remarkLettrt: '',
+      functionList: [],
+      functionArray: []
     }
   },
+  components: {tree},
   computed: {
     brokerId () {
       return this.$store.state.brokerId
@@ -300,6 +280,13 @@ export default {
     createSQL (nVal) {
       if (!nVal) {
         let vm = this
+        let nodes = document.getElementsByClassName('tree_content')
+        if (nodes) {
+          for (let i = 0; i < nodes.length; i++) {
+            let war = nodes[i].childNodes[nodes[i].childNodes.length - 1]
+            war.style.display = 'none'
+          }
+        }
         for (let key in vm.sqlOption) {
           if (key === 'selectField') {
             if (vm.ruleItem.selectField) {
@@ -315,16 +302,12 @@ export default {
               }
             }
           } else {
-            if (key === 'ruleEngineConditionList') {
-              vm.sqlOption.ruleEngineConditionList = [].concat(vm.ruleItem.ruleEngineConditionList)
+            if (key === 'conditionFieldJson') {
+              vm.sqlOption.conditionFieldJson = [].concat(vm.ruleItem.conditionFieldJson)
             } else {
               vm.sqlOption[key] = vm.ruleItem[key]
             }
           }
-        }
-        let war = document.getElementsByClassName('conditionaWarning')
-        for (let i = 0; i < war.length; i++) {
-          war[i].style.display = 'none'
         }
         vm.$refs.sql.resetFields()
       }
@@ -351,6 +334,153 @@ export default {
     }
   },
   methods: {
+    checkSQLData (x, y, z) {
+      let vm = this
+      let index = z + y
+      if (!x[y].children) {
+        x[y].children = []
+      }
+      let item = x[y].children
+      if (item && item.length > 0) {
+        vm.checkSQLData(item, 0, index)
+      } else {
+        vm.getNode(index)
+      }
+    },
+    getNode (e) {
+      let vm = this
+      let list = e.split('')
+      if (list.length === 1) {
+        let index = Number(list[0])
+        vm.sqlLetter(vm.sqlOption.conditionFieldJson[index], true)
+        if (vm.sqlOption.conditionFieldJson[index + 1]) {
+          vm.checkSQLData(vm.sqlOption.conditionFieldJson, index + 1, '')
+        }
+      } else {
+        let nodeItem = vm.sqlOption.conditionFieldJson
+        for (let i = 0; i < list.length - 1; i++) {
+          let index = Number(list[i])
+          let mid = nodeItem[index].children
+          nodeItem = mid
+        }
+        let last = Number(list.pop())
+        let newIndex = list.join('')
+        vm.sqlLetter(nodeItem[last], false)
+        if (nodeItem[last + 1]) {
+          vm.checkSQLData(nodeItem, last + 1, newIndex)
+        } else {
+          vm.getNode(newIndex)
+        }
+      }
+    },
+    sqlLetter (item, e) {
+      let vm = this
+      let str
+      if (item.functionType) {
+        if (['abs', 'ceil', 'floor', 'round', 'lcase'].indexOf(item.functionType) !== -1) {
+          str = item.functionType + '(' + item.columnName + ')' + item.conditionalOperator + item.sqlCondition
+        }
+        if (item.functionType === 'substring' || item.functionType === 'concat') {
+          str = item.columnName + '.' + item.functionType + '(' + item.columnMark + ')' + item.conditionalOperator + item.sqlCondition
+        }
+        if (item.functionType === 'trim') {
+          str = item.columnName + '.trim()' + item.conditionalOperator + item.sqlCondition
+        }
+        if (item.functionType === 'now' || item.functionType === 'currentDate' || item.functionType === 'currentTime') {
+          str = item.columnName + item.conditionalOperator + item.functionType
+        }
+      } else {
+        str = item.columnName + item.conditionalOperator + item.sqlCondition
+      }
+      if (item.children.length > 0) {
+        if (item.connectionOperator) {
+          str = ' ' + item.connectionOperator + ' ' + '(' + str + vm.remarkLettrt + ')'
+        } else {
+          str = '(' + str + vm.remarkLettrt + ')'
+        }
+        vm.remarkLettrt = str
+      } else {
+        if (item.connectionOperator) {
+          str = ' ' + item.connectionOperator + ' ' + str
+        }
+        vm.remarkLettrt += str
+      }
+      if (e) {
+        vm.ruleLetter.push(vm.remarkLettrt)
+        vm.remarkLettrt = ''
+      }
+      if (item.functionType && vm.functionList.indexOf(item.functionType) === -1) {
+        vm.functionList.push(item.functionType)
+      }
+    },
+    getRuleData () {
+      let vm = this
+      let str = vm.ruleLetter.join('')
+      vm.sqlOption.conditionField = str
+      vm.functionList.forEach(e => {
+        let index = 0
+        index = str.indexOf(e, 0)
+        while (index !== -1) {
+          let i = index + 1
+          let startIndex = index + e.length
+          let item = []
+          if (['abs', 'ceil', 'floor', 'round', 'lcase'].indexOf(e) !== -1) {
+            let endIndex = index + e.length
+            while (str[endIndex] !== ')') {
+              endIndex++
+            }
+            item[0] = String(index)
+            item[1] = String(endIndex + 1)
+            item[2] = e
+            item[3] = str.substring(startIndex + 1, endIndex)
+          }
+          if (e === 'substring' || e === 'concat') {
+            let endIndex = index
+            while (str[endIndex] !== ' ' && str[endIndex]) {
+              endIndex--
+            }
+            let lastIndex = index + e.length
+            while (str[lastIndex] !== ')') {
+              lastIndex++
+            }
+            item[0] = String(endIndex + 1)
+            item[1] = String(lastIndex + 1)
+            item[2] = e
+            let str1 = str
+            let str2 = str
+            let key = str1.substring(endIndex + 1, index - 1)
+            let string = str2.substring(startIndex + 1, lastIndex)
+            item[3] = key + ',' + string
+          }
+          if (e === 'trim') {
+            let endIndex = index
+            while (str[endIndex] !== ' ' && str[endIndex]) {
+              endIndex--
+            }
+            item[0] = String(endIndex + 1)
+            item[1] = String(startIndex + 2)
+            item[2] = e
+            item[3] = str.substring(endIndex + 1, index - 1)
+          }
+          if (e === 'now' || e === 'currentDate' || e === 'currentTime') {
+            item[0] = String(index)
+            item[1] = String(index + e.length)
+            item[2] = e
+            let endIndex = index - 1
+            while (['>', '<', '=', '!'].indexOf(str[endIndex]) !== -1) {
+              endIndex--
+            }
+            let start = index - 1
+            while (str[start] !== ' ' && str[start]) {
+              start--
+            }
+            item[3] = str.substring(start + 1, endIndex + 1)
+          }
+          vm.functionArray.push(item)
+          index = str.indexOf(e, i)
+        }
+      })
+    },
     getDetail () {
       let vm = this
       let data = {
@@ -363,6 +493,13 @@ export default {
           for (let key in vm.ruleItem) {
             if (res.data.data[key]) {
               vm.ruleItem[key] = res.data.data[key]
+              if (key === 'conditionFieldJson') {
+                if (res.data.data.conditionFieldJson) {
+                  vm.ruleItem.conditionFieldJson = JSON.parse(res.data.data.conditionFieldJson)
+                } else {
+                  vm.ruleItem.conditionFieldJson = []
+                }
+              }
             }
           }
           for (let key in vm.rule) {
@@ -375,7 +512,7 @@ export default {
             }
           }
           for (let key in vm.sqlOption) {
-            if (key === 'selectField' || key === 'conditionType' || key === 'ruleEngineConditionList') {
+            if (key === 'selectField' || key === 'conditionType' || key === 'conditionFieldJson') {
               if (res.data.data.selectField) {
                 vm.sqlOption.selectField = [].concat(res.data.data.selectField.split(','))
               }
@@ -384,8 +521,12 @@ export default {
                   vm.sqlOption.conditionType = res.data.data.conditionType.toString()
                 }
               }
-              if (key === 'ruleEngineConditionList') {
-                vm.sqlOption.ruleEngineConditionList = [].concat(res.data.data.ruleEngineConditionList)
+              if (key === 'conditionFieldJson') {
+                if (res.data.data.conditionFieldJson) {
+                  vm.sqlOption.conditionFieldJson = JSON.parse(res.data.data.conditionFieldJson)
+                } else {
+                  vm.sqlOption.conditionFieldJson = []
+                }
               }
             } else {
               vm.sqlOption[key] = res.data.data[key]
@@ -439,36 +580,11 @@ export default {
       vm.$refs[e].validate((valid) => {
         if (!valid) {
           if (e === 'sql') {
-            let list = vm.sqlOption.ruleEngineConditionList
-            let hasEmpty = false
             if (!vm.sqlOption.fromDestination) {
               return
             }
             if (vm.sqlOption.selectField.length === 0) {
               return
-            }
-            for (let i = 0; i < list.length; i++) {
-              for (let key1 in list[i]) {
-                let item = list[i]
-                if (item[key1] === '') {
-                  if (i === 0 && key1 === 'connectionOperator') {
-                    hasEmpty = false
-                  } else {
-                    hasEmpty = true
-                  }
-                  let war = document.getElementsByClassName('conditionaWarning')
-                  vm.warning = vm.$t('common.cancel')
-                  war[i].style.display = 'block'
-                }
-              }
-            }
-            if (hasEmpty) {
-              return
-            } else {
-              let war = document.getElementsByClassName('conditionaWarning')
-              for (let i = 0; i < war.length; i++) {
-                war[i].style.display = 'none'
-              }
             }
             if (vm.sqlOption.conditionType === '1') {
               if (!vm.sqlOption.toDestination) {
@@ -489,6 +605,9 @@ export default {
             return
           }
         }
+        if (!checkRule(this.columnName)) {
+          return
+        }
         if (e === 'rule') {
           for (let key in vm.rule) {
             data[key] = vm.rule[key]
@@ -498,32 +617,13 @@ export default {
           }
         }
         if (e === 'sql') {
-          let hasEmpty = false
-          let list = vm.sqlOption.ruleEngineConditionList
-          if (list.length > 0) {
-            for (let i = 0; i < list.length; i++) {
-              for (var key in list[i]) {
-                let item = list[i]
-                if (item[key] === '') {
-                  if (i === 0 && key === 'connectionOperator') {
-                    hasEmpty = false
-                  } else {
-                    hasEmpty = true
-                  }
-                  let war = document.getElementsByClassName('conditionaWarning')
-                  vm.warning = vm.$t('common.cancel')
-                  war[i].style.display = 'block'
-                }
-              }
-            }
-          }
-          if (hasEmpty) {
-            return
-          } else {
-            let war = document.getElementsByClassName('conditionaWarning')
-            for (let i = 0; i < war.length; i++) {
-              war[i].style.display = 'none'
-            }
+          vm.ruleLetter = []
+          vm.functionArray = []
+          vm.sqlOption.conditionField = ''
+          if (vm.sqlOption.conditionFieldJson.length > 0) {
+            vm.checkSQLData(vm.sqlOption.conditionFieldJson, 0, '')
+            vm.getRuleData()
+            vm.sqlOption.functionArray = JSON.stringify(vm.functionArray)
           }
           if (vm.sqlOption.conditionType === '1') {
             vm.sqlOption.ruleDataBaseId = ''
@@ -533,6 +633,8 @@ export default {
           for (let key in vm.sqlOption) {
             if (key === 'selectField') {
               data.selectField = vm.sqlOption.selectField.join(',')
+            } else if (key === 'conditionFieldJson') {
+              data.conditionFieldJson = JSON.stringify(vm.sqlOption.conditionFieldJson)
             } else {
               data[key] = vm.sqlOption[key]
             }
@@ -561,14 +663,12 @@ export default {
         'connectionOperator': '',
         'columnName': '',
         'conditionalOperator': '',
-        'sqlCondition': ''
+        'sqlCondition': '',
+        'functionType': '',
+        'columnMark': '',
+        'children': []
       }
-      if (this.sqlOption.ruleEngineConditionList.length < 3) {
-        this.sqlOption.ruleEngineConditionList.push(item)
-      }
-    },
-    remove (e) {
-      this.sqlOption.ruleEngineConditionList.splice(e, 1)
+      this.sqlOption.conditionFieldJson.push(item)
     },
     getLsitData () {
       let vm = this

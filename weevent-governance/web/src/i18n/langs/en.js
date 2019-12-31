@@ -264,5 +264,16 @@ module.exports = {
     'lastRecord': 'Last Time',
     'runningStatus': 'Running Status',
     'destinationType': 'Destination Type'
+  },
+  ruleCheck: {
+    'inputRule': 'please input completed rule',
+    'notNumber': 'data type error - not a number',
+    'inputInteger': 'data type error - not an integer',
+    'bigger': 'please input the value bigger then 0',
+    'inputString': 'please warp the string in double quotes',
+    'errorOperator': 'operator is error plese use != or ==',
+    'errorParameter': 'function error - parameter is error',
+    'errorIndex': 'function error - index is not a integer'
+
   }
 }
