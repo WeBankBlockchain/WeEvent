@@ -1,5 +1,5 @@
 import i18n from '../i18n'
-const checkRule = (e) => {
+export const checkRule = (e) => {
   let pass = true
   let nodes = document.getElementsByClassName('tree_content')
   let lang = i18n.locale
@@ -118,5 +118,3 @@ const checkRule = (e) => {
   }
   return pass
 }
-
-export { checkRule }
