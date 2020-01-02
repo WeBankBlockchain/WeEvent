@@ -22,9 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.util.StringUtils;
 
-import static com.webank.weevent.processor.utils.ConstantsHelper.*;
-
-
 @Slf4j
 public class CommonUtil {
     private static Map<String, BasicDataSource> dsMap = new ConcurrentHashMap<>();
@@ -218,17 +215,17 @@ public class CommonUtil {
         for (String key : result) {
             // set the flag
             switch (key) {
-                case EVENT_ID:
-                    sqlOrder.put(EVENT_ID, eventId);
+                case ConstantsHelper.EVENT_ID:
+                    sqlOrder.put(ConstantsHelper.EVENT_ID, eventId);
                     break;
-                case TOPIC_NAME:
-                    sqlOrder.put(TOPIC_NAME, topicName);
+                case ConstantsHelper.TOPIC_NAME:
+                    sqlOrder.put(ConstantsHelper.TOPIC_NAME, topicName);
                     break;
-                case BROKER_ID:
-                    sqlOrder.put(BROKER_ID, brokerId);
+                case ConstantsHelper.BROKER_ID:
+                    sqlOrder.put(ConstantsHelper.BROKER_ID, brokerId);
                     break;
-                case GROUP_ID:
-                    sqlOrder.put(GROUP_ID, groupId);
+                case ConstantsHelper.GROUP_ID:
+                    sqlOrder.put(ConstantsHelper.GROUP_ID, groupId);
                     break;
                 default:
                     break;
@@ -241,32 +238,32 @@ public class CommonUtil {
     public static LinkedHashMap<String, Boolean> setFlag(LinkedHashMap<String, Boolean> map, String key) {
         // set the flag
         switch (key) {
-            case EVENT_ID:
-                map.put(EVENT_ID, true);
+            case ConstantsHelper.EVENT_ID:
+                map.put(ConstantsHelper.EVENT_ID, true);
 
                 break;
-            case TOPIC_NAME:
-                map.put(TOPIC_NAME, true);
+            case ConstantsHelper.TOPIC_NAME:
+                map.put(ConstantsHelper.TOPIC_NAME, true);
 
                 break;
-            case BROKER_ID:
-                map.put(BROKER_ID, true);
+            case ConstantsHelper.BROKER_ID:
+                map.put(ConstantsHelper.BROKER_ID, true);
 
                 break;
-            case GROUP_ID:
-                map.put(GROUP_ID, true);
+            case ConstantsHelper.GROUP_ID:
+                map.put(ConstantsHelper.GROUP_ID, true);
 
                 break;
-            case NOW:
-                map.put(NOW, true);
+            case ConstantsHelper.NOW:
+                map.put(ConstantsHelper.NOW, true);
 
                 break;
-            case CURRENT_TIME:
-                map.put(CURRENT_TIME, true);
+            case ConstantsHelper.CURRENT_TIME:
+                map.put(ConstantsHelper.CURRENT_TIME, true);
 
                 break;
-            case CURRENT_DATE:
-                map.put(CURRENT_DATE, true);
+            case ConstantsHelper.CURRENT_DATE:
+                map.put(ConstantsHelper.CURRENT_DATE, true);
 
                 break;
             default:
@@ -301,19 +298,19 @@ public class CommonUtil {
                 iftttContent.put(item, eventContent.get(item));
             }
             switch (item) {
-                case EVENT_ID:
+                case ConstantsHelper.EVENT_ID:
                     iftttContent.put(item, eventMessage.getEventId());
                     break;
 
-                case TOPIC_NAME:
+                case ConstantsHelper.TOPIC_NAME:
                     iftttContent.put(item, eventMessage.getTopic());
                     break;
 
-                case BROKER_ID:
+                case ConstantsHelper.BROKER_ID:
                     iftttContent.put(item, brokerId);
                     break;
 
-                case GROUP_ID:
+                case ConstantsHelper.GROUP_ID:
                     iftttContent.put(item, groupId);
                     break;
 
@@ -334,34 +331,34 @@ public class CommonUtil {
         for (Map.Entry<String, Boolean> entry : map.entrySet()) {
             // if true,then add it
             switch (entry.getKey()) {
-                case EVENT_ID:
-                    sqlOrder.put(EVENT_ID, eventId);
+                case ConstantsHelper.EVENT_ID:
+                    sqlOrder.put(ConstantsHelper.EVENT_ID, eventId);
 
                     break;
-                case TOPIC_NAME:
-                    sqlOrder.put(TOPIC_NAME, topicName);
+                case ConstantsHelper.TOPIC_NAME:
+                    sqlOrder.put(ConstantsHelper.TOPIC_NAME, topicName);
 
                     break;
-                case BROKER_ID:
-                    sqlOrder.put(BROKER_ID, brokerId);
+                case ConstantsHelper.BROKER_ID:
+                    sqlOrder.put(ConstantsHelper.BROKER_ID, brokerId);
 
                     break;
-                case GROUP_ID:
-                    sqlOrder.put(GROUP_ID, groupId);
+                case ConstantsHelper.GROUP_ID:
+                    sqlOrder.put(ConstantsHelper.GROUP_ID, groupId);
 
                     break;
-                case NOW:
-                    sqlOrder.put(NOW, String.valueOf(new Date().getTime()));
+                case ConstantsHelper.NOW:
+                    sqlOrder.put(ConstantsHelper.NOW, String.valueOf(new Date().getTime()));
 
                     break;
-                case CURRENT_TIME:
+                case ConstantsHelper.CURRENT_TIME:
                     SimpleDateFormat sdfTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                    sqlOrder.put(CURRENT_TIME, sdfTime.format(new Date()));
+                    sqlOrder.put(ConstantsHelper.CURRENT_TIME, sdfTime.format(new Date()));
 
                     break;
-                case CURRENT_DATE:
+                case ConstantsHelper.CURRENT_DATE:
                     SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy/MM/dd");
-                    sqlOrder.put(CURRENT_DATE, sdfDate.format(new Date()));
+                    sqlOrder.put(ConstantsHelper.CURRENT_DATE, sdfDate.format(new Date()));
 
                     break;
                 default:
