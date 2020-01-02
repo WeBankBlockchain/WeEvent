@@ -61,7 +61,7 @@ public class QuartzManager {
             log.info("rule size:{} ...", ruleMap.size());
             log.info("start subscribe ...");
             for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
-                CEPRuleCache.updateCEPRule(entry.getValue(), ruleMap);
+                CEPRuleCache.updateCEPRule(entry.getValue(), ruleMap, null);
             }
 
         } catch (Exception e) {
@@ -113,6 +113,7 @@ public class QuartzManager {
             ruleMap.put(currentRule.getId(), currentRule);
             ruleList.add(currentRule);
             params.put("ruleMap", ruleMap);
+            params.put("ruleList", ruleList);
             log.info("update the job  ruleMap:{},ruleList:{}", ruleMap.size(), ruleList.size());
 
             JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).storeDurably(true).build();

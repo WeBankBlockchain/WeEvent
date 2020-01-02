@@ -1,6 +1,7 @@
 package com.webank.weevent.sdk;
 
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyManagementException;
@@ -233,6 +234,8 @@ public class WeEventClient implements IWeEventClient {
                             } catch (JMSException e) {
                                 log.error("onMessage exception", e);
                                 listener.onException(jms2BrokerException(e));
+                            }catch (IOException e){
+                                log.error("onMessage exception", e);
                             }
                         }
                     }

@@ -1,5 +1,7 @@
 package com.webank.weevent.sdk;
 
+import java.io.IOException;
+
 import lombok.NonNull;
 
 /**
@@ -101,7 +103,7 @@ public interface IWeEventClient {
          *
          * @param event the event
          */
-        void onEvent(WeEvent event);
+        void onEvent(WeEvent event) throws IOException;
 
         /**
          * Called while raise exception.
