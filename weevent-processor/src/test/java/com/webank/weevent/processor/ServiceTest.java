@@ -58,7 +58,6 @@ public class ServiceTest {
 
     }
 
-
     @Test
     public void checkConditionRight() throws Exception {
         String url = "/checkWhereCondition";
@@ -134,7 +133,6 @@ public class ServiceTest {
     @Test
     public void insert() throws Exception {
         url = "/insert";
-
         String arr = "";
         rule.setSelectField("a,b,c");
         rule.setConditionField("c<20 or a==10");
@@ -184,12 +182,20 @@ public class ServiceTest {
         rule.setConditionField("(b>=11 and (abs(c)!=22)) and abs(d)<=33");
         rule.setSystemFunctionMessage(arr);
         rule.setConditionType(2);
-        rule.setId("20191230");
+        rule.setId("20200102");
 
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getContentAsString());
         assertEquals(200, result3.getResponse().getStatus());
+        Thread.sleep(100000);
+
+        rule.setFromDestination("testFromDestination");
+        RequestBuilder requestBuilder4 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        MvcResult result4 = mockMvc.perform(requestBuilder4).andDo(print()).andReturn();
+        log.info("result4:{}", result4.getResponse().getContentAsString());
+        assertEquals(200, result4.getResponse().getStatus());
+        Thread.sleep(100000);
 
         String url1 = "/statistic";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url1).contentType(MediaType.APPLICATION_JSON).param("idList", "1104154821111");
@@ -199,7 +205,7 @@ public class ServiceTest {
 
         RequestBuilder requestBuilder2 = MockMvcRequestBuilders.get(url1).contentType(MediaType.APPLICATION_JSON).param("idList", "1104154821");
         MvcResult result2 = mockMvc.perform(requestBuilder2).andDo(print()).andReturn();
-        log.info("result:{}", result3);
+        log.info("result:{}", result2);
         assertEquals(200, result2.getResponse().getStatus());
     }
 

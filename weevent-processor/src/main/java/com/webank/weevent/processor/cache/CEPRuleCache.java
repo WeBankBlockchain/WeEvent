@@ -12,8 +12,8 @@ import java.util.*;
 @Slf4j
 public class CEPRuleCache {
 
-    public static void updateCEPRule(CEPRule rule, Map<String, CEPRule> ruleMap) throws BrokerException {
-        CEPRuleMQ.updateSubscribeMsg(rule, ruleMap);
+    public static void updateCEPRule(CEPRule rule, Map<String, CEPRule> ruleMap, List<CEPRule> ruleList) throws BrokerException {
+        CEPRuleMQ.updateSubscribeMsg(rule, ruleMap, ruleList);
     }
 
 }
