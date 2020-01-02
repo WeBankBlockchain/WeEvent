@@ -136,23 +136,18 @@ public class CEPRuleMQ {
             }
 
             // subscribe topic
-            String subscriptionId;
+            String subscriptionId, offSet;
             ExtendEventLister eventLister = new ExtendEventLister(client, ruleMap, statisticWeEvent);
-            if (null != subId) {
+            if (!StringUtils.isEmpty(subId)) {
                 log.info("update use old subId:{}", subId);
-                if (StringUtils.isEmpty(rule.getOffSet())) {
-                    // if empty,get the new
-                    subscriptionId = client.subscribe(rule.getFromDestination(), WeEvent.OFFSET_LAST, subId, eventLister);
-                } else {
-                    subscriptionId = client.subscribe(rule.getFromDestination(), rule.getOffSet(), subId, eventLister);
-                }
+
+                // if empty,get the new
+                offSet = StringUtils.isEmpty(rule.getOffSet()) ? WeEvent.OFFSET_LAST : rule.getOffSet();
+                subscriptionId = client.subscribe(rule.getFromDestination(), offSet, subId, eventLister);
             } else {
-                if (StringUtils.isEmpty(rule.getOffSet())) {
-                    // if empty,get the new
-                    subscriptionId = client.subscribe(rule.getFromDestination(), WeEvent.OFFSET_LAST, eventLister);
-                } else {
-                    subscriptionId = client.subscribe(rule.getFromDestination(), rule.getOffSet(), eventLister);
-                }
+                // if empty,get the new
+                offSet = StringUtils.isEmpty(rule.getOffSet()) ? WeEvent.OFFSET_LAST : rule.getOffSet();
+                subscriptionId = client.subscribe(rule.getFromDestination(), offSet, eventLister);
             }
 
             log.info("subscriptionIdMap:{},rule.getId() :{} getFromDestination:{}--->subscriptionId:{}", subscriptionIdMap.size(), rule.getId(), rule.getFromDestination(), subscriptionId);

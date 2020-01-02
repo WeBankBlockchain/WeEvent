@@ -214,7 +214,7 @@ public class CommonUtil {
         Map<String, String> sqlOrder = new HashMap<>();
         // get all select field and value, and the select field must in eventContent.
         for (String key : result) {
-            if (null == SystemFields.getByClassCodeAndInfoCode(key)) {
+            if (StringUtils.isEmpty(SystemFields.getByClassCodeAndInfoCode(key))) {
                 continue;
             }
             // set the flag
@@ -240,7 +240,7 @@ public class CommonUtil {
     }
 
     public static LinkedHashMap<String, Boolean> setFlag(LinkedHashMap<String, Boolean> map, String key) {
-        if (null == SystemFields.getByClassCodeAndInfoCode(key)) {
+        if (StringUtils.isEmpty(SystemFields.getByClassCodeAndInfoCode(key))) {
             return map;
         }
         // set the flag
@@ -304,7 +304,7 @@ public class CommonUtil {
             if (eventContent.containsKey(item)) {
                 iftttContent.put(item, eventContent.get(item));
             }
-            if (null == SystemFields.getByClassCodeAndInfoCode(item)) {
+            if (StringUtils.isEmpty(SystemFields.getByClassCodeAndInfoCode(item))) {
                 continue;
             }
             switch (SystemFields.valueOf(item)) {
@@ -339,7 +339,7 @@ public class CommonUtil {
                     eventId, String topicName) {
         // set the flag
         for (Map.Entry<String, Boolean> entry : map.entrySet()) {
-            if (null == SystemFields.getByClassCodeAndInfoCode(entry.getKey())) {
+            if (StringUtils.isEmpty(SystemFields.getByClassCodeAndInfoCode(entry.getKey()))) {
                 continue;
             }
             // if true,then add it
