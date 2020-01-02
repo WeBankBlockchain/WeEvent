@@ -136,7 +136,8 @@ public class CEPRuleMQ {
             }
 
             // subscribe topic
-            String subscriptionId, offSet;
+            String subscriptionId;
+            String offSet;
             ExtendEventLister eventLister = new ExtendEventLister(client, ruleMap, statisticWeEvent);
             if (!StringUtils.isEmpty(subId)) {
                 log.info("update use old subId:{}", subId);
