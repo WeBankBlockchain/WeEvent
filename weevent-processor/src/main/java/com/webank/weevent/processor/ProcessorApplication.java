@@ -82,5 +82,3 @@ public class ProcessorApplication {
         return new CEPRuleMQ();
     }
 }
-
-
