@@ -55,7 +55,6 @@ public class ServiceTest {
         rule.setSystemTag("0");
         rule.setTableName("fromIfttt");
         rule.setConditionType(1);
-
     }
 
     @Test

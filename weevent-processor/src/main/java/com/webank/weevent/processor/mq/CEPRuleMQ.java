@@ -171,6 +171,7 @@ public class CEPRuleMQ {
     }
 
     public static Pair<String, String> handleOnEventOtherPattern(IWeEventClient client, WeEvent event, Map<String, CEPRule> ruleMap) {
+
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
 
         // match the rule and send message
@@ -210,6 +211,7 @@ public class CEPRuleMQ {
     }
 
     public static Pair<String, String> handleOnEvent(IWeEventClient client, WeEvent event, Map<String, CEPRule> ruleMap) {
+
         log.info("handleOnEvent ruleMapsize :{}", ruleMap.size());
         // match the rule and send message
         for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {

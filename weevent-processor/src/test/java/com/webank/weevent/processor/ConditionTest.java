@@ -413,7 +413,6 @@ public class ConditionTest {
         log.info("result3:{}", result.getResponse().getContentAsString());
     }
 
-
     @Test
     public void absHitRule() throws Exception {
         String arr = "[[\"0\", \"6\", \"floor\", \"c\"]]";
