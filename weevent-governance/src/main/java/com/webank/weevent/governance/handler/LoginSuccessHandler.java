@@ -57,6 +57,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         // reset cookie
         cookiesTools.addCookie(request, response, ConstantProperties.COOKIE_MGR_ACCOUNT_ID, userId.toString());
+        cookiesTools.addCookie(request, response, ConstantProperties.COOKIE_JSESSIONID, request.getSession().getId());
         String backStr = JsonUtil.toJSONString(baseResponse);
         log.debug("login backInfo:{}", backStr);
 
