@@ -22,6 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.util.StringUtils;
 
+import static com.webank.weevent.processor.utils.ConstantsHelper.*;
+
 
 @Slf4j
 public class CommonUtil {
@@ -214,22 +216,19 @@ public class CommonUtil {
         Map<String, String> sqlOrder = new HashMap<>();
         // get all select field and value, and the select field must in eventContent.
         for (String key : result) {
-            if (null == SystemFields.getByClassCodeAndInfoCode(key)) {
-                continue;
-            }
             // set the flag
-            switch (SystemFields.valueOf(key)) {
+            switch (key) {
                 case EVENT_ID:
-                    sqlOrder.put(SystemFields.EVENT_ID.getField(), eventId);
+                    sqlOrder.put(EVENT_ID, eventId);
                     break;
                 case TOPIC_NAME:
-                    sqlOrder.put(SystemFields.TOPIC_NAME.getField(), topicName);
+                    sqlOrder.put(TOPIC_NAME, topicName);
                     break;
                 case BROKER_ID:
-                    sqlOrder.put(SystemFields.BROKER_ID.getField(), brokerId);
+                    sqlOrder.put(BROKER_ID, brokerId);
                     break;
                 case GROUP_ID:
-                    sqlOrder.put(SystemFields.GROUP_ID.getField(), groupId);
+                    sqlOrder.put(GROUP_ID, groupId);
                     break;
                 default:
                     break;
@@ -240,37 +239,34 @@ public class CommonUtil {
     }
 
     public static LinkedHashMap<String, Boolean> setFlag(LinkedHashMap<String, Boolean> map, String key) {
-        if (null == SystemFields.getByClassCodeAndInfoCode(key)) {
-            return map;
-        }
         // set the flag
-        switch (SystemFields.valueOf(key)) {
+        switch (key) {
             case EVENT_ID:
-                map.put(SystemFields.EVENT_ID.getField(), true);
+                map.put(EVENT_ID, true);
 
                 break;
             case TOPIC_NAME:
-                map.put(SystemFields.TOPIC_NAME.getField(), true);
+                map.put(TOPIC_NAME, true);
 
                 break;
             case BROKER_ID:
-                map.put(SystemFields.BROKER_ID.getField(), true);
+                map.put(BROKER_ID, true);
 
                 break;
             case GROUP_ID:
-                map.put(SystemFields.GROUP_ID.getField(), true);
+                map.put(GROUP_ID, true);
 
                 break;
             case NOW:
-                map.put(SystemFields.NOW.getField(), true);
+                map.put(NOW, true);
 
                 break;
             case CURRENT_TIME:
-                map.put(SystemFields.CURRENT_DATE.getField(), true);
+                map.put(CURRENT_TIME, true);
 
                 break;
             case CURRENT_DATE:
-                map.put(SystemFields.CURRENT_TIME.getField(), true);
+                map.put(CURRENT_DATE, true);
 
                 break;
             default:
@@ -304,11 +300,7 @@ public class CommonUtil {
             if (eventContent.containsKey(item)) {
                 iftttContent.put(item, eventContent.get(item));
             }
-            if (null == SystemFields.getByClassCodeAndInfoCode(item)) {
-                continue;
-            }
-
-            switch (SystemFields.valueOf(item)) {
+            switch (item) {
                 case EVENT_ID:
                     iftttContent.put(item, eventMessage.getEventId());
                     break;
@@ -340,39 +332,36 @@ public class CommonUtil {
                     eventId, String topicName) {
         // set the flag
         for (Map.Entry<String, Boolean> entry : map.entrySet()) {
-            if (null == SystemFields.getByClassCodeAndInfoCode(entry.getKey())) {
-                continue;
-            }
             // if true,then add it
-            switch (SystemFields.valueOf(entry.getKey())) {
+            switch (entry.getKey()) {
                 case EVENT_ID:
-                    sqlOrder.put(SystemFields.EVENT_ID.getField(), eventId);
+                    sqlOrder.put(EVENT_ID, eventId);
 
                     break;
                 case TOPIC_NAME:
-                    sqlOrder.put(SystemFields.TOPIC_NAME.getField(), topicName);
+                    sqlOrder.put(TOPIC_NAME, topicName);
 
                     break;
                 case BROKER_ID:
-                    sqlOrder.put(SystemFields.BROKER_ID.getField(), brokerId);
+                    sqlOrder.put(BROKER_ID, brokerId);
 
                     break;
                 case GROUP_ID:
-                    sqlOrder.put(SystemFields.GROUP_ID.getField(), groupId);
+                    sqlOrder.put(GROUP_ID, groupId);
 
                     break;
                 case NOW:
-                    sqlOrder.put(SystemFields.NOW.getField(), String.valueOf(new Date().getTime()));
+                    sqlOrder.put(NOW, String.valueOf(new Date().getTime()));
 
                     break;
                 case CURRENT_TIME:
                     SimpleDateFormat sdfTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                    sqlOrder.put(SystemFields.CURRENT_TIME.getField(), sdfTime.format(new Date()));
+                    sqlOrder.put(CURRENT_TIME, sdfTime.format(new Date()));
 
                     break;
                 case CURRENT_DATE:
                     SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy/MM/dd");
-                    sqlOrder.put(SystemFields.CURRENT_DATE.getField(), sdfDate.format(new Date()));
+                    sqlOrder.put(CURRENT_DATE, sdfDate.format(new Date()));
 
                     break;
                 default:
