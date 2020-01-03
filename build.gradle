@@ -67,6 +67,8 @@ ext {
     quartzVersion = "2.3.0"
     // Java-WebSocket
     WebSocketVersion = "1.4.0"
+    // JWTVersion
+    JWTVersion = "0.9.0";
 }
 
 buildscript {

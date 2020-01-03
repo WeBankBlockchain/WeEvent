@@ -39,7 +39,7 @@ public class AccountController {
     }
 
     @PostMapping(value = "/register")
-    public GovernanceResult register(@Valid @RequestBody AccountEntity user, BindingResult result) {
+    public GovernanceResult register(@Valid @RequestBody AccountEntity user, BindingResult result) throws GovernanceException {
         return accountService.register(user);
     }
 

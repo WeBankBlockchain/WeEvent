@@ -34,6 +34,10 @@ dependencies {
     //h2
     implementation("com.h2database:h2:${h2Version}")
 
+    //jwt
+    implementation("io.jsonwebtoken:jjwt:${JWTVersion}")
+
+
 }
 
 processResources {

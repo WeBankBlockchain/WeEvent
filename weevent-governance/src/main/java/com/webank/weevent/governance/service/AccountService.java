@@ -1,5 +1,8 @@
 package com.webank.weevent.governance.service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.Provider;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,9 +33,6 @@ public class AccountService {
 
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
     private MailService mailService;
 
 
@@ -50,7 +50,7 @@ public class AccountService {
             if (accountEntity == null) {
                 accountEntity = new AccountEntity();
                 accountEntity.setUsername("admin");
-                accountEntity.setPassword(passwordEncoder.encode("123456"));
+                accountEntity.setPassword(this.encryptPassWord("admin123456"));
                 accountEntity.setEmail("admin@xxx.com");
                 accountRepository.save(accountEntity);
             }
@@ -81,7 +81,7 @@ public class AccountService {
         return GovernanceResult.ok(true);
     }
 
-    public GovernanceResult register(AccountEntity user) {
+    public GovernanceResult register(AccountEntity user) throws GovernanceException {
         // data criteral
         if (StringUtils.isBlank(user.getUsername()) || StringUtils.isBlank(user.getPassword())) {
             return GovernanceResult.build(400, "user data incomplete，register fail");
@@ -97,8 +97,8 @@ public class AccountService {
         }
 
         // secret
-        String storePassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(storePassword);
+        // String storePassword = encryptPassWord(user.getPassword());
+        //user.setPassword(storePassword);
         // insert user into database
         accountRepository.save(user);
         // return true
@@ -122,12 +122,12 @@ public class AccountService {
             return GovernanceResult.build(400, "username is not exist");
         }
         AccountEntity storeUser = accountEntityList.get(0);
-        if (!passwordEncoder.matches(oldPassword, storeUser.getPassword())) {
+        if (!oldPassword.equals(storeUser.getPassword())) {
             return GovernanceResult.build(400, "old password is incorrect");
         }
 
-        String password = passwordEncoder.encode(user.getPassword());
-        storeUser.setPassword(password);
+      //  String password = passwordEncoder.encode(user.getPassword());
+       // storeUser.setPassword(password);
         accountRepository.save(storeUser);
         return GovernanceResult.ok();
     }
@@ -167,8 +167,8 @@ public class AccountService {
 
         AccountEntity storeUser = this.queryByUsername(user.getUsername());
 
-        String password = passwordEncoder.encode(user.getPassword());
-        storeUser.setPassword(password);
+   //     String password = passwordEncoder.encode(user.getPassword());
+     //   storeUser.setPassword(password);
         storeUser.setLastUpdate(new Date());
         accountRepository.save(storeUser);
         return GovernanceResult.ok(true);
@@ -204,5 +204,20 @@ public class AccountService {
         return accountRepository.findAllByUsernameAndDeleteAt(userName, ConstantProperties.NOT_DELETED);
     }
 
+    private String encryptPassWord(String password) throws GovernanceException {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(password.getBytes(StandardCharsets.UTF_8));
+            StringBuffer buffer = new StringBuffer();
+            final Provider provider = md.getProvider();
+            for (byte dg : md.digest()) {
+                buffer.append(String.format("%02X", dg));
+            }
+            return buffer.toString();
+        } catch (Exception e) {
+            log.error("encrypt passWord fail", e);
+            throw new GovernanceException("encrypt passWord fail", e);
+        }
 
+    }
 }
