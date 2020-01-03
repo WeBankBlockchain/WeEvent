@@ -249,5 +249,31 @@ module.exports = {
     'guideAddress': 'Empty database',
     'abnormalAddress': 'Empty error database',
     'cannotSame': 'Cannot same with Streaming Target'
+  },
+  ruleStatic: {
+    'readRule': 'Read Rules',
+    'readInsideRule': 'System Rules',
+    'systemRules': 'System Rules',
+    'ruleName': 'Rule Name',
+    'hitTimes': 'Hit Times',
+    'notHitTimes': 'Hit Failed Times',
+    'successTimes': 'Successful Times',
+    'failTimes': 'Failed Times',
+    'startTime': 'Start Time',
+    'readFailRecord': 'Read Record',
+    'lastRecord': 'Last Time',
+    'runningStatus': 'Running Status',
+    'destinationType': 'Destination Type'
+  },
+  ruleCheck: {
+    'inputRule': 'please input completed rule',
+    'notNumber': 'data type error - not a number',
+    'inputInteger': 'data type error - not an integer',
+    'bigger': 'please input the value bigger then 0',
+    'inputString': 'please warp the string in double quotes',
+    'errorOperator': 'operator is error plese use != or ==',
+    'errorParameter': 'function error - parameter is error',
+    'errorIndex': 'function error - index is not a integer'
+
   }
 }
