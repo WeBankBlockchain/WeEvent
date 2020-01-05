@@ -1,3 +1,4 @@
+/*
 package com.webank.weevent.governance.filter;
 
 import java.io.IOException;
@@ -14,19 +15,12 @@ import io.jsonwebtoken.Jwts;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-
 
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
-
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
-    }
-
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, AuthenticationEntryPoint authenticationEntryPoint) {
-        super(authenticationManager, authenticationEntryPoint);
     }
 
     @Override
@@ -58,3 +52,4 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         return null;
     }
 }
+*/

@@ -27,7 +27,7 @@ public class JsonLogoutSuccessHandler implements LogoutSuccessHandler {
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
-
+          //这里是清除token，或者使token失效
         // clear cookie
         cookiesTools.clearAllCookie(request, response);
         // session invaild

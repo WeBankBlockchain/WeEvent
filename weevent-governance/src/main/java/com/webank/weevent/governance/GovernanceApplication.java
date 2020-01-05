@@ -14,7 +14,7 @@ import javax.net.ssl.X509TrustManager;
 import com.webank.weevent.governance.filter.ForwardBrokerFilter;
 import com.webank.weevent.governance.filter.ForwardProcessorFilter;
 import com.webank.weevent.governance.filter.ForwardWebaseFilter;
-import com.webank.weevent.governance.filter.UserAuthFilter;
+import com.webank.weevent.governance.filter.JwtLoginFilter;
 import com.webank.weevent.governance.filter.XssFilter;
 import com.webank.weevent.governance.utils.H2ServerUtil;
 
@@ -89,8 +89,6 @@ public class GovernanceApplication {
     @Autowired
     private ForwardWebaseFilter forwardWebaseFilter;
 
-    @Autowired
-    private UserAuthFilter userAuthFilter;
 
     @Autowired
     private ForwardProcessorFilter forwardProcessorFilter;
@@ -132,15 +130,15 @@ public class GovernanceApplication {
         return bean;
     }
 
-    @Bean
-    public FilterRegistrationBean<UserAuthFilter> userAuthFilterRegistrationBean() {
-        FilterRegistrationBean<UserAuthFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(userAuthFilter);
+/*    @Bean
+    public FilterRegistrationBean<JwtLoginFilter> userAuthFilterRegistrationBean() {
+        FilterRegistrationBean<JwtLoginFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+        filterRegistrationBean.setFilter(new JwtLoginFilter());
         filterRegistrationBean.setOrder(1);
         filterRegistrationBean.setEnabled(true);
         filterRegistrationBean.addUrlPatterns("/weevent-governance/*");
         return filterRegistrationBean;
-    }
+    }*/
 
     @Bean
     public FilterRegistrationBean<XssFilter> xssFilterRegistrationBean() {

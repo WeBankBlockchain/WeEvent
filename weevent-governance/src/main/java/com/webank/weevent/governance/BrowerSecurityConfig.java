@@ -1,6 +1,7 @@
 package com.webank.weevent.governance;
 
 import com.webank.weevent.governance.common.ConstantProperties;
+import com.webank.weevent.governance.filter.JwtLoginFilter;
 import com.webank.weevent.governance.handler.JsonAccessDeniedHandler;
 import com.webank.weevent.governance.handler.JsonAuthenticationEntryPoint;
 import com.webank.weevent.governance.handler.JsonLogoutSuccessHandler;
@@ -42,6 +43,7 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private JsonLogoutSuccessHandler jsonLogoutSuccessHandler;
 
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
@@ -56,9 +58,11 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
                 .successHandler(loginSuccessHandler) // if login success
                 .failureHandler(loginfailHandler) // if login fail
                 .and()
+                .addFilter(new JwtLoginFilter(authenticationManager()))
                 .authorizeRequests()
                 .antMatchers("/user/**", "/", "/static/**", "/weevent-governance/user/**")
                 .permitAll()
+
                 .anyRequest()
                 .authenticated()
                 .and()
@@ -69,6 +73,7 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .logout()
                 .logoutUrl("/user/logout")
+                //删除cookie，就是要删除token
                 .deleteCookies(ConstantProperties.COOKIE_JSESSIONID, ConstantProperties.COOKIE_MGR_ACCOUNT)
                 .logoutSuccessHandler(jsonLogoutSuccessHandler)
                 .permitAll();
@@ -84,5 +89,6 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailService).passwordEncoder(new BCryptPasswordEncoder());
     }
+
 }
 

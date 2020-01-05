@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.catalina.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,10 +24,14 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
-    private AuthenticationManager authenticationManager;
 
-    public JwtLoginFilter(AuthenticationManager authenticationManager) {
-        this.authenticationManager = authenticationManager;
+    private AuthenticationManager userAuthenticationManager;
+
+    public JwtLoginFilter(AuthenticationManager userAuthenticationManager) {
+        this.userAuthenticationManager = userAuthenticationManager;
+    }
+
+    public JwtLoginFilter() {
     }
 
     @Override
@@ -34,8 +39,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
             throws AuthenticationException {
         try {
             AccountEntity user = new ObjectMapper().readValue(request.getInputStream(), AccountEntity.class);
-
-            return authenticationManager.authenticate(
+            return userAuthenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), new ArrayList<>()));
         } catch (IOException e) {
             throw new RuntimeException(e);

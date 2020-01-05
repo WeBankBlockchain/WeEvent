@@ -20,7 +20,6 @@ import com.webank.weevent.governance.utils.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component
 public class UserAuthFilter implements Filter {
 
     @Autowired
