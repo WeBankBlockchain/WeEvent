@@ -1,23 +1,7 @@
 package com.webank.weevent.governance;
 
-import java.io.InterruptedIOException;
-import java.net.UnknownHostException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLException;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
-import com.webank.weevent.governance.filter.ForwardBrokerFilter;
-import com.webank.weevent.governance.filter.ForwardProcessorFilter;
-import com.webank.weevent.governance.filter.ForwardWebaseFilter;
-import com.webank.weevent.governance.filter.JwtLoginFilter;
-import com.webank.weevent.governance.filter.XssFilter;
+import com.webank.weevent.governance.filter.*;
 import com.webank.weevent.governance.utils.H2ServerUtil;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpRequest;
@@ -49,6 +33,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.io.InterruptedIOException;
+import java.net.UnknownHostException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 
 
 /**
@@ -130,15 +124,15 @@ public class GovernanceApplication {
         return bean;
     }
 
-/*    @Bean
-    public FilterRegistrationBean<JwtLoginFilter> userAuthFilterRegistrationBean() {
-        FilterRegistrationBean<JwtLoginFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(new JwtLoginFilter());
+    @Bean
+    public FilterRegistrationBean<TestFilter> userAuthFilterRegistrationBean() {
+        FilterRegistrationBean<TestFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+        filterRegistrationBean.setFilter(new TestFilter());
         filterRegistrationBean.setOrder(1);
         filterRegistrationBean.setEnabled(true);
         filterRegistrationBean.addUrlPatterns("/weevent-governance/*");
         return filterRegistrationBean;
-    }*/
+    }
 
     @Bean
     public FilterRegistrationBean<XssFilter> xssFilterRegistrationBean() {

@@ -1,45 +1,44 @@
 package com.webank.weevent.governance.filter;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.weevent.governance.entity.AccountEntity;
+import com.webank.weevent.governance.utils.JwtUtils;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
-import com.webank.weevent.governance.entity.AccountEntity;
-import com.webank.weevent.governance.utils.JwtUtils;
+    private AuthenticationManager authenticationManager;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import org.apache.catalina.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+    private AuthenticationSuccessHandler loginSuccessHandler;
 
-public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 
-    private AuthenticationManager userAuthenticationManager;
-
-    public JwtLoginFilter(AuthenticationManager userAuthenticationManager) {
-        this.userAuthenticationManager = userAuthenticationManager;
+    public LoginFilter(AuthenticationManager authenticationManager, AuthenticationSuccessHandler loginSuccessHandler) {
+        this.authenticationManager = authenticationManager;
+        this.loginSuccessHandler = loginSuccessHandler;
     }
 
-    public JwtLoginFilter() {
-    }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
         try {
             AccountEntity user = new ObjectMapper().readValue(request.getInputStream(), AccountEntity.class);
-            return userAuthenticationManager.authenticate(
+            return authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), new ArrayList<>()));
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -54,5 +53,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
                 .setExpiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000))
                 .signWith(SignatureAlgorithm.HS512, "PrivateSecret").compact();
         response.addHeader("Authorization", JwtUtils.getTokenHeader(token));
+        loginSuccessHandler.onAuthenticationSuccess(request,response,authResult);
     }
+
 }

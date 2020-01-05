@@ -1,15 +1,5 @@
 package com.webank.weevent.governance.service;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.Provider;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-
 import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.ErrorCode;
 import com.webank.weevent.governance.common.GovernanceException;
@@ -17,7 +7,6 @@ import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.repository.AccountRepository;
 import com.webank.weevent.governance.utils.CookiesTools;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.helper.StringUtil;
@@ -27,6 +16,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.Provider;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @Slf4j
 public class AccountService {
@@ -35,6 +33,8 @@ public class AccountService {
     @Autowired
     private MailService mailService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private CookiesTools cookiesTools;
@@ -50,7 +50,7 @@ public class AccountService {
             if (accountEntity == null) {
                 accountEntity = new AccountEntity();
                 accountEntity.setUsername("admin");
-                accountEntity.setPassword(this.encryptPassWord("admin123456"));
+                accountEntity.setPassword(passwordEncoder.encode("123456"));
                 accountEntity.setEmail("admin@xxx.com");
                 accountRepository.save(accountEntity);
             }
