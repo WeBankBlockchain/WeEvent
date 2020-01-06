@@ -3,6 +3,8 @@ package com.webank.weevent.governance.handler;
 import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.service.AccountService;
 import com.webank.weevent.governance.utils.JsonUtil;
+import com.webank.weevent.governance.utils.JwtUtils;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +36,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         Map<String, Object> rsp = new HashMap<>();
         User principal = (User) authentication.getPrincipal();
         AccountEntity accountEntity = accountService.queryByUsername(principal.getUsername());
-        String authorization = response.getHeader("Authorization");
+        String authorization = response.getHeader(JwtUtils.AUTHORIZATION_HEADER_PREFIX);
         //Set the global user Id variable
         Security.setProperty(authorization,accountEntity.getId().toString());
         rsp.put("access_token",authorization);

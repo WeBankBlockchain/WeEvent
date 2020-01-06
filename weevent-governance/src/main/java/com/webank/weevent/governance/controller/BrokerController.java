@@ -35,9 +35,9 @@ public class BrokerController {
 
     // get all broker service
     @GetMapping("/list")
-    public List<BrokerEntity> getAllBrokers(HttpServletRequest request, @CookieValue("MGR_ACCOUNT_ID") String accountId) {
+    public List<BrokerEntity> getAllBrokers(HttpServletRequest request) {
         log.info("get all brokers ");
-        return brokerService.getBrokers(request, accountId);
+        return brokerService.getBrokers(request, "1");
     }
 
     // get broker service by id
@@ -49,10 +49,10 @@ public class BrokerController {
 
     // get brokerEntity service by id
     @PostMapping("/add")
-    public GovernanceResult addBroker(@Valid @RequestBody BrokerEntity brokerEntity, @CookieValue("MGR_ACCOUNT_ID") Integer accountId, HttpServletRequest request,
+    public GovernanceResult addBroker(@Valid @RequestBody BrokerEntity brokerEntity,HttpServletRequest request,
                                       HttpServletResponse response) throws GovernanceException {
         log.info("add  brokerEntity service into db brokerEntity :{} ", brokerEntity);
-        brokerEntity.setUserId(accountId);
+        brokerEntity.setUserId(1);
         return brokerService.addBroker(brokerEntity, request, response);
     }
 

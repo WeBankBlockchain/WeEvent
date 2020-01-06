@@ -7,12 +7,10 @@ import com.webank.weevent.governance.handler.JsonAuthenticationEntryPoint;
 import com.webank.weevent.governance.handler.JsonLogoutSuccessHandler;
 import com.webank.weevent.governance.handler.LoginFailHandler;
 import com.webank.weevent.governance.service.AccountDetailsService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -44,13 +42,6 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private JsonLogoutSuccessHandler jsonLogoutSuccessHandler;
 
-    @Bean
-    @Order(0)
-    @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
-    }
-
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
@@ -65,7 +56,7 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
                 .successHandler(authenticationSuccessHandler) // if login success
                 .failureHandler(loginfailHandler) // if login fail
                 .and()
-                .addFilter(new LoginFilter(authenticationManagerBean(),authenticationSuccessHandler))
+                .addFilter(new LoginFilter(authenticationManagerBean(), authenticationSuccessHandler))
                 .authorizeRequests()
                 .antMatchers("/user/**", "/", "/static/**", "/weevent-governance/user/**")
                 .permitAll()

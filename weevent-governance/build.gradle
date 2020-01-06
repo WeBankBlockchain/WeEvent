@@ -34,8 +34,10 @@ dependencies {
     //h2
     implementation("com.h2database:h2:${h2Version}")
 
-    //jwt
-    implementation("io.jsonwebtoken:jjwt:${JWTVersion}")
+    //JJWT
+    implementation("io.jsonwebtoken:jjwt:${JJWTVersion}")
+    //JWT
+    implementation("com.auth0:java-jwt:${JWTVersion}")
 
 
 }
