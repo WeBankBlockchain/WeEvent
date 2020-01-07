@@ -7,6 +7,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
+@WebFilter("/webase-node-mgr/*")
 public class ForwardWebaseFilter implements Filter {
 
     @Autowired
@@ -38,6 +40,10 @@ public class ForwardWebaseFilter implements Filter {
         HttpServletResponse res = (HttpServletResponse) response;
         String idStr = request.getParameter("brokerId");
         String originUrl = req.getRequestURI();
+        if (!originUrl.contains("/webase-node-mgr/")) {
+            chain.doFilter(request, response);
+            return;
+        }
         // get tail of webase url
         String subStrUrl = originUrl.substring(originUrl.indexOf("/webase-node-mgr/") + "/webase-node-mgr".length());
 

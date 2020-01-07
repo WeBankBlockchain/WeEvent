@@ -11,10 +11,10 @@ import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.service.BrokerService;
+import com.webank.weevent.governance.utils.JwtUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,7 +37,8 @@ public class BrokerController {
     @GetMapping("/list")
     public List<BrokerEntity> getAllBrokers(HttpServletRequest request) {
         log.info("get all brokers ");
-        return brokerService.getBrokers(request, "1");
+        String accountId = JwtUtils.getAccountId(request);
+        return brokerService.getBrokers(request, accountId);
     }
 
     // get broker service by id
@@ -49,7 +50,7 @@ public class BrokerController {
 
     // get brokerEntity service by id
     @PostMapping("/add")
-    public GovernanceResult addBroker(@Valid @RequestBody BrokerEntity brokerEntity,HttpServletRequest request,
+    public GovernanceResult addBroker(@Valid @RequestBody BrokerEntity brokerEntity, HttpServletRequest request,
                                       HttpServletResponse response) throws GovernanceException {
         log.info("add  brokerEntity service into db brokerEntity :{} ", brokerEntity);
         brokerEntity.setUserId(1);
@@ -57,10 +58,10 @@ public class BrokerController {
     }
 
     @PostMapping("/update")
-    public GovernanceResult updateBroker(@RequestBody BrokerEntity brokerEntity, @CookieValue("MGR_ACCOUNT_ID") Integer accountId, HttpServletRequest request,
+    public GovernanceResult updateBroker(@RequestBody BrokerEntity brokerEntity, HttpServletRequest request,
                                          HttpServletResponse response) throws GovernanceException {
         log.info("update  brokerEntity service ,brokerEntity:{} ", brokerEntity);
-        brokerEntity.setUserId(accountId);
+        brokerEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
         return brokerService.updateBroker(brokerEntity, request, response);
     }
 

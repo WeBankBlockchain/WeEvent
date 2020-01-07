@@ -7,6 +7,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
+@WebFilter("/processor/*")
 public class ForwardProcessorFilter implements Filter {
 
 
@@ -35,6 +37,10 @@ public class ForwardProcessorFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
         String originUrl = req.getRequestURI();
+        if (!originUrl.contains("/processor/")) {
+            chain.doFilter(request, response);
+            return;
+        }
         // get tail of processor url
         String subStrUrl = originUrl.substring(originUrl.indexOf("/processor/") + "/processor".length());
         // get complete forward processor url

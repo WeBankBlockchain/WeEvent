@@ -4,13 +4,11 @@ package com.webank.weevent.governance.junit;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.http.Cookie;
-
 import com.webank.weevent.governance.JUnitTestBase;
-import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.RuleEngineEntity;
 import com.webank.weevent.governance.utils.JsonUtil;
+import com.webank.weevent.governance.utils.JwtUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
@@ -35,7 +33,8 @@ public class RuleEngineControllerTest extends JUnitTestBase {
     private WebApplicationContext wac;
 
     private MockMvc mockMvc;
-    private Cookie cookie;
+
+    private String token;
 
     @Value("${weevent.url:http://127.0.0.1:7000/weevent}")
     private String brokerUrl;
@@ -46,7 +45,6 @@ public class RuleEngineControllerTest extends JUnitTestBase {
     @Before
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-        this.cookie = new Cookie(ConstantProperties.COOKIE_MGR_ACCOUNT_ID, "1");
     }
 
     @Before
@@ -54,6 +52,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
         log.info("=============================={}.{}==============================",
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
+        token = createToken();
         addBroker();
         testAddRuleEngine();
     }
@@ -61,7 +60,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
     //add broker
     public void addBroker() throws Exception {
         String content = "{\"name\":\"broker2\",\"brokerUrl\":\"" + this.brokerUrl + "\",\"userId\":\"1\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
@@ -71,7 +70,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
     public void testAddRuleEngine() throws Exception {
         String content = "{\"ruleName\":\"tempera_ture-alaa23\",\"payloadType\":\"1\",\"payloadMap\":{\"temperate\":30,\"humidity\":0.5}," +
                 "\"userId\":\"1\",\"brokerId\":\"" + this.ruleMap.get("brokerId") + "\",\"groupId\":\"1\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/add").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
@@ -85,7 +84,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
     public void testAddRuleEngineException() throws Exception {
         String content = "{\"ruleName\":\"tempera_ture-alaa23\",\"payloadType\":\"1\",\"payloadMap\":{\"temperate\":30,\"humidity\":0.5}," +
                 "\"userId\":\"1\",\"brokerId\":\"" + this.ruleMap.get("brokerId") + "\",\"groupId\":\"1\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/add").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         Map jsonObject = JsonUtil.parseObject(response.getContentAsString(), Map.class);
@@ -95,7 +94,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
     @Test
     public void testGetRuleEngines() throws Exception {
         String content = "{\"userId\":\"1\",\"brokerId\":\"" + this.ruleMap.get("brokerId") + "\",\"pageNumber\":\"1\",\"pageSize\":\"10\"}";
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/list").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/list").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token).content(content))
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
 
@@ -107,7 +106,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
     @Test
     public void testGetRuleEngineDetail() throws Exception {
         String content = "{\"id\":\"" + ruleMap.get("ruleId") + "\",\"userId\":\"1\",\"brokerId\":\"" + this.ruleMap.get("brokerId") + "\"}";
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/detail").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/detail").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token).content(content))
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
 
@@ -123,7 +122,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
                 "\"payloadMap\":{\"temperate\":30,\"humidity\":0.5},\"brokerId\":\"" + this.ruleMap.get("brokerId") + "\"," +
                 "\"fromDestination\":\"com.weevent.stomp\",\"toDestination\":\"com.weevent.test\",\"com.weevent.mqtt\":\"test\"," +
                 "\"selectField\":\"temperate\",\"conditionField\":\"temperate>38\",\"conditionType\":\"1\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/update").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn().getResponse();
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/update").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
@@ -136,7 +135,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
                 "\"payloadMap\":{\"temperate\":30,\"humidity\":0.5},\"brokerId\":\"" + this.ruleMap.get("brokerId") + "\"," +
                 "\"fromDestination\":\"com.weevent.stomp\",\"toDestination\":\"com.weevent.test\",\"com.weevent.mqtt\":\"test\"," +
                 "\"selectField\":\"temperate\",\"conditionField\":\"temperate>38\",\"conditionType\":\"1\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/update").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn().getResponse();
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/update").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         Map jsonObject = JsonUtil.parseObject(response.getContentAsString(), Map.class);
@@ -150,7 +149,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
                 "\"brokerId\":\"" + this.ruleMap.get("brokerId") + "\"," +
                 "\"fromDestination\":\"com.weevent.stomp\",\"toDestination\":\"com.weevent.test\",\"com.weevent.mqtt\":\"test\"," +
                 "\"selectField\":\"temperate\",\"conditionField\":\"temperate>38\",\"conditionType\":\"1\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/update").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn().getResponse();
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/update").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         Map jsonObject = JsonUtil.parseObject(response.getContentAsString(), Map.class);
@@ -162,7 +161,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
     public void testStartEngine() throws Exception {
         testUpdateRuleEngine();
         String content = "{\"id\":\"" + ruleMap.get("ruleId") + "\",\"userId\":\"1\",\"brokerId\":\"" + this.ruleMap.get("brokerId") + "\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/start").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content))
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/start").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
@@ -171,7 +170,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
 
     public void testDeleteRuleEngine() throws Exception {
         String content = "{\"id\":\"" + ruleMap.get("ruleId") + "\",\"userId\":\"1\",\"brokerId\":\"" + this.ruleMap.get("brokerId") + "\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/delete").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content))
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/delete").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
@@ -182,7 +181,7 @@ public class RuleEngineControllerTest extends JUnitTestBase {
     //delete broker by id
     public void deleteBroker() throws Exception {
         String content = "{\"id\":" + this.ruleMap.get("brokerId") + ",\"userId\":\"1\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/delete").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/delete").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         Map jsonObject = JsonUtil.parseObject(response.getContentAsString(), Map.class);

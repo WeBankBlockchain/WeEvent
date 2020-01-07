@@ -1,18 +1,24 @@
 package com.webank.weevent.governance.filter;
 
+import java.io.IOException;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.service.BrokerService;
 import com.webank.weevent.governance.service.CommonService;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.jsoup.helper.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 @Component
 @Slf4j
@@ -24,13 +30,20 @@ public class ForwardBrokerFilter implements Filter {
     @Autowired
     private CommonService commonService;
 
+
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
-        String idStr = request.getParameter("brokerId");
-        String brokerUrl = request.getParameter("brokerUrl");
+        String requestURI = req.getRequestURI();
+        if (!requestURI.contains("/weevent/")) {
+            chain.doFilter(request, response);
+            return;
+        }
+        String idStr = req.getParameter("brokerId");
+        String brokerUrl = req.getParameter("brokerUrl");
         String originUrl = req.getRequestURI();
         // get tail of brokerEntity url
         String subStrUrl = originUrl.substring(originUrl.indexOf("/weevent/") + "/weevent".length());

@@ -1,5 +1,6 @@
 package com.webank.weevent.governance.junit;
 
+import java.security.Security;
 import java.util.Map;
 
 import javax.servlet.http.Cookie;
@@ -7,7 +8,9 @@ import javax.servlet.http.Cookie;
 import com.webank.weevent.governance.JUnitTestBase;
 import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.GovernanceResult;
+import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.utils.JsonUtil;
+import com.webank.weevent.governance.utils.JwtUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
@@ -18,6 +21,8 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -49,7 +54,6 @@ public class AccountControllerTest extends JUnitTestBase {
         testRegister();
     }
 
-
     public void testRegister() throws Exception {
         String content = "{\"username\":\"zjy05\",\"email\":\"admin@test.com\",\"password\":\"123456\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/user/register").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
@@ -61,7 +65,6 @@ public class AccountControllerTest extends JUnitTestBase {
 
     @Test
     public void testRegisterException001() throws Exception {
-
         String content = "{\"username\":\"zjy05\",\"email\":\"admin@test.com\",\"password\":\"123456\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/user/register").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
                 .andReturn().getResponse();
@@ -103,7 +106,9 @@ public class AccountControllerTest extends JUnitTestBase {
 
     @Test
     public void testAccountList() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/user/accountList").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie))
+        String token = JwtUtils.encodeToken("admin", JwtUtils.PRIVATE_SECRET, 60 * 60 * 1000);
+        Security.setProperty(token, "1");
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/user/accountList").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token))
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);

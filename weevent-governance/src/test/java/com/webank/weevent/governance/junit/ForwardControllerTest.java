@@ -8,6 +8,7 @@ import javax.servlet.http.Cookie;
 import com.webank.weevent.governance.JUnitTestBase;
 import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.utils.JsonUtil;
+import com.webank.weevent.governance.utils.JwtUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
@@ -28,13 +29,13 @@ public class ForwardControllerTest extends JUnitTestBase {
     private WebApplicationContext wac;
 
     private MockMvc mockMvc;
+    
+    private String token;
 
-    private Cookie cookie;
 
     @Before
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-        this.cookie = new Cookie(ConstantProperties.COOKIE_MGR_ACCOUNT_ID, "1");
 
     }
 
@@ -43,12 +44,14 @@ public class ForwardControllerTest extends JUnitTestBase {
         log.info("=============================={}.{}==============================",
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
+        token = createToken();
+
     }
 
 
     @Test
     public void testGroupList() throws Exception {
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.get("/weevent/" + "admin" + "/" + "listGroup").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie))
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.get("/weevent/" + "admin" + "/" + "listGroup").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token))
                 .andReturn().getResponse();
         String contentAsString = response.getContentAsString();
         Assert.assertEquals(response.getStatus(), 200);

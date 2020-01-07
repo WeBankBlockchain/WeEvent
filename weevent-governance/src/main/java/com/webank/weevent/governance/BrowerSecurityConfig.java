@@ -1,7 +1,7 @@
 package com.webank.weevent.governance;
 
-import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.filter.LoginFilter;
+import com.webank.weevent.governance.filter.UserFilter;
 import com.webank.weevent.governance.handler.JsonAccessDeniedHandler;
 import com.webank.weevent.governance.handler.JsonAuthenticationEntryPoint;
 import com.webank.weevent.governance.handler.JsonLogoutSuccessHandler;
@@ -16,6 +16,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @Configuration
@@ -56,22 +57,15 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
                 .successHandler(authenticationSuccessHandler) // if login success
                 .failureHandler(loginfailHandler) // if login fail
                 .and()
+                .addFilterBefore(new UserFilter(), LoginFilter.class)
                 .addFilter(new LoginFilter(authenticationManagerBean(), authenticationSuccessHandler))
                 .authorizeRequests()
-                .antMatchers("/user/**", "/", "/static/**", "/weevent-governance/user/**")
-                .permitAll()
-                .anyRequest()
-                .authenticated()
-                .and()
-                .csrf()
-                .disable()
-                .httpBasic()
-                .authenticationEntryPoint(jsonAuthenticationEntryPoint)
-                .and()
-                .logout()
-                .logoutUrl("/user/logout")
-                //删除cookie，就是要删除token
-                .deleteCookies(ConstantProperties.COOKIE_JSESSIONID, ConstantProperties.COOKIE_MGR_ACCOUNT)
+                .antMatchers("/user/**", "/", "/static/**", "/weevent-governance/user/**").permitAll()
+                .anyRequest().authenticated()
+                .and().csrf()
+                .disable().httpBasic().authenticationEntryPoint(jsonAuthenticationEntryPoint)
+                .disable().cors().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and().logout().logoutUrl("/user/logout")
                 .logoutSuccessHandler(jsonLogoutSuccessHandler)
                 .permitAll();
     }

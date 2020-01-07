@@ -16,6 +16,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -48,7 +49,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
-        String token = JwtUtils.createToken(authResult);
+        String username = ((User) authResult.getPrincipal()).getUsername();
+        String token = JwtUtils.encodeToken(username, JwtUtils.PRIVATE_SECRET, 60 * 60 * 24 * 100);
         response.addHeader(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token);
         loginSuccessHandler.onAuthenticationSuccess(request, response, authResult);
     }

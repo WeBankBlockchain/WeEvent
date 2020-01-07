@@ -5,12 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -19,20 +21,21 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * xss filter
- * 
- * @author v_wbjnzhang
  *
+ * @author v_wbjnzhang
  */
+@WebFilter(urlPatterns = {"/topic/*"})
+//@Component
 public class XssFilter implements Filter {
 
     private static boolean IS_INCLUDE_RICH_TEXT = false;
 
     public List<String> excludes = new ArrayList<>();
 
+
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
             throws IOException, ServletException {
-
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse resp = (HttpServletResponse) response;
         if (handleExcludeURL(req, resp)) {
