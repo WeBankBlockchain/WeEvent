@@ -2,26 +2,49 @@ package com.webank.weevent.processor.model;
 
 import java.util.Date;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "timer_scheduler_job")
 public class TimerScheduler {
 
-    private String id;
+    /**
+     * primary key
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Integer id;
 
+    @Column(name = "scheduler_name")
     private String schedulerName;
 
+    @Column(name = "jdbc_url")
     private String jdbcUrl;
 
+    @Column(name = "time_period")
     private String timePeriod;
 
+    @Column(name = "parsing_sql")
+    private String parsingSql;
+
+    @Column(name = "created_time")
     private Date createdTime;
 
 
+    @Column(name = "updated_time")
     private Date updatedTime;
 
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -63,5 +86,13 @@ public class TimerScheduler {
 
     public void setUpdatedTime(Date updatedTime) {
         this.updatedTime = updatedTime;
+    }
+
+    public String getParsingSql() {
+        return parsingSql;
+    }
+
+    public void setParsingSql(String parsingSql) {
+        this.parsingSql = parsingSql;
     }
 }
