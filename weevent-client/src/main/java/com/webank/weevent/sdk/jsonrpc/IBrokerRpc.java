@@ -9,7 +9,7 @@ import com.webank.weevent.sdk.TopicPage;
 import com.webank.weevent.sdk.WeEvent;
 
 /**
- * Interface for rpc, inlcude RESTFul and JsonRPC.
+ * Interface for rpc, include RESTFul and JsonRPC.
  *
  * @author matthewliu
  * @since 2018/11/21
