@@ -39,7 +39,7 @@ public class JUnitTestBase {
 
 
     public String createToken() {
-        String token = JwtUtils.encodeToken("admin", JwtUtils.PRIVATE_SECRET, 60 * 60 * 1000);
+        String token = JwtUtils.encodeToken("admin", JwtUtils.PRIVATE_SECRET, JwtUtils.EXPIRE_TIME);
         Security.setProperty(token, "1");
         return token;
     }

@@ -45,12 +45,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         }
     }
 
-    // 用户成功登录后，这个方法会被调用，我们在这个方法里生成token
+    // after the user successfully logs in, this method will be called, and we generate a token in this method
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
         String username = ((User) authResult.getPrincipal()).getUsername();
-        String token = JwtUtils.encodeToken(username, JwtUtils.PRIVATE_SECRET, 60 * 60 * 24 * 100);
+        String token = JwtUtils.encodeToken(username, JwtUtils.PRIVATE_SECRET, JwtUtils.EXPIRE_TIME);
         response.addHeader(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token);
         loginSuccessHandler.onAuthenticationSuccess(request, response, authResult);
     }
