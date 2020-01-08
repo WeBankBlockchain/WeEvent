@@ -302,7 +302,7 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
     }
 
     @Override
-    public List<WeEvent> loop(Long blockNum, String channelName) throws BrokerException {
+    public List<WeEvent> loop(Long blockNum, String channelName) {
         return fabricDelegate.loop(blockNum, channelName);
     }
 }

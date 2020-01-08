@@ -35,6 +35,16 @@
               <i class='el-icon-delete table_icon' @click='deleteItem(scope.row)' :title="$t('common.delete')"></i>
             </template>
           </el-table-column>
+          <el-table-column
+            width='130'
+            :label="$t('ruleStatic.readInsideRule')"
+           >
+            <template slot-scope='scope'>
+              <span @click='readRule(scope.row)' class='table_icon'>
+                {{$t('ruleStatic.readRule')}}
+              </span>
+            </template>
+          </el-table-column>
         </el-table>
       </div>
     </div>
@@ -339,6 +349,10 @@ export default {
           }
         })
       })
+    },
+    readRule (e) {
+      let list = e.ruleIdList.join(',')
+      this.$router.push({ path: './ruleStatic', query: { 'list': list } })
     },
     back () {
       this.$router.go(-1)

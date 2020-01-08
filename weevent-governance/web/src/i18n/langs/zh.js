@@ -247,5 +247,29 @@ module.exports = {
     'guideAddress': '数据流转地址必须填写',
     'abnormalAddress': '异常流转地址必须填写',
     'cannotSame': '[数据目的]不能和[数据来源]相同'
+  },
+  ruleStatic: {
+    'readRule': '查看规则',
+    'readInsideRule': '查看系统规则',
+    'systemRules': '系统规则',
+    'ruleName': '规则名称',
+    'hitTimes': '命中次数',
+    'notHitTimes': '未命中次数',
+    'successTimes': '发布成功次数',
+    'failTimes': '发布失败次数',
+    'startTime': '启动时间',
+    'readFailRecord': '最后错误详情',
+    'lastRecord': '最后一次失败记录',
+    'runningStatus': '运行状态',
+    'destinationType': '流转目标类型'
+  },
+  ruleCheck: {
+    'inputRule': '请填写完整的条件语句',
+    'notNumber': '填写的数据不是数字类型',
+    'inputInteger': '方法异常，请填写整数类型',
+    'bigger': '输入值请大于0',
+    'inputString': '填写的数据类型错误-字符串类型请用双引号包裹',
+    'errorParameter': '该函数的参数错误',
+    'errorIndex': '该函数的下标不是整数类型'
   }
 }
