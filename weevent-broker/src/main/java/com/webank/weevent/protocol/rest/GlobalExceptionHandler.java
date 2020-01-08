@@ -6,24 +6,10 @@ import javax.servlet.http.HttpServletRequest;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
-
-@Data
-class SimpleException {
-    /**
-     * Error code.
-     */
-    private int code;
-
-    /**
-     * Error message.
-     */
-    private String message;
-}
 
 /**
  * Global exception handler for restful.
@@ -37,25 +23,15 @@ class SimpleException {
 public class GlobalExceptionHandler {
     @ExceptionHandler(value = BrokerException.class)
     public Object baseErrorHandler(HttpServletRequest req, BrokerException e) {
-        log.error("detect BrokerException", e);
-
-        SimpleException simpleException = new SimpleException();
-        simpleException.setCode(e.getCode());
-        simpleException.setMessage(e.getMessage());
-
         log.error("rest api BrokerException, remote: {} uri: {}", req.getRemoteHost(), req.getRequestURL());
-        return simpleException;
+        log.error("detect BrokerException", e);
+        return e;
     }
 
     @ExceptionHandler(value = Exception.class)
     public Object baseErrorHandler(HttpServletRequest req, Exception e) {
-        log.error("detect Exception", e);
-
-        SimpleException simpleException = new SimpleException();
-        simpleException.setCode(ErrorCode.UNKNOWN_ERROR.getCode());
-        simpleException.setMessage(e.getMessage());
-
         log.error("rest api Exception, remote: {} uri: {}", req.getRemoteHost(), req.getRequestURL());
-        return simpleException;
+        log.error("detect Exception", e);
+        return new BrokerException(ErrorCode.UNKNOWN_ERROR.getCode(), e.getMessage());
     }
 }
