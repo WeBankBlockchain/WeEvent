@@ -54,7 +54,7 @@ public class TopicHistoricalService {
     @Autowired
     private RuleDatabaseRepository ruleDatabaseRepository;
 
-    private final static String simpleDateFormat = "YYYY-MM-dd";
+    private final static String simpleDateFormat = "yyyy-MM-dd";
 
     private final static String TOPIC_HISTORICAL = "t_topic_historical";
 

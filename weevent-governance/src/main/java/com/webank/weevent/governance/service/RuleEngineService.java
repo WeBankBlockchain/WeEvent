@@ -73,7 +73,7 @@ public class RuleEngineService {
     @Autowired
     private RuleDatabaseRepository ruleDatabaseRepository;
 
-    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd hh:mm:ss");
+    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
     private static final int PROCESSOR_SUCCESS_CODE = 0;
 

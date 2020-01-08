@@ -117,8 +117,7 @@ public class AccountService {
             return GovernanceResult.build(400, "old password is incorrect");
         }
 
-        //  String password = passwordEncoder.encode(user.getPassword());
-        // storeUser.setPassword(password);
+        storeUser.setPassword(user.getPassword());
         accountRepository.save(storeUser);
         return GovernanceResult.ok();
     }
