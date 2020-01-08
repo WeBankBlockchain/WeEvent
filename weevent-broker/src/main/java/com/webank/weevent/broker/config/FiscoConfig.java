@@ -4,10 +4,10 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Component;
 
 /**
- * FISCO-BCOS Config that loaded by java, not spring.
- * Because Web3sdkUtils.main is a pure java process, no spring ApplicationContext.
+ * FISCO-BCOS Config that support loaded by spring context and pure java
  *
  * @author matthewliu
  * @version 1.0
@@ -15,6 +15,7 @@ import org.springframework.context.annotation.PropertySource;
  */
 @Slf4j
 @Data
+@Component
 @PropertySource(value = "classpath:fisco.properties", encoding = "UTF-8")
 public class FiscoConfig {
     public final static String propertiesFileKey = "block-chain-properties";
