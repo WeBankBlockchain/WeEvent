@@ -39,10 +39,6 @@ import org.fisco.bcos.channel.handler.ChannelConnections;
 import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.gm.GenCredential;
-import org.fisco.bcos.web3j.precompile.crud.CRUDService;
-import org.fisco.bcos.web3j.precompile.crud.Condition;
-import org.fisco.bcos.web3j.precompile.crud.Table;
-import org.fisco.bcos.web3j.precompile.exception.PrecompileMessageException;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.Web3jService;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
@@ -71,12 +67,6 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
  */
 @Slf4j
 public class Web3SDK2Wrapper {
-    // topic control address in CRUD
-    public final static String WeEventTable = "WeEvent";
-    public final static String WeEventTableKey = "key";
-    public final static String WeEventTableValue = "value";
-    public final static String WeEventTableVersion = "version";
-    public final static String WeEventTopicControlAddress = "topic_control_address";
     // partial key of FISCO block info
     public final static String BLOCK_NUMBER = "blockNumber";
     public final static String NODE_ID = "nodeId";
@@ -182,120 +172,6 @@ public class Web3SDK2Wrapper {
         } catch (ExecutionException | TimeoutException | InterruptedException e) {
             log.error("web3sdk execute failed", e);
             throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        }
-    }
-
-    /**
-     * Table in CRUD, it's a key-value store.
-     * WeEvent -> key, value
-     * https://fisco-bcos-documentation.readthedocs.io/zh_CN/release-2.0/docs/manual/console.html#desc
-     *
-     * @param crud table service
-     * @return opened or exist table
-     */
-    private static Table ensureTable(CRUDService crud) throws BrokerException {
-        try {
-            Table table = crud.desc(WeEventTable);
-            if (WeEventTableKey.equals(table.getKey())) {
-                List<String> fields = Arrays.asList(table.getValueFields().split(","));
-                if (fields.size() == 2 && fields.contains(WeEventTableValue) && fields.contains(WeEventTableVersion)) {
-                    return table;
-                }
-            }
-
-            log.error("miss fields in CRUD table, {}/{}/{}", WeEventTableKey, WeEventTableValue, WeEventTableVersion);
-            throw new BrokerException(ErrorCode.UNKNOWN_SOLIDITY_VERSION);
-        } catch (PrecompileMessageException e) {
-            log.info("not exist table in CRUD, create it: {}", WeEventTable);
-
-            return createTable(crud);
-        } catch (BrokerException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("ensure table in CRUD failed, " + WeEventTable, e);
-            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        }
-    }
-
-    private static Table createTable(CRUDService crud) throws BrokerException {
-        Table table = new Table(WeEventTable, WeEventTableKey, WeEventTableValue + "," + WeEventTableVersion);
-        try {
-            int result = crud.createTable(table);
-            if (result == 0) {
-                log.info("create table in CRUD success, {}", WeEventTable);
-                return table;
-            }
-
-            log.error("create table in CRUD failed, " + WeEventTable);
-            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        } catch (Exception e) {
-            log.error("create table in CRUD failed, " + WeEventTable, e);
-            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        }
-    }
-
-    /**
-     * list all address from CRUD table
-     * https://fisco-bcos-documentation.readthedocs.io/zh_CN/release-2.0/en/docs/sdk/sdk.html?highlight=CRUDService#web3sdk-api
-     *
-     * @param web3j web3j
-     * @param credentials credentials
-     * @return address list
-     */
-    public static Map<Long, String> listAddress(Web3j web3j, Credentials credentials) throws BrokerException {
-        String groupId = String.valueOf(((JsonRpc2_0Web3j) web3j).getGroupId());
-        log.info("get topic control address from CRUD, groupId: {}", groupId);
-
-        CRUDService crud = new CRUDService(web3j, credentials);
-        Table table = ensureTable(crud);
-        List<Map<String, String>> records;
-        try {
-            table.setKey(WeEventTopicControlAddress);
-            Condition condition = table.getCondition();
-            records = crud.select(table, condition);
-            log.info("records in CRUD, groupId: {}, {}", groupId, records);
-        } catch (Exception e) {
-            log.error("select from CRUD table failed", e);
-            throw new BrokerException(ErrorCode.UNKNOWN_SOLIDITY_VERSION);
-        }
-
-        Map<Long, String> addresses = new HashMap<>();
-        for (Map<String, String> record : records) {
-            addresses.put(Long.valueOf(record.get(WeEventTableVersion)), record.get(WeEventTableValue));
-        }
-        return addresses;
-    }
-
-    public static boolean addAddress(Web3j web3j, Credentials credentials, Long version, String address) throws BrokerException {
-        String groupId = String.valueOf(((JsonRpc2_0Web3j) web3j).getGroupId());
-        log.info("add topic control address into CRUD, groupId: {}", groupId);
-
-        // check exist manually to avoid duplicate record
-        Map<Long, String> topicControlAddresses = listAddress(web3j, credentials);
-        if (topicControlAddresses.containsKey(version)) {
-            log.info("already exist in CRUD, {} {}", version, address);
-            return false;
-        }
-
-        CRUDService crud = new CRUDService(web3j, credentials);
-        Table table = ensureTable(crud);
-        try {
-            table.setKey(WeEventTopicControlAddress);
-            org.fisco.bcos.web3j.precompile.crud.Entry record = table.getEntry();
-            record.put(WeEventTableValue, address);
-            record.put(WeEventTableVersion, String.valueOf(version));
-            // notice: record's key can be duplicate in CRUD
-            int result = crud.insert(table, record);
-            if (result == 1) {
-                log.info("add topic control address into CRUD success");
-                return true;
-            }
-
-            log.error("add topic control address into CRUD failed, {}", result);
-            return false;
-        } catch (Exception e) {
-            log.error("add topic control address into CRUD failed", e);
-            return false;
         }
     }
 
@@ -472,7 +348,7 @@ public class Web3SDK2Wrapper {
             }
 
             return events;
-        } catch (ExecutionException | NullPointerException | InterruptedException |TimeoutException e) { // Web3sdk's rpc return null
+        } catch (ExecutionException | NullPointerException | InterruptedException | TimeoutException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
             log.error("loop block failed due to web3sdk rpc error", e);
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
@@ -682,7 +558,7 @@ public class Web3SDK2Wrapper {
         JsonNode jsonNode = OBJECT_MAPPER.readTree(web3j.getConsensusStatus().sendForReturnString());
         Map<String, Map<String, String>> nodeViews = new HashMap<>();
         for (JsonNode node : jsonNode) {
-            if(node.isArray()) {
+            if (node.isArray()) {
                 convertJsonArrayToList(nodeViews, node);
             }
         }

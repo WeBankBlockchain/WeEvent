@@ -106,15 +106,12 @@ class HttpInterceptor implements HandlerInterceptor {
  */
 @Slf4j
 class HttpInterceptorConfig implements WebMvcConfigurer {
-    @Bean
-    public HttpInterceptor interceptor() {
-        log.info("client ip white table: {}", BrokerApplication.weEventConfig.getIpWhiteTable());
-        return new HttpInterceptor(BrokerApplication.weEventConfig.getIpWhiteTable());
-    }
-
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(interceptor()).addPathPatterns("/**");
+        log.info("client ip white table: {}", BrokerApplication.weEventConfig.getIpWhiteTable());
+		
+        HttpInterceptor httpInterceptor = new HttpInterceptor(BrokerApplication.weEventConfig.getIpWhiteTable());
+        registry.addInterceptor(httpInterceptor).addPathPatterns("/**");
     }
 }
 
@@ -226,11 +223,7 @@ public class BrokerApplication {
     // FiscoBcosDelegate
     @Bean
     @ConditionalOnProperty(prefix = "broker.blockchain", name = "type", havingValue = "fisco")
-    public static FiscoBcosDelegate fiscoBcosDelegate() throws BrokerException {
-        FiscoConfig fiscoConfig = new FiscoConfig();
-        if (!fiscoConfig.load()) {
-            throw new BrokerException("load FISCO-BCOS configuration failed");
-        }
+    public static FiscoBcosDelegate fiscoBcosDelegate(FiscoConfig fiscoConfig) throws BrokerException {
         FiscoBcosDelegate fiscoBcosDelegate = new FiscoBcosDelegate();
         fiscoBcosDelegate.initProxy(fiscoConfig);
 
@@ -240,11 +233,7 @@ public class BrokerApplication {
     // FabricDelegate
     @Bean
     @ConditionalOnProperty(prefix = "broker.blockchain", name = "type", havingValue = "fabric")
-    public static FabricDelegate fabricDelegate() throws BrokerException {
-        FabricConfig fabricConfig = new FabricConfig();
-        if (!fabricConfig.load()) {
-            throw new BrokerException("load Fabric configuration failed");
-        }
+    public static FabricDelegate fabricDelegate(FabricConfig fabricConfig) throws BrokerException {
         FabricDelegate fabricDelegate = new FabricDelegate();
         fabricDelegate.initProxy(fabricConfig);
 

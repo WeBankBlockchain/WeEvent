@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Component;
 
 /**
  * @author websterchen
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.PropertySource;
  */
 @Slf4j
 @Data
+@Component
 @PropertySource(value = "classpath:fabric/fabric.properties", encoding = "UTF-8")
 public class FabricConfig {
     @Value("${chain.channel.name:mychannel}")
@@ -87,7 +89,7 @@ public class FabricConfig {
      * @return true if success, else false
      */
     public boolean load() {
-        boolean loadResult =  new SmartLoadConfig().load(this, "");
+        boolean loadResult = new SmartLoadConfig().load(this, "");
         this.setOrgUserKeyFile(WeEventUtils.getClassPath() + this.getOrgUserKeyFile());
         this.setOrgUserCertFile(WeEventUtils.getClassPath() + this.getOrgUserCertFile());
         this.setOrdererTlsCaFile(WeEventUtils.getClassPath() + this.getOrdererTlsCaFile());
@@ -98,9 +100,6 @@ public class FabricConfig {
 
         return loadResult;
     }
-
-
-
 
 
 }

@@ -11,6 +11,7 @@ import java.util.Map;
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.web3sdk.v1.Web3SDKWrapper;
+import com.webank.weevent.broker.fisco.web3sdk.v2.CRUDAddress;
 import com.webank.weevent.broker.fisco.web3sdk.v2.SupportedVersion;
 import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDK2Wrapper;
 import com.webank.weevent.sdk.BrokerException;
@@ -128,7 +129,8 @@ public class Web3sdkUtils {
                                         org.fisco.bcos.web3j.protocol.Web3j web3j,
                                         org.fisco.bcos.web3j.crypto.Credentials credentials,
                                         List<EchoAddress> groupAddress) throws BrokerException {
-        Map<Long, String> original = Web3SDK2Wrapper.listAddress(web3j, credentials);
+        CRUDAddress crudAddress = new CRUDAddress(web3j, credentials);
+        Map<Long, String> original = crudAddress.listAddress();
         log.info("address list in CRUD groupId: {}, {}", groupId, original);
 
         // if nowVersion exist
@@ -172,7 +174,7 @@ public class Web3sdkUtils {
         }
 
         // save topic control address into CRUD
-        boolean result = Web3SDK2Wrapper.addAddress(web3j, credentials, SupportedVersion.nowVersion, topicControlAddress);
+        boolean result = crudAddress.addAddress(SupportedVersion.nowVersion, topicControlAddress);
         log.info("save topic control address into CRUD, group: {} result: {}", groupId, result);
         if (result) {
             groupAddress.add(new EchoAddress(SupportedVersion.nowVersion, topicControlAddress, true));
