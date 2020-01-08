@@ -14,6 +14,7 @@ import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
+import com.webank.weevent.broker.fisco.web3sdk.v2.CRUDAddress;
 import com.webank.weevent.broker.fisco.web3sdk.v2.SupportedVersion;
 import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDK2Wrapper;
 import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic;
@@ -83,7 +84,8 @@ public class FiscoBcos2 {
             this.credentials = Web3SDK2Wrapper.getCredentials(this.fiscoConfig);
             this.web3j = Web3SDK2Wrapper.initWeb3j(groupId, this.fiscoConfig);
 
-            Map<Long, String> addresses = Web3SDK2Wrapper.listAddress(this.web3j, this.credentials);
+            CRUDAddress crudAddress = new CRUDAddress(this.web3j, this.credentials);
+            Map<Long, String> addresses = crudAddress.listAddress();
             log.info("address list in CRUD: {}", addresses);
 
             if (addresses.isEmpty() || !addresses.containsKey(SupportedVersion.nowVersion)) {
