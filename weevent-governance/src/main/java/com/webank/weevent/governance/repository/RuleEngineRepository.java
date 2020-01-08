@@ -17,6 +17,12 @@ public interface RuleEngineRepository extends JpaRepository<RuleEngineEntity, Lo
     RuleEngineEntity findById(Integer id);
 
 
+    List<RuleEngineEntity> findAllByBrokerIdAndSystemTagAndDeleteAt(Integer brokerId,Boolean flag, Long deleteAt);
+
+
+    List<RuleEngineEntity> findAllByBrokerIdAndDeleteAt(Integer brokerId, Long deleteAt);
+
+
     @Transactional
     @Modifying
     @Query(value = "update t_rule_engine  set status=2 , delete_at=:deleteAt where id =:id", nativeQuery = true)
