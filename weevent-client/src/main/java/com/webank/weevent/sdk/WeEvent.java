@@ -41,6 +41,7 @@ public class WeEvent implements Serializable {
     public static final String WeEvent_FORMAT = "weevent-format";
     public static final String WeEvent_SubscriptionId = "weevent-subscriptionId";
     public static final String WeEvent_TAG = "weevent-tag";
+    public static final String WeEvent_SIGN = "weevent-sign";
 
     /**
      * Binding topic, like "com.weevent.test".

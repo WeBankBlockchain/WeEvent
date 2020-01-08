@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.config.BuildInfo;
+import com.webank.weevent.broker.fisco.dto.ContractContext;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.util.SystemInfoUtils;
@@ -206,7 +207,7 @@ public class AdminRest extends RestHA {
     }
 
     /**
-     * qurey node info list.
+     * query node info list.
      */
     @RequestMapping(path = "/node/nodeList")
     public ResponseData<ListPage<TbNode>> queryNodeList(@RequestParam(value = "groupId", required = false) String groupId,
@@ -225,6 +226,21 @@ public class AdminRest extends RestHA {
         tbNodeListPage.setPageIndex(pageNumber);
         tbNodeListPage.setPageSize(pageSize);
         responseData.setData(tbNodeListPage);
+        return responseData;
+    }
+
+    /**
+     * query ContractContext.
+     */
+    @RequestMapping(path = "/contractContext")
+    public ResponseData<ContractContext> queryContractContext(@RequestParam(value = "groupId", required = false) String groupId)
+            throws BrokerException {
+        log.info("groupId:{} ", groupId);
+
+        ResponseData<ContractContext> responseData = new ResponseData<>();
+        responseData.setCode(ErrorCode.SUCCESS.getCode());
+        responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
+        responseData.setData(this.consumer.getContractContext(groupId));
         return responseData;
     }
 }

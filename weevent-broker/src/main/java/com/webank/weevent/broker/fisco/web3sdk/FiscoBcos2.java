@@ -1,9 +1,12 @@
 package com.webank.weevent.broker.fisco.web3sdk;
 
 
+import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -11,6 +14,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.webank.weevent.broker.config.FiscoConfig;
+import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.dto.ContractContext;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
@@ -32,14 +37,25 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.fisco.bcos.channel.client.TransactionSucCallback;
+import org.fisco.bcos.web3j.abi.FunctionReturnDecoder;
+import org.fisco.bcos.web3j.abi.TypeReference;
+import org.fisco.bcos.web3j.abi.Utils;
+import org.fisco.bcos.web3j.abi.datatypes.Type;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.StatusCode;
+import org.fisco.bcos.web3j.protocol.core.methods.response.BcosTransactionReceipt;
+import org.fisco.bcos.web3j.protocol.core.methods.response.BlockNumber;
+import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
+import org.fisco.bcos.web3j.protocol.core.methods.response.SendTransaction;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tuples.generated.Tuple1;
 import org.fisco.bcos.web3j.tuples.generated.Tuple3;
 import org.fisco.bcos.web3j.tuples.generated.Tuple8;
 import org.fisco.bcos.web3j.tx.Contract;
+
+import static com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDK2Wrapper.gasProvider;
 
 /**
  * Access to FISCO-BCOS 2.x.
@@ -311,6 +327,71 @@ public class FiscoBcos2 {
         return weEventTransactionCallback.future;
     }
 
+    public CompletableFuture<SendResult> sendRawTransaction(String topicName, String transactionHex) throws BrokerException {
+        try {
+            SendTransaction ethSendTransaction = web3j.sendRawTransaction(transactionHex).send();
+
+            return CompletableFuture.supplyAsync(() -> {
+                SendResult sendResult = new SendResult();
+                sendResult.setTopic(topicName);
+
+                Optional<TransactionReceipt> receiptOptional = Optional.empty();
+                try {
+                    receiptOptional = getTransactionReceiptRequest(ethSendTransaction.getTransactionHash());
+
+                    for (int i = 0; i < WeEventConstants.POLL_TRANSACTION_ATTEMPTS; i++) {
+                        if (!receiptOptional.isPresent()) {
+                            Thread.sleep(fiscoConfig.getConsumerIdleTime());
+                            receiptOptional = getTransactionReceiptRequest(ethSendTransaction.getTransactionHash());
+                        } else {
+                            break;
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("get transaction receipt error.", e);
+                    sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+                }
+
+                if (receiptOptional.isPresent()) {
+                    List<TypeReference<?>> referencesList = Arrays.asList(new TypeReference<Uint256>() {
+                    });
+                    List<Type> returnList = FunctionReturnDecoder.decode(
+                            String.valueOf(receiptOptional.get().getOutput()),
+                            Utils.convert(referencesList));
+
+                    sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+                    sendResult.setEventId(DataTypeUtils.encodeEventId(topicName,
+                            receiptOptional.get().getBlockNumber().intValue(),
+                            ((BigInteger) returnList.get(0).getValue()).intValue()));
+                } else {
+                    sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+                }
+
+                return sendResult;
+            });
+        } catch (IOException e) {
+            log.error("sendRawTransaction error ", e);
+            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
+    }
+
+    /**
+     * Get a TransactionReceipt request from a transaction Hash.
+     *
+     * @param transactionHash the transactionHash value
+     * @return the transactionReceipt wrapper
+     * @throws IOException the exception
+     */
+    private Optional<TransactionReceipt> getTransactionReceiptRequest(String transactionHash) throws IOException {
+        BcosTransactionReceipt transactionReceipt = web3j.getTransactionReceipt(transactionHash).send();
+        if (transactionReceipt.hasError()) {
+            log.error("Error processing transaction request: "
+                    + transactionReceipt.getError().getMessage());
+            return Optional.empty();
+        }
+        return transactionReceipt.getTransactionReceipt();
+    }
+
     /**
      * getBlockHeight
      *
@@ -344,5 +425,36 @@ public class FiscoBcos2 {
 
     public ListPage<TbNode> queryNodeList() throws BrokerException {
         return Web3SDK2Wrapper.queryNodeList(this.web3j);
+    }
+
+    public ContractContext getContractContext() throws BrokerException {
+        ContractContext contractContext = new ContractContext();
+        try {
+            String topicAddress = this.topicController.getTopicAddress().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+            BlockNumber blockNumber = this.web3j.getBlockNumber().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+            NodeVersion nodeVersion = this.web3j.getNodeVersion().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+
+            contractContext.setGasLimit(String.valueOf(gasProvider.getGasLimit("topic")));
+            contractContext.setGasPrice(String.valueOf(gasProvider.getGasPrice("topic")));
+            contractContext.setTopicAddress(topicAddress);
+            contractContext.setBlockNumber(blockNumber.getBlockNumber());
+            contractContext.setChainId(nodeVersion.getResult().getChainID());
+        } catch (InterruptedException | ExecutionException | NullPointerException e) {
+            log.error("getContractContext failed due to transaction execution error. ", e);
+            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (TimeoutException e) {
+            log.error("getContractContext failed due to transaction timeout. ", e);
+            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
+        return contractContext;
+    }
+
+    public NodeVersion.Version getVersion() throws BrokerException {
+        try {
+            return web3j.getNodeVersion().send().getNodeVersion();
+        } catch (IOException e) {
+            log.error("getNodeVersion error ", e);
+            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
     }
 }
