@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.entity.RuleDatabaseEntity;
 import com.webank.weevent.governance.repository.RuleDatabaseRepository;
-import com.webank.weevent.governance.utils.CookiesTools;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.helper.StringUtil;
@@ -24,9 +23,6 @@ public class RuleDatabaseService {
 
     @Autowired
     private CommonService commonService;
-
-    @Autowired
-    private CookiesTools cookiesTools;
 
     @Autowired
     private RuleDatabaseRepository ruleDatabaseRepository;

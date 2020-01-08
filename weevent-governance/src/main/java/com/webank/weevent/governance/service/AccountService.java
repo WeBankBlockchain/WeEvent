@@ -1,29 +1,27 @@
 package com.webank.weevent.governance.service;
 
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+
 import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.ErrorCode;
 import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.repository.AccountRepository;
-import com.webank.weevent.governance.utils.CookiesTools;
+import com.webank.weevent.governance.utils.JwtUtils;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.helper.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.Provider;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -33,11 +31,6 @@ public class AccountService {
     @Autowired
     private MailService mailService;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private CookiesTools cookiesTools;
 
     @Autowired
     private AccountRepository accountRepository;
@@ -50,7 +43,7 @@ public class AccountService {
             if (accountEntity == null) {
                 accountEntity = new AccountEntity();
                 accountEntity.setUsername("admin");
-                accountEntity.setPassword(passwordEncoder.encode("123456"));
+                accountEntity.setPassword(JwtUtils.encryptPassWord("admin123456"));
                 accountEntity.setEmail("admin@xxx.com");
                 accountRepository.save(accountEntity);
             }
@@ -97,8 +90,6 @@ public class AccountService {
         }
 
         // secret
-        // String storePassword = encryptPassWord(user.getPassword());
-        //user.setPassword(storePassword);
         // insert user into database
         accountRepository.save(user);
         // return true
@@ -126,8 +117,8 @@ public class AccountService {
             return GovernanceResult.build(400, "old password is incorrect");
         }
 
-      //  String password = passwordEncoder.encode(user.getPassword());
-       // storeUser.setPassword(password);
+        //  String password = passwordEncoder.encode(user.getPassword());
+        // storeUser.setPassword(password);
         accountRepository.save(storeUser);
         return GovernanceResult.ok();
     }
@@ -167,8 +158,8 @@ public class AccountService {
 
         AccountEntity storeUser = this.queryByUsername(user.getUsername());
 
-   //     String password = passwordEncoder.encode(user.getPassword());
-     //   storeUser.setPassword(password);
+        //     String password = passwordEncoder.encode(user.getPassword());
+        //   storeUser.setPassword(password);
         storeUser.setLastUpdate(new Date());
         accountRepository.save(storeUser);
         return GovernanceResult.ok(true);
@@ -204,20 +195,4 @@ public class AccountService {
         return accountRepository.findAllByUsernameAndDeleteAt(userName, ConstantProperties.NOT_DELETED);
     }
 
-    private String encryptPassWord(String password) throws GovernanceException {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(password.getBytes(StandardCharsets.UTF_8));
-            StringBuffer buffer = new StringBuffer();
-            final Provider provider = md.getProvider();
-            for (byte dg : md.digest()) {
-                buffer.append(String.format("%02X", dg));
-            }
-            return buffer.toString();
-        } catch (Exception e) {
-            log.error("encrypt passWord fail", e);
-            throw new GovernanceException("encrypt passWord fail", e);
-        }
-
-    }
 }

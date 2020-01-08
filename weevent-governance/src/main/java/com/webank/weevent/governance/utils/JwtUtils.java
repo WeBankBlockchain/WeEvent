@@ -1,6 +1,8 @@
 package com.webank.weevent.governance.utils;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.security.Security;
 import java.util.Calendar;
 
@@ -88,5 +90,22 @@ public class JwtUtils {
 
     public static String getAccountId(HttpServletRequest request) {
         return Security.getProperty(request.getHeader(AUTHORIZATION_HEADER_PREFIX));
+    }
+
+
+    public static String encryptPassWord(String password) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(password.getBytes(StandardCharsets.UTF_8));
+            StringBuffer buffer = new StringBuffer();
+            for (byte dg : md.digest()) {
+                buffer.append(String.format("%02X", dg));
+            }
+            return buffer.toString();
+        } catch (Exception e) {
+            log.error("encrypt passWord fail", e);
+            return null;
+        }
+
     }
 }

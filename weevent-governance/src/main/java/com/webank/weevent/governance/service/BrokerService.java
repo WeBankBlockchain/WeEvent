@@ -24,7 +24,6 @@ import com.webank.weevent.governance.repository.RuleDatabaseRepository;
 import com.webank.weevent.governance.repository.RuleEngineRepository;
 import com.webank.weevent.governance.repository.TopicHistoricalRepository;
 import com.webank.weevent.governance.repository.TopicRepository;
-import com.webank.weevent.governance.utils.CookiesTools;
 import com.webank.weevent.governance.utils.JsonUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -88,8 +87,6 @@ public class BrokerService {
 
     private final static String weEventVersion = "2";
 
-    @Autowired
-    private CookiesTools cookiesTools;
 
     public List<BrokerEntity> getBrokers(HttpServletRequest request, String accountId) {
         List<BrokerEntity> brokerEntityList = brokerMapper.getBrokers(Integer.parseInt(accountId));

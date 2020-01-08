@@ -1,5 +1,7 @@
 package com.webank.weevent.governance;
 
+import java.util.Objects;
+
 import com.webank.weevent.governance.filter.LoginFilter;
 import com.webank.weevent.governance.filter.UserFilter;
 import com.webank.weevent.governance.handler.JsonAccessDeniedHandler;
@@ -7,6 +9,7 @@ import com.webank.weevent.governance.handler.JsonAuthenticationEntryPoint;
 import com.webank.weevent.governance.handler.JsonLogoutSuccessHandler;
 import com.webank.weevent.governance.handler.LoginFailHandler;
 import com.webank.weevent.governance.service.AccountDetailsService;
+import com.webank.weevent.governance.utils.JwtUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,6 +20,7 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @Configuration
@@ -50,7 +54,7 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
 
         http.formLogin() // define user login page
                 .loginPage("/user/require")
-                .loginProcessingUrl("/login")
+                .loginProcessingUrl("/user/login")
                 .usernameParameter("username")
                 .passwordParameter("password")
                 .permitAll()
@@ -78,7 +82,17 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailService);
+        auth.userDetailsService(userDetailService).passwordEncoder(new PasswordEncoder() {
+            @Override
+            public String encode(CharSequence rawPassword) {
+                return JwtUtils.encryptPassWord(rawPassword.toString());
+            }
+
+            @Override
+            public boolean matches(CharSequence rawPassword, String encodedPassword) {
+                return Objects.equals(rawPassword.toString(), encodedPassword);
+            }
+        });
     }
 
 }

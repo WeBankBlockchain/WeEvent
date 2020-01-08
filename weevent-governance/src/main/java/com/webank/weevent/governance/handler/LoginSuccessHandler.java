@@ -9,7 +9,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.webank.weevent.governance.common.ConstantCode;
 import com.webank.weevent.governance.entity.AccountEntity;
+import com.webank.weevent.governance.entity.BaseResponse;
 import com.webank.weevent.governance.service.AccountService;
 import com.webank.weevent.governance.utils.JsonUtil;
 import com.webank.weevent.governance.utils.JwtUtils;
@@ -41,9 +43,13 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         //Set the global user Id variable
         Security.setProperty(authorization, accountEntity.getId().toString());
         rsp.put(JwtUtils.AUTHORIZATION_HEADER_PREFIX, authorization);
-        String backStr = JsonUtil.toJSONString(rsp);
-        log.debug("login backInfo:{}", backStr);
-        response.getWriter().write(backStr);
+        rsp.put("username", accountEntity.getUsername());
+        //return
+        BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
+        baseResponse.setData(JsonUtil.toJSONString(rsp));
+        baseResponse.setMessage("success");
+        log.debug("login backInfo:{}", JsonUtil.toJSONString(baseResponse));
+        response.getWriter().write(JsonUtil.toJSONString(baseResponse));
     }
 
 }

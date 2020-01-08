@@ -24,7 +24,6 @@ import com.webank.weevent.governance.entity.RuleEngineEntity;
 import com.webank.weevent.governance.mapper.RuleEngineMapper;
 import com.webank.weevent.governance.repository.RuleDatabaseRepository;
 import com.webank.weevent.governance.repository.RuleEngineRepository;
-import com.webank.weevent.governance.utils.CookiesTools;
 import com.webank.weevent.governance.utils.DAGDetectUtil;
 import com.webank.weevent.governance.utils.JsonUtil;
 
@@ -57,9 +56,6 @@ public class RuleEngineService {
 
     @Autowired
     private CommonService commonService;
-
-    @Autowired
-    private CookiesTools cookiesTools;
 
     @Autowired
     private PermissionService permissionService;

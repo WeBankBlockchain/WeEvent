@@ -8,12 +8,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.common.ConstantCode;
 import com.webank.weevent.governance.entity.BaseResponse;
-import com.webank.weevent.governance.utils.CookiesTools;
 import com.webank.weevent.governance.utils.JsonUtil;
+import com.webank.weevent.governance.utils.JwtUtils;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -21,18 +21,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class JsonLogoutSuccessHandler implements LogoutSuccessHandler {
 
-    @Autowired
-    private CookiesTools cookiesTools;
 
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
-          //这里是清除token，或者使token失效
-        // clear cookie
-        cookiesTools.clearAllCookie(request, response);
-        // session invaild
-        request.getSession().invalidate();
-
+        //clear token
+        request.setAttribute(JwtUtils.AUTHORIZATION_HEADER_PREFIX, null);
+        SecurityContextHolder.getContext().setAuthentication(null);
         log.debug("logout success");
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
 

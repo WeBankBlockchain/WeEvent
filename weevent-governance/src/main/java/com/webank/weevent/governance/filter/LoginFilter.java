@@ -8,10 +8,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.utils.JwtUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -30,17 +28,23 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     public LoginFilter(AuthenticationManager authenticationManager, AuthenticationSuccessHandler loginSuccessHandler) {
         this.authenticationManager = authenticationManager;
         this.loginSuccessHandler = loginSuccessHandler;
+        setFilterProcessesUrl("/user/login");
     }
 
+    @Override
+    public void setFilterProcessesUrl(String filterProcessesUrl) {
+        super.setFilterProcessesUrl(filterProcessesUrl);
+    }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
         try {
-            AccountEntity user = new ObjectMapper().readValue(request.getInputStream(), AccountEntity.class);
+            String username = request.getParameter("username");
+            String password = request.getParameter("password");
             return authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), new ArrayList<>()));
-        } catch (IOException e) {
+                    new UsernamePasswordAuthenticationToken(username, password, new ArrayList<>()));
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

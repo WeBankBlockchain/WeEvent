@@ -21,7 +21,6 @@ import com.webank.weevent.governance.entity.TopicHistoricalEntity;
 import com.webank.weevent.governance.mapper.TopicHistoricalMapper;
 import com.webank.weevent.governance.repository.RuleDatabaseRepository;
 import com.webank.weevent.governance.repository.RuleEngineRepository;
-import com.webank.weevent.governance.utils.CookiesTools;
 import com.webank.weevent.governance.utils.JsonUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -42,9 +41,6 @@ public class TopicHistoricalService {
 
     @Autowired
     private PermissionService permissionService;
-
-    @Autowired
-    private CookiesTools cookiesTools;
 
     @Autowired
     private CommonService commonService;

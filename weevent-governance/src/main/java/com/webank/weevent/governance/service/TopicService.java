@@ -21,7 +21,6 @@ import com.webank.weevent.governance.entity.TopicEntity;
 import com.webank.weevent.governance.entity.TopicPage;
 import com.webank.weevent.governance.entity.TopicPageEntity;
 import com.webank.weevent.governance.repository.TopicRepository;
-import com.webank.weevent.governance.utils.CookiesTools;
 import com.webank.weevent.governance.utils.JsonUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -51,8 +50,6 @@ public class TopicService {
     @Autowired
     private BrokerService brokerService;
 
-    @Autowired
-    private CookiesTools cookiesTools;
 
     @Autowired
     private CommonService commonService;
