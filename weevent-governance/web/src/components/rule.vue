@@ -224,7 +224,6 @@ export default {
     getRuleList () {
       let data = {
         'ruleName': this.ruleName,
-        'userId': localStorage.getItem('userId'),
         'brokerId': localStorage.getItem('brokerId'),
         'groupId': localStorage.getItem('groupId'),
         'pageNumber': this.pageNum,
@@ -233,6 +232,7 @@ export default {
       API.ruleList(data).then(res => {
         if (res.data.status === 200) {
           if (res.data.data) {
+            console.log(JSON.stringify(res.data.data))
             this.ruleList = [].concat(res.data.data)
             this.total = res.data.totalCount
           } else {
@@ -265,7 +265,6 @@ export default {
     ruleStart (e) {
       let data = {
         'id': e.id,
-        'userId': e.userId,
         'brokerId': e.brokerId
       }
       API.ruleStart(data).then(res => {
@@ -286,7 +285,6 @@ export default {
     ruleStop (e) {
       let data = {
         'id': e.id,
-        'userId': e.userId,
         'brokerId': e.brokerId,
         'status': 0
       }
@@ -314,7 +312,6 @@ export default {
       }).then(() => {
         let data = {
           'id': e.id,
-          'userId': e.userId,
           'brokerId': e.brokerId
         }
         API.ruleDelete(data).then(res => {
@@ -346,7 +343,6 @@ export default {
             'ruleName': vm.rule.ruleName,
             'payloadType': vm.rule.payloadType,
             'payloadMap': JSON.parse(this.rule.payloadMap),
-            'userId': localStorage.getItem('userId'),
             'brokerId': localStorage.getItem('brokerId'),
             'groupId': localStorage.getItem('groupId')
           }
