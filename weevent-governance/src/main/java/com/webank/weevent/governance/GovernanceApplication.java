@@ -11,9 +11,6 @@ import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import com.webank.weevent.governance.filter.ForwardBrokerFilter;
-import com.webank.weevent.governance.filter.ForwardProcessorFilter;
-import com.webank.weevent.governance.filter.ForwardWebaseFilter;
 import com.webank.weevent.governance.utils.H2ServerUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +29,6 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -55,7 +51,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 @Slf4j
 @SpringBootApplication
 @EnableTransactionManagement
-@ServletComponentScan("com.webank.weevent.governance")
+@ServletComponentScan(basePackages = "com.webank.weevent.governance.filter")
 public class GovernanceApplication {
 
     @Value("${https.read-timeout:3000}")
@@ -80,15 +76,6 @@ public class GovernanceApplication {
     @Value("${http.client.socket-timeout:5000}")
     private int socketTimeout;
 
-    @Autowired
-    private ForwardBrokerFilter forwardBrokerFilter;
-
-    @Autowired
-    private ForwardWebaseFilter forwardWebaseFilter;
-
-
-    @Autowired
-    private ForwardProcessorFilter forwardProcessorFilter;
 
     private PoolingHttpClientConnectionManager cm;
 

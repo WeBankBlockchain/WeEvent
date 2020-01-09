@@ -7,6 +7,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -18,10 +19,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.jsoup.helper.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 @Slf4j
+@WebFilter(urlPatterns = "/weevent/*")
 public class ForwardBrokerFilter implements Filter {
 
     @Autowired
@@ -38,10 +38,6 @@ public class ForwardBrokerFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
         String requestURI = req.getRequestURI();
-        if (!requestURI.contains("/weevent/")) {
-            chain.doFilter(request, response);
-            return;
-        }
         String idStr = req.getParameter("brokerId");
         String brokerUrl = req.getParameter("brokerUrl");
         String originUrl = req.getRequestURI();

@@ -17,11 +17,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
-@Component
 @Slf4j
-@WebFilter("/processor/*")
+@WebFilter(urlPatterns = "/processor/*")
 public class ForwardProcessorFilter implements Filter {
 
 
@@ -37,10 +35,6 @@ public class ForwardProcessorFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
         String originUrl = req.getRequestURI();
-        if (!originUrl.contains("/processor/")) {
-            chain.doFilter(request, response);
-            return;
-        }
         // get tail of processor url
         String subStrUrl = originUrl.substring(originUrl.indexOf("/processor/") + "/processor".length());
         // get complete forward processor url
