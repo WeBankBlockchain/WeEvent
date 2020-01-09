@@ -7,11 +7,11 @@
   },
   "getVersion": {
     "method": "get",
-    "url": "weevent/admin/getVersion"
+    "url": "weevent-governance/weevent/admin/getVersion"
   },
   "listGroup": {
     "method": "get",
-    "url": "weevent/admin/listGroup"
+    "url": "weevent-governance/weevent/admin/listGroup"
   },
   "loginOut": {
     "method": "get",

@@ -232,7 +232,6 @@ export default {
       API.ruleList(data).then(res => {
         if (res.data.status === 200) {
           if (res.data.data) {
-            console.log(JSON.stringify(res.data.data))
             this.ruleList = [].concat(res.data.data)
             this.total = res.data.totalCount
           } else {
