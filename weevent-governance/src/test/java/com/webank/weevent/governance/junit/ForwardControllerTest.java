@@ -3,10 +3,7 @@ package com.webank.weevent.governance.junit;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.Cookie;
-
 import com.webank.weevent.governance.JUnitTestBase;
-import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.utils.JsonUtil;
 import com.webank.weevent.governance.utils.JwtUtils;
 
@@ -29,7 +26,7 @@ public class ForwardControllerTest extends JUnitTestBase {
     private WebApplicationContext wac;
 
     private MockMvc mockMvc;
-    
+
     private String token;
 
 
@@ -51,7 +48,7 @@ public class ForwardControllerTest extends JUnitTestBase {
 
     @Test
     public void testGroupList() throws Exception {
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.get("/weevent/" + "admin" + "/" + "listGroup").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token))
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.get("/weevent/" + "admin" + "/" + "listGroup").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token))
                 .andReturn().getResponse();
         String contentAsString = response.getContentAsString();
         Assert.assertEquals(response.getStatus(), 200);

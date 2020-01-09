@@ -37,7 +37,6 @@ public class ForwardBrokerFilter implements Filter {
 
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
-        String requestURI = req.getRequestURI();
         String idStr = req.getParameter("brokerId");
         String brokerUrl = req.getParameter("brokerUrl");
         String originUrl = req.getRequestURI();

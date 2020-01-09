@@ -39,14 +39,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
-        try {
-            String username = request.getParameter("username");
-            String password = request.getParameter("password");
-            return authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(username, password, new ArrayList<>()));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        return authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(username, password, new ArrayList<>()));
     }
 
     // after the user successfully logs in, this method will be called, and we generate a token in this method
