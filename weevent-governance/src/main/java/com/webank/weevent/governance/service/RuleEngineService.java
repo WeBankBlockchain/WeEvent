@@ -58,9 +58,6 @@ public class RuleEngineService {
     private CommonService commonService;
 
     @Autowired
-    private PermissionService permissionService;
-
-    @Autowired
     private BrokerService brokerService;
 
     @Autowired
