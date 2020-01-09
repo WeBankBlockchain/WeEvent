@@ -44,8 +44,12 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private AuthenticationSuccessHandler authenticationSuccessHandler;
 
+
     @Autowired
     private JsonLogoutSuccessHandler jsonLogoutSuccessHandler;
+
+    @Autowired
+    private JwtUtils jwtUtils;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -61,7 +65,8 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
                 .successHandler(authenticationSuccessHandler) // if login success
                 .failureHandler(loginfailHandler) // if login fail
                 .and()
-                .addFilterAfter(new UserFilter(), LoginFilter.class)
+                .addFilterAfter(new UserFilter(jwtUtils),LoginFilter.class)
+                .addFilter(new LoginFilter(authenticationManagerBean(), authenticationSuccessHandler, jwtUtils))
                 .authorizeRequests()
                 .antMatchers("/user/**", "/", "/static/**", "/weevent-governance/user/**").permitAll()
                 .anyRequest().authenticated()
@@ -84,7 +89,7 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
         auth.userDetailsService(userDetailService).passwordEncoder(new PasswordEncoder() {
             @Override
             public String encode(CharSequence rawPassword) {
-                return JwtUtils.encryptPassWord(rawPassword.toString());
+                return rawPassword.toString();
             }
 
             @Override

@@ -31,6 +31,9 @@ public class AccountControllerTest extends JUnitTestBase {
 
     private MockMvc mockMvc;
 
+    @Autowired
+    private JwtUtils jwtUtils;
+
     @Before
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
@@ -96,7 +99,7 @@ public class AccountControllerTest extends JUnitTestBase {
 
     @Test
     public void testAccountList() throws Exception {
-        String token = JwtUtils.encodeToken("admin", JwtUtils.PRIVATE_SECRET, 60 * 60 * 1000);
+        String token = jwtUtils.encodeToken("admin", 60 * 60 * 1000);
         Security.setProperty(token, "1");
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/user/accountList").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token))
                 .andReturn();

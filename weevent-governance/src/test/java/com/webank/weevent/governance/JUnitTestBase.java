@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -32,6 +33,9 @@ public class JUnitTestBase {
     @Rule
     public Timeout timeout = new Timeout(120, TimeUnit.SECONDS);
 
+    @Autowired
+    private JwtUtils jwtUtils;
+
     @Test
     public void testBuild() {
         Assert.assertTrue(true);
@@ -39,7 +43,7 @@ public class JUnitTestBase {
 
 
     public String createToken() {
-        String token = JwtUtils.encodeToken("admin", JwtUtils.PRIVATE_SECRET, JwtUtils.EXPIRE_TIME);
+        String token = jwtUtils.encodeToken("admin", JwtUtils.EXPIRE_TIME);
         Security.setProperty(token, "1");
         return token;
     }

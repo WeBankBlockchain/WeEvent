@@ -35,10 +35,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
@@ -50,7 +50,6 @@ import org.springframework.web.servlet.DispatcherServlet;
  */
 @Slf4j
 @SpringBootApplication
-@EnableTransactionManagement
 @ServletComponentScan(basePackages = "com.webank.weevent.governance.filter")
 public class GovernanceApplication {
 
@@ -76,6 +75,8 @@ public class GovernanceApplication {
     @Value("${http.client.socket-timeout:5000}")
     private int socketTimeout;
 
+    private static String privateSecret;
+
 
     private PoolingHttpClientConnectionManager cm;
 
@@ -84,7 +85,8 @@ public class GovernanceApplication {
         H2ServerUtil.startH2();
         SpringApplication app = new SpringApplication(GovernanceApplication.class);
         app.addListeners(new ApplicationPidFileWriter());
-        app.run(args);
+        ConfigurableApplicationContext run = app.run(args);
+        privateSecret = run.getEnvironment().getProperty("jwt.private.secret");
         log.info("Start Governance success");
     }
 
@@ -202,5 +204,10 @@ public class GovernanceApplication {
             // don't check
         }
     }
+
+    public static String getPrivateSecret() {
+        return privateSecret;
+    }
+
 }
 

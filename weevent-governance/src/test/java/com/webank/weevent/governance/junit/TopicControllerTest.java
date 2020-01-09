@@ -4,10 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.http.Cookie;
-
 import com.webank.weevent.governance.JUnitTestBase;
-import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.TopicEntity;
 import com.webank.weevent.governance.entity.TopicPage;
@@ -77,7 +74,7 @@ public class TopicControllerTest extends JUnitTestBase {
 
     public void testTopicOpen() throws Exception {
         String content = "{\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\",\"topic\":\"com.weevent.rest\",\"userId\":\"1\",\"creater\":\"1\",\"groupId\":\"1\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/topic/openTopic").contentType(MediaType.APPLICATION_JSON_UTF8).content(content).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token))
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/topic/openTopic").contentType(MediaType.APPLICATION_JSON_UTF8).content(content).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
     }
@@ -85,7 +82,7 @@ public class TopicControllerTest extends JUnitTestBase {
     @Test
     public void testTopicOpenException() throws Exception {
         String content = "{\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\",\"topic\":\"com.weevent.rest\",\"userId\":\"1\",\"creater\":\"1\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/topic/openTopic").contentType(MediaType.APPLICATION_JSON_UTF8).content(content).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token))
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/topic/openTopic").contentType(MediaType.APPLICATION_JSON_UTF8).content(content).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
@@ -95,7 +92,7 @@ public class TopicControllerTest extends JUnitTestBase {
     @Test
     public void testTopicList() throws Exception {
         String content = "{\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\",\"pageSize\":\"10\",\"pageIndex\":\"0\"}";
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/topic/list").contentType(MediaType.APPLICATION_JSON_UTF8).content(content).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token)).andReturn();
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/topic/list").contentType(MediaType.APPLICATION_JSON_UTF8).content(content).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token)).andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         String result = response.getContentAsString();
         Assert.assertNotNull(result);
@@ -107,7 +104,7 @@ public class TopicControllerTest extends JUnitTestBase {
     @Test
     public void testTopicInfo() throws Exception {
         String url = "/topic/topicInfo?brokerId=" + brokerIdMap.get("brokerId") + "&topic=com.weevent.rest&groupId=1";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token))
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         Assert.assertNotNull(response.getContentAsString());
@@ -119,7 +116,7 @@ public class TopicControllerTest extends JUnitTestBase {
     @Test
     public void testTopicClose() throws Exception {
         String url = "/topic/close?brokerId=" + brokerIdMap.get("brokerId") + "&topic=com.weevent.rest&groupId=1";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token))
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         String contentAsString = response.getContentAsString();

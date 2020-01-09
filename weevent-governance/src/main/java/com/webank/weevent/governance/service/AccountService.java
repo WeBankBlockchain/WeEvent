@@ -13,7 +13,6 @@ import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.repository.AccountRepository;
-import com.webank.weevent.governance.utils.JwtUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -43,7 +42,7 @@ public class AccountService {
             if (accountEntity == null) {
                 accountEntity = new AccountEntity();
                 accountEntity.setUsername("admin");
-                accountEntity.setPassword(JwtUtils.encryptPassWord("admin123456"));
+                accountEntity.setPassword("AC0E7D037817094E9E0B4441F9BAE3209D67B02FA484917065F71B16109A1A78");
                 accountEntity.setEmail("admin@xxx.com");
                 accountRepository.save(accountEntity);
             }

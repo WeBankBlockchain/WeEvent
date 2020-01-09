@@ -17,6 +17,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.stereotype.Component;
 
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
@@ -24,10 +25,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private AuthenticationSuccessHandler loginSuccessHandler;
 
+    private JwtUtils jwtUtils;
 
-    public LoginFilter(AuthenticationManager authenticationManager, AuthenticationSuccessHandler loginSuccessHandler) {
+    public LoginFilter(AuthenticationManager authenticationManager, AuthenticationSuccessHandler loginSuccessHandler, JwtUtils jwtUtils) {
         this.authenticationManager = authenticationManager;
         this.loginSuccessHandler = loginSuccessHandler;
+        this.jwtUtils = jwtUtils;
         setFilterProcessesUrl("/user/login");
     }
 
@@ -50,7 +53,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
         String username = ((User) authResult.getPrincipal()).getUsername();
-        String token = JwtUtils.encodeToken(username, JwtUtils.PRIVATE_SECRET, JwtUtils.EXPIRE_TIME);
+        String token = jwtUtils.encodeToken(username, JwtUtils.EXPIRE_TIME);
         response.addHeader(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token);
         loginSuccessHandler.onAuthenticationSuccess(request, response, authResult);
     }
