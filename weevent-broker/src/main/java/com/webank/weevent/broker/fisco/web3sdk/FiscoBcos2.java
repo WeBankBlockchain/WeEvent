@@ -47,8 +47,6 @@ import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.StatusCode;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BcosTransactionReceipt;
-import org.fisco.bcos.web3j.protocol.core.methods.response.BlockNumber;
-import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
 import org.fisco.bcos.web3j.protocol.core.methods.response.SendTransaction;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tuples.generated.Tuple1;
@@ -89,6 +87,9 @@ public class FiscoBcos2 {
     // history topic, (address <-> version)
     private Map<String, Long> historyTopicVersion = new ConcurrentHashMap<>();
 
+    // the latest blockHeight
+    private Long latestBlockHeight;
+
     public FiscoBcos2(FiscoConfig fiscoConfig) {
         this.fiscoConfig = fiscoConfig;
     }
@@ -125,8 +126,10 @@ public class FiscoBcos2 {
                     this.topic = (Topic) contracts.right;
                 }
             }
-
             log.info("all supported solidity version: {}", this.historyTopicVersion);
+
+            // init latestBlockHeight
+            getBlockHeight();
         }
     }
 
@@ -400,7 +403,8 @@ public class FiscoBcos2 {
      * @return 0L if net error
      */
     public Long getBlockHeight() throws BrokerException {
-        return Web3SDK2Wrapper.getBlockHeight(this.web3j);
+        latestBlockHeight = Web3SDK2Wrapper.getBlockHeight(this.web3j);
+        return latestBlockHeight;
     }
 
     /**
@@ -429,34 +433,13 @@ public class FiscoBcos2 {
         return Web3SDK2Wrapper.queryNodeList(this.web3j);
     }
 
-    public ContractContext getContractContext() throws BrokerException {
+    public ContractContext getContractContext() {
         ContractContext contractContext = new ContractContext();
-        try {
-            String topicAddress = this.topicController.getTopicAddress().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-            BlockNumber blockNumber = this.web3j.getBlockNumber().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-            NodeVersion nodeVersion = this.web3j.getNodeVersion().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-
-            contractContext.setGasLimit(String.valueOf(gasProvider.getGasLimit("topic")));
-            contractContext.setGasPrice(String.valueOf(gasProvider.getGasPrice("topic")));
-            contractContext.setTopicAddress(topicAddress);
-            contractContext.setBlockNumber(blockNumber.getBlockNumber());
-            contractContext.setChainId(nodeVersion.getResult().getChainID());
-        } catch (InterruptedException | ExecutionException | NullPointerException e) {
-            log.error("getContractContext failed due to transaction execution error. ", e);
-            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        } catch (TimeoutException e) {
-            log.error("getContractContext failed due to transaction timeout. ", e);
-            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        }
+        contractContext.setGasLimit(gasProvider.getGasLimit("topic").longValue());
+        contractContext.setGasPrice(gasProvider.getGasPrice("topic").longValue());
+        contractContext.setTopicAddress(this.topic.getContractAddress());
+        contractContext.setBlockNumber(latestBlockHeight);
+        contractContext.setChainId(Web3SDK2Wrapper.chainID);
         return contractContext;
-    }
-
-    public NodeVersion.Version getVersion() throws BrokerException {
-        try {
-            return web3j.getNodeVersion().send().getNodeVersion();
-        } catch (IOException e) {
-            log.error("getNodeVersion error ", e);
-            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        }
     }
 }

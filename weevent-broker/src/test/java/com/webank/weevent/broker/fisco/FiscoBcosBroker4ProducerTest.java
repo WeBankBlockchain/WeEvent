@@ -342,7 +342,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
     private ExtendedRawTransaction getRawTransaction(String data, String topicAddress) throws BrokerException {
         Random r = new SecureRandom();
         BigInteger randomid = new BigInteger(250, r);
-        String chainId = this.fiscoBcosDelegate.getVersion(Long.parseLong(this.groupId)).getChainID();
+        String chainId = this.fiscoBcosDelegate.getContractContext(Long.parseLong(this.groupId)).getChainId();
         ExtendedRawTransaction rawTransaction =
                 ExtendedRawTransaction.createTransaction(
                         randomid,

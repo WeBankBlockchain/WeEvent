@@ -27,7 +27,6 @@ import com.webank.weevent.sdk.WeEvent;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
 import org.springframework.beans.BeansException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -428,16 +427,6 @@ public class FiscoBcosDelegate {
             throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
         } else {
             return this.fiscoBcos2Map.get(groupId).getContractContext();
-        }
-    }
-
-    public NodeVersion.Version getVersion(Long groupId) throws BrokerException {
-        checkVersion(groupId);
-
-        if (this.fiscoBcos != null) {
-            throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
-        } else {
-            return this.fiscoBcos2Map.get(groupId).getVersion();
         }
     }
 }
