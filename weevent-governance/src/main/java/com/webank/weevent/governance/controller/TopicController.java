@@ -3,12 +3,12 @@ package com.webank.weevent.governance.controller;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.webank.weevent.governance.common.GovernanceException;
+import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.TopicCreateEntity;
 import com.webank.weevent.governance.entity.TopicEntity;
 import com.webank.weevent.governance.entity.TopicPage;
 import com.webank.weevent.governance.entity.TopicPageEntity;
-import com.webank.weevent.governance.exception.GovernanceException;
-import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.service.TopicService;
 
 import lombok.extern.slf4j.Slf4j;

@@ -34,6 +34,10 @@ dependencies {
     //h2
     implementation("com.h2database:h2:${h2Version}")
 
+    //JWT
+    implementation("com.auth0:java-jwt:${JWTVersion}")
+
+
 }
 
 processResources {
