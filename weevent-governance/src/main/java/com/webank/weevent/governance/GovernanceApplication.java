@@ -12,7 +12,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import com.webank.weevent.governance.utils.H2ServerUtil;
-import com.webank.weevent.governance.utils.JwtUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -30,15 +29,16 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
+import org.springframework.core.env.Environment;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -79,13 +79,13 @@ public class GovernanceApplication {
 
     private PoolingHttpClientConnectionManager cm;
 
+    public static Environment environment;
 
     public static void main(String[] args) throws Exception {
         H2ServerUtil.startH2();
         SpringApplication app = new SpringApplication(GovernanceApplication.class);
         app.addListeners(new ApplicationPidFileWriter());
-        ConfigurableApplicationContext run = app.run(args);
-        JwtUtils.setPrivateSecret(run.getEnvironment().getProperty("jwt.private.secret"));
+        app.run(args);
         log.info("Start Governance success");
     }
 
@@ -94,6 +94,11 @@ public class GovernanceApplication {
         cm = new PoolingHttpClientConnectionManager();
     }
 
+
+    @Autowired
+    public void setEnvironment(org.springframework.core.env.Environment env) {
+        environment = env;
+    }
 
     @Bean
     public ClientHttpRequestFactory httpsClientRequestFactory() {

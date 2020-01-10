@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.webank.weevent.governance.GovernanceApplication;
 import com.webank.weevent.governance.utils.JwtUtils;
 
 import org.springframework.security.authentication.AuthenticationManager;
@@ -49,7 +50,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
         String username = ((User) authResult.getPrincipal()).getUsername();
-        String token = JwtUtils.encodeToken(username, JwtUtils.EXPIRE_TIME);
+        String token = JwtUtils.encodeToken(username, GovernanceApplication.environment.getProperty("jwt.private.secret"), JwtUtils.EXPIRE_TIME);
         response.addHeader(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token);
         loginSuccessHandler.onAuthenticationSuccess(request, response, authResult);
     }

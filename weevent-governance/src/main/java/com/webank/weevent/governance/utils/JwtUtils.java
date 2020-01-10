@@ -25,13 +25,8 @@ public class JwtUtils {
     public final static String AUTHORIZATION_HEADER_PREFIX = "Authorization";
     public final static int EXPIRE_TIME = 60 * 60 * 24;
 
-    private static String privateSecret;
 
-    public static void setPrivateSecret(String privateSecret) {
-        JwtUtils.privateSecret = privateSecret;
-    }
-
-    public static boolean verifierToken(String token) throws IOException {
+    public static boolean verifierToken(String token, String privateSecret) throws IOException {
         try {
             JWTVerifier build = JWT.require(Algorithm.HMAC256(privateSecret)).build();
             build.verify(token);
@@ -50,7 +45,7 @@ public class JwtUtils {
      * @param expiration
      * @return token
      */
-    public static String encodeToken(String username, int expiration) {
+    public static String encodeToken(String username, String privateSecret, int expiration) {
         try {
             JWTCreator.Builder builder = JWT.create();
             builder.withIssuer(username);
@@ -72,7 +67,7 @@ public class JwtUtils {
      * @param token token
      * @return AccountEntity
      */
-    public static AccountEntity decodeToken(String token) {
+    public static AccountEntity decodeToken(String token, String privateSecret) {
         try {
             JWTVerifier verifier = JWT.require(Algorithm.HMAC256(privateSecret)).build();
             DecodedJWT jwt = verifier.verify(token);

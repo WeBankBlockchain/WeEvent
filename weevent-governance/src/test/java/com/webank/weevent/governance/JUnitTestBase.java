@@ -27,8 +27,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public class JUnitTestBase {
     @Value("${server.port}")
     public String listenPort;
-    @Value("${jwt.private.secret}")
-    private String privateSecret;
     @Rule
     public TestName testName = new TestName();
     @Rule
@@ -42,8 +40,7 @@ public class JUnitTestBase {
 
 
     public String createToken() {
-        JwtUtils.setPrivateSecret(privateSecret);
-        String token = JwtUtils.encodeToken("admin", JwtUtils.EXPIRE_TIME);
+        String token = JwtUtils.encodeToken("admin", GovernanceApplication.environment.getProperty("jwt.private.secret"), JwtUtils.EXPIRE_TIME);
         Security.setProperty(token, "1");
         return token;
     }
