@@ -1,4 +1,4 @@
-package com.webank.weevent.governance.code;
+package com.webank.weevent.governance.common;
 
 public enum ErrorCode {
 

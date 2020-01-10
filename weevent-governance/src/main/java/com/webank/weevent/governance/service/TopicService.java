@@ -12,17 +12,15 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.weevent.governance.code.ErrorCode;
+import com.webank.weevent.governance.common.ConstantProperties;
+import com.webank.weevent.governance.common.ErrorCode;
+import com.webank.weevent.governance.common.GovernanceException;
+import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.entity.TopicEntity;
 import com.webank.weevent.governance.entity.TopicPage;
 import com.webank.weevent.governance.entity.TopicPageEntity;
-import com.webank.weevent.governance.enums.DeleteAtEnum;
-import com.webank.weevent.governance.exception.GovernanceException;
-import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.repository.TopicRepository;
-import com.webank.weevent.governance.result.GovernanceResult;
-import com.webank.weevent.governance.utils.CookiesTools;
 import com.webank.weevent.governance.utils.JsonUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -53,26 +51,15 @@ public class TopicService {
     private BrokerService brokerService;
 
     @Autowired
-    private CookiesTools cookiesTools;
-
-    @Autowired
     private CommonService commonService;
-
-    @Autowired
-    private PermissionService permissionService;
 
     private final String SPLIT = "-";
 
     public Boolean close(Integer brokerId, String topic, String groupId, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
-        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
         BrokerEntity brokerEntity = brokerService.getBroker(brokerId);
         if (brokerEntity == null) {
             return false;
-        }
-        Boolean flag = permissionService.verifyPermissions(brokerId, accountId);
-        if (!flag) {
-            throw new GovernanceException(ErrorCode.ACCESS_DENIED);
         }
         CloseableHttpClient client = commonService.generateHttpClient(brokerEntity.getBrokerUrl());
         String url;
@@ -102,12 +89,7 @@ public class TopicService {
         Integer pageIndex = topicPageEntity.getPageIndex();
         Integer pageSize = topicPageEntity.getPageSize();
         String groupId = topicPageEntity.getGroupId();
-        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
         BrokerEntity brokerEntity = brokerService.getBroker(brokerId);
-        Boolean flag = permissionService.verifyPermissions(brokerId, accountId);
-        if (!flag) {
-            throw new GovernanceException(ErrorCode.ACCESS_DENIED);
-        }
         TopicPage result = new TopicPage();
         result.setPageIndex(pageIndex);
         result.setPageSize(pageSize);
@@ -141,7 +123,7 @@ public class TopicService {
             topicEntityList.forEach(it -> {
                 topicNameList.add(it.getTopicName());
             });
-            List<TopicEntity> topicEntities = topicRepository.findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(brokerId, groupId, topicNameList, DeleteAtEnum.NOT_DELETED.getCode());
+            List<TopicEntity> topicEntities = topicRepository.findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(brokerId, groupId, topicNameList, ConstantProperties.NOT_DELETED);
             if (CollectionUtils.isEmpty(topicEntities)) {
                 return result;
             }
@@ -162,12 +144,10 @@ public class TopicService {
     }
 
     public TopicEntity getTopicInfo(Integer brokerId, String topic, String groupId, HttpServletRequest request) throws GovernanceException {
-        String accountId = this.cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
         BrokerEntity broker = this.brokerService.getBroker(brokerId);
-        Boolean flag = permissionService.verifyPermissions(brokerId, accountId);
-        if (broker == null || !flag) {
+        if (broker == null) {
             log.error("get topicInfo failed, brokerId:{}, topic:{}, groupId:{}.", brokerId, topic, groupId);
-            throw new GovernanceException(ErrorCode.ACCESS_DENIED);
+            throw new GovernanceException("broker is not exists");
         }
 
         try {
@@ -186,7 +166,7 @@ public class TopicService {
             TopicEntity result = JsonUtil.parseObject(mes, TopicEntity.class);
             if (result != null) {
                 // get creator from database
-                List<TopicEntity> creators = topicRepository.findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(brokerId, groupId, new ArrayList<>(Collections.singletonList(topic)), DeleteAtEnum.NOT_DELETED.getCode());
+                List<TopicEntity> creators = topicRepository.findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(brokerId, groupId, new ArrayList<>(Collections.singletonList(topic)), ConstantProperties.NOT_DELETED);
                 if (CollectionUtils.isNotEmpty(creators)) {
                     result.setCreater(creators.get(0).getCreater());
                 }
@@ -202,14 +182,9 @@ public class TopicService {
     @Transactional(rollbackFor = Throwable.class)
     public GovernanceResult open(Integer brokerId, String topic, String creater, String groupId, HttpServletRequest request,
                                  HttpServletResponse response) throws GovernanceException {
-        String accountId = cookiesTools.getCookieValueByName(request, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
         BrokerEntity brokerEntity = brokerService.getBroker(brokerId);
         if (brokerEntity == null) {
             return null;
-        }
-        Boolean flag = permissionService.verifyPermissions(brokerId, accountId);
-        if (!flag) {
-            throw new GovernanceException(ErrorCode.ACCESS_DENIED);
         }
         String mes;
         try {
@@ -240,7 +215,7 @@ public class TopicService {
             return new GovernanceResult(Boolean.valueOf(mes));
         } catch (Exception e) {
             log.error("open topic fail,error:{}", e.getMessage());
-            throw new GovernanceException("open topic fail,error",e);
+            throw new GovernanceException("open topic fail,error", e);
         }
     }
 
