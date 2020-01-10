@@ -1,9 +1,12 @@
 package com.webank.weevent.broker.fisco.web3sdk;
 
 
+import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -11,9 +14,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.webank.weevent.broker.config.FiscoConfig;
+import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.dto.ContractContext;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
+import com.webank.weevent.broker.fisco.web3sdk.v2.CRUDAddress;
 import com.webank.weevent.broker.fisco.web3sdk.v2.SupportedVersion;
 import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDK2Wrapper;
 import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic;
@@ -32,6 +38,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.fisco.bcos.channel.client.TransactionSucCallback;
+import org.fisco.bcos.web3j.abi.FunctionReturnDecoder;
+import org.fisco.bcos.web3j.abi.TypeReference;
+import org.fisco.bcos.web3j.abi.Utils;
+import org.fisco.bcos.web3j.abi.datatypes.Type;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.StatusCode;
@@ -40,6 +51,8 @@ import org.fisco.bcos.web3j.tuples.generated.Tuple1;
 import org.fisco.bcos.web3j.tuples.generated.Tuple3;
 import org.fisco.bcos.web3j.tuples.generated.Tuple8;
 import org.fisco.bcos.web3j.tx.Contract;
+import org.fisco.bcos.web3j.utils.BlockLimit;
+
 
 /**
  * Access to FISCO-BCOS 2.x.
@@ -83,7 +96,8 @@ public class FiscoBcos2 {
             this.credentials = Web3SDK2Wrapper.getCredentials(this.fiscoConfig);
             this.web3j = Web3SDK2Wrapper.initWeb3j(groupId, this.fiscoConfig);
 
-            Map<Long, String> addresses = Web3SDK2Wrapper.listAddress(this.web3j, this.credentials);
+            CRUDAddress crudAddress = new CRUDAddress(this.web3j, this.credentials);
+            Map<Long, String> addresses = crudAddress.listAddress();
             log.info("address list in CRUD: {}", addresses);
 
             if (addresses.isEmpty() || !addresses.containsKey(SupportedVersion.nowVersion)) {
@@ -311,6 +325,55 @@ public class FiscoBcos2 {
         return weEventTransactionCallback.future;
     }
 
+    public CompletableFuture<SendResult> sendRawTransaction(String topicName, String transactionHex) {
+        return web3j.sendRawTransaction(transactionHex).sendAsync().thenApplyAsync(ethSendTransaction -> {
+            SendResult sendResult = new SendResult();
+            sendResult.setTopic(topicName);
+
+            Optional<TransactionReceipt> receiptOptional = getTransactionReceiptRequest(ethSendTransaction.getTransactionHash());
+            if (receiptOptional.isPresent()) {
+                List<TypeReference<?>> referencesList = Arrays.asList(new TypeReference<Uint256>() {
+                });
+                List<Type> returnList = FunctionReturnDecoder.decode(
+                        String.valueOf(receiptOptional.get().getOutput()),
+                        Utils.convert(referencesList));
+
+                sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+                sendResult.setEventId(DataTypeUtils.encodeEventId(topicName,
+                        receiptOptional.get().getBlockNumber().intValue(),
+                        ((BigInteger) returnList.get(0).getValue()).intValue()));
+            } else {
+                sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+            }
+
+            return sendResult;
+        });
+    }
+
+    /**
+     * Get a TransactionReceipt request from a transaction Hash.
+     *
+     * @param transactionHash the transactionHash value
+     * @return the transactionReceipt wrapper
+     */
+    private Optional<TransactionReceipt> getTransactionReceiptRequest(String transactionHash) {
+        Optional<TransactionReceipt> receiptOptional = Optional.empty();
+
+        try {
+            for (int i = 0; i < WeEventConstants.POLL_TRANSACTION_ATTEMPTS; i++) {
+                receiptOptional = web3j.getTransactionReceipt(transactionHash).send().getTransactionReceipt();
+                if (!receiptOptional.isPresent()) {
+                    Thread.sleep(fiscoConfig.getConsumerIdleTime());
+                } else {
+                    return receiptOptional;
+                }
+            }
+        } catch (IOException | InterruptedException e) {
+            log.error("get transactionReceipt failed.", e);
+        }
+        return receiptOptional;
+    }
+
     /**
      * getBlockHeight
      *
@@ -344,5 +407,16 @@ public class FiscoBcos2 {
 
     public ListPage<TbNode> queryNodeList() throws BrokerException {
         return Web3SDK2Wrapper.queryNodeList(this.web3j);
+    }
+
+    public ContractContext getContractContext() {
+        ContractContext contractContext = new ContractContext();
+        contractContext.setGasLimit(Web3SDK2Wrapper.gasProvider.getGasLimit("").longValue());
+        contractContext.setGasPrice(Web3SDK2Wrapper.gasProvider.getGasPrice("").longValue());
+        contractContext.setTopicAddress(this.topic.getContractAddress());
+        contractContext.setBlockNumber(web3j.getBlockNumberCache().longValue() - BlockLimit.blockLimit);
+        contractContext.setBlockLimit(BlockLimit.blockLimit.longValue());
+        contractContext.setChainId(Web3SDK2Wrapper.chainID);
+        return contractContext;
     }
 }
