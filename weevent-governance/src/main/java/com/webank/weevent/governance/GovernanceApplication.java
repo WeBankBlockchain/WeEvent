@@ -11,11 +11,6 @@ import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import com.webank.weevent.governance.filter.ForwardBrokerFilter;
-import com.webank.weevent.governance.filter.ForwardProcessorFilter;
-import com.webank.weevent.governance.filter.ForwardWebaseFilter;
-import com.webank.weevent.governance.filter.UserAuthFilter;
-import com.webank.weevent.governance.filter.XssFilter;
 import com.webank.weevent.governance.utils.H2ServerUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -39,14 +34,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.ApplicationPidFileWriter;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
+import org.springframework.core.env.Environment;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
@@ -58,7 +51,7 @@ import org.springframework.web.servlet.DispatcherServlet;
  */
 @Slf4j
 @SpringBootApplication
-@EnableTransactionManagement
+@ServletComponentScan(basePackages = "com.webank.weevent.governance.filter")
 public class GovernanceApplication {
 
     @Value("${https.read-timeout:3000}")
@@ -83,20 +76,10 @@ public class GovernanceApplication {
     @Value("${http.client.socket-timeout:5000}")
     private int socketTimeout;
 
-    @Autowired
-    private ForwardBrokerFilter forwardBrokerFilter;
-
-    @Autowired
-    private ForwardWebaseFilter forwardWebaseFilter;
-
-    @Autowired
-    private UserAuthFilter userAuthFilter;
-
-    @Autowired
-    private ForwardProcessorFilter forwardProcessorFilter;
 
     private PoolingHttpClientConnectionManager cm;
 
+    public static Environment environment;
 
     public static void main(String[] args) throws Exception {
         H2ServerUtil.startH2();
@@ -111,9 +94,10 @@ public class GovernanceApplication {
         cm = new PoolingHttpClientConnectionManager();
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+
+    @Autowired
+    public void setEnvironment(org.springframework.core.env.Environment env) {
+        environment = env;
     }
 
     @Bean
@@ -131,58 +115,6 @@ public class GovernanceApplication {
         bean.setName("weeventGovernance");
         return bean;
     }
-
-    @Bean
-    public FilterRegistrationBean<UserAuthFilter> userAuthFilterRegistrationBean() {
-        FilterRegistrationBean<UserAuthFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(userAuthFilter);
-        filterRegistrationBean.setOrder(1);
-        filterRegistrationBean.setEnabled(true);
-        filterRegistrationBean.addUrlPatterns("/weevent-governance/*");
-        return filterRegistrationBean;
-    }
-
-    @Bean
-    public FilterRegistrationBean<XssFilter> xssFilterRegistrationBean() {
-        FilterRegistrationBean<XssFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(new XssFilter());
-        filterRegistrationBean.setOrder(2);
-        filterRegistrationBean.setEnabled(true);
-        filterRegistrationBean.addUrlPatterns("/weevent-governance/topic/*");
-        return filterRegistrationBean;
-    }
-
-    @Bean
-    public FilterRegistrationBean<ForwardBrokerFilter> httpForwardFilterRegistrationBean() {
-        FilterRegistrationBean<ForwardBrokerFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(forwardBrokerFilter);
-        filterRegistrationBean.setOrder(3);
-        filterRegistrationBean.setEnabled(true);
-        filterRegistrationBean.addUrlPatterns("/weevent-governance/weevent/*");
-        return filterRegistrationBean;
-    }
-
-    @Bean
-    public FilterRegistrationBean<ForwardWebaseFilter> forwardWebaseFilterRegistrationBean() {
-        FilterRegistrationBean<ForwardWebaseFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(forwardWebaseFilter);
-        filterRegistrationBean.setOrder(4);
-        filterRegistrationBean.setEnabled(true);
-        filterRegistrationBean.addUrlPatterns("/weevent-governance/webase-node-mgr/*");
-        return filterRegistrationBean;
-    }
-
-
-    @Bean
-    public FilterRegistrationBean<ForwardProcessorFilter> forwardProcessorRegistrationBean() {
-        FilterRegistrationBean<ForwardProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(forwardProcessorFilter);
-        filterRegistrationBean.setOrder(5);
-        filterRegistrationBean.setEnabled(true);
-        filterRegistrationBean.addUrlPatterns("/weevent-governance/processor/*");
-        return filterRegistrationBean;
-    }
-
 
     @Scope("prototype")
     @Bean("httpClient")
@@ -276,5 +208,6 @@ public class GovernanceApplication {
             // don't check
         }
     }
+
 }
 
