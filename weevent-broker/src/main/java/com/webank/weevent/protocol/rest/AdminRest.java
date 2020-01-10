@@ -232,8 +232,8 @@ public class AdminRest extends RestHA {
     /**
      * query ContractContext.
      */
-    @RequestMapping(path = "/contractContext")
-    public ResponseData<ContractContext> queryContractContext(@RequestParam(value = "groupId", required = false) String groupId)
+    @RequestMapping(path = "/getContractContext")
+    public ResponseData<ContractContext> getContractContext(@RequestParam(value = "groupId", required = false) String groupId)
             throws BrokerException {
         log.info("groupId:{} ", groupId);
 

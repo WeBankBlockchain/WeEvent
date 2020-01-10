@@ -9,9 +9,13 @@ public class ContractContext {
 
     private Long blockNumber;
 
+    private Long blockLimit;
+
     private String topicAddress;
 
     private Long gasLimit;
 
     private Long gasPrice;
+
+    private Long value;
 }

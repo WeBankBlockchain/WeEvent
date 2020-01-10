@@ -47,14 +47,13 @@ import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.StatusCode;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BcosTransactionReceipt;
-import org.fisco.bcos.web3j.protocol.core.methods.response.SendTransaction;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tuples.generated.Tuple1;
 import org.fisco.bcos.web3j.tuples.generated.Tuple3;
 import org.fisco.bcos.web3j.tuples.generated.Tuple8;
 import org.fisco.bcos.web3j.tx.Contract;
+import org.fisco.bcos.web3j.utils.BlockLimit;
 
-import static com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDK2Wrapper.gasProvider;
 
 /**
  * Access to FISCO-BCOS 2.x.
@@ -86,9 +85,6 @@ public class FiscoBcos2 {
     private Map<String, Contract> historyTopicContract = new ConcurrentHashMap<>();
     // history topic, (address <-> version)
     private Map<String, Long> historyTopicVersion = new ConcurrentHashMap<>();
-
-    // the latest blockHeight
-    private Long latestBlockHeight;
 
     public FiscoBcos2(FiscoConfig fiscoConfig) {
         this.fiscoConfig = fiscoConfig;
@@ -126,10 +122,8 @@ public class FiscoBcos2 {
                     this.topic = (Topic) contracts.right;
                 }
             }
-            log.info("all supported solidity version: {}", this.historyTopicVersion);
 
-            // init latestBlockHeight
-            getBlockHeight();
+            log.info("all supported solidity version: {}", this.historyTopicVersion);
         }
     }
 
@@ -332,52 +326,45 @@ public class FiscoBcos2 {
         return weEventTransactionCallback.future;
     }
 
-    public CompletableFuture<SendResult> sendRawTransaction(String topicName, String transactionHex) throws BrokerException {
-        try {
-            SendTransaction ethSendTransaction = web3j.sendRawTransaction(transactionHex).send();
+    public CompletableFuture<SendResult> sendRawTransaction(String topicName, String transactionHex) {
+        return web3j.sendRawTransaction(transactionHex).sendAsync().thenApplyAsync(ethSendTransaction -> {
+            SendResult sendResult = new SendResult();
+            sendResult.setTopic(topicName);
 
-            return CompletableFuture.supplyAsync(() -> {
-                SendResult sendResult = new SendResult();
-                sendResult.setTopic(topicName);
+            Optional<TransactionReceipt> receiptOptional = Optional.empty();
+            try {
+                receiptOptional = getTransactionReceiptRequest(ethSendTransaction.getTransactionHash());
 
-                Optional<TransactionReceipt> receiptOptional = Optional.empty();
-                try {
-                    receiptOptional = getTransactionReceiptRequest(ethSendTransaction.getTransactionHash());
-
-                    for (int i = 0; i < WeEventConstants.POLL_TRANSACTION_ATTEMPTS; i++) {
-                        if (!receiptOptional.isPresent()) {
-                            Thread.sleep(fiscoConfig.getConsumerIdleTime());
-                            receiptOptional = getTransactionReceiptRequest(ethSendTransaction.getTransactionHash());
-                        } else {
-                            break;
-                        }
+                for (int i = 0; i < WeEventConstants.POLL_TRANSACTION_ATTEMPTS; i++) {
+                    Thread.sleep(fiscoConfig.getConsumerIdleTime());
+                    if (!receiptOptional.isPresent()) {
+                        receiptOptional = getTransactionReceiptRequest(ethSendTransaction.getTransactionHash());
+                    } else {
+                        break;
                     }
-                } catch (Exception e) {
-                    log.error("get transaction receipt error.", e);
-                    sendResult.setStatus(SendResult.SendResultStatus.ERROR);
                 }
+            } catch (Exception e) {
+                log.error("get transaction receipt error.", e);
+                sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+            }
 
-                if (receiptOptional.isPresent()) {
-                    List<TypeReference<?>> referencesList = Arrays.asList(new TypeReference<Uint256>() {
-                    });
-                    List<Type> returnList = FunctionReturnDecoder.decode(
-                            String.valueOf(receiptOptional.get().getOutput()),
-                            Utils.convert(referencesList));
+            if (receiptOptional.isPresent()) {
+                List<TypeReference<?>> referencesList = Arrays.asList(new TypeReference<Uint256>() {
+                });
+                List<Type> returnList = FunctionReturnDecoder.decode(
+                        String.valueOf(receiptOptional.get().getOutput()),
+                        Utils.convert(referencesList));
 
-                    sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
-                    sendResult.setEventId(DataTypeUtils.encodeEventId(topicName,
-                            receiptOptional.get().getBlockNumber().intValue(),
-                            ((BigInteger) returnList.get(0).getValue()).intValue()));
-                } else {
-                    sendResult.setStatus(SendResult.SendResultStatus.ERROR);
-                }
+                sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+                sendResult.setEventId(DataTypeUtils.encodeEventId(topicName,
+                        receiptOptional.get().getBlockNumber().intValue(),
+                        ((BigInteger) returnList.get(0).getValue()).intValue()));
+            } else {
+                sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+            }
 
-                return sendResult;
-            });
-        } catch (IOException e) {
-            log.error("sendRawTransaction error ", e);
-            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        }
+            return sendResult;
+        });
     }
 
     /**
@@ -403,8 +390,7 @@ public class FiscoBcos2 {
      * @return 0L if net error
      */
     public Long getBlockHeight() throws BrokerException {
-        latestBlockHeight = Web3SDK2Wrapper.getBlockHeight(this.web3j);
-        return latestBlockHeight;
+        return Web3SDK2Wrapper.getBlockHeight(this.web3j);
     }
 
     /**
@@ -435,11 +421,13 @@ public class FiscoBcos2 {
 
     public ContractContext getContractContext() {
         ContractContext contractContext = new ContractContext();
-        contractContext.setGasLimit(gasProvider.getGasLimit("topic").longValue());
-        contractContext.setGasPrice(gasProvider.getGasPrice("topic").longValue());
+        contractContext.setGasLimit(Web3SDK2Wrapper.gasProvider.getGasLimit("").longValue());
+        contractContext.setGasPrice(Web3SDK2Wrapper.gasProvider.getGasPrice("").longValue());
         contractContext.setTopicAddress(this.topic.getContractAddress());
-        contractContext.setBlockNumber(latestBlockHeight);
+        contractContext.setBlockNumber(web3j.getBlockNumberCache().longValue() - BlockLimit.blockLimit);
+        contractContext.setBlockLimit(BlockLimit.blockLimit.longValue());
         contractContext.setChainId(Web3SDK2Wrapper.chainID);
+        contractContext.setValue(0L);
         return contractContext;
     }
 }

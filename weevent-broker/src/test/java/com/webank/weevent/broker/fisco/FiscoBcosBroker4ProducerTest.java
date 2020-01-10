@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.JUnitTestBase;
 import com.webank.weevent.broker.config.FiscoConfig;
+import com.webank.weevent.broker.fisco.dto.ContractContext;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDK2Wrapper;
@@ -29,7 +30,6 @@ import org.fisco.bcos.web3j.abi.datatypes.Function;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.crypto.ExtendedRawTransaction;
 import org.fisco.bcos.web3j.crypto.ExtendedTransactionEncoder;
-import org.fisco.bcos.web3j.utils.BlockLimit;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.junit.Assert;
 import org.junit.Before;
@@ -318,10 +318,10 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
         Map<String, String> ext = new HashMap<>();
         ext.put(WeEvent.WeEvent_SIGN, "true");
         WeEvent event = new WeEvent(this.topicName, "this is a signed message".getBytes(), ext);
-        String topicAddress = this.fiscoBcosDelegate.getContractContext(Long.parseLong(this.groupId)).getTopicAddress();
+        ContractContext contractContext = this.fiscoBcosDelegate.getContractContext(Long.parseLong(this.groupId));
 
         String rawData = buildData(event);
-        ExtendedRawTransaction rawTransaction = getRawTransaction(rawData, topicAddress);
+        ExtendedRawTransaction rawTransaction = getRawTransaction(rawData, contractContext);
 
         String signData = signData(rawTransaction);
         SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, signData.getBytes(), ext), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
@@ -339,20 +339,19 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
         return FunctionEncoder.encode(function);
     }
 
-    private ExtendedRawTransaction getRawTransaction(String data, String topicAddress) throws BrokerException {
+    private ExtendedRawTransaction getRawTransaction(String data, ContractContext contractContext) {
         Random r = new SecureRandom();
         BigInteger randomid = new BigInteger(250, r);
-        String chainId = this.fiscoBcosDelegate.getContractContext(Long.parseLong(this.groupId)).getChainId();
         ExtendedRawTransaction rawTransaction =
                 ExtendedRawTransaction.createTransaction(
                         randomid,
-                        new BigInteger("999999999"),
-                        new BigInteger("99999999999"),
-                        BigInteger.valueOf(BlockLimit.blockLimit.intValue()),
-                        topicAddress,
-                        new BigInteger("0"),
+                        BigInteger.valueOf(contractContext.getGasPrice()),
+                        BigInteger.valueOf(contractContext.getGasLimit()),
+                        BigInteger.valueOf(contractContext.getBlockLimit()),
+                        contractContext.getTopicAddress(),
+                        BigInteger.valueOf(contractContext.getValue()),
                         data,
-                        new BigInteger(chainId),
+                        new BigInteger(contractContext.getChainId()),
                         new BigInteger(this.groupId),
                         null);
         return rawTransaction;

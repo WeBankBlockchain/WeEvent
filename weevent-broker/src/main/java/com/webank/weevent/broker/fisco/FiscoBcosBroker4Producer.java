@@ -38,17 +38,16 @@ public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IPr
         this.validateGroupId(groupId);
         ParamCheckUtils.validateEvent(event);
 
-        // async publish an event already signed externally
-        if (event.getExtensions() != null && event.getExtensions().containsKey("weevent-sign")) {
+        // publishEvent support async operator in callback
+        if (event.getExtensions() != null && event.getExtensions().containsKey(WeEvent.WeEvent_SIGN)) {
             return fiscoBcosDelegate.sendRawTransaction(event.getTopic(),
                     Long.parseLong(groupId),
                     new String(event.getContent(), StandardCharsets.UTF_8));
+        } else {
+            return fiscoBcosDelegate.publishEvent(event.getTopic(),
+                    Long.parseLong(groupId),
+                    new String(event.getContent(), StandardCharsets.UTF_8),
+                    DataTypeUtils.object2Json(event.getExtensions()));
         }
-
-        // publishEvent support async operator in callback
-        return fiscoBcosDelegate.publishEvent(event.getTopic(),
-                Long.parseLong(groupId),
-                new String(event.getContent(), StandardCharsets.UTF_8),
-                DataTypeUtils.object2Json(event.getExtensions()));
     }
 }

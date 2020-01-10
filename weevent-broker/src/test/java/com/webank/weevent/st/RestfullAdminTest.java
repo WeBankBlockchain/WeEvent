@@ -109,7 +109,7 @@ public class RestfullAdminTest extends JUnitTestBase {
 
     @Test
     public void testContractContext() {
-        ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "contractContext", ResponseData.class);
+        ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "getContractContext", ResponseData.class);
         Assert.assertEquals(200, rsp.getStatusCodeValue());
         Assert.assertEquals(0, rsp.getBody().getCode());
         Assert.assertNotNull(rsp.getBody().getData());
