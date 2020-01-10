@@ -2,6 +2,7 @@ package com.webank.weevent.broker.fisco;
 
 import java.util.List;
 
+import com.webank.weevent.broker.fisco.dto.ContractContext;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
@@ -175,6 +176,14 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
 
     public String selectGroupId(String groupId) {
         return StringUtils.isBlank(groupId) ? WeEvent.DEFAULT_GROUP_ID : groupId;
+    }
+
+    @Override
+    public ContractContext getContractContext(String groupIdStr) throws BrokerException {
+        String groupId = selectGroupId(groupIdStr);
+        this.validateGroupId(groupId);
+        return fiscoBcosDelegate.getContractContext(Long.valueOf(groupId));
+
     }
 
 }
