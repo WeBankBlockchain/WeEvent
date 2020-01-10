@@ -17,5 +17,4 @@ public class ContractContext {
 
     private Long gasPrice;
 
-    private Long value;
 }

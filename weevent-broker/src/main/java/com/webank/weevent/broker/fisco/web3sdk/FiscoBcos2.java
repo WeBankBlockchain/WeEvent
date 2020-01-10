@@ -46,7 +46,6 @@ import org.fisco.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.StatusCode;
-import org.fisco.bcos.web3j.protocol.core.methods.response.BcosTransactionReceipt;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tuples.generated.Tuple1;
 import org.fisco.bcos.web3j.tuples.generated.Tuple3;
@@ -331,23 +330,7 @@ public class FiscoBcos2 {
             SendResult sendResult = new SendResult();
             sendResult.setTopic(topicName);
 
-            Optional<TransactionReceipt> receiptOptional = Optional.empty();
-            try {
-                receiptOptional = getTransactionReceiptRequest(ethSendTransaction.getTransactionHash());
-
-                for (int i = 0; i < WeEventConstants.POLL_TRANSACTION_ATTEMPTS; i++) {
-                    Thread.sleep(fiscoConfig.getConsumerIdleTime());
-                    if (!receiptOptional.isPresent()) {
-                        receiptOptional = getTransactionReceiptRequest(ethSendTransaction.getTransactionHash());
-                    } else {
-                        break;
-                    }
-                }
-            } catch (Exception e) {
-                log.error("get transaction receipt error.", e);
-                sendResult.setStatus(SendResult.SendResultStatus.ERROR);
-            }
-
+            Optional<TransactionReceipt> receiptOptional = getTransactionReceiptRequest(ethSendTransaction.getTransactionHash());
             if (receiptOptional.isPresent()) {
                 List<TypeReference<?>> referencesList = Arrays.asList(new TypeReference<Uint256>() {
                 });
@@ -372,16 +355,23 @@ public class FiscoBcos2 {
      *
      * @param transactionHash the transactionHash value
      * @return the transactionReceipt wrapper
-     * @throws IOException the exception
      */
-    private Optional<TransactionReceipt> getTransactionReceiptRequest(String transactionHash) throws IOException {
-        BcosTransactionReceipt transactionReceipt = web3j.getTransactionReceipt(transactionHash).send();
-        if (transactionReceipt.hasError()) {
-            log.error("Error processing transaction request: "
-                    + transactionReceipt.getError().getMessage());
-            return Optional.empty();
+    private Optional<TransactionReceipt> getTransactionReceiptRequest(String transactionHash) {
+        Optional<TransactionReceipt> receiptOptional = Optional.empty();
+
+        try {
+            for (int i = 0; i < WeEventConstants.POLL_TRANSACTION_ATTEMPTS; i++) {
+                receiptOptional = web3j.getTransactionReceipt(transactionHash).send().getTransactionReceipt();
+                if (!receiptOptional.isPresent()) {
+                    Thread.sleep(fiscoConfig.getConsumerIdleTime());
+                } else {
+                    return receiptOptional;
+                }
+            }
+        } catch (IOException | InterruptedException e) {
+            log.error("get transactionReceipt failed.", e);
         }
-        return transactionReceipt.getTransactionReceipt();
+        return receiptOptional;
     }
 
     /**
@@ -427,7 +417,6 @@ public class FiscoBcos2 {
         contractContext.setBlockNumber(web3j.getBlockNumberCache().longValue() - BlockLimit.blockLimit);
         contractContext.setBlockLimit(BlockLimit.blockLimit.longValue());
         contractContext.setChainId(Web3SDK2Wrapper.chainID);
-        contractContext.setValue(0L);
         return contractContext;
     }
 }

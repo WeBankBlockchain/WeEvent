@@ -349,7 +349,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
                         BigInteger.valueOf(contractContext.getGasLimit()),
                         BigInteger.valueOf(contractContext.getBlockLimit()),
                         contractContext.getTopicAddress(),
-                        BigInteger.valueOf(contractContext.getValue()),
+                        BigInteger.ZERO,
                         data,
                         new BigInteger(contractContext.getChainId()),
                         new BigInteger(this.groupId),
