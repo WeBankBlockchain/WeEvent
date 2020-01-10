@@ -12,20 +12,15 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.weevent.governance.code.ErrorCode;
+import com.webank.weevent.governance.common.ConstantProperties;
+import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.entity.RuleDatabaseEntity;
 import com.webank.weevent.governance.entity.RuleEngineEntity;
 import com.webank.weevent.governance.entity.TopicHistoricalEntity;
-import com.webank.weevent.governance.enums.ConditionTypeEnum;
-import com.webank.weevent.governance.enums.PayloadEnum;
-import com.webank.weevent.governance.enums.StatusEnum;
-import com.webank.weevent.governance.exception.GovernanceException;
 import com.webank.weevent.governance.mapper.TopicHistoricalMapper;
-import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.repository.RuleDatabaseRepository;
 import com.webank.weevent.governance.repository.RuleEngineRepository;
-import com.webank.weevent.governance.utils.CookiesTools;
 import com.webank.weevent.governance.utils.JsonUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -45,12 +40,6 @@ public class TopicHistoricalService {
     private TopicHistoricalMapper topicHistoricalMapper;
 
     @Autowired
-    private PermissionService permissionService;
-
-    @Autowired
-    private CookiesTools cookiesTools;
-
-    @Autowired
     private CommonService commonService;
 
     @Autowired
@@ -62,7 +51,7 @@ public class TopicHistoricalService {
     @Autowired
     private RuleDatabaseRepository ruleDatabaseRepository;
 
-    private final static String simpleDateFormat = "YYYY-MM-dd";
+    private final static String simpleDateFormat = "yyyy-MM-dd";
 
     private final static String TOPIC_HISTORICAL = "t_topic_historical";
 
@@ -82,11 +71,6 @@ public class TopicHistoricalService {
     public Map<String, List<Integer>> historicalDataList(TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest httpRequest,
                                                          HttpServletResponse httpResponse) throws GovernanceException {
         try {
-            String accountId = cookiesTools.getCookieValueByName(httpRequest, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-            Boolean flag = permissionService.verifyPermissions(topicHistoricalEntity.getBrokerId(), accountId);
-            if (!flag) {
-                throw new GovernanceException(ErrorCode.ACCESS_DENIED);
-            }
             if (topicHistoricalEntity.getBeginDate() == null || topicHistoricalEntity.getEndDate() == null) {
                 throw new GovernanceException("beginDate or endDate is empty");
             }
@@ -131,11 +115,6 @@ public class TopicHistoricalService {
 
     public List<TopicHistoricalEntity> eventList(TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest httpRequest) throws GovernanceException {
         try {
-            String accountId = cookiesTools.getCookieValueByName(httpRequest, ConstantProperties.COOKIE_MGR_ACCOUNT_ID);
-            Boolean flag = permissionService.verifyPermissions(topicHistoricalEntity.getBrokerId(), accountId);
-            if (!flag) {
-                throw new GovernanceException(ErrorCode.ACCESS_DENIED);
-            }
             topicHistoricalEntity.setBeginDateStr(DateFormatUtils.format(topicHistoricalEntity.getBeginDate(), simpleDateFormat) + " 00:00:00");
             topicHistoricalEntity.setEndDateStr(DateFormatUtils.format(topicHistoricalEntity.getEndDate(), simpleDateFormat) + " 23:59:59");
             List<TopicHistoricalEntity> historicalEntities = topicHistoricalMapper.eventList(topicHistoricalEntity);
@@ -218,7 +197,7 @@ public class TopicHistoricalService {
         RuleEngineEntity ruleEngineEntity = new RuleEngineEntity();
         ruleEngineEntity.setRuleName(ruleName);
         ruleEngineEntity.setBrokerId(brokerEntity.getId());
-        ruleEngineEntity.setStatus(StatusEnum.NOT_STARTED.getCode());
+        ruleEngineEntity.setStatus(ConstantProperties.NOT_STARTED);
         ruleEngineEntity.setUserId(brokerEntity.getUserId());
         ruleEngineEntity.setGroupId(groupId);
         ruleEngineEntity.setCreateDate(new Date());
@@ -227,8 +206,8 @@ public class TopicHistoricalService {
         ruleEngineEntity.setSelectField(selectField);
         ruleEngineEntity.setPayload(JsonUtil.toJSONString(map));
         ruleEngineEntity.setRuleDataBaseId(dataBaseId);
-        ruleEngineEntity.setPayloadType(PayloadEnum.JSON.getCode());
-        ruleEngineEntity.setConditionType(ConditionTypeEnum.DATABASE.getCode());
+        ruleEngineEntity.setPayloadType(ConstantProperties.JSON);
+        ruleEngineEntity.setConditionType(ConstantProperties.RULE_DESTINATION_DATABASE);
         ruleEngineEntity.setFromDestination("#");
         ruleEngineEntity.setSystemTag(true);
         ruleEngineEntity.setOffSet("OFFSET_FIRST");
@@ -245,7 +224,7 @@ public class TopicHistoricalService {
             if (StringUtil.isBlank(mes)) {
                 throw new GovernanceException("group is empty");
             }
-            Map jsonObject = JsonUtil.parseObject(mes,Map.class);
+            Map jsonObject = JsonUtil.parseObject(mes, Map.class);
             Object data = jsonObject.get("data");
             if ("0".equals(jsonObject.get("code").toString()) && data instanceof List) {
                 groupList = (List) data;

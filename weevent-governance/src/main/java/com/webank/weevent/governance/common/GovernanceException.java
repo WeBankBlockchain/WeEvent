@@ -1,6 +1,4 @@
-package com.webank.weevent.governance.exception;
-
-import com.webank.weevent.governance.code.ErrorCode;
+package com.webank.weevent.governance.common;
 
 public class GovernanceException extends Exception {
 

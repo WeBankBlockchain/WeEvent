@@ -6,7 +6,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.weevent.governance.code.ConstantCode;
+import com.webank.weevent.governance.common.ConstantCode;
 import com.webank.weevent.governance.entity.BaseResponse;
 import com.webank.weevent.governance.utils.JsonUtil;
 
