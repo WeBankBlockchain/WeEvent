@@ -129,4 +129,9 @@ public class WeEventConstants {
 
     public static final int DEFAULT_CHAINCODE_PARAM_COUNT = 4;
 
+    /**
+     * The transaction poll attempts (max).
+     */
+    public static final Integer POLL_TRANSACTION_ATTEMPTS = 10;
+
 }
