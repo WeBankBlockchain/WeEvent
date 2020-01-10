@@ -33,10 +33,7 @@ public class JwtUtils {
             JWTVerifier build = JWT.require(Algorithm.HMAC256(GovernanceApplication.getPrivateSecret())).build();
             build.verify(token);
             String property = Security.getProperty(token);
-            if (property == null) {
-                return false;
-            }
-            return true;
+            return property != null;
         } catch (Exception e) {
             log.error("token verification failed", e);
             return false;
