@@ -24,6 +24,11 @@ class BaseModule {
       if (config.method === 'delete' || config.method === 'get') {
         config.url = config.url + config.data
       }
+      if (config.url.indexOf('login') > -1 || config.url.indexOf('user/check') > -1 || config.url.indexOf('user/register') > -1) {
+        localStorage.setItem('token', '')
+      } else {
+        config.headers.Authorization = localStorage.getItem('token')
+      }
       return config
     })
 
