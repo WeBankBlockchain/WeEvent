@@ -7,10 +7,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.webank.weevent.governance.common.GovernanceException;
+import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.RuleDatabaseEntity;
-import com.webank.weevent.governance.exception.GovernanceException;
-import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.service.RuleDatabaseService;
+import com.webank.weevent.governance.utils.JwtUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ public class RuleDatabaseController {
     @PostMapping("/list")
     public GovernanceResult getRuleDataBaseList(HttpServletRequest request, @RequestBody RuleDatabaseEntity ruleDatabaseEntity) throws GovernanceException {
         log.info("getRuleDataBaseList,userId:{}", ruleDatabaseEntity.getUserId());
+        ruleDatabaseEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
         List<RuleDatabaseEntity> ruleDatabases = ruleDatabaseService.getRuleDataBaseList(request, ruleDatabaseEntity);
         return new GovernanceResult(ruleDatabases);
     }
@@ -42,6 +44,7 @@ public class RuleDatabaseController {
     public GovernanceResult addRuleDatabase(@Valid @RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request,
                                             HttpServletResponse response) throws GovernanceException {
         log.info("add  ruleDatabaseEntity service into db :{}", ruleDatabaseEntity);
+        ruleDatabaseEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
         RuleDatabaseEntity rule = ruleDatabaseService.addRuleDatabase(ruleDatabaseEntity, request, response);
         return new GovernanceResult(rule);
     }
@@ -50,6 +53,7 @@ public class RuleDatabaseController {
     public GovernanceResult updateRuleDatabase(@Validated @RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request,
                                                HttpServletResponse response) throws GovernanceException {
         log.info("update  ruleDatabaseEntity service ,id:{}", ruleDatabaseEntity.getId());
+        ruleDatabaseEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
         ruleDatabaseService.updateRuleDatabase(ruleDatabaseEntity, request, response);
         return new GovernanceResult(true);
     }
