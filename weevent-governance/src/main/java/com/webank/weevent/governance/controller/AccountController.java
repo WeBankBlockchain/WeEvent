@@ -6,12 +6,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.webank.weevent.governance.code.ConstantCode;
+import com.webank.weevent.governance.common.ConstantCode;
+import com.webank.weevent.governance.common.GovernanceException;
+import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.entity.BaseResponse;
-import com.webank.weevent.governance.exception.GovernanceException;
-import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.service.AccountService;
+import com.webank.weevent.governance.utils.JwtUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
@@ -38,7 +39,7 @@ public class AccountController {
     }
 
     @PostMapping(value = "/register")
-    public GovernanceResult register(@Valid @RequestBody AccountEntity user, BindingResult result) {
+    public GovernanceResult register(@Valid @RequestBody AccountEntity user, BindingResult result) throws GovernanceException {
         return accountService.register(user);
     }
 
@@ -79,7 +80,7 @@ public class AccountController {
     @RequestMapping("/accountList")
     public GovernanceResult accountEntityList(AccountEntity accountEntity, HttpServletRequest request,
                                               HttpServletResponse response) throws GovernanceException {
-        List<AccountEntity> accountEntities = accountService.accountEntityList(request, accountEntity);
+        List<AccountEntity> accountEntities = accountService.accountEntityList(request, accountEntity, JwtUtils.getAccountId(request));
         return new GovernanceResult(accountEntities);
     }
 

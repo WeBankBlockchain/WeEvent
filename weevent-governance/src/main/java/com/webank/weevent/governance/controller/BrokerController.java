@@ -6,11 +6,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.webank.weevent.governance.code.ErrorCode;
+import com.webank.weevent.governance.common.ErrorCode;
+import com.webank.weevent.governance.common.GovernanceException;
+import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.BrokerEntity;
-import com.webank.weevent.governance.exception.GovernanceException;
-import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.service.BrokerService;
+import com.webank.weevent.governance.utils.JwtUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,8 @@ public class BrokerController {
     @GetMapping("/list")
     public List<BrokerEntity> getAllBrokers(HttpServletRequest request) {
         log.info("get all brokers ");
-        return brokerService.getBrokers(request);
+        String accountId = JwtUtils.getAccountId(request);
+        return brokerService.getBrokers(request, accountId);
     }
 
     // get broker service by id
@@ -51,6 +53,7 @@ public class BrokerController {
     public GovernanceResult addBroker(@Valid @RequestBody BrokerEntity brokerEntity, HttpServletRequest request,
                                       HttpServletResponse response) throws GovernanceException {
         log.info("add  brokerEntity service into db brokerEntity :{} ", brokerEntity);
+        brokerEntity.setUserId(1);
         return brokerService.addBroker(brokerEntity, request, response);
     }
 
@@ -58,6 +61,7 @@ public class BrokerController {
     public GovernanceResult updateBroker(@RequestBody BrokerEntity brokerEntity, HttpServletRequest request,
                                          HttpServletResponse response) throws GovernanceException {
         log.info("update  brokerEntity service ,brokerEntity:{} ", brokerEntity);
+        brokerEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
         return brokerService.updateBroker(brokerEntity, request, response);
     }
 

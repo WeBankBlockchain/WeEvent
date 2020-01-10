@@ -1,8 +1,6 @@
-package com.webank.weevent.governance.result;
+package com.webank.weevent.governance.common;
 
 import java.util.List;
-
-import com.webank.weevent.governance.code.ErrorCode;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

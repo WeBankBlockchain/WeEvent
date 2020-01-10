@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
 
 import com.webank.weevent.governance.entity.base.AccountBase;
 
@@ -31,5 +32,11 @@ public class AccountEntity extends AccountBase {
     @Transient
     private List<Integer> permissionIdList;
 
+    public AccountEntity(@NotBlank String username) {
+        super(username);
+    }
 
+    public AccountEntity() {
+        super();
+    }
 }
