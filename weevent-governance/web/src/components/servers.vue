@@ -127,18 +127,6 @@ export default {
       if (value === '') {
         callback()
       } else {
-        // let data = {
-        //   'userId': parseInt(localStorage.getItem('userId')),
-        //   'id': parseInt(localStorage.getItem('brokerId')),
-        //   'weBaseUrl': value
-        // }
-        // API.checkBrokerServer(data).then(res => {
-        //   if (res.data === 'SUCCESS') {
-        //     callback()
-        //   } else {
-        //     callback('error')
-        //   }
-        // })
         callback()
       }
     }
@@ -217,8 +205,7 @@ export default {
       let data = {
         name: this.form.name,
         brokerUrl: this.form.brokerUrl,
-        webaseUrl: this.form.webaseUrl,
-        userId: Number(localStorage.getItem('userId'))
+        webaseUrl: this.form.webaseUrl
       }
       data.userIdList = [].concat(this.form.userIdList)
       API.addServer(data).then(res => {
@@ -262,8 +249,7 @@ export default {
         name: this.form.name,
         brokerUrl: this.form.brokerUrl,
         webaseUrl: this.form.webaseUrl,
-        id: this.brokerId,
-        userId: Number(localStorage.getItem('userId'))
+        id: this.brokerId
       }
       data.userIdList = [].concat(this.form.userIdList)
       API.updateServer(data).then(res => {
