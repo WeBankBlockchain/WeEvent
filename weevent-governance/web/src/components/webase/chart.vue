@@ -81,8 +81,7 @@ export default{
         'beginDate': vm.selectTime[0],
         'endDate': vm.selectTime[1],
         'groupId': localStorage.getItem('groupId'),
-        'brokerId': localStorage.getItem('brokerId'),
-        'userId': localStorage.getItem('userId')
+        'brokerId': localStorage.getItem('brokerId')
       }
       vm.option.series[0].data = []
       API.eventList(data).then(res => {

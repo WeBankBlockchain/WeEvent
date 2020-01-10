@@ -1,34 +1,34 @@
 {
   "getAll": {
     "methods": "get",
-    "url": "weevent-governance/webase-node-mgr/group/all"
+    "url": "webase-node-mgr/group/all"
   },
   "nodeList": {
     "methods": "get",
-    "url": "weevent-governance/webase-node-mgr/node/nodeList"
+    "url": "webase-node-mgr/node/nodeList"
   },
   "general": {
     "methods": "get",
-    "url": "weevent-governance/webase-node-mgr/group/general"
+    "url": "webase-node-mgr/group/general"
   },
   "transDaily": {
     "methods": "get",
-    "url": "weevent-governance/webase-node-mgr/group/transDaily"
+    "url": "webase-node-mgr/group/transDaily"
   },
   "transList": {
     "methods": "get",
-    "url": "weevent-governance/webase-node-mgr/transaction/transList"
+    "url": "webase-node-mgr/transaction/transList"
   },
   "blockList": {
     "methods": "get",
-    "url": "weevent-governance/webase-node-mgr/block/blockList"
+    "url": "webase-node-mgr/block/blockList"
   },
   "blockByNumber": {
     "methods": "get",
-    "url": "weevent-governance/webase-node-mgr/block/blockByNumber"
+    "url": "webase-node-mgr/block/blockByNumber"
   },
   "getEvent": {
     "methods": "get",
-    "url": "weevent-governance/webase-node-mgr/block/transactionReceipt"
+    "url": "webase-node-mgr/block/transactionReceipt"
   }
 }

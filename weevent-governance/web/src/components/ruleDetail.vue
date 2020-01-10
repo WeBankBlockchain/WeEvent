@@ -120,7 +120,7 @@
 <script>
 import API from '../API/resource'
 import tree from './tree.vue'
-import {checkRule} from '../utils/checkRule'
+import { checkRule } from '../utils/checkRule'
 export default {
   data () {
     var ruleName = (rule, value, callback) => {
@@ -484,7 +484,6 @@ export default {
     getDetail () {
       let vm = this
       let data = {
-        'userId': localStorage.getItem('userId'),
         'brokerId': localStorage.getItem('brokerId'),
         'id': sessionStorage.getItem('ruleId')
       }
@@ -552,7 +551,7 @@ export default {
       })
     },
     getDBLsit () {
-      API.dbList({'userId': localStorage.getItem('userId')}).then(res => {
+      API.dbList({}).then(res => {
         if (res.data.status === 200) {
           this.dbList = [].concat(res.data.data)
         }
@@ -615,6 +614,7 @@ export default {
               data.payloadMap = JSON.parse(vm.rule.payloadMap)
             }
           }
+          data.conditionFieldJson = JSON.stringify(vm.rule.conditionFieldJson)
         }
         if (e === 'sql') {
           vm.ruleLetter = []
