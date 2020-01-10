@@ -1,10 +1,12 @@
 package com.webank.weevent.governance.junit;
 
+import java.security.Security;
 import java.util.Map;
 
 import com.webank.weevent.governance.JUnitTestBase;
-import com.webank.weevent.governance.result.GovernanceResult;
+import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.utils.JsonUtil;
+import com.webank.weevent.governance.utils.JwtUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
@@ -29,7 +31,6 @@ public class AccountControllerTest extends JUnitTestBase {
 
     private MockMvc mockMvc;
 
-
     @Before
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
@@ -43,7 +44,6 @@ public class AccountControllerTest extends JUnitTestBase {
         testRegister();
     }
 
-
     public void testRegister() throws Exception {
         String content = "{\"username\":\"zjy05\",\"email\":\"admin@test.com\",\"password\":\"123456\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/user/register").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
@@ -55,7 +55,6 @@ public class AccountControllerTest extends JUnitTestBase {
 
     @Test
     public void testRegisterException001() throws Exception {
-
         String content = "{\"username\":\"zjy05\",\"email\":\"admin@test.com\",\"password\":\"123456\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/user/register").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
                 .andReturn().getResponse();
@@ -97,7 +96,10 @@ public class AccountControllerTest extends JUnitTestBase {
 
     @Test
     public void testAccountList() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/user/accountList").contentType(MediaType.APPLICATION_JSON_UTF8))
+
+        String token = createToken();
+        Security.setProperty(token, "1");
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/user/accountList").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token))
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);

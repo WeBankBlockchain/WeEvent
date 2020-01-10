@@ -2,9 +2,9 @@ package com.webank.weevent.governance.controller;
 
 import java.util.List;
 
+import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.entity.PermissionEntity;
-import com.webank.weevent.governance.result.GovernanceResult;
 import com.webank.weevent.governance.service.PermissionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
