@@ -86,17 +86,20 @@ export default {
   },
   methods: {
     onSubmit (formName) {
+      let sha256 = require('js-sha256').sha256
+      let password = sha256(this.form.name + this.form.passWord)
       let data = {
         'username': this.form.name,
-        'password': this.form.passWord
+        'password': password.toUpperCase()
       }
       this.$refs[formName].validate((valid) => {
         if (valid) {
           // login
           API.login(data).then(res => {
             if (res.status === 200 && res.data.code === 0) {
-              localStorage.setItem('userId', res.data.data.userId)
-              localStorage.setItem('user', res.data.data.username)
+              let base = JSON.parse(res.data.data)
+              localStorage.setItem('user', base.username)
+              localStorage.setItem('token', base.Authorization)
               this.show_error = false
               this.$router.push('./index')
             } else if (res.data.code === 202034) {
