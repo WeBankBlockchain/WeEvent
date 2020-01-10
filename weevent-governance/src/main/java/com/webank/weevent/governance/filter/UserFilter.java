@@ -20,21 +20,16 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Slf4j
 public class UserFilter extends OncePerRequestFilter {
 
-    private JwtUtils jwtUtils;
 
-
-    public UserFilter(JwtUtils jwtUtils) {
-        this.jwtUtils = jwtUtils;
-    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = request.getHeader(JwtUtils.AUTHORIZATION_HEADER_PREFIX);
         if (!StringUtils.isBlank(token)) {
             JwtUtils.verifierToken(token);
-            AccountEntity accountEntity = jwtUtils.decodeToken(token);
+            AccountEntity accountEntity = JwtUtils.decodeToken(token);
             if (accountEntity != null) {
-                log.info("get token from HTTP header, {} : {}", jwtUtils.AUTHORIZATION_HEADER_PREFIX, token);
+                log.info("get token from HTTP header, {} : {}", JwtUtils.AUTHORIZATION_HEADER_PREFIX, token);
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(accountEntity.getUsername(), null, null);
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);

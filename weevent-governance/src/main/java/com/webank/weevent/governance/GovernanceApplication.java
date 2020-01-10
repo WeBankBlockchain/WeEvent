@@ -12,6 +12,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import com.webank.weevent.governance.utils.H2ServerUtil;
+import com.webank.weevent.governance.utils.JwtUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -75,8 +76,6 @@ public class GovernanceApplication {
     @Value("${http.client.socket-timeout:5000}")
     private int socketTimeout;
 
-    private static String privateSecret;
-
 
     private PoolingHttpClientConnectionManager cm;
 
@@ -86,7 +85,7 @@ public class GovernanceApplication {
         SpringApplication app = new SpringApplication(GovernanceApplication.class);
         app.addListeners(new ApplicationPidFileWriter());
         ConfigurableApplicationContext run = app.run(args);
-        privateSecret = run.getEnvironment().getProperty("jwt.private.secret");
+        JwtUtils.setPrivateSecret(run.getEnvironment().getProperty("jwt.private.secret"));
         log.info("Start Governance success");
     }
 
@@ -203,10 +202,6 @@ public class GovernanceApplication {
         public void checkClientTrusted(X509Certificate[] certs, String authType) {
             // don't check
         }
-    }
-
-    public static String getPrivateSecret() {
-        return privateSecret;
     }
 
 }

@@ -11,7 +11,6 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -28,13 +27,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public class JUnitTestBase {
     @Value("${server.port}")
     public String listenPort;
+    @Value("${jwt.private.secret}")
+    private String privateSecret;
     @Rule
     public TestName testName = new TestName();
     @Rule
     public Timeout timeout = new Timeout(120, TimeUnit.SECONDS);
 
-    @Autowired
-    private JwtUtils jwtUtils;
 
     @Test
     public void testBuild() {
@@ -43,7 +42,8 @@ public class JUnitTestBase {
 
 
     public String createToken() {
-        String token = jwtUtils.encodeToken("admin", JwtUtils.EXPIRE_TIME);
+        JwtUtils.setPrivateSecret(privateSecret);
+        String token = JwtUtils.encodeToken("admin", JwtUtils.EXPIRE_TIME);
         Security.setProperty(token, "1");
         return token;
     }

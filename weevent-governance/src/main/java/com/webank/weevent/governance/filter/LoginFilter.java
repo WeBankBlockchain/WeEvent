@@ -24,12 +24,9 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private AuthenticationSuccessHandler loginSuccessHandler;
 
-    private JwtUtils jwtUtils;
-
-    public LoginFilter(AuthenticationManager authenticationManager, AuthenticationSuccessHandler loginSuccessHandler, JwtUtils jwtUtils) {
+    public LoginFilter(AuthenticationManager authenticationManager, AuthenticationSuccessHandler loginSuccessHandler) {
         this.authenticationManager = authenticationManager;
         this.loginSuccessHandler = loginSuccessHandler;
-        this.jwtUtils = jwtUtils;
         setFilterProcessesUrl("/user/login");
     }
 
@@ -52,7 +49,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
         String username = ((User) authResult.getPrincipal()).getUsername();
-        String token = jwtUtils.encodeToken(username, JwtUtils.EXPIRE_TIME);
+        String token = JwtUtils.encodeToken(username, JwtUtils.EXPIRE_TIME);
         response.addHeader(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token);
         loginSuccessHandler.onAuthenticationSuccess(request, response, authResult);
     }
