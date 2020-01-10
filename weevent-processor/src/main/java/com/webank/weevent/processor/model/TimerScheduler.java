@@ -28,7 +28,7 @@ public class TimerScheduler {
     private String jdbcUrl;
 
     @Column(name = "time_period")
-    private String timePeriod;
+    private Long timePeriod;
 
     @Column(name = "parsing_sql")
     private String parsingSql;
@@ -64,11 +64,11 @@ public class TimerScheduler {
         this.jdbcUrl = jdbcUrl;
     }
 
-    public String getTimePeriod() {
+    public Long getTimePeriod() {
         return timePeriod;
     }
 
-    public void setTimePeriod(String timePeriod) {
+    public void setTimePeriod(Long timePeriod) {
         this.timePeriod = timePeriod;
     }
 
