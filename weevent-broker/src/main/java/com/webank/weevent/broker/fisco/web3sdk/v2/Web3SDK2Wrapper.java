@@ -51,6 +51,7 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.BcosTransactionReceip
 import org.fisco.bcos.web3j.protocol.core.methods.response.BlockNumber;
 import org.fisco.bcos.web3j.protocol.core.methods.response.GroupList;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeIDList;
+import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TotalTransactionCount;
 import org.fisco.bcos.web3j.protocol.core.methods.response.Transaction;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -73,6 +74,7 @@ public class Web3SDK2Wrapper {
     public final static String PEERS = "peers";
     public final static String VIEW = "view";
     private static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    public static String chainID;
 
     // static gas provider
     public static final ContractGasProvider gasProvider = new ContractGasProvider() {
@@ -143,12 +145,14 @@ public class Web3SDK2Wrapper {
             Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
 
             // check connect with getNodeVersion command
-            String nodeVersion = web3j.getNodeVersion().send().getNodeVersion().getVersion();
+            NodeVersion.Version version = web3j.getNodeVersion().send().getNodeVersion();
+            String nodeVersion = version.getVersion();
             if (StringUtils.isBlank(nodeVersion)
                     || !nodeVersion.contains(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {
                 log.error("init web3sdk failed, mismatch FISCO-BCOS version in node: {}", nodeVersion);
                 throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
             }
+            chainID = version.getChainID();
 
             log.info("initialize web3sdk success, group id: {}", groupId);
             return web3j;
