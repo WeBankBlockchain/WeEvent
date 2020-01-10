@@ -3,7 +3,7 @@ package com.webank.weevent.governance.controller;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.weevent.governance.exception.GovernanceException;
+import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.service.CommonService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +30,7 @@ public class ForwardController {
     private String url;
 
     @RequestMapping(value = "/weevent/{path1}/{path2}", method = RequestMethod.GET)
-    public Object forward(HttpServletRequest request, HttpServletResponse response, @PathVariable(name = "path1") String path1, @PathVariable(name = "path2") String path2)throws GovernanceException {
+    public Object forward(HttpServletRequest request, HttpServletResponse response, @PathVariable(name = "path1") String path1, @PathVariable(name = "path2") String path2) throws GovernanceException {
         log.info("weevent url: /wevent/ {}  \"/\" {}", path1, path2);
         String forwarUrl = new StringBuffer(this.url).append("/").append(path1).append("/").append(path2).toString();
         try {
