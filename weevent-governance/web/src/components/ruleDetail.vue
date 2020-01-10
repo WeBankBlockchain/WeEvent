@@ -614,6 +614,7 @@ export default {
               data.payloadMap = JSON.parse(vm.rule.payloadMap)
             }
           }
+          data.conditionFieldJson = JSON.stringify(vm.rule.conditionFieldJson)
         }
         if (e === 'sql') {
           vm.ruleLetter = []
