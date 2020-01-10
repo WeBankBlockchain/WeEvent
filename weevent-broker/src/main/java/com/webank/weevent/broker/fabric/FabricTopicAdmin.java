@@ -3,6 +3,7 @@ package com.webank.weevent.broker.fabric;
 import java.util.List;
 
 import com.webank.weevent.broker.fabric.sdk.FabricDelegate;
+import com.webank.weevent.broker.fisco.dto.ContractContext;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.plugin.IEventTopic;
@@ -132,6 +133,11 @@ public class FabricTopicAdmin implements IEventTopic {
 
         return fabricDelegate.getFabricMap().get(queryEntity.getGroupId())
                 .queryNodeList(queryEntity.getPageNumber(), queryEntity.getPageSize());
+    }
+
+    @Override
+    public ContractContext getContractContext(String groupId) throws BrokerException {
+        return null;
     }
 
     protected void validateChannelName(String channelName) throws BrokerException {
