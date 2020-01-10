@@ -3,7 +3,7 @@ package com.webank.weevent.processor.controller;
 import java.util.List;
 
 import com.webank.weevent.processor.model.TimerScheduler;
-import com.webank.weevent.processor.quartz.TimerSchedulerJob;
+import com.webank.weevent.processor.scheduler.TimerSchedulerJob;
 import com.webank.weevent.processor.utils.BaseRspEntity;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.sdk.BrokerException;
