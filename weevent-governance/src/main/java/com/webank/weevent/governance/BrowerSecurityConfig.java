@@ -1,10 +1,13 @@
 package com.webank.weevent.governance;
 
+import java.util.Objects;
+
+import com.webank.weevent.governance.filter.LoginFilter;
+import com.webank.weevent.governance.filter.UserFilter;
 import com.webank.weevent.governance.handler.JsonAccessDeniedHandler;
 import com.webank.weevent.governance.handler.JsonAuthenticationEntryPoint;
 import com.webank.weevent.governance.handler.JsonLogoutSuccessHandler;
 import com.webank.weevent.governance.handler.LoginFailHandler;
-import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.service.AccountDetailsService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +18,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @Configuration
@@ -24,10 +28,6 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private AccountDetailsService userDetailService;
-
-    @Qualifier(value = "loginSuccessHandler")
-    @Autowired
-    private AuthenticationSuccessHandler loginSuccessHandler;
 
     @Qualifier(value = "loginFailHandler")
     @Autowired
@@ -38,6 +38,11 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private JsonAccessDeniedHandler jsonAccessDeniedHandler;
+
+    @Qualifier("loginSuccessHandler")
+    @Autowired
+    private AuthenticationSuccessHandler authenticationSuccessHandler;
+
 
     @Autowired
     private JsonLogoutSuccessHandler jsonLogoutSuccessHandler;
@@ -53,23 +58,18 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
                 .usernameParameter("username")
                 .passwordParameter("password")
                 .permitAll()
-                .successHandler(loginSuccessHandler) // if login success
+                .successHandler(authenticationSuccessHandler) // if login success
                 .failureHandler(loginfailHandler) // if login fail
                 .and()
+                .addFilterAfter(new UserFilter(), LoginFilter.class)
+                .addFilter(new LoginFilter(authenticationManagerBean(), authenticationSuccessHandler))
                 .authorizeRequests()
-                .antMatchers("/user/**", "/", "/static/**", "/weevent-governance/user/**")
-                .permitAll()
-                .anyRequest()
-                .authenticated()
-                .and()
-                .csrf()
-                .disable()
-                .httpBasic()
-                .authenticationEntryPoint(jsonAuthenticationEntryPoint)
-                .and()
-                .logout()
-                .logoutUrl("/user/logout")
-                .deleteCookies(ConstantProperties.COOKIE_JSESSIONID, ConstantProperties.COOKIE_MGR_ACCOUNT)
+                .antMatchers("/user/**", "/", "/static/**", "/weevent-governance/user/**").permitAll()
+                .anyRequest().authenticated()
+                .and().csrf()
+                .disable().httpBasic().authenticationEntryPoint(jsonAuthenticationEntryPoint)
+                .disable().cors().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and().logout().logoutUrl("/user/logout")
                 .logoutSuccessHandler(jsonLogoutSuccessHandler)
                 .permitAll();
     }
@@ -82,7 +82,18 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailService).passwordEncoder(new BCryptPasswordEncoder());
+        auth.userDetailsService(userDetailService).passwordEncoder(new PasswordEncoder() {
+            @Override
+            public String encode(CharSequence rawPassword) {
+                return rawPassword.toString();
+            }
+
+            @Override
+            public boolean matches(CharSequence rawPassword, String encodedPassword) {
+                return Objects.equals(rawPassword.toString(), encodedPassword);
+            }
+        });
     }
+
 }
 
