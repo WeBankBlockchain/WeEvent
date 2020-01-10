@@ -132,6 +132,6 @@ public class WeEventConstants {
     /**
      * The transaction poll attempts (max).
      */
-    public static final Integer POLL_TRANSACTION_ATTEMPTS = 5;
+    public static final Integer POLL_TRANSACTION_ATTEMPTS = 10;
 
 }
