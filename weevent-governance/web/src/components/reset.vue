@@ -85,7 +85,6 @@ export default {
     login (e) {
       API.login(e).then(res => {
         if (res.status === 200 && res.data.code === 0) {
-          localStorage.setItem('userId', res.data.data.userId)
           localStorage.setItem('user', res.data.data.username)
           this.$router.push('./index')
         } else {

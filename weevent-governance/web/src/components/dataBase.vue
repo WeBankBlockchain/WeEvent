@@ -53,7 +53,7 @@
           <el-input v-model.trim="form.username"  autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item :label="$t('rule.JDBCpassword')" prop='password'>
-          <el-input v-model.trim="form.password"  autocomplete="off"></el-input>
+          <el-input v-model.trim="form.password"  type='password'  autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item :label="$t('rule.optionalParameter')">
           <el-input v-model.trim="form.optionalParameter"  autocomplete="off"></el-input>
@@ -186,7 +186,7 @@ export default {
   },
   methods: {
     getDBLsit () {
-      API.dbList({'userId': localStorage.getItem('userId')}).then(res => {
+      API.dbList({}).then(res => {
         if (res.data.status === 200) {
           this.tableData = [].concat(res.data.data)
         }
@@ -201,8 +201,7 @@ export default {
           'username': vm.form.username,
           'password': vm.form.password,
           'tableName': vm.form.tableName,
-          'optionalParameter': vm.form.optionalParameter,
-          'userId': localStorage.getItem('userId')
+          'optionalParameter': vm.form.optionalParameter
         }
         if (valid) {
           if (vm.type === 1) {
@@ -263,8 +262,7 @@ export default {
         type: 'warning'
       }).then(() => {
         let data = {
-          'id': e.id,
-          'userId': localStorage.getItem('userId')
+          'id': e.id
         }
         API.dbDelete(data).then(res => {
           if (res.data.status === 200) {
@@ -294,8 +292,7 @@ export default {
           'username': vm.form.username,
           'password': vm.form.password,
           'tableName': vm.form.tableName,
-          'optionalParameter': vm.form.optionalParameter,
-          'userId': localStorage.getItem('userId')
+          'optionalParameter': vm.form.optionalParameter
         }
         if (valid) {
           API.checkJDBC(data).then(res => {
