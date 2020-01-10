@@ -4,12 +4,10 @@ package com.webank.weevent.governance.junit;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.http.Cookie;
-
 import com.webank.weevent.governance.JUnitTestBase;
-import com.webank.weevent.governance.properties.ConstantProperties;
-import com.webank.weevent.governance.result.GovernanceResult;
+import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.utils.JsonUtil;
+import com.webank.weevent.governance.utils.JwtUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
@@ -34,10 +32,10 @@ public class BrokerControllerTest extends JUnitTestBase {
     private WebApplicationContext wac;
 
 
-
     private MockMvc mockMvc;
 
-    private Cookie cookie;
+    private String token;
+
 
     @Value("${weevent.url:http://127.0.0.1:7000/weevent}")
     private String brokerUrl;
@@ -47,7 +45,6 @@ public class BrokerControllerTest extends JUnitTestBase {
     @Before
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-        this.cookie = new Cookie(ConstantProperties.COOKIE_MGR_ACCOUNT_ID, "1");
         brokerIdMap.put("brokerId", 1);
     }
 
@@ -56,13 +53,14 @@ public class BrokerControllerTest extends JUnitTestBase {
         log.info("=============================={}.{}==============================",
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
+        token = createToken();
         addBroker();
     }
 
     //add broker
     public void addBroker() throws Exception {
         String content = "{\"name\":\"broker2\",\"brokerUrl\":\"" + this.brokerUrl + "\",\"userId\":\"1\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
@@ -72,7 +70,7 @@ public class BrokerControllerTest extends JUnitTestBase {
     @Test
     public void testAddBrokerException001() throws Exception {
         String content = "{\"name\":\"broker\",\"brokerUrl\":\"" + this.brokerUrl + "\",\"userId\":\"1\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
@@ -81,11 +79,11 @@ public class BrokerControllerTest extends JUnitTestBase {
 
     @Test
     public void testAddBrokerException002() throws Exception {
-        String content = "{\"name\":\"broker\",\"brokerUrl\":\"" +"" + "\",\"userId\":\"1\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
+        String content = "{\"name\":\"broker\",\"brokerUrl\":\"" + "" + "\",\"userId\":\"1\"}";
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(),Map.class);
+        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(), Map.class);
         Assert.assertEquals("100105", jsonObject.get("code").toString());
     }
 
@@ -93,7 +91,7 @@ public class BrokerControllerTest extends JUnitTestBase {
     @Test
     public void updateBroker() throws Exception {
         String content = "{\"id\":" + this.brokerIdMap.get("brokerId") + ",\"name\":\"broker1\",\"brokerUrl\":\"" + this.brokerUrl + "\",\"userId\":\"1\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/update").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content)).andReturn().getResponse();
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/update").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token).content(content)).andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
 
     }
@@ -102,7 +100,7 @@ public class BrokerControllerTest extends JUnitTestBase {
     // get broker by id
     @Test
     public void getBrokerByBrokerId() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/broker/" + this.brokerIdMap.get("brokerId")).contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie)).andReturn();
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/broker/" + this.brokerIdMap.get("brokerId")).contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token)).andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         String contentAsString = response.getContentAsString();
@@ -112,7 +110,7 @@ public class BrokerControllerTest extends JUnitTestBase {
     // get broker by userId
     @Test
     public void getBrokerByUserId() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/broker/list?userId=1").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/broker/list?userId=1").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token))
                 .andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
@@ -124,10 +122,10 @@ public class BrokerControllerTest extends JUnitTestBase {
     //delete broker by id
     public void deleteBroker() throws Exception {
         String content = "{\"id\":" + this.brokerIdMap.get("brokerId") + ",\"userId\":\"1\"}";
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/delete").contentType(MediaType.APPLICATION_JSON_UTF8).cookie(this.cookie).content(content))
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/delete").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(),Map.class);
+        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(), Map.class);
         Assert.assertEquals(jsonObject.get("status").toString(), "200");
     }
 
