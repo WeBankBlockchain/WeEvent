@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.dto.ContractContext;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.LRUCache;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
@@ -279,6 +280,17 @@ public class FiscoBcosDelegate {
         }
     }
 
+    public CompletableFuture<SendResult> sendRawTransaction(String topicName, Long groupId, String transactionHex) throws BrokerException {
+        checkVersion(groupId);
+
+        if (this.fiscoBcos != null) {
+            throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
+        } else {
+            return this.fiscoBcos2Map.get(groupId).sendRawTransaction(topicName, transactionHex);
+        }
+    }
+
+
     public Long getBlockHeight(Long groupId) throws BrokerException {
         checkVersion(groupId);
 
@@ -408,4 +420,13 @@ public class FiscoBcosDelegate {
         return this.fiscoConfig;
     }
 
+    public ContractContext getContractContext(Long groupId) throws BrokerException {
+        checkVersion(groupId);
+
+        if (this.fiscoBcos != null) {
+            throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
+        } else {
+            return this.fiscoBcos2Map.get(groupId).getContractContext();
+        }
+    }
 }
