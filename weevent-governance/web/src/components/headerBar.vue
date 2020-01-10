@@ -86,9 +86,9 @@ export default {
           API.loginOut('').then(res => {
             if (res.status === 200 && res.data.code === 0) {
               localStorage.removeItem('user')
-              localStorage.removeItem('userId')
               localStorage.removeItem('groupId')
               localStorage.removeItem('brokerId')
+              localStorage.removeItem('token')
               this.$router.push('./login')
             }
           })
@@ -107,9 +107,8 @@ export default {
     },
     getServer () {
       let brokerId = localStorage.getItem('brokerId')
-      let url = '?userId=' + localStorage.getItem('userId')
       let vm = this
-      API.getServer(url).then(res => {
+      API.getServer('').then(res => {
         if (res.status === 200) {
           if (res.data.length) {
             vm.servers = [].concat(res.data)

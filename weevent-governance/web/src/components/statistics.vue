@@ -100,8 +100,7 @@ export default {
         'endDate': vm.selectTime[1],
         'topicList': [],
         'groupId': localStorage.getItem('groupId'),
-        'brokerId': localStorage.getItem('brokerId'),
-        'userId': localStorage.getItem('userId')
+        'brokerId': localStorage.getItem('brokerId')
       }
       API.historicalData(data).then(res => {
         if (res.data.status === 200) {
@@ -122,8 +121,7 @@ export default {
         'endDate': vm.selectTime[1],
         'topicList': vm.topic,
         'groupId': localStorage.getItem('groupId'),
-        'brokerId': localStorage.getItem('brokerId'),
-        'userId': localStorage.getItem('userId')
+        'brokerId': localStorage.getItem('brokerId')
       }
       vm.getTopic()
       API.historicalData(data).then(res => {
