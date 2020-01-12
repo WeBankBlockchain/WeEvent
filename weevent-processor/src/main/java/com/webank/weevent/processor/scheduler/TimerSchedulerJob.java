@@ -1,21 +1,20 @@
 package com.webank.weevent.processor.scheduler;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.webank.weevent.processor.model.TimerScheduler;
 import com.webank.weevent.processor.repository.TimerSchedulerRepository;
 import com.webank.weevent.sdk.BrokerException;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Timer;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @Slf4j
@@ -64,7 +63,6 @@ public class TimerSchedulerJob {
             TimerScheduler oldScheduler = schedulerRepository.findById(timerScheduler.getId());
             BeanUtils.copyProperties(timerScheduler, oldScheduler, "createdTime");
             oldScheduler.setUpdatedTime(new Date());
-            timerScheduler = schedulerRepository.save(oldScheduler);
             timerSchedulerMap.put(oldScheduler.getId(), oldScheduler);
             //stop old task
             this.stopTask(timerMap.get(timerScheduler.getId()));
@@ -72,6 +70,7 @@ public class TimerSchedulerJob {
             //create new task
             Timer timerTask = this.createTask(timerScheduler);
             timerMap.put(oldScheduler.getId(), timerTask);
+            timerScheduler = schedulerRepository.save(oldScheduler);
             log.info("update timerScheduler success");
             return timerScheduler;
         } catch (Exception e) {
@@ -83,8 +82,12 @@ public class TimerSchedulerJob {
     @Transactional(rollbackFor = Throwable.class)
     public void deleteTimerScheduler(TimerScheduler timerScheduler) throws BrokerException {
         try {
-            schedulerRepository.delete(timerScheduler);
-            this.stopTask(timerMap.get(timerScheduler.getId()));
+            if(timerMap.get(timerScheduler.getId())!=null){
+                timerSchedulerMap.remove(timerScheduler.getId());
+                this.stopTask(timerMap.get(timerScheduler.getId()));
+                schedulerRepository.delete(timerScheduler);
+
+            }
             log.info("delete timerScheduler success");
         } catch (Exception e) {
             log.error("delete timerScheduler fail", e);
