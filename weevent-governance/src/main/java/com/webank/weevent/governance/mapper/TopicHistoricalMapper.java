@@ -2,15 +2,15 @@ package com.webank.weevent.governance.mapper;
 
 import java.util.List;
 
-import com.webank.weevent.governance.entity.TopicHistoricalEntity;
+import com.webank.weevent.governance.entity.TopicEventCountEntity;
 
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface TopicHistoricalMapper {
 
-    List<TopicHistoricalEntity> historicalDataList(TopicHistoricalEntity topicHistoricalEntity);
+    List<TopicEventCountEntity> historicalDataList(TopicEventCountEntity topicEventCountEntity);
 
-    List<TopicHistoricalEntity> eventList(TopicHistoricalEntity topicHistoricalEntity);
+    List<TopicEventCountEntity> eventList(TopicEventCountEntity topicEventCountEntity);
 
 }

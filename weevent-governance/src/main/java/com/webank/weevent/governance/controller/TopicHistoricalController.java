@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.common.GovernanceResult;
-import com.webank.weevent.governance.entity.TopicHistoricalEntity;
+import com.webank.weevent.governance.entity.TopicEventCountEntity;
 import com.webank.weevent.governance.service.TopicHistoricalService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -30,19 +30,19 @@ public class TopicHistoricalController {
     private TopicHistoricalService topicHistoricalService;
 
     @PostMapping("/list")
-    public GovernanceResult historicalDataList(@RequestBody TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request,
+    public GovernanceResult historicalDataList(@RequestBody TopicEventCountEntity topicEventCountEntity, HttpServletRequest request,
                                                HttpServletResponse response) throws GovernanceException {
-        log.info("get  historicalDataEntity:{} ", topicHistoricalEntity);
-        Map<String, List<Integer>> returnMap = topicHistoricalService.historicalDataList(topicHistoricalEntity, request, response);
+        log.info("get  historicalDataEntity:{} ", topicEventCountEntity);
+        Map<String, List<Integer>> returnMap = topicHistoricalService.historicalDataList(topicEventCountEntity, request, response);
         return new GovernanceResult(returnMap);
     }
 
     @PostMapping("/eventList")
-    public GovernanceResult eventList(@RequestBody TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request,
+    public GovernanceResult eventList(@RequestBody TopicEventCountEntity topicEventCountEntity, HttpServletRequest request,
                                       HttpServletResponse response) throws GovernanceException {
-        log.info("get  eventList:{} ", topicHistoricalEntity);
-        List<TopicHistoricalEntity> topicTopicHistoricalEntities = topicHistoricalService.eventList(topicHistoricalEntity, request);
-        return new GovernanceResult(topicTopicHistoricalEntities);
+        log.info("get  eventList:{} ", topicEventCountEntity);
+        List<TopicEventCountEntity> eventList = topicHistoricalService.eventList(topicEventCountEntity, request);
+        return new GovernanceResult(eventList);
     }
 
 }

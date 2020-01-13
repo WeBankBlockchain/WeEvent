@@ -2,25 +2,25 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.webank.weevent.governance.mapper.TopicHistoricalMapper">
 
-    <resultMap id="BaseResultMap" type="com.webank.weevent.governance.entity.TopicHistoricalEntity">
+    <resultMap id="BaseResultMap" type="com.webank.weevent.governance.entity.TopicEventCountEntity">
         <result column="id" property="id" jdbcType="INTEGER"/>
         <result column="create_date" property="createDate" jdbcType="TIMESTAMP"/>
         <result column="last_update" property="lastUpdate" jdbcType="TIMESTAMP"/>
         <result column="brokerId" property="brokerId" jdbcType="INTEGER"/>
         <result column="topicName" property="topicName" jdbcType="VARCHAR"/>
         <result column="groupId" property="groupId" jdbcType="VARCHAR"/>
-        <result column="eventId" property="eventId" jdbcType="VARCHAR"/>
+        <result column="eventCount" property="eventCount" jdbcType="INTEGER"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,create_date,last_update, brokerId,topicName, groupId, eventId
+        id,create_date,last_update, brokerId,topicName, groupId, eventCount
     </sql>
 
 
     <select id="historicalDataList" resultMap="BaseResultMap">
         SELECT
-        topicName,create_date,eventId
-        from t_topic_historical
+        topicName,create_date,eventCount
+        from t_topic_event_count
         WHERE 1=1
         <if test="beginDate != null">
             AND create_date &gt;= #{beginDateStr}
@@ -48,8 +48,8 @@
 
     <select id="eventList" resultMap="BaseResultMap">
         SELECT
-        create_date,eventId
-        from t_topic_historical
+        create_date,eventCount
+        from t_topic_event_count
         WHERE 1=1
         <if test="beginDate != null">
             AND create_date &gt;= #{beginDateStr}
