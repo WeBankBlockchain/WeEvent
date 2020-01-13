@@ -46,8 +46,8 @@ public class ServiceTest {
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
         rule.setConditionField("abs(a)<21 or floor(c)>10");
         rule.setToDestination("to.com.webank.weevent");
-        rule.setDatabaseUrl("jdbc:mysql://***REMOVED***:3306/fromIfttt?user=test&password=007412");
-        rule.setBrokerUrl("http://***REMOVED***:7000/weevent");
+        rule.setDatabaseUrl("jdbc:mysql://127.0.0.1:3306/fromIfttt?user=test&password=123456");
+        rule.setBrokerUrl("http://127.0.0.1:7000/weevent");
         rule.setCreatedTime(new Date());
         rule.setStatus(1);
         rule.setUserId("1");
