@@ -2,11 +2,7 @@ package com.webank.weevent.processor.quartz;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.processor.cache.CEPRuleCache;

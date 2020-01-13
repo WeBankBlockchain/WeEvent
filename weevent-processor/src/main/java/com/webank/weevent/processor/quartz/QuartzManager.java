@@ -1,6 +1,5 @@
 package com.webank.weevent.processor.quartz;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,7 +15,6 @@ import com.webank.weevent.processor.model.StatisticWeEvent;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.RetCode;
 
-import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
