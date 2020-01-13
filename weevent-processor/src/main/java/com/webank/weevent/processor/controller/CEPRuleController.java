@@ -138,6 +138,16 @@ public class CEPRuleController {
         return resEntity;
     }
 
+    @RequestMapping(value = "/getJobDetail")
+    @ResponseBody
+    public BaseRspEntity getJobDetail(@RequestParam(name = "id") String id) throws IOException {
+        BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
+        CEPRule rule = quartzManager.getJobDetail(id);
+        resEntity.setData(rule);
+
+        return resEntity;
+    }
+
     private RetCode createJob(CEPRule rule, String type) {
 
         JobDataMap jobmap = new JobDataMap();

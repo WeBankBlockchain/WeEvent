@@ -16,6 +16,7 @@ import com.webank.weevent.processor.model.StatisticWeEvent;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.RetCode;
 
+import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
@@ -62,7 +63,7 @@ public class QuartzManager {
             log.info("rule size:{} ...", ruleMap.size());
             log.info("start subscribe ...");
             for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
-                CEPRuleCache.updateCEPRule(entry.getValue(), ruleMap);
+                CEPRuleCache.updateCEPRule(entry.getValue(), null);
             }
 
         } catch (Exception e) {
@@ -90,8 +91,6 @@ public class QuartzManager {
         try {
             // get the all rules
             Iterator<JobKey> it = scheduler.getJobKeys(GroupMatcher.anyGroup()).iterator();
-            List<CEPRule> ruleList = new ArrayList<>();
-            Map<String, CEPRule> ruleMap = new HashMap<>();
             CEPRule currentRule = (CEPRule) params.get("rule");
             while (it.hasNext()) {
                 JobKey jobKey = (JobKey) it.next();
@@ -101,23 +100,18 @@ public class QuartzManager {
                     if ((("deleteCEPRuleById".equals(params.get("type").toString()))) && (jobName.equals(rule.getId()))) {
                         // update the delete status
                         rule.setStatus(2);
-                        params.put("rule", rule);
                         currentRule = rule;
-                    } else {
-                        ruleList.add(rule);
-                        ruleMap.put(rule.getId(), rule);
-                        log.info("{}", jobKey);
+                        params.put("rule", rule);
                     }
                 }
-
             }
-            ruleMap.put(currentRule.getId(), currentRule);
-            ruleList.add(currentRule);
-            params.put("ruleMap", ruleMap);
-            log.info("update the job  ruleMap:{},ruleList:{}", ruleMap.size(), ruleList.size());
 
+            if (scheduler.checkExists(JobKey.jobKey(jobName, jobGroupName))) {
+                // add the old one
+                params.put("ruleBak", 1);
+            }
+            // add latest one
             JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).storeDurably(true).build();
-
             // just do one time
             SimpleTrigger trigger = newTrigger()
                     .withIdentity(new Date().toString().concat(currentRule.getId()), triggerGroupName)
@@ -129,16 +123,16 @@ public class QuartzManager {
             if (scheduler.checkExists(JobKey.jobKey(jobName, jobGroupName))) {
                 removeJob(jobName, jobGroupName, triggerName, triggerGroupName);
             }
+
             scheduler.scheduleJob(job, trigger);
             if (!scheduler.isShutdown()) {
                 scheduler.start();
             }
+            // check status
             if (scheduler.checkExists(JobKey.jobKey(jobName, jobGroupName))) {
                 log.info("update job:{} success", jobName);
-
                 return ConstantsHelper.SUCCESS;
             }
-
             return ConstantsHelper.FAIL;
         } catch (Exception e) {
             log.error("e:{}", e.toString());
@@ -180,18 +174,36 @@ public class QuartzManager {
 
 
     /**
-     * modify Job Time
-     *
-     * @param jobName job name
-     * @param jobGroupName job group name
-     */
-    public JobDetail getJobDetail(String jobName, String jobGroupName) {
+     * get Job list
+     **/
+    public static Map<String, CEPRule> getJobList() {
         try {
-            return scheduler.getJobDetail(new JobKey(jobName, jobGroupName));
+            Iterator<JobKey> it = scheduler.getJobKeys(GroupMatcher.anyGroup()).iterator();
+            Map<String, CEPRule> ruleMap = new HashMap<>();
+            while (it.hasNext()) {
+                JobKey jobKey = (JobKey) it.next();
+                CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
+                if (null != rule && 1 == rule.getStatus()) {
+                    ruleMap.put(rule.getId(), rule);
+                }
+            }
+            log.info("ruleMap:{}", ruleMap.size());
+            return ruleMap;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
+
+    public CEPRule getJobDetail(String jobName) {
+        try {
+            JobDetail job = scheduler.getJobDetail(new JobKey(jobName, "rule"));
+            CEPRule rule = (CEPRule) job.getJobDataMap().get("rule");
+            return rule;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     /**
      * remove
