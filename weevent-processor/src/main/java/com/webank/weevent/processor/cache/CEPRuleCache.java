@@ -7,8 +7,6 @@ import com.webank.weevent.sdk.BrokerException;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.*;
-
 
 @Slf4j
 public class CEPRuleCache {
