@@ -95,4 +95,16 @@ public class TimerScheduler {
     public void setParsingSql(String parsingSql) {
         this.parsingSql = parsingSql;
     }
+
+    public TimerScheduler(String schedulerName, String jdbcUrl, Long timePeriod, String parsingSql, Date createdTime, Date updatedTime) {
+        this.schedulerName = schedulerName;
+        this.jdbcUrl = jdbcUrl;
+        this.timePeriod = timePeriod;
+        this.parsingSql = parsingSql;
+        this.createdTime = createdTime;
+        this.updatedTime = updatedTime;
+    }
+
+    public TimerScheduler() {
+    }
 }
