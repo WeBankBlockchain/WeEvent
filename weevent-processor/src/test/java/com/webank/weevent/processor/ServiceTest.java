@@ -46,14 +46,15 @@ public class ServiceTest {
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
         rule.setConditionField("abs(a)<21 or floor(c)>10");
         rule.setToDestination("to.com.webank.weevent");
-        rule.setDatabaseUrl("jdbc:mysql://129.204.225.235:3306/fromIfttt?user=test&password=007412");
-        rule.setBrokerUrl("http://122.51.93.181:7000/weevent");
+        rule.setDatabaseUrl("jdbc:mysql://127.0.0.1:3306/fromIfttt?user=root&password=111111");
+        rule.setBrokerUrl("http://127.0.0.1:7000/weevent");
         rule.setCreatedTime(new Date());
         rule.setStatus(1);
         rule.setUserId("1");
         rule.setGroupId("1");
         rule.setSystemTag("0");
         rule.setTableName("fromIfttt");
+        rule.setSystemFunctionMessage(null);
         rule.setConditionType(1);
 
     }
@@ -184,12 +185,20 @@ public class ServiceTest {
         rule.setConditionField("(b>=11 and (abs(c)!=22)) and abs(d)<=33");
         rule.setSystemFunctionMessage(arr);
         rule.setConditionType(2);
-        rule.setId("20191230");
+        rule.setId("20200102");
 
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getContentAsString());
         assertEquals(200, result3.getResponse().getStatus());
+        Thread.sleep(100000);
+
+        rule.setFromDestination("testFromDestination");
+        RequestBuilder requestBuilder4 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        MvcResult result4 = mockMvc.perform(requestBuilder4).andDo(print()).andReturn();
+        log.info("result4:{}", result4.getResponse().getContentAsString());
+        assertEquals(200, result4.getResponse().getStatus());
+        Thread.sleep(100000);
 
         String url1 = "/statistic";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url1).contentType(MediaType.APPLICATION_JSON).param("idList", "1104154821111");
