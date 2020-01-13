@@ -77,7 +77,7 @@ public class CEPRuleMQ {
                         subscribeMsg(rule, ruleMap, client, subId);
                     }
                 }
-                
+
             } else {
                 ruleMap.put(rule.getId(), rule);
                 // update subscribe
