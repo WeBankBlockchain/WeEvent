@@ -37,7 +37,6 @@ public class ExtendEventLister implements EventListener {
             } else {
                 type = CEPRuleMQ.handleOnEventOtherPattern(client, event, ruleMap);
             }
-            // TODO:
             CEPRuleMQ.statisticWeEvent = StatisticCEPRuleUtil.statisticOrderType(statisticWeEvent, type);
 
         } catch (Exception e) {
