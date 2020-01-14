@@ -1,14 +1,16 @@
 package com.webank.weevent.processor.scheduler;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.annotation.PostConstruct;
-
+import com.webank.weevent.processor.model.TimerScheduler;
 import com.webank.weevent.processor.repository.TimerSchedulerRepository;
+import com.webank.weevent.processor.utils.JsonUtil;
 import com.webank.weevent.sdk.BrokerException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -45,16 +47,14 @@ public class TimerSchedulerJob {
      */
 
 
-    @PostConstruct
-    public void initTimerScheduler() throws BrokerException {
+//    @PostConstruct
+    public void initTimerScheduler() throws BrokerException, IOException {
         TimerScheduler timerScheduler = new TimerScheduler();
         List<TimerScheduler> timerSchedulerList = this.timerSchedulerList(timerScheduler);
         if (timerSchedulerList.isEmpty()) {
-            /**
-             * create build-in task
-             */
-            TimerScheduler scheduler = new TimerScheduler(schedulerName, jdbcUrl, timePeriod, parsingSql, new Date(), new Date());
-            this.insertTimerScheduler(timerScheduler);
+            //create build-in task
+            TimerScheduler scheduler = new TimerScheduler(schedulerName, jdbcUrl, timePeriod, null, null, parsingSql);
+            this.insertTimerScheduler(scheduler);
             return;
         }
         for (TimerScheduler scheduler : timerSchedulerList) {
@@ -133,21 +133,23 @@ public class TimerSchedulerJob {
         }
     }
 
-    private Timer createTask(TimerScheduler timerScheduler) {
+    private Timer createTask(TimerScheduler timerScheduler) throws IOException {
         Timer timer = new Timer();
         Calendar calendar = Calendar.getInstance();
 
-        /*** 定制每日2:00执行方法 ***/
-        Map<String, Integer> periodMap = timerScheduler.getPeriodMap();
-        calendar.set(Calendar.HOUR_OF_DAY, periodMap.get("year"));
-        calendar.set(Calendar.HOUR_OF_DAY, periodMap.get("month"));
-        calendar.set(Calendar.HOUR_OF_DAY, periodMap.get("day"));
-        calendar.set(Calendar.HOUR_OF_DAY, periodMap.get("week"));
-        calendar.set(Calendar.HOUR_OF_DAY, periodMap.get("hour"));
-        calendar.set(Calendar.MINUTE, periodMap.get("minute"));
-        calendar.set(Calendar.SECOND, periodMap.get("second"));
+        /*** Set what time period to execute regularly***/
+        String periodParams = timerScheduler.getPeriodParams();
+        Map<String, Integer> periodMap = JsonUtil.parseObjectToMap(periodParams, String.class, Integer.class);
+        calendar.set(Calendar.YEAR, periodMap.get("year") == null ? calendar.get(Calendar.YEAR) : periodMap.get("year"));
+        calendar.set(Calendar.MONTH, periodMap.get("month") == null ? calendar.get(Calendar.MONTH) : periodMap.get("month"));
+        calendar.set(Calendar.DAY_OF_YEAR, periodMap.get("day") == null ? calendar.get(Calendar.DAY_OF_YEAR) : periodMap.get("day"));
+        calendar.set(Calendar.DAY_OF_WEEK, periodMap.get("week") == null ? calendar.get(Calendar.DAY_OF_WEEK) : periodMap.get("week"));
+        calendar.set(Calendar.HOUR_OF_DAY, periodMap.get("hour") == null ? calendar.get(Calendar.HOUR_OF_DAY) : periodMap.get("hour"));
+        calendar.set(Calendar.MINUTE, periodMap.get("minute") == null ? calendar.get(Calendar.MINUTE) : periodMap.get("minute"));
+        calendar.set(Calendar.SECOND, periodMap.get("second") == null ? calendar.get(Calendar.SECOND) : periodMap.get("second"));
+        long time = calendar.getTime().getTime();
 
-        timer.schedule(new TimerSchedulerTask(timerScheduler), timerScheduler.getTimePeriod());
+        timer.schedule(new TimerSchedulerTask(timerScheduler), timerScheduler.getDelay(), time);
         return timer;
     }
 

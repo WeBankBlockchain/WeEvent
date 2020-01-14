@@ -30,9 +30,11 @@ public class TimerSchedulerTest {
     private MockMvc mockMvc;
     private TimerScheduler timerScheduler;
     private String url = "/timerScheduler/insert";
-    private String jdbcUrl = "jdbc:h2:tcp://localhost:7082/~/WeEvent_governance?user=root&password=123456";
+    private String jdbcUrl = "jdbc:h2:~/WeEvent_governance?user=root&password=123456";
     private Long timePeriod = 1L;
-    private String parsingSql = "select *　from t_topic_historical";
+    private long delay = 1000;
+    private String parsingSql = "select *　from timer_scheduler_job";
+    private String periodParams="{\"hour\":\"17\",\"minute\":\"10\"}";
 
     @Autowired
     protected WebApplicationContext wac;
@@ -40,7 +42,7 @@ public class TimerSchedulerTest {
     @Before
     public void setUp() throws Exception {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-        timerScheduler = new TimerScheduler("test", jdbcUrl, timePeriod, parsingSql, new Date(), new Date());
+        timerScheduler = new TimerScheduler("test", jdbcUrl, timePeriod, periodParams,delay,parsingSql);
     }
 
     @Test
@@ -52,7 +54,7 @@ public class TimerSchedulerTest {
 
     @Test
     public void testInsertException() throws Exception {
-        timerScheduler = new TimerScheduler("test", null, timePeriod, parsingSql, new Date(), new Date());
+        timerScheduler = new TimerScheduler("test", null, timePeriod, periodParams,delay,parsingSql);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timePeriod));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(400, result.getResponse().getStatus());

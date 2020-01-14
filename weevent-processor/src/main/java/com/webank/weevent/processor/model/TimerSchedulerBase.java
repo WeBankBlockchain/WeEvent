@@ -3,6 +3,9 @@ package com.webank.weevent.processor.model;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
@@ -11,6 +14,8 @@ public class TimerSchedulerBase {
     /**
      * primary key
      */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
 
@@ -21,7 +26,13 @@ public class TimerSchedulerBase {
     private String jdbcUrl;
 
     @Column(name = "time_period")
-    private Long timePeriod;
+    private Long timePeriod = 0L;
+
+    @Column(name = "period_params")
+    private String periodParams;
+
+    @Column(name = "delay")
+    private Long delay;
 
     @Column(name = "parsing_sql")
     private String parsingSql;
@@ -32,6 +43,7 @@ public class TimerSchedulerBase {
 
     @Column(name = "updated_time")
     private Date updatedTime;
+
 
     public Integer getId() {
         return id;
@@ -89,16 +101,30 @@ public class TimerSchedulerBase {
         this.parsingSql = parsingSql;
     }
 
-    public TimerSchedulerBase(String schedulerName, String jdbcUrl, Long timePeriod, String parsingSql, Date createdTime, Date updatedTime) {
+    public Long getDelay() {
+        return delay;
+    }
+
+    public void setDelay(Long delay) {
+        this.delay = delay;
+    }
+
+    public String getPeriodParams() {
+        return periodParams;
+    }
+
+    public void setPeriodParams(String periodParams) {
+        this.periodParams = periodParams;
+    }
+
+    public TimerSchedulerBase(String schedulerName, String jdbcUrl, Long timePeriod, String periodParams, Long delay, String parsingSql) {
         this.schedulerName = schedulerName;
         this.jdbcUrl = jdbcUrl;
         this.timePeriod = timePeriod;
+        this.periodParams = periodParams;
+        this.delay = delay;
         this.parsingSql = parsingSql;
-        this.createdTime = createdTime;
-        this.updatedTime = updatedTime;
     }
-
-
 
     public TimerSchedulerBase() {
     }
