@@ -7,21 +7,21 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.entity.BrokerEntity;
-import com.webank.weevent.governance.properties.ConstantProperties;
 import com.webank.weevent.governance.service.BrokerService;
 import com.webank.weevent.governance.service.CommonService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 @Slf4j
+@WebFilter(urlPatterns = "/webase-node-mgr/*")
 public class ForwardWebaseFilter implements Filter {
 
     @Autowired

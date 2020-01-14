@@ -1,7 +1,6 @@
-package com.webank.weevent.governance.properties;
+package com.webank.weevent.governance.common;
 
 import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
@@ -9,16 +8,7 @@ import org.springframework.stereotype.Component;
  */
 @Data
 @Component
-@ConfigurationProperties(prefix = ConstantProperties.CONSTANT_PREFIX)
 public class ConstantProperties {
-
-    // constant
-    public static final String CONSTANT_PREFIX = "constant";
-    public static final String COOKIE_JSESSIONID = "JSESSIONID"; // cookie key---session
-    public static final String COOKIE_MGR_ACCOUNT = "GOVERNANCE_MGR_ACCOUNT_C"; // cookie key---account
-    public static final String COOKIE_MGR_ACCOUNT_ID = "GOVERNANCE_MGR_ACCOUNT_ID";//cookie---account id
-    public static final String COOKIE_GROUP_ID = "GOVERNANCE_GROUP_ID";//cookie---group id
-    public static final String SESSION_MGR_ACCOUNT = "GOVERNANCE_MGR_ACCOUNT_S"; // session key---account
 
     public static final String QUESTION_MARK = "?";
     public static final String AND_SYMBOL = "&";
@@ -70,5 +60,25 @@ public class ConstantProperties {
 
     // COOKIE
     public Integer cookieMaxAge = 86400; //  24 * 60 * 60 seconds
+
+
+    //project business constant==============================
+    public final static int RULE_DESTINATION_TOPIC = 1;
+    public final static int RULE_DESTINATION_DATABASE = 2;
+
+    public final static long NOT_DELETED = 0L;
+
+
+    public final static String CREATOR = "1";
+    public final static String AUTHORIZED = "2";
+
+    public final static int JSON = 1;
+
+    public final static int NOT_STARTED = 0;
+    public final static int RUNNING = 1;
+    public final static int IS_DELETED = 2;
+
+    //project business constant==============================
+
 
 }
