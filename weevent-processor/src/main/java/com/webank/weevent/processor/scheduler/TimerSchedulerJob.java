@@ -16,6 +16,7 @@ import com.webank.weevent.sdk.BrokerException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,28 +31,26 @@ public class TimerSchedulerJob {
     private Map<Integer, Timer> timerMap = new ConcurrentHashMap<>();
     private Map<Integer, TimerScheduler> timerSchedulerMap = new ConcurrentHashMap<>();
 
-    private final String jdbcUrl = "jdbc:h2:tcp://localhost:7082/~/WeEvent_governance?user=root&password=123456";
+    @Value("${spring.datasource.url}")
+    private String databaseUrl;
+
+    @Value("${spring.datasource.username}")
+    private String userName;
+
+    @Value("${spring.datasource.password}")
+    private String password;
+
+
     private final long timePeriod = 1000L;
     private final String parsingSql = "select * from t_topic_historical";
     private final String schedulerName = "systemScheduler";
 
-    /**
-     * 以任务id为key，任务为value，存储到map里面
-     * 1.每次新增，先入库，创建一个任务
-     * 2.每次修改,去map里面取任务，修改，同时更新数据库状态
-     * 3.删除任务，停止任务，删除数据库记录
-     * 4.查询任务也从map取
-     * 5.项目停止再重启，去数据库查询任务重新拉起任务
-     * 6.以历史数据为例，需要有一个记录上次同步的时间，每次都是解析过去24个小时之内的数据
-     * 7.历史数据的可以内置一个定时器
-     */
-
-
-//    @PostConstruct
+    //    @PostConstruct
     public void initTimerScheduler() throws BrokerException, IOException {
         TimerScheduler timerScheduler = new TimerScheduler();
         List<TimerScheduler> timerSchedulerList = this.timerSchedulerList(timerScheduler);
         if (timerSchedulerList.isEmpty()) {
+            String jdbcUrl = databaseUrl + "?user=" + userName + "&password=" + password;
             //create build-in task
             TimerScheduler scheduler = new TimerScheduler(schedulerName, jdbcUrl, timePeriod, null, null, parsingSql);
             this.insertTimerScheduler(scheduler);
