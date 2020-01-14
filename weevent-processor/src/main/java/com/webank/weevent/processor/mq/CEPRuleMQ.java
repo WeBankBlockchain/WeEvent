@@ -314,7 +314,6 @@ public class CEPRuleMQ {
                 List<String> eventContentKeys = CommonUtil.getKeys(payload);
                 Map event = JsonUtil.parseObject(eventContent, Map.class);
                 JexlEngine jexl = new JexlBuilder().create();
-
                 JexlContext context = new MapContext();
                 for (String key : eventContentKeys) {
                     context.set(key, event.get(key));
