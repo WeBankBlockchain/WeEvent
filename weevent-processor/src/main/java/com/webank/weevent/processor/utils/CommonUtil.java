@@ -402,6 +402,10 @@ public class CommonUtil {
     }
 
     public static boolean compareMessage(Pair<CEPRule, CEPRule> rules) {
+        if (StringUtils.isEmpty(rules)) {
+            return false;
+        }
+        // check the from destination
         return rules.getKey().getFromDestination().equals(rules.getValue().getFromDestination());
     }
 

@@ -15,6 +15,7 @@ import com.webank.weevent.processor.model.StatisticWeEvent;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.RetCode;
 
+import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
@@ -104,11 +105,14 @@ public class QuartzManager {
                 }
             }
 
+            Pair<CEPRule, CEPRule> ruleBak = null;
             if (scheduler.checkExists(JobKey.jobKey(jobName, jobGroupName))) {
                 // add the old one
-                params.put("ruleBak", 1);
+                ruleBak = new Pair<>(getJobDetail(jobName), currentRule);
             }
             // add latest one
+            params.put("ruleBak", ruleBak);
+
             JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).storeDurably(true).build();
             // just do one time
             SimpleTrigger trigger = newTrigger()

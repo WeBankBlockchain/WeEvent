@@ -150,12 +150,12 @@ public class CEPRuleController {
 
     private RetCode createJob(CEPRule rule, String type) {
 
-        JobDataMap jobmap = new JobDataMap();
-        jobmap.put("rule", rule);
-        jobmap.put("type", type);
+        JobDataMap jobMap = new JobDataMap();
+        jobMap.put("rule", rule);
+        jobMap.put("type", type);
         // set the original instance
-        jobmap.put("instance", ProcessorApplication.processorConfig.getSchedulerInstanceName());
-        return quartzManager.addModifyJob(rule.getId(), "rule", "rule", "rule-trigger", CRUDJobs.class, jobmap);
+        jobMap.put("instance", ProcessorApplication.processorConfig.getSchedulerInstanceName());
+        return quartzManager.addModifyJob(rule.getId(), "rule", "rule", "rule-trigger", CRUDJobs.class, jobMap);
 
     }
 
