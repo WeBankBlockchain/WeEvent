@@ -268,7 +268,7 @@ public class CommonUtil {
 
                 break;
             default:
-                log.info("error:{}", key);
+                log.info("other type:{}", key);
                 break;
         }
         return map;
