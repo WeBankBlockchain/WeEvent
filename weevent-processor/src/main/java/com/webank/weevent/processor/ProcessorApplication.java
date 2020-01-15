@@ -19,7 +19,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Slf4j
 @SpringBootApplication
-//@MapperScan(basePackages = "com.webank.weevent.processor.quartz")
+@MapperScan(basePackages = "com.webank.weevent.processor")
 public class ProcessorApplication {
     public static ProcessorConfig processorConfig;
     public static ApplicationContext applicationContext;
