@@ -22,10 +22,14 @@ public class TimerSchedulerController {
     @Autowired
     private TimerSchedulerJob timerSchedulerJob;
 
+    public TimerSchedulerController(TimerSchedulerJob timerSchedulerJob) {
+        this.timerSchedulerJob = timerSchedulerJob;
+    }
+
     @RequestMapping("/insert")
     public BaseRspEntity insertTimerScheduler(@RequestBody TimerScheduler timerScheduler) throws BrokerException {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
-        TimerScheduler scheduler = timerSchedulerJob.insertTimerScheduler(timerScheduler);
+        TimerScheduler scheduler = this.timerSchedulerJob.insertTimerScheduler(timerScheduler);
         resEntity.setData(scheduler);
         return resEntity;
     }
@@ -33,7 +37,7 @@ public class TimerSchedulerController {
     @RequestMapping("/list")
     public BaseRspEntity timerSchedulerList(@RequestBody TimerScheduler timerScheduler) throws BrokerException {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
-        List<TimerScheduler> timerSchedulerList = timerSchedulerJob.timerSchedulerList(timerScheduler);
+        List<TimerScheduler> timerSchedulerList = this.timerSchedulerJob.timerSchedulerList(timerScheduler);
         resEntity.setData(timerSchedulerList);
         return resEntity;
     }
@@ -42,7 +46,7 @@ public class TimerSchedulerController {
     @RequestMapping("/update")
     public BaseRspEntity updateTimerScheduler(@RequestBody TimerScheduler timerScheduler) throws BrokerException {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
-        TimerScheduler scheduler = timerSchedulerJob.updateTimerScheduler(timerScheduler);
+        TimerScheduler scheduler = this.timerSchedulerJob.updateTimerScheduler(timerScheduler);
         resEntity.setData(scheduler);
         return resEntity;
     }
@@ -50,7 +54,7 @@ public class TimerSchedulerController {
     @RequestMapping("/delete")
     public BaseRspEntity deleteTimerScheduler(@RequestBody TimerScheduler timerScheduler) throws BrokerException {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
-        timerSchedulerJob.deleteTimerScheduler(timerScheduler);
+        this.timerSchedulerJob.deleteTimerScheduler(timerScheduler);
         return resEntity;
     }
 
