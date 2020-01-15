@@ -169,18 +169,5 @@ CREATE TABLE QRTZ_LOCKS
     PRIMARY KEY (SCHED_NAME,LOCK_NAME)
 );
 
--- timer scheduler table
-
-CREATE TABLE TIMER_SCHEDULER_JOB (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `scheduler_name` varchar(64) NOT NULL,
-  `jdbc_url` varchar(256) NOT NULL,
-  `delay_time` int(11) DEFAULT NULL,
-  `period_params` varchar(256) DEFAULT NULL,
-  `parsing_sql` varchar(512) NOT NULL,
-  `created_time` datetime NOT NULL,
-  `updated_time` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 commit;

@@ -14,13 +14,11 @@ public class TimerScheduler implements Serializable {
     @NotNull(message = "schedulerName cannot be empty")
     private String schedulerName;
 
-    @NotNull(message = "jdbcUrl cannot be empty")
-    private String jdbcUrl;
+    @NotNull(message = "databaseUrl cannot be empty")
+    private String databaseUrl;
 
     @NotNull(message = "periodParams cannot be empty")
     private String periodParams;
-
-    private Long delayTime;
 
     @NotNull(message = "parsingSql cannot be empty")
     private String parsingSql;
@@ -30,11 +28,10 @@ public class TimerScheduler implements Serializable {
     private Date updatedTime = new Date();
 
 
-    public TimerScheduler(String schedulerName, String jdbcUrl, String periodParams, Long delayTime, String parsingSql) {
+    public TimerScheduler(String schedulerName, String databaseUrl, String periodParams , String parsingSql) {
         this.schedulerName = schedulerName;
-        this.jdbcUrl = jdbcUrl;
+        this.databaseUrl = databaseUrl;
         this.periodParams = periodParams;
-        this.delayTime = delayTime;
         this.parsingSql = parsingSql;
     }
 

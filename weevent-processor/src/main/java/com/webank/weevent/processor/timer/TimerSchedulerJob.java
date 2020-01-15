@@ -59,9 +59,9 @@ public class TimerSchedulerJob implements Job {
     }
 
     public static void runTask(TimerScheduler timerScheduler) {
-        try (Connection dbcpConnection = CommonUtil.getDbcpConnection(timerScheduler.getJdbcUrl())) {
+        try (Connection dbcpConnection = CommonUtil.getDbcpConnection(timerScheduler.getDatabaseUrl())) {
             if (dbcpConnection == null) {
-                log.error("database connection fail,jdbcUrl:{}", timerScheduler.getJdbcUrl());
+                log.error("database connection fail,databaseUrl:{}", timerScheduler.getDatabaseUrl());
             } else {
                 PreparedStatement preparedStmt = dbcpConnection.prepareStatement(timerScheduler.getParsingSql());
                 boolean execute = preparedStmt.execute();

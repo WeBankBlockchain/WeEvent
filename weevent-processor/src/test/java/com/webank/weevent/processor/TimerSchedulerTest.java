@@ -28,10 +28,9 @@ public class TimerSchedulerTest {
     private MockMvc mockMvc;
     private TimerScheduler timerScheduler;
     private String url = "/timerScheduler/insert";
-    private String jdbcUrl = "jdbc:h2:~/WeEvent_governance?user=root&password=123456";
-    private long delayTime = 1000;
-    private String parsingSql = "select count(1)　from TIMER_SCHEDULER_JOB";
-    private String periodParams = "{\"hour\":\"17\",\"minute\":\"10\"}";
+    private String jdbcUrl = "jdbc:h2:~/WeEvent_processor1?user=root&password=123456";
+    private String parsingSql = "select count(1)　from QRTZ_JOB_DETAILS";
+    private String periodParams = "*/5 * * * * ?";
 
     @Autowired
     protected WebApplicationContext wac;
@@ -39,7 +38,7 @@ public class TimerSchedulerTest {
     @Before
     public void setUp() throws Exception {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-        timerScheduler = new TimerScheduler("test", jdbcUrl, periodParams, delayTime, parsingSql);
+        timerScheduler = new TimerScheduler("test", jdbcUrl, periodParams, parsingSql);
     }
 
     @Test
@@ -51,7 +50,7 @@ public class TimerSchedulerTest {
 
     @Test
     public void testInsertNormal002() throws Exception {
-        timerScheduler.setDelayTime(2000L);
+        timerScheduler.setSchedulerName("test2");
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
@@ -59,42 +58,23 @@ public class TimerSchedulerTest {
 
 
     @Test
-    public void testFindAllNormal() throws Exception {
-        url = "/timerScheduler/list";
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
-        MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
-        assertEquals(200, result.getResponse().getStatus());
-
-    }
-
-    @Test
-    public void testUpdateNormal001() throws Exception {
-        testInsertNormal001();
-        url = "/timerScheduler/update";
-        timerScheduler.setSchedulerName("test111");
-        timerScheduler.setId(1);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
-        MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
-        assertEquals(200, result.getResponse().getStatus());
-
-    }
-
-    @Test
-    public void testUpdateNormal002() throws Exception {
-        testInsertNormal001();
-        url = "/timerScheduler/update";
-        timerScheduler.setId(1);
+    public void testInsertException001() throws Exception {
+        timerScheduler.setPeriodParams(null);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(400, result.getResponse().getStatus());
     }
 
-
     @Test
+    public void testInsertException002() throws Exception {
+        timerScheduler.setSchedulerName(null);
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
+        MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
+        assertEquals(400, result.getResponse().getStatus());
+    }
+
     public void testDeleteNormal() throws Exception {
         url = "/timerScheduler/delete";
-        timerScheduler = new TimerScheduler();
-        timerScheduler.setId(1);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
