@@ -81,7 +81,7 @@ public class CRUDJobs implements Job {
                 log.info("execute  job: {},rule:{},type:{}", jobName, JsonUtil.toJSONString(obj), type);
             }
         } catch (BrokerException | IOException | SchedulerException e) {
-            log.info("BrokerException:{}", e.toString());
+            log.error("BrokerException:{}", e.toString());
         }
 
     }
