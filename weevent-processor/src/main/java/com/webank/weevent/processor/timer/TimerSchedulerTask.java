@@ -1,4 +1,4 @@
-package com.webank.weevent.processor.scheduler;
+package com.webank.weevent.processor.timer;
 
 import com.webank.weevent.processor.model.TimerScheduler;
 import com.webank.weevent.processor.utils.CommonUtil;
