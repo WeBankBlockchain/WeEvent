@@ -25,14 +25,11 @@ public class TimerSchedulerBase {
     @Column(name = "jdbc_url")
     private String jdbcUrl;
 
-    @Column(name = "time_period")
-    private Long timePeriod = 0L;
-
     @Column(name = "period_params")
     private String periodParams;
 
-    @Column(name = "delay")
-    private Long delay;
+    @Column(name = "delay_time")
+    private Long delayTime;
 
     @Column(name = "parsing_sql")
     private String parsingSql;
@@ -69,13 +66,6 @@ public class TimerSchedulerBase {
         this.jdbcUrl = jdbcUrl;
     }
 
-    public Long getTimePeriod() {
-        return timePeriod;
-    }
-
-    public void setTimePeriod(Long timePeriod) {
-        this.timePeriod = timePeriod;
-    }
 
     public Date getCreatedTime() {
         return createdTime;
@@ -101,12 +91,13 @@ public class TimerSchedulerBase {
         this.parsingSql = parsingSql;
     }
 
-    public Long getDelay() {
-        return delay;
+
+    public Long getDelayTime() {
+        return delayTime;
     }
 
-    public void setDelay(Long delay) {
-        this.delay = delay;
+    public void setDelayTime(Long delayTime) {
+        this.delayTime = delayTime;
     }
 
     public String getPeriodParams() {
@@ -117,12 +108,11 @@ public class TimerSchedulerBase {
         this.periodParams = periodParams;
     }
 
-    public TimerSchedulerBase(String schedulerName, String jdbcUrl, Long timePeriod, String periodParams, Long delay, String parsingSql) {
+    public TimerSchedulerBase(String schedulerName, String jdbcUrl, String periodParams, Long delayTime, String parsingSql) {
         this.schedulerName = schedulerName;
         this.jdbcUrl = jdbcUrl;
-        this.timePeriod = timePeriod;
         this.periodParams = periodParams;
-        this.delay = delay;
+        this.delayTime = delayTime;
         this.parsingSql = parsingSql;
     }
 

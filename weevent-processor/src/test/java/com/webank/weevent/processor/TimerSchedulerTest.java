@@ -1,8 +1,6 @@
 package com.webank.weevent.processor;
 
 
-import java.util.Date;
-
 import com.webank.weevent.processor.model.TimerScheduler;
 import com.webank.weevent.processor.utils.JsonUtil;
 
@@ -31,10 +29,9 @@ public class TimerSchedulerTest {
     private TimerScheduler timerScheduler;
     private String url = "/timerScheduler/insert";
     private String jdbcUrl = "jdbc:h2:~/WeEvent_governance?user=root&password=123456";
-    private Long timePeriod = 1L;
-    private long delay = 1000;
-    private String parsingSql = "select *　from timer_scheduler_job";
-    private String periodParams="{\"hour\":\"17\",\"minute\":\"10\"}";
+    private long delayTime = 1000;
+    private String parsingSql = "select count(1)　from TIMER_SCHEDULER_JOB";
+    private String periodParams = "{\"hour\":\"17\",\"minute\":\"10\"}";
 
     @Autowired
     protected WebApplicationContext wac;
@@ -42,22 +39,22 @@ public class TimerSchedulerTest {
     @Before
     public void setUp() throws Exception {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-        timerScheduler = new TimerScheduler("test", jdbcUrl, timePeriod, periodParams,delay,parsingSql);
+        timerScheduler = new TimerScheduler("test", jdbcUrl, periodParams, delayTime, parsingSql);
     }
 
     @Test
-    public void testInsertNormal() throws Exception {
+    public void testInsertNormal001() throws Exception {
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
     }
 
     @Test
-    public void testInsertException() throws Exception {
-        timerScheduler = new TimerScheduler("test", null, timePeriod, periodParams,delay,parsingSql);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timePeriod));
+    public void testInsertNormal002() throws Exception {
+        timerScheduler.setDelayTime(2000L);
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
-        assertEquals(400, result.getResponse().getStatus());
+        assertEquals(200, result.getResponse().getStatus());
     }
 
 
@@ -71,11 +68,10 @@ public class TimerSchedulerTest {
     }
 
     @Test
-    public void testUpdateNormal() throws Exception {
-        testInsertNormal();
-        timePeriod = 10L;
+    public void testUpdateNormal001() throws Exception {
+        testInsertNormal001();
         url = "/timerScheduler/update";
-        timerScheduler.setTimePeriod(timePeriod);
+        timerScheduler.setSchedulerName("test111");
         timerScheduler.setId(1);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
@@ -84,13 +80,11 @@ public class TimerSchedulerTest {
     }
 
     @Test
-    public void testUpdateException() throws Exception {
-        testInsertNormal();
-        timePeriod = 10L;
+    public void testUpdateNormal002() throws Exception {
+        testInsertNormal001();
         url = "/timerScheduler/update";
-        timerScheduler.setTimePeriod(null);
         timerScheduler.setId(1);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timePeriod));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(400, result.getResponse().getStatus());
     }

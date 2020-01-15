@@ -4,12 +4,12 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "timer_scheduler_job")
+@Table(name = "TIMER_SCHEDULER_JOB")
 public class TimerScheduler extends TimerSchedulerBase {
 
 
-    public TimerScheduler(String schedulerName, String jdbcUrl, Long timePeriod, String periodParams, Long delay, String parsingSql) {
-        super(schedulerName, jdbcUrl, timePeriod, periodParams, delay, parsingSql);
+    public TimerScheduler(String schedulerName, String jdbcUrl, String periodParams, Long delayTime, String parsingSql) {
+        super(schedulerName, jdbcUrl, periodParams, delayTime, parsingSql);
     }
 
     public TimerScheduler() {

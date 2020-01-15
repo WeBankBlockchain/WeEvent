@@ -41,9 +41,11 @@ public class TimerSchedulerJob {
     private String password;
 
 
-    private final long timePeriod = 1000L;
+    private final long delayTime = 1000L;
     private final String parsingSql = "select * from t_topic_historical";
     private final String schedulerName = "systemScheduler";
+    private final String periodParams = "{\"hour\":\"01\",\"minute\":\"0\",,\"second\":\"0\"}";
+
 
     //    @PostConstruct
     public void initTimerScheduler() throws BrokerException, IOException {
@@ -52,7 +54,7 @@ public class TimerSchedulerJob {
         if (timerSchedulerList.isEmpty()) {
             String jdbcUrl = databaseUrl + "?user=" + userName + "&password=" + password;
             //create build-in task
-            TimerScheduler scheduler = new TimerScheduler(schedulerName, jdbcUrl, timePeriod, null, null, parsingSql);
+            TimerScheduler scheduler = new TimerScheduler(schedulerName, jdbcUrl, periodParams, delayTime, parsingSql);
             this.insertTimerScheduler(scheduler);
             return;
         }
@@ -146,9 +148,8 @@ public class TimerSchedulerJob {
         calendar.set(Calendar.HOUR_OF_DAY, periodMap.get("hour") == null ? calendar.get(Calendar.HOUR_OF_DAY) : periodMap.get("hour"));
         calendar.set(Calendar.MINUTE, periodMap.get("minute") == null ? calendar.get(Calendar.MINUTE) : periodMap.get("minute"));
         calendar.set(Calendar.SECOND, periodMap.get("second") == null ? calendar.get(Calendar.SECOND) : periodMap.get("second"));
-        long time = calendar.getTime().getTime();
 
-        timer.schedule(new TimerSchedulerTask(timerScheduler), timerScheduler.getDelay(), time);
+        timer.scheduleAtFixedRate(new TimerSchedulerTask(timerScheduler), calendar.getTime(), timerScheduler.getDelayTime());
         return timer;
     }
 
