@@ -30,6 +30,7 @@ import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
@@ -167,10 +168,9 @@ public class QuartzManager {
                 triggerBuilder.withSchedule(CronScheduleBuilder.cronSchedule(cron));
                 trigger = (CronTrigger) triggerBuilder.build();
                 scheduler.rescheduleJob(triggerKey, trigger);
-
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("error:{}", e.toString());
         }
     }
 
@@ -192,17 +192,22 @@ public class QuartzManager {
             log.info("ruleMap:{}", ruleMap.size());
             return ruleMap;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("error:{}", e.toString());
+            return null;
         }
     }
 
     public CEPRule getJobDetail(String jobName) {
         try {
             JobDetail job = scheduler.getJobDetail(new JobKey(jobName, "rule"));
-            CEPRule rule = (CEPRule) job.getJobDataMap().get("rule");
-            return rule;
+            if (StringUtils.isEmpty(job.getJobDataMap().get("rule"))) {
+                CEPRule rule = (CEPRule) job.getJobDataMap().get("rule");
+                return rule;
+            }
+            return null;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("error:{}", e.toString());
+            return null;
         }
     }
 
