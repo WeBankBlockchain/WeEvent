@@ -33,6 +33,7 @@ import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.MapContext;
+import org.quartz.SchedulerException;
 import org.springframework.util.StringUtils;
 
 @Slf4j
@@ -58,10 +59,11 @@ public class CEPRuleMQ {
         new Thread(dbThread).start();
     }
 
-    public static void updateSubscribeMsg(CEPRule rule, Pair<CEPRule, CEPRule> ruleBak) throws BrokerException {
+    public static void updateSubscribeMsg(CEPRule rule, Pair<CEPRule, CEPRule> ruleBak) throws BrokerException, SchedulerException {
         // when is in run status. update the rule map
         // update unsubscribe
         String subId = subscriptionIdMap.get(rule.getId());
+
         Map<String, CEPRule> ruleMap = QuartzManager.getJobList();
         statisticWeEvent = StatisticCEPRuleUtil.statistic(statisticWeEvent, ruleMap);
 

@@ -14,6 +14,7 @@ import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
+import org.quartz.SchedulerException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -79,7 +80,7 @@ public class CRUDJobs implements Job {
                 }
                 log.info("execute  job: {},rule:{},type:{}", jobName, JsonUtil.toJSONString(obj), type);
             }
-        } catch (BrokerException | IOException e) {
+        } catch (BrokerException | IOException | SchedulerException e) {
             log.info("BrokerException:{}", e.toString());
         }
 

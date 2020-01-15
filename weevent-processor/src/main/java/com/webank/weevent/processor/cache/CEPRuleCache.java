@@ -6,12 +6,13 @@ import com.webank.weevent.sdk.BrokerException;
 
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
+import org.quartz.SchedulerException;
 
 
 @Slf4j
 public class CEPRuleCache {
 
-    public static void updateCEPRule(CEPRule rule, Pair<CEPRule, CEPRule> ruleBak) throws BrokerException {
+    public static void updateCEPRule(CEPRule rule, Pair<CEPRule, CEPRule> ruleBak) throws BrokerException, SchedulerException {
         CEPRuleMQ.updateSubscribeMsg(rule, ruleBak);
     }
 
