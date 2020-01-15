@@ -69,7 +69,7 @@ public class CEPRuleMQ {
             if (null != subId) {
                 IWeEventClient client = subscriptionClientMap.get(subId);
                 // check the FromDestination whether is or not,ruleList have all message and ruleMap has latest message
-                if (!(CommonUtil.compareMessage(ruleBak))) {
+                if (!CommonUtil.compareMessage(ruleBak)) {
                     boolean flag = client.unSubscribe(subId);
                     log.info("start old rule ,and subscribe subId:{}。start rule ,and subscribe flag:{}", subId, flag);
                     if (flag) {
