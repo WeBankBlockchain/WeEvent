@@ -3,8 +3,6 @@ package com.webank.weevent.processor.quartz;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.processor.cache.CEPRuleCache;
@@ -12,10 +10,13 @@ import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.utils.JsonUtil;
 import com.webank.weevent.sdk.BrokerException;
 
+import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
+import org.quartz.SchedulerException;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Component
@@ -65,19 +66,22 @@ public class CRUDJobs implements Job {
     private static void startCEPRule(JobExecutionContext context, String jobName, String type) {
         Object obj = context.getJobDetail().getJobDataMap().get("rule");
         // ruleMap
-        Map<String, CEPRule> ruleMap = (HashMap) context.getJobDetail().getJobDataMap().get("ruleMap");
+        Pair<CEPRule, CEPRule> ruleBak = null;
+        if (StringUtils.isEmpty(context.getJobDetail().getJobDataMap().get("ruleBak"))) {
+            ruleBak = (Pair<CEPRule, CEPRule>) context.getJobDetail().getJobDataMap().get("ruleBak");
+        }
         try {
             if (obj instanceof CEPRule) {
                 log.info("{}", (CEPRule) obj);
                 CEPRule rule = (CEPRule) obj;
                 // check the status,when the status equal 1,then update
                 if (1 == rule.getStatus() || 0 == rule.getStatus() || 2 == rule.getStatus()) {
-                    CEPRuleCache.updateCEPRule(rule, ruleMap);
+                    CEPRuleCache.updateCEPRule(rule, ruleBak);
                 }
                 log.info("execute  job: {},rule:{},type:{}", jobName, JsonUtil.toJSONString(obj), type);
             }
-        } catch (BrokerException | IOException e) {
-            log.info("BrokerException:{}", e.toString());
+        } catch (BrokerException | IOException | SchedulerException e) {
+            log.error("BrokerException:{}", e.toString());
         }
 
     }
