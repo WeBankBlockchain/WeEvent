@@ -88,18 +88,6 @@ public class TimerSchedulerService {
 
 
     @Transactional(rollbackFor = Throwable.class)
-    public TimerScheduler insertTimerScheduler(TimerScheduler timerScheduler) throws BrokerException {
-        try {
-            //1.save entity
-            timerScheduler.setUpdatedTime(new Date());
-            return timerScheduler;
-        } catch (Exception e) {
-            log.error("insert timerScheduler fail", e);
-            throw new BrokerException("insert timerScheduler fail", e);
-        }
-    }
-
-    @Transactional(rollbackFor = Throwable.class)
     public void deleteTimerScheduler(TimerScheduler timerScheduler) throws BrokerException {
         try {
             this.removeJob(timerScheduler.getSchedulerName(), "timer", "timer", "timer-trigger");
