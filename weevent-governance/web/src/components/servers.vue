@@ -54,7 +54,7 @@
           <el-input v-model.trim="form.name" autocomplete="off" :placeholder="$t('serverSet.namePlaceholder')"></el-input>
         </el-form-item>
         <el-form-item :label="$t('serverSet.brokerURLAddress') + ' :'" prop='brokerUrl'>
-          <el-input v-model.trim="form.brokerUrl" autocomplete="off"  :placeholder="$t('serverSet.borkerPlaceholder')"></el-input>
+          <el-input v-model.trim="form.brokerUrl" autocomplete="off"  :placeholder="$t('serverSet.borkerPlaceholder')" :disabled="isEdit"></el-input>
           <p class='version' v-show="version" v-html="version"></p>
         </el-form-item>
         <el-form-item :label="$t('serverSet.webaseURLAddress') + ' :'" prop='webaseUrl'>
@@ -105,22 +105,26 @@ export default {
       if (value === '') {
         callback(new Error(this.$t('serverSet.emptyPort')))
       } else {
-        let url = '?brokerUrl=' + value
-        API.getVersion(url).then(res => {
-          if (res.data.code === 0) {
-            let data = res.data.data
-            let str = this.$t('header.version') + ': '
-            for (var key in data) {
-              str += data[key] + '&nbsp&nbsp'
+        if (this.isEdit) {
+          callback()
+        } else {
+          let url = '?brokerUrl=' + value
+          API.getVersion(url).then(res => {
+            if (res.data.code === 0) {
+              let data = res.data.data
+              let str = this.$t('header.version') + ': '
+              for (var key in data) {
+                str += data[key] + '&nbsp&nbsp'
+              }
+              this.version = str
+              callback()
+            } else {
+              callback(new Error(this.$t('serverSet.errorAddress')))
             }
-            this.version = str
-            callback()
-          } else {
+          }).catch(e => {
             callback(new Error(this.$t('serverSet.errorAddress')))
-          }
-        }).catch(e => {
-          callback(new Error(this.$t('serverSet.errorAddress')))
-        })
+          })
+        }
       }
     }
     var checkWeBase = (rule, value, callback) => {
@@ -301,7 +305,6 @@ export default {
       } else {
         this.showAccount = false
       }
-      this.title = '编辑信息'
       this.showLog = true
       this.isEdit = true
       this.title = this.$t('serverSet.editServer')
