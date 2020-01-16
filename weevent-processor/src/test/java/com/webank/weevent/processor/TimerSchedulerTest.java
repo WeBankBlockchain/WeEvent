@@ -39,6 +39,7 @@ public class TimerSchedulerTest {
     public void setUp() throws Exception {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
         timerScheduler = new TimerScheduler("test", jdbcUrl, periodParams, parsingSql);
+        url = "/timerScheduler/insert";
     }
 
     @Test
@@ -68,6 +69,45 @@ public class TimerSchedulerTest {
     @Test
     public void testInsertException002() throws Exception {
         timerScheduler.setSchedulerName(null);
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
+        MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
+        assertEquals(400, result.getResponse().getStatus());
+    }
+
+    @Test
+    public void testUpdateNormal001() throws Exception {
+        timerScheduler.setSchedulerName("test111");
+        testInsertNormal001();
+        url = "/timerScheduler/update";
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
+        MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
+        assertEquals(200, result.getResponse().getStatus());
+    }
+
+    @Test
+    public void testUpdateNormal002() throws Exception {
+        timerScheduler.setSchedulerName("test2");
+        testInsertNormal001();
+        url = "/timerScheduler/update";
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
+        MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
+        assertEquals(200, result.getResponse().getStatus());
+    }
+
+
+    @Test
+    public void testUpdateException001() throws Exception {
+        timerScheduler.setSchedulerName(null);
+        url = "/timerScheduler/update";
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
+        MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
+        assertEquals(400, result.getResponse().getStatus());
+    }
+
+    @Test
+    public void testUpdateException002() throws Exception {
+        timerScheduler.setPeriodParams(null);
+        url = "/timerScheduler/update";
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(400, result.getResponse().getStatus());

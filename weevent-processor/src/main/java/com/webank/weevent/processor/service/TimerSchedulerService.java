@@ -1,5 +1,6 @@
 package com.webank.weevent.processor.service;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.processor.model.TimerScheduler;
+import com.webank.weevent.processor.utils.CommonUtil;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.RetCode;
 import com.webank.weevent.sdk.BrokerException;
@@ -40,6 +42,10 @@ public class TimerSchedulerService {
     @SuppressWarnings("unchecked")
     public RetCode createTimerScheduler(String jobName, String jobGroupName, String triggerName, String triggerGroupName, Class jobClass, JobDataMap params, TimerScheduler timerScheduler) {
         try {
+            Connection dbcpConnection = CommonUtil.getDbcpConnection(timerScheduler.getDatabaseUrl());
+            if (dbcpConnection == null) {
+                return RetCode.mark(0, "database connect fail,please enter the correct database URL");
+            }
             // get the all timer
             Iterator<JobKey> jobKeyIterator = scheduler.getJobKeys(GroupMatcher.groupEquals(jobGroupName)).iterator();
             List<TimerScheduler> timerSchedulerList = new ArrayList<>();
@@ -67,9 +73,17 @@ public class TimerSchedulerService {
                     .startNow()
                     .withSchedule(CronScheduleBuilder.cronSchedule(timerScheduler.getPeriodParams())).forJob(jobName, jobGroupName).build();
 
-            if (scheduler.checkExists(JobKey.jobKey(jobName, jobGroupName))) {
+            boolean exists = scheduler.checkExists(JobKey.jobKey(jobName, jobGroupName));
+            if (exists && "createTimerTask".equals(params.get("type").toString())) {
+                return RetCode.mark(0, "create job fail,job is exists");
+            }
+            if (!exists && "updateTimerTask".equals(params.get("type").toString())) {
+                return RetCode.mark(0, "create job fail,job is not exists");
+            }
+            if (exists && "updateTimerTask".equals(params.get("type").toString())) {
                 removeJob(jobName, jobGroupName, triggerName, triggerGroupName);
             }
+
             scheduler.scheduleJob(job, trigger);
 
             if (!scheduler.isShutdown()) {

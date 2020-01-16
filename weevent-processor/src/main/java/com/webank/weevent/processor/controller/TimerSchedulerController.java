@@ -42,6 +42,20 @@ public class TimerSchedulerController {
         return resEntity;
     }
 
+    @RequestMapping("/update")
+    public BaseRspEntity updateTimerScheduler(@Validated @RequestBody TimerScheduler timerScheduler) throws BrokerException {
+        BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
+        JobDataMap timerSchedulerMap = new JobDataMap();
+        timerSchedulerMap.put("id", timerScheduler.getSchedulerName());
+        timerSchedulerMap.put("type", "updateTimerTask");
+        timerSchedulerMap.put("timer", timerScheduler);
+        RetCode retCode = timerSchedulerService.createTimerScheduler(timerScheduler.getSchedulerName(), "timer", "timer",
+                "timer-trigger", TimerSchedulerJob.class, timerSchedulerMap, timerScheduler);
+        resEntity.setErrorCode(retCode.getErrorCode());
+        resEntity.setErrorMsg(retCode.getErrorMsg());
+        return resEntity;
+    }
+
     @RequestMapping("/delete")
     public BaseRspEntity deleteTimerScheduler(@RequestBody TimerScheduler timerScheduler) throws BrokerException {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
