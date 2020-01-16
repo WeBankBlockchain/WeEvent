@@ -23,7 +23,8 @@ function check_broker(){
 
 function check_governance(){
     echo "check governance service"
- curl -s  http://127.0.0.1:8080/weevent-governance/user/login -X POST -d "username=admin&password=AC0E7D037817094E9E0B4441F9BAE3209D67B02FA484917065F71B16109A1A78" | grep 'Authorization' >>/dev/null    if [[ $? -eq 0 ]];then
+ curl -s  http://127.0.0.1:8080/weevent-governance/user/login -X POST -d "username=admin&password=AC0E7D037817094E9E0B4441F9BAE3209D67B02FA484917065F71B16109A1A78" | grep 'Authorization' >>/dev/null
+    if [[ $? -eq 0 ]];then
         yellow_echo "governance service is ok"
     else
         yellow_echo "governance service is error"
