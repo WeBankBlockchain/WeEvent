@@ -1,7 +1,6 @@
 package com.webank.weevent.processor.controller;
 
 import java.util.List;
-import java.io.IOException;
 
 import javax.validation.Valid;
 
