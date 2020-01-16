@@ -27,7 +27,6 @@ public class TimerSchedulerJob implements Job {
         log.info("{},{} timer execute {}  executing...", this.toString(), context.getJobDetail().getKey().getName(), f.format(new Date()));
 
         String taskName = context.getJobDetail().getKey().getName();
-        String type = context.getJobDetail().getJobDataMap().get("type").toString();
         log.info("{},{} Task execute {}    executing...", this.toString(), taskName, f.format(new Date()));
         dealTimerTask(context, taskName);
     }

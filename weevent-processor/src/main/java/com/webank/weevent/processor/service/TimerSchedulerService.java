@@ -21,6 +21,7 @@ import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
@@ -42,10 +43,6 @@ public class TimerSchedulerService {
     @SuppressWarnings("unchecked")
     public RetCode createTimerScheduler(String jobName, String jobGroupName, String triggerName, String triggerGroupName, Class jobClass, JobDataMap params, TimerScheduler timerScheduler) {
         try {
-            Connection dbcpConnection = CommonUtil.getDbcpConnection(timerScheduler.getDatabaseUrl());
-            if (dbcpConnection == null) {
-                return RetCode.mark(0, "database connect fail,please enter the correct database URL");
-            }
             // get the all timer
             Iterator<JobKey> jobKeyIterator = scheduler.getJobKeys(GroupMatcher.groupEquals(jobGroupName)).iterator();
             List<TimerScheduler> timerSchedulerList = new ArrayList<>();
@@ -72,16 +69,10 @@ public class TimerSchedulerService {
                     .withIdentity(new Date().toString().concat(currentTimer.getSchedulerName()), triggerGroupName)
                     .startNow()
                     .withSchedule(CronScheduleBuilder.cronSchedule(timerScheduler.getPeriodParams())).forJob(jobName, jobGroupName).build();
-
-            boolean exists = scheduler.checkExists(JobKey.jobKey(jobName, jobGroupName));
-            if (exists && "createTimerTask".equals(params.get("type").toString())) {
-                return RetCode.mark(0, "create job fail,job is exists");
-            }
-            if (!exists && "updateTimerTask".equals(params.get("type").toString())) {
-                return RetCode.mark(0, "create job fail,job is not exists");
-            }
-            if (exists && "updateTimerTask".equals(params.get("type").toString())) {
-                removeJob(jobName, jobGroupName, triggerName, triggerGroupName);
+            //check
+            RetCode retCode = checkTimerTask(timerScheduler, params, jobName, jobGroupName, triggerName, triggerGroupName);
+            if (0 == retCode.getErrorCode()) {
+                return retCode;
             }
 
             scheduler.scheduleJob(job, trigger);
@@ -98,6 +89,25 @@ public class TimerSchedulerService {
             log.error("e:{}", e.toString());
             return RetCode.mark(0, e.toString());
         }
+    }
+
+    private RetCode checkTimerTask(TimerScheduler timerScheduler, JobDataMap params, String jobName, String jobGroupName, String triggerName, String triggerGroupName) throws BrokerException, SchedulerException {
+        Connection dbcpConnection = CommonUtil.getDbcpConnection(timerScheduler.getDatabaseUrl());
+        if (dbcpConnection == null) {
+            return RetCode.mark(0, "database connect fail,please enter the correct database URL");
+        }
+        boolean exists = scheduler.checkExists(JobKey.jobKey(jobName, jobGroupName));
+        if (exists && "createTimerTask".equals(params.get("type").toString())) {
+            return RetCode.mark(0, "create job fail,job is exists");
+        }
+        if (!exists && "updateTimerTask".equals(params.get("type").toString())) {
+            return RetCode.mark(0, "update job fail,job is not exists");
+        }
+        if (exists && "updateTimerTask".equals(params.get("type").toString())) {
+            removeJob(jobName, jobGroupName, triggerName, triggerGroupName);
+            return ConstantsHelper.SUCCESS;
+        }
+        return ConstantsHelper.SUCCESS;
     }
 
 
