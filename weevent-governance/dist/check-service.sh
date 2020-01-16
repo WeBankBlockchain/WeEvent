@@ -16,8 +16,8 @@ function check_governance(){
         exit 1
     fi
 
-    curl -s "http://127.0.0.1:${port}/weevent-governance/topic/getTopics?pageIndex=0&pageSize=10" | grep 302000 >>/dev/null
-    if [[ $? -eq 0 ]];then
+ curl -s  http://127.0.0.1:${port}/weevent-governance/user/login -X POST -d "username=admin&password=AC0E7D037817094E9E0B4441F9BAE3209D67B02FA484917065F71B16109A1A78" | grep 'Authorization' >>/dev/null
+     if [[ $? -eq 0 ]];then
         echo "governance service is ok"
     else
         echo "governance service is error"
