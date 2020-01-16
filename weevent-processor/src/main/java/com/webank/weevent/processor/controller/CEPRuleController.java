@@ -81,7 +81,6 @@ public class CEPRuleController {
 
 
     @RequestMapping(value = "/deleteCEPRuleById", method = RequestMethod.POST)
-    @ResponseBody
     public BaseRspEntity deleteCEPRuleById(@RequestParam(name = "id") String id) {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         createJob(id, "deleteCEPRuleById");
