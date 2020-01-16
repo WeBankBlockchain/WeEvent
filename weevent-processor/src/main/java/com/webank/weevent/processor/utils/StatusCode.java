@@ -13,6 +13,7 @@ public enum StatusCode {
 
     TOPIC_PAGE_INDEX_INVALID(100104, "page index should be an integer start from 0"),
 
+    SCHEDULE_ERROR(100105, "quartz scheduler error"),
     ;
     /**
      * error code

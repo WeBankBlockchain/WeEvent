@@ -18,6 +18,7 @@ import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.sdk.WeEvent;
 
+import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.util.StringUtils;
@@ -267,7 +268,7 @@ public class CommonUtil {
 
                 break;
             default:
-                log.info("error:{}", key);
+                log.info("other type:{}", key);
                 break;
         }
         return map;
@@ -400,13 +401,12 @@ public class CommonUtil {
         return sqlOrder;
     }
 
-    public static boolean compareMessage(CEPRule rule, List<CEPRule> ruleList) {
-        for (int i = 0; i < ruleList.size(); i++) {
-            if (ruleList.get(i).getId().equals(rule.getId())) {
-                return ruleList.get(i).getFromDestination().equals(rule.getFromDestination());
-            }
+    public static boolean compareMessage(Pair<CEPRule, CEPRule> rules) {
+        if (StringUtils.isEmpty(rules)) {
+            return false;
         }
-        return false;
+        // check the from destination
+        return rules.getKey().getFromDestination().equals(rules.getValue().getFromDestination());
     }
 
 
