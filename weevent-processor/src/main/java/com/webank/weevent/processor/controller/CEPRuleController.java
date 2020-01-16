@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -39,7 +38,6 @@ public class CEPRuleController {
 
     // use the rule id to get rule detail
     @RequestMapping(value = "/updateCEPRuleById", method = RequestMethod.POST)
-    @ResponseBody
     public BaseRspEntity updateCEPRuleById(@Valid @RequestBody CEPRule rule) {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = createJob(rule, "updateCEPRuleById");
@@ -52,7 +50,6 @@ public class CEPRuleController {
     }
 
     @RequestMapping(value = "/stopCEPRuleById", method = RequestMethod.POST)
-    @ResponseBody
     public BaseRspEntity stopCEPRuleById(@Valid @RequestBody CEPRule rule) {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = createJob(rule, "stopCEPRuleById");
@@ -65,7 +62,6 @@ public class CEPRuleController {
     }
 
     @RequestMapping(value = "/insert", method = RequestMethod.POST)
-    @ResponseBody
     public BaseRspEntity insert(@RequestBody CEPRule rule) {
         // insert status must be 0
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
@@ -100,7 +96,6 @@ public class CEPRuleController {
     }
 
     @RequestMapping(value = "/statistic", method = RequestMethod.GET)
-    @ResponseBody
     public BaseRspEntity statistic(@RequestParam List<String> idList) {
 
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
@@ -116,7 +111,6 @@ public class CEPRuleController {
 
 
     @RequestMapping(value = "/startCEPRule", method = RequestMethod.POST)
-    @ResponseBody
     public BaseRspEntity startCEPRule(@Valid @RequestBody CEPRule rule) {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = createJob(rule, "startCEPRule");
@@ -129,7 +123,6 @@ public class CEPRuleController {
     }
 
     @RequestMapping(value = "/checkWhereCondition")
-    @ResponseBody
     public BaseRspEntity checkWhereCondition(@RequestParam(name = "payload") String payload, @RequestParam(name = "condition") String condition) {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = CEPRuleMQ.checkCondition(payload, condition);
@@ -143,7 +136,6 @@ public class CEPRuleController {
     }
 
     @RequestMapping(value = "/getJobDetail")
-    @ResponseBody
     public BaseRspEntity getJobDetail(@RequestParam(name = "id") String id) {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         try {
