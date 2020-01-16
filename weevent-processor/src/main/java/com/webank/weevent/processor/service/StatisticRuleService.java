@@ -9,6 +9,7 @@ import com.webank.weevent.processor.model.StatisticWeEvent;
 import com.webank.weevent.processor.mq.CEPRuleMQ;
 import com.webank.weevent.processor.quartz.QuartzManager;
 
+import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,8 +37,11 @@ public class StatisticRuleService {
                 }
             }
         }
-
-        StatisticWeEvent statisticJobs = quartzManager.getStatisticJobs(statisticWeEvent, idList);
-        return statisticJobs;
+        try {
+            StatisticWeEvent statisticJobs = quartzManager.getStatisticJobs(statisticWeEvent, idList);
+            return statisticJobs;
+        } catch (SchedulerException e) {
+            return null;
+        }
     }
 }

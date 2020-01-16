@@ -1,6 +1,5 @@
 package com.webank.weevent.processor.quartz;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -15,21 +14,22 @@ import com.webank.weevent.processor.model.StatisticRule;
 import com.webank.weevent.processor.model.StatisticWeEvent;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.RetCode;
+import com.webank.weevent.sdk.BrokerException;
 
+import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
@@ -62,10 +62,10 @@ public class QuartzManager {
             log.info("rule size:{} ...", ruleMap.size());
             log.info("start subscribe ...");
             for (Map.Entry<String, CEPRule> entry : ruleMap.entrySet()) {
-                CEPRuleCache.updateCEPRule(entry.getValue(), ruleMap);
+                CEPRuleCache.updateCEPRule(entry.getValue(), null);
             }
 
-        } catch (Exception e) {
+        } catch (SchedulerException | BrokerException e) {
             log.error("e:{}", e.toString());
         }
     }
@@ -90,34 +90,30 @@ public class QuartzManager {
         try {
             // get the all rules
             Iterator<JobKey> it = scheduler.getJobKeys(GroupMatcher.anyGroup()).iterator();
-            List<CEPRule> ruleList = new ArrayList<>();
-            Map<String, CEPRule> ruleMap = new HashMap<>();
             CEPRule currentRule = (CEPRule) params.get("rule");
             while (it.hasNext()) {
                 JobKey jobKey = (JobKey) it.next();
                 if (null != (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
                     CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
                     // if the current is delete
-                    if ((("deleteCEPRuleById".equals(params.get("type").toString()))) && (jobName.equals(rule.getId()))) {
+                    if ("deleteCEPRuleById".equals(params.get("type").toString()) && jobName.equals(rule.getId())) {
                         // update the delete status
                         rule.setStatus(2);
-                        params.put("rule", rule);
                         currentRule = rule;
-                    } else {
-                        ruleList.add(rule);
-                        ruleMap.put(rule.getId(), rule);
-                        log.info("{}", jobKey);
+                        params.put("rule", rule);
                     }
                 }
-
             }
-            ruleMap.put(currentRule.getId(), currentRule);
-            ruleList.add(currentRule);
-            params.put("ruleMap", ruleMap);
-            log.info("update the job  ruleMap:{},ruleList:{}", ruleMap.size(), ruleList.size());
+
+            Pair<CEPRule, CEPRule> ruleBak = null;
+            if (scheduler.checkExists(JobKey.jobKey(jobName, jobGroupName))) {
+                // add the old one
+                ruleBak = new Pair<>(getJobDetail(jobName), currentRule);
+            }
+            // add latest one
+            params.put("ruleBak", ruleBak);
 
             JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).storeDurably(true).build();
-
             // just do one time
             SimpleTrigger trigger = newTrigger()
                     .withIdentity(new Date().toString().concat(currentRule.getId()), triggerGroupName)
@@ -129,16 +125,16 @@ public class QuartzManager {
             if (scheduler.checkExists(JobKey.jobKey(jobName, jobGroupName))) {
                 removeJob(jobName, jobGroupName, triggerName, triggerGroupName);
             }
+
             scheduler.scheduleJob(job, trigger);
             if (!scheduler.isShutdown()) {
                 scheduler.start();
             }
+            // check status
             if (scheduler.checkExists(JobKey.jobKey(jobName, jobGroupName))) {
                 log.info("update job:{} success", jobName);
-
                 return ConstantsHelper.SUCCESS;
             }
-
             return ConstantsHelper.FAIL;
         } catch (Exception e) {
             log.error("e:{}", e.toString());
@@ -146,52 +142,23 @@ public class QuartzManager {
         }
     }
 
-
     /**
-     * modify Job Time
-     *
-     * @param triggerName trigger name
-     * @param triggerGroupName trigger group name
-     * @param cron set time
-     */
-    public void modifyJobTime(String triggerName, String triggerGroupName, String cron) {
-        try {
-
-            TriggerKey triggerKey = TriggerKey.triggerKey(triggerName, triggerGroupName);
-            CronTrigger trigger = (CronTrigger) scheduler.getTrigger(triggerKey);
-            if (trigger == null) {
-                return;
+     * get Job list
+     **/
+    public static Map<String, CEPRule> getJobList() throws SchedulerException {
+        Iterator<JobKey> it = scheduler.getJobKeys(GroupMatcher.anyGroup()).iterator();
+        Map<String, CEPRule> ruleMap = new HashMap<>();
+        while (it.hasNext()) {
+            JobKey jobKey = (JobKey) it.next();
+            CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
+            if (null != rule && 1 == rule.getStatus()) {
+                ruleMap.put(rule.getId(), rule);
             }
-
-            String oldTime = trigger.getCronExpression();
-            if (!oldTime.equalsIgnoreCase(cron)) {
-                TriggerBuilder<Trigger> triggerBuilder = newTrigger();
-                triggerBuilder.withIdentity(triggerName, triggerGroupName);
-                triggerBuilder.startNow();
-                triggerBuilder.withSchedule(CronScheduleBuilder.cronSchedule(cron));
-                trigger = (CronTrigger) triggerBuilder.build();
-                scheduler.rescheduleJob(triggerKey, trigger);
-
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
+        log.info("ruleMap:{}", ruleMap.size());
+        return ruleMap;
     }
 
-
-    /**
-     * modify Job Time
-     *
-     * @param jobName job name
-     * @param jobGroupName job group name
-     */
-    public JobDetail getJobDetail(String jobName, String jobGroupName) {
-        try {
-            return scheduler.getJobDetail(new JobKey(jobName, jobGroupName));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     /**
      * remove
@@ -201,20 +168,15 @@ public class QuartzManager {
      * @param triggerName trigger name
      * @param triggerGroupName trigger group name
      */
-    public RetCode removeJob(String jobName, String jobGroupName, String triggerName, String triggerGroupName) {
-        try {
+    public RetCode removeJob(String jobName, String jobGroupName, String triggerName, String triggerGroupName) throws SchedulerException {
+        TriggerKey triggerKey = TriggerKey.triggerKey(triggerName, triggerGroupName);
 
-            TriggerKey triggerKey = TriggerKey.triggerKey(triggerName, triggerGroupName);
-
-            scheduler.pauseTrigger(triggerKey);
-            scheduler.unscheduleJob(triggerKey);
-            if (scheduler.deleteJob(JobKey.jobKey(jobName, jobGroupName))) {
-                return ConstantsHelper.SUCCESS;
-            }
-            return ConstantsHelper.FAIL;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        scheduler.pauseTrigger(triggerKey);
+        scheduler.unscheduleJob(triggerKey);
+        if (scheduler.deleteJob(JobKey.jobKey(jobName, jobGroupName))) {
+            return ConstantsHelper.SUCCESS;
         }
+        return ConstantsHelper.FAIL;
     }
 
     /**
@@ -236,55 +198,65 @@ public class QuartzManager {
     }
 
     /**
+     * get the job message
+     *
+     * @param jobName
+     * @return
+     */
+    public CEPRule getJobDetail(String jobName) throws SchedulerException {
+        JobDetail job = scheduler.getJobDetail(new JobKey(jobName, "rule"));
+        if (StringUtils.isEmpty(job.getJobDataMap().get("rule"))) {
+            CEPRule rule = (CEPRule) job.getJobDataMap().get("rule");
+            return rule;
+        }
+        return null;
+    }
+
+    /**
      * get the statistic jobs
      */
-    public StatisticWeEvent getStatisticJobs(StatisticWeEvent statisticWeEvent, List<String> idList) {
+    public StatisticWeEvent getStatisticJobs(StatisticWeEvent statisticWeEvent, List<String> idList) throws SchedulerException {
         Map<String, StatisticRule> statisticRuleMap = statisticWeEvent.getStatisticRuleMap();
 
-        try {
-            // get the all rules
-            Iterator<JobKey> it = scheduler.getJobKeys(GroupMatcher.anyGroup()).iterator();
+        // get the all rules
+        Iterator<JobKey> it = scheduler.getJobKeys(GroupMatcher.anyGroup()).iterator();
 
-            int systemAmount = 0;
-            int userAmount = 0;
-            int runAmount = 0;
+        int systemAmount = 0;
+        int userAmount = 0;
+        int runAmount = 0;
 
-            while (it.hasNext()) {
-                JobKey jobKey = (JobKey) it.next();
-                if (null != scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
-                    CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
+        while (it.hasNext()) {
+            JobKey jobKey = (JobKey) it.next();
+            if (null != scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
+                CEPRule rule = (CEPRule) scheduler.getJobDetail(jobKey).getJobDataMap().get("rule");
 
-                    // statistic
-                    if ("1".equals(rule.getSystemTag())) {
-                        systemAmount = systemAmount + 1;
-                    } else {
-                        userAmount = userAmount + 1;
-                    }
-                    if ("1".equals(rule.getStatus())) {
-                        runAmount = runAmount + 1;
-                    }
+                // statistic
+                if ("1".equals(rule.getSystemTag())) {
+                    systemAmount = systemAmount + 1;
+                } else {
+                    userAmount = userAmount + 1;
+                }
+                if ("1".equals(rule.getStatus())) {
+                    runAmount = runAmount + 1;
+                }
 
-                    // match the right rule
-                    if ((!statisticRuleMap.containsKey(rule.getId())) && idList.contains(rule.getId())) {
-                        StatisticRule statisticRule = new StatisticRule();
-                        statisticRule.setId(rule.getId());
-                        statisticRule.setBrokerId(rule.getBrokerId());
-                        statisticRule.setRuleName(rule.getRuleName());
-                        statisticRule.setStatus(rule.getStatus());
-                        statisticRule.setStartTime(rule.getCreatedTime());
-                        statisticRule.setDestinationType(rule.getConditionType());
-                        statisticRuleMap.put(rule.getId(), statisticRule);
-                    }
+                // match the right rule
+                if ((!statisticRuleMap.containsKey(rule.getId())) && idList.contains(rule.getId())) {
+                    StatisticRule statisticRule = new StatisticRule();
+                    statisticRule.setId(rule.getId());
+                    statisticRule.setBrokerId(rule.getBrokerId());
+                    statisticRule.setRuleName(rule.getRuleName());
+                    statisticRule.setStatus(rule.getStatus());
+                    statisticRule.setStartTime(rule.getCreatedTime());
+                    statisticRule.setDestinationType(rule.getConditionType());
+                    statisticRuleMap.put(rule.getId(), statisticRule);
                 }
             }
-            statisticWeEvent.setSystemAmount(systemAmount);
-            statisticWeEvent.setUserAmount(userAmount);
-            statisticWeEvent.setRunAmount(runAmount);
-            statisticWeEvent.setStatisticRuleMap(statisticRuleMap);
-            return statisticWeEvent;
-        } catch (Exception e) {
-            log.error("e:{}", e.toString());
-            return null;
         }
+        statisticWeEvent.setSystemAmount(systemAmount);
+        statisticWeEvent.setUserAmount(userAmount);
+        statisticWeEvent.setRunAmount(runAmount);
+        statisticWeEvent.setStatisticRuleMap(statisticRuleMap);
+        return statisticWeEvent;
     }
 }
