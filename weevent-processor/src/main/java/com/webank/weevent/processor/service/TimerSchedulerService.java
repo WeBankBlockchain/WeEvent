@@ -34,7 +34,7 @@ public class TimerSchedulerService {
 
 
     public TimerSchedulerService(Scheduler scheduler) {
-        TimerSchedulerService.scheduler = scheduler;
+        this.scheduler = scheduler;
     }
 
     @SuppressWarnings("unchecked")
@@ -119,7 +119,7 @@ public class TimerSchedulerService {
      * @param triggerName trigger name
      * @param triggerGroupName trigger group name
      */
-    public RetCode removeJob(String jobName, String jobGroupName, String triggerName, String triggerGroupName) {
+    public RetCode removeJob(String jobName, String jobGroupName, String triggerName, String triggerGroupName) throws Exception {
         try {
             TriggerKey triggerKey = TriggerKey.triggerKey(triggerName, triggerGroupName);
             scheduler.pauseTrigger(triggerKey);
@@ -129,7 +129,7 @@ public class TimerSchedulerService {
             }
             return ConstantsHelper.FAIL;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new Exception(e);
         }
     }
 
