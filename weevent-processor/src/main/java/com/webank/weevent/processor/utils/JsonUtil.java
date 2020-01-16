@@ -1,6 +1,7 @@
 package com.webank.weevent.processor.utils;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -9,6 +10,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.MapLikeType;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Assert;
 
 
@@ -44,6 +46,20 @@ public class JsonUtil {
         }
     }
 
+    public static <T, R> Map<T, R> parseObjectToMap(String data, Class tclass1, Class tclass2) throws IOException {
+        if (StringUtils.isBlank(data)) {
+            return new HashMap<>();
+        }
+        try {
+            MapLikeType mapLikeType = objectMapper.getTypeFactory().constructMapLikeType(Map.class, tclass1, tclass2);
+            return objectMapper.readValue(data, mapLikeType);
+        } catch (Exception e) {
+            log.error("conversion of Json failed", e);
+            throw new IOException("conversion of Json failed", e);
+        }
+    }
+
+
     public static Map<String, Object> parseObjectToMap(String data) throws IOException {
         Assert.hasText(data, "data without text");
         try {
@@ -56,7 +72,7 @@ public class JsonUtil {
     }
 
 
-    public static boolean isValid(String data)  {
+    public static boolean isValid(String data) {
         Assert.hasText(data, "data without text");
         try {
             ObjectMapper objectMapper = new ObjectMapper();
