@@ -6,7 +6,9 @@ import java.util.concurrent.TimeUnit;
 
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.JUnitTestBase;
+import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.dto.ListPage;
+import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDK2Wrapper;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
 import com.webank.weevent.protocol.rest.entity.QueryEntity;
@@ -21,6 +23,8 @@ import com.webank.weevent.sdk.TopicPage;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -1084,4 +1088,13 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
         Assert.assertTrue(operatorList.size() >= 1);
     }
 
+    private Credentials getFixedAccountCredentials() {
+        FiscoConfig fiscoConfig = new FiscoConfig();
+        fiscoConfig.load();
+        return Web3SDK2Wrapper.getCredentials(fiscoConfig);
+    }
+
+    private Credentials getExternalAccountCredentials() {
+        return GenCredential.create();
+    }
 }

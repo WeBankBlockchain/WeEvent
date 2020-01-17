@@ -1,7 +1,6 @@
 package com.webank.weevent.broker.fabric;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import com.webank.weevent.broker.fabric.sdk.FabricDelegate;

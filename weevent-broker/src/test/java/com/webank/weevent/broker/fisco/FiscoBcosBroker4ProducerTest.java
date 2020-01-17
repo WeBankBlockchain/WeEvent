@@ -12,9 +12,11 @@ import java.util.concurrent.TimeUnit;
 
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.JUnitTestBase;
+import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.dto.ContractContext;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
+import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDK2Wrapper;
 import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
@@ -30,6 +32,7 @@ import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ExtendedRawTransaction;
 import org.fisco.bcos.web3j.crypto.ExtendedTransactionEncoder;
+import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.junit.Assert;
 import org.junit.Before;
@@ -426,6 +429,16 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
     private String signData(ExtendedRawTransaction rawTransaction, Credentials credentials) {
         byte[] signedMessage = ExtendedTransactionEncoder.signMessage(rawTransaction, credentials);
         return Numeric.toHexString(signedMessage);
+    }
+
+    private Credentials getFixedAccountCredentials() {
+        FiscoConfig fiscoConfig = new FiscoConfig();
+        fiscoConfig.load();
+        return Web3SDK2Wrapper.getCredentials(fiscoConfig);
+    }
+
+    private Credentials getExternalAccountCredentials() {
+        return GenCredential.create();
     }
 
 }
