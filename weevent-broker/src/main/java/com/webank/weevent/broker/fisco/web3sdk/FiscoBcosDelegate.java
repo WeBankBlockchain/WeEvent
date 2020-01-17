@@ -432,47 +432,35 @@ public class FiscoBcosDelegate {
         }
     }
 
-    public boolean addOperator(Long groupId, String topicName, String transactionHex) throws BrokerException {
+    public boolean addOperator(Long groupId, String topicName, String operatorAddress) throws BrokerException {
         checkVersion(groupId);
-        ParamCheckUtils.validateTransactionHex(transactionHex);
+        ParamCheckUtils.validateAddress(operatorAddress);
 
         if (this.fiscoBcos != null) {
             throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
         } else {
-            return this.fiscoBcos2Map.get(groupId).addOperator(topicName, transactionHex);
+            return this.fiscoBcos2Map.get(groupId).addOperator(topicName, operatorAddress);
         }
     }
 
-    public boolean delOperator(Long groupId, String topicName, String transactionHex) throws BrokerException {
+    public boolean delOperator(Long groupId, String topicName, String operatorAddress) throws BrokerException {
         checkVersion(groupId);
-        ParamCheckUtils.validateTransactionHex(transactionHex);
+        ParamCheckUtils.validateAddress(operatorAddress);
 
         if (this.fiscoBcos != null) {
             throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
         } else {
-            return this.fiscoBcos2Map.get(groupId).delOperator(topicName, transactionHex);
+            return this.fiscoBcos2Map.get(groupId).delOperator(topicName, operatorAddress);
         }
     }
 
-    public List<String> listOperator(Long groupId, String topicName, String transactionHex) throws BrokerException {
+    public List<String> listOperator(Long groupId, String topicName) throws BrokerException {
         checkVersion(groupId);
-        ParamCheckUtils.validateTransactionHex(transactionHex);
 
         if (this.fiscoBcos != null) {
             throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
         } else {
-            return this.fiscoBcos2Map.get(groupId).listOperator(topicName, transactionHex);
-        }
-    }
-
-    public boolean checkOperatorPermission(Long groupId, String topicName, String transactionHex) throws BrokerException {
-        checkVersion(groupId);
-        ParamCheckUtils.validateTransactionHex(transactionHex);
-
-        if (this.fiscoBcos != null) {
-            throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
-        } else {
-            return this.fiscoBcos2Map.get(groupId).checkOperatorPermission(topicName, transactionHex);
+            return this.fiscoBcos2Map.get(groupId).listOperator(topicName);
         }
     }
 }

@@ -109,9 +109,13 @@ public enum ErrorCode {
 
     OPERATOR_NOT_EXIST(101018, "operator not exist"),
 
-    TRANSACTIONHEX_IS_NULL(101020, "the transactionHex is null"),
+    OPERATOR_ADDRESS_IS_NULL(101020, "the operatorAddress is null"),
 
-    TRANSACTIONHEX_ILLEGAL(101021, "the transactionHex is illegal"),
+    OPERATOR_ADDRESS_ILLEGAL(101021, "the operatorAddress is illegal"),
+
+    TRANSACTIONHEX_IS_NULL(101022, "the transactionHex is null"),
+
+    TRANSACTIONHEX_ILLEGAL(101023, "the transactionHex is illegal"),
 
     //server error(200000, 300000)
     TOPIC_CONTROLLER_IS_NULL(200100, "get topic control address from CNS failed, please deploy it first"),

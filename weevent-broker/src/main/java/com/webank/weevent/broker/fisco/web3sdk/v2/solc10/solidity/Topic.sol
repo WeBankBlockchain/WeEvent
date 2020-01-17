@@ -37,7 +37,7 @@ contract Topic {
         return (acl.owner == tx.origin);
     }
 
-    function checkOperatorExist(string topicName, address operatorAddress) public constant returns (bool) {
+    function checkOperatorPermission(string topicName, address operatorAddress) internal constant returns (bool) {
         ACL memory acl = ACLMap[topicName];
         if (acl.owner == operatorAddress) {
             return true;
@@ -51,15 +51,11 @@ contract Topic {
         return false;
     }
 
-    function checkOperatorPermission(string topicName) public constant returns (bool) {
-        return checkOperatorExist(topicName, tx.origin);
-    }
-
     function addOperator(string topicName, address operatorAddress) public returns (uint) {
         if (!checkACLPermission(topicName)) {
             return OPERATOR_NO_PERMISSION;
         }
-        if (checkOperatorExist(topicName, operatorAddress)) {
+        if (checkOperatorPermission(topicName, operatorAddress)) {
             return OPERATOR_ALREADY_EXIST;
         }
         ACLMap[topicName].operators.push(operatorAddress);
@@ -70,7 +66,7 @@ contract Topic {
         if (!checkACLPermission(topicName)) {
             return OPERATOR_NO_PERMISSION;
         }
-        if (!checkOperatorExist(topicName, operatorAddress)) {
+        if (!checkOperatorPermission(topicName, operatorAddress)) {
             return OPERATOR_NOT_EXIST;
         }
         uint operatorArrayLength = ACLMap[topicName].operators.length;
@@ -100,7 +96,7 @@ contract Topic {
     }
 
     function publishWeEvent(string topicName, string eventContent, string extensions) public returns (uint) {
-        if (!checkOperatorExist(topicName, tx.origin)) {
+        if (!checkOperatorPermission(topicName, tx.origin)) {
            return PUBLISH_NO_PERMISSION;
         }
 

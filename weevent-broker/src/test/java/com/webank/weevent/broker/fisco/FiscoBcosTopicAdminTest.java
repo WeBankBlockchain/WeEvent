@@ -1,6 +1,7 @@
 package com.webank.weevent.broker.fisco;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.webank.weevent.BrokerApplication;
@@ -950,5 +951,137 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
         Assert.assertTrue(tbNodes.getTotal() > 0);
     }
 
+    /**
+     * add operator by fixed account.
+     */
+    @Test
+    public void testAddOperator() throws BrokerException {
+        // new address
+        String address = getExternalAccountCredentials().getAddress();
+
+        boolean result = this.iProducer.addOperator(this.groupId, this.topicName, address);
+        Assert.assertTrue(result);
+
+    }
+
+    /**
+     * add operator by fixed account, topic not exist.
+     */
+    @Test
+    public void testAddOperatorTopicNotExist() {
+        // new address
+        String address = getExternalAccountCredentials().getAddress();
+
+        try {
+            // operator already exist
+            this.iProducer.addOperator(this.groupId, "AAA", address);
+        } catch (BrokerException e) {
+            Assert.assertEquals(ErrorCode.TOPIC_NOT_EXIST.getCode(), e.getCode());
+        }
+    }
+
+    /**
+     * add exist operator by fixed account.
+     */
+    @Test
+    public void testAddOperatorAlreadyExist() {
+        // new address
+        String address = getExternalAccountCredentials().getAddress();
+
+        try {
+            boolean result = this.iProducer.addOperator(this.groupId, this.topicName, address);
+            Assert.assertTrue(result);
+            // operator already exist
+            this.iProducer.addOperator(this.groupId, this.topicName, address);
+        } catch (BrokerException e) {
+            Assert.assertEquals(ErrorCode.OPERATOR_ALREADY_EXIST.getCode(), e.getCode());
+        }
+    }
+
+    /**
+     * add operator by fixed account.
+     */
+    @Test
+    public void testDelOperator() throws BrokerException {
+        // new address
+        String address = getExternalAccountCredentials().getAddress();
+
+        // add operator
+        boolean addResult = this.iProducer.addOperator(this.groupId, this.topicName, address);
+        Assert.assertTrue(addResult);
+
+        // delete operator
+        boolean delResult = this.iProducer.delOperator(this.groupId, this.topicName, address);
+        Assert.assertTrue(delResult);
+    }
+
+    /**
+     * delete operator by fixed account, topic not exist.
+     */
+    @Test
+    public void testDelOperatorTopicNotExist() {
+        // new address
+        String address = getExternalAccountCredentials().getAddress();
+
+        try {
+            this.iProducer.delOperator(this.groupId, "AAA", address);
+        } catch (BrokerException e) {
+            Assert.assertEquals(ErrorCode.TOPIC_NOT_EXIST.getCode(), e.getCode());
+        }
+    }
+
+    /**
+     * delete not exist operator by fixed account.
+     */
+    @Test
+    public void testDelOperatorNotExist() {
+        // new address
+        String address = getExternalAccountCredentials().getAddress();
+
+        try {
+            this.iProducer.delOperator(this.groupId, this.topicName, address);
+        } catch (BrokerException e) {
+            Assert.assertEquals(ErrorCode.OPERATOR_NOT_EXIST.getCode(), e.getCode());
+        }
+    }
+
+    /**
+     * operator null.
+     */
+    @Test
+    public void testDelOperatorNull() {
+        // new address
+        String address = "";
+
+        try {
+            this.iProducer.delOperator(this.groupId, this.topicName, address);
+        } catch (BrokerException e) {
+            Assert.assertEquals(ErrorCode.OPERATOR_ADDRESS_IS_NULL.getCode(), e.getCode());
+        }
+    }
+
+    /**
+     * operator null.
+     */
+    @Test
+    public void testDelOperatorIllegal() {
+        // new address
+        String address = "abcdefgh";
+
+        try {
+            this.iProducer.delOperator(this.groupId, this.topicName, address);
+        } catch (BrokerException e) {
+            Assert.assertEquals(ErrorCode.OPERATOR_ADDRESS_ILLEGAL.getCode(), e.getCode());
+        }
+    }
+
+    /**
+     * get operator list by fixed account.
+     */
+    @Test
+    public void testGetOperatorList() throws BrokerException {
+        List<String> operatorList = this.iProducer.listOperator(this.groupId, this.topicName);
+        Assert.assertTrue(operatorList.size() >= 1);
+    }
 
 }

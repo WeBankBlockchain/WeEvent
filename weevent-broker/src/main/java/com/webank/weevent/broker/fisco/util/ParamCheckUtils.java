@@ -151,6 +151,15 @@ public class ParamCheckUtils {
         }
     }
 
+    public static void validateAddress(String address) throws BrokerException {
+        if (StringUtils.isBlank(address)) {
+            throw new BrokerException(ErrorCode.OPERATOR_ADDRESS_IS_NULL);
+        }
+        if (!Pattern.compile(WeEventConstants.FISCO_BCOS_ADDRESS_PATTERN).matcher(address).matches()) {
+            throw new BrokerException(ErrorCode.OPERATOR_ADDRESS_ILLEGAL);
+        }
+    }
+
     public static void validateTransactionHex(String transactionHex) throws BrokerException {
         if (StringUtils.isBlank(transactionHex)) {
             throw new BrokerException(ErrorCode.TRANSACTIONHEX_IS_NULL);

@@ -94,4 +94,10 @@ public interface IEventTopic {
     ListPage<TbNode> queryNodeList(QueryEntity queryEntity) throws BrokerException;
 
     ContractContext getContractContext(String groupId) throws BrokerException;
+
+    boolean addOperator(String groupId, String topicName, String operatorAddress) throws BrokerException;
+
+    boolean delOperator(String groupId, String topicName, String operatorAddress) throws BrokerException;
+
+    List<String> listOperator(String groupId, String topicName) throws BrokerException;
 }

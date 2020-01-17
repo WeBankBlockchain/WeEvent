@@ -12,7 +12,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
@@ -42,9 +41,6 @@ import org.fisco.bcos.channel.client.TransactionSucCallback;
 import org.fisco.bcos.web3j.abi.FunctionReturnDecoder;
 import org.fisco.bcos.web3j.abi.TypeReference;
 import org.fisco.bcos.web3j.abi.Utils;
-import org.fisco.bcos.web3j.abi.datatypes.Address;
-import org.fisco.bcos.web3j.abi.datatypes.Bool;
-import org.fisco.bcos.web3j.abi.datatypes.DynamicArray;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.fisco.bcos.web3j.abi.datatypes.generated.Uint32;
@@ -53,6 +49,7 @@ import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.StatusCode;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tuples.generated.Tuple1;
+import org.fisco.bcos.web3j.tuples.generated.Tuple2;
 import org.fisco.bcos.web3j.tuples.generated.Tuple3;
 import org.fisco.bcos.web3j.tuples.generated.Tuple8;
 import org.fisco.bcos.web3j.tx.Contract;
@@ -435,17 +432,31 @@ public class FiscoBcos2 {
         return contractContext;
     }
 
-    public boolean addOperator(String topicName, String transactionHex) throws BrokerException {
+    public boolean addOperator(String topicName, String operatorAddress) throws BrokerException {
         if (!isTopicExist(topicName)) {
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
         }
 
-        TransactionReceipt receipt = getTransactionReceiptAsync(transactionHex);
+        TransactionReceipt transactionReceipt;
+        try {
+            transactionReceipt = this.topic.addOperator(topicName, operatorAddress).sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("addOperator failed due to web3sdk rpc error.", e);
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
+        } catch (TimeoutException e) {
+            log.error("addOperator failed due to web3sdk rpc timeout.", e);
+            throw new BrokerException(ErrorCode.TRANSACTION_TIMEOUT);
+        }
+
+        if (!transactionReceipt.isStatusOK()) {
+            log.error("Topic.addOperator transactionReceipt is empty.");
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
+        }
 
         List<TypeReference<?>> referencesList = Arrays.asList(new TypeReference<Uint32>() {
         });
         List<Type> returnList = FunctionReturnDecoder.decode(
-                String.valueOf(receipt.getOutput()),
+                String.valueOf(transactionReceipt.getOutput()),
                 Utils.convert(referencesList));
 
         int code = ((BigInteger) returnList.get(0).getValue()).intValue();
@@ -458,16 +469,31 @@ public class FiscoBcos2 {
         }
     }
 
-    public boolean delOperator(String topicName, String transactionHex) throws BrokerException {
+    public boolean delOperator(String topicName, String operatorAddress) throws BrokerException {
         if (!isTopicExist(topicName)) {
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
         }
 
-        TransactionReceipt receipt = getTransactionReceiptAsync(transactionHex);
+        TransactionReceipt transactionReceipt;
+        try {
+            transactionReceipt = this.topic.delOperator(topicName, operatorAddress).sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("delOperator failed due to web3sdk rpc error.", e);
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
+        } catch (TimeoutException e) {
+            log.error("delOperator failed due to web3sdk rpc timeout.", e);
+            throw new BrokerException(ErrorCode.TRANSACTION_TIMEOUT);
+        }
+
+        if (!transactionReceipt.isStatusOK()) {
+            log.error("Topic.delOperator transactionReceipt is empty.");
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
+        }
+
         List<TypeReference<?>> referencesList = Arrays.asList(new TypeReference<Uint32>() {
         });
         List<Type> returnList = FunctionReturnDecoder.decode(
-                String.valueOf(receipt.getOutput()),
+                String.valueOf(transactionReceipt.getOutput()),
                 Utils.convert(referencesList));
         int code = ((BigInteger) returnList.get(0).getValue()).intValue();
 
@@ -480,58 +506,32 @@ public class FiscoBcos2 {
         }
     }
 
-    public List<String> listOperator(String topicName, String transactionHex) throws BrokerException {
+    public List<String> listOperator(String topicName) throws BrokerException {
         if (!isTopicExist(topicName)) {
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
         }
 
-        TransactionReceipt receipt = getTransactionReceiptAsync(transactionHex);
-        List<TypeReference<?>> referencesList = Arrays.asList(new TypeReference<Uint256>() {
-        }, new TypeReference<DynamicArray<Address>>() {
-        });
-        List<Type> returnList = FunctionReturnDecoder.decode(
-                String.valueOf(receipt.getOutput()),
-                Utils.convert(referencesList));
+        Tuple2<BigInteger, List<String>> tuple2;
+        try {
+            tuple2 = this.topic.listOperator(topicName).sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("query operator list failed due to web3sdk rpc error.", e);
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
+        } catch (TimeoutException e) {
+            log.error("query operator list failed due to web3sdk rpc timeout.", e);
+            throw new BrokerException(ErrorCode.TRANSACTION_TIMEOUT);
+        }
 
-        int code = ((BigInteger) returnList.get(0).getValue()).intValue();
+        if (tuple2 == null) {
+            log.error("Topic.listOperator result is empty");
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
+        }
+
+        int code = tuple2.getValue1().intValue();
         if (code == ErrorCode.NO_PERMISSION.getCode()) {
             throw new BrokerException(ErrorCode.NO_PERMISSION);
         }
 
-        return DataTypeUtils.object2List(returnList.get(1).getValue(), Address.class)
-                .stream().map(address -> address.getValue()).collect(Collectors.toList());
-    }
-
-    public boolean checkOperatorPermission(String topicName, String transactionHex) throws BrokerException {
-        if (!isTopicExist(topicName)) {
-            throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
-        }
-
-        TransactionReceipt receipt = getTransactionReceiptAsync(transactionHex);
-        List<TypeReference<?>> referencesList = Arrays.asList(new TypeReference<Bool>() {
-        });
-        List<Type> returnList = FunctionReturnDecoder.decode(
-                String.valueOf(receipt.getOutput()),
-                Utils.convert(referencesList));
-
-        return (boolean) returnList.get(0).getValue();
-    }
-
-    private TransactionReceipt getTransactionReceiptAsync(String transactionHex) throws BrokerException {
-        CompletableFuture<Optional<TransactionReceipt>> receiptOptionalFuture = web3j.sendRawTransaction(transactionHex).sendAsync()
-                .thenApplyAsync(ethSendTransaction -> getTransactionReceiptRequest(ethSendTransaction.getTransactionHash()));
-
-        Optional<TransactionReceipt> receiptOptional;
-        try {
-            receiptOptional = receiptOptionalFuture.get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            log.error("get TransactionReceipt failed ", e);
-            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        }
-
-        if (!receiptOptional.isPresent()) {
-            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        }
-        return receiptOptional.get();
+        return tuple2.getValue2();
     }
 }

@@ -2,8 +2,12 @@ package com.webank.weevent;
 
 import java.util.concurrent.TimeUnit;
 
+import com.webank.weevent.broker.config.FiscoConfig;
+import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDK2Wrapper;
 import com.webank.weevent.sdk.WeEvent;
 
+import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -41,5 +45,15 @@ public class JUnitTestBase {
     @Test
     public void testBuild() {
         Assert.assertTrue(true);
+    }
+
+    protected Credentials getFixedAccountCredentials() {
+        FiscoConfig fiscoConfig = new FiscoConfig();
+        fiscoConfig.load();
+        return Web3SDK2Wrapper.getCredentials(fiscoConfig);
+    }
+
+    protected Credentials getExternalAccountCredentials() {
+        return GenCredential.create();
     }
 }
