@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
@@ -41,8 +42,12 @@ import org.fisco.bcos.channel.client.TransactionSucCallback;
 import org.fisco.bcos.web3j.abi.FunctionReturnDecoder;
 import org.fisco.bcos.web3j.abi.TypeReference;
 import org.fisco.bcos.web3j.abi.Utils;
+import org.fisco.bcos.web3j.abi.datatypes.Address;
+import org.fisco.bcos.web3j.abi.datatypes.Bool;
+import org.fisco.bcos.web3j.abi.datatypes.DynamicArray;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.abi.datatypes.generated.Uint256;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint32;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.StatusCode;
@@ -293,10 +298,15 @@ public class FiscoBcos2 {
             // success
             if (receipt.isStatusOK()) {
                 Tuple1<BigInteger> result = this.topic.getPublishWeEventOutput(receipt);
-                sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
-                sendResult.setEventId(DataTypeUtils.encodeEventId(this.topicName,
-                        receipt.getBlockNumber().intValue(),
-                        result.getValue1().intValue()));
+                int sequence = result.getValue1().intValue();
+                if (sequence == 0) {
+                    sendResult.setStatus(SendResult.SendResultStatus.NO_PERMISSION);
+                } else {
+                    sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+                    sendResult.setEventId(DataTypeUtils.encodeEventId(this.topicName,
+                            receipt.getBlockNumber().intValue(),
+                            sequence));
+                }
             } else { // error
                 if ("Transaction receipt timeout.".equals(receipt.getStatus())) {
                     log.error("publish event failed due to transaction execution timeout. {}",
@@ -338,10 +348,15 @@ public class FiscoBcos2 {
                         String.valueOf(receiptOptional.get().getOutput()),
                         Utils.convert(referencesList));
 
-                sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
-                sendResult.setEventId(DataTypeUtils.encodeEventId(topicName,
-                        receiptOptional.get().getBlockNumber().intValue(),
-                        ((BigInteger) returnList.get(0).getValue()).intValue()));
+                int sequence = ((BigInteger) returnList.get(0).getValue()).intValue();
+                if (sequence == 0) {
+                    sendResult.setStatus(SendResult.SendResultStatus.NO_PERMISSION);
+                } else {
+                    sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+                    sendResult.setEventId(DataTypeUtils.encodeEventId(topicName,
+                            receiptOptional.get().getBlockNumber().intValue(),
+                            sequence));
+                }
             } else {
                 sendResult.setStatus(SendResult.SendResultStatus.ERROR);
             }
@@ -418,5 +433,105 @@ public class FiscoBcos2 {
         contractContext.setBlockLimit(BlockLimit.blockLimit.longValue());
         contractContext.setChainId(Web3SDK2Wrapper.chainID);
         return contractContext;
+    }
+
+    public boolean addOperator(String topicName, String transactionHex) throws BrokerException {
+        if (!isTopicExist(topicName)) {
+            throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
+        }
+
+        TransactionReceipt receipt = getTransactionReceiptAsync(transactionHex);
+
+        List<TypeReference<?>> referencesList = Arrays.asList(new TypeReference<Uint32>() {
+        });
+        List<Type> returnList = FunctionReturnDecoder.decode(
+                String.valueOf(receipt.getOutput()),
+                Utils.convert(referencesList));
+
+        int code = ((BigInteger) returnList.get(0).getValue()).intValue();
+        if (code == ErrorCode.NO_PERMISSION.getCode()) {
+            throw new BrokerException(ErrorCode.NO_PERMISSION);
+        } else if (code == ErrorCode.OPERATOR_ALREADY_EXIST.getCode()) {
+            throw new BrokerException(ErrorCode.OPERATOR_ALREADY_EXIST);
+        } else {
+            return true;
+        }
+    }
+
+    public boolean delOperator(String topicName, String transactionHex) throws BrokerException {
+        if (!isTopicExist(topicName)) {
+            throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
+        }
+
+        TransactionReceipt receipt = getTransactionReceiptAsync(transactionHex);
+        List<TypeReference<?>> referencesList = Arrays.asList(new TypeReference<Uint32>() {
+        });
+        List<Type> returnList = FunctionReturnDecoder.decode(
+                String.valueOf(receipt.getOutput()),
+                Utils.convert(referencesList));
+        int code = ((BigInteger) returnList.get(0).getValue()).intValue();
+
+        if (code == ErrorCode.NO_PERMISSION.getCode()) {
+            throw new BrokerException(ErrorCode.NO_PERMISSION);
+        } else if (code == ErrorCode.OPERATOR_NOT_EXIST.getCode()) {
+            throw new BrokerException(ErrorCode.OPERATOR_NOT_EXIST);
+        } else {
+            return true;
+        }
+    }
+
+    public List<String> listOperator(String topicName, String transactionHex) throws BrokerException {
+        if (!isTopicExist(topicName)) {
+            throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
+        }
+
+        TransactionReceipt receipt = getTransactionReceiptAsync(transactionHex);
+        List<TypeReference<?>> referencesList = Arrays.asList(new TypeReference<Uint256>() {
+        }, new TypeReference<DynamicArray<Address>>() {
+        });
+        List<Type> returnList = FunctionReturnDecoder.decode(
+                String.valueOf(receipt.getOutput()),
+                Utils.convert(referencesList));
+
+        int code = ((BigInteger) returnList.get(0).getValue()).intValue();
+        if (code == ErrorCode.NO_PERMISSION.getCode()) {
+            throw new BrokerException(ErrorCode.NO_PERMISSION);
+        }
+
+        return DataTypeUtils.object2List(returnList.get(1).getValue(), Address.class)
+                .stream().map(address -> address.getValue()).collect(Collectors.toList());
+    }
+
+    public boolean checkOperatorPermission(String topicName, String transactionHex) throws BrokerException {
+        if (!isTopicExist(topicName)) {
+            throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
+        }
+
+        TransactionReceipt receipt = getTransactionReceiptAsync(transactionHex);
+        List<TypeReference<?>> referencesList = Arrays.asList(new TypeReference<Bool>() {
+        });
+        List<Type> returnList = FunctionReturnDecoder.decode(
+                String.valueOf(receipt.getOutput()),
+                Utils.convert(referencesList));
+
+        return (boolean) returnList.get(0).getValue();
+    }
+
+    private TransactionReceipt getTransactionReceiptAsync(String transactionHex) throws BrokerException {
+        CompletableFuture<Optional<TransactionReceipt>> receiptOptionalFuture = web3j.sendRawTransaction(transactionHex).sendAsync()
+                .thenApplyAsync(ethSendTransaction -> getTransactionReceiptRequest(ethSendTransaction.getTransactionHash()));
+
+        Optional<TransactionReceipt> receiptOptional;
+        try {
+            receiptOptional = receiptOptionalFuture.get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            log.error("get TransactionReceipt failed ", e);
+            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
+
+        if (!receiptOptional.isPresent()) {
+            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
+        return receiptOptional.get();
     }
 }

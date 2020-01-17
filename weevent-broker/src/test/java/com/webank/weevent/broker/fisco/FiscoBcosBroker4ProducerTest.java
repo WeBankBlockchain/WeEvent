@@ -1,22 +1,16 @@
 package com.webank.weevent.broker.fisco;
 
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.JUnitTestBase;
-import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.dto.ContractContext;
-import com.webank.weevent.broker.fisco.util.DataTypeUtils;
+import com.webank.weevent.broker.fisco.util.RawTransactionUtils;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
-import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDK2Wrapper;
+import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
@@ -24,13 +18,8 @@ import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.web3j.abi.FunctionEncoder;
-import org.fisco.bcos.web3j.abi.TypeReference;
-import org.fisco.bcos.web3j.abi.datatypes.Function;
-import org.fisco.bcos.web3j.abi.datatypes.Type;
+import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ExtendedRawTransaction;
-import org.fisco.bcos.web3j.crypto.ExtendedTransactionEncoder;
-import org.fisco.bcos.web3j.utils.Numeric;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,6 +36,7 @@ import org.junit.Test;
 public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
     private IProducer iProducer;
     private FiscoBcosDelegate fiscoBcosDelegate;
+    private ContractContext contractContext;
 
     @Before
     public void before() throws Exception {
@@ -56,6 +46,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
 
         this.iProducer = BrokerApplication.applicationContext.getBean("iProducer", IProducer.class);
         this.fiscoBcosDelegate = BrokerApplication.applicationContext.getBean("fiscoBcosDelegate", FiscoBcosDelegate.class);
+        this.contractContext = this.fiscoBcosDelegate.getContractContext(Long.parseLong(this.groupId));
         Assert.assertNotNull(this.iProducer);
         this.iProducer.startProducer();
         Assert.assertTrue(this.iProducer.open(this.topicName, this.groupId));
@@ -311,57 +302,317 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * publish an externally signed event
+     * publish an externally signed event by fixed account
      */
     @Test
-    public void testPublishWithSigned() throws Exception {
+    public void testPublishByFixedAccount() throws Exception {
         Map<String, String> ext = new HashMap<>();
         ext.put(WeEvent.WeEvent_SIGN, "true");
         WeEvent event = new WeEvent(this.topicName, "this is a signed message".getBytes(), ext);
         ContractContext contractContext = this.fiscoBcosDelegate.getContractContext(Long.parseLong(this.groupId));
 
-        String rawData = buildData(event);
-        ExtendedRawTransaction rawTransaction = getRawTransaction(rawData, contractContext);
+        String rawData = RawTransactionUtils.buildWeEvent(event);
+        ExtendedRawTransaction rawTransaction = RawTransactionUtils.getRawTransaction(this.groupId, rawData, contractContext);
 
-        String signData = signData(rawTransaction);
+
+        String signData = RawTransactionUtils.signData(rawTransaction, RawTransactionUtils.getFixedAccountCredentials());
         SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, signData.getBytes(), ext), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
 
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 
-    private String buildData(WeEvent event) throws BrokerException {
-        final Function function = new Function(
-                "publishWeEvent",
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName),
-                        new org.fisco.bcos.web3j.abi.datatypes.Utf8String(new String(event.getContent(), StandardCharsets.UTF_8)),
-                        new org.fisco.bcos.web3j.abi.datatypes.Utf8String(DataTypeUtils.object2Json(event.getExtensions()))),
-                Collections.<TypeReference<?>>emptyList());
-        return FunctionEncoder.encode(function);
+    /**
+     * publish an externally signed event by external account
+     */
+    @Test
+    public void testPublishByExternalAccount() throws Exception {
+        Credentials fixedCredentials = RawTransactionUtils.getFixedAccountCredentials();
+        Credentials externallyCredentials = RawTransactionUtils.getExternalAccountCredentials();
+        String operatorAddress = externallyCredentials.getAddress();
+
+        String rawData = RawTransactionUtils.buildACLData(this.topicName, Topic.FUNC_ADDOPERATOR, operatorAddress);
+        ExtendedRawTransaction rawTransaction = RawTransactionUtils.getRawTransaction(this.groupId, rawData, this.contractContext);
+
+        String signData = RawTransactionUtils.signData(rawTransaction, fixedCredentials);
+        // add operatorAddress for topic
+        boolean result = this.iProducer.addOperator(this.groupId, this.topicName, signData);
+        Assert.assertTrue(result);
+
+        // publish event with the above generated externally account
+        Map<String, String> ext = new HashMap<>();
+        ext.put(WeEvent.WeEvent_SIGN, "true");
+        WeEvent event = new WeEvent(this.topicName, "this is a signed message".getBytes(), ext);
+
+        rawData = RawTransactionUtils.buildWeEvent(event);
+        rawTransaction = RawTransactionUtils.getRawTransaction(this.groupId, rawData, this.contractContext);
+
+        signData = RawTransactionUtils.signData(rawTransaction, externallyCredentials);
+        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, signData.getBytes(), ext), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
+
+        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 
-    private ExtendedRawTransaction getRawTransaction(String data, ContractContext contractContext) {
-        Random r = new SecureRandom();
-        BigInteger randomid = new BigInteger(250, r);
-        ExtendedRawTransaction rawTransaction =
-                ExtendedRawTransaction.createTransaction(
-                        randomid,
-                        BigInteger.valueOf(contractContext.getGasPrice()),
-                        BigInteger.valueOf(contractContext.getGasLimit()),
-                        BigInteger.valueOf(contractContext.getBlockLimit()),
-                        contractContext.getTopicAddress(),
-                        BigInteger.ZERO,
-                        data,
-                        new BigInteger(contractContext.getChainId()),
-                        new BigInteger(this.groupId),
-                        null);
-        return rawTransaction;
+    /**
+     * publish an externally signed event by external account
+     */
+    @Test
+    public void testPublishByExternalAccountNoPermission() throws Exception {
+        Map<String, String> ext = new HashMap<>();
+        ext.put(WeEvent.WeEvent_SIGN, "true");
+        WeEvent event = new WeEvent(this.topicName, "this is a signed message".getBytes(), ext);
+
+        String rawData = RawTransactionUtils.buildWeEvent(event);
+        ExtendedRawTransaction rawTransaction = RawTransactionUtils.getRawTransaction(this.groupId, rawData, this.contractContext);
+
+        Credentials credentials = RawTransactionUtils.getExternalAccountCredentials();
+        System.out.println(credentials.getAddress());
+
+        String signData = RawTransactionUtils.signData(rawTransaction, credentials);
+        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, signData.getBytes(), ext), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
+
+        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.NO_PERMISSION);
     }
 
-    private String signData(ExtendedRawTransaction rawTransaction) {
-        FiscoConfig fiscoConfig = new FiscoConfig();
-        fiscoConfig.load();
-        byte[] signedMessage = ExtendedTransactionEncoder.signMessage(rawTransaction, Web3SDK2Wrapper.getCredentials(fiscoConfig));
-        return Numeric.toHexString(signedMessage);
+    /**
+     * check exist operator
+     */
+    @Test
+    public void testCheckExistOperatorPermission() throws Exception {
+        // fixed account
+        Credentials credentials = RawTransactionUtils.getFixedAccountCredentials();
+        String rawData = RawTransactionUtils.buildACLData(this.topicName, Topic.FUNC_CHECKOPERATORPERMISSION, "");
+        ExtendedRawTransaction rawTransaction = RawTransactionUtils.getRawTransaction(this.groupId, rawData, this.contractContext);
+
+        String signData = RawTransactionUtils.signData(rawTransaction, credentials);
+
+        boolean result = this.iProducer.checkOperatorPermission(this.groupId, this.topicName, signData);
+        Assert.assertTrue(result);
+
     }
 
+    /**
+     * check not exist operator
+     */
+    @Test
+    public void testCheckNotExistOperatorPermission() throws Exception {
+        // fixed account
+        Credentials credentials = RawTransactionUtils.getExternalAccountCredentials();
+
+        String rawData = RawTransactionUtils.buildACLData(this.topicName, Topic.FUNC_CHECKOPERATORPERMISSION, "");
+        ExtendedRawTransaction rawTransaction = RawTransactionUtils.getRawTransaction(this.groupId, rawData, this.contractContext);
+
+        String signData = RawTransactionUtils.signData(rawTransaction, credentials);
+
+        boolean result = this.iProducer.checkOperatorPermission(this.groupId, this.topicName, signData);
+        Assert.assertFalse(result);
+
+    }
+
+    /**
+     * add operator by fixed account
+     */
+    @Test
+    public void testAddOperator() throws BrokerException {
+        // fixed account
+        Credentials credentials = RawTransactionUtils.getFixedAccountCredentials();
+        // new address
+        String address = RawTransactionUtils.getExternalAccountCredentials().getAddress();
+        String rawData = RawTransactionUtils.buildACLData(this.topicName, Topic.FUNC_ADDOPERATOR, address);
+        ExtendedRawTransaction rawTransaction = RawTransactionUtils.getRawTransaction(this.groupId, rawData, this.contractContext);
+
+        String signData = RawTransactionUtils.signData(rawTransaction, credentials);
+
+        boolean result = this.iProducer.addOperator(this.groupId, this.topicName, signData);
+        Assert.assertTrue(result);
+
+    }
+
+    /**
+     * add operator by fixed account, topic not exist
+     */
+    @Test
+    public void testAddOperatorTopicNotExist() {
+        Credentials credentials = RawTransactionUtils.getFixedAccountCredentials();
+        // new address
+        String address = RawTransactionUtils.getExternalAccountCredentials().getAddress();
+        String rawData = RawTransactionUtils.buildACLData("AAA", Topic.FUNC_ADDOPERATOR, address);
+        ExtendedRawTransaction rawTransaction = RawTransactionUtils.getRawTransaction(this.groupId, rawData, this.contractContext);
+
+        String signData = RawTransactionUtils.signData(rawTransaction, credentials);
+
+        try {
+            // operator already exist
+            this.iProducer.addOperator(this.groupId, "AAA", signData);
+        } catch (BrokerException e) {
+            Assert.assertEquals(ErrorCode.TOPIC_NOT_EXIST.getCode(), e.getCode());
+        }
+    }
+
+    /**
+     * add exist operator by fixed account
+     */
+    @Test
+    public void testAddOperatorAlreadyExist() {
+        Credentials credentials = RawTransactionUtils.getFixedAccountCredentials();
+        // new address
+        String address = RawTransactionUtils.getExternalAccountCredentials().getAddress();
+        String rawData = RawTransactionUtils.buildACLData(this.topicName, Topic.FUNC_ADDOPERATOR, address);
+        ExtendedRawTransaction rawTransaction = RawTransactionUtils.getRawTransaction(this.groupId, rawData, this.contractContext);
+
+        String signData = RawTransactionUtils.signData(rawTransaction, credentials);
+
+        try {
+            boolean result = this.iProducer.addOperator(this.groupId, this.topicName, signData);
+            Assert.assertTrue(result);
+            // operator already exist
+            this.iProducer.addOperator(this.groupId, this.topicName, signData);
+        } catch (BrokerException e) {
+            Assert.assertEquals(ErrorCode.OPERATOR_ALREADY_EXIST.getCode(), e.getCode());
+        }
+    }
+
+    /**
+     * add operator by external account, no permission
+     */
+    @Test
+    public void testAddOperatorNoPermission() {
+        // external account
+        Credentials credentials = RawTransactionUtils.getExternalAccountCredentials();
+        String address = credentials.getAddress();
+        String rawData = RawTransactionUtils.buildACLData(this.topicName, Topic.FUNC_ADDOPERATOR, address);
+        ExtendedRawTransaction rawTransaction = RawTransactionUtils.getRawTransaction(this.groupId, rawData, this.contractContext);
+
+        String signData = RawTransactionUtils.signData(rawTransaction, credentials);
+
+        try {
+            this.iProducer.addOperator(this.groupId, this.topicName, signData);
+        } catch (BrokerException e) {
+            Assert.assertEquals(ErrorCode.NO_PERMISSION.getCode(), e.getCode());
+        }
+    }
+
+    /**
+     * add operator by fixed account
+     */
+    @Test
+    public void testDelOperator() throws BrokerException {
+        // fixed account
+        Credentials credentials = RawTransactionUtils.getFixedAccountCredentials();
+        // new address
+        String address = RawTransactionUtils.getExternalAccountCredentials().getAddress();
+        String rawData = RawTransactionUtils.buildACLData(this.topicName, Topic.FUNC_ADDOPERATOR, address);
+        ExtendedRawTransaction rawTransaction = RawTransactionUtils.getRawTransaction(this.groupId, rawData, this.contractContext);
+        String signData = RawTransactionUtils.signData(rawTransaction, credentials);
+
+        // add operator
+        boolean addResult = this.iProducer.addOperator(this.groupId, this.topicName, signData);
+        Assert.assertTrue(addResult);
+
+        rawData = RawTransactionUtils.buildACLData(this.topicName, Topic.FUNC_DELOPERATOR, address);
+        rawTransaction = RawTransactionUtils.getRawTransaction(this.groupId, rawData, this.contractContext);
+        signData = RawTransactionUtils.signData(rawTransaction, credentials);
+        // delete operator
+        boolean delResult = this.iProducer.delOperator(this.groupId, this.topicName, signData);
+        Assert.assertTrue(delResult);
+    }
+
+    /**
+     * delete operator by fixed account, topic not exist
+     */
+    @Test
+    public void testDelOperatorTopicNotExist() {
+        Credentials credentials = RawTransactionUtils.getFixedAccountCredentials();
+        // new address
+        String address = RawTransactionUtils.getExternalAccountCredentials().getAddress();
+        String rawData = RawTransactionUtils.buildACLData("AAA", Topic.FUNC_DELOPERATOR, address);
+        ExtendedRawTransaction rawTransaction = RawTransactionUtils.getRawTransaction(this.groupId, rawData, this.contractContext);
+
+        String signData = RawTransactionUtils.signData(rawTransaction, credentials);
+
+        try {
+            this.iProducer.delOperator(this.groupId, "AAA", signData);
+        } catch (BrokerException e) {
+            Assert.assertEquals(ErrorCode.TOPIC_NOT_EXIST.getCode(), e.getCode());
+        }
+    }
+
+    /**
+     * delete not exist operator by fixed account
+     */
+    @Test
+    public void testDelOperatorNotExist() {
+        Credentials credentials = RawTransactionUtils.getFixedAccountCredentials();
+        // new address
+        String address = RawTransactionUtils.getExternalAccountCredentials().getAddress();
+        String rawData = RawTransactionUtils.buildACLData(this.topicName, Topic.FUNC_DELOPERATOR, address);
+        ExtendedRawTransaction rawTransaction = RawTransactionUtils.getRawTransaction(this.groupId, rawData, this.contractContext);
+
+        String signData = RawTransactionUtils.signData(rawTransaction, credentials);
+
+        try {
+            this.iProducer.delOperator(this.groupId, this.topicName, signData);
+        } catch (BrokerException e) {
+            Assert.assertEquals(ErrorCode.OPERATOR_NOT_EXIST.getCode(), e.getCode());
+        }
+    }
+
+    /**
+     * delete operator by external account, no permission
+     */
+    @Test
+    public void testDelOperatorNoPermission() {
+        // external account
+        Credentials credentials = RawTransactionUtils.getExternalAccountCredentials();
+        String address = credentials.getAddress();
+        String rawData = RawTransactionUtils.buildACLData(this.topicName, Topic.FUNC_DELOPERATOR, address);
+        ExtendedRawTransaction rawTransaction = RawTransactionUtils.getRawTransaction(this.groupId, rawData, this.contractContext);
+
+        String signData = RawTransactionUtils.signData(rawTransaction, credentials);
+
+        try {
+            this.iProducer.delOperator(this.groupId, this.topicName, signData);
+        } catch (BrokerException e) {
+            Assert.assertEquals(ErrorCode.NO_PERMISSION.getCode(), e.getCode());
+        }
+    }
+
+    /**
+     * get operator list by fixed account.
+     */
+    @Test
+    public void testGetOperatorList() throws BrokerException {
+        // fixed account
+        Credentials credentials = RawTransactionUtils.getFixedAccountCredentials();
+        String rawData = RawTransactionUtils.buildACLData(this.topicName, Topic.FUNC_LISTOPERATOR, "");
+        ExtendedRawTransaction rawTransaction = RawTransactionUtils.getRawTransaction(this.groupId, rawData, this.contractContext);
+
+        String signData = RawTransactionUtils.signData(rawTransaction, credentials);
+
+        List<String> operatorList = this.iProducer.listOperator(this.groupId, this.topicName, signData);
+        Assert.assertTrue(operatorList.size() >= 1);
+    }
+
+    /**
+     * transactionHex null.
+     */
+    @Test
+    public void testTransactionHexNull() {
+        try {
+            this.iProducer.listOperator(this.groupId, this.topicName, "");
+        } catch (BrokerException e) {
+            Assert.assertEquals(ErrorCode.TRANSACTIONHEX_IS_NULL.getCode(), e.getCode());
+        }
+    }
+
+    /**
+     * transactionHex illegal.
+     */
+    @Test
+    public void testTransactionHexIllegal() {
+        try {
+            this.iProducer.listOperator(this.groupId, this.topicName, "asdfghjkl");
+        } catch (BrokerException e) {
+            Assert.assertEquals(ErrorCode.TRANSACTIONHEX_ILLEGAL.getCode(), e.getCode());
+        }
+    }
 }

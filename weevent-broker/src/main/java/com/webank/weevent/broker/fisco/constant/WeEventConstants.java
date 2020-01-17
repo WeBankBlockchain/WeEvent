@@ -134,4 +134,9 @@ public class WeEventConstants {
      */
     public static final Integer POLL_TRANSACTION_ATTEMPTS = 10;
 
+    /**
+     * The sign data pattern.
+     */
+    public static final String SIGN_DATA_PATTERN = "0x([a-fA-f0-9]*)";
+
 }

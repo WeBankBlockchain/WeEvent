@@ -1,6 +1,7 @@
 package com.webank.weevent.broker.fabric;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import com.webank.weevent.broker.fabric.sdk.FabricDelegate;
@@ -44,5 +45,25 @@ public class FabricBroker4Producer extends FabricTopicAdmin implements IProducer
                 channelName,
                 new String(event.getContent(), StandardCharsets.UTF_8),
                 DataTypeUtils.object2Json(event.getExtensions()));
+    }
+
+    @Override
+    public boolean addOperator(String groupId, String topicName, String address) throws BrokerException {
+        return false;
+    }
+
+    @Override
+    public boolean delOperator(String groupId, String topicName, String transactionHex) throws BrokerException {
+        return false;
+    }
+
+    @Override
+    public List<String> listOperator(String groupId, String topicName, String transactionHex) throws BrokerException {
+        return null;
+    }
+
+    @Override
+    public boolean checkOperatorPermission(String groupId, String topicName, String transactionHex) throws BrokerException {
+        return false;
     }
 }

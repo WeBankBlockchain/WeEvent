@@ -1,6 +1,7 @@
 package com.webank.weevent.broker.fisco;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
@@ -16,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IProducer {
 
-    public FiscoBcosBroker4Producer(FiscoBcosDelegate fiscoBcosDelegate){
+    public FiscoBcosBroker4Producer(FiscoBcosDelegate fiscoBcosDelegate) {
         super(fiscoBcosDelegate);
     }
 
@@ -49,5 +50,37 @@ public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IPr
                     new String(event.getContent(), StandardCharsets.UTF_8),
                     DataTypeUtils.object2Json(event.getExtensions()));
         }
+    }
+
+    @Override
+    public boolean addOperator(String groupIdStr, String topicName, String transactionHex) throws BrokerException {
+        String groupId = selectGroupId(groupIdStr);
+        this.validateGroupId(groupId);
+
+        return fiscoBcosDelegate.addOperator(Long.parseLong(groupId), topicName, transactionHex);
+    }
+
+    @Override
+    public boolean delOperator(String groupIdStr, String topicName, String transactionHex) throws BrokerException {
+        String groupId = selectGroupId(groupIdStr);
+        this.validateGroupId(groupId);
+
+        return fiscoBcosDelegate.delOperator(Long.parseLong(groupId), topicName, transactionHex);
+    }
+
+    @Override
+    public List<String> listOperator(String groupIdStr, String topicName, String transactionHex) throws BrokerException {
+        String groupId = selectGroupId(groupIdStr);
+        this.validateGroupId(groupId);
+
+        return fiscoBcosDelegate.listOperator(Long.parseLong(groupId), topicName, transactionHex);
+    }
+
+    @Override
+    public boolean checkOperatorPermission(String groupIdStr, String topicName, String transactionHex) throws BrokerException {
+        String groupId = selectGroupId(groupIdStr);
+        this.validateGroupId(groupId);
+
+        return fiscoBcosDelegate.checkOperatorPermission(Long.parseLong(groupId), topicName, transactionHex);
     }
 }

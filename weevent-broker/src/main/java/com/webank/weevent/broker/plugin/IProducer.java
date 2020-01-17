@@ -1,6 +1,7 @@
 package com.webank.weevent.broker.plugin;
 
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import com.webank.weevent.sdk.BrokerException;
@@ -67,4 +68,12 @@ public interface IProducer extends IEventTopic {
      * @throws BrokerException BrokerException
      */
     CompletableFuture<SendResult> publish(WeEvent event, String groupId) throws BrokerException;
+
+    boolean addOperator(String groupId, String topicName, String transactionHex) throws BrokerException;
+
+    boolean delOperator(String groupId, String topicName, String transactionHex) throws BrokerException;
+
+    List<String> listOperator(String groupId, String topicName, String transactionHex) throws BrokerException;
+
+    boolean checkOperatorPermission(String groupId, String topicName, String transactionHex) throws BrokerException;
 }

@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.sdk.BrokerException;
@@ -147,6 +148,15 @@ public class ParamCheckUtils {
         }
         if (pageSize == null || pageSize <= 0 || pageSize > 100) {
             throw new BrokerException(ErrorCode.TOPIC_PAGE_SIZE_INVALID);
+        }
+    }
+
+    public static void validateTransactionHex(String transactionHex) throws BrokerException {
+        if (StringUtils.isBlank(transactionHex)) {
+            throw new BrokerException(ErrorCode.TRANSACTIONHEX_IS_NULL);
+        }
+        if (!Pattern.compile(WeEventConstants.SIGN_DATA_PATTERN).matcher(transactionHex).matches()) {
+            throw new BrokerException(ErrorCode.TRANSACTIONHEX_ILLEGAL);
         }
     }
 }
