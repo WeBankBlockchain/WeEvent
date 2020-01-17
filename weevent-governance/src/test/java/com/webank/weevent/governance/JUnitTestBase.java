@@ -1,6 +1,9 @@
 package com.webank.weevent.governance;
 
+import java.security.Security;
 import java.util.concurrent.TimeUnit;
+
+import com.webank.weevent.governance.utils.JwtUtils;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -29,8 +32,16 @@ public class JUnitTestBase {
     @Rule
     public Timeout timeout = new Timeout(120, TimeUnit.SECONDS);
 
+
     @Test
     public void testBuild() {
         Assert.assertTrue(true);
+    }
+
+
+    public String createToken() {
+        String token = JwtUtils.encodeToken("admin", GovernanceApplication.environment.getProperty("jwt.private.secret"), JwtUtils.EXPIRE_TIME);
+        Security.setProperty(token, "1");
+        return token;
     }
 }

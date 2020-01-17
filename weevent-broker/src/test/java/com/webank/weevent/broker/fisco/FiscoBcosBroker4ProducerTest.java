@@ -1,8 +1,14 @@
 package com.webank.weevent.broker.fisco;
 
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import com.webank.weevent.BrokerApplication;
@@ -302,7 +308,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * publish an externally signed event by fixed account
+     * publish an externally signed event by fixed account.
      */
     @Test
     public void testPublishByFixedAccount() throws Exception {
@@ -322,7 +328,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * publish an externally signed event by external account
+     * publish an externally signed event by external account.
      */
     @Test
     public void testPublishByExternalAccount() throws Exception {
@@ -347,13 +353,14 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
         rawTransaction = RawTransactionUtils.getRawTransaction(this.groupId, rawData, this.contractContext);
 
         signData = RawTransactionUtils.signData(rawTransaction, externallyCredentials);
+
         SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, signData.getBytes(), ext), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
 
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 
     /**
-     * publish an externally signed event by external account
+     * publish an externally signed event by external account.
      */
     @Test
     public void testPublishByExternalAccountNoPermission() throws Exception {
@@ -374,7 +381,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * check exist operator
+     * check exist operator.
      */
     @Test
     public void testCheckExistOperatorPermission() throws Exception {
@@ -391,7 +398,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * check not exist operator
+     * check not exist operator.
      */
     @Test
     public void testCheckNotExistOperatorPermission() throws Exception {
@@ -409,7 +416,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * add operator by fixed account
+     * add operator by fixed account.
      */
     @Test
     public void testAddOperator() throws BrokerException {
@@ -428,7 +435,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * add operator by fixed account, topic not exist
+     * add operator by fixed account, topic not exist.
      */
     @Test
     public void testAddOperatorTopicNotExist() {
@@ -449,7 +456,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * add exist operator by fixed account
+     * add exist operator by fixed account.
      */
     @Test
     public void testAddOperatorAlreadyExist() {
@@ -472,7 +479,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * add operator by external account, no permission
+     * add operator by external account, no permission.
      */
     @Test
     public void testAddOperatorNoPermission() {
@@ -492,7 +499,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * add operator by fixed account
+     * add operator by fixed account.
      */
     @Test
     public void testDelOperator() throws BrokerException {
@@ -517,7 +524,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * delete operator by fixed account, topic not exist
+     * delete operator by fixed account, topic not exist.
      */
     @Test
     public void testDelOperatorTopicNotExist() {
@@ -537,7 +544,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * delete not exist operator by fixed account
+     * delete not exist operator by fixed account.
      */
     @Test
     public void testDelOperatorNotExist() {
@@ -557,7 +564,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
     }
 
     /**
-     * delete operator by external account, no permission
+     * delete operator by external account, no permission.
      */
     @Test
     public void testDelOperatorNoPermission() {

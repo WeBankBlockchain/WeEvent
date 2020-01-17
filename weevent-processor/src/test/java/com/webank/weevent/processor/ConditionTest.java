@@ -47,14 +47,15 @@ public class ConditionTest {
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
         rule.setConditionField("abs(a)<21 or floor(c)>10");
         rule.setToDestination("to.com.webank.weevent");
-        rule.setDatabaseUrl("jdbc:mysql://129.204.225.235:3306/fromIfttt?user=test&password=007412");
-        rule.setBrokerUrl("http://122.51.93.181:7000/weevent");
+        rule.setDatabaseUrl("jdbc:mysql://127.0.0.1:3306/fromIfttt?user=root&password=111111");
+        rule.setBrokerUrl("http://127.0.0.1:7000/weevent");
         rule.setCreatedTime(new Date());
         rule.setStatus(1);
         rule.setUserId("1");
         rule.setGroupId("1");
         rule.setSystemTag("0");
         rule.setTableName("fromIfttt");
+        rule.setPayloadType(1);
         rule.setConditionType(1);
 
     }
@@ -69,6 +70,7 @@ public class ConditionTest {
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
+        Thread.sleep(100000);
         log.info("result3:{}", result);
     }
 
@@ -149,8 +151,26 @@ public class ConditionTest {
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
-        log.info("result3:{}", result);
-        Thread.sleep(1000000);
+        log.info("result:{}", result);
+    }
+
+    @Test
+    public void checkHitToTopic2() throws Exception {
+        String arr = "";
+        rule.setSelectField("a,b,c");
+        rule.setConditionField("c>20");
+        rule.setSystemFunctionMessage(arr);
+        rule.setConditionType(1);
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
+        assertEquals(200, result.getResponse().getStatus());
+        log.info("result:{}", result);
+        Thread.sleep(100000);
+
+        RequestBuilder requestBuilder1 = MockMvcRequestBuilders.get("/getJobDetail").contentType(MediaType.APPLICATION_JSON).param("id","1111");
+        MvcResult result2 = mockMvc.perform(requestBuilder1).andDo(print()).andReturn();
+        assertEquals(200, result2.getResponse().getStatus());
+        log.info("result:{}", result2);
     }
 
     @Test
@@ -163,7 +183,7 @@ public class ConditionTest {
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
-        log.info("result3:{}", result);
+        log.info("result:{}", result);
     }
 
     @Test
@@ -487,8 +507,6 @@ public class ConditionTest {
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
         rule.setConditionField("floor(c)<10");
         rule.setToDestination("to.com.webank.weevent");
-        rule.setDatabaseUrl("jdbc:mysql://129.204.225.235:3306/fromIfttt?user=test&password=007412");
-        rule.setBrokerUrl("http://122.51.93.181:7000/weevent");
         rule.setCreatedTime(new Date());
         rule.setStatus(1);
         rule.setUserId("1");

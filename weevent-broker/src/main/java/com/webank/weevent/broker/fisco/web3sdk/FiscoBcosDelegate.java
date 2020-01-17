@@ -475,5 +475,4 @@ public class FiscoBcosDelegate {
             return this.fiscoBcos2Map.get(groupId).checkOperatorPermission(topicName, transactionHex);
         }
     }
-
 }
