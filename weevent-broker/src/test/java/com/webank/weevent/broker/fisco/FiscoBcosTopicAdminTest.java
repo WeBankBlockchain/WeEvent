@@ -6,9 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.JUnitTestBase;
-import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.dto.ListPage;
-import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDK2Wrapper;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
 import com.webank.weevent.protocol.rest.entity.QueryEntity;
@@ -1086,12 +1084,6 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
     public void testGetOperatorList() throws BrokerException {
         List<String> operatorList = this.iProducer.listOperator(this.groupId, this.topicName);
         Assert.assertTrue(operatorList.size() >= 1);
-    }
-
-    private Credentials getFixedAccountCredentials() {
-        FiscoConfig fiscoConfig = new FiscoConfig();
-        fiscoConfig.load();
-        return Web3SDK2Wrapper.getCredentials(fiscoConfig);
     }
 
     private Credentials getExternalAccountCredentials() {
