@@ -5,7 +5,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -243,5 +245,25 @@ public final class DataTypeUtils {
         }
 
         return listPage;
+    }
+
+    /**
+     * convert object to List<T>
+     * @param object obj
+     * @param clazz clazz
+     * @param <T> T
+     * @return List<T>
+     */
+    public static <T> List<T> object2List(Object object, Class<T> clazz) {
+        List<T> result = new ArrayList<>();
+        if(object instanceof List<?>)
+        {
+            for (Object o : (List<?>) object)
+            {
+                result.add(clazz.cast(o));
+            }
+            return result;
+        }
+        return null;
     }
 }

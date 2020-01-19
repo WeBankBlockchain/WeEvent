@@ -14,6 +14,7 @@ import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.dto.ContractContext;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.LRUCache;
+import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
 import com.webank.weevent.protocol.rest.entity.TbBlock;
 import com.webank.weevent.protocol.rest.entity.TbNode;
@@ -282,6 +283,7 @@ public class FiscoBcosDelegate {
 
     public CompletableFuture<SendResult> sendRawTransaction(String topicName, Long groupId, String transactionHex) throws BrokerException {
         checkVersion(groupId);
+        ParamCheckUtils.validateTransactionHex(transactionHex);
 
         if (this.fiscoBcos != null) {
             throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
@@ -427,6 +429,38 @@ public class FiscoBcosDelegate {
             throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
         } else {
             return this.fiscoBcos2Map.get(groupId).getContractContext();
+        }
+    }
+
+    public boolean addOperator(Long groupId, String topicName, String operatorAddress) throws BrokerException {
+        checkVersion(groupId);
+        ParamCheckUtils.validateAddress(operatorAddress);
+
+        if (this.fiscoBcos != null) {
+            throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
+        } else {
+            return this.fiscoBcos2Map.get(groupId).addOperator(topicName, operatorAddress);
+        }
+    }
+
+    public boolean delOperator(Long groupId, String topicName, String operatorAddress) throws BrokerException {
+        checkVersion(groupId);
+        ParamCheckUtils.validateAddress(operatorAddress);
+
+        if (this.fiscoBcos != null) {
+            throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
+        } else {
+            return this.fiscoBcos2Map.get(groupId).delOperator(topicName, operatorAddress);
+        }
+    }
+
+    public List<String> listOperator(Long groupId, String topicName) throws BrokerException {
+        checkVersion(groupId);
+
+        if (this.fiscoBcos != null) {
+            throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
+        } else {
+            return this.fiscoBcos2Map.get(groupId).listOperator(topicName);
         }
     }
 }
