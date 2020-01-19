@@ -103,6 +103,20 @@ public enum ErrorCode {
 
     PARAM_IS_NOT_MAP(101015, "the input param class is not Map"),
 
+    NO_PERMISSION(101016, "no permission to publish event"),
+
+    OPERATOR_ALREADY_EXIST(101017, "operator already exist"),
+
+    OPERATOR_NOT_EXIST(101018, "operator not exist"),
+
+    OPERATOR_ADDRESS_IS_NULL(101020, "the operatorAddress is null"),
+
+    OPERATOR_ADDRESS_ILLEGAL(101021, "the operatorAddress is illegal"),
+
+    TRANSACTIONHEX_IS_NULL(101022, "the transactionHex is null"),
+
+    TRANSACTIONHEX_ILLEGAL(101023, "the transactionHex is illegal"),
+
     //server error(200000, 300000)
     TOPIC_CONTROLLER_IS_NULL(200100, "get topic control address from CNS failed, please deploy it first"),
 
