@@ -134,4 +134,14 @@ public class WeEventConstants {
      */
     public static final Integer POLL_TRANSACTION_ATTEMPTS = 10;
 
+    /**
+     * The FISCO-BCOS Address pattern.
+     */
+    public static final String FISCO_BCOS_ADDRESS_PATTERN = "0x[a-fA-f0-9]{40}";
+
+    /**
+     * The sign data pattern.
+     */
+    public static final String SIGN_DATA_PATTERN = "0x([a-fA-f0-9]*)";
+
 }
