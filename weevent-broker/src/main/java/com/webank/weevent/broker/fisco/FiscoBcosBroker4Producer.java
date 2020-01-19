@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IProducer {
 
-    public FiscoBcosBroker4Producer(FiscoBcosDelegate fiscoBcosDelegate){
+    public FiscoBcosBroker4Producer(FiscoBcosDelegate fiscoBcosDelegate) {
         super(fiscoBcosDelegate);
     }
 

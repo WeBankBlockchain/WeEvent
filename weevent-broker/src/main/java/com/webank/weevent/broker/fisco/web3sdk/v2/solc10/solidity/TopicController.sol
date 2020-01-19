@@ -20,7 +20,7 @@ contract TopicController {
         uint timestamp;
         uint block;
     }
-    
+
     constructor(address topicAddress) public {
         topic = Topic(topicAddress);
     }
@@ -37,6 +37,8 @@ contract TopicController {
         
         topicMap[topicName] = topicInfo;
         topicIndex.push(topicName);
+
+        topic.addTopicACL(topicName, tx.origin);
         return true;
     }
 
