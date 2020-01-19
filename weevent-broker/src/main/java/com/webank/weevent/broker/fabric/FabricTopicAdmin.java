@@ -147,4 +147,18 @@ public class FabricTopicAdmin implements IEventTopic {
         }
     }
 
+    @Override
+    public boolean addOperator(String groupId, String topicName, String address) {
+        return false;
+    }
+
+    @Override
+    public boolean delOperator(String groupId, String topicName, String address) {
+        return false;
+    }
+
+    @Override
+    public List<String> listOperator(String groupId, String topicName) {
+        return null;
+    }
 }
