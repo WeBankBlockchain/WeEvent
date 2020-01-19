@@ -43,11 +43,13 @@ import org.fisco.bcos.web3j.abi.TypeReference;
 import org.fisco.bcos.web3j.abi.Utils;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.abi.datatypes.generated.Uint256;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint32;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.StatusCode;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tuples.generated.Tuple1;
+import org.fisco.bcos.web3j.tuples.generated.Tuple2;
 import org.fisco.bcos.web3j.tuples.generated.Tuple3;
 import org.fisco.bcos.web3j.tuples.generated.Tuple8;
 import org.fisco.bcos.web3j.tx.Contract;
@@ -293,10 +295,16 @@ public class FiscoBcos2 {
             // success
             if (receipt.isStatusOK()) {
                 Tuple1<BigInteger> result = this.topic.getPublishWeEventOutput(receipt);
-                sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
-                sendResult.setEventId(DataTypeUtils.encodeEventId(this.topicName,
-                        receipt.getBlockNumber().intValue(),
-                        result.getValue1().intValue()));
+                int sequence = result.getValue1().intValue();
+                if (sequence == 0) {
+                    log.error("this FISCO-BCOS account has no permission to publish event");
+                    sendResult.setStatus(SendResult.SendResultStatus.NO_PERMISSION);
+                } else {
+                    sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+                    sendResult.setEventId(DataTypeUtils.encodeEventId(this.topicName,
+                            receipt.getBlockNumber().intValue(),
+                            sequence));
+                }
             } else { // error
                 if ("Transaction receipt timeout.".equals(receipt.getStatus())) {
                     log.error("publish event failed due to transaction execution timeout. {}",
@@ -338,10 +346,16 @@ public class FiscoBcos2 {
                         String.valueOf(receiptOptional.get().getOutput()),
                         Utils.convert(referencesList));
 
-                sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
-                sendResult.setEventId(DataTypeUtils.encodeEventId(topicName,
-                        receiptOptional.get().getBlockNumber().intValue(),
-                        ((BigInteger) returnList.get(0).getValue()).intValue()));
+                int sequence = ((BigInteger) returnList.get(0).getValue()).intValue();
+                if (sequence == 0) {
+                    log.error("this FISCO-BCOS account has no permission to publish event");
+                    sendResult.setStatus(SendResult.SendResultStatus.NO_PERMISSION);
+                } else {
+                    sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+                    sendResult.setEventId(DataTypeUtils.encodeEventId(topicName,
+                            receiptOptional.get().getBlockNumber().intValue(),
+                            sequence));
+                }
             } else {
                 sendResult.setStatus(SendResult.SendResultStatus.ERROR);
             }
@@ -418,5 +432,113 @@ public class FiscoBcos2 {
         contractContext.setBlockLimit(BlockLimit.blockLimit.longValue());
         contractContext.setChainId(Web3SDK2Wrapper.chainID);
         return contractContext;
+    }
+
+    public boolean addOperator(String topicName, String operatorAddress) throws BrokerException {
+        if (!isTopicExist(topicName)) {
+            throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
+        }
+
+        TransactionReceipt transactionReceipt;
+        try {
+            transactionReceipt = this.topic.addOperator(topicName, operatorAddress).sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("addOperator failed due to web3sdk rpc error.", e);
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
+        } catch (TimeoutException e) {
+            log.error("addOperator failed due to web3sdk rpc timeout.", e);
+            throw new BrokerException(ErrorCode.TRANSACTION_TIMEOUT);
+        }
+
+        if (!transactionReceipt.isStatusOK()) {
+            log.error("Topic.addOperator transactionReceipt is empty.");
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
+        }
+
+        List<TypeReference<?>> referencesList = Arrays.asList(new TypeReference<Uint32>() {
+        });
+        List<Type> returnList = FunctionReturnDecoder.decode(
+                String.valueOf(transactionReceipt.getOutput()),
+                Utils.convert(referencesList));
+
+        int code = ((BigInteger) returnList.get(0).getValue()).intValue();
+        if (code == ErrorCode.NO_PERMISSION.getCode()) {
+            log.error("Topic.addOperator, this FISCO-BCOS account has no permission to add operator");
+            throw new BrokerException(ErrorCode.NO_PERMISSION);
+        } else if (code == ErrorCode.OPERATOR_ALREADY_EXIST.getCode()) {
+            log.error("Topic.addOperator, operator :{} already exists", operatorAddress);
+            throw new BrokerException(ErrorCode.OPERATOR_ALREADY_EXIST);
+        } else {
+            return true;
+        }
+    }
+
+    public boolean delOperator(String topicName, String operatorAddress) throws BrokerException {
+        if (!isTopicExist(topicName)) {
+            throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
+        }
+
+        TransactionReceipt transactionReceipt;
+        try {
+            transactionReceipt = this.topic.delOperator(topicName, operatorAddress).sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("delOperator failed due to web3sdk rpc error.", e);
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
+        } catch (TimeoutException e) {
+            log.error("delOperator failed due to web3sdk rpc timeout.", e);
+            throw new BrokerException(ErrorCode.TRANSACTION_TIMEOUT);
+        }
+
+        if (!transactionReceipt.isStatusOK()) {
+            log.error("Topic.delOperator transactionReceipt is empty.");
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
+        }
+
+        List<TypeReference<?>> referencesList = Arrays.asList(new TypeReference<Uint32>() {
+        });
+        List<Type> returnList = FunctionReturnDecoder.decode(
+                String.valueOf(transactionReceipt.getOutput()),
+                Utils.convert(referencesList));
+        int code = ((BigInteger) returnList.get(0).getValue()).intValue();
+
+        if (code == ErrorCode.NO_PERMISSION.getCode()) {
+            log.error("Topic.delOperator, this FISCO-BCOS account has no permission to add operator");
+            throw new BrokerException(ErrorCode.NO_PERMISSION);
+        } else if (code == ErrorCode.OPERATOR_NOT_EXIST.getCode()) {
+            log.error("Topic.delOperator, operator :{} not exists", operatorAddress);
+            throw new BrokerException(ErrorCode.OPERATOR_NOT_EXIST);
+        } else {
+            return true;
+        }
+    }
+
+    public List<String> listOperator(String topicName) throws BrokerException {
+        if (!isTopicExist(topicName)) {
+            throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
+        }
+
+        Tuple2<BigInteger, List<String>> tuple2;
+        try {
+            tuple2 = this.topic.listOperator(topicName).sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("query operator list failed due to web3sdk rpc error.", e);
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
+        } catch (TimeoutException e) {
+            log.error("query operator list failed due to web3sdk rpc timeout.", e);
+            throw new BrokerException(ErrorCode.TRANSACTION_TIMEOUT);
+        }
+
+        if (tuple2 == null) {
+            log.error("Topic.listOperator result is empty");
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
+        }
+
+        int code = tuple2.getValue1().intValue();
+        if (code == ErrorCode.NO_PERMISSION.getCode()) {
+            log.error("Topic.listOperator, this FISCO-BCOS account has no permission to query operator list");
+            throw new BrokerException(ErrorCode.NO_PERMISSION);
+        }
+
+        return tuple2.getValue2();
     }
 }
