@@ -11,6 +11,7 @@ import org.junit.Test;
 
 @Slf4j
 public class UtilsTest {
+
     @Test
     public void checkReplaceCondition1() {
         String conditionField = "abs(a)<21 and c>10 or b.trim()==\"1111\" and floor(c)>10";
@@ -37,24 +38,6 @@ public class UtilsTest {
         String condition = CommonUtil.replaceCondition(systemFunctionDetail, conditionField, payload);
         log.info("condition:{}", condition);
         Assert.assertEquals(condition, "10<21 or 10.0>10");
-    }
-
-
-    @Test
-    public void checkReplaceCondition3() {
-        String conditionField = "(abs(a)>=20 or (floor(b)!=222.2 and d<=111)) and ceil(c)<=111 or e!=33";
-        String arr = "[[\"16\", \"24\", \"floor\", \"b\"], [\"1\", \"7\", \"abs\", \"a\"], [\"49\", \"56\", \"ceil\", \"c\"]]";
-        Map<String, Object> payload = new ConcurrentHashMap<>();
-        payload.put("a", 10);
-        payload.put("b", 111);
-        payload.put("c", 10);
-        payload.put("d", 10);
-        payload.put("e", 10);
-
-        String[][] systemFunctionDetail = CommonUtil.stringConvertArray(arr);
-        String condition = CommonUtil.replaceCondition(systemFunctionDetail, conditionField, payload);
-        log.info("condition:{}", condition);
-        Assert.assertNotNull(condition);
     }
 
     @Test

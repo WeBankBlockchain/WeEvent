@@ -37,6 +37,7 @@ public class ServiceTest {
 
     @Before
     public void setUp() {
+        String brokerUrl = wac.getEnvironment().getProperty("ci.broker.ip");
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
         rule.setId("1111");
         rule.setRuleName("test");
@@ -47,7 +48,7 @@ public class ServiceTest {
         rule.setConditionField("abs(a)<21 or floor(c)>10");
         rule.setToDestination("to.com.webank.weevent");
         rule.setDatabaseUrl("jdbc:mysql://127.0.0.1:3306/fromIfttt?user=root&password=111111");
-        rule.setBrokerUrl("http://127.0.0.1:7000/weevent");
+        rule.setBrokerUrl("http://"+brokerUrl+"/weevent");
         rule.setCreatedTime(new Date());
         rule.setStatus(1);
         rule.setUserId("1");
@@ -59,7 +60,6 @@ public class ServiceTest {
 
     }
 
-
     @Test
     public void checkConditionRight() throws Exception {
         String url = "/checkWhereCondition";
@@ -69,7 +69,6 @@ public class ServiceTest {
         log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
     }
-
 
     @Test
     public void checkConditionRight2() throws Exception {
@@ -148,30 +147,10 @@ public class ServiceTest {
     }
 
     @Test
-    public void getRuleDetails() throws Exception {
-        String url = "/getCEPRuleById";
-
-        RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON).param("id", "11041548");
-        MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
-        assertEquals(200, result.getResponse().getStatus());
-    }
-
-    @Test
-    public void getNoNRuleDetails() throws Exception {
-        String url = "/getCEPRuleById";
-
-        RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON).param("id", "111");
-        MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
-        assertEquals(200, result.getResponse().getStatus());
-    }
-
-    @Test
     public void deleteRule() throws Exception {
         String url = "/deleteCEPRuleById";
 
-        RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).param("id", "11041548");
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).param("id", "1111");
         MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
         log.info("result:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
@@ -191,14 +170,12 @@ public class ServiceTest {
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getContentAsString());
         assertEquals(200, result3.getResponse().getStatus());
-        Thread.sleep(100000);
 
         rule.setFromDestination("testFromDestination");
         RequestBuilder requestBuilder4 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result4 = mockMvc.perform(requestBuilder4).andDo(print()).andReturn();
         log.info("result4:{}", result4.getResponse().getContentAsString());
         assertEquals(200, result4.getResponse().getStatus());
-        Thread.sleep(100000);
 
         String url1 = "/statistic";
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url1).contentType(MediaType.APPLICATION_JSON).param("idList", "1104154821111");
