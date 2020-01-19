@@ -67,5 +67,4 @@ public interface IProducer extends IEventTopic {
      * @throws BrokerException BrokerException
      */
     CompletableFuture<SendResult> publish(WeEvent event, String groupId) throws BrokerException;
-
 }

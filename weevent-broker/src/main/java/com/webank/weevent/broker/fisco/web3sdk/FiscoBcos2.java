@@ -297,6 +297,7 @@ public class FiscoBcos2 {
                 Tuple1<BigInteger> result = this.topic.getPublishWeEventOutput(receipt);
                 int sequence = result.getValue1().intValue();
                 if (sequence == 0) {
+                    log.error("this FISCO-BCOS account has no permission to publish event");
                     sendResult.setStatus(SendResult.SendResultStatus.NO_PERMISSION);
                 } else {
                     sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
@@ -347,6 +348,7 @@ public class FiscoBcos2 {
 
                 int sequence = ((BigInteger) returnList.get(0).getValue()).intValue();
                 if (sequence == 0) {
+                    log.error("this FISCO-BCOS account has no permission to publish event");
                     sendResult.setStatus(SendResult.SendResultStatus.NO_PERMISSION);
                 } else {
                     sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
@@ -461,8 +463,10 @@ public class FiscoBcos2 {
 
         int code = ((BigInteger) returnList.get(0).getValue()).intValue();
         if (code == ErrorCode.NO_PERMISSION.getCode()) {
+            log.error("Topic.addOperator, this FISCO-BCOS account has no permission to add operator");
             throw new BrokerException(ErrorCode.NO_PERMISSION);
         } else if (code == ErrorCode.OPERATOR_ALREADY_EXIST.getCode()) {
+            log.error("Topic.addOperator, operator :{} already exists", operatorAddress);
             throw new BrokerException(ErrorCode.OPERATOR_ALREADY_EXIST);
         } else {
             return true;
@@ -498,8 +502,10 @@ public class FiscoBcos2 {
         int code = ((BigInteger) returnList.get(0).getValue()).intValue();
 
         if (code == ErrorCode.NO_PERMISSION.getCode()) {
+            log.error("Topic.delOperator, this FISCO-BCOS account has no permission to add operator");
             throw new BrokerException(ErrorCode.NO_PERMISSION);
         } else if (code == ErrorCode.OPERATOR_NOT_EXIST.getCode()) {
+            log.error("Topic.delOperator, operator :{} not exists", operatorAddress);
             throw new BrokerException(ErrorCode.OPERATOR_NOT_EXIST);
         } else {
             return true;
@@ -529,6 +535,7 @@ public class FiscoBcos2 {
 
         int code = tuple2.getValue1().intValue();
         if (code == ErrorCode.NO_PERMISSION.getCode()) {
+            log.error("Topic.listOperator, this FISCO-BCOS account has no permission to query operator list");
             throw new BrokerException(ErrorCode.NO_PERMISSION);
         }
 

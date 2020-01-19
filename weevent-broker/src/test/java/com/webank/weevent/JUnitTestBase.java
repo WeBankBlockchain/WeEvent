@@ -42,5 +42,4 @@ public class JUnitTestBase {
     public void testBuild() {
         Assert.assertTrue(true);
     }
-
 }
