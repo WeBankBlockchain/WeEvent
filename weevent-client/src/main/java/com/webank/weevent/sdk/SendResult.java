@@ -15,6 +15,7 @@ public class SendResult {
         SUCCESS,
         TIMEOUT,
         ERROR,
+        NO_PERMISSION,
     }
 
 
