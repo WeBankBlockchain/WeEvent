@@ -3,11 +3,11 @@ apply plugin: "io.spring.dependency-management"
 
 dependencies {
     implementation project(path: ":weevent-client")
-    implementation("org.springframework.boot:spring-boot-starter-websocket:${springBoot2Version}")
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("org.springframework.integration:spring-integration-mqtt:${spring5Version}")
     implementation("org.springframework.integration:spring-integration-stream:${spring5Version}")
     implementation("com.github.briandilley.jsonrpc4j:jsonrpc4j:${jsonrpc4jVersion}")
-    implementation("org.springframework.boot:spring-boot-starter-log4j2:${springBoot2Version}")
+    implementation("org.springframework.boot:spring-boot-starter-log4j2")
     // avoid "Log4j appears to be running in a Servlet environment, but there's no log4j-web module available."
     implementation("org.apache.logging.log4j:log4j-web:${log4jVersion}")
     implementation("commons-io:commons-io:${apacheCommonsVersion.commonsIo}")
