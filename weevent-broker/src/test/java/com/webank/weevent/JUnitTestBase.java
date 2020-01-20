@@ -32,9 +32,6 @@ public class JUnitTestBase {
     @Value("${server.port}")
     public String listenPort;
 
-    @Value("${ci.broker.ip}")
-    public String brokerBaseUrl;
-
     @Rule
     public TestName testName = new TestName();
 

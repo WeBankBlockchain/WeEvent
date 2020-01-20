@@ -35,7 +35,7 @@ public class RestfullTest extends JUnitTestBase {
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
-        url = "http://" + brokerBaseUrl + "/weevent/rest/";
+        url = "http://localhost:" + listenPort + "/weevent/rest/";
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         this.rest = new RestTemplate(requestFactory);
         rest.getForEntity(url + "open?topic={topic}", Boolean.class, this.restTopic);

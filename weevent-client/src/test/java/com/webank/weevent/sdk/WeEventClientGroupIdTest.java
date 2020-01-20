@@ -3,7 +3,6 @@ package com.webank.weevent.sdk;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
@@ -12,8 +11,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.support.PropertiesLoaderUtils;
 
 /**
  * WeEventClient Tester.
@@ -38,11 +35,8 @@ public class WeEventClientGroupIdTest {
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
-        Properties prop = PropertiesLoaderUtils.loadProperties(new ClassPathResource("/broker.properties"));
-        String brokerBaseUrl = prop.getProperty("ci.broker.ip");
-
         this.extensions.put(WeEvent.WeEvent_TAG, "test");
-        this.weEventClient = IWeEventClient.build("http://" + brokerBaseUrl + "/weevent", WeEvent.DEFAULT_GROUP_ID);
+        this.weEventClient = IWeEventClient.build("http://localhost:7000/weevent", WeEvent.DEFAULT_GROUP_ID);
         this.weEventClient.open(this.topicName);
     }
 
