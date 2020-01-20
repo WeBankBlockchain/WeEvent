@@ -4,13 +4,13 @@ apply plugin: "io.spring.dependency-management"
 dependencies {
     implementation project(path: ":weevent-client")
     // spring boot
-    implementation("org.springframework.boot:spring-boot-starter:${springBoot2Version}")
+    implementation("org.springframework.boot:spring-boot-starter")
 
-    implementation("org.springframework.boot:spring-boot-starter-web:${springBoot2Version}")
+    implementation("org.springframework.boot:spring-boot-starter-web")
 
 
     // spring boot with log4j2
-    implementation("org.springframework.boot:spring-boot-starter-log4j2:${springBoot2Version}")
+    implementation("org.springframework.boot:spring-boot-starter-log4j2")
 
     // avoid "Log4j appears to be running in a Servlet environment, but there's no log4j-web module available."
     implementation("org.apache.logging.log4j:log4j-web:${log4jVersion}")
@@ -23,7 +23,7 @@ dependencies {
     implementation("org.apache.tomcat:tomcat-jdbc:${tomcatVersion}")
 
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBoot2Version}")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 
     implementation("org.apache.commons:commons-pool2:${apacheCommonsVersion.pool2}")
 
@@ -34,7 +34,7 @@ dependencies {
     implementation("org.quartz-scheduler:quartz:${quartzVersion}")
 
     //jpa
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa:${springBoot2Version}")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
     //h2
     implementation("com.h2database:h2:${h2Version}")
