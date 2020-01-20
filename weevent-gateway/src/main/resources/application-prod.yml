@@ -18,6 +18,9 @@ spring:
   cloud:
     gateway:
       enabled: true
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 10000
       routes:
         - id: weevent-broker
           predicates:

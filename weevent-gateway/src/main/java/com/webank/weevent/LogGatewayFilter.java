@@ -27,9 +27,10 @@ public class LogGatewayFilter implements GlobalFilter, Ordered {
 
         return chain.filter(exchange).then(Mono.fromRunnable(() -> {
             ServerHttpRequest request = exchange.getRequest();
-            log.info("{} {}(ms) {} {} {} {}",
+            log.info("{} {}(ms) {} {}, {} {} {}",
                     request.getRemoteAddress(),
                     Calendar.getInstance().getTimeInMillis() - start_timestamp,
+                    request.getURI().getScheme(),
                     exchange.getResponse().getStatusCode(),
                     request.getMethodValue(),
                     request.getPath(),

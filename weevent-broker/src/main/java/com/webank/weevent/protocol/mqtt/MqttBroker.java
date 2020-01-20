@@ -27,6 +27,7 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,26 +42,23 @@ public class MqttBroker {
     private Channel websocketChannel;
     private Channel mqttChannel;
 
-    @Autowired
     private ProtocolProcess protocolProcess;
+
+    @Autowired
+    public void setProtocolProcess(ProtocolProcess protocolProcess) {
+        this.protocolProcess = protocolProcess;
+    }
 
     @PostConstruct
     public void start() throws Exception {
-        if (BrokerApplication.weEventConfig.getBrokerServerPort() != null
-                || BrokerApplication.weEventConfig.getWebSocketPort() != null) {
-
+        if (!StringUtils.isBlank(BrokerApplication.weEventConfig.getMqttServerPath())
+                && BrokerApplication.weEventConfig.getMqttPort() != null) {
             this.bossGroup = new NioEventLoopGroup();
             this.workerGroup = new NioEventLoopGroup();
 
-            // tcp
-            if (BrokerApplication.weEventConfig.getBrokerServerPort() != null) {
-                this.mqttChannel = mqttServer();
-            }
-
             // websocket
-            if (BrokerApplication.weEventConfig.getWebSocketPort() != null) {
-                this.websocketChannel = webSocketServer();
-            }
+            this.websocketChannel = webSocketServer(BrokerApplication.weEventConfig.getMqttPort(),
+                    BrokerApplication.weEventConfig.getMqttServerPath());
         }
     }
 
@@ -85,32 +83,7 @@ public class MqttBroker {
         }
     }
 
-    private Channel mqttServer() throws Exception {
-        ServerBootstrap serverBootstrap = new ServerBootstrap();
-        serverBootstrap.group(this.bossGroup, this.workerGroup)
-                .channel(NioServerSocketChannel.class)
-                .handler(new LoggingHandler(LogLevel.DEBUG))
-                .childHandler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel socketChannel) throws Exception {
-                        ChannelPipeline channelPipeline = socketChannel.pipeline();
-                        channelPipeline.addFirst("idle", new IdleStateHandler(
-                                0,
-                                0,
-                                BrokerApplication.weEventConfig.getKeepAlive()));
-
-                        //channelPipeline.addLast("ssl", getSslHandler(sslContext, socketChannel.alloc()));
-                        channelPipeline.addLast("decoder", new MqttDecoder());
-                        channelPipeline.addLast("encoder", MqttEncoder.INSTANCE);
-                        channelPipeline.addLast("broker", new BrokerHandler(protocolProcess));
-                    }
-                })
-                .option(ChannelOption.SO_BACKLOG, BrokerApplication.weEventConfig.getSoBackLog())
-                .childOption(ChannelOption.SO_KEEPALIVE, BrokerApplication.weEventConfig.getSoKeepAlive());
-        return serverBootstrap.bind(BrokerApplication.weEventConfig.getBrokerServerPort()).sync().channel();
-    }
-
-    private Channel webSocketServer() throws Exception {
+    private Channel webSocketServer(int port, String path) throws Exception {
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(this.bossGroup, this.workerGroup)
                 .channel(NioServerSocketChannel.class)
@@ -128,7 +101,7 @@ public class MqttBroker {
                         channelPipeline.addLast("aggregator", new HttpObjectAggregator(1048576));
                         channelPipeline.addLast("compressor ", new HttpContentCompressor());
                         channelPipeline.addLast("protocol", new WebSocketServerProtocolHandler(
-                                BrokerApplication.weEventConfig.getWebSocketServerPath(),
+                                path,
                                 "mqtt,mqttv3.1,mqttv3.1.1",
                                 true,
                                 65536));
@@ -141,6 +114,6 @@ public class MqttBroker {
                 .option(ChannelOption.SO_BACKLOG, BrokerApplication.weEventConfig.getSoBackLog())
                 .childOption(ChannelOption.SO_KEEPALIVE, BrokerApplication.weEventConfig.getSoKeepAlive());
 
-        return serverBootstrap.bind(BrokerApplication.weEventConfig.getWebSocketPort()).sync().channel();
+        return serverBootstrap.bind(port).sync().channel();
     }
 }

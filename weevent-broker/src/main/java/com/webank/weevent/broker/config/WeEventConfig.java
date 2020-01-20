@@ -44,10 +44,7 @@ public class WeEventConfig {
     private Integer stompHeartbeats;
 
     @Value("${mqtt.broker.port:7001}")
-    private Integer brokerServerPort;
-
-    @Value("${mqtt.websocket.port:7002}")
-    private Integer webSocketPort;
+    private Integer mqttPort;
 
     @Value("${mqtt.broker.sobacklog:511}")
     private Integer soBackLog;
@@ -58,7 +55,7 @@ public class WeEventConfig {
     @Value("${mqtt.broker.keepalive:60}")
     private Integer keepAlive;
 
-    @Value("${mqtt.websocket.path:/weevent/mqtt}")
-    private String webSocketServerPath;
+    @Value("${mqtt.broker.path:}")
+    private String mqttServerPath;
 
 }
