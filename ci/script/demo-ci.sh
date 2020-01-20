@@ -16,5 +16,6 @@ pwd
        sed -i "/ci.broker.ip*/cci.broker.ip=${brokerIp}" ${application_properties}
     fi
     echo "set server_port success"
+	  cat ./weevent-processor/src/main/resources/application-dev.properties
 
 echo "say hi2"
