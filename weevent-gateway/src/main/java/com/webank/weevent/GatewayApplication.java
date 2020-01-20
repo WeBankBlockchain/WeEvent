@@ -29,12 +29,12 @@ public class GatewayApplication {
     }
 
     @Autowired
-    public static void setApplicationContext(ApplicationContext applicationContext) {
+    public void setApplicationContext(ApplicationContext applicationContext) {
         GatewayApplication.applicationContext = applicationContext;
     }
 
     @Autowired
-    public static void setEnvironment(Environment environment) {
+    public void setEnvironment(Environment environment) {
         GatewayApplication.environment = environment;
     }
 }
