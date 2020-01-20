@@ -27,6 +27,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public class JUnitTestBase {
     @Value("${server.port}")
     public String listenPort;
+
+    @Value("${ci.broker.ip}")
+    private String ciBrokerIp;
+
     @Rule
     public TestName testName = new TestName();
     @Rule
@@ -38,6 +42,9 @@ public class JUnitTestBase {
         Assert.assertTrue(true);
     }
 
+    public  String getCiBrokerUrl() {
+        return "http://" + ciBrokerIp + "/weevent";
+    }
 
     public String createToken() {
         String token = JwtUtils.encodeToken("admin", GovernanceApplication.environment.getProperty("jwt.private.secret"), JwtUtils.EXPIRE_TIME);

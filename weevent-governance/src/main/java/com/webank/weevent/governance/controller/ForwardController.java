@@ -26,13 +26,13 @@ public class ForwardController {
     @Autowired
     private CommonService commonService;
 
-    @Value("${weevent.url}")
+    @Value("${ci.broker.ip}")
     private String url;
 
     @RequestMapping(value = "/weevent/{path1}/{path2}", method = RequestMethod.GET)
     public Object forward(HttpServletRequest request, HttpServletResponse response, @PathVariable(name = "path1") String path1, @PathVariable(name = "path2") String path2) throws GovernanceException {
         log.info("weevent url: /wevent/ {}  \"/\" {}", path1, path2);
-        String forwarUrl = new StringBuffer(this.url).append("/").append(path1).append("/").append(path2).toString();
+        String forwarUrl = new StringBuffer("http://").append(this.url).append("/weevent/").append(path1).append("/").append(path2).toString();
         try {
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, forwarUrl);
             return EntityUtils.toString(closeResponse.getEntity());

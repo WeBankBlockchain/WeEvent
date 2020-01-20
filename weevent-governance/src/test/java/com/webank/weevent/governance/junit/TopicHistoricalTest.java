@@ -35,9 +35,6 @@ public class TopicHistoricalTest extends JUnitTestBase {
     private String token;
 
 
-    @Value("${weevent.url:http://127.0.0.1:7000/weevent}")
-    private String brokerUrl;
-
     private Map<String, Integer> brokerIdMap = new ConcurrentHashMap<>();
 
 
@@ -57,7 +54,7 @@ public class TopicHistoricalTest extends JUnitTestBase {
 
     //add broker
     public void addBroker() throws Exception {
-        String content = "{\"name\":\"broker2\",\"brokerUrl\":\"" + this.brokerUrl + "\",\"userId\":\"1\"}";
+        String content = "{\"name\":\"broker2\",\"brokerUrl\":\"" + getCiBrokerUrl() + "\",\"userId\":\"1\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
