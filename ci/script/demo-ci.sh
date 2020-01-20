@@ -29,6 +29,7 @@ echo "==============================================="
 
 	cat ./weevent-processor/src/main/resources/application-dev.properties
 
+  echo "==============================================="
 
   ## update the governance
 #	application_properties=./weevent-governance/src/main/resources/application-dev.properties
@@ -68,4 +69,3 @@ echo "==============================================="
 #    echo "set nodes success"
 #
 #	cat ./weevent-broker/src/main/resources/fisco.properties
-echo "say hi2"
