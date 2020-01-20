@@ -4,21 +4,21 @@ apply plugin: "com.gorylenko.gradle-git-properties"
 
 dependencies {
     // spring boot
-    implementation("org.springframework.boot:spring-boot-starter:${springBoot2Version}")
-    implementation("org.springframework.boot:spring-boot-starter-web:${springBoot2Version}")
-    implementation("org.springframework.boot:spring-boot-starter-data-redis:${springBoot2Version}")
+    implementation("org.springframework.boot:spring-boot-starter")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.data:spring-data-commons:${springDataCommonsVersion}")
 
     // spring boot with log4j2
-    implementation("org.springframework.boot:spring-boot-starter-log4j2:${springBoot2Version}")
+    implementation("org.springframework.boot:spring-boot-starter-log4j2")
     // avoid "Log4j appears to be running in a Servlet environment, but there's no log4j-web module available."
     implementation("org.apache.logging.log4j:log4j-web:${log4jVersion}")
 
     // restful and json rpc support http base authorization
-    implementation("org.springframework.boot:spring-boot-starter-security:${springBoot2Version}")
+    implementation("org.springframework.boot:spring-boot-starter-security")
 
     // stomp
-    implementation("org.springframework.boot:spring-boot-starter-websocket:${springBoot2Version}")
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
 
     // mqtt
     implementation("org.springframework.integration:spring-integration-mqtt:${spring5Version}")
@@ -54,7 +54,7 @@ dependencies {
     // depend project
     implementation project(path: ":weevent-client")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBoot2Version}")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
     // JMS sample
     testImplementation("javax.jms:jms:${jmsVersion}")
     // jmock
