@@ -6,7 +6,7 @@ if [[ -z ${JAVA_HOME} ]];then
    exit 1
 fi
 
-server_name=weevent-processor
+server_name=weevent-governance
 APP_PARAMS="-Xbootclasspath/a:./conf -cp ./apps/* -Dloader.path=./lib,../lib org.springframework.boot.loader.PropertiesLauncher"
 
 ###############################################################################
@@ -37,7 +37,7 @@ start(){
     if [[ "${total_memory}" -ge "${max_total_memory}" ]];then
         JAVA_OPTS+=" -Xms2048m -Xmx2048m -Xmn1024m -XX:MetaspaceSize=128M"
     fi
-
+    
     nohup ${JAVA_HOME}/bin/java ${JAVA_OPTS} ${APP_PARAMS} >/dev/null 2>&1 &
     i=0
     while :
@@ -105,7 +105,7 @@ monitor(){
     else
         echo "$(date): ${server_name} is not running, restart ${server_name} now"
         start
-    fi
+    fi   
 }
 
 # command list

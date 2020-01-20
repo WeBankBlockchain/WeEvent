@@ -1,27 +1,25 @@
 #!/bin/bash
 
 JAVA_HOME=
-
-APP_PARAMS="-Xbootclasspath/a:./conf -cp ./apps/* -Dloader.path=./lib,../lib org.springframework.boot.loader.PropertiesLauncher"
-
 if [[ -z ${JAVA_HOME} ]];then
    echo "JAVA_HOME is empty, please set it first"
    exit 1
 fi
+
+server_name=weevent-broker
+APP_PARAMS="-Xbootclasspath/a:./conf -cp ./apps/* -Dloader.path=./lib,../lib org.springframework.boot.loader.PropertiesLauncher"
 
 ###############################################################################
 # The following is common logic for start a java application. DO NOT EDIT IT SOLELY.
 ###############################################################################
 JAVA_OPTS="-Xverify:none -XX:+DisableExplicitGC -XX:TieredStopAtLevel=1 -XX:+UseConcMarkSweepGC -XX:+UseCMSCompactAtFullCollection"
 
-
-server_name=$(basename $0|awk -F"." '{print $1}')
-pid_file=./logs/${server_name}.pid
 current_pid=
 #operating system total physical memory, unit MB.
 max_total_memory=2048
 
 get_pid(){
+    pid_file=./logs/${server_name}.pid
     if [[ -e ${pid_file} ]]; then
         pid=$(cat ${pid_file})
         current_pid=$(ps aux|grep "${server_name}" | grep "${pid}" | grep -v grep | awk '{print $2}')

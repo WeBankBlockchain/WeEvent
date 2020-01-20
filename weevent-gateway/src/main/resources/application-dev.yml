@@ -1,0 +1,29 @@
+# web container
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+# log4j2
+logging:
+  config: classpath:log4j2.xml
+
+spring:
+  application:
+    name: weevent-gateway
+  pid:
+    fail-on-write-error: true
+    file: ./logs/${spring.application.name}.pid
+  # gateway
+  cloud:
+    gateway:
+      enabled: true
+      routes:
+        - id: weevent-broker
+          predicates:
+            - Path=/weevent-broker/**
+          uri: "http://localhost:7000/weevent-broker"
+        - id: weevent-governance
+          predicates:
+            - Path=/weevent-governance/**
+          uri: "http://localhost:7009/weevent-governance"

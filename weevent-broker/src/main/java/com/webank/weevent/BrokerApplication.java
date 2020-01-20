@@ -109,7 +109,7 @@ class HttpInterceptorConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         log.info("client ip white table: {}", BrokerApplication.weEventConfig.getIpWhiteTable());
-		
+
         HttpInterceptor httpInterceptor = new HttpInterceptor(BrokerApplication.weEventConfig.getIpWhiteTable());
         registry.addInterceptor(httpInterceptor).addPathPatterns("/**");
     }
@@ -127,9 +127,9 @@ class HttpInterceptorConfig implements WebMvcConfigurer {
 public class BrokerApplication {
     public static ApplicationContext applicationContext;
 
-    public static WeEventConfig weEventConfig;
-
     public static Environment environment;
+
+    public static WeEventConfig weEventConfig;
 
     public static void main(String[] args) {
         /* Forbid banner.
@@ -139,24 +139,23 @@ public class BrokerApplication {
         SpringApplication app = new SpringApplication(BrokerApplication.class);
         app.addListeners(new ApplicationPidFileWriter());
         app.run();
+
         log.info("read from weevent.properties, {}", weEventConfig);
-        log.info("start broker success");
-        //spring-boot-starter-actuator customize /info with InfoContributor bean
     }
 
     @Autowired
-    public void setContext(ApplicationContext context) {
-        applicationContext = context;
+    public void setContext(ApplicationContext applicationContext) {
+        BrokerApplication.applicationContext = applicationContext;
     }
 
     @Autowired
-    public void setWeEventConfig(WeEventConfig config) {
-        weEventConfig = config;
+    public void setEnvironment(Environment environment) {
+        BrokerApplication.environment = environment;
     }
 
     @Autowired
-    public void setEnvironment(Environment env) {
-        environment = env;
+    public void setWeEventConfig(WeEventConfig weEventConfig) {
+        BrokerApplication.weEventConfig = weEventConfig;
     }
 
     // tomcat configuration to enhance performance
