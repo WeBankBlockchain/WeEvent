@@ -47,6 +47,10 @@ public class FabricUpdateContractUtil {
                     systemExit(1);
                 }
                 break;
+            default:
+                log.error("update TopicContract, error command action");
+                systemExit(1);
+                break;
         }
     }
 
