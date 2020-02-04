@@ -18,41 +18,43 @@ function governance_setup() {
     fi
     echo "set server_port success"
 
-    if [[ -z ${mysql_ip} ]];then
-        echo "mysql_ip is empty."
-        echo "set mysql_ip failed"
-        exit 1
-    else
-       sed -i "s/127.0.0.1:3306/${mysql_ip}:3306/" ${application_properties}
-    fi
-    echo "set mysql_ip success"
-     
-    if [[ -z ${mysql_port} ]];then
-        echo "mysql_port is empty."
-        echo "set mysql_port failed"
-        exit 1
-    else
-       sed -i "s/3306/${mysql_port}/" ${application_properties}
-    fi
-    echo "set mysql_port success"
+    if [[ ${database_type} != "H2" ]];then
+        if [[ -z ${mysql_ip} ]];then
+            echo "mysql_ip is empty."
+            echo "set mysql_ip failed"
+            exit 1
+        else
+           sed -i "s/127.0.0.1:3306/${mysql_ip}:3306/" ${application_properties}
+        fi
+        echo "set mysql_ip success"
 
-    if [[ -z ${mysql_user} ]];then
-        echo "mysql_user is empty."
-        echo "set mysql_user failed"
-        exit 1
-    else
-       sed -i "s/xxxx/${mysql_user}/" ${application_properties}
+        if [[ -z ${mysql_port} ]];then
+            echo "mysql_port is empty."
+            echo "set mysql_port failed"
+            exit 1
+        else
+           sed -i "s/3306/${mysql_port}/" ${application_properties}
+        fi
+        echo "set mysql_port success"
+
+        if [[ -z ${mysql_user} ]];then
+            echo "mysql_user is empty."
+            echo "set mysql_user failed"
+            exit 1
+        else
+           sed -i "s/xxxx/${mysql_user}/" ${application_properties}
+        fi
+        echo "set mysql_user success"
+
+        if [[ -z ${mysql_pwd} ]];then
+            echo "mysql_pwd is empty"
+            echo "set mysql_pwd failed"
+            exit 1
+        else
+           sed -i "s/yyyy/${mysql_pwd}/" ${application_properties}
+        fi
+        echo "set mysql_pwd success"
     fi
-    echo "set mysql_user success"
-  
-    if [[ -z ${mysql_pwd} ]];then
-        echo "mysql_pwd is empty"
-        echo "set mysql_pwd failed"
-        exit 1
-    else
-       sed -i "s/yyyy/${mysql_pwd}/" ${application_properties}
-    fi
-    echo "set mysql_pwd success"
 
     if [[ -n ${processor_port} ]];then
        sed -i "/weevent.processor.url*/cweevent.processor.url=http://127.0.0.1:${processor_port}" ${application_properties}
@@ -77,11 +79,12 @@ para=""
 if [[ $# -lt 2 ]]; then
     echo "Usage:"
     echo "    $0 --out_path /data/app/weevent-install/governance "
-    echo "      --server_port --mysql_ip --mysql_port  --mysql_user  --mysql_pwd  "
+    echo "      --server_port --database_type --mysql_ip --mysql_port  --mysql_user  --mysql_pwd  "
     exit 1
 fi
 
 server_port=""
+database_type=""
 mysql_ip=""
 mysql_port=""
 mysql_user=""
@@ -95,6 +98,7 @@ while [[ $# -ge 2 ]] ; do
     case "$1" in
         --out_path) para="$1 = $2;";out_path="$2";shift 2;;
         --server_port) para="$1 = $2;";server_port="$2";shift 2;;
+        --database_type) para="$1 = $2;";database_type="$2";shift 2;;
         --mysql_ip) para="$1 = $2;";mysql_ip="$2";shift 2;;
         --mysql_port) para="$1 = $2;";mysql_port="$2";shift 2;;
         --mysql_user) para="$1 = $2;";mysql_user="$2";shift 2;;
