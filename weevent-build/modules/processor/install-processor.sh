@@ -34,7 +34,7 @@ function processor_setup() {
             echo "set mysql_port failed"
             exit 1
         else
-           sed -i "s/3306/${mysql_port}/" ${application_properties}
+            sed -i "s/3306/${mysql_port}/" ${application_properties}
         fi
         echo "set mysql_port success"
 
@@ -43,7 +43,7 @@ function processor_setup() {
             echo "set mysql_user failed"
             exit 1
         else
-           sed -i "s/xxxx/${mysql_user}/" ${application_properties}
+            sed -i "s/xxxx/${mysql_user}/" ${application_properties}
         fi
         echo "set mysql_user success"
 
@@ -52,7 +52,7 @@ function processor_setup() {
             echo "set mysql_pwd failed"
             exit 1
         else
-           sed -i "s/yyyy/${mysql_pwd}/" ${application_properties}
+            sed -i "s/yyyy/${mysql_pwd}/" ${application_properties}
         fi
         echo "set mysql_pwd success"
     fi
