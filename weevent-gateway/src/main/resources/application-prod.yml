@@ -3,6 +3,12 @@ server:
   port: 8080
   servlet:
     context-path: /
+  ssl:
+    enabled: true
+    key-store: classpath:server.p12
+    key-store-type: PKCS12
+    key-alias: weevent
+    key-password: 123456
 
 # log4j2
 logging:
@@ -14,6 +20,8 @@ spring:
   pid:
     fail-on-write-error: true
     file: ./logs/${spring.application.name}.pid
+  jmx:
+    enabled: false
   # gateway
   cloud:
     gateway:

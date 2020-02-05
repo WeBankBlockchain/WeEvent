@@ -14,6 +14,8 @@ spring:
   pid:
     fail-on-write-error: true
     file: ./logs/${spring.application.name}.pid
+  jmx:
+    enabled: false
   # gateway
   cloud:
     gateway:

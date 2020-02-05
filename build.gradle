@@ -2,12 +2,10 @@ println("Notice: current gradle version is " + gradle.gradleVersion + ", WeEvent
 
 ext {
     // ----- org.springframework -----
-    // spring boot
-    springBoot2Version = "2.1.0.RELEASE"
     // spring
     spring5Version = "5.1.0.RELEASE"
     // data.spring-data-commons
-    springDataCommonsVersion = "2.1.0.RELEASE"
+    springDataCommonsVersion = "2.1.10.RELEASE"
 
     // ----- org.apache -----
     // zookeeper
@@ -83,7 +81,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.0.RELEASE")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.10.RELEASE")
         classpath("gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.1.0")
     }
 }
