@@ -1,108 +1,38 @@
 package com.webank.weevent.processor.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
-@Entity
-@Table(name = "timer_scheduler_job")
-public class TimerScheduler {
+import lombok.Data;
 
-    /**
-     * primary key
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Integer id;
+@Data
+public class TimerScheduler implements Serializable {
 
-    @Column(name = "scheduler_name")
+
+    @NotNull(message = "schedulerName cannot be empty")
     private String schedulerName;
 
-    @Column(name = "jdbc_url")
-    private String jdbcUrl;
+    @NotNull(message = "databaseUrl cannot be empty")
+    private String databaseUrl;
 
-    @Column(name = "time_period")
-    private Long timePeriod;
+    @NotNull(message = "periodParams cannot be empty")
+    private String periodParams;
 
-    @Column(name = "parsing_sql")
+    @NotNull(message = "parsingSql cannot be empty")
     private String parsingSql;
 
-    @Column(name = "created_time")
-    private Date createdTime;
+    private Date createdTime = new Date();
+
+    private Date updatedTime = new Date();
 
 
-    @Column(name = "updated_time")
-    private Date updatedTime;
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getSchedulerName() {
-        return schedulerName == null ? null : schedulerName.trim();
-    }
-
-    public void setSchedulerName(String schedulerName) {
+    public TimerScheduler(String schedulerName, String databaseUrl, String periodParams , String parsingSql) {
         this.schedulerName = schedulerName;
-    }
-
-    public String getJdbcUrl() {
-        return jdbcUrl == null ? null : jdbcUrl.trim();
-    }
-
-    public void setJdbcUrl(String jdbcUrl) {
-        this.jdbcUrl = jdbcUrl;
-    }
-
-    public Long getTimePeriod() {
-        return timePeriod;
-    }
-
-    public void setTimePeriod(Long timePeriod) {
-        this.timePeriod = timePeriod;
-    }
-
-    public Date getCreatedTime() {
-        return createdTime;
-    }
-
-    public void setCreatedTime(Date createdTime) {
-        this.createdTime = createdTime;
-    }
-
-    public Date getUpdatedTime() {
-        return updatedTime;
-    }
-
-    public void setUpdatedTime(Date updatedTime) {
-        this.updatedTime = updatedTime;
-    }
-
-    public String getParsingSql() {
-        return parsingSql;
-    }
-
-    public void setParsingSql(String parsingSql) {
+        this.databaseUrl = databaseUrl;
+        this.periodParams = periodParams;
         this.parsingSql = parsingSql;
-    }
-
-    public TimerScheduler(String schedulerName, String jdbcUrl, Long timePeriod, String parsingSql, Date createdTime, Date updatedTime) {
-        this.schedulerName = schedulerName;
-        this.jdbcUrl = jdbcUrl;
-        this.timePeriod = timePeriod;
-        this.parsingSql = parsingSql;
-        this.createdTime = createdTime;
-        this.updatedTime = updatedTime;
     }
 
     public TimerScheduler() {
