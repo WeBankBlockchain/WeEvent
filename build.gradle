@@ -6,6 +6,8 @@ ext {
     spring5Version = "5.1.0.RELEASE"
     // data.spring-data-commons
     springDataCommonsVersion = "2.1.10.RELEASE"
+    // spring cloud
+    springCloudVersion = "Greenwich.SR5"
 
     // ----- org.apache -----
     // zookeeper

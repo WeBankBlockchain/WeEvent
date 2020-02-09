@@ -12,22 +12,29 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.service.CommonService;
+import com.webank.weevent.governance.utils.Utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 
 @Slf4j
 @WebFilter(urlPatterns = "/processor/*")
 public class ForwardProcessorFilter implements Filter {
-
-
-    @Autowired
     private CommonService commonService;
 
-    @Value("${weevent.processor.url:http://127.0.0.1:7008}")
-    private String weeventProcessorUrl;
+    private DiscoveryClient discoveryClient;
+
+    @Autowired
+    public void setCommonService(CommonService commonService) {
+        this.commonService = commonService;
+    }
+
+    @Autowired
+    public void setDiscoveryClient(DiscoveryClient discoveryClient) {
+        this.discoveryClient = discoveryClient;
+    }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -38,7 +45,12 @@ public class ForwardProcessorFilter implements Filter {
         // get tail of processor url
         String subStrUrl = originUrl.substring(originUrl.indexOf("/processor/") + "/processor".length());
         // get complete forward processor url
-        String newUrl = weeventProcessorUrl + "/processor" + subStrUrl;
+        String uri = Utils.getUrlFromDiscovery(this.discoveryClient, "weevent-processor");
+        if (uri.isEmpty()) {
+            log.error("unknown processor url");
+            throw new IOException("unknown processor url");
+        }
+        String newUrl = uri + "/processor" + subStrUrl;
         // get client according url
         CloseableHttpResponse closeResponse = commonService.getCloseResponse(req, newUrl);
         commonService.writeResponse(closeResponse, res);

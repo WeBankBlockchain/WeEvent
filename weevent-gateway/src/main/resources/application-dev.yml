@@ -16,19 +16,33 @@ spring:
     file: ./logs/${spring.application.name}.pid
   jmx:
     enabled: false
-  # gateway
   cloud:
+    # discovery
+    zookeeper:
+      connect-string: 127.0.0.1:2181
+      discovery:
+        instance-host: ${spring.cloud.client.ip-address}
+        instance-id: ${spring.cloud.client.ip-address}:${server.port}
+      enabled: true
+    # gateway
     gateway:
       enabled: true
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+      discovery:
+        locator:
+          enabled: true
       httpclient:
         connect-timeout: 5000
         response-timeout: 10000
       routes:
         - id: weevent-broker
+          uri: lb://weevent-broker
           predicates:
             - Path=/weevent-broker/**
-          uri: "http://localhost:7000/weevent-broker"
         - id: weevent-governance
+          uri: lb://weevent-governance
           predicates:
             - Path=/weevent-governance/**
-          uri: "http://localhost:7009/weevent-governance"

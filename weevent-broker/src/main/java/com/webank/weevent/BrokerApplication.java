@@ -17,7 +17,6 @@ import com.webank.weevent.broker.fisco.FiscoBcosBroker4Consumer;
 import com.webank.weevent.broker.fisco.FiscoBcosBroker4Producer;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
-import com.webank.weevent.broker.ha.MasterJob;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
@@ -36,6 +35,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
@@ -123,6 +123,7 @@ class HttpInterceptorConfig implements WebMvcConfigurer {
  * @since 2018/11/21
  */
 @Slf4j
+@EnableDiscoveryClient
 @SpringBootApplication
 public class BrokerApplication {
     public static ApplicationContext applicationContext;
@@ -296,12 +297,6 @@ public class BrokerApplication {
         redisTemplate.afterPropertiesSet();
 
         return redisTemplate;
-    }
-
-    // ha
-    @Bean
-    public static MasterJob getMasterJob() {
-        return new MasterJob();
     }
 
     // daemon thread pool

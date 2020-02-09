@@ -31,15 +31,6 @@ public class WeEventConfig {
     @Value("${broker.blockchain.type}")
     private String blockChainType;
 
-    @Value("${broker.zookeeper.ip:}")
-    private String zookeeperIp;
-
-    @Value("${broker.zookeeper.path:}")
-    private String zookeeperPath;
-
-    @Value("${broker.zookeeper.timeout:3000}")
-    private Integer zookeeperTimeout;
-
     @Value("${stomp.heartbeats:30}")
     private Integer stompHeartbeats;
 

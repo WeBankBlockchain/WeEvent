@@ -6,7 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.ApplicationPidFileWriter;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 
 /**
@@ -16,6 +19,7 @@ import org.springframework.core.env.Environment;
  * @since 2020/01/20
  */
 @Slf4j
+@EnableDiscoveryClient
 @SpringBootApplication
 public class GatewayApplication {
     public static ApplicationContext applicationContext;
@@ -36,5 +40,10 @@ public class GatewayApplication {
     @Autowired
     public void setEnvironment(Environment environment) {
         GatewayApplication.environment = environment;
+    }
+
+    @Bean
+    public static GlobalFilter getLogGlobalFilter() {
+        return new LogGlobalFilter();
     }
 }
