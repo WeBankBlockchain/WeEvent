@@ -19,7 +19,7 @@ function processor_setup() {
     fi
     echo "set server_port success"
 
-    if [[ ${database_type} != "H2" ]];then
+    if [[ ${database_type} != "h2" ]];then
         if [[ -z ${mysql_ip} ]];then
             echo "mysql_ip is empty."
             echo "set mysql_ip failed"

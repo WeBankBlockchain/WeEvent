@@ -67,11 +67,11 @@ function set_global_param(){
     governance_port=$(properties_get "governance.port")
 
     database_type=$(properties_get  "database.type")
-    if [[ ${database_type} != "H2" ]] && [[ ${database_type} != "mysql" ]];then
-        yellow_echo "database type error, support both H2 and mysql"
+    if [[ ${database_type} != "h2" ]] && [[ ${database_type} != "mysql" ]];then
+        yellow_echo "database type error, support both h2 and mysql"
         exit 1
     fi
-    if [[ ${governance_enable} = "true" ]] && [[ ${database_type} != "H2" ]];then
+    if [[ ${governance_enable} = "true" ]] && [[ ${database_type} != "h2" ]];then
         mysql_ip=$(properties_get "mysql.ip")
         mysql_port=$(properties_get  "mysql.port")
         mysql_user=$(properties_get "mysql.user")
@@ -116,7 +116,7 @@ function check_param(){
     check_port ${nginx_port}
     if [[ ${governance_enable} = "true" ]];then
         check_port ${governance_port}
-        if [[ ${database_type} != "H2" ]];then
+        if [[ ${database_type} != "h2" ]];then
             check_telnet ${mysql_ip}:${mysql_port}
         fi
     fi
