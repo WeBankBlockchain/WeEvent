@@ -156,6 +156,7 @@ allprojects {
             force "com.alibaba:fastjson:${fastjsonVersion}"
             // force use netty 4.1
             force "io.netty:netty-all:${nettyVersion}"
+            force "org.apache.zookeeper:zookeeper:${zookeeperVersion}"
         }
     }
 
