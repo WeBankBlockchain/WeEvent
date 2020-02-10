@@ -3,7 +3,7 @@
 // see http://vuejs-templates.github.io/webpack for documentation.
 const path = require('path')
 const os = require('os')
-// const config =  require('./config.js')
+const config =  require('./config.js')
 var needHost = ''
 
 try {

@@ -39,7 +39,8 @@ module.exports = {
     'enter': 'Please input',
     'reqException': 'Request exception',
     'timeOut': 'Request timeout',
-    'all': 'all'
+    'all': 'all',
+    'noServer': 'Please input the servers'
   },
   serverSet: {
     'serverMana': 'Server Management',
@@ -49,6 +50,7 @@ module.exports = {
     'brokerURLAddress': 'WeEvent Broker URL',
     'webaseURLAddress': 'WeBASE URL',
     'authorized': 'Authorized Account',
+    'ruleEngine': 'Eule Engine',
     'namePlaceholder': 'Please input server name(1-20character,number,underline)',
     'borkerPlaceholder': 'eg: "http://127.0.0.1:8080/weevent"',
     'webasePlaceholder': 'eg: "http://127.0.0.1:8080/webase"',
@@ -271,9 +273,8 @@ module.exports = {
     'inputInteger': 'data type error - not an integer',
     'bigger': 'please input the value bigger then 0',
     'inputString': 'please warp the string in double quotes',
-    'errorOperator': 'operator is error plese use != or ==',
+    'errorOperator': 'operator is error please use != or ==',
     'errorParameter': 'function error - parameter is error',
     'errorIndex': 'function error - index is not a integer'
-
   }
 }

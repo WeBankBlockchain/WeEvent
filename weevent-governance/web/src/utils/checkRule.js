@@ -67,6 +67,7 @@ export const checkRule = (e) => {
               } else {
                 if (operator !== '!=' && operator !== '==') {
                   warning = i18n.messages[lang].ruleCheck.errorOperator
+                  console.log(i18n.messages[lang].ruleCheck)
                   pass = false
                 } else {
                   if (item.functionType === 'substring') {
