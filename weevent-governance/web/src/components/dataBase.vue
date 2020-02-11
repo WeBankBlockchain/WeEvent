@@ -216,7 +216,8 @@ export default {
               } else {
                 vm.$message({
                   type: 'warning',
-                  message: res.data.message
+                  message: res.data.message,
+                  duration: 5000
                 })
               }
               vm.showlog = false
@@ -233,7 +234,8 @@ export default {
               } else {
                 vm.$message({
                   type: 'warning',
-                  message: res.data.message
+                  message: res.data.message,
+                  duration: 5000
                 })
               }
               vm.showlog = false
@@ -274,7 +276,8 @@ export default {
           } else {
             vm.$message({
               type: 'warning',
-              message: res.data.message
+              message: res.data.message,
+              duration: 5000
             })
           }
           vm.showlog = false

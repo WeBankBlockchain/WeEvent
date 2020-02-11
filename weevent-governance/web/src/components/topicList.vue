@@ -258,19 +258,22 @@ export default {
             } else if (res.data.status === 100109) {
               vm.$message({
                 type: 'error',
-                message: this.$t('tableCont.exitTopic')
+                message: this.$t('tableCont.exitTopic'),
+                duration: 5000
               })
             } else {
               vm.$message({
                 type: 'error',
-                message: res.data.message
+                message: res.data.message,
+                duration: 5000
               })
             }
             vm.dialogFormVisible = false
           }).catch(e => {
             vm.$message({
               type: 'error',
-              message: this.$t('common.addFail')
+              message: this.$t('common.addFail'),
+              duration: 5000
             })
           })
           vm.dialogFormVisible = false
@@ -343,20 +346,16 @@ export default {
         this.$refs.form.resetFields()
       }
     },
-    brokerId () {
-      this.tableData = []
-      this.topicName = ''
-      this.refresh()
-    },
-    groupId () {
-      this.tableData = []
-      this.topicName = ''
-      this.refresh()
+    groupId (nVal) {
+      if (nVal !== '-1') {
+        this.tableData = []
+        this.topicName = ''
+        this.refresh()
+      }
     }
   },
   destroyed () {
     sessionStorage.removeItem('topic')
   }
 }
-
 </script>
