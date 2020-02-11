@@ -86,7 +86,8 @@ export default {
         } else {
           this.$message({
             type: 'warning',
-            message: this.$t('common.reqException')
+            message: this.$t('common.reqException'),
+            duration: 5000
           })
         }
       })
@@ -201,15 +202,12 @@ export default {
     }
   },
   watch: {
-    brokerId () {
-      this.getNodeList()
-      this.nodes = []
-      this.subscription()
-    },
-    groupId () {
-      this.getNodeList()
-      this.nodes = []
-      this.subscription()
+    groupId (nVal) {
+      if (nVal !== '-1') {
+        this.getNodeList()
+        this.nodes = []
+        this.subscription()
+      }
     }
   },
   mounted () {

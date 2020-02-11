@@ -39,7 +39,8 @@ module.exports = {
     'enter': '请填写',
     'reqException': '数据请求异常',
     'timeOut': '请求超时，请稍后重试',
-    'all': '全选'
+    'all': '全选',
+    'noServer': '检测到您还未添加任何服务,请先添加相关服务'
   },
   serverSet: {
     'serverMana': '服务管理',
@@ -55,8 +56,8 @@ module.exports = {
     'webasePlaceholder': '例如: "http://127.0.0.1:8080/webase"',
     'authorizedPlaceholder': '请选择用户',
     'errorServer': '服务名格式错误',
-    'emptyPort': '服务端口不能为空',
     'noServerName': '服务名不能为空',
+    'emptyPort': '服务端口不能为空',
     'errorAddress': '服务地址错误,无法连接',
     'exitBrokerURL': 'Broker服务已存在, 请向所属用户申请访问授权'
   },
@@ -78,6 +79,7 @@ module.exports = {
     'emptyUserName': '用户名不能为空',
     'errorUserName': '用户名只能是6~20位的字母和数字',
     'exitUserName': '用户名已存在',
+    'enterPassWordAgain': '请再次输入密码',
     'passWordInconsistent': '两次输入密码不一致',
     'errorOldPassWord': '旧密码输入错误',
     'passWordModifySuccess': '密码修改成功',
@@ -220,9 +222,11 @@ module.exports = {
   },
   ruleDetail: {
     'guideDetail': '数据详情',
+    'ruleInfo': '规则信息',
     'editRule': '编辑规则',
     'processData': '规则详情',
     'sqlDescription': '规则语法说明',
+    'ruleDetail': '规则详情',
     'noRule': '您还没有编写规则语句处理数据，',
     'ruleSearchLetter': '规则查询语句',
     'ruleSearchWarning': '选择下方选项后，语句将自动生成',
@@ -269,7 +273,12 @@ module.exports = {
     'inputInteger': '方法异常，请填写整数类型',
     'bigger': '输入值请大于0',
     'inputString': '填写的数据类型错误-字符串类型请用双引号包裹',
+    'errorOperator': '关系符错误',
     'errorParameter': '该函数的参数错误',
-    'errorIndex': '该函数的下标不是整数类型'
+    'errorIndex': '该函数的下标不是整数类型',
+    'typeErrorString': '填写的内容与选择的元素类型不匹配，该元素定义的类型是 String',
+    'typeErrorNumber': '填写的内容与选择的元素类型不匹配，该元素定义的类型是 Number',
+    'typeTimeError': '运用此方法,选取的元素其定义的内容需要为数字类型的时间(YYYYMMDD格式)',
+    'errorTime': '运用此方法,选取的元素其定义的内容需要为字符类型的时间("YYYY-MM-dd hh:mm::ss" 格式)'
   }
 }
