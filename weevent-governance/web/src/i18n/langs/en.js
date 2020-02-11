@@ -275,6 +275,10 @@ module.exports = {
     'inputString': 'please warp the string in double quotes',
     'errorOperator': 'operator is error please use != or ==',
     'errorParameter': 'function error - parameter is error',
-    'errorIndex': 'function error - index is not a integer'
+    'errorIndex': 'function error - index is not a integer',
+    'typeErrorString': 'Type error - the type of key is String different with input value',
+    'typeErrorNumber': 'Type error - the type of key is Number different with input value',
+    'typeTimeError': 'Use this function, the value of key should be a time with number type(YYYYMMDD style)',
+    'errorTime': 'Use this function, the value of key should be a time with string type ("YYYY-MM-DD hh:mm:ss" style)'
   }
 }

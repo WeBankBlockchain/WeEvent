@@ -275,6 +275,10 @@ module.exports = {
     'inputString': '填写的数据类型错误-字符串类型请用双引号包裹',
     'errorOperator': '关系符错误',
     'errorParameter': '该函数的参数错误',
-    'errorIndex': '该函数的下标不是整数类型'
+    'errorIndex': '该函数的下标不是整数类型',
+    'typeErrorString': '填写的内容与选择的元素类型不匹配，该元素定义的类型是 String',
+    'typeErrorNumber': '填写的内容与选择的元素类型不匹配，该元素定义的类型是 Number',
+    'typeTimeError': '运用此方法,选取的元素其定义的内容需要为数字类型的时间(YYYYMMDD格式)',
+    'errorTime': '运用此方法,选取的元素其定义的内容需要为字符类型的时间("YYYY-MM-dd hh:mm::ss" 格式)'
   }
 }

@@ -610,7 +610,7 @@ export default {
             return
           }
         }
-        if (!checkRule(this.columnName)) {
+        if (!checkRule(this.columnName, this.rule.payloadMap)) {
           return
         }
         if (e === 'rule') {
@@ -646,6 +646,7 @@ export default {
             }
           }
         }
+        console.log(data)
         API.ruleUpdate(data).then(res => {
           if (res.data.status === 200) {
             vm.$message({
