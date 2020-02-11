@@ -99,7 +99,7 @@ export default {
       this.server = this.servers[e].name
       this.$store.commit('set_id', this.servers[e].id)
       this.$store.commit('setConfigRule', this.servers[e].isConfigRule)
-      localStorage.setItem('brokerId', this.servers[e].id)
+      // localStorage.setItem('brokerId', this.servers[e].id)
     },
     selectGroup (e) {
       this.$store.commit('set_groupId', e)
@@ -119,7 +119,7 @@ export default {
                   let id = e.id
                   vm.$store.commit('set_id', id)
                   vm.$store.commit('setConfigRule', e.isConfigRule)
-                  localStorage.setItem('brokerId', id)
+                  // localStorage.setItem('brokerId', id)
                 }
               })
             } else {
@@ -127,13 +127,14 @@ export default {
               let id = res.data[0].id
               vm.$store.commit('set_id', id)
               vm.$store.commit('setConfigRule', res.data[0].isConfigRule)
-              localStorage.setItem('brokerId', id)
+              // localStorage.setItem('brokerId', id)
             }
-            vm.listGroup()
+            // vm.listGroup()
           } else {
             vm.$message({
               type: 'warning',
-              message: '检测到您还未添加任何服务,请先添加相关服务!'
+              message: vm.$t('common.noServer'),
+              duration: 5000
             })
             vm.$router.push('./servers')
           }
@@ -174,6 +175,8 @@ export default {
   },
   watch: {
     brokerId (nVal) {
+      localStorage.setItem('brokerId', nVal)
+      this.$store.commit('set_groupId', '-1')
       this.listGroup()
     }
   }
