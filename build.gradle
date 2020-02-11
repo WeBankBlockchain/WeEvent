@@ -65,7 +65,7 @@ ext {
     // Java-WebSocket
     WebSocketVersion = "1.4.0"
     // JWTVersion
-    JWTVersion = "3.8.0";
+    JWTVersion = "3.8.0"
 }
 
 buildscript {
