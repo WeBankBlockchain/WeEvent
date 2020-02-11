@@ -13,6 +13,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.processor.model.CEPRule;
@@ -349,11 +351,12 @@ public class CommonUtil {
 
                     break;
                 case ConstantsHelper.NOW:
+                    //yyyy/MM/dd HH:mm:ss
                     sqlOrder.put(ConstantsHelper.NOW, String.valueOf(new Date().getTime()));
 
                     break;
                 case ConstantsHelper.CURRENT_TIME:
-                    SimpleDateFormat sdfTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                    SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm:ss");
                     sqlOrder.put(ConstantsHelper.CURRENT_TIME, sdfTime.format(new Date()));
 
                     break;
@@ -478,6 +481,22 @@ public class CommonUtil {
 
             String replaceContent = "";
             switch (type) {
+                case "now":
+                    // timestamp
+                    long timestamp = new Date().getTime();
+                    sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, String.valueOf(timestamp));
+                    break;
+                case "currentDate":
+                    //yyyyMMdd 20200202
+                    String date = new SimpleDateFormat("yyyyMMdd").format(new Date());
+                    sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, date);
+                    break;
+                case "currentTime":
+                    // HHmmss 111111
+                    String time = new SimpleDateFormat("HHmmss").format(new Date());
+                    sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, time);
+                    break;
+
                 case "abs":
                     sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, String.valueOf(Math.abs((Integer) payload.get(arr[i][3]))));
                     changePosition = changePosition(conditionField, sb.toString());
@@ -542,8 +561,16 @@ public class CommonUtil {
         }
         log.info("sb:{}", sb);
         return sb.toString();
+    }
 
+    public static boolean isDate(String strDate) {
+        Pattern pattern = Pattern
+                .compile("^((\\d{2}(([02468][048])|([13579][26]))[\\-\\/\\s]?((((0?[13578])|(1[02]))[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])|(3[01])))|(((0?[469])|(11))[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])|(30)))|(0?2[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])))))|(\\d{2}(([02468][1235679])|([13579][01345789]))[\\-\\/\\s]?((((0?[13578])|(1[02]))[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])|(3[01])))|(((0?[469])|(11))[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])|(30)))|(0?2[\\-\\/\\s]?((0?[1-9])|(1[0-9])|(2[0-8]))))))(\\s(((0?[0-9])|([1-2][0-3]))\\:([0-5]?[0-9])((\\s)|(\\:([0-5]?[0-9])))))?$");
+        Matcher m = pattern.matcher(strDate);
+        if (m.matches()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
-
-

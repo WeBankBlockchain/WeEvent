@@ -2,6 +2,8 @@ package com.webank.weevent.processor.mq;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingDeque;
@@ -318,7 +320,13 @@ public class CEPRuleMQ {
                 JexlEngine jexl = new JexlBuilder().create();
                 JexlContext context = new MapContext();
                 for (String key : eventContentKeys) {
-                    context.set(key, event.get(key));
+                    if (CommonUtil.isDate(String.valueOf(event.get(key)))) {
+                        String timeStr = String.valueOf(event.get(key));
+                        long time = (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).parse(timeStr, new ParsePosition(0)).getTime() / 1000;
+                        context.set(key, time);
+                    } else {
+                        context.set(key, event.get(key));
+                    }
                 }
 
                 // check the expression ,if match then true
@@ -364,8 +372,15 @@ public class CEPRuleMQ {
 
             JexlContext context = new MapContext();
             for (String key : payloadContentKeys) {
-                context.set(key, payloadJson.get(key));
+                if (CommonUtil.isDate(String.valueOf(payloadJson.get(key)))) {
+                    String timeStr = String.valueOf(payloadJson.get(key));
+                    long time = (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).parse(timeStr, new ParsePosition(0)).getTime() / 1000;
+                    context.set(key, time);
+                } else {
+                    context.set(key, payloadJson.get(key));
+                }
             }
+
             Map event = JsonUtil.parseObject(payload, Map.class);
             String[] strs = condition.split("=");
             boolean flag = false;
@@ -430,4 +445,5 @@ public class CEPRuleMQ {
             }
         }
     }
+
 }
