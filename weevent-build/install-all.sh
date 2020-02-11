@@ -14,6 +14,7 @@ broker_port=7000
 nginx_port=8080
 
 governance_port=
+database_type=
 mysql_ip=
 mysql_port=
 mysql_user=
@@ -57,6 +58,7 @@ function set_global_param(){
     else
         block_chain_node_path=$(realpath -m ${block_chain_node_path})
     fi
+
     nginx_port=$(properties_get "nginx.port")
 
     broker_port=$(properties_get "broker.port")
@@ -64,10 +66,17 @@ function set_global_param(){
     governance_enable=$(properties_get  "governance.enable")
     governance_port=$(properties_get "governance.port")
 
-    mysql_ip=$(properties_get "mysql.ip")
-    mysql_port=$(properties_get  "mysql.port")
-    mysql_user=$(properties_get "mysql.user")
-    mysql_password=$(properties_get "mysql.password")
+    database_type=$(properties_get  "database.type")
+    if [[ ${database_type} != "h2" ]] && [[ ${database_type} != "mysql" ]];then
+        yellow_echo "database type error, support both h2 and mysql"
+        exit 1
+    fi
+    if [[ ${governance_enable} = "true" ]] && [[ ${database_type} != "h2" ]];then
+        mysql_ip=$(properties_get "mysql.ip")
+        mysql_port=$(properties_get  "mysql.port")
+        mysql_user=$(properties_get "mysql.user")
+        mysql_password=$(properties_get "mysql.password")
+    fi
 
     processor_enable=$(properties_get  "processor.enable")
     processor_port=$(properties_get "processor.port")
@@ -107,7 +116,9 @@ function check_param(){
     check_port ${nginx_port}
     if [[ ${governance_enable} = "true" ]];then
         check_port ${governance_port}
-        check_telnet ${mysql_ip}:${mysql_port}
+        if [[ ${database_type} != "h2" ]];then
+            check_telnet ${mysql_ip}:${mysql_port}
+        fi
     fi
     if [[ ${processor_enable} = "true" ]];then
         check_port ${processor_port}
@@ -148,16 +159,16 @@ function install_module(){
         yellow_echo "install module governance"
         cd ${current_path}/modules/governance
         if [[ ${processor_enable} = "true" ]];then
-            ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} --processor_port ${processor_port}
+            ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --database_type ${database_type} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} --processor_port ${processor_port}
         else
-            ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} --processor_port ""
+            ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --database_type ${database_type} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} --processor_port ""
         fi
         check_result "install governance"
     fi
     if [[ ${processor_enable} = "true" ]];then
         yellow_echo "install module processor"
         cd ${current_path}/modules/processor
-        ./install-processor.sh --out_path ${out_path}/processor --server_port ${processor_port} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password}
+        ./install-processor.sh --out_path ${out_path}/processor --server_port ${processor_port} --database_type ${database_type} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password}
         check_result "install processor"
     fi
 
