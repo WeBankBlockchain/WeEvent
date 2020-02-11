@@ -1,5 +1,5 @@
 import i18n from '../i18n'
-export const checkRule = (e) => {
+export const checkRule = (e, s) => {
   let pass = true
   let nodes = document.getElementsByClassName('tree_content')
   let lang = i18n.locale
@@ -67,6 +67,7 @@ export const checkRule = (e) => {
               } else {
                 if (operator !== '!=' && operator !== '==') {
                   warning = i18n.messages[lang].ruleCheck.errorOperator
+                  console.log(i18n.messages[lang].ruleCheck)
                   pass = false
                 } else {
                   if (item.functionType === 'substring') {
@@ -104,6 +105,53 @@ export const checkRule = (e) => {
                   }
                 }
               }
+            }
+          }
+        }
+      }
+      let payLoad = JSON.parse(s)
+      if (item.functionType !== 'now' && item.functionType !== 'currentDate' && item.functionType !== 'currentTime') {
+        let type = typeof (payLoad[item.columnName])
+        if (type === 'string') {
+          if (item.sqlCondition[0] !== '"' || item.sqlCondition[item.sqlCondition.length - 1] !== '"') {
+            pass = false
+            warning = i18n.messages[lang].ruleCheck.typeErrorString
+            console.log('type error')
+          } else {
+            if (item.conditionalOperator !== '!=' && item.conditionalOperator !== '==') {
+              warning = i18n.messages[lang].ruleCheck.errorOperator
+              console.log(i18n.messages[lang].ruleCheck)
+              pass = false
+            }
+          }
+        } else if (type === 'number') {
+          let re = /^(-)?\d+(\.\d+)?$/
+          if (re.exec(item.sqlCondition) == null) {
+            pass = false
+            warning = i18n.messages[lang].ruleCheck.typeErrorNumber
+            console.log('type error')
+          }
+        }
+      } else {
+        let t = payLoad[item.columnName]
+        let type = typeof (t)
+        if (item.functionType === 'now') {
+          let reg = /^(\d{4})(-|\/)(\d{2})\2(\d{2}) (\d{2}):(\d{2}):(\d{2})$/
+          let r = t.match(reg)
+          if (type !== 'string' || r == null) {
+            pass = false
+            warning = i18n.messages[lang].ruleCheck.errorTime
+          }
+        } else {
+          let reg = /^(\d{8})?$/
+          if (type !== 'number') {
+            pass = false
+            warning = i18n.messages[lang].ruleCheck.typeErrorNumber
+          } else {
+            let val = reg.test(t)
+            if (!val) {
+              pass = false
+              warning = i18n.messages[lang].ruleCheck.typeTimeError
             }
           }
         }
