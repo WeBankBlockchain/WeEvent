@@ -265,7 +265,7 @@ public class CEPRuleMQ {
                             SendResult result = toDestinationClient.publish(weEvent);
 
                             // update the  statistic weevent
-                            if ("SUCCESS".equals(result.getStatus().name())) {
+                            if (SendResult.SendResultStatus.SUCCESS.equals(result.getStatus())) {
                                 return new Pair<>(ConstantsHelper.PUBLISH_EVENT_SUCCESS, entry.getValue().getId());
                             } else {
                                 return new Pair<>(ConstantsHelper.PUBLISH_EVENT_FAIL, entry.getValue().getId());
