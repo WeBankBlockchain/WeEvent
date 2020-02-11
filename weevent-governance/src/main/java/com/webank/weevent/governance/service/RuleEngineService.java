@@ -539,7 +539,7 @@ public class RuleEngineService {
     }
 
     private String getProcessorUrl() {
-        return Utils.getUrlFromDiscovery(this.discoveryClient, "weevent-processor");
+        return Utils.getUrlFromDiscovery(this.discoveryClient, "weevent-processor") + "/weevent-processor";
     }
 
     public boolean validationConditions(HttpServletRequest request, RuleEngineEntity ruleEngineEntity) throws GovernanceException {

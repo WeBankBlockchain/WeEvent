@@ -37,14 +37,14 @@ import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 public class WeEventClient implements IWeEventClient {
-    private final static String defaultJsonRpcUrl = "http://127.0.0.1:8080/weevent/jsonrpc";
+    private final static String defaultJsonRpcUrl = "http://127.0.0.1:8080/weevent-broker/jsonrpc";
     // json rpc proxy
     private IBrokerRpc brokerRpc;
 
     // groupId
     private String groupId;
 
-    // default STOMP url, ws://localhost:8080/weevent/stomp
+    // default STOMP url, ws://localhost:8080/weevent-broker/stomp
     private WeEventConnectionFactory connectionFactory;
 
     // stomp connection

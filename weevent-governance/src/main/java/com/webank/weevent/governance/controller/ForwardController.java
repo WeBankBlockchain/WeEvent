@@ -23,8 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 public class ForwardController {
-    private CommonService commonService;
+    private final static String brokerServiceId = "weevent-broker";
 
+    private CommonService commonService;
     private DiscoveryClient discoveryClient;
 
     @Autowired
@@ -41,13 +42,13 @@ public class ForwardController {
     public Object forward(HttpServletRequest request, HttpServletResponse response, @PathVariable(name = "path1") String path1, @PathVariable(name = "path2") String path2) throws GovernanceException {
         log.info("weevent url: /wevent/ {}  \"/\" {}", path1, path2);
 
-        String uri = Utils.getUrlFromDiscovery(this.discoveryClient, "weevent-broker");
+        String uri = Utils.getUrlFromDiscovery(this.discoveryClient, brokerServiceId);
         if (uri.isEmpty()) {
             log.error("unknown broker url");
             throw new GovernanceException(ErrorCode.BROKER_CONNECT_ERROR);
         }
 
-        String forwardUrl = new StringBuffer(uri).append("/").append(path1).append("/").append(path2).toString();
+        String forwardUrl = new StringBuffer(uri + "/" + brokerServiceId).append("/").append(path1).append("/").append(path2).toString();
         try {
             CloseableHttpResponse closeResponse = this.commonService.getCloseResponse(request, forwardUrl);
             return EntityUtils.toString(closeResponse.getEntity());

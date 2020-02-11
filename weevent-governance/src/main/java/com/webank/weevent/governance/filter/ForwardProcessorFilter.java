@@ -22,6 +22,8 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 @Slf4j
 @WebFilter(urlPatterns = "/processor/*")
 public class ForwardProcessorFilter implements Filter {
+    private final static String processorServiceId = "weevent-processor";
+
     private CommonService commonService;
 
     private DiscoveryClient discoveryClient;
@@ -45,12 +47,12 @@ public class ForwardProcessorFilter implements Filter {
         // get tail of processor url
         String subStrUrl = originUrl.substring(originUrl.indexOf("/processor/") + "/processor".length());
         // get complete forward processor url
-        String uri = Utils.getUrlFromDiscovery(this.discoveryClient, "weevent-processor");
+        String uri = Utils.getUrlFromDiscovery(this.discoveryClient, processorServiceId);
         if (uri.isEmpty()) {
             log.error("unknown processor url");
             throw new IOException("unknown processor url");
         }
-        String newUrl = uri + "/processor" + subStrUrl;
+        String newUrl = uri + "/" + processorServiceId + subStrUrl;
         // get client according url
         CloseableHttpResponse closeResponse = commonService.getCloseResponse(req, newUrl);
         commonService.writeResponse(closeResponse, res);
