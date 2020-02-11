@@ -77,7 +77,7 @@ public class RobustConfiguration {
 
     @Bean
     public IBrokerRpc brokerRpc() throws Exception {
-        String jsonRpcUrl = HTTP_HEADER + url + "/weevent/jsonrpc";
+        String jsonRpcUrl = HTTP_HEADER + url + "/weevent-broker/jsonrpc";
         URL url = new URL(jsonRpcUrl);
         JsonRpcHttpClient client = new JsonRpcHttpClient(url);
         return ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);

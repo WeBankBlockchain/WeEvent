@@ -167,14 +167,14 @@ public class ScheduledService implements AutoCloseable {
     }
 
     private void stompSubscribe() {
-        String callUrl = "ws://" + url + "/weevent/stomp";
+        String callUrl = "ws://" + url + "/weevent-broker/stomp";
         StompSessionHandlerAdapter handlerAdapter = this.getStompSessionHandlerAdapter();
         this.socketStompClient.connect(callUrl, handlerAdapter);
     }
 
     private void restfulPublic() {
         // use the rest request to post a message
-        String callUrl = HTTP_HEADER + this.url + "/weevent/rest/publish?topic={topic}&content={content}";
+        String callUrl = HTTP_HEADER + this.url + "/weevent-broker/rest/publish?topic={topic}&content={content}";
         ResponseEntity<String> rsp = this.restTemplate.getForEntity(
                 callUrl,
                 String.class,
@@ -321,7 +321,7 @@ public class ScheduledService implements AutoCloseable {
                         WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
                         stompClient.setMessageConverter(new StringMessageConverter());
                         stompClient.setTaskScheduler(taskScheduler);
-                        ListenableFuture<StompSession> future = stompClient.connect("ws://" + url + "/weevent/stomp", this);
+                        ListenableFuture<StompSession> future = stompClient.connect("ws://" + url + "/weevent-broker/stomp", this);
                         stompSession = future.get();
                         // stomp subscribe
                         stompSession.setAutoReceipt(true);
