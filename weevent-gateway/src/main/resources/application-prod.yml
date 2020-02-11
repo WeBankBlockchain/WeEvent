@@ -8,7 +8,7 @@ server:
     key-store: classpath:server.p12
     key-store-type: PKCS12
     key-alias: weevent
-    key-password: 123456
+    key-store-password: 123456
 
 # log4j2
 logging:
@@ -44,10 +44,12 @@ spring:
         connect-timeout: 5000
         response-timeout: 10000
       routes:
+        # broker
         - id: weevent-broker
           uri: lb://weevent-broker
           predicates:
             - Path=/weevent-broker/**
+        # governance
         - id: weevent-governance
           uri: lb://weevent-governance
           predicates:
