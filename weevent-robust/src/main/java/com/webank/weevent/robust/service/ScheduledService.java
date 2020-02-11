@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,6 +20,7 @@ import com.webank.weevent.robust.service.interfaces.MqttGateway;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.SendResult;
+import com.webank.weevent.sdk.WeEvent;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -188,7 +190,7 @@ public class ScheduledService implements AutoCloseable {
 
     private void jsonRpcPublish() throws BrokerException {
         // use jsonRpc publish topic
-        SendResult publish = brokerRpc.publish(JSON_RPC_TOPIC, "Hello JsonRpc !".getBytes());
+        SendResult publish = brokerRpc.publish(JSON_RPC_TOPIC, WeEvent.DEFAULT_GROUP_ID, "Hello JsonRpc!".getBytes(), new HashMap<>());
         log.info("jsonRpc send message:EventId{}" + publish.getEventId());
         if (publish.getStatus() == SendResult.SendResultStatus.SUCCESS) {
             countTimes(jsonrpcSendMap, this.getFormatTime(new Date()));

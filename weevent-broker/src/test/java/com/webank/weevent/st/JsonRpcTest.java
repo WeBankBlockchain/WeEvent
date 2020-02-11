@@ -39,7 +39,7 @@ public class JsonRpcTest extends JUnitTestBase {
 
         JsonRpcHttpClient client = new JsonRpcHttpClient(new URL(url));
         this.iBrokerRpc = ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);
-        this.eventId = iBrokerRpc.publish(this.jsonTopic, this.content.getBytes()).getEventId();
+        this.eventId = iBrokerRpc.publish(this.jsonTopic, this.groupId, this.content.getBytes(), new HashMap<>()).getEventId();
 
         client.setExceptionResolver(response -> {
             log.error("Exception in json rpc invoke, {}", response.toString());
@@ -50,7 +50,7 @@ public class JsonRpcTest extends JUnitTestBase {
 
     @Test
     public void testOpenNoGroupId() throws BrokerException {
-        boolean open = iBrokerRpc.open(this.jsonTopic);
+        boolean open = iBrokerRpc.open(this.jsonTopic, "");
         log.info("open topic : " + open);
         Assert.assertTrue(open);
     }
@@ -64,7 +64,7 @@ public class JsonRpcTest extends JUnitTestBase {
 
     @Test
     public void testCloseNoGroupId() throws BrokerException {
-        boolean open = iBrokerRpc.close(this.jsonTopic);
+        boolean open = iBrokerRpc.close(this.jsonTopic, "");
         log.info("close topic : " + open);
         Assert.assertTrue(open);
     }
@@ -78,7 +78,7 @@ public class JsonRpcTest extends JUnitTestBase {
 
     @Test
     public void testExistNoGroupId() throws BrokerException {
-        boolean exist = iBrokerRpc.exist(this.jsonTopic);
+        boolean exist = iBrokerRpc.exist(this.jsonTopic, "");
         log.info("topic exist : " + exist);
         Assert.assertTrue(exist);
     }
@@ -92,7 +92,7 @@ public class JsonRpcTest extends JUnitTestBase {
 
     @Test
     public void testStateNoGroupId() throws BrokerException {
-        TopicInfo state = iBrokerRpc.state(this.jsonTopic);
+        TopicInfo state = iBrokerRpc.state(this.jsonTopic, "");
         log.info("state : " + state);
         Assert.assertNotNull(state.getCreatedTimestamp());
     }
@@ -106,7 +106,7 @@ public class JsonRpcTest extends JUnitTestBase {
 
     @Test
     public void testListNoGroupId() throws BrokerException {
-        TopicPage list = iBrokerRpc.list(0, 10);
+        TopicPage list = iBrokerRpc.list(0, 10, "");
         log.info("list topic : " + list);
         Assert.assertTrue(list.getTotal() > 0);
     }
@@ -120,7 +120,7 @@ public class JsonRpcTest extends JUnitTestBase {
 
     @Test
     public void testPublishNoGroupIdExt() throws BrokerException {
-        SendResult publish = iBrokerRpc.publish(this.jsonTopic, "Hello World!".getBytes());
+        SendResult publish = iBrokerRpc.publish(this.jsonTopic, "", "Hello World!".getBytes(), new HashMap<>());
         log.info("publish: " + publish);
         Assert.assertNotNull(publish.getEventId());
     }
@@ -139,7 +139,7 @@ public class JsonRpcTest extends JUnitTestBase {
         Map<String, String> ext = new HashMap<>();
         ext.put("weevent-jsonrpctest1", "json rpc ext value1");
         ext.put("weevent-jsonrpctest2", "json rpc ext value2");
-        SendResult publish = iBrokerRpc.publish(this.jsonTopic, this.content.getBytes());
+        SendResult publish = iBrokerRpc.publish(this.jsonTopic, "", this.content.getBytes(), new HashMap<>());
         log.info("publish: " + publish);
         Assert.assertNotNull(publish.getEventId());
     }
@@ -202,7 +202,7 @@ public class JsonRpcTest extends JUnitTestBase {
 
     @Test
     public void testGetEventNoGroupId() throws BrokerException {
-        WeEvent event = iBrokerRpc.getEvent(this.eventId);
+        WeEvent event = iBrokerRpc.getEvent(this.eventId, "");
         log.info("getEvent : " + event);
         Assert.assertEquals(this.content, new String(event.getContent()));
     }
