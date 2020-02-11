@@ -27,10 +27,6 @@ spring:
     # gateway
     gateway:
       enabled: true
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOrigins: "*"
       discovery:
         locator:
           enabled: true
@@ -38,10 +34,24 @@ spring:
         connect-timeout: 5000
         response-timeout: 10000
       routes:
+        # sock js info
+        - id: weevent-broker-sockjs-info
+          uri: lb://weevent-broker
+          predicates:
+            - Path=/weevent-broker/sockjs/info/**
+        # websocket of stomp & sock js & mqtt
+        - id: weevent-broker-websocket
+          uri: lb:ws://weevent-broker
+          predicates:
+            - Path=/weevent-broker/stomp/**
+            - Path=/weevent-broker/sockjs/**
+            - Path=/weevent-broker/mqtt/**
+        # broker
         - id: weevent-broker
           uri: lb://weevent-broker
           predicates:
             - Path=/weevent-broker/**
+        # governance
         - id: weevent-governance
           uri: lb://weevent-governance
           predicates:
