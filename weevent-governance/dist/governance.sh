@@ -10,7 +10,7 @@ fi
 ###############################################################################
 # The following is common logic for start a java application. DO NOT EDIT IT SOLELY.
 ###############################################################################
-JAVA_OPTS="-Xverify:none -XX:+DisableExplicitGC -XX:TieredStopAtLevel=1 -XX:+UseConcMarkSweepGC -XX:+UseCMSCompactAtFullCollection"
+JAVA_OPTS="-Xverify:none -XX:+DisableExplicitGC -XX:TieredStopAtLevel=1"
 
 
 server_name=$(basename $0|awk -F"." '{print $1}')
