@@ -80,7 +80,7 @@
                     <p><span>{{$t('ruleStatic.notHitTimes')}} :</span>{{ruleStatic.notHitTimes}}</p>
                     <p><span>{{$t('ruleStatic.successTimes')}} :</span>{{ruleStatic.dataFlowSuccess}}</p>
                     <p><span>{{$t('ruleStatic.failTimes')}} :</span>{{ruleStatic.dataFlowFail}}</p>
-                    <p><span>{{$t('ruleStatic.runningStatus')}} :</span>{{ruleStatic.status === 0? $t('rule.notRun') : $t('rule.run')}}</p>
+                    <p><span>{{$t('ruleStatic.runningStatus')}} :</span>{{ruleStatic.status === 0 ? $t('rule.notRun') : $t('rule.run')}}</p>
                   </div>
                   <div slot="reference">
                     <span v-show="scope.row.status === 1" style='font-size:14px'><i class='isActive'></i>{{$t('rule.start')}}</span>
@@ -195,17 +195,12 @@ export default {
     }
   },
   watch: {
-    brokerId () {
-      if (localStorage.getItem('groupId')) {
+    groupId (nVal) {
+      if (nVal !== '-1') {
         this.pageNum = 1
         this.ruleName = ''
         this.getRuleList()
       }
-    },
-    groupId () {
-      this.pageNum = 1
-      this.ruleName = ''
-      this.getRuleList()
     },
     createRule (nVal) {
       if (!nVal) {
@@ -276,7 +271,8 @@ export default {
         } else {
           this.$message({
             type: 'warning',
-            message: res.data.message
+            message: res.data.message,
+            duration: 5000
           })
         }
       })
@@ -297,7 +293,8 @@ export default {
         } else {
           this.$message({
             type: 'warning',
-            message: res.data.message
+            message: res.data.message,
+            duration: 5000
           })
         }
       })
@@ -323,7 +320,8 @@ export default {
           } else {
             vm.$message({
               type: 'warning',
-              message: res.data.message
+              message: res.data.message,
+              duration: 5000
             })
           }
         })
@@ -358,7 +356,8 @@ export default {
             } else {
               this.$message({
                 type: 'warning',
-                message: res.data.message
+                message: res.data.message,
+                duration: 5000
               })
             }
             vm.createRule = false
@@ -376,7 +375,9 @@ export default {
         if (res.data.errorCode === 0) {
           let list = res.data.data.statisticRuleMap
           for (let key in list) {
-            vm.ruleStatic = list[key]
+            if (key === String(id)) {
+              vm.ruleStatic = list[key]
+            }
           }
         }
       })

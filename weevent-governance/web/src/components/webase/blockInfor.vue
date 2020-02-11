@@ -72,13 +72,13 @@ export default {
     },
     getLastData () {
       this.loading = true
-      let url = '/' + localStorage.getItem('groupId') + '/' + this.pageIndex + '/10?brokerId=' + localStorage.getItem('brokerId')
+      let url = '/' + this.groupId + '/' + this.pageIndex + '/10?brokerId=' + this.brokerId
       API.blockList(url).then(res => {
         if (res.status === 200) {
           this.total = res.data.data.total
           let last = Math.ceil(res.data.data.total / 10)
           this.pageIndex = last
-          let url = '/' + localStorage.getItem('groupId') + '/' + last + '/10?brokerId=' + localStorage.getItem('brokerId')
+          let url = '/' + this.groupId + '/' + last + '/10?brokerId=' + this.brokerId
           API.blockList(url).then(res => {
             if (res.status === 200) {
               this.tableData = res.data.data.pageData.reverse()
@@ -90,7 +90,7 @@ export default {
     },
     blockList () {
       this.loading = true
-      let url = '/' + localStorage.getItem('groupId') + '/' + this.pageIndex + '/10?brokerId=' + localStorage.getItem('brokerId')
+      let url = '/' + this.groupId + '/' + this.pageIndex + '/10?brokerId=' + this.brokerId
       API.blockList(url).then(res => {
         if (res.status === 200) {
           this.tableData = res.data.data.pageData.reverse()
@@ -118,19 +118,12 @@ export default {
     }
   },
   watch: {
-    brokerId () {
-      this.loading = true
-      this.tableData = []
-      setTimeout(fun => {
-        this.getLastData()
-      }, 1000)
-    },
     groupId (nVal) {
       this.loading = true
       this.tableData = []
-      setTimeout(fun => {
+      if (nVal !== '-1') {
         this.getLastData()
-      }, 1000)
+      }
     }
   }
 }
