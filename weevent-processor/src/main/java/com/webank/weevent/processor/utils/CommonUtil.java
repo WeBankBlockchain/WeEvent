@@ -500,30 +500,24 @@ public class CommonUtil {
                 case "abs":
                     sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, String.valueOf(Math.abs((Integer) payload.get(arr[i][3]))));
                     changePosition = changePosition(conditionField, sb.toString());
-
                     break;
 
                 case "ceil":
-
                     sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, String.valueOf(Math.ceil((Integer) payload.get(arr[i][3]))));
                     changePosition = changePosition(conditionField, sb.toString());
-
                     break;
 
                 case "floor":
                     log.info("sb:{}", sb);
-
                     sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, String.valueOf(Math.floor((Integer) payload.get(arr[i][3]))));
                     changePosition = changePosition(conditionField, sb.toString());
-
                     break;
 
                 case "round":
-
                     sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, String.valueOf(Math.round(Math.round((Integer) payload.get(arr[i][3])))));
                     changePosition = changePosition(conditionField, sb.toString());
-
                     break;
+
                 case "substring":
                     if (!"".equals(middle)) {
                         replaceContent = "\"" + payload.get(left).toString().substring(Integer.valueOf(middle), Integer.valueOf(right)) + "\"";
@@ -532,28 +526,27 @@ public class CommonUtil {
                         replaceContent = "\"" + payload.get(left).toString().substring(Integer.valueOf(right)) + "\"";
                         sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, replaceContent);
                     }
-
                     changePosition = changePosition(conditionField, sb.toString());
-
                     break;
+
                 case "concat":
                     replaceContent = "\"" + payload.get(left).toString().concat(payload.get(right).toString()) + "\"";
                     sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, replaceContent);
                     changePosition = changePosition(conditionField, sb.toString());
-
                     break;
+
                 case "trim":
                     replaceContent = "\"" + payload.get(left).toString().trim() + "\"";
                     sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, replaceContent);
                     changePosition = changePosition(conditionField, sb.toString());
-
                     break;
+
                 case "lcase":
                     replaceContent = "\"" + payload.get(left).toString().toLowerCase() + "\"";
                     sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, replaceContent);
                     changePosition = changePosition(conditionField, sb.toString());
-
                     break;
+
                 default:
                     log.info("conditionField:{}", conditionField);
                     break;
