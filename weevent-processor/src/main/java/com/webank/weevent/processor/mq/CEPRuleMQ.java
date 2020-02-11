@@ -445,5 +445,4 @@ public class CEPRuleMQ {
             }
         }
     }
-
 }
