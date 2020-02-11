@@ -161,7 +161,6 @@ export default {
         e.columnMark = ''
       }
     }
-  },
-  mounted () {}
+  }
 }
 </script>

@@ -73,7 +73,8 @@ export default {
             } else {
               this.$message({
                 type: 'warning',
-                message: this.$t('common.operFail')
+                message: this.$t('common.operFail'),
+                duration: 5000
               })
             }
           })
@@ -90,7 +91,8 @@ export default {
         } else {
           this.$message({
             type: 'warning',
-            message: this.$t('userSet.loginFail')
+            message: this.$t('userSet.loginFail'),
+            duration: 5000
           })
         }
       })

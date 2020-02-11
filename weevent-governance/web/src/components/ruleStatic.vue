@@ -95,9 +95,14 @@ export default {
       if (res.data.errorCode === 0) {
         vm.ruleStatic = []
         let list = res.data.data.statisticRuleMap
-        for (let key in list) {
-          vm.ruleStatic.push(list[key])
-        }
+        let idList = this.$route.query.list.split(',')
+        idList.forEach(e => {
+          for (let key in list) {
+            if (e === key) {
+              vm.ruleStatic.push(list[key])
+            }
+          }
+        })
       }
     })
   },
