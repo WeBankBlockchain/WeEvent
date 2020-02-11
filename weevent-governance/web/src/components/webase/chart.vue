@@ -7,6 +7,7 @@
         value-format="timestamp"
         v-model='selectTime'
         @change="getTime"
+        :clearable='false'
         :picker-options="pickerOptions"
         range-separator="-"
         :start-placeholder="$t('tableCont.beginTime')"
@@ -84,35 +85,65 @@ export default{
         'brokerId': localStorage.getItem('brokerId')
       }
       vm.option.series[0].data = []
-      API.eventList(data).then(res => {
-        if (res.data.status === 200) {
-          let max = 20
-          let data = res.data.data
-          let time = [].concat(vm.option.xAxis.categories)
-          for (let i = 0; i < time.length; i++) {
-            vm.option.series[0].data[i] = 0
-            for (let x = 0; x < data.length; x++) {
-              if (data[x].createDateStr === time[i]) {
-                vm.option.series[0].data[i] = data[x].eventCount
-                max = max < data[x].eventCount ? data[x].eventCount : max
+      let chart = new Promise(function (resolve, reject) {
+        API.eventList(data).then(res => {
+          if (res.data.status === 200) {
+            let max = 20
+            let data = res.data.data
+            let time = [].concat(vm.option.xAxis.categories)
+            for (let i = 0; i < time.length; i++) {
+              vm.option.series[0].data[i] = 0
+              for (let x = 0; x < data.length; x++) {
+                if (data[x].createDateStr === time[i]) {
+                  vm.option.series[0].data[i] = data[x].eventCount
+                  max = max < data[x].eventCount ? data[x].eventCount : max
+                }
               }
             }
-          }
-          vm.$set(vm.option.yAxis, 'max', max)
-        }
-        setTimeout(fun => {
-          Highcharts.setOptions({
-            lang: {
-              thousandsSep: ','
+            vm.$set(vm.option.yAxis, 'max', max)
+            resolve(true)
+          } else {
+            let max = 20
+            let data = []
+            let time = [].concat(vm.option.xAxis.categories)
+            for (let i = 0; i < time.length; i++) {
+              vm.option.series[0].data[i] = 0
+              for (let x = 0; x < data.length; x++) {
+                if (data[x].createDateStr === time[i]) {
+                  vm.option.series[0].data[i] = data[x].eventCount
+                  max = max < data[x].eventCount ? data[x].eventCount : max
+                }
+              }
             }
-          })
-          Highcharts.chart('chart', vm.option)
-        }, 500)
+            vm.$set(vm.option.yAxis, 'max', max)
+            reject(res.data)
+          }
+        })
+      })
+      chart.then(e => {
+        Highcharts.setOptions({
+          lang: {
+            thousandsSep: ','
+          }
+        })
+        Highcharts.chart('chart', vm.option)
+      }).catch(e => {
+        Highcharts.setOptions({
+          lang: {
+            thousandsSep: ','
+          }
+        })
+        Highcharts.chart('chart', vm.option)
+        this.$message({
+          type: 'warning',
+          message: e.msg,
+          duration: 5000
+        })
       })
     },
     getTime (e) {
       let vm = this
-      if (!e) {
+      if (e === null) {
         vm.getDate()
       } else {
         let timeList = getTimeList(e[0], e[1])
@@ -124,10 +155,12 @@ export default{
       let data = getLastWeek()
       let start = new Date(data[0]).getTime()
       let end = new Date(data[data.length - 1]).getTime()
-      this.selectTime.push(start)
-      this.selectTime.push(end)
-      this.option.xAxis.categories = [].concat(data)
-      this.beginDate()
+      let vm = this
+      vm.selectTime = []
+      vm.selectTime.push(start)
+      vm.selectTime.push(end)
+      vm.option.xAxis.categories = [].concat(data)
+      vm.beginDate()
     }
   },
   computed: {
@@ -142,11 +175,10 @@ export default{
     }
   },
   watch: {
-    brokerId () {
-      this.beginDate()
-    },
-    groupId () {
-      this.beginDate()
+    groupId (nVal) {
+      if (nVal !== '-1') {
+        this.getDate()
+      }
     },
     lang (nVal) {
       this.option.lang.noData = this.$t('common.noData')
