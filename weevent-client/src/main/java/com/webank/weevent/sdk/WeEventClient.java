@@ -1,11 +1,14 @@
 package com.webank.weevent.sdk;
 
 
+import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -345,12 +348,59 @@ public class WeEventClient implements IWeEventClient {
     }
 
     @Override
-    public SendResult publishFile(String topic, String localFile) throws BrokerException {
-        return null;
+    public SendResult publishFile(String topic, String localFile) throws BrokerException, FileNotFoundException {
+        // upload file
+        FileChunks fileChunks = new FileChunks();
+        String fileId = fileChunks.upload(localFile);
+
+        // publish file event
+        Map<String, String> extensions = new HashMap<>();
+        extensions.put(WeEvent.WeEvent_FILE, "1");
+        WeEvent weEvent = new WeEvent(topic, fileId.getBytes(StandardCharsets.UTF_8), extensions);
+        SendResult sendResult = this.publish(weEvent);
+
+        log.info("publish file result: {}", sendResult);
+        return sendResult;
+    }
+
+    static class FileEventListener implements EventListener {
+        private final String filePath;
+        private final FileListener fileListener;
+
+        private String subscriptionId;
+
+        public FileEventListener(String filePath, FileListener fileListener) {
+            this.filePath = filePath;
+            this.fileListener = fileListener;
+        }
+
+        public void setSubscriptionId(String subscriptionId) {
+            this.subscriptionId = subscriptionId;
+        }
+
+        @Override
+        public void onEvent(WeEvent event) {
+            // download file
+            FileChunks fileChunks = new FileChunks(this.filePath);
+            String fileId = new String(event.getContent(), StandardCharsets.UTF_8);
+            String host = event.getExtensions().get("host");
+            String localFile = fileChunks.download(host + fileId);
+            this.fileListener.onFile(this.subscriptionId, localFile);
+        }
+
+        @Override
+        public void onException(Throwable e) {
+            this.fileListener.onException(e);
+        }
     }
 
     @Override
     public String subscribeFile(String topic, String filePath, FileListener fileListener) throws BrokerException {
-        return null;
+        // subscribe file event
+        FileEventListener fileEventListener = new FileEventListener(filePath, fileListener);
+        String subscriptionId = this.subscribe(topic, WeEvent.OFFSET_LAST, fileEventListener);
+        fileEventListener.setSubscriptionId(subscriptionId);
+
+        return subscriptionId;
     }
 }

@@ -1,5 +1,7 @@
 package com.webank.weevent.sdk;
 
+import java.io.FileNotFoundException;
+
 import lombok.NonNull;
 
 /**
@@ -205,7 +207,7 @@ public interface IWeEventClient {
      * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
      * @throws BrokerException broker exception
      */
-    SendResult publishFile(String topic, String localFile) throws BrokerException;
+    SendResult publishFile(String topic, String localFile) throws BrokerException, FileNotFoundException;
 
     /**
      * Interface for file notify callback
