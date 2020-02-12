@@ -331,12 +331,13 @@ public class CEPRuleMQ {
                 }
 
                 // check the expression ,if match then true
-                log.info("condition:{}", condition);
-                if (!StringUtils.isEmpty(rule.getSystemFunctionMessage())) {
-                    String[][] systemFunctionDetail = SystemFunctionUtil.stringConvertArray(rule.getSystemFunctionMessage());
+                log.info("condition:{},systemFunctionMessage：{}", condition,rule.getFunctionArray());
+                if (!StringUtils.isEmpty(rule.getFunctionArray())) {
+                    String[][] systemFunctionDetail = SystemFunctionUtil.stringConvertArray(rule.getFunctionArray());
+                    log.info("systemFunctionDetail:{}",systemFunctionDetail.toString());
                     if (0 != systemFunctionDetail.length) {
-                        String[][] systemFunctionMessage = SystemFunctionUtil.stringConvertArray(rule.getSystemFunctionMessage());
-                        condition = SystemFunctionUtil.analysisSystemFunction(systemFunctionMessage, eventContent, condition);
+                        condition = SystemFunctionUtil.analysisSystemFunction(systemFunctionDetail, eventContent, condition);
+                        log.info("condition:{}",condition);
                     }
                 }
 
