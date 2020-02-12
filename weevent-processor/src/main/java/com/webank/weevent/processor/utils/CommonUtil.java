@@ -452,12 +452,33 @@ public class CommonUtil {
         return replaceCondition(systemFunctionMessage, conditionField, payloadMap);
     }
 
+    public static StringBuilder stringCase(String type, String replaceContent, StringBuilder sb, int start, int end, int changePosition, String right, String middle, String left, Map payload) {
+        if ("trim".equals(type)) {
+            replaceContent = "\"" + payload.get(left).toString().trim() + "\"";
+            sb.replace(start - changePosition, end - changePosition, replaceContent);
+        } else if ("concat".equals(type)) {
+            replaceContent = "\"" + payload.get(left).toString().concat(payload.get(right).toString()) + "\"";
+            sb.replace(start - changePosition, end - changePosition, replaceContent);
+        } else if ("lcase".equals(type)) {
+            replaceContent = "\"" + payload.get(left).toString().toLowerCase() + "\"";
+            sb.replace(start - changePosition, end - changePosition, replaceContent);
+        } else if ("substring".equals(type)) {
+            if (!"".equals(middle)) {
+                replaceContent = "\"" + payload.get(left).toString().substring(Integer.valueOf(middle), Integer.valueOf(right)) + "\"";
+                sb.replace(start - changePosition, end - changePosition, replaceContent);
+            } else {
+                replaceContent = "\"" + payload.get(left).toString().substring(Integer.valueOf(right)) + "\"";
+                sb.replace(start - changePosition, end - changePosition, replaceContent);
+            }
+        }
+        return sb;
+    }
+
     public static Pair<StringBuilder, Integer> replaceCase(StringBuilder sb, String conditionField, Map payload, String[] arr, int changePosition) {
         String type = arr[2];
         String left = arr[3]; // end position
         String middle = "";
         String right = "";
-
         if (arr.length == 5) {
             left = arr[3];
             right = arr[4];
@@ -504,31 +525,22 @@ public class CommonUtil {
                 break;
 
             case "substring":
-                if (!"".equals(middle)) {
-                    replaceContent = "\"" + payload.get(left).toString().substring(Integer.valueOf(middle), Integer.valueOf(right)) + "\"";
-                    sb.replace(start - changePosition, end - changePosition, replaceContent);
-                } else {
-                    replaceContent = "\"" + payload.get(left).toString().substring(Integer.valueOf(right)) + "\"";
-                    sb.replace(start - changePosition, end - changePosition, replaceContent);
-                }
+                sb = stringCase(type, replaceContent, sb, start, end, changePosition, right, middle, left, payload);
                 changePosition = changePosition(conditionField, sb.toString());
                 break;
 
             case "concat":
-                replaceContent = "\"" + payload.get(left).toString().concat(payload.get(right).toString()) + "\"";
-                sb.replace(start - changePosition, end - changePosition, replaceContent);
+                sb = stringCase(type, replaceContent, sb, start, end, changePosition, right, middle, left, payload);
                 changePosition = changePosition(conditionField, sb.toString());
                 break;
 
             case "trim":
-                replaceContent = "\"" + payload.get(left).toString().trim() + "\"";
-                sb.replace(start - changePosition, end - changePosition, replaceContent);
+                sb = stringCase(type, replaceContent, sb, start, end, changePosition, right, middle, left, payload);
                 changePosition = changePosition(conditionField, sb.toString());
                 break;
 
             case "lcase":
-                replaceContent = "\"" + payload.get(left).toString().toLowerCase() + "\"";
-                sb.replace(start - changePosition, end - changePosition, replaceContent);
+                sb = stringCase(type, replaceContent, sb, start, end, changePosition, right, middle, left, payload);
                 changePosition = changePosition(conditionField, sb.toString());
                 break;
 
