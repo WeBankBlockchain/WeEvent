@@ -2,6 +2,8 @@ package com.webank.weevent.processor.mq;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingDeque;
@@ -22,6 +24,7 @@ import com.webank.weevent.processor.utils.DataBaseUtil;
 import com.webank.weevent.processor.utils.JsonUtil;
 import com.webank.weevent.processor.utils.RetCode;
 import com.webank.weevent.processor.utils.StatisticCEPRuleUtil;
+import com.webank.weevent.processor.utils.SystemFunctionUtil;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.SendResult;
@@ -265,7 +268,7 @@ public class CEPRuleMQ {
                             SendResult result = toDestinationClient.publish(weEvent);
 
                             // update the  statistic weevent
-                            if ("SUCCESS".equals(result.getStatus())) {
+                            if (SendResult.SendResultStatus.SUCCESS.equals(result.getStatus())) {
                                 return new Pair<>(ConstantsHelper.PUBLISH_EVENT_SUCCESS, entry.getValue().getId());
                             } else {
                                 return new Pair<>(ConstantsHelper.PUBLISH_EVENT_FAIL, entry.getValue().getId());
@@ -318,16 +321,23 @@ public class CEPRuleMQ {
                 JexlEngine jexl = new JexlBuilder().create();
                 JexlContext context = new MapContext();
                 for (String key : eventContentKeys) {
-                    context.set(key, event.get(key));
+                    if (CommonUtil.isDate(String.valueOf(event.get(key)))) {
+                        String timeStr = String.valueOf(event.get(key));
+                        long time = (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).parse(timeStr, new ParsePosition(0)).getTime() / 1000;
+                        context.set(key, time);
+                    } else {
+                        context.set(key, event.get(key));
+                    }
                 }
 
                 // check the expression ,if match then true
-                log.info("condition:{}", condition);
-                if (!StringUtils.isEmpty(rule.getSystemFunctionMessage())) {
-                    String[][] systemFunctionDetail = CommonUtil.stringConvertArray(rule.getSystemFunctionMessage());
+                log.info("condition:{},systemFunctionMessage：{}", condition,rule.getFunctionArray());
+                if (!StringUtils.isEmpty(rule.getFunctionArray())) {
+                    String[][] systemFunctionDetail = SystemFunctionUtil.stringConvertArray(rule.getFunctionArray());
+                    log.info("systemFunctionDetail:{}",systemFunctionDetail.toString());
                     if (0 != systemFunctionDetail.length) {
-                        String[][] systemFunctionMessage = CommonUtil.stringConvertArray(rule.getSystemFunctionMessage());
-                        condition = CommonUtil.analysisSystemFunction(systemFunctionMessage, eventContent, condition);
+                        condition = SystemFunctionUtil.analysisSystemFunction(systemFunctionDetail, eventContent, condition);
+                        log.info("condition:{}",condition);
                     }
                 }
 
@@ -364,8 +374,15 @@ public class CEPRuleMQ {
 
             JexlContext context = new MapContext();
             for (String key : payloadContentKeys) {
-                context.set(key, payloadJson.get(key));
+                if (CommonUtil.isDate(String.valueOf(payloadJson.get(key)))) {
+                    String timeStr = String.valueOf(payloadJson.get(key));
+                    long time = (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).parse(timeStr, new ParsePosition(0)).getTime() / 1000;
+                    context.set(key, time);
+                } else {
+                    context.set(key, payloadJson.get(key));
+                }
             }
+
             Map event = JsonUtil.parseObject(payload, Map.class);
             String[] strs = condition.split("=");
             boolean flag = false;
@@ -430,4 +447,5 @@ public class CEPRuleMQ {
             }
         }
     }
+
 }
