@@ -139,34 +139,34 @@ public class SystemFunctionUtil {
         return new Pair<>(sb, changePosition);
     }
 
-    public static Pair<StringBuilder, Integer> timeOperator(StringBuilder sb, String conditionField, String[] arr, int changePosition) {
+    public static Pair<StringBuilder, Integer> timeOperator(StringBuilder sb, String conditionField, String[] arr, int changePositionString) {
         Integer start = Integer.valueOf(arr[0]);
         Integer end = Integer.valueOf(arr[1]);
         String type = arr[2];
 
         switch (type) {
             case "now":
-                sb.replace(start - changePosition, end - changePosition, String.valueOf(new Date().getTime()));
-                changePosition = changePosition(conditionField, sb.toString());
+                sb.replace(start - changePositionString, end - changePositionString, String.valueOf(new Date().getTime()));
+                changePositionString = changePosition(conditionField, sb.toString());
 
                 break;
             case "currentDate":
                 String date = new SimpleDateFormat("yyyyMMdd").format(new Date());
-                sb.replace(start - changePosition, end - changePosition, date);
-                changePosition = changePosition(conditionField, sb.toString());
+                sb.replace(start - changePositionString, end - changePositionString, date);
+                changePositionString = changePosition(conditionField, sb.toString());
 
                 break;
             case "currentTime":
                 String time = new SimpleDateFormat("HHmmss").format(new Date());
-                sb.replace(start - changePosition, end - changePosition, time);
-                changePosition = changePosition(conditionField, sb.toString());
+                sb.replace(start - changePositionString, end - changePositionString, time);
+                changePositionString = changePosition(conditionField, sb.toString());
 
                 break;
             default:
                 log.info("conditionField:{}", conditionField);
                 break;
         }
-        return new Pair<>(sb, changePosition);
+        return new Pair<>(sb, changePositionString);
     }
 
     public static Pair<StringBuilder, Integer> replaceCase(StringBuilder sb, String conditionField, Map

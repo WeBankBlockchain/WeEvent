@@ -148,6 +148,7 @@ public class UtilsTest {
         String[][] systemFunctionDetail = SystemFunctionUtil.stringConvertArray(arr);
         String condition = SystemFunctionUtil.replaceCondition(systemFunctionDetail, conditionField, payload);
         log.info("condition:{}", condition);
+        Assert.assertEquals(condition, "datatime>=20200210");
     }
 
     @Test
@@ -161,6 +162,7 @@ public class UtilsTest {
         String[][] systemFunctionDetail = SystemFunctionUtil.stringConvertArray(arr);
         String condition = SystemFunctionUtil.replaceCondition(systemFunctionDetail, conditionField, payload);
         log.info("condition:{}", condition);
+        Assert.assertEquals(condition, "datatime>=161500");
     }
 
     @Test
@@ -177,5 +179,7 @@ public class UtilsTest {
         String[][] systemFunctionDetail = SystemFunctionUtil.stringConvertArray(arr);
         String condition = SystemFunctionUtil.replaceCondition(systemFunctionDetail, conditionField, payload);
         log.info("condition:{}", condition);
+        Assert.assertEquals(condition, "datatime>=161500");
     }
+
 }
