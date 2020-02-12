@@ -38,6 +38,7 @@ public class ConditionTest {
 
     @Before
     public void setUp() {
+        String brokerUrl = wac.getEnvironment().getProperty("ci.broker.ip");
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
         rule.setId("1111");
         rule.setRuleName("test");
@@ -48,16 +49,15 @@ public class ConditionTest {
         rule.setConditionField("abs(a)<21 or floor(c)>10");
         rule.setToDestination("to.com.webank.weevent");
         rule.setDatabaseUrl("jdbc:mysql://127.0.0.1:3306/fromIfttt?user=root&password=111111");
-        rule.setBrokerUrl("http://127.0.0.1:7000/weevent");
+        rule.setBrokerUrl("http://" + brokerUrl + "/weevent");
         rule.setCreatedTime(new Date());
         rule.setStatus(1);
         rule.setUserId("1");
         rule.setGroupId("1");
         rule.setSystemTag("0");
         rule.setTableName("fromIfttt");
-        rule.setPayloadType(1);
+        rule.setFunctionArray(null);
         rule.setConditionType(1);
-
     }
 
     @Test
@@ -65,13 +65,45 @@ public class ConditionTest {
         String arr = "";
         rule.setSelectField("a,b,c");
         rule.setConditionField("c<20 or a==10");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
-        Thread.sleep(100000);
         log.info("result3:{}", result);
+    }
+
+    @Test
+    public void checkMultiUpdateConditionHitToDB1() throws Exception {
+        String arr = "";
+        rule.setSelectField("a,b,c");
+        rule.setConditionField("c<20 or a==10");
+        rule.setFunctionArray(arr);
+        rule.setConditionType(2);
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
+        assertEquals(200, result.getResponse().getStatus());
+        log.info("result3:{}", result);
+
+        String url1 = "/statistic";
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url1).contentType(MediaType.APPLICATION_JSON).param("idList", "");
+        MvcResult result4 = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
+        log.info("statistic:{}", result4.getResponse().getContentAsString());
+        assertEquals(200, result4.getResponse().getStatus());
+
+        rule.setFromDestination("test.fromDestination");
+        rule.setConditionType(1);
+        RequestBuilder requestBuilder1 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        MvcResult result1 = mockMvc.perform(requestBuilder1).andDo(print()).andReturn();
+        assertEquals(200, result1.getResponse().getStatus());
+        log.info("result:{}", result1);
+
+        String url2 = "/statistic";
+        RequestBuilder requestBuilder2 = MockMvcRequestBuilders.get(url2).contentType(MediaType.APPLICATION_JSON).param("idList", "1104154821111");
+        MvcResult result2 = mockMvc.perform(requestBuilder2).andDo(print()).andReturn();
+        log.info("result:{}", result2.getResponse().getContentAsString());
+        assertEquals(200, result2.getResponse().getStatus());
+
     }
 
     @Test
@@ -79,7 +111,7 @@ public class ConditionTest {
         String arr = "";
         rule.setSelectField("a,b,c");
         rule.setConditionField("c<20 and a>10");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
@@ -92,7 +124,7 @@ public class ConditionTest {
         String arr = "";
         rule.setSelectField("a,b,c");
         rule.setConditionField("c<20 or a==10");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(1);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
@@ -105,13 +137,12 @@ public class ConditionTest {
         String arr = "";
         rule.setSelectField("a,b,c");
         rule.setConditionField("c<20 or a==10");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
-        Thread.sleep(1000000);
     }
 
     @Test
@@ -119,7 +150,7 @@ public class ConditionTest {
         String arr = "";
         rule.setSelectField("a,b,c");
         rule.setConditionField("");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
@@ -132,7 +163,7 @@ public class ConditionTest {
         String arr = "";
         rule.setSelectField("a,b,c");
         rule.setConditionField("c>20");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
@@ -146,7 +177,7 @@ public class ConditionTest {
         String arr = "";
         rule.setSelectField("a,b,c");
         rule.setConditionField("c>20");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(1);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
@@ -159,15 +190,14 @@ public class ConditionTest {
         String arr = "";
         rule.setSelectField("a,b,c");
         rule.setConditionField("c>20");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(1);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result:{}", result);
-        Thread.sleep(100000);
 
-        RequestBuilder requestBuilder1 = MockMvcRequestBuilders.get("/getJobDetail").contentType(MediaType.APPLICATION_JSON).param("id","1111");
+        RequestBuilder requestBuilder1 = MockMvcRequestBuilders.get("/getJobDetail").contentType(MediaType.APPLICATION_JSON).param("id", "1111");
         MvcResult result2 = mockMvc.perform(requestBuilder1).andDo(print()).andReturn();
         assertEquals(200, result2.getResponse().getStatus());
         log.info("result:{}", result2);
@@ -178,7 +208,7 @@ public class ConditionTest {
         String arr = "";
         rule.setSelectField("a,b,c");
         rule.setConditionField("");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(1);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
@@ -191,7 +221,7 @@ public class ConditionTest {
         String arr = "";
         rule.setSelectField("a");
         rule.setConditionField("");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(1);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
@@ -205,7 +235,7 @@ public class ConditionTest {
         String arr = "";
         rule.setSelectField("*");
         rule.setConditionField("c<20");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
@@ -218,7 +248,7 @@ public class ConditionTest {
         String arr = "";
         rule.setSelectField("*");
         rule.setConditionField("c<20");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(1);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
@@ -232,14 +262,13 @@ public class ConditionTest {
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,b");
         rule.setConditionField("c<10");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(1);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
 
-        Thread.sleep(1000);
         rule.setSelectField("a,b,c");
         RequestBuilder requestBuilder2 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result2 = mockMvc.perform(requestBuilder2).andDo(print()).andReturn();
@@ -253,7 +282,7 @@ public class ConditionTest {
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,b,c");
         rule.setConditionField("c<20");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(1);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
@@ -267,7 +296,7 @@ public class ConditionTest {
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
         rule.setConditionField("c<20");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(1);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
@@ -282,7 +311,7 @@ public class ConditionTest {
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId");
         rule.setConditionField("c<20");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(1);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
@@ -296,7 +325,7 @@ public class ConditionTest {
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
         rule.setConditionField("c==10");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(1);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
@@ -311,7 +340,7 @@ public class ConditionTest {
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
         rule.setConditionField("c==10 and a>10 or a<1");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(1);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
@@ -326,7 +355,7 @@ public class ConditionTest {
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
         rule.setConditionField("c==10 and a>10");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(1);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
@@ -342,7 +371,7 @@ public class ConditionTest {
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
         rule.setConditionField("c==10 or a>10 or a<1");
         rule.setToDestination("to.com.webank.weevent");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
@@ -358,7 +387,7 @@ public class ConditionTest {
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
         rule.setConditionField("c==10 and a>10");
         rule.setToDestination("to.com.webank.weevent");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
@@ -374,7 +403,7 @@ public class ConditionTest {
         rule.setSelectField("a,eventId,now");
         rule.setConditionField("c==10 and a>10");
         rule.setToDestination("to.com.webank.weevent");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
@@ -383,7 +412,7 @@ public class ConditionTest {
     }
 
     @Test
-    public void currentDateSystemToDB() throws Exception {
+    public void currentDateSystemToTopic() throws Exception {
         String arr = "";
         String url = "/startCEPRule";
         rule.setFromDestination("from.com.webank.weevent");
@@ -391,8 +420,8 @@ public class ConditionTest {
         rule.setSelectField("a,eventId,currentDate");
         rule.setConditionField("c==10 and a>10");
         rule.setToDestination("to.com.webank.weevent");
-        rule.setSystemFunctionMessage(arr);
-        rule.setConditionType(2);
+        rule.setFunctionArray(arr);
+        rule.setConditionType(1);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
@@ -408,13 +437,51 @@ public class ConditionTest {
         rule.setSelectField("a,eventId,currentTime");
         rule.setConditionField("c==10 and a>10");
         rule.setToDestination("to.com.webank.weevent");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
     }
+
+
+    @Test
+    public void currentTimeSystemToTopic2() throws Exception {
+        String arr = "[[\"10\",\"21\",\"currentDate\",\"datatime\"]]";
+        String url = "/startCEPRule";
+        rule.setId("110000");
+        rule.setFromDestination("from.com.webank.weevent");
+        rule.setPayload("{\"age\":1,\"name\":\"test\",\"datatime\":20200210}");
+        rule.setSelectField("a,eventId,currentDate");
+        rule.setConditionField("datatime>=currentDate");
+        rule.setToDestination("to.com.webank.weevent");
+        rule.setFunctionArray(arr);
+        rule.setConditionType(1);
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
+        assertEquals(200, result.getResponse().getStatus());
+        log.info("result3:{}", result);
+    }
+
+    @Test
+    public void currentTimeSystemToTopic3() throws Exception {
+        String arr = "[[\"11\",\"22\",\"currentTime\",\"datatime1\"]]";
+        String url = "/startCEPRule";
+        rule.setId("110000");
+        rule.setFromDestination("from.com.webank.weevent");
+        rule.setPayload("{\"age\":1,\"name\":\"test\",\"datatime1\":20200210}");
+        rule.setSelectField("a,eventId,currentDate");
+        rule.setConditionField("datatime1>=currentTime");
+        rule.setToDestination("to.com.webank.weevent");
+        rule.setFunctionArray(arr);
+        rule.setConditionType(1);
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
+        assertEquals(200, result.getResponse().getStatus());
+        log.info("result3:{}", result);
+    }
+
 
     @Test
     public void systemParameterToDB() throws Exception {
@@ -425,32 +492,12 @@ public class ConditionTest {
         rule.setSelectField("a,eventId,topicName,brokerId,groupId,now,currentDate,currentTime");
         rule.setConditionField("c==10 and a>10");
         rule.setToDestination("to.com.webank.weevent");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void getRuleDetails() throws Exception {
-        String url = "/getCEPRuleById";
-
-        RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON).param("id", "11041548");
-        MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
-        assertEquals(200, result.getResponse().getStatus());
-    }
-
-    @Test
-    public void getNoNRuleDetails() throws Exception {
-        String url = "/getCEPRuleById";
-
-        RequestBuilder requestBuilder = MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON).param("id", "111");
-        MvcResult result = mockMvc.perform(requestBuilder).andDo(print()).andReturn();
-        log.info("result:{}", result.getResponse().getContentAsString());
-        assertEquals(200, result.getResponse().getStatus());
     }
 
     @Test
@@ -471,7 +518,7 @@ public class ConditionTest {
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
         rule.setConditionField("abs(c)<10");
         rule.setToDestination("to.com.webank.weevent");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
@@ -488,7 +535,7 @@ public class ConditionTest {
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
         rule.setConditionField("ceil(c)<10");
         rule.setToDestination("to.com.webank.weevent");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
@@ -513,7 +560,7 @@ public class ConditionTest {
         rule.setGroupId("1");
         rule.setSystemTag("0");
         rule.setTableName("fromIfttt");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
@@ -527,7 +574,7 @@ public class ConditionTest {
         rule.setPayload("{\"a\":1,\"b\":10,\"c\":10,\"d\":10,\"e\":10}");
         rule.setId("201912231453");
         rule.setConditionField("(abs(a)>=20 or (floor(b)!=222.2 and d<=111)) and ceil(c)<=111 or e!=33");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(1);
 
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
@@ -542,7 +589,7 @@ public class ConditionTest {
         rule.setPayload("{\"a\":1,\"b\":10,\"c\":10,\"d\":10,\"e\":10}");
         rule.setId("201912231453");
         rule.setConditionField("(abs(a)>=20 or (floor(b)!=222.2 and d<=111)) and ceil(c)<=111 and e!=33");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(1);
 
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
@@ -557,7 +604,7 @@ public class ConditionTest {
         String url = "/startCEPRule";
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
         rule.setConditionField("abs(a)<21 or floor(c)>10");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(1);
 
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
@@ -574,7 +621,7 @@ public class ConditionTest {
         rule.setSelectField("a,eventId,topicName,brokerId,groupId,now,currentDate,currentTime");
         rule.setConditionField("c==10 and a>10");
         rule.setToDestination("to.com.webank.weevent");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
@@ -588,6 +635,7 @@ public class ConditionTest {
         assertEquals(200, result.getResponse().getStatus());
     }
 
+
     @Test
     public void stringContactHitRule() throws Exception {
         String arr = "[[\"0\", \"18\", \"substring\", \"a,11,12\"], [\"28\", \"39\", \"concat\", \"b,a\"]]";
@@ -595,7 +643,7 @@ public class ConditionTest {
 
         rule.setSelectField("a");
         rule.setConditionField("a.substring(11,12)==\"2\" and b.concat(a)!=\"1234567890123456712345678901234567\"");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(2);
         rule.setId("20191230");
 
@@ -612,7 +660,7 @@ public class ConditionTest {
 
         rule.setSelectField("a");
         rule.setConditionField("a.substring(11,12)==\"2\" and b.concat(a)==\"1234567890123456712345678901234567\"");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(2);
         rule.setId("20191230");
 
@@ -628,7 +676,7 @@ public class ConditionTest {
         rule.setPayload("{\"a\":\"12345678901234567\",\"b\":20,\"c\":10,\"d\":10}");
         rule.setSelectField("a");
         rule.setConditionField("(b>=11 and (abs(c)!=22)) and abs(d)<=33");
-        rule.setSystemFunctionMessage(arr);
+        rule.setFunctionArray(arr);
         rule.setConditionType(2);
         rule.setId("20191230");
 
