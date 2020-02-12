@@ -14,18 +14,18 @@ import lombok.Data;
 @Data
 public class FileChunksMeta {
     // file name in biz
-    String fileName;
+    private String fileName;
     // file size in byte
-    long fileSize;
+    private long fileSize;
     // file data's md5
-    String fileMd5;
+    private String fileMd5;
 
-    // unique id for file
-    String uuid;
+    // uuid for file
+    private String fileId;
     // chunk size
-    int chunkSize;
+    private int chunkSize;
     // chunk num
-    int chunkNum;
+    private int chunkNum;
     // all chunk's upload status(chunkIndex, true/false)
-    BitSet chunkStatus;
+    private BitSet chunkStatus;
 }
