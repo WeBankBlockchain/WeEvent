@@ -181,7 +181,8 @@ export default {
             } else {
               this.$message({
                 type: 'warning',
-                message: this.$t('userSet.regFail')
+                message: this.$t('userSet.regFail'),
+                duration: 5000
               })
             }
           })
@@ -210,7 +211,8 @@ export default {
                 this.$refs.ruleForm.validateField('oldPass')
                 this.$message({
                   type: 'warning',
-                  message: this.$t('userSet.errorOldPassWord')
+                  message: this.$t('userSet.errorOldPassWord'),
+                  duration: 5000
                 })
               } else {
                 this.$message({
@@ -238,7 +240,8 @@ export default {
         } else {
           this.$message({
             type: 'warning',
-            message: this.$t('userSet.loginFail')
+            message: this.$t('userSet.loginFail'),
+            duration: 5000
           })
         }
       })
