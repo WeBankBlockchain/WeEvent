@@ -454,8 +454,7 @@ public class CommonUtil {
 
     public static Pair<StringBuilder, Integer> replaceCase(StringBuilder sb, String conditionField, Map payload, String[] arr, int changePosition) {
         String type = arr[2];
-        // end position
-        String left = arr[3];
+        String left = arr[3]; // end position
         String middle = "";
         String right = "";
 
@@ -469,22 +468,17 @@ public class CommonUtil {
         }
 
         String replaceContent = "";
-
         Integer start = Integer.valueOf(arr[0]);
         Integer end = Integer.valueOf(arr[1]);
         switch (type) {
             case "now":
-                // timestamp
-                long timestamp = new Date().getTime();
-                sb.replace(start - changePosition, end - changePosition, String.valueOf(timestamp));
+                sb.replace(start - changePosition, end - changePosition, String.valueOf(new Date().getTime()));
                 break;
             case "currentDate":
-                //yyyyMMdd 20200202
                 String date = new SimpleDateFormat("yyyyMMdd").format(new Date());
                 sb.replace(start - changePosition, end - changePosition, date);
                 break;
             case "currentTime":
-                // HHmmss 111111
                 String time = new SimpleDateFormat("HHmmss").format(new Date());
                 sb.replace(start - changePosition, end - changePosition, time);
                 break;
@@ -500,7 +494,6 @@ public class CommonUtil {
                 break;
 
             case "floor":
-                log.info("sb:{}", sb);
                 sb.replace(start - changePosition, end - changePosition, String.valueOf(Math.floor((Integer) payload.get(arr[3]))));
                 changePosition = changePosition(conditionField, sb.toString());
                 break;
