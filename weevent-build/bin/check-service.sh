@@ -32,7 +32,7 @@ function check_governance(){
  }
 function check_processor(){
     echo "check processor service"
-    curl -s  -d 'payload={\"a\":\"1\"}&condition=a<10' http://127.0.0.1:8080/processor/checkWhereCondition | grep "errorCode" >>/dev/null
+    curl -s  -d 'payload={"a":"1"}&condition=a<10' http://127.0.0.1:8080/processor/checkWhereCondition | grep "errorCode" >>/dev/null
     if [[ $? -eq 0 ]];then
         yellow_echo "processor service is ok"
     else

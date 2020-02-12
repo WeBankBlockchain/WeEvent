@@ -13,6 +13,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.processor.model.CEPRule;
@@ -349,11 +351,12 @@ public class CommonUtil {
 
                     break;
                 case ConstantsHelper.NOW:
+                    //yyyy/MM/dd HH:mm:ss
                     sqlOrder.put(ConstantsHelper.NOW, String.valueOf(new Date().getTime()));
 
                     break;
                 case ConstantsHelper.CURRENT_TIME:
-                    SimpleDateFormat sdfTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                    SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm:ss");
                     sqlOrder.put(ConstantsHelper.CURRENT_TIME, sdfTime.format(new Date()));
 
                     break;
@@ -409,141 +412,10 @@ public class CommonUtil {
         return rules.getKey().getFromDestination().equals(rules.getValue().getFromDestination());
     }
 
-
-    /**
-     * count the position, for version 1.2 abs and ceil and floor and round
-     *
-     * @param conditionField original condition message
-     * @param sb condition buffer
-     * @return amount
-     */
-    private static int changePosition(String conditionField, String sb) {
-        int changePosition = 0;
-        if (conditionField.length() > sb.length()) {
-            changePosition = conditionField.length() - sb.length();
-        }
-        return changePosition;
-    }
-
-    public static String[][] stringConvertArray(String s) {
-        String[] s1 = s.replaceAll("],", "]#").split("#");
-        String[][] arr = new String[s1.length][];
-        for (int i = 0; i < arr.length; i++) {
-            String[] s2 = s1[i].split(",");
-            arr[i] = new String[s2.length];
-            for (int j = 0; j < s2.length; j++) {
-                arr[i][j] = s2[j].replaceAll("\\[|\\]", "").replace("\"", "").trim();
-            }
-        }
-        return arr;
-    }
-
-    public static String analysisSystemFunction(String[][] systemFunctionMessage, String payload, String
-            conditionField) throws IOException {
-
-        Map maps = JsonUtil.parseObjectToMap(payload);
-        Map<String, Object> payloadMap = new ConcurrentHashMap<>();
-        for (Object map : maps.entrySet()) {
-            payloadMap.put((String) ((Map.Entry) map).getKey(), ((Map.Entry) map).getValue());
-        }
-        return replaceCondition(systemFunctionMessage, conditionField, payloadMap);
-    }
-
-
-    /**
-     * @param arr enhance function message
-     * @param conditionField original condition details
-     * @param payload payload
-     * @return condition
-     */
-    public static String replaceCondition(String[][] arr, String conditionField, Map payload) {
-        StringBuilder sb = new StringBuilder(conditionField);
-        int changePosition = 0;
-
-        for (int i = 0; i < arr.length; i++) {
-            String type = arr[i][2];
-            // end position
-            String left = arr[i][3];
-            String middle = "";
-            String right = "";
-
-            if (arr[i].length == 5) {
-                left = arr[i][3];
-                right = arr[i][4];
-            } else if (arr[i].length == 6) { // multi parameter
-                left = arr[i][3];
-                middle = arr[i][4];
-                right = arr[i][5];
-            }
-
-            String replaceContent = "";
-            switch (type) {
-                case "abs":
-                    sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, String.valueOf(Math.abs((Integer) payload.get(arr[i][3]))));
-                    changePosition = changePosition(conditionField, sb.toString());
-
-                    break;
-
-                case "ceil":
-
-                    sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, String.valueOf(Math.ceil((Integer) payload.get(arr[i][3]))));
-                    changePosition = changePosition(conditionField, sb.toString());
-
-                    break;
-
-                case "floor":
-                    log.info("sb:{}", sb);
-
-                    sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, String.valueOf(Math.floor((Integer) payload.get(arr[i][3]))));
-                    changePosition = changePosition(conditionField, sb.toString());
-
-                    break;
-
-                case "round":
-
-                    sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, String.valueOf(Math.round(Math.round((Integer) payload.get(arr[i][3])))));
-                    changePosition = changePosition(conditionField, sb.toString());
-
-                    break;
-                case "substring":
-                    if (!"".equals(middle)) {
-                        replaceContent = "\"" + payload.get(left).toString().substring(Integer.valueOf(middle), Integer.valueOf(right)) + "\"";
-                        sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, replaceContent);
-                    } else {
-                        replaceContent = "\"" + payload.get(left).toString().substring(Integer.valueOf(right)) + "\"";
-                        sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, replaceContent);
-                    }
-
-                    changePosition = changePosition(conditionField, sb.toString());
-
-                    break;
-                case "concat":
-                    replaceContent = "\"" + payload.get(left).toString().concat(payload.get(right).toString()) + "\"";
-                    sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, replaceContent);
-                    changePosition = changePosition(conditionField, sb.toString());
-
-                    break;
-                case "trim":
-                    replaceContent = "\"" + payload.get(left).toString().trim() + "\"";
-                    sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, replaceContent);
-                    changePosition = changePosition(conditionField, sb.toString());
-
-                    break;
-                case "lcase":
-                    replaceContent = "\"" + payload.get(left).toString().toLowerCase() + "\"";
-                    sb.replace(Integer.valueOf(arr[i][0]) - changePosition, Integer.valueOf(arr[i][1]) - changePosition, replaceContent);
-                    changePosition = changePosition(conditionField, sb.toString());
-
-                    break;
-                default:
-                    log.info("conditionField:{}", conditionField);
-                    break;
-            }
-        }
-        log.info("sb:{}", sb);
-        return sb.toString();
-
+    public static boolean isDate(String strDate) {
+        Pattern pattern = Pattern
+                .compile("^((\\d{2}(([02468][048])|([13579][26]))[\\-\\/\\s]?((((0?[13578])|(1[02]))[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])|(3[01])))|(((0?[469])|(11))[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])|(30)))|(0?2[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])))))|(\\d{2}(([02468][1235679])|([13579][01345789]))[\\-\\/\\s]?((((0?[13578])|(1[02]))[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])|(3[01])))|(((0?[469])|(11))[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])|(30)))|(0?2[\\-\\/\\s]?((0?[1-9])|(1[0-9])|(2[0-8]))))))(\\s(((0?[0-9])|([1-2][0-3]))\\:([0-5]?[0-9])((\\s)|(\\:([0-5]?[0-9])))))?$");
+        Matcher m = pattern.matcher(strDate);
+        return m.matches();
     }
 }
-
-
