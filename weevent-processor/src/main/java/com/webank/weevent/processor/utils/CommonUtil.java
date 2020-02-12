@@ -452,7 +452,22 @@ public class CommonUtil {
         return replaceCondition(systemFunctionMessage, conditionField, payloadMap);
     }
 
-    public static StringBuilder stringCase(String type, String replaceContent, StringBuilder sb, int start, int end, int changePosition, String right, String middle, String left, Map payload) {
+    public static StringBuilder stringCase(String[] arr, String replaceContent, StringBuilder sb, int changePosition, Map payload) {
+        String type = arr[2];
+        String left = arr[3]; // end position
+        String middle = "";
+        String right = "";
+        if (arr.length == 5) {
+            left = arr[3];
+            right = arr[4];
+        } else if (arr.length == 6) { // multi parameter
+            left = arr[3];
+            middle = arr[4];
+            right = arr[5];
+        }
+        Integer start = Integer.valueOf(arr[0]);
+        Integer end = Integer.valueOf(arr[1]);
+
         if ("trim".equals(type)) {
             replaceContent = "\"" + payload.get(left).toString().trim() + "\"";
             sb.replace(start - changePosition, end - changePosition, replaceContent);
@@ -476,18 +491,6 @@ public class CommonUtil {
 
     public static Pair<StringBuilder, Integer> replaceCase(StringBuilder sb, String conditionField, Map payload, String[] arr, int changePosition) {
         String type = arr[2];
-        String left = arr[3]; // end position
-        String middle = "";
-        String right = "";
-        if (arr.length == 5) {
-            left = arr[3];
-            right = arr[4];
-        } else if (arr.length == 6) { // multi parameter
-            left = arr[3];
-            middle = arr[4];
-            right = arr[5];
-        }
-
         String replaceContent = "";
         Integer start = Integer.valueOf(arr[0]);
         Integer end = Integer.valueOf(arr[1]);
@@ -495,10 +498,12 @@ public class CommonUtil {
             case "now":
                 sb.replace(start - changePosition, end - changePosition, String.valueOf(new Date().getTime()));
                 break;
+
             case "currentDate":
                 String date = new SimpleDateFormat("yyyyMMdd").format(new Date());
                 sb.replace(start - changePosition, end - changePosition, date);
                 break;
+
             case "currentTime":
                 String time = new SimpleDateFormat("HHmmss").format(new Date());
                 sb.replace(start - changePosition, end - changePosition, time);
@@ -525,22 +530,22 @@ public class CommonUtil {
                 break;
 
             case "substring":
-                sb = stringCase(type, replaceContent, sb, start, end, changePosition, right, middle, left, payload);
+                sb = stringCase(arr, replaceContent, sb, changePosition, payload);
                 changePosition = changePosition(conditionField, sb.toString());
                 break;
 
             case "concat":
-                sb = stringCase(type, replaceContent, sb, start, end, changePosition, right, middle, left, payload);
+                sb = stringCase(arr, replaceContent, sb, changePosition, payload);
                 changePosition = changePosition(conditionField, sb.toString());
                 break;
 
             case "trim":
-                sb = stringCase(type, replaceContent, sb, start, end, changePosition, right, middle, left, payload);
+                sb = stringCase(arr, replaceContent, sb, changePosition, payload);
                 changePosition = changePosition(conditionField, sb.toString());
                 break;
 
             case "lcase":
-                sb = stringCase(type, replaceContent, sb, start, end, changePosition, right, middle, left, payload);
+                sb = stringCase(arr, replaceContent, sb, changePosition, payload);
                 changePosition = changePosition(conditionField, sb.toString());
                 break;
 
