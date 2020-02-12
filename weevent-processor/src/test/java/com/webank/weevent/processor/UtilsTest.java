@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.processor.utils.CommonUtil;
+import com.webank.weevent.processor.utils.SystemFunctionUtil;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
@@ -19,8 +20,8 @@ public class UtilsTest {
         payload.put("a", 10);
         payload.put("b", "1111 ");
         payload.put("c", 10);
-        String[][] systemFunctionDetail = CommonUtil.stringConvertArray(arr);
-        String condition = CommonUtil.replaceCondition(systemFunctionDetail, conditionField, payload);
+        String[][] systemFunctionDetail = SystemFunctionUtil.stringConvertArray(arr);
+        String condition = SystemFunctionUtil.replaceCondition(systemFunctionDetail, conditionField, payload);
         log.info("condition:{}", condition);
         Assert.assertEquals(condition, "10<21 and c>10 or \"1111\"==\"1111\" and 10.0>10");
     }
@@ -33,8 +34,8 @@ public class UtilsTest {
         payload.put("a", 10);
         payload.put("b", "1111 ");
         payload.put("c", 10);
-        String[][] systemFunctionDetail = CommonUtil.stringConvertArray(arr);
-        String condition = CommonUtil.replaceCondition(systemFunctionDetail, conditionField, payload);
+        String[][] systemFunctionDetail = SystemFunctionUtil.stringConvertArray(arr);
+        String condition = SystemFunctionUtil.replaceCondition(systemFunctionDetail, conditionField, payload);
         log.info("condition:{}", condition);
         Assert.assertEquals(condition, "10<21 or 10.0>10");
     }
@@ -51,8 +52,8 @@ public class UtilsTest {
         payload.put("d", 10);
         payload.put("e", 10);
 
-        String[][] systemFunctionDetail = CommonUtil.stringConvertArray(arr);
-        String condition = CommonUtil.replaceCondition(systemFunctionDetail, conditionField, payload);
+        String[][] systemFunctionDetail = SystemFunctionUtil.stringConvertArray(arr);
+        String condition = SystemFunctionUtil.replaceCondition(systemFunctionDetail, conditionField, payload);
         log.info("condition:{}", condition);
         Assert.assertNotNull(condition);
     }
@@ -68,8 +69,8 @@ public class UtilsTest {
         payload.put("d", 10);
         payload.put("e", 10);
 
-        String[][] systemFunctionDetail = CommonUtil.stringConvertArray(arr);
-        String condition = CommonUtil.replaceCondition(systemFunctionDetail, conditionField, payload);
+        String[][] systemFunctionDetail = SystemFunctionUtil.stringConvertArray(arr);
+        String condition = SystemFunctionUtil.replaceCondition(systemFunctionDetail, conditionField, payload);
         log.info("condition:{}", condition);
         Assert.assertEquals(condition, "10>=20 or e!=33 and 10<=11");
 
@@ -86,8 +87,8 @@ public class UtilsTest {
         payload.put("d", 10);
         payload.put("e", 10);
 
-        String[][] systemFunctionDetail = CommonUtil.stringConvertArray(arr);
-        String condition = CommonUtil.replaceCondition(systemFunctionDetail, conditionField, payload);
+        String[][] systemFunctionDetail = SystemFunctionUtil.stringConvertArray(arr);
+        String condition = SystemFunctionUtil.replaceCondition(systemFunctionDetail, conditionField, payload);
         log.info("condition:{}", condition);
         Assert.assertEquals(condition, "\"2\"==\"2\" and \"1234567890123456712345678901234567\"==\"1234567890123456712345678901234567\"");
 
@@ -104,9 +105,8 @@ public class UtilsTest {
         payload.put("d", 10);
         payload.put("e", 10);
 
-
-        String[][] systemFunctionDetail = CommonUtil.stringConvertArray(arr);
-        String condition = CommonUtil.replaceCondition(systemFunctionDetail, conditionField, payload);
+        String[][] systemFunctionDetail = SystemFunctionUtil.stringConvertArray(arr);
+        String condition = SystemFunctionUtil.replaceCondition(systemFunctionDetail, conditionField, payload);
         log.info("condition:{}", condition);
         Assert.assertEquals(condition, "\"01112131415\"==\"aa\" and \"01234567891011121314150123456789101112131415\"==\"aa\"");
 
@@ -115,7 +115,7 @@ public class UtilsTest {
     @Test
     public void stringConvertArray() {
         String s = "[[\"0\", \"8\", \"floor\", \"c\"]]";
-        String[][] ret = CommonUtil.stringConvertArray(s);
+        String[][] ret = SystemFunctionUtil.stringConvertArray(s);
         Assert.assertEquals(ret.length, 1);
 
     }
@@ -131,8 +131,8 @@ public class UtilsTest {
         payload.put("c", 10);
         payload.put("d", 10);
 
-        String[][] systemFunctionDetail = CommonUtil.stringConvertArray(arr);
-        String condition = CommonUtil.replaceCondition(systemFunctionDetail, conditionField, payload);
+        String[][] systemFunctionDetail = SystemFunctionUtil.stringConvertArray(arr);
+        String condition = SystemFunctionUtil.replaceCondition(systemFunctionDetail, conditionField, payload);
         log.info("condition:{}", condition);
         Assert.assertEquals(condition, "(b>=11 and (10!=22)) and 10<=33");
 

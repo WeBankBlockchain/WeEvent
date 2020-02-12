@@ -24,6 +24,7 @@ import com.webank.weevent.processor.utils.DataBaseUtil;
 import com.webank.weevent.processor.utils.JsonUtil;
 import com.webank.weevent.processor.utils.RetCode;
 import com.webank.weevent.processor.utils.StatisticCEPRuleUtil;
+import com.webank.weevent.processor.utils.SystemFunctionUtil;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.SendResult;
@@ -332,10 +333,10 @@ public class CEPRuleMQ {
                 // check the expression ,if match then true
                 log.info("condition:{}", condition);
                 if (!StringUtils.isEmpty(rule.getSystemFunctionMessage())) {
-                    String[][] systemFunctionDetail = CommonUtil.stringConvertArray(rule.getSystemFunctionMessage());
+                    String[][] systemFunctionDetail = SystemFunctionUtil.stringConvertArray(rule.getSystemFunctionMessage());
                     if (0 != systemFunctionDetail.length) {
-                        String[][] systemFunctionMessage = CommonUtil.stringConvertArray(rule.getSystemFunctionMessage());
-                        condition = CommonUtil.analysisSystemFunction(systemFunctionMessage, eventContent, condition);
+                        String[][] systemFunctionMessage = SystemFunctionUtil.stringConvertArray(rule.getSystemFunctionMessage());
+                        condition = SystemFunctionUtil.analysisSystemFunction(systemFunctionMessage, eventContent, condition);
                     }
                 }
 
@@ -445,4 +446,5 @@ public class CEPRuleMQ {
             }
         }
     }
+
 }
