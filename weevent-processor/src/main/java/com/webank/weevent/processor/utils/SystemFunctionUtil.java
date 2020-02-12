@@ -102,7 +102,7 @@ public class SystemFunctionUtil {
         String replaceContent = "";
         Integer start = Integer.valueOf(arr[0]);
         Integer end = Integer.valueOf(arr[1]);
-
+        int changePositionAfter = 0;
         switch (type) {
             case "substring":
                 if (!"".equals(middle)) {
@@ -112,61 +112,61 @@ public class SystemFunctionUtil {
                     replaceContent = "\"" + payload.get(left).toString().substring(Integer.valueOf(right)) + "\"";
                     sb.replace(start - changePosition, end - changePosition, replaceContent);
                 }
-                changePosition = changePosition(conditionField, sb.toString());
+                changePositionAfter = changePosition(conditionField, sb.toString());
                 break;
 
             case "concat":
                 replaceContent = "\"" + payload.get(left).toString().concat(payload.get(right).toString()) + "\"";
                 sb.replace(start - changePosition, end - changePosition, replaceContent);
-                changePosition = changePosition(conditionField, sb.toString());
+                changePositionAfter = changePosition(conditionField, sb.toString());
                 break;
 
             case "trim":
                 replaceContent = "\"" + payload.get(left).toString().trim() + "\"";
                 sb.replace(start - changePosition, end - changePosition, replaceContent);
-                changePosition = changePosition(conditionField, sb.toString());
+                changePositionAfter = changePosition(conditionField, sb.toString());
                 break;
 
             case "lcase":
                 replaceContent = "\"" + payload.get(left).toString().toLowerCase() + "\"";
                 sb.replace(start - changePosition, end - changePosition, replaceContent);
-                changePosition = changePosition(conditionField, sb.toString());
+                changePositionAfter = changePosition(conditionField, sb.toString());
                 break;
             default:
                 log.info("conditionField:{}", conditionField);
                 break;
         }
-        return new Pair<>(sb, changePosition);
+        return new Pair<>(sb, changePositionAfter);
     }
 
     public static Pair<StringBuilder, Integer> timeOperator(StringBuilder sb, String conditionField, String[] arr, int changePositionString) {
         Integer start = Integer.valueOf(arr[0]);
         Integer end = Integer.valueOf(arr[1]);
         String type = arr[2];
-
+        int changePositionAfter = 0;
         switch (type) {
             case "now":
                 sb.replace(start - changePositionString, end - changePositionString, String.valueOf(new Date().getTime()));
-                changePositionString = changePosition(conditionField, sb.toString());
+                changePositionAfter = changePosition(conditionField, sb.toString());
 
                 break;
             case "currentDate":
                 String date = new SimpleDateFormat("yyyyMMdd").format(new Date());
                 sb.replace(start - changePositionString, end - changePositionString, date);
-                changePositionString = changePosition(conditionField, sb.toString());
+                changePositionAfter = changePosition(conditionField, sb.toString());
 
                 break;
             case "currentTime":
                 String time = new SimpleDateFormat("HHmmss").format(new Date());
                 sb.replace(start - changePositionString, end - changePositionString, time);
-                changePositionString = changePosition(conditionField, sb.toString());
+                changePositionAfter = changePosition(conditionField, sb.toString());
 
                 break;
             default:
                 log.info("conditionField:{}", conditionField);
                 break;
         }
-        return new Pair<>(sb, changePositionString);
+        return new Pair<>(sb, changePositionAfter);
     }
 
     public static Pair<StringBuilder, Integer> replaceCase(StringBuilder sb, String conditionField, Map
@@ -174,13 +174,15 @@ public class SystemFunctionUtil {
         String type = arr[2];
 
         Pair<StringBuilder, Integer> ret;
+        int changePositionAfter = 0;
+        StringBuilder sbTransform = null;
         switch (type) {
             case "now":
             case "currentDate":
             case "currentTime":
                 ret = timeOperator(sb, conditionField, arr, changePosition);
-                sb = ret.getKey();
-                changePosition = ret.getValue();
+                sbTransform = ret.getKey();
+                changePositionAfter = ret.getValue();
                 break;
 
             case "abs":
@@ -188,8 +190,8 @@ public class SystemFunctionUtil {
             case "floor":
             case "round":
                 ret = numberOperator(sb, conditionField, arr, payload, changePosition);
-                sb = ret.getKey();
-                changePosition = ret.getValue();
+                sbTransform = ret.getKey();
+                changePositionAfter = ret.getValue();
                 break;
 
             case "substring":
@@ -197,15 +199,15 @@ public class SystemFunctionUtil {
             case "trim":
             case "lcase":
                 ret = stringOperator(sb, conditionField, arr, payload, changePosition);
-                sb = ret.getKey();
-                changePosition = ret.getValue();
+                sbTransform = ret.getKey();
+                changePositionAfter = ret.getValue();
                 break;
 
             default:
                 log.info("conditionField:{}", conditionField);
                 break;
         }
-        return new Pair<>(sb, changePosition);
+        return new Pair<>(sbTransform, changePositionAfter);
     }
 
     /**
