@@ -5,7 +5,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,9 +14,7 @@ import javax.jms.Session;
 import javax.jms.Topic;
 import javax.jms.TopicConnection;
 import javax.jms.TopicSession;
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
@@ -37,50 +34,33 @@ import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 public class WeEventClient implements IWeEventClient {
-    private final static String defaultJsonRpcUrl = "http://127.0.0.1:8080/weevent-broker/jsonrpc";
+    private final String brokerUrl;
+    private final String groupId;
+    private final String userName;
+    private final String password;
+    private final int timeout;
+
     // json rpc proxy
     private IBrokerRpc brokerRpc;
-
-    // groupId
-    private String groupId;
-
     // default STOMP url, ws://localhost:8080/weevent-broker/stomp
     private WeEventConnectionFactory connectionFactory;
-
     // stomp connection
     private TopicConnection connection;
     // (subscriptionId <-> TopicSession)
     private Map<String, TopicSession> sessionMap;
 
-    // rpc timeout
-    private final int timeoutMillis = 5000;
 
-    WeEventClient() throws BrokerException {
-        buildRpc(defaultJsonRpcUrl);
-        buildJms(WeEventConnectionFactory.defaultBrokerUrl, "", "");
-        this.groupId = "";
-    }
-
-    WeEventClient(String brokerUrl) throws BrokerException {
+    WeEventClient(String brokerUrl, String groupId, String userName, String password, int timeout) throws BrokerException {
         validateParam(brokerUrl);
-        buildRpc(brokerUrl + "/jsonrpc");
-        buildJms(getStompUrl(brokerUrl), "", "");
-        this.groupId = "";
-    }
 
-    WeEventClient(String brokerUrl, String groupId) throws BrokerException {
-        validateParam(brokerUrl);
-        buildRpc(brokerUrl + "/jsonrpc");
-        buildJms(getStompUrl(brokerUrl), "", "");
+        this.brokerUrl = brokerUrl;
         this.groupId = groupId;
-    }
+        this.userName = userName;
+        this.password = password;
+        this.timeout = timeout;
 
-    WeEventClient(String brokerUrl, String groupId, String userName, String password) throws BrokerException {
-        validateParam(brokerUrl);
-        validateUser(userName, password);
-        buildRpc(brokerUrl + "/jsonrpc");
-        buildJms(getStompUrl(brokerUrl), userName, password);
-        this.groupId = groupId;
+        buildRpc();
+        buildJms();
     }
 
     @Override
@@ -266,13 +246,11 @@ public class WeEventClient implements IWeEventClient {
             // impl X509TrustManager interface，not verify certificate
             X509TrustManager x509TrustManager = new X509TrustManager() {
                 @Override
-                public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-
+                public void checkClientTrusted(X509Certificate[] x509Certificates, String s) {
                 }
 
                 @Override
-                public void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-
+                public void checkServerTrusted(X509Certificate[] x509Certificates, String s) {
                 }
 
                 @Override
@@ -289,7 +267,8 @@ public class WeEventClient implements IWeEventClient {
         }
     }
 
-    private void buildRpc(String jsonRpcUrl) throws BrokerException {
+    private void buildRpc() throws BrokerException {
+        String jsonRpcUrl = this.brokerUrl + "/jsonrpc";
         log.info("broker's json rpc url: {}", jsonRpcUrl);
 
         URL url;
@@ -301,20 +280,15 @@ public class WeEventClient implements IWeEventClient {
         }
 
         JsonRpcHttpClient client = new JsonRpcHttpClient(url);
-        client.setConnectionTimeoutMillis(this.timeoutMillis);
-        client.setReadTimeoutMillis(this.timeoutMillis);
+        client.setConnectionTimeoutMillis(this.timeout);
+        client.setReadTimeoutMillis(this.timeout);
 
         // ssl
         if (jsonRpcUrl.contains("https://")) {
             SSLContext sslContext = getSSLContext();
             client.setSslContext(sslContext);
             // dot not verify HostName
-            client.setHostNameVerifier(new HostnameVerifier() {
-                public boolean verify(String hostname,
-                                      SSLSession sslsession) {
-                    return true;
-                }
-            });
+            client.setHostNameVerifier((hostname, sslsession) -> true);
         }
 
         // custom Exception
@@ -328,15 +302,16 @@ public class WeEventClient implements IWeEventClient {
         this.brokerRpc = ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);
     }
 
-    private void buildJms(String stompUrl, String userName, String password) throws BrokerException {
+    private void buildJms() throws BrokerException {
+        String stompUrl = getStompUrl(this.brokerUrl);
         log.info("broker's stomp url: {}", stompUrl);
 
         try {
-            if (connectionFactory == null) {
-                connectionFactory = new WeEventConnectionFactory(userName, password, stompUrl);
+            if (this.connectionFactory == null) {
+                this.connectionFactory = new WeEventConnectionFactory(this.userName, this.password, stompUrl);
             }
             this.sessionMap = new ConcurrentHashMap<>();
-            this.connection = connectionFactory.createTopicConnection();
+            this.connection = this.connectionFactory.createTopicConnection();
             this.connection.start();
         } catch (JMSException e) {
             log.error("init jms connection factory failed", e);
@@ -355,19 +330,9 @@ public class WeEventClient implements IWeEventClient {
         }
     }
 
-
     private static void validateArrayParam(byte[] param) throws BrokerException {
         if (param == null || param.length == 0) {
             throw new BrokerException(ErrorCode.PARAM_ISEMPTY);
-        }
-    }
-
-    private static void validateUser(String userName, String password) throws BrokerException {
-        if (StringUtils.isBlank(userName)) {
-            throw new BrokerException(ErrorCode.PARAM_ISBLANK);
-        }
-        if (StringUtils.isBlank(password)) {
-            throw new BrokerException(ErrorCode.PARAM_ISBLANK);
         }
     }
 
@@ -377,5 +342,15 @@ public class WeEventClient implements IWeEventClient {
         } else {
             return new BrokerException(Integer.parseInt(e.getErrorCode()), e.getMessage());
         }
+    }
+
+    @Override
+    public SendResult publishFile(String topic, String localFile) throws BrokerException {
+        return null;
+    }
+
+    @Override
+    public String subscribeFile(String topic, String filePath, FileListener fileListener) throws BrokerException {
+        return null;
     }
 }

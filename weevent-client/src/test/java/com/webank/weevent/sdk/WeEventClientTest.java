@@ -38,7 +38,7 @@ public class WeEventClientTest {
                 this.testName.getMethodName());
 
         this.extensions.put(WeEvent.WeEvent_TAG, "test");
-        this.weEventClient = IWeEventClient.build("http://localhost:7000/weevent");
+        this.weEventClient = new IWeEventClient.Builder().brokerUrl("http://localhost:7000/weevent-broker").build();
         this.weEventClient.open(this.topicName);
     }
 

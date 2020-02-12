@@ -9,51 +9,50 @@ import lombok.NonNull;
  * @since 2019/07/18
  */
 public interface IWeEventClient {
-    /**
-     * Get the client handler of WeEvent's broker with default groupId and url, http://localhost:8080/weevent.
-     *
-     * @return IWeEventClient WeEventClient struct
-     * @throws BrokerException broker exception
-     */
-    static IWeEventClient build() throws BrokerException {
-        return new WeEventClient();
-    }
+    String defaultBrokerUrl = "http://localhost:8080/weevent-broker";
 
     /**
-     * Get the client handler of WeEvent's broker with custom url.
-     *
-     * @param brokerUrl WeEvent's broker url, like http://localhost:8080/weevent
-     * @return IWeEventClient WeEventClient struct
-     * @throws BrokerException broker exception
+     * builder class
      */
-    static IWeEventClient build(String brokerUrl) throws BrokerException {
-        return new WeEventClient(brokerUrl);
-    }
+    class Builder {
+        // broker url
+        private String brokerUrl = defaultBrokerUrl;
+        // group id
+        private String groupId = WeEvent.DEFAULT_GROUP_ID;
+        // stomp's account&password
+        private String userName = "";
+        private String password = "";
+        // rpc timeout, ms
+        private int timeout = 5000;
 
-    /**
-     * Get the client handler of WeEvent's broker with custom groupId and url.
-     *
-     * @param brokerUrl WeEvent's broker url, like http://localhost:8080/weevent
-     * @param groupId groupId
-     * @return IWeEventClient WeEventClient struct
-     * @throws BrokerException broker exception
-     */
-    static IWeEventClient build(String brokerUrl, String groupId) throws BrokerException {
-        return new WeEventClient(brokerUrl, groupId);
-    }
+        public Builder brokerUrl(String brokerUrl) {
+            this.brokerUrl = brokerUrl;
+            return this;
+        }
 
-    /**
-     * Get the client handler of WeEvent's broker custom url and account authorization.
-     *
-     * @param brokerUrl WeEvent's broker url, like http://localhost:8080/weevent
-     * @param groupId groupId
-     * @param userName account name
-     * @param password password
-     * @return IWeEventClient WeEventClient struct
-     * @throws BrokerException broker exception
-     */
-    static IWeEventClient build(String brokerUrl, String groupId, String userName, String password) throws BrokerException {
-        return new WeEventClient(brokerUrl, groupId, userName, password);
+        public Builder groupId(String groupId) {
+            this.groupId = groupId;
+            return this;
+        }
+
+        public Builder userName(String userName) {
+            this.userName = userName;
+            return this;
+        }
+
+        public Builder password(String password) {
+            this.password = password;
+            return this;
+        }
+
+        public Builder timeout(int timeout) {
+            this.timeout = timeout;
+            return this;
+        }
+
+        public IWeEventClient build() throws BrokerException {
+            return new WeEventClient(this.brokerUrl, this.groupId, this.userName, this.password, this.timeout);
+        }
     }
 
     /**
@@ -93,7 +92,7 @@ public interface IWeEventClient {
     SendResult publish(WeEvent weEvent) throws BrokerException;
 
     /**
-     * Interface for notify callback
+     * Interface for event notify callback
      */
     interface EventListener {
         /**
@@ -116,7 +115,7 @@ public interface IWeEventClient {
      *
      * @param topic topic name
      * @param offset from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
-     * @param listener callback
+     * @param listener notify interface
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
@@ -128,7 +127,7 @@ public interface IWeEventClient {
      * @param topic topic name
      * @param offset from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
      * @param subscriptionId keep last subscribe
-     * @param listener callback
+     * @param listener notify interface
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
@@ -139,7 +138,7 @@ public interface IWeEventClient {
      *
      * @param topics topic list
      * @param offset from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
-     * @param listener callback
+     * @param listener notify interface
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
@@ -151,7 +150,7 @@ public interface IWeEventClient {
      * @param topics topic list
      * @param offset from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
      * @param subscriptionId keep last subscribe
-     * @param listener callback
+     * @param listener notify interface
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
@@ -194,4 +193,48 @@ public interface IWeEventClient {
      * @throws BrokerException broker exception
      */
     WeEvent getEvent(String eventId) throws BrokerException;
+
+    // The following's is for big file's Pub/Sub
+
+    /**
+     * Publish a file to topic.
+     * The file's data DO NOT stored in block chain. Yes, it's not persist, may be deleted after subscribe notify.
+     *
+     * @param topic binding topic
+     * @param localFile local file to be send
+     * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
+     * @throws BrokerException broker exception
+     */
+    SendResult publishFile(String topic, String localFile) throws BrokerException;
+
+    /**
+     * Interface for file notify callback
+     */
+    interface FileListener {
+        /**
+         * Called while new file arrived.
+         *
+         * @param subscriptionId binding subscription
+         * @param localFile local file with data
+         */
+        void onFile(String subscriptionId, String localFile);
+
+        /**
+         * Called while raise exception.
+         *
+         * @param e the e
+         */
+        void onException(Throwable e);
+    }
+
+    /**
+     * Subscribe file from topic.
+     *
+     * @param topic topic name
+     * @param filePath file path to store arriving file
+     * @param fileListener notify interface
+     * @return subscription Id
+     * @throws BrokerException broker exception
+     */
+    String subscribeFile(String topic, String filePath, @NonNull FileListener fileListener) throws BrokerException;
 }

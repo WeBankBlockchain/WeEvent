@@ -71,8 +71,8 @@ public class RobustConfiguration {
 
     @Bean
     public IWeEventClient weEventClient() throws Exception {
-        String jsonurl = HTTP_HEADER + url + "/weevent";
-        return IWeEventClient.build(jsonurl);
+        String jsonurl = HTTP_HEADER + url + "/weevent-broker";
+        return new IWeEventClient.Builder().brokerUrl(jsonurl).build();
     }
 
     @Bean
