@@ -55,32 +55,32 @@ public class SystemFunctionUtil {
         Integer start = Integer.valueOf(arr[0]);
         Integer end = Integer.valueOf(arr[1]);
         String type = arr[2];
-
+        int changePositionAfter = 0;
         switch (type) {
             case "abs":
                 sb.replace(start - changePosition, end - changePosition, String.valueOf(Math.abs((Integer) payload.get(arr[3]))));
-                changePosition = changePosition(conditionField, sb.toString());
+                changePositionAfter = changePosition(conditionField, sb.toString());
                 break;
 
             case "ceil":
                 sb.replace(start - changePosition, end - changePosition, String.valueOf(Math.ceil((Integer) payload.get(arr[3]))));
-                changePosition = changePosition(conditionField, sb.toString());
+                changePositionAfter = changePosition(conditionField, sb.toString());
                 break;
 
             case "floor":
                 sb.replace(start - changePosition, end - changePosition, String.valueOf(Math.floor((Integer) payload.get(arr[3]))));
-                changePosition = changePosition(conditionField, sb.toString());
+                changePositionAfter = changePosition(conditionField, sb.toString());
                 break;
 
             case "round":
                 sb.replace(start - changePosition, end - changePosition, String.valueOf(Math.round(Math.round((Integer) payload.get(arr[3])))));
-                changePosition = changePosition(conditionField, sb.toString());
+                changePositionAfter = changePosition(conditionField, sb.toString());
                 break;
             default:
                 log.info("conditionField:{}", conditionField);
                 break;
         }
-        return new Pair<>(sb, changePosition);
+        return new Pair<>(sb, changePositionAfter);
     }
 
     public static Pair<StringBuilder, Integer> stringOperator(StringBuilder sb, String conditionField, String[] arr, Map
