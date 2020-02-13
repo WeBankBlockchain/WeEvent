@@ -40,7 +40,6 @@ public class SystemFunctionUtil {
         return arr;
     }
 
-
     public static String analysisSystemFunction(String[][] systemFunctionMessage, String payload, String
             conditionField) throws IOException {
 
