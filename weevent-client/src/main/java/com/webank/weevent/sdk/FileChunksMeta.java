@@ -23,7 +23,7 @@ public class FileChunksMeta {
     // uuid for file
     private String fileId;
     // chunk size
-    private long chunkSize;
+    private int chunkSize;
     // chunk num
     private int chunkNum;
     // all chunk's upload status(chunkIndex, true/false)
