@@ -287,7 +287,6 @@ public class CEPRuleMQ {
         return new Pair<>(ConstantsHelper.OTHER, "");
     }
 
-
     private static boolean handleTheEqual(WeEvent eventMessage, String condition) throws IOException {
         String eventContent = new String(eventMessage.getContent());
         Map event = JsonUtil.parseObject(eventContent, Map.class);
@@ -301,7 +300,6 @@ public class CEPRuleMQ {
                 return false;
             }
         }
-
         return false;
     }
 

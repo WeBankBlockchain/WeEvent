@@ -297,6 +297,7 @@ public class CommonUtil {
         String[] result = selectField.split(",");
         // event content must contain the select message
         for (String item : result) {
+            iftttContent.put(item, payloadContent.get(item));
             if (eventContent.containsKey(item)) {
                 iftttContent.put(item, eventContent.get(item));
             }
@@ -382,7 +383,7 @@ public class CommonUtil {
 
         // get all select field and value, and the select field must in eventContent, except the system parameter.
         for (String key : result) {
-            sql.put(key, null);
+            sql.put(key, table.get(key).toString());
             if (eventContent.containsKey(key)) {
                 sql.put(key, eventContent.get(key).toString());
             }
