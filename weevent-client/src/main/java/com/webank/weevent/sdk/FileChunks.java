@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils;
  */
 @Slf4j
 public class FileChunks {
+    //like http://localhost:8080/weevent-broker/file
     private String svrUrl;
     private String downloadFilePath = "";
 
@@ -34,11 +35,11 @@ public class FileChunks {
         log.info("try to upload file {}", localFile);
 
         // get file initial information
-        FileInputStream fileInputStream = new FileInputStream(localFile);
-        FileChunksMeta fileChunksMeta = new FileChunksMeta();
         File file = new File(localFile);
+        FileChunksMeta fileChunksMeta = new FileChunksMeta();
         fileChunksMeta.setFileName(file.getName());
         fileChunksMeta.setFileSize(file.length());
+        FileInputStream fileInputStream = new FileInputStream(file);
         fileChunksMeta.setFileMd5(DigestUtils.md5DigestAsHex(fileInputStream));
 
         // get chunk information
@@ -60,8 +61,7 @@ public class FileChunks {
     }
 
     public String download(String host, String fileId) throws BrokerException, IOException {
-        String url = host + fileId;
-        log.info("try to download file, {}", url);
+        log.info("try to download file, {}@{}", fileId, host);
 
         // get chunk information
         FileChunksMeta fileChunksMeta = new FileChunksMeta();
@@ -69,7 +69,8 @@ public class FileChunks {
         fileChunksMeta = this.getFileChunksInfo(fileChunksMeta);
 
         // create file
-        FileOutputStream fileOutputStream = new FileOutputStream(fileChunksMeta.getFileName());
+        String fileName = this.downloadFilePath + "/" + fileChunksMeta.getFileName();
+        FileOutputStream fileOutputStream = new FileOutputStream(fileName);
 
         // download every single chunk data
         for (int chunkIdx = 0; chunkIdx < fileChunksMeta.getChunkNum(); chunkIdx++) {
@@ -80,14 +81,14 @@ public class FileChunks {
         }
 
         // check md5sum
-        String md5 = DigestUtils.md5DigestAsHex(new FileInputStream(fileChunksMeta.getFileName()));
+        String md5 = DigestUtils.md5DigestAsHex(new FileInputStream(fileName));
         if (!fileChunksMeta.getFileMd5().equals(md5)) {
             log.error("md5 mismatch, {} <=> {}", fileChunksMeta.getFileMd5(), md5);
             throw new BrokerException("");
         }
 
-        log.info("download file success, {}", fileChunksMeta.getFileName());
-        return fileChunksMeta.getFileName();
+        log.info("download file success, {} -> {}", fileId, fileName);
+        return fileName;
     }
 
     private FileChunksMeta getFileChunksInfo(FileChunksMeta fileChunksMeta) {
@@ -96,7 +97,9 @@ public class FileChunks {
         } else { // continue upload
             // this.svrUrl + "/listChunk"
         }
-
+        fileChunksMeta.setFileId("a");
+        fileChunksMeta.setChunkSize(256);
+        fileChunksMeta.setChunkNum((int) fileChunksMeta.getFileSize() / fileChunksMeta.getChunkSize() + 1);
         return fileChunksMeta;
     }
 
@@ -109,7 +112,7 @@ public class FileChunks {
 
     private byte[] downloadChunk(String fileId, int chunkIdx) {
         // this.svrUrl + "/downloadChunk"
-        byte[] chunkData = null;
+        byte[] chunkData = new byte[1];
         log.info("download chunk success, {}@{} {}", fileId, chunkIdx, chunkData.length);
         return chunkData;
     }
