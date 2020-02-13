@@ -1,13 +1,13 @@
 package com.webank.weevent.sdk;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import lombok.NonNull;
 
 /**
  * Java Client for WeEvent
  *
- * @author crisiticmei
+ * @author matthewliu
  * @since 2019/07/18
  */
 public interface IWeEventClient {
@@ -200,14 +200,14 @@ public interface IWeEventClient {
 
     /**
      * Publish a file to topic.
-     * The file's data DO NOT stored in block chain. Yes, it's not persist, may be deleted after subscribe notify.
+     * The file's data DO NOT stored in block chain. Yes, it's not persist, may be deleted sometime after subscribe notify.
      *
      * @param topic binding topic
      * @param localFile local file to be send
-     * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
+     * @return send result, SendResult.SUCCESS if success, and return SendResult.eventId
      * @throws BrokerException broker exception
      */
-    SendResult publishFile(String topic, String localFile) throws BrokerException, FileNotFoundException;
+    SendResult publishFile(String topic, String localFile) throws BrokerException, IOException;
 
     /**
      * Interface for file notify callback

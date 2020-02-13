@@ -1,5 +1,6 @@
 package com.webank.weevent.sdk;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -160,5 +161,45 @@ public class WeEventClientTest {
     @Test(expected = BrokerException.class)
     public void testGetEvent() throws Exception {
         this.weEventClient.getEvent("not exist");
+    }
+
+    @Test
+    public void testPublishFile() throws Exception {
+        boolean result = this.weEventClient.open("com.webank.weevent.file");
+        Assert.assertTrue(result);
+
+        SendResult sendResult = this.weEventClient.publishFile("com.webank.weevent.file",
+                new File("src/main/resources/log4j2.xml").getAbsolutePath());
+        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
+    }
+
+    @Test
+    public void testSubscribeFile() throws Exception {
+        boolean result = this.weEventClient.open("com.webank.weevent.file");
+        Assert.assertTrue(result);
+
+        String subscriptionId = this.weEventClient.subscribeFile("com.webank.weevent.file", "./logs", new IWeEventClient.FileListener() {
+            @Override
+            public void onFile(String subscriptionId, String localFile) {
+                Assert.assertFalse(subscriptionId.isEmpty());
+                Assert.assertFalse(localFile.isEmpty());
+
+                // file data stored in localFile
+            }
+
+            @Override
+            public void onException(Throwable e) {
+
+            }
+        });
+
+        Assert.assertFalse(subscriptionId.isEmpty());
+
+        SendResult sendResult = this.weEventClient.publishFile("com.webank.weevent.file",
+                new File("src/main/resources/log4j2.xml").getAbsolutePath());
+        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
+
+        Thread.sleep(10000);
+        this.weEventClient.unSubscribe(subscriptionId);
     }
 }
