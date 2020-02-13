@@ -65,9 +65,6 @@ public class BrokerService {
     private PermissionRepository permissionRepository;
 
     @Autowired
-    private PermissionService permissionService;
-
-    @Autowired
     private TopicHistoricalService topicHistoricalService;
 
     @Autowired

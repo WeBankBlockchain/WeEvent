@@ -58,9 +58,6 @@ public class RuleEngineService {
     private CommonService commonService;
 
     @Autowired
-    private PermissionService permissionService;
-
-    @Autowired
     private BrokerService brokerService;
 
     @Autowired
@@ -611,7 +608,7 @@ public class RuleEngineService {
     }
 
     private boolean verifyInfiniteLoop(RuleEngineEntity ruleEngineEntity) {
-        if (!(ConstantProperties.RULE_DESTINATION_TOPIC == ruleEngineEntity.getConditionType())) {
+        if (!(String.valueOf(ConstantProperties.RULE_DESTINATION_TOPIC).equals(ruleEngineEntity.getConditionType().toString()))) {
             return true;
         }
         //query all historical rules according to brokerId groupId

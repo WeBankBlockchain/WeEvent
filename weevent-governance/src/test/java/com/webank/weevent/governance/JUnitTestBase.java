@@ -32,6 +32,7 @@ public class JUnitTestBase {
     @Rule
     public Timeout timeout = new Timeout(120, TimeUnit.SECONDS);
 
+
     @Test
     public void testBuild() {
         Assert.assertTrue(true);
@@ -39,7 +40,7 @@ public class JUnitTestBase {
 
 
     public String createToken() {
-        String token = JwtUtils.encodeToken("admin", JwtUtils.PRIVATE_SECRET, JwtUtils.EXPIRE_TIME);
+        String token = JwtUtils.encodeToken("admin", GovernanceApplication.environment.getProperty("jwt.private.secret"), JwtUtils.EXPIRE_TIME);
         Security.setProperty(token, "1");
         return token;
     }

@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.webank.weevent.governance.GovernanceApplication;
 import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.utils.JwtUtils;
 
@@ -24,11 +25,12 @@ public class UserFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = request.getHeader(JwtUtils.AUTHORIZATION_HEADER_PREFIX);
+        String privateSecret = GovernanceApplication.environment.getProperty("jwt.private.secret");
         if (!StringUtils.isBlank(token)) {
-            JwtUtils.verifierToken(token);
-            AccountEntity accountEntity = JwtUtils.decodeToken(token, JwtUtils.PRIVATE_SECRET);
+            JwtUtils.verifierToken(token, privateSecret);
+            AccountEntity accountEntity = JwtUtils.decodeToken(token, privateSecret);
             if (accountEntity != null) {
-                log.info("get token from HTTP header, {} : {}", JwtUtils.AUTHORIZATION_HEADER_PREFIX, accountEntity.getUsername());
+                log.info("get token from HTTP header, {} : {}", JwtUtils.AUTHORIZATION_HEADER_PREFIX, token);
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(accountEntity.getUsername(), null, null);
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);

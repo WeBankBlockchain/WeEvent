@@ -40,9 +40,6 @@ public class TopicHistoricalService {
     private TopicHistoricalMapper topicHistoricalMapper;
 
     @Autowired
-    private PermissionService permissionService;
-
-    @Autowired
     private CommonService commonService;
 
     @Autowired

@@ -3,6 +3,7 @@ package com.webank.weevent.broker.fabric;
 import java.util.List;
 
 import com.webank.weevent.broker.fabric.sdk.FabricDelegate;
+import com.webank.weevent.broker.fisco.dto.ContractContext;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.plugin.IEventTopic;
@@ -134,6 +135,11 @@ public class FabricTopicAdmin implements IEventTopic {
                 .queryNodeList(queryEntity.getPageNumber(), queryEntity.getPageSize());
     }
 
+    @Override
+    public ContractContext getContractContext(String groupId) throws BrokerException {
+        return null;
+    }
+
     protected void validateChannelName(String channelName) throws BrokerException {
         log.debug("check channelName: {} exist. ", channelName);
         if (StringUtils.isBlank(channelName) || !fabricDelegate.listChannel().contains(channelName)){
@@ -141,4 +147,18 @@ public class FabricTopicAdmin implements IEventTopic {
         }
     }
 
+    @Override
+    public boolean addOperator(String groupId, String topicName, String address) {
+        return false;
+    }
+
+    @Override
+    public boolean delOperator(String groupId, String topicName, String address) {
+        return false;
+    }
+
+    @Override
+    public List<String> listOperator(String groupId, String topicName) {
+        return null;
+    }
 }

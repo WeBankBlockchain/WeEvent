@@ -2,6 +2,7 @@ package com.webank.weevent.broker.fisco;
 
 import java.util.List;
 
+import com.webank.weevent.broker.fisco.dto.ContractContext;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
@@ -32,7 +33,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     // FISCO-BCOS handler
     protected FiscoBcosDelegate fiscoBcosDelegate;
 
-    public FiscoBcosTopicAdmin(FiscoBcosDelegate fiscoBcosDelegate){
+    public FiscoBcosTopicAdmin(FiscoBcosDelegate fiscoBcosDelegate) {
         this.fiscoBcosDelegate = fiscoBcosDelegate;
     }
 
@@ -175,6 +176,38 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
 
     public String selectGroupId(String groupId) {
         return StringUtils.isBlank(groupId) ? WeEvent.DEFAULT_GROUP_ID : groupId;
+    }
+
+    @Override
+    public ContractContext getContractContext(String groupIdStr) throws BrokerException {
+        String groupId = selectGroupId(groupIdStr);
+        this.validateGroupId(groupId);
+        return fiscoBcosDelegate.getContractContext(Long.valueOf(groupId));
+
+    }
+
+    @Override
+    public boolean addOperator(String groupIdStr, String topicName, String operatorAddress) throws BrokerException {
+        String groupId = selectGroupId(groupIdStr);
+        this.validateGroupId(groupId);
+
+        return fiscoBcosDelegate.addOperator(Long.parseLong(groupId), topicName, operatorAddress);
+    }
+
+    @Override
+    public boolean delOperator(String groupIdStr, String topicName, String operatorAddress) throws BrokerException {
+        String groupId = selectGroupId(groupIdStr);
+        this.validateGroupId(groupId);
+
+        return fiscoBcosDelegate.delOperator(Long.parseLong(groupId), topicName, operatorAddress);
+    }
+
+    @Override
+    public List<String> listOperator(String groupIdStr, String topicName) throws BrokerException {
+        String groupId = selectGroupId(groupIdStr);
+        this.validateGroupId(groupId);
+
+        return fiscoBcosDelegate.listOperator(Long.parseLong(groupId), topicName);
     }
 
 }

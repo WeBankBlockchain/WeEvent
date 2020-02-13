@@ -19,11 +19,9 @@ import com.webank.weevent.governance.service.CommonService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 @Slf4j
-@WebFilter("/webase-node-mgr/*")
+@WebFilter(urlPatterns = "/webase-node-mgr/*")
 public class ForwardWebaseFilter implements Filter {
 
     @Autowired
@@ -40,10 +38,6 @@ public class ForwardWebaseFilter implements Filter {
         HttpServletResponse res = (HttpServletResponse) response;
         String idStr = request.getParameter("brokerId");
         String originUrl = req.getRequestURI();
-        if (!originUrl.contains("/webase-node-mgr/")) {
-            chain.doFilter(request, response);
-            return;
-        }
         // get tail of webase url
         String subStrUrl = originUrl.substring(originUrl.indexOf("/webase-node-mgr/") + "/webase-node-mgr".length());
 

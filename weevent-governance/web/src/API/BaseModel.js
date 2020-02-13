@@ -24,6 +24,11 @@ class BaseModule {
       if (config.method === 'delete' || config.method === 'get') {
         config.url = config.url + config.data
       }
+      if (config.url.indexOf('login') > -1 || config.url.indexOf('user/check') > -1 || config.url.indexOf('user/register') > -1) {
+        localStorage.setItem('token', '')
+      } else {
+        config.headers.Authorization = localStorage.getItem('token')
+      }
       return config
     })
 
@@ -40,26 +45,30 @@ class BaseModule {
         } else {
           Message({
             type: 'warning',
-            message: i18n.messages[i18n.locale].common.reqException
+            message: i18n.messages[i18n.locale].common.reqException,
+            duration: 5000
           })
           reject(config)
         }
       }).catch((e) => {
         Message({
           type: 'error',
-          message: i18n.messages[i18n.locale].common.reqException
+          message: i18n.messages[i18n.locale].common.reqException,
+          duration: 5000
         })
       })
     }, error => {
       if (error.message.includes('timeout')) {
         Message({
           type: 'error',
-          message: i18n.messages[i18n.locale].common.timeOut
+          message: i18n.messages[i18n.locale].common.timeOut,
+          duration: 5000
         })
       } else {
         Message({
           type: 'error',
-          message: i18n.messages[i18n.locale].common.reqException
+          message: i18n.messages[i18n.locale].common.reqException,
+          duration: 5000
         })
       }
     })

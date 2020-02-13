@@ -73,7 +73,8 @@ export default {
             } else {
               this.$message({
                 type: 'warning',
-                message: this.$t('common.operFail')
+                message: this.$t('common.operFail'),
+                duration: 5000
               })
             }
           })
@@ -85,13 +86,13 @@ export default {
     login (e) {
       API.login(e).then(res => {
         if (res.status === 200 && res.data.code === 0) {
-          localStorage.setItem('userId', res.data.data.userId)
           localStorage.setItem('user', res.data.data.username)
           this.$router.push('./index')
         } else {
           this.$message({
             type: 'warning',
-            message: this.$t('userSet.loginFail')
+            message: this.$t('userSet.loginFail'),
+            duration: 5000
           })
         }
       })

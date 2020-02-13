@@ -2,6 +2,7 @@ package com.webank.weevent.broker.plugin;
 
 import java.util.List;
 
+import com.webank.weevent.broker.fisco.dto.ContractContext;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
 import com.webank.weevent.protocol.rest.entity.QueryEntity;
@@ -92,5 +93,11 @@ public interface IEventTopic {
 
     ListPage<TbNode> queryNodeList(QueryEntity queryEntity) throws BrokerException;
 
+    ContractContext getContractContext(String groupId) throws BrokerException;
 
+    boolean addOperator(String groupId, String topicName, String operatorAddress) throws BrokerException;
+
+    boolean delOperator(String groupId, String topicName, String operatorAddress) throws BrokerException;
+
+    List<String> listOperator(String groupId, String topicName) throws BrokerException;
 }

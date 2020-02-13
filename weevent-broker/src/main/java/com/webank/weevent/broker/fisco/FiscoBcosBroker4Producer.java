@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IProducer {
 
-    public FiscoBcosBroker4Producer(FiscoBcosDelegate fiscoBcosDelegate){
+    public FiscoBcosBroker4Producer(FiscoBcosDelegate fiscoBcosDelegate) {
         super(fiscoBcosDelegate);
     }
 
@@ -39,9 +39,15 @@ public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IPr
         ParamCheckUtils.validateEvent(event);
 
         // publishEvent support async operator in callback
-        return fiscoBcosDelegate.publishEvent(event.getTopic(),
-                Long.parseLong(groupId),
-                new String(event.getContent(), StandardCharsets.UTF_8),
-                DataTypeUtils.object2Json(event.getExtensions()));
+        if (event.getExtensions() != null && event.getExtensions().containsKey(WeEvent.WeEvent_SIGN)) {
+            return fiscoBcosDelegate.sendRawTransaction(event.getTopic(),
+                    Long.parseLong(groupId),
+                    new String(event.getContent(), StandardCharsets.UTF_8));
+        } else {
+            return fiscoBcosDelegate.publishEvent(event.getTopic(),
+                    Long.parseLong(groupId),
+                    new String(event.getContent(), StandardCharsets.UTF_8),
+                    DataTypeUtils.object2Json(event.getExtensions()));
+        }
     }
 }

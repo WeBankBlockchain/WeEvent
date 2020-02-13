@@ -3,17 +3,17 @@ apply plugin: "io.spring.dependency-management"
 
 dependencies {
     // spring boot
-    implementation("org.springframework.boot:spring-boot-starter:${springBoot2Version}")
-    implementation("org.springframework.boot:spring-boot-starter-web:${springBoot2Version}")
+    implementation("org.springframework.boot:spring-boot-starter")
+    implementation("org.springframework.boot:spring-boot-starter-web")
 
     // spring boot with log4j2
-    implementation("org.springframework.boot:spring-boot-starter-log4j2:${springBoot2Version}")
+    implementation("org.springframework.boot:spring-boot-starter-log4j2")
     // avoid "Log4j appears to be running in a Servlet environment, but there's no log4j-web module available."
     implementation("org.apache.logging.log4j:log4j-web:${log4jVersion}")
 
     // account login
-    implementation("org.springframework.boot:spring-boot-starter-security:${springBoot2Version}")
-    implementation("org.springframework.boot:spring-boot-starter-mail:${springBoot2Version}")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-mail")
 
     // persist databaseA
     implementation("org.apache.commons:commons-dbcp2:${apacheCommonsVersion.dbcp2}")
@@ -26,16 +26,14 @@ dependencies {
     // forward backend
     implementation("org.apache.httpcomponents:httpclient:${httpclientVersion}")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBoot2Version}")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 
     //jpa
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa:${springBoot2Version}")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
     //h2
     implementation("com.h2database:h2:${h2Version}")
 
-    //JJWT
-    implementation("io.jsonwebtoken:jjwt:${JJWTVersion}")
     //JWT
     implementation("com.auth0:java-jwt:${JWTVersion}")
 

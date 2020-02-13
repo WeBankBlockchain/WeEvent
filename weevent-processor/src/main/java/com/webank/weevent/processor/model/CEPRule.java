@@ -47,6 +47,7 @@ public class CEPRule implements Serializable {
 
     private String groupId;
 
+    private String functionArray;
 
     private String systemTag;
 

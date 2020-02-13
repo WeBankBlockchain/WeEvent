@@ -24,18 +24,17 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author v_wbjnzhang
  */
-@WebFilter(urlPatterns = {"/topic/*"})
-//@Component
+@WebFilter(urlPatterns = "/topic/*")
 public class XssFilter implements Filter {
 
     private static boolean IS_INCLUDE_RICH_TEXT = false;
 
     public List<String> excludes = new ArrayList<>();
 
-
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
             throws IOException, ServletException {
+
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse resp = (HttpServletResponse) response;
         if (handleExcludeURL(req, resp)) {

@@ -31,7 +31,6 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     @Autowired
     private AccountService accountService;
 
-    @SneakyThrows
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {

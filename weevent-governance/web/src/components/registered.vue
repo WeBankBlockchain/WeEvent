@@ -154,11 +154,14 @@ export default {
   },
   methods: {
     submitForm (formName) {
+      let sha256 = require('js-sha256').sha256
       this.$refs[formName].validate((valid) => {
         if (valid) {
+          let password = sha256(this.ruleForm.name + this.ruleForm.pass)
+          password = password.toUpperCase()
           let data = {
             'username': this.ruleForm.name,
-            'password': this.ruleForm.pass,
+            'password': password,
             'email': this.ruleForm.email
           }
           API.register(data).then(res => {
@@ -169,15 +172,17 @@ export default {
               })
               let e = {
                 'username': this.ruleForm.name,
-                'password': this.ruleForm.pass
+                'password': password
               }
+              console.log('aa')
               setTimeout(fun => {
                 this.login(e)
               }, 1000)
             } else {
               this.$message({
                 type: 'warning',
-                message: this.$t('userSet.regFail')
+                message: this.$t('userSet.regFail'),
+                duration: 5000
               })
             }
           })
@@ -188,11 +193,16 @@ export default {
     },
     submit (formName) {
       this.$refs[formName].validate((valid) => {
+        let sha256 = require('js-sha256').sha256
+        let oldPass = sha256(this.ruleForm2.name + this.ruleForm2.pass)
+        oldPass = oldPass.toUpperCase()
+        let passWord = sha256(this.ruleForm2.name + this.ruleForm2.newPass)
+        passWord = passWord.toUpperCase()
         if (valid) {
           let data = {
             'username': this.ruleForm2.name,
-            'oldPassword': this.ruleForm2.pass,
-            'password': this.ruleForm2.newPass
+            'oldPassword': oldPass,
+            'password': passWord
           }
           API.update(data).then(res => {
             if (res.status === 200) {
@@ -201,7 +211,8 @@ export default {
                 this.$refs.ruleForm.validateField('oldPass')
                 this.$message({
                   type: 'warning',
-                  message: this.$t('userSet.errorOldPassWord')
+                  message: this.$t('userSet.errorOldPassWord'),
+                  duration: 5000
                 })
               } else {
                 this.$message({
@@ -222,13 +233,15 @@ export default {
     login (e) {
       API.login(e).then(res => {
         if (res.status === 200 && res.data.code === 0) {
-          localStorage.setItem('userId', res.data.data.userId)
-          localStorage.setItem('user', res.data.data.username)
+          let base = JSON.parse(res.data.data)
+          localStorage.setItem('user', base.username)
+          localStorage.setItem('token', base.Authorization)
           this.$router.push('./index')
         } else {
           this.$message({
             type: 'warning',
-            message: this.$t('userSet.loginFail')
+            message: this.$t('userSet.loginFail'),
+            duration: 5000
           })
         }
       })

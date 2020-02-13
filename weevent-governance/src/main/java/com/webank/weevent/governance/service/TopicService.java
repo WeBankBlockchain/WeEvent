@@ -50,12 +50,8 @@ public class TopicService {
     @Autowired
     private BrokerService brokerService;
 
-
     @Autowired
     private CommonService commonService;
-
-    @Autowired
-    private PermissionService permissionService;
 
     private final String SPLIT = "-";
 

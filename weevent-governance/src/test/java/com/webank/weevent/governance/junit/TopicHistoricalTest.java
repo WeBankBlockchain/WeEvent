@@ -3,10 +3,7 @@ package com.webank.weevent.governance.junit;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.http.Cookie;
-
 import com.webank.weevent.governance.JUnitTestBase;
-import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.utils.JsonUtil;
 import com.webank.weevent.governance.utils.JwtUtils;
@@ -35,8 +32,6 @@ public class TopicHistoricalTest extends JUnitTestBase {
 
     private MockMvc mockMvc;
 
-    private Cookie cookie;
-
     private String token;
 
 
@@ -49,7 +44,6 @@ public class TopicHistoricalTest extends JUnitTestBase {
     @Before
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-        this.cookie = new Cookie(ConstantProperties.COOKIE_MGR_ACCOUNT_ID, "1");
     }
 
     @Before
@@ -75,7 +69,7 @@ public class TopicHistoricalTest extends JUnitTestBase {
     public void testHistoricalDataList() throws Exception {
         String content = "{\"groupId\":\"1\",\"userId\":\"1\",\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\",\"beginDate\":\"2019-12-08\",\"endDate\":\"2099-12-15\"}";
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/historicalData/list")
-                .contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn();
+                .contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token).content(content)).andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         String result = response.getContentAsString();
         Assert.assertNotNull(result);
@@ -87,7 +81,7 @@ public class TopicHistoricalTest extends JUnitTestBase {
     public void testEventList() throws Exception {
         String content = "{\"groupId\":\"1\",\"userId\":\"1\",\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\",\"beginDate\":\"2019-12-08\",\"endDate\":\"2099-12-15\"}";
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/historicalData/eventList")
-                .contentType(MediaType.APPLICATION_JSON_UTF8).cookie(cookie).content(content)).andReturn();
+                .contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token).content(content)).andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         String result = response.getContentAsString();
         Assert.assertNotNull(result);

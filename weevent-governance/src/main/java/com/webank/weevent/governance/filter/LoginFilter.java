@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.webank.weevent.governance.GovernanceApplication;
 import com.webank.weevent.governance.utils.JwtUtils;
 
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,7 +25,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private AuthenticationSuccessHandler loginSuccessHandler;
 
-
     public LoginFilter(AuthenticationManager authenticationManager, AuthenticationSuccessHandler loginSuccessHandler) {
         this.authenticationManager = authenticationManager;
         this.loginSuccessHandler = loginSuccessHandler;
@@ -39,14 +39,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
-        try {
-            String username = request.getParameter("username");
-            String password = request.getParameter("password");
-            return authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(username, password, new ArrayList<>()));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        return authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(username, password, new ArrayList<>()));
     }
 
     // after the user successfully logs in, this method will be called, and we generate a token in this method
@@ -54,7 +50,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
         String username = ((User) authResult.getPrincipal()).getUsername();
-        String token = JwtUtils.encodeToken(username, JwtUtils.PRIVATE_SECRET, JwtUtils.EXPIRE_TIME);
+        String token = JwtUtils.encodeToken(username, GovernanceApplication.environment.getProperty("jwt.private.secret"), JwtUtils.EXPIRE_TIME);
         response.addHeader(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token);
         loginSuccessHandler.onAuthenticationSuccess(request, response, authResult);
     }

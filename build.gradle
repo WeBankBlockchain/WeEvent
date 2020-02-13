@@ -1,9 +1,6 @@
 println("Notice: current gradle version is " + gradle.gradleVersion + ", WeEvent support gradle version in [4.10, 5.0)")
 
 ext {
-    // ----- org.springframework -----
-    // spring boot
-    springBoot2Version = "2.1.0.RELEASE"
     // spring
     spring5Version = "5.1.0.RELEASE"
     // data.spring-data-commons
@@ -35,7 +32,7 @@ ext {
     // org.fisco-bcos.web3sdk
     web3sdkVersion = [
             fiscoV1: "1.2.5",
-            fiscoV2: "2.2.0.120500-SNAPSHOT"
+            fiscoV2: "2.2.2"
     ]
     // fabric
     fabricVersion = "1.4.4"
@@ -67,10 +64,8 @@ ext {
     quartzVersion = "2.3.0"
     // Java-WebSocket
     WebSocketVersion = "1.4.0"
-    // JJWTVersion
-    JJWTVersion = "0.9.0";
     // JWTVersion
-    JWTVersion = "3.8.0";
+    JWTVersion = "3.8.0"
 }
 
 buildscript {
@@ -85,7 +80,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.0.RELEASE")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.10.RELEASE")
         classpath("gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.1.0")
     }
 }

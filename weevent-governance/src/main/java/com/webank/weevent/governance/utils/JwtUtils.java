@@ -1,8 +1,6 @@
 package com.webank.weevent.governance.utils;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.security.Security;
 import java.util.Calendar;
 
@@ -25,18 +23,18 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JwtUtils {
     public final static String AUTHORIZATION_HEADER_PREFIX = "Authorization";
-    public final static String PRIVATE_SECRET = "PrivateSecret";
-    public final static int EXPIRE_TIME = 60 * 60 * 24 * 1000;
+    public final static int EXPIRE_TIME = 60 * 60 * 24;
 
 
-    public static boolean verifierToken(String token) throws IOException {
+    public static boolean verifierToken(String token, String privateSecret) throws IOException {
         try {
-            JWTVerifier build = JWT.require(Algorithm.HMAC256(PRIVATE_SECRET)).build();
+            JWTVerifier build = JWT.require(Algorithm.HMAC256(privateSecret)).build();
             build.verify(token);
-            return true;
+            String property = Security.getProperty(token);
+            return property != null;
         } catch (Exception e) {
             log.error("token verification failed", e);
-            throw new IOException("token verification failed", e);
+            return false;
         }
 
     }
@@ -44,11 +42,10 @@ public class JwtUtils {
 
     /**
      * @param username
-     * @param secret
      * @param expiration
      * @return token
      */
-    public static String encodeToken(String username, String secret, int expiration) {
+    public static String encodeToken(String username, String privateSecret, int expiration) {
         try {
             JWTCreator.Builder builder = JWT.create();
             builder.withIssuer(username);
@@ -56,7 +53,7 @@ public class JwtUtils {
             Calendar now = Calendar.getInstance();
             now.add(Calendar.SECOND, expiration);
             builder.withExpiresAt(now.getTime());
-            return builder.sign(Algorithm.HMAC256(secret));
+            return builder.sign(Algorithm.HMAC256(privateSecret));
         } catch (JWTCreationException e) {
             log.error("create jwt token failed", e);
             return "";
@@ -64,16 +61,15 @@ public class JwtUtils {
     }
 
     /**
-     * decode VCEUser from token
+     * decode AccountEntity from token
+     * f
      *
      * @param token token
-     * @param secret sign secret
-     * @return VCEUser
+     * @return AccountEntity
      */
-    public static AccountEntity decodeToken(String token, String secret) {
+    public static AccountEntity decodeToken(String token, String privateSecret) {
         try {
-            // .withIssuer() ?
-            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(secret)).build();
+            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(privateSecret)).build();
             DecodedJWT jwt = verifier.verify(token);
             // check expired date
             if (Calendar.getInstance().getTime().after(jwt.getExpiresAt())) {
@@ -87,25 +83,7 @@ public class JwtUtils {
         }
     }
 
-
     public static String getAccountId(HttpServletRequest request) {
         return Security.getProperty(request.getHeader(AUTHORIZATION_HEADER_PREFIX));
-    }
-
-
-    public static String encryptPassWord(String password) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(password.getBytes(StandardCharsets.UTF_8));
-            StringBuffer buffer = new StringBuffer();
-            for (byte dg : md.digest()) {
-                buffer.append(String.format("%02X", dg));
-            }
-            return buffer.toString();
-        } catch (Exception e) {
-            log.error("encrypt passWord fail", e);
-            return null;
-        }
-
     }
 }

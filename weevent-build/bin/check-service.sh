@@ -23,7 +23,7 @@ function check_broker(){
 
 function check_governance(){
     echo "check governance service"
-    curl -s "http://127.0.0.1:8080/weevent-governance/topic/getTopics?pageIndex=0&pageSize=10" | grep 302000 >>/dev/null
+    curl -s  http://127.0.0.1:8080/weevent-governance/user/login -X POST -d "username=admin&password=AC0E7D037817094E9E0B4441F9BAE3209D67B02FA484917065F71B16109A1A78" | grep 'Authorization' >>/dev/null
     if [[ $? -eq 0 ]];then
         yellow_echo "governance service is ok"
     else
@@ -32,7 +32,7 @@ function check_governance(){
  }
 function check_processor(){
     echo "check processor service"
-    curl -s  -d 'payload={\"a\":\"1\"}&condition=a<10' http://127.0.0.1:8080/processor/checkWhereCondition | grep "errorCode" >>/dev/null
+    curl -s  -d 'payload={"a":"1"}&condition=a<10' http://127.0.0.1:8080/processor/checkWhereCondition | grep "errorCode" >>/dev/null
     if [[ $? -eq 0 ]];then
         yellow_echo "processor service is ok"
     else

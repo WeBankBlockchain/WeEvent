@@ -120,7 +120,7 @@
 <script>
 import API from '../API/resource'
 import tree from './tree.vue'
-import {checkRule} from '../utils/checkRule'
+import { checkRule } from '../utils/checkRule'
 export default {
   data () {
     var ruleName = (rule, value, callback) => {
@@ -416,6 +416,12 @@ export default {
     getRuleData () {
       let vm = this
       let str = vm.ruleLetter.join('')
+      let Js = vm.sqlOption.conditionFieldJson
+      if (Js.length === 1 && Js[0].children.length > 0) {
+        str = str.substr(1)
+        str = str.substr(0, str.length - 1)
+      }
+      // 在这处理
       vm.sqlOption.conditionField = str
       vm.functionList.forEach(e => {
         let index = 0
@@ -436,7 +442,7 @@ export default {
           }
           if (e === 'substring' || e === 'concat') {
             let endIndex = index
-            while (str[endIndex] !== ' ' && str[endIndex]) {
+            while (str[endIndex] !== ' ' && str[endIndex] !== '(' && str[endIndex]) {
               endIndex--
             }
             let lastIndex = index + e.length
@@ -454,7 +460,7 @@ export default {
           }
           if (e === 'trim') {
             let endIndex = index
-            while (str[endIndex] !== ' ' && str[endIndex]) {
+            while (str[endIndex] !== ' ' && str[endIndex] !== '(' && str[endIndex]) {
               endIndex--
             }
             item[0] = String(endIndex + 1)
@@ -471,7 +477,7 @@ export default {
               endIndex--
             }
             let start = index - 1
-            while (str[start] !== ' ' && str[start]) {
+            while (str[start] !== ' ' && str[start] !== '(' && str[start]) {
               start--
             }
             item[3] = str.substring(start + 1, endIndex + 1)
@@ -484,7 +490,6 @@ export default {
     getDetail () {
       let vm = this
       let data = {
-        'userId': localStorage.getItem('userId'),
         'brokerId': localStorage.getItem('brokerId'),
         'id': sessionStorage.getItem('ruleId')
       }
@@ -552,7 +557,7 @@ export default {
       })
     },
     getDBLsit () {
-      API.dbList({'userId': localStorage.getItem('userId')}).then(res => {
+      API.dbList({}).then(res => {
         if (res.data.status === 200) {
           this.dbList = [].concat(res.data.data)
         }
@@ -605,7 +610,7 @@ export default {
             return
           }
         }
-        if (!checkRule(this.columnName)) {
+        if (!checkRule(this.columnName, this.rule.payloadMap)) {
           return
         }
         if (e === 'rule') {
@@ -615,6 +620,7 @@ export default {
               data.payloadMap = JSON.parse(vm.rule.payloadMap)
             }
           }
+          data.conditionFieldJson = JSON.stringify(vm.rule.conditionFieldJson)
         }
         if (e === 'sql') {
           vm.ruleLetter = []
@@ -640,6 +646,7 @@ export default {
             }
           }
         }
+        console.log(data)
         API.ruleUpdate(data).then(res => {
           if (res.data.status === 200) {
             vm.$message({
@@ -652,7 +659,8 @@ export default {
           } else {
             vm.$message({
               type: 'warning',
-              message: res.data.message
+              message: res.data.message,
+              duration: 5000
             })
           }
         })

@@ -9,7 +9,6 @@ import com.webank.weevent.governance.handler.JsonAuthenticationEntryPoint;
 import com.webank.weevent.governance.handler.JsonLogoutSuccessHandler;
 import com.webank.weevent.governance.handler.LoginFailHandler;
 import com.webank.weevent.governance.service.AccountDetailsService;
-import com.webank.weevent.governance.utils.JwtUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,6 +43,7 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private AuthenticationSuccessHandler authenticationSuccessHandler;
 
+
     @Autowired
     private JsonLogoutSuccessHandler jsonLogoutSuccessHandler;
 
@@ -61,7 +61,7 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
                 .successHandler(authenticationSuccessHandler) // if login success
                 .failureHandler(loginfailHandler) // if login fail
                 .and()
-                .addFilterBefore(new UserFilter(), LoginFilter.class)
+                .addFilterAfter(new UserFilter(), LoginFilter.class)
                 .addFilter(new LoginFilter(authenticationManagerBean(), authenticationSuccessHandler))
                 .authorizeRequests()
                 .antMatchers("/user/**", "/", "/static/**", "/weevent-governance/user/**").permitAll()
@@ -85,7 +85,7 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
         auth.userDetailsService(userDetailService).passwordEncoder(new PasswordEncoder() {
             @Override
             public String encode(CharSequence rawPassword) {
-                return JwtUtils.encryptPassWord(rawPassword.toString());
+                return rawPassword.toString();
             }
 
             @Override

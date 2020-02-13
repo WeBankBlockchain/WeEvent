@@ -10,14 +10,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConstantProperties {
 
-    // constant
-    public static final String CONSTANT_PREFIX = "constant";
-    public static final String COOKIE_JSESSIONID = "JSESSIONID"; // cookie key---session
-    public static final String COOKIE_MGR_ACCOUNT = "MGR_ACCOUNT_C"; // cookie key---account
-    public static final String COOKIE_MGR_ACCOUNT_ID = "MGR_ACCOUNT_ID";//cookie---account id
-    public static final String COOKIE_GROUP_ID = "GROUP_ID";//cookie---group id
-    public static final String SESSION_MGR_ACCOUNT = "MGR_ACCOUNT_S"; // session key---account
-
     public static final String QUESTION_MARK = "?";
     public static final String AND_SYMBOL = "&";
     public static final String LAYER_SEPARATE = "/";
