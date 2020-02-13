@@ -66,6 +66,7 @@ create TABLE t_account (
 	function_array VARCHAR (1024),
 	group_id VARCHAR (255),
 	payload VARCHAR (4096),
+    rule_description VARCHAR(256) ,
 	payload_type INTEGER,
 	rule_database_id INTEGER,
 	rule_name VARCHAR (128),
