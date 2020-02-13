@@ -1,9 +1,12 @@
 package com.webank.weevent.broker.fisco.web3sdk;
 
 
+import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -13,6 +16,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.dto.ContractContext;
@@ -30,6 +34,7 @@ import com.webank.weevent.protocol.rest.entity.TbNode;
 import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
+import com.webank.weevent.sdk.FileChunksMeta;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.WeEvent;
@@ -87,6 +92,14 @@ public class FiscoBcos2 {
     // history topic, (address <-> version)
     private Map<String, Long> historyTopicVersion = new ConcurrentHashMap<>();
 
+    private String fileDirPath = "";
+    private long chunkSize;
+
+    // <fileId, md5>
+    private static Map<String, String> fileId2Md5Map = new ConcurrentHashMap<>();
+    // <fileId, bitSet>
+    private static Map<String, BitSet> chunkStatusMap = new ConcurrentHashMap<>();
+
     public FiscoBcos2(FiscoConfig fiscoConfig) {
         this.fiscoConfig = fiscoConfig;
     }
@@ -124,6 +137,8 @@ public class FiscoBcos2 {
                 }
             }
 
+            fileDirPath = BrokerApplication.weEventConfig.getBaseFilePath();
+            chunkSize = BrokerApplication.weEventConfig.getChunkSize();
             log.info("all supported solidity version: {}", this.historyTopicVersion);
         }
     }
@@ -540,5 +555,76 @@ public class FiscoBcos2 {
         }
 
         return tuple2.getValue2();
+    }
+
+    public FileChunksMeta createChunk(long fileSize, String md5) {
+        FileChunksMeta fileChunksMeta = new FileChunksMeta();
+        String fileId = DataTypeUtils.generateUuid();
+        fileChunksMeta.setChunkSize(chunkSize);
+        fileChunksMeta.setUuid(fileId);
+        fileId2Md5Map.put(fileId, md5);
+        return fileChunksMeta;
+    }
+
+    public FileChunksMeta upload(String fileId, String fileName, byte[] chunkData, int chunkIdx) {
+        FileChunksMeta fileChunksMeta = new FileChunksMeta();
+        String uploadDirPath = BrokerApplication.weEventConfig.getBaseFilePath() + File.separator + fileId;
+        String tempFileName = fileName + "_tmp";
+        File uploadFile = new File(uploadDirPath);
+        File tmpFile = new File(uploadDirPath, tempFileName);
+        if (!uploadFile.exists()) {
+            uploadFile.mkdirs();
+        }
+
+        try {
+            RandomAccessFile accessTmpFile = new RandomAccessFile(tmpFile, "rw");
+            // write chunk data
+            long offset = chunkSize * chunkIdx;
+            accessTmpFile.write(chunkData);
+            accessTmpFile.close();
+        } catch (IOException e) {
+            log.error("upload chunk failed, fileId:{}, chunkSize:{}", fileId, chunkIdx);
+        }
+
+        BitSet chunkBitSet = chunkStatusMap.get(fileId);
+        if (chunkBitSet == null) {
+            chunkBitSet = new BitSet();
+        }
+        chunkBitSet.set(chunkIdx);
+        chunkStatusMap.put(fileId, chunkBitSet);
+
+        fileChunksMeta.setUuid(fileId);
+        fileChunksMeta.setChunkNum(chunkIdx);
+        BitSet bs = new BitSet();
+        bs.set(chunkIdx);
+        fileChunksMeta.setChunkStatus(bs);
+
+        try {
+            writeChunkMeta(uploadDirPath, fileName, chunkIdx);
+        } catch (IOException e) {
+            log.error("write chunk meta error, e:{}", e);
+        }
+        return fileChunksMeta;
+    }
+
+    public FileChunksMeta listChunk(String fileId) {
+        FileChunksMeta fileChunksMeta = new FileChunksMeta();
+        fileChunksMeta.setUuid(fileId);
+        if (!chunkStatusMap.containsKey(fileId)) {
+            return fileChunksMeta;
+        }
+
+        fileChunksMeta.setChunkStatus(chunkStatusMap.get(fileId));
+        return fileChunksMeta;
+    }
+
+    private void writeChunkMeta(String uploadDirPath, String fileName, Integer chunkNum) throws IOException {
+        File metaFile = new File(uploadDirPath, fileName + ".meta");
+        RandomAccessFile accessConfFile = new RandomAccessFile(metaFile, "rw");
+
+        log.debug("set part " + chunkNum + " complete");
+        accessConfFile.setLength(chunkSize);
+        accessConfFile.seek(chunkNum);
+        accessConfFile.write(Byte.MAX_VALUE);
     }
 }

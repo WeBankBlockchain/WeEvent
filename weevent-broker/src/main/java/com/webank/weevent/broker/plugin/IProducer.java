@@ -4,6 +4,7 @@ package com.webank.weevent.broker.plugin;
 import java.util.concurrent.CompletableFuture;
 
 import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.FileChunksMeta;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
 
@@ -67,4 +68,12 @@ public interface IProducer extends IEventTopic {
      * @throws BrokerException BrokerException
      */
     CompletableFuture<SendResult> publish(WeEvent event, String groupId) throws BrokerException;
+
+    byte[] downloadChunk(String groupId, String fileId, int chunkIdx);
+
+    FileChunksMeta listChunk(String groupId, String fileId) throws BrokerException;
+
+    FileChunksMeta createChunk(String groupId, long fileSize, String md5) throws BrokerException;
+
+    FileChunksMeta uploadChunk(String groupId, String fileId, int chunkIdx, byte[] chunkData) throws BrokerException;
 }

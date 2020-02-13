@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
@@ -266,4 +267,16 @@ public final class DataTypeUtils {
         }
         return null;
     }
+
+    /**
+     * generate 32 length uuid
+     *
+     * @return uuid
+     */
+    public static String generateUuid() {
+        String uuid = UUID.randomUUID().toString();
+        return uuid.replace("-", "");
+    }
+
 }
+
