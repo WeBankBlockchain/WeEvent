@@ -56,7 +56,7 @@ public class SystemFunctionUtil {
             return false;
         }
         Pattern pattern = Pattern.compile("^[-\\+]?[.\\d]*$");
-        return pattern.matcher(str).matches();
+        return pattern.matcher(str).matches() && str.contains(".");
     }
 
     public static Pair<StringBuilder, Integer> numberOperator(StringBuilder sb, String conditionField, String[] arr, Map
