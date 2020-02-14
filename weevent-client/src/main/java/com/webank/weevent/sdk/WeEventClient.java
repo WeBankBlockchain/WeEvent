@@ -350,8 +350,8 @@ public class WeEventClient implements IWeEventClient {
     @Override
     public SendResult publishFile(String topic, String localFile) throws BrokerException, IOException {
         // upload file
-        FileChunks fileChunks = new FileChunks(this.brokerUrl + "/file");
-        String fileId = fileChunks.upload(localFile);
+        FileChunksTransport fileChunksTransport = new FileChunksTransport(this.brokerUrl + "/file");
+        String fileId = fileChunksTransport.upload(localFile);
 
         // publish file event
         Map<String, String> extensions = new HashMap<>();
@@ -364,13 +364,13 @@ public class WeEventClient implements IWeEventClient {
     }
 
     static class FileEventListener implements EventListener {
-        private final FileChunks fileChunks;
+        private final FileChunksTransport fileChunksTransport;
         private final FileListener fileListener;
 
         private String subscriptionId;
 
-        public FileEventListener(FileChunks fileChunks, FileListener fileListener) {
-            this.fileChunks = fileChunks;
+        public FileEventListener(FileChunksTransport fileChunksTransport, FileListener fileListener) {
+            this.fileChunksTransport = fileChunksTransport;
             this.fileListener = fileListener;
         }
 
@@ -385,7 +385,7 @@ public class WeEventClient implements IWeEventClient {
             String host = event.getExtensions().get("host");
             String localFile = null;
             try {
-                localFile = this.fileChunks.download(host, fileId);
+                localFile = this.fileChunksTransport.download(host, fileId);
             } catch (BrokerException | IOException e) {
                 log.error("detect exception", e);
                 this.onException(e);
@@ -402,8 +402,8 @@ public class WeEventClient implements IWeEventClient {
     @Override
     public String subscribeFile(String topic, String filePath, FileListener fileListener) throws BrokerException {
         // subscribe file event
-        FileChunks fileChunks = new FileChunks(this.brokerUrl + "/file", filePath);
-        FileEventListener fileEventListener = new FileEventListener(fileChunks, fileListener);
+        FileChunksTransport fileChunksTransport = new FileChunksTransport(this.brokerUrl + "/file", filePath);
+        FileEventListener fileEventListener = new FileEventListener(fileChunksTransport, fileListener);
         String subscriptionId = this.subscribe(topic, WeEvent.OFFSET_LAST, fileEventListener);
         fileEventListener.setSubscriptionId(subscriptionId);
 

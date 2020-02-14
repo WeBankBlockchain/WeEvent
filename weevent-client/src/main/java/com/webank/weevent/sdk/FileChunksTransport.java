@@ -17,16 +17,16 @@ import org.springframework.util.StringUtils;
  * @since 2020/02/12
  */
 @Slf4j
-public class FileChunks {
+public class FileChunksTransport {
     //like http://localhost:8080/weevent-broker/file
     private String svrUrl;
     private String downloadFilePath = "";
 
-    public FileChunks(String svrUrl) {
+    public FileChunksTransport(String svrUrl) {
         this.svrUrl = svrUrl;
     }
 
-    public FileChunks(String svrUrl, String downloadFilePath) {
+    public FileChunksTransport(String svrUrl, String downloadFilePath) {
         this.svrUrl = svrUrl;
         this.downloadFilePath = downloadFilePath;
     }

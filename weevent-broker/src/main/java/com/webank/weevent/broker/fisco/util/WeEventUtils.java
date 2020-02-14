@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 
@@ -37,4 +38,13 @@ public class WeEventUtils {
         return (new File(url.getPath())).getParentFile().getPath().concat(File.separator);
     }
 
+    /**
+     * generate 32 length uuid
+     *
+     * @return uuid
+     */
+    public static String generateUuid() {
+        String uuid = UUID.randomUUID().toString();
+        return uuid.replace("-", "");
+    }
 }

@@ -8,7 +8,6 @@ import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.FileChunksMeta;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
 
@@ -50,34 +49,5 @@ public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IPr
                     new String(event.getContent(), StandardCharsets.UTF_8),
                     DataTypeUtils.object2Json(event.getExtensions()));
         }
-    }
-
-    @Override
-    public byte[] downloadChunk(String groupId, String fileId, int chunkIdx) {
-        return new byte[0];
-    }
-
-    @Override
-    public FileChunksMeta listChunk(String groupIdStr, String fileId) throws BrokerException {
-        String groupId = selectGroupId(groupIdStr);
-        this.validateGroupId(groupId);
-        return fiscoBcosDelegate.listChunk(Long.valueOf(groupId), fileId);
-    }
-
-    @Override
-    public FileChunksMeta createChunk(String groupIdStr, long fileSize, String md5) throws BrokerException {
-        String groupId = selectGroupId(groupIdStr);
-        this.validateGroupId(groupId);
-
-        return fiscoBcosDelegate.createChunk(Long.valueOf(groupId), fileSize, md5);
-    }
-
-    @Override
-    public FileChunksMeta uploadChunk(String groupIdStr, String fileId, int chunkIdx, byte[] chunkData) throws BrokerException {
-        String groupId = selectGroupId(groupIdStr);
-        this.validateGroupId(groupId);
-
-        // fileName?
-        return fiscoBcosDelegate.upload(Long.valueOf(groupId), fileId, "", chunkData, chunkIdx);
     }
 }

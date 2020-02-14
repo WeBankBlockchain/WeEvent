@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
@@ -36,12 +35,14 @@ public final class DataTypeUtils {
     private static String STRING_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static Map<String, String> topicHashMap = new ConcurrentHashMap<>();
     private static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     static {
         // Include.NON_NULL Property is NULL and not serialized
         OBJECT_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         //Do not convert inconsistent fields
         OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
+
     /**
      * encode eventId
      *
@@ -195,6 +196,7 @@ public final class DataTypeUtils {
 
     /**
      * convert object to String
+     *
      * @param object
      * @return json data
      * @throws BrokerException
@@ -210,6 +212,7 @@ public final class DataTypeUtils {
 
     /**
      * convert jsonString to object
+     *
      * @param jsonString json data
      * @param valueType
      * @param <T>
@@ -228,6 +231,7 @@ public final class DataTypeUtils {
 
     /**
      * convert jsonString to ListPage<T>
+     *
      * @param jsonString json data
      * @param tclass T which in ListPage<T>
      * @param <T> ListPage
@@ -250,6 +254,7 @@ public final class DataTypeUtils {
 
     /**
      * convert object to List<T>
+     *
      * @param object obj
      * @param clazz clazz
      * @param <T> T
@@ -257,26 +262,13 @@ public final class DataTypeUtils {
      */
     public static <T> List<T> object2List(Object object, Class<T> clazz) {
         List<T> result = new ArrayList<>();
-        if(object instanceof List<?>)
-        {
-            for (Object o : (List<?>) object)
-            {
+        if (object instanceof List<?>) {
+            for (Object o : (List<?>) object) {
                 result.add(clazz.cast(o));
             }
             return result;
         }
         return null;
     }
-
-    /**
-     * generate 32 length uuid
-     *
-     * @return uuid
-     */
-    public static String generateUuid() {
-        String uuid = UUID.randomUUID().toString();
-        return uuid.replace("-", "");
-    }
-
 }
 

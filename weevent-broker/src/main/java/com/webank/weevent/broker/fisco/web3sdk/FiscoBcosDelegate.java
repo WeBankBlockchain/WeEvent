@@ -21,7 +21,6 @@ import com.webank.weevent.protocol.rest.entity.TbNode;
 import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
-import com.webank.weevent.sdk.FileChunksMeta;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.WeEvent;
@@ -462,31 +461,6 @@ public class FiscoBcosDelegate {
             throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
         } else {
             return this.fiscoBcos2Map.get(groupId).listOperator(topicName);
-        }
-    }
-
-    public FileChunksMeta createChunk(Long groupId, long fileSize, String md5) throws BrokerException {
-        if (this.fiscoBcos != null) {
-            throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
-        } else {
-            return this.fiscoBcos2Map.get(groupId).createChunk(fileSize, md5);
-        }
-    }
-
-
-    public FileChunksMeta upload(Long groupId, String fileId, String fileName, byte[] chunkData, int chunkIdx) throws BrokerException {
-        if (this.fiscoBcos != null) {
-            throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
-        } else {
-            return this.fiscoBcos2Map.get(groupId).upload(fileId, fileName, chunkData, chunkIdx);
-        }
-    }
-
-    public FileChunksMeta listChunk(Long groupId, String fileId) throws BrokerException {
-        if (this.fiscoBcos != null) {
-            throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
-        } else {
-            return this.fiscoBcos2Map.get(groupId).listChunk(fileId);
         }
     }
 }
