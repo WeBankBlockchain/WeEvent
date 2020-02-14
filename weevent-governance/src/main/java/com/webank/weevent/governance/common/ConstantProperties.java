@@ -63,8 +63,8 @@ public class ConstantProperties {
 
 
     //project business constant==============================
-    public final static int RULE_DESTINATION_TOPIC = 1;
-    public final static int RULE_DESTINATION_DATABASE = 2;
+    public final static Integer RULE_DESTINATION_TOPIC = 1;
+    public final static Integer RULE_DESTINATION_DATABASE = 2;
 
     public final static long NOT_DELETED = 0L;
 
@@ -72,11 +72,11 @@ public class ConstantProperties {
     public final static String CREATOR = "1";
     public final static String AUTHORIZED = "2";
 
-    public final static int JSON = 1;
+    public final static Integer JSON = 1;
 
-    public final static int NOT_STARTED = 0;
-    public final static int RUNNING = 1;
-    public final static int IS_DELETED = 2;
+    public final static Integer NOT_STARTED = 0;
+    public final static Integer RUNNING = 1;
+    public final static Integer IS_DELETED = 2;
 
     //project business constant==============================
 
