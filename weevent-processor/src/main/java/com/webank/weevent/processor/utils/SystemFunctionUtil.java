@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +51,14 @@ public class SystemFunctionUtil {
         return replaceCondition(systemFunctionMessage, conditionField, payloadMap);
     }
 
+    public static boolean isDouble(String str) {
+        if (null == str || "".equals(str)) {
+            return false;
+        }
+        Pattern pattern = Pattern.compile("^[-\\+]?[.\\d]*$");
+        return pattern.matcher(str).matches() && str.contains(".");
+    }
+
     public static Pair<StringBuilder, Integer> numberOperator(StringBuilder sb, String conditionField, String[] arr, Map
             payload, int changePosition) {
         Integer start = Integer.valueOf(arr[0]);
@@ -58,22 +67,38 @@ public class SystemFunctionUtil {
         int changePositionAfter = 0;
         switch (type) {
             case "abs":
-                sb.replace(start - changePosition, end - changePosition, String.valueOf(Math.abs((Integer) payload.get(arr[3]))));
+                if (isDouble((payload.get(arr[3])).toString())) {
+                    sb.replace(start - changePosition, end - changePosition, String.valueOf(Math.abs((Double) payload.get(arr[3]))));
+                } else {
+                    sb.replace(start - changePosition, end - changePosition, String.valueOf(Math.abs((Integer) payload.get(arr[3]))));
+                }
                 changePositionAfter = changePosition(conditionField, sb.toString());
                 break;
 
             case "ceil":
-                sb.replace(start - changePosition, end - changePosition, String.valueOf(Math.ceil((Integer) payload.get(arr[3]))));
+                if (isDouble((payload.get(arr[3])).toString())) {
+                    sb.replace(start - changePosition, end - changePosition, String.valueOf(Math.ceil((Double) payload.get(arr[3]))));
+                } else {
+                    sb.replace(start - changePosition, end - changePosition, String.valueOf(Math.ceil((Integer) payload.get(arr[3]))));
+                }
                 changePositionAfter = changePosition(conditionField, sb.toString());
                 break;
 
             case "floor":
-                sb.replace(start - changePosition, end - changePosition, String.valueOf(Math.floor((Integer) payload.get(arr[3]))));
+                if (isDouble((payload.get(arr[3])).toString())) {
+                    sb.replace(start - changePosition, end - changePosition, String.valueOf(Math.floor((Double) payload.get(arr[3]))));
+                } else {
+                    sb.replace(start - changePosition, end - changePosition, String.valueOf(Math.floor((Integer) payload.get(arr[3]))));
+                }
                 changePositionAfter = changePosition(conditionField, sb.toString());
                 break;
 
             case "round":
-                sb.replace(start - changePosition, end - changePosition, String.valueOf(Math.round(Math.round((Integer) payload.get(arr[3])))));
+                if (isDouble((payload.get(arr[3])).toString())) {
+                    sb.replace(start - changePosition, end - changePosition, String.valueOf(Math.round((Double) payload.get(arr[3]))));
+                } else {
+                    sb.replace(start - changePosition, end - changePosition, String.valueOf(Math.round(Math.round((Integer) payload.get(arr[3])))));
+                }
                 changePositionAfter = changePosition(conditionField, sb.toString());
                 break;
             default:
