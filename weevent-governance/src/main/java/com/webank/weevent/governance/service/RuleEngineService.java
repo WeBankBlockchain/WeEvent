@@ -608,7 +608,7 @@ public class RuleEngineService {
     }
 
     private boolean verifyInfiniteLoop(RuleEngineEntity ruleEngineEntity) {
-        if (ruleEngineEntity.getConditionType() == null || ruleEngineEntity.getConditionType() == ConstantProperties.RULE_DESTINATION_TOPIC) {
+        if (!ConstantProperties.RULE_DESTINATION_TOPIC.equals(ruleEngineEntity.getConditionType())) {
             return true;
         }
         //query all historical rules according to brokerId groupId
