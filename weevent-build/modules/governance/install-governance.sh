@@ -76,10 +76,10 @@ function governance_setup() {
 
 function switch_database_to_mysql() {
     mysql_config_line=$(cat -n $1|grep 'spring.jpa.database=mysql'|awk '{print $1}'|head -1)
-    sed -i ''$mysql_config_line','$(expr $mysql_config_line + 4)'s/^#//' $1
+    sed -i ''$mysql_config_line','$(($mysql_config_line+4))'s/^#//' $1
 
     h2_config_line=$(cat -n $1|grep 'spring.jpa.database=h2'|awk '{print $1}'|head -1)
-    sed -i ''$h2_config_line','$(expr $h2_config_line + 4)'s/^/#/' $1
+    sed -i ''$h2_config_line','$(($h2_config_line+4))'s/^/#/' $1
 }
 
 #get parameter
