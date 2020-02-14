@@ -20,6 +20,8 @@ function processor_setup() {
     echo "set server_port success"
 
     if [[ ${database_type} != "h2" ]];then
+        switch_database_to_mysql "${application_properties}"
+
         if [[ -z ${mysql_ip} ]];then
             echo "mysql_ip is empty."
             echo "set mysql_ip failed"
@@ -68,6 +70,14 @@ function processor_setup() {
     echo "init db success"
     
     echo "processor module install success"
+}
+
+function switch_database_to_mysql() {
+    mysql_config_line=$(cat -n $1|grep 'spring.jpa.database=mysql'|awk '{print $1}'|head -1)
+    sed -i ''$mysql_config_line','$((mysql_config_line+4))'s/^#//' $1
+
+    h2_config_line=$(cat -n $1|grep 'spring.jpa.database=h2'|awk '{print $1}'|head -1)
+    sed -i ''$h2_config_line','$((h2_config_line+4))'s/^/#/' $1
 }
 
 #get parameter
