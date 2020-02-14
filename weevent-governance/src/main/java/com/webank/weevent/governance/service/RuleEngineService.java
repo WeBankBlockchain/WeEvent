@@ -219,7 +219,7 @@ public class RuleEngineService {
                 this.startProcessRule(request, ruleEngineEntity);
             }
 
-            BeanUtils.copyProperties(rule, ruleEngineEntity, "ruleName", "payload", "selectField", "conditionType",
+            BeanUtils.copyProperties(rule, ruleEngineEntity, "ruleDescription", "ruleName", "payload", "selectField", "conditionType",
                     "fromDestination", "toDestination", "ruleDataBaseId", "errorDestination", "functionArray", "conditionField", "conditionFieldJson");
             ruleEngineRepository.save(ruleEngineEntity);
             log.info("update ruleEngine end");
@@ -608,7 +608,7 @@ public class RuleEngineService {
     }
 
     private boolean verifyInfiniteLoop(RuleEngineEntity ruleEngineEntity) {
-        if (!(String.valueOf(ConstantProperties.RULE_DESTINATION_TOPIC).equals(ruleEngineEntity.getConditionType().toString()))) {
+        if (!ConstantProperties.RULE_DESTINATION_TOPIC.equals(ruleEngineEntity.getConditionType())) {
             return true;
         }
         //query all historical rules according to brokerId groupId
