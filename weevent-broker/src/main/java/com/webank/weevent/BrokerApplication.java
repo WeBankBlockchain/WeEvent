@@ -16,6 +16,7 @@ import com.webank.weevent.broker.fabric.sdk.FabricDelegate;
 import com.webank.weevent.broker.fisco.FiscoBcosBroker4Consumer;
 import com.webank.weevent.broker.fisco.FiscoBcosBroker4Producer;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.file.ZKChunksMeta;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
@@ -29,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -270,6 +272,14 @@ public class BrokerApplication {
             default:
                 throw new BrokerException("Invalid chain type");
         }
+    }
+
+    // FileChunksMeta in Zookeeper
+    @Bean
+    @ConditionalOnProperty(prefix = "spring.cloud.zookeeper", name = "enabled", havingValue = "true", matchIfMissing = true)
+    public static ZKChunksMeta getZKChunksMeta(
+            @Value("spring.cloud.zookeeper.connect-string") String connectString) throws BrokerException {
+        return new ZKChunksMeta("/WeEvent", connectString);
     }
 
     // http filter
