@@ -10,6 +10,14 @@ import com.webank.weevent.sdk.BrokerException;
  * @since 2020/02/13
  */
 public class FileTransportSender extends FileTransport {
+    public void start() throws BrokerException {
+
+    }
+
+    public void stop() throws BrokerException {
+
+    }
+
     public void openChannel(String fileId) throws BrokerException {
         // open channel for received file transport status and then subscribe it
         String pubEndian = getPublishEndianTopic(topic, fileId);
@@ -26,7 +34,7 @@ public class FileTransportSender extends FileTransport {
         this.unSubscribeAMOPTopic(pubEndian);
     }
 
-    public void send(String topic, String fileId, int chunkIndex, byte[] data) throws BrokerException {
+    public void send(String fileId, int chunkIndex, byte[] data) throws BrokerException {
 
     }
 }
