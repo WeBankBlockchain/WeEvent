@@ -25,12 +25,13 @@
         <result column="cep_id" property="cepId" jdbcType="VARCHAR"/>
         <result column="function_array" property="functionArray" jdbcType="VARCHAR"/>
         <result column="system_tag" property="systemTag" jdbcType="VARCHAR"/>
+        <result column="rule_description" property="ruleDescription" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id,create_date,last_update, rule_name,payload_type,payload,broker_id,user_id,cep_id,
         from_destination,to_destination,select_field,condition_type,condition_field,condition_field_json,
-        rule_database_id,error_destination,status,group_id,system_tag,function_array
+        rule_database_id,error_destination,status,group_id,system_tag,function_array,rule_description
     </sql>
 
 
