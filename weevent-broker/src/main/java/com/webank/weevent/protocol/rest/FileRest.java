@@ -1,8 +1,10 @@
 package com.webank.weevent.protocol.rest;
 
+import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.file.FileTransportReceiver;
 import com.webank.weevent.broker.fisco.file.FileTransportSender;
 import com.webank.weevent.broker.fisco.file.ZKChunksMeta;
+import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.fisco.util.WeEventUtils;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
@@ -50,9 +52,14 @@ public class FileRest {
 
     @RequestMapping(path = "/createChunk")
     public FileChunksMeta createChunk(@RequestParam(name = "groupId", required = false) String groupId,
+                                      @RequestParam(name = "fileName") String fileName,
                                       @RequestParam(name = "fileSize") long fileSize,
                                       @RequestParam(name = "md5") String md5) throws BrokerException {
         log.info("createChunk, groupId:{} md5:{}", groupId, md5);
+
+        ParamCheckUtils.validateFileName(fileName);
+        ParamCheckUtils.validateFileSize(fileSize);
+        ParamCheckUtils.validateFileMd5(md5);
 
         String fileId = WeEventUtils.generateUuid();
 
@@ -62,6 +69,10 @@ public class FileRest {
         // create FileChunksMeta
         FileChunksMeta fileChunksMeta = new FileChunksMeta();
         fileChunksMeta.setFileId(fileId);
+        fileChunksMeta.setFileName(fileName);
+        fileChunksMeta.setFileSize(fileSize);
+        fileChunksMeta.setFileMd5(md5);
+        fileChunksMeta.setChunkSize(BrokerApplication.weEventConfig.getChunkSize());
 
         // update to Zookeeper
         this.zkChunksMeta.addChunks(fileId, fileChunksMeta);
@@ -76,48 +87,12 @@ public class FileRest {
                                       @RequestParam(name = "chunkData") byte[] chunkData) throws BrokerException {
         log.info("uploadChunk, groupId:{}. fileId:{}. chunkIdx:{}", groupId, fileId, chunkIdx);
 
-        /*
-        FileChunksMeta fileChunksMeta = new FileChunksMeta();
-        String uploadDirPath = BrokerApplication.weEventConfig.getBaseFilePath() + File.separator + fileId;
-        String tempFileName = fileName + "_tmp";
-        File uploadFile = new File(uploadDirPath);
-        File tmpFile = new File(uploadDirPath, tempFileName);
-        if (!uploadFile.exists()) {
-            uploadFile.mkdirs();
-        }
-
-        try {
-            RandomAccessFile accessTmpFile = new RandomAccessFile(tmpFile, "rw");
-            // write chunk data
-            long offset = chunkSize * chunkIdx;
-            accessTmpFile.write(chunkData);
-            accessTmpFile.close();
-        } catch (IOException e) {
-            log.error("upload chunk failed, fileId:{}, chunkSize:{}", fileId, chunkIdx);
-        }
-
-        BitSet chunkBitSet = chunkStatusMap.get(fileId);
-        if (chunkBitSet == null) {
-            chunkBitSet = new BitSet();
-        }
-        chunkBitSet.set(chunkIdx);
-        chunkStatusMap.put(fileId, chunkBitSet);
-
-        fileChunksMeta.setUuid(fileId);
-        fileChunksMeta.setChunkNum(chunkIdx);
-        BitSet bs = new BitSet();
-        bs.set(chunkIdx);
-        fileChunksMeta.setChunkStatus(bs);
-
-        try {
-            writeChunkMeta(uploadDirPath, fileName, chunkIdx);
-        } catch (IOException e) {
-            log.error("write chunk meta error, e:{}", e);
-        }
-        return fileChunksMeta;
-        */
+        ParamCheckUtils.validateFileId(fileId);
+        ParamCheckUtils.validateChunkIdx(chunkIdx);
+        ParamCheckUtils.validateChunkData(chunkData);
 
         // send data to FileTransportSender
+        this.fileTransportSender.send(fileId, chunkIdx, chunkData);
 
         // update bitmap in Zookeeper
         boolean finish = this.zkChunksMeta.setChunksBit(fileId, chunkIdx);
@@ -136,15 +111,18 @@ public class FileRest {
                                 @RequestParam(name = "chunkIdx") int chunkIdx) throws BrokerException {
         log.info("downloadChunk, groupId:{}. fileId:{}. chunkIdx:{}", groupId, fileId, chunkIdx);
 
-        // get file data from FileTransportReceiver
+        ParamCheckUtils.validateFileId(fileId);
+        ParamCheckUtils.validateChunkIdx(chunkIdx);
 
-        return null;
+        // get file data from FileTransportReceiver
+        return this.fileTransportReceiver.downloadChunk(fileId, chunkIdx);
     }
 
     @RequestMapping(path = "/listChunk")
     public FileChunksMeta listChunk(@RequestParam(name = "groupId", required = false) String groupId,
                                     @RequestParam(name = "fileId") String fileId) throws BrokerException {
         log.info("listChunk, groupId:{}. fileId:{}", groupId, fileId);
+        ParamCheckUtils.validateFileId(fileId);
 
         // get file chunks info from Zookeeper
         return this.zkChunksMeta.getChunks(fileId);

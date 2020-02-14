@@ -1,14 +1,19 @@
 package com.webank.weevent.sdk;
 
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.springframework.util.DigestUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Upload&Download File in chunks.
@@ -21,17 +26,21 @@ public class FileChunksTransport {
     //like http://localhost:8080/weevent-broker/file
     private String svrUrl;
     private String downloadFilePath = "";
+    private CloseableHttpClient httpClient;
+    private String groupId;
 
-    public FileChunksTransport(String svrUrl) {
+    public FileChunksTransport(String svrUrl, CloseableHttpClient httpClient) {
         this.svrUrl = svrUrl;
+        this.httpClient = httpClient;
     }
 
-    public FileChunksTransport(String svrUrl, String downloadFilePath) {
+    public FileChunksTransport(String svrUrl, String downloadFilePath, CloseableHttpClient httpClient) {
         this.svrUrl = svrUrl;
         this.downloadFilePath = downloadFilePath;
+        this.httpClient = httpClient;
     }
 
-    public String upload(String localFile) throws BrokerException, IOException {
+    public String upload(String localFile, String groupId) throws BrokerException, IOException {
         log.info("try to upload file {}", localFile);
 
         // get file initial information
@@ -43,7 +52,7 @@ public class FileChunksTransport {
         fileChunksMeta.setFileMd5(DigestUtils.md5DigestAsHex(fileInputStream));
 
         // get chunk information
-        fileChunksMeta = this.getFileChunksInfo(fileChunksMeta);
+        fileChunksMeta = this.getFileChunksInfo(fileChunksMeta, groupId);
 
         // upload every single chunk data
         for (int chunkIdx = 0; chunkIdx < fileChunksMeta.getChunkNum(); chunkIdx++) {
@@ -66,7 +75,7 @@ public class FileChunksTransport {
         // get chunk information
         FileChunksMeta fileChunksMeta = new FileChunksMeta();
         fileChunksMeta.setFileId(fileId);
-        fileChunksMeta = this.getFileChunksInfo(fileChunksMeta);
+        fileChunksMeta = this.getFileChunksInfo(fileChunksMeta, "");
 
         // create file
         String fileName = this.downloadFilePath + "/" + fileChunksMeta.getFileName();
@@ -91,29 +100,87 @@ public class FileChunksTransport {
         return fileName;
     }
 
-    private FileChunksMeta getFileChunksInfo(FileChunksMeta fileChunksMeta) {
+    private FileChunksMeta getFileChunksInfo(FileChunksMeta fileChunksMeta, String groupId) throws BrokerException {
+        FileChunksMeta fileChunksMetaResponse;
+        StringBuffer params = new StringBuffer();
+
+        HttpGet httpGet;
+
         if (StringUtils.isEmpty(fileChunksMeta.getFileId())) { // first create
-            // this.svrUrl + "/createChunk"
+            params.append("groupId=" + groupId);
+            params.append("fileName=" + fileChunksMeta.getFileName());
+            params.append("fileSize=" + fileChunksMeta.getFileSize());
+            params.append("md5=" + fileChunksMeta.getFileMd5());
+            httpGet = new HttpGet(this.svrUrl + "/createChunk" + "?" + params);
         } else { // continue upload
-            // this.svrUrl + "/listChunk"
+            params.append("fileId=" + fileChunksMeta.getFileId());
+            params.append("chunkIdx=" + fileChunksMeta.getChunkNum());
+            // params.append("chunkData="+chunkData);
+            httpGet = new HttpGet(this.svrUrl + "/uploadChunk" + "?" + params);
         }
-        fileChunksMeta.setFileId("a");
-        fileChunksMeta.setChunkSize(256);
-        fileChunksMeta.setChunkNum((int) fileChunksMeta.getFileSize() / fileChunksMeta.getChunkSize() + 1);
-        return fileChunksMeta;
+
+        CloseableHttpResponse closeResponse;
+        try {
+            closeResponse = httpClient.execute(httpGet);
+            String responseResult = EntityUtils.toString(closeResponse.getEntity());
+            fileChunksMetaResponse = DataUtils.parseObject(responseResult, FileChunksMeta.class);
+        } catch (IOException e) {
+            log.error("execute http request :{} error, e:{}", httpGet.getURI(), e);
+            throw new BrokerException(ErrorCode.HTTP_REQUEST_EXECUTE_ERROR);
+        }
+
+//        fileChunksMeta.setFileId("a");
+//        fileChunksMeta.setChunkSize(256);
+//        fileChunksMeta.setChunkNum((int) fileChunksMeta.getFileSize() / fileChunksMeta.getChunkSize() + 1);
+        return fileChunksMetaResponse;
     }
 
-    private boolean uploadChunk(String fileId, int chunkIdx, byte[] chunkData) {
+    private boolean uploadChunk(String fileId, int chunkIdx, byte[] chunkData) throws BrokerException {
         // this.svrUrl + "/uploadChunk"
+        StringBuffer params = new StringBuffer();
+        params.append("fileId=" + fileId);
+        params.append("chunkIdx=" + chunkIdx);
+        params.append("chunkData=" + chunkData);
+        HttpGet httpGet = new HttpGet(this.svrUrl + "/uploadChunk" + "?" + params);
+
+        FileChunksMeta fileChunksMetaResponse;
+        CloseableHttpResponse closeResponse;
+        try {
+            closeResponse = httpClient.execute(httpGet);
+            String responseResult = EntityUtils.toString(closeResponse.getEntity());
+            fileChunksMetaResponse = DataUtils.parseObject(responseResult, FileChunksMeta.class);
+        } catch (IOException e) {
+            log.error("execute http request :{} error, e:{}", httpGet.getURI(), e);
+            throw new BrokerException(ErrorCode.HTTP_REQUEST_EXECUTE_ERROR);
+        }
 
         log.info("upload chunk success, {}@{} {}", fileId, chunkIdx, chunkData.length);
-        return false;
+        return fileChunksMetaResponse.getChunkStatus().get(chunkIdx);
     }
 
-    private byte[] downloadChunk(String fileId, int chunkIdx) {
+    private byte[] downloadChunk(String fileId, int chunkIdx) throws BrokerException {
         // this.svrUrl + "/downloadChunk"
-        byte[] chunkData = new byte[1];
+        StringBuffer params = new StringBuffer();
+        params.append("fileId=" + fileId);
+        params.append("chunkIdx=" + chunkIdx);
+        HttpGet httpGet = new HttpGet(this.svrUrl + "/downloadChunk" + "?" + params);
+
+        CloseableHttpResponse closeResponse;
+        byte[] chunkData;
+        try {
+            closeResponse = httpClient.execute(httpGet); // byte[]
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            closeResponse.getEntity().writeTo(bos);
+            chunkData = bos.toByteArray();
+        } catch (IOException e) {
+            log.error("execute http request :{} error, e:{}", httpGet.getURI(), e);
+            throw new BrokerException(ErrorCode.HTTP_REQUEST_EXECUTE_ERROR);
+        }
+
+        // byte[] chunkData = new byte[1];
         log.info("download chunk success, {}@{} {}", fileId, chunkIdx, chunkData.length);
         return chunkData;
     }
+
+
 }
