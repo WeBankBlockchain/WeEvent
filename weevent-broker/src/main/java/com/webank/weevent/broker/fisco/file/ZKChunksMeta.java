@@ -44,6 +44,7 @@ public class ZKChunksMeta {
                 retryPolicy);
 
         try {
+            this.zkClient.start();
             this.zkClient.checkExists().creatingParentsIfNeeded().forPath(zkPath);
             log.info("ensure zookeeper root path, {}", zkPath);
         } catch (Exception e) {

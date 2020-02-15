@@ -30,7 +30,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -129,9 +128,6 @@ class HttpInterceptorConfig implements WebMvcConfigurer {
 @SpringBootApplication
 public class BrokerApplication {
     public static ApplicationContext applicationContext;
-
-    public static Environment environment;
-
     public static WeEventConfig weEventConfig;
 
     public static void main(String[] args) {
@@ -149,11 +145,6 @@ public class BrokerApplication {
     @Autowired
     public void setContext(ApplicationContext applicationContext) {
         BrokerApplication.applicationContext = applicationContext;
-    }
-
-    @Autowired
-    public void setEnvironment(Environment environment) {
-        BrokerApplication.environment = environment;
     }
 
     @Autowired
@@ -277,9 +268,15 @@ public class BrokerApplication {
     // FileChunksMeta in Zookeeper
     @Bean
     @ConditionalOnProperty(prefix = "spring.cloud.zookeeper", name = "enabled", havingValue = "true", matchIfMissing = true)
-    public static ZKChunksMeta getZKChunksMeta(
-            @Value("spring.cloud.zookeeper.connect-string") String connectString) throws BrokerException {
-        return new ZKChunksMeta("/WeEvent", connectString);
+    public static ZKChunksMeta getZKChunksMeta(Environment environment) throws BrokerException {
+        String connectString = "127.0.0.1:2181";
+
+        final String key = "spring.cloud.zookeeper.connect-string";
+        if (environment.containsProperty(key)) {
+            connectString = environment.getProperty(key);
+        }
+
+        return new ZKChunksMeta("/WeEvent/file", connectString);
     }
 
     // http filter

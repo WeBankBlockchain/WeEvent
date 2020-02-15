@@ -24,6 +24,7 @@ import com.webank.weevent.sdk.WeEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.data.util.Pair;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -55,7 +56,10 @@ public class BrokerStomp extends TextWebSocketHandler {
     private IProducer iproducer;
     private IConsumer iconsumer;
 
-    // session id <-> header subscription id in stomp <-> (subscription id in consumer, topic)]
+    String authAccount = "";
+    String authPassword = "";
+
+    // session id <-> (subscription id in stomp's header <-> (subscription id in consumer, topic))
     private static Map<String, Map<String, Pair<String, String>>> sessionContext = new HashMap<>();
 
     @Autowired
@@ -68,22 +72,28 @@ public class BrokerStomp extends TextWebSocketHandler {
         this.iconsumer = consumer;
     }
 
+    @Autowired
+    public void setAuthAccount(Environment environment) {
+        this.authAccount = environment.getProperty("spring.security.user.name");
+        this.authPassword = environment.getProperty("spring.security.user.password");
+    }
+
     private void handleSingleMessage(Message<byte[]> msg, WebSocketSession session) {
         // get the frame type
         String frameType = "";
         Object frameTypeCommand = msg.getHeaders().get("stompCommand");
         if (frameTypeCommand != null) {
             frameType = frameTypeCommand.toString();
-
         }
+
         // for MESSAGE frame
         Object simpMessageType = msg.getHeaders().get("simpMessageType");
-        if ((simpMessageType != null) && (simpMessageType.toString().equals("HEARTBEAT"))) {
+        if (simpMessageType != null && "HEARTBEAT".equals(simpMessageType.toString())) {
             frameType = "HEARTBEAT";
         }
 
         if ("HEARTBEAT".equals(frameType)) {
-            log.debug("HEARTBEAT from client:{}", session.getId());
+            log.debug("HEARTBEAT from client: {}", session.getId());
             return;
         }
 
@@ -119,7 +129,7 @@ public class BrokerStomp extends TextWebSocketHandler {
     private void handleConnectMessage(Message<byte[]> msg, WebSocketSession session) {
         StompHeaderAccessor accessor;
         StompCommand command;
-        command = checkConnect(msg);
+        command = author(msg);
 
         // package the return frame
         accessor = StompHeaderAccessor.create(command);
@@ -288,22 +298,20 @@ public class BrokerStomp extends TextWebSocketHandler {
         accessor.setNativeHeader("message", "NOT SUPPORT COMMAND");
         // a unique identifier for that message and a subscription header matching the identifier of the subscription that is receiving the message.
         sendSimpleMessage(session, accessor);
+
+        // follow protocol 1.2 to close connection
         try {
-            super.handleTransportError(session, new Exception("unknown command"));
-            // follow protocol 1.2 to close connection
             clearSession(session);
             session.close();
         } catch (Exception e) {
-            log.error(e.toString());
+            log.error("exception in session close", e);
         }
     }
 
-    private StompCommand checkConnect(Message<byte[]> msg) {
+    private StompCommand author(Message<byte[]> msg) {
         StompCommand command = StompCommand.CONNECTED;
 
-        String authAccount = BrokerApplication.environment.getProperty("spring.security.user.name");
-        String authPassword = BrokerApplication.environment.getProperty("spring.security.user.password");
-        if (StringUtils.isBlank(authAccount) || StringUtils.isBlank(authPassword)) {
+        if (StringUtils.isBlank(this.authAccount) || StringUtils.isBlank(this.authPassword)) {
             return command;
         }
 
@@ -322,7 +330,7 @@ public class BrokerStomp extends TextWebSocketHandler {
                 }
             }
         } catch (Exception e) {
-            log.error("authorize failed");
+            log.error("authorize failed", e);
             command = StompCommand.ERROR;
         }
 
@@ -332,25 +340,24 @@ public class BrokerStomp extends TextWebSocketHandler {
     private void clearSession(WebSocketSession session) {
         log.info("cleanup session: {}", session.getId());
 
-        // remove the Consumer subscribe and the session id
-        Map<String, Pair<String, String>> topicMap = sessionContext.get(session.getId());
-        if (topicMap.isEmpty()) {
-            log.error("not found topic, session: {}", session.getId());
+        if (sessionContext.containsKey(session.getId())) {
+            log.error("not exist session: {}, skip it", session.getId());
             return;
         }
 
-        log.info("find topic num: {}, try to unSubscribe one by one", topicMap.size());
-        for (Map.Entry<String, Pair<String, String>> topicPair : topicMap.entrySet()) {
-            String subscriptionId = topicPair.getValue().getFirst();
+        // remove session id and subscriptions
+        Map<String, Pair<String, String>> subscriptions = sessionContext.get(session.getId());
+        sessionContext.remove(session.getId());
+
+        log.info("find subscriptions: {}, try to IConsumer.unSubscribe one by one", subscriptions.size());
+        for (Map.Entry<String, Pair<String, String>> subscription : subscriptions.entrySet()) {
             try {
-                boolean result = this.iconsumer.unSubscribe(subscriptionId);
-                log.info("consumer unSubscribe result, subscriptionId: {}, result: {}", subscriptionId, result);
+                boolean result = this.iconsumer.unSubscribe(subscription.getValue().getFirst());
+                log.info("IConsumer.unSubscribe result, {} <-> {}", subscription, result);
             } catch (BrokerException e) {
-                log.error("exception in consumer unSubscribe", e);
+                log.error("exception in IConsumer.unSubscribe", e);
             }
         }
-
-        sessionContext.remove(session.getId());
     }
 
     private void handleErrorMessage(WebSocketSession session, BrokerException e, String receiptId) {
@@ -536,7 +543,7 @@ public class BrokerStomp extends TextWebSocketHandler {
      */
     private boolean handleUnSubscribe(WebSocketSession session, String headerIdStr) throws BrokerException {
         if (!sessionContext.get(session.getId()).containsKey(headerIdStr)) {
-            log.info("unknown subscription id, {}", headerIdStr);
+            log.info("unknown stomp's header id, {}", headerIdStr);
             return false;
         }
 
@@ -561,34 +568,33 @@ public class BrokerStomp extends TextWebSocketHandler {
      * @return the headers value
      */
     private String getHeadersValue(String key, Message<byte[]> msg) {
-        String id = null;
         LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) msg.getHeaders().get("nativeHeaders"));
         if (nativeHeaders != null) {
             // send command receipt Id
             Object idObject = nativeHeaders.get(key);
             if (idObject != null) {
-                id = ((List) idObject).get(0).toString();
+                return ((List) idObject).get(0).toString();
             }
         }
-        return id;
+
+        return "";
     }
 
 
     private String getSimpDestination(Message<byte[]> msg) {
-        String simpDestination = "";
         Object simpDestinationObj = msg.getHeaders().get("simpDestination");
         if (simpDestinationObj != null) {
-            simpDestination = simpDestinationObj.toString();
+            return simpDestinationObj.toString();
         }
 
-        return simpDestination;
+        return "";
     }
 
-    // methods from super class
+    // the following's methods from super class
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        log.info("afterConnectionEstablished, {} {}", session.getId(), session.getRemoteAddress());
+        log.info("stomp connection in, {} {}", session.getId(), session.getRemoteAddress());
 
         sessionContext.put(session.getId(), new HashMap<>());
     }
@@ -602,7 +608,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-        log.info("message decode error, {} message decode exception: {}", session.getId(), exception);
+        log.info("exception on transport, {} {}", session.getId(), exception);
 
         super.handleTransportError(session, exception);
     }
@@ -627,8 +633,7 @@ public class BrokerStomp extends TextWebSocketHandler {
             return;
         }
 
-        StompDecoder decoder = new StompDecoder();
-        List<Message<byte[]>> stompMsg = decoder.decode(ByteBuffer.wrap(message.getPayload().getBytes(StandardCharsets.UTF_8)));
+        List<Message<byte[]>> stompMsg = new StompDecoder().decode(ByteBuffer.wrap(message.getPayload().getBytes(StandardCharsets.UTF_8)));
         for (Message<byte[]> msg : stompMsg) {
             handleSingleMessage(msg, session);
         }
