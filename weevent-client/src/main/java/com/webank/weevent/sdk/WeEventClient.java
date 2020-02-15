@@ -34,8 +34,6 @@ import com.googlecode.jsonrpc4j.ProxyUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 
 @Slf4j
 public class WeEventClient implements IWeEventClient {
@@ -53,9 +51,6 @@ public class WeEventClient implements IWeEventClient {
     private TopicConnection connection;
     // (subscriptionId <-> TopicSession)
     private Map<String, TopicSession> sessionMap;
-    // httpclient
-    private CloseableHttpClient httpClient;
-
 
     WeEventClient(String brokerUrl, String groupId, String userName, String password, int timeout) throws BrokerException {
         validateParam(brokerUrl);
@@ -68,7 +63,6 @@ public class WeEventClient implements IWeEventClient {
 
         buildRpc();
         buildJms();
-        buildHttpClient();
     }
 
     @Override
@@ -331,10 +325,6 @@ public class WeEventClient implements IWeEventClient {
         }
     }
 
-    private void buildHttpClient() {
-        this.httpClient = HttpClientBuilder.create().build();
-    }
-
     private static void validateWeEvent(WeEvent weEvent) throws BrokerException {
         validateParam(weEvent.getTopic());
         validateArrayParam(weEvent.getContent());
@@ -363,7 +353,7 @@ public class WeEventClient implements IWeEventClient {
     @Override
     public SendResult publishFile(String topic, String localFile) throws BrokerException, IOException {
         // upload file
-        FileChunksTransport fileChunksTransport = new FileChunksTransport(this.brokerUrl + "/file", httpClient);
+        FileChunksTransport fileChunksTransport = new FileChunksTransport(this.brokerUrl + "/file");
         String fileId = fileChunksTransport.upload(localFile, this.groupId);
 
         // publish file event
@@ -415,7 +405,7 @@ public class WeEventClient implements IWeEventClient {
     @Override
     public String subscribeFile(String topic, String filePath, FileListener fileListener) throws BrokerException {
         // subscribe file event
-        FileChunksTransport fileChunksTransport = new FileChunksTransport(this.brokerUrl + "/file", filePath, httpClient);
+        FileChunksTransport fileChunksTransport = new FileChunksTransport(this.brokerUrl + "/file", filePath);
         FileEventListener fileEventListener = new FileEventListener(fileChunksTransport, fileListener);
         String subscriptionId = this.dealSubscribe(topic, WeEvent.OFFSET_LAST, "", true, fileEventListener);
         fileEventListener.setSubscriptionId(subscriptionId);

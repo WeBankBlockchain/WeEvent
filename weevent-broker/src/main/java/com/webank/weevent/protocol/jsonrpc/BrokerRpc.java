@@ -5,11 +5,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
+import com.webank.weevent.sdk.JsonHelper;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.TopicPage;
@@ -46,7 +46,7 @@ public class BrokerRpc implements IBrokerRpc {
                               @JsonRpcParam(value = "groupId") String groupId,
                               @JsonRpcParam(value = "content") byte[] content,
                               @JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException {
-        log.info("topic:{} groupId:{} content.length:{} extensions:{}", topic, groupId, content.length, DataTypeUtils.object2Json(extensions));
+        log.info("topic:{} groupId:{} content.length:{} extensions:{}", topic, groupId, content.length, JsonHelper.object2Json(extensions));
 
         try {
             return this.producer.publish(new WeEvent(topic, content, extensions), groupId).get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);

@@ -81,6 +81,8 @@ public enum ErrorCode {
     FILE_CHUNK_DATA_IS_NULL(102008, "the upload file chunk data is null"),
 
     HTTP_REQUEST_EXECUTE_ERROR(102100, "http request execute failed"),
+    BUILD_HTTP_URL_ERROR(102101, "build http url failed"),
+    HTTPRESPONSE_CLOSE_ERROR(102102, "httpResponse close failed"),
 
 
     //server error(200000, 300000)

@@ -14,13 +14,13 @@ import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.JUnitTestBase;
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.dto.ContractContext;
-import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDK2Wrapper;
 import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
+import com.webank.weevent.sdk.JsonHelper;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
 
@@ -403,7 +403,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
                 Topic.FUNC_PUBLISHWEEVENT,
                 Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(event.getTopic()),
                         new org.fisco.bcos.web3j.abi.datatypes.Utf8String(new String(event.getContent(), StandardCharsets.UTF_8)),
-                        new org.fisco.bcos.web3j.abi.datatypes.Utf8String(DataTypeUtils.object2Json(event.getExtensions()))),
+                        new org.fisco.bcos.web3j.abi.datatypes.Utf8String(JsonHelper.object2Json(event.getExtensions()))),
                 Collections.<TypeReference<?>>emptyList());
         return FunctionEncoder.encode(function);
     }

@@ -28,4 +28,8 @@ public class FileChunksMeta {
     private int chunkNum;
     // all chunk's upload status(chunkIndex, true/false)
     private BitSet chunkStatus;
+    // groupId
+    private String groupId;
+    // topic
+    private String topic;
 }

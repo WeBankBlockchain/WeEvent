@@ -7,6 +7,7 @@ import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.FileChunksMeta;
+import com.webank.weevent.sdk.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.RetryPolicy;
@@ -121,13 +122,13 @@ public class ZKChunksMeta {
             throw new BrokerException(ErrorCode.ZOOKEEPER_ERROR);
         }
 
-        return DataTypeUtils.json2Object(new String(nodeData, StandardCharsets.UTF_8), FileChunksMeta.class);
+        return JsonHelper.json2Object(new String(nodeData, StandardCharsets.UTF_8), FileChunksMeta.class);
     }
 
     private void zkSet(String zkPath, FileChunksMeta fileChunksMeta) throws BrokerException {
         try {
 
-            String json = DataTypeUtils.object2Json(fileChunksMeta);
+            String json = JsonHelper.object2Json(fileChunksMeta);
             this.zkClient.create().withMode(CreateMode.PERSISTENT).forPath(zkPath, json.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             log.error("access zookeeper failed", e);

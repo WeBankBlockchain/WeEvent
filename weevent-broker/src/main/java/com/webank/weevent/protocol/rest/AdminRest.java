@@ -10,7 +10,6 @@ import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.config.BuildInfo;
 import com.webank.weevent.broker.fisco.dto.ContractContext;
 import com.webank.weevent.broker.fisco.dto.ListPage;
-import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
 import com.webank.weevent.protocol.rest.entity.QueryEntity;
@@ -19,6 +18,7 @@ import com.webank.weevent.protocol.rest.entity.TbNode;
 import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
+import com.webank.weevent.sdk.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -106,8 +106,8 @@ public class AdminRest {
                     log.info("url:{}", url);
 
                     ResponseEntity<String> rsp = rest.getForEntity(url, String.class);
-                    log.debug("innerListSubscription:{}", DataTypeUtils.json2Object(rsp.getBody(), Object.class));
-                    nodesInfo.put(nodeIp, DataTypeUtils.json2Object(rsp.getBody(), Object.class));
+                    log.debug("innerListSubscription:{}", JsonHelper.json2Object(rsp.getBody(), Object.class));
+                    nodesInfo.put(nodeIp, JsonHelper.json2Object(rsp.getBody(), Object.class));
                 }
             }
         } catch (Exception e) {

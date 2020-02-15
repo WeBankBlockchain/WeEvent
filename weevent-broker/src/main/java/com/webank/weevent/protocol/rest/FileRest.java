@@ -83,10 +83,11 @@ public class FileRest {
     @RequestMapping(path = "/uploadChunk")
     public FileChunksMeta uploadChunk(@RequestParam(name = "groupId", required = false) String groupId,
                                       @RequestParam(name = "fileId") String fileId,
-                                      @RequestParam(name = "chunkIdx") int chunkIdx,
+                                      @RequestParam(name = "chunkIdx") String chunkNum,
                                       @RequestParam(name = "chunkData") byte[] chunkData) throws BrokerException {
-        log.info("uploadChunk, groupId:{}. fileId:{}. chunkIdx:{}", groupId, fileId, chunkIdx);
+        log.info("uploadChunk, groupId:{}. fileId:{}. chunkIdx:{}", groupId, fileId, chunkNum);
 
+        int chunkIdx = Integer.parseInt(chunkNum);
         ParamCheckUtils.validateFileId(fileId);
         ParamCheckUtils.validateChunkIdx(chunkIdx);
         ParamCheckUtils.validateChunkData(chunkData);

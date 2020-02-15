@@ -20,6 +20,7 @@ import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
+import com.webank.weevent.sdk.JsonHelper;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
@@ -358,7 +359,7 @@ public class Web3SDKWrapper {
 
                     WeEvent event = new WeEvent(topicName,
                             logEvent.eventContent.getValue().getBytes(StandardCharsets.UTF_8),
-                            DataTypeUtils.json2Map(logEvent.extensions.toString()));
+                            JsonHelper.json2Map(logEvent.extensions.toString()));
                     event.setEventId(DataTypeUtils.encodeEventId(topicName, uint256ToInt(logEvent.eventBlockNumer), uint256ToInt(logEvent.eventSeq)));
 
                     log.debug("get a event from block chain: {}", event);
