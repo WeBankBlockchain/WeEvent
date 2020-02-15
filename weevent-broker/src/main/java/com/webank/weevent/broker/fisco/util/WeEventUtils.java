@@ -23,16 +23,6 @@ public class WeEventUtils {
         return extensions;
     }
 
-    public static Map<String, String> getExtend(Map<String, List<String>> eventData) {
-        Map<String, String> extensions = new HashMap<>();
-        for (Map.Entry<String, List<String>> extension : eventData.entrySet()) {
-            if (extension.getKey().startsWith(WeEventConstants.EXTENSIONS_PREFIX_CHAR)) {
-                extensions.put(extension.getKey(), extension.getValue().get(0));
-            }
-        }
-        return extensions;
-    }
-
     public static String getClassPath() {
         URL url = WeEventUtils.class.getClassLoader().getResource("weevent.properties");
         return (new File(url.getPath())).getParentFile().getPath().concat(File.separator);

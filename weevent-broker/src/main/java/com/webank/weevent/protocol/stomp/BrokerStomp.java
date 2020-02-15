@@ -13,11 +13,11 @@ import java.util.concurrent.TimeoutException;
 
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
-import com.webank.weevent.broker.fisco.util.WeEventUtils;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
 
@@ -34,7 +34,6 @@ import org.springframework.messaging.simp.stomp.StompEncoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeType;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.PongMessage;
@@ -79,169 +78,157 @@ public class BrokerStomp extends TextWebSocketHandler {
     }
 
     private void handleSingleMessage(Message<byte[]> msg, WebSocketSession session) {
-        // get the frame type
-        String frameType = "";
-        Object frameTypeCommand = msg.getHeaders().get("stompCommand");
-        if (frameTypeCommand != null) {
-            frameType = frameTypeCommand.toString();
-        }
-
-        // for MESSAGE frame
-        Object simpMessageType = msg.getHeaders().get("simpMessageType");
-        if (simpMessageType != null && "HEARTBEAT".equals(simpMessageType.toString())) {
-            frameType = "HEARTBEAT";
-        }
-
-        if ("HEARTBEAT".equals(frameType)) {
-            log.debug("HEARTBEAT from client: {}", session.getId());
+        StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(msg);
+        if (stompHeaderAccessor.isHeartbeat()) {
+            log.debug("heart beat from client: {}", session.getId());
             return;
         }
 
-        log.info("remote: {} stomp header: {} payload.length: {}", session.getId(), msg.getHeaders(), msg.getPayload().length);
-        // only one topic
-        switch (frameType) {
-            case "CONNECT":
-                handleConnectMessage(msg, session);
+        StompCommand stompCommand = stompHeaderAccessor.getCommand();
+        if (stompCommand == null) {
+            log.error("miss command in stomp header, close session");
+            this.closeSession(session);
+            return;
+        }
+
+        log.info("session id: {} stomp header: {} payload.length: {}", session.getId(), stompHeaderAccessor.getMessageHeaders(), msg.getPayload().length);
+        switch (stompCommand) {
+            case CONNECT:
+                handleConnectMessage(stompHeaderAccessor, session);
                 break;
 
-            case "DISCONNECT":
-                handleDisconnectMessage(msg, session);
+            case DISCONNECT:
+                handleDisconnectMessage(stompHeaderAccessor, session);
                 break;
 
-            case "SEND":
-                handleSendMessage(msg, session);
+            case SEND:
+                handleSendMessage(stompHeaderAccessor, msg, session);
                 break;
 
-            case "SUBSCRIBE":
-                handleSubscribeMessage(msg, session);
+            case SUBSCRIBE:
+                handleSubscribeMessage(stompHeaderAccessor, session);
                 break;
 
-            case "UNSUBSCRIBE":
-                handleUnsubscribeMessage(msg, session);
+            case UNSUBSCRIBE:
+                handleUnsubscribeMessage(stompHeaderAccessor, session);
                 break;
 
             default:
-                handleDefaultMessage(msg, session);
+                handleDefaultMessage(stompHeaderAccessor, session);
                 break;
         }
     }
 
-    private void handleConnectMessage(Message<byte[]> msg, WebSocketSession session) {
-        StompHeaderAccessor accessor;
-        StompCommand command;
-        command = author(msg);
+    private void handleConnectMessage(StompHeaderAccessor stompHeaderAccessor, WebSocketSession session) {
+        boolean result = authorize(stompHeaderAccessor);
 
-        // package the return frame
-        accessor = StompHeaderAccessor.create(command);
+        // send response
+        StompHeaderAccessor accessor;
+        if (result) {
+            accessor = StompHeaderAccessor.create(StompCommand.CONNECTED);
+            accessor.setHeartbeat(0, BrokerApplication.weEventConfig.getStompHeartbeats() * 1000);
+        } else {
+            accessor = StompHeaderAccessor.create(StompCommand.ERROR);
+            accessor.setMessage("login or password is wrong");
+        }
         accessor.setVersion("1.1");
-        accessor.setHeartbeat(0, BrokerApplication.weEventConfig.getStompHeartbeats() * 1000);
-
-        // if check the user login and password is wrong ,return that message
-        if (command == StompCommand.ERROR) {
-            accessor.setNativeHeader("message", "login or password is wrong");
-        }
         sendSimpleMessage(session, accessor);
     }
 
-    private void handleDisconnectMessage(Message<byte[]> msg, WebSocketSession session) {
-        StompHeaderAccessor accessor;
-
-        String headerReceiptIdStr = getHeadersValue("receipt", msg);
-        clearSession(session);
-
-        // package the return frame
-        accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
-        accessor.setReceiptId(headerReceiptIdStr);
+    private void handleDisconnectMessage(StompHeaderAccessor stompHeaderAccessor, WebSocketSession session) {
+        // send response
+        StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
+        accessor.setReceiptId(stompHeaderAccessor.getReceipt());
         sendSimpleMessage(session, accessor);
-        accessor.setNativeHeader("receipt-id", headerReceiptIdStr);
+
         // close session after reply to client
-
-        try {
-            session.close(CloseStatus.NORMAL);
-        } catch (IOException e) {
-            log.error(e.toString());
-        }
+        this.closeSession(session);
     }
+
 
     @SuppressWarnings("unchecked")
-    private void handleSendMessage(Message<byte[]> msg, WebSocketSession session) {
-        LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap<String, List<String>>) msg.getHeaders().get("nativeHeaders"));
+    public Map<String, String> getWeEventExtend(Message<byte[]> msg) {
+        Map<String, String> extensions = new HashMap<>();
+
+        Map<String, List<String>> nativeHeaders = ((Map<String, List<String>>) msg.getHeaders().get("nativeHeaders"));
         if (nativeHeaders == null) {
-            log.error("assert nativeHeaders != null");
-            return;
+            log.error("miss nativeHeaders in stomp header");
+            return extensions;
         }
 
-        // send command receipt Id
-        String headerReceiptIdStr = getHeadersValue("receipt", msg);
+        for (Map.Entry<String, List<String>> extension : nativeHeaders.entrySet()) {
+            if (extension.getKey().startsWith(WeEventConstants.EXTENSIONS_PREFIX_CHAR)) {
+                extensions.put(extension.getKey(), extension.getValue().get(0));
+            }
+        }
+        return extensions;
+    }
 
-        Map<String, String> extensions = WeEventUtils.getExtend(nativeHeaders);
-
+    private void handleSendMessage(StompHeaderAccessor stompHeaderAccessor, Message<byte[]> msg, WebSocketSession session) {
+        Map<String, String> extensions = this.getWeEventExtend(msg);
         // group id
-        String groupId = "";
-        Object eventGroupId = nativeHeaders.get(WeEventConstants.EVENT_GROUP_ID);
-        if (nativeHeaders.containsKey(WeEventConstants.EVENT_GROUP_ID) && eventGroupId != null) {
-            groupId = ((List) eventGroupId).get(0).toString();
+        String groupId = stompHeaderAccessor.getFirstNativeHeader(WeEventConstants.EVENT_GROUP_ID);
+        if (StringUtils.isBlank(groupId)) {
+            groupId = "";
         }
 
         try {
-            String simpDestination = getSimpDestination(msg);
-            SendResult sendResult = handleSend(new WeEvent(simpDestination, msg.getPayload(), extensions), groupId);
+            String destination = stompHeaderAccessor.getDestination();
 
-            // package the return frame
-            StompCommand command = StompCommand.RECEIPT;
-            StompHeaderAccessor accessor = StompHeaderAccessor.create(command);
-            accessor.setDestination(simpDestination);
-            accessor.setReceiptId(headerReceiptIdStr);
-            accessor.setNativeHeader("receipt-id", headerReceiptIdStr);
-            accessor.setNativeHeader(WeEventConstants.EXTENSIONS_EVENT_ID, sendResult.getEventId());
+            // publish event
+            SendResult sendResult = handleSend(new WeEvent(destination, msg.getPayload(), extensions), groupId);
+
+            // send response
+            StompHeaderAccessor accessor;
+            if (sendResult.getStatus().equals(SendResult.SendResultStatus.SUCCESS)) {
+                accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
+                accessor.setDestination(destination);
+                accessor.setNativeHeader(WeEventConstants.EXTENSIONS_EVENT_ID, sendResult.getEventId());
+            } else {
+                accessor = StompHeaderAccessor.create(StompCommand.ERROR);
+                accessor.setMessage(sendResult.toString());
+            }
+            accessor.setReceiptId(stompHeaderAccessor.getReceipt());
+
             sendSimpleMessage(session, accessor);
         } catch (BrokerException e) {
-            handleErrorMessage(session, e, headerReceiptIdStr);
+            handleErrorMessage(session, e, stompHeaderAccessor.getReceipt());
         }
     }
 
-    private void handleSubscribeMessage(Message<byte[]> msg, WebSocketSession session) {
-        LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) msg.getHeaders().get("nativeHeaders"));
-        if (nativeHeaders == null) {
-            log.error("assert nativeHeaders != null");
-            return;
+    private void handleSubscribeMessage(StompHeaderAccessor stompHeaderAccessor, WebSocketSession session) {
+        // subscribe command id
+        String headerIdStr = stompHeaderAccessor.getFirstNativeHeader(StompHeaderAccessor.STOMP_ID_HEADER);
+
+        // group
+        String groupId = stompHeaderAccessor.getFirstNativeHeader(WeEventConstants.EVENT_GROUP_ID);
+        if (StringUtils.isBlank(groupId)) {
+            groupId = "";
         }
 
-        // subscribe command id
-        String headerIdStr = getHeadersValue("id", msg);
-
-        String subEventId = getHeadersValue(WeEventConstants.EXTENSIONS_EVENT_ID, msg);
         // check if there hasn't the event, need use the last id
+        String subEventId = stompHeaderAccessor.getFirstNativeHeader(WeEventConstants.EXTENSIONS_EVENT_ID);
         if (StringUtils.isBlank(subEventId)) {
             subEventId = WeEvent.OFFSET_LAST;
         }
 
-        //subscription
-        String continueSubscriptionIdStr = getHeadersValue(WeEvent.WeEvent_SubscriptionId, msg);
-
-        // group
-        String groupId = "";
-        if (nativeHeaders.containsKey(WeEventConstants.EVENT_GROUP_ID)) {
-            Object eventGroupId = nativeHeaders.get(WeEventConstants.EVENT_GROUP_ID);
-            if (eventGroupId != null) {
-                groupId = ((List) eventGroupId).get(0).toString();
-            }
+        // subscription id
+        String continueSubscriptionIdStr = stompHeaderAccessor.getFirstNativeHeader(WeEvent.WeEvent_SubscriptionId);
+        if (StringUtils.isBlank(continueSubscriptionIdStr)) {
+            continueSubscriptionIdStr = "";
         }
 
         // tag
-        String tag = null;
-        if (nativeHeaders.containsKey(WeEvent.WeEvent_TAG)) {
-            Object value = nativeHeaders.get(WeEvent.WeEvent_TAG);
-            if (value != null) {
-                tag = ((List) value).get(0).toString();
-            }
+        String tag = stompHeaderAccessor.getFirstNativeHeader(WeEvent.WeEvent_TAG);
+        if (StringUtils.isBlank(tag)) {
+            tag = "";
         }
 
         // is file
-        boolean isFile = nativeHeaders.containsKey(WeEvent.WeEvent_FILE);
+        boolean isFile = stompHeaderAccessor.getFirstNativeHeader(WeEvent.WeEvent_FILE) != null;
 
         try {
-            String simpDestination = getSimpDestination(msg);
+            String simpDestination = stompHeaderAccessor.getDestination();
             String subscriptionId = handleSubscribe(session,
                     simpDestination,
                     groupId,
@@ -251,90 +238,82 @@ public class BrokerStomp extends TextWebSocketHandler {
                     tag,
                     isFile);
 
-            // package the return frame
+            // send response
             StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
             accessor.setDestination(simpDestination);
             // a unique identifier for that message and a subscription header matching the identifier of the subscription that is receiving the message.
             accessor.setReceiptId(headerIdStr);
             accessor.setSubscriptionId(subscriptionId);
-            accessor.setNativeHeader("subscription-id", subscriptionId);
-            accessor.setNativeHeader("receipt-id", headerIdStr);
             sendSimpleMessage(session, accessor);
         } catch (BrokerException e) {
-            log.info(e.toString());
             handleErrorMessage(session, e, headerIdStr);
         }
     }
 
-
-    private void handleUnsubscribeMessage(Message<byte[]> msg, WebSocketSession session) {
-        String simpDestination = getSimpDestination(msg);
-        String headerIdStr = getHeadersValue("id", msg);
+    private void handleUnsubscribeMessage(StompHeaderAccessor stompHeaderAccessor, WebSocketSession session) {
+        String simpDestination = stompHeaderAccessor.getDestination();
+        String headerIdStr = stompHeaderAccessor.getFirstNativeHeader(StompHeaderAccessor.STOMP_ID_HEADER);
 
         try {
-            boolean retUnSubscribe = handleUnSubscribe(session, headerIdStr);
-            StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
-            // package the return frame
-            accessor.setDestination(simpDestination);
+            boolean result = handleUnSubscribe(session, headerIdStr);
+
+            // send response
+            StompHeaderAccessor accessor;
+            if (result) {
+                accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
+                accessor.setDestination(simpDestination);
+            } else {
+                accessor = StompHeaderAccessor.create(StompCommand.ERROR);
+            }
             // a unique identifier for that message and a subscription header matching the identifier of the subscription that is receiving the message.
             accessor.setReceiptId(headerIdStr);
-            accessor.setNativeHeader("receipt-id", headerIdStr);
-            accessor.setNativeHeader("message", String.valueOf(retUnSubscribe));
             sendSimpleMessage(session, accessor);
         } catch (BrokerException e) {
             handleErrorMessage(session, e, headerIdStr);
         }
     }
 
-    private void handleDefaultMessage(Message<byte[]> msg, WebSocketSession session) {
-        String simpDestination = getSimpDestination(msg);
-        String headerIdStr = getHeadersValue("id", msg);
+    private void handleDefaultMessage(StompHeaderAccessor stompHeaderAccessor, WebSocketSession session) {
+        String simpDestination = stompHeaderAccessor.getDestination();
+        String headerIdStr = stompHeaderAccessor.getFirstNativeHeader(StompHeaderAccessor.STOMP_ID_HEADER);
 
-        // package the return frame
+        // send response
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
         accessor.setDestination(simpDestination);
         accessor.setMessage("NOT SUPPORT COMMAND");
-        accessor.setNativeHeader("receipt-id", headerIdStr);
-        accessor.setNativeHeader("message", "NOT SUPPORT COMMAND");
+        accessor.setReceiptId(headerIdStr);
         // a unique identifier for that message and a subscription header matching the identifier of the subscription that is receiving the message.
         sendSimpleMessage(session, accessor);
 
         // follow protocol 1.2 to close connection
+        this.closeSession(session);
+    }
+
+    private void closeSession(WebSocketSession session) {
         try {
             clearSession(session);
             session.close();
         } catch (Exception e) {
-            log.error("exception in session close", e);
+            log.error("exception in close session", e);
         }
     }
 
-    private StompCommand author(Message<byte[]> msg) {
-        StompCommand command = StompCommand.CONNECTED;
-
+    // check login/password if needed
+    private boolean authorize(StompHeaderAccessor stompHeaderAccessor) {
         if (StringUtils.isBlank(this.authAccount) || StringUtils.isBlank(this.authPassword)) {
-            return command;
+            return true;
         }
 
-        // check login/password if needed
-        try {
-            LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) msg.getHeaders().get("nativeHeaders"));
-            if (nativeHeaders != null) {
-                Object login = nativeHeaders.get("login");
-                if (login != null) {
-                    String loginName = ((List) login).get(0).toString();
-                    // get the client's passcode
-                    String passcode = StompHeaderAccessor.getPasscode(msg.getHeaders());
-                    if (!authAccount.equals(loginName) || !authPassword.equals(passcode)) {
-                        command = StompCommand.ERROR;
-                    }
-                }
+        if (stompHeaderAccessor.getUser() != null) {
+            if (this.authAccount.equals(stompHeaderAccessor.getUser().getName())
+                    && this.authPassword.equals(stompHeaderAccessor.getPasscode())) {
+                log.error("authorize success");
+                return true;
             }
-        } catch (Exception e) {
-            log.error("authorize failed", e);
-            command = StompCommand.ERROR;
         }
 
-        return command;
+        log.error("authorize failed, check login/password in stomp header");
+        return false;
     }
 
     private void clearSession(WebSocketSession session) {
@@ -364,10 +343,9 @@ public class BrokerStomp extends TextWebSocketHandler {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
 
         // package the return frame ,include the error message and error code
-        accessor.setNativeHeader("message", e.getMessage());
+        accessor.setMessage(e.getMessage());
         accessor.setNativeHeader("code", String.valueOf(e.getCode()));
         accessor.setReceiptId(receiptId);
-        accessor.setNativeHeader("receipt-id", receiptId);
         sendSimpleMessage(session, accessor);
     }
 
@@ -404,33 +382,33 @@ public class BrokerStomp extends TextWebSocketHandler {
     private SendResult handleSend(WeEvent event, String groupId) throws BrokerException {
         if (!this.iproducer.startProducer()) {
             log.error("producer start failed");
+            throw new BrokerException(ErrorCode.UNKNOWN_ERROR);
         }
 
         SendResult sendResult;
         try {
             sendResult = this.iproducer.publish(event, groupId).get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+            log.info("publish result, {}", sendResult);
         } catch (InterruptedException | ExecutionException e) {
             log.error("publishWeEvent failed due to transaction execution error.", e);
+
             sendResult = new SendResult();
             sendResult.setTopic(event.getTopic());
             sendResult.setStatus(SendResult.SendResultStatus.ERROR);
         } catch (TimeoutException e) {
             log.error("publishWeEvent failed due to transaction execution timeout.", e);
+
             sendResult = new SendResult();
             sendResult.setTopic(event.getTopic());
             sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
         }
 
-        log.info("publish result, {}", sendResult);
-        if (sendResult.getStatus() != SendResult.SendResultStatus.SUCCESS) {
-            log.error("producer publish failed");
-        }
         return sendResult;
     }
 
     /**
      * @param session stomp session
-     * @param simpDestination topic name
+     * @param topic topic name
      * @param groupId group id
      * @param subEventId event id
      * @param continueSubscriptionId subscription id
@@ -440,35 +418,38 @@ public class BrokerStomp extends TextWebSocketHandler {
      * @throws BrokerException Exception
      */
     private String handleSubscribe(WebSocketSession session,
-                                   String simpDestination,
+                                   String topic,
                                    String groupId,
                                    String headerIdStr,
                                    String subEventId,
                                    String continueSubscriptionId,
                                    String tag,
                                    boolean isFile) throws BrokerException {
-        log.info("destination: {} header subscribe id: {} group id: {}", simpDestination, headerIdStr, groupId);
+        log.info("topic: {} group id: {} header subscription id: {}", topic, groupId, headerIdStr);
 
         String[] curTopicList;
-        if (simpDestination.contains(WeEvent.MULTIPLE_TOPIC_SEPARATOR)) {
+        if (topic.contains(WeEvent.MULTIPLE_TOPIC_SEPARATOR)) {
             log.info("subscribe topic list");
-            curTopicList = simpDestination.split(WeEvent.MULTIPLE_TOPIC_SEPARATOR);
+            curTopicList = topic.split(WeEvent.MULTIPLE_TOPIC_SEPARATOR);
         } else {
-            curTopicList = new String[]{simpDestination};
+            curTopicList = new String[]{topic};
         }
 
         if (!this.iconsumer.isStarted()) {
-            log.info("start consumer");
-            this.iconsumer.startConsumer();
+            log.error("IConsumer not started");
+            throw new BrokerException(ErrorCode.UNKNOWN_ERROR);
         }
 
         // external params
         Map<IConsumer.SubscribeExt, String> ext = new HashMap<>();
         ext.put(IConsumer.SubscribeExt.InterfaceType, WeEventConstants.STOMPTYPE);
-        String remoteIp = session.getRemoteAddress().getAddress().getHostAddress();
+        String remoteIp = "";
+        if (session.getRemoteAddress() != null) {
+            remoteIp = session.getRemoteAddress().getAddress().getHostAddress();
+        }
         ext.put(IConsumer.SubscribeExt.RemoteIP, remoteIp);
         if (!StringUtils.isBlank(continueSubscriptionId)) {
-            log.info("continueSubscriptionId:{}", continueSubscriptionId);
+            log.info("continueSubscriptionId: {}", continueSubscriptionId);
             ext.put(IConsumer.SubscribeExt.SubscriptionId, continueSubscriptionId);
         }
         if (!StringUtils.isBlank(tag)) {
@@ -514,7 +495,6 @@ public class BrokerStomp extends TextWebSocketHandler {
         // package the return frame
         accessor.setSubscriptionId(headerIdStr);
         accessor.setNativeHeader("subscription-id", subscriptionId);
-        accessor.setNativeHeader("message-id", headerIdStr);
         accessor.setMessageId(headerIdStr);
         accessor.setDestination(event.getTopic());
         accessor.setContentType(new MimeType("text", "plain", StandardCharsets.UTF_8));
@@ -525,7 +505,7 @@ public class BrokerStomp extends TextWebSocketHandler {
         }
 
         // set eventId in header
-        accessor.setNativeHeader("eventId", event.getEventId());
+        accessor.setNativeHeader(WeEventConstants.EXTENSIONS_EVENT_ID, event.getEventId());
 
         // payload == content
         MessageHeaders headers = accessor.getMessageHeaders();
@@ -543,7 +523,7 @@ public class BrokerStomp extends TextWebSocketHandler {
      */
     private boolean handleUnSubscribe(WebSocketSession session, String headerIdStr) throws BrokerException {
         if (!sessionContext.get(session.getId()).containsKey(headerIdStr)) {
-            log.info("unknown stomp's header id, {}", headerIdStr);
+            log.info("unknown stomp header id, {}", headerIdStr);
             return false;
         }
 
@@ -561,40 +541,11 @@ public class BrokerStomp extends TextWebSocketHandler {
         return result;
     }
 
-    /**
-     * use for get the headers
-     *
-     * @param key headers name
-     * @return the headers value
-     */
-    private String getHeadersValue(String key, Message<byte[]> msg) {
-        LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) msg.getHeaders().get("nativeHeaders"));
-        if (nativeHeaders != null) {
-            // send command receipt Id
-            Object idObject = nativeHeaders.get(key);
-            if (idObject != null) {
-                return ((List) idObject).get(0).toString();
-            }
-        }
-
-        return "";
-    }
-
-
-    private String getSimpDestination(Message<byte[]> msg) {
-        Object simpDestinationObj = msg.getHeaders().get("simpDestination");
-        if (simpDestinationObj != null) {
-            return simpDestinationObj.toString();
-        }
-
-        return "";
-    }
-
     // the following's methods from super class
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        log.info("stomp connection in, {} {}", session.getId(), session.getRemoteAddress());
+        log.info("stomp connection in, session id: {} remote: {}", session.getId(), session.getRemoteAddress());
 
         sessionContext.put(session.getId(), new HashMap<>());
     }

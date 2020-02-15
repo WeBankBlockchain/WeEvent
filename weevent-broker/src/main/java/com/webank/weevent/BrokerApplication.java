@@ -57,10 +57,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 @Slf4j
 class HttpInterceptor implements HandlerInterceptor {
-    private String ipWhiteTable;
+    private String ipWhiteList;
 
-    HttpInterceptor(String ipWhiteTable) {
-        this.ipWhiteTable = ipWhiteTable;
+    HttpInterceptor(String ipWhiteList) {
+        this.ipWhiteList = ipWhiteList;
     }
 
     private String getIpAddress(HttpServletRequest request) {
@@ -83,16 +83,17 @@ class HttpInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o) {
-        String ip = getIpAddress(httpServletRequest);
-        if (this.ipWhiteTable.equals("")) {
+        if (StringUtils.isBlank(this.ipWhiteList)) {
             return true;
         }
-        log.debug("ip white list:{} client ip:{}", this.ipWhiteTable, ip);
+
+        String ip = getIpAddress(httpServletRequest);
+        log.debug("ip white list:{} client ip:{}", this.ipWhiteList, ip);
         if (ip.contains("0:0:0:0") || ip.contains("127.0.0.1") || ip.contains("localhost")) {
             return true;
         }
-        if (!this.ipWhiteTable.contains(ip)) {
-            log.error("forbid,client ip:{} not in white table:{}", ip, this.ipWhiteTable);
+        if (!this.ipWhiteList.contains(ip)) {
+            log.error("forbid, client ip not in white list, {} -> {}", ip, this.ipWhiteList);
             httpServletResponse.setStatus(403);
             return false;
         }
@@ -109,7 +110,7 @@ class HttpInterceptor implements HandlerInterceptor {
 class HttpInterceptorConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        log.info("client ip white table: {}", BrokerApplication.weEventConfig.getIpWhiteTable());
+        log.info("client ip white list: {}", BrokerApplication.weEventConfig.getIpWhiteTable());
 
         HttpInterceptor httpInterceptor = new HttpInterceptor(BrokerApplication.weEventConfig.getIpWhiteTable());
         registry.addInterceptor(httpInterceptor).addPathPatterns("/**");
@@ -240,12 +241,18 @@ public class BrokerApplication {
         switch (blockChain) {
             case WeEventConstants.FISCO:
                 FiscoBcosDelegate fiscoBcosDelegate = BrokerApplication.applicationContext.getBean(FiscoBcosDelegate.class);
-                return new FiscoBcosBroker4Consumer(fiscoBcosDelegate);
+                FiscoBcosBroker4Consumer fiscoBcosBroker4Consumer = new FiscoBcosBroker4Consumer(fiscoBcosDelegate);
+                fiscoBcosBroker4Consumer.startConsumer();
+                return fiscoBcosBroker4Consumer;
+
             case WeEventConstants.FABRIC:
                 FabricDelegate fabricDelegate = BrokerApplication.applicationContext.getBean(FabricDelegate.class);
-                return new FabricBroker4Consumer(fabricDelegate);
+                FabricBroker4Consumer fabricBroker4Consumer = new FabricBroker4Consumer(fabricDelegate);
+                fabricBroker4Consumer.startConsumer();
+                return fabricBroker4Consumer;
+
             default:
-                throw new BrokerException("Invalid chain type");
+                throw new BrokerException("invalid block chain type");
         }
     }
 
@@ -253,15 +260,22 @@ public class BrokerApplication {
     @Bean
     public static IProducer iProducer() throws BrokerException {
         String blockChain = BrokerApplication.weEventConfig.getBlockChainType();
+
         switch (blockChain) {
             case WeEventConstants.FISCO:
                 FiscoBcosDelegate fiscoBcosDelegate = BrokerApplication.applicationContext.getBean(FiscoBcosDelegate.class);
-                return new FiscoBcosBroker4Producer(fiscoBcosDelegate);
+                FiscoBcosBroker4Producer fiscoBcosBroker4Producer = new FiscoBcosBroker4Producer(fiscoBcosDelegate);
+                fiscoBcosBroker4Producer.startProducer();
+                return fiscoBcosBroker4Producer;
+
             case WeEventConstants.FABRIC:
                 FabricDelegate fabricDelegate = BrokerApplication.applicationContext.getBean(FabricDelegate.class);
-                return new FabricBroker4Producer(fabricDelegate);
+                FabricBroker4Producer fabricBroker4Producer = new FabricBroker4Producer(fabricDelegate);
+                fabricBroker4Producer.startProducer();
+                return fabricBroker4Producer;
+
             default:
-                throw new BrokerException("Invalid chain type");
+                throw new BrokerException("invalid block chain type");
         }
     }
 
