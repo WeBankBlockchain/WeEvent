@@ -70,6 +70,19 @@ public enum ErrorCode {
     TRANSACTIONHEX_IS_NULL(101022, "the transactionHex is null"),
     TRANSACTIONHEX_ILLEGAL(101023, "the transactionHex is illegal"),
 
+    FILE_NAME_IS_NULL(102000, "the upload file name is null"),
+    FILE_ID_IS_NULL(102001, "the upload fileId is null"),
+    FILE_ID_ILLEGAL(102002, "the upload fileId is illegal"),
+    FILE_SIZE_ILLEGAL(102003, "the upload file size is illegal"),
+    FILE_MD5_IS_NULL(102004, "the upload file md5 is null"),
+    CHUNK_IDX_ILLEGAL(102005, "the upload file chunk index is illegal"),
+    CHUNK_DATA_ILLEGAL(102006, "the upload file chunk data is illegal"),
+    FILE_CHUNK_INDEX_ILLEGAL(102007, "the upload file chunk idx is illegal"),
+    FILE_CHUNK_DATA_IS_NULL(102008, "the upload file chunk data is null"),
+
+    HTTP_REQUEST_EXECUTE_ERROR(102100, "http request execute failed"),
+
+
     //server error(200000, 300000)
     TOPIC_CONTROLLER_IS_NULL(200100, "get topic control address from CNS failed, please deploy it first"),
     CONSUMER_ALREADY_STARTED(200102, "consumer already started"),

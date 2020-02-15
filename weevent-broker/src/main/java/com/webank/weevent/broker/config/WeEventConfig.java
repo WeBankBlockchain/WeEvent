@@ -53,6 +53,6 @@ public class WeEventConfig {
     private String baseFilePath;
 
     @Value("${file.chunk.size:1048576}")
-    private long chunkSize;
+    private int chunkSize;
 
 }

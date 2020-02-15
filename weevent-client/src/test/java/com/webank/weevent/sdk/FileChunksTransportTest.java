@@ -1,5 +1,7 @@
 package com.webank.weevent.sdk;
 
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,10 +16,12 @@ import org.junit.Test;
  */
 public class FileChunksTransportTest {
     private FileChunksTransport fileChunksTransport;
+    private CloseableHttpClient httpClient;
 
     @Before
     public void before() throws Exception {
-        this.fileChunksTransport = new FileChunksTransport("http://localhost:7000/weevent-broker/file", "./logs");
+        httpClient = HttpClientBuilder.create().build();
+        this.fileChunksTransport = new FileChunksTransport("http://localhost:7000/weevent-broker/file", "./logs", httpClient);
     }
 
     @After
@@ -29,7 +33,7 @@ public class FileChunksTransportTest {
      */
     @Test
     public void testUpload() throws Exception {
-        String fileId = this.fileChunksTransport.upload("src/main/resources/log4j2.xml");
+        String fileId = this.fileChunksTransport.upload("src/main/resources/log4j2.xml", "");
         Assert.assertFalse(fileId.isEmpty());
     }
 
@@ -38,7 +42,7 @@ public class FileChunksTransportTest {
      */
     @Test
     public void testDownload() throws Exception {
-        String fileId = this.fileChunksTransport.upload("src/main/resources/log4j2.xml");
+        String fileId = this.fileChunksTransport.upload("src/main/resources/log4j2.xml", "");
         Assert.assertFalse(fileId.isEmpty());
 
         String localFile = this.fileChunksTransport.download("http://localhost:7000", "fileId");
