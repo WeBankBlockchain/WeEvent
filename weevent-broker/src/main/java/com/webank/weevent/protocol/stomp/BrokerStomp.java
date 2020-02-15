@@ -244,6 +244,7 @@ public class BrokerStomp extends TextWebSocketHandler {
             // a unique identifier for that message and a subscription header matching the identifier of the subscription that is receiving the message.
             accessor.setReceiptId(headerIdStr);
             accessor.setSubscriptionId(subscriptionId);
+            accessor.setNativeHeader("subscription-id", subscriptionId);
             sendSimpleMessage(session, accessor);
         } catch (BrokerException e) {
             handleErrorMessage(session, e, headerIdStr);
@@ -305,7 +306,7 @@ public class BrokerStomp extends TextWebSocketHandler {
         }
 
         if (stompHeaderAccessor.getUser() != null) {
-            if (this.authAccount.equals(stompHeaderAccessor.getUser().getName())
+            if (this.authAccount.equals(stompHeaderAccessor.getLogin())
                     && this.authPassword.equals(stompHeaderAccessor.getPasscode())) {
                 log.error("authorize success");
                 return true;
@@ -319,7 +320,7 @@ public class BrokerStomp extends TextWebSocketHandler {
     private void clearSession(WebSocketSession session) {
         log.info("cleanup session: {}", session.getId());
 
-        if (sessionContext.containsKey(session.getId())) {
+        if (!sessionContext.containsKey(session.getId())) {
             log.error("not exist session: {}, skip it", session.getId());
             return;
         }

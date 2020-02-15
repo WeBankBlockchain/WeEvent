@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.jms.JMSException;
 
+import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.Data;
@@ -78,14 +79,14 @@ public class WeEventStompCommand {
         return encodeRaw(accessor);
     }
 
-    public String encodeSubscribe(WeEventTopic topic, Long id) throws JMSException {
+    public String encodeSubscribe(WeEventTopic topic, Long id) {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
         accessor.setDestination(topic.getTopicName());
         accessor.setNativeHeader("eventId", topic.getOffset());
         if (topic.isFile()) {
             accessor.setNativeHeader(WeEvent.WeEvent_FILE, "1");
         }
-        accessor.setNativeHeader("id", Long.toString(id));
+        accessor.setNativeHeader(StompHeaderAccessor.STOMP_ID_HEADER, Long.toString(id));
         if (!StringUtils.isBlank(topic.getGroupId())) {
             accessor.setNativeHeader("groupId", topic.getGroupId());
         }
@@ -111,7 +112,7 @@ public class WeEventStompCommand {
         accessor.setDestination(topic.getTopicName());
         accessor.setContentType(new MimeType("text", "plain", StandardCharsets.UTF_8));
         accessor.setContentLength(weEvent.getContent().length);
-        accessor.setNativeHeader("receipt", Long.toString(id));
+        accessor.setReceipt(Long.toString(id));
         if (!StringUtils.isBlank(topic.getGroupId())) {
             accessor.setNativeHeader("groupId", topic.getGroupId());
         }
@@ -123,12 +124,15 @@ public class WeEventStompCommand {
         return encodeRaw(accessor, weEvent.getContent());
     }
 
-    public boolean isError(Message message) {
-        return "ERROR".equals(message.getHeaders().get("stompCommand"));
-    }
-
-    public String getSubscriptionId(Message message) {
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
-        return accessor.getNativeHeader("subscription-id").get(0);
+    public void checkError(StompHeaderAccessor stompHeaderAccessor) throws JMSException {
+        if (StompCommand.ERROR == stompHeaderAccessor.getCommand()) {
+            String message = stompHeaderAccessor.getMessage();
+            log.error("message in ERROR frame, {}", message);
+            if (!StringUtils.isEmpty(message)) {
+                throw new JMSException(message);
+            } else {
+                throw WeEventConnectionFactory.error2JMSException(ErrorCode.SDK_JMS_EXCEPTION_STOMP_EXECUTE);
+            }
+        }
     }
 }
