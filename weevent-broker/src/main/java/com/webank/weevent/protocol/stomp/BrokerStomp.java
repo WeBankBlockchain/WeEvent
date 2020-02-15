@@ -42,7 +42,12 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 /**
- * @since 2018/12/20.
+ * Stomp 1.1 protocol.
+ * Support sockjs + stomp.js client.
+ * see at https://github.com/sockjs/sockjs-client and https://github.com/stomp-js/stompjs.
+ *
+ * @author matthewliu
+ * @since 2018/12/20
  */
 @Slf4j
 @Component
@@ -50,8 +55,8 @@ public class BrokerStomp extends TextWebSocketHandler {
     private IProducer iproducer;
     private IConsumer iconsumer;
 
-    // session id <-> [header subscription id in stomp <-> (subscription id in consumer, topic)]
-    private static Map<String, Map<String, Pair<String, String>>> sessionContext;
+    // session id <-> header subscription id in stomp <-> (subscription id in consumer, topic)]
+    private static Map<String, Map<String, Pair<String, String>>> sessionContext = new HashMap<>();
 
     @Autowired
     public void setProducer(IProducer producer) {
@@ -61,10 +66,6 @@ public class BrokerStomp extends TextWebSocketHandler {
     @Autowired
     public void setConsumer(IConsumer consumer) {
         this.iconsumer = consumer;
-    }
-
-    static {
-        sessionContext = new HashMap<>();
     }
 
     private void handleSingleMessage(Message<byte[]> msg, WebSocketSession session) {
@@ -208,6 +209,7 @@ public class BrokerStomp extends TextWebSocketHandler {
         //subscription
         String continueSubscriptionIdStr = getHeadersValue(WeEvent.WeEvent_SubscriptionId, msg);
 
+        // group
         String groupId = "";
         if (nativeHeaders.containsKey(WeEventConstants.EVENT_GROUP_ID)) {
             Object eventGroupId = nativeHeaders.get(WeEventConstants.EVENT_GROUP_ID);
@@ -216,6 +218,7 @@ public class BrokerStomp extends TextWebSocketHandler {
             }
         }
 
+        // tag
         String tag = null;
         if (nativeHeaders.containsKey(WeEvent.WeEvent_TAG)) {
             Object value = nativeHeaders.get(WeEvent.WeEvent_TAG);
@@ -224,9 +227,19 @@ public class BrokerStomp extends TextWebSocketHandler {
             }
         }
 
+        // is file
+        boolean isFile = nativeHeaders.containsKey(WeEvent.WeEvent_FILE);
+
         try {
             String simpDestination = getSimpDestination(msg);
-            String subscriptionId = handleSubscribe(session, simpDestination, groupId, headerIdStr, subEventId, continueSubscriptionIdStr, tag);
+            String subscriptionId = handleSubscribe(session,
+                    simpDestination,
+                    groupId,
+                    headerIdStr,
+                    subEventId,
+                    continueSubscriptionIdStr,
+                    tag,
+                    isFile);
 
             // package the return frame
             StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
@@ -415,6 +428,7 @@ public class BrokerStomp extends TextWebSocketHandler {
      * @param subEventId event id
      * @param continueSubscriptionId subscription id
      * @param tag weevent-tag
+     * @param isFile is binding file
      * @return String consumer subscription id, return "" if error
      * @throws BrokerException Exception
      */
@@ -424,7 +438,8 @@ public class BrokerStomp extends TextWebSocketHandler {
                                    String headerIdStr,
                                    String subEventId,
                                    String continueSubscriptionId,
-                                   String tag) throws BrokerException {
+                                   String tag,
+                                   boolean isFile) throws BrokerException {
         log.info("destination: {} header subscribe id: {} group id: {}", simpDestination, headerIdStr, groupId);
 
         String[] curTopicList;

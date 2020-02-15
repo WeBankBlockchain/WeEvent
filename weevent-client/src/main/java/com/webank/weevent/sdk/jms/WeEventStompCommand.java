@@ -78,10 +78,13 @@ public class WeEventStompCommand {
         return encodeRaw(accessor);
     }
 
-    public String encodeSubscribe(WeEventTopic topic, String offset, Long id) throws JMSException {
+    public String encodeSubscribe(WeEventTopic topic, Long id) throws JMSException {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
         accessor.setDestination(topic.getTopicName());
-        accessor.setNativeHeader("eventId", offset);
+        accessor.setNativeHeader("eventId", topic.getOffset());
+        if (topic.isFile()) {
+            accessor.setNativeHeader(WeEvent.WeEvent_FILE, "1");
+        }
         accessor.setNativeHeader("id", Long.toString(id));
         if (!StringUtils.isBlank(topic.getGroupId())) {
             accessor.setNativeHeader("groupId", topic.getGroupId());

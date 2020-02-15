@@ -161,31 +161,31 @@ public class WeEventClient implements IWeEventClient {
     @Override
     public String subscribe(String topic, String offset, @NonNull EventListener listener) throws BrokerException {
 
-        return dealSubscribe(topic, offset, null, listener);
+        return dealSubscribe(topic, offset, null, false, listener);
     }
 
     @Override
     public String subscribe(String topic, String offset, String subscriptionId,
                             @NonNull EventListener listener) throws BrokerException {
 
-        return dealSubscribe(topic, offset, subscriptionId, listener);
+        return dealSubscribe(topic, offset, subscriptionId, false, listener);
     }
 
     @Override
     public String subscribe(String[] topics, String offset, @NonNull EventListener listener) throws BrokerException {
 
         String topic = StringUtils.join(topics, WeEvent.MULTIPLE_TOPIC_SEPARATOR);
-        return dealSubscribe(topic, offset, "", listener);
+        return dealSubscribe(topic, offset, "", false, listener);
     }
 
     @Override
     public String subscribe(String[] topics, String offset, String subscriptionId,
                             @NonNull EventListener listener) throws BrokerException {
         String topic = StringUtils.join(topics, WeEvent.MULTIPLE_TOPIC_SEPARATOR);
-        return dealSubscribe(topic, offset, subscriptionId, listener);
+        return dealSubscribe(topic, offset, subscriptionId, false, listener);
     }
 
-    private String dealSubscribe(String topic, String offset, String subscriptionId, EventListener listener) throws BrokerException {
+    private String dealSubscribe(String topic, String offset, String subscriptionId, boolean isFile, EventListener listener) throws BrokerException {
         try {
             validateParam(topic);
             validateParam(offset);
@@ -193,12 +193,16 @@ public class WeEventClient implements IWeEventClient {
             // create topic
             Topic destination = session.createTopic(topic);
 
-            // create subscriber
-            ((WeEventTopic) destination).setOffset(offset);
-            ((WeEventTopic) destination).setGroupId(this.groupId);
+            // extend param
+            WeEventTopic weEventTopic = (WeEventTopic) destination;
+            weEventTopic.setOffset(offset);
+            weEventTopic.setGroupId(this.groupId);
             if (!StringUtils.isBlank(subscriptionId)) {
-                ((WeEventTopic) destination).setContinueSubscriptionId(subscriptionId);
+                weEventTopic.setContinueSubscriptionId(subscriptionId);
             }
+            weEventTopic.setFile(isFile);
+
+            // create subscriber
             WeEventTopicSubscriber subscriber = (WeEventTopicSubscriber) session.createSubscriber(destination);
 
             // create listener
@@ -209,8 +213,8 @@ public class WeEventClient implements IWeEventClient {
                                 byte[] body = new byte[(int) message.getBodyLength()];
                                 message.readBytes(body);
 
-                                WeEventTopic weEventTopic = (WeEventTopic) message.getJMSDestination();
-                                WeEvent event = new WeEvent(weEventTopic.getTopicName(), body, message.getExtensions());
+                                Topic jmsDestination = (Topic) message.getJMSDestination();
+                                WeEvent event = new WeEvent(jmsDestination.getTopicName(), body, message.getExtensions());
                                 event.setEventId(message.getJMSMessageID());
                                 listener.onEvent(event);
                             } catch (JMSException e) {
@@ -404,7 +408,7 @@ public class WeEventClient implements IWeEventClient {
         // subscribe file event
         FileChunksTransport fileChunksTransport = new FileChunksTransport(this.brokerUrl + "/file", filePath);
         FileEventListener fileEventListener = new FileEventListener(fileChunksTransport, fileListener);
-        String subscriptionId = this.subscribe(topic, WeEvent.OFFSET_LAST, fileEventListener);
+        String subscriptionId = this.dealSubscribe(topic, WeEvent.OFFSET_LAST, "", true, fileEventListener);
         fileEventListener.setSubscriptionId(subscriptionId);
 
         return subscriptionId;

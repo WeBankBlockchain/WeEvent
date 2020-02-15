@@ -247,7 +247,7 @@ public class WebSocketTransport extends WebSocketClient {
     public String stompSubscribe(WeEventTopic topic) throws JMSException {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         Long asyncSeq = this.sequence.incrementAndGet();
-        String req = stompCommand.encodeSubscribe(topic, topic.getOffset(), asyncSeq);
+        String req = stompCommand.encodeSubscribe(topic, asyncSeq);
         this.sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
 
         Message stompResponse = this.stompRequest(req, asyncSeq);

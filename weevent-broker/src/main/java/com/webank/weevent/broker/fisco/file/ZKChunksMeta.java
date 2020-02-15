@@ -55,7 +55,7 @@ public class ZKChunksMeta {
     }
 
     public FileChunksMeta getChunks(String fileId) throws BrokerException {
-        String zkPath = this.getFilePath(fileId);
+        String zkPath = this.genFilePath(fileId);
 
         if (!this.zkExist(zkPath)) {
             throw new BrokerException(ErrorCode.ZOOKEEPER_UNKNOWN_FILE);
@@ -66,7 +66,7 @@ public class ZKChunksMeta {
     }
 
     public void addChunks(String fileId, FileChunksMeta fileChunksMeta) throws BrokerException {
-        String zkPath = this.getFilePath(fileId);
+        String zkPath = this.genFilePath(fileId);
 
         if (this.zkExist(zkPath)) {
             log.error("already exist file id in zookeeper, {}", fileId);
@@ -78,14 +78,14 @@ public class ZKChunksMeta {
     }
 
     public void removeChunks(String fileId) throws BrokerException {
-        String zkPath = this.getFilePath(fileId);
+        String zkPath = this.genFilePath(fileId);
 
         // remove in zookeeper
         this.zkRemove(zkPath);
     }
 
     public boolean setChunksBit(String fileId, int bitIndex) throws BrokerException {
-        String zkPath = this.getFilePath(fileId);
+        String zkPath = this.genFilePath(fileId);
 
         if (!this.zkExist(zkPath)) {
             log.error("not exist file id in zookeeper, {}", fileId);
@@ -143,7 +143,7 @@ public class ZKChunksMeta {
         }
     }
 
-    private String getFilePath(String fileId) {
+    private String genFilePath(String fileId) {
         return this.zkPath + "/" + fileId;
     }
 }
