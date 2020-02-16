@@ -13,11 +13,9 @@ import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
+import com.webank.weevent.sdk.JsonHelper;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -29,14 +27,6 @@ public final class DataTypeUtils {
 
     private static String STRING_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static Map<String, String> topicHashMap = new ConcurrentHashMap<>();
-    private static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-    static {
-        // Include.NON_NULL Property is NULL and not serialized
-        OBJECT_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-        //Do not convert inconsistent fields
-        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }
 
     /**
      * encode eventId
@@ -181,23 +171,19 @@ public final class DataTypeUtils {
      * convert jsonString to ListPage<T>
      *
      * @param jsonString json data
-     * @param tclass T which in ListPage<T>
+     * @param valueType T which in ListPage<T>
      * @param <T> ListPage
      * @return ListPage<T>
-     * @throws BrokerException
+     * @throws BrokerException BrokerException
      */
-    public static <T> ListPage<T> json2ListPage(String jsonString, Class tclass) throws BrokerException {
-        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        JavaType javaType = OBJECT_MAPPER.getTypeFactory().constructParametricType(ListPage.class, tclass);
-        ListPage<T> listPage = null;
+    public static <T> ListPage<T> json2ListPage(String jsonString, Class<T> valueType) throws BrokerException {
         try {
-            listPage = OBJECT_MAPPER.readValue(jsonString, javaType);
+            JavaType javaType = JsonHelper.getObjectMapper().getTypeFactory().constructParametricType(ListPage.class, valueType);
+            return JsonHelper.getObjectMapper().readValue(jsonString, javaType);
         } catch (IOException e) {
             log.error("convert jsonString to object failed ", e);
             throw new BrokerException(ErrorCode.JSON_DECODE_EXCEPTION);
         }
-
-        return listPage;
     }
 }
 

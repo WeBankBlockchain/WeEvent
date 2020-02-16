@@ -27,10 +27,10 @@ import com.webank.weevent.protocol.rest.entity.TbNode;
 import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
+import com.webank.weevent.sdk.JsonHelper;
 import com.webank.weevent.sdk.WeEvent;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -73,7 +73,6 @@ public class Web3SDK2Wrapper {
     public final static String NODE_ID = "nodeId";
     public final static String PEERS = "peers";
     public final static String VIEW = "view";
-    private static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     public static String chainID;
 
     // static gas provider
@@ -559,7 +558,7 @@ public class Web3SDK2Wrapper {
     }
 
     private static Map<String, Map<String, String>> getNodeViews(Web3j web3j) throws IOException {
-        JsonNode jsonNode = OBJECT_MAPPER.readTree(web3j.getConsensusStatus().sendForReturnString());
+        JsonNode jsonNode = JsonHelper.getObjectMapper().readTree(web3j.getConsensusStatus().sendForReturnString());
         Map<String, Map<String, String>> nodeViews = new HashMap<>();
         for (JsonNode node : jsonNode) {
             if (node.isArray()) {
@@ -570,7 +569,7 @@ public class Web3SDK2Wrapper {
     }
 
     private static Map<String, Map<String, String>> getBlockNums(Web3j web3j) throws IOException {
-        JsonNode jsonObj = OBJECT_MAPPER.readTree(web3j.getSyncStatus().sendForReturnString());
+        JsonNode jsonObj = JsonHelper.getObjectMapper().readTree(web3j.getSyncStatus().sendForReturnString());
         Map<String, Map<String, String>> nodeBlockNums = new HashMap<>();
 
         Map<String, String> map = new HashMap<>();
