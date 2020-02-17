@@ -3,7 +3,6 @@ package com.webank.weevent.broker.fisco.file;
 
 import java.nio.charset.StandardCharsets;
 
-import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.FileChunksMeta;

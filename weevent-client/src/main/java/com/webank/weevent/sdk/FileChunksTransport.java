@@ -8,8 +8,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -49,8 +52,10 @@ public class FileChunksTransport {
         this.httpClient = HttpClientBuilder.create().build();
     }
 
-    public String upload(String localFile, String groupId) throws BrokerException, IOException {
+    public SendResult upload(WeEventClient weEventClient, String localFile, String groupId, String topic) throws BrokerException, IOException {
         log.info("try to upload file {}", localFile);
+        SendResult sendResult = new SendResult();
+        sendResult.setTopic(topic);
 
         // get file initial information
         File file = new File(localFile);
@@ -71,12 +76,17 @@ public class FileChunksTransport {
             boolean finish = this.uploadChunk(fileChunksMeta.getFileId(), chunkIdx, chunkData);
             if (finish) {
                 log.info("upload file complete, {}", localFile);
-                return fileChunksMeta.getFileId();
+                // publish file event
+                Map<String, String> extensions = new HashMap<>();
+                extensions.put(WeEvent.WeEvent_FILE, "1");
+                WeEvent weEvent = new WeEvent(topic, fileChunksMeta.getFileId().getBytes(StandardCharsets.UTF_8), extensions);
+                sendResult = weEventClient.publish(weEvent);
             }
         }
 
         log.error("upload file not complete, {}", localFile);
-        return "";
+        sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+        return sendResult;
     }
 
     public String download(String host, String fileId) throws BrokerException, IOException {

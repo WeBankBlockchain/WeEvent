@@ -78,22 +78,21 @@ public class FileRest {
     @RequestMapping(path = "/uploadChunk")
     public FileChunksMeta uploadChunk(@RequestParam(name = "groupId", required = false) String groupId,
                                       @RequestParam(name = "fileId") String fileId,
-                                      @RequestParam(name = "chunkIdx") String chunkNum,
+                                      @RequestParam(name = "chunkIdx") String chunkIdx,
                                       @RequestParam(name = "chunkData") byte[] chunkData) throws BrokerException {
-        log.info("groupId: {}  fileId: {}  chunkIdx: {}", groupId, fileId, chunkNum);
+        log.info("groupId: {}  fileId: {}  chunkIdx: {}", groupId, fileId, chunkIdx);
 
         checkSupport();
 
-        int chunkIdx = Integer.parseInt(chunkNum);
         ParamCheckUtils.validateFileId(fileId);
-        ParamCheckUtils.validateChunkIdx(chunkIdx);
+        ParamCheckUtils.validateChunkIdx(Integer.parseInt(chunkIdx));
         ParamCheckUtils.validateChunkData(chunkData);
 
         // send data to FileTransportSender
-        this.fileTransportService.sendChunkData(fileId, chunkIdx, chunkData);
+        this.fileTransportService.sendChunkData(fileId, Integer.parseInt(chunkIdx), chunkData);
 
         // update bitmap in Zookeeper
-        boolean finish = this.zkChunksMeta.setChunksBit(fileId, chunkIdx);
+        boolean finish = this.zkChunksMeta.setChunksBit(fileId, Integer.parseInt(chunkIdx));
         // close AMOP channel if finish
         if (finish) {
             this.fileTransportService.closeChannel(fileId);

@@ -8,7 +8,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -354,16 +353,11 @@ public class WeEventClient implements IWeEventClient {
     public SendResult publishFile(String topic, String localFile) throws BrokerException, IOException {
         // upload file
         FileChunksTransport fileChunksTransport = new FileChunksTransport(this.brokerUrl + "/file");
-        String fileId = fileChunksTransport.upload(localFile, this.groupId);
-
-        // publish file event
-        Map<String, String> extensions = new HashMap<>();
-        extensions.put(WeEvent.WeEvent_FILE, "1");
-        WeEvent weEvent = new WeEvent(topic, fileId.getBytes(StandardCharsets.UTF_8), extensions);
-        SendResult sendResult = this.publish(weEvent);
+        SendResult sendResult = fileChunksTransport.upload(this, localFile, this.groupId, topic);
 
         log.info("publish file result: {}", sendResult);
         return sendResult;
+
     }
 
     static class FileEventListener implements EventListener {
