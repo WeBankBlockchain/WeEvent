@@ -19,17 +19,18 @@ public class FileChunksMeta {
     private long fileSize;
     // file data's md5
     private String fileMd5;
+    // topic
+    private String topic;
+    // groupId
+    private String groupId;
 
     // uuid for file
     private String fileId;
+
     // chunk size
     private int chunkSize;
     // chunk num
     private int chunkNum;
     // all chunk's upload status(chunkIndex, true/false)
     private BitSet chunkStatus;
-    // groupId
-    private String groupId;
-    // topic
-    private String topic;
 }

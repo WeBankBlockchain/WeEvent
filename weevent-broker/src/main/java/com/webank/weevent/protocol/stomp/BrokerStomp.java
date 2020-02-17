@@ -13,6 +13,8 @@ import java.util.concurrent.TimeoutException;
 
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.file.FileEventListener;
+import com.webank.weevent.broker.fisco.file.FileTransportService;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
@@ -55,8 +57,10 @@ public class BrokerStomp extends TextWebSocketHandler {
     private IProducer iproducer;
     private IConsumer iconsumer;
 
-    String authAccount = "";
-    String authPassword = "";
+    private String authAccount = "";
+    private String authPassword = "";
+
+    private FileTransportService fileTransportService;
 
     // session id <-> (subscription id in stomp's header <-> (subscription id in consumer, topic))
     private static Map<String, Map<String, Pair<String, String>>> sessionContext = new HashMap<>();
@@ -75,6 +79,11 @@ public class BrokerStomp extends TextWebSocketHandler {
     public void setAuthAccount(Environment environment) {
         this.authAccount = environment.getProperty("spring.security.user.name");
         this.authPassword = environment.getProperty("spring.security.user.password");
+    }
+
+    @Autowired(required = false)
+    public void setFileTransportService(FileTransportService fileTransportService) {
+        this.fileTransportService = fileTransportService;
     }
 
     private void handleSingleMessage(Message<byte[]> msg, WebSocketSession session) {
@@ -457,32 +466,41 @@ public class BrokerStomp extends TextWebSocketHandler {
             ext.put(IConsumer.SubscribeExt.TopicTag, tag);
         }
 
+        IConsumer.ConsumerListener listener;
+        if (isFile) {
+            log.info("this is a subscription extended for file");
+
+            if (this.fileTransportService == null) {
+                log.error("NOT FOUND zookeeper for file subscription, skip it");
+                throw new BrokerException(ErrorCode.ZOOKEEPER_NOT_SUPPORT_FILE_SUBSCRIPTION);
+            }
+
+            listener = new FileEventListener(this.fileTransportService) {
+                @Override
+                public void send(String subscriptionId, WeEvent event) {
+                    handleOnEvent(headerIdStr, subscriptionId, event, session);
+                }
+            };
+        } else {
+            listener = new IConsumer.ConsumerListener() {
+                @Override
+                public void onEvent(String subscriptionId, WeEvent event) {
+                    log.info("consumer onEvent, subscriptionId: {} event: {}", subscriptionId, event);
+                    handleOnEvent(headerIdStr, subscriptionId, event, session);
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("consumer onException", e);
+                }
+            };
+        }
+
         // support both single/multiple topic
-        String subscriptionId = this.iconsumer.subscribe(curTopicList,
-                groupId,
-                subEventId,
-                ext,
-                new IConsumer.ConsumerListener() {
-                    @Override
-                    public void onEvent(String subscriptionId, WeEvent event) {
-                        log.info("consumer onEvent, subscriptionId: {} event: {}", subscriptionId, event);
-                        try {
-                            handleOnEvent(headerIdStr, subscriptionId, event, session);
-                        } catch (IOException e) {
-                            log.error("exception in session.sendMessage", e);
-                        }
-                    }
-
-                    @Override
-                    public void onException(Throwable e) {
-                        log.error("consumer onException", e);
-                    }
-                });
-
+        String subscriptionId = this.iconsumer.subscribe(curTopicList, groupId, subEventId, ext, listener);
         log.info("bind context, session id: {} header subscription id: {} consumer subscription id: {} topic: {}",
                 session.getId(), headerIdStr, subscriptionId, Arrays.toString(curTopicList));
-        sessionContext.get(session.getId())
-                .put(headerIdStr, Pair.of(subscriptionId, StringUtils.join(curTopicList, WeEvent.MULTIPLE_TOPIC_SEPARATOR)));
+        sessionContext.get(session.getId()).put(headerIdStr, Pair.of(subscriptionId, StringUtils.join(curTopicList, WeEvent.MULTIPLE_TOPIC_SEPARATOR)));
 
         log.info("consumer subscribe success, consumer subscriptionId: {}", subscriptionId);
         return subscriptionId;
@@ -491,7 +509,7 @@ public class BrokerStomp extends TextWebSocketHandler {
     private void handleOnEvent(String headerIdStr,
                                String subscriptionId,
                                WeEvent event,
-                               WebSocketSession session) throws IOException {
+                               WebSocketSession session) {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.MESSAGE);
         // package the return frame
         accessor.setSubscriptionId(headerIdStr);

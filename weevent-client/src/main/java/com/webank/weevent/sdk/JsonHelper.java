@@ -59,6 +59,22 @@ public class JsonHelper {
     }
 
     /**
+     * convert object to byte[]
+     *
+     * @param object java object
+     * @return json data
+     * @throws BrokerException BrokerException
+     */
+    public static byte[] object2JsonBytes(Object object) throws BrokerException {
+        try {
+            return OBJECT_MAPPER.writeValueAsBytes(object);
+        } catch (JsonProcessingException e) {
+            log.error("convert object to jsonString failed ", e);
+            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
+        }
+    }
+
+    /**
      * convert jsonString to object
      *
      * @param jsonString json data
@@ -70,6 +86,24 @@ public class JsonHelper {
     public static <T> T json2Object(String jsonString, Class<T> valueType) throws BrokerException {
         try {
             return OBJECT_MAPPER.readValue(jsonString, valueType);
+        } catch (IOException e) {
+            log.error("convert jsonString to object failed ", e);
+            throw new BrokerException(ErrorCode.JSON_DECODE_EXCEPTION);
+        }
+    }
+
+    /**
+     * convert jsonString to object
+     *
+     * @param json json data
+     * @param valueType java object type
+     * @param <T> template type
+     * @return Object java object
+     * @throws BrokerException BrokerException
+     */
+    public static <T> T json2Object(byte[] json, Class<T> valueType) throws BrokerException {
+        try {
+            return OBJECT_MAPPER.readValue(json, valueType);
         } catch (IOException e) {
             log.error("convert jsonString to object failed ", e);
             throw new BrokerException(ErrorCode.JSON_DECODE_EXCEPTION);

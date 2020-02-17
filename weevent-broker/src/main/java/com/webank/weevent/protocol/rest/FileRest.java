@@ -1,13 +1,12 @@
 package com.webank.weevent.protocol.rest;
 
 import com.webank.weevent.BrokerApplication;
-import com.webank.weevent.broker.fisco.file.FileTransportReceiver;
-import com.webank.weevent.broker.fisco.file.FileTransportSender;
+import com.webank.weevent.broker.fisco.file.FileTransportService;
 import com.webank.weevent.broker.fisco.file.ZKChunksMeta;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.fisco.util.WeEventUtils;
-import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.FileChunksMeta;
 
 import lombok.extern.slf4j.Slf4j;
@@ -21,33 +20,28 @@ import org.springframework.web.bind.annotation.RestController;
  * @version 1.2
  * @since 2020/2/12
  */
+@Slf4j
 @RequestMapping(value = "/file")
 @RestController
-@Slf4j
 public class FileRest {
-    private IProducer producer;
     private ZKChunksMeta zkChunksMeta;
-    private FileTransportSender fileTransportSender;
-    private FileTransportReceiver fileTransportReceiver;
+    private FileTransportService fileTransportService;
 
-    @Autowired
-    public void setProducer(IProducer producer) {
-        this.producer = producer;
-    }
-
-    @Autowired
+    @Autowired(required = false)
     public void setZkChunksMeta(ZKChunksMeta zkChunksMeta) {
         this.zkChunksMeta = zkChunksMeta;
     }
 
-    @Autowired
-    public void setFileTransportSender(FileTransportSender fileTransportSender) {
-        this.fileTransportSender = fileTransportSender;
+    @Autowired(required = false)
+    public void setFileTransportService(FileTransportService fileTransportService) {
+        this.fileTransportService = fileTransportService;
     }
 
-    @Autowired
-    public void fileTransportReceiver(FileTransportReceiver fileTransportReceiver) {
-        this.fileTransportReceiver = fileTransportReceiver;
+    private void checkSupport() throws BrokerException {
+        if (this.fileTransportService == null) {
+            log.error("DO NOT SUPPORT file transport without zookeeper");
+            throw new BrokerException(ErrorCode.ZOOKEEPER_NOT_SUPPORT_FILE_SUBSCRIPTION);
+        }
     }
 
     @RequestMapping(path = "/createChunk")
@@ -55,17 +49,15 @@ public class FileRest {
                                       @RequestParam(name = "fileName") String fileName,
                                       @RequestParam(name = "fileSize") long fileSize,
                                       @RequestParam(name = "md5") String md5) throws BrokerException {
-        log.info("createChunk, groupId:{} md5:{}", groupId, md5);
+        log.info("groupId:{} md5:{}", groupId, md5);
+
+        checkSupport();
 
         ParamCheckUtils.validateFileName(fileName);
         ParamCheckUtils.validateFileSize(fileSize);
         ParamCheckUtils.validateFileMd5(md5);
 
         String fileId = WeEventUtils.generateUuid();
-
-        // create AMOP channel with FileTransportSender
-        this.fileTransportSender.openChannel(fileId);
-
         // create FileChunksMeta
         FileChunksMeta fileChunksMeta = new FileChunksMeta();
         fileChunksMeta.setFileId(fileId);
@@ -73,6 +65,9 @@ public class FileRest {
         fileChunksMeta.setFileSize(fileSize);
         fileChunksMeta.setFileMd5(md5);
         fileChunksMeta.setChunkSize(BrokerApplication.weEventConfig.getChunkSize());
+
+        // create AMOP channel with FileTransportSender
+        this.fileTransportService.openChannel(fileChunksMeta);
 
         // update to Zookeeper
         this.zkChunksMeta.addChunks(fileId, fileChunksMeta);
@@ -85,7 +80,9 @@ public class FileRest {
                                       @RequestParam(name = "fileId") String fileId,
                                       @RequestParam(name = "chunkIdx") String chunkNum,
                                       @RequestParam(name = "chunkData") byte[] chunkData) throws BrokerException {
-        log.info("uploadChunk, groupId:{}. fileId:{}. chunkIdx:{}", groupId, fileId, chunkNum);
+        log.info("groupId: {}  fileId: {}  chunkIdx: {}", groupId, fileId, chunkNum);
+
+        checkSupport();
 
         int chunkIdx = Integer.parseInt(chunkNum);
         ParamCheckUtils.validateFileId(fileId);
@@ -93,14 +90,13 @@ public class FileRest {
         ParamCheckUtils.validateChunkData(chunkData);
 
         // send data to FileTransportSender
-        this.fileTransportSender.send(fileId, chunkIdx, chunkData);
+        this.fileTransportService.sendChunkData(fileId, chunkIdx, chunkData);
 
         // update bitmap in Zookeeper
         boolean finish = this.zkChunksMeta.setChunksBit(fileId, chunkIdx);
         // close AMOP channel if finish
         if (finish) {
-            this.fileTransportReceiver.closeChannel(fileId);
-            this.fileTransportSender.closeChannel(fileId);
+            this.fileTransportService.closeChannel(fileId);
         }
 
         return this.zkChunksMeta.getChunks(fileId);
@@ -110,19 +106,24 @@ public class FileRest {
     public byte[] downloadChunk(@RequestParam(name = "groupId", required = false) String groupId,
                                 @RequestParam(name = "fileId") String fileId,
                                 @RequestParam(name = "chunkIdx") int chunkIdx) throws BrokerException {
-        log.info("downloadChunk, groupId:{}. fileId:{}. chunkIdx:{}", groupId, fileId, chunkIdx);
+        log.info("groupId: {}  fileId: {}  chunkIdx: {}", groupId, fileId, chunkIdx);
+
+        checkSupport();
 
         ParamCheckUtils.validateFileId(fileId);
         ParamCheckUtils.validateChunkIdx(chunkIdx);
 
         // get file data from FileTransportReceiver
-        return this.fileTransportReceiver.downloadChunk(fileId, chunkIdx);
+        return this.fileTransportService.downloadChunk(fileId, chunkIdx);
     }
 
     @RequestMapping(path = "/listChunk")
     public FileChunksMeta listChunk(@RequestParam(name = "groupId", required = false) String groupId,
                                     @RequestParam(name = "fileId") String fileId) throws BrokerException {
-        log.info("listChunk, groupId:{}. fileId:{}", groupId, fileId);
+        log.info("groupId: {} fileId: {}", groupId, fileId);
+
+        checkSupport();
+
         ParamCheckUtils.validateFileId(fileId);
 
         // get file chunks info from Zookeeper

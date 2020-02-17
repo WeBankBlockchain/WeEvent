@@ -16,6 +16,7 @@ import com.webank.weevent.broker.fabric.sdk.FabricDelegate;
 import com.webank.weevent.broker.fisco.FiscoBcosBroker4Consumer;
 import com.webank.weevent.broker.fisco.FiscoBcosBroker4Producer;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.file.FileTransportService;
 import com.webank.weevent.broker.fisco.file.ZKChunksMeta;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.plugin.IConsumer;
@@ -32,6 +33,7 @@ import org.apache.coyote.http11.Http11NioProtocol;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
@@ -291,6 +293,14 @@ public class BrokerApplication {
         }
 
         return new ZKChunksMeta("/WeEvent/file", connectString);
+    }
+
+    @Bean
+    @ConditionalOnBean(ZKChunksMeta.class)
+    public static FileTransportService getFileService(IProducer iProducer) {
+        FileTransportService fileTransportService = new FileTransportService();
+        fileTransportService.setProducer(iProducer);
+        return fileTransportService;
     }
 
     // http filter

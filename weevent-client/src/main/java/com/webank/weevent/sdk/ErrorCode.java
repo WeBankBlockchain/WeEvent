@@ -50,6 +50,7 @@ public enum ErrorCode {
     ZOOKEEPER_INVALID_PATH(100601, "invalid zookeeper path"),
     ZOOKEEPER_UNKNOWN_FILE(100602, "unknown file id in zookeeper"),
     ZOOKEEPER_EXIST_FILE(100603, "file id already exist in zookeeper"),
+    ZOOKEEPER_NOT_SUPPORT_FILE_SUBSCRIPTION(100604, "DO NOT SUPPORT file transport without zookeeper"),
 
     SDK_TLS_INIT_FAILED(101001, "init tsl ca failed"),
     SDK_JMS_INIT_FAILED(101002, "init jms connection factory failed"),
