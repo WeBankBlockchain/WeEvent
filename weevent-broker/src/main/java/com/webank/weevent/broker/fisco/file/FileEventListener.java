@@ -26,6 +26,13 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
     public void onEvent(String subscriptionId, WeEvent event) {
         log.info("received file event, subscriptionId: {} {}", subscriptionId, event);
 
+        if (!event.getExtensions().containsKey(WeEvent.WeEvent_FILE)
+                || !event.getExtensions().containsKey(WeEvent.WeEvent_FORMAT)
+                || "json".equals(event.getExtensions().get(WeEvent.WeEvent_FORMAT))) {
+            log.error("unknown FileEvent, skip it");
+            return;
+        }
+
         FileEvent fileEvent;
         try {
             fileEvent = JsonHelper.json2Object(event.getContent(), FileEvent.class);
@@ -40,13 +47,15 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
                 break;
 
             case FileTransportEnd:
-                WeEvent notifyWeEvent = this.fileTransportService.genWeEventForReceivedFile(fileEvent.getFileChunksMeta());
+                // TODO close amop channel
+
+                WeEvent notifyWeEvent = this.fileTransportService.genWeEventForReceivedFile(event);
                 log.info("try to send file received event to remote, {}", notifyWeEvent);
                 this.send(subscriptionId, notifyWeEvent);
                 break;
 
             default:
-                log.error("unknown file event");
+                log.error("unknown file event type");
         }
     }
 

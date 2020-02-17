@@ -1,10 +1,6 @@
 package com.webank.weevent.protocol.rest;
 
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.webank.weevent.BrokerApplication;
@@ -12,13 +8,11 @@ import com.webank.weevent.broker.fisco.file.FileTransportService;
 import com.webank.weevent.broker.fisco.file.ZKChunksMeta;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.fisco.util.WeEventUtils;
-import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.FileChunksMeta;
 import com.webank.weevent.sdk.SendResult;
-import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,24 +117,7 @@ public class FileRest {
         // publish file and close AMOP channel if finish
         if (finish) {
             sendResult.setFinish(true);
-            Map<String, String> extensions = new HashMap<>();
-            extensions.put(WeEvent.WeEvent_FILE, "1");
-            WeEvent weEvent = new WeEvent(topic, fileId.getBytes(StandardCharsets.UTF_8), extensions);
-
-            try {
-                sendResult = this.producer.publish(weEvent, groupId).get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-                sendResult.setFileChunksMeta(this.zkChunksMeta.getChunks(fileId));
-            } catch (InterruptedException | ExecutionException e) {
-                log.error("publishWeEvent failed due to transaction execution error.", e);
-                sendResult.setFileChunksMeta(fileChunksMeta);
-                sendResult.setStatus(SendResult.SendResultStatus.ERROR);
-            } catch (TimeoutException e) {
-                log.error("publishWeEvent failed due to transaction execution timeout.", e);
-                sendResult.setFileChunksMeta(fileChunksMeta);
-                sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
-            }
-
-            this.fileTransportService.closeChannel(fileId);
+            sendResult = this.fileTransportService.closeChannel(fileId);
         }
 
         return sendResult;

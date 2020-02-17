@@ -46,12 +46,6 @@ public enum ErrorCode {
     TOPIC_TAG_IS_BLANK(100506, "topic's tag is blank"),
     SUBSCRIPTIONID_ALREADY_EXIST(100507, "subscriptionId is already exist, can not subscribe again"),
 
-    ZOOKEEPER_ERROR(100600, "access zookeeper failed"),
-    ZOOKEEPER_INVALID_PATH(100601, "invalid zookeeper path"),
-    ZOOKEEPER_UNKNOWN_FILE(100602, "unknown file id in zookeeper"),
-    ZOOKEEPER_EXIST_FILE(100603, "file id already exist in zookeeper"),
-    ZOOKEEPER_NOT_SUPPORT_FILE_SUBSCRIPTION(100604, "DO NOT SUPPORT file transport without zookeeper"),
-
     SDK_TLS_INIT_FAILED(101001, "init tsl ca failed"),
     SDK_JMS_INIT_FAILED(101002, "init jms connection factory failed"),
     SDK_JMS_EXCEPTION_STOMP_EXECUTE(101003, "stomp command execute failed"),
@@ -100,7 +94,7 @@ public enum ErrorCode {
     TRANSACTION_RECEIPT_IS_NULL(200206, "transaction reception is null"),
     DEPLOY_CONTRACT_ERROR(200207, "deploy contract failed"),
     LOAD_CONTRACT_ERROR(200208, "load contract failed"),
-    WEB3SDK_INIT_ERROR(200209, "init web3sdk failed"),
+    WEB3SDK_INIT_ERROR(200209, "init web3sdk's client service failed"),
     WEB3SDK_VERSION_NOT_SUPPORT(200210, "FISCO-BCOS 1.x, do not support group"),
     WEB3SDK_UNKNOWN_GROUP(200211, "FISCO-BCOS 2.x, unknown group id"),
     SUBSCRIPTION_NOTIFY_QUEUE_FULL(200212, "onEvent is blocked too long, notify queue is full"),
@@ -112,6 +106,18 @@ public enum ErrorCode {
     FABRICSDK_CHANNEL_NAME_INVALID(200300, "Fabric 1.4x, channel name invalid"),
     FABRICSDK_GETBLOCKINFO_ERROR(200301, "Fabric 1.4x, get blockInfo error"),
     FABRICSDK_CHAINCODE_INVOKE_FAILED(200302, "Fabric 1.4x, execute chaincode invoke failed"),
+
+    ZOOKEEPER_ERROR(200400, "access zookeeper failed"),
+    ZOOKEEPER_INVALID_PATH(200401, "invalid zookeeper path"),
+    ZOOKEEPER_UNKNOWN_FILE(200402, "unknown file id in zookeeper"),
+    ZOOKEEPER_EXIST_FILE(200403, "file id already exist in zookeeper"),
+    ZOOKEEPER_NOT_SUPPORT_FILE_SUBSCRIPTION(200404, "DO NOT SUPPORT file transport without zookeeper"),
+
+    FILE_NOT_EXIST_CONTEXT(200500, "not exist file context"),
+    FILE_INVALID_CHUNK(200501, "invalid chunk data"),
+    FILE_NOT_EXIST(200502, "not exist file"),
+    FILE_READ_EXCEPTION(200503, "read file exception"),
+    FILE_WRITE_EXCEPTION(200504, "read file exception"),
     ;
 
     /**
