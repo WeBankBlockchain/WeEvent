@@ -81,7 +81,7 @@ public class FileTransportService {
 
         // send amop event to close
         amopChannel.sendEvent(amopChannel.getAmopReceivedTopic(),
-                new FileEvent(FileEvent.EventType.FIleChannelEnd));
+                new FileEvent(FileEvent.EventType.FIleChannelClose));
     }
 
     public void sendChunkData(String fileId, int chunkIndex, byte[] data) throws BrokerException {
@@ -101,6 +101,7 @@ public class FileTransportService {
 
     // inner interface
 
+    // callback with FileEvent.EventType.FileTransportStart
     public void prepareReceiveFile(FileChunksMeta fileChunksMeta) {
         // create file buff
 

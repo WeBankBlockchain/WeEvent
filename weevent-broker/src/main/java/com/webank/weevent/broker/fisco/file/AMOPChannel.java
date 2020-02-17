@@ -39,7 +39,10 @@ public class AMOPChannel {
 
     }
 
+    // can be called after received FileEvent.EventType.FIleChannelAlready
     public void sendEvent(String topic, FileEvent fileEvent) {
 
     }
+
+    // FileEvent.EventType.FIleChannelClose
 }
