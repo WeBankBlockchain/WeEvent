@@ -1,13 +1,24 @@
 package com.webank.weevent.protocol.rest;
 
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.file.FileTransportService;
 import com.webank.weevent.broker.fisco.file.ZKChunksMeta;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.fisco.util.WeEventUtils;
+import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
+import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.FileChunksMeta;
+import com.webank.weevent.sdk.SendResult;
+import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class FileRest {
     private ZKChunksMeta zkChunksMeta;
     private FileTransportService fileTransportService;
+    private IProducer producer;
 
     @Autowired(required = false)
     public void setZkChunksMeta(ZKChunksMeta zkChunksMeta) {
@@ -35,6 +47,11 @@ public class FileRest {
     @Autowired(required = false)
     public void setFileTransportService(FileTransportService fileTransportService) {
         this.fileTransportService = fileTransportService;
+    }
+
+    @Autowired
+    public void setProducer(IProducer producer) {
+        this.producer = producer;
     }
 
     private void checkSupport() throws BrokerException {
@@ -76,29 +93,58 @@ public class FileRest {
     }
 
     @RequestMapping(path = "/uploadChunk")
-    public FileChunksMeta uploadChunk(@RequestParam(name = "groupId", required = false) String groupId,
-                                      @RequestParam(name = "fileId") String fileId,
-                                      @RequestParam(name = "chunkIdx") String chunkIdx,
-                                      @RequestParam(name = "chunkData") byte[] chunkData) throws BrokerException {
+    public SendResult uploadChunk(@RequestParam(name = "groupId", required = false) String groupId,
+                                  @RequestParam(name = "topic") String topic,
+                                  @RequestParam(name = "fileId") String fileId,
+                                  @RequestParam(name = "chunkIdx") String chunkIdx,
+                                  @RequestParam(name = "chunkData") byte[] chunkData) throws BrokerException, InterruptedException, ExecutionException, TimeoutException {
         log.info("groupId: {}  fileId: {}  chunkIdx: {}", groupId, fileId, chunkIdx);
-
         checkSupport();
 
         ParamCheckUtils.validateFileId(fileId);
         ParamCheckUtils.validateChunkIdx(Integer.parseInt(chunkIdx));
         ParamCheckUtils.validateChunkData(chunkData);
 
+        FileChunksMeta fileChunksMeta = new FileChunksMeta();
+        fileChunksMeta.setTopic(topic);
+        fileChunksMeta.setChunkNum(Integer.parseInt(chunkIdx));
+        fileChunksMeta.setFileId(fileId);
+
+        SendResult sendResult = new SendResult();
+        sendResult.setTopic(topic);
+        sendResult.setFinish(false);
+        sendResult.setStatus(SendResult.SendResultStatus.FILE_UPLOAD_NOT_YET);
+
         // send data to FileTransportSender
         this.fileTransportService.sendChunkData(fileId, Integer.parseInt(chunkIdx), chunkData);
 
         // update bitmap in Zookeeper
         boolean finish = this.zkChunksMeta.setChunksBit(fileId, Integer.parseInt(chunkIdx));
-        // close AMOP channel if finish
+        // publish file and close AMOP channel if finish
         if (finish) {
+            sendResult.setFinish(true);
+            Map<String, String> extensions = new HashMap<>();
+            extensions.put(WeEvent.WeEvent_FILE, "1");
+            WeEvent weEvent = new WeEvent(topic, fileId.getBytes(StandardCharsets.UTF_8), extensions);
+
+            try {
+                sendResult = this.producer.publish(weEvent, groupId).get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
+                sendResult.setFileChunksMeta(this.zkChunksMeta.getChunks(fileId));
+            } catch (InterruptedException | ExecutionException e) {
+                log.error("publishWeEvent failed due to transaction execution error.", e);
+                sendResult.setFileChunksMeta(fileChunksMeta);
+                sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+            } catch (TimeoutException e) {
+                log.error("publishWeEvent failed due to transaction execution timeout.", e);
+                sendResult.setFileChunksMeta(fileChunksMeta);
+                sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
+            }
+
             this.fileTransportService.closeChannel(fileId);
         }
 
-        return this.zkChunksMeta.getChunks(fileId);
+        return sendResult;
+        // return this.zkChunksMeta.getChunks(fileId);
     }
 
     @RequestMapping(path = "/downloadChunk")

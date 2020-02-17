@@ -8,11 +8,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -52,10 +49,9 @@ public class FileChunksTransport {
         this.httpClient = HttpClientBuilder.create().build();
     }
 
-    public SendResult upload(WeEventClient weEventClient, String localFile, String groupId, String topic) throws BrokerException, IOException {
+    public SendResult upload(String localFile, String groupId, String topic) throws BrokerException, IOException {
         log.info("try to upload file {}", localFile);
         SendResult sendResult = new SendResult();
-        sendResult.setTopic(topic);
 
         // get file initial information
         File file = new File(localFile);
@@ -73,19 +69,14 @@ public class FileChunksTransport {
         for (int chunkIdx = 0; chunkIdx < fileChunksMeta.getChunkNum(); chunkIdx++) {
             byte[] chunkData = new byte[fileChunksMeta.getChunkSize()];
             fileInputStream.read(chunkData, chunkIdx * fileChunksMeta.getChunkSize(), fileChunksMeta.getChunkSize());
-            boolean finish = this.uploadChunk(fileChunksMeta.getFileId(), chunkIdx, chunkData);
-            if (finish) {
-                log.info("upload file complete, {}", localFile);
-                // publish file event
-                Map<String, String> extensions = new HashMap<>();
-                extensions.put(WeEvent.WeEvent_FILE, "1");
-                WeEvent weEvent = new WeEvent(topic, fileChunksMeta.getFileId().getBytes(StandardCharsets.UTF_8), extensions);
-                sendResult = weEventClient.publish(weEvent);
+            sendResult = this.uploadChunk(topic, fileChunksMeta.getFileId(), chunkIdx, chunkData);
+            if (sendResult.isFinish()) {
+                log.info("upload file complete, publish file success {}", localFile);
+                return sendResult;
             }
         }
 
         log.error("upload file not complete, {}", localFile);
-        sendResult.setStatus(SendResult.SendResultStatus.ERROR);
         return sendResult;
     }
 
@@ -155,12 +146,13 @@ public class FileChunksTransport {
         return fileChunksMetaResponse;
     }
 
-    private boolean uploadChunk(String fileId, int chunkIdx, byte[] chunkData) throws BrokerException {
+    private SendResult uploadChunk(String topic, String fileId, int chunkIdx, byte[] chunkData) throws BrokerException {
         // this.svrUrl + "/uploadChunk"
         URI svrUri = URI.create(this.svrUrl + "/uploadChunk");
         URI uploadUri;
         try {
             List<NameValuePair> params = new ArrayList<>();
+            params.add(new BasicNameValuePair("topic", topic));
             params.add(new BasicNameValuePair("fileId", fileId));
             params.add(new BasicNameValuePair("chunkIdx", String.valueOf(chunkIdx)));
             uploadUri = new URIBuilder().setScheme(svrUri.getScheme()).setHost(svrUri.getHost()).setPort(svrUri.getPort())
@@ -175,11 +167,11 @@ public class FileChunksTransport {
         httpPost.setEntity(new ByteArrayEntity(chunkData));
         httpPost.setHeader("Content-type", "application/octet-stream");
         CloseableHttpResponse httpResponse = null;
-        FileChunksMeta fileChunksMetaResponse;
+        SendResult sendResult;
         try {
             httpResponse = this.httpClient.execute(httpPost);
             String responseResult = EntityUtils.toString(httpResponse.getEntity());
-            fileChunksMetaResponse = JsonHelper.json2Object(responseResult, FileChunksMeta.class);
+            sendResult = JsonHelper.json2Object(responseResult, SendResult.class);
         } catch (IOException e) {
             log.error("execute http request url:{} error, e:{}", svrUri, e);
             throw new BrokerException(ErrorCode.HTTP_REQUEST_EXECUTE_ERROR);
@@ -188,7 +180,7 @@ public class FileChunksTransport {
         }
 
         log.info("upload chunk success, {}@{} {}", fileId, chunkIdx, chunkData.length);
-        return fileChunksMetaResponse.getChunkStatus().get(chunkIdx);
+        return sendResult;
     }
 
     private byte[] downloadChunk(String fileId, int chunkIdx) throws BrokerException {

@@ -353,7 +353,7 @@ public class WeEventClient implements IWeEventClient {
     public SendResult publishFile(String topic, String localFile) throws BrokerException, IOException {
         // upload file
         FileChunksTransport fileChunksTransport = new FileChunksTransport(this.brokerUrl + "/file");
-        SendResult sendResult = fileChunksTransport.upload(this, localFile, this.groupId, topic);
+        SendResult sendResult = fileChunksTransport.upload(localFile, this.groupId, topic);
 
         log.info("publish file result: {}", sendResult);
         return sendResult;

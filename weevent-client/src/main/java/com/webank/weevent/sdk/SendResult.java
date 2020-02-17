@@ -16,8 +16,8 @@ public class SendResult {
         TIMEOUT,
         ERROR,
         NO_PERMISSION,
+        FILE_UPLOAD_NOT_YET,
     }
-
 
     /**
      * Result status.
@@ -33,6 +33,16 @@ public class SendResult {
      * Event ID.
      */
     private String eventId;
+
+    /**
+     * FileChunksMeta.
+     */
+    private FileChunksMeta fileChunksMeta;
+
+    /**
+     * File upload complete.
+     */
+    private boolean finish;
 
     /**
      * Default construction needed by jackson marshall.
