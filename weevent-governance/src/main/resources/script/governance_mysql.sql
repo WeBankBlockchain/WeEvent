@@ -76,6 +76,7 @@ CREATE TABLE t_rule_engine (
 
 CREATE TABLE t_rule_database (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `database_type` VARCHAR(1) NOT NULL COMMENT '数据源类型,1代表h2,2代表mysql',
   `datasource_name` VARCHAR(256) NOT NULL COMMENT '数据源名称',
   `database_url` VARCHAR(128) NOT NULL COMMENT '数据库url',
   `username` VARCHAR(16) NOT NULL COMMENT '数据库用户名',

@@ -22,13 +22,13 @@ import org.hibernate.validator.constraints.Length;
 public class RuleDatabaseEntity extends RuleDatabaseBase {
 
 
-
     public RuleDatabaseEntity(Integer userId, Integer brokerId,
                               @NotBlank String databaseUrl, @NotBlank String username,
                               @NotBlank String password, @NotBlank String datasourceName,
+                              @NotBlank String databaseType,
                               @Length(max = 256) String optionalParameter,
                               @NotBlank String tableName, Boolean systemTag) {
-        super(userId, brokerId, databaseUrl, username, password, datasourceName, optionalParameter, tableName, systemTag);
+        super(userId, brokerId, databaseUrl, username, password, datasourceName, databaseType, optionalParameter, tableName, systemTag);
     }
 
     public RuleDatabaseEntity() {

@@ -52,6 +52,10 @@ public class RuleDatabaseBase extends BaseEntity {
     @Column(name = "system_tag")
     private Boolean systemTag;
 
+    @NotBlank
+    @Column(name = "database_type")
+    private String databaseType;
+
     public RuleDatabaseBase() {
     }
 
@@ -61,6 +65,7 @@ public class RuleDatabaseBase extends BaseEntity {
                             @NotBlank String username,
                             @NotBlank String password,
                             @NotBlank String datasourceName,
+                            @NotBlank String databaseType,
                             @Length(max = 256) String optionalParameter,
                             @NotBlank String tableName, Boolean systemTag) {
         this.userId = userId;
@@ -72,5 +77,6 @@ public class RuleDatabaseBase extends BaseEntity {
         this.optionalParameter = optionalParameter;
         this.tableName = tableName;
         this.systemTag = systemTag;
+        this.databaseType = databaseType;
     }
 }

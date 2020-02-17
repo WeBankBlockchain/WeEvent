@@ -54,7 +54,7 @@ public class RuleDatabaseService {
             throws GovernanceException {
         try {
             //check dbUrl
-            commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseUrl(), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword());
+            commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseType(), ruleDatabaseEntity.getDatabaseUrl(), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword());
             ruleDatabaseEntity.setSystemTag(false);
             ruleDatabaseRepository.save(ruleDatabaseEntity);
             return ruleDatabaseEntity;
@@ -84,7 +84,7 @@ public class RuleDatabaseService {
         try {
             ruleDatabaseEntity.setSystemTag(false);
             //check databaseUrl
-            commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseUrl(), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword());
+            commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseType(), ruleDatabaseEntity.getDatabaseUrl(), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword());
             ruleDatabaseEntity.setLastUpdate(new Date());
             ruleDatabaseRepository.save(ruleDatabaseEntity);
         } catch (Exception e) {
@@ -96,7 +96,7 @@ public class RuleDatabaseService {
 
     public void checkRuleDataBaseUrl(RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
         try {
-            commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseUrl(), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(),
+            commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseType(), ruleDatabaseEntity.getDatabaseUrl(), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(),
                     ruleDatabaseEntity.getPassword());
         } catch (Exception e) {
             log.error("database url is incorrect", e);

@@ -41,6 +41,7 @@ create TABLE t_account (
 	create_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	last_update TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	broker_id INTEGER,
+	database_type VARCHAR (1),
 	database_url VARCHAR (255),
 	datasource_name VARCHAR (255),
 	optional_parameter VARCHAR (256),

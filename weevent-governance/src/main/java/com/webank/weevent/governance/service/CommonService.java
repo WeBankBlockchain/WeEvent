@@ -7,6 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -63,6 +64,7 @@ public class CommonService implements AutoCloseable {
 
     @Value("${spring.datasource.url}")
     private String dataBaseUrl;
+
 
     public CloseableHttpResponse getCloseResponse(HttpServletRequest req, String newUrl) throws ServletException {
         CloseableHttpResponse closeResponse;
@@ -197,7 +199,13 @@ public class CommonService implements AutoCloseable {
         out.write(mes.getBytes());
     }
 
-    public void checkDataBaseUrl(String dataBaseUrl, String tableName, String user, String password) throws GovernanceException {
+    public void checkDataBaseUrl(String dataBaseType, String dataBaseUrl, String tableName, String user, String password) throws GovernanceException, ClassNotFoundException, SQLException {
+        //1 h2 ,2 mysql
+        if (dataBaseType.toLowerCase().equals("1")) {
+            Class.forName("org.h2.Driver");
+        } else {
+            Class.forName("org.mariadb.jdbc.Driver");
+        }
         try (Connection conn = DriverManager.getConnection(dataBaseUrl, user, password);
              Statement stat = conn.createStatement()) {
             if (stat == null) {
