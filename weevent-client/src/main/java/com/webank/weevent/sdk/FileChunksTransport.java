@@ -55,28 +55,37 @@ public class FileChunksTransport {
 
         // get file initial information
         File file = new File(localFile);
-        FileChunksMeta fileChunksMeta = new FileChunksMeta();
-        fileChunksMeta.setFileName(file.getName());
-        fileChunksMeta.setFileSize(file.length());
-        FileInputStream fileInputStream = new FileInputStream(file);
-        fileChunksMeta.setFileMd5(DigestUtils.md5DigestAsHex(fileInputStream));
-        fileChunksMeta.setGroupId(groupId);
+        try (FileInputStream fileInputStream = new FileInputStream(file)) {
+            String md5 = DigestUtils.md5DigestAsHex(fileInputStream);
+            FileChunksMeta fileChunksMeta = new FileChunksMeta(file.getName(), file.length(), md5, topic, groupId);
+            // get chunk information
+            fileChunksMeta = this.getFileChunksInfo(fileChunksMeta);
 
-        // get chunk information
-        fileChunksMeta = this.getFileChunksInfo(fileChunksMeta);
-
-        // upload every single chunk data
-        for (int chunkIdx = 0; chunkIdx < fileChunksMeta.getChunkNum(); chunkIdx++) {
-            byte[] chunkData = new byte[fileChunksMeta.getChunkSize()];
-            fileInputStream.read(chunkData, chunkIdx * fileChunksMeta.getChunkSize(), fileChunksMeta.getChunkSize());
-            sendResult = this.uploadChunk(topic, fileChunksMeta.getFileId(), chunkIdx, chunkData);
-            if (sendResult.isFinish()) {
-                log.info("upload file complete, publish file success {}", localFile);
-                return sendResult;
+            // upload every single chunk data
+            for (int chunkIdx = 0; chunkIdx < fileChunksMeta.getChunkNum(); chunkIdx++) {
+                int size = fileChunksMeta.getChunkSize();
+                if (chunkIdx == fileChunksMeta.getChunkNum() - 1) {
+                    size = (int) (fileChunksMeta.getFileSize() % fileChunksMeta.getChunkSize());
+                }
+                byte[] chunkData = new byte[size];
+                int readSize = fileInputStream.read(chunkData, chunkIdx * fileChunksMeta.getChunkSize(), size);
+                if (readSize != size) {
+                    log.error("read file exception, chunkIdx: {}", chunkIdx);
+                    throw new BrokerException(ErrorCode.FILE_READ_EXCEPTION);
+                }
+                sendResult = this.uploadChunk(topic, fileChunksMeta.getFileId(), chunkIdx, chunkData);
+                log.info("upload file chunk data, {}@{}", sendResult, chunkIdx);
             }
         }
 
-        log.error("upload file not complete, {}", localFile);
+        //TODO list chunk and check is it complete
+        FileChunksMeta fileChunksMeta = null;// = this.getFileChunksInfo(fileChunksMeta);
+        while (!fileChunksMeta.isFull()) {
+            // TODO try again
+        }
+
+        log.info("upload file complete, {}", localFile);
+        // TODO invoke removeChunk
         return sendResult;
     }
 
@@ -84,7 +93,7 @@ public class FileChunksTransport {
         log.info("try to download file, {}@{}", fileId, host);
 
         // get chunk information
-        FileChunksMeta fileChunksMeta = new FileChunksMeta();
+        FileChunksMeta fileChunksMeta = new FileChunksMeta(fileId);
         fileChunksMeta.setFileId(fileId);
         fileChunksMeta = this.getFileChunksInfo(fileChunksMeta);
 

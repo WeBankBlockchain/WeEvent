@@ -85,7 +85,7 @@ public class ZKChunksMeta {
         this.zkRemove(zkPath);
     }
 
-    public boolean setChunksBit(String fileId, int bitIndex) throws BrokerException {
+    public boolean updateChunks(String fileId, FileChunksMeta fileChunksMeta) throws BrokerException {
         String zkPath = this.genFilePath(fileId);
 
         if (!this.zkExist(zkPath)) {
@@ -93,14 +93,11 @@ public class ZKChunksMeta {
             throw new BrokerException(ErrorCode.ZOOKEEPER_UNKNOWN_FILE);
         }
 
-        FileChunksMeta fileChunksMeta = this.zkGet(zkPath);
-        fileChunksMeta.getChunkStatus().set(bitIndex);
-
         // update to zookeeper
         this.zkSet(this.zkPath, fileChunksMeta);
 
-        // check if whole true
-        return fileChunksMeta.getChunkStatus().cardinality() == fileChunksMeta.getChunkStatus().length();
+        // check is full
+        return fileChunksMeta.isFull();
     }
 
     private boolean zkExist(String zkPath) throws BrokerException {
@@ -126,7 +123,6 @@ public class ZKChunksMeta {
 
     private void zkSet(String zkPath, FileChunksMeta fileChunksMeta) throws BrokerException {
         try {
-
             String json = JsonHelper.object2Json(fileChunksMeta);
             this.zkClient.create().withMode(CreateMode.PERSISTENT).forPath(zkPath, json.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {

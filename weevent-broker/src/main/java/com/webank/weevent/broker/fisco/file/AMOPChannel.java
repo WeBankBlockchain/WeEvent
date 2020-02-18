@@ -1,9 +1,6 @@
 package com.webank.weevent.broker.fisco.file;
 
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,6 +26,7 @@ public class AMOPChannel extends ChannelPushCallback {
     private final static String publishEndian = "pubEndian";
     private final static String subscribeEndian = "subEndian";
 
+    private final FileTransportService fileTransportService;
     private final String subTopic;
     private Service service;
     private volatile boolean already = false;
@@ -41,15 +39,21 @@ public class AMOPChannel extends ChannelPushCallback {
         return weEventTopic + "/" + fileId + "/" + subscribeEndian;
     }
 
+    public boolean isAlready() {
+        return this.already;
+    }
+
     /**
      * Create a new amop channel(new connection to block chain) for subscribe topic
      *
+     * @param fileTransportService component class
      * @param topic binding amop topic
      * @param service initialized service, have not run
      * @throws BrokerException BrokerException
      */
-    public AMOPChannel(String topic, Service service) throws BrokerException {
+    public AMOPChannel(FileTransportService fileTransportService, String topic, Service service) throws BrokerException {
         try {
+            this.fileTransportService = fileTransportService;
             this.subTopic = topic;
             this.service = service;
             Set<String> topics = new HashSet<>();
@@ -76,19 +80,6 @@ public class AMOPChannel extends ChannelPushCallback {
             return;
         }
 
-        // wait 10s until receiver ready
-        int times = 0;
-        while (!this.already && times < 10) {
-            log.info("idle to wait receiver ready");
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                log.error("idle wait exception", e);
-            }
-
-            times++;
-        }
-
         ChannelRequest channelRequest = new ChannelRequest();
         channelRequest.setToTopic(topic);
         channelRequest.setMessageID(this.service.newSeq());
@@ -109,12 +100,12 @@ public class AMOPChannel extends ChannelPushCallback {
         try {
             fileEvent = JsonHelper.json2Object(push.getContent2(), FileEvent.class);
         } catch (BrokerException e) {
-            log.error("invalid FileEvent", e);
+            log.error("invalid file event via amop", e);
             return;
         }
-        log.info("received event, {}", fileEvent);
+        log.info("received event via amop, {}", fileEvent);
 
-        FileChunksMeta fileChunksMeta = fileEvent.getFileChunksMeta();
+        String senderTopic = genPublishEndianTopic(fileEvent.getFileChunksMeta().getTopic(), fileEvent.getFileChunksMeta().getFileId());
         switch (fileEvent.getEventType()) {
             // event from receiver
             case FileChannelAlready:
@@ -122,33 +113,32 @@ public class AMOPChannel extends ChannelPushCallback {
                 break;
 
             case FileChannelStatus:
-                // update status to zookeeper
+                log.info("try to update FileChunksMeta to zookeeper");
+                this.fileTransportService.flushZKFileChunksMeta(fileEvent.getFileChunksMeta());
                 break;
 
             case FileChannelException:
-                //
+                log.info("Warning: remote exception in received file");
                 break;
 
             // event from sender
             case FileChannelData:
+                log.info("try to write chunk data in local file");
                 try {
-                    // write file into cache
-                    FileOutputStream fileOutputStream = new FileOutputStream("./fileCache/" + fileChunksMeta.getFileId());
-                    fileOutputStream.write(fileEvent.getChunkData(), fileEvent.getChunkIndex() * fileChunksMeta.getChunkSize(), fileEvent.getChunkData().length);
-                    fileOutputStream.flush();
+                    FileChunksMeta updatedFileChunksMeta = this.fileTransportService.writeChunkData(fileEvent);
+                    FileEvent reply = new FileEvent(FileEvent.EventType.FileChannelStatus);
+                    reply.setFileChunksMeta(updatedFileChunksMeta);
 
                     // send local file status to sender
-                    String amopTopic = genPublishEndianTopic(fileChunksMeta.getTopic(), fileChunksMeta.getFileId());
-                    this.sendEvent(amopTopic, new FileEvent(FileEvent.EventType.FileChannelStatus));
-                } catch (FileNotFoundException e) {
-                    log.error("not exist file", e);
-                } catch (IOException e) {
-                    log.error("write file failed", e);
+                    this.sendEvent(senderTopic, reply);
+                } catch (BrokerException e) {
+                    log.error("write chunk data in local file exception", e);
+                    this.sendEvent(senderTopic, new FileEvent(FileEvent.EventType.FileChannelStatus));
                 }
                 break;
 
             default:
-                log.error("unknown file event type");
+                log.error("unknown file event type via amop");
         }
     }
 }

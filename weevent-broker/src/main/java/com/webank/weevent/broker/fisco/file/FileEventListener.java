@@ -9,7 +9,7 @@ import com.webank.weevent.sdk.WeEvent;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Event listener for file.
+ * Event listener for file via WeEvent.
  *
  * @author matthewliu
  * @since 2020/02/16
@@ -24,12 +24,12 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
 
     @Override
     public void onEvent(String subscriptionId, WeEvent event) {
-        log.info("received file event, subscriptionId: {} {}", subscriptionId, event);
+        log.info("received file event via WeEvent, subscriptionId: {} {}", subscriptionId, event);
 
         if (!event.getExtensions().containsKey(WeEvent.WeEvent_FILE)
                 || !event.getExtensions().containsKey(WeEvent.WeEvent_FORMAT)
                 || !"json".equals(event.getExtensions().get(WeEvent.WeEvent_FORMAT))) {
-            log.error("unknown FileEvent, skip it");
+            log.error("unknown file event via WeEvent, skip it");
             return;
         }
 
@@ -37,7 +37,7 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
         try {
             fileEvent = JsonHelper.json2Object(event.getContent(), FileEvent.class);
         } catch (BrokerException e) {
-            log.error("invalid file event content", e);
+            log.error("invalid file event content via WeEvent", e);
             return;
         }
 
@@ -48,20 +48,20 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
                 break;
 
             case FileTransportEnd:
-                // TODO close amop channel
+                log.info("try to finalize file context for receiving file");
+                WeEvent notifyWeEvent = this.fileTransportService.cleanUpReceivedFile(fileEvent.getFileChunksMeta(), event);
 
-                WeEvent notifyWeEvent = this.fileTransportService.genWeEventForReceivedFile(event);
                 log.info("try to send file received event to remote, {}", notifyWeEvent);
                 this.send(subscriptionId, notifyWeEvent);
                 break;
 
             default:
-                log.error("unknown file event type");
+                log.error("unknown file event type via WeEvent");
         }
     }
 
     @Override
     public void onException(Throwable e) {
-        log.error("file event onException", e);
+        log.error("file event via WeEvent onException", e);
     }
 }
