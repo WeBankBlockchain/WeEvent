@@ -1,5 +1,5 @@
 import i18n from '../i18n'
-import {checkCurrentData, checkCurrentTime} from './formatTime'
+import { checkCurrentData, checkCurrentTime } from './formatTime'
 export const checkRule = (e, s) => {
   let pass = true
   let nodes = document.getElementsByClassName('tree_content')
