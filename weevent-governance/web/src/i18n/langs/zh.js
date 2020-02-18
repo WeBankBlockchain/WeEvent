@@ -57,7 +57,7 @@ module.exports = {
     'authorizedPlaceholder': '请选择用户',
     'errorServer': '服务名格式错误',
     'noServerName': '服务名不能为空',
-    'emptyPort': '服务端口不能为空',
+    'emptyAddress': '请填写服务地址',
     'errorAddress': '服务地址错误,无法连接',
     'exitBrokerURL': 'Broker服务已存在, 请向所属用户申请访问授权'
   },
@@ -171,7 +171,8 @@ module.exports = {
     'enterRuleName': '请输入规则名称',
     'ruleName': '规则名称',
     'payloadType': '规则格式',
-    'payloadMap': '规则描述',
+    'payloadMap': '内容',
+    'ruleDescription': '描述',
     'run': '运行中',
     'notRun': '未启动',
     'start': '启动',
@@ -180,7 +181,7 @@ module.exports = {
     'delete': '删除',
     'creatRuleRemark': '数据流转类型的规则可以对设备上报的数据进行简单处理，并将处理后的数据流转到其他Topic，支持JSON数据格式',
     'dataType': '数据格式',
-    'enterPayload': '请输入规则描述',
+    'enterPayload': '请填写规则的主要内容',
     'commit': '提交',
     'errorType': '格式错误',
     'isStart': '已启动',
@@ -200,11 +201,13 @@ module.exports = {
     'JDBCname': '数据源名称',
     'JDBCIP': '数据源IP',
     'JDBCport': '数据源端口',
-    'JDBCDatabaseName': '库名',
+    'JDBCDatabaseName': '库',
     'JDBCdatabaseUrl': '数据库链接',
     'JDBCusername': '用户名',
     'JDBCpassword': '密码',
     'tableName': '表名',
+    'errorTable': '无法在选中的数据源中连接到此表格',
+    'inputTableName': '请填写选择的数据库中对应的表格名称',
     'optionalParameter': '可选参数',
     'enterJDBCname': '请填写数据源名称',
     'enterJDBCIP': '请填写数据源IP',
@@ -218,7 +221,8 @@ module.exports = {
     'deleteAddress': '删除该地址？',
     'checkJDBC': '数据源检验',
     'connectSuccess': '数据源地址连接成功',
-    'connectFailed': '数据源地址连接失败'
+    'connectFailed': '数据源地址连接失败',
+    'databaseType': '数据源类型'
   },
   ruleDetail: {
     'guideDetail': '数据详情',
@@ -278,7 +282,11 @@ module.exports = {
     'errorIndex': '该函数的下标不是整数类型',
     'typeErrorString': '填写的内容与选择的元素类型不匹配，该元素定义的类型是 String',
     'typeErrorNumber': '填写的内容与选择的元素类型不匹配，该元素定义的类型是 Number',
-    'typeTimeError': '运用此方法,选取的元素其定义的内容需要为数字类型的时间(YYYYMMDD格式)',
-    'errorTime': '运用此方法,选取的元素其定义的内容需要为字符类型的时间("YYYY-MM-dd hh:mm::ss" 格式)'
+    'typeTimeError': '运用此方法,选取的元素其定义的内容需要为时间类型("hh:mm::ss" 格式)',
+    'typeDateError': '运用此方法,选取的元素其定义的内容需要为日期类型("YYYY-MM-DD" 格式)',
+    'errorTime': '运用此方法,选取的元素其定义的内容需要为时间类型("YYYY-MM-DD hh:mm::ss" 格式)',
+    'columnMarkError': '此方法选择的参数都只能是字符串类型',
+    'notAdate': '所选参数的值不是一个有效的日期',
+    'notAtime': '所选参数的值不是一个有效的时间'
   }
 }

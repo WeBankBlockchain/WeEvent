@@ -17,11 +17,6 @@
       width='200'>
     </el-table-column>
     <el-table-column
-      :label="$t('rule.tableName')"
-      prop="tableName"
-      width='200'>
-    </el-table-column>
-    <el-table-column
       :label="$t('rule.ruleDataBaseId')"
     >
       <template slot-scope="scope">
@@ -46,8 +41,20 @@
         <div class='JDBCTitle'><i>*</i> {{$t('rule.JDBCinfor')}}
          <el-button type='primary' size='small' @click='checkJDBC'>{{$t('rule.checkJDBC')}}</el-button>
         </div>
-        <el-form-item :label="$t('rule.JDBCdatabaseUrl')" prop='databaseUrl'>
-          <el-input v-model.trim="form.databaseUrl"  autocomplete="off"></el-input>
+        <el-form-item :label="$t('rule.databaseType')  + ' :'">
+          <el-radio-group v-model="form.databaseType">
+            <el-radio label="2">Mysql</el-radio>
+            <el-radio label="1">H2</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="ip" prop='databaseIp'>
+          <el-input v-model.trim="form.databaseIp"  autocomplete="off" placeholder="127.0.0.1"></el-input>
+        </el-form-item>
+        <el-form-item label="port" prop='databasePort'>
+          <el-input v-model.trim="form.databasePort"  autocomplete="off" :placeholder="3306"></el-input>
+        </el-form-item>
+        <el-form-item :label="$t('rule.JDBCDatabaseName')" prop='databaseName'>
+          <el-input v-model.trim="form.databaseName"  autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item :label="$t('rule.JDBCusername')" prop='username'>
           <el-input v-model.trim="form.username"  autocomplete="off"></el-input>
@@ -59,9 +66,6 @@
           <el-input v-model.trim="form.optionalParameter"  autocomplete="off"></el-input>
         </el-form-item>
       </div>
-      <el-form-item :label="$t('rule.tableName')" prop='tableName'>
-        <el-input v-model.trim="form.tableName" autocomplete="off"></el-input>
-      </el-form-item>
     </el-form>
     <p style='color:#67c23a' class='collectWarning' v-show="connectSuccess">
       {{$t('rule.connectSuccess')}}
@@ -70,7 +74,7 @@
       {{$t('rule.connectFailed')}}
     </p>
     <div slot="footer" class="dialog-footer">
-      <el-button type="primary" @click='addURL' :disabled="!JDBCCheck">{{$t('common.ok')}}</el-button>
+      <el-button type="primary" @click='addURL' :disabled="!connectSuccess">{{$t('common.ok')}}</el-button>
       <el-button @click="showlog = false">{{$t('common.cancel')}}</el-button>
     </div>
   </el-dialog>
@@ -101,16 +105,23 @@ export default {
         callback()
       }
     }
-    var databaseUrl = (rule, value, callback) => {
+    var databaseIp = (rule, value, callback) => {
       if (value === '') {
-        callback(new Error(this.$t('rule.enterJDBCDatabaseUrl')))
+        callback(new Error(this.$t('rule.enterJDBCIP')))
       } else {
         callback()
       }
     }
-    var tableName = (rule, value, callback) => {
+    var databasePort = (rule, value, callback) => {
       if (value === '') {
-        callback(new Error(this.$t('rule.enterTableName')))
+        callback(new Error(this.$t('rule.enterJDBCport')))
+      } else {
+        callback()
+      }
+    }
+    var databaseName = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error(this.$t('rule.enterJDBCDatabaseName')))
       } else {
         callback()
       }
@@ -119,27 +130,25 @@ export default {
       topicName: '',
       loading: false,
       showlog: false,
+      connectSuccess: false,
+      connectFailed: false,
       tableData: [],
       id: '',
       type: 1,
       title: this.$t('rule.addJDBCAddress'),
       form: {
         datasourceName: '',
-        databaseUrl: '',
+        databaseType: '2',
+        databaseIp: '',
+        databasePort: '',
+        databaseName: '',
         username: '',
         password: '',
-        tableName: '',
         optionalParameter: ''
       },
-      JDBCCheck: false,
-      connectSuccess: false,
-      connectFailed: false,
       rules: {
         datasourceName: [
           { required: true, validator: datasourceName, trigger: 'blur' }
-        ],
-        databaseUrl: [
-          { required: true, validator: databaseUrl, trigger: 'blur' }
         ],
         username: [
           { required: true, validator: username, trigger: 'blur' }
@@ -147,8 +156,14 @@ export default {
         password: [
           { required: true, validator: password, trigger: 'blur' }
         ],
-        tableName: [
-          { required: true, validator: tableName, trigger: 'blur' }
+        databaseIp: [
+          { required: true, validator: databaseIp, trigger: 'blur' }
+        ],
+        databasePort: [
+          { required: true, validator: databasePort, trigger: 'blur' }
+        ],
+        databaseName: [
+          { required: true, validator: databaseName, trigger: 'blur' }
         ]
       }
     }
@@ -158,17 +173,16 @@ export default {
       if (!nVal) {
         let data = {
           datasourceName: '',
-          databaseUrl: '',
-          ip: '',
-          port: '',
+          databaseType: '2',
+          databaseIp: '',
+          databasePort: '',
+          databaseName: '',
           username: '',
           password: '',
-          tableName: '',
           optionalParameter: ''
         }
         this.form = Object.assign({}, data)
         this.type = 1
-        this.JDBCCheck = false
         this.connectSuccess = false
         this.connectFailed = false
         this.title = this.$t('rule.addJDBCAddress')
@@ -177,7 +191,6 @@ export default {
     },
     form: {
       handler (nVal) {
-        this.JDBCCheck = false
         this.connectSuccess = false
         this.connectFailed = false
       },
@@ -197,11 +210,13 @@ export default {
       vm.$refs.form.validate((valid) => {
         let data = {
           'datasourceName': vm.form.datasourceName,
-          'databaseUrl': vm.form.databaseUrl,
+          'databaseType': vm.form.databaseType,
           'username': vm.form.username,
           'password': vm.form.password,
-          'tableName': vm.form.tableName,
-          'optionalParameter': vm.form.optionalParameter
+          'optionalParameter': vm.form.optionalParameter,
+          'databaseIp': vm.form.databaseIp,
+          'databasePort': vm.form.databasePort,
+          'databaseName': vm.form.databaseName
         }
         if (valid) {
           if (vm.type === 1) {
@@ -248,10 +263,12 @@ export default {
       this.showlog = true
       this.id = e.id
       this.form.datasourceName = e.datasourceName
-      this.form.databaseUrl = e.databaseUrl
+      this.form.databaseType = e.databaseType
+      this.form.databaseIp = e.databaseIp
+      this.form.databasePort = e.databasePort
+      this.form.databaseName = e.databaseName
       this.form.username = e.username
       this.form.password = e.password
-      this.form.tableName = e.tableName
       this.form.optionalParameter = e.optionalParameter
       this.title = this.$t('rule.editJDBCAddress')
       this.type = 2
@@ -291,16 +308,18 @@ export default {
       vm.$refs.form.validate((valid) => {
         let data = {
           'datasourceName': vm.form.datasourceName,
-          'databaseUrl': vm.form.databaseUrl,
+          'databaseType': vm.form.databaseType,
           'username': vm.form.username,
           'password': vm.form.password,
-          'tableName': vm.form.tableName,
-          'optionalParameter': vm.form.optionalParameter
+          'databaseIp': vm.form.databaseIp,
+          'databasePort': vm.form.databasePort,
+          'databaseName': vm.form.databaseName,
+          'optionalParameter': vm.form.optionalParameter,
+          'checkType': 1
         }
         if (valid) {
           API.checkJDBC(data).then(res => {
             if (res.data.status === 200) {
-              vm.JDBCCheck = true
               this.connectSuccess = true
               this.connectFailed = false
             } else {

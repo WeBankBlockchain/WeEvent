@@ -128,6 +128,46 @@ const getTimeList = (start, end) => {
   return getDayList
 }
 
+const checkCurrentData = (t) => {
+  let time = t.split('-')
+  let intYear = parseInt(time[0], 10)
+  let intMonth = parseInt(time[1], 10)
+  let intDay = parseInt(time[2], 10)
+  if (intYear < 1900 || intMonth > 12 || intMonth < 0 || intDay > 31 || intDay < 0) {
+    return false
+  }
+  if ((intMonth === 4 || intMonth === 6 || intMonth === 9 || intMonth === 11) && intDay > 30) {
+    return false
+  }
+  if (intYear % 4 === 0) {
+    if (intYear % 100 === 0 && intYear % 400) {
+      if (intDay > 28) {
+        return false
+      }
+    } else {
+      if (intDay > 29) {
+        return false
+      }
+    }
+  } else {
+    if (intDay > 28) {
+      return false
+    }
+  }
+  return true
+}
+
+const checkCurrentTime = (t) => {
+  let time = t.split(':')
+  let intHou = parseInt(time[0], 10)
+  let intMin = parseInt(time[1], 10)
+  let intSes = parseInt(time[2], 10)
+  if (intHou > 24 || intMin > 60 || intSes > 60) {
+    return false
+  }
+  return true
+}
+
 export {
   getAge,
   getAstro,
@@ -136,5 +176,7 @@ export {
   getDate,
   getDateDetail,
   getLastWeek,
-  getTimeList
+  getTimeList,
+  checkCurrentData,
+  checkCurrentTime
 }
