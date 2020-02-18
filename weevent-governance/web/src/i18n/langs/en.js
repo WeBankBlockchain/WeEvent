@@ -222,7 +222,8 @@ module.exports = {
     'checkJDBC': 'Check JDBC',
     'connectSuccess': 'JDBC Connect Success',
     'connectFailed': 'JDBC Connect Failed',
-    'databaseType': 'Databae Type'
+    'databaseType': 'Databae Type',
+    'connectTimeOut': 'Please check the operations of database'
   },
   ruleDetail: {
     'guideDetail': 'Data Guide Detail',

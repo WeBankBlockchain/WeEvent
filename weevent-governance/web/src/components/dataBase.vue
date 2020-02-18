@@ -73,6 +73,9 @@
     <p style='color:#F56C6C' class='collectWarning' v-show="connectFailed">
       {{$t('rule.connectFailed')}}
     </p>
+    <p style='color:#F56C6C' class='collectWarning' v-show="connectTimeOut">
+      {{$t('rule.connectTimeOut')}}
+    </p>
     <div slot="footer" class="dialog-footer">
       <el-button type="primary" @click='addURL' :disabled="!connectSuccess">{{$t('common.ok')}}</el-button>
       <el-button @click="showlog = false">{{$t('common.cancel')}}</el-button>
@@ -132,6 +135,7 @@ export default {
       showlog: false,
       connectSuccess: false,
       connectFailed: false,
+      connectTimeOut: false,
       tableData: [],
       id: '',
       type: 1,
@@ -185,6 +189,7 @@ export default {
         this.type = 1
         this.connectSuccess = false
         this.connectFailed = false
+        this.connectTimeOut = false
         this.title = this.$t('rule.addJDBCAddress')
         this.$refs.form.resetFields()
       }
@@ -193,6 +198,7 @@ export default {
       handler (nVal) {
         this.connectSuccess = false
         this.connectFailed = false
+        this.connectTimeOut = false
       },
       deep: true
     }
@@ -319,12 +325,18 @@ export default {
         }
         if (valid) {
           API.checkJDBC(data).then(res => {
-            if (res.data.status === 200) {
-              this.connectSuccess = true
-              this.connectFailed = false
-            } else {
-              this.connectSuccess = false
-              this.connectFailed = true
+            try {
+              if (res.data.status === 200) {
+                this.connectSuccess = true
+                this.connectFailed = false
+              } else {
+                this.connectSuccess = false
+                this.connectFailed = true
+              }
+            } catch (e) {
+              if (res.message.includes('timeout')) {
+                vm.connectTimeOut = true
+              }
             }
           })
         }
