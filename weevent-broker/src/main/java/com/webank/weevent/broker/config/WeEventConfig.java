@@ -49,10 +49,10 @@ public class WeEventConfig {
     @Value("${mqtt.broker.path:}")
     private String mqttServerPath;
 
-    @Value("${file.chunk.path:}")
-    private String baseFilePath;
+    @Value("${file.path:./logs/file}")
+    private String filePath;
 
     @Value("${file.chunk.size:1048576}")
-    private int chunkSize;
+    private int fileChunkSize;
 
 }

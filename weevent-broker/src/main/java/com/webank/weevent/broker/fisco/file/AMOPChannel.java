@@ -31,7 +31,7 @@ public class AMOPChannel extends ChannelPushCallback {
 
     private final String subTopic;
     private Service service;
-    private boolean already = false;
+    private volatile boolean already = false;
 
     public static String genPublishEndianTopic(String weEventTopic, String fileId) {
         return weEventTopic + "/" + fileId + "/" + publishEndian;
@@ -76,11 +76,25 @@ public class AMOPChannel extends ChannelPushCallback {
             return;
         }
 
+        // wait 10s until receiver ready
+        int times = 0;
+        while (!this.already && times < 10) {
+            log.info("idle to wait receiver ready");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                log.error("idle wait exception", e);
+            }
+
+            times++;
+        }
+
         ChannelRequest channelRequest = new ChannelRequest();
         channelRequest.setToTopic(topic);
         channelRequest.setMessageID(this.service.newSeq());
         channelRequest.setTimeout(5000);
         channelRequest.setContent(json);
+        log.info("send amop channel message, topic: {} id: {}", channelRequest.getToTopic(), channelRequest.getMessageID());
         this.service.sendChannelMessage2(channelRequest);
     }
 
@@ -106,6 +120,7 @@ public class AMOPChannel extends ChannelPushCallback {
             case FileChannelAlready:
                 this.already = true;
                 break;
+
             case FileChannelStatus:
                 // update status to zookeeper
                 break;

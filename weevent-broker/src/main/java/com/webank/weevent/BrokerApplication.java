@@ -297,9 +297,10 @@ public class BrokerApplication {
 
     @Bean
     @ConditionalOnBean(ZKChunksMeta.class)
-    public static FileTransportService getFileService(IProducer iProducer) {
+    public static FileTransportService getFileService(IProducer iProducer, FiscoConfig fiscoConfig) {
         FileTransportService fileTransportService = new FileTransportService();
         fileTransportService.setProducer(iProducer);
+        fileTransportService.setFiscoConfig(fiscoConfig);
         return fileTransportService;
     }
 

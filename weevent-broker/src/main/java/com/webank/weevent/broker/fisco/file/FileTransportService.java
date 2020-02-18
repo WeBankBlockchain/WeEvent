@@ -4,14 +4,19 @@ package com.webank.weevent.broker.fisco.file;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import com.webank.weevent.BrokerApplication;
+import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
+import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDKConnector;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
@@ -41,6 +46,7 @@ public class FileTransportService {
     }
 
     private IProducer producer;
+    private FiscoConfig fiscoConfig;
 
     // fileId -> (FileChunksMeta, sender AMOPChannel, receiver AMOPChannel)
     private Map<String, FileTransportContext> fileTransportContexts = new HashMap<>();
@@ -49,8 +55,12 @@ public class FileTransportService {
         this.producer = iProducer;
     }
 
-    private Service initService(String groupId) {
-        return new Service();
+    public void setFiscoConfig(FiscoConfig fiscoConfig) {
+        this.fiscoConfig = fiscoConfig;
+    }
+
+    private Service initService(String groupId) throws BrokerException {
+        return Web3SDKConnector.initService(Long.valueOf(groupId), this.fiscoConfig);
     }
 
     // CGI interface
@@ -169,82 +179,152 @@ public class FileTransportService {
         }
     }
 
-    public byte[] downloadChunk(String fileId, int chunkIndex) throws BrokerException {
-        if (!this.fileTransportContexts.containsKey(fileId)) {
-            log.error("not exist file context, fileId: {}", fileId);
-            throw new BrokerException(ErrorCode.FILE_NOT_EXIST_CONTEXT);
+    private FileChunksMeta loadFileMeta(String localFile) throws BrokerException {
+        File fileMeta = new File(localFile);
+        if (!fileMeta.exists()) {
+            log.error("not exist local meta file, {}", localFile);
+            throw new BrokerException(ErrorCode.FILE_NOT_EXIST);
+        }
+        if (fileMeta.length() > 1024 * 1024) {
+            log.error("read local meta file failed, {}", localFile);
+            throw new BrokerException(ErrorCode.FILE_READ_EXCEPTION);
         }
 
-        FileTransportContext fileTransportContext = this.fileTransportContexts.get(fileId);
-        FileChunksMeta fileChunksMeta = fileTransportContext.getFileChunksMeta();
+        try (FileInputStream fileInputStream = new FileInputStream(fileMeta)) {
+            byte[] data = new byte[(int) fileMeta.length()];
+            int readSize = fileInputStream.read(data);
+            if (readSize != fileMeta.length()) {
+                log.error("read local meta file failed");
+                throw new BrokerException(ErrorCode.FILE_READ_EXCEPTION);
+            }
+            return JsonHelper.json2Object(data, FileChunksMeta.class);
+        } catch (IOException | BrokerException e) {
+            log.error("read local meta file exception", e);
+            throw new BrokerException(ErrorCode.FILE_READ_EXCEPTION);
+        }
+    }
+
+    private void saveFileMeta(String localFile, FileChunksMeta fileChunksMeta) throws BrokerException {
+        try (FileOutputStream fileOutputStream = new FileOutputStream(localFile)) {
+            byte[] data = JsonHelper.object2JsonBytes(fileChunksMeta);
+            fileOutputStream.write(data);
+        } catch (IOException | BrokerException e) {
+            log.error("write local meta file exception", e);
+            throw new BrokerException(ErrorCode.FILE_WRITE_EXCEPTION);
+        }
+    }
+
+    private void createFixedLengthFile(String localFile, long len) throws BrokerException {
+        String localPath = BrokerApplication.weEventConfig.getFilePath();
+        // ensure path exist and disk space
+        File path = new File(localPath);
+        if (!path.exists()) {
+            try {
+                boolean result = path.createNewFile();
+                if (result) {
+                    log.info("create local file path, {}", localPath);
+                }
+            } catch (IOException e) {
+                log.error("create local file path failed", e);
+                throw new BrokerException(ErrorCode.FILE_WRITE_EXCEPTION);
+            }
+        }
+        if (path.getFreeSpace() < len + 1024 * 1024) {
+            log.error("not enough disk space, len <-> file1.getFreeSpace()");
+            throw new BrokerException(ErrorCode.FILE_NOT_ENOUGH_SPACE);
+        }
+
+        try (RandomAccessFile file = new RandomAccessFile(localFile, "rw")) {
+            file.setLength(len);
+        } catch (IOException e) {
+            log.error("create fixed length empty file failed", e);
+            throw new BrokerException(ErrorCode.FILE_WRITE_EXCEPTION);
+        }
+    }
+
+    public byte[] downloadChunk(String fileId, int chunkIndex) throws BrokerException {
+        String localFileName = BrokerApplication.weEventConfig.getFilePath() + "/" + fileId;
+
+        // load FileChunksMeta from local file, FileChunksMeta in memory is closed within amop chanel
+        FileChunksMeta fileChunksMeta = this.loadFileMeta(localFileName + ".meta");
         if (chunkIndex >= fileChunksMeta.getChunkNum()) {
-            log.error("invalid chunk data, skip");
+            log.error("invalid chunk meta data, skip");
+            throw new BrokerException(ErrorCode.FILE_INVALID_CHUNK);
+        }
+        if (!fileId.equals(fileChunksMeta.getFileId())) {
+            log.error("invalid chunk meta data, skip");
             throw new BrokerException(ErrorCode.FILE_INVALID_CHUNK);
         }
 
         // read data from local file
-        try {
-            FileInputStream fileInputStream = new FileInputStream("./fileCache/" + fileChunksMeta.getFileId());
+        try (FileInputStream fileInputStream = new FileInputStream(localFileName)) {
             int size = fileChunksMeta.getChunkSize();
             if (chunkIndex == fileChunksMeta.getChunkNum() - 1) {
                 size = (int) (fileChunksMeta.getFileSize() % fileChunksMeta.getChunkSize());
             }
             byte[] data = new byte[size];
-            fileInputStream.read(data, chunkIndex * fileChunksMeta.getChunkSize(), fileChunksMeta.getChunkSize());
+            int readSize = fileInputStream.read(data, chunkIndex * fileChunksMeta.getChunkSize(), size);
+            if (size != readSize) {
+                log.error("read data from local file failed");
+                throw new BrokerException(ErrorCode.FILE_READ_EXCEPTION);
+            }
             return data;
         } catch (FileNotFoundException e) {
-            log.error("not exist file, skip");
+            log.error("not exist local file, skip");
             throw new BrokerException(ErrorCode.FILE_NOT_EXIST);
         } catch (IOException e) {
-            log.error("read data from file exception", e);
+            log.error("read data from local file exception", e);
             throw new BrokerException(ErrorCode.FILE_READ_EXCEPTION);
         }
     }
 
     // inner interface
 
-    // callback by FileEvent.EventType.FileTransportStart
+    /**
+     * call by FileEvent.EventType.FileTransportStart
+     * open amop channel to received file data, and create local file(include data and meta).
+     *
+     * @param fileChunksMeta file meta
+     */
     public void prepareReceiveFile(FileChunksMeta fileChunksMeta) {
-        log.info("init file context, fileId: {}", fileChunksMeta.getFileId());
-
         FileTransportContext fileTransportContext;
         if (this.fileTransportContexts.containsKey(fileChunksMeta.getFileId())) {
             if (this.fileTransportContexts.get(fileChunksMeta.getFileId()).receiver == null) {
                 fileTransportContext = this.fileTransportContexts.get(fileChunksMeta.getFileId());
             } else {
-                log.error("already exist file context, fileId: {}", fileChunksMeta.getFileId());
+                log.error("already exist file receiving context, fileId: {}", fileChunksMeta.getFileId());
                 return;
             }
         } else {
             fileTransportContext = new FileTransportContext();
             fileTransportContext.setFileId(fileChunksMeta.getFileId());
             fileTransportContext.setFileChunksMeta(fileChunksMeta);
-
             this.fileTransportContexts.put(fileChunksMeta.getFileId(), fileTransportContext);
         }
 
+        log.info("initialize file context for receiving fileId, {}", fileChunksMeta.getFileId());
+
         String amopTopic = AMOPChannel.genSubscribeEndianTopic(fileChunksMeta.getTopic(), fileChunksMeta.getFileId());
-        AMOPChannel amopChannel = null;
+        String senderTopic = AMOPChannel.genPublishEndianTopic(fileChunksMeta.getTopic(), fileChunksMeta.getFileId());
         try {
-            // listen amop receiver topic
-            amopChannel = new AMOPChannel(amopTopic, this.initService(fileChunksMeta.getGroupId()));
+            // open amop channel with receiver topic
+            AMOPChannel amopChannel = new AMOPChannel(amopTopic, this.initService(fileChunksMeta.getGroupId()));
             fileTransportContext.setReceiver(amopChannel);
 
-            // create local file buff
-            File file = new File("./fileCache/" + fileChunksMeta.getFileId());
-            file.createNewFile();
-        } catch (IOException | BrokerException e) {
-            log.error("exception in new FileTransportContext", e);
-            if (amopChannel != null) {
-                amopChannel.sendEvent(AMOPChannel.genPublishEndianTopic(fileChunksMeta.getTopic(), fileChunksMeta.getFileId()),
-                        new FileEvent(FileEvent.EventType.FileChannelException));
-            }
-            return;
-        }
+            // create local file
+            String localFile = BrokerApplication.weEventConfig.getFilePath() + "/" + fileChunksMeta.getFileId();
+            createFixedLengthFile(localFile, fileChunksMeta.getFileSize());
+            saveFileMeta(localFile + ".meta", fileChunksMeta);
 
-        // send amop event to begin upload
-        amopChannel.sendEvent(AMOPChannel.genPublishEndianTopic(fileChunksMeta.getTopic(), fileChunksMeta.getFileId()),
-                new FileEvent(FileEvent.EventType.FileChannelAlready));
+            // send amop event to begin upload
+            amopChannel.sendEvent(senderTopic, new FileEvent(FileEvent.EventType.FileChannelAlready));
+        } catch (BrokerException e) {
+            log.error("exception in new FileTransportContext", e);
+
+            if (fileTransportContext.getReceiver() != null) {
+                fileTransportContext.getReceiver().sendEvent(senderTopic, new FileEvent(FileEvent.EventType.FileChannelException));
+            }
+        }
     }
 
     public WeEvent genWeEventForReceivedFile(WeEvent event) {

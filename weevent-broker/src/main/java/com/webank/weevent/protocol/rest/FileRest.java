@@ -75,7 +75,7 @@ public class FileRest {
         fileChunksMeta.setFileName(fileName);
         fileChunksMeta.setFileSize(fileSize);
         fileChunksMeta.setFileMd5(md5);
-        fileChunksMeta.setChunkSize(BrokerApplication.weEventConfig.getChunkSize());
+        fileChunksMeta.setChunkSize(BrokerApplication.weEventConfig.getFileChunkSize());
 
         // create AMOP channel with FileTransportSender
         this.fileTransportService.openChannel(fileChunksMeta);

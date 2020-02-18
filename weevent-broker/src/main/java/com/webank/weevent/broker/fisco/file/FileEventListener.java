@@ -28,7 +28,7 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
 
         if (!event.getExtensions().containsKey(WeEvent.WeEvent_FILE)
                 || !event.getExtensions().containsKey(WeEvent.WeEvent_FORMAT)
-                || "json".equals(event.getExtensions().get(WeEvent.WeEvent_FORMAT))) {
+                || !"json".equals(event.getExtensions().get(WeEvent.WeEvent_FORMAT))) {
             log.error("unknown FileEvent, skip it");
             return;
         }
@@ -37,12 +37,13 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
         try {
             fileEvent = JsonHelper.json2Object(event.getContent(), FileEvent.class);
         } catch (BrokerException e) {
-            log.error("invalid file event", e);
+            log.error("invalid file event content", e);
             return;
         }
 
         switch (fileEvent.getEventType()) {
             case FileTransportStart:
+                log.info("try to initialize file context for receiving file");
                 this.fileTransportService.prepareReceiveFile(fileEvent.getFileChunksMeta());
                 break;
 
