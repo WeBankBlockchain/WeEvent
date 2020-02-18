@@ -7,13 +7,17 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -199,26 +203,63 @@ public class CommonService implements AutoCloseable {
         out.write(mes.getBytes());
     }
 
-    public void checkDataBaseUrl(String dataBaseType, String dataBaseUrl, String tableName, String user, String password) throws GovernanceException, ClassNotFoundException, SQLException {
+
+    public void checkDataBaseUrl(String dataBaseType, String dataBaseUrl, String tableName, String user, String password) throws GovernanceException, ClassNotFoundException {
         //1 h2 ,2 mysql
         if (dataBaseType.toLowerCase().equals("1")) {
             Class.forName("org.h2.Driver");
         } else {
             Class.forName("org.mariadb.jdbc.Driver");
         }
-        try (Connection conn = DriverManager.getConnection(dataBaseUrl, user, password);
+
+        final ExecutorService exec = Executors.newFixedThreadPool(1);
+
+        Callable<String> call = new Callable<String>() {
+            public String call() throws Exception {
+                //开始执行耗时操作
+                Thread.sleep(1000 * 5);
+                try (Connection conn = DriverManager.getConnection(dataBaseUrl, user, password);
+                     Statement stat = conn.createStatement()) {
+                    if (stat == null) {
+                        log.info("database connect fail,dataBaseUrl:{}", dataBaseUrl);
+                        throw new GovernanceException("database connect success,dataBaseUrl:" + dataBaseUrl);
+                    }
+                    log.info("database connect success,dataBaseUrl:{}", dataBaseUrl);
+                    if (tableName != null) {
+                        String querySql = "SELECT 1 FROM " + tableName + " LIMIT 1";
+                        stat.executeQuery(querySql);
+                    }
+                } catch (Exception e) {
+                    log.error("check failed", e);
+                    return "check failed " + e.getMessage();
+                }
+                return "check success";
+            }
+        };
+        try {
+            Future<String> future = exec.submit(call);
+            String result = future.get(1000 * 3, TimeUnit.MILLISECONDS);
+            log.info("check result,{}", result);
+        } catch (Exception e) {
+            log.error("check failed {}", e.toString());
+            throw new GovernanceException("check failed " + e.toString());
+        }
+
+ /*       try (Connection conn = DriverManager.getConnection(dataBaseUrl, user, password);
              Statement stat = conn.createStatement()) {
             if (stat == null) {
                 log.info("database connect fail,dataBaseUrl:{}", dataBaseUrl);
                 throw new GovernanceException("database connect success,dataBaseUrl:" + dataBaseUrl);
             }
             log.info("database connect success,dataBaseUrl:{}", dataBaseUrl);
-            String querySql = "SELECT 1 FROM " + tableName + " LIMIT 1";
-            stat.executeQuery(querySql);
+            if (tableName != null) {
+                String querySql = "SELECT 1 FROM " + tableName + " LIMIT 1";
+                stat.executeQuery(querySql);
+            }
         } catch (Exception e) {
-            log.error("database url is error", e);
-            throw new GovernanceException("database url is error", e);
-        }
+            log.error("check failed", e);
+            throw new GovernanceException("check failed", e);
+        }*/
     }
 
     private RequestConfig getRequestConfig() {
