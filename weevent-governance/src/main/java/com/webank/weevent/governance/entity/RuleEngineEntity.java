@@ -59,9 +59,6 @@ public class RuleEngineEntity extends RuleEngineBase {
     @Transient
     private String offSet;
 
-    @Transient
-    private String tableName;
-
 }
 
 

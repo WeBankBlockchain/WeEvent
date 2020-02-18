@@ -24,9 +24,17 @@ public class RuleDatabaseBase extends BaseEntity {
     @Column(name = "broker_id")
     private Integer brokerId;
 
-    @NotBlank
     @Column(name = "database_url")
     private String databaseUrl;
+
+    @Column(name = "database_ip")
+    private String databaseIp;
+
+    @Column(name = "database_port")
+    private String databasePort;
+
+    @Column(name = "database_name")
+    private String databaseName;
 
     @NotBlank
     @Column(name = "username")
@@ -44,10 +52,6 @@ public class RuleDatabaseBase extends BaseEntity {
     @Column(name = "optional_parameter")
     private String optionalParameter;
 
-    @NotBlank
-    @Column(name = "table_name")
-    private String tableName;
-
     // 1 means the system
     @Column(name = "system_tag")
     private Boolean systemTag;
@@ -61,13 +65,10 @@ public class RuleDatabaseBase extends BaseEntity {
 
 
     public RuleDatabaseBase(Integer userId, Integer brokerId,
-                            @NotBlank String databaseUrl,
-                            @NotBlank String username,
-                            @NotBlank String password,
-                            @NotBlank String datasourceName,
-                            @NotBlank String databaseType,
+                            @NotBlank String databaseUrl, @NotBlank String username,
+                            @NotBlank String password, @NotBlank String datasourceName,
                             @Length(max = 256) String optionalParameter,
-                            @NotBlank String tableName, Boolean systemTag) {
+                            Boolean systemTag, @NotBlank String databaseType) {
         this.userId = userId;
         this.brokerId = brokerId;
         this.databaseUrl = databaseUrl;
@@ -75,7 +76,6 @@ public class RuleDatabaseBase extends BaseEntity {
         this.password = password;
         this.datasourceName = datasourceName;
         this.optionalParameter = optionalParameter;
-        this.tableName = tableName;
         this.systemTag = systemTag;
         this.databaseType = databaseType;
     }

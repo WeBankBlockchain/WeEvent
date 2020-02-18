@@ -13,11 +13,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -211,41 +206,7 @@ public class CommonService implements AutoCloseable {
         } else {
             Class.forName("org.mariadb.jdbc.Driver");
         }
-
-        final ExecutorService exec = Executors.newFixedThreadPool(1);
-
-        Callable<String> call = new Callable<String>() {
-            public String call() throws Exception {
-                //开始执行耗时操作
-                Thread.sleep(1000 * 5);
-                try (Connection conn = DriverManager.getConnection(dataBaseUrl, user, password);
-                     Statement stat = conn.createStatement()) {
-                    if (stat == null) {
-                        log.info("database connect fail,dataBaseUrl:{}", dataBaseUrl);
-                        throw new GovernanceException("database connect success,dataBaseUrl:" + dataBaseUrl);
-                    }
-                    log.info("database connect success,dataBaseUrl:{}", dataBaseUrl);
-                    if (tableName != null) {
-                        String querySql = "SELECT 1 FROM " + tableName + " LIMIT 1";
-                        stat.executeQuery(querySql);
-                    }
-                } catch (Exception e) {
-                    log.error("check failed", e);
-                    return "check failed " + e.getMessage();
-                }
-                return "check success";
-            }
-        };
-        try {
-            Future<String> future = exec.submit(call);
-            String result = future.get(1000 * 3, TimeUnit.MILLISECONDS);
-            log.info("check result,{}", result);
-        } catch (Exception e) {
-            log.error("check failed {}", e.toString());
-            throw new GovernanceException("check failed " + e.toString());
-        }
-
- /*       try (Connection conn = DriverManager.getConnection(dataBaseUrl, user, password);
+        try (Connection conn = DriverManager.getConnection(dataBaseUrl, user, password);
              Statement stat = conn.createStatement()) {
             if (stat == null) {
                 log.info("database connect fail,dataBaseUrl:{}", dataBaseUrl);
@@ -259,7 +220,7 @@ public class CommonService implements AutoCloseable {
         } catch (Exception e) {
             log.error("check failed", e);
             throw new GovernanceException("check failed", e);
-        }*/
+        }
     }
 
     private RequestConfig getRequestConfig() {
