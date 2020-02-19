@@ -162,7 +162,7 @@ const checkCurrentTime = (t) => {
   let intHou = parseInt(time[0], 10)
   let intMin = parseInt(time[1], 10)
   let intSes = parseInt(time[2], 10)
-  if (intHou > 24 || intMin > 60 || intSes > 60) {
+  if (intHou > 23 || intMin > 59 || intSes > 59) {
     return false
   }
   return true
