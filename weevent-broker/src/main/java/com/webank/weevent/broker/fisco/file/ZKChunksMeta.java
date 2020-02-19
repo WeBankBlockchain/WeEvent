@@ -1,8 +1,6 @@
 package com.webank.weevent.broker.fisco.file;
 
 
-import java.nio.charset.StandardCharsets;
-
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.FileChunksMeta;
@@ -29,6 +27,8 @@ public class ZKChunksMeta {
     private CuratorFramework zkClient;
 
     public ZKChunksMeta(String zkPath, String connectString) throws BrokerException {
+        log.info("try to access zookeeper, {}@{}", zkPath, connectString);
+
         try {
             PathUtils.validatePath(zkPath);
         } catch (IllegalArgumentException e) {
@@ -45,10 +45,14 @@ public class ZKChunksMeta {
 
         try {
             this.zkClient.start();
-            this.zkClient.checkExists().creatingParentsIfNeeded().forPath(zkPath);
-            log.info("ensure zookeeper root path, {}", zkPath);
+            // ensure path
+            if (this.zkClient.checkExists().forPath(zkPath) == null) {
+                this.zkClient.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(zkPath);
+            }
+
+            log.info("ensure zookeeper root path for file, {}", zkPath);
         } catch (Exception e) {
-            log.error("ensure zookeeper root path failed", e);
+            log.error("ensure zookeeper root path for file failed", e);
             throw new BrokerException(ErrorCode.ZOOKEEPER_ERROR);
         }
 
@@ -75,7 +79,7 @@ public class ZKChunksMeta {
         }
 
         // create in zookeeper
-        this.zkSet(zkPath, fileChunksMeta);
+        this.zkAdd(zkPath, fileChunksMeta);
     }
 
     public void removeChunks(String fileId) throws BrokerException {
@@ -94,7 +98,7 @@ public class ZKChunksMeta {
         }
 
         // update to zookeeper
-        this.zkSet(this.zkPath, fileChunksMeta);
+        this.zkUpdate(zkPath, fileChunksMeta);
 
         // check is full
         return fileChunksMeta.checkChunkFull();
@@ -103,6 +107,18 @@ public class ZKChunksMeta {
     private boolean zkExist(String zkPath) throws BrokerException {
         try {
             return this.zkClient.checkExists().forPath(zkPath) != null;
+        } catch (Exception e) {
+            log.error("access zookeeper failed", e);
+            throw new BrokerException(ErrorCode.ZOOKEEPER_ERROR);
+        }
+    }
+
+    private void zkAdd(String zkPath, FileChunksMeta fileChunksMeta) throws BrokerException {
+        log.info("zookeeper add path, {}", zkPath);
+
+        try {
+            byte[] json = JsonHelper.object2JsonBytes(fileChunksMeta);
+            this.zkClient.create().withMode(CreateMode.PERSISTENT).forPath(zkPath, json);
         } catch (Exception e) {
             log.error("access zookeeper failed", e);
             throw new BrokerException(ErrorCode.ZOOKEEPER_ERROR);
@@ -118,22 +134,27 @@ public class ZKChunksMeta {
             throw new BrokerException(ErrorCode.ZOOKEEPER_ERROR);
         }
 
-        return JsonHelper.json2Object(new String(nodeData, StandardCharsets.UTF_8), FileChunksMeta.class);
+        return JsonHelper.json2Object(nodeData, FileChunksMeta.class);
     }
 
-    private void zkSet(String zkPath, FileChunksMeta fileChunksMeta) throws BrokerException {
+    private void zkUpdate(String zkPath, FileChunksMeta fileChunksMeta) throws BrokerException {
+        log.info("zookeeper update path, {}", zkPath);
+
         try {
-            String json = JsonHelper.object2Json(fileChunksMeta);
-            this.zkClient.create().withMode(CreateMode.PERSISTENT).forPath(zkPath, json.getBytes(StandardCharsets.UTF_8));
+            byte[] json = JsonHelper.object2JsonBytes(fileChunksMeta);
+            this.zkClient.setData().forPath(zkPath, json);
         } catch (Exception e) {
             log.error("access zookeeper failed", e);
             throw new BrokerException(ErrorCode.ZOOKEEPER_ERROR);
         }
     }
 
+    // zkPath is a child node, DO NOT contains any child
     private void zkRemove(String zkPath) throws BrokerException {
+        log.info("zookeeper remove path, {}", zkPath);
+
         try {
-            this.zkClient.delete().forPath(zkPath);
+            this.zkClient.delete().guaranteed().forPath(zkPath);
         } catch (Exception e) {
             log.error("access zookeeper failed", e);
             throw new BrokerException(ErrorCode.ZOOKEEPER_ERROR);

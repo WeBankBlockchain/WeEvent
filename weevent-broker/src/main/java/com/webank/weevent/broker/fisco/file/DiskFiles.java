@@ -34,7 +34,7 @@ public class DiskFiles {
             }
         }
 
-        log.info("local file path: {}, {}/{}", path, localPath.getFreeSpace(), localPath.getTotalSpace());
+        log.info("local file path: {}, {} -> {}", path, localPath.getFreeSpace(), localPath.getTotalSpace());
         this.path = path;
     }
 

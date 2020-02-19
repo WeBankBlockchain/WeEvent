@@ -1,6 +1,13 @@
 package com.webank.weevent.broker.fisco.file;
 
+import com.webank.weevent.BrokerApplication;
+import com.webank.weevent.JUnitTestBase;
+import com.webank.weevent.broker.fisco.util.WeEventUtils;
+import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.FileChunksMeta;
+
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -11,10 +18,18 @@ import org.junit.Test;
  * @version 1.0
  * @since <pre>02/18/2020</pre>
  */
-public class ZKChunksMetaTest {
+public class ZKChunksMetaTest extends JUnitTestBase {
+    private ZKChunksMeta zkChunksMeta;
+    private FileChunksMeta fileChunksMeta;
 
     @Before
     public void before() throws Exception {
+        this.zkChunksMeta = BrokerApplication.applicationContext.getBean(ZKChunksMeta.class);
+
+        this.fileChunksMeta = new FileChunksMeta("abc.txt", 100, "fce6f5f5d390fc1928c48eeb4e9271e9", "com.weevent.file", "1");
+        this.fileChunksMeta.setFileId(WeEventUtils.generateUuid());
+        this.fileChunksMeta.setChunkSize(32);
+        this.fileChunksMeta.setChunkNum((int) (this.fileChunksMeta.getFileSize() + this.fileChunksMeta.getChunkSize()) / this.fileChunksMeta.getChunkSize());
     }
 
     @After
@@ -24,9 +39,9 @@ public class ZKChunksMetaTest {
     /**
      * Method: getChunks(String fileId)
      */
-    @Test
+    @Test(expected = BrokerException.class)
     public void testGetChunks() throws Exception {
-//TODO: Test goes here... 
+        this.zkChunksMeta.getChunks("notexist");
     }
 
     /**
@@ -34,7 +49,8 @@ public class ZKChunksMetaTest {
      */
     @Test
     public void testAddChunks() throws Exception {
-//TODO: Test goes here... 
+        this.zkChunksMeta.addChunks(this.fileChunksMeta.getFileId(), this.fileChunksMeta);
+        Assert.assertTrue(true);
     }
 
     /**
@@ -42,7 +58,11 @@ public class ZKChunksMetaTest {
      */
     @Test
     public void testRemoveChunks() throws Exception {
-//TODO: Test goes here... 
+        this.zkChunksMeta.addChunks(this.fileChunksMeta.getFileId(), this.fileChunksMeta);
+        Assert.assertTrue(true);
+
+        this.zkChunksMeta.removeChunks(this.fileChunksMeta.getFileId());
+        Assert.assertTrue(true);
     }
 
     /**
@@ -50,6 +70,14 @@ public class ZKChunksMetaTest {
      */
     @Test
     public void testUpdateChunks() throws Exception {
-//TODO: Test goes here... 
+        this.zkChunksMeta.addChunks(this.fileChunksMeta.getFileId(), this.fileChunksMeta);
+        Assert.assertTrue(true);
+
+        this.fileChunksMeta.setTopic("update");
+        this.zkChunksMeta.updateChunks(this.fileChunksMeta.getFileId(), this.fileChunksMeta);
+        Assert.assertTrue(true);
+
+        FileChunksMeta fileChunksMeta = this.zkChunksMeta.getChunks(this.fileChunksMeta.getFileId());
+        Assert.assertEquals(fileChunksMeta.getTopic(), "update");
     }
 }
