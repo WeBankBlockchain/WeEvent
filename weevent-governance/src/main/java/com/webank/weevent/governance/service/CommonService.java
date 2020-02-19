@@ -19,6 +19,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.ErrorCode;
 import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.utils.SpringContextUtil;
@@ -201,7 +202,7 @@ public class CommonService implements AutoCloseable {
 
     public void checkDataBaseUrl(String dataBaseType, String dataBaseUrl, String tableName, String user, String password) throws GovernanceException, ClassNotFoundException {
         //1 h2 ,2 mysql
-        if (dataBaseType.toLowerCase().equals("1")) {
+        if (ConstantProperties.H2_DATABASE.equals(dataBaseType.toLowerCase())) {
             Class.forName("org.h2.Driver");
         } else {
             Class.forName("org.mariadb.jdbc.Driver");

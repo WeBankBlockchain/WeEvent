@@ -6,6 +6,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.entity.RuleDatabaseEntity;
 import com.webank.weevent.governance.repository.RuleDatabaseRepository;
@@ -67,7 +68,8 @@ public class RuleDatabaseService {
 
     private void getDataBaseUrl(RuleDatabaseEntity ruleDatabaseEntity) {
         String dataBaseUrl = "";
-        if ("1".equals(ruleDatabaseEntity.getDatabaseType().toLowerCase())) {
+        // 1 h2, 2 mysql
+        if (ConstantProperties.H2_DATABASE.equals(ruleDatabaseEntity.getDatabaseType().toLowerCase())) {
             dataBaseUrl = "jdbc:h2:tcp://" + ruleDatabaseEntity.getDatabaseIp() + ":" + ruleDatabaseEntity.getDatabasePort()
                     + "/" + ruleDatabaseEntity.getDatabaseName();
         } else {
@@ -110,8 +112,8 @@ public class RuleDatabaseService {
 
     public void checkRuleDataBaseUrl(RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
         try {
-            // 1 check database 2 check tableName
-            if ("1".equals(ruleDatabaseEntity.getCheckType())) {
+            // 1 check database, 2 check tableName
+            if (ConstantProperties.CHECK_DATABASE.equals(ruleDatabaseEntity.getCheckType())) {
                 getDataBaseUrl(ruleDatabaseEntity);
                 commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseType(), ruleDatabaseEntity.getDatabaseUrl(), null, ruleDatabaseEntity.getUsername(),
                         ruleDatabaseEntity.getPassword());

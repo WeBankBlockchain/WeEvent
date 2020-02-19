@@ -81,4 +81,15 @@ public class ConstantProperties {
     //project business constant==============================
 
 
+    // databaseType================
+    public final static String H2_DATABASE = "1";
+    public final static String MYSQL_DATABASE = "2";
+    // databaseType ==============
+
+    // checkType================
+    public final static String CHECK_DATABASE = "1";
+    public final static String CHECK_TABLE = "2";
+    // checkType ==============
+
+
 }
