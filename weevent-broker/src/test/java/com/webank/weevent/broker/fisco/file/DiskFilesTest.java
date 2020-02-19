@@ -25,10 +25,13 @@ public class DiskFilesTest {
     public void before() throws Exception {
         this.diskFiles = new DiskFiles("./logs/file");
 
-        this.fileChunksMeta = new FileChunksMeta("abc.txt", 100, "fce6f5f5d390fc1928c48eeb4e9271e9", "com.weevent.file", "1");
-        this.fileChunksMeta.setFileId(WeEventUtils.generateUuid());
+        this.fileChunksMeta = new FileChunksMeta(WeEventUtils.generateUuid(),
+                "abc.txt",
+                100,
+                "fce6f5f5d390fc1928c48eeb4e9271e9",
+                "com.weevent.file",
+                "1");
         this.fileChunksMeta.setChunkSize(32);
-        this.fileChunksMeta.setChunkNum((int) (this.fileChunksMeta.getFileSize() + this.fileChunksMeta.getChunkSize()) / this.fileChunksMeta.getChunkSize());
     }
 
     @After

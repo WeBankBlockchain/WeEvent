@@ -62,17 +62,20 @@ public class FileRest {
         ParamCheckUtils.validateFileSize(fileSize);
         ParamCheckUtils.validateFileMd5(md5);
 
-        String fileId = WeEventUtils.generateUuid();
         // create FileChunksMeta
-        FileChunksMeta fileChunksMeta = new FileChunksMeta(fileName, fileSize, md5, topic, groupId);
-        fileChunksMeta.setFileId(fileId);
+        FileChunksMeta fileChunksMeta = new FileChunksMeta(WeEventUtils.generateUuid(),
+                fileName,
+                fileSize,
+                md5,
+                topic,
+                groupId);
         fileChunksMeta.setChunkSize(BrokerApplication.weEventConfig.getFileChunkSize());
 
         // create AMOP channel with FileTransportSender
         this.fileTransportService.openChannel(fileChunksMeta);
 
         // update to Zookeeper
-        this.zkChunksMeta.addChunks(fileId, fileChunksMeta);
+        this.zkChunksMeta.addChunks(fileChunksMeta.getFileId(), fileChunksMeta);
 
         return fileChunksMeta;
     }

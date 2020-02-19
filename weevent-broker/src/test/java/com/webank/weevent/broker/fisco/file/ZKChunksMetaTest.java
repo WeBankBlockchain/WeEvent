@@ -26,10 +26,15 @@ public class ZKChunksMetaTest extends JUnitTestBase {
     public void before() throws Exception {
         this.zkChunksMeta = BrokerApplication.applicationContext.getBean(ZKChunksMeta.class);
 
-        this.fileChunksMeta = new FileChunksMeta("abc.txt", 100, "fce6f5f5d390fc1928c48eeb4e9271e9", "com.weevent.file", "1");
-        this.fileChunksMeta.setFileId(WeEventUtils.generateUuid());
+        this.fileChunksMeta = new FileChunksMeta(WeEventUtils.generateUuid(),
+                "abc.txt",
+                100,
+                "fce6f5f5d390fc1928c48eeb4e9271e9",
+                "com.weevent.file",
+                "1");
         this.fileChunksMeta.setChunkSize(32);
-        this.fileChunksMeta.setChunkNum((int) (this.fileChunksMeta.getFileSize() + this.fileChunksMeta.getChunkSize()) / this.fileChunksMeta.getChunkSize());
+        this.fileChunksMeta.getChunkStatus().set(0);
+        this.fileChunksMeta.getChunkStatus().set(2);
     }
 
     @After
@@ -73,11 +78,13 @@ public class ZKChunksMetaTest extends JUnitTestBase {
         this.zkChunksMeta.addChunks(this.fileChunksMeta.getFileId(), this.fileChunksMeta);
         Assert.assertTrue(true);
 
-        this.fileChunksMeta.setTopic("update");
+        this.fileChunksMeta.getChunkStatus().set(1);
         this.zkChunksMeta.updateChunks(this.fileChunksMeta.getFileId(), this.fileChunksMeta);
         Assert.assertTrue(true);
 
         FileChunksMeta fileChunksMeta = this.zkChunksMeta.getChunks(this.fileChunksMeta.getFileId());
-        Assert.assertEquals(fileChunksMeta.getTopic(), "update");
+        Assert.assertTrue(fileChunksMeta.getChunkStatus().get(0));
+        Assert.assertTrue(fileChunksMeta.getChunkStatus().get(1));
+        Assert.assertTrue(fileChunksMeta.getChunkStatus().get(2));
     }
 }

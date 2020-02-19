@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -56,10 +55,14 @@ public class FileChunksTransport {
         // get file initial information
         File file = new File(localFile);
         try (FileInputStream fileInputStream = new FileInputStream(file)) {
-            String md5 = DigestUtils.md5DigestAsHex(fileInputStream);
-            FileChunksMeta fileChunksMeta = new FileChunksMeta(file.getName(), file.length(), md5, topic, groupId);
+            FileChunksMeta fileChunksMeta = new FileChunksMeta("",
+                    file.getName(),
+                    file.length(),
+                    DigestUtils.md5DigestAsHex(fileInputStream),
+                    topic,
+                    groupId);
             // get chunk information
-            fileChunksMeta = this.getFileChunksInfo(fileChunksMeta);
+            fileChunksMeta = this.openFileChunksInfo(fileChunksMeta);
 
             // upload every single chunk data
             for (int chunkIdx = 0; chunkIdx < fileChunksMeta.getChunkNum(); chunkIdx++) {
@@ -93,9 +96,7 @@ public class FileChunksTransport {
         log.info("try to download file, {}@{}", fileId, host);
 
         // get chunk information
-        FileChunksMeta fileChunksMeta = new FileChunksMeta(fileId);
-        fileChunksMeta.setFileId(fileId);
-        fileChunksMeta = this.getFileChunksInfo(fileChunksMeta);
+        FileChunksMeta fileChunksMeta = this.getFileChunksInfo(fileId);
 
         // create file
         String fileName = this.downloadFilePath + "/" + fileChunksMeta.getFileName();
@@ -120,23 +121,41 @@ public class FileChunksTransport {
         return fileName;
     }
 
-    private FileChunksMeta getFileChunksInfo(FileChunksMeta fileChunksMeta) throws BrokerException {
-        FileChunksMeta fileChunksMetaResponse;
-        StringBuffer params = new StringBuffer();
-
+    private FileChunksMeta openFileChunksInfo(FileChunksMeta fileChunksMeta) throws BrokerException {
         HttpGet httpGet;
+        StringBuffer params = new StringBuffer();
+        params.append("groupId=").append(fileChunksMeta.getGroupId());
+        params.append("&fileName=").append(fileChunksMeta.getFileName());
+        params.append("&fileSize=").append(fileChunksMeta.getFileSize());
+        params.append("&md5=").append(fileChunksMeta.getFileMd5());
+        httpGet = new HttpGet(this.svrUrl + "/openChunk" + "?" + params.toString());
 
-        if (StringUtils.isEmpty(fileChunksMeta.getFileId())) { // first create
-            params.append("groupId=").append(fileChunksMeta.getGroupId());
-            params.append("&fileName=").append(fileChunksMeta.getFileName());
-            params.append("&fileSize=").append(fileChunksMeta.getFileSize());
-            params.append("&md5=").append(fileChunksMeta.getFileMd5());
-            httpGet = new HttpGet(this.svrUrl + "/openChunk" + "?" + params.toString());
-        } else { // continue listChunk
-            params.append("fileId=").append(fileChunksMeta.getFileId());
-            httpGet = new HttpGet(this.svrUrl + "/listChunk" + "?" + params.toString());
+        FileChunksMeta fileChunksMetaResponse;
+        CloseableHttpResponse httpResponse = null;
+        try {
+            httpResponse = this.httpClient.execute(httpGet);
+            String responseResult = EntityUtils.toString(httpResponse.getEntity());
+            fileChunksMetaResponse = JsonHelper.json2Object(responseResult, FileChunksMeta.class);
+        } catch (IOException e) {
+            log.error("execute http request :{} error, e:{}", httpGet.getURI(), e);
+            throw new BrokerException(ErrorCode.HTTP_REQUEST_EXECUTE_ERROR);
+        } finally {
+            closeHttpResponse(httpResponse, "getFileChunksInfo");
         }
 
+//        fileChunksMeta.setFileId("a");
+//        fileChunksMeta.setChunkSize(256);
+//        fileChunksMeta.setChunkNum((int) fileChunksMeta.getFileSize() / fileChunksMeta.getChunkSize() + 1);
+        return fileChunksMetaResponse;
+    }
+
+    private FileChunksMeta getFileChunksInfo(String fileId) throws BrokerException {
+        StringBuffer params = new StringBuffer();
+        HttpGet httpGet;
+        params.append("fileId=").append(fileId);
+        httpGet = new HttpGet(this.svrUrl + "/listChunk" + "?" + params.toString());
+
+        FileChunksMeta fileChunksMetaResponse;
         CloseableHttpResponse httpResponse = null;
         try {
             httpResponse = this.httpClient.execute(httpGet);

@@ -1,9 +1,18 @@
 package com.webank.weevent.sdk;
 
 
+import java.io.IOException;
 import java.util.BitSet;
 
-import lombok.Data;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.Getter;
 
 /**
  * File chunk information.
@@ -11,12 +20,14 @@ import lombok.Data;
  * @author matthewliu
  * @since 2020/02/12
  */
-@Data
+@Getter
 public class FileChunksMeta {
+    // uuid for file
+    private String fileId;
     // file name in biz
     private String fileName;
     // file size in byte
-    private long fileSize = 0;
+    private long fileSize;
     // file data's md5
     private String fileMd5;
     // topic
@@ -24,17 +35,22 @@ public class FileChunksMeta {
     // groupId
     private String groupId;
 
-    // uuid for file
-    private String fileId;
-
     // chunk size
     private int chunkSize = 0;
     // chunk num
     private int chunkNum = 0;
-    // all chunk's upload status(chunkIndex, true/false)
-    private BitSet chunkStatus = new BitSet();
+    // all chunk's upload status(chunkIndex, true/false), chunkIndex begin with 0
+    @JsonSerialize(using = BitSetJsonSerializer.class)
+    @JsonDeserialize(using = BitSetJsonDeserializer.class)
+    private BitSet chunkStatus;
 
-    public FileChunksMeta(String fileName, long fileSize, String fileMd5, String topic, String groupId) {
+    public FileChunksMeta(String fileId,
+                          String fileName,
+                          long fileSize,
+                          String fileMd5,
+                          String topic,
+                          String groupId) {
+        this.fileId = fileId;
         this.fileName = fileName;
         this.fileSize = fileSize;
         this.fileMd5 = fileMd5;
@@ -42,14 +58,31 @@ public class FileChunksMeta {
         this.groupId = groupId;
     }
 
-    public FileChunksMeta(String fileId) {
-        this.fileId = fileId;
-    }
-
-    private FileChunksMeta() {
+    public void setChunkSize(int chunkSize) {
+        this.chunkSize = chunkSize;
+        this.chunkNum = (int) (this.fileSize + this.chunkSize) / this.chunkSize;
+        this.chunkStatus = new BitSet(this.chunkNum);
     }
 
     public boolean checkChunkFull() {
-        return chunkStatus.cardinality() == chunkStatus.length();
+        return this.chunkStatus.cardinality() == this.chunkStatus.length();
+    }
+
+    // this is for jackson Serializer/Deserializer
+    private FileChunksMeta() {
+    }
+
+    static class BitSetJsonSerializer extends JsonSerializer<BitSet> {
+        @Override
+        public void serialize(BitSet value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            gen.writeBinary(value.toByteArray());
+        }
+    }
+
+    static class BitSetJsonDeserializer extends JsonDeserializer<BitSet> {
+        @Override
+        public BitSet deserialize(JsonParser p, DeserializationContext deserializationContext) throws IOException {
+            return BitSet.valueOf(p.getBinaryValue());
+        }
     }
 }
