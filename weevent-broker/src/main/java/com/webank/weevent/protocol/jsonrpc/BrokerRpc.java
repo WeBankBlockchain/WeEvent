@@ -1,14 +1,9 @@
 package com.webank.weevent.protocol.jsonrpc;
 
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
-import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.JsonHelper;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.TopicInfo;
@@ -48,18 +43,7 @@ public class BrokerRpc implements IBrokerRpc {
                               @JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException {
         log.info("topic:{} groupId:{} content.length:{} extensions:{}", topic, groupId, content.length, JsonHelper.object2Json(extensions));
 
-        try {
-            return this.producer.publish(new WeEvent(topic, content, extensions), groupId).get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException e) {
-            log.error("publishWeEvent failed due to transaction execution error.", e);
-            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        } catch (TimeoutException e) {
-            log.error("publishWeEvent failed due to transaction execution timeout.", e);
-            SendResult sendResult = new SendResult();
-            sendResult.setTopic(topic);
-            sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
-            return sendResult;
-        }
+        return this.producer.publishSync(new WeEvent(topic, content, extensions), groupId);
     }
 
     @Override

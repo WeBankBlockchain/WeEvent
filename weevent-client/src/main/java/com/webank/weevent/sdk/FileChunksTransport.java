@@ -80,12 +80,12 @@ public class FileChunksTransport {
 
         //TODO list chunk and check is it complete
         FileChunksMeta fileChunksMeta = null;// = this.getFileChunksInfo(fileChunksMeta);
-        while (!fileChunksMeta.isFull()) {
+        while (!fileChunksMeta.checkChunkFull()) {
             // TODO try again
         }
 
         log.info("upload file complete, {}", localFile);
-        // TODO invoke removeChunk
+        // TODO invoke closeChunk
         return sendResult;
     }
 
@@ -131,7 +131,7 @@ public class FileChunksTransport {
             params.append("&fileName=").append(fileChunksMeta.getFileName());
             params.append("&fileSize=").append(fileChunksMeta.getFileSize());
             params.append("&md5=").append(fileChunksMeta.getFileMd5());
-            httpGet = new HttpGet(this.svrUrl + "/createChunk" + "?" + params.toString());
+            httpGet = new HttpGet(this.svrUrl + "/openChunk" + "?" + params.toString());
         } else { // continue listChunk
             params.append("fileId=").append(fileChunksMeta.getFileId());
             httpGet = new HttpGet(this.svrUrl + "/listChunk" + "?" + params.toString());

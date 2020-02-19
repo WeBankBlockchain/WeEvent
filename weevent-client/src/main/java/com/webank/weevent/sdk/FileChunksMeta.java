@@ -16,7 +16,7 @@ public class FileChunksMeta {
     // file name in biz
     private String fileName;
     // file size in byte
-    private long fileSize;
+    private long fileSize = 0;
     // file data's md5
     private String fileMd5;
     // topic
@@ -28,11 +28,11 @@ public class FileChunksMeta {
     private String fileId;
 
     // chunk size
-    private int chunkSize;
+    private int chunkSize = 0;
     // chunk num
-    private int chunkNum;
+    private int chunkNum = 0;
     // all chunk's upload status(chunkIndex, true/false)
-    private BitSet chunkStatus;
+    private BitSet chunkStatus = new BitSet();
 
     public FileChunksMeta(String fileName, long fileSize, String fileMd5, String topic, String groupId) {
         this.fileName = fileName;
@@ -49,7 +49,7 @@ public class FileChunksMeta {
     private FileChunksMeta() {
     }
 
-    public boolean isFull() {
+    public boolean checkChunkFull() {
         return chunkStatus.cardinality() == chunkStatus.length();
     }
 }

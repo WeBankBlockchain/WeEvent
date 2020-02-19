@@ -7,15 +7,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.file.FileEventListener;
 import com.webank.weevent.broker.fisco.file.FileTransportService;
-import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
@@ -390,29 +386,8 @@ public class BrokerStomp extends TextWebSocketHandler {
      * @throws BrokerException broker exception
      */
     private SendResult handleSend(WeEvent event, String groupId) throws BrokerException {
-        if (!this.iproducer.startProducer()) {
-            log.error("producer start failed");
-            throw new BrokerException(ErrorCode.UNKNOWN_ERROR);
-        }
-
-        SendResult sendResult;
-        try {
-            sendResult = this.iproducer.publish(event, groupId).get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-            log.info("publish result, {}", sendResult);
-        } catch (InterruptedException | ExecutionException e) {
-            log.error("publishWeEvent failed due to transaction execution error.", e);
-
-            sendResult = new SendResult();
-            sendResult.setTopic(event.getTopic());
-            sendResult.setStatus(SendResult.SendResultStatus.ERROR);
-        } catch (TimeoutException e) {
-            log.error("publishWeEvent failed due to transaction execution timeout.", e);
-
-            sendResult = new SendResult();
-            sendResult.setTopic(event.getTopic());
-            sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
-        }
-
+        SendResult sendResult = this.iproducer.publishSync(event, groupId);
+        log.info("publish result, {}", sendResult);
         return sendResult;
     }
 

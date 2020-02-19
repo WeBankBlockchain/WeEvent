@@ -97,7 +97,7 @@ public class ZKChunksMeta {
         this.zkSet(this.zkPath, fileChunksMeta);
 
         // check is full
-        return fileChunksMeta.isFull();
+        return fileChunksMeta.checkChunkFull();
     }
 
     private boolean zkExist(String zkPath) throws BrokerException {

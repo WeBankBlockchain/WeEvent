@@ -48,12 +48,12 @@ public class FileRest {
         }
     }
 
-    @RequestMapping(path = "/createChunk")
-    public FileChunksMeta createChunk(@RequestParam(name = "topic") String topic,
-                                      @RequestParam(name = "groupId", required = false) String groupId,
-                                      @RequestParam(name = "fileName") String fileName,
-                                      @RequestParam(name = "fileSize") long fileSize,
-                                      @RequestParam(name = "md5") String md5) throws BrokerException {
+    @RequestMapping(path = "/openChunk")
+    public FileChunksMeta openChunk(@RequestParam(name = "topic") String topic,
+                                    @RequestParam(name = "groupId", required = false) String groupId,
+                                    @RequestParam(name = "fileName") String fileName,
+                                    @RequestParam(name = "fileSize") long fileSize,
+                                    @RequestParam(name = "md5") String md5) throws BrokerException {
         log.info("groupId:{} md5:{}", groupId, md5);
 
         checkSupport();
@@ -79,18 +79,18 @@ public class FileRest {
 
     @RequestMapping(path = "/uploadChunk")
     public SendResult uploadChunk(@RequestParam(name = "fileId") String fileId,
-                                  @RequestParam(name = "chunkIdx") String chunkIdx,
+                                  @RequestParam(name = "chunkIdx") int chunkIdx,
                                   @RequestParam(name = "chunkData") byte[] chunkData) throws BrokerException, InterruptedException, ExecutionException, TimeoutException {
         log.info("fileId: {}  chunkIdx: {} chunkData: {}", fileId, chunkIdx, chunkData.length);
         checkSupport();
 
         ParamCheckUtils.validateFileId(fileId);
-        ParamCheckUtils.validateChunkIdx(Integer.parseInt(chunkIdx));
+        ParamCheckUtils.validateChunkIdx(chunkIdx);
         ParamCheckUtils.validateChunkData(chunkData);
 
         FileChunksMeta fileChunksMeta = this.zkChunksMeta.getChunks(fileId);
         // send data to FileTransportSender
-        this.fileTransportService.sendChunkData(fileId, Integer.parseInt(chunkIdx), chunkData);
+        this.fileTransportService.sendChunkData(fileId, chunkIdx, chunkData);
 
         SendResult sendResult = new SendResult(SendResult.SendResultStatus.SUCCESS);
         sendResult.setTopic(fileChunksMeta.getTopic());
@@ -123,8 +123,8 @@ public class FileRest {
         return this.zkChunksMeta.getChunks(fileId);
     }
 
-    @RequestMapping(path = "/removeChunk")
-    public SendResult removeChunk(@RequestParam(name = "fileId") String fileId) throws BrokerException {
+    @RequestMapping(path = "/closeChunk")
+    public SendResult closeChunk(@RequestParam(name = "fileId") String fileId) throws BrokerException {
         log.info("fileId: {}", fileId);
 
         checkSupport();

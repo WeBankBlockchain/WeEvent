@@ -117,8 +117,9 @@ public enum ErrorCode {
     FILE_INVALID_CHUNK(200501, "invalid chunk data"),
     FILE_NOT_EXIST(200502, "not exist file"),
     FILE_READ_EXCEPTION(200503, "read file exception"),
-    FILE_WRITE_EXCEPTION(200504, "read file exception"),
-    FILE_NOT_ENOUGH_SPACE(200505, "not enough disk space"),
+    FILE_WRITE_EXCEPTION(200504, "write file exception"),
+    FILE_NOT_EXIST_PATH(200505, "not exist file path"),
+    FILE_NOT_ENOUGH_SPACE(200506, "not enough disk space"),
     ;
 
     /**
