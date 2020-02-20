@@ -4,8 +4,8 @@ package com.webank.weevent.sdk;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -61,7 +61,7 @@ public class FileChunksTransport {
         }
 
         // get file initial information
-        try (FileInputStream fileInputStream = new FileInputStream(file)) {
+        try (RandomAccessFile f = new RandomAccessFile(file, "r")) {
             FileChunksMeta fileChunksMeta = new FileChunksMeta("",
                     file.getName(),
                     file.length(),
@@ -77,8 +77,9 @@ public class FileChunksTransport {
                 if (chunkIdx == fileChunksMeta.getChunkNum() - 1) {
                     size = (int) (fileChunksMeta.getFileSize() % fileChunksMeta.getChunkSize());
                 }
+                f.seek(chunkIdx * fileChunksMeta.getChunkSize());
                 byte[] chunkData = new byte[size];
-                int readSize = fileInputStream.read(chunkData, chunkIdx * fileChunksMeta.getChunkSize(), size);
+                int readSize = f.read(chunkData);
                 if (readSize != size) {
                     log.error("read file exception, chunkIdx: {}", chunkIdx);
                     throw new BrokerException(ErrorCode.FILE_READ_EXCEPTION);
@@ -109,12 +110,13 @@ public class FileChunksTransport {
         // create file
         String fileName = this.downloadFilePath + "/" + fileChunksMeta.getFileName();
 
-        try (FileOutputStream fileOutputStream = new FileOutputStream(fileName)) {
+        try (RandomAccessFile f = new RandomAccessFile(fileName, "rw")) {
             // download every single chunk data
             for (int chunkIdx = 0; chunkIdx < fileChunksMeta.getChunkNum(); chunkIdx++) {
                 byte[] chunkData = this.downloadChunk(fileChunksMeta.getFileId(), chunkIdx);
-
-                fileOutputStream.write(chunkData, chunkIdx * fileChunksMeta.getChunkSize(), chunkData.length);
+                f.seek(chunkIdx * fileChunksMeta.getChunkSize());
+                f.write(chunkData);
+				f.flush();
             }
         } catch (BrokerException e) {
             throw e;

@@ -85,6 +85,7 @@ public class FileTransportService {
 
         // listen amop sender topic
         String amopTopic = AMOPChannel.genPublishEndianTopic(fileChunksMeta.getTopic(), fileChunksMeta.getFileId());
+        log.info("open sender amop channel for file, {}", amopTopic);
         AMOPChannel amopChannel = new AMOPChannel(this, amopTopic, this.initService(fileChunksMeta.getGroupId()));
         fileTransportContext.setSender(amopChannel);
 
@@ -97,10 +98,12 @@ public class FileTransportService {
         WeEvent startTransport = new WeEvent(fileChunksMeta.getTopic(), JsonHelper.object2JsonBytes(fileEvent), extensions);
 
         SendResult sendResult = this.producer.publishSync(startTransport, fileChunksMeta.getGroupId());
-        log.info("send start event result, {}", sendResult);
+        log.info("send start WeEvent to receiver result, {}", sendResult);
     }
 
     public SendResult closeChannel(String fileId) throws BrokerException {
+        log.info("close amopsender channel for file, fileId: {}", fileId);
+
         SendResult sendResult = new SendResult(SendResult.SendResultStatus.ERROR);
         if (!this.fileTransportContexts.containsKey(fileId)) {
             log.error("not exist file context, fileId: {}", fileId);
@@ -137,6 +140,8 @@ public class FileTransportService {
     }
 
     public void sendChunkData(String fileId, int chunkIndex, byte[] data) throws BrokerException {
+        log.info("send chunk data via amop sender channel, {}@{}", fileId, chunkIndex);
+
         if (!this.fileTransportContexts.containsKey(fileId)) {
             log.error("not exist file context, fileId: {}", fileId);
             throw new BrokerException(ErrorCode.FILE_NOT_EXIST_CONTEXT);
@@ -175,6 +180,7 @@ public class FileTransportService {
     }
 
     public byte[] downloadChunk(String fileId, int chunkIndex) throws BrokerException {
+        log.info("download chunk data, {}@{}", fileId, chunkIndex);
         return this.diskFiles.readChunkData(fileId, chunkIndex);
     }
 
@@ -208,6 +214,7 @@ public class FileTransportService {
         String senderTopic = AMOPChannel.genPublishEndianTopic(fileChunksMeta.getTopic(), fileChunksMeta.getFileId());
         try {
             // open amop channel with receiver topic
+			log.info("open receiver amop channel for file, {}", amopTopic);
             AMOPChannel amopChannel = new AMOPChannel(this, amopTopic, this.initService(fileChunksMeta.getGroupId()));
             fileTransportContext.setReceiver(amopChannel);
 
@@ -231,7 +238,7 @@ public class FileTransportService {
         if (this.fileTransportContexts.containsKey(fileChunksMeta.getFileId())) {
             FileTransportContext fileTransportContext = this.fileTransportContexts.get(fileChunksMeta.getFileId());
             if (fileTransportContext.getReceiver() != null) {
-                log.error("close amop channel for file receiving, fileId: {}", fileChunksMeta.getFileId());
+                log.error("close amop receiver channel for file, fileId: {}", fileChunksMeta.getFileId());
                 fileTransportContext.getReceiver().close();
                 fileTransportContext.setSender(null);
             }

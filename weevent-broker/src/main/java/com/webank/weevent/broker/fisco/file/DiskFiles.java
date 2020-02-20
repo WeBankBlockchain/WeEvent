@@ -73,6 +73,8 @@ public class DiskFiles {
     }
 
     public void saveFileMeta(FileChunksMeta fileChunksMeta) throws BrokerException {
+        log.info("save FileChunksMeta, chunkStatus: {}", fileChunksMeta.getChunkStatus());
+
         String localMetaFile = this.genLocalMetaFileName(fileChunksMeta.getFileId());
         try (FileOutputStream fileOutputStream = new FileOutputStream(localMetaFile)) {
             byte[] data = JsonHelper.object2JsonBytes(fileChunksMeta);
@@ -97,11 +99,11 @@ public class DiskFiles {
         }
 
         String localFile = this.genLocalFileName(fileId);
-        log.info("create local file to received data, {} size: {}", localFile, size);
+        log.info("create local file for receiving file, {} size: {}", localFile, size);
         try (RandomAccessFile file = new RandomAccessFile(localFile, "rw")) {
             file.setLength(size);
         } catch (IOException e) {
-            log.error("create fixed length empty file failed", e);
+            log.error("create fixed length file failed", e);
             throw new BrokerException(ErrorCode.FILE_WRITE_EXCEPTION);
         }
     }
