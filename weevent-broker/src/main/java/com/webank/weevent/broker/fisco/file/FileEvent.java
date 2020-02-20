@@ -21,13 +21,10 @@ public class FileEvent {
         FileTransportEnd(2),
 
         // over AMOP channel
-        // receiver -> sender, channel is already
+        // receiver -> sender, check channel is already
         FileChannelAlready(11),
-        // receiver -> sender, exception on channel, cancel do
-        FileChannelException(12),
         // sender -> receiver, send file chunk data
-        FileChannelData(13);
-
+        FileChannelData(12);
 
         private final int code;
 

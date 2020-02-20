@@ -18,31 +18,19 @@ import org.fisco.bcos.channel.dto.ChannelResponse;
 
 /**
  * AMOP channel for file transport.
+ * sender and receiver can not be in one process,
+ * because one file's sender and receiver MUST access in different block node.
  *
  * @author matthewliu
  * @since 2020/02/16
  */
 @Slf4j
 public class AMOPChannel extends ChannelPushCallback {
-    private final static String publishEndian = "pubEndian";
-    private final static String subscribeEndian = "subEndian";
-
     private final FileTransportService fileTransportService;
-    private final String subTopic;
+    private final String topic;
     private Service service;
+    private boolean sender;
     private volatile boolean already = false;
-
-    public static String genPublishEndianTopic(String weEventTopic, String fileId) {
-        return weEventTopic + "/" + fileId + "/" + publishEndian;
-    }
-
-    public static String genSubscribeEndianTopic(String weEventTopic, String fileId) {
-        return weEventTopic + "/" + fileId + "/" + subscribeEndian;
-    }
-
-    public boolean isAlready() {
-        return this.already;
-    }
 
     /**
      * Create a new amop channel(new connection to block chain) for subscribe topic
@@ -50,19 +38,24 @@ public class AMOPChannel extends ChannelPushCallback {
      * @param fileTransportService component class
      * @param topic binding amop topic
      * @param service initialized service, have not run
+     * @param sender is this used by sender or receiver
      * @throws BrokerException BrokerException
      */
-    public AMOPChannel(FileTransportService fileTransportService, String topic, Service service) throws BrokerException {
+    public AMOPChannel(FileTransportService fileTransportService, String topic, Service service, boolean sender) throws BrokerException {
         try {
             this.fileTransportService = fileTransportService;
-            this.subTopic = topic;
+            this.topic = topic;
             this.service = service;
+            this.sender = sender;
 
-            // init amop subscription on this service(tcp connection)
-            Set<String> topics = new HashSet<>();
-            topics.add(this.subTopic);
-            this.service.setPushCallback(this);
-            this.service.setTopics(topics);
+            if (!this.sender) {
+                // init amop subscription on this service(tcp connection)
+                Set<String> topics = new HashSet<>();
+                topics.add(this.topic);
+                this.service.setPushCallback(this);
+                this.service.setTopics(topics);
+                this.already = true;
+            }
             this.service.run();
         } catch (Exception e) {
             log.error("exception in init amop channel", e);
@@ -75,11 +68,32 @@ public class AMOPChannel extends ChannelPushCallback {
         this.service = null;
     }
 
-    public ChannelResponse sendEvent(String topic, FileEvent fileEvent) throws BrokerException {
+    public static String genTopic(String weEventTopic, String fileId) {
+        return weEventTopic + "/" + fileId;
+    }
+
+    public boolean checkReceiverAlready() throws BrokerException {
+        if (!this.sender) {
+            log.error("only call by sender");
+            throw new BrokerException(ErrorCode.UNKNOWN_ERROR);
+        }
+
+        if (!this.already) {
+            ChannelResponse rsp = this.sendEvent(new FileEvent(FileEvent.EventType.FileChannelAlready));
+            if (rsp.getErrorCode() == 0) {
+                log.info("amop channel is already, can be send chunk data");
+                this.already = true;
+            }
+        }
+
+        return this.already;
+    }
+
+    public ChannelResponse sendEvent(FileEvent fileEvent) throws BrokerException {
         byte[] json = JsonHelper.object2JsonBytes(fileEvent);
 
         ChannelRequest channelRequest = new ChannelRequest();
-        channelRequest.setToTopic(topic);
+        channelRequest.setToTopic(this.topic);
         channelRequest.setMessageID(this.service.newSeq());
         channelRequest.setTimeout(5000);
         channelRequest.setContent(json);
@@ -88,10 +102,11 @@ public class AMOPChannel extends ChannelPushCallback {
         return this.service.sendChannelMessage2(channelRequest);
     }
 
+    // event from sender
     @Override
     public void onPush(ChannelPush push) {
-        if (!this.subTopic.equals(push.getTopic())) {
-            log.error("miss match amop topic, {} <-> {}", this.subTopic, push.getTopic());
+        if (!this.topic.equals(push.getTopic())) {
+            log.error("miss match amop topic, {} <-> {}", this.topic, push.getTopic());
             push.sendResponse(AMOPChannel.toChannelResponse(ErrorCode.UNKNOWN_ERROR));
             return;
         }
@@ -107,19 +122,12 @@ public class AMOPChannel extends ChannelPushCallback {
 
         log.info("received file event via amop, {}", fileEvent);
         switch (fileEvent.getEventType()) {
-            // event from receiver
             case FileChannelAlready:
                 log.info("get {}, can send chunk data now", fileEvent.getEventType());
 
-                this.already = true;
                 push.sendResponse(AMOPChannel.toChannelResponse(ErrorCode.SUCCESS));
                 break;
 
-            case FileChannelException:
-                log.error("get {}, Warning: remote exception in received file", fileEvent.getEventType());
-                break;
-
-            // event from sender
             case FileChannelData:
                 log.info("get {}, try to write chunk data in local file", fileEvent.getEventType());
 
