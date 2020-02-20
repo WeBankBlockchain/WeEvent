@@ -116,7 +116,6 @@ public class FileChunksTransport {
                 byte[] chunkData = this.downloadChunk(fileChunksMeta.getFileId(), chunkIdx);
                 f.seek(chunkIdx * fileChunksMeta.getChunkSize());
                 f.write(chunkData);
-				f.flush();
             }
         } catch (BrokerException e) {
             throw e;
