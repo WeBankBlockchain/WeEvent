@@ -22,13 +22,12 @@ public class FileEvent {
 
         // over AMOP channel
         // receiver -> sender, channel is already
-        FileChannelAlready(10),
+        FileChannelAlready(11),
+        // receiver -> sender, exception on channel, cancel do
+        FileChannelException(12),
         // sender -> receiver, send file chunk data
-        FileChannelData(11),
-        // receiver -> sender, send file status
-        FileChannelStatus(12),
-        // exception on channel, cancel do
-        FileChannelException(13);
+        FileChannelData(13);
+
 
         private final int code;
 
@@ -41,7 +40,7 @@ public class FileEvent {
         }
     }
 
-    private final EventType eventType;
+    private EventType eventType;
     private FileChunksMeta fileChunksMeta;
 
     // have data while eventType == FIleChannelData
@@ -50,5 +49,9 @@ public class FileEvent {
 
     public FileEvent(EventType eventType) {
         this.eventType = eventType;
+    }
+
+    // this is for jackson Serializer/Deserializer
+    private FileEvent() {
     }
 }

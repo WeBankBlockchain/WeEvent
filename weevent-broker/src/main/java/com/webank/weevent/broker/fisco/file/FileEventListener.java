@@ -1,6 +1,9 @@
 package com.webank.weevent.broker.fisco.file;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.JsonHelper;
@@ -17,9 +20,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class FileEventListener implements IConsumer.ConsumerListener, NotifyWeEvent {
     private final FileTransportService fileTransportService;
+    private List<String> files;
 
     public FileEventListener(FileTransportService fileTransportService) {
         this.fileTransportService = fileTransportService;
+        this.files = new ArrayList<>();
     }
 
     @Override
@@ -43,16 +48,23 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
 
         switch (fileEvent.getEventType()) {
             case FileTransportStart:
-                log.info("try to initialize file context for receiving file");
+                log.info("get {}, try to initialize context for receiving file", fileEvent.getEventType());
+
+                // send amop event to sender to begin upload
                 this.fileTransportService.prepareReceiveFile(fileEvent.getFileChunksMeta());
+                this.files.add(fileEvent.getFileChunksMeta().getFileId());
                 break;
 
             case FileTransportEnd:
-                log.info("try to finalize file context for receiving file");
-                WeEvent notifyWeEvent = this.fileTransportService.cleanUpReceivedFile(fileEvent.getFileChunksMeta(), event);
+                log.info("get {}, try to finalize context for receiving file", fileEvent.getEventType());
 
-                log.info("try to send file received event to remote, {}", notifyWeEvent);
-                this.send(subscriptionId, notifyWeEvent);
+                this.fileTransportService.cleanUpReceivedFile(fileEvent.getFileChunksMeta().getFileId());
+                this.files.remove(fileEvent.getFileChunksMeta().getFileId());
+
+                // set host in WeEvent, then downloadChunk invoke will be routed to this host
+                event.getExtensions().put("host", "127.0.0.1");
+                log.info("try to send file received event to remote, {}", event);
+                this.send(subscriptionId, event);
                 break;
 
             default:
@@ -63,5 +75,13 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
     @Override
     public void onException(Throwable e) {
         log.error("file event via WeEvent onException", e);
+    }
+
+    @Override
+    public void onClose(String subscriptionId) {
+        log.info("subscription: {} closed, try to finalize binding file context one by one", subscriptionId);
+        for (String fileId : this.files) {
+            this.fileTransportService.cleanUpReceivedFile(fileId);
+        }
     }
 }

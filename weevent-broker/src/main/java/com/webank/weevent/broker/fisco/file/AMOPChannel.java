@@ -14,6 +14,7 @@ import org.fisco.bcos.channel.client.ChannelPushCallback;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.dto.ChannelPush;
 import org.fisco.bcos.channel.dto.ChannelRequest;
+import org.fisco.bcos.channel.dto.ChannelResponse;
 
 /**
  * AMOP channel for file transport.
@@ -56,8 +57,11 @@ public class AMOPChannel extends ChannelPushCallback {
             this.fileTransportService = fileTransportService;
             this.subTopic = topic;
             this.service = service;
+
+            // init amop subscription on this service(tcp connection)
             Set<String> topics = new HashSet<>();
             topics.add(this.subTopic);
+            this.service.setPushCallback(this);
             this.service.setTopics(topics);
             this.service.run();
         } catch (Exception e) {
@@ -67,32 +71,28 @@ public class AMOPChannel extends ChannelPushCallback {
     }
 
     public void close() {
+        // TODO need unSubscribe and then close binding service
         this.service = null;
     }
 
-    // can be called after received FileEvent.EventType.FIleChannelAlready
-    public void sendEvent(String topic, FileEvent fileEvent) {
-        byte[] json;
-        try {
-            json = JsonHelper.object2JsonBytes(fileEvent);
-        } catch (BrokerException e) {
-            log.error("encode json failed, skip it", e);
-            return;
-        }
+    public ChannelResponse sendEvent(String topic, FileEvent fileEvent) throws BrokerException {
+        byte[] json = JsonHelper.object2JsonBytes(fileEvent);
 
         ChannelRequest channelRequest = new ChannelRequest();
         channelRequest.setToTopic(topic);
         channelRequest.setMessageID(this.service.newSeq());
         channelRequest.setTimeout(5000);
         channelRequest.setContent(json);
+
         log.info("send amop channel message, topic: {} id: {}", channelRequest.getToTopic(), channelRequest.getMessageID());
-        this.service.sendChannelMessage2(channelRequest);
+        return this.service.sendChannelMessage2(channelRequest);
     }
 
     @Override
     public void onPush(ChannelPush push) {
         if (!this.subTopic.equals(push.getTopic())) {
-            log.error("miss match topic, {} <-> {}", this.subTopic, push.getTopic());
+            log.error("miss match amop topic, {} <-> {}", this.subTopic, push.getTopic());
+            push.sendResponse(AMOPChannel.toChannelResponse(ErrorCode.UNKNOWN_ERROR));
             return;
         }
 
@@ -101,44 +101,61 @@ public class AMOPChannel extends ChannelPushCallback {
             fileEvent = JsonHelper.json2Object(push.getContent2(), FileEvent.class);
         } catch (BrokerException e) {
             log.error("invalid file event via amop", e);
+            push.sendResponse(AMOPChannel.toChannelResponse(e));
             return;
         }
-        log.info("received event via amop, {}", fileEvent);
 
-        String senderTopic = genPublishEndianTopic(fileEvent.getFileChunksMeta().getTopic(), fileEvent.getFileChunksMeta().getFileId());
+        log.info("received file event via amop, {}", fileEvent);
         switch (fileEvent.getEventType()) {
             // event from receiver
             case FileChannelAlready:
-                this.already = true;
-                break;
+                log.info("get {}, can send chunk data now", fileEvent.getEventType());
 
-            case FileChannelStatus:
-                log.info("try to update FileChunksMeta to zookeeper");
-                this.fileTransportService.flushZKFileChunksMeta(fileEvent.getFileChunksMeta());
+                this.already = true;
+                push.sendResponse(AMOPChannel.toChannelResponse(ErrorCode.SUCCESS));
                 break;
 
             case FileChannelException:
-                log.info("Warning: remote exception in received file");
+                log.error("get {}, Warning: remote exception in received file", fileEvent.getEventType());
                 break;
 
             // event from sender
             case FileChannelData:
-                log.info("try to write chunk data in local file");
+                log.info("get {}, try to write chunk data in local file", fileEvent.getEventType());
+
                 try {
                     FileChunksMeta updatedFileChunksMeta = this.fileTransportService.writeChunkData(fileEvent);
-                    FileEvent reply = new FileEvent(FileEvent.EventType.FileChannelStatus);
-                    reply.setFileChunksMeta(updatedFileChunksMeta);
-
                     // send local file status to sender
-                    this.sendEvent(senderTopic, reply);
+                    ChannelResponse rsp = AMOPChannel.toChannelResponse(ErrorCode.SUCCESS);
+                    byte[] json = JsonHelper.object2JsonBytes(updatedFileChunksMeta);
+                    rsp.setContent(json);
+                    push.sendResponse(rsp);
                 } catch (BrokerException e) {
                     log.error("write chunk data in local file exception", e);
-                    this.sendEvent(senderTopic, new FileEvent(FileEvent.EventType.FileChannelStatus));
+                    push.sendResponse(AMOPChannel.toChannelResponse(e));
                 }
                 break;
 
             default:
                 log.error("unknown file event type via amop");
         }
+    }
+
+    private static ChannelResponse toChannelResponse(ErrorCode errorCode) {
+        ChannelResponse reply = new ChannelResponse();
+        reply.setErrorCode(errorCode.getCode());
+        reply.setErrorMessage(errorCode.getCodeDesc());
+        return reply;
+    }
+
+    private static ChannelResponse toChannelResponse(BrokerException e) {
+        ChannelResponse reply = new ChannelResponse();
+        reply.setErrorCode(e.getCode());
+        reply.setErrorMessage(e.getMessage());
+        return reply;
+    }
+
+    public static BrokerException toBrokerException(ChannelResponse reply) {
+        return new BrokerException(reply.getErrorCode(), reply.getErrorMessage());
     }
 }
