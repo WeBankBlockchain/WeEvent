@@ -81,8 +81,10 @@ public class AMOPChannel extends ChannelPushCallback {
         if (!this.already) {
             ChannelResponse rsp = this.sendEvent(new FileEvent(FileEvent.EventType.FileChannelAlready));
             if (rsp.getErrorCode() == 0) {
-                log.info("amop channel is already, can be send chunk data");
+                log.info("amop channel is ready, can send chunk data");
                 this.already = true;
+            } else {
+                log.error("amop channel is not ready");
             }
         }
 
@@ -98,8 +100,10 @@ public class AMOPChannel extends ChannelPushCallback {
         channelRequest.setTimeout(5000);
         channelRequest.setContent(json);
 
-        log.info("send amop channel message, topic: {} id: {}", channelRequest.getToTopic(), channelRequest.getMessageID());
-        return this.service.sendChannelMessage2(channelRequest);
+        log.info("send amop channel request, topic: {} id: {}", channelRequest.getToTopic(), channelRequest.getMessageID());
+        ChannelResponse rsp = this.service.sendChannelMessage2(channelRequest);
+        log.info("receive amop channel response, id: {} result: {}-{}", rsp.getMessageID(), rsp.getErrorCode(), rsp.getErrorMessage());
+        return rsp;
     }
 
     // event from sender

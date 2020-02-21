@@ -165,10 +165,10 @@ public class WeEventClientTest {
 
     @Test
     public void testPublishFile() throws Exception {
-        boolean result = this.weEventClient.open("com.webank.weevent.file");
+        boolean result = this.weEventClient.open("com.weevent.file");
         Assert.assertTrue(result);
 
-        SendResult sendResult = this.weEventClient.publishFile("com.webank.weevent.file",
+        SendResult sendResult = this.weEventClient.publishFile("com.weevent.file",
                 new File("src/main/resources/log4j2.xml").getAbsolutePath());
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
@@ -194,12 +194,6 @@ public class WeEventClientTest {
         });
 
         Assert.assertFalse(subscriptionId.isEmpty());
-
-        SendResult sendResult = this.weEventClient.publishFile("com.weevent.file",
-                new File("src/main/resources/log4j2.xml").getAbsolutePath());
-        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
-
-        Thread.sleep(1000000);
         this.weEventClient.unSubscribe(subscriptionId);
     }
 }

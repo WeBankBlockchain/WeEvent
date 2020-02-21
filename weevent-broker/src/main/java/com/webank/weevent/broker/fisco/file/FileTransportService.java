@@ -128,8 +128,6 @@ public class FileTransportService {
             throw new BrokerException(ErrorCode.FILE_NOT_EXIST_CONTEXT);
         }
 
-        log.info("send chunk data via amop channel, {}@{}", fileId, chunkIndex);
-
         FileTransportContext fileTransportContext = this.fileTransportContexts.get(fileId);
         FileChunksMeta fileChunksMeta = fileTransportContext.getFileChunksMeta();
         if (chunkIndex >= fileChunksMeta.getChunkNum()
@@ -138,18 +136,13 @@ public class FileTransportService {
             throw new BrokerException(ErrorCode.FILE_INVALID_CHUNK);
         }
 
-        // wait 10s until receiver ready
-        int times = 0;
-        while (!fileTransportContext.getChannel().checkReceiverAlready() && times < 10) {
-            log.info("idle to wait receiver ready");
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                log.error("idle wait exception", e);
-            }
-
-            times++;
+        // check receiver ready
+        if (!fileTransportContext.getChannel().checkReceiverAlready()) {
+            log.error("amop channel haven't ready");
+            throw new BrokerException(ErrorCode.FILE_CHANNEL_NOT_READY);
         }
+
+        log.info("send chunk data via amop channel, {}@{}", fileId, chunkIndex);
 
         FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileChannelData);
         fileEvent.setFileChunksMeta(fileTransportContext.getFileChunksMeta());
