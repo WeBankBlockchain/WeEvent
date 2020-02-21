@@ -297,13 +297,11 @@ public class BrokerApplication {
 
     @Bean
     @ConditionalOnBean(ZKChunksMeta.class)
-    public static FileTransportService getFileService(IProducer iProducer,
-                                                      FiscoConfig fiscoConfig,
-                                                      ZKChunksMeta zkChunksMeta) {
-        FileTransportService fileTransportService = new FileTransportService();
-        fileTransportService.setProducer(iProducer);
-        fileTransportService.setFiscoConfig(fiscoConfig);
-        fileTransportService.setZkChunksMeta(zkChunksMeta);
+    public static FileTransportService getFileService(FiscoConfig fiscoConfig,
+                                                      IProducer iProducer,
+                                                      ZKChunksMeta zkChunksMeta) throws BrokerException {
+        FileTransportService fileTransportService = new FileTransportService(fiscoConfig, iProducer, zkChunksMeta);
+        fileTransportService.init();
         return fileTransportService;
     }
 

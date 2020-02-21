@@ -56,10 +56,6 @@ public class Web3SDKConnector {
         try {
             log.info("begin to initialize web3sdk's Web3j, group id: {}", service.getGroupId());
 
-            // special thread for TransactionSucCallback.onResponse, callback from IO thread directly if not setting
-            //service.setThreadPool(poolTaskExecutor);
-            service.run();
-
             ChannelEthereumService channelEthereumService = new ChannelEthereumService();
             channelEthereumService.setChannelService(service);
             channelEthereumService.setTimeout(service.getConnectSeconds() * 1000);
@@ -90,30 +86,39 @@ public class Web3SDKConnector {
     public static Service initService(Long groupId, FiscoConfig fiscoConfig) throws BrokerException {
         log.info("begin to initialize web3sdk's Service, group id: {}", groupId);
 
-        int web3sdkTimeout = fiscoConfig.getWeb3sdkTimeout();
+        try {
+            int web3sdkTimeout = fiscoConfig.getWeb3sdkTimeout();
 
-        Service service = new Service();
-        // group info
-        service.setOrgID(fiscoConfig.getOrgId());
-        service.setGroupId(groupId.intValue());
-        service.setConnectSeconds(web3sdkTimeout / 1000);
-        // reconnect idle time 100ms
-        service.setConnectSleepPerMillis(100);
+            Service service = new Service();
+            // group info
+            service.setOrgID(fiscoConfig.getOrgId());
+            service.setGroupId(groupId.intValue());
+            service.setConnectSeconds(web3sdkTimeout / 1000);
+            // reconnect idle time 100ms
+            service.setConnectSleepPerMillis(100);
 
-        // connect key and string
-        GroupChannelConnectionsConfig connectionsConfig = new GroupChannelConnectionsConfig();
-        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        connectionsConfig.setCaCert(resolver.getResource("classpath:" + fiscoConfig.getV2CaCrtPath()));
-        connectionsConfig.setSslCert(resolver.getResource("classpath:" + fiscoConfig.getV2NodeCrtPath()));
-        connectionsConfig.setSslKey(resolver.getResource("classpath:" + fiscoConfig.getV2NodeKeyPath()));
+            // connect key and string
+            GroupChannelConnectionsConfig connectionsConfig = new GroupChannelConnectionsConfig();
+            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+            connectionsConfig.setCaCert(resolver.getResource("classpath:" + fiscoConfig.getV2CaCrtPath()));
+            connectionsConfig.setSslCert(resolver.getResource("classpath:" + fiscoConfig.getV2NodeCrtPath()));
+            connectionsConfig.setSslKey(resolver.getResource("classpath:" + fiscoConfig.getV2NodeKeyPath()));
 
-        ChannelConnections channelConnections = new ChannelConnections();
-        channelConnections.setGroupId(groupId.intValue());
-        channelConnections.setConnectionsStr(Arrays.asList(fiscoConfig.getNodes().split(";")));
-        connectionsConfig.setAllChannelConnections(Arrays.asList(channelConnections));
+            ChannelConnections channelConnections = new ChannelConnections();
+            channelConnections.setGroupId(groupId.intValue());
+            channelConnections.setConnectionsStr(Arrays.asList(fiscoConfig.getNodes().split(";")));
+            connectionsConfig.setAllChannelConnections(Arrays.asList(channelConnections));
 
-        service.setAllChannelConnections(connectionsConfig);
-        return service;
+            service.setAllChannelConnections(connectionsConfig);
+
+            // special thread for TransactionSucCallback.onResponse, callback from IO thread directly if not setting
+            //service.setThreadPool(poolTaskExecutor);
+            service.run();
+            return service;
+        } catch (Exception e) {
+            log.error("init web3sdk's Service failed", e);
+            throw new BrokerException(ErrorCode.WEB3SDK_INIT_SERVICE_ERROR);
+        }
     }
 
     public static ThreadPoolTaskExecutor initThreadPool(FiscoConfig fiscoConfig) {

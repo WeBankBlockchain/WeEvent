@@ -1,8 +1,8 @@
 package com.webank.weevent.broker.fisco.file;
 
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
@@ -27,75 +27,82 @@ import org.fisco.bcos.channel.dto.ChannelResponse;
 @Slf4j
 public class AMOPChannel extends ChannelPushCallback {
     private final FileTransportService fileTransportService;
-    private final String topic;
-    private Service service;
-    private boolean sender;
-    private volatile boolean already = false;
+    private final Service service;
+
+    // topic <-> ready status, used by sender
+    private Map<String, Boolean> topicStatus = new ConcurrentHashMap<>();
+
+    // topic <-> ready status, used by receiver
+    private Map<String, Boolean> subTopics = new ConcurrentHashMap<>();
 
     /**
-     * Create a new amop channel(new connection to block chain) for subscribe topic
+     * Create a amop channel on service for subscribe topic
      *
      * @param fileTransportService component class
-     * @param topic binding amop topic
-     * @param service initialized service, have not run
-     * @param sender is this used by sender or receiver
-     * @throws BrokerException BrokerException
+     * @param service initialized service
      */
-    public AMOPChannel(FileTransportService fileTransportService, String topic, Service service, boolean sender) throws BrokerException {
-        try {
-            this.fileTransportService = fileTransportService;
-            this.topic = topic;
-            this.service = service;
-            this.sender = sender;
-
-            if (!this.sender) {
-                // init amop subscription on this service(tcp connection)
-                Set<String> topics = new HashSet<>();
-                topics.add(this.topic);
-                this.service.setPushCallback(this);
-                this.service.setTopics(topics);
-                this.already = true;
-            }
-            this.service.run();
-        } catch (Exception e) {
-            log.error("exception in init amop channel", e);
-            throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
-        }
-    }
-
-    public void close() {
-        // TODO need unSubscribe and then close binding service
-        this.service = null;
+    public AMOPChannel(FileTransportService fileTransportService, Service service) {
+        this.fileTransportService = fileTransportService;
+        this.service = service;
     }
 
     public static String genTopic(String weEventTopic, String fileId) {
         return weEventTopic + "/" + fileId;
     }
 
-    public boolean checkReceiverAlready() throws BrokerException {
-        if (!this.sender) {
-            log.error("only call by sender");
-            throw new BrokerException(ErrorCode.UNKNOWN_ERROR);
-        }
+    public void subTopic(String topic) {
+        if (!this.subTopics.containsKey(topic)) {
+            log.info("subscribe topic on channel, {}", topic);
 
-        if (!this.already) {
-            ChannelResponse rsp = this.sendEvent(new FileEvent(FileEvent.EventType.FileChannelAlready));
-            if (rsp.getErrorCode() == 0) {
-                log.info("amop channel is ready, can send chunk data");
-                this.already = true;
-            } else {
-                log.error("amop channel is not ready");
-            }
+            this.subTopics.put(topic, false);
+            this.service.addTopics(this.subTopics.keySet());
+            this.service.updateTopicsToNode();
         }
-
-        return this.already;
     }
 
-    public ChannelResponse sendEvent(FileEvent fileEvent) throws BrokerException {
+    public void unSubTopic(String topic) {
+        if (this.subTopics.containsKey(topic)) {
+            log.info("unSubscribe topic on channel, {}", topic);
+
+            this.subTopics.remove(topic);
+            this.service.addTopics(this.subTopics.keySet());
+            this.service.updateTopicsToNode();
+        }
+    }
+
+    public boolean checkReceiverAlready(String topic) throws BrokerException {
+        if (this.topicStatus.containsKey(topic) &&
+                this.topicStatus.get(topic)) {
+            return true;
+        }
+
+        int times = 0;
+        while (times < 5) {
+            ChannelResponse rsp = this.sendEvent(topic, new FileEvent(FileEvent.EventType.FileChannelAlready));
+            if (rsp.getErrorCode() == 0) {
+                log.info("topic is subscribe, go");
+                this.topicStatus.put(topic, true);
+                return true;
+            }
+
+            log.error("topic is not subscribe");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                log.error("sleep Interrupted");
+            }
+            times++;
+        }
+
+        this.topicStatus.put(topic, false);
+        return false;
+    }
+
+    public ChannelResponse sendEvent(String topic, FileEvent fileEvent) throws BrokerException {
         byte[] json = JsonHelper.object2JsonBytes(fileEvent);
 
         ChannelRequest channelRequest = new ChannelRequest();
-        channelRequest.setToTopic(this.topic);
+        channelRequest.setToTopic(topic);
         channelRequest.setMessageID(this.service.newSeq());
         channelRequest.setTimeout(5000);
         channelRequest.setContent(json);
@@ -109,8 +116,8 @@ public class AMOPChannel extends ChannelPushCallback {
     // event from sender
     @Override
     public void onPush(ChannelPush push) {
-        if (!this.topic.equals(push.getTopic())) {
-            log.error("miss match amop topic, {} <-> {}", this.topic, push.getTopic());
+        if (!this.subTopics.containsKey(push.getTopic())) {
+            log.error("unknown topic in amop channel, {} <-> {}", push.getTopic(), this.subTopics.keySet());
             push.sendResponse(AMOPChannel.toChannelResponse(ErrorCode.UNKNOWN_ERROR));
             return;
         }
@@ -157,6 +164,7 @@ public class AMOPChannel extends ChannelPushCallback {
         ChannelResponse reply = new ChannelResponse();
         reply.setErrorCode(errorCode.getCode());
         reply.setErrorMessage(errorCode.getCodeDesc());
+        reply.setContent("".getBytes());
         return reply;
     }
 
@@ -164,6 +172,7 @@ public class AMOPChannel extends ChannelPushCallback {
         ChannelResponse reply = new ChannelResponse();
         reply.setErrorCode(e.getCode());
         reply.setErrorMessage(e.getMessage());
+        reply.setContent("".getBytes());
         return reply;
     }
 
