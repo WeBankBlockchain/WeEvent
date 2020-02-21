@@ -16,6 +16,9 @@ dependencies {
     // httpclient
     implementation("org.apache.httpcomponents:httpclient:${httpclientVersion}")
 
+    // httpmime
+    implementation("org.apache.httpcomponents:httpmime:${httpclientVersion}")
+
     // event-client.log for test
     testImplementation("org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}")
 }

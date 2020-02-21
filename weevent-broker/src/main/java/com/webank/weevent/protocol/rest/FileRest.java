@@ -1,7 +1,6 @@
 package com.webank.weevent.protocol.rest;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
+import java.io.IOException;
 
 import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.file.FileTransportService;
@@ -18,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @author v_wbhwliu
@@ -83,9 +83,11 @@ public class FileRest {
     @RequestMapping(path = "/uploadChunk")
     public SendResult uploadChunk(@RequestParam(name = "fileId") String fileId,
                                   @RequestParam(name = "chunkIdx") int chunkIdx,
-                                  @RequestParam(name = "chunkData") byte[] chunkData) throws BrokerException, InterruptedException, ExecutionException, TimeoutException {
-        log.info("fileId: {}  chunkIdx: {} chunkData: {}", fileId, chunkIdx, chunkData.length);
+                                  @RequestParam(name = "chunkData") MultipartFile chunkFile) throws BrokerException, IOException {
+        log.info("fileId: {}  chunkIdx: {} chunkData: {}", fileId, chunkIdx, chunkFile);
         checkSupport();
+
+        byte[] chunkData = chunkFile.getBytes();
 
         ParamCheckUtils.validateFileId(fileId);
         ParamCheckUtils.validateChunkIdx(chunkIdx);

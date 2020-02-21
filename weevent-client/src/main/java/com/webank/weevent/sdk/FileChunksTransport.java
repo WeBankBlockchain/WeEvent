@@ -6,21 +6,20 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.UnsupportedEncodingException;
+import java.util.Objects;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.NameValuePair;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.springframework.util.DigestUtils;
 
@@ -50,6 +49,11 @@ public class FileChunksTransport {
 
     public SendResult upload(String localFile, String topic, String groupId) throws BrokerException, IOException {
         log.info("try to upload file {}", localFile);
+        SendResult sendResult = new SendResult(SendResult.SendResultStatus.SUCCESS);
+        sendResult.setTopic(topic);
+
+        String fileId = "";
+        String eventId = "";
 
         File file = new File(localFile);
         String md5;
@@ -70,6 +74,9 @@ public class FileChunksTransport {
                     groupId);
             // get chunk information
             fileChunksMeta = this.openFileChunksInfo(fileChunksMeta);
+            if (StringUtils.isBlank(fileId)) {
+                fileId = fileChunksMeta.getFileId();
+            }
 
             // upload every single chunk data
             for (int chunkIdx = 0; chunkIdx < fileChunksMeta.getChunkNum(); chunkIdx++) {
@@ -84,20 +91,33 @@ public class FileChunksTransport {
                     log.error("read file exception, chunkIdx: {}", chunkIdx);
                     throw new BrokerException(ErrorCode.FILE_READ_EXCEPTION);
                 }
-                SendResult sendResult = this.uploadChunk(fileChunksMeta.getFileId(), chunkIdx, chunkData);
-                log.info("upload file chunk data, {}@{}", sendResult, chunkIdx);
+                SendResult chunkSendResult = this.uploadChunk(fileChunksMeta.getFileId(), file.getName(), chunkIdx, chunkData);
+                log.info("upload file chunk data, {}@{}", chunkSendResult, chunkIdx);
+                if (!StringUtils.isBlank(chunkSendResult.getEventId())) {
+                    eventId = chunkSendResult.getEventId();
+                }
             }
         }
 
         //TODO list chunk and check is it complete
-        FileChunksMeta fileChunksMeta = null;// = this.getFileChunksInfo(fileChunksMeta);
+        FileChunksMeta fileChunksMeta = this.getFileChunksInfo(fileId);
         while (!fileChunksMeta.checkChunkFull()) {
             // TODO try again
+            fileChunksMeta = this.getFileChunksInfo(fileId);
+            if (!fileChunksMeta.checkChunkFull()) {
+                sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+                return sendResult;
+            }
         }
 
         log.info("upload file complete, {}", localFile);
         // TODO invoke closeChunk
-        SendResult sendResult = new SendResult();
+        SendResult closeChunkResult = this.closeChunk(fileId);
+        if (Objects.equals(closeChunkResult.getStatus(), SendResult.SendResultStatus.ERROR)) {
+            log.error("close chunk error, fileId:{}", fileId);
+            sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+        }
+        sendResult.setEventId(eventId);
         return sendResult;
     }
 
@@ -167,30 +187,25 @@ public class FileChunksTransport {
         }
     }
 
-    private SendResult uploadChunk(String fileId, int chunkIdx, byte[] chunkData) throws BrokerException {
+    private SendResult uploadChunk(String fileId, String fileName, int chunkIdx, byte[] chunkData) throws BrokerException, UnsupportedEncodingException {
         // this.svrUrl + "/uploadChunk"
-        URI svrUri = URI.create(this.svrUrl + "/uploadChunk");
-        URI uploadUri;
-        try {
-            List<NameValuePair> params = new ArrayList<>();
-            params.add(new BasicNameValuePair("fileId", fileId));
-            params.add(new BasicNameValuePair("chunkIdx", String.valueOf(chunkIdx)));
-            uploadUri = new URIBuilder().setScheme(svrUri.getScheme()).setHost(svrUri.getHost()).setPort(svrUri.getPort())
-                    .setPath(svrUri.getPath()).setParameters(params).build();
-        } catch (URISyntaxException e) {
-            log.error("build upload url error, fileId:{}, chunkIdx:{}, e:{}", fileId, chunkIdx, e);
-            throw new BrokerException(ErrorCode.BUILD_HTTP_URL_ERROR);
-        }
+        String uploadUrl = this.svrUrl + "/uploadChunk";
+        HttpPost httpPost = new HttpPost(uploadUrl);
 
-        HttpPost httpPost = new HttpPost(uploadUri);
-        httpPost.setEntity(new ByteArrayEntity(chunkData));
-        httpPost.setHeader("Content-type", "application/octet-stream");
+        MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setMode(HttpMultipartMode.RFC6532);
+        multipartEntityBuilder.addBinaryBody("chunkData", chunkData, ContentType.DEFAULT_BINARY, fileName);
+        multipartEntityBuilder.addTextBody("fileId", fileId);
+        multipartEntityBuilder.addTextBody("chunkIdx", String.valueOf(chunkIdx));
+        HttpEntity requestEntity = multipartEntityBuilder.build();
+
+        httpPost.setEntity(requestEntity);
+        // httpPost.setHeader("Content-type", "application/octet-stream");
         SendResult sendResult;
         try (CloseableHttpResponse httpResponse = this.httpClient.execute(httpPost)) {
             String responseResult = EntityUtils.toString(httpResponse.getEntity());
             sendResult = JsonHelper.json2Object(responseResult, SendResult.class);
         } catch (IOException e) {
-            log.error("execute http request url:{} error, e:{}", svrUri, e);
+            log.error("execute http request url:{} error, e:{}", uploadUrl, e);
             throw new BrokerException(ErrorCode.HTTP_REQUEST_EXECUTE_ERROR);
         }
 
@@ -210,6 +225,22 @@ public class FileChunksTransport {
             byte[] chunkData = bos.toByteArray();
             log.info("download chunk success, {}@{} {}", fileId, chunkIdx, chunkData.length);
             return chunkData;
+        } catch (IOException e) {
+            log.error("execute http request :{} error, e:{}", httpGet.getURI(), e);
+            throw new BrokerException(ErrorCode.HTTP_REQUEST_EXECUTE_ERROR);
+        }
+    }
+
+    private SendResult closeChunk(String fileId) throws BrokerException {
+        // this.svrUrl + "/closeChunk"
+        String params = "fileId=" + fileId;
+        HttpGet httpGet = new HttpGet(this.svrUrl + "/closeChunk?" + params);
+
+        try (CloseableHttpResponse httpResponse = this.httpClient.execute(httpGet)) {
+            String responseResult = EntityUtils.toString(httpResponse.getEntity());
+            SendResult closeChunkResult = JsonHelper.json2Object(responseResult, SendResult.class);
+            log.info("closeChunk chunk success, {}, {}", fileId, closeChunkResult);
+            return closeChunkResult;
         } catch (IOException e) {
             log.error("execute http request :{} error, e:{}", httpGet.getURI(), e);
             throw new BrokerException(ErrorCode.HTTP_REQUEST_EXECUTE_ERROR);
