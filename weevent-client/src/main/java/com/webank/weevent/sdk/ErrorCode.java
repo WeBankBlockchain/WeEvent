@@ -74,6 +74,7 @@ public enum ErrorCode {
     CHUNK_DATA_ILLEGAL(102006, "the upload file chunk data is illegal"),
     FILE_CHUNK_INDEX_ILLEGAL(102007, "the upload file chunk idx is illegal"),
     FILE_CHUNK_DATA_IS_NULL(102008, "the upload file chunk data is null"),
+    FILE_UPLOAD_FAILED(102009, "file upload failed"),
 
     HTTP_REQUEST_EXECUTE_ERROR(102100, "http request execute failed"),
     BUILD_HTTP_URL_ERROR(102101, "build http url failed"),

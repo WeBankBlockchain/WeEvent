@@ -84,7 +84,7 @@ public class FileRest {
     public SendResult uploadChunk(@RequestParam(name = "fileId") String fileId,
                                   @RequestParam(name = "chunkIdx") int chunkIdx,
                                   @RequestParam(name = "chunkData") MultipartFile chunkFile) throws BrokerException, IOException {
-        log.info("fileId: {}  chunkIdx: {} chunkData: {}", fileId, chunkIdx, chunkFile);
+        log.info("fileId: {}  chunkIdx: {} chunkData: {}", fileId, chunkIdx, chunkFile.getSize());
         checkSupport();
 
         byte[] chunkData = chunkFile.getBytes();
