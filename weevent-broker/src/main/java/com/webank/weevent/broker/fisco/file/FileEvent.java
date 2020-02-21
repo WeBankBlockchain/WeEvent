@@ -48,6 +48,16 @@ public class FileEvent {
         this.eventType = eventType;
     }
 
+    @Override
+    public String toString() {
+        return "FileEvent{" +
+                "eventType=" + this.eventType +
+                ", fileChunksMeta=" + this.fileChunksMeta +
+                ", chunkIndex=" + this.chunkIndex +
+                ", chunkData.length=" + (this.chunkData == null ? 0 : this.chunkData.length) +
+                '}';
+    }
+
     // this is for jackson Serializer/Deserializer
     private FileEvent() {
     }

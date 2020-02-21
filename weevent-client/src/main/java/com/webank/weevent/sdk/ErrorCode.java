@@ -87,6 +87,8 @@ public enum ErrorCode {
     PRODUCER_SEND_CALLBACK_IS_NULL(200103, "producer send callback is null"),
     CONSUMER_LISTENER_IS_NULL(200104, "consumer listener is null"),
 
+
+    WEB3SDK_INIT_SERVICE_ERROR(200200, "init web3sdk's service failed"),
     TRANSACTION_TIMEOUT(200201, "the transaction is timeout."),
     TRANSACTION_EXECUTE_ERROR(200202, "the transaction does not correctly executed."),
     UNKNOWN_ERROR(200203, "unknown error, please check error log."),
@@ -95,7 +97,7 @@ public enum ErrorCode {
     TRANSACTION_RECEIPT_IS_NULL(200206, "transaction reception is null"),
     DEPLOY_CONTRACT_ERROR(200207, "deploy contract failed"),
     LOAD_CONTRACT_ERROR(200208, "load contract failed"),
-    WEB3SDK_INIT_ERROR(200209, "init web3sdk's client service failed"),
+    WEB3SDK_INIT_ERROR(200209, "init web3sdk failed"),
     WEB3SDK_VERSION_NOT_SUPPORT(200210, "FISCO-BCOS 1.x, do not support group"),
     WEB3SDK_UNKNOWN_GROUP(200211, "FISCO-BCOS 2.x, unknown group id"),
     SUBSCRIPTION_NOTIFY_QUEUE_FULL(200212, "onEvent is blocked too long, notify queue is full"),
@@ -121,6 +123,7 @@ public enum ErrorCode {
     FILE_WRITE_EXCEPTION(200504, "write file exception"),
     FILE_NOT_EXIST_PATH(200505, "not exist file path"),
     FILE_NOT_ENOUGH_SPACE(200506, "not enough disk space"),
+    FILE_CHANNEL_NOT_READY(200507, "amop channel is not ready"),
     ;
 
     /**

@@ -43,7 +43,7 @@ public class DiskFiles {
     }
 
     private String genLocalMetaFileName(String fileId) {
-        return this.genLocalFileName(fileId) + ".meta";
+        return this.genLocalFileName(fileId) + ".json";
     }
 
     public FileChunksMeta loadFileMeta(String fileId) throws BrokerException {
@@ -175,5 +175,18 @@ public class DiskFiles {
             log.error("read data from local file exception", e);
             throw new BrokerException(ErrorCode.FILE_READ_EXCEPTION);
         }
+    }
+
+    private void deleteFile(String fileName) {
+        File file = new File(fileName);
+        if (file.exists()) {
+            boolean result = file.delete();
+            log.info("delete file, result: {} {}", result, fileName);
+        }
+    }
+
+    public void cleanUp(String fileId) {
+        this.deleteFile(this.genLocalFileName(fileId));
+        this.deleteFile(this.genLocalMetaFileName(fileId));
     }
 }

@@ -47,7 +47,8 @@ public class ZKChunksMeta {
             this.zkClient.start();
             // ensure path
             if (this.zkClient.checkExists().forPath(zkPath) == null) {
-                this.zkClient.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(zkPath);
+                // default data is local address. skip it
+                this.zkClient.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(zkPath, "".getBytes());
             }
 
             log.info("ensure zookeeper root path for file, {}", zkPath);
