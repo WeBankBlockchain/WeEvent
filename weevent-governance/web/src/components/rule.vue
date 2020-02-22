@@ -123,7 +123,10 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item :label="$t('rule.payloadMap')  + ' :'" prop='payloadMap'>
-          <el-input v-model="rule.payloadMap" size='small' type='textarea' :rows='5' :placeholder="$t('rule.enterPayload')" autocomplete="off"></el-input>
+          <el-input v-model="rule.payloadMap" size='small' type='textarea' :rows='4' :placeholder="$t('rule.enterPayload')" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item :label="$t('rule.ruleDescription')  + ' :'" >
+          <el-input v-model="rule.ruleDescription" size='small' type='textarea' :rows='3' autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -173,7 +176,8 @@ export default {
         'ruleName': '',
         'payloadType': '1',
         'payloadMap': '',
-        'conditionType': '1'
+        'conditionType': '1',
+        'ruleDescription': ''
       },
       ruleStatic: {},
       rules: {
@@ -341,7 +345,8 @@ export default {
             'payloadType': vm.rule.payloadType,
             'payloadMap': JSON.parse(this.rule.payloadMap),
             'brokerId': localStorage.getItem('brokerId'),
-            'groupId': localStorage.getItem('groupId')
+            'groupId': localStorage.getItem('groupId'),
+            'ruleDescription': vm.rule.ruleDescription
           }
           API.ruleAdd(data).then(res => {
             if (res.data.status === 200) {

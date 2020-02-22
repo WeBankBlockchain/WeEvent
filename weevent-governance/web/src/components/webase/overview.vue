@@ -59,7 +59,9 @@ export default {
   },
   mounted () {
     setTimeout(fun => {
-      this.general()
+      if (this.brokerId) {
+        this.general()
+      }
     }, 500)
   },
   methods: {
