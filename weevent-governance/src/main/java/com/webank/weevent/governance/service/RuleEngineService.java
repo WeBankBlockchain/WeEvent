@@ -219,7 +219,7 @@ public class RuleEngineService {
                 this.startProcessRule(request, ruleEngineEntity);
             }
 
-            BeanUtils.copyProperties(rule, ruleEngineEntity, "ruleDescription", "ruleName", "payload", "selectField", "conditionType",
+            BeanUtils.copyProperties(rule, ruleEngineEntity, "tableName", "ruleDescription", "ruleName", "payload", "selectField", "conditionType",
                     "fromDestination", "toDestination", "ruleDataBaseId", "errorDestination", "functionArray", "conditionField", "conditionFieldJson");
             ruleEngineRepository.save(ruleEngineEntity);
             log.info("update ruleEngine end");
@@ -597,12 +597,12 @@ public class RuleEngineService {
         RuleDatabaseEntity ruleDataBase = ruleDatabaseRepository.findById(rule.getRuleDataBaseId());
         if (ruleDataBase != null) {
             String dbUrl = ruleDataBase.getDatabaseUrl() + "?user=" + ruleDataBase.getUsername() + "&password=" + ruleDataBase.getPassword() +
-                    "&tableName=" + ruleDataBase.getTableName();
+                    "&tableName=" + rule.getTableName();
             if (!StringUtil.isBlank(ruleDataBase.getOptionalParameter())) {
                 dbUrl = dbUrl + "&" + ruleDataBase.getOptionalParameter();
             }
             rule.setDatabaseUrl(dbUrl);
-            rule.setTableName(ruleDataBase.getTableName());
+            rule.setTableName(rule.getTableName());
             log.info("dataBaseUrl:{}", rule.getDatabaseUrl());
         }
     }
