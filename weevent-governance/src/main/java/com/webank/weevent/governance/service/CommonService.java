@@ -19,6 +19,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.ErrorCode;
 import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.utils.SpringContextUtil;
@@ -63,6 +64,7 @@ public class CommonService implements AutoCloseable {
 
     @Value("${spring.datasource.url}")
     private String dataBaseUrl;
+
 
     public CloseableHttpResponse getCloseResponse(HttpServletRequest req, String newUrl) throws ServletException {
         CloseableHttpResponse closeResponse;
@@ -197,7 +199,14 @@ public class CommonService implements AutoCloseable {
         out.write(mes.getBytes());
     }
 
-    public void checkDataBaseUrl(String dataBaseUrl, String tableName, String user, String password) throws GovernanceException {
+
+    public void checkDataBaseUrl(String dataBaseType, String dataBaseUrl, String tableName, String user, String password) throws GovernanceException, ClassNotFoundException {
+        //1 h2 ,2 mysql
+        if (ConstantProperties.H2_DATABASE.equals(dataBaseType.toLowerCase())) {
+            Class.forName("org.h2.Driver");
+        } else {
+            Class.forName("org.mariadb.jdbc.Driver");
+        }
         try (Connection conn = DriverManager.getConnection(dataBaseUrl, user, password);
              Statement stat = conn.createStatement()) {
             if (stat == null) {
@@ -205,11 +214,13 @@ public class CommonService implements AutoCloseable {
                 throw new GovernanceException("database connect success,dataBaseUrl:" + dataBaseUrl);
             }
             log.info("database connect success,dataBaseUrl:{}", dataBaseUrl);
-            String querySql = "SELECT 1 FROM " + tableName + " LIMIT 1";
-            stat.executeQuery(querySql);
+            if (tableName != null) {
+                String querySql = "SELECT 1 FROM " + tableName + " LIMIT 1";
+                stat.executeQuery(querySql);
+            }
         } catch (Exception e) {
-            log.error("database url is error", e);
-            throw new GovernanceException("database url is error", e);
+            log.error("check failed", e);
+            throw new GovernanceException("check failed", e);
         }
     }
 
