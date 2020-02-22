@@ -164,10 +164,11 @@ public class TopicHistoricalService {
             int first = goalUrl.lastIndexOf("/");
             int end = goalUrl.lastIndexOf("?");
             dbName = flag ? goalUrl.substring(first + 1, end) : goalUrl.substring(first + 1);
+            String type = flag ? "2" : "1";
             // get mysql default url like jdbc:mysql://127.0.0.1:3306
             Map<String, String> urlMap = commonService.uRLRequest(goalUrl);
             RuleDatabaseEntity ruleDatabaseEntity = new RuleDatabaseEntity(brokerEntity.getUserId(), brokerEntity.getId(), urlMap.get("dataBaseUrl"),
-                    user, password, "SYSTEM-" + dbName, urlMap.get("optionalParameter"), TOPIC_HISTORICAL, true);
+                    user, password, "SYSTEM-" + dbName, urlMap.get("optionalParameter"), true, type);
             ruleDatabaseRepository.save(ruleDatabaseEntity);
 
             //Request broker to get all groups
@@ -210,6 +211,7 @@ public class TopicHistoricalService {
         ruleEngineEntity.setConditionType(ConstantProperties.RULE_DESTINATION_DATABASE);
         ruleEngineEntity.setFromDestination("#");
         ruleEngineEntity.setSystemTag(true);
+        ruleEngineEntity.setTableName(TOPIC_HISTORICAL);
         ruleEngineEntity.setOffSet("OFFSET_FIRST");
         return ruleEngineEntity;
     }
