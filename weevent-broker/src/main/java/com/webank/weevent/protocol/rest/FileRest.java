@@ -70,6 +70,7 @@ public class FileRest {
                 topic,
                 groupId);
         fileChunksMeta.setChunkSize(BrokerApplication.weEventConfig.getFileChunkSize());
+        fileChunksMeta.setHost(this.fileTransportService.getHost());
 
         // create AMOP channel with FileTransportSender
         this.fileTransportService.openChannel(fileChunksMeta);

@@ -35,6 +35,8 @@ public class FileChunksMeta {
     // groupId
     private String groupId;
 
+    // file host, sender and receiver is different
+    private String host;
     // chunk size
     private int chunkSize = 0;
     // chunk num
@@ -66,6 +68,10 @@ public class FileChunksMeta {
 
     public boolean checkChunkFull() {
         return this.chunkStatus.cardinality() == this.chunkStatus.length();
+    }
+
+    public void setHost(String host) {
+        this.host = host;
     }
 
     // this is for jackson Serializer/Deserializer

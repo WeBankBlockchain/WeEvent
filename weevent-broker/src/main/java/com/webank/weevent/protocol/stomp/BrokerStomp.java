@@ -450,7 +450,7 @@ public class BrokerStomp extends TextWebSocketHandler {
                 throw new BrokerException(ErrorCode.ZOOKEEPER_NOT_SUPPORT_FILE_SUBSCRIPTION);
             }
 
-            listener = new FileEventListener(this.fileTransportService) {
+            listener = new FileEventListener(this.fileTransportService, topic, groupId) {
                 @Override
                 public void send(String subscriptionId, WeEvent event) {
                     handleOnEvent(headerIdStr, subscriptionId, event, session);

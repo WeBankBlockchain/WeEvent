@@ -299,9 +299,10 @@ public class BrokerApplication {
     @ConditionalOnBean(ZKChunksMeta.class)
     public static FileTransportService getFileService(FiscoConfig fiscoConfig,
                                                       IProducer iProducer,
-                                                      ZKChunksMeta zkChunksMeta) throws BrokerException {
+                                                      ZKChunksMeta zkChunksMeta,
+                                                      Environment environment) throws BrokerException {
         FileTransportService fileTransportService = new FileTransportService(fiscoConfig, iProducer, zkChunksMeta);
-        fileTransportService.init();
+        fileTransportService.init(environment.getProperty("spring.cloud.zookeeper.discovery.instance-id"));
         return fileTransportService;
     }
 

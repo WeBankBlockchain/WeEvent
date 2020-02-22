@@ -123,7 +123,8 @@ public enum ErrorCode {
     FILE_WRITE_EXCEPTION(200504, "write file exception"),
     FILE_NOT_EXIST_PATH(200505, "not exist file path"),
     FILE_NOT_ENOUGH_SPACE(200506, "not enough disk space"),
-    FILE_CHANNEL_NOT_READY(200507, "amop channel is not ready"),
+    FILE_RECEIVE_CONTEXT_NOT_READY(200507, "receive file context is not ready"),
+    FILE_SENDER_RECEIVER_CONFLICT(200508, "can't publish and subscribe a file in the same node"),
     ;
 
     /**

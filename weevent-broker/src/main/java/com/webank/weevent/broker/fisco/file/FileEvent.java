@@ -38,20 +38,26 @@ public class FileEvent {
     }
 
     private EventType eventType;
-    private FileChunksMeta fileChunksMeta;
+    private String fileId;
 
-    // have data while eventType == FIleChannelData
+    // available only if while eventType == FileTransportStart
+    private FileChunksMeta fileChunksMeta = null;
+
+    // available only if eventType == FIleChannelData
     private int chunkIndex = 0;
+    // available while eventType == FIleChannelData
     private byte[] chunkData = null;
 
-    public FileEvent(EventType eventType) {
+    public FileEvent(EventType eventType, String fileId) {
         this.eventType = eventType;
+        this.fileId = fileId;
     }
 
     @Override
     public String toString() {
         return "FileEvent{" +
                 "eventType=" + this.eventType +
+                ", fileId=" + this.fileId +
                 ", fileChunksMeta=" + this.fileChunksMeta +
                 ", chunkIndex=" + this.chunkIndex +
                 ", chunkData.length=" + (this.chunkData == null ? 0 : this.chunkData.length) +

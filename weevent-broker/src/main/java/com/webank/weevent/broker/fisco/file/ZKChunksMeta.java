@@ -37,18 +37,20 @@ public class ZKChunksMeta {
         }
 
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
-        this.zkClient = CuratorFrameworkFactory.newClient(
-                connectString,
-                10000,
-                3000,
-                retryPolicy);
+        // default data is local address. skip it
+        this.zkClient = CuratorFrameworkFactory.builder()
+                .connectString(connectString)
+                .sessionTimeoutMs(10000)
+                .connectionTimeoutMs(3000)
+                .retryPolicy(retryPolicy)
+                .defaultData("".getBytes())
+                .build();
 
         try {
             this.zkClient.start();
             // ensure path
             if (this.zkClient.checkExists().forPath(zkPath) == null) {
-                // default data is local address. skip it
-                this.zkClient.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(zkPath, "".getBytes());
+                this.zkClient.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(zkPath);
             }
 
             log.info("ensure zookeeper root path for file, {}", zkPath);

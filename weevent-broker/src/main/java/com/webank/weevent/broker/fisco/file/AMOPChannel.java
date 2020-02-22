@@ -4,6 +4,7 @@ package com.webank.weevent.broker.fisco.file;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.FileChunksMeta;
@@ -20,6 +21,7 @@ import org.fisco.bcos.channel.dto.ChannelResponse;
  * AMOP channel for file transport.
  * sender and receiver can not be in one process,
  * because one file's sender and receiver MUST access in different block node.
+ * throws ErrorCode.FILE_SENDER_RECEIVER_CONFLICT if found
  *
  * @author matthewliu
  * @since 2020/02/16
@@ -30,13 +32,12 @@ public class AMOPChannel extends ChannelPushCallback {
     private final Service service;
 
     // topic <-> ready status, used by sender
-    private Map<String, Boolean> topicStatus = new ConcurrentHashMap<>();
-
+    private Map<String, Boolean> senderTopicStatus = new ConcurrentHashMap<>();
     // topic <-> ready status, used by receiver
     private Map<String, Boolean> subTopics = new ConcurrentHashMap<>();
 
     /**
-     * Create a amop channel on service for subscribe topic
+     * Create a AMOP channel on service for subscribe topic
      *
      * @param fileTransportService component class
      * @param service initialized service
@@ -46,46 +47,61 @@ public class AMOPChannel extends ChannelPushCallback {
         this.service = service;
     }
 
-    public static String genTopic(String weEventTopic, String fileId) {
-        return weEventTopic + "/" + fileId;
+    public static String genTopic(String weEventTopic) {
+        // the total length of all topic on AMOP channel is limited
+        return DataTypeUtils.genTopicNameHash(weEventTopic);
     }
 
-    public void subTopic(String topic) {
-        if (!this.subTopics.containsKey(topic)) {
-            log.info("subscribe topic on channel, {}", topic);
+    public void subTopic(String topic) throws BrokerException {
+        if (this.senderTopicStatus.containsKey(topic)) {
+            log.error("this is already sender side for topic: {}", topic);
+            throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
+        }
 
-            this.subTopics.put(topic, false);
-            this.service.addTopics(this.subTopics.keySet());
+        if (!this.subTopics.containsKey(topic)) {
+            log.info("subscribe topic on AMOP channel, {}", topic);
+
+            this.subTopics.put(topic, true);
+            this.service.setTopics(this.subTopics.keySet());
             this.service.updateTopicsToNode();
         }
     }
 
     public void unSubTopic(String topic) {
         if (this.subTopics.containsKey(topic)) {
-            log.info("unSubscribe topic on channel, {}", topic);
+            log.info("unSubscribe topic on AMOP channel, {}", topic);
 
             this.subTopics.remove(topic);
-            this.service.addTopics(this.subTopics.keySet());
+            this.service.setTopics(this.subTopics.keySet());
             this.service.updateTopicsToNode();
         }
     }
 
-    public boolean checkReceiverAlready(String topic) throws BrokerException {
-        if (this.topicStatus.containsKey(topic) &&
-                this.topicStatus.get(topic)) {
+    public boolean checkReceiverFileContextAlready(String topic, String fileId) throws BrokerException {
+        if (this.subTopics.containsKey(topic)) {
+            log.error("this side is already for receiving, topic: {}", topic);
+            throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
+        }
+
+        if (this.senderTopicStatus.containsKey(topic) &&
+                this.senderTopicStatus.get(topic)) {
             return true;
         }
 
         int times = 0;
         while (times < 5) {
-            ChannelResponse rsp = this.sendEvent(topic, new FileEvent(FileEvent.EventType.FileChannelAlready));
-            if (rsp.getErrorCode() == 0) {
-                log.info("topic is subscribe, go");
-                this.topicStatus.put(topic, true);
+            ChannelResponse rsp = this.sendEvent(topic, new FileEvent(FileEvent.EventType.FileChannelAlready, fileId));
+            if (rsp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
+                log.info("receive file context is ready, go");
+                this.senderTopicStatus.put(topic, true);
+                return true;
+            } else if (rsp.getErrorCode() == ErrorCode.FILE_NOT_EXIST_CONTEXT.getCode()) {
+                log.info("receive file context is not exist, skip");
+                this.senderTopicStatus.put(topic, false);
                 return true;
             }
 
-            log.error("topic is not subscribe");
+            log.error("receive file context is not ready, idle to try again");
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -94,11 +110,16 @@ public class AMOPChannel extends ChannelPushCallback {
             times++;
         }
 
-        this.topicStatus.put(topic, false);
+        this.senderTopicStatus.put(topic, false);
         return false;
     }
 
     public ChannelResponse sendEvent(String topic, FileEvent fileEvent) throws BrokerException {
+        if (this.subTopics.containsKey(topic)) {
+            log.error("this is already receiver side for topic: {}", topic);
+            throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
+        }
+
         byte[] json = JsonHelper.object2JsonBytes(fileEvent);
 
         ChannelRequest channelRequest = new ChannelRequest();
@@ -107,9 +128,9 @@ public class AMOPChannel extends ChannelPushCallback {
         channelRequest.setTimeout(5000);
         channelRequest.setContent(json);
 
-        log.info("send amop channel request, topic: {} id: {}", channelRequest.getToTopic(), channelRequest.getMessageID());
+        log.info("send channel request, topic: {} id: {}", channelRequest.getToTopic(), channelRequest.getMessageID());
         ChannelResponse rsp = this.service.sendChannelMessage2(channelRequest);
-        log.info("receive amop channel response, id: {} result: {}-{}", rsp.getMessageID(), rsp.getErrorCode(), rsp.getErrorMessage());
+        log.info("receive channel response, id: {} result: {}-{}", rsp.getMessageID(), rsp.getErrorCode(), rsp.getErrorMessage());
         return rsp;
     }
 
@@ -117,7 +138,7 @@ public class AMOPChannel extends ChannelPushCallback {
     @Override
     public void onPush(ChannelPush push) {
         if (!this.subTopics.containsKey(push.getTopic())) {
-            log.error("unknown topic in amop channel, {} <-> {}", push.getTopic(), this.subTopics.keySet());
+            log.error("unknown topic on channel, {} -> {}", push.getTopic(), this.subTopics.keySet());
             push.sendResponse(AMOPChannel.toChannelResponse(ErrorCode.UNKNOWN_ERROR));
             return;
         }
@@ -126,17 +147,22 @@ public class AMOPChannel extends ChannelPushCallback {
         try {
             fileEvent = JsonHelper.json2Object(push.getContent2(), FileEvent.class);
         } catch (BrokerException e) {
-            log.error("invalid file event via amop", e);
+            log.error("invalid file event on channel", e);
             push.sendResponse(AMOPChannel.toChannelResponse(e));
             return;
         }
 
-        log.info("received file event via amop, {}", fileEvent);
+        log.info("received file event on channel, {}", fileEvent);
         switch (fileEvent.getEventType()) {
             case FileChannelAlready:
-                log.info("get {}, can send chunk data now", fileEvent.getEventType());
-
-                push.sendResponse(AMOPChannel.toChannelResponse(ErrorCode.SUCCESS));
+                log.info("get {}", fileEvent.getEventType());
+                if (this.fileTransportService.existFileContext(fileEvent.getFileId())) {
+                    log.info("exist file context, can send chunk data now, fileId: {}", fileEvent.getFileId());
+                    push.sendResponse(AMOPChannel.toChannelResponse(ErrorCode.SUCCESS));
+                } else {
+                    log.error("not exist file context, fileId: {}", fileEvent.getFileId());
+                    push.sendResponse(AMOPChannel.toChannelResponse(ErrorCode.FILE_NOT_EXIST_CONTEXT));
+                }
                 break;
 
             case FileChannelData:
@@ -156,7 +182,7 @@ public class AMOPChannel extends ChannelPushCallback {
                 break;
 
             default:
-                log.error("unknown file event type via amop");
+                log.error("unknown file event type on channel");
         }
     }
 
