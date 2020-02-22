@@ -57,7 +57,7 @@ module.exports = {
     'authorizedPlaceholder': 'Select Account',
     'errorServer': 'Invalid server name',
     'noServerName': 'Empty server name',
-    'emptyPort': 'Invalid server URL',
+    'emptyAddress': 'Invalid server URL',
     'errorAddress': 'Can not connect to server',
     'exitBrokerURL': 'Broker server is already existed, please apply for authorization from another user'
   },
@@ -173,6 +173,7 @@ module.exports = {
     'ruleName': 'Rule Name',
     'payloadType': 'Format',
     'payloadMap': 'Event Payload Samples',
+    'ruleDescription': 'Rule Description',
     'run': 'Running',
     'notRun': 'Init',
     'start': 'Start',
@@ -205,6 +206,8 @@ module.exports = {
     'JDBCusername': 'Username',
     'JDBCpassword': 'Password',
     'tableName': 'Table Name',
+    'errorTable': 'Can not connect to the table in selected baseData',
+    'inputTableName': 'Please input the table Name in selected baseData',
     'optionalParameter': 'Optional',
     'enterJDBCname': 'Please input database JDBC Name',
     'enterJDBCIP': 'Please input database JDBC IP',
@@ -218,7 +221,9 @@ module.exports = {
     'deleteAddress': 'Delete database?',
     'checkJDBC': 'Check JDBC',
     'connectSuccess': 'JDBC Connect Success',
-    'connectFailed': 'JDBC Connect Failed'
+    'connectFailed': 'JDBC Connect Failed',
+    'databaseType': 'Databae Type',
+    'connectTimeOut': 'Please check the operations of database'
   },
   ruleDetail: {
     'guideDetail': 'Data Guide Detail',
@@ -278,7 +283,11 @@ module.exports = {
     'errorIndex': 'function error - index is not a integer',
     'typeErrorString': 'Type error - the type of key is String different with input value',
     'typeErrorNumber': 'Type error - the type of key is Number different with input value',
-    'typeTimeError': 'Use this function, the value of key should be a time with number type(YYYYMMDD style)',
-    'errorTime': 'Use this function, the value of key should be a time with string type ("YYYY-MM-DD hh:mm:ss" style)'
+    'typeTimeError': 'Use this function, the value of key should be a time(hh:mm:ss type)',
+    'typeDateError': 'Use this function, the value of key should be a time(YYYY-MM-DD type)',
+    'errorTime': 'Use this function, the value of key should be a time("YYYY-MM-DD hh:mm:ss" type)',
+    'columnMarkError': 'Use this function, the selected datas should be string type',
+    'notAdate': 'The value of selected data is a error date',
+    'notAtime': 'The value of selected data is a error time'
   }
 }
