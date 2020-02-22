@@ -103,7 +103,7 @@ export default {
     }
     var checkBroker = (rule, value, callback) => {
       if (value === '') {
-        callback(new Error(this.$t('serverSet.emptyPort')))
+        callback(new Error(this.$t('serverSet.emptyAddress')))
       } else {
         if (this.isEdit) {
           callback()
@@ -223,18 +223,21 @@ export default {
           } else if (res.data.status === 100108) {
             this.$message({
               type: 'warning',
-              message: this.$t('serverSet.exitBrokerURL')
+              message: this.$t('serverSet.exitBrokerURL'),
+              duration: 5000
             })
           } else {
             this.$message({
               type: 'warning',
-              message: this.$t('common.addFail')
+              message: this.$t('common.addFail'),
+              duration: 5000
             })
           }
         } else {
           this.$message({
             type: 'warning',
-            message: this.$t('common.addFail')
+            message: this.$t('common.addFail'),
+            duration: 5000
           })
         }
         this.showLog = false
@@ -267,18 +270,21 @@ export default {
           } else if (res.data.status === 100108) {
             this.$message({
               type: 'warning',
-              message: this.$t('serverSet.exitBrokerURL')
+              message: this.$t('serverSet.exitBrokerURL'),
+              duration: 5000
             })
           } else {
             this.$message({
               type: 'warning',
-              message: this.$t('common.editFail')
+              message: this.$t('common.editFail'),
+              duration: 5000
             })
           }
         } else {
           this.$message({
             type: 'warning',
-            message: this.$t('common.editFail')
+            message: this.$t('common.editFail'),
+            duration: 5000
           })
         }
         this.showLog = false
@@ -333,7 +339,8 @@ export default {
           } else {
             this.$message({
               type: 'warning',
-              message: vm.$t('common.deleteFail')
+              message: vm.$t('common.deleteFail'),
+              duration: 5000
             })
           }
         })

@@ -8,6 +8,7 @@
       </p>
       <p class='name'><span>{{$t('rule.dataType')}} :</span>{{ruleItem.payloadType === 1 ? 'JSON' : '' }}</p>
       <p class='name'><span>{{$t('rule.payloadMap')}} :</span>{{ruleItem.payloadMap}}</p>
+      <p class='name'><span>{{$t('rule.ruleDescription')}} :</span>{{ruleItem.ruleDescription}}</p>
     </div>
     <el-dialog :title="$t('ruleDetail.editRule')" :visible.sync="createRule" :close-on-click-modal='false'>
       <div class='warning_part'>
@@ -24,7 +25,10 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item :label="$t('rule.payloadMap')  + ' :'" prop='payloadMap'>
-          <el-input v-model="rule.payloadMap" size='small' type='textarea' :rows='5' :placeholder="$t('rule.enterPayload')" autocomplete="off"></el-input>
+          <el-input v-model="rule.payloadMap" size='small' type='textarea' :rows='4' :placeholder="$t('rule.enterPayload')" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item :label="$t('rule.ruleDescription')  + ' :'">
+          <el-input v-model="rule.ruleDescription" size='small' type='textarea' :rows='3' :placeholder="$t('rule.enterPayload')" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -98,6 +102,10 @@
           </el-select>
           <p class='no_dbList' v-show="dbList.length === 0">{{$t('ruleDetail.guideURL')}} <span @click="creatDB" >{{$t('ruleDetail.setGuide')}}</span></p>
         </el-form-item>
+        <!-- 这里 -->
+        <el-form-item :label="$t('rule.tableName')" v-show="sqlOption.ruleDataBaseId && sqlOption.conditionType === '2'" prop='tableName'>
+          <el-input v-model.trim='sqlOption.tableName'  autocomplete="off" :placeholder="$t('rule.inputTableName')"></el-input>
+        </el-form-item>
         <el-form-item :label="$t('ruleDetail.abnormalData')  + ' :'" prop='errorDestination'>
           <el-select  v-model="sqlOption.errorDestination" size='mini' :clearable="true" @visible-change='selectShow' :placeholder="$t('common.choose')">
             <el-option v-for='(item, index) in listData' :key='index' :label="item.topicName" :value="item.topicName"></el-option>
@@ -170,10 +178,48 @@ export default {
         }
       }
     }
+    var tableName = (rule, value, callback) => {
+      if (!this.sqlOption.ruleDataBaseId) {
+        callback()
+      } else {
+        if (!value) {
+          callback(new Error(this.$t('rule.enterTableName')))
+        } else {
+          let list = this.dbList
+          let id = this.sqlOption.ruleDataBaseId
+          list.forEach(e => {
+            if (e.id === id) {
+              let data = {
+                'datasourceName': e.datasourceName,
+                'databaseType': e.databaseType,
+                'username': e.username,
+                'password': e.password,
+                'databaseIp': e.databaseIp,
+                'databasePort': e.databasePort,
+                'databaseName': e.databaseName,
+                'optionalParameter': e.optionalParameter,
+                'checkType': 2,
+                'id': e.id,
+                'tableName': value
+              }
+              API.checkJDBC(data).then(res => {
+                if (res.data.status === 200) {
+                  callback()
+                } else {
+                  this.crrentTable = false
+                  callback(new Error(this.$t('rule.errorTable')))
+                }
+              })
+            }
+          })
+        }
+      }
+    }
     return {
       selAll: false,
       createRule: false,
       createSQL: false,
+      crrentTable: true,
       ruleItem: {
         'id': '',
         'brokerId': '',
@@ -188,12 +234,15 @@ export default {
         'ruleDataBaseId': '',
         'errorDestination': '',
         'conditionFieldJson': [],
-        'functionArray': ''
+        'functionArray': '',
+        'ruleDescription': '',
+        'tableName': ''
       },
       rule: {
         'ruleName': '',
         'payloadType': '1',
-        'payloadMap': ''
+        'payloadMap': '',
+        'ruleDescription': ''
       },
       rules: {
         ruleName: [
@@ -212,7 +261,8 @@ export default {
         'ruleDataBaseId': '',
         'errorDestination': '',
         'functionArray': '',
-        'conditionField': ''
+        'conditionField': '',
+        'tableName': ''
       },
       sqlCheck: {
         fromDestination: [
@@ -232,6 +282,9 @@ export default {
         ],
         errorDestination: [
           { validator: errorDestination, trigger: 'change' }
+        ],
+        tableName: [
+          { required: true, validator: tableName, trigger: 'blur' }
         ]
       },
       dbList: [],
@@ -274,12 +327,14 @@ export default {
             vm.rule[key] = vm.ruleItem.payloadType.toString()
           }
         }
+
         vm.$refs.rule.resetFields()
       }
     },
     createSQL (nVal) {
       if (!nVal) {
         let vm = this
+        vm.crrentTable = true
         let nodes = document.getElementsByClassName('tree_content')
         if (nodes) {
           for (let i = 0; i < nodes.length; i++) {
@@ -416,6 +471,12 @@ export default {
     getRuleData () {
       let vm = this
       let str = vm.ruleLetter.join('')
+      let Js = vm.sqlOption.conditionFieldJson
+      if (Js.length === 1 && Js[0].children.length > 0) {
+        str = str.substr(1)
+        str = str.substr(0, str.length - 1)
+      }
+      // 在这处理
       vm.sqlOption.conditionField = str
       vm.functionList.forEach(e => {
         let index = 0
@@ -436,7 +497,7 @@ export default {
           }
           if (e === 'substring' || e === 'concat') {
             let endIndex = index
-            while (str[endIndex] !== ' ' && str[endIndex]) {
+            while (str[endIndex] !== ' ' && str[endIndex] !== '(' && str[endIndex]) {
               endIndex--
             }
             let lastIndex = index + e.length
@@ -454,7 +515,7 @@ export default {
           }
           if (e === 'trim') {
             let endIndex = index
-            while (str[endIndex] !== ' ' && str[endIndex]) {
+            while (str[endIndex] !== ' ' && str[endIndex] !== '(' && str[endIndex]) {
               endIndex--
             }
             item[0] = String(endIndex + 1)
@@ -471,7 +532,7 @@ export default {
               endIndex--
             }
             let start = index - 1
-            while (str[start] !== ' ' && str[start]) {
+            while (str[start] !== ' ' && str[start] !== '(' && str[start]) {
               start--
             }
             item[3] = str.substring(start + 1, endIndex + 1)
@@ -490,7 +551,7 @@ export default {
       API.ruleDetail(data).then(res => {
         if (res.data.status === 200) {
           for (let key in vm.ruleItem) {
-            if (res.data.data[key]) {
+            if (res.data.data[key] || key === 'ruleDescription') {
               vm.ruleItem[key] = res.data.data[key]
               if (key === 'conditionFieldJson') {
                 if (res.data.data.conditionFieldJson) {
@@ -563,6 +624,7 @@ export default {
       if (e === '1') {
         vm.$refs.sql.clearValidate('toDestination')
         vm.sqlOption.ruleDataBaseId = this.ruleItem.ruleDataBaseId
+        vm.sqlOption.tableName = this.ruleItem.tableName
       } else {
         vm.$refs.sql.clearValidate('ruleDataBaseId')
         vm.sqlOption.toDestination = this.ruleItem.toDestination
@@ -591,6 +653,7 @@ export default {
               } else {
                 vm.$refs.sql.clearValidate('ruleDataBaseId')
                 vm.sqlOption.ruleDataBaseId = ''
+                vm.sqlOption.tableName = ''
               }
             } else {
               if (!vm.sqlOption.ruleDataBaseId) {
@@ -598,14 +661,18 @@ export default {
               } else {
                 vm.$refs.sql.clearValidate('toDestination')
                 vm.sqlOption.toDestination = ''
+                if (!vm.sqlOption.tableName) {
+                  return
+                } else {
+                  if (!vm.crrentTable) {
+                    return
+                  }
+                }
               }
             }
           } else {
             return
           }
-        }
-        if (!checkRule(this.columnName)) {
-          return
         }
         if (e === 'rule') {
           for (let key in vm.rule) {
@@ -614,9 +681,12 @@ export default {
               data.payloadMap = JSON.parse(vm.rule.payloadMap)
             }
           }
-          data.conditionFieldJson = JSON.stringify(vm.rule.conditionFieldJson)
+          data.conditionFieldJson = JSON.stringify(vm.sqlOption.conditionFieldJson)
         }
         if (e === 'sql') {
+          if (!checkRule(this.columnName, this.rule.payloadMap)) {
+            return
+          }
           vm.ruleLetter = []
           vm.functionArray = []
           vm.sqlOption.conditionField = ''
@@ -627,6 +697,7 @@ export default {
           }
           if (vm.sqlOption.conditionType === '1') {
             vm.sqlOption.ruleDataBaseId = ''
+            vm.sqlOption.tableName = ''
           } else {
             vm.sqlOption.toDestination = ''
           }
@@ -652,7 +723,8 @@ export default {
           } else {
             vm.$message({
               type: 'warning',
-              message: res.data.message
+              message: res.data.message,
+              duration: 5000
             })
           }
         })

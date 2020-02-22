@@ -45,26 +45,31 @@ class BaseModule {
         } else {
           Message({
             type: 'warning',
-            message: i18n.messages[i18n.locale].common.reqException
+            message: i18n.messages[i18n.locale].common.reqException,
+            duration: 5000
           })
           reject(config)
         }
       }).catch((e) => {
         Message({
           type: 'error',
-          message: i18n.messages[i18n.locale].common.reqException
+          message: i18n.messages[i18n.locale].common.reqException,
+          duration: 5000
         })
       })
     }, error => {
       if (error.message.includes('timeout')) {
         Message({
           type: 'error',
-          message: i18n.messages[i18n.locale].common.timeOut
+          message: i18n.messages[i18n.locale].common.timeOut,
+          duration: 5000
         })
+        return error
       } else {
         Message({
           type: 'error',
-          message: i18n.messages[i18n.locale].common.reqException
+          message: i18n.messages[i18n.locale].common.reqException,
+          duration: 5000
         })
       }
     })
