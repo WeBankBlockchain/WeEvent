@@ -1,8 +1,6 @@
 package com.webank.weevent.governance.entity;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Entity;
@@ -60,9 +58,6 @@ public class RuleEngineEntity extends RuleEngineBase {
 
     @Transient
     private String offSet;
-
-    @Transient
-    private String tableName;
 
 }
 

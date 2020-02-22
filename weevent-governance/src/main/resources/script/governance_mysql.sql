@@ -68,6 +68,7 @@ CREATE TABLE t_rule_engine (
   `rule_database_id` INT(11) NULL DEFAULT NULL COMMENT '数据源 主键id',
   `error_destination` VARCHAR(255) NULL DEFAULT NULL COMMENT '失败流转目的地',
   `system_tag` VARCHAR(1) NOT NULL DEFAULT '1' COMMENT '1 系统内置 ,2 用户新增',
+  `table_name` VARCHAR(128)  NULL DEFAULT NULL COMMENT '表格名称',
   `create_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
   `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改日期',
   `delete_at` BIGINT(16) NOT NULL DEFAULT  0 COMMENT '0 表示 未删除, 时间戳 表示 已经被删除',
@@ -76,11 +77,14 @@ CREATE TABLE t_rule_engine (
 
 CREATE TABLE t_rule_database (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `database_type` VARCHAR(1) NOT NULL COMMENT '数据源类型,1代表h2,2代表mysql',
   `datasource_name` VARCHAR(256) NOT NULL COMMENT '数据源名称',
   `database_url` VARCHAR(128) NOT NULL COMMENT '数据库url',
+  `database_ip` VARCHAR(32) NULL DEFAULT NULL COMMENT '数据库ip',
+  `database_port` VARCHAR(32) NULL DEFAULT NULL COMMENT '数据库port',
+  `database_name` VARCHAR(128) NULL DEFAULT NULL COMMENT '数据库名称',
   `username` VARCHAR(16) NOT NULL COMMENT '数据库用户名',
   `password` VARCHAR(128) NOT NULL COMMENT '数据库密码',
-  `table_name` VARCHAR(32) NOT NULL COMMENT '表格名称',
   `optional_parameter` VARCHAR(256) DEFAULT NULL COMMENT '数据库可选参数',
   `broker_id` VARCHAR(256) DEFAULT NULL COMMENT 'broker主键id',
   `user_id` VARCHAR(256) DEFAULT NULL COMMENT 'user主键id',
