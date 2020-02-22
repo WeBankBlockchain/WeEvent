@@ -6,6 +6,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.entity.RuleDatabaseEntity;
 import com.webank.weevent.governance.repository.RuleDatabaseRepository;
@@ -54,7 +55,8 @@ public class RuleDatabaseService {
             throws GovernanceException {
         try {
             //check dbUrl
-            commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseUrl(), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword());
+            getDataBaseUrl(ruleDatabaseEntity);
+            commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseType(), ruleDatabaseEntity.getDatabaseUrl(), null, ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword());
             ruleDatabaseEntity.setSystemTag(false);
             ruleDatabaseRepository.save(ruleDatabaseEntity);
             return ruleDatabaseEntity;
@@ -62,6 +64,19 @@ public class RuleDatabaseService {
             log.error("add ruleDatabaseEntity fail", e);
             throw new GovernanceException("add ruleDatabaseEntity fail ", e);
         }
+    }
+
+    private void getDataBaseUrl(RuleDatabaseEntity ruleDatabaseEntity) {
+        String dataBaseUrl = "";
+        // 1 h2, 2 mysql
+        if (ConstantProperties.H2_DATABASE.equals(ruleDatabaseEntity.getDatabaseType().toLowerCase())) {
+            dataBaseUrl = "jdbc:h2:tcp://" + ruleDatabaseEntity.getDatabaseIp() + ":" + ruleDatabaseEntity.getDatabasePort()
+                    + "/" + ruleDatabaseEntity.getDatabaseName();
+        } else {
+            dataBaseUrl = "jdbc:mysql://" + ruleDatabaseEntity.getDatabaseIp() + ":" + ruleDatabaseEntity.getDatabasePort()
+                    + "/" + ruleDatabaseEntity.getDatabaseName();
+        }
+        ruleDatabaseEntity.setDatabaseUrl(dataBaseUrl);
     }
 
     @Transactional(rollbackFor = Throwable.class)
@@ -84,7 +99,8 @@ public class RuleDatabaseService {
         try {
             ruleDatabaseEntity.setSystemTag(false);
             //check databaseUrl
-            commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseUrl(), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword());
+            getDataBaseUrl(ruleDatabaseEntity);
+            commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseType(), ruleDatabaseEntity.getDatabaseUrl(), null, ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword());
             ruleDatabaseEntity.setLastUpdate(new Date());
             ruleDatabaseRepository.save(ruleDatabaseEntity);
         } catch (Exception e) {
@@ -96,11 +112,23 @@ public class RuleDatabaseService {
 
     public void checkRuleDataBaseUrl(RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
         try {
-            commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseUrl(), ruleDatabaseEntity.getTableName(), ruleDatabaseEntity.getUsername(),
-                    ruleDatabaseEntity.getPassword());
+            // 1 check database, 2 check tableName
+            if (ConstantProperties.CHECK_DATABASE.equals(ruleDatabaseEntity.getCheckType())) {
+                getDataBaseUrl(ruleDatabaseEntity);
+                commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseType(), ruleDatabaseEntity.getDatabaseUrl(), null, ruleDatabaseEntity.getUsername(),
+                        ruleDatabaseEntity.getPassword());
+            } else {
+                RuleDatabaseEntity ruleDatabase = ruleDatabaseRepository.findById(ruleDatabaseEntity.getId());
+                if (ruleDatabase == null) {
+                    throw new GovernanceException("database record is not exists");
+                }
+                commonService.checkDataBaseUrl(ruleDatabase.getDatabaseType(), ruleDatabase.getDatabaseUrl(), ruleDatabase.getTableName(), ruleDatabase.getUsername(),
+                        ruleDatabase.getPassword());
+            }
+
         } catch (Exception e) {
-            log.error("database url is incorrect", e);
-            throw new GovernanceException("database url is incorrect", e);
+            log.error("check failed", e);
+            throw new GovernanceException("check failed", e);
         }
     }
 }

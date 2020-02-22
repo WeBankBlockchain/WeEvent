@@ -67,7 +67,7 @@ public class RuleDatabaseController {
     }
 
     @PostMapping("/checkDataBaseUrl")
-    public GovernanceResult checkDataBaseUrl(@Validated @RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
+    public GovernanceResult checkDataBaseUrl(@RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
         log.info("checkDataBaseUrl service ,ruleDatabaseEntity:{}", ruleDatabaseEntity);
         ruleDatabaseService.checkRuleDataBaseUrl(ruleDatabaseEntity, request);
         return new GovernanceResult(true);
