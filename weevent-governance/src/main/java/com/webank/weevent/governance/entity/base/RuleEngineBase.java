@@ -87,4 +87,7 @@ public class RuleEngineBase extends BaseEntity {
 
     @Column(name = "rule_description")
     private String ruleDescription;
+
+    @Column(name = "table_name")
+    private String tableName;
 }
