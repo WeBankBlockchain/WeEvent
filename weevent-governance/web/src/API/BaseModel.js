@@ -64,6 +64,7 @@ class BaseModule {
           message: i18n.messages[i18n.locale].common.timeOut,
           duration: 5000
         })
+        return error
       } else {
         Message({
           type: 'error',
