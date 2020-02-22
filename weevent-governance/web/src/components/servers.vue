@@ -103,7 +103,7 @@ export default {
     }
     var checkBroker = (rule, value, callback) => {
       if (value === '') {
-        callback(new Error(this.$t('serverSet.emptyPort')))
+        callback(new Error(this.$t('serverSet.emptyAddress')))
       } else {
         if (this.isEdit) {
           callback()
