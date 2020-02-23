@@ -179,11 +179,12 @@ export default {
                 this.login(e)
               }, 1000)
             } else {
-              this.$message({
+              this.$store.commit(this.$message({
                 type: 'warning',
                 message: this.$t('userSet.regFail'),
-                duration: 5000
-              })
+                duration: 0,
+                showClose: true
+              }))
             }
           })
         } else {
@@ -209,11 +210,12 @@ export default {
               if (res.data.status === 400) {
                 this.ruleForm.oldPass = ''
                 this.$refs.ruleForm.validateField('oldPass')
-                this.$message({
+                this.$store.commit(this.$message({
                   type: 'warning',
                   message: this.$t('userSet.errorOldPassWord'),
-                  duration: 5000
-                })
+                  duration: 0,
+                  showClose: true
+                }))
               } else {
                 this.$message({
                   type: 'success',
@@ -238,11 +240,12 @@ export default {
           localStorage.setItem('token', base.Authorization)
           this.$router.push('./index')
         } else {
-          this.$message({
+          this.$store.commit(this.$message({
             type: 'warning',
             message: this.$t('userSet.loginFail'),
-            duration: 5000
-          })
+            duration: 0,
+            showClose: true
+          }))
         }
       })
     }

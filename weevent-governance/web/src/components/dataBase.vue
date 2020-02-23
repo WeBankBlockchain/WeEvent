@@ -235,11 +235,12 @@ export default {
                 })
                 vm.getDBLsit()
               } else {
-                vm.$message({
+                vm.$store.commit('set_Msg', vm.$message({
                   type: 'warning',
                   message: res.data.message,
-                  duration: 5000
-                })
+                  duration: 0,
+                  showClose: true
+                }))
               }
               vm.showlog = false
             })
@@ -253,11 +254,12 @@ export default {
                 })
                 vm.getDBLsit()
               } else {
-                vm.$message({
+                vm.$store.commit(vm.$message({
                   type: 'warning',
                   message: res.data.message,
-                  duration: 5000
-                })
+                  duration: 0,
+                  showClose: true
+                }))
               }
               vm.showlog = false
             })
@@ -297,11 +299,12 @@ export default {
             })
             vm.getDBLsit()
           } else {
-            vm.$message({
+            vm.$store.commit(vm.$message({
               type: 'warning',
               message: res.data.message,
-              duration: 5000
-            })
+              duration: 0,
+              showClose: true
+            }))
           }
           vm.showlog = false
         })
