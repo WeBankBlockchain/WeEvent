@@ -26,7 +26,7 @@ public class RestfullAdminTest extends JUnitTestBase {
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
-        url = "http://localhost:" + listenPort + "/weevent/admin/";
+        url = "http://localhost:" + listenPort + "/weevent-broker/admin/";
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         this.admin = new RestTemplate(requestFactory);
     }

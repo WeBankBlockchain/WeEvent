@@ -13,6 +13,12 @@ dependencies {
     implementation("org.springframework.data:spring-data-commons:${springDataCommonsVersion}")
     implementation("org.springframework:spring-messaging:${spring5Version}")
 
+    // httpclient
+    implementation("org.apache.httpcomponents:httpclient:${httpclientVersion}")
+
+    // httpmime
+    implementation("org.apache.httpcomponents:httpmime:${httpclientVersion}")
+
     // event-client.log for test
     testImplementation("org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}")
 }

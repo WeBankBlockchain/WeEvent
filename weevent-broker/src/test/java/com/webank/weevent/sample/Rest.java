@@ -18,14 +18,14 @@ public class Rest {
 
             // ensure topic exist "com.weevent.test"
             String topic = "com.weevent.test";
-            Boolean result = rest.getForEntity("http://localhost:7000/weevent/rest/open?topic={topic}&groupId={groupId}",
+            Boolean result = rest.getForEntity("http://localhost:7000/weevent-broker/rest/open?topic={topic}&groupId={groupId}",
                     Boolean.class,
                     topic,
                     WeEvent.DEFAULT_GROUP_ID).getBody();
             System.out.println(result);
 
             // publish event to topic "com.weevent.test"
-            SendResult sendResult = rest.getForEntity("http://localhost:7000/weevent/rest/publish?topic={topic}&groupId={groupId}&content={content}",
+            SendResult sendResult = rest.getForEntity("http://localhost:7000/weevent-broker/rest/publish?topic={topic}&groupId={groupId}&content={content}",
                     SendResult.class,
                     topic,
                     WeEvent.DEFAULT_GROUP_ID,

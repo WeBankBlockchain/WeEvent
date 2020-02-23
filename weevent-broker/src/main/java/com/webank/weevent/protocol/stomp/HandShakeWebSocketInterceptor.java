@@ -54,7 +54,7 @@ public class HandShakeWebSocketInterceptor implements HandshakeInterceptor {
         }
 
         if (request instanceof ServletServerHttpRequest) {
-            log.debug("ip white list:{} client ip:{}", this.ipWhiteTable, ip);
+            log.debug("ip white list: {} client ip: {}", this.ipWhiteTable, ip);
             if (ip.contains("0:0:0:0") || ip.contains("127.0.0.1") || ip.contains("localhost")) {
                 return true;
             }
@@ -62,7 +62,7 @@ public class HandShakeWebSocketInterceptor implements HandshakeInterceptor {
             if (!this.ipWhiteTable.contains(ip)) {
                 response.setStatusCode(HttpStatus.FORBIDDEN);
                 response.close();
-                log.error("forbid,client ip:{} not in white table:{}", ip, this.ipWhiteTable);
+                log.error("forbid, client ip is not in white list, {} -> {}", ip, this.ipWhiteTable);
                 return false;
             }
         }

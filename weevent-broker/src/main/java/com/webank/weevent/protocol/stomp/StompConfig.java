@@ -20,9 +20,9 @@ import org.springframework.web.socket.server.standard.ServletServerContainerFact
  * @author matthewliu
  * @since 2018/12/20
  */
+@Slf4j
 @Configuration
 @EnableWebSocket
-@Slf4j
 public class StompConfig implements WebSocketConfigurer {
     private BrokerStomp brokerStomp;
 
@@ -60,8 +60,8 @@ public class StompConfig implements WebSocketConfigurer {
      * @return HandShakeWebSocketInterceptor
      */
     private HandShakeWebSocketInterceptor interceptorWebSocket() {
+        log.info("client ip white list: {}", BrokerApplication.weEventConfig.getIpWhiteTable());
 
-        log.info("client ip white table: {}", BrokerApplication.weEventConfig.getIpWhiteTable());
         return new HandShakeWebSocketInterceptor(BrokerApplication.weEventConfig.getIpWhiteTable());
     }
 }
