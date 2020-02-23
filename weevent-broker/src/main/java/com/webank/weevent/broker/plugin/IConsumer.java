@@ -86,6 +86,14 @@ public interface IConsumer extends IEventTopic {
          * @param e the e
          */
         void onException(Throwable e);
+
+        /**
+         * Called while subscription closed, like unSubscribe.
+         *
+         * @param subscriptionId binding which subscription
+         */
+        default void onClose(String subscriptionId) {
+        }
     }
 
     /**

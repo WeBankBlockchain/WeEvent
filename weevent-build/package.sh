@@ -95,9 +95,12 @@ function build_weevent(){
 
 function copy_install_file(){
     cd ${current_path}
-    cp ${current_path}/config.properties ${current_path}/install-all.sh ${out_path}
-    cp -r ${current_path}/bin ${out_path}
-    cp -r ${current_path}/third-packages ${out_path}
+
+    cp ${current_path}/config.properties ${current_path}/install-all.sh ${current_path}/bin ${out_path}
+
+    mkdir -p ${out_path}/modules/gateway
+    cp ${current_path}/modules/gateway/install-gateway.sh ${out_path}/modules/gateway
+    cp -r ${top_path}/weevent-gateway/dist/* ${out_path}/modules/gateway
 
     mkdir -p ${out_path}/modules/broker
     cp ${current_path}/modules/broker/install-broker.sh ${out_path}/modules/broker
@@ -110,17 +113,16 @@ function copy_install_file(){
     mkdir -p ${out_path}/modules/processor
     cp ${current_path}/modules/processor/install-processor.sh ${out_path}/modules/processor
     cp -r ${top_path}/weevent-processor/dist/* ${out_path}/modules/processor
-
-
-
-    mkdir -p ${out_path}/modules/nginx
-    cp ${current_path}/modules/nginx/install-nginx.sh ./modules/nginx/nginx.sh ${out_path}/modules/nginx
-    cp -r ${current_path}/modules/nginx/conf ${out_path}/modules/nginx
 }
 
 # switch to prod.properties, remove dev.properties
 function switch_to_prod(){
     cd ${current_path}
+
+    rm -rf ${out_path}/modules/gateway/conf/application-dev.properties
+    if [[ -e ${out_path}/modules/gateway/conf/application.properties ]]; then
+        sed -i 's/dev/prod/' ${out_path}/modules/gateway/conf/application.properties
+    fi
 
     rm -rf ${out_path}/modules/broker/conf/application-dev.properties
     if [[ -e ${out_path}/modules/broker/conf/application.properties ]]; then
@@ -136,6 +138,22 @@ function switch_to_prod(){
     if [[ -e ${out_path}/modules/processor/conf/application.properties ]]; then
         sed -i 's/dev/prod/' ${out_path}/modules/processor/conf/application.properties
     fi
+}
+
+function tar_gateway(){
+    local target=$1
+    yellow_echo "generate ${target}"
+
+    cp -r ${out_path}/modules/gateway ${current_path}/gateway-${version}
+    # no need install shell
+    rm -rf ${current_path}/gateway-${version}/install-gateway.sh
+
+    # do not tar the top dir
+    cd ${current_path}/gateway-${version}
+    tar -czpvf ${target} *
+    mv ${target} ${current_path}
+
+    rm -rf ${current_path}/gateway-${version}
 }
 
 function tar_broker(){
@@ -225,6 +243,9 @@ function package(){
     copy_install_file
     switch_to_prod
     set_permission
+
+    # tar gateway module
+    tar_gateway weevent-gateway-${version}.tar.gz
 
     # tar broker module
     tar_broker weevent-broker-${version}.tar.gz

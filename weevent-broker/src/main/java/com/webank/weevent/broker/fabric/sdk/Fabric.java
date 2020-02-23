@@ -22,6 +22,7 @@ import com.webank.weevent.protocol.rest.entity.TbNode;
 import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
+import com.webank.weevent.sdk.JsonHelper;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.TopicPage;
@@ -86,7 +87,7 @@ public class Fabric {
             if (ErrorCode.SUCCESS.getCode() != transactionInfo.getCode()) {
                 throw new BrokerException(transactionInfo.getCode(), transactionInfo.getMessage());
             }
-            TopicInfo topicInfo = DataTypeUtils.json2Object(transactionInfo.getPayLoad(), TopicInfo.class);
+            TopicInfo topicInfo = JsonHelper.json2Object(transactionInfo.getPayLoad(), TopicInfo.class);
 
             this.topicInfo.put(topicName, topicInfo);
             return topicInfo;
