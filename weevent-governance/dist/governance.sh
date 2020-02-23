@@ -6,7 +6,7 @@ if [[ -z ${JAVA_HOME} ]];then
    exit 1
 fi
 
-server_name=$(basename $0|awk -F"." '{print $1}')
+server_name=weevent-governance
 APP_PARAMS="-Xbootclasspath/a:./conf:./html -Djava.security.egd=file:/dev/./urandom -cp ./apps/* -Dloader.path=./lib,../lib org.springframework.boot.loader.PropertiesLauncher"
 
 ###############################################################################

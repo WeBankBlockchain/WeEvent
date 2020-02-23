@@ -6,7 +6,7 @@ if [[ -z ${JAVA_HOME} ]];then
    exit 1
 fi
 
-server_name=weevent-governance
+server_name=weevent-gateway
 APP_PARAMS="-Xbootclasspath/a:./conf -cp ./apps/* -Dloader.path=./lib,../lib org.springframework.boot.loader.PropertiesLauncher"
 
 ###############################################################################
