@@ -51,7 +51,7 @@ public class RestfulFiscoV1Test {
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
-        this.url = "http://localhost:" + listenPort + "/weevent/rest/";
+        this.url = "http://localhost:" + listenPort + "/weevent-broker/rest/";
 
         this.rest.getForEntity(this.url + "open?topic={topic}", Boolean.class, this.topicName);
         ResponseEntity<SendResult> rsp = this.rest.getForEntity(this.url + "publish?topic={topic}&content={content}",

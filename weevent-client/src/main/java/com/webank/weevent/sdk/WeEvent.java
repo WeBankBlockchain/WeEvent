@@ -1,7 +1,6 @@
 package com.webank.weevent.sdk;
 
 
-import java.io.Serializable;
 import java.util.Map;
 
 import lombok.Data;
@@ -14,11 +13,8 @@ import lombok.Data;
  * @since 2018/11/02
  */
 @Data
-public class WeEvent implements Serializable {
-    private static final long serialVersionUID = 2026046567802960173L;
-
+public class WeEvent {
     public static final String DEFAULT_GROUP_ID = "1";
-
     public static final String OFFSET_FIRST = "OFFSET_FIRST";
     public static final String OFFSET_LAST = "OFFSET_LAST";
 
@@ -42,7 +38,7 @@ public class WeEvent implements Serializable {
     public static final String WeEvent_SubscriptionId = "weevent-subscriptionId";
     public static final String WeEvent_TAG = "weevent-tag";
     public static final String WeEvent_SIGN = "weevent-sign";
-
+    public static final String WeEvent_FILE = "weevent-file";
     /**
      * Binding topic, like "com.weevent.test".
      */
