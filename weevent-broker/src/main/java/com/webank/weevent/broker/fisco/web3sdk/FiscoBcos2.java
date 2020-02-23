@@ -22,6 +22,7 @@ import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.fisco.web3sdk.v2.CRUDAddress;
 import com.webank.weevent.broker.fisco.web3sdk.v2.SupportedVersion;
 import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDK2Wrapper;
+import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDKConnector;
 import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic;
 import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
@@ -95,8 +96,8 @@ public class FiscoBcos2 {
         log.info("WeEvent support solidity version, now: {} support: {}", SupportedVersion.nowVersion, SupportedVersion.history);
 
         if (this.topicController == null) {
-            this.credentials = Web3SDK2Wrapper.getCredentials(this.fiscoConfig);
-            this.web3j = Web3SDK2Wrapper.initWeb3j(groupId, this.fiscoConfig);
+            this.credentials = Web3SDKConnector.getCredentials(this.fiscoConfig);
+            this.web3j = Web3SDKConnector.initWeb3j(Web3SDKConnector.initService(groupId, this.fiscoConfig));
 
             CRUDAddress crudAddress = new CRUDAddress(this.web3j, this.credentials);
             Map<Long, String> addresses = crudAddress.listAddress();
@@ -133,7 +134,7 @@ public class FiscoBcos2 {
     }
 
     public List<String> listGroupId() throws BrokerException {
-        return Web3SDK2Wrapper.listGroupId(this.web3j);
+        return Web3SDKConnector.listGroupId(this.web3j, FiscoBcosDelegate.timeout);
     }
 
     /**

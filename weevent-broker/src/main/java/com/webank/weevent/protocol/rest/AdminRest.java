@@ -10,8 +10,6 @@ import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.config.BuildInfo;
 import com.webank.weevent.broker.fisco.dto.ContractContext;
 import com.webank.weevent.broker.fisco.dto.ListPage;
-import com.webank.weevent.broker.fisco.util.DataTypeUtils;
-import com.webank.weevent.broker.fisco.util.SystemInfoUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
 import com.webank.weevent.protocol.rest.entity.QueryEntity;
@@ -20,10 +18,13 @@ import com.webank.weevent.protocol.rest.entity.TbNode;
 import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
+import com.webank.weevent.sdk.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,9 +40,10 @@ import org.springframework.web.client.RestTemplate;
 @RequestMapping(value = "/admin")
 @RestController
 @Slf4j
-public class AdminRest extends RestHA {
+public class AdminRest {
     private IConsumer consumer;
     private BuildInfo buildInfo;
+    private DiscoveryClient discoveryClient;
 
     @Autowired
     public void setConsumer(IConsumer consumer) {
@@ -51,6 +53,11 @@ public class AdminRest extends RestHA {
     @Autowired
     public void setBuildInfo(BuildInfo buildInfo) {
         this.buildInfo = buildInfo;
+    }
+
+    @Autowired
+    public void setDiscoveryClient(DiscoveryClient discoveryClient) {
+        this.discoveryClient = discoveryClient;
     }
 
     @RequestMapping(path = "/listGroup")
@@ -67,20 +74,9 @@ public class AdminRest extends RestHA {
 
         ResponseData<List<String>> responseData = new ResponseData<>();
         List<String> nodesInfo = new ArrayList<>();
-        if (this.masterJob.getClient() == null) {
-            nodesInfo.add(SystemInfoUtils.getCurrentIp() + ":" + SystemInfoUtils.getCurrentPort());
-        } else {
-            try {
-                List<String> ipList = this.masterJob.getClient().getChildren().forPath(BrokerApplication.weEventConfig.getZookeeperPath() + "/nodes");
-                log.info("zookeeper ip List:{}", ipList);
-                for (String nodeIP : ipList) {
-                    byte[] ip = this.masterJob.getZookeeperNode(BrokerApplication.weEventConfig.getZookeeperPath() + "/nodes" + "/" + nodeIP);
-                    nodesInfo.add(new String(ip));
-                }
-            } catch (Exception e) {
-                log.error("find listNodes fail", e);
-                throw new BrokerException("find listNodes fail", e);
-            }
+        List<ServiceInstance> instances = this.discoveryClient.getInstances(BrokerApplication.applicationContext.getApplicationName());
+        for (ServiceInstance serviceInstance : instances) {
+            nodesInfo.add(serviceInstance.getUri().toString());
         }
         responseData.setErrorCode(ErrorCode.SUCCESS);
         responseData.setData(nodesInfo);
@@ -99,30 +95,24 @@ public class AdminRest extends RestHA {
         }
 
         Map<String, Object> nodesInfo = new HashMap<>();
-        if (this.masterJob.getClient() == null) {
-            nodesInfo.put(SystemInfoUtils.getCurrentIp() + ":" + SystemInfoUtils.getCurrentPort(),
-                    this.consumer.listSubscription(groupId));
-        } else {
-            try {
-                log.info("zookeeper ip List:{}", nodeIp);
-                String[] ipList = nodeIp.split(",");
-                for (String ipStr : ipList) {
-                    if (!StringUtils.isBlank(ipStr)) {
-                        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-                        RestTemplate rest = new RestTemplate(requestFactory);
-                        String url = new StringBuffer("http://").append(ipStr).append("/weevent/admin/innerListSubscription")
-                                .append("?groupId=").append(groupId).toString();
-                        log.info("url:{}", url);
+        try {
+            log.info("zookeeper ip List:{}", nodeIp);
+            String[] ipList = nodeIp.split(",");
+            for (String ipStr : ipList) {
+                if (!StringUtils.isBlank(ipStr)) {
+                    SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+                    RestTemplate rest = new RestTemplate(requestFactory);
+                    String url = ipStr + "/" + BrokerApplication.applicationContext.getApplicationName() + "/admin/innerListSubscription?groupId=" + groupId;
+                    log.info("url:{}", url);
 
-                        ResponseEntity<String> rsp = rest.getForEntity(url, String.class);
-                        log.debug("innerListSubscription:{}", DataTypeUtils.json2Object(rsp.getBody(), Object.class));
-                        nodesInfo.put(nodeIp, DataTypeUtils.json2Object(rsp.getBody(), Object.class));
-                    }
+                    ResponseEntity<String> rsp = rest.getForEntity(url, String.class);
+                    log.debug("innerListSubscription:{}", JsonHelper.json2Object(rsp.getBody(), Object.class));
+                    nodesInfo.put(nodeIp, JsonHelper.json2Object(rsp.getBody(), Object.class));
                 }
-            } catch (Exception e) {
-                log.error("find subscriptionList fail", e);
-                throw new BrokerException("find subscriptionList fail", e);
             }
+        } catch (Exception e) {
+            log.error("find subscriptionList fail", e);
+            throw new BrokerException("find subscriptionList fail", e);
         }
 
         responseData.setErrorCode(ErrorCode.SUCCESS);

@@ -2,12 +2,8 @@ package com.webank.weevent.protocol.mqtt.command;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
-import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.SendResult;
@@ -61,36 +57,18 @@ public class Publish {
 
         // QoS=2
         if (msg.fixedHeader().qosLevel() == MqttQoS.EXACTLY_ONCE) {
-            log.error("dosn't support QoS=2 close channel");
+            log.error("doesn't support QoS=2 close channel");
             channel.close();//blockchain not suppuer QOS=2 colse channel
-            return;
         }
     }
 
     private SendResult sendMessageToFisco(String topic, byte[] messageBytes, String groupId, Map<String, String> extensions) {
-        SendResult sendResult = new SendResult();
-        sendResult.setTopic(topic);
-
         try {
-            //this.iproducer.open(topic, groupId);
-            if (this.iproducer.exist(topic, groupId)) {
-                try {
-                    sendResult = this.iproducer.publish(new WeEvent(topic, messageBytes, extensions), groupId).get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-                } catch (InterruptedException | ExecutionException e) {
-                    log.error("publishWeEvent failed due to transaction execution error.", e);
-                    sendResult.setStatus(SendResult.SendResultStatus.ERROR);
-                } catch (TimeoutException e) {
-                    log.error("publishWeEvent failed due to transaction execution timeout.", e);
-                    sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
-                }
-            } else {
-                sendResult.setStatus(SendResult.SendResultStatus.ERROR);
-                log.error("topic is not exist");
-            }
+            return this.iproducer.publishSync(new WeEvent(topic, messageBytes, extensions), groupId);
         } catch (BrokerException e) {
-            log.error("publish error:{}", sendResult.toString());
+            log.error("exception in publish", e);
+            return new SendResult(SendResult.SendResultStatus.ERROR);
         }
-        return sendResult;
     }
 
     private void sendPubAckMessage(Channel channel, int messageId) {
