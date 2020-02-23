@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
@@ -27,18 +25,13 @@ import com.webank.weevent.protocol.rest.entity.TbNode;
 import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
+import com.webank.weevent.sdk.JsonHelper;
 import com.webank.weevent.sdk.WeEvent;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.channel.client.Service;
-import org.fisco.bcos.channel.handler.ChannelConnections;
-import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
 import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.Web3jService;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
@@ -49,15 +42,12 @@ import org.fisco.bcos.web3j.protocol.core.RemoteCall;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BcosTransactionReceipt;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BlockNumber;
-import org.fisco.bcos.web3j.protocol.core.methods.response.GroupList;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeIDList;
-import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TotalTransactionCount;
 import org.fisco.bcos.web3j.protocol.core.methods.response.Transaction;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tx.Contract;
 import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 /**
  * Wrapper of Web3SDK 2.x function.
@@ -73,7 +63,6 @@ public class Web3SDK2Wrapper {
     public final static String NODE_ID = "nodeId";
     public final static String PEERS = "peers";
     public final static String VIEW = "view";
-    private static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     public static String chainID;
 
     // static gas provider
@@ -101,100 +90,11 @@ public class Web3SDK2Wrapper {
         }
     };
 
-    /**
-     * init web3j handler with given group id
-     *
-     * @param groupId group id
-     * @return Web3j
-     */
-    public static Web3j initWeb3j(Long groupId, FiscoConfig fiscoConfig) throws BrokerException {
-        // init web3j with given group id
-        try {
-            log.info("begin to initialize web3sdk, group id: {}", groupId);
-
-            int web3sdkTimeout = fiscoConfig.getWeb3sdkTimeout();
-
-            Service service = new Service();
-            // group info
-            service.setOrgID(fiscoConfig.getOrgId());
-            service.setGroupId(groupId.intValue());
-            service.setConnectSeconds(web3sdkTimeout / 1000);
-            // reconnect idle time 100ms
-            service.setConnectSleepPerMillis(100);
-
-            // connect key and string
-            GroupChannelConnectionsConfig connectionsConfig = new GroupChannelConnectionsConfig();
-            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-            connectionsConfig.setCaCert(resolver.getResource("classpath:" + fiscoConfig.getV2CaCrtPath()));
-            connectionsConfig.setSslCert(resolver.getResource("classpath:" + fiscoConfig.getV2NodeCrtPath()));
-            connectionsConfig.setSslKey(resolver.getResource("classpath:" + fiscoConfig.getV2NodeKeyPath()));
-
-            ChannelConnections channelConnections = new ChannelConnections();
-            channelConnections.setGroupId(groupId.intValue());
-            channelConnections.setConnectionsStr(Arrays.asList(fiscoConfig.getNodes().split(";")));
-            connectionsConfig.setAllChannelConnections(Arrays.asList(channelConnections));
-
-            service.setAllChannelConnections(connectionsConfig);
-            // special thread for TransactionSucCallback.onResponse, callback from IO thread directly if not setting
-            //service.setThreadPool(poolTaskExecutor);
-            service.run();
-
-            ChannelEthereumService channelEthereumService = new ChannelEthereumService();
-            channelEthereumService.setChannelService(service);
-            channelEthereumService.setTimeout(web3sdkTimeout);
-            Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
-
-            // check connect with getNodeVersion command
-            NodeVersion.Version version = web3j.getNodeVersion().send().getNodeVersion();
-            String nodeVersion = version.getVersion();
-            if (StringUtils.isBlank(nodeVersion)
-                    || !nodeVersion.contains(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {
-                log.error("init web3sdk failed, mismatch FISCO-BCOS version in node: {}", nodeVersion);
-                throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
-            }
-            chainID = version.getChainID();
-
-            log.info("initialize web3sdk success, group id: {}", groupId);
-            return web3j;
-        } catch (Exception e) {
-            log.error("init web3sdk failed, group id: " + groupId, e);
-            throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
-        }
-    }
-
     public static void setBlockNotifyCallBack(Web3j web3j, FiscoBcosDelegate.IBlockEventListener listener) {
         Web3jService web3jService = ((JsonRpc2_0Web3j) web3j).web3jService();
         ((ChannelEthereumService) web3jService).getChannelService().setBlockNotifyCallBack(
                 (int groupID, BigInteger blockNumber) -> listener.onEvent((long) groupID, blockNumber.longValue())
         );
-    }
-
-    public static List<String> listGroupId(Web3j web3j) throws BrokerException {
-        try {
-            GroupList groupList = web3j.getGroupList().sendAsync().get(FiscoBcosDelegate.timeout, TimeUnit.MILLISECONDS);
-            return groupList.getGroupList();
-        } catch (ExecutionException | TimeoutException | InterruptedException e) {
-            log.error("web3sdk execute failed", e);
-            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        }
-    }
-
-    /**
-     * get account Credentials
-     *
-     * @return Credentials return null if error
-     */
-    public static Credentials getCredentials(FiscoConfig fiscoConfig) {
-        log.debug("begin init Credentials");
-
-        Credentials credentials = GenCredential.create(fiscoConfig.getAccount());
-        if (null == credentials) {
-            log.error("init Credentials failed");
-            return null;
-        }
-
-        log.info("init Credentials success");
-        return credentials;
     }
 
     /**
@@ -559,7 +459,7 @@ public class Web3SDK2Wrapper {
     }
 
     private static Map<String, Map<String, String>> getNodeViews(Web3j web3j) throws IOException {
-        JsonNode jsonNode = OBJECT_MAPPER.readTree(web3j.getConsensusStatus().sendForReturnString());
+        JsonNode jsonNode = JsonHelper.getObjectMapper().readTree(web3j.getConsensusStatus().sendForReturnString());
         Map<String, Map<String, String>> nodeViews = new HashMap<>();
         for (JsonNode node : jsonNode) {
             if (node.isArray()) {
@@ -570,7 +470,7 @@ public class Web3SDK2Wrapper {
     }
 
     private static Map<String, Map<String, String>> getBlockNums(Web3j web3j) throws IOException {
-        JsonNode jsonObj = OBJECT_MAPPER.readTree(web3j.getSyncStatus().sendForReturnString());
+        JsonNode jsonObj = JsonHelper.getObjectMapper().readTree(web3j.getSyncStatus().sendForReturnString());
         Map<String, Map<String, String>> nodeBlockNums = new HashMap<>();
 
         Map<String, String> map = new HashMap<>();
