@@ -91,11 +91,12 @@ export default {
           this.tableData = res.data.data.pageData
           // this.total = res.data.totalCount
         } else {
-          this.$message({
+          this.$store.commit(this.$message({
             type: 'warning',
             message: this.$t('tableCont.getDataError'),
-            duration: 5000
-          })
+            duration: 0,
+            showClose: true
+          }))
         }
       })
       this.loading = false
