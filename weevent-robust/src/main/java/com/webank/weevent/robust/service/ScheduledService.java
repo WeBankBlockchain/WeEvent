@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,6 +20,7 @@ import com.webank.weevent.robust.service.interfaces.MqttGateway;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
 import com.webank.weevent.sdk.SendResult;
+import com.webank.weevent.sdk.WeEvent;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -167,14 +169,14 @@ public class ScheduledService implements AutoCloseable {
     }
 
     private void stompSubscribe() {
-        String callUrl = "ws://" + url + "/weevent/stomp";
+        String callUrl = "ws://" + url + "/weevent-broker/stomp";
         StompSessionHandlerAdapter handlerAdapter = this.getStompSessionHandlerAdapter();
         this.socketStompClient.connect(callUrl, handlerAdapter);
     }
 
     private void restfulPublic() {
         // use the rest request to post a message
-        String callUrl = HTTP_HEADER + this.url + "/weevent/rest/publish?topic={topic}&content={content}";
+        String callUrl = HTTP_HEADER + this.url + "/weevent-broker/rest/publish?topic={topic}&content={content}";
         ResponseEntity<String> rsp = this.restTemplate.getForEntity(
                 callUrl,
                 String.class,
@@ -188,7 +190,7 @@ public class ScheduledService implements AutoCloseable {
 
     private void jsonRpcPublish() throws BrokerException {
         // use jsonRpc publish topic
-        SendResult publish = brokerRpc.publish(JSON_RPC_TOPIC, "Hello JsonRpc !".getBytes());
+        SendResult publish = brokerRpc.publish(JSON_RPC_TOPIC, WeEvent.DEFAULT_GROUP_ID, "Hello JsonRpc!".getBytes(), new HashMap<>());
         log.info("jsonRpc send message:EventId{}" + publish.getEventId());
         if (publish.getStatus() == SendResult.SendResultStatus.SUCCESS) {
             countTimes(jsonrpcSendMap, this.getFormatTime(new Date()));
@@ -321,7 +323,7 @@ public class ScheduledService implements AutoCloseable {
                         WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
                         stompClient.setMessageConverter(new StringMessageConverter());
                         stompClient.setTaskScheduler(taskScheduler);
-                        ListenableFuture<StompSession> future = stompClient.connect("ws://" + url + "/weevent/stomp", this);
+                        ListenableFuture<StompSession> future = stompClient.connect("ws://" + url + "/weevent-broker/stomp", this);
                         stompSession = future.get();
                         // stomp subscribe
                         stompSession.setAutoReceipt(true);

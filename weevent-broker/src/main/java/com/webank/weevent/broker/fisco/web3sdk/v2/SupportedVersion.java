@@ -17,6 +17,7 @@ import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic;
 import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.TopicController;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
+import com.webank.weevent.sdk.JsonHelper;
 import com.webank.weevent.sdk.TopicInfo;
 import com.webank.weevent.sdk.WeEvent;
 
@@ -203,7 +204,7 @@ public class SupportedVersion {
                 String topicName = input.getValue1();
                 WeEvent event = new WeEvent(topicName,
                         input.getValue2().getBytes(StandardCharsets.UTF_8),
-                        DataTypeUtils.json2Map(input.getValue3()));
+                        JsonHelper.json2Map(input.getValue3()));
                 event.setEventId(DataTypeUtils.encodeEventId(topicName,
                         receipt.getBlockNumber().intValue(),
                         output.getValue1().intValue()));

@@ -36,7 +36,7 @@ public class WeEventClientGroupIdTest {
                 this.testName.getMethodName());
 
         this.extensions.put(WeEvent.WeEvent_TAG, "test");
-        this.weEventClient = IWeEventClient.build("http://localhost:7000/weevent", WeEvent.DEFAULT_GROUP_ID);
+        this.weEventClient = new IWeEventClient.Builder().brokerUrl("http://localhost:7000/weevent-broker").groupId(WeEvent.DEFAULT_GROUP_ID).build();
         this.weEventClient.open(this.topicName);
     }
 
