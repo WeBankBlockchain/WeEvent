@@ -131,11 +131,12 @@ export default {
             }
             // vm.listGroup()
           } else {
-            vm.$message({
+            vm.$store.commit(vm.$message({
               type: 'warning',
               message: vm.$t('common.noServer'),
-              duration: 5000
-            })
+              duration: 0,
+              showClose: true
+            }))
             vm.$router.push('./servers')
           }
         }

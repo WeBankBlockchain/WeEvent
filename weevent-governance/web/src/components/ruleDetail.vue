@@ -102,7 +102,6 @@
           </el-select>
           <p class='no_dbList' v-show="dbList.length === 0">{{$t('ruleDetail.guideURL')}} <span @click="creatDB" >{{$t('ruleDetail.setGuide')}}</span></p>
         </el-form-item>
-        <!-- 这里 -->
         <el-form-item :label="$t('rule.tableName')" v-show="sqlOption.ruleDataBaseId && sqlOption.conditionType === '2'" prop='tableName'>
           <el-input v-model.trim='sqlOption.tableName'  autocomplete="off" :placeholder="$t('rule.inputTableName')"></el-input>
         </el-form-item>
@@ -129,6 +128,7 @@
 import API from '../API/resource'
 import tree from './tree.vue'
 import { checkRule } from '../utils/checkRule'
+import { checkLoad } from '../utils/checkLoad'
 export default {
   data () {
     var ruleName = (rule, value, callback) => {
@@ -146,7 +146,15 @@ export default {
           try {
             var obj = JSON.parse(value)
             if (typeof obj === 'object' && obj) {
-              callback()
+              if (this.fullSQL) {
+                if (checkLoad(value, this.ruleItem.payloadMap, this.sqlOption.functionArray, this.sqlOption.selectField)) {
+                  callback()
+                } else {
+                  callback(new Error(this.$t('rule.errorPayLoad')))
+                }
+              } else {
+                callback()
+              }
             } else {
               callback(new Error(this.$t('rule.errorType')))
             }
@@ -318,16 +326,18 @@ export default {
     createRule (nVal) {
       if (!nVal) {
         let vm = this
-        for (let key in vm.rule) {
-          vm.rule[key] = vm.ruleItem[key]
-          if (key === 'payloadMap') {
-            vm.rule[key] = JSON.stringify(vm.ruleItem.payloadMap)
+        vm.$nextTick(fun => {
+          for (let key in vm.rule) {
+            if (key === 'payloadMap') {
+              vm.rule.payloadMap = ''
+              vm.rule.payloadMap = JSON.stringify(vm.ruleItem.payloadMap)
+            } else if (key === 'payloadType') {
+              vm.rule[key] = vm.ruleItem.payloadType.toString()
+            } else {
+              vm.rule[key] = vm.ruleItem[key]
+            }
           }
-          if (key === 'payloadType') {
-            vm.rule[key] = vm.ruleItem.payloadType.toString()
-          }
-        }
-
+        })
         vm.$refs.rule.resetFields()
       }
     },
@@ -342,28 +352,30 @@ export default {
             war.style.display = 'none'
           }
         }
-        for (let key in vm.sqlOption) {
-          if (key === 'selectField') {
-            if (vm.ruleItem.selectField) {
-              vm.sqlOption.selectField = [].concat(vm.ruleItem.selectField.split(','))
-              let listColumnName = []
-              for (let key in vm.columnName) {
-                listColumnName.push(key)
+        vm.$nextTick(fun => {
+          for (let key in vm.sqlOption) {
+            if (key === 'selectField') {
+              if (vm.ruleItem.selectField) {
+                vm.sqlOption.selectField = [].concat(vm.ruleItem.selectField.split(','))
+                let listColumnName = []
+                for (let key in vm.columnName) {
+                  listColumnName.push(key)
+                }
+                if (vm.sqlOption.selectField.length === listColumnName.length + 1) {
+                  vm.selAll = true
+                } else {
+                  vm.selAll = false
+                }
               }
-              if (vm.sqlOption.selectField.length === listColumnName.length + 1) {
-                vm.selAll = true
-              } else {
-                vm.selAll = false
-              }
-            }
-          } else {
-            if (key === 'conditionFieldJson') {
-              vm.sqlOption.conditionFieldJson = [].concat(vm.ruleItem.conditionFieldJson)
             } else {
-              vm.sqlOption[key] = vm.ruleItem[key]
+              if (key === 'conditionFieldJson') {
+                vm.sqlOption.conditionFieldJson = [].concat(vm.ruleItem.conditionFieldJson)
+              } else {
+                vm.sqlOption[key] = vm.ruleItem[key]
+              }
             }
           }
-        }
+        })
         vm.$refs.sql.resetFields()
       }
     },
@@ -563,12 +575,12 @@ export default {
             }
           }
           for (let key in vm.rule) {
-            vm.rule[key] = res.data.data[key]
             if (key === 'payloadMap') {
               vm.rule[key] = JSON.stringify(res.data.data.payloadMap)
-            }
-            if (key === 'payloadType') {
+            } else if (key === 'payloadType') {
               vm.rule[key] = res.data.data.payloadType.toString()
+            } else {
+              vm.rule[key] = res.data.data[key]
             }
           }
           for (let key in vm.sqlOption) {
@@ -694,6 +706,8 @@ export default {
             vm.checkSQLData(vm.sqlOption.conditionFieldJson, 0, '')
             vm.getRuleData()
             vm.sqlOption.functionArray = JSON.stringify(vm.functionArray)
+          } else {
+            vm.sqlOption.functionArray = '[]'
           }
           if (vm.sqlOption.conditionType === '1') {
             vm.sqlOption.ruleDataBaseId = ''
@@ -717,15 +731,16 @@ export default {
               type: 'success',
               message: vm.$t('common.editSuccess')
             })
+            vm.getDetail()
             vm.createRule = false
             vm.createSQL = false
-            vm.getDetail()
           } else {
-            vm.$message({
+            vm.$store.commit(vm.$message({
               type: 'warning',
               message: res.data.message,
-              duration: 5000
-            })
+              duration: 0,
+              showClose: true
+            }))
           }
         })
       })
