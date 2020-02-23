@@ -1,7 +1,6 @@
 println("Notice: current gradle version is " + gradle.gradleVersion + ", WeEvent support gradle version in [4.10, 5.0)")
 
 ext {
-    // ----- org.springframework -----
     // spring
     spring5Version = "5.1.0.RELEASE"
     // data.spring-data-commons
@@ -68,7 +67,7 @@ ext {
     // Java-WebSocket
     WebSocketVersion = "1.4.0"
     // JWTVersion
-    JWTVersion = "3.8.0";
+    JWTVersion = "3.8.0"
 }
 
 buildscript {

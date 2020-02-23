@@ -18,7 +18,7 @@
           <span class='forget' @click='changePass'>{{$t('userSet.forgetPassWord')}}</span>
         </el-form-item>
         <el-form-item>
-          <el-button type='primary' @click='onSubmit("loginForm")' @keyup.enter.native='onSubmit("loginForm")'>{{$t('userSet.login')}}</el-button>
+          <el-button type='primary' @click='onSubmit()'>{{$t('userSet.login')}}</el-button>
           <span class='registered_btn' @click='registered'>{{$t('userSet.quickRegistered')}}</span>
         </el-form-item>
       </el-form>
@@ -85,14 +85,14 @@ export default {
     }
   },
   methods: {
-    onSubmit (formName) {
+    onSubmit () {
       let sha256 = require('js-sha256').sha256
       let password = sha256(this.form.name + this.form.passWord)
       let data = {
         'username': this.form.name,
         'password': password.toUpperCase()
       }
-      this.$refs[formName].validate((valid) => {
+      this.$refs.loginForm.validate((valid) => {
         if (valid) {
           // login
           API.login(data).then(res => {
@@ -105,8 +105,8 @@ export default {
             } else if (res.data.code === 202034) {
               this.form.passWord = ''
               this.show_error = true
-              this.$refs[formName].fields[1].$el.style.borderColor = '#000'
-              this.$refs[formName].fields[1].$el.children[0].children[0].children[0].focus()
+              this.$refs.loginForm.fields[1].$el.style.borderColor = '#000'
+              this.$refs.loginForm.fields[1].$el.children[0].children[0].children[0].focus()
             }
           })
         } else {
@@ -122,15 +122,19 @@ export default {
       API.forget(url).then(res => {
         if (res.status === 200) {
           if (res.data.status === 400) {
-            this.$message({
+            this.$store.commit(this.$message({
               type: 'warning',
-              message: this.$t('userSet.noUser')
-            })
+              message: this.$t('userSet.noUser'),
+              duration: 0,
+              showClose: true
+            }))
           } else if (res.data.status === 100107 || res.data.status === 100102) {
-            this.$message({
+            this.$store.commit(this.$message({
               type: 'warning',
-              message: this.$t('userSet.sendMailFail')
-            })
+              message: this.$t('userSet.sendMailFail'),
+              duration: 0,
+              showClose: true
+            }))
           } else {
             this.$message({
               type: 'success',
@@ -138,10 +142,12 @@ export default {
             })
           }
         } else {
-          this.$message({
+          this.$store.commit(this.$message({
             type: 'warning',
-            message: this.$t('userSet.sendMailFail')
-          })
+            message: this.$t('userSet.sendMailFail'),
+            duration: 0,
+            showClose: true
+          }))
         }
       })
     },
@@ -157,7 +163,7 @@ export default {
     this.$nextTick(fun => {
       document.addEventListener('keyup', function (e) {
         if (e.keyCode === 13) {
-          vm.onSubmit('loginForm')
+          vm.onSubmit()
         }
       })
     })

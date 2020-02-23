@@ -51,25 +51,22 @@ export default {
     }
   },
   watch: {
-    brokerId () {
-      if (localStorage.getItem('groupId')) {
+    groupId (nVal) {
+      if (String(nVal) !== '-1') {
         this.general()
       }
-    },
-    groupId () {
-      this.general()
     }
   },
   mounted () {
     setTimeout(fun => {
-      if (localStorage.getItem('brokerId')) {
+      if (this.brokerId) {
         this.general()
       }
     }, 500)
   },
   methods: {
     general () {
-      let url = '/' + localStorage.getItem('groupId') + '?brokerId=' + localStorage.getItem('brokerId')
+      let url = '/' + this.groupId + '?brokerId=' + this.brokerId
       API.general(url).then(res => {
         if (res.data.code === 0) {
           this.node = res.data.data.nodeCount

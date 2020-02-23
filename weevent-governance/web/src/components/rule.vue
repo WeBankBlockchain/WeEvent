@@ -80,7 +80,7 @@
                     <p><span>{{$t('ruleStatic.notHitTimes')}} :</span>{{ruleStatic.notHitTimes}}</p>
                     <p><span>{{$t('ruleStatic.successTimes')}} :</span>{{ruleStatic.dataFlowSuccess}}</p>
                     <p><span>{{$t('ruleStatic.failTimes')}} :</span>{{ruleStatic.dataFlowFail}}</p>
-                    <p><span>{{$t('ruleStatic.runningStatus')}} :</span>{{ruleStatic.status === 0? $t('rule.notRun') : $t('rule.run')}}</p>
+                    <p><span>{{$t('ruleStatic.runningStatus')}} :</span>{{ruleStatic.status === 0 ? $t('rule.notRun') : $t('rule.run')}}</p>
                   </div>
                   <div slot="reference">
                     <span v-show="scope.row.status === 1" style='font-size:14px'><i class='isActive'></i>{{$t('rule.start')}}</span>
@@ -123,7 +123,10 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item :label="$t('rule.payloadMap')  + ' :'" prop='payloadMap'>
-          <el-input v-model="rule.payloadMap" size='small' type='textarea' :rows='5' :placeholder="$t('rule.enterPayload')" autocomplete="off"></el-input>
+          <el-input v-model="rule.payloadMap" size='small' type='textarea' :rows='4' :placeholder="$t('rule.enterPayload')" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item :label="$t('rule.ruleDescription')  + ' :'" >
+          <el-input v-model="rule.ruleDescription" size='small' type='textarea' :rows='3' autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -173,7 +176,8 @@ export default {
         'ruleName': '',
         'payloadType': '1',
         'payloadMap': '',
-        'conditionType': '1'
+        'conditionType': '1',
+        'ruleDescription': ''
       },
       ruleStatic: {},
       rules: {
@@ -195,17 +199,12 @@ export default {
     }
   },
   watch: {
-    brokerId () {
-      if (localStorage.getItem('groupId')) {
+    groupId (nVal) {
+      if (nVal !== '-1') {
         this.pageNum = 1
         this.ruleName = ''
         this.getRuleList()
       }
-    },
-    groupId () {
-      this.pageNum = 1
-      this.ruleName = ''
-      this.getRuleList()
     },
     createRule (nVal) {
       if (!nVal) {
@@ -274,10 +273,12 @@ export default {
             message: this.$t('rule.isStart')
           })
         } else {
-          this.$message({
+          this.$store.commit(this.$message({
             type: 'warning',
-            message: res.data.message
-          })
+            message: res.data.message,
+            duration: 0,
+            showClose: true
+          }))
         }
       })
     },
@@ -295,10 +296,12 @@ export default {
             message: this.$t('rule.isStop')
           })
         } else {
-          this.$message({
+          this.$store.commit(this.$message({
             type: 'warning',
-            message: res.data.message
-          })
+            message: res.data.message,
+            duration: 0,
+            showClose: true
+          }))
         }
       })
     },
@@ -321,10 +324,12 @@ export default {
               message: vm.$t('rule.hasDelete')
             })
           } else {
-            vm.$message({
+            this.$store.commit(this.$message({
               type: 'warning',
-              message: res.data.message
-            })
+              message: res.data.message,
+              duration: 0,
+              showClose: true
+            }))
           }
         })
       }).catch(() => {})
@@ -343,7 +348,8 @@ export default {
             'payloadType': vm.rule.payloadType,
             'payloadMap': JSON.parse(this.rule.payloadMap),
             'brokerId': localStorage.getItem('brokerId'),
-            'groupId': localStorage.getItem('groupId')
+            'groupId': localStorage.getItem('groupId'),
+            'ruleDescription': vm.rule.ruleDescription
           }
           API.ruleAdd(data).then(res => {
             if (res.data.status === 200) {
@@ -356,10 +362,12 @@ export default {
               this.$store.commit('set_menu', [this.$t('sideBar.engine'), this.$t('sideBar.ruleMana'), this.$t('sideBar.ruleDetail')])
               this.$router.push('./ruleDetail')
             } else {
-              this.$message({
+              this.$store.commit(this.$message({
                 type: 'warning',
-                message: res.data.message
-              })
+                message: res.data.message,
+                duration: 0,
+                showClose: true
+              }))
             }
             vm.createRule = false
           })
@@ -376,7 +384,9 @@ export default {
         if (res.data.errorCode === 0) {
           let list = res.data.data.statisticRuleMap
           for (let key in list) {
-            vm.ruleStatic = list[key]
+            if (key === String(id)) {
+              vm.ruleStatic = list[key]
+            }
           }
         }
       })

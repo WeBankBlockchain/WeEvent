@@ -71,10 +71,12 @@ export default {
               })
               this.login(data)
             } else {
-              this.$message({
+              this.$store.commit(this.$message({
                 type: 'warning',
-                message: this.$t('common.operFail')
-              })
+                message: this.$t('common.operFail'),
+                duration: 0,
+                showClose: true
+              }))
             }
           })
         } else {
@@ -88,10 +90,12 @@ export default {
           localStorage.setItem('user', res.data.data.username)
           this.$router.push('./index')
         } else {
-          this.$message({
+          this.$store.commit(this.$message({
             type: 'warning',
-            message: this.$t('userSet.loginFail')
-          })
+            message: this.$t('userSet.loginFail'),
+            duration: 0,
+            showClose: true
+          }))
         }
       })
     }

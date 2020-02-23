@@ -131,44 +131,49 @@ export default {
             Highcharts.chart('chart', vm.option).showNoData()
             return
           }
-          let topic = []
-          vm.option.series = []
-          for (var key in resData) {
-            let item = {
-              'name': key,
-              'data': resData[key]
-            }
-            if (e) {
-              if (vm.option.series.length < 5) {
+          let chart = new Promise(function (resolve, reject) {
+            let topic = []
+            vm.option.series = []
+            for (var key in resData) {
+              let item = {
+                'name': key,
+                'data': resData[key]
+              }
+              if (e) {
+                if (vm.option.series.length < 5) {
+                  topic.push(key)
+                  vm.option.series.push(item)
+                }
+              } else {
                 topic.push(key)
                 vm.option.series.push(item)
               }
-            } else {
-              topic.push(key)
-              vm.option.series.push(item)
             }
-          }
-          let max = 10
-          vm.option.series.forEach(x => {
-            x.data.forEach(y => {
-              max = y > max ? y : max
+            let max = 10
+            vm.option.series.forEach(x => {
+              x.data.forEach(y => {
+                max = y > max ? y : max
+              })
             })
+            vm.option.yAxis.max = max
+            vm.topic = [].concat(topic)
+            resolve(vm.option)
           })
-          vm.option.yAxis.max = max
-          vm.topic = [].concat(topic)
-          setTimeout(fun => {
+          chart.then(e => {
             Highcharts.setOptions({
               lang: {
                 thousandsSep: ','
               }
             })
             Highcharts.chart('chart', vm.option)
-          }, 500)
-        } else {
-          vm.$message({
-            type: 'warning',
-            message: this.$t('tableCont.getDataError')
           })
+        } else {
+          vm.$store.commit(vm.$message({
+            type: 'warning',
+            message: this.$t('tableCont.getDataError'),
+            duration: 0,
+            showClose: true
+          }))
           Highcharts.chart('chart', vm.option).showNoData()
         }
       })
@@ -194,6 +199,12 @@ export default {
     },
     selectChange (e) {
       if (!e) {
+        let vm = this
+        if (vm.topic.length === 0) {
+          for (let i = 0; i < 5; i++) {
+            vm.topic.push(vm.topicList[i])
+          }
+        }
         this.beginDate(false)
       }
     }
@@ -210,11 +221,10 @@ export default {
     }
   },
   watch: {
-    brokerId () {
-      this.beginDate(true)
-    },
-    groupId () {
-      this.beginDate(true)
+    groupId (nVal) {
+      if (nVal !== '-1') {
+        this.beginDate(true)
+      }
     },
     lang () {
       this.option.lang.noData = this.$t('common.noData')

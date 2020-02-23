@@ -84,4 +84,10 @@ public class RuleEngineBase extends BaseEntity {
     //0 means not deleted ,others means deleted
     @Column(name = "delete_at",nullable = false, columnDefinition = "BIGINT(16)")
     private Long deleteAt = 0L;
+
+    @Column(name = "rule_description")
+    private String ruleDescription;
+
+    @Column(name = "table_name")
+    private String tableName;
 }

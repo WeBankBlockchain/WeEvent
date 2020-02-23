@@ -12,7 +12,7 @@ APP_PARAMS="-Xbootclasspath/a:./conf:./html -Djava.security.egd=file:/dev/./uran
 ###############################################################################
 # The following is common logic for start a java application. DO NOT EDIT IT SOLELY.
 ###############################################################################
-JAVA_OPTS="-Xverify:none -XX:+DisableExplicitGC -XX:TieredStopAtLevel=1 -XX:+UseConcMarkSweepGC -XX:+UseCMSCompactAtFullCollection"
+JAVA_OPTS="-Xverify:none -XX:+DisableExplicitGC -XX:TieredStopAtLevel=1"
 
 current_pid=
 #operating system total physical memory, unit MB.

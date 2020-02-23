@@ -76,19 +76,8 @@ export default {
     }
   },
   methods: {
-    // indexChange (e) {
-    //   this.pageIndex = e
-    //   this.getNode()
-    // },
-    // sizeChange (e) {
-    //   this.pageSize = e
-    //   this.pageIndex = 1
-    //   this.getNode()
-    // },
     update () {
       this.loading = true
-      // this.pageSize = 10
-      // this.pageIndex = 1
       setTimeout(fun => {
         this.getNode()
       }, 1000)
@@ -102,10 +91,12 @@ export default {
           this.tableData = res.data.data.pageData
           // this.total = res.data.totalCount
         } else {
-          this.$message({
+          this.$store.commit(this.$message({
             type: 'warning',
-            message: this.$t('tableCont.getDataError')
-          })
+            message: this.$t('tableCont.getDataError'),
+            duration: 0,
+            showClose: true
+          }))
         }
       })
       this.loading = false
@@ -123,11 +114,10 @@ export default {
     }
   },
   watch: {
-    brokerId () {
-      this.update()
-    },
-    groupId () {
-      this.update()
+    groupId (nVal) {
+      if (String(nVal) !== '-1') {
+        this.update()
+      }
     }
   }
 }
