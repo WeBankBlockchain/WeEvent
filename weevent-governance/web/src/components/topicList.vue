@@ -256,25 +256,28 @@ export default {
               })
               vm.refresh()
             } else if (res.data.status === 100109) {
-              vm.$message({
-                type: 'error',
+              vm.$store.commit(vm.$message({
+                type: 'warning',
                 message: this.$t('tableCont.exitTopic'),
-                duration: 5000
-              })
+                duration: 0,
+                showClose: true
+              }))
             } else {
-              vm.$message({
-                type: 'error',
+              vm.$store.commit(vm.$message({
+                type: 'warning',
                 message: res.data.message,
-                duration: 5000
-              })
+                duration: 0,
+                showClose: true
+              }))
             }
             vm.dialogFormVisible = false
           }).catch(e => {
-            vm.$message({
-              type: 'error',
+            vm.$store.commit(vm.$message({
+              type: 'warning',
               message: this.$t('common.addFail'),
-              duration: 5000
-            })
+              duration: 0,
+              showClose: true
+            }))
           })
           vm.dialogFormVisible = false
         } else {
