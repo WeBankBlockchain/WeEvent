@@ -223,7 +223,8 @@ module.exports = {
     'connectSuccess': 'JDBC Connect Success',
     'connectFailed': 'JDBC Connect Failed',
     'databaseType': 'Databae Type',
-    'connectTimeOut': 'Please check the operations of database'
+    'connectTimeOut': 'Please check the operations of database',
+    'errorPayLoad': 'please do not delete or change the type of key that had been using'
   },
   ruleDetail: {
     'guideDetail': 'Data Guide Detail',

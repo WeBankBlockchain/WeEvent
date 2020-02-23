@@ -273,11 +273,12 @@ export default {
             message: this.$t('rule.isStart')
           })
         } else {
-          this.$message({
+          this.$store.commit(this.$message({
             type: 'warning',
             message: res.data.message,
-            duration: 5000
-          })
+            duration: 0,
+            showClose: true
+          }))
         }
       })
     },
@@ -295,11 +296,12 @@ export default {
             message: this.$t('rule.isStop')
           })
         } else {
-          this.$message({
+          this.$store.commit(this.$message({
             type: 'warning',
             message: res.data.message,
-            duration: 5000
-          })
+            duration: 0,
+            showClose: true
+          }))
         }
       })
     },
@@ -322,11 +324,12 @@ export default {
               message: vm.$t('rule.hasDelete')
             })
           } else {
-            vm.$message({
+            this.$store.commit(this.$message({
               type: 'warning',
               message: res.data.message,
-              duration: 5000
-            })
+              duration: 0,
+              showClose: true
+            }))
           }
         })
       }).catch(() => {})
@@ -359,11 +362,12 @@ export default {
               this.$store.commit('set_menu', [this.$t('sideBar.engine'), this.$t('sideBar.ruleMana'), this.$t('sideBar.ruleDetail')])
               this.$router.push('./ruleDetail')
             } else {
-              this.$message({
+              this.$store.commit(this.$message({
                 type: 'warning',
                 message: res.data.message,
-                duration: 5000
-              })
+                duration: 0,
+                showClose: true
+              }))
             }
             vm.createRule = false
           })

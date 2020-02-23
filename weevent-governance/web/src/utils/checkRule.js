@@ -1,5 +1,5 @@
 import i18n from '../i18n'
-import { checkCurrentData, checkCurrentTime } from './formatTime'
+import { checkCurrentData, checkCurrentTime } from './formatTime.js'
 export const checkRule = (e, s) => {
   let pass = true
   let nodes = document.getElementsByClassName('tree_content')
@@ -69,7 +69,6 @@ export const checkRule = (e, s) => {
               } else {
                 if (operator !== '!=' && operator !== '==') {
                   warning = i18n.messages[lang].ruleCheck.errorOperator
-                  console.log(i18n.messages[lang].ruleCheck)
                   pass = false
                 } else {
                   if (item.functionType === 'substring') {

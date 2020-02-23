@@ -134,11 +134,12 @@ export default{
           }
         })
         Highcharts.chart('chart', vm.option)
-        this.$message({
+        this.$store.commit(this.$message({
           type: 'warning',
           message: e.msg,
-          duration: 5000
-        })
+          duration: 0,
+          showClose: true
+        }))
       })
     },
     getTime (e) {
