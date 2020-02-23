@@ -3,7 +3,6 @@ package com.webank.weevent.broker.fisco.util;
 import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 

@@ -183,6 +183,7 @@ public class AMOPChannel extends ChannelPushCallback {
 
             default:
                 log.error("unknown file event type on channel");
+                break;
         }
     }
 

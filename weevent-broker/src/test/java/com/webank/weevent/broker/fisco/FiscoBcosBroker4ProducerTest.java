@@ -15,7 +15,6 @@ import com.webank.weevent.JUnitTestBase;
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.dto.ContractContext;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
-import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDK2Wrapper;
 import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDKConnector;
 import com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic;
 import com.webank.weevent.broker.plugin.IProducer;

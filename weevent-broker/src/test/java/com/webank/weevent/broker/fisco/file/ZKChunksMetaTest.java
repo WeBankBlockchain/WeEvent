@@ -6,6 +6,7 @@ import com.webank.weevent.broker.fisco.util.WeEventUtils;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.FileChunksMeta;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -18,12 +19,17 @@ import org.junit.Test;
  * @version 1.0
  * @since <pre>02/18/2020</pre>
  */
+@Slf4j
 public class ZKChunksMetaTest extends JUnitTestBase {
     private ZKChunksMeta zkChunksMeta;
     private FileChunksMeta fileChunksMeta;
 
     @Before
     public void before() throws Exception {
+        log.info("=============================={}.{}==============================",
+                this.getClass().getSimpleName(),
+                this.testName.getMethodName());
+
         this.zkChunksMeta = BrokerApplication.applicationContext.getBean(ZKChunksMeta.class);
 
         this.fileChunksMeta = new FileChunksMeta(WeEventUtils.generateUuid(),

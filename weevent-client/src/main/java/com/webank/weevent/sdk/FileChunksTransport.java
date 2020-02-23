@@ -50,10 +50,6 @@ public class FileChunksTransport {
 
     public SendResult upload(String localFile, String topic, String groupId) throws BrokerException, IOException {
         log.info("try to upload file {}", localFile);
-        SendResult sendResult = new SendResult(SendResult.SendResultStatus.SUCCESS);
-        sendResult.setTopic(topic);
-        String fileId = "";
-        String eventId = "";
 
         File file = new File(localFile);
         String md5;
@@ -65,6 +61,7 @@ public class FileChunksTransport {
         }
 
         // get file initial information
+        String fileId;
         try (RandomAccessFile f = new RandomAccessFile(file, "r")) {
             FileChunksMeta fileChunksMeta = new FileChunksMeta("",
                     file.getName(),

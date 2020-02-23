@@ -303,6 +303,7 @@ public class WebSocketTransport extends WebSocketClient {
 
             default:
                 log.error("unknown STOMP command: {}", command);
+                break;
         }
     }
 
