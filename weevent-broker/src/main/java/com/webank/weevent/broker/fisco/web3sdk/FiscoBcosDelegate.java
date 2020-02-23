@@ -15,6 +15,7 @@ import com.webank.weevent.broker.fisco.dto.ContractContext;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.broker.fisco.util.LRUCache;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
+import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDKConnector;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
 import com.webank.weevent.protocol.rest.entity.TbBlock;
 import com.webank.weevent.protocol.rest.entity.TbNode;
@@ -99,27 +100,9 @@ public class FiscoBcosDelegate {
         }
     }
 
-    public static ThreadPoolTaskExecutor initThreadPool(FiscoConfig fiscoConfig) {
-        // init thread pool
-        ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
-        pool.setThreadNamePrefix("web3sdk-");
-        pool.setCorePoolSize(fiscoConfig.getWeb3sdkCorePoolSize());
-        pool.setMaxPoolSize(fiscoConfig.getWeb3sdkMaxPoolSize());
-        // queue conflict with thread pool scale up, forbid it
-        pool.setQueueCapacity(0);
-        pool.setKeepAliveSeconds(fiscoConfig.getWeb3sdkKeepAliveSeconds());
-        // abort policy
-        pool.setRejectedExecutionHandler(null);
-        pool.setDaemon(true);
-        pool.initialize();
-
-        log.info("init ThreadPoolTaskExecutor");
-        return pool;
-    }
-
     public void initProxy(FiscoConfig config) throws BrokerException {
         this.fiscoConfig = config;
-        threadPool = initThreadPool(config);
+        threadPool = Web3SDKConnector.initThreadPool(config);
         timeout = config.getWeb3sdkTimeout();
 
         if (StringUtils.isBlank(config.getVersion())) {

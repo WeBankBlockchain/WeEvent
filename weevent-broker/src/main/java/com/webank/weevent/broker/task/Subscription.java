@@ -235,6 +235,9 @@ public class Subscription {
         StoppableTask.idle(this.idleTime);
 
         stopHistory();
+
+        // call onClose
+        this.notifyTask.getConsumerListener().onClose(this.uuid);
     }
 
     public synchronized void stopHistory() {
