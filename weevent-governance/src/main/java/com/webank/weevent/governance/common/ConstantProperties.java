@@ -37,12 +37,12 @@ public class ConstantProperties {
 
 
     //process url begin ========================================================
-    public final static String PROCESSOR_INSERT = "/processor/insert";
-    public final static String PROCESSOR_DELETE_CEP_RULE = "/processor/deleteCEPRuleById";
-    public final static String PROCESSOR_UPDATE_CEP_RULE = "/processor/updateCEPRuleById";
-    public final static String PROCESSOR_CHECK_WHERE_CONDITION = "/processor/checkWhereCondition";
-    public final static String PROCESSOR_START_CEP_RULE = "/processor/startCEPRule";
-    public final static String PROCESSOR_STOP_CEP_RULE = "/processor/stopCEPRuleById";
+    public final static String PROCESSOR_INSERT = "/insert";
+    public final static String PROCESSOR_DELETE_CEP_RULE = "/deleteCEPRuleById";
+    public final static String PROCESSOR_UPDATE_CEP_RULE = "/updateCEPRuleById";
+    public final static String PROCESSOR_CHECK_WHERE_CONDITION = "/checkWhereCondition";
+    public final static String PROCESSOR_START_CEP_RULE = "/startCEPRule";
+    public final static String PROCESSOR_STOP_CEP_RULE = "/stopCEPRuleById";
 
 
     //process url end ===========================================================

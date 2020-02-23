@@ -29,7 +29,6 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
-import org.springframework.util.LinkedMultiValueMap;
 
 
 /**
@@ -73,18 +72,18 @@ public class WebSocketTransport extends WebSocketClient {
     // is reconnect thread already exist
     private boolean connectFlag = false;
 
-    class ResponseFuture implements Future<Message> {
+    class ResponseFuture implements Future<Message<?>> {
         private CountDownLatch latch = new CountDownLatch(1);
 
         private Long key;
-        private Message response;
+        private Message<?> response;
 
         ResponseFuture(Long key) {
             this.key = key;
             futures.put(this.key, this);
         }
 
-        public void setResponse(Message response) {
+        public void setResponse(Message<?> response) {
             this.response = response;
             futures.remove(this.key);
 
@@ -109,13 +108,13 @@ public class WebSocketTransport extends WebSocketClient {
         }
 
         @Override
-        public Message get() throws InterruptedException {
+        public Message<?> get() throws InterruptedException {
             latch.await();
             return this.response;
         }
 
         @Override
-        public Message get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
+        public Message<?> get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
             if (latch.await(timeout, unit)) {
                 if (this.response != null) {
                     return this.response;
@@ -150,7 +149,7 @@ public class WebSocketTransport extends WebSocketClient {
     }
 
     // Stomp command
-    public Message stompRequest(String req, Long asyncSeq) throws JMSException {
+    public Message<?> stompRequest(String req, Long asyncSeq) throws JMSException {
         log.info("stomp request, seq: {} size: {}", asyncSeq, req.length());
 
         try {
@@ -171,34 +170,32 @@ public class WebSocketTransport extends WebSocketClient {
     }
 
 
-    public boolean stompConnect(String userName, String password) throws JMSException {
+    public void stompConnect(String userName, String password) throws JMSException {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         String req = stompCommand.encodeConnect(userName, password);
 
         this.sequence2Id.put(Long.toString(0L), 0L);
-        Message stompResponse = this.stompRequest(req, 0L);
+        Message<?> stompResponse = this.stompRequest(req, 0L);
+        StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(stompResponse);
+        stompCommand.checkError(stompHeaderAccessor);
         this.account = Pair.of(userName, password);
 
         // initialize connection context
         this.cleanup();
         this.receiptId2SubscriptionId.clear();
         this.subscriptionId2ReceiptId.clear();
-        this.connected = !stompCommand.isError(stompResponse);
-        return connected;
+        this.connected = true;
     }
 
-    public boolean stompDisconnect() throws JMSException {
+    public void stompDisconnect() throws JMSException {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         Long asyncSeq = this.sequence.incrementAndGet();
         String req = stompCommand.encodeDisConnect(asyncSeq);
         this.sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
 
-        Message stompResponse = this.stompRequest(req, asyncSeq);
-        boolean flag = stompCommand.isError(stompResponse);
-        if (flag) {
-            this.connected = false;
-        }
-        return flag;
+        Message<?> stompResponse = this.stompRequest(req, asyncSeq);
+        StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(stompResponse);
+        stompCommand.checkError(stompHeaderAccessor);
     }
 
     // return receipt-id
@@ -217,27 +214,13 @@ public class WebSocketTransport extends WebSocketClient {
             String req = stompCommand.encodeSend(asyncSeq, topic, weEvent);
             this.sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
 
-            Message stompResponse = this.stompRequest(req, asyncSeq);
-            if (stompCommand.isError(stompResponse)) {
-                log.info("STOMP ERROR received: {}", stompResponse.toString());
-
-                if (stompResponse.getHeaders().containsKey("message")) {
-                    throw new JMSException(stompResponse.getHeaders().get("message").toString());
-                } else {
-                    throw WeEventConnectionFactory.error2JMSException(ErrorCode.SDK_JMS_EXCEPTION_STOMP_EXECUTE);
-                }
-            }
+            Message<?> stompResponse = this.stompRequest(req, asyncSeq);
+            StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(stompResponse);
+            stompCommand.checkError(stompHeaderAccessor);
 
             // handler stompResponse
-            LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) stompResponse.getHeaders().get("nativeHeaders"));
-            if (nativeHeaders == null) {
-                log.error("unknown native header");
-                throw WeEventConnectionFactory.error2JMSException(ErrorCode.SDK_JMS_EXCEPTION_STOMP_EXECUTE);
-            }
-
-            String eventID = nativeHeaders.get("eventId") == null ? "" : nativeHeaders.get("eventId").get(0).toString();
-            bytesMessage.setJMSMessageID(eventID);
-            return nativeHeaders.get("receipt-id") == null ? "" : nativeHeaders.get("receipt-id").get(0).toString();
+            bytesMessage.setJMSMessageID(stompHeaderAccessor.getFirstNativeHeader("eventId"));
+            return stompHeaderAccessor.getReceiptId();
         }
 
         throw new JMSException(WeEventConnectionFactory.NotSupportTips);
@@ -247,88 +230,80 @@ public class WebSocketTransport extends WebSocketClient {
     public String stompSubscribe(WeEventTopic topic) throws JMSException {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         Long asyncSeq = this.sequence.incrementAndGet();
-        String req = stompCommand.encodeSubscribe(topic, topic.getOffset(), asyncSeq);
+        String req = stompCommand.encodeSubscribe(topic, asyncSeq);
         this.sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
 
-        Message stompResponse = this.stompRequest(req, asyncSeq);
-        if (stompCommand.isError(stompResponse)) {
-            log.info("stomp request is fail");
-            return "";
-        } else {
-            // cache the subscription id and the WeEventTopic,the subscription2EventCache which can use for reconnect
-            topic.setContinueSubscriptionId(stompCommand.getSubscriptionId(stompResponse));
-            this.subscription2EventCache.put(stompCommand.getSubscriptionId(stompResponse), topic);
+        Message<?> stompResponse = this.stompRequest(req, asyncSeq);
+        StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(stompResponse);
+        stompCommand.checkError(stompHeaderAccessor);
 
-            LinkedMultiValueMap nativeHeaders = ((LinkedMultiValueMap) stompResponse.getHeaders().get("nativeHeaders"));
+        // cache the subscription id and the WeEventTopic,the subscription2EventCache which can use for reconnect
+        String subscriptionId = stompHeaderAccessor.getFirstNativeHeader("subscription-id");
+        topic.setContinueSubscriptionId(subscriptionId);
+        this.subscription2EventCache.put(subscriptionId, topic);
+        // map the receipt id and the subscription id
+        this.receiptId2SubscriptionId.put(String.valueOf(asyncSeq), subscriptionId);
+        this.subscriptionId2ReceiptId.put(subscriptionId, String.valueOf(asyncSeq));
 
-            if (nativeHeaders != null) {
-                // send command receipt Id
-                Object subscriptionId = nativeHeaders.get("subscription-id");
-                String subscriptionIdStr = null;
-                if (subscriptionId != null) {
-                    subscriptionIdStr = ((List) subscriptionId).get(0).toString();
-                    // map the receipt id and the subscription id
-                    this.receiptId2SubscriptionId.put(String.valueOf(asyncSeq), subscriptionIdStr);
-                    this.subscriptionId2ReceiptId.put(subscriptionIdStr, String.valueOf(asyncSeq));
-                }
-            }
+        return subscriptionId;
 
-        }
-        return stompCommand.getSubscriptionId(stompResponse);
     }
 
     /**
-     * stompUnsubscribe stomp unSubscribe
+     * stompUnSubscribe stomp unSubscribe
      *
      * @param subscriptionId subscription id
      * @return true if success
      * @throws JMSException error
      */
-    public boolean stompUnsubscribe(String subscriptionId) throws JMSException {
+    public void stompUnSubscribe(String subscriptionId) throws JMSException {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         String headerId = this.subscriptionId2ReceiptId.get(subscriptionId);
         String req = stompCommand.encodeUnSubscribe(subscriptionId, headerId);
         Long asyncSeq = this.sequence.incrementAndGet();
         this.sequence2Id.put(headerId, asyncSeq);
 
-        Message stompResponse = this.stompRequest(req, asyncSeq);
-        return !stompCommand.isError(stompResponse);
+        Message<?> stompResponse = this.stompRequest(req, asyncSeq);
+        StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(stompResponse);
+        stompCommand.checkError(stompHeaderAccessor);
     }
 
     private void handleFrame(Message<byte[]> stompMsg) {
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(stompMsg);
-        StompCommand command = accessor.getCommand();
-        log.debug("STOMP command received: {}", command);
+        StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(stompMsg);
+        if (stompHeaderAccessor.isHeartbeat()) {
+            return;
+        }
 
-        switch (command.name()) {
+        StompCommand command = stompHeaderAccessor.getCommand();
+        if (command == null) {
+            log.error("miss command in stomp header");
+            return;
+        }
+
+        log.info("STOMP command received: {}", stompHeaderAccessor.toString());
+        switch (command) {
             // connect response
-            case "CONNECTED":
+            case CONNECTED:
                 // connect command always 0
                 futures.get(0L).setResponse(stompMsg);
                 break;
 
             // disconnect/send/subscribe/unsubscribe response
-            case "RECEIPT":
-                handleReceiptFrame(stompMsg);
+            case RECEIPT:
+                handleReceiptFrame(stompHeaderAccessor, stompMsg);
                 break;
 
-            case "ERROR":
-                try {
-                    handleErrorFrame(stompMsg);
-                } catch (JMSException e) {
-                    log.error(e.toString());
-                }
+            case ERROR:
+                handleErrorFrame(stompHeaderAccessor, stompMsg);
                 break;
 
-            case "MESSAGE":
-                handleMessageFrame(stompMsg);
-                break;
-
-            case "HEARTBEAT":
+            case MESSAGE:
+                handleMessageFrame(stompHeaderAccessor, stompMsg);
                 break;
 
             default:
                 log.error("unknown STOMP command: {}", command);
+                break;
         }
     }
 
@@ -337,11 +312,8 @@ public class WebSocketTransport extends WebSocketClient {
      *
      * @param stompMsg handle the receipt frame
      */
-    private void handleReceiptFrame(Message<byte[]> stompMsg) {
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(stompMsg);
-        log.info("receipt frame: {}", accessor.toString());
-
-        String receiptId = getHeadersValue(accessor, "receipt-id");
+    private void handleReceiptFrame(StompHeaderAccessor stompHeaderAccessor, Message<byte[]> stompMsg) {
+        String receiptId = stompHeaderAccessor.getReceiptId();
         // add the map<receiptId2SubscriptionId>
         if (this.futures.containsKey(this.sequence2Id.get(receiptId))) {
             this.futures.get(this.sequence2Id.get(receiptId)).setResponse(stompMsg);
@@ -356,12 +328,9 @@ public class WebSocketTransport extends WebSocketClient {
      * @param stompMsg handle the message frame
      */
     @SuppressWarnings("unchecked")
-    private void handleMessageFrame(Message<byte[]> stompMsg) {
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(stompMsg);
-        log.info("accessor: {}", accessor.toString());
-
-        String messageId = getHeadersValue(accessor, "message-id");
-        String subscriptionId = getHeadersValue(accessor, "subscription-id");
+    private void handleMessageFrame(StompHeaderAccessor stompHeaderAccessor, Message<byte[]> stompMsg) {
+        String messageId = stompHeaderAccessor.getMessageId();
+        String subscriptionId = stompHeaderAccessor.getFirstNativeHeader("subscription-id");
 
         // custom properties, eventId is in native header
         Map<String, String> extensions = new HashMap<>();
@@ -371,9 +340,8 @@ public class WebSocketTransport extends WebSocketClient {
             }
         }
 
-        WeEvent event = new WeEvent(accessor.getDestination(), stompMsg.getPayload(), extensions);
-        event.setEventId(accessor.getNativeHeader("eventId").get(0));
-
+        WeEvent event = new WeEvent(stompHeaderAccessor.getDestination(), stompMsg.getPayload(), extensions);
+        event.setEventId(stompHeaderAccessor.getFirstNativeHeader("eventId"));
         log.info("received: {}", event);
 
         // update the cache eventId
@@ -399,42 +367,17 @@ public class WebSocketTransport extends WebSocketClient {
      *
      * @param stompMsg handle error frame
      */
-    private void handleErrorFrame(Message<byte[]> stompMsg) throws JMSException {
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(stompMsg);
-        log.info("accessor: {}", accessor.toString());
-
-        String code = getHeadersValue(accessor, "code");
-        String receiptId;
-
-        if (code != null) {
-            receiptId = getHeadersValue(accessor, "message-id");
-            log.info("receiptId:{}", receiptId);
-            if (receiptId != null) {
-                this.futures.get(this.sequence2Id.get(receiptId)).setResponse(stompMsg);
-            }
-        } else {
-            log.info("connect error");
-        }
-        throw new JMSException("message:" + accessor.getNativeHeader("message").get(0) + "code:" + code);
-    }
-
-    /**
-     * use for get the headers
-     *
-     * @param accessor StompHeaderAccessor
-     * @param key headers name
-     * @return the headers value
-     */
-    private String getHeadersValue(StompHeaderAccessor accessor, String key) {
-        Object idObject = accessor.getNativeHeader(key);
-        if (idObject != null) {
-            return ((List) idObject).get(0).toString();
+    private void handleErrorFrame(StompHeaderAccessor stompHeaderAccessor, Message<byte[]> stompMsg) {
+        String receiptId = stompHeaderAccessor.getReceiptId();
+        log.info("stomp ERROR, receipt-id: {}", receiptId);
+        if (receiptId == null) {
+            return;
         }
 
-        return null;
+        this.futures.get(this.sequence2Id.get(receiptId)).setResponse(stompMsg);
     }
 
-    class WSThread extends Thread {
+    static class WSThread extends Thread {
         private WebSocketTransport webSocketTransport;
 
         public WSThread(WebSocketTransport webSocketTransport) {
@@ -451,11 +394,16 @@ public class WebSocketTransport extends WebSocketClient {
                     Thread.sleep(3000);
                 }
                 // check the stomp connect,and use cache login and password
-                while (!this.webSocketTransport.stompConnect(this.webSocketTransport.account.getFirst(),
-                        this.webSocketTransport.account.getSecond())) {
-                    Thread.sleep(3000);
+                while (true) {
+                    try {
+                        this.webSocketTransport.stompConnect(this.webSocketTransport.account.getFirst(),
+                                this.webSocketTransport.account.getSecond());
+                        break;
+                    } catch (JMSException e) {
+                        Thread.sleep(3000);
+                    }
                 }
-            } catch (InterruptedException | JMSException e) {
+            } catch (InterruptedException e) {
                 log.error("auto reconnect failed", e);
             }
 
