@@ -1,0 +1,65 @@
+# web container
+server:
+  port: 443
+  servlet:
+    context-path: /
+  ssl:
+    enabled: true
+    key-store: classpath:server.p12
+    key-store-type: PKCS12
+    key-alias: weevent
+    key-store-password: 123456
+
+# log4j2
+logging:
+  config: classpath:log4j2.xml
+
+spring:
+  application:
+    name: weevent-gateway
+  pid:
+    fail-on-write-error: true
+    file: ./logs/${spring.application.name}.pid
+  jmx:
+    enabled: false
+  cloud:
+    # discovery
+    zookeeper:
+      connect-string: 127.0.0.1:2181
+      discovery:
+        instance-host: ${spring.cloud.client.ip-address}
+        instance-id: ${spring.cloud.client.ip-address}:${server.port}
+        root: WeEvent/services
+      enabled: true
+    # gateway
+    gateway:
+      enabled: true
+      discovery:
+        locator:
+          enabled: true
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 10000
+      routes:
+        # sock js info
+        - id: weevent-broker-sockjs-info
+          uri: lb://weevent-broker
+          predicates:
+            - Path=/weevent-broker/sockjs/info/**
+        # websocket of stomp & sock js & mqtt
+        - id: weevent-broker-websocket
+          uri: lb:ws://weevent-broker
+          predicates:
+            - Path=/weevent-broker/stomp/**
+            - Path=/weevent-broker/sockjs/**
+            - Path=/weevent-broker/mqtt/**
+        # broker
+        - id: weevent-broker
+          uri: lb://weevent-broker
+          predicates:
+            - Path=/weevent-broker/**
+        # governance
+        - id: weevent-governance
+          uri: lb://weevent-governance
+          predicates:
+            - Path=/weevent-governance/**

@@ -31,23 +31,11 @@ public class WeEventConfig {
     @Value("${broker.blockchain.type}")
     private String blockChainType;
 
-    @Value("${broker.zookeeper.ip:}")
-    private String zookeeperIp;
-
-    @Value("${broker.zookeeper.path:}")
-    private String zookeeperPath;
-
-    @Value("${broker.zookeeper.timeout:3000}")
-    private Integer zookeeperTimeout;
-
     @Value("${stomp.heartbeats:30}")
     private Integer stompHeartbeats;
 
     @Value("${mqtt.broker.port:7001}")
-    private Integer brokerServerPort;
-
-    @Value("${mqtt.websocket.port:7002}")
-    private Integer webSocketPort;
+    private Integer mqttPort;
 
     @Value("${mqtt.broker.sobacklog:511}")
     private Integer soBackLog;
@@ -58,7 +46,13 @@ public class WeEventConfig {
     @Value("${mqtt.broker.keepalive:60}")
     private Integer keepAlive;
 
-    @Value("${mqtt.websocket.path:/weevent/mqtt}")
-    private String webSocketServerPath;
+    @Value("${mqtt.broker.path:}")
+    private String mqttServerPath;
+
+    @Value("${file.path:./logs/file}")
+    private String filePath;
+
+    @Value("${file.chunk.size:1048576}")
+    private int fileChunkSize;
 
 }

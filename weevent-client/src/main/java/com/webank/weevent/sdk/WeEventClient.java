@@ -1,11 +1,12 @@
 package com.webank.weevent.sdk;
 
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,9 +16,7 @@ import javax.jms.Session;
 import javax.jms.Topic;
 import javax.jms.TopicConnection;
 import javax.jms.TopicSession;
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
@@ -37,50 +36,32 @@ import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 public class WeEventClient implements IWeEventClient {
-    private final static String defaultJsonRpcUrl = "http://127.0.0.1:8080/weevent/jsonrpc";
+    private final String brokerUrl;
+    private final String groupId;
+    private final String userName;
+    private final String password;
+    private final int timeout;
+
     // json rpc proxy
     private IBrokerRpc brokerRpc;
-
-    // groupId
-    private String groupId;
-
-    // default STOMP url, ws://localhost:8080/weevent/stomp
+    // default STOMP url, ws://localhost:8080/weevent-broker/stomp
     private WeEventConnectionFactory connectionFactory;
-
     // stomp connection
     private TopicConnection connection;
     // (subscriptionId <-> TopicSession)
     private Map<String, TopicSession> sessionMap;
 
-    // rpc timeout
-    private final int timeoutMillis = 5000;
-
-    WeEventClient() throws BrokerException {
-        buildRpc(defaultJsonRpcUrl);
-        buildJms(WeEventConnectionFactory.defaultBrokerUrl, "", "");
-        this.groupId = "";
-    }
-
-    WeEventClient(String brokerUrl) throws BrokerException {
+    WeEventClient(String brokerUrl, String groupId, String userName, String password, int timeout) throws BrokerException {
         validateParam(brokerUrl);
-        buildRpc(brokerUrl + "/jsonrpc");
-        buildJms(getStompUrl(brokerUrl), "", "");
-        this.groupId = "";
-    }
 
-    WeEventClient(String brokerUrl, String groupId) throws BrokerException {
-        validateParam(brokerUrl);
-        buildRpc(brokerUrl + "/jsonrpc");
-        buildJms(getStompUrl(brokerUrl), "", "");
+        this.brokerUrl = brokerUrl;
         this.groupId = groupId;
-    }
+        this.userName = userName;
+        this.password = password;
+        this.timeout = timeout;
 
-    WeEventClient(String brokerUrl, String groupId, String userName, String password) throws BrokerException {
-        validateParam(brokerUrl);
-        validateUser(userName, password);
-        buildRpc(brokerUrl + "/jsonrpc");
-        buildJms(getStompUrl(brokerUrl), userName, password);
-        this.groupId = groupId;
+        buildRpc();
+        buildJms();
     }
 
     @Override
@@ -178,31 +159,31 @@ public class WeEventClient implements IWeEventClient {
     @Override
     public String subscribe(String topic, String offset, @NonNull EventListener listener) throws BrokerException {
 
-        return dealSubscribe(topic, offset, null, listener);
+        return dealSubscribe(topic, offset, null, false, listener);
     }
 
     @Override
     public String subscribe(String topic, String offset, String subscriptionId,
                             @NonNull EventListener listener) throws BrokerException {
 
-        return dealSubscribe(topic, offset, subscriptionId, listener);
+        return dealSubscribe(topic, offset, subscriptionId, false, listener);
     }
 
     @Override
     public String subscribe(String[] topics, String offset, @NonNull EventListener listener) throws BrokerException {
 
         String topic = StringUtils.join(topics, WeEvent.MULTIPLE_TOPIC_SEPARATOR);
-        return dealSubscribe(topic, offset, "", listener);
+        return dealSubscribe(topic, offset, "", false, listener);
     }
 
     @Override
     public String subscribe(String[] topics, String offset, String subscriptionId,
                             @NonNull EventListener listener) throws BrokerException {
         String topic = StringUtils.join(topics, WeEvent.MULTIPLE_TOPIC_SEPARATOR);
-        return dealSubscribe(topic, offset, subscriptionId, listener);
+        return dealSubscribe(topic, offset, subscriptionId, false, listener);
     }
 
-    private String dealSubscribe(String topic, String offset, String subscriptionId, EventListener listener) throws BrokerException {
+    private String dealSubscribe(String topic, String offset, String subscriptionId, boolean isFile, EventListener listener) throws BrokerException {
         try {
             validateParam(topic);
             validateParam(offset);
@@ -210,12 +191,16 @@ public class WeEventClient implements IWeEventClient {
             // create topic
             Topic destination = session.createTopic(topic);
 
-            // create subscriber
-            ((WeEventTopic) destination).setOffset(offset);
-            ((WeEventTopic) destination).setGroupId(this.groupId);
+            // extend param
+            WeEventTopic weEventTopic = (WeEventTopic) destination;
+            weEventTopic.setOffset(offset);
+            weEventTopic.setGroupId(this.groupId);
             if (!StringUtils.isBlank(subscriptionId)) {
-                ((WeEventTopic) destination).setContinueSubscriptionId(subscriptionId);
+                weEventTopic.setContinueSubscriptionId(subscriptionId);
             }
+            weEventTopic.setFile(isFile);
+
+            // create subscriber
             WeEventTopicSubscriber subscriber = (WeEventTopicSubscriber) session.createSubscriber(destination);
 
             // create listener
@@ -226,8 +211,8 @@ public class WeEventClient implements IWeEventClient {
                                 byte[] body = new byte[(int) message.getBodyLength()];
                                 message.readBytes(body);
 
-                                WeEventTopic weEventTopic = (WeEventTopic) message.getJMSDestination();
-                                WeEvent event = new WeEvent(weEventTopic.getTopicName(), body, message.getExtensions());
+                                Topic jmsDestination = (Topic) message.getJMSDestination();
+                                WeEvent event = new WeEvent(jmsDestination.getTopicName(), body, message.getExtensions());
                                 event.setEventId(message.getJMSMessageID());
                                 listener.onEvent(event);
                             } catch (JMSException e) {
@@ -266,13 +251,11 @@ public class WeEventClient implements IWeEventClient {
             // impl X509TrustManager interface，not verify certificate
             X509TrustManager x509TrustManager = new X509TrustManager() {
                 @Override
-                public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-
+                public void checkClientTrusted(X509Certificate[] x509Certificates, String s) {
                 }
 
                 @Override
-                public void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-
+                public void checkServerTrusted(X509Certificate[] x509Certificates, String s) {
                 }
 
                 @Override
@@ -289,7 +272,8 @@ public class WeEventClient implements IWeEventClient {
         }
     }
 
-    private void buildRpc(String jsonRpcUrl) throws BrokerException {
+    private void buildRpc() throws BrokerException {
+        String jsonRpcUrl = this.brokerUrl + "/jsonrpc";
         log.info("broker's json rpc url: {}", jsonRpcUrl);
 
         URL url;
@@ -301,20 +285,15 @@ public class WeEventClient implements IWeEventClient {
         }
 
         JsonRpcHttpClient client = new JsonRpcHttpClient(url);
-        client.setConnectionTimeoutMillis(this.timeoutMillis);
-        client.setReadTimeoutMillis(this.timeoutMillis);
+        client.setConnectionTimeoutMillis(this.timeout);
+        client.setReadTimeoutMillis(this.timeout);
 
         // ssl
         if (jsonRpcUrl.contains("https://")) {
             SSLContext sslContext = getSSLContext();
             client.setSslContext(sslContext);
             // dot not verify HostName
-            client.setHostNameVerifier(new HostnameVerifier() {
-                public boolean verify(String hostname,
-                                      SSLSession sslsession) {
-                    return true;
-                }
-            });
+            client.setHostNameVerifier((hostname, sslsession) -> true);
         }
 
         // custom Exception
@@ -328,15 +307,16 @@ public class WeEventClient implements IWeEventClient {
         this.brokerRpc = ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);
     }
 
-    private void buildJms(String stompUrl, String userName, String password) throws BrokerException {
+    private void buildJms() throws BrokerException {
+        String stompUrl = getStompUrl(this.brokerUrl);
         log.info("broker's stomp url: {}", stompUrl);
 
         try {
-            if (connectionFactory == null) {
-                connectionFactory = new WeEventConnectionFactory(userName, password, stompUrl);
+            if (this.connectionFactory == null) {
+                this.connectionFactory = new WeEventConnectionFactory(this.userName, this.password, stompUrl);
             }
             this.sessionMap = new ConcurrentHashMap<>();
-            this.connection = connectionFactory.createTopicConnection();
+            this.connection = this.connectionFactory.createTopicConnection();
             this.connection.start();
         } catch (JMSException e) {
             log.error("init jms connection factory failed", e);
@@ -355,19 +335,9 @@ public class WeEventClient implements IWeEventClient {
         }
     }
 
-
     private static void validateArrayParam(byte[] param) throws BrokerException {
         if (param == null || param.length == 0) {
             throw new BrokerException(ErrorCode.PARAM_ISEMPTY);
-        }
-    }
-
-    private static void validateUser(String userName, String password) throws BrokerException {
-        if (StringUtils.isBlank(userName)) {
-            throw new BrokerException(ErrorCode.PARAM_ISBLANK);
-        }
-        if (StringUtils.isBlank(password)) {
-            throw new BrokerException(ErrorCode.PARAM_ISBLANK);
         }
     }
 
@@ -377,5 +347,63 @@ public class WeEventClient implements IWeEventClient {
         } else {
             return new BrokerException(Integer.parseInt(e.getErrorCode()), e.getMessage());
         }
+    }
+
+    @Override
+    public SendResult publishFile(String topic, String localFile) throws BrokerException, IOException {
+        // upload file
+        FileChunksTransport fileChunksTransport = new FileChunksTransport(this.brokerUrl + "/file");
+        SendResult sendResult = fileChunksTransport.upload(localFile, topic, this.groupId);
+
+        log.info("publish file result: {}", sendResult);
+        return sendResult;
+
+    }
+
+    static class FileEventListener implements EventListener {
+        private final FileChunksTransport fileChunksTransport;
+        private final FileListener fileListener;
+
+        private String subscriptionId;
+
+        public FileEventListener(FileChunksTransport fileChunksTransport, FileListener fileListener) {
+            this.fileChunksTransport = fileChunksTransport;
+            this.fileListener = fileListener;
+        }
+
+        public void setSubscriptionId(String subscriptionId) {
+            this.subscriptionId = subscriptionId;
+        }
+
+        @Override
+        public void onEvent(WeEvent event) {
+            // download file
+            String fileId = new String(event.getContent(), StandardCharsets.UTF_8);
+            String host = event.getExtensions().get("host");
+            String localFile = null;
+            try {
+                localFile = this.fileChunksTransport.download(host, fileId);
+            } catch (BrokerException | IOException e) {
+                log.error("detect exception", e);
+                this.onException(e);
+            }
+            this.fileListener.onFile(this.subscriptionId, localFile);
+        }
+
+        @Override
+        public void onException(Throwable e) {
+            this.fileListener.onException(e);
+        }
+    }
+
+    @Override
+    public String subscribeFile(String topic, String filePath, FileListener fileListener) throws BrokerException {
+        // subscribe file event
+        FileChunksTransport fileChunksTransport = new FileChunksTransport(this.brokerUrl + "/file", filePath);
+        FileEventListener fileEventListener = new FileEventListener(fileChunksTransport, fileListener);
+        String subscriptionId = this.dealSubscribe(topic, WeEvent.OFFSET_LAST, "", true, fileEventListener);
+        fileEventListener.setSubscriptionId(subscriptionId);
+
+        return subscriptionId;
     }
 }
