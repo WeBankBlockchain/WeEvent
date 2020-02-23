@@ -36,6 +36,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.env.Environment;
@@ -50,6 +51,7 @@ import org.springframework.web.servlet.DispatcherServlet;
  * @since 2018/12/18
  */
 @Slf4j
+@EnableDiscoveryClient
 @SpringBootApplication
 @ServletComponentScan(basePackages = "com.webank.weevent.governance.filter")
 public class GovernanceApplication {
