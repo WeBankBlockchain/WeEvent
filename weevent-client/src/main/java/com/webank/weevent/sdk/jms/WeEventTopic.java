@@ -1,7 +1,6 @@
 package com.webank.weevent.sdk.jms;
 
 
-import javax.jms.JMSException;
 import javax.jms.Topic;
 
 /**
@@ -11,17 +10,19 @@ import javax.jms.Topic;
  * @since 2019/03/25
  */
 public class WeEventTopic implements Topic {
-    private String topicName;
+    private final String topicName;
+
     private String offset;
     private String groupId;
     private String continueSubscriptionId;
+    private boolean isFile;
 
     public WeEventTopic(String topicName) {
         this.topicName = topicName;
     }
 
     @Override
-    public String getTopicName() throws JMSException {
+    public String getTopicName() {
         return this.topicName;
     }
 
@@ -47,5 +48,13 @@ public class WeEventTopic implements Topic {
 
     public void setContinueSubscriptionId(String continueSubscriptionId) {
         this.continueSubscriptionId = continueSubscriptionId;
+    }
+
+    public boolean isFile() {
+        return this.isFile;
+    }
+
+    public void setFile(boolean file) {
+        this.isFile = file;
     }
 }
