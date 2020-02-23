@@ -29,6 +29,7 @@ import com.webank.weevent.protocol.rest.entity.TbNode;
 import com.webank.weevent.protocol.rest.entity.TbTransHash;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
+import com.webank.weevent.sdk.JsonHelper;
 import com.webank.weevent.sdk.WeEvent;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -272,7 +273,7 @@ public class FabricSDKWrapper {
                         WeEvent weEvent = new WeEvent();
                         weEvent.setTopic(new String(transactionActionInfo.getChaincodeInputArgs(1), UTF_8));
                         weEvent.setContent(transactionActionInfo.getChaincodeInputArgs(2));
-                        weEvent.setExtensions(DataTypeUtils.json2Map(new String(transactionActionInfo.getChaincodeInputArgs(3))));
+                        weEvent.setExtensions(JsonHelper.json2Map(new String(transactionActionInfo.getChaincodeInputArgs(3))));
                         weEvent.setEventId(DataTypeUtils.encodeEventId(weEvent.getTopic(),
                                 blockNumber.intValue(),
                                 Integer.parseInt(new String(transactionActionInfo.getProposalResponsePayload()))));

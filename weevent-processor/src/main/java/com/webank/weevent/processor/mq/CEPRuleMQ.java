@@ -19,7 +19,6 @@ import com.webank.weevent.processor.model.StatisticWeEvent;
 import com.webank.weevent.processor.quartz.QuartzManager;
 import com.webank.weevent.processor.utils.CommonUtil;
 import com.webank.weevent.processor.utils.ConstantsHelper;
-
 import com.webank.weevent.processor.utils.DataBaseUtil;
 import com.webank.weevent.processor.utils.JsonUtil;
 import com.webank.weevent.processor.utils.RetCode;
@@ -114,14 +113,15 @@ public class CEPRuleMQ {
             // set group id
             String groupId = rule.getGroupId();
             IWeEventClient client;
+            IWeEventClient.Builder builder = new IWeEventClient.Builder();
+            builder.brokerUrl(baseUrl);
             if (null != groupId) {
-                client = IWeEventClient.build(baseUrl, groupId);
-                Pair<String, String> brokerMessage = new Pair<>(baseUrl, groupId);
-                clientGroupMap.put(client, brokerMessage);
+                builder.groupId(groupId);
+                client = builder.build();
+                clientGroupMap.put(client, new Pair<>(baseUrl, groupId));
             } else {
-                client = IWeEventClient.build(baseUrl, "");
-                Pair<String, String> brokerMessage = new Pair<>(baseUrl, "");
-                clientGroupMap.put(client, brokerMessage);
+                client = builder.build();
+                clientGroupMap.put(client, new Pair<>(baseUrl, ""));
             }
             return client;
         } catch (BrokerException e) {

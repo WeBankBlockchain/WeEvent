@@ -2,6 +2,12 @@ apply plugin: "org.springframework.boot"
 apply plugin: "io.spring.dependency-management"
 apply plugin: "com.gorylenko.gradle-git-properties"
 
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
 dependencies {
     // spring boot
     implementation("org.springframework.boot:spring-boot-starter")
@@ -26,13 +32,10 @@ dependencies {
     // json rpc, https://mvnrepository.com/artifact/com.github.briandilley.jsonrpc4j/jsonrpc4j
     implementation("com.github.briandilley.jsonrpc4j:jsonrpc4j:${jsonrpc4jVersion}")
 
-    // zookeeper 3.5.5 is first stable version support netty 4.1
-    implementation("org.apache.zookeeper:zookeeper:${zookeeperVersion}") {
-        exclude group: "org.slf4j", module: "slf4j-log4j12"
+    // discovery
+    implementation("org.springframework.cloud:spring-cloud-starter-zookeeper-discovery") {
+        exclude group: "commons-logging", module: "commons-logging"
     }
-    // curator prefer zookeeper 3.5
-    // http://curator.apache.org/zk-compatibility.html
-    implementation("org.apache.curator:curator-recipes:${curatorVersion}")
 
     // web3sdk for FISCO-BCOS 2.0
     implementation("org.fisco-bcos:web3sdk:${web3sdkVersion.fiscoV2}") {

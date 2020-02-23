@@ -5,23 +5,21 @@
 ################################################################################
 
 java_home_path=
-out_path=""
+out_path=
+
+broker_port=7000
+gateway_port=8080
+governance_port=7009
+processor_port=7008
+
 block_chain_version=
 block_chain_channel=
 block_chain_node_path=
-broker_port=7000
-
-nginx_port=8080
-
-governance_port=
 database_type=
 mysql_ip=
 mysql_port=
 mysql_user=
 mysql_password=
-
-processor_port=
-
 
 current_path=$PWD
 
@@ -58,8 +56,7 @@ function set_global_param(){
     else
         block_chain_node_path=$(realpath -m ${block_chain_node_path})
     fi
-
-    nginx_port=$(properties_get "nginx.port")
+    gateway_port=$(properties_get "gateway.port")
 
     broker_port=$(properties_get "broker.port")
 
@@ -113,7 +110,7 @@ function check_param(){
     fi
 
     check_port ${broker_port}
-    check_port ${nginx_port}
+    check_port ${gateway_port}
     if [[ ${governance_enable} = "true" ]];then
         check_port ${governance_port}
         if [[ ${database_type} != "h2" ]];then
@@ -144,16 +141,15 @@ function check_result(){
 }
 
 function install_module(){
+    yellow_echo "install module gateway"
+    cd ${current_path}/modules/gateway
+    ./install-gateway.sh --gateway_path ${out_path}/gateway --gateway_port ${gateway_port} &>> ${current_path}/install.log
+    check_result "install gateway"
+
     yellow_echo "install module broker"
     cd ${current_path}/modules/broker
     ./install-broker.sh --out_path ${out_path}/broker --listen_port ${broker_port} --block_chain_node_path ${block_chain_node_path} --channel_info ${block_chain_channel} --version ${block_chain_version}
-
     check_result "install broker"
-
-    yellow_echo "install module nginx"
-    cd ${current_path}/modules/nginx
-    ./install-nginx.sh --nginx_path ${out_path}/nginx --nginx_port ${nginx_port} --broker_port ${broker_port} --governance_port ${governance_port} --processor_port ${processor_port} &>> ${current_path}/install.log
-    check_result "install nginx"
 
     if [[ ${governance_enable} = "true" ]];then
         yellow_echo "install module governance"
@@ -171,7 +167,6 @@ function install_module(){
         ./install-processor.sh --out_path ${out_path}/processor --server_port ${processor_port} --database_type ${database_type} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password}
         check_result "install processor"
     fi
-
 }
 
 function config_java_home(){
@@ -199,7 +194,7 @@ function config_java_home(){
 }
 
 function update_server_port(){
-    sed -i "s/8080/$nginx_port/g" ${current_path}/bin/check-service.sh
+    sed -i "s/8080/$gateway_port/g" ${current_path}/bin/check-service.sh
 }
 
 function main(){

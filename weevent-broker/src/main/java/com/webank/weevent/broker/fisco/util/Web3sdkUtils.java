@@ -10,10 +10,12 @@ import java.util.Map;
 
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.fisco.web3sdk.v1.Web3SDKWrapper;
 import com.webank.weevent.broker.fisco.web3sdk.v2.CRUDAddress;
 import com.webank.weevent.broker.fisco.web3sdk.v2.SupportedVersion;
 import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDK2Wrapper;
+import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDKConnector;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.WeEvent;
 
@@ -87,19 +89,19 @@ public class Web3sdkUtils {
     }
 
     private static boolean deployV2Contract(FiscoConfig fiscoConfig) throws BrokerException {
-        org.fisco.bcos.web3j.crypto.Credentials credentials = Web3SDK2Wrapper.getCredentials(fiscoConfig);
+        org.fisco.bcos.web3j.crypto.Credentials credentials = Web3SDKConnector.getCredentials(fiscoConfig);
 
         Map<Long, org.fisco.bcos.web3j.protocol.Web3j> groups = new HashMap<>();
         // 1 is always exist
         Long defaultGroup = Long.valueOf(WeEvent.DEFAULT_GROUP_ID);
-        org.fisco.bcos.web3j.protocol.Web3j defaultWeb3j = Web3SDK2Wrapper.initWeb3j(defaultGroup, fiscoConfig);
+        org.fisco.bcos.web3j.protocol.Web3j defaultWeb3j = Web3SDKConnector.initWeb3j(Web3SDKConnector.initService(defaultGroup, fiscoConfig));
         groups.put(defaultGroup, defaultWeb3j);
 
-        List<String> groupIds = Web3SDK2Wrapper.listGroupId(defaultWeb3j);
+        List<String> groupIds = Web3SDKConnector.listGroupId(defaultWeb3j, FiscoBcosDelegate.timeout);
         groupIds.remove(WeEvent.DEFAULT_GROUP_ID);
         for (String groupId : groupIds) {
             Long gid = Long.valueOf(groupId);
-            org.fisco.bcos.web3j.protocol.Web3j web3j = Web3SDK2Wrapper.initWeb3j(gid, fiscoConfig);
+            org.fisco.bcos.web3j.protocol.Web3j web3j = Web3SDKConnector.initWeb3j(Web3SDKConnector.initService(gid, fiscoConfig));
             groups.put(gid, web3j);
         }
         log.info("all group in nodes: {}", groups.keySet());

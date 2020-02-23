@@ -16,8 +16,9 @@ import com.webank.weevent.broker.fabric.sdk.FabricDelegate;
 import com.webank.weevent.broker.fisco.FiscoBcosBroker4Consumer;
 import com.webank.weevent.broker.fisco.FiscoBcosBroker4Producer;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.fisco.file.FileTransportService;
+import com.webank.weevent.broker.fisco.file.ZKChunksMeta;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
-import com.webank.weevent.broker.ha.MasterJob;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
@@ -32,10 +33,12 @@ import org.apache.coyote.http11.Http11NioProtocol;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
@@ -56,10 +59,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 @Slf4j
 class HttpInterceptor implements HandlerInterceptor {
-    private String ipWhiteTable;
+    private String ipWhiteList;
 
-    HttpInterceptor(String ipWhiteTable) {
-        this.ipWhiteTable = ipWhiteTable;
+    HttpInterceptor(String ipWhiteList) {
+        this.ipWhiteList = ipWhiteList;
     }
 
     private String getIpAddress(HttpServletRequest request) {
@@ -82,16 +85,17 @@ class HttpInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o) {
-        String ip = getIpAddress(httpServletRequest);
-        if (this.ipWhiteTable.equals("")) {
+        if (StringUtils.isBlank(this.ipWhiteList)) {
             return true;
         }
-        log.debug("ip white list:{} client ip:{}", this.ipWhiteTable, ip);
+
+        String ip = getIpAddress(httpServletRequest);
+        log.debug("ip white list:{} client ip:{}", this.ipWhiteList, ip);
         if (ip.contains("0:0:0:0") || ip.contains("127.0.0.1") || ip.contains("localhost")) {
             return true;
         }
-        if (!this.ipWhiteTable.contains(ip)) {
-            log.error("forbid,client ip:{} not in white table:{}", ip, this.ipWhiteTable);
+        if (!this.ipWhiteList.contains(ip)) {
+            log.error("forbid, client ip not in white list, {} -> {}", ip, this.ipWhiteList);
             httpServletResponse.setStatus(403);
             return false;
         }
@@ -108,8 +112,8 @@ class HttpInterceptor implements HandlerInterceptor {
 class HttpInterceptorConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        log.info("client ip white table: {}", BrokerApplication.weEventConfig.getIpWhiteTable());
-		
+        log.info("client ip white list: {}", BrokerApplication.weEventConfig.getIpWhiteTable());
+
         HttpInterceptor httpInterceptor = new HttpInterceptor(BrokerApplication.weEventConfig.getIpWhiteTable());
         registry.addInterceptor(httpInterceptor).addPathPatterns("/**");
     }
@@ -123,13 +127,11 @@ class HttpInterceptorConfig implements WebMvcConfigurer {
  * @since 2018/11/21
  */
 @Slf4j
+@EnableDiscoveryClient
 @SpringBootApplication
 public class BrokerApplication {
     public static ApplicationContext applicationContext;
-
     public static WeEventConfig weEventConfig;
-
-    public static Environment environment;
 
     public static void main(String[] args) {
         /* Forbid banner.
@@ -139,24 +141,18 @@ public class BrokerApplication {
         SpringApplication app = new SpringApplication(BrokerApplication.class);
         app.addListeners(new ApplicationPidFileWriter());
         app.run();
+
         log.info("read from weevent.properties, {}", weEventConfig);
-        log.info("start broker success");
-        //spring-boot-starter-actuator customize /info with InfoContributor bean
     }
 
     @Autowired
-    public void setContext(ApplicationContext context) {
-        applicationContext = context;
+    public void setContext(ApplicationContext applicationContext) {
+        BrokerApplication.applicationContext = applicationContext;
     }
 
     @Autowired
-    public void setWeEventConfig(WeEventConfig config) {
-        weEventConfig = config;
-    }
-
-    @Autowired
-    public void setEnvironment(Environment env) {
-        environment = env;
+    public void setWeEventConfig(WeEventConfig weEventConfig) {
+        BrokerApplication.weEventConfig = weEventConfig;
     }
 
     // tomcat configuration to enhance performance
@@ -247,12 +243,18 @@ public class BrokerApplication {
         switch (blockChain) {
             case WeEventConstants.FISCO:
                 FiscoBcosDelegate fiscoBcosDelegate = BrokerApplication.applicationContext.getBean(FiscoBcosDelegate.class);
-                return new FiscoBcosBroker4Consumer(fiscoBcosDelegate);
+                FiscoBcosBroker4Consumer fiscoBcosBroker4Consumer = new FiscoBcosBroker4Consumer(fiscoBcosDelegate);
+                fiscoBcosBroker4Consumer.startConsumer();
+                return fiscoBcosBroker4Consumer;
+
             case WeEventConstants.FABRIC:
                 FabricDelegate fabricDelegate = BrokerApplication.applicationContext.getBean(FabricDelegate.class);
-                return new FabricBroker4Consumer(fabricDelegate);
+                FabricBroker4Consumer fabricBroker4Consumer = new FabricBroker4Consumer(fabricDelegate);
+                fabricBroker4Consumer.startConsumer();
+                return fabricBroker4Consumer;
+
             default:
-                throw new BrokerException("Invalid chain type");
+                throw new BrokerException("invalid block chain type");
         }
     }
 
@@ -260,16 +262,48 @@ public class BrokerApplication {
     @Bean
     public static IProducer iProducer() throws BrokerException {
         String blockChain = BrokerApplication.weEventConfig.getBlockChainType();
+
         switch (blockChain) {
             case WeEventConstants.FISCO:
                 FiscoBcosDelegate fiscoBcosDelegate = BrokerApplication.applicationContext.getBean(FiscoBcosDelegate.class);
-                return new FiscoBcosBroker4Producer(fiscoBcosDelegate);
+                FiscoBcosBroker4Producer fiscoBcosBroker4Producer = new FiscoBcosBroker4Producer(fiscoBcosDelegate);
+                fiscoBcosBroker4Producer.startProducer();
+                return fiscoBcosBroker4Producer;
+
             case WeEventConstants.FABRIC:
                 FabricDelegate fabricDelegate = BrokerApplication.applicationContext.getBean(FabricDelegate.class);
-                return new FabricBroker4Producer(fabricDelegate);
+                FabricBroker4Producer fabricBroker4Producer = new FabricBroker4Producer(fabricDelegate);
+                fabricBroker4Producer.startProducer();
+                return fabricBroker4Producer;
+
             default:
-                throw new BrokerException("Invalid chain type");
+                throw new BrokerException("invalid block chain type");
         }
+    }
+
+    // FileChunksMeta in Zookeeper
+    @Bean
+    @ConditionalOnProperty(prefix = "spring.cloud.zookeeper", name = "enabled", havingValue = "true", matchIfMissing = true)
+    public static ZKChunksMeta getZKChunksMeta(Environment environment) throws BrokerException {
+        String connectString = "127.0.0.1:2181";
+
+        final String key = "spring.cloud.zookeeper.connect-string";
+        if (environment.containsProperty(key)) {
+            connectString = environment.getProperty(key);
+        }
+
+        return new ZKChunksMeta("/WeEvent/file", connectString);
+    }
+
+    @Bean
+    @ConditionalOnBean(ZKChunksMeta.class)
+    public static FileTransportService getFileService(FiscoConfig fiscoConfig,
+                                                      IProducer iProducer,
+                                                      ZKChunksMeta zkChunksMeta,
+                                                      Environment environment) throws BrokerException {
+        FileTransportService fileTransportService = new FileTransportService(fiscoConfig, iProducer, zkChunksMeta);
+        fileTransportService.init(environment.getProperty("spring.cloud.zookeeper.discovery.instance-id"));
+        return fileTransportService;
     }
 
     // http filter
@@ -297,12 +331,6 @@ public class BrokerApplication {
         redisTemplate.afterPropertiesSet();
 
         return redisTemplate;
-    }
-
-    // ha
-    @Bean
-    public static MasterJob getMasterJob() {
-        return new MasterJob();
     }
 
     // daemon thread pool

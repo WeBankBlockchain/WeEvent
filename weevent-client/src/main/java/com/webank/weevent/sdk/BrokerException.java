@@ -38,14 +38,12 @@ public class BrokerException extends Exception {
      * @return java.lang.String
      */
     private static String getText(int code, String message) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Code: ");
-        sb.append(code);
-        sb.append(", Message: ");
-        sb.append(message);
-        sb.append("\nFor more information, please visit wiki: ");
-        sb.append(WIKIUrl);
-        return sb.toString();
+        return "Code: " +
+                code +
+                ", Message: " +
+                message +
+                "\nFor more information, please visit wiki: " +
+                WIKIUrl;
     }
 
     /**

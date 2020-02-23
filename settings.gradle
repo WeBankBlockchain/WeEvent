@@ -1,9 +1,10 @@
 rootProject.name = "WeEvent"
+
 // submodules
 include "weevent-client"
 include "weevent-broker"
 include "weevent-governance"
-include "weevent-robust"
 include "weevent-processor"
+include "weevent-gateway"
+include "weevent-robust"
 include "weevent-jmeter"
-
