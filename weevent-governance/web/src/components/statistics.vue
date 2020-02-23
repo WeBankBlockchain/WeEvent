@@ -168,11 +168,12 @@ export default {
             Highcharts.chart('chart', vm.option)
           })
         } else {
-          vm.$message({
+          vm.$store.commit(vm.$message({
             type: 'warning',
             message: this.$t('tableCont.getDataError'),
-            duration: 5000
-          })
+            duration: 0,
+            showClose: true
+          }))
           Highcharts.chart('chart', vm.option).showNoData()
         }
       })

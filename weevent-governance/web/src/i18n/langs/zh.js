@@ -223,7 +223,8 @@ module.exports = {
     'connectSuccess': '数据源地址连接成功',
     'connectFailed': '数据源地址连接失败',
     'databaseType': '数据源类型',
-    'connectTimeOut': '请检查数据源配置是否正确'
+    'connectTimeOut': '请检查数据源配置是否正确',
+    'errorPayLoad': '请勿删除已使用的元素或修改其属性'
   },
   ruleDetail: {
     'guideDetail': '数据详情',

@@ -11,7 +11,8 @@ export default new vuex.Store({
     brokerId: '',
     groupId: '',
     isConfigRule: '',
-    lang: localStorage.getItem('lang') || 'zh'
+    lang: localStorage.getItem('lang') || 'zh',
+    msg: []
   },
   mutations: {
     set_name (state, note) {
@@ -37,6 +38,9 @@ export default new vuex.Store({
     },
     setlang (state, lang) {
       state.lang = lang
+    },
+    set_Msg (state, msg) {
+      state.msg.push(msg)
     }
   }
 })
