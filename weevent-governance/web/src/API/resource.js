@@ -138,6 +138,21 @@ class ResoruceService extends BaseModel {
   ruleStatic (data) {
     return this.request(api.ruleStatic, data)
   }
+  timerList (data) {
+    return this.request(api.timerList, data)
+  }
+  addTimer (data) {
+    return this.request(api.addTimer, data)
+  }
+  updateTimer (data) {
+    return this.request(api.updateTimer, data)
+  }
+  deleteTimer (data) {
+    return this.request(api.deleteTimer, data)
+  }
+  cornCheck (data) {
+    return this.request(api.cornCheck, data)
+  }
 }
 
 export default new ResoruceService()
