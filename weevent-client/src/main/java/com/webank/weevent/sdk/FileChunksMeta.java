@@ -67,7 +67,7 @@ public class FileChunksMeta {
     }
 
     public boolean checkChunkFull() {
-        return this.chunkStatus.cardinality() == this.chunkStatus.length();
+        return this.chunkStatus.cardinality() == this.chunkNum;
     }
 
     public void setHost(String host) {
