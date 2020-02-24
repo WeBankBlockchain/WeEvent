@@ -119,9 +119,9 @@ function copy_install_file(){
 function switch_to_prod(){
     cd ${current_path}
 
-    rm -rf ${out_path}/modules/gateway/conf/application-dev.properties
-    if [[ -e ${out_path}/modules/gateway/conf/application.properties ]]; then
-        sed -i 's/dev/prod/' ${out_path}/modules/gateway/conf/application.properties
+    rm -rf ${out_path}/modules/gateway/conf/application-dev.yml
+    if [[ -e ${out_path}/modules/gateway/conf/application.yml ]]; then
+        sed -i 's/dev/prod/' ${out_path}/modules/gateway/conf/application.yml
     fi
 
     rm -rf ${out_path}/modules/broker/conf/application-dev.properties

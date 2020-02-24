@@ -144,8 +144,7 @@ function check_result(){
 function install_module(){
     yellow_echo "install module gateway"
     cd ${current_path}/modules/gateway
-    ./install-gateway.sh --gateway_path ${out_path}/gateway --gateway_port ${gateway_port} &>> ${current_path}/install.log
-    ./install-gateway.sh --gateway_path ${out_path}/gateway --zookeeper_connect_string ${zookeeper_connect_string} &>> ${current_path}/install.log
+    ./install-gateway.sh --out_path ${out_path}/gateway --gateway_port ${gateway_port} --zookeeper_connect_string ${zookeeper_connect_string} &>> ${current_path}/install.log
     check_result "install gateway"
 
     yellow_echo "install module broker"

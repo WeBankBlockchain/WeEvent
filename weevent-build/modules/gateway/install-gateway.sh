@@ -28,8 +28,8 @@ copy_file
 cd ${current_path}
 
 if [[ ${gateway_port} -gt 0 ]]; then
-    sed -i "/server.port=/cserver.port=${gateway_port}" ${out_path}/conf/application-prod.properties
-    sed -i "/zookeeper.connect-string=/cserver.port=${zookeeper_connect_string}" ${out_path}/conf/application-prod.properties
+    sed -i "/server.port=/cserver.port=${gateway_port}" ${out_path}/conf/application-prod.yml
+    sed -i "/zookeeper.connect-string=/cserver.port=${zookeeper_connect_string}" ${out_path}/conf/application-prod.yml
 else
     echo "gateway_port is error"
     exit 1
