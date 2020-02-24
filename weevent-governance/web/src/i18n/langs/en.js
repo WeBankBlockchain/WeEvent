@@ -109,7 +109,8 @@ module.exports = {
     'engine': 'Streaming',
     'ruleMana': 'Rule Engine',
     'ruleDetail': 'Rule Detail',
-    'sources': 'DataBase Resources'
+    'sources': 'DataBase Resources',
+    'timerSchedule': 'Timer Schedule'
   },
   overview: {
     'nodeNum': 'Nodes',
@@ -290,5 +291,19 @@ module.exports = {
     'columnMarkError': 'Use this function, the selected datas should be string type',
     'notAdate': 'The value of selected data is a error date',
     'notAtime': 'The value of selected data is a error time'
+  },
+  timerSchedule: {
+    'schedulerName': 'Scheduler Name',
+    'databaseUrl': 'DatabaseUrl',
+    'periodParams': 'DeriodParams',
+    'parsingSql': 'Parsing Letter',
+    'addScheduler': 'Add Scheduler',
+    'editScheduler': 'Edit Scheduler',
+    'noDbList': 'No Database list',
+    'enterSN': 'please input Scheduler Name',
+    'enterPP': 'please input Period Params',
+    'enterSQL': 'please input Parsing Sql',
+    'selectDB': 'please Select Database',
+    'errorCorn': 'Error Period Params'
   }
 }
