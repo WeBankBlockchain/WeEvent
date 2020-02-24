@@ -97,6 +97,7 @@ function copy_install_file(){
     cd ${current_path}
 
     cp ${current_path}/config.properties ${current_path}/install-all.sh ${out_path}
+    cp -r ${current_path}/bin ${out_path}
 
     mkdir -p ${out_path}/modules/gateway
     cp ${current_path}/modules/gateway/install-gateway.sh ${out_path}/modules/gateway
