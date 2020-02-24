@@ -12,12 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.ApplicationPidFileWriter;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Slf4j
+@EnableDiscoveryClient
 @SpringBootApplication
 @MapperScan(basePackages = "com.webank.weevent.processor")
 public class ProcessorApplication {
@@ -47,14 +49,6 @@ public class ProcessorApplication {
     @Autowired
     public void setEnvironment(org.springframework.core.env.Environment env) {
         environment = env;
-    }
-
-    private static void exit() {
-        if (applicationContext != null) {
-            System.exit(SpringApplication.exit(applicationContext));
-        } else {
-            System.exit(1);
-        }
     }
 
     @Bean(name = "processor_daemon_task_executor")

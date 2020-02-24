@@ -1,4 +1,5 @@
 import i18n from '../i18n'
+import { checkCurrentData, checkCurrentTime } from './formatTime.js'
 export const checkRule = (e, s) => {
   let pass = true
   let nodes = document.getElementsByClassName('tree_content')
@@ -9,6 +10,7 @@ export const checkRule = (e, s) => {
       let warning = ''
       let item = nodes[i].attributes[0].value
       let index = nodes[i].attributes[1].nodeValue
+      let payLoad = JSON.parse(s)
       item = JSON.parse(item)
       if (index !== '00' && !item.connectionOperator) {
         // not first line and connectionOperator is empty
@@ -16,7 +18,7 @@ export const checkRule = (e, s) => {
         warning = i18n.messages[lang].ruleCheck.inputRule
         console.log('connectionOperator is empty')
       } else {
-        if (!item.columnName || item.sqlCondition === '') {
+        if (!item.columnName || item.sqlCondition === '' || !item.conditionalOperator) {
           // has empty
           pass = false
           warning = i18n.messages[lang].ruleCheck.inputRule
@@ -67,7 +69,6 @@ export const checkRule = (e, s) => {
               } else {
                 if (operator !== '!=' && operator !== '==') {
                   warning = i18n.messages[lang].ruleCheck.errorOperator
-                  console.log(i18n.messages[lang].ruleCheck)
                   pass = false
                 } else {
                   if (item.functionType === 'substring') {
@@ -98,10 +99,20 @@ export const checkRule = (e, s) => {
                       }
                     }
                   }
-                  if (item.functionType === 'concat' && !item.columnMark) {
-                    pass = false
-                    warning = i18n.messages[lang].ruleCheck.inputRule
-                    console.log('columnMark is empty')
+                  if (item.functionType === 'concat') {
+                    if (!item.columnMark) {
+                      pass = false
+                      warning = i18n.messages[lang].ruleCheck.inputRule
+                      console.log('columnMark is empty')
+                    } else {
+                      let t = payLoad[item.columnMark]
+                      let type = typeof (t)
+                      if (type !== 'string') {
+                        pass = false
+                        warning = i18n.messages[lang].ruleCheck.columnMarkError
+                        console.log('columnMark type error11')
+                      }
+                    }
                   }
                 }
               }
@@ -109,49 +120,80 @@ export const checkRule = (e, s) => {
           }
         }
       }
-      let payLoad = JSON.parse(s)
-      if (item.functionType !== 'now' && item.functionType !== 'currentDate' && item.functionType !== 'currentTime') {
-        let type = typeof (payLoad[item.columnName])
-        if (type === 'string') {
-          if (item.sqlCondition[0] !== '"' || item.sqlCondition[item.sqlCondition.length - 1] !== '"') {
-            pass = false
-            warning = i18n.messages[lang].ruleCheck.typeErrorString
-            console.log('type error')
-          } else {
-            if (item.conditionalOperator !== '!=' && item.conditionalOperator !== '==') {
-              warning = i18n.messages[lang].ruleCheck.errorOperator
-              console.log(i18n.messages[lang].ruleCheck)
+      if (pass) {
+        if (item.functionType !== 'now' && item.functionType !== 'currentDate' && item.functionType !== 'currentTime') {
+          let type = typeof (payLoad[item.columnName])
+          if (type === 'string') {
+            if (item.sqlCondition[0] !== '"' || item.sqlCondition[item.sqlCondition.length - 1] !== '"') {
               pass = false
+              warning = i18n.messages[lang].ruleCheck.typeErrorString
+              console.log('type error')
+            } else {
+              if (item.conditionalOperator !== '!=' && item.conditionalOperator !== '==') {
+                warning = i18n.messages[lang].ruleCheck.errorOperator
+                console.log(i18n.messages[lang].ruleCheck)
+                pass = false
+              }
+            }
+          } else if (type === 'number') {
+            let re = /^(-)?\d+(\.\d+)?$/
+            if (re.exec(item.sqlCondition) == null) {
+              pass = false
+              warning = i18n.messages[lang].ruleCheck.typeErrorNumber
+              console.log('type error')
             }
           }
-        } else if (type === 'number') {
-          let re = /^(-)?\d+(\.\d+)?$/
-          if (re.exec(item.sqlCondition) == null) {
-            pass = false
-            warning = i18n.messages[lang].ruleCheck.typeErrorNumber
-            console.log('type error')
-          }
-        }
-      } else {
-        let t = payLoad[item.columnName]
-        let type = typeof (t)
-        if (item.functionType === 'now') {
-          let reg = /^(\d{4})(-|\/)(\d{2})\2(\d{2}) (\d{2}):(\d{2}):(\d{2})$/
-          let r = t.match(reg)
-          if (type !== 'string' || r == null) {
-            pass = false
-            warning = i18n.messages[lang].ruleCheck.errorTime
-          }
         } else {
-          let reg = /^(\d{8})?$/
-          if (type !== 'number') {
-            pass = false
-            warning = i18n.messages[lang].ruleCheck.typeErrorNumber
+          let t = payLoad[item.columnName]
+          let type = typeof (t)
+          if (item.functionType === 'now') {
+            let reg = /^(\d{4})(-|\/)(\d{2})\2(\d{2}) (\d{2}):(\d{2}):(\d{2})$/
+            if (type !== 'string') {
+              pass = false
+              warning = i18n.messages[lang].ruleCheck.errorTime
+            } else {
+              if (t.match(reg) == null) {
+                pass = false
+                warning = i18n.messages[lang].ruleCheck.errorTime
+              } else {
+                let time = t.split(' ')
+                if (!checkCurrentData(time[0]) || !checkCurrentTime(time[1])) {
+                  pass = false
+                  warning = i18n.messages[lang].ruleCheck.notAdate
+                }
+              }
+            }
+          } else if (item.functionType === 'currentDate') {
+            let reg = /^(\d{4})(-|\/)(\d{2})\2(\d{2})$/
+            if (type !== 'string') {
+              pass = false
+              warning = i18n.messages[lang].ruleCheck.typeDateError
+            } else {
+              if (t.match(reg) == null) {
+                pass = false
+                warning = i18n.messages[lang].ruleCheck.typeDateError
+              } else {
+                if (!checkCurrentData(t)) {
+                  pass = false
+                  warning = i18n.messages[lang].ruleCheck.notAdate
+                }
+              }
+            }
           } else {
-            let val = reg.test(t)
-            if (!val) {
+            let reg = /^(\d{2}):(\d{2}):(\d{2})$/
+            if (type !== 'string') {
               pass = false
               warning = i18n.messages[lang].ruleCheck.typeTimeError
+            } else {
+              if (t.match(reg) == null) {
+                pass = false
+                warning = i18n.messages[lang].ruleCheck.typeTimeError
+              } else {
+                if (!checkCurrentTime(t)) {
+                  pass = false
+                  warning = i18n.messages[lang].ruleCheck.notAtime
+                }
+              }
             }
           }
         }
