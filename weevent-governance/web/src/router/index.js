@@ -18,6 +18,7 @@ import servers from '../components/servers'
 import dataBase from '../components/dataBase'
 import statistics from '../components/statistics'
 import ruleStatic from '../components/ruleStatic'
+import timerSchedule from '../components/timerSchedule'
 
 Vue.use(Router)
 
@@ -64,6 +65,10 @@ export default new Router({
         path: '/dataBase',
         name: 'dataBase',
         component: dataBase
+      }, {
+        path: '/timerSchedule',
+        name: 'timerSchedule',
+        component: timerSchedule
       }, {
         path: '/statistics',
         name: 'statistics',

@@ -41,6 +41,9 @@
       <el-menu-item index='4-2'>
         {{$t('sideBar.sources')}}
       </el-menu-item>
+      <el-menu-item index='4-3'>
+        {{$t('sideBar.timerSchedule')}}
+      </el-menu-item>
     </el-submenu>
   </el-menu>
 </template>
