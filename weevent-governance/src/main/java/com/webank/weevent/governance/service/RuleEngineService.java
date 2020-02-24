@@ -602,6 +602,7 @@ public class RuleEngineService {
                 dbUrl = dbUrl + "&" + ruleDataBase.getOptionalParameter();
             }
             rule.setDatabaseUrl(dbUrl);
+            rule.setDataBaseType(ruleDataBase.getDatabaseType());
             rule.setTableName(rule.getTableName());
             log.info("dataBaseUrl:{}", rule.getDatabaseUrl());
         }

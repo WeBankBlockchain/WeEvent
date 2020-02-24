@@ -9,11 +9,13 @@ import com.webank.weevent.processor.utils.RetCode;
 import com.webank.weevent.sdk.BrokerException;
 
 import lombok.extern.slf4j.Slf4j;
+import org.quartz.CronExpression;
 import org.quartz.JobDataMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -63,4 +65,11 @@ public class TimerSchedulerController {
         return resEntity;
     }
 
+    @RequestMapping("/checkCorn")
+    public BaseRspEntity checkCorn(@RequestParam("corn") String corn) {
+        BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
+        boolean validExpression = CronExpression.isValidExpression(corn);
+        resEntity.setData(validExpression);
+        return resEntity;
+    }
 }
