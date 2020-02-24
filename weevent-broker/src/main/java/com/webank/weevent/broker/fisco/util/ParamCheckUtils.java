@@ -168,4 +168,45 @@ public class ParamCheckUtils {
             throw new BrokerException(ErrorCode.TRANSACTIONHEX_ILLEGAL);
         }
     }
+
+    public static void validateFileName(String fileName) throws BrokerException {
+        if (StringUtils.isBlank(fileName)) {
+            throw new BrokerException(ErrorCode.FILE_NAME_IS_NULL);
+        }
+    }
+
+    public static void validateFileId(String fileId) throws BrokerException {
+        if (StringUtils.isBlank(fileId)) {
+            throw new BrokerException(ErrorCode.FILE_ID_IS_NULL);
+        }
+        if (fileId.length() != 32) {
+            throw new BrokerException(ErrorCode.FILE_ID_ILLEGAL);
+        }
+
+    }
+
+    public static void validateFileSize(long fileSize) throws BrokerException {
+        if (fileSize <= 0) {
+            throw new BrokerException(ErrorCode.FILE_SIZE_ILLEGAL);
+        }
+    }
+
+    public static void validateFileMd5(String md5) throws BrokerException {
+        if (StringUtils.isBlank(md5)) {
+            throw new BrokerException(ErrorCode.FILE_MD5_IS_NULL);
+        }
+    }
+
+    public static void validateChunkIdx(int chunkIdx) throws BrokerException {
+        if (chunkIdx < 0) {
+            throw new BrokerException(ErrorCode.FILE_CHUNK_INDEX_ILLEGAL);
+        }
+    }
+
+    public static void validateChunkData(byte[] chunkData) throws BrokerException {
+        if (chunkData == null || chunkData.length == 0) {
+            throw new BrokerException(ErrorCode.FILE_CHUNK_DATA_IS_NULL);
+        }
+    }
+
 }

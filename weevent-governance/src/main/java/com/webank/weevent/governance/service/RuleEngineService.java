@@ -26,6 +26,7 @@ import com.webank.weevent.governance.repository.RuleDatabaseRepository;
 import com.webank.weevent.governance.repository.RuleEngineRepository;
 import com.webank.weevent.governance.utils.DAGDetectUtil;
 import com.webank.weevent.governance.utils.JsonUtil;
+import com.webank.weevent.governance.utils.Utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -33,7 +34,7 @@ import org.apache.http.util.EntityUtils;
 import org.jsoup.helper.StringUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,9 +64,8 @@ public class RuleEngineService {
     @Autowired
     private DAGDetectUtil dagDetectUtil;
 
-
-    @Value("${weevent.processor.url:http://127.0.0.1:7008}")
-    private String processorUrl;
+    @Autowired
+    private DiscoveryClient discoveryClient;
 
     @Autowired
     private RuleDatabaseRepository ruleDatabaseRepository;
@@ -539,7 +539,7 @@ public class RuleEngineService {
     }
 
     private String getProcessorUrl() {
-        return processorUrl;
+        return Utils.getUrlFromDiscovery(this.discoveryClient, "weevent-processor") + "/weevent-processor";
     }
 
     public boolean validationConditions(HttpServletRequest request, RuleEngineEntity ruleEngineEntity) throws GovernanceException {
@@ -602,7 +602,6 @@ public class RuleEngineService {
                 dbUrl = dbUrl + "&" + ruleDataBase.getOptionalParameter();
             }
             rule.setDatabaseUrl(dbUrl);
-            rule.setDataBaseType(ruleDataBase.getDatabaseType());
             rule.setTableName(rule.getTableName());
             log.info("dataBaseUrl:{}", rule.getDatabaseUrl());
         }

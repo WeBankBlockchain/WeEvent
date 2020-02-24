@@ -103,7 +103,7 @@ export default {
     }
     var checkBroker = (rule, value, callback) => {
       if (value === '') {
-        callback(new Error(this.$t('serverSet.emptyPort')))
+        callback(new Error(this.$t('serverSet.emptyAddress')))
       } else {
         if (this.isEdit) {
           callback()
@@ -221,24 +221,27 @@ export default {
             })
             this.getServer()
           } else if (res.data.status === 100108) {
-            this.$message({
+            this.$store.commit(this.$message({
               type: 'warning',
               message: this.$t('serverSet.exitBrokerURL'),
-              duration: 5000
-            })
+              duration: 0,
+              showClose: true
+            }))
           } else {
-            this.$message({
+            this.$store.commit(this.$message({
               type: 'warning',
               message: this.$t('common.addFail'),
-              duration: 5000
-            })
+              duration: 0,
+              showClose: true
+            }))
           }
         } else {
-          this.$message({
+          this.$store.commit(this.$message({
             type: 'warning',
             message: this.$t('common.addFail'),
-            duration: 5000
-          })
+            duration: 0,
+            showClose: true
+          }))
         }
         this.showLog = false
       })
@@ -268,24 +271,27 @@ export default {
             })
             this.getServer()
           } else if (res.data.status === 100108) {
-            this.$message({
+            this.$store.commit(this.$message({
               type: 'warning',
               message: this.$t('serverSet.exitBrokerURL'),
-              duration: 5000
-            })
+              duration: 0,
+              showClose: true
+            }))
           } else {
-            this.$message({
+            this.$store.commit(this.$message({
               type: 'warning',
               message: this.$t('common.editFail'),
-              duration: 5000
-            })
+              duration: 0,
+              showClose: true
+            }))
           }
         } else {
-          this.$message({
+          this.$store.commit(this.$message({
             type: 'warning',
             message: this.$t('common.editFail'),
-            duration: 5000
-          })
+            duration: 0,
+            showClose: true
+          }))
         }
         this.showLog = false
       })
@@ -337,11 +343,12 @@ export default {
               }
             }
           } else {
-            this.$message({
+            this.$store.commit(this.$message({
               type: 'warning',
-              message: vm.$t('common.deleteFail'),
-              duration: 5000
-            })
+              message: this.$t('common.editFail'),
+              duration: 0,
+              showClose: true
+            }))
           }
         })
       })

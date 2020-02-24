@@ -43,33 +43,38 @@ class BaseModule {
             resolve(config)
           }
         } else {
-          Message({
+          store.commit('set_Msg', Message({
             type: 'warning',
             message: i18n.messages[i18n.locale].common.reqException,
-            duration: 5000
-          })
+            duration: 0,
+            showClose: true
+          }))
           reject(config)
         }
       }).catch((e) => {
-        Message({
+        store.commit('set_Msg', Message({
           type: 'error',
           message: i18n.messages[i18n.locale].common.reqException,
-          duration: 5000
-        })
+          duration: 0,
+          showClose: true
+        }))
       })
     }, error => {
       if (error.message.includes('timeout')) {
-        Message({
+        store.commit('set_Msg', Message({
           type: 'error',
           message: i18n.messages[i18n.locale].common.timeOut,
-          duration: 5000
-        })
+          duration: 0,
+          showClose: true
+        }))
+        return error
       } else {
-        Message({
+        store.commit('set_Msg', Message({
           type: 'error',
           message: i18n.messages[i18n.locale].common.reqException,
-          duration: 5000
-        })
+          duration: 0,
+          showClose: true
+        }))
       }
     })
   }
