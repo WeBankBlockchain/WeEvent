@@ -153,7 +153,8 @@ public class FileTransportService {
         ChannelResponse rsp = channel.sendEvent(amopTopic, fileEvent);
         if (rsp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
             log.info("sender chunk data to remote success, try to update FileChunksMeta in zookeeper");
-            this.flushZKFileChunksMeta(fileChunksMeta);
+            FileChunksMeta updatedFileChunksMeta = JsonHelper.json2Object(rsp.getContentByteArray(), FileChunksMeta.class);
+            this.flushZKFileChunksMeta(updatedFileChunksMeta);
         } else {
             BrokerException e = AMOPChannel.toBrokerException(rsp);
             log.error("sender chunk data to remote failed", e);
