@@ -63,6 +63,7 @@ public class CRUDTable {
             log.error("miss fields in CRUD table, {}/{}/{}", TableKey, TableValue, TableVersion);
             throw new BrokerException(ErrorCode.UNKNOWN_SOLIDITY_VERSION);
         } catch (PrecompileMessageException e) {
+            log.error("detect PrecompileMessageException in web3sdk", e);
             log.info("not exist table in CRUD, create it: {}", this.tableName);
 
             createTable();
