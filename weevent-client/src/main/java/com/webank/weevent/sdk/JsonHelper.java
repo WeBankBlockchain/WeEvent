@@ -1,6 +1,8 @@
 package com.webank.weevent.sdk;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -75,6 +77,24 @@ public class JsonHelper {
     }
 
     /**
+     * convert byte[] to object
+     *
+     * @param bytes json byte
+     * @param valueType java object type
+     * @param <T> template type
+     * @return Object java object
+     * @throws BrokerException
+     */
+    public static <T> T jsonBytes2Object(byte[] bytes, Class<T> valueType) throws BrokerException {
+        try {
+            return OBJECT_MAPPER.readValue(bytes, valueType);
+        } catch (IOException e) {
+            log.error("convert byte[] to object failed ", e);
+            throw new BrokerException(ErrorCode.JSON_DECODE_EXCEPTION);
+        }
+    }
+
+    /**
      * convert jsonString to object
      *
      * @param jsonString json data
@@ -109,4 +129,24 @@ public class JsonHelper {
             throw new BrokerException(ErrorCode.JSON_DECODE_EXCEPTION);
         }
     }
+
+    /**
+     * convert object to List
+     *
+     * @param obj object
+     * @param valueType java object type
+     * @param <T> template type
+     * @return List<T>
+     */
+    public static <T> List<T> object2List(Object obj, Class<T> valueType) {
+        List<T> result = new ArrayList<T>();
+        if (obj instanceof List<?>) {
+            for (Object o : (List<?>) obj) {
+                result.add(valueType.cast(o));
+            }
+            return result;
+        }
+        return null;
+    }
+
 }

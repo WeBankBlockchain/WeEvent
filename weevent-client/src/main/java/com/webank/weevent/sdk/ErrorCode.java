@@ -75,11 +75,14 @@ public enum ErrorCode {
     FILE_CHUNK_INDEX_ILLEGAL(102007, "the upload file chunk idx is illegal"),
     FILE_CHUNK_DATA_IS_NULL(102008, "the upload file chunk data is null"),
     FILE_UPLOAD_FAILED(102009, "file upload failed"),
+    FILE_GENERATE_MD5_ERROR(102010, "file generate md5 failed"),
+    FILE_DOWNLOAD_ERROR(102010, "file download failed"),
+    FILE_MD5_MISMATCH(102011, "file md5 mismatch"),
 
     HTTP_REQUEST_EXECUTE_ERROR(102100, "http request execute failed"),
     BUILD_HTTP_URL_ERROR(102101, "build http url failed"),
-    HTTPRESPONSE_CLOSE_ERROR(102102, "httpResponse close failed"),
-
+    HTTP_RESPONSE_FAILED(102102, "http response failed"),
+    HTTP_RESPONSE_ENTITY_EMPTY(102103, "http response entity is empty"),
 
     //server error(200000, 300000)
     TOPIC_CONTROLLER_IS_NULL(200100, "get topic control address from CNS failed, please deploy it first"),

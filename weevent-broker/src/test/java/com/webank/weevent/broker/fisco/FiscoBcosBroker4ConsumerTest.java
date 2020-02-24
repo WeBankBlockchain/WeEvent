@@ -68,8 +68,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
         this.iConsumer = BrokerApplication.applicationContext.getBean("iConsumer", IConsumer.class);
         this.iProducer = BrokerApplication.applicationContext.getBean("iProducer", IProducer.class);
-        Assert.assertTrue(this.iProducer.startProducer());
-        Assert.assertTrue(this.iConsumer.startConsumer());
         Assert.assertTrue(this.iProducer.open(this.topicName, this.groupId));
         Assert.assertTrue(this.iProducer.open(this.topic2, this.groupId));
         Assert.assertTrue(this.iProducer.open(this.topic3, this.groupId));

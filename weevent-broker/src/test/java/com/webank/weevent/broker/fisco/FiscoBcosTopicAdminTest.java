@@ -52,7 +52,6 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
 
         this.iProducer = BrokerApplication.applicationContext.getBean("iProducer", IProducer.class);
         Assert.assertNotNull(this.iProducer);
-        this.iProducer.startProducer();
 
         SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
         Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());

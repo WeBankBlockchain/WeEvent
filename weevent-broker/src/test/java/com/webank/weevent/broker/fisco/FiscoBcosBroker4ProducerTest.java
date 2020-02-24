@@ -62,7 +62,6 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
         this.fiscoBcosDelegate = BrokerApplication.applicationContext.getBean("fiscoBcosDelegate", FiscoBcosDelegate.class);
         this.contractContext = this.fiscoBcosDelegate.getContractContext(Long.parseLong(this.groupId));
         Assert.assertNotNull(this.iProducer);
-        this.iProducer.startProducer();
         Assert.assertTrue(this.iProducer.open(this.topicName, this.groupId));
     }
 

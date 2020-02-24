@@ -82,10 +82,11 @@ public class FileRest {
     }
 
     @RequestMapping(path = "/uploadChunk")
-    public SendResult uploadChunk(@RequestParam(name = "fileId") String fileId,
+    public SendResult uploadChunk(@RequestParam(name = "host") String host,
+                                  @RequestParam(name = "fileId") String fileId,
                                   @RequestParam(name = "chunkIdx") int chunkIdx,
                                   @RequestParam(name = "chunkData") MultipartFile chunkFile) throws BrokerException, IOException {
-        log.info("fileId: {}  chunkIdx: {} chunkData: {}", fileId, chunkIdx, chunkFile.getSize());
+        log.info("host:{} fileId: {}  chunkIdx: {} chunkData: {}", host, fileId, chunkIdx, chunkFile.getSize());
         checkSupport();
 
         byte[] chunkData = chunkFile.getBytes();
@@ -104,9 +105,10 @@ public class FileRest {
     }
 
     @RequestMapping(path = "/downloadChunk")
-    public byte[] downloadChunk(@RequestParam(name = "fileId") String fileId,
+    public byte[] downloadChunk(@RequestParam(name = "host") String host,
+                                @RequestParam(name = "fileId") String fileId,
                                 @RequestParam(name = "chunkIdx") int chunkIdx) throws BrokerException {
-        log.info("fileId: {} chunkIdx: {}", fileId, chunkIdx);
+        log.info("host:{} fileId: {} chunkIdx: {}", host, fileId, chunkIdx);
 
         checkSupport();
 
@@ -118,8 +120,9 @@ public class FileRest {
     }
 
     @RequestMapping(path = "/listChunk")
-    public FileChunksMeta listChunk(@RequestParam(name = "fileId") String fileId) throws BrokerException {
-        log.info("fileId: {}", fileId);
+    public FileChunksMeta listChunk(@RequestParam(name = "host") String host,
+                                    @RequestParam(name = "fileId") String fileId) throws BrokerException {
+        log.info("host:{} fileId: {}", host, fileId);
 
         checkSupport();
 
@@ -130,8 +133,9 @@ public class FileRest {
     }
 
     @RequestMapping(path = "/closeChunk")
-    public SendResult closeChunk(@RequestParam(name = "fileId") String fileId) throws BrokerException {
-        log.info("fileId: {}", fileId);
+    public SendResult closeChunk(@RequestParam(name = "host") String host,
+                                 @RequestParam(name = "fileId") String fileId) throws BrokerException {
+        log.info("host:{} fileId: {}", host, fileId);
 
         checkSupport();
 
