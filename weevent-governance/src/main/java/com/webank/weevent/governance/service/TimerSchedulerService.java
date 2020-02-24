@@ -44,7 +44,7 @@ public class TimerSchedulerService {
             }
             timerSchedulerEntity.setTotalCount((int) count);
 
-            Pageable pageable = PageRequest.of(timerSchedulerEntity.getPageNumber()-1, timerSchedulerEntity.getPageSize());
+            Pageable pageable = PageRequest.of(timerSchedulerEntity.getPageNumber() - 1, timerSchedulerEntity.getPageSize());
             Page<TimerSchedulerEntity> page = timerSchedulerRepository.findAll(example, pageable);
             List<TimerSchedulerEntity> content = page.getContent();
 

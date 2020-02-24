@@ -12,6 +12,7 @@ import lombok.EqualsAndHashCode;
 @MappedSuperclass
 public class TimerSchedulerBase extends BaseEntity {
 
+    @NotNull(message = "brokerId cannot be empty")
     @Column(name = "broker_id")
     private Integer brokerId;
 
