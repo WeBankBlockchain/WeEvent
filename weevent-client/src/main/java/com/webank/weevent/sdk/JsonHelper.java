@@ -83,7 +83,7 @@ public class JsonHelper {
      * @param valueType java object type
      * @param <T> template type
      * @return Object java object
-     * @throws BrokerException
+     * @throws BrokerException BrokerException
      */
     public static <T> T jsonBytes2Object(byte[] bytes, Class<T> valueType) throws BrokerException {
         try {
@@ -136,7 +136,7 @@ public class JsonHelper {
      * @param obj object
      * @param valueType java object type
      * @param <T> template type
-     * @return List<T>
+     * @return class instance
      */
     public static <T> List<T> object2List(Object obj, Class<T> valueType) {
         List<T> result = new ArrayList<T>();
