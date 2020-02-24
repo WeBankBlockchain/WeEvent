@@ -148,5 +148,25 @@
   "ruleStatic": {
     "method": "get",
     "url": "processor/statistic"
+  },
+  "timerList": {
+    "method": "post",
+    "url": "timerScheduler/list"
+  },
+  "addTimer": {
+    "method": "post",
+    "url": "timerScheduler/add"
+  },
+  "updateTimer": {
+    "method": "post",
+    "url": "timerScheduler/update"
+  },
+  "deleteTimer": {
+    "method": "post",
+    "url": "timerScheduler/delete"
+  },
+  "cornCheck": {
+    "method": "get",
+    "url": "processor/timerScheduler/checkCorn"
   }
 }

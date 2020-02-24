@@ -24,7 +24,7 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.util.DigestUtils;
 
 /**
- * Upload&Download File in chunks.
+ * Upload and Download File in chunks.
  *
  * @author matthewliu
  * @since 2020/02/12

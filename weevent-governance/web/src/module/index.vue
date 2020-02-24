@@ -65,6 +65,10 @@ export default {
           this.$store.commit('set_menu', [this.$t('sideBar.engine'), this.$t('sideBar.sources')])
           this.$router.push('./dataBase')
           break
+        case '4-3':
+          this.$store.commit('set_menu', [this.$t('sideBar.engine'), this.$t('sideBar.timerSchedule')])
+          this.$router.push('./timerSchedule')
+          break
       }
     },
     getMenu () {
@@ -114,6 +118,10 @@ export default {
         case '/dataBase':
           this.$store.commit('set_active', '4-2')
           this.$store.commit('set_menu', [this.$t('sideBar.engine'), this.$t('sideBar.sources')])
+          break
+        case '/timerSchedule':
+          this.$store.commit('set_active', '4-3')
+          this.$store.commit('set_menu', [this.$t('sideBar.engine'), this.$t('sideBar.timerSchedule')])
           break
       }
     }
