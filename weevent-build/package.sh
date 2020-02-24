@@ -96,7 +96,7 @@ function build_weevent(){
 function copy_install_file(){
     cd ${current_path}
 
-    cp ${current_path}/config.properties ${current_path}/install-all.sh ${current_path}/bin ${out_path}
+    cp ${current_path}/config.properties ${current_path}/install-all.sh ${out_path}
 
     mkdir -p ${out_path}/modules/gateway
     cp ${current_path}/modules/gateway/install-gateway.sh ${out_path}/modules/gateway
@@ -164,13 +164,6 @@ function tar_broker(){
     # no need install shell
     rm -rf ${current_path}/broker-${version}/install-broker.sh
 
-    # do not tar the top dir
-    cd ${current_path}/broker-${version}
-    tar -czpvf ${target} *
-    mv ${target} ${current_path}
-
-    rm -rf ${current_path}/broker-${version}
-}
 
 function tar_governance(){
     local target=$1
