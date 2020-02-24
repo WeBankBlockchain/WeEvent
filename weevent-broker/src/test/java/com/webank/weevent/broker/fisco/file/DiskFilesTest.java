@@ -82,8 +82,11 @@ public class DiskFilesTest {
     public void testWriteChunkData() throws Exception {
         this.diskFiles.createFixedLengthFile(this.fileChunksMeta.getFileId(), this.fileChunksMeta.getFileSize());
         this.diskFiles.saveFileMeta(this.fileChunksMeta);
-        this.diskFiles.writeChunkData(this.fileChunksMeta.getFileId(), 0, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa".getBytes());
-        Assert.assertTrue(true);
+        FileChunksMeta fileChunksMeta = this.diskFiles.writeChunkData(this.fileChunksMeta.getFileId(), 0, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa".getBytes());
+
+        Assert.assertTrue(fileChunksMeta.getChunkStatus().get(0));
+        Assert.assertFalse(fileChunksMeta.getChunkStatus().get(1));
+        Assert.assertFalse(fileChunksMeta.checkChunkFull());
     }
 
     /**

@@ -360,6 +360,11 @@ export default {
     back () {
       this.$router.go(-1)
     }
+  },
+  destroyed () {
+    this.$store.state.msg.forEach(e => {
+      e.close()
+    })
   }
 }
 </script>
