@@ -89,6 +89,9 @@ export default {
               localStorage.removeItem('groupId')
               localStorage.removeItem('brokerId')
               localStorage.removeItem('token')
+              this.$store.state.msg.forEach(e => {
+                e.close()
+              })
               this.$router.push('./login')
             }
           })
@@ -99,7 +102,7 @@ export default {
       this.server = this.servers[e].name
       this.$store.commit('set_id', this.servers[e].id)
       this.$store.commit('setConfigRule', this.servers[e].isConfigRule)
-      // localStorage.setItem('brokerId', this.servers[e].id)
+      localStorage.setItem('brokerId', this.servers[e].id)
     },
     selectGroup (e) {
       this.$store.commit('set_groupId', e)
@@ -119,7 +122,7 @@ export default {
                   let id = e.id
                   vm.$store.commit('set_id', id)
                   vm.$store.commit('setConfigRule', e.isConfigRule)
-                  // localStorage.setItem('brokerId', id)
+                  localStorage.setItem('brokerId', id)
                 }
               })
             } else {
@@ -127,9 +130,9 @@ export default {
               let id = res.data[0].id
               vm.$store.commit('set_id', id)
               vm.$store.commit('setConfigRule', res.data[0].isConfigRule)
-              // localStorage.setItem('brokerId', id)
+              localStorage.setItem('brokerId', id)
             }
-            // vm.listGroup()
+            vm.listGroup()
           } else {
             vm.$store.commit(vm.$message({
               type: 'warning',

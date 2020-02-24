@@ -109,7 +109,8 @@ module.exports = {
     'engine': '规则引擎',
     'ruleMana': '规则管理',
     'ruleDetail': '规则详情',
-    'sources': '数据源设置'
+    'sources': '数据源设置',
+    'timerSchedule': '任务列表'
   },
   overview: {
     'nodeNum': '节点数量',
@@ -290,5 +291,19 @@ module.exports = {
     'columnMarkError': '此方法选择的参数都只能是字符串类型',
     'notAdate': '所选参数的值不是一个有效的日期',
     'notAtime': '所选参数的值不是一个有效的时间'
+  },
+  timerSchedule: {
+    'schedulerName': '任务名称',
+    'databaseUrl': '数据源',
+    'periodParams': '周期参数',
+    'parsingSql': 'SQL文本',
+    'addScheduler': '新增任务',
+    'editScheduler': '编辑任务',
+    'noDbList': '还未配置数据源',
+    'enterSN': '请填写任务名',
+    'enterPP': '请填写周期参数',
+    'enterSQL': '请填写SQl文本',
+    'selectDB': '请选择数据源',
+    'errorCorn': '参数无效'
   }
 }
