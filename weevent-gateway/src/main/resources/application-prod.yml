@@ -63,3 +63,8 @@ spring:
           uri: lb://weevent-governance
           predicates:
             - Path=/weevent-governance/**
+        # processor
+        - id: weevent-processor
+          uri: lb://weevent-processor
+          predicates:
+            - Path=/weevent-processor/**

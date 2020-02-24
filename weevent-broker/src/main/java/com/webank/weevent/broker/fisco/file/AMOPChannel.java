@@ -1,6 +1,7 @@
 package com.webank.weevent.broker.fisco.file;
 
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -45,6 +46,8 @@ public class AMOPChannel extends ChannelPushCallback {
     public AMOPChannel(FileTransportService fileTransportService, Service service) {
         this.fileTransportService = fileTransportService;
         this.service = service;
+
+        this.service.setPushCallback(this);
     }
 
     public static String genTopic(String weEventTopic) {
@@ -62,7 +65,7 @@ public class AMOPChannel extends ChannelPushCallback {
             log.info("subscribe topic on AMOP channel, {}", topic);
 
             this.subTopics.put(topic, true);
-            this.service.setTopics(this.subTopics.keySet());
+            this.service.setTopics(new HashSet<>(this.subTopics.keySet()));
             this.service.updateTopicsToNode();
         }
     }
@@ -72,7 +75,7 @@ public class AMOPChannel extends ChannelPushCallback {
             log.info("unSubscribe topic on AMOP channel, {}", topic);
 
             this.subTopics.remove(topic);
-            this.service.setTopics(this.subTopics.keySet());
+            this.service.setTopics(new HashSet<>(this.subTopics.keySet()));
             this.service.updateTopicsToNode();
         }
     }
