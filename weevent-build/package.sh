@@ -165,7 +165,13 @@ function tar_broker(){
     # no need install shell
     rm -rf ${current_path}/broker-${version}/install-broker.sh
 
+    # do not tar the top dir
+    cd ${current_path}/broker-${version}
+    tar -czpvf ${target} *
+    mv ${target} ${current_path}
 
+    rm -rf ${current_path}/broker-${version}
+}
 function tar_governance(){
     local target=$1
     yellow_echo "generate ${target}"
