@@ -206,6 +206,7 @@ public interface IWeEventClient {
      * @param localFile local file to be send
      * @return send result, SendResult.SUCCESS if success, and return SendResult.eventId
      * @throws BrokerException broker exception
+     * @throws IOException IOException
      */
     SendResult publishFile(String topic, String localFile) throws BrokerException, IOException;
 
