@@ -11,7 +11,7 @@ broker_port=7000
 gateway_port=8080
 governance_port=7009
 processor_port=7008
-
+zookeeper_connect_string=
 block_chain_version=
 block_chain_channel=
 block_chain_node_path=
@@ -57,6 +57,7 @@ function set_global_param(){
         block_chain_node_path=$(realpath -m ${block_chain_node_path})
     fi
     gateway_port=$(properties_get "gateway.port")
+    zookeeper_connect_string=$(properties_get "zookeeper.connect-string")
 
     broker_port=$(properties_get "broker.port")
 
@@ -144,6 +145,7 @@ function install_module(){
     yellow_echo "install module gateway"
     cd ${current_path}/modules/gateway
     ./install-gateway.sh --gateway_path ${out_path}/gateway --gateway_port ${gateway_port} &>> ${current_path}/install.log
+    ./install-gateway.sh --gateway_path ${out_path}/gateway --zookeeper_connect_string ${zookeeper_connect_string} &>> ${current_path}/install.log
     check_result "install gateway"
 
     yellow_echo "install module broker"
