@@ -144,11 +144,19 @@ export default {
     },
     lang () {
       return this.$store.state.lang
+    },
+    msgList () {
+      return this.$store.state.msg
     }
   },
   watch: {
     lang (nVal) {
       this.getMenu()
+    },
+    $route (to, from) {
+      this.msgList.forEach(e => {
+        e.close()
+      })
     }
   }
 }

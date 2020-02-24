@@ -1,5 +1,6 @@
 package com.webank.weevent.sdk;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +39,7 @@ public class WeEventClientTest {
                 this.testName.getMethodName());
 
         this.extensions.put(WeEvent.WeEvent_TAG, "test");
-        this.weEventClient = IWeEventClient.build("http://localhost:7000/weevent");
+        this.weEventClient = new IWeEventClient.Builder().brokerUrl("http://localhost:7000/weevent-broker").build();
         this.weEventClient.open(this.topicName);
     }
 
@@ -160,5 +161,39 @@ public class WeEventClientTest {
     @Test(expected = BrokerException.class)
     public void testGetEvent() throws Exception {
         this.weEventClient.getEvent("not exist");
+    }
+
+    @Test
+    public void testPublishFile() throws Exception {
+        boolean result = this.weEventClient.open("com.weevent.file");
+        Assert.assertTrue(result);
+
+        SendResult sendResult = this.weEventClient.publishFile("com.weevent.file",
+                new File("src/main/resources/log4j2.xml").getAbsolutePath());
+        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
+    }
+
+    @Test
+    public void testSubscribeFile() throws Exception {
+        boolean result = this.weEventClient.open("com.weevent.file");
+        Assert.assertTrue(result);
+
+        String subscriptionId = this.weEventClient.subscribeFile("com.weevent.file", "./logs", new IWeEventClient.FileListener() {
+            @Override
+            public void onFile(String subscriptionId, String localFile) {
+                Assert.assertFalse(subscriptionId.isEmpty());
+                Assert.assertFalse(localFile.isEmpty());
+
+                // file data stored in localFile
+            }
+
+            @Override
+            public void onException(Throwable e) {
+
+            }
+        });
+
+        Assert.assertFalse(subscriptionId.isEmpty());
+        this.weEventClient.unSubscribe(subscriptionId);
     }
 }

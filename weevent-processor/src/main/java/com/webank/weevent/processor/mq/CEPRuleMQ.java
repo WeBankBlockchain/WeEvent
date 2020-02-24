@@ -19,7 +19,6 @@ import com.webank.weevent.processor.model.StatisticWeEvent;
 import com.webank.weevent.processor.quartz.QuartzManager;
 import com.webank.weevent.processor.utils.CommonUtil;
 import com.webank.weevent.processor.utils.ConstantsHelper;
-
 import com.webank.weevent.processor.utils.DataBaseUtil;
 import com.webank.weevent.processor.utils.JsonUtil;
 import com.webank.weevent.processor.utils.RetCode;
@@ -114,14 +113,15 @@ public class CEPRuleMQ {
             // set group id
             String groupId = rule.getGroupId();
             IWeEventClient client;
+            IWeEventClient.Builder builder = new IWeEventClient.Builder();
+            builder.brokerUrl(baseUrl);
             if (null != groupId) {
-                client = IWeEventClient.build(baseUrl, groupId);
-                Pair<String, String> brokerMessage = new Pair<>(baseUrl, groupId);
-                clientGroupMap.put(client, brokerMessage);
+                builder.groupId(groupId);
+                client = builder.build();
+                clientGroupMap.put(client, new Pair<>(baseUrl, groupId));
             } else {
-                client = IWeEventClient.build(baseUrl, "");
-                Pair<String, String> brokerMessage = new Pair<>(baseUrl, "");
-                clientGroupMap.put(client, brokerMessage);
+                client = builder.build();
+                clientGroupMap.put(client, new Pair<>(baseUrl, ""));
             }
             return client;
         } catch (BrokerException e) {
@@ -287,7 +287,6 @@ public class CEPRuleMQ {
         return new Pair<>(ConstantsHelper.OTHER, "");
     }
 
-
     private static boolean handleTheEqual(WeEvent eventMessage, String condition) throws IOException {
         String eventContent = new String(eventMessage.getContent());
         Map event = JsonUtil.parseObject(eventContent, Map.class);
@@ -319,25 +318,15 @@ public class CEPRuleMQ {
                 List<String> eventContentKeys = CommonUtil.getKeys(payload);
                 Map event = JsonUtil.parseObject(eventContent, Map.class);
                 JexlEngine jexl = new JexlBuilder().create();
-                JexlContext context = new MapContext();
-                for (String key : eventContentKeys) {
-                    if (CommonUtil.isDate(String.valueOf(event.get(key)))) {
-                        String timeStr = String.valueOf(event.get(key));
-                        long time = (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).parse(timeStr, new ParsePosition(0)).getTime() / 1000;
-                        context.set(key, time);
-                    } else {
-                        context.set(key, event.get(key));
-                    }
-                }
+                JexlContext context = setContext(event, eventContentKeys);
 
                 // check the expression ,if match then true
-                log.info("condition:{},systemFunctionMessage：{}", condition,rule.getFunctionArray());
+                log.info("condition:{},systemFunctionMessage：{}", condition, rule.getFunctionArray());
                 if (!StringUtils.isEmpty(rule.getFunctionArray())) {
                     String[][] systemFunctionDetail = SystemFunctionUtil.stringConvertArray(rule.getFunctionArray());
-                    log.info("systemFunctionDetail:{}",systemFunctionDetail.toString());
                     if (0 != systemFunctionDetail.length) {
                         condition = SystemFunctionUtil.analysisSystemFunction(systemFunctionDetail, eventContent, condition);
-                        log.info("condition:{}",condition);
+                        log.info("condition:{}", condition);
                     }
                 }
 
@@ -359,6 +348,26 @@ public class CEPRuleMQ {
         }
     }
 
+    public static JexlContext setContext(Map payloadJson, List<String> payloadContentKeys) {
+        JexlContext context = new MapContext();
+        for (String key : payloadContentKeys) {
+            if (CommonUtil.isDate(String.valueOf(payloadJson.get(key)))) {
+                String timeStr = String.valueOf(payloadJson.get(key));
+                long time = (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).parse(timeStr, new ParsePosition(0)).getTime() / 1000;
+                context.set(key, time);
+            } else if (CommonUtil.isSimpleDate(String.valueOf(payloadJson.get(key)))) {
+                String newString = payloadJson.get(key).toString().replace("-", "");
+                context.set(key, Integer.valueOf(newString));
+            } else if (CommonUtil.isTime(String.valueOf(payloadJson.get(key)))) {
+                String newString = payloadJson.get(key).toString().replace(":", "");
+                context.set(key, Integer.valueOf(newString));
+            } else {
+                context.set(key, payloadJson.get(key));
+            }
+        }
+        return context;
+    }
+
     /**
      * check the condition field
      *
@@ -372,17 +381,7 @@ public class CEPRuleMQ {
             Map payloadJson = JsonUtil.parseObject(payload, Map.class);
             JexlEngine jexl = new JexlBuilder().create();
 
-            JexlContext context = new MapContext();
-            for (String key : payloadContentKeys) {
-                if (CommonUtil.isDate(String.valueOf(payloadJson.get(key)))) {
-                    String timeStr = String.valueOf(payloadJson.get(key));
-                    long time = (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).parse(timeStr, new ParsePosition(0)).getTime() / 1000;
-                    context.set(key, time);
-                } else {
-                    context.set(key, payloadJson.get(key));
-                }
-            }
-
+            JexlContext context = setContext(payloadJson, payloadContentKeys);
             Map event = JsonUtil.parseObject(payload, Map.class);
             String[] strs = condition.split("=");
             boolean flag = false;
