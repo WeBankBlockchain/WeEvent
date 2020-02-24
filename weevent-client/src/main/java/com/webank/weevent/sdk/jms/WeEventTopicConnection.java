@@ -92,7 +92,7 @@ public class WeEventTopicConnection implements TopicConnection, CommandDispatche
     public void destroySubscriber(String subscriptionId) throws JMSException {
         checkConnected();
         if (this.subscribers.containsKey(subscriptionId)) {
-            this.transport.stompUnsubscribe(subscriptionId);
+            this.transport.stompUnSubscribe(subscriptionId);
             this.subscribers.remove(subscriptionId);
         }
     }

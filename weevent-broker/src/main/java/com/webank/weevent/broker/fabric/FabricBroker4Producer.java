@@ -4,10 +4,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 
 import com.webank.weevent.broker.fabric.sdk.FabricDelegate;
-import com.webank.weevent.broker.fisco.util.DataTypeUtils;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.JsonHelper;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
 
@@ -43,6 +43,6 @@ public class FabricBroker4Producer extends FabricTopicAdmin implements IProducer
         return fabricDelegate.publishEvent(event.getTopic(),
                 channelName,
                 new String(event.getContent(), StandardCharsets.UTF_8),
-                DataTypeUtils.object2Json(event.getExtensions()));
+                JsonHelper.object2Json(event.getExtensions()));
     }
 }

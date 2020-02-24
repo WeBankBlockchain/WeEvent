@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="info">
     <Properties>
-        <Property name="logPath">./logs/</Property>
+        <Property name="logPath">./logs</Property>
     </Properties>
     <Appenders>
         <Console name="console" target="SYSTEM_OUT">
@@ -9,8 +9,8 @@
         </Console>
 
         <RollingRandomAccessFile name="fileAppender"
-                                 fileName="${logPath}event-broker.log"
-                                 filePattern="${logPath}event-broker.log.%d{yyyy-MM-dd}.%i.log.gz">
+                                 fileName="${logPath}/weevent-broker.log"
+                                 filePattern="${logPath}/weevent-broker.log.%d{yyyy-MM-dd}.%i.log.gz">
             <PatternLayout pattern="%-d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%pid-%tid %t] [%F:%L %M] %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy/>
