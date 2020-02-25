@@ -448,9 +448,9 @@ a:hover {
     height:300px;
 }
 
-#filed-send{
+/* #filed-send{
     margin-top:-16px;
-}
+} */
 
 .filed-title{
     display: inline-block;
@@ -628,14 +628,14 @@ section {
     font-size: 12px;
     width:200px;
     text-align: left;
-    display: none;
+    /* display: none; */
 }
 
 .new-item .item .error_type{
     font-size: 12px;
     width:200px;
     text-align: left;
-    display: none;
+    /* display: none; */
 }
 
 .new-item .item span{
@@ -692,6 +692,50 @@ section {
 .input_radio{
     margin-left:20px;
 }
+
+#tagList{
+    margin-bottom:20px;
+}
+/* #tagList .one-tag{
+    width:100%;
+    text-align: right;
+    margin-top:5px;
+    position: relative;
+    height:60px;
+}
+#tagList .one-tag span,input{
+    display:inline-block;
+}
+
+#tagList .one-tag .warningbox,.error_type{
+    font-size: 12px;
+    width:200px;
+    text-align: left;
+    display: none;
+}
+
+#tagList .one-tag .error_type{
+    font-size: 12px;
+    width:200px;
+    text-align: left;
+    display: none;
+}
+
+#tagList .one-tag span{
+    font-size: 16px;
+    width:60px;
+}
+
+#tagList .one-tag input{
+    border: 1px solid #ccc;
+    width: 136px;
+    height: 14px;
+    line-height: 14px;
+    padding: 19px 24px 19px 10px;
+    padding-left: 12px;
+    padding-right: 10px;
+    border-radius: 3px;
+} */
 
 @media screen and (max-width:1350px){
     .leftbox,.rightbox{
