@@ -23,17 +23,33 @@ function copy_file(){
     rm -f ${out_path}/install-gateway.sh
 }
 
-copy_file
+#copy file
+function copy_file(){
+    mkdir -p ${out_path}
+    cp -r ./* ${out_path}/
+    rm -f ${out_path}/install-gateway.sh
+}
 
+copy_file
+connectString="\      connect-string:"
+serverPort="\  port:"
 cd ${current_path}
 
 if [[ ${gateway_port} -gt 0 ]]; then
-    sed -i "/server.port=/cserver.port=${gateway_port}" ${out_path}/conf/application-prod.yml
-    sed -i "/zookeeper.connect-string=/cserver.port=${zookeeper_connect_string}" ${out_path}/conf/application-prod.yml
+    sed -i "/port:/c ${serverPort} ${gateway_port}" ${out_path}/conf/application-prod.yml
 else
     echo "gateway_port is error"
     exit 1
 fi
 echo "set gateway_port success"
+
+if [[ -n ${zookeeper_connect_string} ]];then
+    sed -i "/connect-string:/c ${connectString} ${zookeeper_connect_string}" ${out_path}/conf/application-prod.yml
+else
+    echo "zookeeper_connect_string is error"
+    exit 1
+fi
+echo "set zookeeper_connect_string success"
+
 
 echo "gateway module install success"

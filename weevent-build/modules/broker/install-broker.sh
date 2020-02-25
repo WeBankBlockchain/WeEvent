@@ -20,7 +20,7 @@ echo "param listen_port: ${listen_port}"
 echo "param version: ${version}"
 echo "param block_chain_node_path: ${block_chain_node_path}"
 echo "param channel_info: ${channel_info}"
-echo "zookeeper connect_string: ${zookeeper_connect_string}"
+echo "param zookeeper_connect_string: ${zookeeper_connect_string}"
 
 #copy file
 function copy_file(){
@@ -77,8 +77,8 @@ else
 fi
 echo "set lister_port success"
 
-if [[ ${zookeeper_connect_string} -gt 0 ]]; then
-    sed -i "/spring.cloud.zookeeper.connect-string=/cspring.cloud.zookeeper.connect-string=${zookeeper_connect_string}" ${out_path}/conf/application-prod.properties
+if [[ -z ${zookeeper_connect_string} ]];then
+  sed -i "/spring.cloud.zookeeper.connect-string=/cspring.cloud.zookeeper.connect-string=${zookeeper_connect_string}" ${out_path}/conf/application-prod.properties
 else
     echo "zookeeper_connect_string is err"
     exit 1
