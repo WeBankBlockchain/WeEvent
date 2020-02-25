@@ -30,6 +30,7 @@ public class GatewayApplication {
         SpringApplication app = new SpringApplication(GatewayApplication.class);
         app.addListeners(new ApplicationPidFileWriter());
         app.run();
+        log.info("Start gateway success");
     }
 
     @Autowired
