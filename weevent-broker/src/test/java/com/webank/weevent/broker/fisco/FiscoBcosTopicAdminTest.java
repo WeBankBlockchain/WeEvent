@@ -4,9 +4,9 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.JUnitTestBase;
 import com.webank.weevent.broker.fisco.dto.ListPage;
+import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.protocol.rest.entity.GroupGeneral;
 import com.webank.weevent.protocol.rest.entity.QueryEntity;
@@ -27,6 +27,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * FiscoBcosTopicAdmin Tester.
@@ -37,22 +38,26 @@ import org.junit.Test;
  */
 @Slf4j
 public class FiscoBcosTopicAdminTest extends JUnitTestBase {
-    private IProducer iProducer;
     private String eventId = "";
     private QueryEntity queryEntity;
     private String groupId = WeEvent.DEFAULT_GROUP_ID;
     private final BigInteger blockNumber = BigInteger.valueOf(1);
+    private IProducer iProducer;
+    private FiscoBcosDelegate fiscoBcosDelegate;
 
+    @Autowired
+    public void setFiscoBcosDelegate(FiscoBcosDelegate fiscoBcosDelegate) {
+        this.fiscoBcosDelegate = fiscoBcosDelegate;
+    }
 
     @Before
     public void before() throws Exception {
         log.info("=============================={}.{}==============================",
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
+        this.iProducer = new FiscoBcosBroker4Producer(this.fiscoBcosDelegate);
 
-        this.iProducer = BrokerApplication.applicationContext.getBean("iProducer", IProducer.class);
-        Assert.assertNotNull(this.iProducer);
-
+        Assert.assertTrue(this.iProducer.startProducer());
         SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
         Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
         this.eventId = sendResult.getEventId();

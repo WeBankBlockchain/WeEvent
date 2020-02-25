@@ -131,6 +131,18 @@ public class JsonHelper {
     }
 
     /**
+     * convert Object to Bean
+     *
+     * @param obj object data
+     * @param valueType java object type
+     * @param <T> template type
+     * @return class instance
+     */
+    public static <T> T object2Bean(Object obj, Class<T> valueType) {
+        return OBJECT_MAPPER.convertValue(obj, valueType);
+    }
+
+    /**
      * convert object to List
      *
      * @param obj object
@@ -139,7 +151,7 @@ public class JsonHelper {
      * @return class instance
      */
     public static <T> List<T> object2List(Object obj, Class<T> valueType) {
-        List<T> result = new ArrayList<T>();
+        List<T> result = new ArrayList<>();
         if (obj instanceof List<?>) {
             for (Object o : (List<?>) obj) {
                 result.add(valueType.cast(o));

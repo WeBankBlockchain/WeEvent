@@ -15,7 +15,6 @@ import com.webank.weevent.broker.fabric.config.FabricConfig;
 import com.webank.weevent.broker.fabric.sdk.FabricDelegate;
 import com.webank.weevent.broker.fisco.FiscoBcosBroker4Consumer;
 import com.webank.weevent.broker.fisco.FiscoBcosBroker4Producer;
-import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.file.FileTransportService;
 import com.webank.weevent.broker.fisco.file.ZKChunksMeta;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
@@ -236,49 +235,40 @@ public class BrokerApplication {
         return fabricDelegate;
     }
 
-    // IConsumer
-    @Bean
-    public static IConsumer iConsumer() throws BrokerException {
-        String blockChain = BrokerApplication.weEventConfig.getBlockChainType();
-        switch (blockChain) {
-            case WeEventConstants.FISCO:
-                FiscoBcosDelegate fiscoBcosDelegate = BrokerApplication.applicationContext.getBean(FiscoBcosDelegate.class);
-                FiscoBcosBroker4Consumer fiscoBcosBroker4Consumer = new FiscoBcosBroker4Consumer(fiscoBcosDelegate);
-                fiscoBcosBroker4Consumer.startConsumer();
-                return fiscoBcosBroker4Consumer;
-
-            case WeEventConstants.FABRIC:
-                FabricDelegate fabricDelegate = BrokerApplication.applicationContext.getBean(FabricDelegate.class);
-                FabricBroker4Consumer fabricBroker4Consumer = new FabricBroker4Consumer(fabricDelegate);
-                fabricBroker4Consumer.startConsumer();
-                return fabricBroker4Consumer;
-
-            default:
-                throw new BrokerException("invalid block chain type");
-        }
+    // FISCO-BCOS IConsumer
+    @Bean(name = "iConsumer")
+    @ConditionalOnBean(name = "fiscoBcosDelegate")
+    public static IConsumer fiscoIConsumer(FiscoBcosDelegate fiscoBcosDelegate) throws BrokerException {
+        FiscoBcosBroker4Consumer fiscoBcosBroker4Consumer = new FiscoBcosBroker4Consumer(fiscoBcosDelegate);
+        boolean startConsumer = fiscoBcosBroker4Consumer.startConsumer();
+        return fiscoBcosBroker4Consumer;
     }
 
-    // IProducer
-    @Bean
-    public static IProducer iProducer() throws BrokerException {
-        String blockChain = BrokerApplication.weEventConfig.getBlockChainType();
+    // Fabric IConsumer
+    @Bean(name = "iConsumer")
+    @ConditionalOnBean(name = "fabricDelegate")
+    public static IConsumer fabricIConsumer(FabricDelegate fabricDelegate) throws BrokerException {
+        FabricBroker4Consumer fabricBroker4Consumer = new FabricBroker4Consumer(fabricDelegate);
+        fabricBroker4Consumer.startConsumer();
+        return fabricBroker4Consumer;
+    }
 
-        switch (blockChain) {
-            case WeEventConstants.FISCO:
-                FiscoBcosDelegate fiscoBcosDelegate = BrokerApplication.applicationContext.getBean(FiscoBcosDelegate.class);
-                FiscoBcosBroker4Producer fiscoBcosBroker4Producer = new FiscoBcosBroker4Producer(fiscoBcosDelegate);
-                fiscoBcosBroker4Producer.startProducer();
-                return fiscoBcosBroker4Producer;
+    // FISCO-BCOS IProducer
+    @Bean(name = "iProducer")
+    @ConditionalOnBean(name = "fiscoBcosDelegate")
+    public static IProducer fiscoIProducer(FiscoBcosDelegate fiscoBcosDelegate) {
+        FiscoBcosBroker4Producer fiscoBcosBroker4Producer = new FiscoBcosBroker4Producer(fiscoBcosDelegate);
+        fiscoBcosBroker4Producer.startProducer();
+        return fiscoBcosBroker4Producer;
+    }
 
-            case WeEventConstants.FABRIC:
-                FabricDelegate fabricDelegate = BrokerApplication.applicationContext.getBean(FabricDelegate.class);
-                FabricBroker4Producer fabricBroker4Producer = new FabricBroker4Producer(fabricDelegate);
-                fabricBroker4Producer.startProducer();
-                return fabricBroker4Producer;
-
-            default:
-                throw new BrokerException("invalid block chain type");
-        }
+    // Fabric IProducer
+    @Bean(name = "iProducer")
+    @ConditionalOnBean(name = "fabricDelegate")
+    public static IProducer fabricIProducer(FabricDelegate fabricDelegate) {
+        FabricBroker4Producer fabricBroker4Producer = new FabricBroker4Producer(fabricDelegate);
+        fabricBroker4Producer.startProducer();
+        return fabricBroker4Producer;
     }
 
     // FileChunksMeta in Zookeeper

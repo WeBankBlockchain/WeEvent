@@ -83,6 +83,7 @@ public enum ErrorCode {
     BUILD_HTTP_URL_ERROR(102101, "build http url failed"),
     HTTP_RESPONSE_FAILED(102102, "http response failed"),
     HTTP_RESPONSE_ENTITY_EMPTY(102103, "http response entity is empty"),
+    HTTPENTITY_TO_BYTEARRAY_ERROR(102104, "convert httpEntity to byte[] error"),
 
     //server error(200000, 300000)
     TOPIC_CONTROLLER_IS_NULL(200100, "get topic control address from CNS failed, please deploy it first"),

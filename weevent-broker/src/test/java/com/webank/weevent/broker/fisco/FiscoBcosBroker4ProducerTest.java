@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.JUnitTestBase;
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.dto.ContractContext;
@@ -34,9 +33,11 @@ import org.fisco.bcos.web3j.crypto.ExtendedRawTransaction;
 import org.fisco.bcos.web3j.crypto.ExtendedTransactionEncoder;
 import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.utils.Numeric;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * FiscoBcosBroker4Producer Tester.
@@ -48,9 +49,14 @@ import org.junit.Test;
  */
 @Slf4j
 public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
+    private ContractContext contractContext;
     private IProducer iProducer;
     private FiscoBcosDelegate fiscoBcosDelegate;
-    private ContractContext contractContext;
+
+    @Autowired
+    public void setFiscoBcosDelegate(FiscoBcosDelegate fiscoBcosDelegate) {
+        this.fiscoBcosDelegate = fiscoBcosDelegate;
+    }
 
     @Before
     public void before() throws Exception {
@@ -58,11 +64,16 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
-        this.iProducer = BrokerApplication.applicationContext.getBean("iProducer", IProducer.class);
-        this.fiscoBcosDelegate = BrokerApplication.applicationContext.getBean("fiscoBcosDelegate", FiscoBcosDelegate.class);
+        this.iProducer = new FiscoBcosBroker4Producer(this.fiscoBcosDelegate);
+        Assert.assertTrue(this.iProducer.startProducer());
         this.contractContext = this.fiscoBcosDelegate.getContractContext(Long.parseLong(this.groupId));
         Assert.assertNotNull(this.iProducer);
         Assert.assertTrue(this.iProducer.open(this.topicName, this.groupId));
+    }
+
+    @After
+    public void after() {
+        Assert.assertTrue(this.iProducer.shutdownProducer());
     }
 
     /**

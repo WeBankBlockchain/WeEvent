@@ -1,7 +1,6 @@
 package com.webank.weevent.sdk;
 
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -35,7 +34,8 @@ public class FileChunksTransport {
     private String svrUrl;
     private String downloadFilePath = "";
     private CloseableHttpClient httpClient;
-    private static final int RETRY_UPLOAD_CHUNK_COUNT = 5;
+    // retry upload/download chunk times
+    private static final int CHUNK_RETRY_COUNT = 5;
     private static final int HTTP_RESPONSE_STATUS_SUCCESS = 200;
 
     public FileChunksTransport(String svrUrl) {
@@ -77,12 +77,12 @@ public class FileChunksTransport {
 
             // upload every single chunk data
             for (int chunkIdx = 0; chunkIdx < fileChunksMeta.getChunkNum(); chunkIdx++) {
-                this.uploadChunkDetails(fileChunksMeta.getHost(), file, f, fileChunksMeta, chunkIdx);
+                this.uploadChunkDetails(fileChunksMeta.getHost(), f, fileChunksMeta, chunkIdx);
             }
 
-            boolean chunkFullUpload = checkChunkFullUpload(fileChunksMeta.getHost(), file, f, fileId);
+            boolean chunkFullUpload = checkChunkFullUpload(fileChunksMeta.getHost(), f, fileId);
             if (!chunkFullUpload) {
-                log.error("upload file :{} failed,", file.getName());
+                log.error("upload file :{} failed", file.getName());
                 throw new BrokerException(ErrorCode.FILE_UPLOAD_FAILED);
             }
         }
@@ -91,7 +91,7 @@ public class FileChunksTransport {
         return this.closeChunk(fileChunksMeta.getHost(), fileId);
     }
 
-    private void uploadChunkDetails(String host, File file, RandomAccessFile f, FileChunksMeta fileChunksMeta, int chunkIdx) throws IOException, BrokerException {
+    private void uploadChunkDetails(String host, RandomAccessFile f, FileChunksMeta fileChunksMeta, int chunkIdx) throws IOException, BrokerException {
         int size = fileChunksMeta.getChunkSize();
         if (chunkIdx == fileChunksMeta.getChunkNum() - 1) {
             size = (int) (fileChunksMeta.getFileSize() % fileChunksMeta.getChunkSize());
@@ -103,11 +103,9 @@ public class FileChunksTransport {
             log.error("read file exception, chunkIdx: {}", chunkIdx);
             throw new BrokerException(ErrorCode.FILE_READ_EXCEPTION);
         }
-        SendResult chunkSendResult = this.uploadChunk(fileChunksMeta.getFileId(), host, chunkIdx, chunkData);
-        if (!SendResult.SendResultStatus.SUCCESS.equals(chunkSendResult.getStatus())) {
-            log.error("upload file:{} ,chunkIdx:{} failed", file.getName(), chunkIdx);
-        }
-        log.info("upload file chunk data, {}@{}", chunkSendResult, chunkIdx);
+        this.uploadChunk(fileChunksMeta.getFileId(), host, chunkIdx, chunkData);
+
+        log.info("upload file chunk data, {}@{}", fileChunksMeta.getFileId(), chunkIdx);
     }
 
     public String download(String host, String fileId) throws BrokerException, IOException {
@@ -122,13 +120,21 @@ public class FileChunksTransport {
         try (RandomAccessFile f = new RandomAccessFile(fileName, "rw")) {
             // download every single chunk data
             for (int chunkIdx = 0; chunkIdx < fileChunksMeta.getChunkNum(); chunkIdx++) {
-                byte[] chunkData = this.downloadChunk(host, fileChunksMeta.getFileId(), chunkIdx);
+                byte[] chunkData = new byte[0];
+                for (int i = 0; i < CHUNK_RETRY_COUNT; i++) {
+                    chunkData = this.downloadChunk(host, fileChunksMeta.getFileId(), chunkIdx);
+                    if (chunkData.length > 0) {
+                        break;
+                    }
+                }
+                if (chunkData.length == 0) {
+                    log.error("download file failed, host:{} fileId:{}", host, fileId);
+                    throw new BrokerException(ErrorCode.FILE_DOWNLOAD_ERROR);
+                }
+
                 f.seek(chunkIdx * fileChunksMeta.getChunkSize());
                 f.write(chunkData);
             }
-        } catch (BrokerException e) {
-            log.error("down file failed, fileId:{}, e:{}", fileId, e);
-            throw new BrokerException(ErrorCode.FILE_DOWNLOAD_ERROR);
         }
 
         // check md5sum
@@ -136,7 +142,7 @@ public class FileChunksTransport {
         try (FileInputStream fileInputStream = new FileInputStream(fileName)) {
             md5 = DigestUtils.md5DigestAsHex(fileInputStream);
         } catch (Exception e) {
-            log.error("generate md5 error, fileId:{}, e:{}", fileId, e);
+            log.error("generate md5 error, fileId:{}", fileId, e);
             throw new BrokerException(ErrorCode.FILE_GENERATE_MD5_ERROR);
         }
 
@@ -158,9 +164,12 @@ public class FileChunksTransport {
         HttpGet httpGet = new HttpGet(this.svrUrl + "/openChunk?" + params);
 
         try (CloseableHttpResponse httpResponse = this.httpClient.execute(httpGet)) {
-            this.checkHttpResponse(httpResponse);
-            String responseResult = EntityUtils.toString(httpResponse.getEntity());
-            return JsonHelper.json2Object(responseResult, FileChunksMeta.class);
+            BaseResponse baseResponse = this.parseHttpResponse(httpResponse);
+            if (ErrorCode.SUCCESS.getCode() != baseResponse.getCode()) {
+                log.error("open chunk failed, filedId:{} msg:{}", fileChunksMeta.getFileName(), baseResponse.getMessage());
+                throw new BrokerException(baseResponse.getCode(), baseResponse.getMessage());
+            }
+            return JsonHelper.object2Bean(baseResponse.getData(), FileChunksMeta.class);
         } catch (IOException e) {
             log.error("execute http request: {} error", httpGet.getURI(), e);
             throw new BrokerException(ErrorCode.HTTP_REQUEST_EXECUTE_ERROR);
@@ -168,91 +177,107 @@ public class FileChunksTransport {
     }
 
     private FileChunksMeta getFileChunksInfo(String host, String fileId) throws BrokerException {
-        HttpGet httpGet = new HttpGet(this.svrUrl + "/listChunk?host=" + host + "&fileId=" + fileId);
+        HttpGet httpGet = new HttpGet(this.svrUrl + "/listChunk?fileId=" + fileId);
+        httpGet.addHeader("file_host", host);
 
         try (CloseableHttpResponse httpResponse = this.httpClient.execute(httpGet)) {
-            this.checkHttpResponse(httpResponse);
-            String responseResult = EntityUtils.toString(httpResponse.getEntity());
-            return JsonHelper.json2Object(responseResult, FileChunksMeta.class);
+            BaseResponse baseResponse = this.parseHttpResponse(httpResponse);
+            if (ErrorCode.SUCCESS.getCode() != baseResponse.getCode()) {
+                log.error("get chunk list failed, filedId:{} msg:{}", fileId, baseResponse.getMessage());
+                throw new BrokerException(baseResponse.getCode(), baseResponse.getMessage());
+            }
+            return JsonHelper.object2Bean(baseResponse.getData(), FileChunksMeta.class);
         } catch (IOException e) {
-            log.error("execute http request :{} error, e:{}", httpGet.getURI(), e);
+            log.error("execute http request :{} error", httpGet.getURI(), e);
             throw new BrokerException(ErrorCode.HTTP_REQUEST_EXECUTE_ERROR);
         }
     }
 
-    private SendResult uploadChunk(String fileId, String host, int chunkIdx, byte[] chunkData) throws BrokerException {
+    private void uploadChunk(String fileId, String host, int chunkIdx, byte[] chunkData) {
         // this.svrUrl + "/uploadChunk"
+        boolean isUploadSuccess = true;
         String uploadUrl = this.svrUrl + "/uploadChunk";
         HttpPost httpPost = new HttpPost(uploadUrl);
+        httpPost.addHeader("file_host", host);
 
         MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setMode(HttpMultipartMode.RFC6532);
         multipartEntityBuilder.addBinaryBody("chunkData", chunkData, ContentType.DEFAULT_BINARY, fileId);
-        multipartEntityBuilder.addTextBody("host", host);
         multipartEntityBuilder.addTextBody("fileId", fileId);
         multipartEntityBuilder.addTextBody("chunkIdx", String.valueOf(chunkIdx));
         HttpEntity requestEntity = multipartEntityBuilder.build();
 
         httpPost.setEntity(requestEntity);
-        SendResult sendResult;
         try (CloseableHttpResponse httpResponse = this.httpClient.execute(httpPost)) {
-            this.checkHttpResponse(httpResponse);
-            String responseResult = EntityUtils.toString(httpResponse.getEntity());
-            sendResult = JsonHelper.json2Object(responseResult, SendResult.class);
-        } catch (IOException e) {
-            log.error("execute http request url:{} error, e:{}", uploadUrl, e);
-            throw new BrokerException(ErrorCode.HTTP_REQUEST_EXECUTE_ERROR);
+            BaseResponse baseResponse = this.parseHttpResponse(httpResponse);
+            if (ErrorCode.SUCCESS.getCode() != baseResponse.getCode()) {
+                isUploadSuccess = false;
+                log.error("upload chunk failed, {}@{} msg:{}", fileId, chunkIdx, baseResponse.getMessage());
+            }
+        } catch (IOException | BrokerException e) {
+            isUploadSuccess = false;
+            log.error("execute http request url:{} error", uploadUrl, e);
         }
 
-        log.info("upload chunk success, {}@{} {}", fileId, chunkIdx, chunkData.length);
-        return sendResult;
+        if (isUploadSuccess) {
+            log.info("upload chunk success, {}@{} {}", fileId, chunkIdx, chunkData.length);
+        }
     }
 
-    private byte[] downloadChunk(String host, String fileId, int chunkIdx) throws BrokerException {
-        // this.svrUrl + "/downloadChunk"
-        String params = "host" + host + "&fileId=" + fileId +
-                "&chunkIdx=" + chunkIdx;
+    private byte[] downloadChunk(String host, String fileId, int chunkIdx) {
+        String params = "fileId=" + fileId + "&chunkIdx=" + chunkIdx;
         HttpGet httpGet = new HttpGet(this.svrUrl + "/downloadChunk?" + params);
+        httpGet.addHeader("file_host", host);
+        byte[] chunkData = new byte[0];
 
         try (CloseableHttpResponse httpResponse = this.httpClient.execute(httpGet)) {
-            this.checkHttpResponse(httpResponse);
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            httpResponse.getEntity().writeTo(bos);
-            byte[] chunkData = bos.toByteArray();
+            BaseResponse baseResponse = this.parseHttpResponse(httpResponse);
+            if (ErrorCode.SUCCESS.getCode() != baseResponse.getCode()) {
+                log.error("download chunk failed, {}@{} msg:{}", fileId, chunkIdx, baseResponse.getMessage());
+                return chunkData;
+            }
+            chunkData = (byte[]) baseResponse.getData();
             log.info("download chunk success, {}@{} {}", fileId, chunkIdx, chunkData.length);
+        } catch (IOException | BrokerException e) {
+            log.error("execute http request :{} error", httpGet.getURI(), e);
             return chunkData;
-        } catch (IOException e) {
-            log.error("execute http request :{} error, e:{}", httpGet.getURI(), e);
-            throw new BrokerException(ErrorCode.HTTP_REQUEST_EXECUTE_ERROR);
         }
+        return chunkData;
     }
 
     private SendResult closeChunk(String host, String fileId) throws BrokerException {
-        // this.svrUrl + "/closeChunk"
-        String params = "host=" + host + "&fileId=" + fileId;
+        String params = "fileId=" + fileId;
         HttpGet httpGet = new HttpGet(this.svrUrl + "/closeChunk?" + params);
+        httpGet.addHeader("file_host", host);
 
         try (CloseableHttpResponse httpResponse = this.httpClient.execute(httpGet)) {
-            this.checkHttpResponse(httpResponse);
-            String responseResult = EntityUtils.toString(httpResponse.getEntity());
-            return JsonHelper.json2Object(responseResult, SendResult.class);
+            BaseResponse baseResponse = this.parseHttpResponse(httpResponse);
+            if (ErrorCode.SUCCESS.getCode() != baseResponse.getCode()) {
+                log.error("close chunk failed, filedId:{} host:{} msg:{}", fileId, host, baseResponse.getMessage());
+                throw new BrokerException(baseResponse.getCode(), baseResponse.getMessage());
+            }
+            return JsonHelper.object2Bean(baseResponse.getData(), SendResult.class);
         } catch (IOException e) {
-            log.error("execute http request :{} error, e:{}", httpGet.getURI(), e);
+            log.error("execute http request :{} error", httpGet.getURI(), e);
             throw new BrokerException(ErrorCode.HTTP_REQUEST_EXECUTE_ERROR);
         }
     }
 
-    private boolean checkChunkFullUpload(String host, File file, RandomAccessFile f, String fileId) throws IOException, BrokerException {
+    private boolean checkChunkFullUpload(String host, RandomAccessFile f, String fileId) {
         boolean isFullUpload = false;
-        for (int i = 0; i < RETRY_UPLOAD_CHUNK_COUNT; i++) {
-            FileChunksMeta fileChunksMeta = this.getFileChunksInfo(host, fileId);
-            if (fileChunksMeta.checkChunkFull()) {
-                isFullUpload = true;
-                break;
-            } else {
-                List<Integer> missChunkIdxList = this.missChunkIdxList(fileChunksMeta.getChunkStatus());
-                for (Integer missChunkIdx : missChunkIdxList) {
-                    this.uploadChunkDetails(fileChunksMeta.getHost(), file, f, fileChunksMeta, missChunkIdx);
+        for (int i = 0; i < CHUNK_RETRY_COUNT; i++) {
+            try {
+                FileChunksMeta fileChunksMeta = this.getFileChunksInfo(host, fileId);
+                if (fileChunksMeta.checkChunkFull()) {
+                    isFullUpload = true;
+                    break;
+                } else {
+                    List<Integer> missChunkIdxList = this.missChunkIdxList(fileChunksMeta.getChunkStatus());
+                    for (Integer missChunkIdx : missChunkIdxList) {
+                        this.uploadChunkDetails(fileChunksMeta.getHost(), f, fileChunksMeta, missChunkIdx);
+                    }
                 }
+            } catch (BrokerException | IOException e) {
+                log.error("checkChunkFullUpload failed ,fileId:{} retry count: {}", fileId, i);
             }
         }
         return isFullUpload;
@@ -268,13 +293,21 @@ public class FileChunksTransport {
         return missChunksList;
     }
 
-    private void checkHttpResponse(CloseableHttpResponse httpResponse) throws BrokerException {
+    private BaseResponse parseHttpResponse(CloseableHttpResponse httpResponse) throws BrokerException {
         if (HTTP_RESPONSE_STATUS_SUCCESS != httpResponse.getStatusLine().getStatusCode()) {
             throw new BrokerException(ErrorCode.HTTP_RESPONSE_FAILED);
         }
         if (null == httpResponse.getEntity()) {
             throw new BrokerException(ErrorCode.HTTP_RESPONSE_ENTITY_EMPTY);
         }
+        byte[] responseResult;
+        try {
+            responseResult = EntityUtils.toByteArray(httpResponse.getEntity());
+        } catch (IOException e) {
+            log.error("convert httpEntity to byte[] error", e);
+            throw new BrokerException(ErrorCode.HTTPENTITY_TO_BYTEARRAY_ERROR);
+        }
+        return JsonHelper.json2Object(responseResult, BaseResponse.class);
 
     }
 }
