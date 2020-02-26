@@ -10,6 +10,7 @@ while [[ $# -ge 2 ]] ; do
     --block_chain_node_path) para="$1 = $2;";block_chain_node_path="$2";shift 2;;
     --channel_info) para="$1 = $2;";channel_info="$2";shift 2;;
     --version) para="$1 = $2;";version="$2";shift 2;;
+    --zookeeper_connect_string) para="$1 = $2;";zookeeper_connect_string="$2";shift 2;;
     *) echo "unknown parameter $1." ; exit 1 ; break;;
     esac
 done
@@ -19,6 +20,7 @@ echo "param listen_port: ${listen_port}"
 echo "param version: ${version}"
 echo "param block_chain_node_path: ${block_chain_node_path}"
 echo "param channel_info: ${channel_info}"
+echo "param zookeeper_connect_string: ${zookeeper_connect_string}"
 
 #copy file
 function copy_file(){
@@ -74,5 +76,13 @@ else
     exit 1
 fi
 echo "set lister_port success"
+
+if [[ -n ${zookeeper_connect_string} ]];then
+  sed -i "/spring.cloud.zookeeper.connect-string=/cspring.cloud.zookeeper.connect-string=${zookeeper_connect_string}" ${out_path}/conf/application-prod.properties
+else
+    echo "zookeeper_connect_string is err"
+    exit 1
+fi
+echo "set zookeeper_connect_string success"
 
 echo "broker module install success"
