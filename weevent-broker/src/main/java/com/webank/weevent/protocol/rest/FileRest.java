@@ -5,10 +5,9 @@ import java.io.OutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.HEAD;
 
-import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.file.FileTransportService;
-import com.webank.weevent.broker.fisco.file.ZKChunksMeta;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.fisco.util.WeEventUtils;
 import com.webank.weevent.sdk.BaseResponse;
@@ -35,13 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping(value = "/file")
 @Controller
 public class FileRest {
-    private ZKChunksMeta zkChunksMeta;
     private FileTransportService fileTransportService;
-
-    @Autowired(required = false)
-    public void setZkChunksMeta(ZKChunksMeta zkChunksMeta) {
-        this.zkChunksMeta = zkChunksMeta;
-    }
 
     @Autowired(required = false)
     public void setFileTransportService(FileTransportService fileTransportService) {
@@ -76,14 +69,9 @@ public class FileRest {
                 md5,
                 topic,
                 groupId);
-        fileChunksMeta.setChunkSize(BrokerApplication.weEventConfig.getFileChunkSize());
-        fileChunksMeta.setHost(this.fileTransportService.getHost());
 
         // create AMOP channel with FileTransportSender
         this.fileTransportService.openChannel(fileChunksMeta);
-
-        // update to Zookeeper
-        this.zkChunksMeta.addChunks(fileChunksMeta.getFileId(), fileChunksMeta);
 
         return BaseResponse.buildSuccess(fileChunksMeta);
     }
@@ -143,20 +131,17 @@ public class FileRest {
         ParamCheckUtils.validateFileId(fileId);
 
         // get file chunks info from Zookeeper
-        FileChunksMeta fileChunksMeta = this.zkChunksMeta.getChunks(fileId);
+        FileChunksMeta fileChunksMeta = this.fileTransportService.getZKFileChunksMeta(fileId);
 
         return BaseResponse.buildSuccess(fileChunksMeta);
     }
-
+    
     @RequestMapping(path = "/closeChunk")
     @ResponseBody
     public BaseResponse<SendResult> closeChunk(@RequestParam(name = "fileId") String fileId) throws BrokerException {
         log.info("fileId: {}", fileId);
         checkSupport();
         ParamCheckUtils.validateFileId(fileId);
-
-        // remove chunk meta data in zookeeper
-        this.zkChunksMeta.removeChunks(fileId);
 
         // close channel and send WeEvent
         SendResult sendResult = this.fileTransportService.closeChannel(fileId);

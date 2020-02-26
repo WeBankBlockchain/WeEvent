@@ -120,15 +120,16 @@ public enum ErrorCode {
     ZOOKEEPER_EXIST_FILE(200403, "file id already exist in zookeeper"),
     ZOOKEEPER_NOT_SUPPORT_FILE_SUBSCRIPTION(200404, "DO NOT SUPPORT file transport without zookeeper"),
 
-    FILE_NOT_EXIST_CONTEXT(200500, "not exist file context"),
-    FILE_INVALID_CHUNK(200501, "invalid chunk data"),
-    FILE_NOT_EXIST(200502, "not exist file"),
-    FILE_READ_EXCEPTION(200503, "read file exception"),
-    FILE_WRITE_EXCEPTION(200504, "write file exception"),
-    FILE_NOT_EXIST_PATH(200505, "not exist file path"),
-    FILE_NOT_ENOUGH_SPACE(200506, "not enough disk space"),
-    FILE_RECEIVE_CONTEXT_NOT_READY(200507, "receive file context is not ready"),
-    FILE_SENDER_RECEIVER_CONFLICT(200508, "can't publish and subscribe a file in the same node"),
+    FILE_NOT_EXIST_PATH(200500, "not exist file path"),
+    FILE_INVALID_FILE_CHUNK_SIZE(200501, "file chunk size must be in (0, 2M)"),
+    FILE_NOT_EXIST_CONTEXT(200502, "not exist file context"),
+    FILE_INVALID_CHUNK(200503, "invalid chunk data"),
+    FILE_NOT_EXIST(200504, "not exist file"),
+    FILE_READ_EXCEPTION(200505, "read file exception"),
+    FILE_WRITE_EXCEPTION(200506, "write file exception"),
+    FILE_NOT_ENOUGH_SPACE(200507, "not enough disk space"),
+    FILE_RECEIVE_CONTEXT_NOT_READY(200508, "receive file context is not ready"),
+    FILE_SENDER_RECEIVER_CONFLICT(200509, "can't publish and subscribe a file in the same node"),
     ;
 
     /**
