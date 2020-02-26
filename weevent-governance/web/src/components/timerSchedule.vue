@@ -197,7 +197,8 @@ export default {
                 vm.$store.commit('set_Msg', vm.$message({
                   type: 'warning',
                   message: res.data.message,
-                  duration: 5000
+                  duration: 0,
+                  showClose: true
                 }))
               }
               vm.showlog = false
@@ -216,7 +217,8 @@ export default {
                 vm.$store.commit('set_Msg', vm.$message({
                   type: 'warning',
                   message: res.data.message,
-                  duration: 5000
+                  duration: 0,
+                  showClose: true
                 }))
               }
               vm.showlog = false
@@ -257,7 +259,8 @@ export default {
             vm.$store.commit('set_Msg', vm.$message({
               type: 'warning',
               message: res.data.message,
-              duration: 5000
+              duration: 0,
+              showClose: true
             }))
           }
           vm.showlog = false
