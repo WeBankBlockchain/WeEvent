@@ -183,7 +183,6 @@ public class TimerSchedulerService {
             }
             timerSchedulerRepository.delete(optional.get());
             this.deleteTimerScheduler(request, optional.get());
-            //推送数据到processor
         } catch (Exception e) {
             log.info("delete timerScheduler failed", e);
             throw new GovernanceException("delete timerScheduler failed", e);
