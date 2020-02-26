@@ -1,6 +1,9 @@
 package com.webank.weevent;
 
 
+import com.webank.weevent.filter.Fix302GlobalFilter;
+import com.webank.weevent.filter.LogGlobalFilter;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -23,6 +26,11 @@ public class GatewayApplication {
         SpringApplication app = new SpringApplication(GatewayApplication.class);
         app.addListeners(new ApplicationPidFileWriter());
         app.run();
+    }
+
+    @Bean
+    public static Fix302GlobalFilter getFix302GlobalFilter() {
+        return new Fix302GlobalFilter();
     }
 
     @Bean
