@@ -196,10 +196,9 @@ public class TimerSchedulerService {
             if (!this.checkProcessorExist(request)) {
                 return;
             }
-            String deleteUrl = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.TIMER_SCHEDULER_DELETE).append(ConstantProperties.QUESTION_MARK)
-                    .append("id=").append(timerSchedulerEntity.getId()).toString();
+            String deleteUrl = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.TIMER_SCHEDULER_DELETE).toString();
             log.info("processor delete timerScheduler,id:{}", timerSchedulerEntity.getId());
-            CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, deleteUrl);
+            CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, deleteUrl, JsonUtil.toJSONString(timerSchedulerEntity));
             String mes = EntityUtils.toString(closeResponse.getEntity());
             log.info("delete timerScheduler result:{}", mes);
             //deal  timerScheduler result
@@ -254,7 +253,7 @@ public class TimerSchedulerService {
                 dbUrl = dbUrl + "&" + ruleDataBase.getOptionalParameter();
             }
             timerSchedulerEntity.setDatabaseUrl(dbUrl);
-            timerSchedulerEntity.setDataBaseType(ruleDataBase.getDatabaseType());
+            timerSchedulerEntity.setDataBaseType(ruleDataBase.getDatabaseType().toLowerCase());
             log.info("dataBaseUrl:{}", timerSchedulerEntity.getDatabaseUrl());
         }
     }

@@ -92,7 +92,7 @@ public class TimerSchedulerService {
     }
 
     private RetCode checkTimerTask(TimerScheduler timerScheduler, JobDataMap params, String jobName, String jobGroupName, String triggerName, String triggerGroupName) throws BrokerException, SchedulerException {
-        Connection dbcpConnection = CommonUtil.getDbcpConnection(timerScheduler.getDatabaseUrl());
+        Connection dbcpConnection = CommonUtil.getDbcpConnection(timerScheduler.getDatabaseUrl(),timerScheduler.getDataBaseType());
         if (dbcpConnection == null) {
             return RetCode.mark(0, "database connect fail,please enter the correct database URL");
         }
@@ -114,7 +114,7 @@ public class TimerSchedulerService {
     @Transactional(rollbackFor = Throwable.class)
     public void deleteTimerScheduler(TimerScheduler timerScheduler) throws BrokerException {
         try {
-            this.removeJob(timerScheduler.getSchedulerName(), "timer", "timer", "timer-trigger");
+            this.removeJob(timerScheduler.getId(), "timer", "timer", "timer-trigger");
             log.info("delete timerScheduler success");
         } catch (Exception e) {
             log.error("delete timerScheduler fail", e);
