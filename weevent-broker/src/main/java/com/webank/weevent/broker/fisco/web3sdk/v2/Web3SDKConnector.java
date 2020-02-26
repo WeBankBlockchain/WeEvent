@@ -21,6 +21,7 @@ import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.protocol.core.methods.response.GroupList;
+import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -42,6 +43,11 @@ public class Web3SDKConnector {
      */
     public static final String DEFAULT_GROUP_ID = "1";
 
+    /**
+     * FISCO-BCOS chain id
+     */
+    public static String chainID;
+
     private Web3SDKConnector() {
     }
 
@@ -62,12 +68,14 @@ public class Web3SDKConnector {
             Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
 
             // check connect with getNodeVersion command
-            String nodeVersion = web3j.getNodeVersion().send().getNodeVersion().getVersion();
+            NodeVersion.Version version = web3j.getNodeVersion().send().getNodeVersion();
+            String nodeVersion = version.getVersion();
             if (StringUtils.isBlank(nodeVersion)
                     || !nodeVersion.contains(FISCO_BCOS_2_X_VERSION_PREFIX)) {
                 log.error("init web3sdk failed, mismatch FISCO-BCOS version in node: {}", nodeVersion);
                 throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
             }
+            chainID = version.getChainID();
 
             log.info("initialize web3sdk success, group id: {}", service.getGroupId());
             return web3j;
