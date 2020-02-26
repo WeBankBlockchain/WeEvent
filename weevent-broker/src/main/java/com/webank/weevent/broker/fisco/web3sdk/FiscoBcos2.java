@@ -431,7 +431,7 @@ public class FiscoBcos2 {
         contractContext.setTopicAddress(this.topic.getContractAddress());
         contractContext.setBlockNumber(web3j.getBlockNumberCache().longValue() - BlockLimit.blockLimit);
         contractContext.setBlockLimit(BlockLimit.blockLimit.longValue());
-        contractContext.setChainId(Web3SDK2Wrapper.chainID);
+        contractContext.setChainId(Web3SDKConnector.chainID);
         return contractContext;
     }
 
