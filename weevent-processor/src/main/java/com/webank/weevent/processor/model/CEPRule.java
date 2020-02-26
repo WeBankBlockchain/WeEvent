@@ -54,4 +54,6 @@ public class CEPRule implements Serializable {
     private String offSet;
 
     private String tableName;
+
+    private String databaseType;
 }
