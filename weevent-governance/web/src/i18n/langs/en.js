@@ -52,7 +52,7 @@ module.exports = {
     'authorized': 'Authorized Account',
     'ruleEngine': 'Eule Engine',
     'namePlaceholder': 'Please input server name(1-20character,number,underline)',
-    'borkerPlaceholder': 'eg: "http://127.0.0.1:8080/weevent"',
+    'borkerPlaceholder': 'eg: "http://127.0.0.1:8080/weevent-brokers"',
     'webasePlaceholder': 'eg: "http://127.0.0.1:8080/webase"',
     'authorizedPlaceholder': 'Select Account',
     'errorServer': 'Invalid server name',
