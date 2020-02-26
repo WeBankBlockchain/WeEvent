@@ -38,7 +38,7 @@ public class TimerSchedulerTest {
     @Before
     public void setUp() throws Exception {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-        timerScheduler = new TimerScheduler("test", jdbcUrl, periodParams, parsingSql);
+        timerScheduler = new TimerScheduler("1","test", jdbcUrl, periodParams, parsingSql);
         url = "/timerScheduler/insert";
     }
 
