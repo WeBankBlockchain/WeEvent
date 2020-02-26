@@ -77,7 +77,7 @@ else
 fi
 echo "set lister_port success"
 
-if [[ -z ${zookeeper_connect_string} ]];then
+if [[ -n ${zookeeper_connect_string} ]];then
   sed -i "/spring.cloud.zookeeper.connect-string=/cspring.cloud.zookeeper.connect-string=${zookeeper_connect_string}" ${out_path}/conf/application-prod.properties
 else
     echo "zookeeper_connect_string is err"
