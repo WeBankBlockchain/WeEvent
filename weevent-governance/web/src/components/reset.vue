@@ -71,7 +71,7 @@ export default {
               })
               this.login(data)
             } else {
-              this.$store.commit(this.$message({
+              this.$store.commit('set_Msg', this.$message({
                 type: 'warning',
                 message: this.$t('common.operFail'),
                 duration: 0,
@@ -90,7 +90,7 @@ export default {
           localStorage.setItem('user', res.data.data.username)
           this.$router.push('./index')
         } else {
-          this.$store.commit(this.$message({
+          this.$store.commit('set_Msg', this.$message({
             type: 'warning',
             message: this.$t('userSet.loginFail'),
             duration: 0,

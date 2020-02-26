@@ -122,14 +122,14 @@ export default {
       API.forget(url).then(res => {
         if (res.status === 200) {
           if (res.data.status === 400) {
-            this.$store.commit(this.$message({
+            this.$store.commit('set_Msg', this.$message({
               type: 'warning',
               message: this.$t('userSet.noUser'),
               duration: 0,
               showClose: true
             }))
           } else if (res.data.status === 100107 || res.data.status === 100102) {
-            this.$store.commit(this.$message({
+            this.$store.commit('set_Msg', this.$message({
               type: 'warning',
               message: this.$t('userSet.sendMailFail'),
               duration: 0,
@@ -142,7 +142,7 @@ export default {
             })
           }
         } else {
-          this.$store.commit(this.$message({
+          this.$store.commit('set_Msg', this.$message({
             type: 'warning',
             message: this.$t('userSet.sendMailFail'),
             duration: 0,

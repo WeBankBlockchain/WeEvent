@@ -26,6 +26,12 @@ public class GatewayApplication {
         SpringApplication app = new SpringApplication(GatewayApplication.class);
         app.addListeners(new ApplicationPidFileWriter());
         app.run();
+        log.info("Start gateway success");
+    }
+
+    @Bean
+    public static Fix302GlobalFilter getFix302GlobalFilter() {
+        return new Fix302GlobalFilter();
     }
 
     @Bean
