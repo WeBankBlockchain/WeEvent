@@ -173,10 +173,11 @@ public class WeEventClientTest {
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 
-    @Test
+    /**@Test
     public void testSubscribeFile() throws Exception {
         boolean result = this.weEventClient.open("com.weevent.file");
         Assert.assertTrue(result);
+
 
         String subscriptionId = this.weEventClient.subscribeFile("com.weevent.file", "./logs", new IWeEventClient.FileListener() {
             @Override
@@ -195,5 +196,5 @@ public class WeEventClientTest {
 
         Assert.assertFalse(subscriptionId.isEmpty());
         this.weEventClient.unSubscribe(subscriptionId);
-    }
+    }*/
 }

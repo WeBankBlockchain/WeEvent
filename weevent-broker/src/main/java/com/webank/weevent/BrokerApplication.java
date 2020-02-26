@@ -15,7 +15,6 @@ import com.webank.weevent.broker.fabric.config.FabricConfig;
 import com.webank.weevent.broker.fabric.sdk.FabricDelegate;
 import com.webank.weevent.broker.fisco.FiscoBcosBroker4Consumer;
 import com.webank.weevent.broker.fisco.FiscoBcosBroker4Producer;
-import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.file.FileTransportService;
 import com.webank.weevent.broker.fisco.file.ZKChunksMeta;
 import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
@@ -236,49 +235,40 @@ public class BrokerApplication {
         return fabricDelegate;
     }
 
-    // IConsumer
+    // FISCO-BCOS IConsumer
     @Bean
-    public static IConsumer iConsumer() throws BrokerException {
-        String blockChain = BrokerApplication.weEventConfig.getBlockChainType();
-        switch (blockChain) {
-            case WeEventConstants.FISCO:
-                FiscoBcosDelegate fiscoBcosDelegate = BrokerApplication.applicationContext.getBean(FiscoBcosDelegate.class);
-                FiscoBcosBroker4Consumer fiscoBcosBroker4Consumer = new FiscoBcosBroker4Consumer(fiscoBcosDelegate);
-                fiscoBcosBroker4Consumer.startConsumer();
-                return fiscoBcosBroker4Consumer;
-
-            case WeEventConstants.FABRIC:
-                FabricDelegate fabricDelegate = BrokerApplication.applicationContext.getBean(FabricDelegate.class);
-                FabricBroker4Consumer fabricBroker4Consumer = new FabricBroker4Consumer(fabricDelegate);
-                fabricBroker4Consumer.startConsumer();
-                return fabricBroker4Consumer;
-
-            default:
-                throw new BrokerException("invalid block chain type");
-        }
+    @ConditionalOnBean(FiscoBcosDelegate.class)
+    public static IConsumer fiscoIConsumer(FiscoBcosDelegate fiscoBcosDelegate) throws BrokerException {
+        FiscoBcosBroker4Consumer fiscoBcosBroker4Consumer = new FiscoBcosBroker4Consumer(fiscoBcosDelegate);
+        fiscoBcosBroker4Consumer.startConsumer();
+        return fiscoBcosBroker4Consumer;
     }
 
-    // IProducer
+    // Fabric IConsumer
     @Bean
-    public static IProducer iProducer() throws BrokerException {
-        String blockChain = BrokerApplication.weEventConfig.getBlockChainType();
+    @ConditionalOnBean(FiscoBcosDelegate.class)
+    public static IConsumer fabricIConsumer(FabricDelegate fabricDelegate) throws BrokerException {
+        FabricBroker4Consumer fabricBroker4Consumer = new FabricBroker4Consumer(fabricDelegate);
+        fabricBroker4Consumer.startConsumer();
+        return fabricBroker4Consumer;
+    }
 
-        switch (blockChain) {
-            case WeEventConstants.FISCO:
-                FiscoBcosDelegate fiscoBcosDelegate = BrokerApplication.applicationContext.getBean(FiscoBcosDelegate.class);
-                FiscoBcosBroker4Producer fiscoBcosBroker4Producer = new FiscoBcosBroker4Producer(fiscoBcosDelegate);
-                fiscoBcosBroker4Producer.startProducer();
-                return fiscoBcosBroker4Producer;
+    // FISCO-BCOS IProducer
+    @Bean
+    @ConditionalOnBean(FiscoBcosDelegate.class)
+    public static IProducer fiscoIProducer(FiscoBcosDelegate fiscoBcosDelegate) {
+        FiscoBcosBroker4Producer fiscoBcosBroker4Producer = new FiscoBcosBroker4Producer(fiscoBcosDelegate);
+        fiscoBcosBroker4Producer.startProducer();
+        return fiscoBcosBroker4Producer;
+    }
 
-            case WeEventConstants.FABRIC:
-                FabricDelegate fabricDelegate = BrokerApplication.applicationContext.getBean(FabricDelegate.class);
-                FabricBroker4Producer fabricBroker4Producer = new FabricBroker4Producer(fabricDelegate);
-                fabricBroker4Producer.startProducer();
-                return fabricBroker4Producer;
-
-            default:
-                throw new BrokerException("invalid block chain type");
-        }
+    // Fabric IProducer
+    @Bean
+    @ConditionalOnBean(FabricDelegate.class)
+    public static IProducer fabricIProducer(FabricDelegate fabricDelegate) {
+        FabricBroker4Producer fabricBroker4Producer = new FabricBroker4Producer(fabricDelegate);
+        fabricBroker4Producer.startProducer();
+        return fabricBroker4Producer;
     }
 
     // FileChunksMeta in Zookeeper
@@ -286,13 +276,12 @@ public class BrokerApplication {
     @ConditionalOnProperty(prefix = "spring.cloud.zookeeper", name = "enabled", havingValue = "true", matchIfMissing = true)
     public static ZKChunksMeta getZKChunksMeta(Environment environment) throws BrokerException {
         String connectString = "127.0.0.1:2181";
-
         final String key = "spring.cloud.zookeeper.connect-string";
         if (environment.containsProperty(key)) {
             connectString = environment.getProperty(key);
         }
 
-        return new ZKChunksMeta("/WeEvent/file", connectString);
+        return new ZKChunksMeta("/WeEvent/files", connectString);
     }
 
     @Bean
@@ -300,10 +289,14 @@ public class BrokerApplication {
     public static FileTransportService getFileService(FiscoConfig fiscoConfig,
                                                       IProducer iProducer,
                                                       ZKChunksMeta zkChunksMeta,
-                                                      Environment environment) throws BrokerException {
-        FileTransportService fileTransportService = new FileTransportService(fiscoConfig, iProducer, zkChunksMeta);
-        fileTransportService.init(environment.getProperty("spring.cloud.zookeeper.discovery.instance-id"));
-        return fileTransportService;
+                                                      Environment environment,
+                                                      WeEventConfig weEventConfig) throws BrokerException {
+        return new FileTransportService(fiscoConfig,
+                iProducer,
+                zkChunksMeta,
+                environment.getProperty("spring.cloud.zookeeper.discovery.instance-id"),
+                weEventConfig.getFilePath(),
+                weEventConfig.getFileChunkSize());
     }
 
     // http filter
