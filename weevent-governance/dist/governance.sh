@@ -7,7 +7,7 @@ if [[ -z ${JAVA_HOME} ]];then
 fi
 
 server_name=weevent-governance
-APP_PARAMS="-Xbootclasspath/a:./conf:./html -Djava.security.egd=file:/dev/./urandom -cp ./apps/* -Dloader.path=./lib,../lib org.springframework.boot.loader.PropertiesLauncher"
+APP_PARAMS="-Xbootclasspath/a:./conf -Djava.security.egd=file:/dev/./urandom -cp ./apps/* -Dloader.path=./lib,../lib org.springframework.boot.loader.PropertiesLauncher"
 
 ###############################################################################
 # The following is common logic for start a java application. DO NOT EDIT IT SOLELY.
