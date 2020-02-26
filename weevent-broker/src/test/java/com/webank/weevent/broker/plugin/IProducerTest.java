@@ -30,7 +30,7 @@ public class IProducerTest extends JUnitTestBase {
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
-        this.iProducer = BrokerApplication.applicationContext.getBean("iProducer", IProducer.class);
+        this.iProducer = BrokerApplication.applicationContext.getBean(IProducer.class);
         Assert.assertNotNull(this.iProducer);
         Assert.assertTrue(this.iProducer.open(this.topicName, this.groupId));
     }

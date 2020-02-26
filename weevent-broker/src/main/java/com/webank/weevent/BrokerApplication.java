@@ -235,24 +235,6 @@ public class BrokerApplication {
         return fabricDelegate;
     }
 
-    // FISCO-BCOS IConsumer
-    @Bean
-    @ConditionalOnBean(FiscoBcosDelegate.class)
-    public static IConsumer fiscoIConsumer(FiscoBcosDelegate fiscoBcosDelegate) throws BrokerException {
-        FiscoBcosBroker4Consumer fiscoBcosBroker4Consumer = new FiscoBcosBroker4Consumer(fiscoBcosDelegate);
-        fiscoBcosBroker4Consumer.startConsumer();
-        return fiscoBcosBroker4Consumer;
-    }
-
-    // Fabric IConsumer
-    @Bean
-    @ConditionalOnBean(FiscoBcosDelegate.class)
-    public static IConsumer fabricIConsumer(FabricDelegate fabricDelegate) throws BrokerException {
-        FabricBroker4Consumer fabricBroker4Consumer = new FabricBroker4Consumer(fabricDelegate);
-        fabricBroker4Consumer.startConsumer();
-        return fabricBroker4Consumer;
-    }
-
     // FISCO-BCOS IProducer
     @Bean
     @ConditionalOnBean(FiscoBcosDelegate.class)
@@ -262,6 +244,15 @@ public class BrokerApplication {
         return fiscoBcosBroker4Producer;
     }
 
+    // FISCO-BCOS IConsumer
+    @Bean
+    @ConditionalOnBean(FiscoBcosDelegate.class)
+    public static IConsumer fiscoIConsumer(FiscoBcosDelegate fiscoBcosDelegate) throws BrokerException {
+        FiscoBcosBroker4Consumer fiscoBcosBroker4Consumer = new FiscoBcosBroker4Consumer(fiscoBcosDelegate);
+        fiscoBcosBroker4Consumer.startConsumer();
+        return fiscoBcosBroker4Consumer;
+    }
+
     // Fabric IProducer
     @Bean
     @ConditionalOnBean(FabricDelegate.class)
@@ -269,6 +260,15 @@ public class BrokerApplication {
         FabricBroker4Producer fabricBroker4Producer = new FabricBroker4Producer(fabricDelegate);
         fabricBroker4Producer.startProducer();
         return fabricBroker4Producer;
+    }
+    
+    // Fabric IConsumer
+    @Bean
+    @ConditionalOnBean(FabricDelegate.class)
+    public static IConsumer fabricIConsumer(FabricDelegate fabricDelegate) throws BrokerException {
+        FabricBroker4Consumer fabricBroker4Consumer = new FabricBroker4Consumer(fabricDelegate);
+        fabricBroker4Consumer.startConsumer();
+        return fabricBroker4Consumer;
     }
 
     // FileChunksMeta in Zookeeper
