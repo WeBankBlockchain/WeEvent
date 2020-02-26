@@ -273,7 +273,7 @@ export default {
             message: this.$t('rule.isStart')
           })
         } else {
-          this.$store.commit(this.$message({
+          this.$store.commit('set_Msg', this.$message({
             type: 'warning',
             message: res.data.message,
             duration: 0,
@@ -296,7 +296,7 @@ export default {
             message: this.$t('rule.isStop')
           })
         } else {
-          this.$store.commit(this.$message({
+          this.$store.commit('set_Msg', this.$message({
             type: 'warning',
             message: res.data.message,
             duration: 0,
@@ -324,7 +324,7 @@ export default {
               message: vm.$t('rule.hasDelete')
             })
           } else {
-            this.$store.commit(this.$message({
+            this.$store.commit('set_Msg', this.$message({
               type: 'warning',
               message: res.data.message,
               duration: 0,
@@ -362,7 +362,7 @@ export default {
               this.$store.commit('set_menu', [this.$t('sideBar.engine'), this.$t('sideBar.ruleMana'), this.$t('sideBar.ruleDetail')])
               this.$router.push('./ruleDetail')
             } else {
-              this.$store.commit(this.$message({
+              this.$store.commit('set_Msg', this.$message({
                 type: 'warning',
                 message: res.data.message,
                 duration: 0,
