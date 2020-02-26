@@ -48,7 +48,6 @@ public class Fix302GlobalFilter implements GlobalFilter, Ordered {
                                         originalURI.getPath(),
                                         originalURI.getQuery(),
                                         originalURI.getFragment());
-
                                 String newLocation = uri.toString();
                                 headers.put(HttpHeaders.LOCATION, new ArrayList<String>() {
                                     {
