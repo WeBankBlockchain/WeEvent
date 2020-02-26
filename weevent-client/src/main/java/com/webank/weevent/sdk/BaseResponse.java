@@ -15,9 +15,9 @@ import lombok.Data;
  */
 @Data
 public class BaseResponse<T> {
-    int code;
-    String message;
-    T data;
+    private int code;
+    private String message;
+    private T data;
 
     private BaseResponse() {
     }

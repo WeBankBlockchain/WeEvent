@@ -240,7 +240,7 @@ public class BrokerApplication {
     @ConditionalOnBean(FiscoBcosDelegate.class)
     public static IConsumer fiscoIConsumer(FiscoBcosDelegate fiscoBcosDelegate) throws BrokerException {
         FiscoBcosBroker4Consumer fiscoBcosBroker4Consumer = new FiscoBcosBroker4Consumer(fiscoBcosDelegate);
-        boolean startConsumer = fiscoBcosBroker4Consumer.startConsumer();
+        fiscoBcosBroker4Consumer.startConsumer();
         return fiscoBcosBroker4Consumer;
     }
 

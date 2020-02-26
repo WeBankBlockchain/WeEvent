@@ -5,7 +5,6 @@ import java.io.OutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.HEAD;
 
 import com.webank.weevent.broker.fisco.file.FileTransportService;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
@@ -135,7 +134,7 @@ public class FileRest {
 
         return BaseResponse.buildSuccess(fileChunksMeta);
     }
-    
+
     @RequestMapping(path = "/closeChunk")
     @ResponseBody
     public BaseResponse<SendResult> closeChunk(@RequestParam(name = "fileId") String fileId) throws BrokerException {
