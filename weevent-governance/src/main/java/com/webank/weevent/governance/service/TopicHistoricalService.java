@@ -17,7 +17,7 @@ import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.entity.RuleDatabaseEntity;
 import com.webank.weevent.governance.entity.RuleEngineEntity;
-import com.webank.weevent.governance.entity.TopicEventCountEntity;
+import com.webank.weevent.governance.entity.TopicHistoricalEntity;
 import com.webank.weevent.governance.mapper.TopicHistoricalMapper;
 import com.webank.weevent.governance.repository.RuleDatabaseRepository;
 import com.webank.weevent.governance.repository.RuleEngineRepository;
@@ -67,38 +67,36 @@ public class TopicHistoricalService {
     @Value("${spring.datasource.password}")
     private String dataBasePassword;
 
-    /**
-     * count the number of events on a day group by  brokerId、groupId、topicName
-     *
-     * @param topicEventCountEntity
-     * @param httpRequest
-     * @param httpResponse
-     * @return
-     * @throws GovernanceException
-     */
-    public Map<String, List<Integer>> historicalDataList(TopicEventCountEntity topicEventCountEntity, HttpServletRequest httpRequest,
+
+    public Map<String, List<Integer>> historicalDataList(TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest httpRequest,
                                                          HttpServletResponse httpResponse) throws GovernanceException {
         try {
-            if (topicEventCountEntity.getBeginDate() == null || topicEventCountEntity.getEndDate() == null) {
+            if (topicHistoricalEntity.getBeginDate() == null || topicHistoricalEntity.getEndDate() == null) {
                 throw new GovernanceException("beginDate or endDate is empty");
             }
+
             Map<String, List<Integer>> returnMap = new HashMap<>();
-            topicEventCountEntity.setBeginDateStr(DateFormatUtils.format(topicEventCountEntity.getBeginDate(), simpleDateFormat) + " 00:00:00");
-            topicEventCountEntity.setEndDateStr(DateFormatUtils.format(topicEventCountEntity.getEndDate(), simpleDateFormat) + " 23:59:59");
-            List<TopicEventCountEntity> historicalDataEntities = topicHistoricalMapper.historicalDataList(topicEventCountEntity);
+            topicHistoricalEntity.setBeginDateStr(DateFormatUtils.format(topicHistoricalEntity.getBeginDate(), simpleDateFormat) + " 00:00:00");
+            topicHistoricalEntity.setEndDateStr(DateFormatUtils.format(topicHistoricalEntity.getEndDate(), simpleDateFormat) + " 23:59:59");
+            List<TopicHistoricalEntity> historicalDataEntities = topicHistoricalMapper.historicalDataList(topicHistoricalEntity);
+
             if (historicalDataEntities.isEmpty()) {
                 return null;
             }
+
             //deal data
-            Map<String, List<TopicEventCountEntity>> map = historicalDataEntities.stream().collect(Collectors.groupingBy(TopicEventCountEntity::getTopicName));
+            Map<String, List<TopicHistoricalEntity>> map = historicalDataEntities.stream().collect(Collectors.groupingBy(TopicHistoricalEntity::getTopicName));
             List<String> listDate;
-            listDate = listDate(topicEventCountEntity.getBeginDate(), topicEventCountEntity.getEndDate());
+            listDate = listDate(topicHistoricalEntity.getBeginDate(), topicHistoricalEntity.getEndDate());
 
             map.forEach((k, v) -> {
                 Map<String, Integer> eventCountMap = new HashMap<>();
                 //format createDate
                 v.forEach(it -> it.setCreateDateStr(DateFormatUtils.format(it.getCreateDate(), simpleDateFormat)));
-                eventCountMap = v.stream().collect(Collectors.toMap(topic -> topic.getCreateDateStr(), topic -> topic.getEventCount()));
+                Map<String, List<TopicHistoricalEntity>> dateTopicMap = v.stream().collect(Collectors.groupingBy(TopicHistoricalEntity::getCreateDateStr));
+                for (TopicHistoricalEntity dataEntity : v) {
+                    eventCountMap.put(dataEntity.getCreateDateStr(), dateTopicMap.get(dataEntity.getCreateDateStr()).size());
+                }
                 List<Integer> integerList = new ArrayList<>();
                 for (String date : listDate) {
                     //Make sure there is data every day, even if it is zero
@@ -114,41 +112,32 @@ public class TopicHistoricalService {
 
     }
 
-    /**
-     * count the number of events on a day group by brokerId、groupId
-     *
-     * @param topicEventCountEntity
-     * @param httpRequest
-     * @return
-     * @throws GovernanceException
-     */
-    public List<TopicEventCountEntity> eventList(TopicEventCountEntity topicEventCountEntity, HttpServletRequest httpRequest) throws GovernanceException {
 
+    public List<TopicHistoricalEntity> eventList(TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest httpRequest) throws GovernanceException {
         try {
-            topicEventCountEntity.setBeginDateStr(DateFormatUtils.format(topicEventCountEntity.getBeginDate(), simpleDateFormat) + " 00:00:00");
-            topicEventCountEntity.setEndDateStr(DateFormatUtils.format(topicEventCountEntity.getEndDate(), simpleDateFormat) + " 23:59:59");
-            List<TopicEventCountEntity> eventList = topicHistoricalMapper.eventList(topicEventCountEntity);
-            if (eventList.isEmpty()) {
-                return eventList;
+            topicHistoricalEntity.setBeginDateStr(DateFormatUtils.format(topicHistoricalEntity.getBeginDate(), simpleDateFormat) + " 00:00:00");
+            topicHistoricalEntity.setEndDateStr(DateFormatUtils.format(topicHistoricalEntity.getEndDate(), simpleDateFormat) + " 23:59:59");
+            List<TopicHistoricalEntity> historicalEntities = topicHistoricalMapper.eventList(topicHistoricalEntity);
+            if (historicalEntities.isEmpty()) {
+                return historicalEntities;
             }
-            eventList.forEach(it -> it.setCreateDateStr(DateFormatUtils.format(it.getCreateDate(), simpleDateFormat)));
-            Map<String, List<TopicEventCountEntity>> collect = eventList.stream().collect(Collectors.groupingBy(TopicEventCountEntity::getCreateDateStr));
-            List<TopicEventCountEntity> topicEventCountEntities = new ArrayList<>();
-            collect.forEach((k, v) -> {
-                Integer eventCount = v.stream().mapToInt(TopicEventCountEntity::getEventCount).sum();
-                TopicEventCountEntity eventCountEntity = new TopicEventCountEntity();
-                eventCountEntity.setEventCount(eventCount);
-                eventCountEntity.setCreateDateStr(k);
-                topicEventCountEntities.add(eventCountEntity);
+
+            historicalEntities.forEach(it -> it.setCreateDateStr(DateFormatUtils.format(it.getCreateDate(), simpleDateFormat)));
+            Map<String, List<TopicHistoricalEntity>> dateMap = historicalEntities.stream().collect(Collectors.groupingBy(TopicHistoricalEntity::getCreateDateStr));
+            historicalEntities.clear();
+            dateMap.forEach((k, v) -> {
+                TopicHistoricalEntity historicalEntity = new TopicHistoricalEntity();
+                historicalEntity.setCreateDateStr(k);
+                historicalEntity.setEventCount(v.size());
+                historicalEntities.add(historicalEntity);
             });
-            return topicEventCountEntities;
+            return historicalEntities;
         } catch (Exception e) {
             log.error("get eventList fail", e);
             throw new GovernanceException("get eventList fail", e);
         }
 
     }
-
 
     private List<String> listDate(Date beginDate, Date endDate) {
         List<String> dateList = new ArrayList<>();
