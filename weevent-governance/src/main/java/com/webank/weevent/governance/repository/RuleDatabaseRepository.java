@@ -1,6 +1,7 @@
 package com.webank.weevent.governance.repository;
 
 
+import java.util.Collection;
 import java.util.List;
 
 import com.webank.weevent.governance.entity.RuleDatabaseEntity;
@@ -14,5 +15,7 @@ public interface RuleDatabaseRepository extends JpaRepository<RuleDatabaseEntity
     RuleDatabaseEntity findById(Integer id);
 
     List<RuleDatabaseEntity> findAllByBrokerIdAndSystemTag(Integer brokerId, Boolean tag);
+
+    List<RuleDatabaseEntity> findAllByIdIn(Collection<Integer> ids);
 
 }
