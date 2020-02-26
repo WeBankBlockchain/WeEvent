@@ -4,9 +4,7 @@ ext {
     // spring
     spring5Version = "5.1.0.RELEASE"
     // data.spring-data-commons
-    springDataCommonsVersion = "2.1.10.RELEASE"
-    // spring cloud
-    springCloudVersion = "Greenwich.SR5"
+    springDataCommonsVersion = "2.1.0.RELEASE"
 
     // ----- org.apache -----
     // zookeeper
@@ -34,7 +32,7 @@ ext {
     // org.fisco-bcos.web3sdk
     web3sdkVersion = [
             fiscoV1: "1.2.5",
-            fiscoV2: "release-2.3.0.0221-topic-SNAPSHOT"
+            fiscoV2: "2.2.2"
     ]
     // fabric
     fabricVersion = "1.4.4"
@@ -67,7 +65,7 @@ ext {
     // Java-WebSocket
     WebSocketVersion = "1.4.0"
     // JWTVersion
-    JWTVersion = "3.8.0"
+    JWTVersion = "3.8.0";
 }
 
 buildscript {
@@ -155,7 +153,6 @@ allprojects {
             force "com.alibaba:fastjson:${fastjsonVersion}"
             // force use netty 4.1
             force "io.netty:netty-all:${nettyVersion}"
-            force "org.apache.zookeeper:zookeeper:${zookeeperVersion}"
         }
     }
 

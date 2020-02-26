@@ -1,12 +1,6 @@
 apply plugin: "org.springframework.boot"
 apply plugin: "io.spring.dependency-management"
 
-dependencyManagement {
-    imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-    }
-}
-
 dependencies {
     implementation project(path: ":weevent-client")
     // spring boot
@@ -14,8 +8,10 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-web")
 
+
     // spring boot with log4j2
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
+
     // avoid "Log4j appears to be running in a Servlet environment, but there's no log4j-web module available."
     implementation("org.apache.logging.log4j:log4j-web:${log4jVersion}")
 
@@ -23,12 +19,9 @@ dependencies {
     implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:${mybatisVersion}")
     implementation("org.mariadb.jdbc:mariadb-java-client:${mariadbClientVersion}")
 
-    // discovery
-    implementation("org.springframework.cloud:spring-cloud-starter-zookeeper-discovery") {
-        exclude group: "commons-logging", module: "commons-logging"
-    }
 
     implementation("org.apache.tomcat:tomcat-jdbc:${tomcatVersion}")
+
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 

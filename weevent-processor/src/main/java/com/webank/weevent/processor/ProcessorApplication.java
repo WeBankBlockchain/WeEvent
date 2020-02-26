@@ -21,7 +21,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Slf4j
 @EnableDiscoveryClient
 @SpringBootApplication
-@MapperScan(basePackages = "com.webank.weevent.processor")
+//@MapperScan(basePackages = "com.webank.weevent.processor.quartz")
 public class ProcessorApplication {
     public static ProcessorConfig processorConfig;
     public static ApplicationContext applicationContext;

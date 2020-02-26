@@ -5,7 +5,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,10 +15,15 @@ import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.broker.fisco.dto.ListPage;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
-import com.webank.weevent.sdk.JsonHelper;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.MapLikeType;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.util.encoders.Hex;
 
 /**
@@ -27,7 +34,13 @@ public final class DataTypeUtils {
 
     private static String STRING_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static Map<String, String> topicHashMap = new ConcurrentHashMap<>();
-
+    private static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    static {
+        // Include.NON_NULL Property is NULL and not serialized
+        OBJECT_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        //Do not convert inconsistent fields
+        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
     /**
      * encode eventId
      *
@@ -137,6 +150,19 @@ public final class DataTypeUtils {
         }
     }
 
+    public static Map<String, String> json2Map(String json) {
+        if (StringUtils.isBlank(json)) {
+            return null;
+        }
+        try {
+            MapLikeType mapLikeType = OBJECT_MAPPER.getTypeFactory().constructMapLikeType(Map.class, String.class, String.class);
+            return OBJECT_MAPPER.readValue(json, mapLikeType);
+        } catch (Exception e) {
+            log.error("parse extensions failed");
+            return null;
+        }
+    }
+
     /**
      * convert data timestamp to String.
      *
@@ -166,24 +192,78 @@ public final class DataTypeUtils {
         return new SimpleDateFormat(STRING_DATE_FORMAT);
     }
 
+    /**
+     * convert object to String
+     * @param object
+     * @return json data
+     * @throws BrokerException
+     */
+    public static String object2Json(Object object) throws BrokerException {
+        try {
+            return OBJECT_MAPPER.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            log.error("convert object to String failed ", e);
+            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
+        }
+    }
 
     /**
-     * convert jsonString to ListPage<T>
-     *
+     * convert jsonString to object
      * @param jsonString json data
-     * @param valueType T which in ListPage<T>
-     * @param <T> ListPage
-     * @return ListPage<T>
-     * @throws BrokerException BrokerException
+     * @param valueType
+     * @param <T>
+     * @return Object
+     * @throws BrokerException
      */
-    public static <T> ListPage<T> json2ListPage(String jsonString, Class<T> valueType) throws BrokerException {
+    public static <T> T json2Object(String jsonString, Class<T> valueType) throws BrokerException {
         try {
-            JavaType javaType = JsonHelper.getObjectMapper().getTypeFactory().constructParametricType(ListPage.class, valueType);
-            return JsonHelper.getObjectMapper().readValue(jsonString, javaType);
+            OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            return OBJECT_MAPPER.readValue(jsonString, valueType);
         } catch (IOException e) {
             log.error("convert jsonString to object failed ", e);
             throw new BrokerException(ErrorCode.JSON_DECODE_EXCEPTION);
         }
     }
-}
 
+    /**
+     * convert jsonString to ListPage<T>
+     * @param jsonString json data
+     * @param tclass T which in ListPage<T>
+     * @param <T> ListPage
+     * @return ListPage<T>
+     * @throws BrokerException
+     */
+    public static <T> ListPage<T> json2ListPage(String jsonString, Class tclass) throws BrokerException {
+        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        JavaType javaType = OBJECT_MAPPER.getTypeFactory().constructParametricType(ListPage.class, tclass);
+        ListPage<T> listPage = null;
+        try {
+            listPage = OBJECT_MAPPER.readValue(jsonString, javaType);
+        } catch (IOException e) {
+            log.error("convert jsonString to object failed ", e);
+            throw new BrokerException(ErrorCode.JSON_DECODE_EXCEPTION);
+        }
+
+        return listPage;
+    }
+
+    /**
+     * convert object to List<T>
+     * @param object obj
+     * @param clazz clazz
+     * @param <T> T
+     * @return List<T>
+     */
+    public static <T> List<T> object2List(Object object, Class<T> clazz) {
+        List<T> result = new ArrayList<>();
+        if(object instanceof List<?>)
+        {
+            for (Object o : (List<?>) object)
+            {
+                result.add(clazz.cast(o));
+            }
+            return result;
+        }
+        return null;
+    }
+}
