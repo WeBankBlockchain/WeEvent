@@ -71,7 +71,7 @@ public class TimerSchedulerService {
                     .withSchedule(CronScheduleBuilder.cronSchedule(timerScheduler.getPeriodParams())).forJob(jobName, jobGroupName).build();
             //check
             RetCode retCode = checkTimerTask(timerScheduler, params, jobName, jobGroupName, triggerName, triggerGroupName);
-            if (0 == retCode.getErrorCode()) {
+            if (1 == retCode.getErrorCode()) {
                 return retCode;
             }
 
@@ -82,9 +82,9 @@ public class TimerSchedulerService {
             }
             if (scheduler.checkExists(JobKey.jobKey(jobName, jobGroupName))) {
                 log.info("deal timer task:{} success", jobName);
-                return ConstantsHelper.SUCCESS;
+                return ConstantsHelper.RET_SUCCESS;
             }
-            return ConstantsHelper.FAIL;
+            return ConstantsHelper.RET_FAIL;
         } catch (Exception e) {
             log.error("e:{}", e.toString());
             return RetCode.mark(0, e.toString());
@@ -94,20 +94,20 @@ public class TimerSchedulerService {
     private RetCode checkTimerTask(TimerScheduler timerScheduler, JobDataMap params, String jobName, String jobGroupName, String triggerName, String triggerGroupName) throws BrokerException, SchedulerException {
         Connection dbcpConnection = CommonUtil.getDbcpConnection(timerScheduler.getDatabaseUrl(),timerScheduler.getDataBaseType());
         if (dbcpConnection == null) {
-            return RetCode.mark(0, "database connect fail,please enter the correct database URL");
+            return RetCode.mark(1, "database connect fail,please enter the correct database URL");
         }
         boolean exists = scheduler.checkExists(JobKey.jobKey(jobName, jobGroupName));
         if (exists && "createTimerTask".equals(params.get("type").toString())) {
-            return RetCode.mark(0, "create job fail,job is exists");
+            return RetCode.mark(1, "create job fail,job is exists");
         }
         if (!exists && "updateTimerTask".equals(params.get("type").toString())) {
-            return RetCode.mark(0, "update job fail,job is not exists");
+            return RetCode.mark(1, "update job fail,job is not exists");
         }
         if (exists && "updateTimerTask".equals(params.get("type").toString())) {
             removeJob(jobName, jobGroupName, triggerName, triggerGroupName);
-            return ConstantsHelper.SUCCESS;
+            return ConstantsHelper.RET_SUCCESS;
         }
-        return ConstantsHelper.SUCCESS;
+        return ConstantsHelper.RET_SUCCESS;
     }
 
 

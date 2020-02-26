@@ -39,8 +39,10 @@ public class TimerSchedulerController {
         timerSchedulerMap.put("timer", timerScheduler);
         RetCode retCode = timerSchedulerService.createTimerScheduler(timerScheduler.getId(), "timer", "timer",
                 "timer-trigger", TimerSchedulerJob.class, timerSchedulerMap, timerScheduler);
-        resEntity.setErrorCode(retCode.getErrorCode());
-        resEntity.setErrorMsg(retCode.getErrorMsg());
+        if (1 == retCode.getErrorCode()) { //fail
+            resEntity.setErrorCode(retCode.getErrorCode());
+            resEntity.setErrorMsg(retCode.getErrorMsg());
+        }
         return resEntity;
     }
 
@@ -48,13 +50,15 @@ public class TimerSchedulerController {
     public BaseRspEntity updateTimerScheduler(@Validated @RequestBody TimerScheduler timerScheduler) throws BrokerException {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         JobDataMap timerSchedulerMap = new JobDataMap();
-        timerSchedulerMap.put("id", timerScheduler.getSchedulerName());
+        timerSchedulerMap.put("id", timerScheduler.getId());
         timerSchedulerMap.put("type", "updateTimerTask");
         timerSchedulerMap.put("timer", timerScheduler);
-        RetCode retCode = timerSchedulerService.createTimerScheduler(timerScheduler.getSchedulerName(), "timer", "timer",
+        RetCode retCode = timerSchedulerService.createTimerScheduler(timerScheduler.getId(), "timer", "timer",
                 "timer-trigger", TimerSchedulerJob.class, timerSchedulerMap, timerScheduler);
-        resEntity.setErrorCode(retCode.getErrorCode());
-        resEntity.setErrorMsg(retCode.getErrorMsg());
+        if (1 == retCode.getErrorCode()) { //fail
+            resEntity.setErrorCode(retCode.getErrorCode());
+            resEntity.setErrorMsg(retCode.getErrorMsg());
+        }
         return resEntity;
     }
 
