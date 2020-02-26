@@ -96,7 +96,8 @@ function build_weevent(){
 function copy_install_file(){
     cd ${current_path}
 
-    cp ${current_path}/config.properties ${current_path}/install-all.sh ${current_path}/bin ${out_path}
+    cp ${current_path}/config.properties ${current_path}/install-all.sh ${out_path}
+    cp -r ${current_path}/bin ${out_path}
 
     mkdir -p ${out_path}/modules/gateway
     cp ${current_path}/modules/gateway/install-gateway.sh ${out_path}/modules/gateway
@@ -119,9 +120,9 @@ function copy_install_file(){
 function switch_to_prod(){
     cd ${current_path}
 
-    rm -rf ${out_path}/modules/gateway/conf/application-dev.properties
-    if [[ -e ${out_path}/modules/gateway/conf/application.properties ]]; then
-        sed -i 's/dev/prod/' ${out_path}/modules/gateway/conf/application.properties
+    rm -rf ${out_path}/modules/gateway/conf/application-dev.yml
+    if [[ -e ${out_path}/modules/gateway/conf/application.yml ]]; then
+        sed -i 's/dev/prod/' ${out_path}/modules/gateway/conf/application.yml
     fi
 
     rm -rf ${out_path}/modules/broker/conf/application-dev.properties
@@ -171,7 +172,6 @@ function tar_broker(){
 
     rm -rf ${current_path}/broker-${version}
 }
-
 function tar_governance(){
     local target=$1
     yellow_echo "generate ${target}"
