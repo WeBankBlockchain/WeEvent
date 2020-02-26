@@ -359,7 +359,7 @@ public class Subscription {
      * see MQTT specification http://public.dhe.ibm.com/software/dw/webservices/ws-mqtt/mqtt-v3r1.html.
      * notice:
      * "com/weevent/test" is invalid
-     * "com/weevent/test" is different from "/com.weevent/test"
+     * "com/weevent/test" is different from "/com/weevent/test"
      *
      * @param topic topic name
      * @param pattern mqtt pattern with wildcard
