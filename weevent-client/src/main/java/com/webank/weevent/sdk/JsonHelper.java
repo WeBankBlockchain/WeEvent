@@ -1,12 +1,12 @@
 package com.webank.weevent.sdk;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.MapLikeType;
@@ -151,14 +151,7 @@ public class JsonHelper {
      * @return class instance
      */
     public static <T> List<T> object2List(Object obj, Class<T> valueType) {
-        List<T> result = new ArrayList<>();
-        if (obj instanceof List<?>) {
-            for (Object o : (List<?>) obj) {
-                result.add(valueType.cast(o));
-            }
-            return result;
-        }
-        return null;
+        return OBJECT_MAPPER.convertValue(obj, new TypeReference<T>() {
+        });
     }
-
 }

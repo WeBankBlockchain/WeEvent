@@ -4,7 +4,6 @@ package com.webank.weevent.sdk;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
@@ -378,12 +377,10 @@ public class WeEventClient implements IWeEventClient {
         @Override
         public void onEvent(WeEvent event) {
             // download file
-            String fileId = new String(event.getContent(), StandardCharsets.UTF_8);
             String localFile = null;
             try {
                 FileChunksMeta fileChunksMeta = JsonHelper.jsonBytes2Object(event.getContent(), FileChunksMeta.class);
-                String host = fileChunksMeta.getHost();
-                localFile = this.fileChunksTransport.download(host, fileId);
+                localFile = this.fileChunksTransport.download(fileChunksMeta);
             } catch (BrokerException | IOException e) {
                 log.error("detect exception", e);
                 this.onException(e);

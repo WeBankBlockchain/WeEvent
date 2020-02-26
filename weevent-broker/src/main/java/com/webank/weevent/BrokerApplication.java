@@ -237,7 +237,7 @@ public class BrokerApplication {
 
     // FISCO-BCOS IConsumer
     @Bean(name = "iConsumer")
-    @ConditionalOnBean(name = "fiscoBcosDelegate")
+    @ConditionalOnBean(FiscoBcosDelegate.class)
     public static IConsumer fiscoIConsumer(FiscoBcosDelegate fiscoBcosDelegate) throws BrokerException {
         FiscoBcosBroker4Consumer fiscoBcosBroker4Consumer = new FiscoBcosBroker4Consumer(fiscoBcosDelegate);
         boolean startConsumer = fiscoBcosBroker4Consumer.startConsumer();
@@ -246,7 +246,7 @@ public class BrokerApplication {
 
     // Fabric IConsumer
     @Bean(name = "iConsumer")
-    @ConditionalOnBean(name = "fabricDelegate")
+    @ConditionalOnBean(FiscoBcosDelegate.class)
     public static IConsumer fabricIConsumer(FabricDelegate fabricDelegate) throws BrokerException {
         FabricBroker4Consumer fabricBroker4Consumer = new FabricBroker4Consumer(fabricDelegate);
         fabricBroker4Consumer.startConsumer();
@@ -255,7 +255,7 @@ public class BrokerApplication {
 
     // FISCO-BCOS IProducer
     @Bean(name = "iProducer")
-    @ConditionalOnBean(name = "fiscoBcosDelegate")
+    @ConditionalOnBean(FiscoBcosDelegate.class)
     public static IProducer fiscoIProducer(FiscoBcosDelegate fiscoBcosDelegate) {
         FiscoBcosBroker4Producer fiscoBcosBroker4Producer = new FiscoBcosBroker4Producer(fiscoBcosDelegate);
         fiscoBcosBroker4Producer.startProducer();
@@ -264,7 +264,7 @@ public class BrokerApplication {
 
     // Fabric IProducer
     @Bean(name = "iProducer")
-    @ConditionalOnBean(name = "fabricDelegate")
+    @ConditionalOnBean(FabricDelegate.class)
     public static IProducer fabricIProducer(FabricDelegate fabricDelegate) {
         FabricBroker4Producer fabricBroker4Producer = new FabricBroker4Producer(fabricDelegate);
         fabricBroker4Producer.startProducer();
