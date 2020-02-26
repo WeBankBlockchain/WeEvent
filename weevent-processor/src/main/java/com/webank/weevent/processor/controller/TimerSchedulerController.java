@@ -9,11 +9,13 @@ import com.webank.weevent.processor.utils.RetCode;
 import com.webank.weevent.sdk.BrokerException;
 
 import lombok.extern.slf4j.Slf4j;
+import org.quartz.CronExpression;
 import org.quartz.JobDataMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -32,13 +34,15 @@ public class TimerSchedulerController {
     public BaseRspEntity insertTimerScheduler(@Validated @RequestBody TimerScheduler timerScheduler) throws BrokerException {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         JobDataMap timerSchedulerMap = new JobDataMap();
-        timerSchedulerMap.put("id", timerScheduler.getSchedulerName());
+        timerSchedulerMap.put("id", timerScheduler.getId());
         timerSchedulerMap.put("type", "createTimerTask");
         timerSchedulerMap.put("timer", timerScheduler);
-        RetCode retCode = timerSchedulerService.createTimerScheduler(timerScheduler.getSchedulerName(), "timer", "timer",
+        RetCode retCode = timerSchedulerService.createTimerScheduler(timerScheduler.getId(), "timer", "timer",
                 "timer-trigger", TimerSchedulerJob.class, timerSchedulerMap, timerScheduler);
-        resEntity.setErrorCode(retCode.getErrorCode());
-        resEntity.setErrorMsg(retCode.getErrorMsg());
+        if (1 == retCode.getErrorCode()) { //fail
+            resEntity.setErrorCode(retCode.getErrorCode());
+            resEntity.setErrorMsg(retCode.getErrorMsg());
+        }
         return resEntity;
     }
 
@@ -46,13 +50,15 @@ public class TimerSchedulerController {
     public BaseRspEntity updateTimerScheduler(@Validated @RequestBody TimerScheduler timerScheduler) throws BrokerException {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         JobDataMap timerSchedulerMap = new JobDataMap();
-        timerSchedulerMap.put("id", timerScheduler.getSchedulerName());
+        timerSchedulerMap.put("id", timerScheduler.getId());
         timerSchedulerMap.put("type", "updateTimerTask");
         timerSchedulerMap.put("timer", timerScheduler);
-        RetCode retCode = timerSchedulerService.createTimerScheduler(timerScheduler.getSchedulerName(), "timer", "timer",
+        RetCode retCode = timerSchedulerService.createTimerScheduler(timerScheduler.getId(), "timer", "timer",
                 "timer-trigger", TimerSchedulerJob.class, timerSchedulerMap, timerScheduler);
-        resEntity.setErrorCode(retCode.getErrorCode());
-        resEntity.setErrorMsg(retCode.getErrorMsg());
+        if (1 == retCode.getErrorCode()) { //fail
+            resEntity.setErrorCode(retCode.getErrorCode());
+            resEntity.setErrorMsg(retCode.getErrorMsg());
+        }
         return resEntity;
     }
 
@@ -63,4 +69,11 @@ public class TimerSchedulerController {
         return resEntity;
     }
 
+    @RequestMapping("/checkCorn")
+    public BaseRspEntity checkCorn(@RequestParam("corn") String corn) {
+        BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
+        boolean validExpression = CronExpression.isValidExpression(corn);
+        resEntity.setData(validExpression);
+        return resEntity;
+    }
 }
