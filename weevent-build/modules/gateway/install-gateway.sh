@@ -31,12 +31,13 @@ function copy_file(){
 }
 
 copy_file
-connectString="\      connect-string:"
-serverPort="\  port:"
+
+
 cd ${current_path}
 
 if [[ ${gateway_port} -gt 0 ]]; then
-    sed -i "/port:/c ${serverPort} ${gateway_port}" ${out_path}/conf/application-prod.yml
+    sed -i "/port:/cport: ${gateway_port}" ${out_path}/conf/application-prod.yml
+    sed -i "s/port:*/  &/" ${out_path}/conf/application-prod.yml
 else
     echo "gateway_port is error"
     exit 1
@@ -44,7 +45,8 @@ fi
 echo "set gateway_port success"
 
 if [[ -n ${zookeeper_connect_string} ]];then
-    sed -i "/connect-string:/c ${connectString} ${zookeeper_connect_string}" ${out_path}/conf/application-prod.yml
+     sed -i "/connect-string:/cconnect-string: ${zookeeper_connect_string}" ${out_path}/conf/application-prod.yml
+     sed -i "s/connect-string:*/      &/" ${out_path}/conf/application-prod.yml
 else
     echo "zookeeper_connect_string is error"
     exit 1
@@ -53,3 +55,4 @@ echo "set zookeeper_connect_string success"
 
 
 echo "gateway module install success"
+
