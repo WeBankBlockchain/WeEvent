@@ -194,11 +194,11 @@ export default {
                 })
                 vm.timerList()
               } else {
-                vm.$message({
+                vm.$store.commit('set_Msg', vm.$message({
                   type: 'warning',
                   message: res.data.message,
                   duration: 5000
-                })
+                }))
               }
               vm.showlog = false
             })
@@ -213,11 +213,11 @@ export default {
                 })
                 vm.timerList()
               } else {
-                vm.$message({
+                vm.$store.commit('set_Msg', vm.$message({
                   type: 'warning',
                   message: res.data.message,
                   duration: 5000
-                })
+                }))
               }
               vm.showlog = false
             })
@@ -254,11 +254,11 @@ export default {
             })
             vm.timerList()
           } else {
-            vm.$message({
+            vm.$store.commit('set_Msg', vm.$message({
               type: 'warning',
               message: res.data.message,
               duration: 5000
-            })
+            }))
           }
           vm.showlog = false
         })
