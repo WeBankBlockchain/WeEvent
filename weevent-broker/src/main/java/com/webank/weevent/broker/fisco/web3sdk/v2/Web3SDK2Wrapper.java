@@ -63,7 +63,6 @@ public class Web3SDK2Wrapper {
     public final static String NODE_ID = "nodeId";
     public final static String PEERS = "peers";
     public final static String VIEW = "view";
-    public static String chainID;
 
     // static gas provider
     public static final ContractGasProvider gasProvider = new ContractGasProvider() {
