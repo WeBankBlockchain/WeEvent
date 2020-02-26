@@ -735,7 +735,7 @@ export default {
             vm.createRule = false
             vm.createSQL = false
           } else {
-            vm.$store.commit(vm.$message({
+            vm.$store.commit('set_Msg', vm.$message({
               type: 'warning',
               message: res.data.message,
               duration: 0,
