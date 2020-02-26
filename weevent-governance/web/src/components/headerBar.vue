@@ -62,7 +62,9 @@ export default {
     }
   },
   mounted () {
-    this.getServer()
+    if (!this.noServer) {
+      this.getServer()
+    }
   },
   methods: {
     home () {
@@ -134,7 +136,7 @@ export default {
             }
             vm.listGroup()
           } else {
-            vm.$store.commit(vm.$message({
+            vm.$store.commit('set_Msg', vm.$message({
               type: 'warning',
               message: vm.$t('common.noServer'),
               duration: 0,

@@ -84,11 +84,12 @@ export default {
             this.subscription()
           }
         } else {
-          this.$message({
+          this.$store.commit('set_Msg', this.$message({
             type: 'warning',
             message: this.$t('common.reqException'),
-            duration: 5000
-          })
+            duration: 0,
+            showClose: true
+          }))
         }
       })
     },
