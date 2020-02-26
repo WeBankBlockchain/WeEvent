@@ -73,7 +73,7 @@ public class DiskFiles {
     }
 
     public void saveFileMeta(FileChunksMeta fileChunksMeta) throws BrokerException {
-        log.info("save FileChunksMeta, chunkStatus: {}", fileChunksMeta.getChunkStatus());
+        log.info("save FileChunksMeta, filled chunk: {} -> chunkNum: {}", fileChunksMeta.getChunkStatus().cardinality(), fileChunksMeta.getChunkNum());
 
         String localMetaFile = this.genLocalMetaFileName(fileChunksMeta.getFileId());
         try (FileOutputStream fileOutputStream = new FileOutputStream(localMetaFile)) {

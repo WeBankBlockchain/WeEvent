@@ -286,13 +286,12 @@ public class BrokerApplication {
     @ConditionalOnProperty(prefix = "spring.cloud.zookeeper", name = "enabled", havingValue = "true", matchIfMissing = true)
     public static ZKChunksMeta getZKChunksMeta(Environment environment) throws BrokerException {
         String connectString = "127.0.0.1:2181";
-
         final String key = "spring.cloud.zookeeper.connect-string";
         if (environment.containsProperty(key)) {
             connectString = environment.getProperty(key);
         }
 
-        return new ZKChunksMeta("/WeEvent/file", connectString);
+        return new ZKChunksMeta("/WeEvent/files", connectString);
     }
 
     @Bean
@@ -300,10 +299,14 @@ public class BrokerApplication {
     public static FileTransportService getFileService(FiscoConfig fiscoConfig,
                                                       IProducer iProducer,
                                                       ZKChunksMeta zkChunksMeta,
-                                                      Environment environment) throws BrokerException {
-        FileTransportService fileTransportService = new FileTransportService(fiscoConfig, iProducer, zkChunksMeta);
-        fileTransportService.init(environment.getProperty("spring.cloud.zookeeper.discovery.instance-id"));
-        return fileTransportService;
+                                                      Environment environment,
+                                                      WeEventConfig weEventConfig) throws BrokerException {
+        return new FileTransportService(fiscoConfig,
+                iProducer,
+                zkChunksMeta,
+                environment.getProperty("spring.cloud.zookeeper.discovery.instance-id"),
+                weEventConfig.getFilePath(),
+                weEventConfig.getFileChunkSize());
     }
 
     // http filter
