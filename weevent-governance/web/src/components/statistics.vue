@@ -168,7 +168,7 @@ export default {
             Highcharts.chart('chart', vm.option)
           })
         } else {
-          vm.$store.commit(vm.$message({
+          vm.$store.commit('set_Msg', vm.$message({
             type: 'warning',
             message: this.$t('tableCont.getDataError'),
             duration: 0,

@@ -91,7 +91,7 @@ export default {
           this.tableData = res.data.data.pageData
           // this.total = res.data.totalCount
         } else {
-          this.$store.commit(this.$message({
+          this.$store.commit('set_Msg', this.$message({
             type: 'warning',
             message: this.$t('tableCont.getDataError'),
             duration: 0,
