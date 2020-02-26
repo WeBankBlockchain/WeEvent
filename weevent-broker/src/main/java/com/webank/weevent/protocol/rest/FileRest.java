@@ -2,9 +2,7 @@ package com.webank.weevent.protocol.rest;
 
 import java.io.IOException;
 
-import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.fisco.file.FileTransportService;
-import com.webank.weevent.broker.fisco.file.ZKChunksMeta;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.fisco.util.WeEventUtils;
 import com.webank.weevent.sdk.BrokerException;
@@ -28,13 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping(value = "/file")
 @RestController
 public class FileRest {
-    private ZKChunksMeta zkChunksMeta;
     private FileTransportService fileTransportService;
-
-    @Autowired(required = false)
-    public void setZkChunksMeta(ZKChunksMeta zkChunksMeta) {
-        this.zkChunksMeta = zkChunksMeta;
-    }
 
     @Autowired(required = false)
     public void setFileTransportService(FileTransportService fileTransportService) {
@@ -69,14 +61,9 @@ public class FileRest {
                 md5,
                 topic,
                 groupId);
-        fileChunksMeta.setChunkSize(BrokerApplication.weEventConfig.getFileChunkSize());
-        fileChunksMeta.setHost(this.fileTransportService.getHost());
 
         // create AMOP channel with FileTransportSender
         this.fileTransportService.openChannel(fileChunksMeta);
-
-        // update to Zookeeper
-        this.zkChunksMeta.addChunks(fileChunksMeta.getFileId(), fileChunksMeta);
 
         return fileChunksMeta;
     }
@@ -94,13 +81,9 @@ public class FileRest {
         ParamCheckUtils.validateChunkIdx(chunkIdx);
         ParamCheckUtils.validateChunkData(chunkData);
 
-        FileChunksMeta fileChunksMeta = this.zkChunksMeta.getChunks(fileId);
         // send data to FileTransportSender
         this.fileTransportService.sendChunkData(fileId, chunkIdx, chunkData);
-
-        SendResult sendResult = new SendResult(SendResult.SendResultStatus.SUCCESS);
-        sendResult.setTopic(fileChunksMeta.getTopic());
-        return sendResult;
+        return new SendResult(SendResult.SendResultStatus.SUCCESS);
     }
 
     @RequestMapping(path = "/downloadChunk")
@@ -126,7 +109,7 @@ public class FileRest {
         ParamCheckUtils.validateFileId(fileId);
 
         // get file chunks info from Zookeeper
-        return this.zkChunksMeta.getChunks(fileId);
+        return this.fileTransportService.getZKFileChunksMeta(fileId);
     }
 
     @RequestMapping(path = "/closeChunk")
@@ -136,9 +119,6 @@ public class FileRest {
         checkSupport();
 
         ParamCheckUtils.validateFileId(fileId);
-
-        // remove chunk meta data in zookeeper
-        this.zkChunksMeta.removeChunks(fileId);
 
         // close channel and send WeEvent
         return this.fileTransportService.closeChannel(fileId);
