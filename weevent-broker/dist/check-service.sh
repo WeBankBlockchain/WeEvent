@@ -10,13 +10,13 @@ function check_broker(){
         exit 1        
     fi
     
-    port=$(grep "server.port" ${current_path}/conf/application-prod.properties| awk -F'=' '{print $2}' | sed s/[[:space:]]//g)
+    port=$(grep "port" ${current_path}/conf/application-prod.properties| head -1 | awk -F'=' '{print $NF}' | sed s/[[:space:]]//g)
     if [[ $? -ne 0 ]];then
         echo "get broker port fail"
         exit 1
     fi
     
-    list_group_response=$(curl -s "http://127.0.0.1:$port/weevent/admin/listGroup")
+    list_group_response=$(curl -s "http://127.0.0.1:${port}/weevent-broker/admin/listGroup")
     if [[ ${list_group_response} == {*success*} ]];then
         echo "broker service is ok"
     else
