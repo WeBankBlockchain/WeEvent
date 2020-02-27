@@ -6,8 +6,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.JUnitTestBase;
+import com.webank.weevent.broker.fisco.FiscoBcosBroker4Producer;
+import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
@@ -15,10 +16,12 @@ import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * FabricBroker4ProducerTest Tester.
@@ -31,17 +34,27 @@ import org.junit.Test;
 @Ignore("Fabric is not default setting")
 public class FabricBroker4ProducerTest extends JUnitTestBase {
     private IProducer iProducer;
+    private FiscoBcosDelegate fiscoBcosDelegate;
+
+    @Autowired
+    public void setFiscoBcosDelegate(FiscoBcosDelegate fiscoBcosDelegate) {
+        this.fiscoBcosDelegate = fiscoBcosDelegate;
+    }
 
     @Before
     public void before() throws Exception {
         log.info("=============================={}.{}==============================",
         this.getClass().getSimpleName(),
         this.testName.getMethodName());
+        this.iProducer = new FiscoBcosBroker4Producer(this.fiscoBcosDelegate);
 
-        this.iProducer = BrokerApplication.applicationContext.getBean("iProducer", IProducer.class);
-        Assert.assertNotNull(this.iProducer);
-        this.iProducer.startProducer();
+        Assert.assertTrue(this.iProducer.startProducer());
         Assert.assertTrue(this.iProducer.open(this.topicName, this.channelName));
+    }
+
+    @After
+    public void after() {
+        Assert.assertTrue(this.iProducer.shutdownProducer());
     }
 
     /**
