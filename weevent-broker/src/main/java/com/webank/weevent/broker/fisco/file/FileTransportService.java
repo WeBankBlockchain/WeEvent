@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.broker.config.FiscoConfig;
 import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDKConnector;
 import com.webank.weevent.broker.plugin.IProducer;
@@ -31,36 +30,42 @@ public class FileTransportService {
     private final FiscoConfig fiscoConfig;
     private final IProducer producer;
     private final ZKChunksMeta zkChunksMeta;
+    private final String host;
+    private final int fileChunkSize;
     private final DiskFiles diskFiles;
-    private String host;
 
     // groupId <-> AMOPChannel
     private Map<String, AMOPChannel> groupChannels = new ConcurrentHashMap<>();
     // fileId <-> FileChunksMeta
     private Map<String, FileChunksMeta> fileTransportContexts = new ConcurrentHashMap<>();
 
-    public FileTransportService(FiscoConfig fiscoConfig, IProducer iProducer, ZKChunksMeta zkChunksMeta) {
+    public FileTransportService(FiscoConfig fiscoConfig,
+                                IProducer iProducer,
+                                ZKChunksMeta zkChunksMeta,
+                                String host,
+                                String filePath,
+                                int fileChunkSize) throws BrokerException {
         this.fiscoConfig = fiscoConfig;
         this.producer = iProducer;
         this.zkChunksMeta = zkChunksMeta;
-        this.diskFiles = new DiskFiles(BrokerApplication.weEventConfig.getFilePath());
-    }
 
-    public void init(String host) throws BrokerException {
-        log.info("host: {}", host);
+
+        log.info("host: {}, file path: {}, chunk size: {}", host, filePath, fileChunkSize);
+        if (fileChunkSize <= 0 || fileChunkSize > 2 * 1024 * 1024) {
+            log.error("invalid file chunk size");
+            throw new BrokerException(ErrorCode.FILE_INVALID_FILE_CHUNK_SIZE);
+        }
+        this.host = host;
+        this.fileChunkSize = fileChunkSize;
+        this.diskFiles = new DiskFiles(filePath);
 
         // init default group
         String defaultGroupId = WeEvent.DEFAULT_GROUP_ID;
         Service service = Web3SDKConnector.initService(Long.valueOf(defaultGroupId), this.fiscoConfig);
         AMOPChannel channel = new AMOPChannel(this, service);
         this.groupChannels.put(defaultGroupId, channel);
-
-        this.host = host;
     }
 
-    public String getHost() {
-        return this.host;
-    }
 
     public AMOPChannel getChannel(String groupId) throws BrokerException {
         if (this.groupChannels.containsKey(groupId)) {
@@ -84,6 +89,9 @@ public class FileTransportService {
             return;
         }
 
+        fileChunksMeta.setChunkSize(this.fileChunkSize);
+        fileChunksMeta.setHost(this.host);
+
         // check channel is exist
         this.getChannel(fileChunksMeta.getGroupId());
 
@@ -97,6 +105,9 @@ public class FileTransportService {
 
         SendResult sendResult = this.producer.publishSync(startTransport, fileChunksMeta.getGroupId());
         log.info("send start WeEvent to receiver, result: {}", sendResult);
+
+        // update to Zookeeper
+        this.zkChunksMeta.addChunks(fileChunksMeta.getFileId(), fileChunksMeta);
 
         this.fileTransportContexts.put(fileChunksMeta.getFileId(), fileChunksMeta);
     }
@@ -112,6 +123,9 @@ public class FileTransportService {
 
         FileChunksMeta fileChunksMeta = this.fileTransportContexts.get(fileId);
         this.fileTransportContexts.remove(fileId);
+
+        // remove chunk meta data in zookeeper
+        this.zkChunksMeta.removeChunks(fileId);
 
         // send WeEvent to close receiver
         FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileTransportEnd, fileId);
@@ -153,7 +167,8 @@ public class FileTransportService {
         ChannelResponse rsp = channel.sendEvent(amopTopic, fileEvent);
         if (rsp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
             log.info("sender chunk data to remote success, try to update FileChunksMeta in zookeeper");
-            this.flushZKFileChunksMeta(fileChunksMeta);
+            FileChunksMeta updatedFileChunksMeta = JsonHelper.json2Object(rsp.getContentByteArray(), FileChunksMeta.class);
+            this.flushZKFileChunksMeta(updatedFileChunksMeta);
         } else {
             BrokerException e = AMOPChannel.toBrokerException(rsp);
             log.error("sender chunk data to remote failed", e);
@@ -233,6 +248,10 @@ public class FileTransportService {
         }
 
         return this.diskFiles.writeChunkData(fileEvent.getFileId(), fileEvent.getChunkIndex(), fileEvent.getChunkData());
+    }
+
+    public FileChunksMeta getZKFileChunksMeta(String fileId) throws BrokerException {
+        return this.zkChunksMeta.getChunks(fileId);
     }
 
     public void flushZKFileChunksMeta(FileChunksMeta fileChunksMeta) throws BrokerException {

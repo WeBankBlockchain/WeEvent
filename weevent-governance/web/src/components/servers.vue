@@ -221,14 +221,14 @@ export default {
             })
             this.getServer()
           } else if (res.data.status === 100108) {
-            this.$store.commit(this.$message({
+            this.$store.commit('set_Msg', this.$message({
               type: 'warning',
               message: this.$t('serverSet.exitBrokerURL'),
               duration: 0,
               showClose: true
             }))
           } else {
-            this.$store.commit(this.$message({
+            this.$store.commit('set_Msg', this.$message({
               type: 'warning',
               message: this.$t('common.addFail'),
               duration: 0,
@@ -236,7 +236,7 @@ export default {
             }))
           }
         } else {
-          this.$store.commit(this.$message({
+          this.$store.commit('set_Msg', this.$message({
             type: 'warning',
             message: this.$t('common.addFail'),
             duration: 0,
@@ -271,14 +271,14 @@ export default {
             })
             this.getServer()
           } else if (res.data.status === 100108) {
-            this.$store.commit(this.$message({
+            this.$store.commit('set_Msg', this.$message({
               type: 'warning',
               message: this.$t('serverSet.exitBrokerURL'),
               duration: 0,
               showClose: true
             }))
           } else {
-            this.$store.commit(this.$message({
+            this.$store.commit('set_Msg', this.$message({
               type: 'warning',
               message: this.$t('common.editFail'),
               duration: 0,
@@ -286,7 +286,7 @@ export default {
             }))
           }
         } else {
-          this.$store.commit(this.$message({
+          this.$store.commit('set_Msg', this.$message({
             type: 'warning',
             message: this.$t('common.editFail'),
             duration: 0,
@@ -343,7 +343,7 @@ export default {
               }
             }
           } else {
-            this.$store.commit(this.$message({
+            this.$store.commit('set_Msg', this.$message({
               type: 'warning',
               message: this.$t('common.editFail'),
               duration: 0,
@@ -360,6 +360,11 @@ export default {
     back () {
       this.$router.go(-1)
     }
+  },
+  beforeDestroy () {
+    this.$store.state.msg.forEach(e => {
+      e.close()
+    })
   }
 }
 </script>

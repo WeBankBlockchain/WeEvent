@@ -249,13 +249,6 @@ public class WebSocketTransport extends WebSocketClient {
 
     }
 
-    /**
-     * stompUnSubscribe stomp unSubscribe
-     *
-     * @param subscriptionId subscription id
-     * @return true if success
-     * @throws JMSException error
-     */
     public void stompUnSubscribe(String subscriptionId) throws JMSException {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         String headerId = this.subscriptionId2ReceiptId.get(subscriptionId);
@@ -307,11 +300,6 @@ public class WebSocketTransport extends WebSocketClient {
         }
     }
 
-    /**
-     * handle the receipt frame from the server
-     *
-     * @param stompMsg handle the receipt frame
-     */
     private void handleReceiptFrame(StompHeaderAccessor stompHeaderAccessor, Message<byte[]> stompMsg) {
         String receiptId = stompHeaderAccessor.getReceiptId();
         // add the map<receiptId2SubscriptionId>
@@ -322,11 +310,6 @@ public class WebSocketTransport extends WebSocketClient {
         }
     }
 
-    /**
-     * handle the message frame from the server
-     *
-     * @param stompMsg handle the message frame
-     */
     @SuppressWarnings("unchecked")
     private void handleMessageFrame(StompHeaderAccessor stompHeaderAccessor, Message<byte[]> stompMsg) {
         String messageId = stompHeaderAccessor.getMessageId();
@@ -362,11 +345,6 @@ public class WebSocketTransport extends WebSocketClient {
 
     }
 
-    /**
-     * handle the error frame from the server
-     *
-     * @param stompMsg handle error frame
-     */
     private void handleErrorFrame(StompHeaderAccessor stompHeaderAccessor, Message<byte[]> stompMsg) {
         String receiptId = stompHeaderAccessor.getReceiptId();
         log.info("stomp ERROR, receipt-id: {}", receiptId);
