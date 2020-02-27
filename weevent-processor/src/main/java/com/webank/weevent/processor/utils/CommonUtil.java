@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,7 +37,7 @@ public class CommonUtil {
      * @param databaseUrl data bae url
      * @return connection
      */
-    public static Connection getDbcpConnection(String databaseUrl) {
+    public static Connection getDbcpConnection(String databaseUrl,String databaseType) {
         try {
             Map<String, String> requestUrlMap = uRLRequest(databaseUrl);
             // check all parameter
@@ -50,14 +51,18 @@ public class CommonUtil {
             } else {
                 BasicDataSource ds = new BasicDataSource();
                 dsMap.put(databaseUrl, ds);
-                ds.setDriverClassName(ProcessorApplication.environment.getProperty("spring.datasource.driverClassName"));
+                if("h2".equals(databaseType)){
+                    ds.setDriverClassName("org.h2.Driver");
+                }else {
+                    ds.setDriverClassName("org.mariadb.jdbc.Driver");
+                }
                 ds.setUrl(urlPage(databaseUrl));
                 ds.setUsername(requestUrlMap.get("user"));
                 ds.setPassword(requestUrlMap.get("password"));
 
-                ds.setInitialSize(Integer.valueOf(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.initial-size")));
-                ds.setMinIdle(Integer.valueOf(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.min-idle")));
-                ds.setMaxWaitMillis(Integer.valueOf(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.max-wait-millis")));
+                ds.setInitialSize(Integer.parseInt(Objects.requireNonNull(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.initial-size"))));
+                ds.setMinIdle(Integer.parseInt(Objects.requireNonNull(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.min-idle"))));
+                ds.setMaxWaitMillis(Integer.parseInt(Objects.requireNonNull(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.max-wait-millis"))));
 
                 return ds.getConnection();
             }

@@ -37,7 +37,7 @@ public class TimerSchedulerJob implements Job {
         Map<String, TimerScheduler> timerMap = (HashMap) context.getJobDetail().getJobDataMap().get("timerMap");
         try {
             if (obj instanceof TimerScheduler) {
-                log.info("{}", (TimerScheduler) obj);
+                log.info("{}",  obj);
                 TimerScheduler timerScheduler = (TimerScheduler) obj;
                 // check the status,when the status equal 1,then update
                 log.info("execute  task: {},rule:{}", taskName, JsonUtil.toJSONString(timerScheduler));
@@ -50,7 +50,7 @@ public class TimerSchedulerJob implements Job {
     }
 
     public static void runTask(TimerScheduler timerScheduler) {
-        try (Connection dbcpConnection = CommonUtil.getDbcpConnection(timerScheduler.getDatabaseUrl())) {
+        try (Connection dbcpConnection = CommonUtil.getDbcpConnection(timerScheduler.getDatabaseUrl(),timerScheduler.getDataBaseType())) {
             if (dbcpConnection == null) {
                 log.error("database connection fail,databaseUrl:{}", timerScheduler.getDatabaseUrl());
             } else {
