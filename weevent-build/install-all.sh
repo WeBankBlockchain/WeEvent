@@ -196,10 +196,6 @@ function config_java_home(){
     fi
 }
 
-function update_server_port(){
-    sed -i "s/8080/$gateway_port/g" ${current_path}/bin/check-service.sh
-}
-
 function main(){
     # confirm
     if [[ -d $2 ]]; then
@@ -221,9 +217,6 @@ function main(){
 
     # check the dir is exist or not
     check_param
-
-    # set the check service port
-    update_server_port
 
     # set the JAVA_HOME
     config_java_home
