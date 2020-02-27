@@ -55,7 +55,6 @@ CREATE TABLE t_rule_engine (
   `user_id` INT(11) not NULL COMMENT 'user主键id',
   `group_id` VARCHAR(64) not NULL COMMENT '群组id',
   `cep_id` VARCHAR(64) NULL COMMENT '规则id',
-  `broker_url` VARCHAR(255) NULL DEFAULT NULL COMMENT 'broker url',
   `from_destination` VARCHAR(64)  NULL DEFAULT NULL COMMENT  '数据来源',
   `to_destination` VARCHAR(64)  NULL DEFAULT NULL COMMENT  '数据目的',
   `function_array` VARCHAR(1024)  NULL DEFAULT NULL COMMENT  '函数数组字符串',
@@ -104,6 +103,21 @@ CREATE TABLE t_topic_historical (
    `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改日期',
    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='主题历史数据表';
+
+
+
+CREATE TABLE t_timer_scheduler (
+   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '主键id',
+   `broker_id` INT(11) DEFAULT NULL COMMENT 'broker主键id',
+   `user_id` INT(11) DEFAULT NULL COMMENT 'user主键id',
+   `scheduler_name` VARCHAR(64) NOT NULL COMMENT '调度任务名称',
+   `rule_database_id` INT(11) NULL DEFAULT NULL COMMENT '数据源 主键id',
+   `period_params` VARCHAR(64) NOT  NULL COMMENT '任务周期参数',
+   `parsing_sql` VARCHAR(1024) NOT  NULL COMMENT '任务解析sql',
+   `create_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
+   `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改日期',
+   PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='定时任务表';
 
 
 ALTER TABLE t_broker ADD CONSTRAINT brokerUrlDeleteAt UNIQUE (broker_url, delete_at) ;

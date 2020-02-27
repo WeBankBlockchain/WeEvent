@@ -11,7 +11,7 @@ broker_port=7000
 gateway_port=8080
 governance_port=7009
 processor_port=7008
-
+zookeeper_connect_string=
 block_chain_version=
 block_chain_channel=
 block_chain_node_path=
@@ -57,6 +57,7 @@ function set_global_param(){
         block_chain_node_path=$(realpath -m ${block_chain_node_path})
     fi
     gateway_port=$(properties_get "gateway.port")
+    zookeeper_connect_string=$(properties_get "zookeeper.connect-string")
 
     broker_port=$(properties_get "broker.port")
 
@@ -95,7 +96,7 @@ function check_telnet(){
     do
         local channel_ip=$(echo | awk '{split("'${channel}'", array, ":");print array[1]}')
         local channel_port=$(echo | awk '{split("'${channel}'", array, ":");print array[2]}')
-        ssh ${channel_ip} -p ${channel_port} -o ConnectTimeout=3 2>&1 | grep "Connection refused" &>> ${current_path}/install.log
+        ssh ${channel_ip} -p ${channel_port} -o ConnectTimeout=3 2>&1 | grep "Connection refused"
         if [[ $? -eq 0 ]];then
             echo "${channel} connection fail"
             exit 1
@@ -135,7 +136,6 @@ function check_result(){
         yellow_echo "$1 success"
     else
         yellow_echo "$1 failed, exit"
-        yellow_echo "see the install log for details in ${current_path}/install.log"
         exit 1
    fi
 }
@@ -143,28 +143,28 @@ function check_result(){
 function install_module(){
     yellow_echo "install module gateway"
     cd ${current_path}/modules/gateway
-    ./install-gateway.sh --gateway_path ${out_path}/gateway --gateway_port ${gateway_port} &>> ${current_path}/install.log
+    ./install-gateway.sh --out_path ${out_path}/gateway --gateway_port ${gateway_port} --zookeeper_connect_string ${zookeeper_connect_string}
     check_result "install gateway"
 
     yellow_echo "install module broker"
     cd ${current_path}/modules/broker
-    ./install-broker.sh --out_path ${out_path}/broker --listen_port ${broker_port} --block_chain_node_path ${block_chain_node_path} --channel_info ${block_chain_channel} --version ${block_chain_version}
+    ./install-broker.sh --out_path ${out_path}/broker --listen_port ${broker_port} --block_chain_node_path ${block_chain_node_path} --channel_info ${block_chain_channel} --version ${block_chain_version} --zookeeper_connect_string ${zookeeper_connect_string}
     check_result "install broker"
 
     if [[ ${governance_enable} = "true" ]];then
         yellow_echo "install module governance"
         cd ${current_path}/modules/governance
         if [[ ${processor_enable} = "true" ]];then
-            ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --database_type ${database_type} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} --processor_port ${processor_port}
+            ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --database_type ${database_type} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} --processor_port ${processor_port} --zookeeper_connect_string ${zookeeper_connect_string}
         else
-            ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --database_type ${database_type} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} --processor_port ""
+            ./install-governance.sh --out_path ${out_path}/governance --server_port ${governance_port} --database_type ${database_type} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} --processor_port "" --zookeeper_connect_string ${zookeeper_connect_string}
         fi
         check_result "install governance"
     fi
     if [[ ${processor_enable} = "true" ]];then
         yellow_echo "install module processor"
         cd ${current_path}/modules/processor
-        ./install-processor.sh --out_path ${out_path}/processor --server_port ${processor_port} --database_type ${database_type} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password}
+        ./install-processor.sh --out_path ${out_path}/processor --server_port ${processor_port} --database_type ${database_type} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} --zookeeper_connect_string ${zookeeper_connect_string}
         check_result "install processor"
     fi
 }
@@ -191,10 +191,9 @@ function config_java_home(){
     if [[ -e ${current_path}/modules/processor/init-processor.sh ]];then
         sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/processor/init-processor.sh
     fi
-}
-
-function update_server_port(){
-    sed -i "s/8080/$gateway_port/g" ${current_path}/bin/check-service.sh
+    if [[ -e ${current_path}/modules/gateway/gateway.sh ]];then
+        sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/gateway/gateway.sh
+    fi
 }
 
 function main(){
@@ -218,9 +217,6 @@ function main(){
 
     # check the dir is exist or not
     check_param
-
-    # set the check service port
-    update_server_port
 
     # set the JAVA_HOME
     config_java_home
