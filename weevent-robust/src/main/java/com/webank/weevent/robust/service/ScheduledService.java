@@ -19,11 +19,11 @@ import com.webank.weevent.robust.RobustApplication;
 import com.webank.weevent.robust.service.interfaces.MqttGateway;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.IWeEventClient;
+import com.webank.weevent.sdk.JsonHelper;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -288,10 +288,9 @@ public class ScheduledService implements AutoCloseable {
                         if (topicSubscribeMap.get(EVENT_ID) != null && topicSubscribeMap.get(STOMP_TOPIC) != null) {
                             countTimes(stompReceiveMap, getFormatTime(new Date()));
                         }
-                        ObjectMapper objectMapper = new ObjectMapper();
                         Map map = null;
                         try {
-                            map = objectMapper.readValue(payload.toString(), Map.class);
+                            map = JsonHelper.getObjectMapper().readValue(payload.toString(), Map.class);
                         } catch (IOException e) {
                             log.error("json conversion failed", e);
                             e.printStackTrace();
