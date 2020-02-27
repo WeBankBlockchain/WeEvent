@@ -209,18 +209,6 @@ function tar_weevent(){
     local target=$1
     yellow_echo "generate ${target}"
 
-    # thin spring boot jar, merge comm jars into one lib to reduce tar size
-    mkdir -p ${out_path}/modules/lib
-    for commonjar in $(ls ${out_path}/modules/broker/lib/);
-    do
-        # copy common jar into modules lib
-        if [[ (-e ${out_path}/modules/governance/lib/${commonjar}) && (-e ${out_path}/modules/processor/lib/${commonjar}) ]]; then
-            cp ${out_path}/modules/broker/lib/${commonjar} ${out_path}/modules/lib
-            rm ${out_path}/modules/governance/lib/${commonjar}
-            rm ${out_path}/modules/processor/lib/${commonjar}
-            rm ${out_path}/modules/broker/lib/${commonjar}
-        fi
-    done
 
     # tar
     cd ${current_path}
