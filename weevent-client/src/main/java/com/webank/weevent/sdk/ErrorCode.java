@@ -75,11 +75,15 @@ public enum ErrorCode {
     FILE_CHUNK_INDEX_ILLEGAL(102007, "the upload file chunk idx is illegal"),
     FILE_CHUNK_DATA_IS_NULL(102008, "the upload file chunk data is null"),
     FILE_UPLOAD_FAILED(102009, "file upload failed"),
+    FILE_GENERATE_MD5_ERROR(102010, "file generate md5 failed"),
+    FILE_DOWNLOAD_ERROR(102010, "file download failed"),
+    FILE_MD5_MISMATCH(102011, "file md5 mismatch"),
 
     HTTP_REQUEST_EXECUTE_ERROR(102100, "http request execute failed"),
     BUILD_HTTP_URL_ERROR(102101, "build http url failed"),
-    HTTPRESPONSE_CLOSE_ERROR(102102, "httpResponse close failed"),
-
+    HTTP_RESPONSE_FAILED(102102, "http response failed"),
+    HTTP_RESPONSE_ENTITY_EMPTY(102103, "http response entity is empty"),
+    HTTPENTITY_TO_BYTEARRAY_ERROR(102104, "convert httpEntity to byte[] error"),
 
     //server error(200000, 300000)
     TOPIC_CONTROLLER_IS_NULL(200100, "get topic control address from CNS failed, please deploy it first"),
@@ -116,15 +120,16 @@ public enum ErrorCode {
     ZOOKEEPER_EXIST_FILE(200403, "file id already exist in zookeeper"),
     ZOOKEEPER_NOT_SUPPORT_FILE_SUBSCRIPTION(200404, "DO NOT SUPPORT file transport without zookeeper"),
 
-    FILE_NOT_EXIST_CONTEXT(200500, "not exist file context"),
-    FILE_INVALID_CHUNK(200501, "invalid chunk data"),
-    FILE_NOT_EXIST(200502, "not exist file"),
-    FILE_READ_EXCEPTION(200503, "read file exception"),
-    FILE_WRITE_EXCEPTION(200504, "write file exception"),
-    FILE_NOT_EXIST_PATH(200505, "not exist file path"),
-    FILE_NOT_ENOUGH_SPACE(200506, "not enough disk space"),
-    FILE_RECEIVE_CONTEXT_NOT_READY(200507, "receive file context is not ready"),
-    FILE_SENDER_RECEIVER_CONFLICT(200508, "can't publish and subscribe a file in the same node"),
+    FILE_NOT_EXIST_PATH(200500, "not exist file path"),
+    FILE_INVALID_FILE_CHUNK_SIZE(200501, "file chunk size must be in (0, 2M)"),
+    FILE_NOT_EXIST_CONTEXT(200502, "not exist file context"),
+    FILE_INVALID_CHUNK(200503, "invalid chunk data"),
+    FILE_NOT_EXIST(200504, "not exist file"),
+    FILE_READ_EXCEPTION(200505, "read file exception"),
+    FILE_WRITE_EXCEPTION(200506, "write file exception"),
+    FILE_NOT_ENOUGH_SPACE(200507, "not enough disk space"),
+    FILE_RECEIVE_CONTEXT_NOT_READY(200508, "receive file context is not ready"),
+    FILE_SENDER_RECEIVER_CONFLICT(200509, "can't publish and subscribe a file in the same node"),
     ;
 
     /**
