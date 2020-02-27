@@ -26,7 +26,7 @@ public class IConsumerTest extends JUnitTestBase {
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
-        this.iConsumer = BrokerApplication.applicationContext.getBean("iConsumer", IConsumer.class);
+        this.iConsumer = BrokerApplication.applicationContext.getBean(IConsumer.class);
     }
 
     @After
