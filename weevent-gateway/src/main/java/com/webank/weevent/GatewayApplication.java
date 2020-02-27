@@ -35,11 +35,6 @@ public class GatewayApplication {
     }
 
     @Bean
-    public static Fix302GlobalFilter getFix302GlobalFilter() {
-        return new Fix302GlobalFilter();
-    }
-
-    @Bean
     public static GlobalFilter getLogGlobalFilter() {
         return new LogGlobalFilter();
     }
