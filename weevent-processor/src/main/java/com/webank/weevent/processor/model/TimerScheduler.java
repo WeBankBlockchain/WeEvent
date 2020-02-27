@@ -10,6 +10,7 @@ import lombok.Data;
 @Data
 public class TimerScheduler implements Serializable {
 
+    private String id;
 
     @NotNull(message = "schedulerName cannot be empty")
     private String schedulerName;
@@ -23,12 +24,18 @@ public class TimerScheduler implements Serializable {
     @NotNull(message = "parsingSql cannot be empty")
     private String parsingSql;
 
+    private String dataBaseType;
+
     private Date createdTime = new Date();
 
     private Date updatedTime = new Date();
 
 
-    public TimerScheduler(String schedulerName, String databaseUrl, String periodParams , String parsingSql) {
+    public TimerScheduler(String id, @NotNull(message = "schedulerName cannot be empty") String schedulerName,
+                          @NotNull(message = "databaseUrl cannot be empty") String databaseUrl,
+                          @NotNull(message = "periodParams cannot be empty") String periodParams,
+                          @NotNull(message = "parsingSql cannot be empty") String parsingSql) {
+        this.id = id;
         this.schedulerName = schedulerName;
         this.databaseUrl = databaseUrl;
         this.periodParams = periodParams;

@@ -52,7 +52,7 @@ module.exports = {
     'authorized': '授权用户',
     'ruleEngine': '配置规则引擎',
     'namePlaceholder': '请输入服务名称(1-20位字母数字下划线)',
-    'borkerPlaceholder': '例如: "http://127.0.0.1:8080/weevent"',
+    'borkerPlaceholder': '例如: "http://127.0.0.1:8080/weevent-broker"',
     'webasePlaceholder': '例如: "http://127.0.0.1:8080/webase"',
     'authorizedPlaceholder': '请选择用户',
     'errorServer': '服务名格式错误',
