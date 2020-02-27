@@ -179,7 +179,7 @@ export default {
                 this.login(e)
               }, 1000)
             } else {
-              this.$store.commit(this.$message({
+              this.$store.commit('set_Msg', this.$message({
                 type: 'warning',
                 message: this.$t('userSet.regFail'),
                 duration: 0,
@@ -210,7 +210,7 @@ export default {
               if (res.data.status === 400) {
                 this.ruleForm.oldPass = ''
                 this.$refs.ruleForm.validateField('oldPass')
-                this.$store.commit(this.$message({
+                this.$store.commit('set_Msg', this.$message({
                   type: 'warning',
                   message: this.$t('userSet.errorOldPassWord'),
                   duration: 0,
@@ -240,7 +240,7 @@ export default {
           localStorage.setItem('token', base.Authorization)
           this.$router.push('./index')
         } else {
-          this.$store.commit(this.$message({
+          this.$store.commit('set_Msg', this.$message({
             type: 'warning',
             message: this.$t('userSet.loginFail'),
             duration: 0,
