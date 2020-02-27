@@ -36,7 +36,7 @@ public class ConstantProperties {
     //broker url end ===========================================================
 
 
-    //process url begin ========================================================
+    //process rule url begin ========================================================
     public final static String PROCESSOR_INSERT = "/insert";
     public final static String PROCESSOR_DELETE_CEP_RULE = "/deleteCEPRuleById";
     public final static String PROCESSOR_UPDATE_CEP_RULE = "/updateCEPRuleById";
@@ -45,7 +45,15 @@ public class ConstantProperties {
     public final static String PROCESSOR_STOP_CEP_RULE = "/stopCEPRuleById";
 
 
-    //process url end ===========================================================
+    //process rule url end ===========================================================
+
+    //process timerScheduler url begin ===========================================================
+
+    public final static String TIMER_SCHEDULER_INSERT = "/timerScheduler/insert";
+    public final static String TIMER_SCHEDULER_UPDATE = "/timerScheduler/update";
+    public final static String TIMER_SCHEDULER_DELETE = "/timerScheduler/delete";
+
+    //process timerScheduler url end ===========================================================
 
 
     //weBase url begin ========================================================

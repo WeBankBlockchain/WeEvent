@@ -1,10 +1,12 @@
 package com.webank.weevent.sdk;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.MapLikeType;
@@ -75,6 +77,24 @@ public class JsonHelper {
     }
 
     /**
+     * convert byte[] to object
+     *
+     * @param bytes json byte
+     * @param valueType java object type
+     * @param <T> template type
+     * @return Object java object
+     * @throws BrokerException BrokerException
+     */
+    public static <T> T jsonBytes2Object(byte[] bytes, Class<T> valueType) throws BrokerException {
+        try {
+            return OBJECT_MAPPER.readValue(bytes, valueType);
+        } catch (IOException e) {
+            log.error("convert byte[] to object failed ", e);
+            throw new BrokerException(ErrorCode.JSON_DECODE_EXCEPTION);
+        }
+    }
+
+    /**
      * convert jsonString to object
      *
      * @param jsonString json data
@@ -108,5 +128,30 @@ public class JsonHelper {
             log.error("convert jsonString to object failed ", e);
             throw new BrokerException(ErrorCode.JSON_DECODE_EXCEPTION);
         }
+    }
+
+    /**
+     * convert Object to Bean
+     *
+     * @param obj object data
+     * @param valueType java object type
+     * @param <T> template type
+     * @return class instance
+     */
+    public static <T> T object2Bean(Object obj, Class<T> valueType) {
+        return OBJECT_MAPPER.convertValue(obj, valueType);
+    }
+
+    /**
+     * convert object to List
+     *
+     * @param obj object
+     * @param valueType java object type
+     * @param <T> template type
+     * @return class instance
+     */
+    public static <T> List<T> object2List(Object obj, Class<T> valueType) {
+        return OBJECT_MAPPER.convertValue(obj, new TypeReference<T>() {
+        });
     }
 }
