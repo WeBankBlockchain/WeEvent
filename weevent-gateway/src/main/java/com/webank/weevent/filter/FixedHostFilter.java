@@ -1,6 +1,7 @@
 package com.webank.weevent.filter;
 
 
+import java.net.URI;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
@@ -35,16 +36,19 @@ public class FixedHostFilter extends LoadBalancerClientFilter {
         HttpHeaders httpHeaders = exchange.getRequest().getHeaders();
         String fileHost = httpHeaders.getFirst("file_host");
         if (!StringUtils.isEmpty(fileHost)) {
+            URI requestUri = exchange.getRequest().getURI();
             List<ServiceInstance> instances = this.discoveryClient.getInstances("weevent-broker");
             for (ServiceInstance instance : instances) {
                 if (instance.getInstanceId().equals(fileHost)) {
-                    log.info("FIND header \"file_host\": {}, FIX choose it", fileHost);
+                    log.info("FIND header \"file_host\": {} in request {}, FIX choose it", fileHost, requestUri);
                     return instance;
                 }
             }
+
+            log.info("FIND header \"file_host\": {} in request {}, but it's invalid instance, skip this", fileHost, requestUri);
+            return null;
         }
 
-        log.info("FIND header \"file_host\": {}, but it's invalid instance, skip this", fileHost);
-        return null;
+        return super.choose(exchange);
     }
 }
