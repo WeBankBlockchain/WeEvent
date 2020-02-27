@@ -33,8 +33,7 @@ $ ./install-all.sh -p /usr/local/weevent/
 ```
 
 ### Tutorials
-There are some base usecase showed via browser，like [Publish Event](http://localhost:8080/weevent/rest/publish?topic=test&content=helloevent).  
-For more examples, see the [WeEvent tutorials](https://weeventdoc.readthedocs.io/zh_CN/latest/protocal/restful.html).
+There are some base usecase showed via browser，like [Publish Event](http://localhost:8080/weevent-broker/rest/publish?topic=test&content=helloevent). For more examples, see the [WeEvent tutorials](https://weeventdoc.readthedocs.io/zh_CN/latest/protocal/restful.html).
 
 ## User’s Guide
 [WeEvent online documents](https://weeventdoc.readthedocs.io/latest).
