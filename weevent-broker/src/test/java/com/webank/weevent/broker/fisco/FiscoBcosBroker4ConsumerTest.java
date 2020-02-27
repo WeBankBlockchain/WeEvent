@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import com.webank.weevent.BrokerApplication;
 import com.webank.weevent.JUnitTestBase;
+import com.webank.weevent.broker.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.broker.plugin.IConsumer;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
@@ -22,6 +22,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * FiscoBcosBroker4Consumer Tester.
@@ -36,11 +37,17 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
     private final String topic3 = topicName + "2";
     private final long wait3s = 3000;
 
-    private IProducer iProducer;
-    private IConsumer iConsumer;
     private String lastEventId = "";
     private Map<IConsumer.SubscribeExt, String> ext = new HashMap<>();
     private IConsumer.ConsumerListener defaultListener = new MyConsumerListener();
+    private IConsumer iConsumer;
+    private IProducer iProducer;
+    private FiscoBcosDelegate fiscoBcosDelegate;
+
+    @Autowired
+    public void setFiscoBcosDelegate(FiscoBcosDelegate fiscoBcosDelegate) {
+        this.fiscoBcosDelegate = fiscoBcosDelegate;
+    }
 
     class MyConsumerListener implements IConsumer.ConsumerListener {
         public List<String> notifiedEvents = new ArrayList<>();
@@ -66,8 +73,9 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
-        this.iConsumer = BrokerApplication.applicationContext.getBean("iConsumer", IConsumer.class);
-        this.iProducer = BrokerApplication.applicationContext.getBean("iProducer", IProducer.class);
+        this.iProducer = new FiscoBcosBroker4Producer(this.fiscoBcosDelegate);
+        this.iConsumer = new FiscoBcosBroker4Consumer(this.fiscoBcosDelegate);
+
         Assert.assertTrue(this.iProducer.startProducer());
         Assert.assertTrue(this.iConsumer.startConsumer());
         Assert.assertTrue(this.iProducer.open(this.topicName, this.groupId));
