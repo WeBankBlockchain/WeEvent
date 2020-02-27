@@ -1,10 +1,10 @@
 package com.webank.weevent.st;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.webank.weevent.JUnitTestBase;
 import com.webank.weevent.protocol.rest.ResponseData;
+import com.webank.weevent.sdk.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
@@ -44,19 +44,21 @@ public class RestfullAdminTest extends JUnitTestBase {
     public void testListNodes() {
         ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "listNodes", ResponseData.class);
         log.info("listNodes, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
-        List<String> data = (ArrayList<String>)rsp.getBody().getData();
+        Object data = rsp.getBody().getData();
+        List<String> nodes = JsonHelper.object2List(data, String.class);
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody().getCode() == 0);
-        Assert.assertTrue(!data.isEmpty());
+        Assert.assertTrue(!nodes.isEmpty());
     }
 
     @Test
     public void testListSubscription() {
         ResponseEntity<ResponseData> rsponse = admin.getForEntity(url + "listNodes", ResponseData.class);
-        List<String> data = (ArrayList<String>)rsponse.getBody().getData();
-        Assert.assertTrue(!data.isEmpty());
+        Object data = rsponse.getBody().getData();
+        List<String> nodes = JsonHelper.object2List(data, String.class);
+        Assert.assertTrue(!nodes.isEmpty());
 
-        ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "listSubscription?groupId={groupId}&nodeIp={nodeIp}", ResponseData.class, this.groupId, data.get(0));
+        ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "listSubscription?groupId={groupId}&nodeIp={nodeIp}", ResponseData.class, this.groupId, nodes.get(0));
         log.info("listSubscription, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody().getCode() == 0);

@@ -61,6 +61,10 @@ function governance_setup() {
     if [[ -n ${processor_port} ]];then
        sed -i "/weevent.processor.url*/cweevent.processor.url=http://127.0.0.1:${processor_port}" ${application_properties}
     fi
+
+    if [[ -n ${zookeeper_connect_string} ]];then
+       sed -i "/spring.cloud.zookeeper.connect-string*/cspring.cloud.zookeeper.connect-string=${zookeeper_connect_string}" ${application_properties}
+    fi
      
     # init db, create database and tables
     cd ${out_path}
@@ -101,6 +105,7 @@ mysql_user=""
 mysql_pwd=""
 out_path=""
 processor_port=""
+zookeeper_connect_string=""
 current_path=$(pwd)
 echo "current path $current_path"
 
@@ -114,6 +119,7 @@ while [[ $# -ge 2 ]] ; do
         --mysql_user) para="$1 = $2;";mysql_user="$2";shift 2;;
         --mysql_pwd) para="$1 = $2;";mysql_pwd="$2";shift 2;;
         --processor_port) para="$1 = $2;";processor_port="$2";shift 2;;
+        --zookeeper_connect_string) para="$1 = $2;";zookeeper_connect_string="$2";shift 2;;
         *) echo "unknown parameter $1." ; exit 1 ; break;;
     esac
 done
