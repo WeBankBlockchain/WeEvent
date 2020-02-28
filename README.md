@@ -31,8 +31,7 @@ $ ./install-all.sh -p /usr/local/weevent/
 ```
 
 ### 功能体验
-通过浏览器即可体验事件发布等基本功能，如[发布事件](http://localhost:8080/weevent/rest/publish?topic=test&content=helloevent)。  
-更多功能，请参见[WeEvent接入](https://weeventdoc.readthedocs.io/zh_CN/latest/protocal/restful.html)。
+通过浏览器即可体验事件发布等基本功能，如[发布事件](http://localhost:8080/weevent-broker/rest/publish?topic=test&content=helloevent)。更多功能，请参见[WeEvent接入](https://weeventdoc.readthedocs.io/zh_CN/latest/protocol/restful.html)。
 
 ## 用户文档
 [WeEvent在线文档](https://weeventdoc.readthedocs.io/zh_CN/latest)。
