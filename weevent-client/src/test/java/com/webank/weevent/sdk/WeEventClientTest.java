@@ -28,7 +28,7 @@ public class WeEventClientTest {
     @Rule
     public TestName testName = new TestName();
 
-    private String topicName = "com.webank.weevent";
+    private String topicName = "com.weevent.test";
 
     private IWeEventClient weEventClient;
 
