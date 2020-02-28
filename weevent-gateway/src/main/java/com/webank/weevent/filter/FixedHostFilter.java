@@ -40,12 +40,12 @@ public class FixedHostFilter extends LoadBalancerClientFilter {
             List<ServiceInstance> instances = this.discoveryClient.getInstances("weevent-broker");
             for (ServiceInstance instance : instances) {
                 if (instance.getInstanceId().equals(fileHost)) {
-                    log.info("FIND header \"file_host\": {} in request {}, FIX choose it", fileHost, requestUri);
+                    log.info("header \"file_host\": {} in R: {}, FIX choose it", fileHost, requestUri);
                     return instance;
                 }
             }
 
-            log.info("FIND header \"file_host\": {} in request {}, but it's invalid instance, skip this", fileHost, requestUri);
+            log.info("header \"file_host\": {} in R: {}, but it's invalid instance, skip this", fileHost, requestUri);
             return null;
         }
 
