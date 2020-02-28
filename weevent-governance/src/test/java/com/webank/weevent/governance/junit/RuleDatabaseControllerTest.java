@@ -67,8 +67,9 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
 
     @Test
     public void testAddRuleDatabase() throws Exception {
-        String content = "{\"datasourceName\":\"test123\",\"databaseUrl\":\"jdbc:h2:~/WeEvent_governance\"," +
-                "\"username\":\"root\",\"password\":\"123456\",\"tableName\":\"t_rule_database\"," +
+        String content = "{\"datasourceName\":\"test123\",\"databaseType\":\"2\",\"databaseUrl\":\"jdbc:h2:~/WeEvent_governance\"," +
+                "\"databaseIp\":\"10.107.96.203\",\"databasePort\":\"3307\",\"databaseName\":\"/home/app/WeEvent_governance\"," +
+                "\"username\":\"root\",\"password\":\"Apps@123\",\"tableName\":\"t_rule_database\"," +
                 "\"userId\":" + this.userId + ",\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\",\"systemTag\":\"false\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/circulationDatabase/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
@@ -91,7 +92,7 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
 
     @Test
     public void testUpdateRuleDatabase() throws Exception {
-        String content = "{\"id\":\"1\",\"datasourceName\":\"test123\",\"databaseUrl\":\"jdbc:h2:~/WeEvent_governance\"," +
+        String content = "{\"id\":\"2\",\"datasourceName\":\"test123\",\"databaseType\":\"1\",\"databaseUrl\":\"jdbc:h2:~/WeEvent_governance\"," +
                 "\"username\":\"root\",\"password\":\"123456\",\"tableName\":\"t_rule_database\"," +
                 "\"userId\":" + this.userId + ",\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\",\"systemTag\":\"false\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/circulationDatabase/update").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content)).andReturn().getResponse();
@@ -113,7 +114,7 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
 
     @Test
     public void testCheckDataBaseUrl() throws Exception {
-        String content = "{\"datasourceName\":\"test123\",\"databaseUrl\":\"jdbc:h2:~/WeEvent_governance\"," +
+        String content = "{\"databaseType\":\"1\",\"datasourceName\":\"test123\",\"databaseUrl\":\"jdbc:h2:~/WeEvent_governance\"," +
                 "\"username\":\"root\",\"password\":\"123456\",\"tableName\":\"t_rule_database\"," +
                 "\"userId\":" + this.userId + ",\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/circulationDatabase/checkDataBaseUrl").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content)).andReturn().getResponse();
