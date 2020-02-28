@@ -1,10 +1,10 @@
 # web container
 server:
-  port: 443
+  port: 8080
   servlet:
     context-path: /
   ssl:
-    enabled: true
+    enabled: false
     key-store: classpath:server.p12
     key-store-type: PKCS12
     key-alias: weevent
