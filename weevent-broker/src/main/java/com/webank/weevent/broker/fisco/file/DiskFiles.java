@@ -6,7 +6,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
+import java.nio.charset.StandardCharsets;
 
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
@@ -46,6 +49,7 @@ public class DiskFiles {
         return this.genLocalFileName(fileId) + ".json";
     }
 
+    // save FileChunksMeta in UTF-8 format, fileName may be contain chinese character
     public FileChunksMeta loadFileMeta(String fileId) throws BrokerException {
         String localMetaFile = this.genLocalMetaFileName(fileId);
         File fileMeta = new File(localMetaFile);
@@ -58,14 +62,16 @@ public class DiskFiles {
             throw new BrokerException(ErrorCode.FILE_READ_EXCEPTION);
         }
 
-        try (FileInputStream fileInputStream = new FileInputStream(fileMeta)) {
-            byte[] data = new byte[(int) fileMeta.length()];
-            int readSize = fileInputStream.read(data);
-            if (readSize != fileMeta.length()) {
+        try (FileInputStream fileInputStream = new FileInputStream(fileMeta);
+             InputStreamReader reader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8)) {
+            char[] data = new char[(int) fileMeta.length()];
+            int readSize = reader.read(data);
+            // the read size is length of UTF-8 char, less then fileMeta.length()
+            if (readSize <= 0) {
                 log.error("read local meta file failed");
                 throw new BrokerException(ErrorCode.FILE_READ_EXCEPTION);
             }
-            return JsonHelper.json2Object(data, FileChunksMeta.class);
+            return JsonHelper.json2Object(String.valueOf(data), FileChunksMeta.class);
         } catch (IOException | BrokerException e) {
             log.error("read local meta file exception", e);
             throw new BrokerException(ErrorCode.FILE_READ_EXCEPTION);
@@ -76,10 +82,10 @@ public class DiskFiles {
         log.info("save FileChunksMeta, filled chunk: {} -> chunkNum: {}", fileChunksMeta.getChunkStatus().cardinality(), fileChunksMeta.getChunkNum());
 
         String localMetaFile = this.genLocalMetaFileName(fileChunksMeta.getFileId());
-        try (FileOutputStream fileOutputStream = new FileOutputStream(localMetaFile)) {
-            byte[] data = JsonHelper.object2JsonBytes(fileChunksMeta);
-            fileOutputStream.write(data);
-            fileOutputStream.flush();
+        try (FileOutputStream fileOutputStream = new FileOutputStream(localMetaFile);
+             OutputStreamWriter writer = new OutputStreamWriter(fileOutputStream, StandardCharsets.UTF_8)) {
+            String data = JsonHelper.object2Json(fileChunksMeta);
+            writer.write(data);
         } catch (IOException | BrokerException e) {
             log.error("write local meta file exception", e);
             throw new BrokerException(ErrorCode.FILE_WRITE_EXCEPTION);
