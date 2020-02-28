@@ -10,14 +10,13 @@ function processor_setup() {
 
     application_properties=${out_path}/conf/application-prod.properties
 
-    if [[ -z ${server_port} ]];then
-        echo "server_port is empty."
-        echo "set server_port failed"
-        exit 1
-    else
-       sed -i "/server.port*/cserver.port=${server_port}" ${application_properties}
-    fi
-    echo "set server_port success"
+      if [[ ${server_port} -gt 0 ]]; then
+          sed -i "/server.port=/cserver.port=${server_port}" ${application_properties}
+      else
+          echo "server_port is err"
+          exit 1
+      fi
+          echo "set server_port success"
 
     if [[ ${database_type} != "h2" ]];then
         switch_database_to_mysql "${application_properties}"
