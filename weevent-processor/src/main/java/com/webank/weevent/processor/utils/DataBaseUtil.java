@@ -17,7 +17,7 @@ public class DataBaseUtil {
 
     public static String sendMessageToDB(WeEvent eventContent, CEPRule rule) {
         try {
-            try (Connection conn = CommonUtil.getDbcpConnection(rule.getDatabaseUrl())) {
+            try (Connection conn = CommonUtil.getDbcpConnection(rule.getDatabaseUrl(),rule.getDatabaseType())) {
 
                 if (conn != null) {
                     // get the insert sql

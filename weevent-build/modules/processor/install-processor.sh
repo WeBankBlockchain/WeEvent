@@ -10,14 +10,13 @@ function processor_setup() {
 
     application_properties=${out_path}/conf/application-prod.properties
 
-    if [[ -z ${server_port} ]];then
-        echo "server_port is empty."
-        echo "set server_port failed"
-        exit 1
-    else
-       sed -i "/server.port*/cserver.port=${server_port}" ${application_properties}
-    fi
-    echo "set server_port success"
+      if [[ ${server_port} -gt 0 ]]; then
+          sed -i "/server.port=/cserver.port=${server_port}" ${application_properties}
+      else
+          echo "server_port is err"
+          exit 1
+      fi
+          echo "set server_port success"
 
     if [[ ${database_type} != "h2" ]];then
         switch_database_to_mysql "${application_properties}"
@@ -57,6 +56,10 @@ function processor_setup() {
             sed -i "s/yyyy/${mysql_pwd}/" ${application_properties}
         fi
         echo "set mysql_pwd success"
+    fi
+
+    if [[ -n ${zookeeper_connect_string} ]];then
+       sed -i "/spring.cloud.zookeeper.connect-string*/cspring.cloud.zookeeper.connect-string=${zookeeper_connect_string}" ${application_properties}
     fi
      
     # init db, create database and tables
@@ -98,6 +101,7 @@ mysql_port=""
 mysql_user=""
 mysql_pwd=""
 out_path=""
+zookeeper_connect_string=""
 current_path=$(pwd)
 echo "current path $current_path"
 
@@ -110,6 +114,7 @@ while [[ $# -ge 2 ]] ; do
         --mysql_port) para="$1 = $2;";mysql_port="$2";shift 2;;
         --mysql_user) para="$1 = $2;";mysql_user="$2";shift 2;;
         --mysql_pwd) para="$1 = $2;";mysql_pwd="$2";shift 2;;
+        --zookeeper_connect_string) para="$1 = $2;";zookeeper_connect_string="$2";shift 2;;
         *) echo "unknown parameter $1." ; exit 1 ; break;;
     esac
 done

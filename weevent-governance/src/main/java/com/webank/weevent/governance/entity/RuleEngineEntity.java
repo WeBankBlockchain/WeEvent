@@ -30,6 +30,9 @@ public class RuleEngineEntity extends RuleEngineBase {
     private String databaseUrl;
 
     @Transient
+    private String databaseType;
+
+    @Transient
     private Map<String, Object> payloadMap = new HashMap<>();
 
     @Transient
