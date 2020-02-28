@@ -32,7 +32,7 @@ function connect() {
         showGreeting("connect", "", "");
         // 通过rest 连接open
         var url = $("#urlparam");
-        fetch('http://localhost:8080/weevent/rest/open?topic=com.webank.test.matthew', {
+        fetch('http://localhost:8080/weevent/rest/open?topic=com.weevent.test', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -49,12 +49,12 @@ function connect() {
             }
         })
 
-        // fetch('http://127.0.0.1/weevent/rest/open?topic=com.webank.test.matthew', {
+        // fetch('http://127.0.0.1/weevent/rest/open?topic=com.weevent.test', {
         //     method: 'POST',
         //     headers: {
         //         'Content-Type': 'application/json',
         //     },
-        //     body: '{"com.webank.test.matthew"}',
+        //     body: '{"com.weevent.test"}',
         // }).then(function (response) {
         //     //change the css
         //     if (response.ok) {
