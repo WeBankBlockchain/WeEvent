@@ -37,7 +37,7 @@ cd ${current_path}
 
 if [[ ${gateway_port} -gt 0 ]]; then
     sed -i "/port:/cport: ${gateway_port}" ${out_path}/conf/application-prod.yml
-    sed -i "s/port:*/  &/" ${out_path}/conf/application-prod.yml
+    sed -i "s/port:/  &/" ${out_path}/conf/application-prod.yml
 else
     echo "gateway_port is error"
     exit 1
