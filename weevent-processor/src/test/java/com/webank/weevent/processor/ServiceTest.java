@@ -3,7 +3,7 @@ package com.webank.weevent.processor;
 import java.util.Date;
 
 import com.webank.weevent.processor.model.CEPRule;
-import com.webank.weevent.processor.utils.JsonUtil;
+import com.webank.weevent.sdk.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
@@ -150,7 +150,7 @@ public class ServiceTest {
         rule.setConditionField("c<20 or a==10");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -176,7 +176,7 @@ public class ServiceTest {
         rule.setToDestination("to.com.webank.weevent");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getStatus());
         assertEquals(200, result3.getResponse().getStatus());
@@ -191,13 +191,13 @@ public class ServiceTest {
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
         rule.setId("20200102");
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getContentAsString());
         assertEquals(200, result3.getResponse().getStatus());
 
         rule.setFromDestination("testFromDestination");
-        RequestBuilder requestBuilder4 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder4 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result4 = mockMvc.perform(requestBuilder4).andDo(print()).andReturn();
         log.info("result4:{}", result4.getResponse().getContentAsString());
         assertEquals(200, result4.getResponse().getStatus());
@@ -241,7 +241,7 @@ public class ServiceTest {
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
         rule.setId("202002101213");
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getStatus());
         assertEquals(200, result3.getResponse().getStatus());
@@ -259,7 +259,7 @@ public class ServiceTest {
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
         rule.setId("202002101213");
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getStatus());
         assertEquals(200, result3.getResponse().getStatus());
@@ -277,7 +277,7 @@ public class ServiceTest {
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
         rule.setId("202002101214");
-        RequestBuilder requestBuilder6 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder6 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result6 = mockMvc.perform(requestBuilder6).andDo(print()).andReturn();
         log.info("result3:{}", result6.getResponse().getStatus());
         assertEquals(200, result6.getResponse().getStatus());
@@ -290,7 +290,7 @@ public class ServiceTest {
 
         // rule.setId("202002101215");
         rule.setFromDestination("testFromDestination");
-        RequestBuilder requestBuilder4 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder4 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result4 = mockMvc.perform(requestBuilder4).andDo(print()).andReturn();
         log.info("result4:{}", result4.getResponse().getContentAsString());
         assertEquals(200, result4.getResponse().getStatus());
@@ -312,7 +312,7 @@ public class ServiceTest {
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
         rule.setId("202002101216");
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getStatus());
         assertEquals(200, result3.getResponse().getStatus());
@@ -331,7 +331,7 @@ public class ServiceTest {
         rule.setToDestination("to.com.webank.weevent");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);

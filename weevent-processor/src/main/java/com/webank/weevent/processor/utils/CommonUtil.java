@@ -1,6 +1,5 @@
 package com.webank.weevent.processor.utils;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -20,6 +19,8 @@ import java.util.regex.Pattern;
 
 import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.processor.model.CEPRule;
+import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.JsonHelper;
 import com.webank.weevent.sdk.WeEvent;
 
 import javafx.util.Pair;
@@ -126,8 +127,8 @@ public class CommonUtil {
     public static List<String> getKeys(String objJson) {
         List<String> keys = new ArrayList<>();
         try {
-            Map<String, Object> map = JsonUtil.parseObjectToMap(objJson);
-            if (JsonUtil.isValid(objJson)) {
+            Map<String, Object> map = JsonHelper.object2Map(objJson);
+            if (JsonHelper.isValid(objJson) && map != null) {
                 for (Map.Entry<String, Object> entry : map.entrySet()) {
                     keys.add(entry.getKey());
                 }
@@ -135,7 +136,7 @@ public class CommonUtil {
                 keys = null;
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             keys = null;
             log.info("json get key error");
         }
@@ -177,12 +178,12 @@ public class CommonUtil {
         return keys;
     }
 
-    private static List<String> getSelectFieldList(String selectFields, String payload) throws IOException {
+    private static List<String> getSelectFieldList(String selectFields, String payload) throws BrokerException {
         List<String> result = new ArrayList<>();
         // if select is equal * ,then select all fields.
         if ("*".equals(selectFields)) {
             String selectFieldsTemp = payload;
-            Iterator it = JsonUtil.parseObject(selectFieldsTemp, Map.class).entrySet().iterator();
+            Iterator it = JsonHelper.json2Object(selectFieldsTemp, Map.class).entrySet().iterator();
 
             while (it.hasNext()) {
                 Map.Entry entry = (Map.Entry) it.next();
@@ -196,17 +197,17 @@ public class CommonUtil {
         return result;
     }
 
-    public static Map<String, String> contactsql(CEPRule rule, WeEvent eventMessage) throws IOException {
+    public static Map<String, String> contactsql(CEPRule rule, WeEvent eventMessage) throws BrokerException {
         String content = new String(eventMessage.getContent());
 
         // get select field
         List<String> result = getSelectFieldList(rule.getSelectField(), rule.getPayload());
-        Map<String, Object> table = JsonUtil.parseObjectToMap(rule.getPayload());
+        Map<String, Object> table = JsonHelper.object2Map(rule.getPayload());
         Map eventContent;
         Map<String, String> sqlOrder;
 
-        if (JsonUtil.isValid(content)) {
-            eventContent = JsonUtil.parseObject(content, Map.class);
+        if (JsonHelper.isValid(content)) {
+            eventContent = JsonHelper.json2Object(content, Map.class);
             sqlOrder = generateSqlOrder(rule.getBrokerId(), rule.getGroupId(), eventMessage.getEventId(), eventMessage.getTopic(), result, eventContent, table);
         } else {
             sqlOrder = generateSystemSqlOrder(rule.getBrokerId(), rule.getGroupId(), eventMessage.getEventId(), eventMessage.getTopic(), result);
@@ -284,10 +285,10 @@ public class CommonUtil {
 
 
     public static String setWeEventContent(String brokerId, String groupId, WeEvent eventMessage, String
-            selectField, String payload) throws IOException {
+            selectField, String payload) throws BrokerException {
         String content = new String(eventMessage.getContent());
-        Map eventContent = JsonUtil.parseObject(content, Map.class);
-        Map<String, Object> payloadContent = JsonUtil.parseObjectToMap(payload);
+        Map eventContent = JsonHelper.json2Object(content, Map.class);
+        Map<String, Object> payloadContent = JsonHelper.object2Map(payload);
 
         // match the table
         Map<String, Object> iftttContent = new HashMap<>();
@@ -389,7 +390,7 @@ public class CommonUtil {
         // get all select field and value, and the select field must in eventContent, except the system parameter.
         for (String key : result) {
             sql.put(key, null);
-            if (eventContent.containsKey(key)) {
+            if (eventContent != null && eventContent.containsKey(key)) {
                 sql.put(key, eventContent.get(key).toString());
             }
             tags = setFlag(tags, key);

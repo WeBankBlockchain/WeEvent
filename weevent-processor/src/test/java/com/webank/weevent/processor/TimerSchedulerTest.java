@@ -2,7 +2,7 @@ package com.webank.weevent.processor;
 
 
 import com.webank.weevent.processor.model.TimerScheduler;
-import com.webank.weevent.processor.utils.JsonUtil;
+import com.webank.weevent.sdk.JsonHelper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -44,7 +44,7 @@ public class TimerSchedulerTest {
 
     @Test
     public void testInsertNormal001() throws Exception {
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(timerScheduler));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
     }
@@ -52,7 +52,7 @@ public class TimerSchedulerTest {
     @Test
     public void testInsertNormal002() throws Exception {
         timerScheduler.setSchedulerName("test2");
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(timerScheduler));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
     }
@@ -61,7 +61,7 @@ public class TimerSchedulerTest {
     @Test
     public void testInsertException001() throws Exception {
         timerScheduler.setPeriodParams(null);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(timerScheduler));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(400, result.getResponse().getStatus());
     }
@@ -69,7 +69,7 @@ public class TimerSchedulerTest {
     @Test
     public void testInsertException002() throws Exception {
         timerScheduler.setSchedulerName(null);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(timerScheduler));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(400, result.getResponse().getStatus());
     }
@@ -79,7 +79,7 @@ public class TimerSchedulerTest {
         timerScheduler.setSchedulerName("test111");
         testInsertNormal001();
         url = "/timerScheduler/update";
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(timerScheduler));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
     }
@@ -89,7 +89,7 @@ public class TimerSchedulerTest {
         timerScheduler.setSchedulerName("test2");
         testInsertNormal001();
         url = "/timerScheduler/update";
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(timerScheduler));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
     }
@@ -99,7 +99,7 @@ public class TimerSchedulerTest {
     public void testUpdateException001() throws Exception {
         timerScheduler.setSchedulerName(null);
         url = "/timerScheduler/update";
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(timerScheduler));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(400, result.getResponse().getStatus());
     }
@@ -108,14 +108,14 @@ public class TimerSchedulerTest {
     public void testUpdateException002() throws Exception {
         timerScheduler.setPeriodParams(null);
         url = "/timerScheduler/update";
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(timerScheduler));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(400, result.getResponse().getStatus());
     }
 
     public void testDeleteNormal() throws Exception {
         url = "/timerScheduler/delete";
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(timerScheduler));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(timerScheduler));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
     }
