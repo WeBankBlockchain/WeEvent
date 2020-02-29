@@ -1,11 +1,11 @@
 package com.webank.weevent.processor.utils;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
+import com.webank.weevent.sdk.JsonHelper;
 
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
@@ -41,14 +41,18 @@ public class SystemFunctionUtil {
     }
 
     public static String analysisSystemFunction(String[][] systemFunctionMessage, String payload, String
-            conditionField) throws IOException {
+            conditionField) {
 
-        Map maps = JsonUtil.parseObjectToMap(payload);
+        Map maps = JsonHelper.object2Map(payload);
         Map<String, Object> payloadMap = new ConcurrentHashMap<>();
-        for (Object map : maps.entrySet()) {
-            payloadMap.put((String) ((Map.Entry) map).getKey(), ((Map.Entry) map).getValue());
+        if (maps != null) {
+            for (Object map : maps.entrySet()) {
+                payloadMap.put((String) ((Map.Entry) map).getKey(), ((Map.Entry) map).getValue());
+            }
+            return replaceCondition(systemFunctionMessage, conditionField, payloadMap);
+        } else {
+            return null;
         }
-        return replaceCondition(systemFunctionMessage, conditionField, payloadMap);
     }
 
     public static boolean isDouble(String str) {
