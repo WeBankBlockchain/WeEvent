@@ -1,9 +1,9 @@
 package com.webank.weevent.robust.service;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 
+import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -22,12 +22,12 @@ public class MqttBridge implements MessageHandler {
         Object payload = message.getPayload();
         Map map = null;
         try {
-            map = JsonHelper.getObjectMapper().readValue(payload.toString(), Map.class);
-        } catch (IOException e) {
+            map = JsonHelper.json2Object(payload.toString(), Map.class);
+        } catch (BrokerException e) {
             log.error("json conversion failed", e);
             e.printStackTrace();
         }
-        if (map.get("eventId") != null) {
+        if (map != null && map.get("eventId") != null) {
             String eventId = map.get("eventId").toString();
             log.info("mqtt receive success.topic {}, eventId: {},countMqtt:{}", map.get("topic"), eventId, countMqtt++);
             ScheduledService.countTimes(ScheduledService.getMqttReceiveMap(), DateFormatUtils.format(new Date(), "yyyy-MM-dd HH"));
