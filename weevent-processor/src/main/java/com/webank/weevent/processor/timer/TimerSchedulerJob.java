@@ -9,7 +9,7 @@ import java.util.Map;
 
 import com.webank.weevent.processor.model.TimerScheduler;
 import com.webank.weevent.processor.utils.CommonUtil;
-import com.webank.weevent.processor.utils.JsonUtil;
+import com.webank.weevent.sdk.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
@@ -40,7 +40,7 @@ public class TimerSchedulerJob implements Job {
                 log.info("{}",  obj);
                 TimerScheduler timerScheduler = (TimerScheduler) obj;
                 // check the status,when the status equal 1,then update
-                log.info("execute  task: {},rule:{}", taskName, JsonUtil.toJSONString(timerScheduler));
+                log.info("execute  task: {},rule:{}", taskName, JsonHelper.object2Json(timerScheduler));
                 runTask(timerScheduler);
                 timerMap.put(timerScheduler.getSchedulerName(), timerScheduler);
             }
