@@ -21,7 +21,8 @@ import com.webank.weevent.governance.entity.TopicEntity;
 import com.webank.weevent.governance.entity.TopicPage;
 import com.webank.weevent.governance.entity.TopicPageEntity;
 import com.webank.weevent.governance.repository.TopicRepository;
-import com.webank.weevent.governance.utils.JsonUtil;
+import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -76,7 +77,7 @@ public class TopicService {
             CloseableHttpResponse closeResponse = client.execute(get);
             String mes = EntityUtils.toString(closeResponse.getEntity());
             topicRepository.deleteTopicInfo(topic, new Date().getTime(), brokerId, groupId);
-            return JsonUtil.parseObject(mes, Boolean.class);
+            return JsonHelper.json2Object(mes, Boolean.class);
         } catch (Exception e) {
             log.error("close topic fail,topic :{},error:{}", topic, e.getMessage());
             throw new GovernanceException("close topic fail", e);
@@ -113,7 +114,7 @@ public class TopicService {
         try {
             CloseableHttpResponse closeResponse = client.execute(get);
             String mes = EntityUtils.toString(closeResponse.getEntity());
-            result = JsonUtil.parseObject(mes, TopicPage.class);
+            result = JsonHelper.json2Object(mes, TopicPage.class);
             if (result == null || CollectionUtils.isEmpty(result.getTopicInfoList())) {
                 return result;
             }
@@ -163,7 +164,7 @@ public class TopicService {
             HttpGet get = commonService.getMethod(url, request);
             CloseableHttpResponse closeResponse = client.execute(get);
             String mes = EntityUtils.toString(closeResponse.getEntity());
-            TopicEntity result = JsonUtil.parseObject(mes, TopicEntity.class);
+            TopicEntity result = JsonHelper.json2Object(mes, TopicEntity.class);
             if (result != null) {
                 // get creator from database
                 List<TopicEntity> creators = topicRepository.findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(brokerId, groupId, new ArrayList<>(Collections.singletonList(topic)), ConstantProperties.NOT_DELETED);
@@ -242,12 +243,11 @@ public class TopicService {
             throw new GovernanceException(ErrorCode.BROKER_CONNECT_ERROR);
         }
         try {
-            return JsonUtil.parseObject(mes, Boolean.class);
-        } catch (Exception e) {
+            return JsonHelper.json2Object(mes, Boolean.class);
+        } catch (BrokerException e) {
             log.error("parse json fail,error:{}", e.getMessage());
-            Map result = JsonUtil.parseObject(mes, Map.class);
-            throw new GovernanceException((Integer) (result.get("code")), result.get("message").toString());
         }
+        return false;
     }
 
 
