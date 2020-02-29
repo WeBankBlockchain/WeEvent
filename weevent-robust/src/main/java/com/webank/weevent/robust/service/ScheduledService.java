@@ -290,12 +290,12 @@ public class ScheduledService implements AutoCloseable {
                         }
                         Map map = null;
                         try {
-                            map = JsonHelper.getObjectMapper().readValue(payload.toString(), Map.class);
-                        } catch (IOException e) {
+                            map = JsonHelper.json2Object(payload.toString(), Map.class);
+                        } catch (BrokerException e) {
                             log.error("json conversion failed", e);
                             e.printStackTrace();
                         }
-                        if (map.get(EVENT_ID) != null) {
+                        if (map != null && map.get(EVENT_ID) != null) {
                             String eventId = map.get("eventId").toString();
                             topicSubscribeMap.put(EVENT_ID, eventId);
                             log.info("stomp  eventId: {},countStomp:{}", eventId, countStomp++);
