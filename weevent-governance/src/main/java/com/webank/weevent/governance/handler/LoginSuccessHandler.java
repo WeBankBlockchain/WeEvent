@@ -13,10 +13,10 @@ import com.webank.weevent.governance.common.ConstantCode;
 import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.entity.BaseResponse;
 import com.webank.weevent.governance.service.AccountService;
-import com.webank.weevent.governance.utils.JsonUtil;
 import com.webank.weevent.governance.utils.JwtUtils;
+import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.JsonHelper;
 
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -45,10 +45,14 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         rsp.put("username", accountEntity.getUsername());
         //return
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
-        baseResponse.setData(JsonUtil.toJSONString(rsp));
-        baseResponse.setMessage("success");
-        log.debug("login backInfo:{}", JsonUtil.toJSONString(baseResponse));
-        response.getWriter().write(JsonUtil.toJSONString(baseResponse));
+        try {
+            baseResponse.setData(JsonHelper.object2Json(rsp));
+            baseResponse.setMessage("success");
+            log.debug("login backInfo:{}", JsonHelper.object2Json(baseResponse));
+            response.getWriter().write(JsonHelper.object2Json(baseResponse));
+        } catch (BrokerException e) {
+            log.error("Code: " + e.getCode() + ", " + e.getMessage());
+        }
     }
 
 }

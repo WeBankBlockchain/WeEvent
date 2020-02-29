@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.processor.model.CEPRule;
+import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
@@ -65,7 +66,7 @@ public class DataBaseUtil {
                     }
                 }
             }
-        } catch (SQLException | IOException e) {
+        } catch (SQLException | BrokerException e) {
             //statisticWeEvent.getStatisticRuleMap().get(rule.getId()).setLastFailReason(e.toString());
             log.info(e.toString());
             return ConstantsHelper.LAST_FAIL_REASON;
