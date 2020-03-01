@@ -52,7 +52,7 @@ public class CommonUtil {
             } else {
                 BasicDataSource ds = new BasicDataSource();
                 dsMap.put(databaseUrl, ds);
-                if("h2".equals(databaseType)){
+                if("1".equals(databaseType)){
                     ds.setDriverClassName("org.h2.Driver");
                 }else {
                     ds.setDriverClassName("org.mariadb.jdbc.Driver");
