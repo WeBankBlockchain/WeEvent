@@ -33,7 +33,7 @@
           <stringProp name="path">/weevent/sockjs/089/2mrus2y5/websocket</stringProp>
           <stringProp name="connectTimeout">20000</stringProp>
           <boolProp name="binaryPayload">false</boolProp>
-          <stringProp name="requestData">[&quot;SEND\ndestination:com.webank.weevent\ncontent-length:5\n\n88888\u0000&quot;]</stringProp>
+          <stringProp name="requestData">[&quot;SEND\ndestination:com.weevent.test\ncontent-length:5\n\n88888\u0000&quot;]</stringProp>
           <stringProp name="readTimeout">6000</stringProp>
           <boolProp name="loadDataFromFile">false</boolProp>
           <stringProp name="dataFile"></stringProp>
@@ -250,7 +250,7 @@
             <collectionProp name="Arguments.arguments">
               <elementProp name="topic" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">true</boolProp>
-                <stringProp name="Argument.value">com.webank.weevent</stringProp>
+                <stringProp name="Argument.value">com.weevent.test</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
                 <boolProp name="HTTPArgument.use_equals">true</boolProp>
                 <stringProp name="Argument.name">topic</stringProp>
@@ -551,7 +551,7 @@
           <stringProp name="path">/weevent/sockjs/089/2mrus2y5/websocket</stringProp>
           <stringProp name="connectTimeout">20000</stringProp>
           <boolProp name="binaryPayload">false</boolProp>
-          <stringProp name="requestData">[&quot;SUBSCRIBE\nid:5258003a-8cfd-4c9d-85f1-b7923f80f259\ndestination:com.webank.weevent\n\n\u0000&quot;]</stringProp>
+          <stringProp name="requestData">[&quot;SUBSCRIBE\nid:5258003a-8cfd-4c9d-85f1-b7923f80f259\ndestination:com.weevent.test\n\n\u0000&quot;]</stringProp>
           <stringProp name="readTimeout">6000</stringProp>
           <boolProp name="loadDataFromFile">false</boolProp>
           <stringProp name="dataFile"></stringProp>

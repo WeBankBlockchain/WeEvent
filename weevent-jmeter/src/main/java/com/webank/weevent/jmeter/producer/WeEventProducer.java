@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 
 
 public class WeEventProducer extends AbstractJavaSamplerClient {
-    private String topic = "com.webank.weevent.jmeter";
+    private String topic = "com.weevent.test.jmeter";
     private int size = 1;
     private String format = "json";
 

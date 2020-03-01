@@ -42,11 +42,11 @@ public class ServiceTest {
         rule.setId("1111");
         rule.setRuleName("test");
         rule.setBrokerId("1");
-        rule.setFromDestination("from.com.webank.weevent");
+        rule.setFromDestination("from.com.weevent.test");
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
         rule.setConditionField("abs(a)<21 or floor(c)>10");
-        rule.setToDestination("to.com.webank.weevent");
+        rule.setToDestination("to.com.weevent.test");
         rule.setDatabaseUrl("jdbc:mysql://127.0.0.1:3306/fromIfttt?user=root&password=111111");
         rule.setBrokerUrl("http://"+brokerUrl+"/weevent");
         rule.setCreatedTime(new Date());
@@ -169,11 +169,11 @@ public class ServiceTest {
     @Test
     public void absHitRule() throws Exception {
         String arr = "[[\"0\", \"6\", \"floor\", \"c\"]]";
-        rule.setFromDestination("from.com.webank.weevent");
+        rule.setFromDestination("from.com.weevent.test");
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
         rule.setConditionField("abs(c)<10");
-        rule.setToDestination("to.com.webank.weevent");
+        rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
@@ -233,11 +233,11 @@ public class ServiceTest {
     @Test
     public void multiHitRule() throws Exception {
         String arr ="[[\"0\",\"8\", \"abs\",\"age\"]]";
-        rule.setFromDestination("from.com.webank.weevent");
+        rule.setFromDestination("from.com.weevent.test");
         rule.setPayload("{\"age\":1,\"name\":\"rocky\"}");
         rule.setSelectField("age,name,eventId,topicName,brokerId,groupId");
         rule.setConditionField("abs(age)>20 and name!=\"name\"");
-        rule.setToDestination("to.com.webank.weevent");
+        rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
         rule.setId("202002101213");
@@ -251,11 +251,11 @@ public class ServiceTest {
     public void multiHitRule2() throws Exception {
         String url1 = "/statistic";
         String arr ="[[\"0\",\"9\",\"ceil\",\"age\"]]";
-        rule.setFromDestination("from.com.webank.weevent");
+        rule.setFromDestination("from.com.weevent.test");
         rule.setPayload("{\"age\":1,\"name\":\"rocky\"}");
         rule.setSelectField("age,name,eventId,topicName,brokerId,groupId");
         rule.setConditionField("ceil(age)>=20 and (age<=40 and name!=\"mark\")");
-        rule.setToDestination("to.com.webank.weevent");
+        rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
         rule.setId("202002101213");
@@ -269,11 +269,11 @@ public class ServiceTest {
         log.info("result:{}", result5);
         assertEquals(200, result5.getResponse().getStatus());
 
-        rule.setFromDestination("from.com.webank.weevent");
+        rule.setFromDestination("from.com.weevent.test");
         rule.setPayload("{\"age\":1,\"name\":\"rocky\"}");
         rule.setSelectField("age,name,eventId,topicName,brokerId,groupId");
         rule.setConditionField("ceil(age)>=20 and (age<=40 and name!=\"mark\")");
-        rule.setToDestination("to.com.webank.weevent");
+        rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
         rule.setId("202002101214");
@@ -304,11 +304,11 @@ public class ServiceTest {
     @Test
     public void multiHitRule3() throws Exception {
         String arr ="[[\"0\",\"6\", \"abs\",\"a\"]]";
-        rule.setFromDestination("from.com.webank.weevent");
+        rule.setFromDestination("from.com.weevent.test");
         rule.setPayload("{\"a\":1,\"b\":\"rocky\"}");
         rule.setSelectField("a,b,eventId,topicName,brokerId,groupId");
         rule.setConditionField("abs(a)>20");
-        rule.setToDestination("to.com.webank.weevent");
+        rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
         rule.setId("202002101216");
@@ -324,11 +324,11 @@ public class ServiceTest {
         String arr = "[[\"10\",\"13\",\"now\",\"datatime\"]]";
         String url = "/startCEPRule";
         rule.setId("110000");
-        rule.setFromDestination("from.com.webank.weevent");
+        rule.setFromDestination("from.com.weevent.test");
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"datatime\":\"2018-06-30 20:00:00\"}");
         rule.setSelectField("a,eventId,currentDate");
         rule.setConditionField("datatime<=now");
-        rule.setToDestination("to.com.webank.weevent");
+        rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));

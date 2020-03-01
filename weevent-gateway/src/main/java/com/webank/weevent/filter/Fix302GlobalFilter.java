@@ -50,7 +50,7 @@ public class Fix302GlobalFilter implements GlobalFilter, Ordered {
                                 }
                             });
 
-                            log.info("FIND 301/302 redirect request {}, FIX location {} -> {}", requestUri, location, newLocation);
+                            log.info("301/302 redirect in R: {}, FIX location {} -> {}", requestUri, location, newLocation);
                         }
                         break;
 

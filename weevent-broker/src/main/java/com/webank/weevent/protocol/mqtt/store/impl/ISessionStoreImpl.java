@@ -15,35 +15,25 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class ISessionStoreImpl implements ISessionStore {
-    private Map<String, SessionStore> sessionCache = new ConcurrentHashMap<String, SessionStore>();
+    private Map<String, SessionStore> sessionCache = new ConcurrentHashMap<>();
 
     @Override
     public void put(String clientId, SessionStore sessionStore) {
-        if (null != sessionStore) {
-            sessionCache.put(clientId, sessionStore);
-        }
+        this.sessionCache.put(clientId, sessionStore);
     }
 
     @Override
     public SessionStore get(String clientId) {
-        if (null != sessionCache) {
-            return sessionCache.get(clientId);
-        }
-        return null;
+        return this.sessionCache.get(clientId);
     }
 
     @Override
     public boolean containsKey(String clientId) {
-        if (null != sessionCache) {
-            return sessionCache.containsKey(clientId);
-        }
-        return false;
+        return this.sessionCache.containsKey(clientId);
     }
 
     @Override
     public void remove(String clientId) {
-        if (null != sessionCache) {
-            sessionCache.remove(clientId);
-        }
+        this.sessionCache.remove(clientId);
     }
 }
