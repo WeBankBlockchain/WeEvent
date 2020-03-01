@@ -25,7 +25,7 @@ public class WeEventClientGroupIdTest {
     @Rule
     public TestName testName = new TestName();
 
-    private String topicName = "com.webank.weevent";
+    private String topicName = "com.weevent.test";
 
     private IWeEventClient weEventClient;
 
@@ -197,7 +197,7 @@ public class WeEventClientGroupIdTest {
     @Test
     public void testSubscribeWildCard() throws Exception {
         // create subscriber
-        String subscriptionId = this.weEventClient.subscribe("com.webank.weevent/#", WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
+        String subscriptionId = this.weEventClient.subscribe("com.weevent.test/#", WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
                 log.info(event.toString());
