@@ -43,11 +43,11 @@ public class ConditionTest {
         rule.setId("1111");
         rule.setRuleName("test");
         rule.setBrokerId("1");
-        rule.setFromDestination("from.com.webank.weevent");
+        rule.setFromDestination("from.com.weevent.test");
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
         rule.setConditionField("abs(a)<21 or floor(c)>10");
-        rule.setToDestination("to.com.webank.weevent");
+        rule.setToDestination("to.com.weevent.test");
         rule.setDatabaseUrl("jdbc:mysql://127.0.0.1:3306/fromIfttt?user=root&password=111111");
         rule.setBrokerUrl("http://" + brokerUrl + "/weevent");
         rule.setCreatedTime(new Date());
@@ -366,11 +366,11 @@ public class ConditionTest {
     @Test
     public void conditionConplexToDB() throws Exception {
         String arr = "";
-        rule.setFromDestination("from.com.webank.weevent");
+        rule.setFromDestination("from.com.weevent.test");
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
         rule.setConditionField("c==10 or a>10 or a<1");
-        rule.setToDestination("to.com.webank.weevent");
+        rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
@@ -382,11 +382,11 @@ public class ConditionTest {
     @Test
     public void conditionConplexToDB2() throws Exception {
         String arr = "";
-        rule.setFromDestination("from.com.webank.weevent");
+        rule.setFromDestination("from.com.weevent.test");
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
         rule.setConditionField("c==10 and a>10");
-        rule.setToDestination("to.com.webank.weevent");
+        rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
@@ -398,11 +398,11 @@ public class ConditionTest {
     @Test
     public void nowSystemToDB() throws Exception {
         String arr = "";
-        rule.setFromDestination("from.com.webank.weevent");
+        rule.setFromDestination("from.com.weevent.test");
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,now");
         rule.setConditionField("c==10 and a>10");
-        rule.setToDestination("to.com.webank.weevent");
+        rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
@@ -415,11 +415,11 @@ public class ConditionTest {
     public void currentDateSystemToTopic() throws Exception {
         String arr = "";
         String url = "/startCEPRule";
-        rule.setFromDestination("from.com.webank.weevent");
+        rule.setFromDestination("from.com.weevent.test");
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,currentDate");
         rule.setConditionField("c==10 and a>10");
-        rule.setToDestination("to.com.webank.weevent");
+        rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
@@ -432,11 +432,11 @@ public class ConditionTest {
     public void currentTimeSystemToDB() throws Exception {
         String arr = "";
         String url = "/startCEPRule";
-        rule.setFromDestination("from.com.webank.weevent");
+        rule.setFromDestination("from.com.weevent.test");
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,currentTime");
         rule.setConditionField("c==10 and a>10");
-        rule.setToDestination("to.com.webank.weevent");
+        rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
@@ -451,11 +451,11 @@ public class ConditionTest {
         String arr = "[[\"10\",\"21\",\"currentDate\",\"datatime\"]]";
         String url = "/startCEPRule";
         rule.setId("110000");
-        rule.setFromDestination("from.com.webank.weevent");
+        rule.setFromDestination("from.com.weevent.test");
         rule.setPayload("{\"age\":1,\"name\":\"test\",\"datatime\":20200210}");
         rule.setSelectField("a,eventId,currentDate");
         rule.setConditionField("datatime>=currentDate");
-        rule.setToDestination("to.com.webank.weevent");
+        rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
@@ -469,11 +469,11 @@ public class ConditionTest {
         String arr = "[[\"11\",\"22\",\"currentTime\",\"datatime1\"]]";
         String url = "/startCEPRule";
         rule.setId("110000");
-        rule.setFromDestination("from.com.webank.weevent");
+        rule.setFromDestination("from.com.weevent.test");
         rule.setPayload("{\"age\":1,\"name\":\"test\",\"datatime1\":20200210}");
         rule.setSelectField("a,eventId,currentDate");
         rule.setConditionField("datatime1>=currentTime");
-        rule.setToDestination("to.com.webank.weevent");
+        rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
@@ -487,11 +487,11 @@ public class ConditionTest {
     public void systemParameterToDB() throws Exception {
         String arr = "";
         String url = "/startCEPRule";
-        rule.setFromDestination("from.com.webank.weevent");
+        rule.setFromDestination("from.com.weevent.test");
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,topicName,brokerId,groupId,now,currentDate,currentTime");
         rule.setConditionField("c==10 and a>10");
-        rule.setToDestination("to.com.webank.weevent");
+        rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
@@ -513,11 +513,11 @@ public class ConditionTest {
     @Test
     public void absHitRule() throws Exception {
         String arr = "[[\"0\", \"6\", \"floor\", \"c\"]]";
-        rule.setFromDestination("from.com.webank.weevent");
+        rule.setFromDestination("from.com.weevent.test");
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
         rule.setConditionField("abs(c)<10");
-        rule.setToDestination("to.com.webank.weevent");
+        rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
@@ -530,11 +530,11 @@ public class ConditionTest {
     public void ceilHitRule() throws Exception {
         String arr = "[[\"0\", \"7\", \"floor\", \"c\"]]";
         String url = "/startCEPRule";
-        rule.setFromDestination("from.com.webank.weevent");
+        rule.setFromDestination("from.com.weevent.test");
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
         rule.setConditionField("ceil(c)<10");
-        rule.setToDestination("to.com.webank.weevent");
+        rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
@@ -549,11 +549,11 @@ public class ConditionTest {
         rule.setId("1111");
         rule.setRuleName("test");
         rule.setBrokerId("1");
-        rule.setFromDestination("from.com.webank.weevent");
+        rule.setFromDestination("from.com.weevent.test");
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,topicName,brokerId,groupId");
         rule.setConditionField("floor(c)<10");
-        rule.setToDestination("to.com.webank.weevent");
+        rule.setToDestination("to.com.weevent.test");
         rule.setCreatedTime(new Date());
         rule.setStatus(1);
         rule.setUserId("1");
@@ -616,11 +616,11 @@ public class ConditionTest {
     @Test
     public void deleteTheRule() throws Exception {
         String arr = "";
-        rule.setFromDestination("from.com.webank.weevent");
+        rule.setFromDestination("from.com.weevent.test");
         rule.setPayload("{\"a\":1,\"b\":\"test\",\"c\":10}");
         rule.setSelectField("a,eventId,topicName,brokerId,groupId,now,currentDate,currentTime");
         rule.setConditionField("c==10 and a>10");
-        rule.setToDestination("to.com.webank.weevent");
+        rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
         RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
