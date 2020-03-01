@@ -92,18 +92,6 @@ public class TimerSchedulerService {
         }
     }
 
-    public void updateTimerScheduler(TimerSchedulerEntity timerSchedulerEntity, HttpServletRequest request, HttpServletResponse response) throws GovernanceException {
-        try {
-            //check params
-            timerSchedulerEntity.setLastUpdate(new Date());
-            this.updateTimerScheduler(request, timerSchedulerEntity);
-            timerSchedulerRepository.save(timerSchedulerEntity);
-        } catch (Exception e) {
-            log.info("update timerScheduler failed", e);
-            throw new GovernanceException("update timerScheduler failed", e);
-        }
-    }
-
     @SuppressWarnings("unchecked")
     private void insertTimerScheduler(HttpServletRequest request, TimerSchedulerEntity timerSchedulerEntity) throws GovernanceException {
         try {
@@ -137,6 +125,18 @@ public class TimerSchedulerService {
             throw new GovernanceException("processor insert timerScheduler fail", e);
         }
 
+    }
+
+    public void updateTimerScheduler(TimerSchedulerEntity timerSchedulerEntity, HttpServletRequest request, HttpServletResponse response) throws GovernanceException {
+        try {
+            //check params
+            timerSchedulerEntity.setLastUpdate(new Date());
+            this.updateTimerScheduler(request, timerSchedulerEntity);
+            timerSchedulerRepository.save(timerSchedulerEntity);
+        } catch (Exception e) {
+            log.info("update timerScheduler failed", e);
+            throw new GovernanceException("update timerScheduler failed", e);
+        }
     }
 
     @SuppressWarnings("unchecked")
