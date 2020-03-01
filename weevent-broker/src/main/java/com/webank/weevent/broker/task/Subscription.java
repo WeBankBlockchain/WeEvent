@@ -358,8 +358,8 @@ public class Subscription {
      * check is topic name matched the input pattern.
      * see MQTT specification http://public.dhe.ibm.com/software/dw/webservices/ws-mqtt/mqtt-v3r1.html.
      * notice:
-     * "com/webank/weevent/" is invalid
-     * "com/webank/weevent" is different from "/com.webank/weevent"
+     * "com/weevent/test" is invalid
+     * "com/weevent/test" is different from "/com/weevent/test"
      *
      * @param topic topic name
      * @param pattern mqtt pattern with wildcard
