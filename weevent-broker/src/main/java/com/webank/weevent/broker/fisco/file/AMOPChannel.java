@@ -3,6 +3,7 @@ package com.webank.weevent.broker.fisco.file;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.broker.fisco.util.DataTypeUtils;
@@ -32,8 +33,8 @@ public class AMOPChannel extends ChannelPushCallback {
     private final FileTransportService fileTransportService;
     private final Service service;
 
-    // topic <-> ready status, used by sender
-    private Map<String, Boolean> senderTopicStatus = new ConcurrentHashMap<>();
+    // topic <-> fileId list status cache, used by sender
+    private Map<String, Set<String>> senderFileIdStatus = new ConcurrentHashMap<>();
     // topic <-> ready status, used by receiver
     private Map<String, Boolean> subTopics = new ConcurrentHashMap<>();
 
@@ -56,7 +57,7 @@ public class AMOPChannel extends ChannelPushCallback {
     }
 
     public void subTopic(String topic) throws BrokerException {
-        if (this.senderTopicStatus.containsKey(topic)) {
+        if (this.senderFileIdStatus.containsKey(topic)) {
             log.error("this is already sender side for topic: {}", topic);
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
         }
@@ -86,22 +87,23 @@ public class AMOPChannel extends ChannelPushCallback {
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
         }
 
-        if (this.senderTopicStatus.containsKey(topic) &&
-                this.senderTopicStatus.get(topic)) {
+        if (this.senderFileIdStatus.containsKey(topic) &&
+                this.senderFileIdStatus.get(topic).contains(fileId)) {
             return true;
         }
 
         int times = 0;
+        boolean status = false;
         while (times < 5) {
             ChannelResponse rsp = this.sendEvent(topic, new FileEvent(FileEvent.EventType.FileChannelAlready, fileId));
             if (rsp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
                 log.info("receive file context is ready, go");
-                this.senderTopicStatus.put(topic, true);
-                return true;
+                status = true;
+                break;
             } else if (rsp.getErrorCode() == ErrorCode.FILE_NOT_EXIST_CONTEXT.getCode()) {
-                log.info("receive file context is not exist, skip");
-                this.senderTopicStatus.put(topic, false);
-                return true;
+                log.info("receive file context is not exist");
+                status = false;
+                break;
             }
 
             log.error("receive file context is not ready, idle to try again");
@@ -109,12 +111,23 @@ public class AMOPChannel extends ChannelPushCallback {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 log.error("sleep Interrupted");
+                break;
             }
             times++;
         }
 
-        this.senderTopicStatus.put(topic, false);
-        return false;
+        if (status) {
+            Set<String> fileIds;
+            if (this.senderFileIdStatus.containsKey(topic)) {
+                fileIds = this.senderFileIdStatus.get(topic);
+            } else {
+                fileIds = new HashSet<>();
+                this.senderFileIdStatus.put(topic, fileIds);
+            }
+            fileIds.add(fileId);
+        }
+
+        return status;
     }
 
     public ChannelResponse sendEvent(String topic, FileEvent fileEvent) throws BrokerException {
