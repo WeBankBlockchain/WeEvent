@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.webank.weevent.broker.fisco.util.DataTypeUtils;
+import com.webank.weevent.core.fisco.util.DataTypeUtils;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.FileChunksMeta;

@@ -19,20 +19,17 @@ import org.springframework.stereotype.Component;
 @Component
 @PropertySource(value = "classpath:weevent.properties", encoding = "UTF-8")
 public class WeEventConfig {
-    @Value("${ip.check.white-table:}")
-    private String ipWhiteTable;
+    @Value("${ip.check.white-list:}")
+    private String ipWhiteList;
 
     @Value("${lru.cache.capacity:65536}")
     private Integer maxCapacity;
 
-    @Value("${cgi.subscribe.notify.timeout:5000}")
-    private Integer cgi_notify_timeout;
-
-    @Value("${broker.blockchain.type}")
-    private String blockChainType;
-
     @Value("${stomp.heartbeats:30}")
     private Integer stompHeartbeats;
+
+    @Value("${stomp.timeout:10}")
+    private Integer stompTimeout;
 
     @Value("${mqtt.broker.port:7001}")
     private Integer mqttPort;
