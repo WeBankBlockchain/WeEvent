@@ -1,13 +1,15 @@
 package com.webank.weevent.governance.common;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 @Slf4j
-@Data
+@Setter
+@Getter
 @Component
 @PropertySource(value = "classpath:governance.properties", encoding = "UTF-8")
 public class GovernanceConfig {
