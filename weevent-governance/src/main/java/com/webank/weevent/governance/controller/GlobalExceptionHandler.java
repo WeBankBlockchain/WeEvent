@@ -4,13 +4,15 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.webank.weevent.governance.common.GovernanceException;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 
-@Data
+@Getter
+@Setter
 class SimpleException {
     /**
      * Error code.

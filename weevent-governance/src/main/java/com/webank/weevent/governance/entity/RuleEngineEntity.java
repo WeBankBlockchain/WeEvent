@@ -10,15 +10,17 @@ import javax.persistence.UniqueConstraint;
 
 import com.webank.weevent.governance.entity.base.RuleEngineBase;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * RuleEngineEntity class
  *
  * @since 2019/09/23
  */
-@Data
+@Setter
+@Getter
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "t_rule_engine",
