@@ -33,6 +33,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.boot.web.servlet.ServletComponentScan;
@@ -89,7 +90,6 @@ public class GovernanceApplication {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "https", name = "read-timeout", havingValue = "3000")
     public ClientHttpRequestFactory httpsClientRequestFactory(GovernanceConfig config) {
         HttpsClientRequestFactory factory = new HttpsClientRequestFactory();
         factory.setReadTimeout(config.getReadTimeout());// ms
@@ -107,7 +107,6 @@ public class GovernanceApplication {
 
     @Scope("prototype")
     @Bean("httpClient")
-    @ConditionalOnProperty(prefix = "http", name = "connect-timeout", havingValue = "3000")
     public CloseableHttpClient getHttpClient(GovernanceConfig config) {
         /**
          * config connect parameter
@@ -122,22 +121,6 @@ public class GovernanceApplication {
         return httpClient;
     }
 
-    @Scope("prototype")
-    @Bean("httpsClient")
-    @ConditionalOnProperty(prefix = "https", name = "connect-timeout", havingValue = "3000")
-    public CloseableHttpClient getHttpsClient(GovernanceConfig config) {
-        RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(config.getConnectionRequestTimeout())
-                .setConnectTimeout(config.getConnectTimeOut()).setSocketTimeout(config.getSocketTimeout()).build();
-
-        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-                .register("http", PlainConnectionSocketFactory.INSTANCE).register("https", trustAllHttpsCertificates())
-                .build();
-        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(
-                socketFactoryRegistry);
-        CloseableHttpClient httpsClient = HttpClients.custom().setConnectionManager(connectionManager)
-                .setDefaultRequestConfig(requestConfig).setRetryHandler(retryHandler).build();
-        return httpsClient;
-    }
 
     /**
      * reconnet str
