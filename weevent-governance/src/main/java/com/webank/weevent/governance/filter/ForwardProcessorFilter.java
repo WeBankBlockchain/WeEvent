@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 
 @Slf4j
-@WebFilter(urlPatterns = "/processor/*")
+@WebFilter(urlPatterns = "/weevent-processor/*")
 public class ForwardProcessorFilter implements Filter {
     private final static String processorServiceId = "weevent-processor";
 
@@ -45,7 +45,7 @@ public class ForwardProcessorFilter implements Filter {
         HttpServletResponse res = (HttpServletResponse) response;
         String originUrl = req.getRequestURI();
         // get tail of processor url
-        String subStrUrl = originUrl.substring(originUrl.indexOf("/processor/") + "/processor".length());
+        String subStrUrl = originUrl.substring(originUrl.indexOf("/weevent-processor/") + "/weevent-processor".length());
         // get complete forward processor url
         String uri = Utils.getUrlFromDiscovery(this.discoveryClient, processorServiceId);
         if (uri.isEmpty()) {
