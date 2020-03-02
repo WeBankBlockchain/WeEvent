@@ -1,6 +1,7 @@
 package com.webank.weevent.sdk;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Base wrapper fields in rest response. like:
@@ -13,7 +14,8 @@ import lombok.Data;
  * @author matthewliu
  * @since 2019/12/26
  */
-@Data
+@Getter
+@Setter
 public class BaseResponse<T> {
     private int code;
     private String message;

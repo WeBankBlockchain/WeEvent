@@ -9,8 +9,9 @@ import javax.persistence.UniqueConstraint;
 
 import com.webank.weevent.governance.entity.base.BrokerBase;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 /**
@@ -18,8 +19,9 @@ import lombok.ToString;
  *
  * @since 2019/04/28
  */
-@Data
 @EqualsAndHashCode(callSuper = false)
+@Setter
+@Getter
 @ToString
 @Entity
 @Table(name = "t_broker",
