@@ -10,15 +10,17 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * BaseEntity class
  *
  * @since 2019/10/15
  */
-@Data
+@Setter
+@Getter
 @EqualsAndHashCode(callSuper = false)
 @MappedSuperclass
 public class BaseEntity {
