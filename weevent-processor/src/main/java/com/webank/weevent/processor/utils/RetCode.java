@@ -1,8 +1,10 @@
 package com.webank.weevent.processor.utils;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Setter
+@Getter
 public class RetCode {
     private int errorCode;
     private String errorMsg;
