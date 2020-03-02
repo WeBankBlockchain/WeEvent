@@ -81,7 +81,7 @@ function set_global_param(){
 }
 
 function check_port(){
-    netstat_result=$(netstat -nap |grep "${1}")
+    netstat_result=$(netstat -nap |grep "${1}" |grep LISTEN)
     if [[ -z ${netstat_result} ]] || [[ ${netstat_result} != *${1}* ]];then
         echo "$1 port is okay"
     else
