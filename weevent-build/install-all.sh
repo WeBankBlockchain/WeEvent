@@ -81,8 +81,8 @@ function set_global_param(){
 }
 
 function check_port(){
-    lsof -i:${1}
-    if [[ $? -eq 1 ]];then
+    netstat_result=$(netstat -nap |grep "${1}")
+    if [[ -z ${netstat_result} ]] || [[ ${netstat_result} != *${1}* ]];then
         echo "$1 port is okay"
     else
         echo "$1 port is in used"
