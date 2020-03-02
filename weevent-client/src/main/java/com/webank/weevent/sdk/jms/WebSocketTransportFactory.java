@@ -11,7 +11,8 @@ import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEventClient;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -21,7 +22,8 @@ import lombok.extern.slf4j.Slf4j;
  * @since 2019/04/02
  */
 @Slf4j
-@Data
+@Getter
+@Setter
 public class WebSocketTransportFactory {
     private static int heartbeat = 30;
 
