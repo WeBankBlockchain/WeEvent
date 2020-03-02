@@ -9,7 +9,8 @@ import javax.jms.JMSException;
 import com.webank.weevent.sdk.ErrorCode;
 import com.webank.weevent.sdk.WeEvent;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.messaging.Message;
@@ -28,7 +29,8 @@ import org.springframework.util.MimeType;
  * @since 2019/04/11
  */
 @Slf4j
-@Data
+@Getter
+@Setter
 public class WeEventStompCommand {
     private final static String stompVersion = "1.1";
     private final static int stompHeartBeat = 30;

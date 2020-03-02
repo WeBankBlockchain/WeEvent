@@ -4,7 +4,7 @@ package com.webank.weevent.broker.fisco.file;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.webank.weevent.broker.plugin.IConsumer;
+import com.webank.weevent.core.IConsumer;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.FileChunksMeta;
 import com.webank.weevent.sdk.JsonHelper;
