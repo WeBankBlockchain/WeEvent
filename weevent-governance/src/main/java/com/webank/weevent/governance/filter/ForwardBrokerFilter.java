@@ -21,7 +21,7 @@ import org.jsoup.helper.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
-@WebFilter(urlPatterns = "/weevent/*")
+@WebFilter(urlPatterns = "/weevent-broker/*")
 public class ForwardBrokerFilter implements Filter {
 
     @Autowired
@@ -41,7 +41,7 @@ public class ForwardBrokerFilter implements Filter {
         String brokerUrl = req.getParameter("brokerUrl");
         String originUrl = req.getRequestURI();
         // get tail of brokerEntity url
-        String subStrUrl = originUrl.substring(originUrl.indexOf("/weevent/") + "/weevent".length());
+        String subStrUrl = originUrl.substring(originUrl.indexOf("/weevent-broker/") + "/weevent-broker".length());
         if (!StringUtil.isBlank(idStr) && StringUtil.isBlank(brokerUrl)) {
             Integer id = Integer.parseInt(idStr);
             BrokerEntity brokerEntity = brokerService.getBroker(id);
