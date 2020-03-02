@@ -2,7 +2,6 @@ package com.webank.weevent.filter;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +15,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 /**
@@ -38,28 +38,19 @@ public class Fix302GlobalFilter implements GlobalFilter, Ordered {
                         HttpHeaders headers = getHeaders();
                         String location = headers.getFirst(HttpHeaders.LOCATION);
                         if (!StringUtils.isEmpty(location)) {
-                            try {
-                                // replace scheme//host:port with original request's
-                                URI originalURI = URI.create(location);
-                                URI uri = new URI(requestUri.getScheme(),
-                                        originalURI.getUserInfo(),
-                                        requestUri.getHost(),
-                                        requestUri.getPort(),
-                                        originalURI.getPath(),
-                                        originalURI.getQuery(),
-                                        originalURI.getFragment());
-                                String newLocation = uri.toString();
-                                headers.put(HttpHeaders.LOCATION, new ArrayList<String>() {
-                                    {
-                                        add(newLocation);
-                                    }
-                                });
+                            UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromHttpUrl(location);
+                            // replace scheme//host:port with original request's
+                            uriComponentsBuilder.scheme(requestUri.getScheme())
+                                    .host(requestUri.getHost())
+                                    .port(requestUri.getPort());
+                            String newLocation = uriComponentsBuilder.build().toUri().toString();
+                            headers.put(HttpHeaders.LOCATION, new ArrayList<String>() {
+                                {
+                                    add(newLocation);
+                                }
+                            });
 
-                                log.info("FIND 301/302 redirect, request: {}, FIX location {} -> {}",
-                                        requestUri.toString(), location, newLocation);
-                            } catch (URISyntaxException e) {
-                                log.error("invalid uri format: {}", e.getMessage());
-                            }
+                            log.info("301/302 redirect in R: {}, FIX location {} -> {}", requestUri, location, newLocation);
                         }
                         break;
 
