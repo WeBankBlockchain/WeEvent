@@ -1,6 +1,8 @@
 package com.webank.weevent.sdk;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Publish function result.
@@ -9,7 +11,9 @@ import lombok.Data;
  * @author matthewliu
  * @since 2018/11/02
  */
-@Data
+@Getter
+@Setter
+@ToString
 public class SendResult {
     public enum SendResultStatus {
         SUCCESS,
