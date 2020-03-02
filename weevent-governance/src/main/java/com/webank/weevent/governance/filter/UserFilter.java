@@ -25,7 +25,7 @@ public class UserFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = request.getHeader(JwtUtils.AUTHORIZATION_HEADER_PREFIX);
-        String privateSecret = GovernanceApplication.environment.getProperty("jwt.private.secret");
+        String privateSecret = GovernanceApplication.governanceConfig.getPrivateSecret();
         if (!StringUtils.isBlank(token)) {
             JwtUtils.verifierToken(token, privateSecret);
             AccountEntity accountEntity = JwtUtils.decodeToken(token, privateSecret);
