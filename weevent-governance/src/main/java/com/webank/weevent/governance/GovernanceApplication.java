@@ -2,14 +2,8 @@ package com.webank.weevent.governance;
 
 import java.io.InterruptedIOException;
 import java.net.UnknownHostException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
 
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import com.webank.weevent.governance.common.GovernanceConfig;
 import com.webank.weevent.governance.utils.H2ServerUtil;
@@ -20,21 +14,13 @@ import org.apache.http.HttpRequest;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.config.Registry;
-import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -59,8 +45,6 @@ import org.springframework.web.servlet.DispatcherServlet;
 public class GovernanceApplication {
 
 
-    private PoolingHttpClientConnectionManager cm;
-
     public static Environment environment;
 
     public static GovernanceConfig governanceConfig;
@@ -71,11 +55,6 @@ public class GovernanceApplication {
         app.addListeners(new ApplicationPidFileWriter());
         app.run(args);
         log.info("Start Governance success");
-    }
-
-
-    public GovernanceApplication() {
-        cm = new PoolingHttpClientConnectionManager();
     }
 
 
@@ -111,6 +90,8 @@ public class GovernanceApplication {
         /**
          * config connect parameter
          */
+        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+
         RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(config.getConnectionRequestTimeout())
                 .setConnectTimeout(config.getHttpConnectTimeOut()).setSocketTimeout(config.getSocketTimeout()).build();
 
@@ -151,39 +132,6 @@ public class GovernanceApplication {
         HttpRequest request = clientContext.getRequest();
         return !(request instanceof HttpEntityEnclosingRequest);
     };
-
-    private SSLConnectionSocketFactory trustAllHttpsCertificates() {
-        SSLConnectionSocketFactory socketFactory = null;
-        TrustManager[] trustAllCerts = new TrustManager[1];
-        TrustManager tm = null;
-        // TrustManager tm1 = this.miTM;
-        trustAllCerts[0] = tm;
-        SSLContext sc = null;
-        try {
-            sc = SSLContext.getInstance("TLS");// sc = SSLContext.getInstance("TLS")
-            sc.init(null, trustAllCerts, null);
-            socketFactory = new SSLConnectionSocketFactory(sc, NoopHostnameVerifier.INSTANCE);
-            // HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        } catch (NoSuchAlgorithmException | KeyManagementException e) {
-            log.error(e.getMessage());
-        }
-        return socketFactory;
-    }
-
-    private class miTM implements TrustManager, X509TrustManager {
-
-        public X509Certificate[] getAcceptedIssuers() {
-            return null;
-        }
-
-        public void checkServerTrusted(X509Certificate[] certs, String authType) {
-            // don't check
-        }
-
-        public void checkClientTrusted(X509Certificate[] certs, String authType) {
-            // don't check
-        }
-    }
 
 }
 
