@@ -1,23 +1,25 @@
 package com.webank.weevent.governance.entity;
 
-import com.webank.weevent.governance.entity.base.AccountBase;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
-import java.util.List;
+
+import com.webank.weevent.governance.entity.base.AccountBase;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * AccountEntity class
  *
  * @since 2019/04/28
  */
-@Setter
 @Getter
+@Setter
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "t_account")

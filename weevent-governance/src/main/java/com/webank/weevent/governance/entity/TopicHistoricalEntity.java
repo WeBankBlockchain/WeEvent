@@ -1,16 +1,18 @@
 package com.webank.weevent.governance.entity;
 
-import com.webank.weevent.governance.entity.base.TopicHistoricalBase;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-import java.util.Date;
-import java.util.List;
+
+import com.webank.weevent.governance.entity.base.TopicHistoricalBase;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 
 @Setter
@@ -45,6 +47,7 @@ public class TopicHistoricalEntity extends TopicHistoricalBase {
 
     @Transient
     private String tableName;
+
 
 
 }

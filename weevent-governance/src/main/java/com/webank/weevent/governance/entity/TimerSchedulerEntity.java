@@ -1,13 +1,14 @@
 package com.webank.weevent.governance.entity;
 
-import com.webank.weevent.governance.entity.base.TimerSchedulerBase;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
+import com.webank.weevent.governance.entity.base.TimerSchedulerBase;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 @EqualsAndHashCode(callSuper = true)
 @Setter

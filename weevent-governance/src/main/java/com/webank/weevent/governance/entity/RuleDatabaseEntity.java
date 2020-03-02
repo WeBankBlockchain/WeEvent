@@ -1,15 +1,16 @@
 package com.webank.weevent.governance.entity;
 
-import com.webank.weevent.governance.entity.base.RuleDatabaseBase;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.validator.constraints.Length;
-
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
+
+import com.webank.weevent.governance.entity.base.RuleDatabaseBase;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.validator.constraints.Length;
 
 /**
  * RuleDatabaseEntity class

@@ -1,14 +1,15 @@
 package com.webank.weevent.governance.entity;
 
 import com.webank.weevent.governance.common.RetCode;
+
 import lombok.Getter;
 import lombok.Setter;
 
 /**
  * Entity class of response info.
  */
-@Setter
 @Getter
+@Setter
 public class BaseResponse {
 
     private int code;

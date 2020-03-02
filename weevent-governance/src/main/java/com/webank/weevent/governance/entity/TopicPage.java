@@ -1,9 +1,9 @@
 package com.webank.weevent.governance.entity;
 
+import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.List;
 
 /**
  * TopicEntity data in page list.

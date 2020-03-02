@@ -1,21 +1,21 @@
 package com.webank.weevent.governance.entity.base;
 
+import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
+import javax.validation.constraints.NotBlank;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
-
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
-import javax.validation.constraints.NotBlank;
 
 /**
  * RuleDatabaseBase class
  *
  * @since 2019/10/15
  */
-@Setter
 @Getter
+@Setter
 @EqualsAndHashCode(callSuper = false)
 @MappedSuperclass
 public class RuleDatabaseBase extends BaseEntity {

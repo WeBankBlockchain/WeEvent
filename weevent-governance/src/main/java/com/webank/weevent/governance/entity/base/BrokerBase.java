@@ -1,13 +1,13 @@
 package com.webank.weevent.governance.entity.base;
 
+import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
+import javax.validation.constraints.Min;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.validator.constraints.URL;
-
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
-import javax.validation.constraints.Min;
 
 /**
  * BrokerBase class
@@ -35,7 +35,7 @@ public class BrokerBase extends BaseEntity {
     private String webaseUrl;
 
     //0 means not deleted ,others means deleted
-    @Column(name = "delete_at", nullable = false, columnDefinition = "BIGINT(16)")
+    @Column(name = "delete_at",nullable = false, columnDefinition = "BIGINT(16)")
     private Long deleteAt = 0L;
 
     public void setBrokerUrl(String brokerUrl) {

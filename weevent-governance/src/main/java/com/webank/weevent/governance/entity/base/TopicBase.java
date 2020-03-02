@@ -1,11 +1,11 @@
 package com.webank.weevent.governance.entity.base;
 
+import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
 
 /**
  * TopicBase class
@@ -14,7 +14,7 @@ import javax.persistence.MappedSuperclass;
  */
 @Setter
 @Getter
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper=false)
 @MappedSuperclass
 public class TopicBase extends BaseEntity {
 
@@ -34,7 +34,7 @@ public class TopicBase extends BaseEntity {
     private String description;
 
     //0 means not deleted ,others means deleted
-    @Column(name = "delete_at", nullable = false, columnDefinition = "BIGINT(16)")
+    @Column(name = "delete_at",nullable = false, columnDefinition = "BIGINT(16)")
     private Long deleteAt = 0L;
 
 }
