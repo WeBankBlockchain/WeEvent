@@ -7,11 +7,11 @@
   },
   "getVersion": {
     "method": "get",
-    "url": "weevent-governance/weevent/admin/getVersion"
+    "url": "weevent-broker/admin/getVersion"
   },
   "listGroup": {
     "method": "get",
-    "url": "weevent-governance/weevent/admin/listGroup"
+    "url": "weevent-broker/admin/listGroup"
   },
   "loginOut": {
     "method": "get",
@@ -19,135 +19,135 @@
   },
   "openTopic": {
     "method": "post",
-    "url": "weevent-governance/topic/openTopic"
+    "url": "topic/openTopic"
   },
   "topicList": {
     "method": "post",
-    "url": "weevent-governance/topic/list"
+    "url": "topic/list"
   },
   "subscription": {
     "method": "get",
-    "url": "weevent-governance/weevent/admin/listSubscription"
+    "url": "weevent-broker/admin/listSubscription"
   },
   "getNodes": {
     "method": "get",
-    "url": "weevent-governance/weevent/admin/listNodes"
+    "url": "weevent-broker/admin/listNodes"
   },
   "addServer": {
     "method": "post",
-    "url": "weevent-governance/broker/add"
+    "url": "broker/add"
   },
   "updateServer": {
     "method": "post",
-    "url": "weevent-governance/broker/update"
+    "url": "broker/update"
   },
   "getServer": {
     "method": "get",
-    "url": "weevent-governance/broker/list"
+    "url": "broker/list"
   },
   "deleteServer": {
     "method": "post",
-    "url": "weevent-governance/broker/delete"
+    "url": "broker/delete"
   },
   "checkBrokerServer": {
     "method": "post",
-    "url": "weevent-governance/broker/checkServer"
+    "url": "broker/checkServer"
   },
   "topicState": {
     "method": "get",
-    "url": "weevent-governance/weevent/rest/state"
+    "url": "weevent-broker/rest/state"
   },
   "topicInfo": {
     "method": "get",
-    "url": "weevent-governance/topic/topicInfo"
+    "url": "topic/topicInfo"
   },
   "checkExsit": {
     "method": "get",
-    "url": "weevent-governance/user/check"
+    "url": "user/check"
   },
   "register": {
     "method": "post",
-    "url": "weevent-governance/user/register"
+    "url": "user/register"
   },
   "forget": {
     "method": "get",
-    "url": "weevent-governance/user/forget"
+    "url": "user/forget"
   },
   "update": {
     "method": "post",
-    "url": "weevent-governance/user/update"
+    "url": "user/update"
   },
   "reset": {
     "method": "post",
-    "url": "weevent-governance/user/reset"
+    "url": "user/reset"
   },
   "accountList": {
     "method": "get",
-    "url": "weevent-governance/user/accountList"
+    "url": "user/accountList"
   },
   "permissionList": {
     "method": "post",
-    "url": "weevent-governance/permission/permissionList"
+    "url": "permission/permissionList"
   },
   "ruleList": {
     "method": "post",
-    "url": "weevent-governance/ruleEngine/list"
+    "url": "ruleEngine/list"
   },
   "ruleAdd": {
     "method": "post",
-    "url": "weevent-governance/ruleEngine/add"
+    "url": "ruleEngine/add"
   },
   "ruleUpdate": {
     "method": "post",
-    "url": "weevent-governance/ruleEngine/update"
+    "url": "ruleEngine/update"
   },
   "ruleStart": {
     "method": "post",
-    "url": "weevent-governance/ruleEngine/start"
+    "url": "ruleEngine/start"
   },
   "ruleDelete": {
     "method": "post",
-    "url": "weevent-governance/ruleEngine/delete"
+    "url": "ruleEngine/delete"
   },
   "ruleStop": {
     "method": "post",
-    "url": "weevent-governance/ruleEngine/updateStatus"
+    "url": "ruleEngine/updateStatus"
   },
   "ruleDetail": {
     "method": "post",
-    "url": "weevent-governance/ruleEngine/detail"
+    "url": "ruleEngine/detail"
   },
   "dbList": {
     "method": "post",
-    "url": "weevent-governance/circulationDatabase/list"
+    "url": "circulationDatabase/list"
   },
   "dbAdd": {
     "method": "post",
-    "url": "weevent-governance/circulationDatabase/add"
+    "url": "circulationDatabase/add"
   },
   "dbDelete": {
     "method": "post",
-    "url": "weevent-governance/circulationDatabase/delete"
+    "url": "circulationDatabase/delete"
   },
   "dbUpdate": {
     "method": "post",
-    "url": "weevent-governance/circulationDatabase/update"
+    "url": "circulationDatabase/update"
   },
   "historicalData": {
     "method": "post",
-    "url": "weevent-governance/historicalData/list"
+    "url": "historicalData/list"
   },
   "eventList": {
     "method": "post",
-    "url": "weevent-governance/historicalData/eventList"
+    "url": "historicalData/eventList"
   },
   "checkJDBC": {
     "method": "post",
-    "url": "weevent-governance/circulationDatabase/checkDataBaseUrl"
+    "url": "circulationDatabase/checkDataBaseUrl"
   },
   "ruleStatic": {
     "method": "get",
-    "url": "processor/statistic"
+    "url": "weevent-processor/statistic"
   },
   "timerList": {
     "method": "post",
@@ -167,6 +167,6 @@
   },
   "cornCheck": {
     "method": "get",
-    "url": "processor/timerScheduler/checkCorn"
+    "url": "weevent-processor/timerScheduler/checkCorn"
   }
 }

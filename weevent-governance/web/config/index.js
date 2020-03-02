@@ -26,7 +26,6 @@ module.exports = {
     //     target: config.proxyRoot,
     //     changeOrigin:true,
     //     pathRewrite:{
-    //       // '^/api': ''
     //       '^/api': '/weevent-governance'
     //     }
     //   }
