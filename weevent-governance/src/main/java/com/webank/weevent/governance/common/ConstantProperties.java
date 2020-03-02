@@ -1,13 +1,8 @@
 package com.webank.weevent.governance.common;
 
-import lombok.Data;
-import org.springframework.stereotype.Component;
-
 /**
  * constants.
  */
-@Data
-@Component
 public class ConstantProperties {
 
     public static final String QUESTION_MARK = "?";
@@ -62,13 +57,6 @@ public class ConstantProperties {
 
 
     //weBase url end ===========================================================
-
-    public Integer maxRequestFail = 3;
-    public Long sleepWhenHttpMaxFail = 60000L; // default 1min
-
-    // COOKIE
-    public Integer cookieMaxAge = 86400; //  24 * 60 * 60 seconds
-
 
     //project business constant==============================
     public final static Integer RULE_DESTINATION_TOPIC = 1;
