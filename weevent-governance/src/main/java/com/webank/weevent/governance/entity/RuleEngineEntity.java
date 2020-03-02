@@ -1,24 +1,24 @@
 package com.webank.weevent.governance.entity;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.webank.weevent.governance.entity.base.RuleEngineBase;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-
-import com.webank.weevent.governance.entity.base.RuleEngineBase;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * RuleEngineEntity class
  *
  * @since 2019/09/23
  */
-@Data
+@Setter
+@Getter
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "t_rule_engine",

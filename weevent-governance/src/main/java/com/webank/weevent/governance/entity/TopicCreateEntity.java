@@ -1,11 +1,12 @@
 package com.webank.weevent.governance.entity;
 
 import com.webank.weevent.governance.entity.base.TopicBase;
-
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Setter
+@Getter
 @EqualsAndHashCode(callSuper = false)
 public class TopicCreateEntity extends TopicBase {
 

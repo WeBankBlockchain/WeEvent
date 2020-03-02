@@ -1,23 +1,23 @@
 package com.webank.weevent.governance.entity;
 
-import java.util.Date;
+import com.webank.weevent.governance.entity.base.TopicBase;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-
-import com.webank.weevent.governance.entity.base.TopicBase;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import java.util.Date;
 
 /**
  * TopicEntity class
  *
  * @since 2019/02/11
  */
-@Data
+@Setter
+@Getter
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "t_topic",

@@ -1,17 +1,19 @@
 package com.webank.weevent.governance.entity.base;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * RuleEngineBase class
  *
  * @since 2019/09/23
  */
-@Data
+@Setter
+@Getter
 @EqualsAndHashCode(callSuper = false)
 @MappedSuperclass
 public class RuleEngineBase extends BaseEntity {
@@ -74,7 +76,7 @@ public class RuleEngineBase extends BaseEntity {
     @Column(name = "error_destination")
     private String errorDestination;
 
-    @Column(name="function_array")
+    @Column(name = "function_array")
     private String functionArray;
 
     // 1 means the system
@@ -82,7 +84,7 @@ public class RuleEngineBase extends BaseEntity {
     private Boolean systemTag;
 
     //0 means not deleted ,others means deleted
-    @Column(name = "delete_at",nullable = false, columnDefinition = "BIGINT(16)")
+    @Column(name = "delete_at", nullable = false, columnDefinition = "BIGINT(16)")
     private Long deleteAt = 0L;
 
     @Column(name = "rule_description")
