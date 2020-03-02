@@ -92,7 +92,7 @@ public class RestfullTest extends JUnitTestBase {
     @Test
     public void testStateNoGroupId() {
         ResponseEntity<TopicInfo> rsp = rest.getForEntity(url + "state?topic={topic}", TopicInfo.class, this.restTopic);
-        System.out.println("state, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
+        log.info("state, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
         Assert.assertEquals(200, rsp.getStatusCodeValue());
         Assert.assertEquals(this.restTopic, rsp.getBody().getTopicName());
     }
@@ -101,7 +101,7 @@ public class RestfullTest extends JUnitTestBase {
     public void testStateWithGroupId() {
         ResponseEntity<TopicInfo> rsp = rest.getForEntity(url + "state?topic={topic}&groupId={groupId}",
                 TopicInfo.class, this.restTopic, WeEvent.DEFAULT_GROUP_ID);
-        System.out.println("state, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
+        log.info("state, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
         Assert.assertEquals(200, rsp.getStatusCodeValue());
         Assert.assertEquals(this.restTopic, rsp.getBody().getTopicName());
     }
