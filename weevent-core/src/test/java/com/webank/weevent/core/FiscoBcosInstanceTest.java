@@ -7,7 +7,6 @@ import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,17 +26,18 @@ public class FiscoBcosInstanceTest extends JUnitTestBase {
     private FiscoConfig fiscoConfig;
 
     @Before
-    public void before() throws Exception {
+    public void before() {
         log.info("=============================={}.{}==============================",
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
+        // Another choice to initialize FiscoConfig:
+        // weevent-core.jar contains the FiscoConfig bean, you can scan it in spring context.
+        // like this:
+        // @SpringBootApplication(scanBasePackages = {"com.webank.weevent.broker", "com.webank.weevent.core.config"})
+        // "com.webank.weevent.broker" is package name of a spring boot server
         this.fiscoConfig = new FiscoConfig();
         Assert.assertTrue(this.fiscoConfig.load(""));
-    }
-
-    @After
-    public void after() throws Exception {
     }
 
     /**
@@ -50,7 +50,7 @@ public class FiscoBcosInstanceTest extends JUnitTestBase {
         iProducer.startProducer();
 
         WeEvent weEvent = new WeEvent(this.topicName, "hello weevent".getBytes());
-        SendResult sendResult = iProducer.publish(weEvent, this.groupId, 10);
+        SendResult sendResult = iProducer.publish(weEvent, this.groupId, this.fiscoConfig.getWeb3sdkTimeout());
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 

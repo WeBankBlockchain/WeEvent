@@ -2,9 +2,11 @@ package com.webank.weevent.core.dto;
 
 import java.math.BigInteger;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class GroupGeneral {
 
     private int nodeCount;

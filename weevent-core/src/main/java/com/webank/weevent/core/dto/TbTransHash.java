@@ -2,13 +2,15 @@ package com.webank.weevent.core.dto;
 
 import java.math.BigInteger;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Entity class of table tb_trans_hash.
  */
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 public class TbTransHash {
 

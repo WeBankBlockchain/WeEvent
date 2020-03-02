@@ -127,7 +127,7 @@ class HttpInterceptorConfig implements WebMvcConfigurer {
  */
 @Slf4j
 @EnableDiscoveryClient
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.webank.weevent.broker", "com.webank.weevent.core.config"})
 public class BrokerApplication {
     private static WeEventConfig weEventConfig;
 
@@ -209,40 +209,21 @@ public class BrokerApplication {
         return exporter;
     }
 
-    // FiscoConfig
-    @Bean
-    @ConditionalOnProperty(prefix = "block.chain", name = "type", havingValue = "fisco")
-    public FiscoConfig getFiscoConfig() {
-        log.info("FISCO-BCOS enter");
-        FiscoConfig fiscoConfig = new FiscoConfig();
-        fiscoConfig.load("");
-        return fiscoConfig;
-    }
-
     // FiscoBcosDelegate
     @Bean
-    @ConditionalOnBean(FiscoConfig.class)
+    @ConditionalOnProperty(prefix = "block.chain", name = "type", havingValue = "fisco")
     public FiscoBcosDelegate fiscoBcosDelegate(FiscoConfig fiscoConfig) throws BrokerException {
+        log.info("++++++++++ FISCO-BCOS Enter ++++++++++");
         FiscoBcosDelegate fiscoBcosDelegate = new FiscoBcosDelegate();
         fiscoBcosDelegate.initProxy(fiscoConfig);
-
         return fiscoBcosDelegate;
-    }
-
-    // FabricConfig
-    @Bean
-    @ConditionalOnProperty(prefix = "block.chain", name = "type", havingValue = "fabric")
-    public FabricConfig getFabricConfig() {
-        log.info("Fabric enter");
-        FabricConfig fabricConfig = new FabricConfig();
-        fabricConfig.load("");
-        return fabricConfig;
     }
 
     // FabricDelegate
     @Bean
-    @ConditionalOnBean(FabricConfig.class)
+    @ConditionalOnProperty(prefix = "block.chain", name = "type", havingValue = "fabric")
     public FabricDelegate fabricDelegate(FabricConfig fabricConfig) throws BrokerException {
+        log.info("++++++++++ Fabric Enter ++++++++++");
         FabricDelegate fabricDelegate = new FabricDelegate();
         fabricDelegate.initProxy(fabricConfig);
 
@@ -321,9 +302,11 @@ public class BrokerApplication {
         return config;
     }
 
-    // daemon thread pool, json rpc need bean(name = "taskScheduler")
+
+    // Notice: json rpc need default bean org.springframework.scheduling.TaskScheduler(name = "taskScheduler")
+    // daemon thread pool
     @Bean
-    public Executor taskScheduler() {
+    public Executor taskExecutor() {
         ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
         pool.setThreadNamePrefix("weevent-executor-");
         // run in thread immediately, no blocking queue

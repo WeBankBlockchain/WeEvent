@@ -1,11 +1,10 @@
 package com.webank.weevent.broker.protocol.rest;
 
 
-import java.io.Serializable;
-
 import com.webank.weevent.sdk.WeEvent;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * WeEvent with subscription ID.
@@ -13,8 +12,9 @@ import lombok.Data;
  * @author matthewliu
  * @since 2019/03/05
  */
-@Data
-public class SubscriptionWeEvent implements Serializable {
+@Getter
+@Setter
+public class SubscriptionWeEvent {
     private String subscriptionId;
     private WeEvent event;
 }

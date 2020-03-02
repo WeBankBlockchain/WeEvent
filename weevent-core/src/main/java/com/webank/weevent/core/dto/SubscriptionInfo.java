@@ -1,13 +1,17 @@
 package com.webank.weevent.core.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * @author websterchen
  * @version 1.0
  * @since 2019/4/4
  */
-@Data
+@Getter
+@Setter
+@ToString
 public class SubscriptionInfo {
     /**
      * subscribe from which protocol, restful or json rpc, etc.

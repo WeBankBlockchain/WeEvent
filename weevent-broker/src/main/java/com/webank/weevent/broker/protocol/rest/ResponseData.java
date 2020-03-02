@@ -2,7 +2,8 @@ package com.webank.weevent.broker.protocol.rest;
 
 import com.webank.weevent.sdk.ErrorCode;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * The base response result class.
@@ -11,7 +12,8 @@ import lombok.Data;
  * @version 1.0
  * @since 2019/9/12
  */
-@Data
+@Getter
+@Setter
 public class ResponseData<T> {
 
     /**

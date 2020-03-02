@@ -18,12 +18,14 @@ import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.WeEvent;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-@Data
+@Getter
+@Setter
 class EchoAddress {
     private Long version;
     private String address;

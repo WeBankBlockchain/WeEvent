@@ -1,8 +1,10 @@
 package com.webank.weevent.core.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class ContractContext {
 
     private String chainId;
