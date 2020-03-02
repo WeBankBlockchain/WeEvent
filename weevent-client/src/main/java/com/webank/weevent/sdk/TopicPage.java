@@ -4,7 +4,8 @@ package com.webank.weevent.sdk;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Topic data in page list.
@@ -12,7 +13,8 @@ import lombok.Data;
  * @author matthewliu
  * @since 2019/02/11
  */
-@Data
+@Getter
+@Setter
 public class TopicPage {
     private Integer total;
     private Integer pageIndex;
