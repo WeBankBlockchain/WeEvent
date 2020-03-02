@@ -9,15 +9,17 @@ import javax.persistence.UniqueConstraint;
 
 import com.webank.weevent.governance.entity.base.TopicBase;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * TopicEntity class
  *
  * @since 2019/02/11
  */
-@Data
+@Setter
+@Getter
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "t_topic",

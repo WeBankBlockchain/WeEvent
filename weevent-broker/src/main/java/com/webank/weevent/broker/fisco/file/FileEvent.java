@@ -3,7 +3,8 @@ package com.webank.weevent.broker.fisco.file;
 
 import com.webank.weevent.sdk.FileChunksMeta;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Event for file transport.
@@ -11,7 +12,8 @@ import lombok.Data;
  * @author matthewliu
  * @since 2020/02/16
  */
-@Data
+@Getter
+@Setter
 public class FileEvent {
     public enum EventType {
         // over WeEvent
