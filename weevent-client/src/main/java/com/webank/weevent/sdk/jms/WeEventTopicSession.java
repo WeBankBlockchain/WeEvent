@@ -24,7 +24,8 @@ import javax.jms.TopicPublisher;
 import javax.jms.TopicSession;
 import javax.jms.TopicSubscriber;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -33,8 +34,9 @@ import lombok.extern.slf4j.Slf4j;
  * @author matthewliu
  * @since 2019/03/25
  */
-@Data
 @Slf4j
+@Getter
+@Setter
 public class WeEventTopicSession implements TopicSession {
     private WeEventTopicConnection topicConnection;
 

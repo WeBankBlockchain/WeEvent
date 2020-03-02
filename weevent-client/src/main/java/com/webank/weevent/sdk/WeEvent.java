@@ -3,7 +3,8 @@ package com.webank.weevent.sdk;
 
 import java.util.Map;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Event entity, like a message in traditional MQ.
@@ -12,7 +13,8 @@ import lombok.Data;
  * @author matthewliu
  * @since 2018/11/02
  */
-@Data
+@Getter
+@Setter
 public class WeEvent {
     public static final String DEFAULT_GROUP_ID = "1";
     public static final String OFFSET_FIRST = "OFFSET_FIRST";

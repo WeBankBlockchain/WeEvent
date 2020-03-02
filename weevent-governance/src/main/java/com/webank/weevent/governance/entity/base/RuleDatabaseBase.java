@@ -4,8 +4,9 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotBlank;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 
 /**
@@ -13,7 +14,8 @@ import org.hibernate.validator.constraints.Length;
  *
  * @since 2019/10/15
  */
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = false)
 @MappedSuperclass
 public class RuleDatabaseBase extends BaseEntity {

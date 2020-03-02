@@ -1,6 +1,7 @@
 package com.webank.weevent.sdk;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Publish function result.
@@ -9,7 +10,8 @@ import lombok.Data;
  * @author matthewliu
  * @since 2018/11/02
  */
-@Data
+@Getter
+@Setter
 public class TopicInfo {
     /**
      * Topic name.

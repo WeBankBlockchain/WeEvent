@@ -11,8 +11,6 @@ ext {
     // ----- org.apache -----
     // zookeeper
     zookeeperVersion = "3.5.5"
-    // curator.recipes
-    curatorVersion = "4.2.0"
     // httpclient
     httpclientVersion = "4.5.6"
     // tomcat
@@ -26,10 +24,10 @@ ext {
             dbcp2       : "2.6.0",
             commonsIo   : "2.4"
     ]
+    // org slf4j
+    slf4jVersion = "1.7.26"
     // logging.log4j
     log4jVersion = "2.11.1"
-    // jmeter
-    jmeterVersion = "5.0"
 
     // org.fisco-bcos.web3sdk
     web3sdkVersion = [
@@ -38,8 +36,9 @@ ext {
     ]
     // fabric
     fabricVersion = "1.4.4"
-    // org slf4j
-    slf4jVersion = "1.7.26"
+    // pb
+    protobufVersion = "3.6.1"
+
     // lombok
     lombokVersion = "1.16.14"
     // junit
@@ -68,6 +67,9 @@ ext {
     WebSocketVersion = "1.4.0"
     // JWTVersion
     JWTVersion = "3.8.0"
+
+    // jmeter
+    jmeterVersion = "5.0"
 }
 
 buildscript {
