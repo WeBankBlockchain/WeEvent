@@ -1,7 +1,19 @@
 package com.webank.weevent.governance;
 
+import java.io.InterruptedIOException;
+import java.net.UnknownHostException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 import com.webank.weevent.governance.common.GovernanceConfig;
 import com.webank.weevent.governance.utils.H2ServerUtil;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpRequest;
@@ -32,16 +44,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLException;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import java.io.InterruptedIOException;
-import java.net.UnknownHostException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
 
 
 /**
@@ -87,10 +89,11 @@ public class GovernanceApplication {
     }
 
     @Bean
-    public ClientHttpRequestFactory httpsClientRequestFactory() {
+    @ConditionalOnProperty(prefix = "https", name = "read-timeout", havingValue = "3000")
+    public ClientHttpRequestFactory httpsClientRequestFactory(GovernanceConfig config) {
         HttpsClientRequestFactory factory = new HttpsClientRequestFactory();
-        factory.setReadTimeout(governanceConfig.getReadTimeout());// ms
-        factory.setConnectTimeout(governanceConfig.getConnectTimeOut());// ms
+        factory.setReadTimeout(config.getReadTimeout());// ms
+        factory.setConnectTimeout(config.getConnectTimeOut());// ms
         return factory;
     }
 
@@ -105,15 +108,15 @@ public class GovernanceApplication {
     @Scope("prototype")
     @Bean("httpClient")
     @ConditionalOnProperty(prefix = "http", name = "connect-timeout", havingValue = "3000")
-    public CloseableHttpClient getHttpClient() {
+    public CloseableHttpClient getHttpClient(GovernanceConfig config) {
         /**
          * config connect parameter
          */
-        RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(governanceConfig.getConnectionRequestTimeout())
-                .setConnectTimeout(governanceConfig.getHttpConnectTimeOut()).setSocketTimeout(governanceConfig.getSocketTimeout()).build();
+        RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(config.getConnectionRequestTimeout())
+                .setConnectTimeout(config.getHttpConnectTimeOut()).setSocketTimeout(config.getSocketTimeout()).build();
 
-        cm.setMaxTotal(governanceConfig.getMaxTotal());
-        cm.setDefaultMaxPerRoute(governanceConfig.getMaxPerRoute());
+        cm.setMaxTotal(config.getMaxTotal());
+        cm.setDefaultMaxPerRoute(config.getMaxPerRoute());
         CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm)
                 .setDefaultRequestConfig(requestConfig).setRetryHandler(retryHandler).build();
         return httpClient;
@@ -122,9 +125,9 @@ public class GovernanceApplication {
     @Scope("prototype")
     @Bean("httpsClient")
     @ConditionalOnProperty(prefix = "https", name = "connect-timeout", havingValue = "3000")
-    public CloseableHttpClient getHttpsClient() {
-        RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(governanceConfig.getConnectionRequestTimeout())
-                .setConnectTimeout(governanceConfig.getConnectTimeOut()).setSocketTimeout(governanceConfig.getSocketTimeout()).build();
+    public CloseableHttpClient getHttpsClient(GovernanceConfig config) {
+        RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(config.getConnectionRequestTimeout())
+                .setConnectTimeout(config.getConnectTimeOut()).setSocketTimeout(config.getSocketTimeout()).build();
 
         Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
                 .register("http", PlainConnectionSocketFactory.INSTANCE).register("https", trustAllHttpsCertificates())
