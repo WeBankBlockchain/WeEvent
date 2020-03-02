@@ -38,9 +38,9 @@ public class ForwardController {
         this.discoveryClient = discoveryClient;
     }
 
-    @RequestMapping(value = "/weevent/{path1}/{path2}", method = RequestMethod.GET)
+    @RequestMapping(value = "/weevent-broker/admin/listGroup", method = RequestMethod.GET)
     public Object forward(HttpServletRequest request, HttpServletResponse response, @PathVariable(name = "path1") String path1, @PathVariable(name = "path2") String path2) throws GovernanceException {
-        log.info("weevent url: /wevent/ {}  \"/\" {}", path1, path2);
+        log.info("weevent url: /weevent-broker/ {}  \"/\" {}", path1, path2);
 
         String uri = Utils.getUrlFromDiscovery(this.discoveryClient, brokerServiceId);
         if (uri.isEmpty()) {
