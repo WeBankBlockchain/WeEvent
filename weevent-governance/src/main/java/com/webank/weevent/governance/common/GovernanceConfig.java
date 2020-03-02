@@ -18,6 +18,9 @@ public class GovernanceConfig {
     @Value("${https.connect-timeout:3000}")
     private int connectTimeOut;
 
+    @Value("${http.connect-timeout:3000}")
+    private int httpConnectTimeOut;
+
     // max connect
     @Value("${http.client.max-total:200}")
     private int maxTotal;
