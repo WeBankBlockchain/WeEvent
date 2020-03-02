@@ -1,19 +1,7 @@
 package com.webank.weevent.governance;
 
-import java.io.InterruptedIOException;
-import java.net.UnknownHostException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLException;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
 import com.webank.weevent.governance.common.GovernanceConfig;
 import com.webank.weevent.governance.utils.H2ServerUtil;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpRequest;
@@ -33,6 +21,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -43,6 +32,16 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.io.InterruptedIOException;
+import java.net.UnknownHostException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 
 
 /**
@@ -105,12 +104,13 @@ public class GovernanceApplication {
 
     @Scope("prototype")
     @Bean("httpClient")
+    @ConditionalOnProperty(prefix = "http", name = "connect-timeout", havingValue = "3000")
     public CloseableHttpClient getHttpClient() {
         /**
          * config connect parameter
          */
-         RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(governanceConfig.getConnectionRequestTimeout())
-                .setConnectTimeout(governanceConfig.getConnectTimeOut()).setSocketTimeout(governanceConfig.getSocketTimeout()).build();
+        RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(governanceConfig.getConnectionRequestTimeout())
+                .setConnectTimeout(governanceConfig.getHttpConnectTimeOut()).setSocketTimeout(governanceConfig.getSocketTimeout()).build();
 
         cm.setMaxTotal(governanceConfig.getMaxTotal());
         cm.setDefaultMaxPerRoute(governanceConfig.getMaxPerRoute());
@@ -121,6 +121,7 @@ public class GovernanceApplication {
 
     @Scope("prototype")
     @Bean("httpsClient")
+    @ConditionalOnProperty(prefix = "https", name = "connect-timeout", havingValue = "3000")
     public CloseableHttpClient getHttpsClient() {
         RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(governanceConfig.getConnectionRequestTimeout())
                 .setConnectTimeout(governanceConfig.getConnectTimeOut()).setSocketTimeout(governanceConfig.getSocketTimeout()).build();
