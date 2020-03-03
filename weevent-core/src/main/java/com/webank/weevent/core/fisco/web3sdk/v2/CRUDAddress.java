@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.ErrorCode;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
 
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.crypto.Credentials;

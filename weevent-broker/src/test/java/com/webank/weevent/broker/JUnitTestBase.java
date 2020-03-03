@@ -2,7 +2,7 @@ package com.webank.weevent.broker;
 
 import java.util.concurrent.TimeUnit;
 
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.client.WeEvent;
 
 import org.junit.Assert;
 import org.junit.Rule;
