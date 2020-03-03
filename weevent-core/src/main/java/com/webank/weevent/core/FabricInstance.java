@@ -5,7 +5,7 @@ import com.webank.weevent.core.config.FabricConfig;
 import com.webank.weevent.core.fabric.FabricBroker4Consumer;
 import com.webank.weevent.core.fabric.FabricBroker4Producer;
 import com.webank.weevent.core.fabric.sdk.FabricDelegate;
-import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.client.BrokerException;
 
 /**
  * Fabric instance.

@@ -4,8 +4,8 @@ import java.net.URL;
 
 import com.webank.weevent.robust.RobustApplication;
 import com.webank.weevent.robust.service.MqttBridge;
-import com.webank.weevent.sdk.IWeEventClient;
-import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
+import com.webank.weevent.client.IWeEventClient;
+import com.webank.weevent.client.jsonrpc.IBrokerRpc;
 
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.googlecode.jsonrpc4j.ProxyUtil;

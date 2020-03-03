@@ -6,7 +6,7 @@ import com.webank.weevent.processor.timer.TimerSchedulerJob;
 import com.webank.weevent.processor.utils.BaseRspEntity;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.RetCode;
-import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.client.BrokerException;
 
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.CronExpression;

@@ -5,9 +5,9 @@ import java.util.Map;
 
 import com.webank.weevent.core.IProducer;
 import com.webank.weevent.core.fisco.constant.WeEventConstants;
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.SendResult;
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.SendResult;
+import com.webank.weevent.client.WeEvent;
 
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttFixedHeader;
