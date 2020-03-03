@@ -1,6 +1,6 @@
 package com.webank.weevent.broker.protocol.rest;
 
-import com.webank.weevent.sdk.ErrorCode;
+import com.webank.weevent.client.ErrorCode;
 
 import lombok.Getter;
 import lombok.Setter;

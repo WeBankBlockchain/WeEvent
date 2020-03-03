@@ -1,10 +1,10 @@
 package com.webank.weevent.broker.sample;
 
 
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.IWeEventClient;
-import com.webank.weevent.sdk.SendResult;
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.IWeEventClient;
+import com.webank.weevent.client.SendResult;
+import com.webank.weevent.client.WeEvent;
 
 /**
  * Sample of Java SDK.

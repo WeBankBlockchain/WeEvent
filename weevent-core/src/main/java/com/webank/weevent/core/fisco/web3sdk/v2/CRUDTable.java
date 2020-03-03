@@ -4,8 +4,8 @@ package com.webank.weevent.core.fisco.web3sdk.v2;
 import java.util.Arrays;
 import java.util.List;
 
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.ErrorCode;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
 
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.crypto.Credentials;
