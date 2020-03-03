@@ -6,9 +6,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.SendResult;
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.SendResult;
+import com.webank.weevent.client.WeEvent;
 
 /**
  * Base interface for event producer.

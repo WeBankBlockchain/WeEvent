@@ -6,10 +6,10 @@ import java.util.concurrent.CompletableFuture;
 import com.webank.weevent.core.IProducer;
 import com.webank.weevent.core.fabric.sdk.FabricDelegate;
 import com.webank.weevent.core.fisco.util.ParamCheckUtils;
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.JsonHelper;
-import com.webank.weevent.sdk.SendResult;
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.client.SendResult;
+import com.webank.weevent.client.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 

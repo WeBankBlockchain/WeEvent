@@ -8,12 +8,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.webank.weevent.core.IProducer;
 import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.ErrorCode;
-import com.webank.weevent.sdk.FileChunksMeta;
-import com.webank.weevent.sdk.JsonHelper;
-import com.webank.weevent.sdk.SendResult;
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
+import com.webank.weevent.client.FileChunksMeta;
+import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.client.SendResult;
+import com.webank.weevent.client.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.Service;

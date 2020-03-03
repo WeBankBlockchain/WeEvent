@@ -3,8 +3,8 @@ package com.webank.weevent.core.task;
 
 import java.util.List;
 
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.WeEvent;
 
 /**
  * Block chain interface used by subscribe.

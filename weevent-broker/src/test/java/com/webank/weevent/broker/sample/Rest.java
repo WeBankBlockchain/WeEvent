@@ -2,8 +2,8 @@ package com.webank.weevent.broker.sample;
 
 import java.nio.charset.StandardCharsets;
 
-import com.webank.weevent.sdk.SendResult;
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.client.SendResult;
+import com.webank.weevent.client.WeEvent;
 
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClientException;
