@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.webank.weevent.broker.JUnitTestBase;
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.ErrorCode;
-import com.webank.weevent.sdk.SendResult;
-import com.webank.weevent.sdk.TopicInfo;
-import com.webank.weevent.sdk.TopicPage;
-import com.webank.weevent.sdk.WeEvent;
-import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
+import com.webank.weevent.client.SendResult;
+import com.webank.weevent.client.TopicInfo;
+import com.webank.weevent.client.TopicPage;
+import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.client.jsonrpc.IBrokerRpc;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;

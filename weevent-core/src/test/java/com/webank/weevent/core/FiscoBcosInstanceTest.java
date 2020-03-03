@@ -3,8 +3,8 @@ package com.webank.weevent.core;
 import java.util.HashMap;
 
 import com.webank.weevent.core.config.FiscoConfig;
-import com.webank.weevent.sdk.SendResult;
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.client.SendResult;
+import com.webank.weevent.client.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;

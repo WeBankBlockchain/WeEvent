@@ -11,10 +11,10 @@ import com.webank.weevent.core.IConsumer;
 import com.webank.weevent.core.JUnitTestBase;
 import com.webank.weevent.core.config.FabricConfig;
 import com.webank.weevent.core.fabric.sdk.FabricDelegate;
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.ErrorCode;
-import com.webank.weevent.sdk.SendResult;
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
+import com.webank.weevent.client.SendResult;
+import com.webank.weevent.client.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
