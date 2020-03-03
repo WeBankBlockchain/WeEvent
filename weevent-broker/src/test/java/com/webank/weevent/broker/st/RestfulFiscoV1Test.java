@@ -3,10 +3,10 @@ package com.webank.weevent.broker.st;
 import java.util.concurrent.TimeUnit;
 
 import com.webank.weevent.broker.BrokerApplication;
-import com.webank.weevent.sdk.SendResult;
-import com.webank.weevent.sdk.TopicInfo;
-import com.webank.weevent.sdk.TopicPage;
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.client.SendResult;
+import com.webank.weevent.client.TopicInfo;
+import com.webank.weevent.client.TopicPage;
+import com.webank.weevent.client.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;

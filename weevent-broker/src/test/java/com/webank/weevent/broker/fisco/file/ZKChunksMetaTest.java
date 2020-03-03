@@ -2,8 +2,8 @@ package com.webank.weevent.broker.fisco.file;
 
 import com.webank.weevent.broker.JUnitTestBase;
 import com.webank.weevent.core.fisco.util.WeEventUtils;
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.FileChunksMeta;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.FileChunksMeta;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;

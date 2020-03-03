@@ -13,10 +13,10 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.IWeEventClient;
-import com.webank.weevent.sdk.SendResult;
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.IWeEventClient;
+import com.webank.weevent.client.SendResult;
+import com.webank.weevent.client.WeEvent;
 
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;

@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.webank.weevent.core.IConsumer;
 import com.webank.weevent.core.JUnitTestBase;
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.client.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;

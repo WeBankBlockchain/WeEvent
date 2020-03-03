@@ -10,9 +10,9 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import com.webank.weevent.core.fisco.constant.WeEventConstants;
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.ErrorCode;
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
+import com.webank.weevent.client.WeEvent;
 
 import org.apache.commons.lang3.StringUtils;
 
