@@ -1,7 +1,6 @@
 package com.webank.weevent.processor;
 
 
-import com.webank.weevent.governance.utils.H2ServerUtil;
 import com.webank.weevent.processor.cache.CEPRuleCache;
 import com.webank.weevent.processor.config.ProcessorConfig;
 import com.webank.weevent.processor.mq.CEPRuleMQ;
@@ -33,7 +32,6 @@ public class ProcessorApplication {
     }
 
     public static void main(String[] args) throws Exception {
-        H2ServerUtil.startH2();
         log.info("start processor success");
         SpringApplication app = new SpringApplication(ProcessorApplication.class);
         app.addListeners(new ApplicationPidFileWriter());
