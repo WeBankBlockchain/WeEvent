@@ -36,9 +36,6 @@ public class TimerSchedulerControllerTest extends JUnitTestBase {
     private String token;
     private String userId = "1";
 
-    @Value("${weevent.url:http://127.0.0.1:7000/weevent}")
-    private String brokerUrl;
-
     private Map<String, Integer> brokerIdMap = new ConcurrentHashMap<>();
 
     @Before
@@ -67,7 +64,7 @@ public class TimerSchedulerControllerTest extends JUnitTestBase {
 
     @Test
     public void testAddTimerScheduler() throws Exception {
-        String content = "{\"schedulerName\":\"test123\",\"ruleBaseId\":\"1\",\"periodParams\":\"0 0 * * * ？\"," +
+        String content = "{\"schedulerName\":\"test123\",\"ruleDatabaseId\":\"1\",\"periodParams\":\"0 0 * * * ？\"," +
                 "\"parsingSql\":\"select 1 from t_account\"," +
                 "\"userId\":" + this.userId + ",\"brokerId\":" + this.brokerIdMap.get("brokerId")+"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/timerScheduler/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
@@ -91,7 +88,7 @@ public class TimerSchedulerControllerTest extends JUnitTestBase {
 
     @Test
     public void testUpdateTimerScheduler() throws Exception {
-        String content = "{\"id\":\"1\",\"schedulerName\":\"test456\",\"ruleBaseId\":\"1\",\"periodParams\":\"0 0 * * * ？\"," +
+        String content = "{\"id\":\"1\",\"schedulerName\":\"test456\",\"ruleDatabaseId\":\"1\",\"periodParams\":\"0 0 * * * ？\"," +
                 "\"parsingSql\":\"select 1 from t_account\"," +
                 "\"userId\":" + this.userId + ",\"brokerId\":" + this.brokerIdMap.get("brokerId")+"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/timerScheduler/update").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content)).andReturn().getResponse();

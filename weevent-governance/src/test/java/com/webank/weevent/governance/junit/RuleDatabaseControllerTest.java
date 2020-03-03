@@ -36,8 +36,7 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
     private String token;
     private String userId = "1";
 
-    @Value("${weevent.url:http://127.0.0.1:7000/weevent}")
-    private String brokerUrl;
+
 
     private Map<String, Integer> brokerIdMap = new ConcurrentHashMap<>();
 
@@ -57,7 +56,7 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
 
     //add broker
     public void addBroker() throws Exception {
-        String content = "{\"name\":\"broker2\",\"brokerUrl\":\"" + this.brokerUrl + "\",\"userId\":\"1\"}";
+        String content = "{\"name\":\"broker2\",\"brokerUrl\":\"" + brokerUrl + "\",\"userId\":\"1\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
@@ -67,7 +66,7 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
 
     @Test
     public void testAddRuleDatabase() throws Exception {
-        String content = "{\"datasourceName\":\"test123\",\"databaseUrl\":\"jdbc:h2:~/WeEvent_governance\"," +
+        String content = "{\"databaseType\":\"1\",\"datasourceName\":\"test123\",\"databaseUrl\":\"jdbc:h2:~/WeEvent_governance\"," +
                 "\"username\":\"root\",\"password\":\"123456\",\"tableName\":\"t_rule_database\"," +
                 "\"userId\":" + this.userId + ",\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\",\"systemTag\":\"false\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/circulationDatabase/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
@@ -91,7 +90,7 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
 
     @Test
     public void testUpdateRuleDatabase() throws Exception {
-        String content = "{\"id\":\"1\",\"datasourceName\":\"test123\",\"databaseUrl\":\"jdbc:h2:~/WeEvent_governance\"," +
+        String content = "{\"id\":\"1\",\"databaseType\":\"1\",\"datasourceName\":\"test123\",\"databaseUrl\":\"jdbc:h2:~/WeEvent_governance\"," +
                 "\"username\":\"root\",\"password\":\"123456\",\"tableName\":\"t_rule_database\"," +
                 "\"userId\":" + this.userId + ",\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\",\"systemTag\":\"false\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/circulationDatabase/update").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content)).andReturn().getResponse();
@@ -112,15 +111,15 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
     }
 
     @Test
-    public void testCheckDataBaseUrl() throws Exception {
-        String content = "{\"datasourceName\":\"test123\",\"databaseUrl\":\"jdbc:h2:~/WeEvent_governance\"," +
+    public void testCheckDataBaseUrlException() throws Exception {
+        String content = "{\"id\":1111,\"datasourceName\":\"test123\",\"databaseType\":\"1\",\"databaseUrl\":\"jdbc:h2:~/WeEvent_governance\"," +
                 "\"username\":\"root\",\"password\":\"123456\",\"tableName\":\"t_rule_database\"," +
                 "\"userId\":" + this.userId + ",\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/circulationDatabase/checkDataBaseUrl").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
-        Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
+        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(), Map.class);
+        Assert.assertEquals(jsonObject.get("code").toString(), "-1");
     }
 
     //delete broker by id

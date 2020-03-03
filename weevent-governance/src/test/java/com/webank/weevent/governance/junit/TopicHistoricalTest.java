@@ -34,10 +34,6 @@ public class TopicHistoricalTest extends JUnitTestBase {
 
     private String token;
 
-
-    @Value("${weevent.url:http://127.0.0.1:7000/weevent}")
-    private String brokerUrl;
-
     private Map<String, Integer> brokerIdMap = new ConcurrentHashMap<>();
 
 

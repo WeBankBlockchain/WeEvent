@@ -68,6 +68,9 @@ public class RuleDatabaseService {
 
     private void getDataBaseUrl(RuleDatabaseEntity ruleDatabaseEntity) {
         String dataBaseUrl = "";
+        if (ruleDatabaseEntity.getDatabaseUrl() != null) {
+            return;
+        }
         // 1 h2, 2 mysql
         if (ConstantProperties.H2_DATABASE.equals(ruleDatabaseEntity.getDatabaseType().toLowerCase())) {
             dataBaseUrl = "jdbc:h2:tcp://" + ruleDatabaseEntity.getDatabaseIp() + ":" + ruleDatabaseEntity.getDatabasePort()

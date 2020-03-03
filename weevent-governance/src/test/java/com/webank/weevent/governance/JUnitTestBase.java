@@ -27,6 +27,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public class JUnitTestBase {
     @Value("${server.port}")
     public String listenPort;
+    @Value("${weevent.url:http://127.0.0.1:7000/weevent-broker}")
+    public String brokerUrl;
+
     @Rule
     public TestName testName = new TestName();
     @Rule
