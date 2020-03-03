@@ -160,6 +160,9 @@ public class TopicHistoricalService {
         String password = dataBasePassword;
         String dbName;
         boolean flag = ("mysql").equals(databaseType);
+        if (!flag) {
+            return;
+        }
         try {
             int first = goalUrl.lastIndexOf("/");
             int end = goalUrl.lastIndexOf("?");
