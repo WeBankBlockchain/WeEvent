@@ -5,10 +5,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.SendResult;
-import com.webank.weevent.sdk.WeEvent;
-import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.SendResult;
+import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.client.jsonrpc.IBrokerRpc;
 
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.googlecode.jsonrpc4j.ProxyUtil;

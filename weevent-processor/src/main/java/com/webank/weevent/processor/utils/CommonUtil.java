@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 
 import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.processor.model.CEPRule;
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.client.WeEvent;
 
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;

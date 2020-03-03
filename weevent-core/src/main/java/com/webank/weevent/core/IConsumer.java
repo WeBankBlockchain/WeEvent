@@ -2,8 +2,8 @@ package com.webank.weevent.core;
 
 import java.util.Map;
 
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.WeEvent;
 
 import lombok.NonNull;
 
