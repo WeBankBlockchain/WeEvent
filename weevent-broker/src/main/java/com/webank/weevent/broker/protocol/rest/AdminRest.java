@@ -15,9 +15,9 @@ import com.webank.weevent.core.dto.QueryEntity;
 import com.webank.weevent.core.dto.TbBlock;
 import com.webank.weevent.core.dto.TbNode;
 import com.webank.weevent.core.dto.TbTransHash;
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.ErrorCode;
-import com.webank.weevent.sdk.JsonHelper;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
+import com.webank.weevent.client.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

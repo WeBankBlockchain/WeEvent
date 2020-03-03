@@ -14,7 +14,7 @@ import com.webank.weevent.processor.model.StatisticRule;
 import com.webank.weevent.processor.model.StatisticWeEvent;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.RetCode;
-import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.client.BrokerException;
 
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;

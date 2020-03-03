@@ -1,7 +1,7 @@
 package com.webank.weevent.broker.fisco.file;
 
 
-import com.webank.weevent.sdk.FileChunksMeta;
+import com.webank.weevent.client.FileChunksMeta;
 
 import lombok.Getter;
 import lombok.Setter;

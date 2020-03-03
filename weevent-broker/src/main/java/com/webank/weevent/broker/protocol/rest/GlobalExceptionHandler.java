@@ -3,8 +3,8 @@ package com.webank.weevent.broker.protocol.rest;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.ErrorCode;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ControllerAdvice;

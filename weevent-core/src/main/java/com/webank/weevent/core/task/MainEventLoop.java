@@ -10,9 +10,9 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.ErrorCode;
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
+import com.webank.weevent.client.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 

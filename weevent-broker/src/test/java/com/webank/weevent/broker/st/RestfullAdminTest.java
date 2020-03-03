@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.webank.weevent.broker.JUnitTestBase;
 import com.webank.weevent.broker.protocol.rest.ResponseData;
-import com.webank.weevent.sdk.JsonHelper;
+import com.webank.weevent.client.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
