@@ -4,7 +4,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.client.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
