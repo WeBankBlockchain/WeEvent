@@ -1,7 +1,7 @@
 package com.webank.weevent.broker.fisco.file;
 
 
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.client.WeEvent;
 
 /**
  * Notify WeEvent to remote.
