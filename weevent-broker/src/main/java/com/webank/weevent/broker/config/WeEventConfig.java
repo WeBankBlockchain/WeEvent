@@ -32,9 +32,6 @@ public class WeEventConfig {
     @Value("${stomp.heartbeats:30}")
     private Integer stompHeartbeats;
 
-    @Value("${stomp.timeout:10}")
-    private Integer stompTimeout;
-
     @Value("${mqtt.broker.port:7001}")
     private Integer mqttPort;
 
