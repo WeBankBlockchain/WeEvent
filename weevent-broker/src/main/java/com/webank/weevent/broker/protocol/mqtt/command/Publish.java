@@ -3,11 +3,12 @@ package com.webank.weevent.broker.protocol.mqtt.command;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.webank.weevent.core.IProducer;
-import com.webank.weevent.core.fisco.constant.WeEventConstants;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.SendResult;
 import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.core.IProducer;
+import com.webank.weevent.core.config.FiscoConfig;
+import com.webank.weevent.core.fisco.constant.WeEventConstants;
 
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttFixedHeader;
@@ -27,9 +28,11 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class Publish {
+    private FiscoConfig fiscoConfig;
     private IProducer iproducer;
 
-    public Publish(IProducer iproducer) {
+    public Publish(FiscoConfig fiscoConfig, IProducer iproducer) {
+        this.fiscoConfig = fiscoConfig;
         this.iproducer = iproducer;
     }
 
@@ -64,7 +67,7 @@ public class Publish {
 
     private SendResult sendMessageToFisco(String topic, byte[] messageBytes, String groupId, Map<String, String> extensions) {
         try {
-            return this.iproducer.publish(new WeEvent(topic, messageBytes, extensions), groupId, 10);
+            return this.iproducer.publish(new WeEvent(topic, messageBytes, extensions), groupId, this.fiscoConfig.getWeb3sdkTimeout());
         } catch (BrokerException e) {
             log.error("exception in publish", e);
             return new SendResult(SendResult.SendResultStatus.ERROR);
