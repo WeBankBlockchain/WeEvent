@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.webank.weevent.broker.config.WeEventConfig;
 import com.webank.weevent.broker.fisco.file.FileTransportService;
 import com.webank.weevent.broker.fisco.file.ZKChunksMeta;
+import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.core.IConsumer;
 import com.webank.weevent.core.IProducer;
 import com.webank.weevent.core.config.FabricConfig;
@@ -20,7 +21,6 @@ import com.webank.weevent.core.fabric.sdk.FabricDelegate;
 import com.webank.weevent.core.fisco.FiscoBcosBroker4Consumer;
 import com.webank.weevent.core.fisco.FiscoBcosBroker4Producer;
 import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegate;
-import com.webank.weevent.client.BrokerException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.googlecode.jsonrpc4j.ErrorResolver;
@@ -28,7 +28,6 @@ import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImplExporter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.Http11NioProtocol;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -129,8 +128,6 @@ class HttpInterceptorConfig implements WebMvcConfigurer {
 @EnableDiscoveryClient
 @SpringBootApplication(scanBasePackages = {"com.webank.weevent.broker", "com.webank.weevent.core.config"})
 public class BrokerApplication {
-    private static WeEventConfig weEventConfig;
-
     public static void main(String[] args) {
         /* Forbid banner.
         SpringApplicationBuilder builder = new SpringApplicationBuilder(BrokerApplication.class);
@@ -140,12 +137,7 @@ public class BrokerApplication {
         app.addListeners(new ApplicationPidFileWriter());
         app.run();
 
-        log.info("read from weevent.properties, {}", weEventConfig);
-    }
-
-    @Autowired
-    public void setWeEventConfig(WeEventConfig weEventConfig) {
-        BrokerApplication.weEventConfig = weEventConfig;
+        log.info("start broker success");
     }
 
     // tomcat configuration to enhance performance
