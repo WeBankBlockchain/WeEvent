@@ -20,7 +20,7 @@ import com.webank.weevent.core.fabric.sdk.FabricDelegate;
 import com.webank.weevent.core.fisco.FiscoBcosBroker4Consumer;
 import com.webank.weevent.core.fisco.FiscoBcosBroker4Producer;
 import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegate;
-import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.client.BrokerException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.googlecode.jsonrpc4j.ErrorResolver;

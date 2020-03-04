@@ -9,10 +9,10 @@ import com.webank.weevent.core.dto.QueryEntity;
 import com.webank.weevent.core.dto.TbBlock;
 import com.webank.weevent.core.dto.TbNode;
 import com.webank.weevent.core.dto.TbTransHash;
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.TopicInfo;
-import com.webank.weevent.sdk.TopicPage;
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.TopicInfo;
+import com.webank.weevent.client.TopicPage;
+import com.webank.weevent.client.WeEvent;
 
 /**
  * Base interface for topic admin.

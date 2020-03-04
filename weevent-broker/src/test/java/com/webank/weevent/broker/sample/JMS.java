@@ -12,9 +12,9 @@ import javax.jms.TopicPublisher;
 import javax.jms.TopicSession;
 import javax.jms.TopicSubscriber;
 
-import com.webank.weevent.sdk.WeEvent;
-import com.webank.weevent.sdk.jms.WeEventConnectionFactory;
-import com.webank.weevent.sdk.jms.WeEventTopic;
+import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.client.jms.WeEventConnectionFactory;
+import com.webank.weevent.client.jms.WeEventTopic;
 
 
 /**
