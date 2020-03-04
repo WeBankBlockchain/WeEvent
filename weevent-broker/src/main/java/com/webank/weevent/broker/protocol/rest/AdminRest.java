@@ -7,17 +7,17 @@ import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.broker.config.BuildInfo;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.core.IConsumer;
 import com.webank.weevent.core.dto.ContractContext;
 import com.webank.weevent.core.dto.GroupGeneral;
 import com.webank.weevent.core.dto.ListPage;
 import com.webank.weevent.core.dto.QueryEntity;
+import com.webank.weevent.core.dto.SubscriptionInfo;
 import com.webank.weevent.core.dto.TbBlock;
 import com.webank.weevent.core.dto.TbNode;
 import com.webank.weevent.core.dto.TbTransHash;
-import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.client.ErrorCode;
-import com.webank.weevent.client.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -83,17 +83,16 @@ public class AdminRest {
     }
 
     @RequestMapping(path = "/listSubscription")
-    public ResponseData<Map<String, Object>> listSubscription(@RequestParam(name = "nodeIp") String nodeIp,
-                                                              @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+    public ResponseData<Map<String, SubscriptionInfo>> listSubscription(@RequestParam(name = "nodeIp") String nodeIp,
+                                                                        @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         log.info("groupId:{}, nodeIp:{}", groupId, nodeIp);
 
-        ResponseData<Map<String, Object>> responseData = new ResponseData<>();
         if (StringUtils.isBlank(nodeIp)) {
             log.error("node ipList is null.");
             throw new BrokerException("node ipList is null.");
         }
 
-        Map<String, Object> nodesInfo = new HashMap<>();
+        Map<String, SubscriptionInfo> nodesInfo = new HashMap<>();
         try {
             log.info("zookeeper ip List:{}", nodeIp);
             String[] ipList = nodeIp.split(",");
@@ -104,9 +103,9 @@ public class AdminRest {
                     String url = ipStr + "/weevent-broker/admin/innerListSubscription?groupId=" + groupId;
                     log.info("url:{}", url);
 
-                    ResponseEntity<String> rsp = rest.getForEntity(url, String.class);
-                    log.debug("innerListSubscription:{}", JsonHelper.json2Object(rsp.getBody(), Object.class));
-                    nodesInfo.put(nodeIp, JsonHelper.json2Object(rsp.getBody(), Object.class));
+                    ResponseEntity<SubscriptionInfo> rsp = rest.getForEntity(url, SubscriptionInfo.class);
+                    log.debug("innerListSubscription:{}", rsp.getBody());
+                    nodesInfo.put(nodeIp, rsp.getBody());
                 }
             }
         } catch (Exception e) {
@@ -114,13 +113,14 @@ public class AdminRest {
             throw new BrokerException("find subscriptionList fail", e);
         }
 
+        ResponseData<Map<String, SubscriptionInfo>> responseData = new ResponseData<>();
         responseData.setErrorCode(ErrorCode.SUCCESS);
         responseData.setData(nodesInfo);
         return responseData;
     }
 
     @RequestMapping(path = "/innerListSubscription")
-    public Map<String, Object> innerListSubscription(@RequestParam(name = "groupId") String groupId) throws BrokerException {
+    public Map<String, SubscriptionInfo> innerListSubscription(@RequestParam(name = "groupId") String groupId) throws BrokerException {
         log.info("groupId:{}", groupId);
 
         return this.consumer.listSubscription(groupId);
