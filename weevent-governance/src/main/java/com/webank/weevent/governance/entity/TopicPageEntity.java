@@ -1,9 +1,11 @@
 package com.webank.weevent.governance.entity;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 
-@Data
+@Setter
+@Getter
 public class TopicPageEntity {
 
     private String groupId;

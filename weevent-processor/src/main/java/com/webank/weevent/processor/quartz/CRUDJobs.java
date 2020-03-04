@@ -6,8 +6,8 @@ import java.util.Date;
 import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.processor.cache.CEPRuleCache;
 import com.webank.weevent.processor.model.CEPRule;
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.JsonHelper;
+import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.client.BrokerException;
 
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
