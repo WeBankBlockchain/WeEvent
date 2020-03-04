@@ -30,7 +30,7 @@ public class ForwardController {
     }
 
 
-    @RequestMapping(value = "/weevent-broker/admin/testListGroup", method = RequestMethod.GET)
+    @RequestMapping(value = "/admin/testListGroup", method = RequestMethod.GET)
     public Object forward(HttpServletRequest request, HttpServletResponse response, @RequestParam("brokerUrl") String brokerUrl) throws GovernanceException {
         String forwardUrl = brokerUrl + ConstantProperties.REST_LIST_SUBSCRIPTION;
         try {

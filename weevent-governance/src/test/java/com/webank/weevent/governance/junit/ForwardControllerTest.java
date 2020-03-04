@@ -46,7 +46,7 @@ public class ForwardControllerTest extends JUnitTestBase {
 
     @Test
     public void testGroupList() throws Exception {
-        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.get("/weevent-broker/admin/testListGroup?brokerUrl=" + brokerUrl).contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token))
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.get("/admin/testListGroup?brokerUrl=" + brokerUrl).contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token))
                 .andReturn().getResponse();
         String contentAsString = response.getContentAsString();
         Assert.assertEquals(response.getStatus(), 200);
