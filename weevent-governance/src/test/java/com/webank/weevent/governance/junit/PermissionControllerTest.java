@@ -3,7 +3,7 @@ package com.webank.weevent.governance.junit;
 import java.util.Map;
 
 import com.webank.weevent.governance.JUnitTestBase;
-import com.webank.weevent.sdk.JsonHelper;
+import com.webank.weevent.client.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
