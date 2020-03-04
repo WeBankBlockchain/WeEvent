@@ -6,6 +6,7 @@ import com.webank.weevent.broker.protocol.mqtt.store.ISessionStore;
 import com.webank.weevent.broker.protocol.mqtt.store.ISubscribeStore;
 import com.webank.weevent.core.IConsumer;
 import com.webank.weevent.core.IProducer;
+import com.webank.weevent.core.config.FiscoConfig;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,8 +22,6 @@ public class ProtocolProcess {
     private Publish publish;
     private Subscribe subscribe;
     private UnSubscribe unSubscribe;
-    private IProducer iproducer;
-    private IConsumer iconsumer;
     private DisConnect disConnect;
     private PubRel pubRel;
     private PubAck pubAck;
@@ -30,14 +29,19 @@ public class ProtocolProcess {
     private PubComp pubComp;
     private PingReq pingReq;
 
-    @Autowired
+    // beans
+    private FiscoConfig fiscoConfig;
+    private IProducer iproducer;
+    private IConsumer iconsumer;
     private ISessionStore iSessionStore;
-    @Autowired
     private IAuthService iAuthService;
-    @Autowired
     private ISubscribeStore iSubscribeStore;
-    @Autowired
     private IMessageIdStore iMessageIdStore;
+
+    @Autowired
+    public void setFiscoConfig(FiscoConfig fiscoConfig) {
+        this.fiscoConfig = fiscoConfig;
+    }
 
     @Autowired
     public void setProducer(IProducer producer) {
@@ -47,6 +51,26 @@ public class ProtocolProcess {
     @Autowired
     public void setConsumer(IConsumer consumer) {
         this.iconsumer = consumer;
+    }
+
+    @Autowired
+    public void setiSessionStore(ISessionStore iSessionStore) {
+        this.iSessionStore = iSessionStore;
+    }
+
+    @Autowired
+    public void setiAuthService(IAuthService iAuthService) {
+        this.iAuthService = iAuthService;
+    }
+
+    @Autowired
+    public void setiSubscribeStore(ISubscribeStore iSubscribeStore) {
+        this.iSubscribeStore = iSubscribeStore;
+    }
+
+    @Autowired
+    public void setiMessageIdStore(IMessageIdStore iMessageIdStore) {
+        this.iMessageIdStore = iMessageIdStore;
     }
 
     public Connect connect() {
@@ -65,7 +89,7 @@ public class ProtocolProcess {
 
     public Publish publish() {
         if (publish == null) {
-            publish = new Publish(iproducer);
+            publish = new Publish(fiscoConfig, iproducer);
         }
         return publish;
     }
