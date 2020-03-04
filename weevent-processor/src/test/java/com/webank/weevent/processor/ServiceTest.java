@@ -3,7 +3,7 @@ package com.webank.weevent.processor;
 import java.util.Date;
 
 import com.webank.weevent.processor.model.CEPRule;
-import com.webank.weevent.sdk.JsonHelper;
+import com.webank.weevent.client.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
