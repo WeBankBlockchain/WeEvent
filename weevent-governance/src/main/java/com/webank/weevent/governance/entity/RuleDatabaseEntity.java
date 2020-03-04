@@ -7,8 +7,9 @@ import javax.validation.constraints.NotBlank;
 
 import com.webank.weevent.governance.entity.base.RuleDatabaseBase;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 
 /**
@@ -16,7 +17,8 @@ import org.hibernate.validator.constraints.Length;
  *
  * @since 2019/09/28
  */
-@Data
+@Setter
+@Getter
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "t_rule_database")
