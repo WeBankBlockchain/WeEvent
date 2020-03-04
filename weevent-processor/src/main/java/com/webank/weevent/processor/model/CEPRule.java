@@ -1,12 +1,13 @@
 package com.webank.weevent.processor.model;
 
-import java.io.Serializable;
 import java.util.Date;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-public class CEPRule implements Serializable {
+@Setter
+@Getter
+public class CEPRule {
     private String id;
 
     private String ruleName;

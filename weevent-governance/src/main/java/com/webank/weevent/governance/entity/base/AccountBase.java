@@ -4,15 +4,17 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotBlank;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * AccountBase class
  *
  * @since 2019/10/15
  */
-@Data
+@Setter
+@Getter
 @EqualsAndHashCode(callSuper = false)
 @MappedSuperclass
 public class AccountBase extends BaseEntity {

@@ -3,15 +3,17 @@ package com.webank.weevent.governance.entity.base;
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * RuleEngineBase class
  *
  * @since 2019/09/23
  */
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = false)
 @MappedSuperclass
 public class RuleEngineBase extends BaseEntity {

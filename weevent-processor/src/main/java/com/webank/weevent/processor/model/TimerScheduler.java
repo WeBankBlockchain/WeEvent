@@ -1,14 +1,15 @@
 package com.webank.weevent.processor.model;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.validation.constraints.NotNull;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-public class TimerScheduler implements Serializable {
+@Setter
+@Getter
+public class TimerScheduler {
 
     private String id;
 
