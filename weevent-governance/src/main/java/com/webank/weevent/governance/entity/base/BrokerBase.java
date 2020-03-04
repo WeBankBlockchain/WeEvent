@@ -4,8 +4,9 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.Min;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.validator.constraints.URL;
 
 /**
@@ -13,7 +14,8 @@ import org.hibernate.validator.constraints.URL;
  *
  * @since 2019/10/15
  */
-@Data
+@Setter
+@Getter
 @EqualsAndHashCode(callSuper = false)
 @MappedSuperclass
 public class BrokerBase extends BaseEntity {

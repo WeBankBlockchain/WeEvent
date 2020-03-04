@@ -5,15 +5,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.webank.weevent.broker.config.FiscoConfig;
-import com.webank.weevent.broker.fisco.web3sdk.v2.Web3SDKConnector;
-import com.webank.weevent.broker.plugin.IProducer;
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.ErrorCode;
-import com.webank.weevent.sdk.FileChunksMeta;
-import com.webank.weevent.sdk.JsonHelper;
-import com.webank.weevent.sdk.SendResult;
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.core.IProducer;
+import com.webank.weevent.core.config.FiscoConfig;
+import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
+import com.webank.weevent.client.FileChunksMeta;
+import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.client.SendResult;
+import com.webank.weevent.client.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.Service;
@@ -29,6 +29,7 @@ import org.fisco.bcos.channel.dto.ChannelResponse;
 public class FileTransportService {
     private final FiscoConfig fiscoConfig;
     private final IProducer producer;
+    private final int timeout;
     private final ZKChunksMeta zkChunksMeta;
     private final String host;
     private final int fileChunkSize;
@@ -47,6 +48,7 @@ public class FileTransportService {
                                 int fileChunkSize) throws BrokerException {
         this.fiscoConfig = fiscoConfig;
         this.producer = iProducer;
+        this.timeout = fiscoConfig.getWeb3sdkTimeout();
         this.zkChunksMeta = zkChunksMeta;
 
 
@@ -103,7 +105,7 @@ public class FileTransportService {
         extensions.put(WeEvent.WeEvent_FORMAT, "json");
         WeEvent startTransport = new WeEvent(fileChunksMeta.getTopic(), JsonHelper.object2JsonBytes(fileEvent), extensions);
 
-        SendResult sendResult = this.producer.publishSync(startTransport, fileChunksMeta.getGroupId());
+        SendResult sendResult = this.producer.publish(startTransport, fileChunksMeta.getGroupId(), this.timeout);
         log.info("send start WeEvent to receiver, result: {}", sendResult);
 
         // update to Zookeeper
@@ -135,7 +137,7 @@ public class FileTransportService {
         byte[] json = JsonHelper.object2JsonBytes(fileEvent);
         WeEvent weEvent = new WeEvent(fileChunksMeta.getTopic(), json, extensions);
 
-        return this.producer.publishSync(weEvent, fileChunksMeta.getGroupId());
+        return this.producer.publish(weEvent, fileChunksMeta.getGroupId(), this.timeout);
     }
 
     public void sendChunkData(String fileId, int chunkIndex, byte[] data) throws BrokerException {

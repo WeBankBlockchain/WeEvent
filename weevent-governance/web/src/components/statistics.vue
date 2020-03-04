@@ -198,6 +198,7 @@ export default {
       this.beginDate(true)
     },
     selectChange (e) {
+      console.log(e)
       if (!e) {
         let vm = this
         if (vm.topic.length === 0) {
