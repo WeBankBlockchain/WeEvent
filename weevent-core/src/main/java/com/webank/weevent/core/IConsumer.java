@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.core.dto.SubscriptionInfo;
 
 import lombok.NonNull;
 
@@ -128,5 +129,5 @@ public interface IConsumer extends IEventTopic {
      * @return subscription list if success
      * @throws BrokerException invalid input param
      */
-    Map<String, Object> listSubscription(String groupId) throws BrokerException;
+    Map<String, SubscriptionInfo> listSubscription(String groupId) throws BrokerException;
 }
