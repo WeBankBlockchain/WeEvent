@@ -1,16 +1,16 @@
 package com.webank.weevent.broker.fisco.file;
 
-import com.webank.weevent.BrokerApplication;
-import com.webank.weevent.JUnitTestBase;
-import com.webank.weevent.broker.fisco.util.WeEventUtils;
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.FileChunksMeta;
+import com.webank.weevent.broker.JUnitTestBase;
+import com.webank.weevent.core.fisco.util.WeEventUtils;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.FileChunksMeta;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * ZKChunksMeta Tester.
@@ -24,13 +24,16 @@ public class ZKChunksMetaTest extends JUnitTestBase {
     private ZKChunksMeta zkChunksMeta;
     private FileChunksMeta fileChunksMeta;
 
+    @Autowired
+    public void setZkChunksMeta(ZKChunksMeta zkChunksMeta) {
+        this.zkChunksMeta = zkChunksMeta;
+    }
+
     @Before
     public void before() throws Exception {
         log.info("=============================={}.{}==============================",
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
-
-        this.zkChunksMeta = BrokerApplication.applicationContext.getBean(ZKChunksMeta.class);
 
         this.fileChunksMeta = new FileChunksMeta(WeEventUtils.generateUuid(),
                 "abc.txt",
