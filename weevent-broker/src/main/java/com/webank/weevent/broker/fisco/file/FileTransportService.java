@@ -5,15 +5,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.webank.weevent.core.IProducer;
-import com.webank.weevent.core.config.FiscoConfig;
-import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.FileChunksMeta;
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.client.SendResult;
 import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.core.IProducer;
+import com.webank.weevent.core.config.FiscoConfig;
+import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
 
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.Service;
@@ -85,14 +85,16 @@ public class FileTransportService {
     // CGI interface
 
     // called by sender cgi
-    public void openChannel(FileChunksMeta fileChunksMeta) throws BrokerException {
+    public FileChunksMeta openChannel(FileChunksMeta fileChunksMeta) throws BrokerException {
         if (this.fileTransportContexts.containsKey(fileChunksMeta.getFileId())) {
             log.error("already exist file context, fileId: {}", fileChunksMeta.getFileId());
-            return;
+            throw new BrokerException(ErrorCode.FILE_EXIST_CONTEXT);
         }
 
-        fileChunksMeta.setChunkSize(this.fileChunkSize);
-        fileChunksMeta.setHost(this.host);
+        // sender side DO NOT need chunk size, skip to minimize memory use
+        // fileChunksMeta.setChunkSize(this.fileChunkSize);
+        // sender side can fail over automatic
+        // fileChunksMeta.setHost(this.host);
 
         // check channel is exist
         this.getChannel(fileChunksMeta.getGroupId());
@@ -108,26 +110,79 @@ public class FileTransportService {
         SendResult sendResult = this.producer.publish(startTransport, fileChunksMeta.getGroupId(), this.timeout);
         log.info("send start WeEvent to receiver, result: {}", sendResult);
 
-        // update to Zookeeper
+        // cache chunk meta
         this.zkChunksMeta.addChunks(fileChunksMeta.getFileId(), fileChunksMeta);
-
         this.fileTransportContexts.put(fileChunksMeta.getFileId(), fileChunksMeta);
+
+        // get remote chunk meta from receiver
+        return this.getRemoteFileChunksMeta(fileChunksMeta.getTopic(), fileChunksMeta.getGroupId(), fileChunksMeta.getFileId());
+    }
+
+    // sender side can fail over automatic
+    private FileChunksMeta getSenderFileChunksMeta(String fileId) throws BrokerException {
+        FileChunksMeta fileChunksMeta = null;
+        if (this.fileTransportContexts.containsKey(fileId)) {
+            log.info("get file context in memory");
+            fileChunksMeta = this.fileTransportContexts.get(fileId);
+        } else {
+            if (this.zkChunksMeta.existChunks(fileId)) {
+                log.info("get file context from zookeeper");
+                fileChunksMeta = this.zkChunksMeta.getChunks(fileId);
+            }
+        }
+        return fileChunksMeta;
+    }
+
+    // get remote chunk meta from receiver
+    public FileChunksMeta getRemoteFileChunksMeta(String topic, String groupId, String fileId) throws BrokerException {
+        String amopTopic = AMOPChannel.genTopic(topic);
+        AMOPChannel channel = this.getChannel(groupId);
+        FileChunksMeta remoteFileChunksMeta = channel.getReceiverFileContext(amopTopic, fileId);
+        if (remoteFileChunksMeta == null) {
+            log.error("not exist receive file context, haven't ready");
+            throw new BrokerException(ErrorCode.FILE_RECEIVE_CONTEXT_NOT_READY);
+        }
+
+        // it's not used in sender side
+        remoteFileChunksMeta.setHost("");
+        return remoteFileChunksMeta;
+    }
+
+    public FileChunksMeta getRemoteFileChunksMeta(String fileId) throws BrokerException {
+        FileChunksMeta fileChunksMeta = this.getSenderFileChunksMeta(fileId);
+        if (fileChunksMeta == null) {
+            log.error("not exist file context, fileId: {}", fileId);
+            throw new BrokerException(ErrorCode.FILE_NOT_EXIST_CONTEXT);
+        }
+
+        // get remote chunk meta from receiver
+        String amopTopic = AMOPChannel.genTopic(fileChunksMeta.getTopic());
+        AMOPChannel channel = this.getChannel(fileChunksMeta.getGroupId());
+        FileChunksMeta remoteFileChunksMeta = channel.getReceiverFileContext(amopTopic, fileChunksMeta.getFileId());
+        if (remoteFileChunksMeta == null) {
+            log.error("not exist receive file context");
+            throw new BrokerException(ErrorCode.FILE_RECEIVE_CONTEXT_NOT_READY);
+        }
+
+        // it's not used in sender side
+        remoteFileChunksMeta.setHost("");
+        return remoteFileChunksMeta;
     }
 
     public SendResult closeChannel(String fileId) throws BrokerException {
         log.info("close AMOP sender channel for file, fileId: {}", fileId);
 
         SendResult sendResult = new SendResult(SendResult.SendResultStatus.ERROR);
-        if (!this.fileTransportContexts.containsKey(fileId)) {
+
+        FileChunksMeta fileChunksMeta = this.getSenderFileChunksMeta(fileId);
+        if (fileChunksMeta == null) {
             log.error("not exist file context, fileId: {}", fileId);
             return sendResult;
         }
 
-        FileChunksMeta fileChunksMeta = this.fileTransportContexts.get(fileId);
-        this.fileTransportContexts.remove(fileId);
-
-        // remove chunk meta data in zookeeper
+        // remove chunk data
         this.zkChunksMeta.removeChunks(fileId);
+        this.fileTransportContexts.remove(fileId);
 
         // send WeEvent to close receiver
         FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileTransportEnd, fileId);
@@ -141,24 +196,10 @@ public class FileTransportService {
     }
 
     public void sendChunkData(String fileId, int chunkIndex, byte[] data) throws BrokerException {
-        if (!this.fileTransportContexts.containsKey(fileId)) {
+        FileChunksMeta fileChunksMeta = this.getSenderFileChunksMeta(fileId);
+        if (fileChunksMeta == null) {
             log.error("not exist file context, fileId: {}", fileId);
             throw new BrokerException(ErrorCode.FILE_NOT_EXIST_CONTEXT);
-        }
-
-        FileChunksMeta fileChunksMeta = this.fileTransportContexts.get(fileId);
-        if (chunkIndex >= fileChunksMeta.getChunkNum()
-                || data.length > fileChunksMeta.getChunkSize()) {
-            log.error("invalid chunk data, skip");
-            throw new BrokerException(ErrorCode.FILE_INVALID_CHUNK);
-        }
-
-        // check receiver ready
-        String amopTopic = AMOPChannel.genTopic(fileChunksMeta.getTopic());
-        AMOPChannel channel = this.getChannel(fileChunksMeta.getGroupId());
-        if (!channel.checkReceiverFileContextAlready(amopTopic, fileId)) {
-            log.error("receive file context haven't ready");
-            throw new BrokerException(ErrorCode.FILE_RECEIVE_CONTEXT_NOT_READY);
         }
 
         log.info("send chunk data via AMOP channel, {}#{}", fileId, chunkIndex);
@@ -166,11 +207,12 @@ public class FileTransportService {
         FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileChannelData, fileId);
         fileEvent.setChunkIndex(chunkIndex);
         fileEvent.setChunkData(data);
+
+        String amopTopic = AMOPChannel.genTopic(fileChunksMeta.getTopic());
+        AMOPChannel channel = this.getChannel(fileChunksMeta.getGroupId());
         ChannelResponse rsp = channel.sendEvent(amopTopic, fileEvent);
         if (rsp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
-            log.info("sender chunk data to remote success, try to update FileChunksMeta in zookeeper");
-            FileChunksMeta updatedFileChunksMeta = JsonHelper.json2Object(rsp.getContentByteArray(), FileChunksMeta.class);
-            this.flushZKFileChunksMeta(updatedFileChunksMeta);
+            log.info("sender chunk data to remote success");
         } else {
             BrokerException e = AMOPChannel.toBrokerException(rsp);
             log.error("sender chunk data to remote failed", e);
@@ -194,7 +236,7 @@ public class FileTransportService {
     public void prepareReceiveFile(FileChunksMeta fileChunksMeta) {
         String fileId = fileChunksMeta.getFileId();
         if (this.fileTransportContexts.containsKey(fileId)) {
-            log.error("already exist file receiving context, fileId: {}", fileId);
+            log.warn("already exist file receiving context, fileId: {}", fileId);
             return;
         }
 
@@ -203,6 +245,8 @@ public class FileTransportService {
         try {
             // create local file
             this.diskFiles.createFixedLengthFile(fileId, fileChunksMeta.getFileSize());
+            // initialize chunk size
+            fileChunksMeta.setChunkSize(this.fileChunkSize);
             // set local host
             fileChunksMeta.setHost(this.host);
             this.diskFiles.saveFileMeta(fileChunksMeta);
@@ -212,8 +256,11 @@ public class FileTransportService {
         }
     }
 
-    public boolean existFileContext(String fileId) {
-        return this.fileTransportContexts.containsKey(fileId);
+    public FileChunksMeta getLocalFileContext(String fileId) {
+        if (this.fileTransportContexts.containsKey(fileId)) {
+            return this.fileTransportContexts.get(fileId);
+        }
+        return null;
     }
 
     public FileChunksMeta cleanUpReceivedFile(String fileId) {
@@ -243,28 +290,12 @@ public class FileTransportService {
     }
 
     // Notice: always believe FileChunksMeta in local file
-    public FileChunksMeta writeChunkData(FileEvent fileEvent) throws BrokerException {
+    public void writeChunkData(FileEvent fileEvent) throws BrokerException {
         if (!this.fileTransportContexts.containsKey(fileEvent.getFileId())) {
             log.error("not exist file receiving context, fileId: {}", fileEvent.getFileId());
             throw new BrokerException(ErrorCode.FILE_NOT_EXIST_CONTEXT);
         }
 
-        return this.diskFiles.writeChunkData(fileEvent.getFileId(), fileEvent.getChunkIndex(), fileEvent.getChunkData());
-    }
-
-    public FileChunksMeta getZKFileChunksMeta(String fileId) throws BrokerException {
-        return this.zkChunksMeta.getChunks(fileId);
-    }
-
-    public void flushZKFileChunksMeta(FileChunksMeta fileChunksMeta) throws BrokerException {
-        try {
-            boolean full = this.zkChunksMeta.updateChunks(fileChunksMeta.getFileId(), fileChunksMeta);
-            if (full) {
-                log.info("all chunk bit is set on, file complete {}", fileChunksMeta.getFileId());
-            }
-        } catch (BrokerException e) {
-            log.error("update FileChunksMeta in zookeeper failed", e);
-            throw e;
-        }
+        this.diskFiles.writeChunkData(fileEvent.getFileId(), fileEvent.getChunkIndex(), fileEvent.getChunkData());
     }
 }

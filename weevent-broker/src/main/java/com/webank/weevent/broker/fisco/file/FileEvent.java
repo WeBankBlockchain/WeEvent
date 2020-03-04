@@ -23,10 +23,11 @@ public class FileEvent {
         FileTransportEnd(2),
 
         // over AMOP channel
-        // receiver -> sender, check channel is already
-        FileChannelAlready(11),
+        // sender -> receiver, get file chunk meta
+        FileChannelStatus(11),
         // sender -> receiver, send file chunk data
-        FileChannelData(12);
+        FileChannelData(12),
+        ;
 
         private final int code;
 

@@ -114,7 +114,7 @@ public class DiskFiles {
         }
     }
 
-    public FileChunksMeta writeChunkData(String fileId, int chunkIndex, byte[] chunkData) throws BrokerException {
+    public void writeChunkData(String fileId, int chunkIndex, byte[] chunkData) throws BrokerException {
         // believe FileChunksMeta in local file
         FileChunksMeta fileChunksMeta = this.loadFileMeta(fileId);
         if (chunkIndex >= fileChunksMeta.getChunkNum()) {
@@ -143,8 +143,6 @@ public class DiskFiles {
         log.info("update FileChunksMeta in local file, {}@{}", localMetaFile, chunkIndex);
         fileChunksMeta.getChunkStatus().set(chunkIndex);
         saveFileMeta(fileChunksMeta);
-
-        return fileChunksMeta;
     }
 
     public byte[] readChunkData(String fileId, int chunkIndex) throws BrokerException {
