@@ -2,7 +2,7 @@ package com.webank.weevent.processor;
 
 
 import com.webank.weevent.processor.model.TimerScheduler;
-import com.webank.weevent.sdk.JsonHelper;
+import com.webank.weevent.client.JsonHelper;
 
 import org.junit.Before;
 import org.junit.Test;
