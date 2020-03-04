@@ -2,8 +2,8 @@ package com.webank.weevent.broker.fisco.file;
 
 import java.io.File;
 
-import com.webank.weevent.broker.fisco.util.WeEventUtils;
-import com.webank.weevent.sdk.FileChunksMeta;
+import com.webank.weevent.core.fisco.util.WeEventUtils;
+import com.webank.weevent.client.FileChunksMeta;
 
 import org.junit.After;
 import org.junit.Assert;

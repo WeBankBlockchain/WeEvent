@@ -21,8 +21,8 @@ import com.webank.weevent.governance.entity.TopicEntity;
 import com.webank.weevent.governance.entity.TopicPage;
 import com.webank.weevent.governance.entity.TopicPageEntity;
 import com.webank.weevent.governance.repository.TopicRepository;
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.JsonHelper;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;

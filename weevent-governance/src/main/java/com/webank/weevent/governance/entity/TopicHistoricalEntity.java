@@ -10,11 +10,13 @@ import javax.persistence.UniqueConstraint;
 
 import com.webank.weevent.governance.entity.base.TopicHistoricalBase;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 
-@Data
+@Setter
+@Getter
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "t_topic_historical",
