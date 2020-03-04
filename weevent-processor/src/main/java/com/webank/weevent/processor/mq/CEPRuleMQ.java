@@ -23,11 +23,11 @@ import com.webank.weevent.processor.utils.DataBaseUtil;
 import com.webank.weevent.processor.utils.RetCode;
 import com.webank.weevent.processor.utils.StatisticCEPRuleUtil;
 import com.webank.weevent.processor.utils.SystemFunctionUtil;
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.IWeEventClient;
-import com.webank.weevent.sdk.JsonHelper;
-import com.webank.weevent.sdk.SendResult;
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.IWeEventClient;
+import com.webank.weevent.client.SendResult;
+import com.webank.weevent.client.WeEvent;
 
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
