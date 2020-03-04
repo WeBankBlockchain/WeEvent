@@ -8,11 +8,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.processor.model.TimerScheduler;
 import com.webank.weevent.processor.utils.CommonUtil;
 import com.webank.weevent.processor.utils.ConstantsHelper;
+import com.webank.weevent.processor.utils.JsonUtil;
 import com.webank.weevent.processor.utils.RetCode;
-import com.webank.weevent.client.BrokerException;
 
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.CronScheduleBuilder;
@@ -47,19 +48,19 @@ public class TimerSchedulerService {
             Iterator<JobKey> jobKeyIterator = scheduler.getJobKeys(GroupMatcher.groupEquals(jobGroupName)).iterator();
             List<TimerScheduler> timerSchedulerList = new ArrayList<>();
             Map<String, TimerScheduler> timerSchedulerMap = new HashMap<>();
-            TimerScheduler currentTimer = (TimerScheduler) params.get("timer");
+            TimerScheduler currentTimer = JsonUtil.parseObject(params.get("timer").toString(), TimerScheduler.class);
             while (jobKeyIterator.hasNext()) {
                 JobKey jobKey = jobKeyIterator.next();
                 if (null != scheduler.getJobDetail(jobKey).getJobDataMap().get("timer")) {
                     TimerScheduler timer = (TimerScheduler) scheduler.getJobDetail(jobKey).getJobDataMap().get("timer");
                     // if the current is delete
                     timerSchedulerList.add(timer);
-                    timerSchedulerMap.put(timer.getSchedulerName(), timer);
+                    timerSchedulerMap.put(timer.getId(), timer);
                 }
             }
-            timerSchedulerMap.put(currentTimer.getSchedulerName(), currentTimer);
+            timerSchedulerMap.put(currentTimer.getId(), currentTimer);
             timerSchedulerList.add(currentTimer);
-            params.put("timerMap", timerSchedulerMap);
+            params.put("timerMap", JsonUtil.toJSONString(timerSchedulerMap));
             log.info("update the timer timerMap:{},ruleList:{}", timerSchedulerList.size(), timerSchedulerList.size());
 
             JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).storeDurably(true).build();
@@ -92,7 +93,7 @@ public class TimerSchedulerService {
     }
 
     private RetCode checkTimerTask(TimerScheduler timerScheduler, JobDataMap params, String jobName, String jobGroupName, String triggerName, String triggerGroupName) throws BrokerException, SchedulerException {
-        Connection dbcpConnection = CommonUtil.getDbcpConnection(timerScheduler.getDatabaseUrl(),timerScheduler.getDataBaseType());
+        Connection dbcpConnection = CommonUtil.getDbcpConnection(timerScheduler.getDatabaseUrl(), timerScheduler.getDataBaseType());
         if (dbcpConnection == null) {
             return RetCode.mark(1, "database connect fail,please enter the correct database URL");
         }
