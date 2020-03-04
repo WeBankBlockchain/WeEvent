@@ -1,12 +1,13 @@
 package com.webank.weevent.processor.model;
 
-import java.io.Serializable;
 import java.util.Map;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-public class StatisticWeEvent implements Serializable {
+@Setter
+@Getter
+public class StatisticWeEvent {
     private Integer systemAmount;
     private Integer userAmount;
     private Integer runAmount;
