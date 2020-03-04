@@ -9,15 +9,17 @@ import javax.validation.constraints.NotBlank;
 
 import com.webank.weevent.governance.entity.base.AccountBase;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * AccountEntity class
  *
  * @since 2019/04/28
  */
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "t_account")

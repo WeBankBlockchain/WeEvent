@@ -3,11 +3,13 @@ package com.webank.weevent.governance.entity.base;
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 
-@Data
+@Setter
+@Getter
 @EqualsAndHashCode(callSuper = false)
 @MappedSuperclass
 public class TopicHistoricalBase extends BaseEntity {

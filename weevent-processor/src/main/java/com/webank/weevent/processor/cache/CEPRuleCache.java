@@ -2,7 +2,7 @@ package com.webank.weevent.processor.cache;
 
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.mq.CEPRuleMQ;
-import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.client.BrokerException;
 
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;

@@ -40,7 +40,7 @@ public class JUnitTestBase {
 
 
     public String createToken() {
-        String token = JwtUtils.encodeToken("admin", GovernanceApplication.environment.getProperty("jwt.private.secret"), JwtUtils.EXPIRE_TIME);
+        String token = JwtUtils.encodeToken("admin", GovernanceApplication.governanceConfig.getPrivateSecret(), JwtUtils.EXPIRE_TIME);
         Security.setProperty(token, "1");
         return token;
     }

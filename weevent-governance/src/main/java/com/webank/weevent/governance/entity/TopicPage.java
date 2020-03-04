@@ -2,14 +2,16 @@ package com.webank.weevent.governance.entity;
 
 import java.util.List;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * TopicEntity data in page list.
  *
  * @since 2019/02/11
  */
-@Data
+@Setter
+@Getter
 public class TopicPage {
 
     private Integer total;
