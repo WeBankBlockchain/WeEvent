@@ -57,7 +57,7 @@ function confirm(){
 # chmod & dos2unix
 function set_permission(){
     cd ${out_path}
-    find -type f -regex  ".*\.\(sh\|ini\|properties\|xml\)" | xargs dos2unix
+    find -type f -regex  ".*\.\(sh\|ini\|properties\|xml\|yml\)" | xargs dos2unix
     find -type f -regex ".*\.\(sh\)" | xargs -t -i chmod +x {}
 }
 
