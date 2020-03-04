@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.webank.weevent.governance.JUnitTestBase;
 import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.utils.JwtUtils;
-import com.webank.weevent.sdk.JsonHelper;
+import com.webank.weevent.client.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
