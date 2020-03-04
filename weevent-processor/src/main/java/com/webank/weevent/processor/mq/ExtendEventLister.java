@@ -5,10 +5,10 @@ import java.util.Map;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.model.StatisticWeEvent;
 import com.webank.weevent.processor.utils.StatisticCEPRuleUtil;
-import com.webank.weevent.sdk.IWeEventClient;
-import com.webank.weevent.sdk.IWeEventClient.EventListener;
-import com.webank.weevent.sdk.JsonHelper;
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.client.IWeEventClient;
+import com.webank.weevent.client.IWeEventClient.EventListener;
+import com.webank.weevent.client.WeEvent;
 
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;

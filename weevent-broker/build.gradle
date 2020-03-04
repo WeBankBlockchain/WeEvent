@@ -12,7 +12,6 @@ dependencies {
     // spring boot
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.data:spring-data-commons:${springDataCommonsVersion}")
 
     // spring boot with log4j2
@@ -45,17 +44,13 @@ dependencies {
         // compile solidity
         exclude group: "org.ethereum", module: "solcJ-all"
     }
-    // web3sdk for FISCO-BCOS 1.3
-    implementation("org.fisco-bcos:web3sdk-weevent:${web3sdkVersion.fiscoV1}") {
-        exclude group: "org.slf4j", module: "slf4j-log4j12"
-        exclude group: "org.springframework"
-    }
 
     // fabric 1.4.4
     implementation("org.hyperledger.fabric-sdk-java:fabric-sdk-java:${fabricVersion}")
 
     // depend project
-    implementation project(path: ":weevent-client")
+    implementation(project(":weevent-client"))
+    implementation(project(":weevent-core"))
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     // JMS sample

@@ -4,11 +4,13 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Data
+@Getter
+@Setter
 public class GovernanceResult {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
