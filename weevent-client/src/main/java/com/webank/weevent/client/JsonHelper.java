@@ -32,9 +32,6 @@ public class JsonHelper {
     }
 
     public static Map<String, String> json2Map(String json) throws BrokerException {
-        if (StringUtils.isBlank(json)) {
-            return null;
-        }
         try {
             MapLikeType mapLikeType = OBJECT_MAPPER.getTypeFactory().constructMapLikeType(Map.class, String.class, String.class);
             return OBJECT_MAPPER.readValue(json, mapLikeType);
@@ -45,9 +42,6 @@ public class JsonHelper {
     }
 
     public static Map<String, Object> object2Map(String json) throws BrokerException {
-        if (StringUtils.isBlank(json)) {
-            return null;
-        }
         try {
             MapLikeType mapLikeType = OBJECT_MAPPER.getTypeFactory().constructMapLikeType(Map.class, String.class, Object.class);
             return OBJECT_MAPPER.readValue(json, mapLikeType);
