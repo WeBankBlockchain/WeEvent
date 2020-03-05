@@ -20,10 +20,10 @@ import com.webank.weevent.processor.quartz.QuartzManager;
 import com.webank.weevent.processor.utils.CommonUtil;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.DataBaseUtil;
-import com.webank.weevent.processor.utils.JsonUtil;
 import com.webank.weevent.processor.utils.RetCode;
 import com.webank.weevent.processor.utils.StatisticCEPRuleUtil;
 import com.webank.weevent.processor.utils.SystemFunctionUtil;
+import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.IWeEventClient;
 import com.webank.weevent.client.SendResult;
@@ -278,7 +278,7 @@ public class CEPRuleMQ {
                     } else {
                         return new Pair<>(ConstantsHelper.NOT_HIT_TIMES, entry.getValue().getId());
                     }
-                } catch (BrokerException | IOException e) {
+                } catch (BrokerException e) {
                     log.error(e.toString());
                     return new Pair<>(ConstantsHelper.LAST_FAIL_REASON, entry.getValue().getId());
                 }
@@ -287,9 +287,9 @@ public class CEPRuleMQ {
         return new Pair<>(ConstantsHelper.OTHER, "");
     }
 
-    private static boolean handleTheEqual(WeEvent eventMessage, String condition) throws IOException {
+    private static boolean handleTheEqual(WeEvent eventMessage, String condition) throws BrokerException {
         String eventContent = new String(eventMessage.getContent());
-        Map event = JsonUtil.parseObject(eventContent, Map.class);
+        Map event = JsonHelper.json2Object(eventContent, Map.class);
         String[] strs = condition.split("=");
         if (strs.length == 2) {
             // event contain left key
@@ -304,7 +304,7 @@ public class CEPRuleMQ {
         return false;
     }
 
-    private static boolean hitRuleEngine(CEPRule rule, WeEvent eventMessage) throws IOException {
+    private static boolean hitRuleEngine(CEPRule rule, WeEvent eventMessage) throws BrokerException {
         // String payload, WeEvent eventMessage, String condition
         String payload = rule.getPayload();
         String condition = rule.getConditionField();
@@ -316,7 +316,7 @@ public class CEPRuleMQ {
                 return true;
             } else if (CommonUtil.checkJson(eventContent, payload)) {
                 List<String> eventContentKeys = CommonUtil.getKeys(payload);
-                Map event = JsonUtil.parseObject(eventContent, Map.class);
+                Map event = JsonHelper.json2Object(eventContent, Map.class);
                 JexlEngine jexl = new JexlBuilder().create();
                 JexlContext context = setContext(event, eventContentKeys);
 
@@ -378,11 +378,11 @@ public class CEPRuleMQ {
     public static RetCode checkCondition(String payload, String condition) {
         try {
             List<String> payloadContentKeys = CommonUtil.getKeys(payload);
-            Map payloadJson = JsonUtil.parseObject(payload, Map.class);
+            Map payloadJson = JsonHelper.json2Object(payload, Map.class);
             JexlEngine jexl = new JexlBuilder().create();
 
             JexlContext context = setContext(payloadJson, payloadContentKeys);
-            Map event = JsonUtil.parseObject(payload, Map.class);
+            Map event = JsonHelper.json2Object(payload, Map.class);
             String[] strs = condition.split("=");
             boolean flag = false;
             if (strs.length == 2 && !(strs[0].contains("<") || strs[0].contains(">") || (strs[1].contains("<") || strs[1].contains(">")))) {
