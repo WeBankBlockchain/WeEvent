@@ -128,7 +128,7 @@ public class CommonUtil {
         List<String> keys = new ArrayList<>();
         try {
             Map<String, Object> map = JsonHelper.object2Map(objJson);
-            if (JsonHelper.isValid(objJson) && map != null) {
+            if (JsonHelper.isValid(objJson)) {
                 for (Map.Entry<String, Object> entry : map.entrySet()) {
                     keys.add(entry.getKey());
                 }
@@ -390,7 +390,7 @@ public class CommonUtil {
         // get all select field and value, and the select field must in eventContent, except the system parameter.
         for (String key : result) {
             sql.put(key, null);
-            if (eventContent != null && eventContent.containsKey(key)) {
+            if (eventContent.containsKey(key)) {
                 sql.put(key, eventContent.get(key).toString());
             }
             tags = setFlag(tags, key);
