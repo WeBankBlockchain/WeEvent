@@ -1,13 +1,12 @@
 package com.webank.weevent.processor.quartz;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.processor.cache.CEPRuleCache;
 import com.webank.weevent.processor.model.CEPRule;
-import com.webank.weevent.processor.utils.JsonUtil;
+import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.client.BrokerException;
 
 import javafx.util.Pair;
@@ -78,9 +77,9 @@ public class CRUDJobs implements Job {
                 if (1 == rule.getStatus() || 0 == rule.getStatus() || 2 == rule.getStatus()) {
                     CEPRuleCache.updateCEPRule(rule, ruleBak);
                 }
-                log.info("execute  job: {},rule:{},type:{}", jobName, JsonUtil.toJSONString(obj), type);
+                log.info("execute  job: {},rule:{},type:{}", jobName, JsonHelper.object2Json(obj), type);
             }
-        } catch (BrokerException | IOException | SchedulerException e) {
+        } catch (BrokerException | SchedulerException e) {
             log.error("BrokerException:{}", e.toString());
         }
 
