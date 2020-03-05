@@ -31,7 +31,7 @@ public class JsonHelper {
         return OBJECT_MAPPER;
     }
 
-    public static Map<String, String> json2Map(String json) {
+    public static Map<String, String> json2Map(String json) throws BrokerException {
         if (StringUtils.isBlank(json)) {
             return null;
         }
@@ -40,11 +40,11 @@ public class JsonHelper {
             return OBJECT_MAPPER.readValue(json, mapLikeType);
         } catch (Exception e) {
             log.error("parse extensions failed");
-            return null;
+            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
         }
     }
 
-    public static Map<String, Object> object2Map(String json) {
+    public static Map<String, Object> object2Map(String json) throws BrokerException {
         if (StringUtils.isBlank(json)) {
             return null;
         }
@@ -53,7 +53,7 @@ public class JsonHelper {
             return OBJECT_MAPPER.readValue(json, mapLikeType);
         } catch (Exception e) {
             log.error("parse extensions failed");
-            return null;
+            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
         }
     }
 
