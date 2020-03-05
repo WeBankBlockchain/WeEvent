@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
+
+import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.JsonHelper;
 
 import javafx.util.Pair;
@@ -41,7 +43,7 @@ public class SystemFunctionUtil {
     }
 
     public static String analysisSystemFunction(String[][] systemFunctionMessage, String payload, String
-            conditionField) {
+            conditionField) throws BrokerException {
 
         Map maps = JsonHelper.object2Map(payload);
         Map<String, Object> payloadMap = new ConcurrentHashMap<>();
