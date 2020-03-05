@@ -8,8 +8,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.common.ConstantCode;
 import com.webank.weevent.governance.entity.BaseResponse;
-import com.webank.weevent.governance.utils.JsonUtil;
 import com.webank.weevent.governance.utils.JwtUtils;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -32,7 +33,11 @@ public class JsonLogoutSuccessHandler implements LogoutSuccessHandler {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.SUCCESS);
 
         response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(JsonUtil.toJSONString(baseResponse));
+        try {
+            response.getWriter().write(JsonHelper.object2Json(baseResponse));
+        } catch (BrokerException e) {
+            log.error("Code: " + e.getCode() + ", " + e.getMessage());
+        }
     }
 
 }

@@ -3,7 +3,7 @@ package com.webank.weevent.processor;
 import java.util.Date;
 
 import com.webank.weevent.processor.model.CEPRule;
-import com.webank.weevent.processor.utils.JsonUtil;
+import com.webank.weevent.client.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
@@ -67,7 +67,7 @@ public class ConditionTest {
         rule.setConditionField("c<20 or a==10");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -80,7 +80,7 @@ public class ConditionTest {
         rule.setConditionField("c<20 or a==10");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -93,7 +93,7 @@ public class ConditionTest {
 
         rule.setFromDestination("test.fromDestination");
         rule.setConditionType(1);
-        RequestBuilder requestBuilder1 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder1 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result1 = mockMvc.perform(requestBuilder1).andDo(print()).andReturn();
         assertEquals(200, result1.getResponse().getStatus());
         log.info("result:{}", result1);
@@ -113,7 +113,7 @@ public class ConditionTest {
         rule.setConditionField("c<20 and a>10");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -126,7 +126,7 @@ public class ConditionTest {
         rule.setConditionField("c<20 or a==10");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -139,7 +139,7 @@ public class ConditionTest {
         rule.setConditionField("c<20 or a==10");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -152,7 +152,7 @@ public class ConditionTest {
         rule.setConditionField("");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -165,7 +165,7 @@ public class ConditionTest {
         rule.setConditionField("c>20");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -179,7 +179,7 @@ public class ConditionTest {
         rule.setConditionField("c>20");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result:{}", result);
@@ -192,7 +192,7 @@ public class ConditionTest {
         rule.setConditionField("c>20");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result:{}", result);
@@ -210,7 +210,7 @@ public class ConditionTest {
         rule.setConditionField("");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result:{}", result);
@@ -223,7 +223,7 @@ public class ConditionTest {
         rule.setConditionField("");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -237,7 +237,7 @@ public class ConditionTest {
         rule.setConditionField("c<20");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -250,7 +250,7 @@ public class ConditionTest {
         rule.setConditionField("c<20");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -264,13 +264,13 @@ public class ConditionTest {
         rule.setConditionField("c<10");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
 
         rule.setSelectField("a,b,c");
-        RequestBuilder requestBuilder2 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder2 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result2 = mockMvc.perform(requestBuilder2).andDo(print()).andReturn();
         assertEquals(200, result2.getResponse().getStatus());
     }
@@ -284,7 +284,7 @@ public class ConditionTest {
         rule.setConditionField("c<20");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -298,7 +298,7 @@ public class ConditionTest {
         rule.setConditionField("c<20");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -313,7 +313,7 @@ public class ConditionTest {
         rule.setConditionField("c<20");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -327,7 +327,7 @@ public class ConditionTest {
         rule.setConditionField("c==10");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -342,7 +342,7 @@ public class ConditionTest {
         rule.setConditionField("c==10 and a>10 or a<1");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -357,7 +357,7 @@ public class ConditionTest {
         rule.setConditionField("c==10 and a>10");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -373,7 +373,7 @@ public class ConditionTest {
         rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -389,7 +389,7 @@ public class ConditionTest {
         rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -405,7 +405,7 @@ public class ConditionTest {
         rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -422,7 +422,7 @@ public class ConditionTest {
         rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -439,7 +439,7 @@ public class ConditionTest {
         rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -458,7 +458,7 @@ public class ConditionTest {
         rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -476,7 +476,7 @@ public class ConditionTest {
         rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result);
@@ -494,7 +494,7 @@ public class ConditionTest {
         rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         assertEquals(200, result.getResponse().getStatus());
         log.info("result3:{}", result.getResponse().getContentAsString());
@@ -520,7 +520,7 @@ public class ConditionTest {
         rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getStatus());
         assertEquals(200, result3.getResponse().getStatus());
@@ -537,7 +537,7 @@ public class ConditionTest {
         rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getContentAsString());
         assertEquals(200, result3.getResponse().getStatus());
@@ -562,7 +562,7 @@ public class ConditionTest {
         rule.setTableName("fromIfttt");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getContentAsString());
         assertEquals(200, result3.getResponse().getStatus());
@@ -577,7 +577,7 @@ public class ConditionTest {
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
 
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getContentAsString());
         assertEquals(200, result3.getResponse().getStatus());
@@ -592,7 +592,7 @@ public class ConditionTest {
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
 
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getContentAsString());
         assertEquals(200, result3.getResponse().getStatus());
@@ -607,7 +607,7 @@ public class ConditionTest {
         rule.setFunctionArray(arr);
         rule.setConditionType(1);
 
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getContentAsString());
         assertEquals(200, result3.getResponse().getStatus());
@@ -623,7 +623,7 @@ public class ConditionTest {
         rule.setToDestination("to.com.weevent.test");
         rule.setFunctionArray(arr);
         rule.setConditionType(2);
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result.getResponse().getContentAsString());
         assertEquals(200, result.getResponse().getStatus());
@@ -647,7 +647,7 @@ public class ConditionTest {
         rule.setConditionType(2);
         rule.setId("20191230");
 
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getContentAsString());
         assertEquals(200, result3.getResponse().getStatus());
@@ -664,7 +664,7 @@ public class ConditionTest {
         rule.setConditionType(2);
         rule.setId("20191230");
 
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getContentAsString());
         assertEquals(200, result3.getResponse().getStatus());
@@ -680,7 +680,7 @@ public class ConditionTest {
         rule.setConditionType(2);
         rule.setId("20191230");
 
-        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJSONString(rule));
+        RequestBuilder requestBuilder3 = MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.object2Json(rule));
         MvcResult result3 = mockMvc.perform(requestBuilder3).andDo(print()).andReturn();
         log.info("result3:{}", result3.getResponse().getContentAsString());
         assertEquals(200, result3.getResponse().getStatus());
