@@ -47,14 +47,10 @@ public class SystemFunctionUtil {
 
         Map maps = JsonHelper.object2Map(payload);
         Map<String, Object> payloadMap = new ConcurrentHashMap<>();
-        if (maps != null) {
-            for (Object map : maps.entrySet()) {
-                payloadMap.put((String) ((Map.Entry) map).getKey(), ((Map.Entry) map).getValue());
-            }
-            return replaceCondition(systemFunctionMessage, conditionField, payloadMap);
-        } else {
-            return null;
+        for (Object map : maps.entrySet()) {
+            payloadMap.put((String) ((Map.Entry) map).getKey(), ((Map.Entry) map).getValue());
         }
+        return replaceCondition(systemFunctionMessage, conditionField, payloadMap);
     }
 
     public static boolean isDouble(String str) {
