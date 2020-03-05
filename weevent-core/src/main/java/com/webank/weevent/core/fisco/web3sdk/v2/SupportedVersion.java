@@ -192,7 +192,7 @@ public class SupportedVersion {
         return true;
     }
 
-    public static WeEvent decodeWeEvent(TransactionReceipt receipt, int version, Map<String, Contract> historyTopic) {
+    public static WeEvent decodeWeEvent(TransactionReceipt receipt, int version, Map<String, Contract> historyTopic) throws BrokerException {
         // support version list
         switch (version) {
             case 10:
