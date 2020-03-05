@@ -114,7 +114,7 @@ public class QuartzManager {
                 ruleBak = new Pair<>(getJobDetail(jobName), currentRule);
             }
             // add latest one
-            params.put("ruleBak", ruleBak);
+            params.put("ruleBak", ruleBak == null ? null : JsonUtil.toJSONString(ruleBak));
 
             JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).storeDurably(true).build();
             // just do one time
@@ -209,7 +209,7 @@ public class QuartzManager {
      */
     public CEPRule getJobDetail(String jobName) throws SchedulerException, IOException {
         JobDetail job = scheduler.getJobDetail(new JobKey(jobName, "rule"));
-        if (StringUtils.isEmpty(job.getJobDataMap().get("rule"))) {
+        if (!StringUtils.isEmpty(job.getJobDataMap().get("rule"))) {
             return JsonUtil.parseObject(job.getJobDataMap().get("rule").toString(), CEPRule.class);
         }
         return null;
