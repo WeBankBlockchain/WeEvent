@@ -80,32 +80,55 @@ public class AMOPChannel extends ChannelPushCallback {
         }
     }
 
+    public FileChunksMeta createReceiverFileContext(FileChunksMeta fileChunksMeta) throws BrokerException {
+        if (this.subTopics.containsKey(fileChunksMeta.getTopic())) {
+            log.error("this side is already for receiving, topic: {}", fileChunksMeta.getTopic());
+            throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
+        }
+
+        String amopTopic = AMOPChannel.genTopic(fileChunksMeta.getTopic());
+        FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileChannelStart, fileChunksMeta.getFileId());
+        fileEvent.setFileChunksMeta(fileChunksMeta);
+        ChannelResponse rsp = this.sendEvent(amopTopic, fileEvent);
+        if (rsp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
+            log.info("create remote file context success");
+            FileChunksMeta remoteFileChunksMeta = JsonHelper.json2Object(rsp.getContentByteArray(), FileChunksMeta.class);
+            this.senderTopics.put(fileChunksMeta.getTopic(), true);
+            return remoteFileChunksMeta;
+        }
+
+        log.error("create remote file context failed");
+        throw toBrokerException(rsp);
+    }
+
+    public void cleanUpReceiverFileContext(FileChunksMeta fileChunksMeta) throws BrokerException {
+        String amopTopic = AMOPChannel.genTopic(fileChunksMeta.getTopic());
+        FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileChannelEnd, fileChunksMeta.getFileId());
+        ChannelResponse rsp = this.sendEvent(amopTopic, fileEvent);
+        if (rsp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
+            log.info("clean up receiver file context success");
+        } else {
+            log.error("clean up remote file context failed");
+            throw toBrokerException(rsp);
+        }
+    }
+
     public FileChunksMeta getReceiverFileContext(String topic, String fileId) throws BrokerException {
         if (this.subTopics.containsKey(topic)) {
             log.error("this side is already for receiving, topic: {}", topic);
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
         }
 
-        int times = 0;
-        while (times < 5) {
-            ChannelResponse rsp = this.sendEvent(topic, new FileEvent(FileEvent.EventType.FileChannelStatus, fileId));
-            if (rsp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
-                log.info("receive file context is ready, go");
-                FileChunksMeta fileChunksMeta = JsonHelper.json2Object(rsp.getContentByteArray(), FileChunksMeta.class);
-                this.senderTopics.put(topic, true);
-                return fileChunksMeta;
-            }
-            log.error("receive file context is not ready, idle to try again");
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                log.error("sleep Interrupted");
-                break;
-            }
-            times++;
+        ChannelResponse rsp = this.sendEvent(topic, new FileEvent(FileEvent.EventType.FileChannelStatus, fileId));
+        if (rsp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
+            log.info("receive file context is ready, go");
+            FileChunksMeta fileChunksMeta = JsonHelper.json2Object(rsp.getContentByteArray(), FileChunksMeta.class);
+            this.senderTopics.put(topic, true);
+            return fileChunksMeta;
         }
 
-        return null;
+        log.error("receive file context is not exist");
+        throw toBrokerException(rsp);
     }
 
     public ChannelResponse sendEvent(String topic, FileEvent fileEvent) throws BrokerException {
@@ -147,45 +170,69 @@ public class AMOPChannel extends ChannelPushCallback {
         }
 
         log.info("received file event on channel, {}", fileEvent);
+        ChannelResponse channelResponse;
         switch (fileEvent.getEventType()) {
-            case FileChannelStatus:
-                log.info("get {}", fileEvent.getEventType());
+            case FileChannelStart: {
+                log.info("get {}, try to initialize context for receiving file", fileEvent.getEventType());
+                try {
+                    FileChunksMeta fileChunksMeta = this.fileTransportService.prepareReceiveFile(fileEvent.getFileChunksMeta());
+                    log.info("create file context success, fileId: {}", fileEvent.getFileId());
 
-                ChannelResponse channelResponse;
-                FileChunksMeta fileChunksMeta = this.fileTransportService.getLocalFileContext(fileEvent.getFileId());
-                if (fileChunksMeta != null) {
-                    log.info("exist file context, fileId: {}", fileEvent.getFileId());
-                    try {
-                        byte[] json = JsonHelper.object2JsonBytes(fileChunksMeta);
-                        channelResponse = AMOPChannel.toChannelResponse(ErrorCode.SUCCESS, json);
-                    } catch (BrokerException e) {
-                        log.error("encode ChannelResponse failed", e);
-                        channelResponse = AMOPChannel.toChannelResponse(ErrorCode.JSON_ENCODE_EXCEPTION);
-                    }
-                } else {
-                    log.error("not exist file context, fileId: {}", fileEvent.getFileId());
-                    channelResponse = AMOPChannel.toChannelResponse(ErrorCode.FILE_NOT_EXIST_CONTEXT);
+                    byte[] json = JsonHelper.object2JsonBytes(fileChunksMeta);
+                    channelResponse = AMOPChannel.toChannelResponse(ErrorCode.SUCCESS, json);
+                } catch (BrokerException e) {
+                    log.error("create file context failed, fileId: {}", fileEvent.getFileId());
+                    channelResponse = AMOPChannel.toChannelResponse(e);
                 }
-                push.sendResponse(channelResponse);
-                break;
+            }
+            break;
 
-            case FileChannelData:
+            case FileChannelStatus: {
+                log.info("get {}", fileEvent.getEventType());
+                try {
+                    FileChunksMeta fileChunksMeta = this.fileTransportService.loadFileChunksMeta(fileEvent.getFileId());
+                    log.info("exist file context, fileId: {}", fileEvent.getFileId());
+
+                    byte[] json = JsonHelper.object2JsonBytes(fileChunksMeta);
+                    channelResponse = AMOPChannel.toChannelResponse(ErrorCode.SUCCESS, json);
+                } catch (BrokerException e) {
+                    log.error("load file context failed", e);
+                    channelResponse = AMOPChannel.toChannelResponse(e);
+                }
+            }
+            break;
+
+            case FileChannelData: {
                 log.info("get {}, try to write chunk data in local file", fileEvent.getEventType());
-
                 try {
                     this.fileTransportService.writeChunkData(fileEvent);
-                    ChannelResponse rsp = AMOPChannel.toChannelResponse(ErrorCode.SUCCESS);
-                    push.sendResponse(rsp);
+                    channelResponse = AMOPChannel.toChannelResponse(ErrorCode.SUCCESS);
                 } catch (BrokerException e) {
-                    log.error("write chunk data in local file exception", e);
-                    push.sendResponse(AMOPChannel.toChannelResponse(e));
+                    log.error("write chunk data in local file failed", e);
+                    channelResponse = AMOPChannel.toChannelResponse(e);
                 }
-                break;
+            }
+            break;
+
+            case FileChannelEnd: {
+                log.info("get {}, try to clean up file context", fileEvent.getEventType());
+                try {
+                    this.fileTransportService.cleanUpReceivedFile(fileEvent.getFileId());
+                    channelResponse = AMOPChannel.toChannelResponse(ErrorCode.SUCCESS);
+                } catch (BrokerException e) {
+                    log.error("clean up not complete file failed", e);
+                    channelResponse = AMOPChannel.toChannelResponse(e);
+                }
+            }
+            break;
 
             default:
                 log.error("unknown file event type on channel");
+                channelResponse = AMOPChannel.toChannelResponse(ErrorCode.UNKNOWN_ERROR);
                 break;
         }
+
+        push.sendResponse(channelResponse);
     }
 
     private static ChannelResponse toChannelResponse(ErrorCode errorCode) {

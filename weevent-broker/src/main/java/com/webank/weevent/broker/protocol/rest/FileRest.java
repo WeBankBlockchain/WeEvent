@@ -129,7 +129,7 @@ public class FileRest {
         ParamCheckUtils.validateFileId(fileId);
 
         // get file chunks info from Zookeeper
-        FileChunksMeta fileChunksMeta = this.fileTransportService.getRemoteFileChunksMeta(fileId);
+        FileChunksMeta fileChunksMeta = this.fileTransportService.getReceiverFileChunksMeta(fileId);
 
         return BaseResponse.buildSuccess(fileChunksMeta);
     }
