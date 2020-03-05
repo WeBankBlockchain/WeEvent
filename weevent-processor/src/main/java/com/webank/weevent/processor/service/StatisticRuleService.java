@@ -1,5 +1,6 @@
 package com.webank.weevent.processor.service;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ public class StatisticRuleService {
             for (String id : idList) {
                 // check the id
                 if (statisticWeEvent.getStatisticRuleMap().containsKey(id)) {
-                    statisticRuleMap.put(id,statisticWeEvent.getStatisticRuleMap().get(id));
+                    statisticRuleMap.put(id, statisticWeEvent.getStatisticRuleMap().get(id));
                 }
             }
             // set the run rule map
@@ -42,7 +43,7 @@ public class StatisticRuleService {
         try {
             StatisticWeEvent statisticJobs = quartzManager.getStatisticJobs(statisticWeEvent, idList);
             return statisticJobs;
-        } catch (SchedulerException e) {
+        } catch (SchedulerException | IOException e) {
             return null;
         }
     }

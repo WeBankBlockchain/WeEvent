@@ -1,5 +1,7 @@
 package com.webank.weevent.processor.cache;
 
+import java.io.IOException;
+
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.mq.CEPRuleMQ;
 import com.webank.weevent.client.BrokerException;
@@ -12,7 +14,7 @@ import org.quartz.SchedulerException;
 @Slf4j
 public class CEPRuleCache {
 
-    public static void updateCEPRule(CEPRule rule, Pair<CEPRule, CEPRule> ruleBak) throws BrokerException, SchedulerException {
+    public static void updateCEPRule(CEPRule rule, Pair<CEPRule, CEPRule> ruleBak) throws BrokerException, SchedulerException, IOException {
         CEPRuleMQ.updateSubscribeMsg(rule, ruleBak);
     }
 
