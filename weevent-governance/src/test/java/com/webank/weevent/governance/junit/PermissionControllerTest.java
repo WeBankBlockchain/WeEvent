@@ -3,7 +3,7 @@ package com.webank.weevent.governance.junit;
 import java.util.Map;
 
 import com.webank.weevent.governance.JUnitTestBase;
-import com.webank.weevent.governance.utils.JsonUtil;
+import com.webank.weevent.client.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
@@ -47,7 +47,7 @@ public class PermissionControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
 
-        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(),Map.class);
+        Map jsonObject = JsonHelper.json2Object(response.getContentAsString(),Map.class);
         Assert.assertEquals(jsonObject.get("status").toString(),"200");
     }
 
