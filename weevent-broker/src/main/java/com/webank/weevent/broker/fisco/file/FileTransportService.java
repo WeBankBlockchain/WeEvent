@@ -216,7 +216,7 @@ public class FileTransportService {
         // create local file
         this.diskFiles.createFixedLengthFile(fileId, fileChunksMeta.getFileSize());
         // initialize chunk size
-        fileChunksMeta.setChunkSize(this.fileChunkSize);
+        fileChunksMeta.InitChunkSize(this.fileChunkSize);
         // set local host
         fileChunksMeta.setHost(this.host);
         this.diskFiles.saveFileMeta(fileChunksMeta);

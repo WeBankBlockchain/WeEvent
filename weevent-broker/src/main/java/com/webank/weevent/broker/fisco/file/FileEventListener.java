@@ -40,7 +40,8 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
         if (!event.getExtensions().containsKey(WeEvent.WeEvent_FILE)
                 || !event.getExtensions().containsKey(WeEvent.WeEvent_FORMAT)
                 || !"json".equals(event.getExtensions().get(WeEvent.WeEvent_FORMAT))) {
-            log.error("unknown file event on WeEvent, skip it");
+            log.error("unknown FileEvent in WeEvent, send original");
+            this.send(subscriptionId, event);
             return;
         }
 
@@ -48,7 +49,8 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
         try {
             fileEvent = JsonHelper.json2Object(event.getContent(), FileEvent.class);
         } catch (BrokerException e) {
-            log.error("invalid file event content on WeEvent", e);
+            log.error("invalid FileEvent in WeEvent's content, send original", e);
+            this.send(subscriptionId, event);
             return;
         }
 
@@ -70,7 +72,7 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
                 log.info("try to send file received WeEvent to client, {}", weEvent);
                 this.send(subscriptionId, weEvent);
             } catch (BrokerException e) {
-                log.error("changed received WeEvent failed, send original", e);
+                log.error("change received WeEvent failed, send original", e);
                 this.send(subscriptionId, event);
             }
         }

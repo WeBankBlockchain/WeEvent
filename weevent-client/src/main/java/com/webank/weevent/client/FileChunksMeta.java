@@ -60,7 +60,7 @@ public class FileChunksMeta {
         this.groupId = groupId;
     }
 
-    public void setChunkSize(int chunkSize) {
+    public void InitChunkSize(int chunkSize) {
         this.chunkSize = chunkSize;
         this.chunkNum = (int) ((this.fileSize + this.chunkSize - 1) / this.chunkSize);
         this.chunkStatus = new BitSet(this.chunkNum);

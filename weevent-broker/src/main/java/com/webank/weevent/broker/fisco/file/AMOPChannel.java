@@ -86,6 +86,7 @@ public class AMOPChannel extends ChannelPushCallback {
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
         }
 
+        log.info("send AMOP message to create receiver file context");
         String amopTopic = AMOPChannel.genTopic(fileChunksMeta.getTopic());
         FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileChannelStart, fileChunksMeta.getFileId());
         fileEvent.setFileChunksMeta(fileChunksMeta);
@@ -102,6 +103,8 @@ public class AMOPChannel extends ChannelPushCallback {
     }
 
     public void cleanUpReceiverFileContext(FileChunksMeta fileChunksMeta) throws BrokerException {
+        log.info("send AMOP message to clean up receiver file context");
+
         String amopTopic = AMOPChannel.genTopic(fileChunksMeta.getTopic());
         FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileChannelEnd, fileChunksMeta.getFileId());
         ChannelResponse rsp = this.sendEvent(amopTopic, fileEvent);
@@ -119,6 +122,7 @@ public class AMOPChannel extends ChannelPushCallback {
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
         }
 
+        log.info("send AMOP message to get receiver file context");
         ChannelResponse rsp = this.sendEvent(topic, new FileEvent(FileEvent.EventType.FileChannelStatus, fileId));
         if (rsp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
             log.info("receive file context is ready, go");

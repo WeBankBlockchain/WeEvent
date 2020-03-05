@@ -194,7 +194,7 @@ public class BrokerStomp extends TextWebSocketHandler {
             String destination = stompHeaderAccessor.getDestination();
 
             // publish event
-            SendResult sendResult = handleSend(new WeEvent(destination, msg.getPayload(), extensions), groupId);
+            SendResult sendResult = this.iproducer.publish(new WeEvent(destination, msg.getPayload(), extensions), groupId, this.fiscoConfig.getWeb3sdkTimeout());
 
             // send response
             StompHeaderAccessor accessor;
@@ -387,20 +387,6 @@ public class BrokerStomp extends TextWebSocketHandler {
         byte[] bytes = new StompEncoder().encode(message1);
         TextMessage textMessage = new TextMessage(bytes);
         send2Remote(session, textMessage);
-    }
-
-    /**
-     * publish event into block
-     *
-     * @param event event
-     * @param groupId groupId
-     * @return send result
-     * @throws BrokerException broker exception
-     */
-    private SendResult handleSend(WeEvent event, String groupId) throws BrokerException {
-        SendResult sendResult = this.iproducer.publish(event, groupId, this.fiscoConfig.getWeb3sdkTimeout());
-        log.info("publish result, {}", sendResult);
-        return sendResult;
     }
 
     /**
