@@ -261,7 +261,7 @@ public class FabricSDKWrapper {
         return completableFuture;
     }
 
-    public static List<WeEvent> getBlockChainInfo(Channel channel, Long blockNumber) throws ProposalException, InvalidArgumentException {
+    public static List<WeEvent> getBlockChainInfo(Channel channel, Long blockNumber) throws ProposalException, InvalidArgumentException, BrokerException {
         List<WeEvent> weEventList = new ArrayList<>();
         BlockInfo returnedBlock = channel.queryBlockByNumber(blockNumber);
         for (BlockInfo.EnvelopeInfo envelopeInfo : returnedBlock.getEnvelopeInfos()) {

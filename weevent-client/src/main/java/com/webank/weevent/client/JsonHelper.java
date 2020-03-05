@@ -31,16 +31,23 @@ public class JsonHelper {
         return OBJECT_MAPPER;
     }
 
-    public static Map<String, String> json2Map(String json) {
-        if (StringUtils.isBlank(json)) {
-            return null;
-        }
+    public static Map<String, String> json2Map(String json) throws BrokerException {
         try {
             MapLikeType mapLikeType = OBJECT_MAPPER.getTypeFactory().constructMapLikeType(Map.class, String.class, String.class);
             return OBJECT_MAPPER.readValue(json, mapLikeType);
         } catch (Exception e) {
             log.error("parse extensions failed");
-            return null;
+            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
+        }
+    }
+
+    public static Map<String, Object> object2Map(String json) throws BrokerException {
+        try {
+            MapLikeType mapLikeType = OBJECT_MAPPER.getTypeFactory().constructMapLikeType(Map.class, String.class, Object.class);
+            return OBJECT_MAPPER.readValue(json, mapLikeType);
+        } catch (Exception e) {
+            log.error("parse extensions failed");
+            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
         }
     }
 
@@ -153,5 +160,17 @@ public class JsonHelper {
     public static <T> List<T> object2List(Object obj, Class<T> valueType) {
         return OBJECT_MAPPER.convertValue(obj, new TypeReference<T>() {
         });
+    }
+
+    public static boolean isValid(String jsonString) {
+        if (StringUtils.isBlank(jsonString)) {
+            return false;
+        }
+        try {
+            OBJECT_MAPPER.readTree(jsonString);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 }
