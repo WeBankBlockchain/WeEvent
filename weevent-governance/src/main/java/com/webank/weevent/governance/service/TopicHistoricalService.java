@@ -22,6 +22,7 @@ import com.webank.weevent.governance.repository.RuleDatabaseRepository;
 import com.webank.weevent.governance.repository.RuleEngineRepository;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.governance.repository.TopicHistoricalRepository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
