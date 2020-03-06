@@ -10,6 +10,7 @@ import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.entity.RuleDatabaseEntity;
 import com.webank.weevent.governance.repository.RuleDatabaseRepository;
+import com.webank.weevent.governance.repository.RuleEngineRepository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.helper.StringUtil;
@@ -27,6 +28,9 @@ public class RuleDatabaseService {
 
     @Autowired
     private RuleDatabaseRepository ruleDatabaseRepository;
+
+    @Autowired
+    private RuleEngineRepository ruleEngineRepository;
 
     public List<RuleDatabaseEntity> getRuleDataBaseList(HttpServletRequest request, RuleDatabaseEntity ruleDatabaseEntity) throws GovernanceException {
         try {
@@ -53,6 +57,12 @@ public class RuleDatabaseService {
     @Transactional(rollbackFor = Throwable.class)
     public RuleDatabaseEntity addRuleDatabase(RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
+
+        //check name repeat
+        int count = ruleDatabaseRepository.countAllByDatasourceName(ruleDatabaseEntity.getDatasourceName());
+        if (count > 0) {
+            throw new GovernanceException("The data source name already exists");
+        }
         try {
             //check dbUrl
             getDataBaseUrl(ruleDatabaseEntity);
@@ -99,6 +109,11 @@ public class RuleDatabaseService {
     @Transactional(rollbackFor = Throwable.class)
     public void updateRuleDatabase(RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
+        //check used
+        int count = ruleEngineRepository.countAllByRuleDataBaseIdAndDeleteAt(ruleDatabaseEntity.getId(), ConstantProperties.NOT_DELETED);
+        if (count > 0) {
+            throw new GovernanceException("This data source is being used by the rules engine and cannot be modified");
+        }
         try {
             ruleDatabaseEntity.setSystemTag(false);
             //check databaseUrl
