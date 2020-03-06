@@ -37,7 +37,7 @@ public class FileChunksMetaTest {
                 "5291aeb50bddf9ef9ad8824ee7df34ba",
                 "com.weevent.test",
                 "1");
-        fileChunksMeta.setChunkSize(1024);
+        fileChunksMeta.initChunkSize(1024);
         Assert.assertEquals(1, fileChunksMeta.getChunkNum());
     }
 
@@ -52,7 +52,7 @@ public class FileChunksMetaTest {
                 "5291aeb50bddf9ef9ad8824ee7df34ba",
                 "com.weevent.test",
                 "1");
-        fileChunksMeta.setChunkSize(1024);
+        fileChunksMeta.initChunkSize(1024);
         Assert.assertEquals(1, fileChunksMeta.getChunkNum());
     }
 
@@ -67,7 +67,7 @@ public class FileChunksMetaTest {
                 "5291aeb50bddf9ef9ad8824ee7df34ba",
                 "com.weevent.test",
                 "1");
-        fileChunksMeta.setChunkSize(1024);
+        fileChunksMeta.initChunkSize(1024);
         Assert.assertEquals(2, fileChunksMeta.getChunkNum());
     }
 
@@ -82,7 +82,7 @@ public class FileChunksMetaTest {
                 "5291aeb50bddf9ef9ad8824ee7df34ba",
                 "com.weevent.test",
                 "1");
-        fileChunksMeta.setChunkSize(1024);
+        fileChunksMeta.initChunkSize(1024);
         Assert.assertEquals(2, fileChunksMeta.getChunkNum());
     }
 
@@ -97,7 +97,7 @@ public class FileChunksMetaTest {
                 "5291aeb50bddf9ef9ad8824ee7df34ba",
                 "com.weevent.test",
                 "1");
-        fileChunksMeta.setChunkSize(1048576);
+        fileChunksMeta.initChunkSize(1048576);
         Assert.assertEquals(1, fileChunksMeta.getChunkNum());
     }
 
@@ -112,7 +112,7 @@ public class FileChunksMetaTest {
                 "5291aeb50bddf9ef9ad8824ee7df34ba",
                 "com.weevent.test",
                 "1");
-        fileChunksMeta.setChunkSize(1048576);
+        fileChunksMeta.initChunkSize(1048576);
         Assert.assertEquals(1, fileChunksMeta.getChunkNum());
     }
 
@@ -127,7 +127,7 @@ public class FileChunksMetaTest {
                 "5291aeb50bddf9ef9ad8824ee7df34ba",
                 "com.weevent.test",
                 "1");
-        fileChunksMeta.setChunkSize(1048576);
+        fileChunksMeta.initChunkSize(1048576);
         Assert.assertEquals(8192, fileChunksMeta.getChunkNum());
     }
 } 
