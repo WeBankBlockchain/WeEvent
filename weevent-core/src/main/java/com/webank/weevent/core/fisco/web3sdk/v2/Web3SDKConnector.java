@@ -160,12 +160,12 @@ public class Web3SDKConnector {
     public static Credentials getCredentials(FiscoConfig fiscoConfig) {
         log.debug("begin init Credentials");
 
-        // set encrypt type for web3sdk
-        EncryptType encryptType = new EncryptType(EncryptType.SM2_TYPE);
-
         // read OSSCA account
         Credentials credentials = null;
-        if (fiscoConfig.getWeb3sdkEncryptType() == 1) {
+        if (fiscoConfig.getWeb3sdkEncryptType().equals("SM2_TYPE")) {
+            // set encrypt type for web3sdk
+            EncryptType encryptType = new EncryptType(EncryptType.SM2_TYPE);
+
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
             Resource resource = resolver.getResource("classpath:" + fiscoConfig.getV2PemKeyPath());
             PEMManager pemManager = new PEMManager();
@@ -185,6 +185,9 @@ public class Web3SDKConnector {
                 return null;
             }
         } else {
+            // set encrypt type for web3sdk
+            EncryptType encryptType = new EncryptType(EncryptType.ECDSA_TYPE);
+
             credentials = GenCredential.create(fiscoConfig.getAccount());
             if (null == credentials) {
                 log.error("init Credentials failed");

@@ -48,8 +48,8 @@ public class FiscoConfig {
     @Value("${web3sdk.keep-alive-seconds:10}")
     private Integer web3sdkKeepAliveSeconds;
 
-    @Value("${web3sdk.encrypt-type:0}")
-    private Integer web3sdkEncryptType;
+    @Value("${web3sdk.encrypt-type:ECDSA_TYPE}")
+    private String web3sdkEncryptType;
     
     @Value("${proxy.address:}")
     private String proxyAddress;
