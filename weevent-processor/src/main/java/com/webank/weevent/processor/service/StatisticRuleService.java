@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.processor.model.StatisticRule;
 import com.webank.weevent.processor.model.StatisticWeEvent;
 import com.webank.weevent.processor.mq.CEPRuleMQ;
@@ -33,7 +34,7 @@ public class StatisticRuleService {
             for (String id : idList) {
                 // check the id
                 if (statisticWeEvent.getStatisticRuleMap().containsKey(id)) {
-                    statisticRuleMap.put(id,statisticWeEvent.getStatisticRuleMap().get(id));
+                    statisticRuleMap.put(id, statisticWeEvent.getStatisticRuleMap().get(id));
                 }
             }
             // set the run rule map
@@ -42,7 +43,7 @@ public class StatisticRuleService {
         try {
             StatisticWeEvent statisticJobs = quartzManager.getStatisticJobs(statisticWeEvent, idList);
             return statisticJobs;
-        } catch (SchedulerException e) {
+        } catch (SchedulerException | BrokerException e) {
             return null;
         }
     }
