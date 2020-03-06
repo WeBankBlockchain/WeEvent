@@ -1,7 +1,7 @@
 package com.webank.weevent.broker.fisco.file;
 
 
-import com.webank.weevent.sdk.FileChunksMeta;
+import com.webank.weevent.client.FileChunksMeta;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -16,17 +16,19 @@ import lombok.Setter;
 @Setter
 public class FileEvent {
     public enum EventType {
-        // over WeEvent
-        // sender -> receiver, start to transport file
-        FileTransportStart(1),
-        // sender -> receiver, end to transport file
-        FileTransportEnd(2),
+        // sign well done transport event in WeEvent
+        FileTransport(1),
 
-        // over AMOP channel
-        // receiver -> sender, check channel is already
-        FileChannelAlready(11),
-        // sender -> receiver, send file chunk data
-        FileChannelData(12);
+        // sender -> receiver over AMOP channel
+        // start to a file transport
+        FileChannelStart(10),
+        // get file chunk meta
+        FileChannelStatus(11),
+        // send file chunk data
+        FileChannelData(12),
+        // end to a file transport
+        FileChannelEnd(13),
+        ;
 
         private final int code;
 
@@ -42,7 +44,7 @@ public class FileEvent {
     private EventType eventType;
     private String fileId;
 
-    // available only if while eventType == FileTransportStart
+    // available only if while eventType == FileChannelStart or FileTransport
     private FileChunksMeta fileChunksMeta = null;
 
     // available only if eventType == FIleChannelData

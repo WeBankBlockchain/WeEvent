@@ -14,11 +14,11 @@ import java.util.concurrent.TimeoutException;
 import com.webank.weevent.core.fisco.util.DataTypeUtils;
 import com.webank.weevent.core.fisco.web3sdk.v2.solc10.Topic;
 import com.webank.weevent.core.fisco.web3sdk.v2.solc10.TopicController;
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.ErrorCode;
-import com.webank.weevent.sdk.JsonHelper;
-import com.webank.weevent.sdk.TopicInfo;
-import com.webank.weevent.sdk.WeEvent;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
+import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.client.TopicInfo;
+import com.webank.weevent.client.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -192,7 +192,7 @@ public class SupportedVersion {
         return true;
     }
 
-    public static WeEvent decodeWeEvent(TransactionReceipt receipt, int version, Map<String, Contract> historyTopic) {
+    public static WeEvent decodeWeEvent(TransactionReceipt receipt, int version, Map<String, Contract> historyTopic) throws BrokerException {
         // support version list
         switch (version) {
             case 10:

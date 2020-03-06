@@ -7,13 +7,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.broker.fisco.file.FileTransportService;
+import com.webank.weevent.client.BaseResponse;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
+import com.webank.weevent.client.FileChunksMeta;
+import com.webank.weevent.client.SendResult;
 import com.webank.weevent.core.fisco.util.ParamCheckUtils;
 import com.webank.weevent.core.fisco.util.WeEventUtils;
-import com.webank.weevent.sdk.BaseResponse;
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.ErrorCode;
-import com.webank.weevent.sdk.FileChunksMeta;
-import com.webank.weevent.sdk.SendResult;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,9 +70,8 @@ public class FileRest {
                 groupId);
 
         // create AMOP channel with FileTransportSender
-        this.fileTransportService.openChannel(fileChunksMeta);
-
-        return BaseResponse.buildSuccess(fileChunksMeta);
+        FileChunksMeta remoteFileChunksMeta = this.fileTransportService.openChannel(fileChunksMeta);
+        return BaseResponse.buildSuccess(remoteFileChunksMeta);
     }
 
     @RequestMapping(path = "/uploadChunk")
@@ -130,7 +129,7 @@ public class FileRest {
         ParamCheckUtils.validateFileId(fileId);
 
         // get file chunks info from Zookeeper
-        FileChunksMeta fileChunksMeta = this.fileTransportService.getZKFileChunksMeta(fileId);
+        FileChunksMeta fileChunksMeta = this.fileTransportService.getReceiverFileChunksMeta(fileId);
 
         return BaseResponse.buildSuccess(fileChunksMeta);
     }

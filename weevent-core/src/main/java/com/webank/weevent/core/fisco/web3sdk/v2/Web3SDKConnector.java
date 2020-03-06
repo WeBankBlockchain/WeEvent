@@ -7,9 +7,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.core.config.FiscoConfig;
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.ErrorCode;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -95,6 +95,8 @@ public class Web3SDKConnector {
             int web3sdkTimeout = fiscoConfig.getWeb3sdkTimeout();
 
             Service service = new Service();
+            // change jdk.tls.namedGroups will cause https's bug: ERR_SSL_VERSION_OR_CIPHER_MISMATCH
+            service.setSetJavaOpt(false);
             // group info
             service.setOrgID(fiscoConfig.getOrgId());
             service.setGroupId(groupId.intValue());

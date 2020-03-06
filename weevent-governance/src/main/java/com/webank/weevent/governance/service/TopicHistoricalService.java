@@ -1,6 +1,5 @@
 package com.webank.weevent.governance.service;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -21,8 +20,8 @@ import com.webank.weevent.governance.entity.TopicHistoricalEntity;
 import com.webank.weevent.governance.mapper.TopicHistoricalMapper;
 import com.webank.weevent.governance.repository.RuleDatabaseRepository;
 import com.webank.weevent.governance.repository.RuleEngineRepository;
-import com.webank.weevent.governance.repository.TopicHistoricalRepository;
-import com.webank.weevent.governance.utils.JsonUtil;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -164,9 +163,6 @@ public class TopicHistoricalService {
         String password = dataBasePassword;
         String dbName;
         boolean flag = ("mysql").equals(databaseType);
-        if (!flag) {
-            return;
-        }
         try {
             int first = goalUrl.lastIndexOf("/");
             int end = goalUrl.lastIndexOf("?");
@@ -195,7 +191,7 @@ public class TopicHistoricalService {
         }
     }
 
-    private RuleEngineEntity initializationRule(String ruleName, BrokerEntity brokerEntity, String groupId, Integer dataBaseId) throws IOException {
+    private RuleEngineEntity initializationRule(String ruleName, BrokerEntity brokerEntity, String groupId, Integer dataBaseId) throws BrokerException {
         String selectField = "eventId,topicName,groupId,brokerId";
         Map<String, String> map = new HashMap<>();
         map.put("topicName", "*");
@@ -212,7 +208,7 @@ public class TopicHistoricalService {
         ruleEngineEntity.setLastUpdate(new Date());
         ruleEngineEntity.setBrokerUrl(brokerEntity.getBrokerUrl() + "?groupId=" + groupId);
         ruleEngineEntity.setSelectField(selectField);
-        ruleEngineEntity.setPayload(JsonUtil.toJSONString(map));
+        ruleEngineEntity.setPayload(JsonHelper.object2Json(map));
         ruleEngineEntity.setRuleDataBaseId(dataBaseId);
         ruleEngineEntity.setPayloadType(ConstantProperties.JSON);
         ruleEngineEntity.setConditionType(ConstantProperties.RULE_DESTINATION_DATABASE);
@@ -233,7 +229,7 @@ public class TopicHistoricalService {
             if (StringUtil.isBlank(mes)) {
                 throw new GovernanceException("group is empty");
             }
-            Map jsonObject = JsonUtil.parseObject(mes, Map.class);
+            Map jsonObject = JsonHelper.json2Object(mes, Map.class);
             Object data = jsonObject.get("data");
             if ("0".equals(jsonObject.get("code").toString()) && data instanceof List) {
                 groupList = (List) data;
