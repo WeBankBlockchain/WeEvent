@@ -1,6 +1,5 @@
 package com.webank.weevent.core.fabric;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +7,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
+import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.IConsumer;
 import com.webank.weevent.core.dto.SubscriptionInfo;
 import com.webank.weevent.core.fabric.sdk.FabricDelegate;
@@ -15,9 +17,6 @@ import com.webank.weevent.core.fisco.util.ParamCheckUtils;
 import com.webank.weevent.core.task.IBlockChain;
 import com.webank.weevent.core.task.MainEventLoop;
 import com.webank.weevent.core.task.Subscription;
-import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.client.ErrorCode;
-import com.webank.weevent.client.WeEvent;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -211,35 +210,15 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
     }
 
     @Override
-    public Map<String, Object> listSubscription(String channnelName) throws BrokerException {
+    public Map<String, SubscriptionInfo> listSubscription(String channnelName) throws BrokerException {
         this.validateChannelName(channnelName);
-        Map<String, Object> subscribeIdList = new HashMap<>();
+        Map<String, SubscriptionInfo> subscribeIdList = new HashMap<>();
         for (Map.Entry<String, Subscription> entry : this.subscriptions.entrySet()) {
             Subscription subscription = entry.getValue();
-            if (!channnelName.equals(subscription.getGroupId())) {
-                continue;
+            if (channnelName.equals(subscription.getGroupId())) {
+                SubscriptionInfo subscriptionInfo = SubscriptionInfo.fromSubscription(subscription);
+                subscribeIdList.put(subscription.getUuid(), subscriptionInfo);
             }
-
-            SubscriptionInfo subscriptionInfo = new SubscriptionInfo();
-            subscriptionInfo.setInterfaceType(subscription.getInterfaceType());
-            subscriptionInfo.setNotifiedEventCount(subscription.getNotifiedEventCount().toString());
-            subscriptionInfo.setNotifyingEventCount(subscription.getNotifyingEventCount().toString());
-            subscriptionInfo.setNotifyTimeStamp(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                    .format(subscription.getNotifyTimeStamp()));
-            subscriptionInfo.setRemoteIp(subscription.getRemoteIp());
-            subscriptionInfo.setCreateTimeStamp(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                    .format(subscription.getCreateTimeStamp()));
-            subscriptionInfo.setGroupId(subscription.getGroupId());
-
-            // Arrays.toString will append plus "[]"
-            if (subscription.getTopics().length == 1) {
-                subscriptionInfo.setTopicName(subscription.getTopics()[0]);
-            } else {
-                subscriptionInfo.setTopicName(Arrays.toString(subscription.getTopics()));
-            }
-
-            subscriptionInfo.setSubscribeId(subscription.getUuid());
-            subscribeIdList.put(subscription.getUuid(), subscriptionInfo);
         }
 
         log.debug("subscriptions: {}", this.subscriptions.toString());

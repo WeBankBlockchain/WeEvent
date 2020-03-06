@@ -11,13 +11,14 @@ import java.util.Map;
 import com.webank.weevent.broker.config.WeEventConfig;
 import com.webank.weevent.broker.fisco.file.FileEventListener;
 import com.webank.weevent.broker.fisco.file.FileTransportService;
-import com.webank.weevent.core.IConsumer;
-import com.webank.weevent.core.IProducer;
-import com.webank.weevent.core.fisco.constant.WeEventConstants;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.SendResult;
 import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.core.IConsumer;
+import com.webank.weevent.core.IProducer;
+import com.webank.weevent.core.config.FiscoConfig;
+import com.webank.weevent.core.fisco.constant.WeEventConstants;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -51,6 +52,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 @Component
 public class BrokerStomp extends TextWebSocketHandler {
     private WeEventConfig weEventConfig;
+    private FiscoConfig fiscoConfig;
     private IProducer iproducer;
     private IConsumer iconsumer;
 
@@ -65,6 +67,11 @@ public class BrokerStomp extends TextWebSocketHandler {
     @Autowired
     public void setWeEventConfig(WeEventConfig weEventConfig) {
         this.weEventConfig = weEventConfig;
+    }
+
+    @Autowired
+    public void setFiscoConfig(FiscoConfig fiscoConfig) {
+        this.fiscoConfig = fiscoConfig;
     }
 
     @Autowired
@@ -187,7 +194,7 @@ public class BrokerStomp extends TextWebSocketHandler {
             String destination = stompHeaderAccessor.getDestination();
 
             // publish event
-            SendResult sendResult = handleSend(new WeEvent(destination, msg.getPayload(), extensions), groupId);
+            SendResult sendResult = this.iproducer.publish(new WeEvent(destination, msg.getPayload(), extensions), groupId, this.fiscoConfig.getWeb3sdkTimeout());
 
             // send response
             StompHeaderAccessor accessor;
@@ -380,20 +387,6 @@ public class BrokerStomp extends TextWebSocketHandler {
         byte[] bytes = new StompEncoder().encode(message1);
         TextMessage textMessage = new TextMessage(bytes);
         send2Remote(session, textMessage);
-    }
-
-    /**
-     * publish event into block
-     *
-     * @param event event
-     * @param groupId groupId
-     * @return send result
-     * @throws BrokerException broker exception
-     */
-    private SendResult handleSend(WeEvent event, String groupId) throws BrokerException {
-        SendResult sendResult = this.iproducer.publish(event, groupId, this.weEventConfig.getStompTimeout());
-        log.info("publish result, {}", sendResult);
-        return sendResult;
     }
 
     /**

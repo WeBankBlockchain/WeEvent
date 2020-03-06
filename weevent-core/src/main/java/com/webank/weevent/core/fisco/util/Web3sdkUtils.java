@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.core.fisco.constant.WeEventConstants;
 import com.webank.weevent.core.fisco.web3sdk.v1.Web3SDKWrapper;
@@ -15,8 +17,6 @@ import com.webank.weevent.core.fisco.web3sdk.v2.CRUDAddress;
 import com.webank.weevent.core.fisco.web3sdk.v2.SupportedVersion;
 import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDK2Wrapper;
 import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
-import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.client.WeEvent;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -43,19 +43,18 @@ class EchoAddress {
     }
 }
 
-/*
- * Utils 4 web3sdk.
+/**
+ * Utils to deploy FISCO-BCOS solidity contract.
+ * It will deploy contract "TopicController", and save address back into block chain.
+ * Usage:
+ * java -classpath "./lib/*:./conf" com.webank.weevent.core.fisco.util.Web3sdkUtils
  *
  * @author matthewliu
  * @since 2019/02/12
  */
 @Slf4j
 public class Web3sdkUtils {
-    /*
-     * tool to deploy contract "TopicController", and save address back to block chain.
-     * Usage:
-     * java -Xbootclasspath/a:./config -cp weevent-broker-2.0.0.jar -Dloader.main=com.webank.weevent.broker.fisco.util.Web3sdkUtils org.springframework.boot.loader.PropertiesLauncher
-     */
+
     public static void main(String[] args) {
         try {
             FiscoConfig fiscoConfig = new FiscoConfig();

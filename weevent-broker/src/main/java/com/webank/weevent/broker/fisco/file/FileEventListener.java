@@ -1,14 +1,11 @@
 package com.webank.weevent.broker.fisco.file;
 
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.webank.weevent.core.IConsumer;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.FileChunksMeta;
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.core.IConsumer;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
@@ -24,8 +21,6 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
     private final FileTransportService fileTransportService;
     private final String topic;
     private final String groupId;
-
-    private List<String> files = new ArrayList<>();
 
     public FileEventListener(FileTransportService fileTransportService, String topic, String groupId) throws BrokerException {
         this.fileTransportService = fileTransportService;
@@ -45,7 +40,8 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
         if (!event.getExtensions().containsKey(WeEvent.WeEvent_FILE)
                 || !event.getExtensions().containsKey(WeEvent.WeEvent_FORMAT)
                 || !"json".equals(event.getExtensions().get(WeEvent.WeEvent_FORMAT))) {
-            log.error("unknown file event on WeEvent, skip it");
+            log.error("unknown FileEvent in WeEvent, send original");
+            this.send(subscriptionId, event);
             return;
         }
 
@@ -53,48 +49,32 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
         try {
             fileEvent = JsonHelper.json2Object(event.getContent(), FileEvent.class);
         } catch (BrokerException e) {
-            log.error("invalid file event content on WeEvent", e);
+            log.error("invalid FileEvent in WeEvent's content, send original", e);
+            this.send(subscriptionId, event);
             return;
         }
 
-        switch (fileEvent.getEventType()) {
-            case FileTransportStart:
-                log.info("get {}, try to initialize context for receiving file", fileEvent.getEventType());
+        if (FileEvent.EventType.FileTransport == fileEvent.getEventType()) {
+            log.info("get {}", fileEvent.getEventType());
 
-                this.fileTransportService.prepareReceiveFile(fileEvent.getFileChunksMeta());
-                this.files.add(fileEvent.getFileId());
-                break;
-
-            case FileTransportEnd:
-                log.info("get {}, try to finalize context for receiving file", fileEvent.getEventType());
-
-                FileChunksMeta fileChunksMeta = this.fileTransportService.cleanUpReceivedFile(fileEvent.getFileId());
-                if (fileChunksMeta == null) {
-                    log.error("clean up file context return null");
-                    return;
+            // set host in WeEvent, then downloadChunk invoke will be routed to this host
+            try {
+                FileChunksMeta fileChunksMeta = this.fileTransportService.loadFileChunksMeta(fileEvent.getFileId());
+                if (StringUtils.isEmpty(fileChunksMeta.getHost())) {
+                    log.error("FATAL: unknown host in FileChunksMeta");
                 }
-                this.files.remove(fileEvent.getFileId());
-
-                // set host in WeEvent, then downloadChunk invoke will be routed to this host
-                try {
-                    if (StringUtils.isEmpty(fileChunksMeta.getHost())) {
-                        log.error("FATAL: unknown host in FileChunksMeta");
-                    }
-                    if (!fileChunksMeta.checkChunkFull()) {
-                        log.error("FATAL: FileChunksMeta is not full");
-                    }
-
-                    byte[] json = JsonHelper.object2JsonBytes(fileChunksMeta);
-                    WeEvent weEvent = new WeEvent(event.getTopic(), json, event.getExtensions());
-                    log.info("try to send file received WeEvent to client, {}", weEvent);
-                    this.send(subscriptionId, weEvent);
-                } catch (BrokerException e) {
-                    log.error("send file received WeEvent to client failed", e);
+                if (!fileChunksMeta.checkChunkFull()) {
+                    log.error("FATAL: FileChunksMeta is not full");
                 }
-                break;
 
-            default:
-                log.error("unknown file event type on WeEvent");
+                byte[] json = JsonHelper.object2JsonBytes(fileChunksMeta);
+                WeEvent weEvent = new WeEvent(event.getTopic(), json, event.getExtensions());
+                log.info("try to send file received WeEvent to client, {}", weEvent);
+                this.send(subscriptionId, weEvent);
+            } catch (BrokerException e) {
+                log.error("change received WeEvent failed, send original", e);
+                this.send(subscriptionId, event);
+            }
         }
     }
 
@@ -105,7 +85,7 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
 
     @Override
     public void onClose(String subscriptionId) {
-        log.info("subscription: {} closed, try to finalize binding file context one by one", subscriptionId);
+        log.info("subscription: {} closed, try to unsub topic on AMOP", subscriptionId);
 
         // unSubscribe topic on AMOP channel
         try {
@@ -114,10 +94,6 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
             channel.unSubTopic(amopTopic);
         } catch (BrokerException e) {
             log.error("AMOPChannel.unSubTopic failed", e);
-        }
-
-        for (String fileId : this.files) {
-            this.fileTransportService.cleanUpReceivedFile(fileId);
         }
     }
 }
