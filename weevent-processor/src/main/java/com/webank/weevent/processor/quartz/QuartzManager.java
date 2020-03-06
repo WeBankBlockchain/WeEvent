@@ -1,6 +1,5 @@
 package com.webank.weevent.processor.quartz;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -10,12 +9,12 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.processor.cache.CEPRuleCache;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.model.StatisticRule;
 import com.webank.weevent.processor.model.StatisticWeEvent;
 import com.webank.weevent.processor.utils.ConstantsHelper;
-import com.webank.weevent.processor.utils.JsonUtil;
 import com.webank.weevent.processor.utils.RetCode;
 
 import javafx.util.Pair;
@@ -46,12 +45,12 @@ public class QuartzManager {
     public void init() {
         try {
             // get all rule
-            Iterator<JobKey> it = this.scheduler.getJobKeys(GroupMatcher.anyGroup()).iterator();
+            Iterator<JobKey> it = this.scheduler.getJobKeys(GroupMatcher.groupEquals("rule")).iterator();
             Map<String, CEPRule> ruleMap = new HashMap<>();
             while (it.hasNext()) {
                 JobKey jobKey = it.next();
                 if (null != scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
-                    CEPRule rule = JsonUtil.parseObject(scheduler.getJobDetail(jobKey).getJobDataMap().get("rule").toString(), CEPRule.class);
+                    CEPRule rule = JsonHelper.json2Object(scheduler.getJobDetail(jobKey).getJobDataMap().get("rule").toString(), CEPRule.class);
                     // if the current is delete
                     ruleMap.put(rule.getId(), rule);
                     log.info("{}", jobKey);
@@ -67,7 +66,7 @@ public class QuartzManager {
                 CEPRuleCache.updateCEPRule(entry.getValue(), null);
             }
 
-        } catch (SchedulerException | BrokerException | IOException e) {
+        } catch (SchedulerException | BrokerException e) {
             log.error("e:{}", e.toString());
         }
     }
@@ -93,17 +92,17 @@ public class QuartzManager {
             // get the all rules
             Iterator<JobKey> it = scheduler.getJobKeys(GroupMatcher.groupEquals(jobGroupName)).iterator();
             CEPRule currentRule = (CEPRule) params.get("rule");
-            params.put("rule", currentRule == null ? null : JsonUtil.toJSONString(currentRule));
+            params.put("rule", currentRule == null ? null : JsonHelper.object2Json(currentRule));
             while (it.hasNext()) {
                 JobKey jobKey = it.next();
                 if (null != scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
-                    CEPRule rule = JsonUtil.parseObject(scheduler.getJobDetail(jobKey).getJobDataMap().get("rule").toString(), CEPRule.class);
+                    CEPRule rule = JsonHelper.json2Object(scheduler.getJobDetail(jobKey).getJobDataMap().get("rule").toString(), CEPRule.class);
                     // if the current is delete
                     if ("deleteCEPRuleById".equals(params.get("type").toString()) && jobName.equals(rule.getId())) {
                         // update the delete status
                         rule.setStatus(2);
                         currentRule = rule;
-                        params.put("rule", JsonUtil.toJSONString(rule));
+                        params.put("rule", JsonHelper.object2Json(rule));
                     }
                 }
             }
@@ -114,7 +113,7 @@ public class QuartzManager {
                 ruleBak = new Pair<>(getJobDetail(jobName), currentRule);
             }
             // add latest one
-            params.put("ruleBak", ruleBak == null ? null : JsonUtil.toJSONString(ruleBak));
+            params.put("ruleBak", ruleBak == null ? null : JsonHelper.object2Json(ruleBak));
 
             JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).storeDurably(true).build();
             // just do one time
@@ -149,12 +148,12 @@ public class QuartzManager {
     /**
      * get Job list
      **/
-    public static Map<String, CEPRule> getJobList() throws SchedulerException, IOException {
+    public static Map<String, CEPRule> getJobList() throws SchedulerException, BrokerException {
         Iterator<JobKey> it = scheduler.getJobKeys(GroupMatcher.anyGroup()).iterator();
         Map<String, CEPRule> ruleMap = new HashMap<>();
         while (it.hasNext()) {
             JobKey jobKey = it.next();
-            CEPRule rule = JsonUtil.parseObject(scheduler.getJobDetail(jobKey).getJobDataMap().get("rule").toString(), CEPRule.class);
+            CEPRule rule = JsonHelper.json2Object(scheduler.getJobDetail(jobKey).getJobDataMap().get("rule").toString(), CEPRule.class);
             if (null != rule && 1 == rule.getStatus()) {
                 ruleMap.put(rule.getId(), rule);
             }
@@ -207,10 +206,10 @@ public class QuartzManager {
      * @param jobName
      * @return
      */
-    public CEPRule getJobDetail(String jobName) throws SchedulerException, IOException {
+    public CEPRule getJobDetail(String jobName) throws SchedulerException, BrokerException {
         JobDetail job = scheduler.getJobDetail(new JobKey(jobName, "rule"));
         if (!StringUtils.isEmpty(job.getJobDataMap().get("rule"))) {
-            return JsonUtil.parseObject(job.getJobDataMap().get("rule").toString(), CEPRule.class);
+            return JsonHelper.json2Object(job.getJobDataMap().get("rule").toString(), CEPRule.class);
         }
         return null;
     }
@@ -218,7 +217,7 @@ public class QuartzManager {
     /**
      * get the statistic jobs
      */
-    public StatisticWeEvent getStatisticJobs(StatisticWeEvent statisticWeEvent, List<String> idList) throws SchedulerException, IOException {
+    public StatisticWeEvent getStatisticJobs(StatisticWeEvent statisticWeEvent, List<String> idList) throws SchedulerException, BrokerException {
         Map<String, StatisticRule> statisticRuleMap = statisticWeEvent.getStatisticRuleMap();
 
         // get the all rules
@@ -231,7 +230,7 @@ public class QuartzManager {
         while (it.hasNext()) {
             JobKey jobKey = it.next();
             if (null != scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
-                CEPRule rule = JsonUtil.parseObject(scheduler.getJobDetail(jobKey).getJobDataMap().get("rule").toString(), CEPRule.class);
+                CEPRule rule = JsonHelper.json2Object(scheduler.getJobDetail(jobKey).getJobDataMap().get("rule").toString(), CEPRule.class);
 
                 // statistic
                 if ("1".equals(rule.getSystemTag())) {

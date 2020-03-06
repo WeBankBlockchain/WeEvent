@@ -1,10 +1,10 @@
 package com.webank.weevent.processor.controller;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax.validation.Valid;
 
+import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.model.StatisticWeEvent;
@@ -143,7 +143,7 @@ public class CEPRuleController {
             CEPRule rule = quartzManager.getJobDetail(id);
             resEntity.setData(rule);
             return resEntity;
-        } catch (SchedulerException | IOException e) {
+        } catch (SchedulerException | BrokerException e) {
             resEntity.setErrorCode(StatusCode.SCHEDULE_ERROR.getCode());
             resEntity.setErrorMsg(StatusCode.SCHEDULE_ERROR.getCodeDesc());
             return resEntity;

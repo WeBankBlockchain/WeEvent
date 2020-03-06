@@ -6,9 +6,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
+import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.processor.model.TimerScheduler;
 import com.webank.weevent.processor.utils.CommonUtil;
-import com.webank.weevent.processor.utils.JsonUtil;
 
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
@@ -34,10 +34,10 @@ public class TimerSchedulerJob implements Job {
     private static void dealTimerTask(JobExecutionContext context, String taskName) {
         try {
             Object obj = context.getJobDetail().getJobDataMap().get("timer");
-            TimerScheduler scheduler = JsonUtil.parseObject(obj.toString(), TimerScheduler.class);
-            Map<String, TimerScheduler> timerMap = JsonUtil.parseObjectToMap(context.getJobDetail().getJobDataMap().get("timerMap").toString(), String.class, TimerScheduler.class);
+            TimerScheduler scheduler = JsonHelper.json2Object(obj.toString(), TimerScheduler.class);
+            Map<String, TimerScheduler> timerMap = JsonHelper.json2Map(context.getJobDetail().getJobDataMap().get("timerMap").toString(), String.class, TimerScheduler.class);
             // check the status,when the status equal 1,then update
-            log.info("execute  task: {},rule:{}", taskName, JsonUtil.toJSONString(scheduler));
+            log.info("execute  task: {},rule:{}", taskName, JsonHelper.object2Json(scheduler));
             runTask(scheduler);
             timerMap.put(scheduler.getId(), scheduler);
         } catch (Exception e) {

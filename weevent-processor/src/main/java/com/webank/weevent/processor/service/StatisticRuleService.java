@@ -1,10 +1,10 @@
 package com.webank.weevent.processor.service;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.processor.model.StatisticRule;
 import com.webank.weevent.processor.model.StatisticWeEvent;
 import com.webank.weevent.processor.mq.CEPRuleMQ;
@@ -43,7 +43,7 @@ public class StatisticRuleService {
         try {
             StatisticWeEvent statisticJobs = quartzManager.getStatisticJobs(statisticWeEvent, idList);
             return statisticJobs;
-        } catch (SchedulerException | IOException e) {
+        } catch (SchedulerException | BrokerException e) {
             return null;
         }
     }

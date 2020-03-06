@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.processor.model.TimerScheduler;
 import com.webank.weevent.processor.utils.CommonUtil;
 import com.webank.weevent.processor.utils.ConstantsHelper;
-import com.webank.weevent.processor.utils.JsonUtil;
 import com.webank.weevent.processor.utils.RetCode;
 
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +48,7 @@ public class TimerSchedulerService {
             Iterator<JobKey> jobKeyIterator = scheduler.getJobKeys(GroupMatcher.groupEquals(jobGroupName)).iterator();
             List<TimerScheduler> timerSchedulerList = new ArrayList<>();
             Map<String, TimerScheduler> timerSchedulerMap = new HashMap<>();
-            TimerScheduler currentTimer = JsonUtil.parseObject(params.get("timer").toString(), TimerScheduler.class);
+            TimerScheduler currentTimer = JsonHelper.json2Object(params.get("timer").toString(), TimerScheduler.class);
             while (jobKeyIterator.hasNext()) {
                 JobKey jobKey = jobKeyIterator.next();
                 if (null != scheduler.getJobDetail(jobKey).getJobDataMap().get("timer")) {
@@ -60,7 +60,7 @@ public class TimerSchedulerService {
             }
             timerSchedulerMap.put(currentTimer.getId(), currentTimer);
             timerSchedulerList.add(currentTimer);
-            params.put("timerMap", JsonUtil.toJSONString(timerSchedulerMap));
+            params.put("timerMap", JsonHelper.object2Json(timerSchedulerMap));
             log.info("update the timer timerMap:{},ruleList:{}", timerSchedulerList.size(), timerSchedulerList.size());
 
             JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroupName).setJobData(params).requestRecovery(true).storeDurably(true).build();
