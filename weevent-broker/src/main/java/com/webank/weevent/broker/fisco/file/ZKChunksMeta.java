@@ -62,6 +62,12 @@ public class ZKChunksMeta {
         this.zkPath = zkPath;
     }
 
+    public boolean existChunks(String fileId) throws BrokerException {
+        String zkPath = this.genFilePath(fileId);
+
+        return this.zkExist(zkPath);
+    }
+
     public FileChunksMeta getChunks(String fileId) throws BrokerException {
         String zkPath = this.genFilePath(fileId);
 
