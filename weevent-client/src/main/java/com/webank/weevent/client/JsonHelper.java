@@ -51,6 +51,16 @@ public class JsonHelper {
         }
     }
 
+    public static <T, R> Map<T, R> json2Map(String json, Class clazz1, Class clazz2) throws BrokerException {
+        try {
+            MapLikeType mapLikeType = OBJECT_MAPPER.getTypeFactory().constructMapLikeType(Map.class, clazz1, clazz2);
+            return OBJECT_MAPPER.readValue(json, mapLikeType);
+        } catch (Exception e) {
+            log.error("parse extensions failed");
+            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
+        }
+    }
+
     /**
      * convert object to String
      *
