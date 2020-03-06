@@ -45,4 +45,11 @@ public class TopicHistoricalController {
         return new GovernanceResult(topicTopicHistoricalEntities);
     }
 
+    @PostMapping("/insertHistoricalData")
+    public void insertHistoricalData(@RequestBody TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request,
+                                     HttpServletResponse response) throws GovernanceException {
+        log.info("get  eventList:{} ", topicHistoricalEntity);
+        topicHistoricalService.insertHistoricalData(topicHistoricalEntity, request);
+    }
+
 }

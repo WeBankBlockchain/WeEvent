@@ -21,6 +21,7 @@ import com.webank.weevent.governance.entity.TopicHistoricalEntity;
 import com.webank.weevent.governance.mapper.TopicHistoricalMapper;
 import com.webank.weevent.governance.repository.RuleDatabaseRepository;
 import com.webank.weevent.governance.repository.RuleEngineRepository;
+import com.webank.weevent.governance.repository.TopicHistoricalRepository;
 import com.webank.weevent.governance.utils.JsonUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +39,9 @@ public class TopicHistoricalService {
 
     @Autowired
     private TopicHistoricalMapper topicHistoricalMapper;
+
+    @Autowired
+    private TopicHistoricalRepository topicHistoricalRepository;
 
     @Autowired
     private CommonService commonService;
@@ -241,6 +245,16 @@ public class TopicHistoricalService {
         } catch (Exception e) {
             log.error("get group list fail", e);
             throw new GovernanceException("get group list fail", e);
+        }
+    }
+
+    public void insertHistoricalData(TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request) throws GovernanceException {
+        try {
+            TopicHistoricalEntity historicalEntity = topicHistoricalRepository.save(topicHistoricalEntity);
+            log.info("insert historicalData success");
+        } catch (Exception e) {
+            log.error("insert historicalData fail", e);
+            throw new GovernanceException("insert historicalData fail", e);
         }
     }
 }
