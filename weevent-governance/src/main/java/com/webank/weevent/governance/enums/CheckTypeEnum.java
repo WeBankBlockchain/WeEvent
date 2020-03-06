@@ -1,22 +1,23 @@
 package com.webank.weevent.governance.enums;
 
-public enum IsDeleteEnum {
+public enum CheckTypeEnum {
 
-    NOT_DELETED(0L, "not deleted");
+    CHECK_DATABASE(1, "check database"),
+    CHECK_TABLE(2, "check database");
 
-    private Long code;
+    private Integer code;
     private String value;
 
-    IsDeleteEnum(Long code, String value) {
+    CheckTypeEnum(Integer code, String value) {
         this.code = code;
         this.value = value;
     }
 
-    public Long getCode() {
+    public Integer getCode() {
         return code;
     }
 
-    public void setCode(Long code) {
+    public void setCode(Integer code) {
         this.code = code;
     }
 
@@ -28,8 +29,8 @@ public enum IsDeleteEnum {
         this.value = value;
     }
 
-    public String getValueByCode(Long code) {
-        for (IsDeleteEnum isDeleteEnum : IsDeleteEnum.values()) {
+    public String getValueByCode(Integer code) {
+        for (CheckTypeEnum isDeleteEnum : CheckTypeEnum.values()) {
             if (isDeleteEnum.code.equals(code)) {
                 return isDeleteEnum.value;
             }

@@ -6,9 +6,11 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.entity.RuleDatabaseEntity;
+import com.webank.weevent.governance.enums.CheckTypeEnum;
+import com.webank.weevent.governance.enums.DatabaseTypeEnum;
+import com.webank.weevent.governance.enums.IsDeleteEnum;
 import com.webank.weevent.governance.repository.RuleDatabaseRepository;
 import com.webank.weevent.governance.repository.RuleEngineRepository;
 
@@ -82,7 +84,7 @@ public class RuleDatabaseService {
             return;
         }
         // 1 h2, 2 mysql
-        if (ConstantProperties.H2_DATABASE.equals(ruleDatabaseEntity.getDatabaseType().toLowerCase())) {
+        if (DatabaseTypeEnum.H2_DATABASE.getCode().equals(ruleDatabaseEntity.getDatabaseType())) {
             dataBaseUrl = "jdbc:h2:tcp://" + ruleDatabaseEntity.getDatabaseIp() + ":" + ruleDatabaseEntity.getDatabasePort()
                     + "/" + ruleDatabaseEntity.getDatabaseName();
         } else {
@@ -110,7 +112,7 @@ public class RuleDatabaseService {
     public void updateRuleDatabase(RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         //check used
-        int count = ruleEngineRepository.countAllByRuleDataBaseIdAndDeleteAt(ruleDatabaseEntity.getId(), ConstantProperties.NOT_DELETED);
+        int count = ruleEngineRepository.countAllByRuleDataBaseIdAndDeleteAt(ruleDatabaseEntity.getId(), IsDeleteEnum.NOT_DELETED.getCode());
         if (count > 0) {
             throw new GovernanceException("This data source is being used by the rules engine and cannot be modified");
         }
@@ -131,7 +133,7 @@ public class RuleDatabaseService {
     public void checkRuleDataBaseUrl(RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
         try {
             // 1 check database, 2 check tableName
-            if (ConstantProperties.CHECK_DATABASE.equals(ruleDatabaseEntity.getCheckType())) {
+            if (CheckTypeEnum.CHECK_DATABASE.getCode().equals(ruleDatabaseEntity.getCheckType())) {
                 getDataBaseUrl(ruleDatabaseEntity);
                 commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseType(), ruleDatabaseEntity.getDatabaseUrl(), null, ruleDatabaseEntity.getUsername(),
                         ruleDatabaseEntity.getPassword());
