@@ -48,6 +48,9 @@ public class FiscoConfig {
     @Value("${web3sdk.keep-alive-seconds:10}")
     private Integer web3sdkKeepAliveSeconds;
 
+    @Value("${web3sdk.encrypt-type:ECDSA_TYPE}")
+    private String web3sdkEncryptType;
+    
     @Value("${proxy.address:}")
     private String proxyAddress;
 
@@ -71,6 +74,9 @@ public class FiscoConfig {
 
     @Value("${v2.node-key-path:node.key}")
     private String v2NodeKeyPath;
+
+    @Value("${v2.pem-key-path:privateKey.pem}")
+    private String v2PemKeyPath;
 
     @Value("${consumer.idle-time:1000}")
     private Integer consumerIdleTime;
