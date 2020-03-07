@@ -379,7 +379,7 @@ public class WeEventClient implements IWeEventClient {
             // download file
             String localFile = null;
             try {
-                FileChunksMeta fileChunksMeta = JsonHelper.jsonBytes2Object(event.getContent(), FileChunksMeta.class);
+                FileChunksMeta fileChunksMeta = JsonHelper.json2Object(event.getContent(), FileChunksMeta.class);
                 localFile = this.fileChunksTransport.download(fileChunksMeta);
             } catch (BrokerException | IOException e) {
                 log.error("detect exception", e);
