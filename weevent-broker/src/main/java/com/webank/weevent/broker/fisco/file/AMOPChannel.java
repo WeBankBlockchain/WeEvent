@@ -201,6 +201,9 @@ public class AMOPChannel extends ChannelPushCallback {
         ChannelResponse rsp = this.sendEvent(amopTopic, fileEvent);
         if (rsp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
             log.info("create remote file context success");
+            if (!this.senderTopics.containsKey(amopTopic)) {
+                this.senderTopics.put(amopTopic, false);
+            }
             return JsonHelper.json2Object(rsp.getContentByteArray(), FileChunksMeta.class);
         }
 
@@ -227,9 +230,7 @@ public class AMOPChannel extends ChannelPushCallback {
         ChannelResponse rsp = this.sendEvent(topic, new FileEvent(FileEvent.EventType.FileChannelStatus, fileId));
         if (rsp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
             log.info("receive file context is ready, go");
-            FileChunksMeta fileChunksMeta = JsonHelper.json2Object(rsp.getContentByteArray(), FileChunksMeta.class);
-            this.senderTopics.put(topic, true);
-            return fileChunksMeta;
+            return JsonHelper.json2Object(rsp.getContentByteArray(), FileChunksMeta.class);
         }
 
         log.error("receive file context is not exist");
