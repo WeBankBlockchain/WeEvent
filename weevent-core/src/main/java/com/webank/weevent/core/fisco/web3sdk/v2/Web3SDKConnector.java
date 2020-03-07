@@ -31,8 +31,8 @@ import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.protocol.core.methods.response.GroupList;
-import org.springframework.core.io.Resource;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -68,6 +68,10 @@ public class Web3SDKConnector {
         try {
             log.info("begin to initialize web3sdk's Web3j, group id: {}", service.getGroupId());
 
+            // special thread for TransactionSucCallback.onResponse, callback from IO thread directly if not setting
+            //service.setThreadPool(poolTaskExecutor);
+            service.run();
+
             ChannelEthereumService channelEthereumService = new ChannelEthereumService();
             channelEthereumService.setChannelService(service);
             channelEthereumService.setTimeout(service.getConnectSeconds() * 1000);
@@ -93,6 +97,7 @@ public class Web3SDKConnector {
 
     /*
      * initialize Service handler with given group id
+     * Notice: returned Service haven't run
      *
      * @param groupId group id
      * @param fiscoConfig fisco Config
@@ -128,10 +133,6 @@ public class Web3SDKConnector {
             connectionsConfig.setAllChannelConnections(Arrays.asList(channelConnections));
 
             service.setAllChannelConnections(connectionsConfig);
-
-            // special thread for TransactionSucCallback.onResponse, callback from IO thread directly if not setting
-            //service.setThreadPool(poolTaskExecutor);
-            service.run();
             return service;
         } catch (Exception e) {
             log.error("init web3sdk's Service failed", e);
@@ -161,38 +162,32 @@ public class Web3SDKConnector {
         log.debug("begin init Credentials");
 
         // read OSSCA account
-        Credentials credentials = null;
+        String privateKey;
         if (fiscoConfig.getWeb3sdkEncryptType().equals("SM2_TYPE")) {
+            log.info("SM2_TYPE");
             // set encrypt type for web3sdk
             EncryptType encryptType = new EncryptType(EncryptType.SM2_TYPE);
 
-            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-            Resource resource = resolver.getResource("classpath:" + fiscoConfig.getV2PemKeyPath());
-            PEMManager pemManager = new PEMManager();
-            ECKeyPair pemKeyPair = null;
-
             try {
-                pemManager.load(resource.getInputStream());
-                pemKeyPair = pemManager.getECKeyPair();
-            } catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException
-                | InvalidKeySpecException | NoSuchProviderException | CertificateException | IOException e) {
-                log.error("Init OSSCA Credentials failed:  "+ e.getMessage());
-            }
+                PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+                Resource resource = resolver.getResource("classpath:" + fiscoConfig.getV2PemKeyPath());
 
-            credentials = GenCredential.create(pemKeyPair.getPrivateKey().toString(16));
-            if (null == credentials) {
-                log.error("init OSSCA Credentials failed");
+                PEMManager pemManager = new PEMManager();
+                pemManager.load(resource.getInputStream());
+                ECKeyPair pemKeyPair = pemManager.getECKeyPair();
+                privateKey = pemKeyPair.getPrivateKey().toString(16);
+            } catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException | CertificateException | IOException e) {
+                log.error("Init OSSCA Credentials failed", e);
                 return null;
             }
         } else {
-            // set encrypt type for web3sdk
-            EncryptType encryptType = new EncryptType(EncryptType.ECDSA_TYPE);
+            privateKey = fiscoConfig.getAccount();
+        }
 
-            credentials = GenCredential.create(fiscoConfig.getAccount());
-            if (null == credentials) {
-                log.error("init Credentials failed");
-                return null;
-            }
+        Credentials credentials = GenCredential.create(privateKey);
+        if (null == credentials) {
+            log.error("init Credentials failed");
+            return null;
         }
 
         log.info("init Credentials success");
