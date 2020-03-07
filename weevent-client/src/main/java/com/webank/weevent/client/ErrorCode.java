@@ -131,6 +131,7 @@ public enum ErrorCode {
     FILE_RECEIVE_CONTEXT_NOT_READY(200508, "receive file context is not ready"),
     FILE_SENDER_RECEIVER_CONFLICT(200509, "can't publish and subscribe a file in the same node"),
     FILE_EXIST_CONTEXT(200510, "exist file context"),
+    FILE_INIT_VERIFY_FAILED(200511, "initialize PEM for verify topic failed"),
     ;
 
     /**

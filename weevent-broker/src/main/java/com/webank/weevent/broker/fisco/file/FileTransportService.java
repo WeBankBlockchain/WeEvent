@@ -134,7 +134,7 @@ public class FileTransportService {
         }
 
         // get remote chunk meta from receiver
-        String amopTopic = AMOPChannel.genTopic(fileChunksMeta.getTopic());
+        String amopTopic = AMOPChannel.genAMOPTopic(fileChunksMeta.getTopic());
         AMOPChannel channel = this.getChannel(fileChunksMeta.getGroupId());
         FileChunksMeta remoteFileChunksMeta = channel.getReceiverFileContext(amopTopic, fileChunksMeta.getFileId());
         if (remoteFileChunksMeta == null) {
@@ -190,7 +190,7 @@ public class FileTransportService {
         fileEvent.setChunkIndex(chunkIndex);
         fileEvent.setChunkData(data);
 
-        String amopTopic = AMOPChannel.genTopic(fileChunksMeta.getTopic());
+        String amopTopic = AMOPChannel.genAMOPTopic(fileChunksMeta.getTopic());
         AMOPChannel channel = this.getChannel(fileChunksMeta.getGroupId());
         ChannelResponse rsp = channel.sendEvent(amopTopic, fileEvent);
         if (rsp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
