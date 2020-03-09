@@ -26,7 +26,7 @@ public class RuleDatabaseEntity extends RuleDatabaseBase {
 
 
     @Transient
-    private String checkType;
+    private Integer checkType;
 
     @Transient
     private String tableName;
@@ -35,7 +35,7 @@ public class RuleDatabaseEntity extends RuleDatabaseBase {
                               @NotBlank String databaseUrl, @NotBlank String username,
                               @NotBlank String password, @NotBlank String datasourceName,
                               @Length(max = 256) String optionalParameter,
-                              Boolean systemTag, @NotBlank String databaseType) {
+                              Boolean systemTag, @NotBlank Integer databaseType) {
         super(userId, brokerId, databaseUrl, username, password, datasourceName, optionalParameter, systemTag, databaseType);
     }
 

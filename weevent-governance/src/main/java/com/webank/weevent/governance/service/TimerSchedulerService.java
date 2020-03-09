@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.ErrorCode;
 import com.webank.weevent.governance.common.GovernanceException;
@@ -20,7 +21,6 @@ import com.webank.weevent.governance.entity.TimerSchedulerEntity;
 import com.webank.weevent.governance.repository.RuleDatabaseRepository;
 import com.webank.weevent.governance.repository.TimerSchedulerRepository;
 import com.webank.weevent.governance.utils.Utils;
-import com.webank.weevent.client.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -252,7 +252,7 @@ public class TimerSchedulerService {
                 dbUrl = dbUrl + "&" + ruleDataBase.getOptionalParameter();
             }
             timerSchedulerEntity.setDatabaseUrl(dbUrl);
-            timerSchedulerEntity.setDataBaseType(ruleDataBase.getDatabaseType().toLowerCase());
+            timerSchedulerEntity.setDataBaseType(ruleDataBase.getDatabaseType());
             log.info("dataBaseUrl:{}", timerSchedulerEntity.getDatabaseUrl());
         }
     }
