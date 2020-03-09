@@ -1,14 +1,14 @@
 package com.webank.weevent.processor.enums;
 
-public enum DatabaseTypeEnum {
+public enum SystemTagEnum {
 
-    H2_DATABASE("1", "h2 database"),
-    MYSQL_DATABASE("2", "mysql database");
+    TOPIC("1", "built-in system "),
+    DATABASE("2", "user created");
 
     private String code;
     private String value;
 
-    DatabaseTypeEnum(String code, String value) {
+    SystemTagEnum(String code, String value) {
         this.code = code;
         this.value = value;
     }
@@ -29,8 +29,8 @@ public enum DatabaseTypeEnum {
         this.value = value;
     }
 
-    public String getValueByCode(String code) {
-        for (DatabaseTypeEnum isDeleteEnum : DatabaseTypeEnum.values()) {
+    public String getValueByCode(Integer code) {
+        for (SystemTagEnum isDeleteEnum : SystemTagEnum.values()) {
             if (isDeleteEnum.code.equals(code)) {
                 return isDeleteEnum.value;
             }
