@@ -31,26 +31,6 @@ public class JsonHelper {
         return OBJECT_MAPPER;
     }
 
-    public static Map<String, String> json2Map(String json) throws BrokerException {
-        try {
-            MapLikeType mapLikeType = OBJECT_MAPPER.getTypeFactory().constructMapLikeType(Map.class, String.class, String.class);
-            return OBJECT_MAPPER.readValue(json, mapLikeType);
-        } catch (Exception e) {
-            log.error("parse extensions failed");
-            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
-        }
-    }
-
-    public static Map<String, Object> object2Map(String json) throws BrokerException {
-        try {
-            MapLikeType mapLikeType = OBJECT_MAPPER.getTypeFactory().constructMapLikeType(Map.class, String.class, Object.class);
-            return OBJECT_MAPPER.readValue(json, mapLikeType);
-        } catch (Exception e) {
-            log.error("parse extensions failed");
-            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
-        }
-    }
-
     /**
      * convert object to String
      *
@@ -80,24 +60,6 @@ public class JsonHelper {
         } catch (JsonProcessingException e) {
             log.error("convert object to jsonString failed ", e);
             throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
-        }
-    }
-
-    /**
-     * convert byte[] to object
-     *
-     * @param bytes json byte
-     * @param valueType java object type
-     * @param <T> template type
-     * @return Object java object
-     * @throws BrokerException BrokerException
-     */
-    public static <T> T jsonBytes2Object(byte[] bytes, Class<T> valueType) throws BrokerException {
-        try {
-            return OBJECT_MAPPER.readValue(bytes, valueType);
-        } catch (IOException e) {
-            log.error("convert byte[] to object failed ", e);
-            throw new BrokerException(ErrorCode.JSON_DECODE_EXCEPTION);
         }
     }
 
@@ -160,6 +122,36 @@ public class JsonHelper {
     public static <T> List<T> object2List(Object obj, Class<T> valueType) {
         return OBJECT_MAPPER.convertValue(obj, new TypeReference<T>() {
         });
+    }
+
+    public static Map<String, String> json2Map(String json) throws BrokerException {
+        try {
+            MapLikeType mapLikeType = OBJECT_MAPPER.getTypeFactory().constructMapLikeType(Map.class, String.class, String.class);
+            return OBJECT_MAPPER.readValue(json, mapLikeType);
+        } catch (Exception e) {
+            log.error("parse extensions failed");
+            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
+        }
+    }
+
+    public static Map<String, Object> object2Map(String json) throws BrokerException {
+        try {
+            MapLikeType mapLikeType = OBJECT_MAPPER.getTypeFactory().constructMapLikeType(Map.class, String.class, Object.class);
+            return OBJECT_MAPPER.readValue(json, mapLikeType);
+        } catch (Exception e) {
+            log.error("parse extensions failed");
+            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
+        }
+    }
+
+    public static <T, R> Map<T, R> json2Map(String json, Class clazz1, Class clazz2) throws BrokerException {
+        try {
+            MapLikeType mapLikeType = OBJECT_MAPPER.getTypeFactory().constructMapLikeType(Map.class, clazz1, clazz2);
+            return OBJECT_MAPPER.readValue(json, mapLikeType);
+        } catch (Exception e) {
+            log.error("parse extensions failed");
+            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
+        }
     }
 
     public static boolean isValid(String jsonString) {

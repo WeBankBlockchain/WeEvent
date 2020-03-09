@@ -1,6 +1,13 @@
 package com.webank.weevent.core.fisco.web3sdk.v2;
 
 
+import java.io.IOException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -13,15 +20,19 @@ import com.webank.weevent.core.config.FiscoConfig;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.handler.ChannelConnections;
 import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
 import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.crypto.ECKeyPair;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.protocol.core.methods.response.GroupList;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -57,6 +68,10 @@ public class Web3SDKConnector {
         try {
             log.info("begin to initialize web3sdk's Web3j, group id: {}", service.getGroupId());
 
+            // special thread for TransactionSucCallback.onResponse, callback from IO thread directly if not setting
+            //service.setThreadPool(poolTaskExecutor);
+            service.run();
+
             ChannelEthereumService channelEthereumService = new ChannelEthereumService();
             channelEthereumService.setChannelService(service);
             channelEthereumService.setTimeout(service.getConnectSeconds() * 1000);
@@ -82,6 +97,7 @@ public class Web3SDKConnector {
 
     /*
      * initialize Service handler with given group id
+     * Notice: returned Service haven't run
      *
      * @param groupId group id
      * @param fiscoConfig fisco Config
@@ -117,10 +133,6 @@ public class Web3SDKConnector {
             connectionsConfig.setAllChannelConnections(Arrays.asList(channelConnections));
 
             service.setAllChannelConnections(connectionsConfig);
-
-            // special thread for TransactionSucCallback.onResponse, callback from IO thread directly if not setting
-            //service.setThreadPool(poolTaskExecutor);
-            service.run();
             return service;
         } catch (Exception e) {
             log.error("init web3sdk's Service failed", e);
@@ -149,7 +161,30 @@ public class Web3SDKConnector {
     public static Credentials getCredentials(FiscoConfig fiscoConfig) {
         log.debug("begin init Credentials");
 
-        Credentials credentials = GenCredential.create(fiscoConfig.getAccount());
+        // read OSSCA account
+        String privateKey;
+        if (fiscoConfig.getWeb3sdkEncryptType().equals("SM2_TYPE")) {
+            log.info("SM2_TYPE");
+            // set encrypt type for web3sdk
+            EncryptType encryptType = new EncryptType(EncryptType.SM2_TYPE);
+
+            try {
+                PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+                Resource resource = resolver.getResource("classpath:" + fiscoConfig.getV2PemKeyPath());
+
+                PEMManager pemManager = new PEMManager();
+                pemManager.load(resource.getInputStream());
+                ECKeyPair pemKeyPair = pemManager.getECKeyPair();
+                privateKey = pemKeyPair.getPrivateKey().toString(16);
+            } catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException | CertificateException | IOException e) {
+                log.error("Init OSSCA Credentials failed", e);
+                return null;
+            }
+        } else {
+            privateKey = fiscoConfig.getAccount();
+        }
+
+        Credentials credentials = GenCredential.create(privateKey);
         if (null == credentials) {
             log.error("init Credentials failed");
             return null;
