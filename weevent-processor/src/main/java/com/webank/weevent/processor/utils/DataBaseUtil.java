@@ -21,8 +21,12 @@ public class DataBaseUtil {
         try {
             if (SystemTagEnum.TOPIC.getCode().equals(rule.getSystemTag()) && rule.getFromDestination().equals("#") && rule.getConditionType().equals(ConditionTypeEnum.DATABASE.getCode())) {
                 Map<String, String> sqlvalue = CommonUtil.contactsql(rule, eventContent);
-                SaveTopicDataUtil.saveTopicData(sqlvalue);
-                return ConstantsHelper.WRITE_DB_SUCCESS;
+                boolean flag = SaveTopicDataUtil.saveTopicData(sqlvalue);
+                if (flag) {
+                    return ConstantsHelper.WRITE_DB_SUCCESS;
+                } else {
+                    return ConstantsHelper.WRITE_DB_FAIL;
+                }
             }
 
             try (Connection conn = CommonUtil.getDbcpConnection(rule.getDatabaseUrl(), rule.getDatabaseType())) {
