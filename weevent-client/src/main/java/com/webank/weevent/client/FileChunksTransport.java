@@ -78,7 +78,14 @@ public class FileChunksTransport {
 
             // upload every single chunk data
             for (int chunkIdx = 0; chunkIdx < fileChunksMeta.getChunkNum(); chunkIdx++) {
-                this.uploadChunkDetails(f, fileChunksMeta, chunkIdx);
+                try {
+                    this.uploadChunkDetails(f, fileChunksMeta, chunkIdx);
+                } catch (BrokerException e) {
+                    if (ErrorCode.FILE_READ_EXCEPTION.equals(e.getCode())) {
+                        throw e;
+                    }
+                    continue;
+                }
             }
 
             boolean chunkFullUpload = checkChunkFullUpload(f, fileId);
@@ -164,7 +171,7 @@ public class FileChunksTransport {
         HttpGet httpGet = new HttpGet(this.svrUrl + "/openChunk?" + params);
 
         byte[] responseResult = this.invokeCGI(httpGet);
-        BaseResponse<FileChunksMeta> baseResponse = JsonHelper.json2BaseResponse(responseResult, FileChunksMeta.class);
+        BaseResponse<FileChunksMeta> baseResponse = JsonHelper.json2Object(responseResult, BaseResponse.class, FileChunksMeta.class);
         if (ErrorCode.SUCCESS.getCode() != baseResponse.getCode()) {
             log.error("open chunk failed, filedId:{} msg:{}", fileChunksMeta.getFileName(), baseResponse.getMessage());
             throw new BrokerException(baseResponse.getCode(), baseResponse.getMessage());
@@ -177,7 +184,7 @@ public class FileChunksTransport {
         HttpGet httpGet = new HttpGet(this.svrUrl + "/listChunk?fileId=" + fileId);
 
         byte[] responseResult = this.invokeCGI(httpGet);
-        BaseResponse<FileChunksMeta> baseResponse = JsonHelper.json2BaseResponse(responseResult, FileChunksMeta.class);
+        BaseResponse<FileChunksMeta> baseResponse = JsonHelper.json2Object(responseResult, BaseResponse.class, FileChunksMeta.class);
         if (ErrorCode.SUCCESS.getCode() != baseResponse.getCode()) {
             log.error("get chunk list failed, filedId:{} msg:{}", fileId, baseResponse.getMessage());
             throw new BrokerException(baseResponse.getCode(), baseResponse.getMessage());
@@ -185,7 +192,7 @@ public class FileChunksTransport {
         return baseResponse.getData();
     }
 
-    private void uploadChunk(String fileId, int chunkIdx, byte[] chunkData) {
+    private void uploadChunk(String fileId, int chunkIdx, byte[] chunkData) throws BrokerException {
         // this.svrUrl + "/uploadChunk"
         String uploadUrl = this.svrUrl + "/uploadChunk";
         HttpPost httpPost = new HttpPost(uploadUrl);
@@ -196,14 +203,11 @@ public class FileChunksTransport {
         multipartEntityBuilder.addTextBody("chunkIdx", String.valueOf(chunkIdx));
         HttpEntity requestEntity = multipartEntityBuilder.build();
         httpPost.setEntity(requestEntity);
-        try {
-            byte[] responseResult = this.invokeCGI(httpPost);
-            BaseResponse baseResponse = JsonHelper.json2Object(responseResult, BaseResponse.class);
-            if (ErrorCode.SUCCESS.getCode() != baseResponse.getCode()) {
-                log.error("upload chunk failed, {}@{} msg:{}", fileId, chunkIdx, baseResponse.getMessage());
-            }
-        } catch (BrokerException e) {
-            log.error("invokeCGI:{} error", uploadUrl, e);
+
+        byte[] responseResult = this.invokeCGI(httpPost);
+        BaseResponse baseResponse = JsonHelper.json2Object(responseResult, BaseResponse.class);
+        if (ErrorCode.SUCCESS.getCode() != baseResponse.getCode()) {
+            log.error("upload chunk failed, {}@{} msg:{}", fileId, chunkIdx, baseResponse.getMessage());
         }
     }
 
@@ -230,7 +234,7 @@ public class FileChunksTransport {
         HttpGet httpGet = new HttpGet(this.svrUrl + "/closeChunk?" + params);
 
         byte[] responseResult = this.invokeCGI(httpGet);
-        BaseResponse<SendResult> baseResponse = JsonHelper.json2BaseResponse(responseResult, SendResult.class);
+        BaseResponse<SendResult> baseResponse = JsonHelper.json2Object(responseResult, BaseResponse.class, SendResult.class);
         if (ErrorCode.SUCCESS.getCode() != baseResponse.getCode()) {
             log.error("close chunk failed, filedId:{} host:{} msg:{}", fileId, host, baseResponse.getMessage());
             throw new BrokerException(baseResponse.getCode(), baseResponse.getMessage());

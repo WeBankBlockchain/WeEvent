@@ -127,7 +127,7 @@ public class CommonUtil {
     public static List<String> getKeys(String objJson) {
         List<String> keys = new ArrayList<>();
         try {
-            Map<String, Object> map = JsonHelper.object2Map(objJson);
+            Map<String, Object> map = JsonHelper.json2Map(objJson, String.class, Object.class);
             if (JsonHelper.isValid(objJson)) {
                 for (Map.Entry<String, Object> entry : map.entrySet()) {
                     keys.add(entry.getKey());
@@ -202,7 +202,7 @@ public class CommonUtil {
 
         // get select field
         List<String> result = getSelectFieldList(rule.getSelectField(), rule.getPayload());
-        Map<String, Object> table = JsonHelper.object2Map(rule.getPayload());
+        Map<String, Object> table = JsonHelper.json2Map(rule.getPayload(), String.class, Object.class);
         Map eventContent;
         Map<String, String> sqlOrder;
 
@@ -288,7 +288,7 @@ public class CommonUtil {
             selectField, String payload) throws BrokerException {
         String content = new String(eventMessage.getContent());
         Map eventContent = JsonHelper.json2Object(content, Map.class);
-        Map<String, Object> payloadContent = JsonHelper.object2Map(payload);
+        Map<String, Object> payloadContent = JsonHelper.json2Map(payload, String.class, Object.class);
 
         // match the table
         Map<String, Object> iftttContent = new HashMap<>();

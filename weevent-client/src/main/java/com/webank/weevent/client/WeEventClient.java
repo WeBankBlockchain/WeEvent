@@ -408,6 +408,7 @@ public class WeEventClient implements IWeEventClient {
     @Override
     public String subscribeFile(String topic, String filePath, FileListener fileListener) throws BrokerException {
         // subscribe file event
+        validateLocalFile(filePath);
         FileChunksTransport fileChunksTransport = new FileChunksTransport(this.brokerUrl + "/file", filePath);
         FileEventListener fileEventListener = new FileEventListener(fileChunksTransport, fileListener);
         String subscriptionId = this.dealSubscribe(topic, WeEvent.OFFSET_LAST, "", true, fileEventListener);

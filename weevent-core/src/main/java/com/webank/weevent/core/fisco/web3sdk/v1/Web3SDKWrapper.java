@@ -366,7 +366,7 @@ public class Web3SDKWrapper {
 
                     WeEvent event = new WeEvent(topicName,
                             logEvent.eventContent.getValue().getBytes(StandardCharsets.UTF_8),
-                            JsonHelper.json2Map(logEvent.extensions.toString()));
+                            JsonHelper.json2Map(logEvent.extensions.toString(), String.class, String.class));
                     event.setEventId(DataTypeUtils.encodeEventId(topicName, uint256ToInt(logEvent.eventBlockNumer), uint256ToInt(logEvent.eventSeq)));
 
                     log.debug("get a event from block chain: {}", event);

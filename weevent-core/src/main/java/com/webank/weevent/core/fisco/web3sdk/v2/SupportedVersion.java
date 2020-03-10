@@ -11,14 +11,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.webank.weevent.core.fisco.util.DataTypeUtils;
-import com.webank.weevent.core.fisco.web3sdk.v2.solc10.Topic;
-import com.webank.weevent.core.fisco.web3sdk.v2.solc10.TopicController;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.client.TopicInfo;
 import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.core.fisco.util.DataTypeUtils;
+import com.webank.weevent.core.fisco.web3sdk.v2.solc10.Topic;
+import com.webank.weevent.core.fisco.web3sdk.v2.solc10.TopicController;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -204,7 +204,7 @@ public class SupportedVersion {
                 String topicName = input.getValue1();
                 WeEvent event = new WeEvent(topicName,
                         input.getValue2().getBytes(StandardCharsets.UTF_8),
-                        JsonHelper.json2Map(input.getValue3()));
+                        JsonHelper.json2Map(input.getValue3(), String.class, String.class));
                 event.setEventId(DataTypeUtils.encodeEventId(topicName,
                         receipt.getBlockNumber().intValue(),
                         output.getValue1().intValue()));

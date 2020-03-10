@@ -101,15 +101,23 @@ public class JsonHelper {
     }
 
     /**
-     * convert Object to Bean
+     * convert json byte[] to Object
      *
-     * @param obj object data
-     * @param valueType java object type
+     * @param json byte
+     * @param clazz1 Class1
+     * @param clazz2 Class2
      * @param <T> template type
      * @return class instance
+     * @throws BrokerException BrokerException
      */
-    public static <T> T object2Bean(Object obj, Class<T> valueType) {
-        return OBJECT_MAPPER.convertValue(obj, valueType);
+    public static <T> T json2Object(byte[] json, Class clazz1, Class clazz2) throws BrokerException {
+        try {
+            JavaType javaType = OBJECT_MAPPER.getTypeFactory().constructParametricType(clazz1, clazz2);
+            return OBJECT_MAPPER.readValue(json, javaType);
+        } catch (Exception e) {
+            log.error("parse extensions failed");
+            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
+        }
     }
 
     /**
@@ -125,49 +133,10 @@ public class JsonHelper {
         });
     }
 
-    public static Map<String, String> json2Map(String json) throws BrokerException {
-        try {
-            MapLikeType mapLikeType = OBJECT_MAPPER.getTypeFactory().constructMapLikeType(Map.class, String.class, String.class);
-            return OBJECT_MAPPER.readValue(json, mapLikeType);
-        } catch (Exception e) {
-            log.error("parse extensions failed");
-            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
-        }
-    }
-
-    public static Map<String, Object> object2Map(String json) throws BrokerException {
-        try {
-            MapLikeType mapLikeType = OBJECT_MAPPER.getTypeFactory().constructMapLikeType(Map.class, String.class, Object.class);
-            return OBJECT_MAPPER.readValue(json, mapLikeType);
-        } catch (Exception e) {
-            log.error("parse extensions failed");
-            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
-        }
-    }
-
     public static <T, R> Map<T, R> json2Map(String json, Class clazz1, Class clazz2) throws BrokerException {
         try {
             MapLikeType mapLikeType = OBJECT_MAPPER.getTypeFactory().constructMapLikeType(Map.class, clazz1, clazz2);
             return OBJECT_MAPPER.readValue(json, mapLikeType);
-        } catch (Exception e) {
-            log.error("parse extensions failed");
-            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
-        }
-    }
-
-    /**
-     * convert jsonString to BaseResponse
-     *
-     * @param json byte
-     * @param clazz Class
-     * @param <T> template type
-     * @return class instance
-     * @throws BrokerException
-     */
-    public static <T> BaseResponse<T> json2BaseResponse(byte[] json, Class clazz) throws BrokerException {
-        try {
-            JavaType javaType = OBJECT_MAPPER.getTypeFactory().constructParametricType(BaseResponse.class, clazz);
-            return OBJECT_MAPPER.readValue(json, javaType);
         } catch (Exception e) {
             log.error("parse extensions failed");
             throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
