@@ -12,8 +12,8 @@ if [ $# -eq 0 ];then
     exit 1
 fi
 
-java_cmd_deploy="${JAVA_HOME}/bin/java -classpath './lib/*:./conf' com.webank.weevent.broker.fabric.util.FabricDeployContractUtil"
-java_cmd_invoke="${JAVA_HOME}/bin/java -classpath './lib/*:./conf' com.webank.weevent.broker.fabric.util.FabricUpdateContractUtil"
+java_cmd_deploy="${JAVA_HOME}/bin/java -classpath './lib/*:../lib/*:./conf' com.webank.weevent.core.fabric.util.FabricDeployContractUtil"
+java_cmd_invoke="${JAVA_HOME}/bin/java -classpath './lib/*:../lib/*:./conf' com.webank.weevent.core.fabric.util.FabricUpdateContractUtil"
 cmd=$1
 
 if [[ ${cmd} = "deploy" ]];then
