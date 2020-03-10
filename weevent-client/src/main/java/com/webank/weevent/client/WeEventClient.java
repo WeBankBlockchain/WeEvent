@@ -1,6 +1,7 @@
 package com.webank.weevent.client;
 
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -340,6 +341,15 @@ public class WeEventClient implements IWeEventClient {
         }
     }
 
+    private static void validateLocalFile(String filePath) throws BrokerException {
+        if (StringUtils.isBlank(filePath)) {
+            throw new BrokerException(ErrorCode.LOCAL_FILE_IS_EMPTY);
+        }
+        if (!(new File(filePath)).exists()) {
+            throw new BrokerException(ErrorCode.LOCAL_FILE_NOT_EXIST);
+        }
+    }
+
     private static BrokerException jms2BrokerException(JMSException e) {
         if (StringUtils.isBlank(e.getErrorCode())) {
             return new BrokerException(e.getMessage());
@@ -351,6 +361,7 @@ public class WeEventClient implements IWeEventClient {
     @Override
     public SendResult publishFile(String topic, String localFile) throws BrokerException, IOException {
         // upload file
+        validateLocalFile(localFile);
         FileChunksTransport fileChunksTransport = new FileChunksTransport(this.brokerUrl + "/file");
         SendResult sendResult = fileChunksTransport.upload(localFile, topic, this.groupId);
 

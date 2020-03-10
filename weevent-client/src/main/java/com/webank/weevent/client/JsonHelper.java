@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.MapLikeType;
 import lombok.extern.slf4j.Slf4j;
@@ -148,6 +149,25 @@ public class JsonHelper {
         try {
             MapLikeType mapLikeType = OBJECT_MAPPER.getTypeFactory().constructMapLikeType(Map.class, clazz1, clazz2);
             return OBJECT_MAPPER.readValue(json, mapLikeType);
+        } catch (Exception e) {
+            log.error("parse extensions failed");
+            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
+        }
+    }
+
+    /**
+     * convert jsonString to BaseResponse
+     *
+     * @param json byte
+     * @param clazz Class
+     * @param <T> template type
+     * @return class instance
+     * @throws BrokerException
+     */
+    public static <T> BaseResponse<T> json2BaseResponse(byte[] json, Class clazz) throws BrokerException {
+        try {
+            JavaType javaType = OBJECT_MAPPER.getTypeFactory().constructParametricType(BaseResponse.class, clazz);
+            return OBJECT_MAPPER.readValue(json, javaType);
         } catch (Exception e) {
             log.error("parse extensions failed");
             throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
