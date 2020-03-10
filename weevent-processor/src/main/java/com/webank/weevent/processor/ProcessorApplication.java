@@ -11,11 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.ApplicationPidFileWriter;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @EnableDiscoveryClient
@@ -25,6 +27,9 @@ public class ProcessorApplication {
     public static ProcessorConfig processorConfig;
     public static ApplicationContext applicationContext;
     public static Environment environment;
+    public static DiscoveryClient discoveryClient;
+    public static RestTemplate restTemplate;
+
 
     @Autowired
     public void setContext(ApplicationContext context) {
@@ -47,6 +52,17 @@ public class ProcessorApplication {
     @Autowired
     public void setEnvironment(org.springframework.core.env.Environment env) {
         environment = env;
+    }
+
+
+    @Autowired
+    public void setDiscoveryClient(DiscoveryClient client) {
+        discoveryClient = client;
+    }
+
+    @Autowired
+    public void setRestTemplate(RestTemplate template) {
+        restTemplate = template;
     }
 
     @Bean(name = "processor_daemon_task_executor")
@@ -73,4 +89,11 @@ public class ProcessorApplication {
         log.info("CEPRuleMQ....");
         return new CEPRuleMQ();
     }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        log.info("RestTemplate....");
+        return new RestTemplate();
+    }
+
 }

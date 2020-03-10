@@ -57,7 +57,7 @@ public class CEPRuleMQ {
     public static StatisticWeEvent statisticWeEvent = new StatisticWeEvent();
 
     @PostConstruct
-    public void init() {
+    public void init() throws BrokerException {
         // get all rule
         log.info("start dBThread ...");
         new Thread(dbThread).start();
@@ -194,7 +194,7 @@ public class CEPRuleMQ {
                 continue;
             }
             // write the # topic to history db
-            if ("1".equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(ConditionTypeEnum.DATABASE.getCode())) {
+            if (SystemTagEnum.TOPIC.getCode().equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(ConditionTypeEnum.DATABASE.getCode())) {
 
                 log.info("system insert db:{}", entry.getValue().getId());
                 Pair<WeEvent, CEPRule> messagePair = new Pair<>(event, entry.getValue());

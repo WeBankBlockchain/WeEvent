@@ -1,6 +1,7 @@
 package com.webank.weevent.governance.controller;
 
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,10 +47,13 @@ public class TopicHistoricalController {
     }
 
     @PostMapping("/insertHistoricalData")
-    public void insertHistoricalData(@RequestBody TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request,
-                                     HttpServletResponse response) throws GovernanceException {
-        log.info("get  eventList:{} ", topicHistoricalEntity);
-        topicHistoricalService.insertHistoricalData(topicHistoricalEntity, request);
+    public Map<String, Object> insertHistoricalData(@RequestBody TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request,
+                                                    HttpServletResponse response) {
+        log.info("insert  historicalData:{} ", topicHistoricalEntity);
+        boolean result = topicHistoricalService.insertHistoricalData(topicHistoricalEntity);
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("result", result);
+        return resultMap;
     }
 
 }

@@ -249,13 +249,19 @@ public class TopicHistoricalService {
         }
     }
 
-    public void insertHistoricalData(TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request) throws GovernanceException {
+    public boolean insertHistoricalData(TopicHistoricalEntity topicHistoricalEntity) {
         try {
+            int count = topicHistoricalRepository.countByBrokerIdAndGroupIdAndEventId(topicHistoricalEntity.getBrokerId(), topicHistoricalEntity.getGroupId(), topicHistoricalEntity.getEventId());
+            if (count > 0) {
+                log.info("the record is exists");
+                return false;
+            }
             TopicHistoricalEntity historicalEntity = topicHistoricalRepository.save(topicHistoricalEntity);
-            log.info("insert historicalData success");
+            log.info("insert historicalData success,id:{}",historicalEntity.getId());
+            return true;
         } catch (Exception e) {
             log.error("insert historicalData fail", e);
-            throw new GovernanceException("insert historicalData fail", e);
+            return false;
         }
     }
 }

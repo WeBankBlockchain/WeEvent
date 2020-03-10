@@ -1,15 +1,16 @@
 package com.webank.weevent.processor.utils;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.processor.enums.ConditionTypeEnum;
+import com.webank.weevent.processor.enums.SystemTagEnum;
+import com.webank.weevent.processor.model.CEPRule;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,7 +19,13 @@ public class DataBaseUtil {
 
     public static String sendMessageToDB(WeEvent eventContent, CEPRule rule) {
         try {
-            try (Connection conn = CommonUtil.getDbcpConnection(rule.getDatabaseUrl(),rule.getDatabaseType())) {
+            if (SystemTagEnum.TOPIC.getCode().equals(rule.getSystemTag()) && rule.getFromDestination().equals("#") && rule.getConditionType().equals(ConditionTypeEnum.DATABASE.getCode())) {
+                Map<String, String> sqlvalue = CommonUtil.contactsql(rule, eventContent);
+                SaveTopicDataUtil.saveTopicData(sqlvalue);
+                return ConstantsHelper.WRITE_DB_SUCCESS;
+            }
+
+            try (Connection conn = CommonUtil.getDbcpConnection(rule.getDatabaseUrl(), rule.getDatabaseType())) {
 
                 if (conn != null) {
                     // get the insert sql
@@ -73,4 +80,6 @@ public class DataBaseUtil {
         }
         return "";
     }
+
+
 }
