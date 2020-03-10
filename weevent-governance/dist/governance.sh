@@ -7,6 +7,7 @@ if [[ -z ${JAVA_HOME} ]];then
 fi
 
 server_name=weevent-governance
+bash_name=$(basename $0|awk -F'.' '{print $1}')
 APP_PARAMS="-Xbootclasspath/a:./conf -Djava.security.egd=file:/dev/./urandom -cp ./apps/* -Dloader.path=./lib,../lib org.springframework.boot.loader.PropertiesLauncher"
 
 ###############################################################################
@@ -56,14 +57,14 @@ start(){
         i=$(( i + 1 ))
     done
 
-    if [[ $(crontab -l | grep -w ${server_name} | wc -l) -eq 0 ]]; then
+    if [[ $(crontab -l | grep -w ${bash_name} | wc -l) -eq 0 ]]; then
          crontab -l > cron.backup
-         echo "* * * * * cd $(pwd); ./${server_name}.sh monitor >> ./logs/monitor.log 2>&1" >> cron.backup
+         echo "* * * * * cd $(pwd); ./${bash_name}.sh monitor >> ./logs/monitor.log 2>&1" >> cron.backup
          crontab cron.backup
          rm cron.backup
     fi
 
-    if [[ $(crontab -l | grep -w ${server_name} | wc -l) -gt 0 ]]; then
+    if [[ $(crontab -l | grep -w ${bash_name} | wc -l) -gt 0 ]]; then
          echo "add the crontab job success"
          exit 0
     else
@@ -79,14 +80,14 @@ stop(){
         eval ${kill_cmd}
 
         echo "stop ${server_name} success"
-        if [[ $(crontab -l | grep -w ${server_name} | wc -l) -gt 0 ]]; then
+        if [[ $(crontab -l | grep -w ${bash_name} | wc -l) -gt 0 ]]; then
             crontab -l>cron.backup
-            sed -i '/'${server_name}'/d' cron.backup
+            sed -i '/'${bash_name}'/d' cron.backup
             crontab cron.backup
             rm cron.backup
         fi
 
-        if [[ $(crontab -l | grep -w ${server_name} | wc -l) -gt 0 ]]; then
+        if [[ $(crontab -l | grep -w ${bash_name} | wc -l) -gt 0 ]]; then
             echo "remove the crontab job fail"
             exit 1
         else
@@ -121,6 +122,6 @@ monitor)
     ;;
 *)
     echo "Usage:"
-    echo "    ${server_name}.sh start|stop|monitor"
+    echo "    $(basename $0) start|stop|monitor"
     ;;
 esac
