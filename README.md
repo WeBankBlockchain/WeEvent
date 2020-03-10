@@ -21,7 +21,7 @@ WeEvent由微众银行自主研发并完全开源，秉承分布式商业模式�
 WeEvent支持三种安装方式：[Docker镜像](https://hub.docker.com/r/weevent/)、[Bash一键脚本](https://weeventdoc.readthedocs.io/zh_CN/latest/install/quickinstall.html)、[进阶安装](https://weeventdoc.readthedocs.io/zh_CN/latest/install/module/index.html)。
 ### Docker镜像安装
 ```shell
-$ docker pull weevent/weevent:1.0.0; docker run -d -p 8080:8080 weevent/weevent:1.0.0 /root/run.sh
+$ docker pull weevent/weevent:latest; docker run -d -p 8080:8080 weevent/weevent:latest /root/run.sh
 ```
 
 ### Bash一键安装
