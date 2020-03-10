@@ -36,8 +36,7 @@ public class UserFilter extends OncePerRequestFilter {
         if (!urlSet.contains(url)) {
             String token = request.getHeader(JwtUtils.AUTHORIZATION_HEADER_PREFIX);
             String privateSecret = GovernanceApplication.governanceConfig.getPrivateSecret();
-            if (!StringUtils.isBlank(token)) {
-                JwtUtils.verifierToken(token, privateSecret);
+            if (!StringUtils.isBlank(token) && JwtUtils.verifierToken(token, privateSecret)) {
                 AccountEntity accountEntity = JwtUtils.decodeToken(token, privateSecret);
                 if (accountEntity != null) {
                     log.info("get token from HTTP header, {} : {}", JwtUtils.AUTHORIZATION_HEADER_PREFIX, token);
