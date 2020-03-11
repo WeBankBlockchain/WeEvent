@@ -42,7 +42,7 @@ public class CEPRuleController {
     public BaseRspEntity updateCEPRuleById(@Valid @RequestBody CEPRule rule) {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = createJob(rule, "updateCEPRuleById");
-        if (!(ConstantsHelper.RET_FAIL.getErrorCode() == ret.getErrorCode())) { //fail
+        if (ConstantsHelper.RET_FAIL.getErrorCode() != ret.getErrorCode()) { //fail
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
             resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());
         }
@@ -54,7 +54,7 @@ public class CEPRuleController {
     public BaseRspEntity stopCEPRuleById(@Valid @RequestBody CEPRule rule) {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = createJob(rule, "stopCEPRuleById");
-        if (!(ConstantsHelper.RET_FAIL.getErrorCode() == ret.getErrorCode())) { //fail
+        if (ConstantsHelper.RET_FAIL.getErrorCode() != ret.getErrorCode()) { //fail
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
             resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());
         }
@@ -67,7 +67,7 @@ public class CEPRuleController {
         // insert status must be 0
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = createJob(rule, "insert");
-        if (!(ConstantsHelper.RET_FAIL.getErrorCode() == ret.getErrorCode())) { //fail
+        if (ConstantsHelper.RET_FAIL.getErrorCode() != ret.getErrorCode()) { //fail
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
             resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());
         } else {
@@ -84,7 +84,7 @@ public class CEPRuleController {
         try {
             RetCode ret = deleteJob(id);
 
-            if (!(ConstantsHelper.RET_FAIL.getErrorCode() == ret.getErrorCode())) { //fail
+            if (ConstantsHelper.RET_FAIL.getErrorCode() != ret.getErrorCode()) { //fail
                 resEntity.setErrorCode(ret.getErrorCode());
                 resEntity.setErrorMsg(ret.getErrorMsg());
             }
@@ -116,7 +116,7 @@ public class CEPRuleController {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = createJob(rule, "startCEPRule");
 
-        if (!(ConstantsHelper.RET_FAIL.getErrorCode() == ret.getErrorCode())) { //fail
+        if (ConstantsHelper.RET_FAIL.getErrorCode() != ret.getErrorCode()) { //fail
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
             resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());
         }
@@ -128,7 +128,7 @@ public class CEPRuleController {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = CEPRuleMQ.checkCondition(payload, condition);
 
-        if (!(ConstantsHelper.RET_FAIL.getErrorCode() == ret.getErrorCode())) { //fail
+        if (ConstantsHelper.RET_FAIL.getErrorCode() != ret.getErrorCode()) { //fail
             resEntity.setErrorCode(ret.getErrorCode());
             resEntity.setErrorMsg(ret.getErrorMsg());
         }
