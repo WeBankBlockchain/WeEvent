@@ -1,7 +1,6 @@
 package com.webank.weevent.processor.utils;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,19 +12,22 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.webank.weevent.processor.ProcessorApplication;
-import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.processor.ProcessorApplication;
+import com.webank.weevent.processor.enums.DatabaseTypeEnum;
+import com.webank.weevent.processor.model.CEPRule;
 
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSourceFactory;
 import org.springframework.util.StringUtils;
 
 @Slf4j
@@ -38,7 +40,7 @@ public class CommonUtil {
      * @param databaseUrl data bae url
      * @return connection
      */
-    public static Connection getDbcpConnection(String databaseUrl,String databaseType) {
+    public static Connection getDbcpConnection(String databaseUrl, String databaseType) {
         try {
             Map<String, String> requestUrlMap = uRLRequest(databaseUrl);
             // check all parameter
@@ -50,11 +52,12 @@ public class CommonUtil {
                 // use the old connection
                 return dsMap.get(databaseUrl).getConnection();
             } else {
-                BasicDataSource ds = new BasicDataSource();
+                Properties properties = new Properties();
+                BasicDataSource ds = BasicDataSourceFactory.createDataSource(properties);
                 dsMap.put(databaseUrl, ds);
-                if("1".equals(databaseType)){
+                if (DatabaseTypeEnum.H2_DATABASE.getCode().equals(databaseType)) {
                     ds.setDriverClassName("org.h2.Driver");
-                }else {
+                } else {
                     ds.setDriverClassName("org.mariadb.jdbc.Driver");
                 }
                 ds.setUrl(urlPage(databaseUrl));
@@ -67,7 +70,7 @@ public class CommonUtil {
 
                 return ds.getConnection();
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             log.error("e:{}", e.toString());
             return null;
         }

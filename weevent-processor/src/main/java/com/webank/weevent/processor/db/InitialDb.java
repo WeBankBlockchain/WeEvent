@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Properties;
 
 import lombok.extern.slf4j.Slf4j;
-import org.h2.tools.Server;
 import org.springframework.util.Assert;
 
 /**
@@ -23,7 +22,6 @@ import org.springframework.util.Assert;
 @Slf4j
 public class InitialDb implements AutoCloseable {
 
-    private Server server;
     private String user;
     private String password;
     private String dbName;
@@ -34,9 +32,7 @@ public class InitialDb implements AutoCloseable {
         InitialDb initialDb = new InitialDb();
         properties = initialDb.getProperties();
         databaseType = properties.getProperty("spring.jpa.database").toLowerCase();
-        initialDb.startH2();
         initialDb.createDataBase();
-        initialDb.stopH2();
     }
 
     private void createDataBase() throws Exception {
@@ -57,7 +53,6 @@ public class InitialDb implements AutoCloseable {
 
             runScript(defaultUrl, flag, tableSqlList);
         } catch (Exception e) {
-            stopH2();
             log.error("create database error,{}", e.getMessage());
             throw e;
         }
@@ -71,7 +66,6 @@ public class InitialDb implements AutoCloseable {
         properties.load(new FileInputStream(url.getFile()));
         return properties;
     }
-
 
 
     private static List<String> readCEPSql() throws IOException {
@@ -112,21 +106,6 @@ public class InitialDb implements AutoCloseable {
             log.error("execute sql fail,message: {}", e.getMessage());
             throw e;
         }
-    }
-    private void startH2() throws Exception {
-        if (!"h2".equals(databaseType)) {
-            return;
-        }
-        this.server = Server.createTcpServer(new String[]{"-tcp", "-tcpAllowOthers", "-tcpPort", "7083"}).start();
-        log.info("start h2 server success");
-    }
-
-    private void stopH2() throws Exception {
-        if (!"h2".equals(databaseType)) {
-            return;
-        }
-        this.server.stop();
-        log.info("stop h2 server success");
     }
 
     @Override
