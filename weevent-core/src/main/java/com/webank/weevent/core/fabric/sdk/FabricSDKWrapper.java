@@ -17,6 +17,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
+import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.config.FabricConfig;
 import com.webank.weevent.core.dto.GroupGeneral;
 import com.webank.weevent.core.dto.ListPage;
@@ -27,11 +31,8 @@ import com.webank.weevent.core.fabric.dto.TransactionInfo;
 import com.webank.weevent.core.fabric.util.FabricUser;
 import com.webank.weevent.core.fisco.constant.WeEventConstants;
 import com.webank.weevent.core.fisco.util.DataTypeUtils;
-import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.client.ErrorCode;
-import com.webank.weevent.client.JsonHelper;
-import com.webank.weevent.client.WeEvent;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.protobuf.InvalidProtocolBufferException;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
@@ -273,7 +274,8 @@ public class FabricSDKWrapper {
                         WeEvent weEvent = new WeEvent();
                         weEvent.setTopic(new String(transactionActionInfo.getChaincodeInputArgs(1), UTF_8));
                         weEvent.setContent(transactionActionInfo.getChaincodeInputArgs(2));
-                        weEvent.setExtensions(JsonHelper.json2Map(new String(transactionActionInfo.getChaincodeInputArgs(3))));
+                        weEvent.setExtensions(JsonHelper.json2Object(new String(transactionActionInfo.getChaincodeInputArgs(3)), new TypeReference<Map<String, String>>() {
+                        }));
                         weEvent.setEventId(DataTypeUtils.encodeEventId(weEvent.getTopic(),
                                 blockNumber.intValue(),
                                 Integer.parseInt(new String(transactionActionInfo.getProposalResponsePayload()))));
