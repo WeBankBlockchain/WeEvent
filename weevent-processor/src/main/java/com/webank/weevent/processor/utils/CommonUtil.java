@@ -24,6 +24,7 @@ import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.processor.enums.DatabaseTypeEnum;
 import com.webank.weevent.processor.model.CEPRule;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -130,7 +131,9 @@ public class CommonUtil {
     public static List<String> getKeys(String objJson) {
         List<String> keys = new ArrayList<>();
         try {
-            Map<String, Object> map = JsonHelper.object2Map(objJson);
+            Map<String, Object> map = JsonHelper.json2Object(objJson, new TypeReference<Map<String, Object>>() {
+            });
+
             if (JsonHelper.isValid(objJson)) {
                 for (Map.Entry<String, Object> entry : map.entrySet()) {
                     keys.add(entry.getKey());
@@ -205,7 +208,9 @@ public class CommonUtil {
 
         // get select field
         List<String> result = getSelectFieldList(rule.getSelectField(), rule.getPayload());
-        Map<String, Object> table = JsonHelper.object2Map(rule.getPayload());
+        Map<String, Object> table = JsonHelper.json2Object(rule.getPayload(), new TypeReference<Map<String, Object>>() {
+        });
+
         Map eventContent;
         Map<String, String> sqlOrder;
 
@@ -291,7 +296,8 @@ public class CommonUtil {
             selectField, String payload) throws BrokerException {
         String content = new String(eventMessage.getContent());
         Map eventContent = JsonHelper.json2Object(content, Map.class);
-        Map<String, Object> payloadContent = JsonHelper.object2Map(payload);
+        Map<String, Object> payloadContent = JsonHelper.json2Object(payload, new TypeReference<Map<String, Object>>() {
+        });
 
         // match the table
         Map<String, Object> iftttContent = new HashMap<>();
