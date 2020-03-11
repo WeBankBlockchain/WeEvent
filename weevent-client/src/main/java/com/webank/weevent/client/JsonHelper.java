@@ -61,18 +61,6 @@ public class JsonHelper {
     }
 
     /**
-     * convert object to Bean
-     *
-     * @param obj object
-     * @param typeReference java object type
-     * @param <T> template type
-     * @return class instance
-     */
-    public static <T> T object2Bean(Object obj, TypeReference<T> typeReference) {
-        return OBJECT_MAPPER.convertValue(obj, typeReference);
-    }
-
-    /**
      * convert jsonString to object
      *
      * @param jsonString json String
