@@ -18,4 +18,6 @@ public interface TopicHistoricalRepository extends JpaRepository<TopicHistorical
     @Query(value = "delete from t_topic_historical where brokerId =:brokerId", nativeQuery = true)
     void deleteTopicHistoricalByBrokerId(@Param("brokerId") Integer brokerId);
 
+    int countByBrokerIdAndGroupIdAndEventId(Integer brokerId,String groupId,String eventId);
+
 }
