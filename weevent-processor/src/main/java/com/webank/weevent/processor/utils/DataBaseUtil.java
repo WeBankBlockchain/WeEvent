@@ -19,7 +19,7 @@ public class DataBaseUtil {
 
     public static String sendMessageToDB(WeEvent eventContent, CEPRule rule) {
         try {
-            if (SystemTagEnum.TOPIC.getCode().equals(rule.getSystemTag()) && rule.getFromDestination().equals("#") && rule.getConditionType().equals(ConditionTypeEnum.DATABASE.getCode())) {
+            if (SystemTagEnum.BUILT_IN_SYSTEM.getCode().equals(rule.getSystemTag()) && rule.getFromDestination().equals("#") && rule.getConditionType().equals(ConditionTypeEnum.DATABASE.getCode())) {
                 Map<String, String> sqlvalue = CommonUtil.contactsql(rule, eventContent);
                 boolean flag = SaveTopicDataUtil.saveTopicData(sqlvalue);
                 if (flag) {

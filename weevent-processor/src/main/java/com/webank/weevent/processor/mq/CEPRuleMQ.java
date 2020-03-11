@@ -194,7 +194,7 @@ public class CEPRuleMQ {
                 continue;
             }
             // write the # topic to history db
-            if (SystemTagEnum.TOPIC.getCode().equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(ConditionTypeEnum.DATABASE.getCode())) {
+            if (SystemTagEnum.BUILT_IN_SYSTEM.getCode().equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(ConditionTypeEnum.DATABASE.getCode())) {
 
                 log.info("system insert db:{}", entry.getValue().getId());
                 Pair<WeEvent, CEPRule> messagePair = new Pair<>(event, entry.getValue());
@@ -230,7 +230,7 @@ public class CEPRuleMQ {
             }
 
             // write the # topic to history db  or ifttt message
-            if (SystemTagEnum.TOPIC.getCode().equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && ConditionTypeEnum.DATABASE.getCode().equals(entry.getValue().getConditionType())) {
+            if (SystemTagEnum.BUILT_IN_SYSTEM.getCode().equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && ConditionTypeEnum.DATABASE.getCode().equals(entry.getValue().getConditionType())) {
                 log.info("system insert db:{}", entry.getValue().getId());
                 Pair<WeEvent, CEPRule> messagePair = new Pair<>(event, entry.getValue());
                 systemMessageQueue.add(messagePair);

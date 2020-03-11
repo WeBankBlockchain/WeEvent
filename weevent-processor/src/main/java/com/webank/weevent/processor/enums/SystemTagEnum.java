@@ -5,8 +5,8 @@ import lombok.Getter;
 @Getter
 public enum SystemTagEnum {
 
-    TOPIC("1", "built-in system "),
-    DATABASE("2", "user created");
+    BUILT_IN_SYSTEM("1", "built-in system "),
+    USER_CREATED("2", "user created");
 
     private String code;
     private String value;
