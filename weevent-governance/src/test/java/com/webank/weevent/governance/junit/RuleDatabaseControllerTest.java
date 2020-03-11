@@ -4,12 +4,11 @@ package com.webank.weevent.governance.junit;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.governance.JUnitTestBase;
 import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.utils.JwtUtils;
-import com.webank.weevent.client.JsonHelper;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.junit.After;
@@ -62,8 +61,7 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), new TypeReference<GovernanceResult>() {
-        });
+        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
         brokerIdMap.put("brokerId", (Integer) governanceResult.getData());
     }
 
@@ -75,8 +73,7 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/circulationDatabase/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), new TypeReference<GovernanceResult>() {
-        });
+        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
         Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
     }
 
@@ -88,8 +85,7 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mvcResult.getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), new TypeReference<GovernanceResult>() {
-        });
+        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
         Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
     }
 
@@ -101,8 +97,7 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/circulationDatabase/update").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), new TypeReference<GovernanceResult>() {
-        });
+        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
         Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
     }
 
@@ -112,8 +107,7 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/circulationDatabase/delete").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), new TypeReference<GovernanceResult>() {
-        });
+        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
         Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
     }
 
@@ -125,8 +119,7 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/circulationDatabase/checkDataBaseUrl").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), new TypeReference<GovernanceResult>() {
-        });
+        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
         Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
     }
 
@@ -136,8 +129,7 @@ public class RuleDatabaseControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/delete").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Map jsonObject = JsonHelper.json2Object(response.getContentAsString(), new TypeReference<Map>() {
-        });
+        Map jsonObject = JsonHelper.json2Object(response.getContentAsString(), Map.class);
         Assert.assertEquals(jsonObject.get("status").toString(), "200");
     }
 

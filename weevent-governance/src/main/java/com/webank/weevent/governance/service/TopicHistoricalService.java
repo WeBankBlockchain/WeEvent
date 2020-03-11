@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.entity.BrokerEntity;
@@ -20,10 +22,7 @@ import com.webank.weevent.governance.entity.TopicHistoricalEntity;
 import com.webank.weevent.governance.mapper.TopicHistoricalMapper;
 import com.webank.weevent.governance.repository.RuleDatabaseRepository;
 import com.webank.weevent.governance.repository.RuleEngineRepository;
-import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.client.JsonHelper;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -227,8 +226,7 @@ public class TopicHistoricalService {
             if (StringUtil.isBlank(mes)) {
                 throw new GovernanceException("group is empty");
             }
-            Map jsonObject = JsonHelper.json2Object(mes, new TypeReference<Map>() {
-            });
+            Map jsonObject = JsonHelper.json2Object(mes, Map.class);
             Object data = jsonObject.get("data");
             if ("0".equals(jsonObject.get("code").toString()) && data instanceof List) {
                 groupList = (List) data;

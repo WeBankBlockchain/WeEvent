@@ -26,7 +26,6 @@ import com.webank.weevent.governance.repository.RuleEngineRepository;
 import com.webank.weevent.governance.repository.TopicHistoricalRepository;
 import com.webank.weevent.governance.repository.TopicRepository;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -292,8 +291,7 @@ public class BrokerService {
         try {
             CloseableHttpResponse response = client.execute(get);
             String responseResult = EntityUtils.toString(response.getEntity());
-            jsonObject = JsonHelper.json2Object(responseResult, new TypeReference<Map>() {
-            });
+            jsonObject = JsonHelper.json2Object(responseResult, Map.class);
         } catch (Exception e) {
             log.error("url {}, connect fail,error:{}", headUrl, e.getMessage());
             throw new GovernanceException("url:{}" + headUrl + " connect fail", e);
@@ -310,8 +308,7 @@ public class BrokerService {
         try {
             CloseableHttpResponse versionResponse = commonService.getCloseResponse(request, versionUrl);
             String mes = EntityUtils.toString(versionResponse.getEntity());
-            Map map = JsonHelper.json2Object(mes, new TypeReference<Map>() {
-            });
+            Map map = JsonHelper.json2Object(mes, Map.class);
             return map.get("weEventVersion") == null ? null : map.get("weEventVersion").toString();
         } catch (Exception e) {
             log.error("get version fail,error:", e);

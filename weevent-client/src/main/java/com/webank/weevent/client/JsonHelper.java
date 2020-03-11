@@ -73,33 +73,69 @@ public class JsonHelper {
     }
 
     /**
-     * convert json byte[] to Object
+     * convert jsonString to object
      *
-     * @param json object
-     * @param typeReference typeReference
+     * @param jsonString json String
+     * @param valueType java object type
      * @param <T> template type
-     * @return class instance
+     * @return Object java object
      * @throws BrokerException BrokerException
      */
-    public static <T> T json2Object(byte[] json, TypeReference<T> typeReference) throws BrokerException {
+    public static <T> T json2Object(String jsonString, Class<T> valueType) throws BrokerException {
         try {
-            return OBJECT_MAPPER.readValue(json, typeReference);
+            return OBJECT_MAPPER.readValue(jsonString, valueType);
         } catch (IOException e) {
-            log.error("parse extensions failed");
-            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
+            log.error("convert jsonString to object failed ", e);
+            throw new BrokerException(ErrorCode.JSON_DECODE_EXCEPTION);
         }
     }
 
     /**
      * convert json String to Object
      *
-     * @param json object
+     * @param jsonString json String
      * @param typeReference typeReference
      * @param <T> template type
      * @return class instance
      * @throws BrokerException BrokerException
      */
-    public static <T> T json2Object(String json, TypeReference<T> typeReference) throws BrokerException {
+    public static <T> T json2Object(String jsonString, TypeReference<T> typeReference) throws BrokerException {
+        try {
+            return OBJECT_MAPPER.readValue(jsonString, typeReference);
+        } catch (IOException e) {
+            log.error("convert jsonString to object failed ", e);
+            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
+        }
+    }
+
+    /**
+     * convert json byte[] to Object
+     *
+     * @param json json data
+     * @param valueType java object type
+     * @param <T> template type
+     * @return Object java object
+     * @throws BrokerException BrokerException
+     */
+    public static <T> T json2Object(byte[] json, Class<T> valueType) throws BrokerException {
+        try {
+            return OBJECT_MAPPER.readValue(json, valueType);
+        } catch (IOException e) {
+            log.error("convert jsonString to object failed ", e);
+            throw new BrokerException(ErrorCode.JSON_DECODE_EXCEPTION);
+        }
+    }
+
+    /**
+     * convert json byte[] to Object
+     *
+     * @param json json data
+     * @param typeReference typeReference
+     * @param <T> template type
+     * @return class instance
+     * @throws BrokerException BrokerException
+     */
+    public static <T> T json2Object(byte[] json, TypeReference<T> typeReference) throws BrokerException {
         try {
             return OBJECT_MAPPER.readValue(json, typeReference);
         } catch (IOException e) {

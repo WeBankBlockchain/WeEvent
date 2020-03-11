@@ -35,8 +35,7 @@ public class TimerSchedulerJob implements Job {
     private static void dealTimerTask(JobExecutionContext context, String taskName) {
         try {
             Object obj = context.getJobDetail().getJobDataMap().get("timer");
-            TimerScheduler scheduler = JsonHelper.json2Object(obj.toString(), new TypeReference<TimerScheduler>() {
-            });
+            TimerScheduler scheduler = JsonHelper.json2Object(obj.toString(), TimerScheduler.class);
             Map<String, TimerScheduler> timerMap = JsonHelper.json2Object(context.getJobDetail().getJobDataMap().get("timerMap").toString(), new TypeReference<Map<String, TimerScheduler>>() {
             });
 

@@ -7,7 +7,6 @@ import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.IConsumer;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
@@ -48,8 +47,7 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
 
         FileEvent fileEvent;
         try {
-            fileEvent = JsonHelper.json2Object(event.getContent(), new TypeReference<FileEvent>() {
-            });
+            fileEvent = JsonHelper.json2Object(event.getContent(), FileEvent.class);
         } catch (BrokerException e) {
             log.error("invalid FileEvent in WeEvent's content, send original", e);
             this.send(subscriptionId, event);

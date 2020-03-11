@@ -15,7 +15,6 @@ import com.webank.weevent.processor.utils.CommonUtil;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.RetCode;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
@@ -49,8 +48,7 @@ public class TimerSchedulerService {
             Iterator<JobKey> jobKeyIterator = scheduler.getJobKeys(GroupMatcher.groupEquals(jobGroupName)).iterator();
             List<TimerScheduler> timerSchedulerList = new ArrayList<>();
             Map<String, TimerScheduler> timerSchedulerMap = new HashMap<>();
-            TimerScheduler currentTimer = JsonHelper.json2Object(params.get("timer").toString(), new TypeReference<TimerScheduler>() {
-            });
+            TimerScheduler currentTimer = JsonHelper.json2Object(params.get("timer").toString(), TimerScheduler.class);
             while (jobKeyIterator.hasNext()) {
                 JobKey jobKey = jobKeyIterator.next();
                 if (null != scheduler.getJobDetail(jobKey).getJobDataMap().get("timer")) {

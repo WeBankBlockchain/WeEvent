@@ -186,8 +186,7 @@ public class CommonUtil {
         // if select is equal * ,then select all fields.
         if ("*".equals(selectFields)) {
             String selectFieldsTemp = payload;
-            Iterator it = JsonHelper.json2Object(selectFieldsTemp, new TypeReference<Map>() {
-            }).entrySet().iterator();
+            Iterator it = JsonHelper.json2Object(selectFieldsTemp, Map.class).entrySet().iterator();
 
             while (it.hasNext()) {
                 Map.Entry entry = (Map.Entry) it.next();
@@ -213,8 +212,7 @@ public class CommonUtil {
         Map<String, String> sqlOrder;
 
         if (JsonHelper.isValid(content)) {
-            eventContent = JsonHelper.json2Object(content, new TypeReference<Map>() {
-            });
+            eventContent = JsonHelper.json2Object(content, Map.class);
             sqlOrder = generateSqlOrder(rule.getBrokerId(), rule.getGroupId(), eventMessage.getEventId(), eventMessage.getTopic(), result, eventContent, table);
         } else {
             sqlOrder = generateSystemSqlOrder(rule.getBrokerId(), rule.getGroupId(), eventMessage.getEventId(), eventMessage.getTopic(), result);
@@ -294,8 +292,7 @@ public class CommonUtil {
     public static String setWeEventContent(String brokerId, String groupId, WeEvent eventMessage, String
             selectField, String payload) throws BrokerException {
         String content = new String(eventMessage.getContent());
-        Map eventContent = JsonHelper.json2Object(content, new TypeReference<Map>() {
-        });
+        Map eventContent = JsonHelper.json2Object(content, Map.class);
         Map<String, Object> payloadContent = JsonHelper.json2Object(payload, new TypeReference<Map<String, Object>>() {
         });
 

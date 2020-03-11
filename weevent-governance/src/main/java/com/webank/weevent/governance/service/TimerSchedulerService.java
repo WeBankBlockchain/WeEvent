@@ -22,7 +22,6 @@ import com.webank.weevent.governance.repository.RuleDatabaseRepository;
 import com.webank.weevent.governance.repository.TimerSchedulerRepository;
 import com.webank.weevent.governance.utils.Utils;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
@@ -102,8 +101,7 @@ public class TimerSchedulerService {
             this.setRuleDataBaseUrl(timerSchedulerEntity);
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.TIMER_SCHEDULER_INSERT).toString();
             String jsonString = JsonHelper.object2Json(timerSchedulerEntity);
-            Map map = JsonHelper.json2Object(jsonString, new TypeReference<Map>() {
-            });
+            Map map = JsonHelper.json2Object(jsonString, Map.class);
             map.put("updatedTime", timerSchedulerEntity.getLastUpdate());
             map.put("createdTime", timerSchedulerEntity.getCreateDate());
             //updateCEPRuleById
@@ -116,8 +114,7 @@ public class TimerSchedulerService {
             if (200 != statusCode) {
                 throw new GovernanceException(ErrorCode.PROCESS_CONNECT_ERROR);
             }
-            Map jsonObject = JsonHelper.json2Object(updateMes, new TypeReference<Map>() {
-            });
+            Map jsonObject = JsonHelper.json2Object(updateMes, Map.class);
             Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
             if (PROCESSOR_SUCCESS_CODE != code) {
                 String msg = jsonObject.get("errorMsg").toString();
@@ -152,8 +149,7 @@ public class TimerSchedulerService {
 
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.TIMER_SCHEDULER_UPDATE).toString();
             String jsonString = JsonHelper.object2Json(timerSchedulerEntity);
-            Map map = JsonHelper.json2Object(jsonString, new TypeReference<Map>() {
-            });
+            Map map = JsonHelper.json2Object(jsonString, Map.class);
             map.put("updatedTime", timerSchedulerEntity.getLastUpdate());
             map.put("createdTime", timerSchedulerEntity.getCreateDate());
             //updateCEPRuleById
@@ -166,8 +162,7 @@ public class TimerSchedulerService {
             if (200 != statusCode) {
                 throw new GovernanceException(ErrorCode.PROCESS_CONNECT_ERROR);
             }
-            Map jsonObject = JsonHelper.json2Object(updateMes, new TypeReference<Map>() {
-            });
+            Map jsonObject = JsonHelper.json2Object(updateMes, Map.class);
             Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
             if (PROCESSOR_SUCCESS_CODE != code) {
                 String msg = jsonObject.get("errorMsg").toString();
@@ -212,8 +207,7 @@ public class TimerSchedulerService {
                 throw new GovernanceException(ErrorCode.PROCESS_CONNECT_ERROR);
             }
 
-            Map jsonObject = JsonHelper.json2Object(mes, new TypeReference<Map>() {
-            });
+            Map jsonObject = JsonHelper.json2Object(mes, Map.class);
             Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
             if (PROCESSOR_SUCCESS_CODE != code) {
                 String msg = jsonObject.get("errorMsg").toString();

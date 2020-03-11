@@ -17,7 +17,6 @@ import com.webank.weevent.client.FileChunksMeta;
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.core.fisco.util.DataTypeUtils;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.ChannelPushCallback;
 import org.fisco.bcos.channel.client.Service;
@@ -205,8 +204,7 @@ public class AMOPChannel extends ChannelPushCallback {
             if (!this.senderTopics.containsKey(amopTopic)) {
                 this.senderTopics.put(amopTopic, false);
             }
-            return JsonHelper.json2Object(rsp.getContentByteArray(), new TypeReference<FileChunksMeta>() {
-            });
+            return JsonHelper.json2Object(rsp.getContentByteArray(), FileChunksMeta.class);
         }
 
         log.error("create remote file context failed");
@@ -232,8 +230,7 @@ public class AMOPChannel extends ChannelPushCallback {
         ChannelResponse rsp = this.sendEvent(topic, new FileEvent(FileEvent.EventType.FileChannelStatus, fileId));
         if (rsp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
             log.info("receive file context is ready, go");
-            return JsonHelper.json2Object(rsp.getContentByteArray(), new TypeReference<FileChunksMeta>() {
-            });
+            return JsonHelper.json2Object(rsp.getContentByteArray(), FileChunksMeta.class);
         }
 
         log.error("receive file context is not exist");
@@ -276,8 +273,7 @@ public class AMOPChannel extends ChannelPushCallback {
 
         FileEvent fileEvent;
         try {
-            fileEvent = JsonHelper.json2Object(push.getContent2(), new TypeReference<FileEvent>() {
-            });
+            fileEvent = JsonHelper.json2Object(push.getContent2(), FileEvent.class);
         } catch (BrokerException e) {
             log.error("invalid file event on channel", e);
             push.sendResponse(AMOPChannel.toChannelResponse(e));

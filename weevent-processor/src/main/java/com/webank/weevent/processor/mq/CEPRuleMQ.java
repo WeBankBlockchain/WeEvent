@@ -28,7 +28,6 @@ import com.webank.weevent.processor.utils.RetCode;
 import com.webank.weevent.processor.utils.StatisticCEPRuleUtil;
 import com.webank.weevent.processor.utils.SystemFunctionUtil;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.jexl3.JexlBuilder;
@@ -289,8 +288,7 @@ public class CEPRuleMQ {
 
     private static boolean handleTheEqual(WeEvent eventMessage, String condition) throws BrokerException {
         String eventContent = new String(eventMessage.getContent());
-        Map event = JsonHelper.json2Object(eventContent, new TypeReference<Map>() {
-        });
+        Map event = JsonHelper.json2Object(eventContent, Map.class);
         String[] strs = condition.split("=");
         if (strs.length == 2) {
             // event contain left key
@@ -317,8 +315,7 @@ public class CEPRuleMQ {
                 return true;
             } else if (CommonUtil.checkJson(eventContent, payload)) {
                 List<String> eventContentKeys = CommonUtil.getKeys(payload);
-                Map event = JsonHelper.json2Object(eventContent, new TypeReference<Map>() {
-                });
+                Map event = JsonHelper.json2Object(eventContent, Map.class);
                 JexlEngine jexl = new JexlBuilder().create();
                 JexlContext context = setContext(event, eventContentKeys);
 
@@ -380,13 +377,11 @@ public class CEPRuleMQ {
     public static RetCode checkCondition(String payload, String condition) {
         try {
             List<String> payloadContentKeys = CommonUtil.getKeys(payload);
-            Map payloadJson = JsonHelper.json2Object(payload, new TypeReference<Map>() {
-            });
+            Map payloadJson = JsonHelper.json2Object(payload, Map.class);
             JexlEngine jexl = new JexlBuilder().create();
 
             JexlContext context = setContext(payloadJson, payloadContentKeys);
-            Map event = JsonHelper.json2Object(payload, new TypeReference<Map>() {
-            });
+            Map event = JsonHelper.json2Object(payload, Map.class);
             String[] strs = condition.split("=");
             boolean flag = false;
             if (strs.length == 2 && !(strs[0].contains("<") || strs[0].contains(">") || (strs[1].contains("<") || strs[1].contains(">")))) {

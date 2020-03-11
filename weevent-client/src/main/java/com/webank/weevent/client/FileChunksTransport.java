@@ -208,8 +208,7 @@ public class FileChunksTransport {
         httpPost.setEntity(requestEntity);
 
         byte[] responseResult = this.invokeCGI(httpPost);
-        BaseResponse baseResponse = JsonHelper.json2Object(responseResult, new TypeReference<BaseResponse>() {
-        });
+        BaseResponse baseResponse = JsonHelper.json2Object(responseResult, BaseResponse.class);
 
         if (ErrorCode.SUCCESS.getCode() != baseResponse.getCode()) {
             log.error("upload chunk failed, {}@{} msg:{}", fileId, chunkIdx, baseResponse.getMessage());

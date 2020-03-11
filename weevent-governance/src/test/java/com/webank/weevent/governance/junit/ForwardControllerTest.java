@@ -3,11 +3,10 @@ package com.webank.weevent.governance.junit;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.governance.JUnitTestBase;
 import com.webank.weevent.governance.utils.JwtUtils;
-import com.webank.weevent.client.JsonHelper;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
@@ -54,8 +53,7 @@ public class ForwardControllerTest extends JUnitTestBase {
         String contentAsString = response.getContentAsString();
         Assert.assertEquals(response.getStatus(), 200);
         Assert.assertNotNull(contentAsString);
-        Map jsonObject = JsonHelper.json2Object(response.getContentAsString(), new TypeReference<Map>() {
-        });
+        Map jsonObject = JsonHelper.json2Object(response.getContentAsString(), Map.class);
         Object code = jsonObject.get("code");
         Object data = jsonObject.get("data");
         Assert.assertEquals(0, code);

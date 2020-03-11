@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.ErrorCode;
 import com.webank.weevent.governance.common.GovernanceException;
@@ -26,9 +27,7 @@ import com.webank.weevent.governance.repository.RuleDatabaseRepository;
 import com.webank.weevent.governance.repository.RuleEngineRepository;
 import com.webank.weevent.governance.utils.DAGDetectUtil;
 import com.webank.weevent.governance.utils.Utils;
-import com.webank.weevent.client.JsonHelper;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
@@ -90,8 +89,7 @@ public class RuleEngineService {
                 for (RuleEngineEntity it : ruleEngineEntities) {
                     it.setCreateDateStr(simpleDateFormat.format(it.getCreateDate()));
                     String payload = it.getPayload();
-                    it.setPayloadMap(payload == null ? new HashMap<>() : JsonHelper.json2Object(payload, new TypeReference<Map>() {
-                    }));
+                    it.setPayloadMap(payload == null ? new HashMap<>() : JsonHelper.json2Object(payload, Map.class));
                 }
             }
             return ruleEngineEntities;
@@ -171,8 +169,7 @@ public class RuleEngineService {
                 throw new GovernanceException(ErrorCode.PROCESS_CONNECT_ERROR);
             }
 
-            Map jsonObject = JsonHelper.json2Object(mes, new TypeReference<Map>() {
-            });
+            Map jsonObject = JsonHelper.json2Object(mes, Map.class);
             Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
             if (PROCESSOR_SUCCESS_CODE != code) {
                 String msg = jsonObject.get("errorMsg").toString();
@@ -260,8 +257,7 @@ public class RuleEngineService {
             }
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_UPDATE_CEP_RULE).toString();
             String jsonString = JsonHelper.object2Json(ruleEngineEntity);
-            Map map = JsonHelper.json2Object(jsonString, new TypeReference<Map>() {
-            });
+            Map map = JsonHelper.json2Object(jsonString, Map.class);
             map.put("updatedTime", ruleEngineEntity.getLastUpdate());
             map.put("createdTime", oldRule.getCreateDate());
             //updateCEPRuleById
@@ -274,8 +270,7 @@ public class RuleEngineService {
             if (200 != statusCode) {
                 throw new GovernanceException(ErrorCode.PROCESS_CONNECT_ERROR);
             }
-            Map jsonObject = JsonHelper.json2Object(updateMes, new TypeReference<Map>() {
-            });
+            Map jsonObject = JsonHelper.json2Object(updateMes, Map.class);
             Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
             if (PROCESSOR_SUCCESS_CODE != code) {
                 String msg = jsonObject.get("errorMsg").toString();
@@ -323,8 +318,7 @@ public class RuleEngineService {
             ruleEngineEntity.setBrokerUrl(broker.getBrokerUrl());
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_STOP_CEP_RULE).toString();
             String jsonString = JsonHelper.object2Json(ruleEngineEntity);
-            Map map = JsonHelper.json2Object(jsonString, new TypeReference<Map>() {
-            });
+            Map map = JsonHelper.json2Object(jsonString, Map.class);
             map.put("updatedTime", ruleEngineEntity.getLastUpdate());
             map.put("createdTime", oldRule.getCreateDate());
             //updateCEPRuleById
@@ -338,8 +332,7 @@ public class RuleEngineService {
                 throw new GovernanceException(ErrorCode.PROCESS_CONNECT_ERROR);
             }
 
-            Map jsonObject = JsonHelper.json2Object(stopMsg, new TypeReference<Map>() {
-            });
+            Map jsonObject = JsonHelper.json2Object(stopMsg, Map.class);
             Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
             if (PROCESSOR_SUCCESS_CODE != code) {
                 String msg = jsonObject.get("errorMsg").toString();
@@ -396,8 +389,7 @@ public class RuleEngineService {
                 return;
             }
             String jsonString = JsonHelper.object2Json(rule);
-            Map map = JsonHelper.json2Object(jsonString, new TypeReference<Map>() {
-            });
+            Map map = JsonHelper.json2Object(jsonString, Map.class);
             map.put("updatedTime", rule.getLastUpdate());
             map.put("createdTime", rule.getCreateDate());
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_START_CEP_RULE).toString();
@@ -413,8 +405,7 @@ public class RuleEngineService {
                 throw new GovernanceException(ErrorCode.PROCESS_CONNECT_ERROR);
             }
 
-            Map jsonObject = JsonHelper.json2Object(mes, new TypeReference<Map>() {
-            });
+            Map jsonObject = JsonHelper.json2Object(mes, Map.class);
             Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
             String msg = jsonObject.get("errorMsg").toString();
             if (PROCESSOR_SUCCESS_CODE != code) {
@@ -477,8 +468,7 @@ public class RuleEngineService {
         }
         try {
             String payload = engineEntity.getPayload();
-            engineEntity.setPayloadMap(payload == null ? new HashMap<>() : JsonHelper.json2Object(payload, new TypeReference<Map>() {
-            }));
+            engineEntity.setPayloadMap(payload == null ? new HashMap<>() : JsonHelper.json2Object(payload, Map.class));
             //get ruleEngineConditionList
             String fullSql = parsingDetailSQL(engineEntity);
             engineEntity.setFullSQL(fullSql);
@@ -570,8 +560,7 @@ public class RuleEngineService {
                 throw new GovernanceException(ErrorCode.PROCESS_CONNECT_ERROR);
             }
             String msg = EntityUtils.toString(closeResponse.getEntity());
-            Map jsonObject = JsonHelper.json2Object(msg, new TypeReference<Map>() {
-            });
+            Map jsonObject = JsonHelper.json2Object(msg, Map.class);
             Integer code = Integer.valueOf(jsonObject.get("errorCode").toString());
             if (PROCESSOR_SUCCESS_CODE != code) {
                 throw new GovernanceException(msg);

@@ -6,7 +6,6 @@ import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.FileChunksMeta;
 import com.webank.weevent.client.JsonHelper;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
@@ -144,8 +143,7 @@ public class ZKChunksMeta {
             throw new BrokerException(ErrorCode.ZOOKEEPER_ERROR);
         }
 
-        return JsonHelper.json2Object(nodeData, new TypeReference<FileChunksMeta>() {
-        });
+        return JsonHelper.json2Object(nodeData, FileChunksMeta.class);
     }
 
     private void zkUpdate(String zkPath, FileChunksMeta fileChunksMeta) throws BrokerException {
