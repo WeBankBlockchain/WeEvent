@@ -6,7 +6,6 @@ import java.net.UnknownHostException;
 import javax.net.ssl.SSLException;
 
 import com.webank.weevent.governance.common.GovernanceConfig;
-import com.webank.weevent.governance.utils.H2ServerUtil;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -50,7 +49,6 @@ public class GovernanceApplication {
     public static GovernanceConfig governanceConfig;
 
     public static void main(String[] args) throws Exception {
-        H2ServerUtil.startH2();
         SpringApplication app = new SpringApplication(GovernanceApplication.class);
         app.addListeners(new ApplicationPidFileWriter());
         app.run(args);

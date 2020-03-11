@@ -40,7 +40,7 @@ public class TimerSchedulerController {
         timerSchedulerMap.put("timer", JsonHelper.object2Json(timerScheduler));
         RetCode retCode = timerSchedulerService.createTimerScheduler(timerScheduler.getId(), "timer", "timer",
                 "timer-trigger", TimerSchedulerJob.class, timerSchedulerMap, timerScheduler);
-        if (1 == retCode.getErrorCode()) { //fail
+        if (ConstantsHelper.RET_FAIL.getErrorCode() == retCode.getErrorCode()) { //fail
             resEntity.setErrorCode(retCode.getErrorCode());
             resEntity.setErrorMsg(retCode.getErrorMsg());
         }
@@ -57,7 +57,7 @@ public class TimerSchedulerController {
         timerSchedulerMap.put("timer", JsonHelper.object2Json(timerScheduler));
         RetCode retCode = timerSchedulerService.createTimerScheduler(timerScheduler.getId(), "timer", "timer",
                 "timer-trigger", TimerSchedulerJob.class, timerSchedulerMap, timerScheduler);
-        if (1 == retCode.getErrorCode()) { //fail
+        if (ConstantsHelper.RET_FAIL.getErrorCode() == retCode.getErrorCode()) { //fail
             resEntity.setErrorCode(retCode.getErrorCode());
             resEntity.setErrorMsg(retCode.getErrorMsg());
         }
