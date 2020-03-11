@@ -7,11 +7,11 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
-import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.ErrorCode;
 import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.AccountEntity;
+import com.webank.weevent.governance.enums.IsDeleteEnum;
 import com.webank.weevent.governance.repository.AccountRepository;
 
 import lombok.extern.slf4j.Slf4j;
@@ -190,7 +190,7 @@ public class AccountService {
     }
 
     private List<AccountEntity> findAllByUsernameAndDeleteAt(String userName) {
-        return accountRepository.findAllByUsernameAndDeleteAt(userName, ConstantProperties.NOT_DELETED);
+        return accountRepository.findAllByUsernameAndDeleteAt(userName, IsDeleteEnum.NOT_DELETED.getCode());
     }
 
 }
