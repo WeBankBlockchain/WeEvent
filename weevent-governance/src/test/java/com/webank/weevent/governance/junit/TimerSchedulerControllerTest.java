@@ -9,6 +9,7 @@ import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.utils.JwtUtils;
 import com.webank.weevent.client.JsonHelper;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.junit.After;
@@ -61,7 +62,8 @@ public class TimerSchedulerControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
+        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), new TypeReference<GovernanceResult>() {
+        });
         brokerIdMap.put("brokerId", (Integer) governanceResult.getData());
     }
 
@@ -69,11 +71,12 @@ public class TimerSchedulerControllerTest extends JUnitTestBase {
     public void testAddTimerScheduler() throws Exception {
         String content = "{\"schedulerName\":\"test123\",\"ruleBaseId\":\"1\",\"periodParams\":\"0 0 * * * ？\"," +
                 "\"parsingSql\":\"select 1 from t_account\"," +
-                "\"userId\":" + this.userId + ",\"brokerId\":" + this.brokerIdMap.get("brokerId")+"}";
+                "\"userId\":" + this.userId + ",\"brokerId\":" + this.brokerIdMap.get("brokerId") + "}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/timerScheduler/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
+        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), new TypeReference<GovernanceResult>() {
+        });
         Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
     }
 
@@ -85,7 +88,8 @@ public class TimerSchedulerControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mvcResult.getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
+        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), new TypeReference<GovernanceResult>() {
+        });
         Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
     }
 
@@ -93,11 +97,12 @@ public class TimerSchedulerControllerTest extends JUnitTestBase {
     public void testUpdateTimerScheduler() throws Exception {
         String content = "{\"id\":\"1\",\"schedulerName\":\"test456\",\"ruleBaseId\":\"1\",\"periodParams\":\"0 0 * * * ？\"," +
                 "\"parsingSql\":\"select 1 from t_account\"," +
-                "\"userId\":" + this.userId + ",\"brokerId\":" + this.brokerIdMap.get("brokerId")+"}";
+                "\"userId\":" + this.userId + ",\"brokerId\":" + this.brokerIdMap.get("brokerId") + "}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/timerScheduler/update").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
+        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), new TypeReference<GovernanceResult>() {
+        });
         Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
     }
 
@@ -107,7 +112,8 @@ public class TimerSchedulerControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/timerScheduler/delete").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
+        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), new TypeReference<GovernanceResult>() {
+        });
         Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
     }
 
@@ -118,7 +124,8 @@ public class TimerSchedulerControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/delete").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Map jsonObject = JsonHelper.json2Object(response.getContentAsString(), Map.class);
+        Map jsonObject = JsonHelper.json2Object(response.getContentAsString(), new TypeReference<Map>() {
+        });
         Assert.assertEquals(jsonObject.get("status").toString(), "200");
     }
 

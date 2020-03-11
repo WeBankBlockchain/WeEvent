@@ -1,6 +1,5 @@
 package com.webank.weevent.processor.mq;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
@@ -13,6 +12,11 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.IWeEventClient;
+import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.client.SendResult;
+import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.model.StatisticRule;
 import com.webank.weevent.processor.model.StatisticWeEvent;
@@ -23,12 +27,8 @@ import com.webank.weevent.processor.utils.DataBaseUtil;
 import com.webank.weevent.processor.utils.RetCode;
 import com.webank.weevent.processor.utils.StatisticCEPRuleUtil;
 import com.webank.weevent.processor.utils.SystemFunctionUtil;
-import com.webank.weevent.client.JsonHelper;
-import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.client.IWeEventClient;
-import com.webank.weevent.client.SendResult;
-import com.webank.weevent.client.WeEvent;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.jexl3.JexlBuilder;
@@ -289,7 +289,8 @@ public class CEPRuleMQ {
 
     private static boolean handleTheEqual(WeEvent eventMessage, String condition) throws BrokerException {
         String eventContent = new String(eventMessage.getContent());
-        Map event = JsonHelper.json2Object(eventContent, Map.class);
+        Map event = JsonHelper.json2Object(eventContent, new TypeReference<Map>() {
+        });
         String[] strs = condition.split("=");
         if (strs.length == 2) {
             // event contain left key
@@ -316,7 +317,8 @@ public class CEPRuleMQ {
                 return true;
             } else if (CommonUtil.checkJson(eventContent, payload)) {
                 List<String> eventContentKeys = CommonUtil.getKeys(payload);
-                Map event = JsonHelper.json2Object(eventContent, Map.class);
+                Map event = JsonHelper.json2Object(eventContent, new TypeReference<Map>() {
+                });
                 JexlEngine jexl = new JexlBuilder().create();
                 JexlContext context = setContext(event, eventContentKeys);
 
@@ -378,11 +380,13 @@ public class CEPRuleMQ {
     public static RetCode checkCondition(String payload, String condition) {
         try {
             List<String> payloadContentKeys = CommonUtil.getKeys(payload);
-            Map payloadJson = JsonHelper.json2Object(payload, Map.class);
+            Map payloadJson = JsonHelper.json2Object(payload, new TypeReference<Map>() {
+            });
             JexlEngine jexl = new JexlBuilder().create();
 
             JexlContext context = setContext(payloadJson, payloadContentKeys);
-            Map event = JsonHelper.json2Object(payload, Map.class);
+            Map event = JsonHelper.json2Object(payload, new TypeReference<Map>() {
+            });
             String[] strs = condition.split("=");
             boolean flag = false;
             if (strs.length == 2 && !(strs[0].contains("<") || strs[0].contains(">") || (strs[1].contains("<") || strs[1].contains(">")))) {

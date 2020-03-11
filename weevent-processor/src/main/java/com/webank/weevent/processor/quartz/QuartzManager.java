@@ -17,6 +17,7 @@ import com.webank.weevent.processor.model.StatisticWeEvent;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.RetCode;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobBuilder;
@@ -50,7 +51,8 @@ public class QuartzManager {
             while (it.hasNext()) {
                 JobKey jobKey = it.next();
                 if (null != scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
-                    CEPRule rule = JsonHelper.json2Object(scheduler.getJobDetail(jobKey).getJobDataMap().get("rule").toString(), CEPRule.class);
+                    CEPRule rule = JsonHelper.json2Object(scheduler.getJobDetail(jobKey).getJobDataMap().get("rule").toString(), new TypeReference<CEPRule>() {
+                    });
                     // if the current is delete
                     ruleMap.put(rule.getId(), rule);
                     log.info("{}", jobKey);
@@ -96,7 +98,8 @@ public class QuartzManager {
             while (it.hasNext()) {
                 JobKey jobKey = it.next();
                 if (null != scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
-                    CEPRule rule = JsonHelper.json2Object(scheduler.getJobDetail(jobKey).getJobDataMap().get("rule").toString(), CEPRule.class);
+                    CEPRule rule = JsonHelper.json2Object(scheduler.getJobDetail(jobKey).getJobDataMap().get("rule").toString(), new TypeReference<CEPRule>() {
+                    });
                     // if the current is delete
                     if ("deleteCEPRuleById".equals(params.get("type").toString()) && jobName.equals(rule.getId())) {
                         // update the delete status
@@ -153,7 +156,8 @@ public class QuartzManager {
         Map<String, CEPRule> ruleMap = new HashMap<>();
         while (it.hasNext()) {
             JobKey jobKey = it.next();
-            CEPRule rule = JsonHelper.json2Object(scheduler.getJobDetail(jobKey).getJobDataMap().get("rule").toString(), CEPRule.class);
+            CEPRule rule = JsonHelper.json2Object(scheduler.getJobDetail(jobKey).getJobDataMap().get("rule").toString(), new TypeReference<CEPRule>() {
+            });
             if (null != rule && 1 == rule.getStatus()) {
                 ruleMap.put(rule.getId(), rule);
             }
@@ -209,7 +213,8 @@ public class QuartzManager {
     public CEPRule getJobDetail(String jobName) throws SchedulerException, BrokerException {
         JobDetail job = scheduler.getJobDetail(new JobKey(jobName, "rule"));
         if (!StringUtils.isEmpty(job.getJobDataMap().get("rule"))) {
-            return JsonHelper.json2Object(job.getJobDataMap().get("rule").toString(), CEPRule.class);
+            return JsonHelper.json2Object(job.getJobDataMap().get("rule").toString(), new TypeReference<CEPRule>() {
+            });
         }
         return null;
     }
@@ -230,7 +235,8 @@ public class QuartzManager {
         while (it.hasNext()) {
             JobKey jobKey = it.next();
             if (null != scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")) {
-                CEPRule rule = JsonHelper.json2Object(scheduler.getJobDetail(jobKey).getJobDataMap().get("rule").toString(), CEPRule.class);
+                CEPRule rule = JsonHelper.json2Object(scheduler.getJobDetail(jobKey).getJobDataMap().get("rule").toString(), new TypeReference<CEPRule>() {
+                });
 
                 // statistic
                 if ("1".equals(rule.getSystemTag())) {

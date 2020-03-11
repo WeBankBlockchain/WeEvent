@@ -28,6 +28,7 @@ import com.webank.weevent.client.TopicInfo;
 import com.webank.weevent.client.TopicPage;
 import com.webank.weevent.client.WeEvent;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.DecoderException;
@@ -87,7 +88,8 @@ public class Fabric {
             if (ErrorCode.SUCCESS.getCode() != transactionInfo.getCode()) {
                 throw new BrokerException(transactionInfo.getCode(), transactionInfo.getMessage());
             }
-            TopicInfo topicInfo = JsonHelper.json2Object(transactionInfo.getPayLoad(), TopicInfo.class);
+            TopicInfo topicInfo = JsonHelper.json2Object(transactionInfo.getPayLoad(), new TypeReference<TopicInfo>() {
+            });
 
             this.topicInfo.put(topicName, topicInfo);
             return topicInfo;

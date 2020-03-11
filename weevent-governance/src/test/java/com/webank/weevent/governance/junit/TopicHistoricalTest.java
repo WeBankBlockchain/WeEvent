@@ -8,6 +8,7 @@ import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.utils.JwtUtils;
 import com.webank.weevent.client.JsonHelper;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.junit.After;
@@ -61,7 +62,8 @@ public class TopicHistoricalTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
+        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), new TypeReference<GovernanceResult>() {
+        });
         brokerIdMap.put("brokerId", (Integer) governanceResult.getData());
     }
 
@@ -69,11 +71,12 @@ public class TopicHistoricalTest extends JUnitTestBase {
     public void testHistoricalDataList() throws Exception {
         String content = "{\"groupId\":\"1\",\"userId\":\"1\",\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\",\"beginDate\":\"2019-12-08\",\"endDate\":\"2099-12-15\"}";
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/historicalData/list")
-                .contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token).content(content)).andReturn();
+                .contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content)).andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         String result = response.getContentAsString();
         Assert.assertNotNull(result);
-        GovernanceResult governanceResult = JsonHelper.json2Object(result, GovernanceResult.class);
+        GovernanceResult governanceResult = JsonHelper.json2Object(result, new TypeReference<GovernanceResult>() {
+        });
         Assert.assertEquals(governanceResult.getStatus().toString(), "200");
     }
 
@@ -81,11 +84,12 @@ public class TopicHistoricalTest extends JUnitTestBase {
     public void testEventList() throws Exception {
         String content = "{\"groupId\":\"1\",\"userId\":\"1\",\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\",\"beginDate\":\"2019-12-08\",\"endDate\":\"2099-12-15\"}";
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/historicalData/eventList")
-                .contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX,token).content(content)).andReturn();
+                .contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content)).andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
         String result = response.getContentAsString();
         Assert.assertNotNull(result);
-        GovernanceResult governanceResult = JsonHelper.json2Object(result, GovernanceResult.class);
+        GovernanceResult governanceResult = JsonHelper.json2Object(result, new TypeReference<GovernanceResult>() {
+        });
         Assert.assertEquals(governanceResult.getStatus().toString(), "200");
     }
 
@@ -95,7 +99,8 @@ public class TopicHistoricalTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/delete").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Map jsonObject = JsonHelper.json2Object(response.getContentAsString(), Map.class);
+        Map jsonObject = JsonHelper.json2Object(response.getContentAsString(), new TypeReference<Map>() {
+        });
         Assert.assertEquals(jsonObject.get("status").toString(), "200");
     }
 

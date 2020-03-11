@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -14,14 +15,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-import com.webank.weevent.core.config.FiscoConfig;
-import com.webank.weevent.core.fisco.constant.WeEventConstants;
-import com.webank.weevent.core.fisco.util.DataTypeUtils;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.core.config.FiscoConfig;
+import com.webank.weevent.core.fisco.constant.WeEventConstants;
+import com.webank.weevent.core.fisco.util.DataTypeUtils;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.channel.client.Service;
@@ -366,7 +368,8 @@ public class Web3SDKWrapper {
 
                     WeEvent event = new WeEvent(topicName,
                             logEvent.eventContent.getValue().getBytes(StandardCharsets.UTF_8),
-                            JsonHelper.json2Map(logEvent.extensions.toString(), String.class, String.class));
+                            JsonHelper.json2Object(logEvent.extensions.toString(), new TypeReference<Map<String, String>>() {
+                            }));
                     event.setEventId(DataTypeUtils.encodeEventId(topicName, uint256ToInt(logEvent.eventBlockNumer), uint256ToInt(logEvent.eventSeq)));
 
                     log.debug("get a event from block chain: {}", event);

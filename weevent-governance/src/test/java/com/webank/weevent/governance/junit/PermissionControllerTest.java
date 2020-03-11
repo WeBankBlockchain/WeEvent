@@ -5,6 +5,7 @@ import java.util.Map;
 import com.webank.weevent.governance.JUnitTestBase;
 import com.webank.weevent.client.JsonHelper;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.junit.Assert;
@@ -47,8 +48,9 @@ public class PermissionControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mvcResult.getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
 
-        Map jsonObject = JsonHelper.json2Object(response.getContentAsString(),Map.class);
-        Assert.assertEquals(jsonObject.get("status").toString(),"200");
+        Map jsonObject = JsonHelper.json2Object(response.getContentAsString(), new TypeReference<Map>() {
+        });
+        Assert.assertEquals(jsonObject.get("status").toString(), "200");
     }
 
 

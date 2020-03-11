@@ -9,6 +9,7 @@ import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.processor.cache.CEPRuleCache;
 import com.webank.weevent.processor.model.CEPRule;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
@@ -65,7 +66,8 @@ public class CRUDJobs implements Job {
     private static void startCEPRule(JobExecutionContext context, String jobName, String type) {
 
         try {
-            CEPRule rule = JsonHelper.json2Object(context.getJobDetail().getJobDataMap().get("rule").toString(), CEPRule.class);
+            CEPRule rule = JsonHelper.json2Object(context.getJobDetail().getJobDataMap().get("rule").toString(), new TypeReference<CEPRule>() {
+            });
             // ruleMap
             Pair<CEPRule, CEPRule> ruleBak = null;
             if (StringUtils.isEmpty(context.getJobDetail().getJobDataMap().get("ruleBak"))) {

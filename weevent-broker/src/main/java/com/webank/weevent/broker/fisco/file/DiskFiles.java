@@ -16,6 +16,7 @@ import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.FileChunksMeta;
 import com.webank.weevent.client.JsonHelper;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -71,7 +72,8 @@ public class DiskFiles {
                 log.error("read local meta file failed");
                 throw new BrokerException(ErrorCode.FILE_READ_EXCEPTION);
             }
-            return JsonHelper.json2Object(String.valueOf(data), FileChunksMeta.class);
+            return JsonHelper.json2Object(String.valueOf(data), new TypeReference<FileChunksMeta>() {
+            });
         } catch (IOException | BrokerException e) {
             log.error("read local meta file exception", e);
             throw new BrokerException(ErrorCode.FILE_READ_EXCEPTION);

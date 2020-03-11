@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.JsonHelper;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,7 +44,8 @@ public class SystemFunctionUtil {
 
     public static String analysisSystemFunction(String[][] systemFunctionMessage, String payload, String
             conditionField) throws BrokerException {
-        Map<String, Object> payloadMap = JsonHelper.json2Map(payload, String.class, Object.class);
+        Map<String, Object> payloadMap = JsonHelper.json2Object(payload, new TypeReference<Map<String, Object>>() {
+        });
 
         return replaceCondition(systemFunctionMessage, conditionField, payloadMap);
     }

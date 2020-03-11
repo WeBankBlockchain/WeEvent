@@ -27,6 +27,7 @@ import com.webank.weevent.client.jms.WeEventTopicPublisher;
 import com.webank.weevent.client.jms.WeEventTopicSubscriber;
 import com.webank.weevent.client.jsonrpc.IBrokerRpc;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.googlecode.jsonrpc4j.ProxyUtil;
@@ -390,7 +391,9 @@ public class WeEventClient implements IWeEventClient {
             // download file
             String localFile = null;
             try {
-                FileChunksMeta fileChunksMeta = JsonHelper.json2Object(event.getContent(), FileChunksMeta.class);
+                FileChunksMeta fileChunksMeta = JsonHelper.json2Object(event.getContent(), new TypeReference<FileChunksMeta>() {
+                });
+
                 localFile = this.fileChunksTransport.download(fileChunksMeta);
             } catch (BrokerException | IOException e) {
                 log.error("detect exception", e);

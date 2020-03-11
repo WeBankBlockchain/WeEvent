@@ -6,6 +6,7 @@ import com.webank.weevent.broker.JUnitTestBase;
 import com.webank.weevent.broker.protocol.rest.ResponseData;
 import com.webank.weevent.client.JsonHelper;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
@@ -45,7 +46,8 @@ public class RestfullAdminTest extends JUnitTestBase {
         ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "listNodes", ResponseData.class);
         log.info("listNodes, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
         Object data = rsp.getBody().getData();
-        List<String> nodes = JsonHelper.object2List(data, String.class);
+        List<String> nodes = JsonHelper.object2Bean(data, new TypeReference<List<String>>() {
+        });
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody().getCode() == 0);
         Assert.assertTrue(!nodes.isEmpty());
@@ -55,7 +57,7 @@ public class RestfullAdminTest extends JUnitTestBase {
     public void testListSubscription() {
         ResponseEntity<ResponseData> rsponse = admin.getForEntity(url + "listNodes", ResponseData.class);
         Object data = rsponse.getBody().getData();
-        List<String> nodes = JsonHelper.object2List(data, String.class);
+        List<String> nodes = JsonHelper.object2Bean(data, new TypeReference<List<String>>(){});
         Assert.assertTrue(!nodes.isEmpty());
 
         ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "listSubscription?groupId={groupId}&nodeIp={nodeIp}", ResponseData.class, this.groupId, nodes.get(0));

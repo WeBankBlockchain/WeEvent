@@ -23,6 +23,7 @@ import com.webank.weevent.governance.repository.RuleEngineRepository;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.JsonHelper;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -226,7 +227,8 @@ public class TopicHistoricalService {
             if (StringUtil.isBlank(mes)) {
                 throw new GovernanceException("group is empty");
             }
-            Map jsonObject = JsonHelper.json2Object(mes, Map.class);
+            Map jsonObject = JsonHelper.json2Object(mes, new TypeReference<Map>() {
+            });
             Object data = jsonObject.get("data");
             if ("0".equals(jsonObject.get("code").toString()) && data instanceof List) {
                 groupList = (List) data;
