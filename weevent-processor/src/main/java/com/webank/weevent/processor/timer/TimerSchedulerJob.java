@@ -10,6 +10,7 @@ import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.processor.model.TimerScheduler;
 import com.webank.weevent.processor.utils.CommonUtil;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -35,7 +36,9 @@ public class TimerSchedulerJob implements Job {
         try {
             Object obj = context.getJobDetail().getJobDataMap().get("timer");
             TimerScheduler scheduler = JsonHelper.json2Object(obj.toString(), TimerScheduler.class);
-            Map<String, TimerScheduler> timerMap = JsonHelper.json2Map(context.getJobDetail().getJobDataMap().get("timerMap").toString(), String.class, TimerScheduler.class);
+            Map<String, TimerScheduler> timerMap = JsonHelper.json2Object(context.getJobDetail().getJobDataMap().get("timerMap").toString(), new TypeReference<Map<String, TimerScheduler>>() {
+            });
+
             // check the status,when the status equal 1,then update
             log.info("execute  task: {},rule:{}", taskName, JsonHelper.object2Json(scheduler));
             runTask(scheduler);
