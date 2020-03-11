@@ -45,4 +45,10 @@ public class TopicHistoricalController {
         return new GovernanceResult(topicTopicHistoricalEntities);
     }
 
+    @PostMapping("/insertHistoricalData")
+    public Boolean insertHistoricalData(@RequestBody TopicHistoricalEntity topicHistoricalEntity) {
+        log.info("insert  historicalData:{} ", topicHistoricalEntity);
+        return topicHistoricalService.insertHistoricalData(topicHistoricalEntity);
+    }
+
 }
