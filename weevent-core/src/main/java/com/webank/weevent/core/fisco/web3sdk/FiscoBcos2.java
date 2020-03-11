@@ -432,8 +432,9 @@ public class FiscoBcos2 {
         contractContext.setGasPrice(Web3SDK2Wrapper.gasProvider.getGasPrice("").longValue());
         contractContext.setTopicAddress(this.topic.getContractAddress());
         contractContext.setBlockNumber(web3j.getBlockNumberCache().longValue() - BlockLimit.blockLimit);
-        contractContext.setBlockLimit(BlockLimit.blockLimit.longValue());
+        contractContext.setBlockLimit(web3j.getBlockNumberCache().longValue());
         contractContext.setChainId(Web3SDKConnector.chainID);
+
         return contractContext;
     }
 
