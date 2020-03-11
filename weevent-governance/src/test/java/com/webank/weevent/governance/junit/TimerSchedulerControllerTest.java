@@ -4,10 +4,10 @@ package com.webank.weevent.governance.junit;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.governance.JUnitTestBase;
 import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.utils.JwtUtils;
-import com.webank.weevent.client.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
@@ -16,7 +16,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
@@ -66,7 +65,7 @@ public class TimerSchedulerControllerTest extends JUnitTestBase {
     public void testAddTimerScheduler() throws Exception {
         String content = "{\"schedulerName\":\"test123\",\"ruleDatabaseId\":\"1\",\"periodParams\":\"0 0 * * * ？\"," +
                 "\"parsingSql\":\"select 1 from t_account\"," +
-                "\"userId\":" + this.userId + ",\"brokerId\":" + this.brokerIdMap.get("brokerId")+"}";
+                "\"userId\":" + this.userId + ",\"brokerId\":" + this.brokerIdMap.get("brokerId") + "}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/timerScheduler/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
@@ -90,7 +89,7 @@ public class TimerSchedulerControllerTest extends JUnitTestBase {
     public void testUpdateTimerScheduler() throws Exception {
         String content = "{\"id\":\"1\",\"schedulerName\":\"test456\",\"ruleDatabaseId\":\"1\",\"periodParams\":\"0 0 * * * ？\"," +
                 "\"parsingSql\":\"select 1 from t_account\"," +
-                "\"userId\":" + this.userId + ",\"brokerId\":" + this.brokerIdMap.get("brokerId")+"}";
+                "\"userId\":" + this.userId + ",\"brokerId\":" + this.brokerIdMap.get("brokerId") + "}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/timerScheduler/update").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
