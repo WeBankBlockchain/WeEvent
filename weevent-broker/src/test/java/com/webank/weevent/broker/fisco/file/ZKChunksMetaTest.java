@@ -41,7 +41,7 @@ public class ZKChunksMetaTest extends JUnitTestBase {
                 "fce6f5f5d390fc1928c48eeb4e9271e9",
                 "com.weevent.file",
                 "1");
-        this.fileChunksMeta.setChunkSize(32);
+        this.fileChunksMeta.initChunkSize(32);
         this.fileChunksMeta.getChunkStatus().set(0);
         this.fileChunksMeta.getChunkStatus().set(2);
     }
