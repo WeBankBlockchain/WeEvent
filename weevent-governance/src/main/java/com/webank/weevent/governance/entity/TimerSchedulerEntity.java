@@ -30,7 +30,7 @@ public class TimerSchedulerEntity extends TimerSchedulerBase {
     private String databaseUrl;
 
     @Transient
-    private String dataBaseType;
+    private Integer dataBaseType;
 
 
 }

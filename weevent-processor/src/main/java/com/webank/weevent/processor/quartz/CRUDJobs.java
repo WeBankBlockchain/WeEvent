@@ -7,6 +7,7 @@ import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.processor.ProcessorApplication;
 import com.webank.weevent.processor.cache.CEPRuleCache;
+import com.webank.weevent.processor.enums.RuleStatusEnum;
 import com.webank.weevent.processor.model.CEPRule;
 
 import javafx.util.Pair;
@@ -73,7 +74,7 @@ public class CRUDJobs implements Job {
             }
             log.info("{}", rule);
             // check the status,when the status equal 1,then update
-            if (1 == rule.getStatus() || 0 == rule.getStatus() || 2 == rule.getStatus()) {
+            if (RuleStatusEnum.RUNNING.getCode().equals(rule.getStatus()) || RuleStatusEnum.NOT_STARTED.getCode().equals(rule.getStatus()) || RuleStatusEnum.IS_DELETED.getCode().equals(rule.getStatus())) {
                 CEPRuleCache.updateCEPRule(rule, ruleBak);
             }
         } catch (BrokerException | SchedulerException e) {

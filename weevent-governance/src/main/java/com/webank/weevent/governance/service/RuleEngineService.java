@@ -15,18 +15,22 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.ErrorCode;
 import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.entity.RuleDatabaseEntity;
 import com.webank.weevent.governance.entity.RuleEngineEntity;
+import com.webank.weevent.governance.enums.ConditionTypeEnum;
+import com.webank.weevent.governance.enums.IsDeleteEnum;
+import com.webank.weevent.governance.enums.PayloadEnum;
+import com.webank.weevent.governance.enums.StatusEnum;
 import com.webank.weevent.governance.mapper.RuleEngineMapper;
 import com.webank.weevent.governance.repository.RuleDatabaseRepository;
 import com.webank.weevent.governance.repository.RuleEngineRepository;
 import com.webank.weevent.governance.utils.DAGDetectUtil;
 import com.webank.weevent.governance.utils.Utils;
-import com.webank.weevent.client.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -106,11 +110,11 @@ public class RuleEngineService {
             throws GovernanceException {
         try {
             ruleEngineEntity.setSystemTag(false);
-            ruleEngineEntity.setStatus(ConstantProperties.NOT_STARTED);
+            ruleEngineEntity.setStatus(StatusEnum.NOT_STARTED.getCode());
             String payload = JsonHelper.object2Json(ruleEngineEntity.getPayloadMap());
             ruleEngineEntity.setPayload(payload);
             if (ruleEngineEntity.getPayloadType() == null || ruleEngineEntity.getPayloadType() == 0) {
-                ruleEngineEntity.setPayloadType(ConstantProperties.JSON);
+                ruleEngineEntity.setPayloadType(PayloadEnum.JSON.getCode());
             }
             ruleEngineEntity.setCreateDate(new Date());
             ruleEngineEntity.setLastUpdate(new Date());
@@ -136,7 +140,7 @@ public class RuleEngineService {
                 throw new GovernanceException("the data is deleted ");
             }
             RuleEngineEntity engineEntity = ruleEngines.get(0);
-            ruleEngineEntity.setStatus(ConstantProperties.IS_DELETED);
+            ruleEngineEntity.setStatus(StatusEnum.IS_DELETED.getCode());
 
             //delete processor rule
             this.deleteProcessRule(request, engineEntity);
@@ -211,7 +215,7 @@ public class RuleEngineService {
             //update process rule
             BrokerEntity broker = brokerService.getBroker(rule.getBrokerId());
             ruleEngineEntity.setBrokerUrl(broker.getBrokerUrl());
-            if (rule.getStatus() == ConstantProperties.NOT_STARTED) {
+            if (StatusEnum.NOT_STARTED.getCode().equals(rule.getStatus())) {
                 this.updateProcessRule(request, ruleEngineEntity, rule);
             } else {
                 ruleEngineEntity.setGroupId(rule.getGroupId());
@@ -352,7 +356,7 @@ public class RuleEngineService {
         try {
             //query by id and status
             rule.setId(ruleEngineEntity.getId());
-            rule.setStatus(ConstantProperties.NOT_STARTED);
+            rule.setStatus(StatusEnum.NOT_STARTED.getCode());
             List<RuleEngineEntity> ruleEngines = ruleEngineMapper.getRuleEngines(rule);
             if (CollectionUtils.isEmpty(ruleEngines)) {
                 throw new GovernanceException("the data is not non-start state");
@@ -362,7 +366,7 @@ public class RuleEngineService {
 
             BrokerEntity broker = brokerService.getBroker(rule.getBrokerId());
             rule.setBrokerUrl(broker.getBrokerUrl());
-            rule.setStatus(ConstantProperties.RUNNING);
+            rule.setStatus(StatusEnum.RUNNING.getCode());
             rule.setLastUpdate(new Date());
             //set dataBaseUrl
             setRuleDataBaseUrl(rule);
@@ -444,12 +448,12 @@ public class RuleEngineService {
             log.error("the conditionType is empty");
             throw new GovernanceException("the conditionType is empty");
         }
-        boolean flag = ConstantProperties.RULE_DESTINATION_TOPIC == rule.getConditionType() && StringUtil.isBlank(rule.getToDestination());
+        boolean flag = ConditionTypeEnum.TOPIC.getCode().equals(rule.getConditionType()) && StringUtil.isBlank(rule.getToDestination());
         if (flag) {
             log.error("the toDestination is empty");
             throw new GovernanceException("the toDestination is empty");
         }
-        flag = ConstantProperties.RULE_DESTINATION_DATABASE == rule.getConditionType() && StringUtil.isBlank(rule.getDatabaseUrl());
+        flag = ConditionTypeEnum.DATABASE.getCode().equals(rule.getConditionType()) && StringUtil.isBlank(rule.getDatabaseUrl());
         if (flag) {
             log.error("the databaseUrl is empty");
             throw new GovernanceException("the databaseUrl is empty");
@@ -526,7 +530,7 @@ public class RuleEngineService {
         RuleEngineEntity rule = new RuleEngineEntity();
         rule.setRuleName(ruleEngineEntity.getRuleName());
         rule.setSystemTag(false);
-        rule.setDeleteAt(ConstantProperties.NOT_DELETED);
+        rule.setDeleteAt(IsDeleteEnum.NOT_DELETED.getCode());
         Example<RuleEngineEntity> example = Example.of(rule);
         List<RuleEngineEntity> ruleEngines = ruleEngineRepository.findAll(example);
         if (CollectionUtils.isEmpty(ruleEngines)) {
@@ -602,13 +606,13 @@ public class RuleEngineService {
                 dbUrl = dbUrl + "&" + ruleDataBase.getOptionalParameter();
             }
             rule.setDatabaseUrl(dbUrl);
-            rule.setDatabaseType(ruleDataBase.getDatabaseType().toLowerCase());
+            rule.setDatabaseType(ruleDataBase.getDatabaseType());
             log.info("dataBaseUrl:{}", rule.getDatabaseUrl());
         }
     }
 
     private boolean verifyInfiniteLoop(RuleEngineEntity ruleEngineEntity) {
-        if (!ConstantProperties.RULE_DESTINATION_TOPIC.equals(ruleEngineEntity.getConditionType())) {
+        if (!ConditionTypeEnum.TOPIC.getCode().equals(ruleEngineEntity.getConditionType())) {
             return true;
         }
         //query all historical rules according to brokerId groupId

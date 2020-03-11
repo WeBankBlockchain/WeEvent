@@ -25,7 +25,7 @@ public class TimerSchedulerBase extends BaseEntity {
     @Column(name = "scheduler_name")
     private String schedulerName;
 
-    @NotNull(message = "ruleDataBaseId cannot be empty")
+    @NotNull(message = "ruleDatabaseId cannot be empty")
     @Column(name = "rule_database_id")
     private Integer ruleDatabaseId;
 

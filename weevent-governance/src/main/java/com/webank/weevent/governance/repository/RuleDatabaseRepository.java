@@ -18,4 +18,6 @@ public interface RuleDatabaseRepository extends JpaRepository<RuleDatabaseEntity
 
     List<RuleDatabaseEntity> findAllByIdIn(Collection<Integer> ids);
 
+    int countAllByDatasourceName(String name);
+
 }
