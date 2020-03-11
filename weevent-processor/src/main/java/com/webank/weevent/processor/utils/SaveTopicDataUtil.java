@@ -5,8 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.processor.ProcessorApplication;
+import com.webank.weevent.processor.model.CEPRule;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.client.ServiceInstance;
@@ -20,8 +21,9 @@ public class SaveTopicDataUtil {
 
     public final static String saveTopicUrl = "/historicalData/insertHistoricalData";
 
-    public static boolean saveTopicData(Map<String, String> sqlvalue) throws BrokerException {
+    public static String saveTopicData(WeEvent eventContent, CEPRule rule) {
         try {
+            Map<String, String> sqlvalue = CommonUtil.contactsql(rule, eventContent);
             Map<String, String> topicHashMap = new HashMap<>();
             topicHashMap.put(ConstantsHelper.EVENT_ID, sqlvalue.get(ConstantsHelper.EVENT_ID));
             topicHashMap.put(ConstantsHelper.BROKER_ID, sqlvalue.get(ConstantsHelper.BROKER_ID));
@@ -30,13 +32,17 @@ public class SaveTopicDataUtil {
 
             String urlFromDiscovery = getUrlFromDiscovery();
             String url = urlFromDiscovery + "/" + serviceId + saveTopicUrl;
-            ResponseEntity<Map> mapResponseEntity = ProcessorApplication.restTemplate.postForEntity(url, topicHashMap, Map.class);
-            Map body = mapResponseEntity.getBody();
-            log.info("insert result", body.get("result"));
-            return (boolean) body.get("result");
+            ResponseEntity<Boolean> mapResponseEntity = ProcessorApplication.restTemplate.postForEntity(url, topicHashMap, Boolean.class);
+            Boolean flag = mapResponseEntity.getBody();
+            log.info("insert result,{}", flag);
+            if (flag) {
+                return ConstantsHelper.WRITE_DB_SUCCESS;
+            } else {
+                return ConstantsHelper.WRITE_DB_FAIL;
+            }
         } catch (Exception e) {
             log.info("insert fail", e);
-            return false;
+            return ConstantsHelper.WRITE_DB_FAIL;
         }
 
     }
