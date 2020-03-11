@@ -78,6 +78,8 @@ public enum ErrorCode {
     FILE_GENERATE_MD5_ERROR(102010, "file generate md5 failed"),
     FILE_DOWNLOAD_ERROR(102010, "file download failed"),
     FILE_MD5_MISMATCH(102011, "file md5 mismatch"),
+    LOCAL_FILE_IS_EMPTY(102012, "local file path is empty"),
+    LOCAL_FILE_NOT_EXIST(102013, "local file not exist"),
 
     HTTP_REQUEST_EXECUTE_ERROR(102100, "http request execute failed"),
     BUILD_HTTP_URL_ERROR(102101, "build http url failed"),
