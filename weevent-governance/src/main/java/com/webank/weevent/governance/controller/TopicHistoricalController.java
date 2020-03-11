@@ -1,7 +1,6 @@
 package com.webank.weevent.governance.controller;
 
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,9 +47,9 @@ public class TopicHistoricalController {
 
     @PostMapping("/insertHistoricalData")
     public Boolean insertHistoricalData(@RequestBody TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request,
-                                                    HttpServletResponse response) {
+                                        HttpServletResponse response) {
         log.info("insert  historicalData:{} ", topicHistoricalEntity);
-       return topicHistoricalService.insertHistoricalData(topicHistoricalEntity);
+        return topicHistoricalService.insertHistoricalData(topicHistoricalEntity);
     }
 
 }
