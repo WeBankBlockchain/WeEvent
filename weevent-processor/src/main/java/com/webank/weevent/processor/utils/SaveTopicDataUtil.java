@@ -32,7 +32,7 @@ public class SaveTopicDataUtil {
             String url = urlFromDiscovery + "/" + serviceId + saveTopicUrl;
             ResponseEntity<Map> mapResponseEntity = ProcessorApplication.restTemplate.postForEntity(url, topicHashMap, Map.class);
             Map body = mapResponseEntity.getBody();
-            log.info("insert result", body.get("result"));
+            log.info("insert result,{}", body.get("result"));
             return (boolean) body.get("result");
         } catch (Exception e) {
             log.info("insert fail", e);
