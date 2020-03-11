@@ -1,7 +1,6 @@
 package com.webank.weevent.processor.utils;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,19 +12,23 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.webank.weevent.processor.ProcessorApplication;
-import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.processor.ProcessorApplication;
+import com.webank.weevent.processor.enums.DatabaseTypeEnum;
+import com.webank.weevent.processor.model.CEPRule;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSourceFactory;
 import org.springframework.util.StringUtils;
 
 @Slf4j
@@ -38,7 +41,7 @@ public class CommonUtil {
      * @param databaseUrl data bae url
      * @return connection
      */
-    public static Connection getDbcpConnection(String databaseUrl,String databaseType) {
+    public static Connection getDbcpConnection(String databaseUrl, String databaseType) {
         try {
             Map<String, String> requestUrlMap = uRLRequest(databaseUrl);
             // check all parameter
@@ -50,11 +53,12 @@ public class CommonUtil {
                 // use the old connection
                 return dsMap.get(databaseUrl).getConnection();
             } else {
-                BasicDataSource ds = new BasicDataSource();
+                Properties properties = new Properties();
+                BasicDataSource ds = BasicDataSourceFactory.createDataSource(properties);
                 dsMap.put(databaseUrl, ds);
-                if("1".equals(databaseType)){
+                if (DatabaseTypeEnum.H2_DATABASE.getCode().equals(databaseType)) {
                     ds.setDriverClassName("org.h2.Driver");
-                }else {
+                } else {
                     ds.setDriverClassName("org.mariadb.jdbc.Driver");
                 }
                 ds.setUrl(urlPage(databaseUrl));
@@ -67,7 +71,7 @@ public class CommonUtil {
 
                 return ds.getConnection();
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             log.error("e:{}", e.toString());
             return null;
         }
@@ -127,7 +131,9 @@ public class CommonUtil {
     public static List<String> getKeys(String objJson) {
         List<String> keys = new ArrayList<>();
         try {
-            Map<String, Object> map = JsonHelper.object2Map(objJson);
+            Map<String, Object> map = JsonHelper.json2Object(objJson, new TypeReference<Map<String, Object>>() {
+            });
+
             if (JsonHelper.isValid(objJson)) {
                 for (Map.Entry<String, Object> entry : map.entrySet()) {
                     keys.add(entry.getKey());
@@ -202,7 +208,9 @@ public class CommonUtil {
 
         // get select field
         List<String> result = getSelectFieldList(rule.getSelectField(), rule.getPayload());
-        Map<String, Object> table = JsonHelper.object2Map(rule.getPayload());
+        Map<String, Object> table = JsonHelper.json2Object(rule.getPayload(), new TypeReference<Map<String, Object>>() {
+        });
+
         Map eventContent;
         Map<String, String> sqlOrder;
 
@@ -288,7 +296,8 @@ public class CommonUtil {
             selectField, String payload) throws BrokerException {
         String content = new String(eventMessage.getContent());
         Map eventContent = JsonHelper.json2Object(content, Map.class);
-        Map<String, Object> payloadContent = JsonHelper.object2Map(payload);
+        Map<String, Object> payloadContent = JsonHelper.json2Object(payload, new TypeReference<Map<String, Object>>() {
+        });
 
         // match the table
         Map<String, Object> iftttContent = new HashMap<>();

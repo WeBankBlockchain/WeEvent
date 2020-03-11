@@ -1,15 +1,12 @@
 package com.webank.weevent.client;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.MapLikeType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -66,7 +63,7 @@ public class JsonHelper {
     /**
      * convert jsonString to object
      *
-     * @param jsonString json data
+     * @param jsonString json String
      * @param valueType java object type
      * @param <T> template type
      * @return Object java object
@@ -82,7 +79,25 @@ public class JsonHelper {
     }
 
     /**
-     * convert jsonString to object
+     * convert json String to Object
+     *
+     * @param jsonString json String
+     * @param typeReference typeReference
+     * @param <T> template type
+     * @return class instance
+     * @throws BrokerException BrokerException
+     */
+    public static <T> T json2Object(String jsonString, TypeReference<T> typeReference) throws BrokerException {
+        try {
+            return OBJECT_MAPPER.readValue(jsonString, typeReference);
+        } catch (IOException e) {
+            log.error("convert jsonString to object failed ", e);
+            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
+        }
+    }
+
+    /**
+     * convert json byte[] to Object
      *
      * @param json json data
      * @param valueType java object type
@@ -100,55 +115,18 @@ public class JsonHelper {
     }
 
     /**
-     * convert Object to Bean
+     * convert json byte[] to Object
      *
-     * @param obj object data
-     * @param valueType java object type
+     * @param json json data
+     * @param typeReference typeReference
      * @param <T> template type
      * @return class instance
+     * @throws BrokerException BrokerException
      */
-    public static <T> T object2Bean(Object obj, Class<T> valueType) {
-        return OBJECT_MAPPER.convertValue(obj, valueType);
-    }
-
-    /**
-     * convert object to List
-     *
-     * @param obj object
-     * @param valueType java object type
-     * @param <T> template type
-     * @return class instance
-     */
-    public static <T> List<T> object2List(Object obj, Class<T> valueType) {
-        return OBJECT_MAPPER.convertValue(obj, new TypeReference<T>() {
-        });
-    }
-
-    public static Map<String, String> json2Map(String json) throws BrokerException {
+    public static <T> T json2Object(byte[] json, TypeReference<T> typeReference) throws BrokerException {
         try {
-            MapLikeType mapLikeType = OBJECT_MAPPER.getTypeFactory().constructMapLikeType(Map.class, String.class, String.class);
-            return OBJECT_MAPPER.readValue(json, mapLikeType);
-        } catch (Exception e) {
-            log.error("parse extensions failed");
-            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
-        }
-    }
-
-    public static Map<String, Object> object2Map(String json) throws BrokerException {
-        try {
-            MapLikeType mapLikeType = OBJECT_MAPPER.getTypeFactory().constructMapLikeType(Map.class, String.class, Object.class);
-            return OBJECT_MAPPER.readValue(json, mapLikeType);
-        } catch (Exception e) {
-            log.error("parse extensions failed");
-            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
-        }
-    }
-
-    public static <T, R> Map<T, R> json2Map(String json, Class clazz1, Class clazz2) throws BrokerException {
-        try {
-            MapLikeType mapLikeType = OBJECT_MAPPER.getTypeFactory().constructMapLikeType(Map.class, clazz1, clazz2);
-            return OBJECT_MAPPER.readValue(json, mapLikeType);
-        } catch (Exception e) {
+            return OBJECT_MAPPER.readValue(json, typeReference);
+        } catch (IOException e) {
             log.error("parse extensions failed");
             throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
         }
