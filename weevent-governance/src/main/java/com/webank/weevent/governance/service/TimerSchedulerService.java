@@ -252,7 +252,7 @@ public class TimerSchedulerService {
                 dbUrl = dbUrl + "&" + ruleDataBase.getOptionalParameter();
             }
             timerSchedulerEntity.setDatabaseUrl(dbUrl);
-            timerSchedulerEntity.setDataBaseType(ruleDataBase.getDatabaseType().toLowerCase());
+            timerSchedulerEntity.setDataBaseType(ruleDataBase.getDatabaseType());
             log.info("dataBaseUrl:{}", timerSchedulerEntity.getDatabaseUrl());
         }
     }

@@ -22,6 +22,7 @@ public interface RuleEngineRepository extends JpaRepository<RuleEngineEntity, Lo
 
     List<RuleEngineEntity> findAllByBrokerIdAndDeleteAt(Integer brokerId, Long deleteAt);
 
+    int countAllByRuleDataBaseIdAndDeleteAt(Integer ruleDataBaseId,Long deleteAt);
 
     @Transactional
     @Modifying

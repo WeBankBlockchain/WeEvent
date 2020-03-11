@@ -17,7 +17,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
@@ -35,9 +34,6 @@ public class RuleEngineControllerTest extends JUnitTestBase {
     private MockMvc mockMvc;
 
     private String token;
-
-    @Value("${weevent.url:http://127.0.0.1:7000/weevent}")
-    private String brokerUrl;
 
     private Map<String, Integer> ruleMap = new ConcurrentHashMap<>();
 

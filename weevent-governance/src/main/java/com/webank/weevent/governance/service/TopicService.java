@@ -22,6 +22,7 @@ import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.entity.TopicEntity;
 import com.webank.weevent.governance.entity.TopicPage;
 import com.webank.weevent.governance.entity.TopicPageEntity;
+import com.webank.weevent.governance.enums.IsDeleteEnum;
 import com.webank.weevent.governance.repository.TopicRepository;
 
 import lombok.extern.slf4j.Slf4j;
@@ -124,7 +125,7 @@ public class TopicService {
             topicEntityList.forEach(it -> {
                 topicNameList.add(it.getTopicName());
             });
-            List<TopicEntity> topicEntities = topicRepository.findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(brokerId, groupId, topicNameList, ConstantProperties.NOT_DELETED);
+            List<TopicEntity> topicEntities = topicRepository.findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(brokerId, groupId, topicNameList, IsDeleteEnum.NOT_DELETED.getCode());
             if (CollectionUtils.isEmpty(topicEntities)) {
                 return result;
             }
@@ -167,7 +168,7 @@ public class TopicService {
             TopicEntity result = JsonHelper.json2Object(mes, TopicEntity.class);
             if (result != null) {
                 // get creator from database
-                List<TopicEntity> creators = topicRepository.findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(brokerId, groupId, new ArrayList<>(Collections.singletonList(topic)), ConstantProperties.NOT_DELETED);
+                List<TopicEntity> creators = topicRepository.findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(brokerId, groupId, new ArrayList<>(Collections.singletonList(topic)), IsDeleteEnum.NOT_DELETED.getCode());
                 if (CollectionUtils.isNotEmpty(creators)) {
                     result.setCreater(creators.get(0).getCreater());
                 }
