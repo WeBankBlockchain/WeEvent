@@ -35,7 +35,7 @@ public class RuleDatabaseEntity extends RuleDatabaseBase {
                               @NotBlank String databaseUrl, @NotBlank String username,
                               @NotBlank String password, @NotBlank String datasourceName,
                               @Length(max = 256) String optionalParameter,
-                              Boolean systemTag, @NotBlank Integer databaseType) {
+                              Boolean systemTag, Integer databaseType) {
         super(userId, brokerId, databaseUrl, username, password, datasourceName, optionalParameter, systemTag, databaseType);
     }
 
