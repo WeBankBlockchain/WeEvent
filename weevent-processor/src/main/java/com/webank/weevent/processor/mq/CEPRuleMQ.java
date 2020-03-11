@@ -28,6 +28,7 @@ import com.webank.weevent.processor.utils.CommonUtil;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.DataBaseUtil;
 import com.webank.weevent.processor.utils.RetCode;
+import com.webank.weevent.processor.utils.SaveTopicDataUtil;
 import com.webank.weevent.processor.utils.StatisticCEPRuleUtil;
 import com.webank.weevent.processor.utils.SystemFunctionUtil;
 
@@ -256,7 +257,12 @@ public class CEPRuleMQ {
                             log.info("entry: {},event hit the db and insert: {}", entry.getValue().toString(), event.toString());
 
                             // send to database
-                            String ret = DataBaseUtil.sendMessageToDB(event, entry.getValue());
+                            String ret;
+                            if (SystemTagEnum.BUILT_IN_SYSTEM.getCode().equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#")) {
+                                ret = SaveTopicDataUtil.saveTopicData(event, entry.getValue());
+                            } else {
+                                ret = DataBaseUtil.sendMessageToDB(event, entry.getValue());
+                            }
                             return new Pair<>(ret, entry.getValue().getId());
                         } else if (ConditionTypeEnum.TOPIC.getCode().equals(entry.getValue().getConditionType())) {
 
@@ -440,7 +446,11 @@ public class CEPRuleMQ {
                     if (null != item) {
                         log.info("auto redo thread enter,system insert db:{}", item.getValue().getId());
                         //  send to  the db
-                        DataBaseUtil.sendMessageToDB(item.getKey(), item.getValue());
+                        if (SystemTagEnum.BUILT_IN_SYSTEM.getCode().equals(item.getValue().getSystemTag()) && item.getValue().getFromDestination().equals("#")) {
+                            SaveTopicDataUtil.saveTopicData(item.getKey(), item.getValue());
+                        } else {
+                            DataBaseUtil.sendMessageToDB(item.getKey(), item.getValue());
+                        }
                     }
                 } catch (InterruptedException e) {
                     log.info(e.toString());
