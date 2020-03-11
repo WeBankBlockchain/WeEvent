@@ -1,5 +1,8 @@
 package com.webank.weevent.governance.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum IsCreatorEnum {
 
     CREATOR("1", "creator"),
@@ -10,22 +13,6 @@ public enum IsCreatorEnum {
 
     IsCreatorEnum(String code, String value) {
         this.code = code;
-        this.value = value;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
         this.value = value;
     }
 

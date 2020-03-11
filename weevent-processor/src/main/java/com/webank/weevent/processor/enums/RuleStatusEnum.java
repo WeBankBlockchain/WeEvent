@@ -1,5 +1,8 @@
 package com.webank.weevent.processor.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum RuleStatusEnum {
 
     NOT_STARTED(0, "not started"),
@@ -11,22 +14,6 @@ public enum RuleStatusEnum {
 
     RuleStatusEnum(Integer code, String value) {
         this.code = code;
-        this.value = value;
-    }
-
-    public Integer getCode() {
-        return code;
-    }
-
-    public void setCode(Integer code) {
-        this.code = code;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
         this.value = value;
     }
 

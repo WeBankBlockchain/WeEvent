@@ -1,5 +1,8 @@
 package com.webank.weevent.governance.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum IsDeleteEnum {
 
     NOT_DELETED(0L, "not deleted");
@@ -9,22 +12,6 @@ public enum IsDeleteEnum {
 
     IsDeleteEnum(Long code, String value) {
         this.code = code;
-        this.value = value;
-    }
-
-    public Long getCode() {
-        return code;
-    }
-
-    public void setCode(Long code) {
-        this.code = code;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
         this.value = value;
     }
 
