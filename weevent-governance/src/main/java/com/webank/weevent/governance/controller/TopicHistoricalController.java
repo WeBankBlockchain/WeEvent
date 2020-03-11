@@ -46,8 +46,7 @@ public class TopicHistoricalController {
     }
 
     @PostMapping("/insertHistoricalData")
-    public Boolean insertHistoricalData(@RequestBody TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request,
-                                        HttpServletResponse response) {
+    public Boolean insertHistoricalData(@RequestBody TopicHistoricalEntity topicHistoricalEntity) {
         log.info("insert  historicalData:{} ", topicHistoricalEntity);
         return topicHistoricalService.insertHistoricalData(topicHistoricalEntity);
     }
