@@ -4,12 +4,13 @@ import java.util.List;
 
 import com.webank.weevent.broker.JUnitTestBase;
 import com.webank.weevent.broker.protocol.rest.ResponseData;
-import com.webank.weevent.client.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
@@ -42,10 +43,10 @@ public class RestfullAdminTest extends JUnitTestBase {
 
     @Test
     public void testListNodes() {
-        ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "listNodes", ResponseData.class);
+        ResponseEntity<ResponseData<List<String>>> rsp = admin.exchange(url + "listNodes", HttpMethod.GET, null, new ParameterizedTypeReference<ResponseData<List<String>>>() {
+        });
         log.info("listNodes, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
-        Object data = rsp.getBody().getData();
-        List<String> nodes = JsonHelper.object2List(data, String.class);
+        List<String> nodes = rsp.getBody().getData();
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody().getCode() == 0);
         Assert.assertTrue(!nodes.isEmpty());
@@ -53,9 +54,9 @@ public class RestfullAdminTest extends JUnitTestBase {
 
     @Test
     public void testListSubscription() {
-        ResponseEntity<ResponseData> rsponse = admin.getForEntity(url + "listNodes", ResponseData.class);
-        Object data = rsponse.getBody().getData();
-        List<String> nodes = JsonHelper.object2List(data, String.class);
+        ResponseEntity<ResponseData<List<String>>> response = admin.exchange(url + "listNodes", HttpMethod.GET, null, new ParameterizedTypeReference<ResponseData<List<String>>>() {
+        });
+        List<String> nodes = response.getBody().getData();
         Assert.assertTrue(!nodes.isEmpty());
 
         ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "listSubscription?groupId={groupId}&nodeIp={nodeIp}", ResponseData.class, this.groupId, nodes.get(0));
