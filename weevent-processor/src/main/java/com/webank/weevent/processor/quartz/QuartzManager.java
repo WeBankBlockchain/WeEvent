@@ -11,6 +11,7 @@ import javax.annotation.PostConstruct;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.processor.cache.CEPRuleCache;
+import com.webank.weevent.processor.enums.RuleStatusEnum;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.model.StatisticRule;
 import com.webank.weevent.processor.model.StatisticWeEvent;
@@ -54,7 +55,7 @@ public class QuartzManager {
                     // if the current is delete
                     ruleMap.put(rule.getId(), rule);
                     log.info("{}", jobKey);
-                    if (rule.getStatus().equals(1)) {
+                    if (RuleStatusEnum.RUNNING.getCode().equals(rule.getStatus())) {
                         ruleMap.put(rule.getId(), rule);
                     }
                 }
@@ -100,7 +101,7 @@ public class QuartzManager {
                     // if the current is delete
                     if ("deleteCEPRuleById".equals(params.get("type").toString()) && jobName.equals(rule.getId())) {
                         // update the delete status
-                        rule.setStatus(2);
+                        rule.setStatus(RuleStatusEnum.IS_DELETED.getCode());
                         currentRule = rule;
                         params.put("rule", JsonHelper.object2Json(rule));
                     }
@@ -154,7 +155,7 @@ public class QuartzManager {
         while (it.hasNext()) {
             JobKey jobKey = it.next();
             CEPRule rule = JsonHelper.json2Object(scheduler.getJobDetail(jobKey).getJobDataMap().get("rule").toString(), CEPRule.class);
-            if (null != rule && 1 == rule.getStatus()) {
+            if (null != rule && RuleStatusEnum.RUNNING.getCode().equals(rule.getStatus())) {
                 ruleMap.put(rule.getId(), rule);
             }
         }

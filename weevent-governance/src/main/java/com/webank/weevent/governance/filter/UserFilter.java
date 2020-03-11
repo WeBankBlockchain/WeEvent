@@ -1,8 +1,11 @@
 package com.webank.weevent.governance.filter;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.FilterChain;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -21,22 +24,35 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Slf4j
 public class UserFilter extends OncePerRequestFilter {
 
+    private static Set<String> urlSet = new HashSet<>();
+
+    static {
+        urlSet.add("/weevent-governance/historicalData/insertHistoricalData");
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String token = request.getHeader(JwtUtils.AUTHORIZATION_HEADER_PREFIX);
-        String privateSecret = GovernanceApplication.governanceConfig.getPrivateSecret();
-        if (!StringUtils.isBlank(token)) {
-            JwtUtils.verifierToken(token, privateSecret);
-            AccountEntity accountEntity = JwtUtils.decodeToken(token, privateSecret);
-            if (accountEntity != null) {
-                log.info("get token from HTTP header, {} : {}", JwtUtils.AUTHORIZATION_HEADER_PREFIX, token);
-                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(accountEntity.getUsername(), null, null);
-                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(auth);
+        String url = request.getRequestURI();
+        if (!urlSet.contains(url)) {
+            String token = request.getHeader(JwtUtils.AUTHORIZATION_HEADER_PREFIX);
+            String privateSecret = GovernanceApplication.governanceConfig.getPrivateSecret();
+            if (!StringUtils.isBlank(token) && JwtUtils.verifierToken(token, privateSecret)) {
+                AccountEntity accountEntity = JwtUtils.decodeToken(token, privateSecret);
+                if (accountEntity != null) {
+                    log.info("get token from HTTP header, {} : {}", JwtUtils.AUTHORIZATION_HEADER_PREFIX, token);
+                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(accountEntity.getUsername(), null, null);
+                    auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                }
             }
+            filterChain.doFilter(request, response);
+        } else {
+            String newPath = url.replace("/weevent-governance", "");
+            RequestDispatcher requestDispatcher = request.getRequestDispatcher(newPath);
+            requestDispatcher.forward(request, response);
+
         }
-        filterChain.doFilter(request, response);
+
     }
 
 
