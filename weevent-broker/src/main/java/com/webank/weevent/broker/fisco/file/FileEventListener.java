@@ -32,13 +32,17 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
         channel.subTopic(this.topic);
     }
 
+    public static boolean isFileEvent(WeEvent event) {
+        return event.getExtensions().containsKey(WeEvent.WeEvent_FILE)
+                && event.getExtensions().containsKey(WeEvent.WeEvent_FORMAT)
+                && "json".equals(event.getExtensions().get(WeEvent.WeEvent_FORMAT));
+    }
+
     @Override
     public void onEvent(String subscriptionId, WeEvent event) {
         log.info("received file event on WeEvent, subscriptionId: {} {}", subscriptionId, event);
 
-        if (!event.getExtensions().containsKey(WeEvent.WeEvent_FILE)
-                || !event.getExtensions().containsKey(WeEvent.WeEvent_FORMAT)
-                || !"json".equals(event.getExtensions().get(WeEvent.WeEvent_FORMAT))) {
+        if (!isFileEvent(event)) {
             log.error("unknown FileEvent in WeEvent, send original");
             this.send(subscriptionId, event);
             return;

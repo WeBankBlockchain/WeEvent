@@ -67,7 +67,16 @@ public class FileTransportService {
         this.groupChannels.put(defaultGroupId, channel);
     }
 
-    public FileTransportStats stats() {
+    public FileChunksMeta verify(String eventId, String groupId) throws BrokerException {
+        WeEvent event = this.producer.getEvent(eventId, groupId);
+        if (FileEventListener.isFileEvent(event)) {
+            FileEvent fileEvent = JsonHelper.json2Object(event.getContent(), FileEvent.class);
+            return fileEvent.getFileChunksMeta();
+        }
+        return null;
+    }
+
+    public FileTransportStats stats(boolean all) {
         FileTransportStats fileTransportStats = new FileTransportStats();
 
         for (Map.Entry<String, AMOPChannel> groupEntry : groupChannels.entrySet()) {
@@ -86,7 +95,7 @@ public class FileTransportService {
             fileTransportStats.getSender().put(groupId, senders);
 
             // receiver
-            List<FileChunksMeta> localFiles = this.diskFiles.listNotCompleteFiles();
+            List<FileChunksMeta> localFiles = this.diskFiles.listNotCompleteFiles(all);
             Map<String, List<FileChunksMetaPlus>> receivers = new HashMap<>();
             for (String topic : amopChannel.getSubTopics().keySet()) {
                 List<FileChunksMetaPlus> filePlus = localFiles.stream()

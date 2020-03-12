@@ -200,7 +200,7 @@ public class DiskFiles {
         this.deleteFile(this.genLocalMetaFileName(fileId));
     }
 
-    public List<FileChunksMeta> listNotCompleteFiles() {
+    public List<FileChunksMeta> listNotCompleteFiles(boolean all) {
         List<FileChunksMeta> fileChunksMetas = new ArrayList<>();
 
         File topPath = new File(this.path);
@@ -214,7 +214,7 @@ public class DiskFiles {
             for (File file : files) {
                 try {
                     FileChunksMeta fileChunksMeta = this.loadFileMeta(file);
-                    if (!fileChunksMeta.checkChunkFull()) {
+                    if (all || !fileChunksMeta.checkChunkFull()) {
                         fileChunksMetas.add(fileChunksMeta);
                     }
                 } catch (BrokerException e) {

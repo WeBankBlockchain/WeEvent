@@ -117,10 +117,17 @@ public class FileRest {
         return BaseResponse.buildSuccess(sendResult);
     }
 
+    @RequestMapping(path = "/verify")
+    @ResponseBody
+    public BaseResponse<FileChunksMeta> verify(@RequestParam(name = "eventId") String eventId,
+                                               @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+        return BaseResponse.buildSuccess(this.fileTransportService.verify(eventId, groupId));
+    }
+
     @RequestMapping(path = "/stats")
     @ResponseBody
-    public BaseResponse<FileTransportStats> stats() {
-        return BaseResponse.buildSuccess(this.fileTransportService.stats());
+    public BaseResponse<FileTransportStats> stats(@RequestParam(name = "all", required = false) boolean all) {
+        return BaseResponse.buildSuccess(this.fileTransportService.stats(all));
     }
 
     @RequestMapping(path = "/downloadChunk")
