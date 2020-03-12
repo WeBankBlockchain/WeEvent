@@ -284,7 +284,7 @@ public class BrokerService {
     private void checkUrl(String url, String afterUrl, HttpServletRequest request) throws GovernanceException {
         // get httpclient
         String headUrl = url;
-        CloseableHttpClient client = commonService.generateHttpClient(headUrl);
+        CloseableHttpClient client = commonService.generateHttpClient();
         // get one of broker urls
         headUrl = headUrl + afterUrl;
         HttpGet get = commonService.getMethod(headUrl, request);

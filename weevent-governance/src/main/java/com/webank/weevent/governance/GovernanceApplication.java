@@ -48,7 +48,7 @@ public class GovernanceApplication {
 
     public static GovernanceConfig governanceConfig;
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args)  {
         SpringApplication app = new SpringApplication(GovernanceApplication.class);
         app.addListeners(new ApplicationPidFileWriter());
         app.run(args);
@@ -64,14 +64,6 @@ public class GovernanceApplication {
     @Autowired
     public void setGovernanceConfig(GovernanceConfig config) {
         governanceConfig = config;
-    }
-
-    @Bean
-    public ClientHttpRequestFactory httpsClientRequestFactory(GovernanceConfig config) {
-        HttpsClientRequestFactory factory = new HttpsClientRequestFactory();
-        factory.setReadTimeout(config.getReadTimeout());// ms
-        factory.setConnectTimeout(config.getConnectTimeOut());// ms
-        return factory;
     }
 
     @Bean
