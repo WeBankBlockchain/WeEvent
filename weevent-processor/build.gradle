@@ -8,7 +8,6 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation project(path: ":weevent-client")
     // spring boot
     implementation("org.springframework.boot:spring-boot-starter")
 
@@ -30,8 +29,6 @@ dependencies {
 
     implementation("org.apache.tomcat:tomcat-jdbc:${tomcatVersion}")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-
     implementation("org.apache.commons:commons-pool2:${apacheCommonsVersion.pool2}")
 
     implementation("org.apache.commons:commons-jexl3:${apacheCommonsVersion.jexl3}")
@@ -46,6 +43,9 @@ dependencies {
     //h2
     implementation("com.h2database:h2:${h2Version}")
 
+    implementation(project(":weevent-client"))
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
 bootJar {
