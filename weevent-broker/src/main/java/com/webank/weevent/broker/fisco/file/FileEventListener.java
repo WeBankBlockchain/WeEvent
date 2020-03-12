@@ -29,8 +29,7 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
 
         // subscribe topic on AMOP channel
         AMOPChannel channel = this.fileTransportService.getChannel(this.groupId);
-        String amopTopic = AMOPChannel.genAMOPTopic(this.topic);
-        channel.subTopic(amopTopic);
+        channel.subTopic(this.topic);
     }
 
     @Override
@@ -90,8 +89,7 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
         // unSubscribe topic on AMOP channel
         try {
             AMOPChannel channel = this.fileTransportService.getChannel(this.groupId);
-            String amopTopic = AMOPChannel.genAMOPTopic(this.topic);
-            channel.unSubTopic(amopTopic);
+            channel.unSubTopic(this.topic);
         } catch (BrokerException e) {
             log.error("AMOPChannel.unSubTopic failed", e);
         }

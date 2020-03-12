@@ -10,6 +10,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
@@ -57,8 +59,12 @@ public class DiskFiles {
             log.error("not exist local meta file, {}", localMetaFile);
             throw new BrokerException(ErrorCode.FILE_NOT_EXIST);
         }
+        return this.loadFileMeta(fileMeta);
+    }
+
+    public FileChunksMeta loadFileMeta(File fileMeta) throws BrokerException {
         if (fileMeta.length() > 1024 * 1024) {
-            log.error("read local meta file failed, {}", localMetaFile);
+            log.error("local meta file is exceed 1M, skip it");
             throw new BrokerException(ErrorCode.FILE_READ_EXCEPTION);
         }
 
@@ -192,5 +198,31 @@ public class DiskFiles {
     public void cleanUp(String fileId) {
         this.deleteFile(this.genLocalFileName(fileId));
         this.deleteFile(this.genLocalMetaFileName(fileId));
+    }
+
+    public List<FileChunksMeta> listNotCompleteFiles() {
+        List<FileChunksMeta> fileChunksMetas = new ArrayList<>();
+
+        File topPath = new File(this.path);
+        if (!topPath.exists()) {
+            log.error("not exist path: {}", path);
+            return fileChunksMetas;
+        }
+
+        File[] files = topPath.listFiles((dir, name) -> name.endsWith(".json"));
+        if (files != null) {
+            for (File file : files) {
+                try {
+                    FileChunksMeta fileChunksMeta = this.loadFileMeta(file);
+                    if (!fileChunksMeta.checkChunkFull()) {
+                        fileChunksMetas.add(fileChunksMeta);
+                    }
+                } catch (BrokerException e) {
+                    log.error("load file meta failed, skip");
+                }
+            }
+        }
+
+        return fileChunksMetas;
     }
 }
