@@ -45,9 +45,6 @@ dependencies {
         exclude group: "org.ethereum", module: "solcJ-all"
     }
 
-    // fabric 1.4.4
-    implementation("org.hyperledger.fabric-sdk-java:fabric-sdk-java:${fabricVersion}")
-
     // depend project
     implementation(project(":weevent-client"))
     implementation(project(":weevent-core"))
