@@ -2,6 +2,8 @@ package com.webank.weevent.broker.protocol.rest;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -53,7 +55,7 @@ public class FileRest {
                                                   @RequestParam(name = "groupId", required = false) String groupId,
                                                   @RequestParam(name = "fileName") String fileName,
                                                   @RequestParam(name = "fileSize") long fileSize,
-                                                  @RequestParam(name = "md5") String md5) throws BrokerException {
+                                                  @RequestParam(name = "md5") String md5) throws BrokerException, UnsupportedEncodingException {
         log.info("groupId:{} md5:{}", groupId, md5);
 
         checkSupport();
@@ -63,7 +65,7 @@ public class FileRest {
 
         // create FileChunksMeta
         FileChunksMeta fileChunksMeta = new FileChunksMeta(WeEventUtils.generateUuid(),
-                fileName,
+                URLDecoder.decode(fileName, "UTF-8"),
                 fileSize,
                 md5,
                 topic,

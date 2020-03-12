@@ -129,7 +129,7 @@ public class DiskFiles {
         String localFile = this.genLocalFileName(fileId);
         log.info("write data in local file, {}@{} size: {}", localFile, chunkIndex, chunkData.length);
         try (RandomAccessFile f = new RandomAccessFile(localFile, "rw")) {
-            f.seek(chunkIndex * fileChunksMeta.getChunkSize());
+            f.seek((long) chunkIndex * fileChunksMeta.getChunkSize());
             f.write(chunkData);
         } catch (FileNotFoundException e) {
             log.error("not exist local file", e);
@@ -165,7 +165,7 @@ public class DiskFiles {
                 size = (int) (fileChunksMeta.getFileSize() % fileChunksMeta.getChunkSize());
             }
             byte[] data = new byte[size];
-            f.seek(chunkIndex * fileChunksMeta.getChunkSize());
+            f.seek((long) chunkIndex * fileChunksMeta.getChunkSize());
             int readSize = f.read(data);
             if (size != readSize) {
                 log.error("read data from local file failed");
