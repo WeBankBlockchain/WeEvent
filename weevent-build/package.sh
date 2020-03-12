@@ -1,30 +1,27 @@
 #!/bin/bash
 # generate WeEvent-x.x.x.tar.gz package from github project.
-# depend internet online and tools as followings:
+# this bash run online and depend tools as followings:
 # 1. git
 # 2. gradle 4.10
 # 3. java 1.8
 # 4. nodejs 10.16
 ################################################################################
-weevent_version=1.1.0
 function usage(){
     echo "Usage:"
-    echo "    package master: ./package.sh --version ${weevent_version}"
-    echo "    package tag: ./package.sh --tag v${weevent_version} --version ${weevent_version}"
-    echo "    package local: ./package.sh --tag local --version ${weevent_version}"
+    echo "    package master: ./package.sh"
+    echo "    package tag: ./package.sh --tag v1.0.0"
+    echo "    package local: ./package.sh --tag local"
 }
 
-version=""
 tag="master"
-
+version=$(grep "[ ]\+version[ ]\+\".*\"" ../build.gradle | awk '{print $2}' | sed 's/"//g')
 current_path=$(pwd)
 top_path=$(dirname ${current_path})
-out_path=""
+out_path=${current_path}/weevent-${version}
 
 while [[ $# -ge 2 ]] ; do
     case "$1" in
     --tag) param="$1 = $2;";tag=$2;shift 2;;
-    --version) param="$1 = $2;";version="$2";shift 2;;
     *) echo "unknown parameter $1." ; exit 1 ; break;;
     esac
 done
@@ -264,13 +261,18 @@ function package(){
 }
 
 function main(){
+    usage
     if [[ -z "${version}" ]];then
-        usage
         exit 1
     fi
 
+    read -p "start to package ${tag} in version ${version}, go ahead? [Y/N]" cmd_input
+    if [[ "Y" != "$cmd_input" && "y" != "$cmd_input" ]]; then
+        echo "input $cmd_input, skipped"
+        exit 1
+    fi
+    
     # package in current path
-    out_path=${current_path}/weevent-${version}
     package
 
     # reset to original path

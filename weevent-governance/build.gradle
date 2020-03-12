@@ -8,7 +8,6 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation project(path: ":weevent-client")
     // spring boot
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -38,8 +37,6 @@ dependencies {
     // forward backend
     implementation("org.apache.httpcomponents:httpclient:${httpclientVersion}")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-
     //jpa
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
@@ -48,6 +45,10 @@ dependencies {
 
     //JWT
     implementation("com.auth0:java-jwt:${JWTVersion}")
+
+    implementation(project(":weevent-client"))
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
 bootJar {
@@ -57,16 +58,18 @@ bootJar {
     // thin spring boot jar
     excludes = ["*.jar"]
 
-    copy {
-        from file("src/main/resources/")
-        into "dist/conf"
-    }
-    copy {
-        from configurations.runtimeClasspath
-        into "dist/lib"
-    }
-    copy {
-        from file("web/html/")
-        into "dist/html"
+    doLast {
+        copy {
+            from file("src/main/resources/")
+            into "dist/conf"
+        }
+        copy {
+            from configurations.runtimeClasspath
+            into "dist/lib"
+        }
+        copy {
+            from file("web/html/")
+            into "dist/html"
+        }
     }
 }
