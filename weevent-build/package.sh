@@ -142,9 +142,10 @@ function tar_gateway(){
     local target=$1
     yellow_echo "generate ${target}"
 
-    cp -r ${out_path}/modules/gateway ${current_path}/gateway-${version}
+    mkdir -p ${current_path}/gateway-${version}/weevent-gateway-${version}
+    cp -r ${out_path}/modules/gateway/* ${current_path}/gateway-${version}/weevent-gateway-${version}
     # no need install shell
-    rm -rf ${current_path}/gateway-${version}/install-gateway.sh
+    rm -rf ${current_path}/gateway-${version}/weevent-gateway-${version}/install-gateway.sh
 
     # do not tar the top dir
     cd ${current_path}/gateway-${version}
@@ -158,9 +159,10 @@ function tar_broker(){
     local target=$1
     yellow_echo "generate ${target}"
 
-    cp -r ${out_path}/modules/broker ${current_path}/broker-${version}
+    mkdir -p ${current_path}/broker-${version}/weevent-broker-${version}
+    cp -r ${out_path}/modules/broker/* ${current_path}/broker-${version}/weevent-broker-${version}
     # no need install shell
-    rm -rf ${current_path}/broker-${version}/install-broker.sh
+    rm -rf ${current_path}/broker-${version}/weevent-broker-${version}/install-broker.sh
 
     # do not tar the top dir
     cd ${current_path}/broker-${version}
@@ -173,9 +175,10 @@ function tar_governance(){
     local target=$1
     yellow_echo "generate ${target}"
 
-    cp -r ${out_path}/modules/governance ${current_path}/governance-${version}
+    mkdir -p ${current_path}/governance-${version}/weevent-governance-${version}
+    cp -r ${out_path}/modules/governance/* ${current_path}/governance-${version}/weevent-governance-${version}
     # no need install shell
-    rm -rf ${current_path}/governance-${version}/install-governance.sh
+    rm -rf ${current_path}/governance-${version}/weevent-governance-${version}/install-governance.sh
 
     # do not tar the top dir
     cd ${current_path}/governance-${version}
@@ -190,9 +193,10 @@ function tar_processor(){
     local target=$1
     yellow_echo "generate ${target}"
 
-    cp -r ${out_path}/modules/processor ${current_path}/processor-${version}
+    mkdir -p ${current_path}/processor-${version}/weevent-processor-${version}
+    cp -r ${out_path}/modules/processor/* ${current_path}/processor-${version}/weevent-processor-${version}
     # no need install shell
-    rm -rf ${current_path}/processor-${version}/install-processor.sh
+    rm -rf ${current_path}/processor-${version}/weevent-processor-${version}/install-processor.sh
 
     # do not tar the top dir
     cd ${current_path}/processor-${version}
