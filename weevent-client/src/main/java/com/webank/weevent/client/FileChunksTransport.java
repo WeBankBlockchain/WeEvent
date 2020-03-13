@@ -7,9 +7,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.List;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
@@ -130,7 +127,7 @@ public class FileChunksTransport {
             // download every single chunk data
             for (int chunkIdx = 0; chunkIdx < fileChunksMeta.getChunkNum(); chunkIdx++) {
                 byte[] chunkData = new byte[0];
-                for (int i = 0; i < CHUNK_RETRY_COUNT; i++) {
+                for (int i = 0; i <= CHUNK_RETRY_COUNT; i++) {
                     chunkData = this.downloadChunk(host, fileChunksMeta.getFileId(), chunkIdx);
                     if (chunkData.length > 0) {
                         break;
@@ -259,19 +256,20 @@ public class FileChunksTransport {
 
     private boolean checkChunkFullUpload(RandomAccessFile f, String fileId) {
         boolean isFullUpload = false;
-        for (int i = 0; i < CHUNK_RETRY_COUNT; i++) {
+        for (int i = 0; i <= CHUNK_RETRY_COUNT; i++) {
             try {
                 FileChunksMeta fileChunksMeta = this.getFileChunksInfo(fileId);
                 if (fileChunksMeta.checkChunkFull()) {
                     isFullUpload = true;
                     break;
                 } else {
-                    List<Integer> missChunkIdxList = this.missChunkIdxList(fileChunksMeta.getChunkStatus(), fileChunksMeta.getChunkNum());
-                    for (Integer missChunkIdx : missChunkIdxList) {
-                        this.uploadChunkDetails(f, fileChunksMeta, missChunkIdx);
+                    for (int k = 0; i < fileChunksMeta.getChunkNum(); i++) {
+                        if (!fileChunksMeta.getChunkStatus().get(i)) {
+                            this.uploadChunkDetails(f, fileChunksMeta, k);
+                        }
                     }
 
-                    if (i == (CHUNK_RETRY_COUNT - 1)) {
+                    if (i == CHUNK_RETRY_COUNT) {
                         fileChunksMeta = this.getFileChunksInfo(fileId);
                         isFullUpload = fileChunksMeta.checkChunkFull();
                     }
@@ -281,16 +279,6 @@ public class FileChunksTransport {
             }
         }
         return isFullUpload;
-    }
-
-    private List<Integer> missChunkIdxList(BitSet bitSet, int chunkNum) {
-        List<Integer> missChunksList = new ArrayList<>();
-        for (int i = 0; i < chunkNum; i++) {
-            if (!bitSet.get(i)) {
-                missChunksList.add(i);
-            }
-        }
-        return missChunksList;
     }
 
     private byte[] invokeCGI(HttpUriRequest request) throws BrokerException {
