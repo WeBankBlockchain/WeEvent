@@ -268,7 +268,7 @@ public class FileChunksTransport {
                     }
 
                     if (i == CHUNK_RETRY_COUNT) {
-                        fileChunksMeta = this.getFileChunksInfo(fileId);
+                        fileChunksMeta = this.getFileChunksInfo(local.getTopic(), local.getGroupId(), local.getFileId());
                         isFullUpload = fileChunksMeta.checkChunkFull();
                     }
                 }
