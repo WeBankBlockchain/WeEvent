@@ -63,7 +63,7 @@ public class TopicService {
         if (brokerEntity == null) {
             return false;
         }
-        CloseableHttpClient client = commonService.generateHttpClient(brokerEntity.getBrokerUrl());
+        CloseableHttpClient client = commonService.generateHttpClient();
         String url;
         try {
             if (groupId == null) {
@@ -99,7 +99,7 @@ public class TopicService {
             return result;
         }
         // get event broker url
-        CloseableHttpClient client = commonService.generateHttpClient(brokerEntity.getBrokerUrl());
+        CloseableHttpClient client = commonService.generateHttpClient();
         String url;
         if (groupId != null) {
             url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_LIST)
@@ -153,7 +153,7 @@ public class TopicService {
         }
 
         try {
-            CloseableHttpClient client = commonService.generateHttpClient(broker.getBrokerUrl());
+            CloseableHttpClient client = commonService.generateHttpClient();
             // get event broker url
             String url = new StringBuffer(broker.getBrokerUrl()).append(ConstantProperties.BROKER_REST_STATE).append("?topic=")
                     .append(URLEncoder.encode(topic, "UTF-8")).toString();
@@ -202,7 +202,7 @@ public class TopicService {
             topicEntity.setGroupId(groupId);
             topicRepository.save(topicEntity);
 
-            CloseableHttpClient client = commonService.generateHttpClient(brokerEntity.getBrokerUrl());
+            CloseableHttpClient client = commonService.generateHttpClient();
             String url;
             if (groupId != null) {
                 url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_OPEN).append("?topic=").append(URLEncoder.encode(topic, "UTF-8"))
@@ -235,7 +235,7 @@ public class TopicService {
         log.info("url: {}", url);
         String mes;
         try {
-            CloseableHttpClient client = commonService.generateHttpClient(brokerUrl);
+            CloseableHttpClient client = commonService.generateHttpClient();
             HttpGet get = commonService.getMethod(url, request);
             CloseableHttpResponse closeResponse = client.execute(get);
             mes = EntityUtils.toString(closeResponse.getEntity());
