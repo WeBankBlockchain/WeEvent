@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -58,7 +59,7 @@ public class FileRest {
 
         // create FileChunksMeta
         FileChunksMeta fileChunksMeta = new FileChunksMeta(WeEventUtils.generateUuid(),
-                URLDecoder.decode(fileName, "UTF-8"),
+                URLDecoder.decode(fileName, String.valueOf(StandardCharsets.UTF_8)),
                 fileSize,
                 md5,
                 topic,

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
@@ -64,7 +65,6 @@ public class FileChunksTransport {
 
         // get file initial information
         FileChunksMeta fileChunksMeta;
-        String fileId;
         try (RandomAccessFile f = new RandomAccessFile(file, "r")) {
             fileChunksMeta = new FileChunksMeta("",
                     file.getName(),
@@ -74,7 +74,6 @@ public class FileChunksTransport {
                     groupId);
             // get chunk information
             fileChunksMeta = this.openFileChunksInfo(fileChunksMeta);
-            fileId = fileChunksMeta.getFileId();
 
             // upload every single chunk data
             for (int chunkIdx = 0; chunkIdx < fileChunksMeta.getChunkNum(); chunkIdx++) {
@@ -162,19 +161,18 @@ public class FileChunksTransport {
     }
 
     private FileChunksMeta openFileChunksInfo(FileChunksMeta fileChunksMeta) throws BrokerException {
-        String params;
+        HttpGet httpGet;
         try {
-            params = "topic=" + fileChunksMeta.getTopic() +
-                    "&groupId=" + fileChunksMeta.getGroupId() +
-                    "&fileName=" + URLEncoder.encode(fileChunksMeta.getFileName(), "UTF-8") +
-                    "&fileSize=" + fileChunksMeta.getFileSize() +
-                    "&md5=" + fileChunksMeta.getFileMd5();
+            httpGet = new HttpGet(String.format("%s/openChunk?topic=%s&groupId=%s&fileName=%s&fileSize=%s&md5=%s", this.svrUrl,
+                    fileChunksMeta.getTopic(),
+                    fileChunksMeta.getGroupId(),
+                    URLEncoder.encode(fileChunksMeta.getFileName(), String.valueOf(StandardCharsets.UTF_8)),
+                    fileChunksMeta.getFileSize(),
+                    fileChunksMeta.getFileMd5()));
         } catch (UnsupportedEncodingException e) {
             log.error("encode fileName error, fileName:{}", fileChunksMeta.getFileName(), e);
             throw new BrokerException(ErrorCode.ENCODE_FILE_NAME_ERROR);
         }
-
-        HttpGet httpGet = new HttpGet(this.svrUrl + "/openChunk?" + params);
 
         byte[] responseResult = this.invokeCGI(httpGet);
         BaseResponse<FileChunksMeta> baseResponse = JsonHelper.json2Object(responseResult, new TypeReference<BaseResponse<FileChunksMeta>>() {
@@ -261,8 +259,8 @@ public class FileChunksTransport {
                     isFullUpload = true;
                     break;
                 } else {
-                    for (int k = 0; i < fileChunksMeta.getChunkNum(); i++) {
-                        if (!fileChunksMeta.getChunkStatus().get(i)) {
+                    for (int k = 0; k < fileChunksMeta.getChunkNum(); k++) {
+                        if (!fileChunksMeta.getChunkStatus().get(k)) {
                             this.uploadChunkDetails(f, fileChunksMeta, k);
                         }
                     }
