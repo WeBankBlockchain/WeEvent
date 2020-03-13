@@ -13,7 +13,6 @@ import org.apache.http.HttpRequest;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -27,7 +26,6 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.env.Environment;
-import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
@@ -48,7 +46,7 @@ public class GovernanceApplication {
 
     public static GovernanceConfig governanceConfig;
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args)  {
         SpringApplication app = new SpringApplication(GovernanceApplication.class);
         app.addListeners(new ApplicationPidFileWriter());
         app.run(args);
@@ -64,14 +62,6 @@ public class GovernanceApplication {
     @Autowired
     public void setGovernanceConfig(GovernanceConfig config) {
         governanceConfig = config;
-    }
-
-    @Bean
-    public ClientHttpRequestFactory httpsClientRequestFactory(GovernanceConfig config) {
-        HttpsClientRequestFactory factory = new HttpsClientRequestFactory();
-        factory.setReadTimeout(config.getReadTimeout());// ms
-        factory.setConnectTimeout(config.getConnectTimeOut());// ms
-        return factory;
     }
 
     @Bean
@@ -95,9 +85,8 @@ public class GovernanceApplication {
 
         cm.setMaxTotal(config.getMaxTotal());
         cm.setDefaultMaxPerRoute(config.getMaxPerRoute());
-        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm)
+        return HttpClients.custom().setConnectionManager(cm)
                 .setDefaultRequestConfig(requestConfig).setRetryHandler(retryHandler).build();
-        return httpClient;
     }
 
 
@@ -115,10 +104,6 @@ public class GovernanceApplication {
         }
         if (exception instanceof UnknownHostException) {
             // Unknown host
-            return false;
-        }
-        if (exception instanceof ConnectTimeoutException) {
-            // Connection refused
             return false;
         }
         if (exception instanceof SSLException) {
