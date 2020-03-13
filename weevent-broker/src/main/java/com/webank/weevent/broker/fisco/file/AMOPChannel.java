@@ -15,7 +15,6 @@ import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.FileChunksMeta;
 import com.webank.weevent.client.JsonHelper;
-import com.webank.weevent.core.fisco.util.DataTypeUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.ChannelPushCallback;
@@ -70,9 +69,12 @@ public class AMOPChannel extends ChannelPushCallback {
         }
     }
 
-    public static String genAMOPTopic(String weEventTopic) {
-        // the total length of all topic on AMOP channel is limited
-        return DataTypeUtils.genTopicNameHash(weEventTopic);
+    public Map<String, Boolean> getSenderTopics() {
+        return this.senderTopics;
+    }
+
+    public Map<String, Boolean> getSubTopics() {
+        return this.subTopics;
     }
 
     // path in resources like "file-transport\sender\1"
@@ -122,9 +124,8 @@ public class AMOPChannel extends ChannelPushCallback {
         for (Map.Entry<String, List<Resource>> resource : senderResources.entrySet()) {
             verifyKeyInfo.setPublicKey(resource.getValue());
 
-            String amopTopic = AMOPChannel.genAMOPTopic(resource.getKey());
-            this.senderTopics.put(amopTopic, true);
-            topicToKeyInfo.put(amopTopic, verifyKeyInfo);
+            this.senderTopics.put(resource.getKey(), true);
+            topicToKeyInfo.put(resource.getKey(), verifyKeyInfo);
         }
 
         // load PEM in receiver
@@ -136,10 +137,9 @@ public class AMOPChannel extends ChannelPushCallback {
             }
             verifyKeyInfo.setPrivateKey(resource.getValue().get(0));
 
-            String amopTopic = AMOPChannel.genAMOPTopic(resource.getKey());
-            this.subTopics.put(amopTopic, true);
-            topicToKeyInfo.put(amopTopic, verifyKeyInfo);
-            this.service.setNeedVerifyTopics(amopTopic);
+            this.subTopics.put(resource.getKey(), true);
+            topicToKeyInfo.put(resource.getKey(), verifyKeyInfo);
+            this.service.setNeedVerifyTopics(resource.getKey());
         }
 
         verifyTopicToKeyInfo.setTopicToKeyInfo(topicToKeyInfo);
@@ -195,14 +195,13 @@ public class AMOPChannel extends ChannelPushCallback {
 
     public FileChunksMeta createReceiverFileContext(FileChunksMeta fileChunksMeta) throws BrokerException {
         log.info("send AMOP message to create receiver file context");
-        String amopTopic = AMOPChannel.genAMOPTopic(fileChunksMeta.getTopic());
         FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileChannelStart, fileChunksMeta.getFileId());
         fileEvent.setFileChunksMeta(fileChunksMeta);
-        ChannelResponse rsp = this.sendEvent(amopTopic, fileEvent);
+        ChannelResponse rsp = this.sendEvent(fileChunksMeta.getTopic(), fileEvent);
         if (rsp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
             log.info("create remote file context success");
-            if (!this.senderTopics.containsKey(amopTopic)) {
-                this.senderTopics.put(amopTopic, false);
+            if (!this.senderTopics.containsKey(fileChunksMeta.getTopic())) {
+                this.senderTopics.put(fileChunksMeta.getTopic(), false);
             }
             return JsonHelper.json2Object(rsp.getContentByteArray(), FileChunksMeta.class);
         }
@@ -211,14 +210,14 @@ public class AMOPChannel extends ChannelPushCallback {
         throw toBrokerException(rsp);
     }
 
-    public void cleanUpReceiverFileContext(FileChunksMeta fileChunksMeta) throws BrokerException {
+    public FileChunksMeta cleanUpReceiverFileContext(String topic, String fileId) throws BrokerException {
         log.info("send AMOP message to clean up receiver file context");
 
-        String amopTopic = AMOPChannel.genAMOPTopic(fileChunksMeta.getTopic());
-        FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileChannelEnd, fileChunksMeta.getFileId());
-        ChannelResponse rsp = this.sendEvent(amopTopic, fileEvent);
+        FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileChannelEnd, fileId);
+        ChannelResponse rsp = this.sendEvent(topic, fileEvent);
         if (rsp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
             log.info("clean up receiver file context success");
+            return JsonHelper.json2Object(rsp.getContentByteArray(), FileChunksMeta.class);
         } else {
             log.error("clean up remote file context failed");
             throw toBrokerException(rsp);
@@ -328,8 +327,9 @@ public class AMOPChannel extends ChannelPushCallback {
             case FileChannelEnd: {
                 log.info("get {}, try to clean up file context", fileEvent.getEventType());
                 try {
-                    this.fileTransportService.cleanUpReceivedFile(fileEvent.getFileId());
-                    channelResponse = AMOPChannel.toChannelResponse(ErrorCode.SUCCESS);
+                    FileChunksMeta fileChunksMeta = this.fileTransportService.cleanUpReceivedFile(fileEvent.getFileId());
+                    byte[] json = JsonHelper.object2JsonBytes(fileChunksMeta);
+                    channelResponse = AMOPChannel.toChannelResponse(ErrorCode.SUCCESS, json);
                 } catch (BrokerException e) {
                     log.error("clean up not complete file failed", e);
                     channelResponse = AMOPChannel.toChannelResponse(e);
