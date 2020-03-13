@@ -87,9 +87,8 @@ public class GovernanceApplication {
 
         cm.setMaxTotal(config.getMaxTotal());
         cm.setDefaultMaxPerRoute(config.getMaxPerRoute());
-        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm)
+        return HttpClients.custom().setConnectionManager(cm)
                 .setDefaultRequestConfig(requestConfig).setRetryHandler(retryHandler).build();
-        return httpClient;
     }
 
 
@@ -107,10 +106,6 @@ public class GovernanceApplication {
         }
         if (exception instanceof UnknownHostException) {
             // Unknown host
-            return false;
-        }
-        if (exception instanceof ConnectTimeoutException) {
-            // Connection refused
             return false;
         }
         if (exception instanceof SSLException) {
