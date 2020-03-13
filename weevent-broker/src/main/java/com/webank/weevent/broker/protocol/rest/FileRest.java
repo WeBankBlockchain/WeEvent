@@ -59,7 +59,7 @@ public class FileRest {
 
         // create FileChunksMeta
         FileChunksMeta fileChunksMeta = new FileChunksMeta(WeEventUtils.generateUuid(),
-                URLDecoder.decode(fileName, String.valueOf(StandardCharsets.UTF_8)),
+                URLDecoder.decode(fileName, StandardCharsets.UTF_8.toString()),
                 fileSize,
                 md5,
                 topic,

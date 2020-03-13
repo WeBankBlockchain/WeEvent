@@ -166,7 +166,7 @@ public class FileChunksTransport {
             httpGet = new HttpGet(String.format("%s/openChunk?topic=%s&groupId=%s&fileName=%s&fileSize=%s&md5=%s", this.svrUrl,
                     fileChunksMeta.getTopic(),
                     fileChunksMeta.getGroupId(),
-                    URLEncoder.encode(fileChunksMeta.getFileName(), String.valueOf(StandardCharsets.UTF_8)),
+                    URLEncoder.encode(fileChunksMeta.getFileName(), StandardCharsets.UTF_8.toString()),
                     fileChunksMeta.getFileSize(),
                     fileChunksMeta.getFileMd5()));
         } catch (UnsupportedEncodingException e) {
