@@ -45,9 +45,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class CommonService implements AutoCloseable {
 
-    public static final String HTTPS = "https";
-    public static final String HTTP = "http";
-    public static final String HTTPS_CLIENT = "httpsClient";
     public static final String HTTP_CLIENT = "httpClient";
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String METHOD_TYPE = "GET";
@@ -69,7 +66,7 @@ public class CommonService implements AutoCloseable {
     public CloseableHttpResponse getCloseResponse(HttpServletRequest req, String newUrl) throws ServletException {
         CloseableHttpResponse closeResponse;
         try {
-            CloseableHttpClient client = this.generateHttpClient(newUrl);
+            CloseableHttpClient client = this.generateHttpClient();
             if (req.getMethod().equals(METHOD_TYPE)) {
                 HttpGet get = this.getMethod(newUrl, req);
                 closeResponse = client.execute(get);
@@ -88,7 +85,7 @@ public class CommonService implements AutoCloseable {
         CloseableHttpResponse closeResponse;
         try {
             log.info("url {}", newUrl);
-            CloseableHttpClient client = this.generateHttpClient(newUrl);
+            CloseableHttpClient client = this.generateHttpClient();
             if (req.getMethod().equals(METHOD_TYPE)) {
                 HttpGet get = this.getMethod(newUrl, req);
                 closeResponse = client.execute(get);
@@ -180,14 +177,8 @@ public class CommonService implements AutoCloseable {
      */
 
     // generate CloseableHttpClient from url
-    public CloseableHttpClient generateHttpClient(String url) {
-        CloseableHttpClient bean;
-        if (url.startsWith(HTTPS)) {
-            bean = (CloseableHttpClient) SpringContextUtil.getBean(HTTPS_CLIENT);
-        } else {
-            bean = (CloseableHttpClient) SpringContextUtil.getBean(HTTP_CLIENT);
-        }
-        return bean;
+    public CloseableHttpClient generateHttpClient() {
+        return (CloseableHttpClient) SpringContextUtil.getBean(HTTP_CLIENT);
     }
 
     public void writeResponse(CloseableHttpResponse closeResponse, HttpServletResponse res) throws IOException {
