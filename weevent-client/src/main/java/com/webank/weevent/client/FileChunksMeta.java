@@ -35,7 +35,9 @@ public class FileChunksMeta {
     // groupId
     private String groupId;
 
-    // file host, sender and receiver is different
+    // start time in second
+    private int startTime = 0;
+    // file receiver's host
     private String host;
     // chunk size
     private int chunkSize = 0;
@@ -58,6 +60,8 @@ public class FileChunksMeta {
         this.fileMd5 = fileMd5;
         this.topic = topic;
         this.groupId = groupId;
+
+        this.startTime = (int) (System.currentTimeMillis() / 1000);
     }
 
     public void initChunkSize(int chunkSize) {
@@ -68,6 +72,10 @@ public class FileChunksMeta {
 
     public boolean checkChunkFull() {
         return this.chunkStatus.cardinality() == this.chunkNum;
+    }
+
+    public void cleanChunkStatus() {
+        this.chunkStatus = null;
     }
 
     public void setHost(String host) {
