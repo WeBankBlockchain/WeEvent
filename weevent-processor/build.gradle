@@ -37,8 +37,6 @@ dependencies {
     // https://mvnrepository.com/artifact/org.quartz-scheduler/quartz
     implementation("org.quartz-scheduler:quartz:${quartzVersion}")
 
-    //jpa
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
     //h2
     implementation("com.h2database:h2:${h2Version}")
