@@ -2,11 +2,15 @@ package com.webank.weevent.broker.protocol.rest;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.broker.fisco.file.FileTransportService;
+import com.webank.weevent.broker.fisco.file.FileTransportStats;
 import com.webank.weevent.client.BaseResponse;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
@@ -35,35 +39,27 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileRest {
     private FileTransportService fileTransportService;
 
-    @Autowired(required = false)
+    @Autowired
     public void setFileTransportService(FileTransportService fileTransportService) {
         this.fileTransportService = fileTransportService;
-    }
-
-    private void checkSupport() throws BrokerException {
-        if (this.fileTransportService == null) {
-            log.error("DO NOT SUPPORT file transport without zookeeper");
-            throw new BrokerException(ErrorCode.ZOOKEEPER_NOT_SUPPORT_FILE_SUBSCRIPTION);
-        }
     }
 
     @RequestMapping(path = "/openChunk")
     @ResponseBody
     public BaseResponse<FileChunksMeta> openChunk(@RequestParam(name = "topic") String topic,
-                                                  @RequestParam(name = "groupId", required = false) String groupId,
+                                                  @RequestParam(name = "groupId") String groupId,
                                                   @RequestParam(name = "fileName") String fileName,
                                                   @RequestParam(name = "fileSize") long fileSize,
-                                                  @RequestParam(name = "md5") String md5) throws BrokerException {
+                                                  @RequestParam(name = "md5") String md5) throws BrokerException, UnsupportedEncodingException {
         log.info("groupId:{} md5:{}", groupId, md5);
 
-        checkSupport();
         ParamCheckUtils.validateFileName(fileName);
         ParamCheckUtils.validateFileSize(fileSize);
         ParamCheckUtils.validateFileMd5(md5);
 
         // create FileChunksMeta
         FileChunksMeta fileChunksMeta = new FileChunksMeta(WeEventUtils.generateUuid(),
-                fileName,
+                URLDecoder.decode(fileName, StandardCharsets.UTF_8.toString()),
                 fileSize,
                 md5,
                 topic,
@@ -76,11 +72,13 @@ public class FileRest {
 
     @RequestMapping(path = "/uploadChunk")
     @ResponseBody
-    public BaseResponse<?> uploadChunk(@RequestParam(name = "fileId") String fileId,
+    public BaseResponse<?> uploadChunk(@RequestParam(name = "topic") String topic,
+                                       @RequestParam(name = "groupId") String groupId,
+                                       @RequestParam(name = "fileId") String fileId,
                                        @RequestParam(name = "chunkIdx") int chunkIdx,
                                        @RequestParam(name = "chunkData") MultipartFile chunkFile) throws BrokerException, IOException {
         log.info("fileId: {}  chunkIdx: {} chunkData: {}", fileId, chunkIdx, chunkFile.getSize());
-        checkSupport();
+
         byte[] chunkData = chunkFile.getBytes();
 
         ParamCheckUtils.validateFileId(fileId);
@@ -88,9 +86,51 @@ public class FileRest {
         ParamCheckUtils.validateChunkData(chunkData);
 
         // send data to FileTransportSender
-        this.fileTransportService.sendChunkData(fileId, chunkIdx, chunkData);
+        this.fileTransportService.sendChunkData(topic, groupId, fileId, chunkIdx, chunkData);
 
         return BaseResponse.buildSuccess();
+    }
+
+    @RequestMapping(path = "/listChunk")
+    @ResponseBody
+    public BaseResponse<FileChunksMeta> listChunk(@RequestParam(name = "topic") String topic,
+                                                  @RequestParam(name = "groupId") String groupId,
+                                                  @RequestParam(name = "fileId") String fileId) throws BrokerException {
+        log.info("fileId: {}", fileId);
+
+        ParamCheckUtils.validateFileId(fileId);
+
+        // get file chunks info from Zookeeper
+        FileChunksMeta fileChunksMeta = this.fileTransportService.getReceiverFileChunksMeta(topic, groupId, fileId);
+
+        return BaseResponse.buildSuccess(fileChunksMeta);
+    }
+
+    @RequestMapping(path = "/closeChunk")
+    @ResponseBody
+    public BaseResponse<SendResult> closeChunk(@RequestParam(name = "topic") String topic,
+                                               @RequestParam(name = "groupId") String groupId,
+                                               @RequestParam(name = "fileId") String fileId) throws BrokerException {
+        log.info("fileId: {}", fileId);
+
+        ParamCheckUtils.validateFileId(fileId);
+
+        // close channel and send WeEvent
+        SendResult sendResult = this.fileTransportService.closeChannel(topic, groupId, fileId);
+        return BaseResponse.buildSuccess(sendResult);
+    }
+
+    @RequestMapping(path = "/verify")
+    @ResponseBody
+    public BaseResponse<FileChunksMeta> verify(@RequestParam(name = "eventId") String eventId,
+                                               @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+        return BaseResponse.buildSuccess(this.fileTransportService.verify(eventId, groupId));
+    }
+
+    @RequestMapping(path = "/stats")
+    @ResponseBody
+    public BaseResponse<FileTransportStats> stats(@RequestParam(name = "all", required = false) boolean all) {
+        return BaseResponse.buildSuccess(this.fileTransportService.stats(all));
     }
 
     @RequestMapping(path = "/downloadChunk")
@@ -99,7 +139,6 @@ public class FileRest {
                               HttpServletResponse response) throws BrokerException {
         log.info("fileId: {} chunkIdx: {}", fileId, chunkIdx);
 
-        checkSupport();
         ParamCheckUtils.validateFileId(fileId);
         ParamCheckUtils.validateChunkIdx(chunkIdx);
 
@@ -118,32 +157,6 @@ public class FileRest {
             log.error("write bytes to client error, fileId:{} chunkIdx:{}", fileId, chunkIdx, e);
             throw new BrokerException(ErrorCode.FILE_DOWNLOAD_ERROR);
         }
-    }
-
-    @RequestMapping(path = "/listChunk")
-    @ResponseBody
-    public BaseResponse<FileChunksMeta> listChunk(@RequestParam(name = "fileId") String fileId) throws BrokerException {
-        log.info("fileId: {}", fileId);
-
-        checkSupport();
-        ParamCheckUtils.validateFileId(fileId);
-
-        // get file chunks info from Zookeeper
-        FileChunksMeta fileChunksMeta = this.fileTransportService.getReceiverFileChunksMeta(fileId);
-
-        return BaseResponse.buildSuccess(fileChunksMeta);
-    }
-
-    @RequestMapping(path = "/closeChunk")
-    @ResponseBody
-    public BaseResponse<SendResult> closeChunk(@RequestParam(name = "fileId") String fileId) throws BrokerException {
-        log.info("fileId: {}", fileId);
-        checkSupport();
-        ParamCheckUtils.validateFileId(fileId);
-
-        // close channel and send WeEvent
-        SendResult sendResult = this.fileTransportService.closeChannel(fileId);
-        return BaseResponse.buildSuccess(sendResult);
     }
 
     @ExceptionHandler(value = BrokerException.class)
