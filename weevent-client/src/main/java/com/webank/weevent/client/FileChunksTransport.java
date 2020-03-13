@@ -88,7 +88,7 @@ public class FileChunksTransport {
                 }
             }
 
-            boolean chunkFullUpload = checkChunkFullUpload(f, fileId);
+            boolean chunkFullUpload = checkChunkFullUpload(f, fileChunksMeta);
             if (!chunkFullUpload) {
                 log.error("upload file :{} failed", file.getName());
                 throw new BrokerException(ErrorCode.FILE_UPLOAD_FAILED);
@@ -96,7 +96,7 @@ public class FileChunksTransport {
         }
 
         log.info("upload file complete, {}", localFile);
-        return this.closeChunk(fileChunksMeta.getHost(), fileId);
+        return this.closeChunk(fileChunksMeta.getHost(), fileChunksMeta);
     }
 
     private void uploadChunkDetails(RandomAccessFile f, FileChunksMeta fileChunksMeta, int chunkIdx) throws IOException, BrokerException {
@@ -111,7 +111,7 @@ public class FileChunksTransport {
             log.error("read file exception, chunkIdx: {}", chunkIdx);
             throw new BrokerException(ErrorCode.FILE_READ_EXCEPTION);
         }
-        this.uploadChunk(fileChunksMeta.getFileId(), chunkIdx, chunkData);
+        this.uploadChunk(fileChunksMeta, chunkIdx, chunkData);
 
         log.info("upload file chunk data, {}@{}", fileChunksMeta.getFileId(), chunkIdx);
     }
@@ -181,8 +181,8 @@ public class FileChunksTransport {
     }
 
 
-    private FileChunksMeta getFileChunksInfo(String fileId) throws BrokerException {
-        HttpGet httpGet = new HttpGet(this.svrUrl + "/listChunk?fileId=" + fileId);
+    private FileChunksMeta getFileChunksInfo(String topic, String groupId, String fileId) throws BrokerException {
+        HttpGet httpGet = new HttpGet(String.format("%s/listChunk?topic=%s&groupId=%s&fileId=%s", this.svrUrl, topic, groupId, fileId));
 
         byte[] responseResult = this.invokeCGI(httpGet);
         BaseResponse<FileChunksMeta> baseResponse = JsonHelper.json2Object(responseResult, new TypeReference<BaseResponse<FileChunksMeta>>() {
@@ -195,15 +195,15 @@ public class FileChunksTransport {
         return baseResponse.getData();
     }
 
-    private void uploadChunk(String fileId, int chunkIdx, byte[] chunkData) throws BrokerException {
-        // this.svrUrl + "/uploadChunk"
-        String uploadUrl = this.svrUrl + "/uploadChunk";
-        HttpPost httpPost = new HttpPost(uploadUrl);
+    private void uploadChunk(FileChunksMeta local, int chunkIdx, byte[] chunkData) throws BrokerException {
+        HttpPost httpPost = new HttpPost(this.svrUrl + "/uploadChunk");
 
         MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setMode(HttpMultipartMode.RFC6532);
-        multipartEntityBuilder.addBinaryBody("chunkData", chunkData, ContentType.DEFAULT_BINARY, fileId);
-        multipartEntityBuilder.addTextBody("fileId", fileId);
+        multipartEntityBuilder.addTextBody("topic", local.getTopic());
+        multipartEntityBuilder.addTextBody("groupId", local.getGroupId());
+        multipartEntityBuilder.addTextBody("fileId", local.getFileId());
         multipartEntityBuilder.addTextBody("chunkIdx", String.valueOf(chunkIdx));
+        multipartEntityBuilder.addBinaryBody("chunkData", chunkData, ContentType.DEFAULT_BINARY, local.getFileId());
         HttpEntity requestEntity = multipartEntityBuilder.build();
         httpPost.setEntity(requestEntity);
 
@@ -211,13 +211,12 @@ public class FileChunksTransport {
         BaseResponse baseResponse = JsonHelper.json2Object(responseResult, BaseResponse.class);
 
         if (ErrorCode.SUCCESS.getCode() != baseResponse.getCode()) {
-            log.error("upload chunk failed, {}@{} msg:{}", fileId, chunkIdx, baseResponse.getMessage());
+            log.error("upload chunk failed, {}@{} msg:{}", local.getFileId(), chunkIdx, baseResponse.getMessage());
         }
     }
 
     private byte[] downloadChunk(String host, String fileId, int chunkIdx) {
-        String params = "fileId=" + fileId + "&chunkIdx=" + chunkIdx;
-        HttpGet httpGet = new HttpGet(this.svrUrl + "/downloadChunk?" + params);
+        HttpGet httpGet = new HttpGet(String.format("%s/downloadChunk?fileId=%s&chunkIdx=%s", this.svrUrl, fileId, chunkIdx));
         httpGet.addHeader("file_host", host);
         byte[] chunkDataBytes = new byte[0];
         try {
@@ -233,26 +232,25 @@ public class FileChunksTransport {
         return chunkDataBytes;
     }
 
-    private SendResult closeChunk(String host, String fileId) throws BrokerException {
-        String params = "fileId=" + fileId;
-        HttpGet httpGet = new HttpGet(this.svrUrl + "/closeChunk?" + params);
+    private SendResult closeChunk(String host, FileChunksMeta local) throws BrokerException {
+        HttpGet httpGet = new HttpGet(String.format("%s/closeChunk?topic=%s&groupId=%s&fileId=%s", this.svrUrl, local.getTopic(), local.getGroupId(), local.getFileId()));
 
         byte[] responseResult = this.invokeCGI(httpGet);
         BaseResponse<SendResult> baseResponse = JsonHelper.json2Object(responseResult, new TypeReference<BaseResponse<SendResult>>() {
         });
 
         if (ErrorCode.SUCCESS.getCode() != baseResponse.getCode()) {
-            log.error("close chunk failed, filedId:{} host:{} msg:{}", fileId, host, baseResponse.getMessage());
+            log.error("close chunk failed, filedId:{} host:{} msg:{}", local.getFileId(), host, baseResponse.getMessage());
             throw new BrokerException(baseResponse.getCode(), baseResponse.getMessage());
         }
         return baseResponse.getData();
     }
 
-    private boolean checkChunkFullUpload(RandomAccessFile f, String fileId) {
+    private boolean checkChunkFullUpload(RandomAccessFile f, FileChunksMeta local) {
         boolean isFullUpload = false;
         for (int i = 0; i < CHUNK_RETRY_COUNT; i++) {
             try {
-                FileChunksMeta fileChunksMeta = this.getFileChunksInfo(fileId);
+                FileChunksMeta fileChunksMeta = this.getFileChunksInfo(local.getTopic(), local.getGroupId(), local.getFileId());
                 if (fileChunksMeta.checkChunkFull()) {
                     isFullUpload = true;
                     break;
@@ -263,7 +261,7 @@ public class FileChunksTransport {
                     }
                 }
             } catch (BrokerException | IOException e) {
-                log.error("checkChunkFullUpload failed ,fileId:{} retry count: {}", fileId, i);
+                log.error("checkChunkFullUpload failed ,fileId:{} retry count: {}", local.getFileId(), i);
             }
         }
         return isFullUpload;
