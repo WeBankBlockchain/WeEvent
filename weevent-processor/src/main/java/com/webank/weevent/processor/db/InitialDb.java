@@ -31,7 +31,6 @@ public class InitialDb implements AutoCloseable {
     public static void main(String[] args) throws Exception {
         InitialDb initialDb = new InitialDb();
         properties = initialDb.getProperties();
-        databaseType = properties.getProperty("spring.jpa.database").toLowerCase();
         initialDb.createDataBase();
     }
 
@@ -41,8 +40,10 @@ public class InitialDb implements AutoCloseable {
             this.user = properties.getProperty("spring.datasource.username");
             this.password = properties.getProperty("spring.datasource.password");
             String driverName = properties.getProperty("spring.datasource.driverClassName");
-            boolean flag = ("mysql").equals(databaseType);
-
+            boolean flag = driverName.contains("mariadb");
+            if (flag) {
+                databaseType = "mysql";
+            }
             int first = goalUrl.lastIndexOf("/") + 1;
             this.dbName = goalUrl.substring(first);
             // get mysql default url like jdbc:mysql://127.0.0.1:3306

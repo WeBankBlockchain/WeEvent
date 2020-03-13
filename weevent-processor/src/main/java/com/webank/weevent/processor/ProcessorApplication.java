@@ -22,7 +22,6 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 @EnableDiscoveryClient
 @SpringBootApplication
-@MapperScan(basePackages = "com.webank.weevent.processor")
 public class ProcessorApplication {
     public static ProcessorConfig processorConfig;
     public static ApplicationContext applicationContext;
