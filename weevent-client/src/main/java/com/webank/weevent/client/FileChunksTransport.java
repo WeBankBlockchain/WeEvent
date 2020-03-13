@@ -5,9 +5,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.List;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
@@ -65,7 +65,6 @@ public class FileChunksTransport {
 
         // get file initial information
         FileChunksMeta fileChunksMeta;
-        String fileId;
         try (RandomAccessFile f = new RandomAccessFile(file, "r")) {
             fileChunksMeta = new FileChunksMeta("",
                     file.getName(),
@@ -75,7 +74,6 @@ public class FileChunksTransport {
                     groupId);
             // get chunk information
             fileChunksMeta = this.openFileChunksInfo(fileChunksMeta);
-            fileId = fileChunksMeta.getFileId();
 
             // upload every single chunk data
             for (int chunkIdx = 0; chunkIdx < fileChunksMeta.getChunkNum(); chunkIdx++) {
@@ -104,7 +102,7 @@ public class FileChunksTransport {
         if (chunkIdx == fileChunksMeta.getChunkNum() - 1) {
             size = (int) (fileChunksMeta.getFileSize() % fileChunksMeta.getChunkSize());
         }
-        f.seek(chunkIdx * fileChunksMeta.getChunkSize());
+        f.seek((long) chunkIdx * fileChunksMeta.getChunkSize());
         byte[] chunkData = new byte[size];
         int readSize = f.read(chunkData);
         if (readSize != size) {
@@ -128,7 +126,7 @@ public class FileChunksTransport {
             // download every single chunk data
             for (int chunkIdx = 0; chunkIdx < fileChunksMeta.getChunkNum(); chunkIdx++) {
                 byte[] chunkData = new byte[0];
-                for (int i = 0; i < CHUNK_RETRY_COUNT; i++) {
+                for (int i = 0; i <= CHUNK_RETRY_COUNT; i++) {
                     chunkData = this.downloadChunk(host, fileChunksMeta.getFileId(), chunkIdx);
                     if (chunkData.length > 0) {
                         break;
@@ -139,7 +137,7 @@ public class FileChunksTransport {
                     throw new BrokerException(ErrorCode.FILE_DOWNLOAD_ERROR);
                 }
 
-                f.seek(chunkIdx * fileChunksMeta.getChunkSize());
+                f.seek((long) chunkIdx * fileChunksMeta.getChunkSize());
                 f.write(chunkData);
             }
         }
@@ -163,12 +161,18 @@ public class FileChunksTransport {
     }
 
     private FileChunksMeta openFileChunksInfo(FileChunksMeta fileChunksMeta) throws BrokerException {
-        String params = "topic=" + fileChunksMeta.getTopic() +
-                "&groupId=" + fileChunksMeta.getGroupId() +
-                "&fileName=" + fileChunksMeta.getFileName() +
-                "&fileSize=" + fileChunksMeta.getFileSize() +
-                "&md5=" + fileChunksMeta.getFileMd5();
-        HttpGet httpGet = new HttpGet(this.svrUrl + "/openChunk?" + params);
+        HttpGet httpGet;
+        try {
+            httpGet = new HttpGet(String.format("%s/openChunk?topic=%s&groupId=%s&fileName=%s&fileSize=%s&md5=%s", this.svrUrl,
+                    fileChunksMeta.getTopic(),
+                    fileChunksMeta.getGroupId(),
+                    URLEncoder.encode(fileChunksMeta.getFileName(), StandardCharsets.UTF_8.toString()),
+                    fileChunksMeta.getFileSize(),
+                    fileChunksMeta.getFileMd5()));
+        } catch (UnsupportedEncodingException e) {
+            log.error("encode fileName error, fileName:{}", fileChunksMeta.getFileName(), e);
+            throw new BrokerException(ErrorCode.ENCODE_FILE_NAME_ERROR);
+        }
 
         byte[] responseResult = this.invokeCGI(httpGet);
         BaseResponse<FileChunksMeta> baseResponse = JsonHelper.json2Object(responseResult, new TypeReference<BaseResponse<FileChunksMeta>>() {
@@ -248,16 +252,22 @@ public class FileChunksTransport {
 
     private boolean checkChunkFullUpload(RandomAccessFile f, FileChunksMeta local) {
         boolean isFullUpload = false;
-        for (int i = 0; i < CHUNK_RETRY_COUNT; i++) {
+        for (int i = 0; i <= CHUNK_RETRY_COUNT; i++) {
             try {
                 FileChunksMeta fileChunksMeta = this.getFileChunksInfo(local.getTopic(), local.getGroupId(), local.getFileId());
                 if (fileChunksMeta.checkChunkFull()) {
                     isFullUpload = true;
                     break;
                 } else {
-                    List<Integer> missChunkIdxList = this.missChunkIdxList(fileChunksMeta.getChunkStatus());
-                    for (Integer missChunkIdx : missChunkIdxList) {
-                        this.uploadChunkDetails(f, fileChunksMeta, missChunkIdx);
+                    for (int k = 0; k < fileChunksMeta.getChunkNum(); k++) {
+                        if (!fileChunksMeta.getChunkStatus().get(k)) {
+                            this.uploadChunkDetails(f, fileChunksMeta, k);
+                        }
+                    }
+
+                    if (i == CHUNK_RETRY_COUNT) {
+                        fileChunksMeta = this.getFileChunksInfo(local.getTopic(), local.getGroupId(), local.getFileId());
+                        isFullUpload = fileChunksMeta.checkChunkFull();
                     }
                 }
             } catch (BrokerException | IOException e) {
@@ -265,16 +275,6 @@ public class FileChunksTransport {
             }
         }
         return isFullUpload;
-    }
-
-    private List<Integer> missChunkIdxList(BitSet bitSet) {
-        List<Integer> missChunksList = new ArrayList<>();
-        for (int i = 0; i < bitSet.length(); i++) {
-            if (!bitSet.get(i)) {
-                missChunksList.add(i);
-            }
-        }
-        return missChunksList;
     }
 
     private byte[] invokeCGI(HttpUriRequest request) throws BrokerException {
