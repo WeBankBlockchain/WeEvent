@@ -27,7 +27,7 @@ public class WeEventConsumer extends AbstractJavaSamplerClient {
 
     private IWeEventClient weEventClient;
 
-    private String defaultUrl = "http://127.0.0.1:8080/weevent";
+    private String defaultUrl = "http://127.0.0.1:7000/weevent-broker";
 
     // Run every time the pressure thread starts
     @Override
@@ -71,6 +71,7 @@ public class WeEventConsumer extends AbstractJavaSamplerClient {
         SampleResult result = new SampleResult();
         result.setSampleLabel("consumer");
         try {
+            this.weEventClient = new IWeEventClient.Builder().brokerUrl(defaultUrl).groupId(this.groupId).build();
             result.sampleStart();
             String subscribeId = this.weEventClient.subscribe(this.topic, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
                 @Override
@@ -86,7 +87,7 @@ public class WeEventConsumer extends AbstractJavaSamplerClient {
             result.setSuccessful(true);
             result.setResponseMessage(subscribeId);
             result.setResponseData(subscribeId, Charset.defaultCharset().name());
-            result.setResponseHeaders("true");
+            result.setResponseHeaders("subscribe success");
 
             result.sampleEnd();
         } catch (Exception e) {
