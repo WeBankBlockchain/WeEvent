@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.broker.config.WeEventConfig;
 import com.webank.weevent.broker.fisco.file.FileTransportService;
-import com.webank.weevent.broker.fisco.file.ZKChunksMeta;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.core.IConsumer;
 import com.webank.weevent.core.IProducer;
@@ -257,30 +256,14 @@ public class BrokerApplication {
         fabricBroker4Consumer.startConsumer();
         return fabricBroker4Consumer;
     }
-
-    // FileChunksMeta in Zookeeper
+    
     @Bean
-    @ConditionalOnProperty(prefix = "spring.cloud.zookeeper", name = "enabled", havingValue = "true", matchIfMissing = true)
-    public ZKChunksMeta getZKChunksMeta(Environment environment) throws BrokerException {
-        String connectString = "127.0.0.1:2181";
-        final String key = "spring.cloud.zookeeper.connect-string";
-        if (environment.containsProperty(key)) {
-            connectString = environment.getProperty(key);
-        }
-
-        return new ZKChunksMeta("/WeEvent/files", connectString);
-    }
-
-    @Bean
-    @ConditionalOnBean(ZKChunksMeta.class)
     public FileTransportService getFileService(FiscoConfig fiscoConfig,
                                                IProducer iProducer,
-                                               ZKChunksMeta zkChunksMeta,
                                                Environment environment,
                                                WeEventConfig weEventConfig) throws BrokerException {
         return new FileTransportService(fiscoConfig,
                 iProducer,
-                zkChunksMeta,
                 environment.getProperty("spring.cloud.zookeeper.discovery.instance-id"),
                 weEventConfig.getFilePath(),
                 weEventConfig.getFileChunkSize());
