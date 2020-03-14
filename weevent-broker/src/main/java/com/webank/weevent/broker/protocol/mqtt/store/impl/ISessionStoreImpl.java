@@ -3,17 +3,14 @@ package com.webank.weevent.broker.protocol.mqtt.store.impl;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.webank.weevent.broker.protocol.mqtt.common.dto.SessionStore;
+import com.webank.weevent.broker.protocol.mqtt.store.dto.SessionStore;
 import com.webank.weevent.broker.protocol.mqtt.store.ISessionStore;
-
-import org.springframework.stereotype.Service;
 
 /**
  * @author websterchen
  * @version v1.0
  * @since 2019/6/1
  */
-@Service
 public class ISessionStoreImpl implements ISessionStore {
     private Map<String, SessionStore> sessionCache = new ConcurrentHashMap<>();
 
