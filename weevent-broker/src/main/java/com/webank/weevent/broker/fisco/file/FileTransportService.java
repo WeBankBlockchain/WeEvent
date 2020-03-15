@@ -59,12 +59,6 @@ public class FileTransportService {
         this.host = host;
         this.fileChunkSize = fileChunkSize;
         this.diskFiles = new DiskFiles(filePath);
-
-        // init default group
-        String defaultGroupId = WeEvent.DEFAULT_GROUP_ID;
-        Service service = Web3SDKConnector.initService(Long.valueOf(defaultGroupId), this.fiscoConfig);
-        AMOPChannel channel = new AMOPChannel(this, service);
-        this.groupChannels.put(defaultGroupId, channel);
     }
 
     public FileChunksMeta verify(String eventId, String groupId) throws BrokerException {
