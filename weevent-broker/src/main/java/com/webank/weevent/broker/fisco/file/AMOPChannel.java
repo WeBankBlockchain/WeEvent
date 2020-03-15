@@ -88,7 +88,7 @@ public class AMOPChannel extends ChannelPushCallback {
         }
 
         try {
-            File[] topics = resource.getFile().listFiles();
+            File[] topics = resource.getFile().listFiles((dir, name) -> name.endsWith(".pem"));
             if (topics != null) {
                 for (File topic : topics) {
                     List<Resource> pemResources = new ArrayList<>();

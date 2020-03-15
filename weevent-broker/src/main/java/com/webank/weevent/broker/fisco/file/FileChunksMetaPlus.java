@@ -46,7 +46,7 @@ public class FileChunksMetaPlus {
         this.time = String.format("%ss", time);
         this.readyChunk = this.file.getChunkStatus().cardinality();
         this.process = String.format("%.2f%%", (float) (this.readyChunk * 100) / this.file.getChunkNum());
-        this.speed = String.format("%.2fB/s", (double) (this.readyChunk * this.file.getChunkSize()) / time);
+        this.speed = String.format("%.2fB/s", ((double) this.readyChunk * this.file.getChunkSize()) / time);
 
         // do not show chunk detail
         this.file.cleanChunkStatus();
