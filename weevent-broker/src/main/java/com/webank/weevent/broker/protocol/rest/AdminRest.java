@@ -2,11 +2,12 @@ package com.webank.weevent.broker.protocol.rest;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.webank.weevent.broker.config.BuildInfo;
+import com.webank.weevent.client.BaseResponse;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.core.IConsumer;
@@ -24,7 +25,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,9 +43,15 @@ import org.springframework.web.client.RestTemplate;
 @RestController
 @Slf4j
 public class AdminRest {
+    private String appName;
     private IConsumer consumer;
     private BuildInfo buildInfo;
     private DiscoveryClient discoveryClient;
+
+    @Autowired
+    public void setEnvironment(Environment environment) {
+        this.appName = environment.getProperty("spring.application.name");
+    }
 
     @Autowired
     public void setConsumer(IConsumer consumer) {
@@ -60,93 +69,79 @@ public class AdminRest {
     }
 
     @RequestMapping(path = "/listGroup")
-    public ResponseData<List<String>> listGroup() throws BrokerException {
-        ResponseData<List<String>> responseData = new ResponseData<>();
-        responseData.setData(this.consumer.listGroupId());
-        responseData.setErrorCode(ErrorCode.SUCCESS);
-        return responseData;
+    public BaseResponse<List<String>> listGroup() throws BrokerException {
+        return BaseResponse.buildSuccess(this.consumer.listGroupId());
     }
 
     @RequestMapping(path = "/listNodes")
-    public ResponseData<List<String>> listNodes() throws BrokerException {
+    public BaseResponse<List<String>> listNodes() {
         log.info("query node list");
 
-        ResponseData<List<String>> responseData = new ResponseData<>();
         List<String> nodesInfo = new ArrayList<>();
-        List<ServiceInstance> instances = this.discoveryClient.getInstances("weevent-broker");
+        List<ServiceInstance> instances = this.discoveryClient.getInstances(this.appName);
         for (ServiceInstance serviceInstance : instances) {
-            nodesInfo.add(serviceInstance.getUri().toString());
+            nodesInfo.add(serviceInstance.getInstanceId());
         }
-        responseData.setErrorCode(ErrorCode.SUCCESS);
-        responseData.setData(nodesInfo);
-        return responseData;
+
+        return BaseResponse.buildSuccess(nodesInfo);
     }
 
     @RequestMapping(path = "/listSubscription")
-    public ResponseData<Map<String, SubscriptionInfo>> listSubscription(@RequestParam(name = "nodeIp") String nodeIp,
-                                                                        @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+    public BaseResponse<Map<String, SubscriptionInfo>> listSubscription(@RequestParam(name = "nodeIp") String nodeIp,
+                                                                        @RequestParam(name = "groupId", required = false) String groupId) {
         log.info("groupId:{}, nodeIp:{}", groupId, nodeIp);
-
         if (StringUtils.isBlank(nodeIp)) {
-            log.error("node ipList is null.");
-            throw new BrokerException("node ipList is null.");
+            log.error("nodeIp is empty.");
+            return BaseResponse.buildFail(ErrorCode.CGI_INVALID_INPUT);
         }
 
-        Map<String, SubscriptionInfo> nodesInfo = new HashMap<>();
-        try {
-            log.info("zookeeper ip List:{}", nodeIp);
-            String[] ipList = nodeIp.split(",");
-            for (String ipStr : ipList) {
-                if (!StringUtils.isBlank(ipStr)) {
-                    SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-                    RestTemplate rest = new RestTemplate(requestFactory);
-                    String url = ipStr + "/weevent-broker/admin/innerListSubscription?groupId=" + groupId;
-                    log.info("url:{}", url);
-
-                    ResponseEntity<SubscriptionInfo> rsp = rest.getForEntity(url, SubscriptionInfo.class);
-                    log.debug("innerListSubscription:{}", rsp.getBody());
-                    nodesInfo.put(nodeIp, rsp.getBody());
-                }
+        List<ServiceInstance> instances = this.discoveryClient.getInstances(this.appName);
+        Optional<ServiceInstance> instance = instances.stream().filter(item -> item.getInstanceId().equals(nodeIp)).findFirst();
+        if (instance.isPresent()) {
+            String url = String.format("%s/%s/admin/innerListSubscription", instance.get().getUri(), this.appName);
+            if (!StringUtils.isBlank(groupId)) {
+                url += "?groupId=" + groupId;
             }
-        } catch (Exception e) {
-            log.error("find subscriptionList fail", e);
-            throw new BrokerException("find subscriptionList fail", e);
+            log.info("url: {}", url);
+
+            SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+            RestTemplate rest = new RestTemplate(requestFactory);
+            BaseResponse<Map<String, SubscriptionInfo>> rsp = rest.exchange(url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<BaseResponse<Map<String, SubscriptionInfo>>>() {
+                    }).getBody();
+            if (rsp != null) {
+                log.debug("innerListSubscription: {}", rsp);
+                return BaseResponse.buildSuccess(rsp.getData());
+            }
         }
 
-        ResponseData<Map<String, SubscriptionInfo>> responseData = new ResponseData<>();
-        responseData.setErrorCode(ErrorCode.SUCCESS);
-        responseData.setData(nodesInfo);
-        return responseData;
+        return BaseResponse.buildSuccess(null);
     }
 
     @RequestMapping(path = "/innerListSubscription")
-    public Map<String, SubscriptionInfo> innerListSubscription(@RequestParam(name = "groupId") String groupId) throws BrokerException {
-        log.info("groupId:{}", groupId);
+    public BaseResponse<Map<String, SubscriptionInfo>> innerListSubscription(@RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+        log.info("groupId: {}", groupId);
 
-        return this.consumer.listSubscription(groupId);
+        return BaseResponse.buildSuccess(this.consumer.listSubscription(groupId));
     }
 
     @RequestMapping(path = "/getVersion")
-    public ResponseData<BuildInfo> getVersion() {
-        ResponseData<BuildInfo> responseData = new ResponseData<>();
-        responseData.setErrorCode(ErrorCode.SUCCESS);
-        responseData.setData(this.buildInfo);
-        return responseData;
+    public BaseResponse<BuildInfo> getVersion() {
+        return BaseResponse.buildSuccess(this.buildInfo);
     }
 
     /**
      * get general
      */
     @RequestMapping(path = "/group/general")
-    public ResponseData<GroupGeneral> getGroupGeneral(@RequestParam(value = "groupId", required = false) String groupId) throws BrokerException {
-        log.info("groupId:{}", groupId);
+    public BaseResponse<GroupGeneral> getGroupGeneral(@RequestParam(value = "groupId", required = false) String groupId) throws BrokerException {
+        log.info("groupId: {}", groupId);
 
-        ResponseData<GroupGeneral> responseData = new ResponseData<>();
         GroupGeneral groupGeneral = this.consumer.getGroupGeneral(groupId);
-        responseData.setCode(ErrorCode.SUCCESS.getCode());
-        responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
-        responseData.setData(groupGeneral);
-        return responseData;
+
+        return BaseResponse.buildSuccess(groupGeneral);
     }
 
 
@@ -154,22 +149,17 @@ public class AdminRest {
      * query transaction list.
      */
     @RequestMapping(path = "/transaction/transList")
-    public ResponseData<ListPage<TbTransHash>> queryTransList(@RequestParam(value = "groupId", required = false) String groupId,
+    public BaseResponse<ListPage<TbTransHash>> queryTransList(@RequestParam(value = "groupId", required = false) String groupId,
                                                               @RequestParam("pageNumber") Integer pageNumber,
                                                               @RequestParam("pageSize") Integer pageSize,
                                                               @RequestParam(value = "transactionHash", required = false) String transHash,
-                                                              @RequestParam(value = "blockNumber", required = false) BigInteger blockNumber)
-            throws BrokerException {
+                                                              @RequestParam(value = "blockNumber", required = false) BigInteger blockNumber) throws BrokerException {
         log.info("groupId:{} pageNumber:{} pageSize:{} pkHash:{} blockNumber:{}", groupId, pageNumber, pageSize, transHash, blockNumber);
 
-        ResponseData<ListPage<TbTransHash>> responseData = new ResponseData<>();
         QueryEntity queryEntity = new QueryEntity(groupId, pageNumber, pageSize, transHash, blockNumber);
-
         ListPage<TbTransHash> tbTransHashes = this.consumer.queryTransList(queryEntity);
-        responseData.setCode(ErrorCode.SUCCESS.getCode());
-        responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
-        responseData.setData(tbTransHashes);
-        return responseData;
+
+        return BaseResponse.buildSuccess(tbTransHashes);
     }
 
 
@@ -177,59 +167,45 @@ public class AdminRest {
      * query block list.
      */
     @RequestMapping(path = "/block/blockList")
-    public ResponseData<ListPage<TbBlock>> queryBlockList(@RequestParam(value = "groupId", required = false) String groupId,
+    public BaseResponse<ListPage<TbBlock>> queryBlockList(@RequestParam(value = "groupId", required = false) String groupId,
                                                           @RequestParam("pageNumber") Integer pageNumber,
                                                           @RequestParam("pageSize") Integer pageSize,
                                                           @RequestParam(value = "pkHash", required = false) String pkHash,
-                                                          @RequestParam(value = "blockNumber", required = false) BigInteger blockNumber)
-            throws BrokerException {
+                                                          @RequestParam(value = "blockNumber", required = false) BigInteger blockNumber) throws BrokerException {
         log.info("groupId:{} pageNumber:{} pageSize:{} pkHash:{} blockNumber:{}", groupId, pageNumber, pageSize, pkHash, blockNumber);
 
-        ResponseData<ListPage<TbBlock>> responseData = new ResponseData<>();
         QueryEntity queryEntity = new QueryEntity(groupId, pageNumber, pageSize, pkHash, blockNumber);
-
         ListPage<TbBlock> tbBlocks = this.consumer.queryBlockList(queryEntity);
-        responseData.setCode(ErrorCode.SUCCESS.getCode());
-        responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
-        responseData.setData(tbBlocks);
-        return responseData;
+
+        return BaseResponse.buildSuccess(tbBlocks);
     }
 
     /**
      * query node info list.
      */
     @RequestMapping(path = "/node/nodeList")
-    public ResponseData<ListPage<TbNode>> queryNodeList(@RequestParam(value = "groupId", required = false) String groupId,
+    public BaseResponse<ListPage<TbNode>> queryNodeList(@RequestParam(value = "groupId", required = false) String groupId,
                                                         @RequestParam("pageNumber") Integer pageNumber,
                                                         @RequestParam("pageSize") Integer pageSize,
-                                                        @RequestParam(value = "nodeName", required = false) String nodeName)
-            throws BrokerException {
+                                                        @RequestParam(value = "nodeName", required = false) String nodeName) throws BrokerException {
         log.info("groupId:{}  pageNumber:{} pageSize:{} nodeName:{}", groupId, pageNumber, pageSize, nodeName);
 
         QueryEntity queryEntity = new QueryEntity(groupId, pageNumber, pageSize, null, null);
         queryEntity.setNodeName(nodeName);
-        ResponseData<ListPage<TbNode>> responseData = new ResponseData<>();
-        responseData.setCode(ErrorCode.SUCCESS.getCode());
-        responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
         ListPage<TbNode> tbNodeListPage = this.consumer.queryNodeList(queryEntity);
         tbNodeListPage.setPageIndex(pageNumber);
         tbNodeListPage.setPageSize(pageSize);
-        responseData.setData(tbNodeListPage);
-        return responseData;
+
+        return BaseResponse.buildSuccess(tbNodeListPage);
     }
 
     /**
      * query ContractContext.
      */
     @RequestMapping(path = "/getContractContext")
-    public ResponseData<ContractContext> getContractContext(@RequestParam(value = "groupId", required = false) String groupId)
-            throws BrokerException {
-        log.info("groupId:{} ", groupId);
+    public BaseResponse<ContractContext> getContractContext(@RequestParam(value = "groupId", required = false) String groupId) throws BrokerException {
+        log.info("groupId: {} ", groupId);
 
-        ResponseData<ContractContext> responseData = new ResponseData<>();
-        responseData.setCode(ErrorCode.SUCCESS.getCode());
-        responseData.setMessage(ErrorCode.SUCCESS.getCodeDesc());
-        responseData.setData(this.consumer.getContractContext(groupId));
-        return responseData;
+        return BaseResponse.buildSuccess(this.consumer.getContractContext(groupId));
     }
 }

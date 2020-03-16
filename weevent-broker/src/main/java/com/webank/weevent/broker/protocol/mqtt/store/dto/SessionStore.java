@@ -1,4 +1,4 @@
-package com.webank.weevent.broker.protocol.mqtt.common.dto;
+package com.webank.weevent.broker.protocol.mqtt.store.dto;
 
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;

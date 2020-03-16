@@ -1,9 +1,12 @@
 package com.webank.weevent.broker.st;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.webank.weevent.broker.JUnitTestBase;
-import com.webank.weevent.broker.protocol.rest.ResponseData;
+import com.webank.weevent.client.BaseResponse;
+import com.webank.weevent.core.dto.SubscriptionInfo;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
@@ -34,7 +37,7 @@ public class RestfullAdminTest extends JUnitTestBase {
 
     @Test
     public void testGetVersion() {
-        ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "getVersion", ResponseData.class);
+        ResponseEntity<BaseResponse> rsp = admin.getForEntity(url + "getVersion", BaseResponse.class);
         log.info("getVersion, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody().getCode() == 0);
@@ -43,7 +46,7 @@ public class RestfullAdminTest extends JUnitTestBase {
 
     @Test
     public void testListNodes() {
-        ResponseEntity<ResponseData<List<String>>> rsp = admin.exchange(url + "listNodes", HttpMethod.GET, null, new ParameterizedTypeReference<ResponseData<List<String>>>() {
+        ResponseEntity<BaseResponse<List<String>>> rsp = admin.exchange(url + "listNodes", HttpMethod.GET, null, new ParameterizedTypeReference<BaseResponse<List<String>>>() {
         });
         log.info("listNodes, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
         List<String> nodes = rsp.getBody().getData();
@@ -54,21 +57,32 @@ public class RestfullAdminTest extends JUnitTestBase {
 
     @Test
     public void testListSubscription() {
-        ResponseEntity<ResponseData<List<String>>> response = admin.exchange(url + "listNodes", HttpMethod.GET, null, new ParameterizedTypeReference<ResponseData<List<String>>>() {
-        });
+        ResponseEntity<BaseResponse<List<String>>> response = admin.exchange(url + "listNodes",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<BaseResponse<List<String>>>() {
+                });
+        Assert.assertEquals(200, response.getStatusCodeValue());
         List<String> nodes = response.getBody().getData();
-        Assert.assertTrue(!nodes.isEmpty());
+        Assert.assertFalse(nodes.isEmpty());
 
-        ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "listSubscription?groupId={groupId}&nodeIp={nodeIp}", ResponseData.class, this.groupId, nodes.get(0));
+        Map<String, String> params = new HashMap<>();
+        params.put("groupId", groupId);
+        params.put("nodeIp", nodes.get(0));
+        ResponseEntity<BaseResponse<Map<String, SubscriptionInfo>>> rsp = admin.exchange(url + "listSubscription?groupId={groupId}&nodeIp={nodeIp}",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<BaseResponse<Map<String, SubscriptionInfo>>>() {
+                },
+                params);
         log.info("listSubscription, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
-        Assert.assertTrue(rsp.getStatusCodeValue() == 200);
-        Assert.assertTrue(rsp.getBody().getCode() == 0);
-        Assert.assertTrue(rsp.getBody().getData() != null);
+        Assert.assertEquals(200, rsp.getStatusCodeValue());
+        Assert.assertEquals(0, rsp.getBody().getCode());
     }
 
     @Test
     public void testGetGroupGeneral() {
-        ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "group/general", ResponseData.class);
+        ResponseEntity<BaseResponse> rsp = admin.getForEntity(url + "group/general", BaseResponse.class);
         log.info("get group general, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody().getCode() == 0);
@@ -77,7 +91,7 @@ public class RestfullAdminTest extends JUnitTestBase {
 
     @Test
     public void testQueryTransList() {
-        ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "transaction/transList?pageNumber={pageNumber}&pageSize={pageSize}", ResponseData.class, 1, 10);
+        ResponseEntity<BaseResponse> rsp = admin.getForEntity(url + "transaction/transList?pageNumber={pageNumber}&pageSize={pageSize}", BaseResponse.class, 1, 10);
         log.info("get transaction list, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody().getCode() == 0);
@@ -86,7 +100,7 @@ public class RestfullAdminTest extends JUnitTestBase {
 
     @Test
     public void testQueryBlockList() {
-        ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "block/blockList?pageNumber={pageNumber}&pageSize={pageSize}", ResponseData.class, 1, 10);
+        ResponseEntity<BaseResponse> rsp = admin.getForEntity(url + "block/blockList?pageNumber={pageNumber}&pageSize={pageSize}", BaseResponse.class, 1, 10);
         log.info("get blockList list, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody().getCode() == 0);
@@ -95,7 +109,7 @@ public class RestfullAdminTest extends JUnitTestBase {
 
     @Test
     public void testQueryNodeList() {
-        ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "node/nodeList?pageNumber={pageNumber}&pageSize={pageSize}", ResponseData.class, 1, 10);
+        ResponseEntity<BaseResponse> rsp = admin.getForEntity(url + "node/nodeList?pageNumber={pageNumber}&pageSize={pageSize}", BaseResponse.class, 1, 10);
         log.info("get node list, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody().getCode() == 0);
@@ -104,7 +118,7 @@ public class RestfullAdminTest extends JUnitTestBase {
 
     @Test
     public void testListGroupId() {
-        ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "listGroup", ResponseData.class);
+        ResponseEntity<BaseResponse> rsp = admin.getForEntity(url + "listGroup", BaseResponse.class);
         Assert.assertTrue(rsp.getStatusCodeValue() == 200);
         Assert.assertTrue(rsp.getBody().getCode() == 0);
         Assert.assertTrue(rsp.getBody().getData() != null);
@@ -112,7 +126,7 @@ public class RestfullAdminTest extends JUnitTestBase {
 
     @Test
     public void testContractContext() {
-        ResponseEntity<ResponseData> rsp = admin.getForEntity(url + "getContractContext", ResponseData.class);
+        ResponseEntity<BaseResponse> rsp = admin.getForEntity(url + "getContractContext", BaseResponse.class);
         Assert.assertEquals(200, rsp.getStatusCodeValue());
         Assert.assertEquals(0, rsp.getBody().getCode());
         Assert.assertNotNull(rsp.getBody().getData());
