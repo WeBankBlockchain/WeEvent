@@ -196,8 +196,7 @@ public class FileTransportService {
         // send sign to WeEvent
         FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileTransport, fileId);
         // not need detail
-        fileChunksMeta.setHost("");
-        fileChunksMeta.cleanChunkStatus();
+        fileChunksMeta.clearPrivacy();
         fileEvent.setFileChunksMeta(fileChunksMeta);
         Map<String, String> extensions = new HashMap<>();
         extensions.put(WeEvent.WeEvent_FILE, "1");
