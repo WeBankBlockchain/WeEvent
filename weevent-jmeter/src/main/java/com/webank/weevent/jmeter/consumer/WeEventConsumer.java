@@ -84,15 +84,16 @@ public class WeEventConsumer extends AbstractJavaSamplerClient {
                     getNewLogger().error("subscribe Exception", e);
                 }
             });
-            result.setSuccessful(true);
-            result.setResponseMessage(subscribeId);
+            result.setResponseMessage("subscribeId: " + subscribeId);
             result.setResponseData(subscribeId, Charset.defaultCharset().name());
             stringBuffer.append("subscribe success.");
             boolean flag = this.weEventClient.unSubscribe(subscribeId);
             if (flag) {
                 stringBuffer.append("  unsubscribe success.");
+                result.setSuccessful(true);
             } else {
                 stringBuffer.append("  unsubscribe fail.");
+                result.setSuccessful(false);
             }
             result.setResponseHeaders(stringBuffer.toString());
             result.sampleEnd();
