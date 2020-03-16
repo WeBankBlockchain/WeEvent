@@ -1,4 +1,4 @@
-package com.webank.weevent.broker.fisco.file;
+package com.webank.weevent.broker.fisco.file.dto;
 
 
 import java.util.HashMap;
@@ -18,9 +18,9 @@ import lombok.Setter;
 @Setter
 public class FileTransportStats {
     // groupId -> topic -> files
-    private Map<String, Map<String, List<FileChunksMetaPlus>>> sender = new HashMap<>();
+    private Map<String, Map<String, List<FileChunksMetaStatus>>> sender = new HashMap<>();
     // groupId -> topic -> files
-    private Map<String, Map<String, List<FileChunksMetaPlus>>> receiver = new HashMap<>();
+    private Map<String, Map<String, List<FileChunksMetaStatus>>> receiver = new HashMap<>();
 
     public FileTransportStats() {
     }
