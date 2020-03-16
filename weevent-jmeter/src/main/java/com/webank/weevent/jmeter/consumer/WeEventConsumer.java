@@ -71,7 +71,6 @@ public class WeEventConsumer extends AbstractJavaSamplerClient {
         SampleResult result = new SampleResult();
         result.setSampleLabel("consumer");
         try {
-            this.weEventClient = new IWeEventClient.Builder().brokerUrl(defaultUrl).groupId(this.groupId).build();
             result.sampleStart();
             String subscribeId = this.weEventClient.subscribe(this.topic, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
                 @Override
@@ -89,6 +88,7 @@ public class WeEventConsumer extends AbstractJavaSamplerClient {
             result.setResponseData(subscribeId, Charset.defaultCharset().name());
             result.setResponseHeaders("subscribe success");
 
+            this.weEventClient.unSubscribe(subscribeId);
             result.sampleEnd();
         } catch (Exception e) {
             getNewLogger().error("subscribe exception", e);
