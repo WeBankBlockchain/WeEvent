@@ -4,14 +4,15 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.processor.ProcessorApplication;
+import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.model.StatisticWeEvent;
 import com.webank.weevent.processor.mq.CEPRuleMQ;
 import com.webank.weevent.processor.quartz.CRUDJobs;
 import com.webank.weevent.processor.quartz.QuartzManager;
 import com.webank.weevent.processor.service.StatisticRuleService;
 import com.webank.weevent.processor.utils.BaseRspEntity;
-import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.RetCode;
 import com.webank.weevent.processor.utils.StatusCode;
@@ -41,7 +42,7 @@ public class CEPRuleController {
     public BaseRspEntity updateCEPRuleById(@Valid @RequestBody CEPRule rule) {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = createJob(rule, "updateCEPRuleById");
-        if (!(1 == ret.getErrorCode())) { //fail
+        if (ConstantsHelper.RET_FAIL.getErrorCode() != ret.getErrorCode()) { //fail
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
             resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());
         }
@@ -53,7 +54,7 @@ public class CEPRuleController {
     public BaseRspEntity stopCEPRuleById(@Valid @RequestBody CEPRule rule) {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = createJob(rule, "stopCEPRuleById");
-        if (!(1 == ret.getErrorCode())) { //fail
+        if (ConstantsHelper.RET_FAIL.getErrorCode() != ret.getErrorCode()) { //fail
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
             resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());
         }
@@ -66,7 +67,7 @@ public class CEPRuleController {
         // insert status must be 0
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = createJob(rule, "insert");
-        if (!(1 == ret.getErrorCode())) { //fail
+        if (ConstantsHelper.RET_FAIL.getErrorCode() != ret.getErrorCode()) { //fail
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
             resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());
         } else {
@@ -83,7 +84,7 @@ public class CEPRuleController {
         try {
             RetCode ret = deleteJob(id);
 
-            if (!(1 == ret.getErrorCode())) { //fail
+            if (ConstantsHelper.RET_FAIL.getErrorCode() != ret.getErrorCode()) { //fail
                 resEntity.setErrorCode(ret.getErrorCode());
                 resEntity.setErrorMsg(ret.getErrorMsg());
             }
@@ -115,7 +116,7 @@ public class CEPRuleController {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = createJob(rule, "startCEPRule");
 
-        if (!(1 == ret.getErrorCode())) { //fail
+        if (ConstantsHelper.RET_FAIL.getErrorCode() != ret.getErrorCode()) { //fail
             resEntity.setErrorCode(ConstantsHelper.RET_FAIL.getErrorCode());
             resEntity.setErrorMsg(ConstantsHelper.RET_FAIL.getErrorMsg());
         }
@@ -127,7 +128,7 @@ public class CEPRuleController {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = CEPRuleMQ.checkCondition(payload, condition);
 
-        if (!(1 == ret.getErrorCode())) { //fail
+        if (ConstantsHelper.RET_FAIL.getErrorCode() != ret.getErrorCode()) { //fail
             resEntity.setErrorCode(ret.getErrorCode());
             resEntity.setErrorMsg(ret.getErrorMsg());
         }
@@ -142,7 +143,7 @@ public class CEPRuleController {
             CEPRule rule = quartzManager.getJobDetail(id);
             resEntity.setData(rule);
             return resEntity;
-        } catch (SchedulerException e) {
+        } catch (SchedulerException | BrokerException e) {
             resEntity.setErrorCode(StatusCode.SCHEDULE_ERROR.getCode());
             resEntity.setErrorMsg(StatusCode.SCHEDULE_ERROR.getCodeDesc());
             return resEntity;

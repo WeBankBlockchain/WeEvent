@@ -1,6 +1,8 @@
 package com.webank.weevent.broker.config;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -15,27 +17,26 @@ import org.springframework.stereotype.Component;
  * @since 2019/1/28
  */
 @Slf4j
-@Data
+@Getter
+@Setter
+@ToString
 @Component
 @PropertySource(value = "classpath:weevent.properties", encoding = "UTF-8")
 public class WeEventConfig {
-    @Value("${ip.check.white-table:}")
-    private String ipWhiteTable;
+    @Value("${ip.check.white-list:}")
+    private String ipWhiteList;
 
     @Value("${lru.cache.capacity:65536}")
     private Integer maxCapacity;
 
-    @Value("${cgi.subscribe.notify.timeout:5000}")
-    private Integer cgi_notify_timeout;
-
-    @Value("${broker.blockchain.type}")
-    private String blockChainType;
-
     @Value("${stomp.heartbeats:30}")
     private Integer stompHeartbeats;
 
-    @Value("${mqtt.broker.port:7001}")
+    @Value("${mqtt.broker.port:0}")
     private Integer mqttPort;
+
+    @Value("${mqtt.broker.tcp.port:0}")
+    private Integer mqttTcpPort;
 
     @Value("${mqtt.broker.sobacklog:511}")
     private Integer soBackLog;
@@ -54,5 +55,4 @@ public class WeEventConfig {
 
     @Value("${file.chunk.size:1048576}")
     private int fileChunkSize;
-
 }

@@ -19,9 +19,9 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.ErrorCode;
 import com.webank.weevent.governance.common.GovernanceException;
+import com.webank.weevent.governance.enums.DatabaseTypeEnum;
 import com.webank.weevent.governance.utils.SpringContextUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -45,9 +45,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class CommonService implements AutoCloseable {
 
-    public static final String HTTPS = "https";
-    public static final String HTTP = "http";
-    public static final String HTTPS_CLIENT = "httpsClient";
     public static final String HTTP_CLIENT = "httpClient";
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String METHOD_TYPE = "GET";
@@ -69,7 +66,7 @@ public class CommonService implements AutoCloseable {
     public CloseableHttpResponse getCloseResponse(HttpServletRequest req, String newUrl) throws ServletException {
         CloseableHttpResponse closeResponse;
         try {
-            CloseableHttpClient client = this.generateHttpClient(newUrl);
+            CloseableHttpClient client = this.generateHttpClient();
             if (req.getMethod().equals(METHOD_TYPE)) {
                 HttpGet get = this.getMethod(newUrl, req);
                 closeResponse = client.execute(get);
@@ -88,7 +85,7 @@ public class CommonService implements AutoCloseable {
         CloseableHttpResponse closeResponse;
         try {
             log.info("url {}", newUrl);
-            CloseableHttpClient client = this.generateHttpClient(newUrl);
+            CloseableHttpClient client = this.generateHttpClient();
             if (req.getMethod().equals(METHOD_TYPE)) {
                 HttpGet get = this.getMethod(newUrl, req);
                 closeResponse = client.execute(get);
@@ -180,14 +177,8 @@ public class CommonService implements AutoCloseable {
      */
 
     // generate CloseableHttpClient from url
-    public CloseableHttpClient generateHttpClient(String url) {
-        CloseableHttpClient bean;
-        if (url.startsWith(HTTPS)) {
-            bean = (CloseableHttpClient) SpringContextUtil.getBean(HTTPS_CLIENT);
-        } else {
-            bean = (CloseableHttpClient) SpringContextUtil.getBean(HTTP_CLIENT);
-        }
-        return bean;
+    public CloseableHttpClient generateHttpClient() {
+        return (CloseableHttpClient) SpringContextUtil.getBean(HTTP_CLIENT);
     }
 
     public void writeResponse(CloseableHttpResponse closeResponse, HttpServletResponse res) throws IOException {
@@ -200,9 +191,9 @@ public class CommonService implements AutoCloseable {
     }
 
 
-    public void checkDataBaseUrl(String dataBaseType, String dataBaseUrl, String tableName, String user, String password) throws GovernanceException, ClassNotFoundException {
+    public void checkDataBaseUrl(Integer dataBaseType, String dataBaseUrl, String tableName, String user, String password) throws GovernanceException, ClassNotFoundException {
         //1 h2 ,2 mysql
-        if (ConstantProperties.H2_DATABASE.equals(dataBaseType.toLowerCase())) {
+        if (DatabaseTypeEnum.H2_DATABASE.getCode().equals(dataBaseType)) {
             Class.forName("org.h2.Driver");
         } else {
             Class.forName("org.mariadb.jdbc.Driver");

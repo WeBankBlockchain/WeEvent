@@ -1,6 +1,5 @@
 package com.webank.weevent.governance.service;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -12,16 +11,22 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.entity.RuleDatabaseEntity;
 import com.webank.weevent.governance.entity.RuleEngineEntity;
 import com.webank.weevent.governance.entity.TopicHistoricalEntity;
+import com.webank.weevent.governance.enums.ConditionTypeEnum;
+import com.webank.weevent.governance.enums.DatabaseTypeEnum;
+import com.webank.weevent.governance.enums.PayloadEnum;
+import com.webank.weevent.governance.enums.StatusEnum;
 import com.webank.weevent.governance.mapper.TopicHistoricalMapper;
 import com.webank.weevent.governance.repository.RuleDatabaseRepository;
 import com.webank.weevent.governance.repository.RuleEngineRepository;
-import com.webank.weevent.governance.utils.JsonUtil;
+import com.webank.weevent.governance.repository.TopicHistoricalRepository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -38,6 +43,9 @@ public class TopicHistoricalService {
 
     @Autowired
     private TopicHistoricalMapper topicHistoricalMapper;
+
+    @Autowired
+    private TopicHistoricalRepository topicHistoricalRepository;
 
     @Autowired
     private CommonService commonService;
@@ -164,7 +172,7 @@ public class TopicHistoricalService {
             int first = goalUrl.lastIndexOf("/");
             int end = goalUrl.lastIndexOf("?");
             dbName = flag ? goalUrl.substring(first + 1, end) : goalUrl.substring(first + 1);
-            String type = flag ? "2" : "1";
+            Integer type = flag ? DatabaseTypeEnum.MYSQL_DATABASE.getCode() : DatabaseTypeEnum.H2_DATABASE.getCode();
             // get mysql default url like jdbc:mysql://127.0.0.1:3306
             Map<String, String> urlMap = commonService.uRLRequest(goalUrl);
             RuleDatabaseEntity ruleDatabaseEntity = new RuleDatabaseEntity(brokerEntity.getUserId(), brokerEntity.getId(), urlMap.get("dataBaseUrl"),
@@ -188,7 +196,7 @@ public class TopicHistoricalService {
         }
     }
 
-    private RuleEngineEntity initializationRule(String ruleName, BrokerEntity brokerEntity, String groupId, Integer dataBaseId) throws IOException {
+    private RuleEngineEntity initializationRule(String ruleName, BrokerEntity brokerEntity, String groupId, Integer dataBaseId) throws BrokerException {
         String selectField = "eventId,topicName,groupId,brokerId";
         Map<String, String> map = new HashMap<>();
         map.put("topicName", "*");
@@ -198,17 +206,17 @@ public class TopicHistoricalService {
         RuleEngineEntity ruleEngineEntity = new RuleEngineEntity();
         ruleEngineEntity.setRuleName(ruleName);
         ruleEngineEntity.setBrokerId(brokerEntity.getId());
-        ruleEngineEntity.setStatus(ConstantProperties.NOT_STARTED);
+        ruleEngineEntity.setStatus(StatusEnum.NOT_STARTED.getCode());
         ruleEngineEntity.setUserId(brokerEntity.getUserId());
         ruleEngineEntity.setGroupId(groupId);
         ruleEngineEntity.setCreateDate(new Date());
         ruleEngineEntity.setLastUpdate(new Date());
         ruleEngineEntity.setBrokerUrl(brokerEntity.getBrokerUrl() + "?groupId=" + groupId);
         ruleEngineEntity.setSelectField(selectField);
-        ruleEngineEntity.setPayload(JsonUtil.toJSONString(map));
+        ruleEngineEntity.setPayload(JsonHelper.object2Json(map));
         ruleEngineEntity.setRuleDataBaseId(dataBaseId);
-        ruleEngineEntity.setPayloadType(ConstantProperties.JSON);
-        ruleEngineEntity.setConditionType(ConstantProperties.RULE_DESTINATION_DATABASE);
+        ruleEngineEntity.setPayloadType(PayloadEnum.JSON.getCode());
+        ruleEngineEntity.setConditionType(ConditionTypeEnum.DATABASE.getCode());
         ruleEngineEntity.setFromDestination("#");
         ruleEngineEntity.setSystemTag(true);
         ruleEngineEntity.setTableName(TOPIC_HISTORICAL);
@@ -226,7 +234,7 @@ public class TopicHistoricalService {
             if (StringUtil.isBlank(mes)) {
                 throw new GovernanceException("group is empty");
             }
-            Map jsonObject = JsonUtil.parseObject(mes, Map.class);
+            Map jsonObject = JsonHelper.json2Object(mes, Map.class);
             Object data = jsonObject.get("data");
             if ("0".equals(jsonObject.get("code").toString()) && data instanceof List) {
                 groupList = (List) data;
@@ -238,6 +246,22 @@ public class TopicHistoricalService {
         } catch (Exception e) {
             log.error("get group list fail", e);
             throw new GovernanceException("get group list fail", e);
+        }
+    }
+
+    public boolean insertHistoricalData(TopicHistoricalEntity topicHistoricalEntity) {
+        try {
+            int count = topicHistoricalRepository.countByBrokerIdAndGroupIdAndEventId(topicHistoricalEntity.getBrokerId(), topicHistoricalEntity.getGroupId(), topicHistoricalEntity.getEventId());
+            if (count > 0) {
+                log.info("the record is exists");
+                return false;
+            }
+            TopicHistoricalEntity historicalEntity = topicHistoricalRepository.save(topicHistoricalEntity);
+            log.info("insert historicalData success,id:{}",historicalEntity.getId());
+            return true;
+        } catch (Exception e) {
+            log.error("insert historicalData fail", e);
+            return false;
         }
     }
 }

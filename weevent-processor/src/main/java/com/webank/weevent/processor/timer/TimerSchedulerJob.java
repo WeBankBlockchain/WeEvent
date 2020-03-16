@@ -4,13 +4,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
+import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.processor.model.TimerScheduler;
 import com.webank.weevent.processor.utils.CommonUtil;
-import com.webank.weevent.processor.utils.JsonUtil;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -33,24 +33,23 @@ public class TimerSchedulerJob implements Job {
 
     @SuppressWarnings("unchecked")
     private static void dealTimerTask(JobExecutionContext context, String taskName) {
-        Object obj = context.getJobDetail().getJobDataMap().get("timer");
-        Map<String, TimerScheduler> timerMap = (HashMap) context.getJobDetail().getJobDataMap().get("timerMap");
         try {
-            if (obj instanceof TimerScheduler) {
-                log.info("{}",  obj);
-                TimerScheduler timerScheduler = (TimerScheduler) obj;
-                // check the status,when the status equal 1,then update
-                log.info("execute  task: {},rule:{}", taskName, JsonUtil.toJSONString(timerScheduler));
-                runTask(timerScheduler);
-                timerMap.put(timerScheduler.getSchedulerName(), timerScheduler);
-            }
+            Object obj = context.getJobDetail().getJobDataMap().get("timer");
+            TimerScheduler scheduler = JsonHelper.json2Object(obj.toString(), TimerScheduler.class);
+            Map<String, TimerScheduler> timerMap = JsonHelper.json2Object(context.getJobDetail().getJobDataMap().get("timerMap").toString(), new TypeReference<Map<String, TimerScheduler>>() {
+            });
+
+            // check the status,when the status equal 1,then update
+            log.info("execute  task: {},rule:{}", taskName, JsonHelper.object2Json(scheduler));
+            runTask(scheduler);
+            timerMap.put(scheduler.getId(), scheduler);
         } catch (Exception e) {
             log.info("error:{}", e.toString());
         }
     }
 
     public static void runTask(TimerScheduler timerScheduler) {
-        try (Connection dbcpConnection = CommonUtil.getDbcpConnection(timerScheduler.getDatabaseUrl(),timerScheduler.getDataBaseType())) {
+        try (Connection dbcpConnection = CommonUtil.getDbcpConnection(timerScheduler.getDatabaseUrl(), timerScheduler.getDataBaseType())) {
             if (dbcpConnection == null) {
                 log.error("database connection fail,databaseUrl:{}", timerScheduler.getDatabaseUrl());
             } else {
@@ -62,7 +61,7 @@ public class TimerSchedulerJob implements Job {
                 dbcpConnection.close();
             }
         } catch (Exception e) {
-            log.error("execute task fail,taskName:{}", timerScheduler.getSchedulerName(), e);
+            log.error("execute task fail,taskId:{}", timerScheduler.getId(), e);
         }
     }
 

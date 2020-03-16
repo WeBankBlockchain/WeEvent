@@ -1,8 +1,6 @@
 package com.webank.weevent.processor.utils;
 
-import java.io.IOException;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,17 +12,23 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.processor.ProcessorApplication;
+import com.webank.weevent.processor.enums.DatabaseTypeEnum;
 import com.webank.weevent.processor.model.CEPRule;
-import com.webank.weevent.sdk.WeEvent;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSourceFactory;
 import org.springframework.util.StringUtils;
 
 @Slf4j
@@ -37,7 +41,7 @@ public class CommonUtil {
      * @param databaseUrl data bae url
      * @return connection
      */
-    public static Connection getDbcpConnection(String databaseUrl,String databaseType) {
+    public static Connection getDbcpConnection(String databaseUrl, String databaseType) {
         try {
             Map<String, String> requestUrlMap = uRLRequest(databaseUrl);
             // check all parameter
@@ -49,11 +53,12 @@ public class CommonUtil {
                 // use the old connection
                 return dsMap.get(databaseUrl).getConnection();
             } else {
-                BasicDataSource ds = new BasicDataSource();
+                Properties properties = new Properties();
+                BasicDataSource ds = BasicDataSourceFactory.createDataSource(properties);
                 dsMap.put(databaseUrl, ds);
-                if("1".equals(databaseType)){
+                if (DatabaseTypeEnum.H2_DATABASE.getCode().equals(databaseType)) {
                     ds.setDriverClassName("org.h2.Driver");
-                }else {
+                } else {
                     ds.setDriverClassName("org.mariadb.jdbc.Driver");
                 }
                 ds.setUrl(urlPage(databaseUrl));
@@ -66,7 +71,7 @@ public class CommonUtil {
 
                 return ds.getConnection();
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             log.error("e:{}", e.toString());
             return null;
         }
@@ -126,8 +131,10 @@ public class CommonUtil {
     public static List<String> getKeys(String objJson) {
         List<String> keys = new ArrayList<>();
         try {
-            Map<String, Object> map = JsonUtil.parseObjectToMap(objJson);
-            if (JsonUtil.isValid(objJson)) {
+            Map<String, Object> map = JsonHelper.json2Object(objJson, new TypeReference<Map<String, Object>>() {
+            });
+
+            if (JsonHelper.isValid(objJson)) {
                 for (Map.Entry<String, Object> entry : map.entrySet()) {
                     keys.add(entry.getKey());
                 }
@@ -135,7 +142,7 @@ public class CommonUtil {
                 keys = null;
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             keys = null;
             log.info("json get key error");
         }
@@ -177,12 +184,12 @@ public class CommonUtil {
         return keys;
     }
 
-    private static List<String> getSelectFieldList(String selectFields, String payload) throws IOException {
+    private static List<String> getSelectFieldList(String selectFields, String payload) throws BrokerException {
         List<String> result = new ArrayList<>();
         // if select is equal * ,then select all fields.
         if ("*".equals(selectFields)) {
             String selectFieldsTemp = payload;
-            Iterator it = JsonUtil.parseObject(selectFieldsTemp, Map.class).entrySet().iterator();
+            Iterator it = JsonHelper.json2Object(selectFieldsTemp, Map.class).entrySet().iterator();
 
             while (it.hasNext()) {
                 Map.Entry entry = (Map.Entry) it.next();
@@ -196,17 +203,19 @@ public class CommonUtil {
         return result;
     }
 
-    public static Map<String, String> contactsql(CEPRule rule, WeEvent eventMessage) throws IOException {
+    public static Map<String, String> contactsql(CEPRule rule, WeEvent eventMessage) throws BrokerException {
         String content = new String(eventMessage.getContent());
 
         // get select field
         List<String> result = getSelectFieldList(rule.getSelectField(), rule.getPayload());
-        Map<String, Object> table = JsonUtil.parseObjectToMap(rule.getPayload());
+        Map<String, Object> table = JsonHelper.json2Object(rule.getPayload(), new TypeReference<Map<String, Object>>() {
+        });
+
         Map eventContent;
         Map<String, String> sqlOrder;
 
-        if (JsonUtil.isValid(content)) {
-            eventContent = JsonUtil.parseObject(content, Map.class);
+        if (JsonHelper.isValid(content)) {
+            eventContent = JsonHelper.json2Object(content, Map.class);
             sqlOrder = generateSqlOrder(rule.getBrokerId(), rule.getGroupId(), eventMessage.getEventId(), eventMessage.getTopic(), result, eventContent, table);
         } else {
             sqlOrder = generateSystemSqlOrder(rule.getBrokerId(), rule.getGroupId(), eventMessage.getEventId(), eventMessage.getTopic(), result);
@@ -284,10 +293,11 @@ public class CommonUtil {
 
 
     public static String setWeEventContent(String brokerId, String groupId, WeEvent eventMessage, String
-            selectField, String payload) throws IOException {
+            selectField, String payload) throws BrokerException {
         String content = new String(eventMessage.getContent());
-        Map eventContent = JsonUtil.parseObject(content, Map.class);
-        Map<String, Object> payloadContent = JsonUtil.parseObjectToMap(payload);
+        Map eventContent = JsonHelper.json2Object(content, Map.class);
+        Map<String, Object> payloadContent = JsonHelper.json2Object(payload, new TypeReference<Map<String, Object>>() {
+        });
 
         // match the table
         Map<String, Object> iftttContent = new HashMap<>();

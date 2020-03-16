@@ -11,8 +11,6 @@ ext {
     // ----- org.apache -----
     // zookeeper
     zookeeperVersion = "3.5.5"
-    // curator.recipes
-    curatorVersion = "4.2.0"
     // httpclient
     httpclientVersion = "4.5.6"
     // tomcat
@@ -26,20 +24,21 @@ ext {
             dbcp2       : "2.6.0",
             commonsIo   : "2.4"
     ]
+    // org slf4j
+    slf4jVersion = "1.7.26"
     // logging.log4j
     log4jVersion = "2.11.1"
-    // jmeter
-    jmeterVersion = "5.0"
 
     // org.fisco-bcos.web3sdk
     web3sdkVersion = [
             fiscoV1: "1.2.5",
-            fiscoV2: "release-2.3.0.0221-topic-SNAPSHOT"
+            fiscoV2: "2.2.3"
     ]
     // fabric
     fabricVersion = "1.4.4"
-    // org slf4j
-    slf4jVersion = "1.7.26"
+    // pb
+    protobufVersion = "3.6.1"
+
     // lombok
     lombokVersion = "1.16.14"
     // junit
@@ -68,6 +67,9 @@ ext {
     WebSocketVersion = "1.4.0"
     // JWTVersion
     JWTVersion = "3.8.0"
+
+    // jmeter
+    jmeterVersion = "5.0"
 }
 
 buildscript {
@@ -93,7 +95,7 @@ List lombok = [
 
 allprojects {
     group "com.webank.weevent"
-    version "1.1.0"
+    version "1.2.0"
 
     apply plugin: "java"
     apply plugin: "maven"
@@ -113,7 +115,7 @@ allprojects {
         maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
         // "org.ethereum.solcJ-all-0.4.25"
         // maven { url "https://dl.bintray.com/ethereum/maven/" }
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        //maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         mavenLocal()
         mavenCentral()
     }

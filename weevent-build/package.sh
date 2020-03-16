@@ -1,30 +1,27 @@
 #!/bin/bash
 # generate WeEvent-x.x.x.tar.gz package from github project.
-# depend internet online and tools as followings:
+# this bash run online and depend tools as followings:
 # 1. git
 # 2. gradle 4.10
 # 3. java 1.8
 # 4. nodejs 10.16
 ################################################################################
-weevent_version=1.1.0
 function usage(){
     echo "Usage:"
-    echo "    package master: ./package.sh --version ${weevent_version}"
-    echo "    package tag: ./package.sh --tag v${weevent_version} --version ${weevent_version}"
-    echo "    package local: ./package.sh --tag local --version ${weevent_version}"
+    echo "    package master: ./package.sh"
+    echo "    package tag: ./package.sh --tag v1.0.0"
+    echo "    package local: ./package.sh --tag local"
 }
 
-version=""
 tag="master"
-
+version=$(grep "[ ]\+version[ ]\+\".*\"" ../build.gradle | awk '{print $2}' | sed 's/"//g')
 current_path=$(pwd)
 top_path=$(dirname ${current_path})
-out_path=""
+out_path=${current_path}/weevent-${version}
 
 while [[ $# -ge 2 ]] ; do
     case "$1" in
     --tag) param="$1 = $2;";tag=$2;shift 2;;
-    --version) param="$1 = $2;";version="$2";shift 2;;
     *) echo "unknown parameter $1." ; exit 1 ; break;;
     esac
 done
@@ -57,7 +54,7 @@ function confirm(){
 # chmod & dos2unix
 function set_permission(){
     cd ${out_path}
-    find -type f -regex  ".*\.\(sh\|ini\|properties\|xml\)" | xargs dos2unix
+    find -type f -regex  ".*\.\(sh\|ini\|properties\|xml\|yml\)" | xargs dos2unix
     find -type f -regex ".*\.\(sh\)" | xargs -t -i chmod +x {}
 }
 
@@ -145,47 +142,47 @@ function tar_gateway(){
     local target=$1
     yellow_echo "generate ${target}"
 
-    cp -r ${out_path}/modules/gateway ${current_path}/gateway-${version}
+    mkdir -p ${current_path}/weevent-gateway-${version}
+    cp -r ${out_path}/modules/gateway/* ${current_path}/weevent-gateway-${version}
     # no need install shell
-    rm -rf ${current_path}/gateway-${version}/install-gateway.sh
+    rm -rf ${current_path}/weevent-gateway-${version}/install-gateway.sh
 
     # do not tar the top dir
-    cd ${current_path}/gateway-${version}
-    tar -czpvf ${target} *
-    mv ${target} ${current_path}
+    cd ${current_path}
+    tar -czpvf ${target} ./weevent-gateway-${version}/
 
-    rm -rf ${current_path}/gateway-${version}
+    rm -rf ${current_path}/weevent-gateway-${version}
 }
 
 function tar_broker(){
     local target=$1
     yellow_echo "generate ${target}"
 
-    cp -r ${out_path}/modules/broker ${current_path}/broker-${version}
+    mkdir -p ${current_path}/weevent-broker-${version}
+    cp -r ${out_path}/modules/broker/* ${current_path}/weevent-broker-${version}
     # no need install shell
-    rm -rf ${current_path}/broker-${version}/install-broker.sh
+    rm -rf ${current_path}/weevent-broker-${version}/install-broker.sh
 
     # do not tar the top dir
-    cd ${current_path}/broker-${version}
-    tar -czpvf ${target} *
-    mv ${target} ${current_path}
+    cd ${current_path}
+    tar -czpvf ${target} ./weevent-broker-${version}/
 
-    rm -rf ${current_path}/broker-${version}
+    rm -rf ${current_path}/weevent-broker-${version}
 }
 function tar_governance(){
     local target=$1
     yellow_echo "generate ${target}"
 
-    cp -r ${out_path}/modules/governance ${current_path}/governance-${version}
+    mkdir -p ${current_path}/weevent-governance-${version}
+    cp -r ${out_path}/modules/governance/* ${current_path}/weevent-governance-${version}
     # no need install shell
-    rm -rf ${current_path}/governance-${version}/install-governance.sh
+    rm -rf ${current_path}/weevent-governance-${version}/install-governance.sh
 
     # do not tar the top dir
-    cd ${current_path}/governance-${version}
-    tar -czpvf ${target} *
-    mv ${target} ${current_path}
+    cd ${current_path}
+    tar -czpvf ${target} ./weevent-governance-${version}/
 
-    rm -rf ${current_path}/governance-${version}
+    rm -rf ${current_path}/weevent-governance-${version}
 }
 
 
@@ -193,16 +190,16 @@ function tar_processor(){
     local target=$1
     yellow_echo "generate ${target}"
 
-    cp -r ${out_path}/modules/processor ${current_path}/processor-${version}
+    mkdir -p ${current_path}/weevent-processor-${version}
+    cp -r ${out_path}/modules/processor/* ${current_path}/weevent-processor-${version}
     # no need install shell
-    rm -rf ${current_path}/processor-${version}/install-processor.sh
+    rm -rf ${current_path}/weevent-processor-${version}/install-processor.sh
 
     # do not tar the top dir
-    cd ${current_path}/processor-${version}
-    tar -czpvf ${target} *
-    mv ${target} ${current_path}
+    cd ${current_path}
+    tar -czpvf ${target} ./weevent-processor-${version}/
 
-    rm -rf ${current_path}/processor-${version}
+    rm -rf ${current_path}/weevent-processor-${version}
 }
 
 function tar_weevent(){
@@ -264,13 +261,18 @@ function package(){
 }
 
 function main(){
+    usage
     if [[ -z "${version}" ]];then
-        usage
         exit 1
     fi
 
+    read -p "start to package ${tag} in version ${version}, go ahead? [Y/N]" cmd_input
+    if [[ "Y" != "$cmd_input" && "y" != "$cmd_input" ]]; then
+        echo "input $cmd_input, skipped"
+        exit 1
+    fi
+    
     # package in current path
-    out_path=${current_path}/weevent-${version}
     package
 
     # reset to original path

@@ -27,6 +27,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public class JUnitTestBase {
     @Value("${server.port}")
     public String listenPort;
+
+    public String brokerUrl ="http://127.0.0.1:7000/weevent-broker";
+
     @Rule
     public TestName testName = new TestName();
     @Rule
@@ -40,7 +43,7 @@ public class JUnitTestBase {
 
 
     public String createToken() {
-        String token = JwtUtils.encodeToken("admin", GovernanceApplication.environment.getProperty("jwt.private.secret"), JwtUtils.EXPIRE_TIME);
+        String token = JwtUtils.encodeToken("admin", GovernanceApplication.governanceConfig.getPrivateSecret(), JwtUtils.EXPIRE_TIME);
         Security.setProperty(token, "1");
         return token;
     }

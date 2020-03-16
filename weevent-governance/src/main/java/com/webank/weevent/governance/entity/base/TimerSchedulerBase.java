@@ -4,10 +4,12 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Setter
+@Getter
 @EqualsAndHashCode(callSuper = false)
 @MappedSuperclass
 public class TimerSchedulerBase extends BaseEntity {
@@ -23,7 +25,7 @@ public class TimerSchedulerBase extends BaseEntity {
     @Column(name = "scheduler_name")
     private String schedulerName;
 
-    @NotNull(message = "ruleDataBaseId cannot be empty")
+    @NotNull(message = "ruleDatabaseId cannot be empty")
     @Column(name = "rule_database_id")
     private Integer ruleDatabaseId;
 

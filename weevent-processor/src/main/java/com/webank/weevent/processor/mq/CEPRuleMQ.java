@@ -1,6 +1,5 @@
 package com.webank.weevent.processor.mq;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
@@ -13,6 +12,14 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.IWeEventClient;
+import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.client.SendResult;
+import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.processor.enums.ConditionTypeEnum;
+import com.webank.weevent.processor.enums.RuleStatusEnum;
+import com.webank.weevent.processor.enums.SystemTagEnum;
 import com.webank.weevent.processor.model.CEPRule;
 import com.webank.weevent.processor.model.StatisticRule;
 import com.webank.weevent.processor.model.StatisticWeEvent;
@@ -20,14 +27,10 @@ import com.webank.weevent.processor.quartz.QuartzManager;
 import com.webank.weevent.processor.utils.CommonUtil;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.DataBaseUtil;
-import com.webank.weevent.processor.utils.JsonUtil;
 import com.webank.weevent.processor.utils.RetCode;
+import com.webank.weevent.processor.utils.SaveTopicDataUtil;
 import com.webank.weevent.processor.utils.StatisticCEPRuleUtil;
 import com.webank.weevent.processor.utils.SystemFunctionUtil;
-import com.webank.weevent.sdk.BrokerException;
-import com.webank.weevent.sdk.IWeEventClient;
-import com.webank.weevent.sdk.SendResult;
-import com.webank.weevent.sdk.WeEvent;
 
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +58,7 @@ public class CEPRuleMQ {
     public static StatisticWeEvent statisticWeEvent = new StatisticWeEvent();
 
     @PostConstruct
-    public void init() {
+    public void init() throws BrokerException {
         // get all rule
         log.info("start dBThread ...");
         new Thread(dbThread).start();
@@ -69,7 +72,7 @@ public class CEPRuleMQ {
         Map<String, CEPRule> ruleMap = QuartzManager.getJobList();
         statisticWeEvent = StatisticCEPRuleUtil.statistic(statisticWeEvent, ruleMap);
 
-        if (1 == rule.getStatus()) {
+        if (RuleStatusEnum.RUNNING.getCode().equals(rule.getStatus())) {
             if (null != subId) {
                 IWeEventClient client = subscriptionClientMap.get(subId);
                 // check the FromDestination whether is or not,ruleList have all message and ruleMap has latest message
@@ -88,7 +91,7 @@ public class CEPRuleMQ {
                 log.info("start rule ,and subscribe rule:{}", rule.getId());
             }
         }
-        if (0 == rule.getStatus() || 2 == rule.getStatus()) {
+        if (RuleStatusEnum.NOT_STARTED.getCode().equals(rule.getStatus()) || RuleStatusEnum.IS_DELETED.getCode().equals(rule.getStatus())) {
             log.info("stop,update,delete rule subscriptionIdMap.size:{}", subscriptionIdMap.size());
 
             log.info("stop,update,delete rule ,and unsubscribe,subId :{}", subId);
@@ -192,7 +195,7 @@ public class CEPRuleMQ {
                 continue;
             }
             // write the # topic to history db
-            if ("1".equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2)) {
+            if (SystemTagEnum.BUILT_IN_SYSTEM.getCode().equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(ConditionTypeEnum.DATABASE.getCode())) {
 
                 log.info("system insert db:{}", entry.getValue().getId());
                 Pair<WeEvent, CEPRule> messagePair = new Pair<>(event, entry.getValue());
@@ -228,7 +231,7 @@ public class CEPRuleMQ {
             }
 
             // write the # topic to history db  or ifttt message
-            if ("1".equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && entry.getValue().getConditionType().equals(2)) {
+            if (SystemTagEnum.BUILT_IN_SYSTEM.getCode().equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#") && ConditionTypeEnum.DATABASE.getCode().equals(entry.getValue().getConditionType())) {
                 log.info("system insert db:{}", entry.getValue().getId());
                 Pair<WeEvent, CEPRule> messagePair = new Pair<>(event, entry.getValue());
                 systemMessageQueue.add(messagePair);
@@ -249,14 +252,19 @@ public class CEPRuleMQ {
                         String groupId = entry.getValue().getGroupId();
 
                         // parsing the payload && match the content,if true and hit it
-                        if (entry.getValue().getConditionType().equals(2)) {
+                        if (ConditionTypeEnum.DATABASE.getCode().equals(entry.getValue().getConditionType())) {
 
                             log.info("entry: {},event hit the db and insert: {}", entry.getValue().toString(), event.toString());
 
                             // send to database
-                            String ret = DataBaseUtil.sendMessageToDB(event, entry.getValue());
+                            String ret;
+                            if (SystemTagEnum.BUILT_IN_SYSTEM.getCode().equals(entry.getValue().getSystemTag()) && entry.getValue().getFromDestination().equals("#")) {
+                                ret = SaveTopicDataUtil.saveTopicData(event, entry.getValue());
+                            } else {
+                                ret = DataBaseUtil.sendMessageToDB(event, entry.getValue());
+                            }
                             return new Pair<>(ret, entry.getValue().getId());
-                        } else if (entry.getValue().getConditionType().equals(1)) {
+                        } else if (ConditionTypeEnum.TOPIC.getCode().equals(entry.getValue().getConditionType())) {
 
                             // select the field and publish the message to the toDestination
                             String eventContent = CommonUtil.setWeEventContent(entry.getValue().getBrokerId(), groupId, event, entry.getValue().getSelectField(), entry.getValue().getPayload());
@@ -278,7 +286,7 @@ public class CEPRuleMQ {
                     } else {
                         return new Pair<>(ConstantsHelper.NOT_HIT_TIMES, entry.getValue().getId());
                     }
-                } catch (BrokerException | IOException e) {
+                } catch (BrokerException e) {
                     log.error(e.toString());
                     return new Pair<>(ConstantsHelper.LAST_FAIL_REASON, entry.getValue().getId());
                 }
@@ -287,9 +295,9 @@ public class CEPRuleMQ {
         return new Pair<>(ConstantsHelper.OTHER, "");
     }
 
-    private static boolean handleTheEqual(WeEvent eventMessage, String condition) throws IOException {
+    private static boolean handleTheEqual(WeEvent eventMessage, String condition) throws BrokerException {
         String eventContent = new String(eventMessage.getContent());
-        Map event = JsonUtil.parseObject(eventContent, Map.class);
+        Map event = JsonHelper.json2Object(eventContent, Map.class);
         String[] strs = condition.split("=");
         if (strs.length == 2) {
             // event contain left key
@@ -304,7 +312,7 @@ public class CEPRuleMQ {
         return false;
     }
 
-    private static boolean hitRuleEngine(CEPRule rule, WeEvent eventMessage) throws IOException {
+    private static boolean hitRuleEngine(CEPRule rule, WeEvent eventMessage) throws BrokerException {
         // String payload, WeEvent eventMessage, String condition
         String payload = rule.getPayload();
         String condition = rule.getConditionField();
@@ -316,7 +324,7 @@ public class CEPRuleMQ {
                 return true;
             } else if (CommonUtil.checkJson(eventContent, payload)) {
                 List<String> eventContentKeys = CommonUtil.getKeys(payload);
-                Map event = JsonUtil.parseObject(eventContent, Map.class);
+                Map event = JsonHelper.json2Object(eventContent, Map.class);
                 JexlEngine jexl = new JexlBuilder().create();
                 JexlContext context = setContext(event, eventContentKeys);
 
@@ -378,11 +386,11 @@ public class CEPRuleMQ {
     public static RetCode checkCondition(String payload, String condition) {
         try {
             List<String> payloadContentKeys = CommonUtil.getKeys(payload);
-            Map payloadJson = JsonUtil.parseObject(payload, Map.class);
+            Map payloadJson = JsonHelper.json2Object(payload, Map.class);
             JexlEngine jexl = new JexlBuilder().create();
 
             JexlContext context = setContext(payloadJson, payloadContentKeys);
-            Map event = JsonUtil.parseObject(payload, Map.class);
+            Map event = JsonHelper.json2Object(payload, Map.class);
             String[] strs = condition.split("=");
             boolean flag = false;
             if (strs.length == 2 && !(strs[0].contains("<") || strs[0].contains(">") || (strs[1].contains("<") || strs[1].contains(">")))) {
@@ -438,7 +446,11 @@ public class CEPRuleMQ {
                     if (null != item) {
                         log.info("auto redo thread enter,system insert db:{}", item.getValue().getId());
                         //  send to  the db
-                        DataBaseUtil.sendMessageToDB(item.getKey(), item.getValue());
+                        if (SystemTagEnum.BUILT_IN_SYSTEM.getCode().equals(item.getValue().getSystemTag()) && item.getValue().getFromDestination().equals("#")) {
+                            SaveTopicDataUtil.saveTopicData(item.getKey(), item.getValue());
+                        } else {
+                            DataBaseUtil.sendMessageToDB(item.getKey(), item.getValue());
+                        }
                     }
                 } catch (InterruptedException e) {
                     log.info(e.toString());

@@ -1,12 +1,13 @@
 package com.webank.weevent.processor.controller;
 
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.processor.model.TimerScheduler;
 import com.webank.weevent.processor.service.TimerSchedulerService;
 import com.webank.weevent.processor.timer.TimerSchedulerJob;
 import com.webank.weevent.processor.utils.BaseRspEntity;
 import com.webank.weevent.processor.utils.ConstantsHelper;
 import com.webank.weevent.processor.utils.RetCode;
-import com.webank.weevent.sdk.BrokerException;
 
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.CronExpression;
@@ -36,13 +37,14 @@ public class TimerSchedulerController {
         JobDataMap timerSchedulerMap = new JobDataMap();
         timerSchedulerMap.put("id", timerScheduler.getId());
         timerSchedulerMap.put("type", "createTimerTask");
-        timerSchedulerMap.put("timer", timerScheduler);
+        timerSchedulerMap.put("timer", JsonHelper.object2Json(timerScheduler));
         RetCode retCode = timerSchedulerService.createTimerScheduler(timerScheduler.getId(), "timer", "timer",
                 "timer-trigger", TimerSchedulerJob.class, timerSchedulerMap, timerScheduler);
-        if (1 == retCode.getErrorCode()) { //fail
+        if (ConstantsHelper.RET_FAIL.getErrorCode() == retCode.getErrorCode()) { //fail
             resEntity.setErrorCode(retCode.getErrorCode());
             resEntity.setErrorMsg(retCode.getErrorMsg());
         }
+
         return resEntity;
     }
 
@@ -52,10 +54,10 @@ public class TimerSchedulerController {
         JobDataMap timerSchedulerMap = new JobDataMap();
         timerSchedulerMap.put("id", timerScheduler.getId());
         timerSchedulerMap.put("type", "updateTimerTask");
-        timerSchedulerMap.put("timer", timerScheduler);
+        timerSchedulerMap.put("timer", JsonHelper.object2Json(timerScheduler));
         RetCode retCode = timerSchedulerService.createTimerScheduler(timerScheduler.getId(), "timer", "timer",
                 "timer-trigger", TimerSchedulerJob.class, timerSchedulerMap, timerScheduler);
-        if (1 == retCode.getErrorCode()) { //fail
+        if (ConstantsHelper.RET_FAIL.getErrorCode() == retCode.getErrorCode()) { //fail
             resEntity.setErrorCode(retCode.getErrorCode());
             resEntity.setErrorMsg(retCode.getErrorMsg());
         }

@@ -4,9 +4,9 @@ package com.webank.weevent.governance.junit;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.governance.JUnitTestBase;
 import com.webank.weevent.governance.common.GovernanceResult;
-import com.webank.weevent.governance.utils.JsonUtil;
 import com.webank.weevent.governance.utils.JwtUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
@@ -35,9 +34,6 @@ public class TimerSchedulerControllerTest extends JUnitTestBase {
 
     private String token;
     private String userId = "1";
-
-    @Value("${weevent.url:http://127.0.0.1:7000/weevent}")
-    private String brokerUrl;
 
     private Map<String, Integer> brokerIdMap = new ConcurrentHashMap<>();
 
@@ -61,19 +57,19 @@ public class TimerSchedulerControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
+        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
         brokerIdMap.put("brokerId", (Integer) governanceResult.getData());
     }
 
     @Test
     public void testAddTimerScheduler() throws Exception {
-        String content = "{\"schedulerName\":\"test123\",\"ruleBaseId\":\"1\",\"periodParams\":\"0 0 * * * ？\"," +
+        String content = "{\"schedulerName\":\"test123\",\"ruleDatabaseId\":\"1\",\"periodParams\":\"0 0 * * * ？\"," +
                 "\"parsingSql\":\"select 1 from t_account\"," +
-                "\"userId\":" + this.userId + ",\"brokerId\":" + this.brokerIdMap.get("brokerId")+"}";
+                "\"userId\":" + this.userId + ",\"brokerId\":" + this.brokerIdMap.get("brokerId") + "}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/timerScheduler/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
+        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
         Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
     }
 
@@ -85,19 +81,19 @@ public class TimerSchedulerControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mvcResult.getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
+        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
         Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
     }
 
     @Test
     public void testUpdateTimerScheduler() throws Exception {
-        String content = "{\"id\":\"1\",\"schedulerName\":\"test456\",\"ruleBaseId\":\"1\",\"periodParams\":\"0 0 * * * ？\"," +
+        String content = "{\"id\":\"1\",\"schedulerName\":\"test456\",\"ruleDatabaseId\":\"1\",\"periodParams\":\"0 0 * * * ？\"," +
                 "\"parsingSql\":\"select 1 from t_account\"," +
-                "\"userId\":" + this.userId + ",\"brokerId\":" + this.brokerIdMap.get("brokerId")+"}";
+                "\"userId\":" + this.userId + ",\"brokerId\":" + this.brokerIdMap.get("brokerId") + "}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/timerScheduler/update").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
+        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
         Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
     }
 
@@ -107,7 +103,7 @@ public class TimerSchedulerControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/timerScheduler/delete").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonUtil.parseObject(response.getContentAsString(), GovernanceResult.class);
+        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
         Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
     }
 
@@ -118,7 +114,7 @@ public class TimerSchedulerControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/delete").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        Map jsonObject = JsonUtil.parseObject(response.getContentAsString(), Map.class);
+        Map jsonObject = JsonHelper.json2Object(response.getContentAsString(), Map.class);
         Assert.assertEquals(jsonObject.get("status").toString(), "200");
     }
 

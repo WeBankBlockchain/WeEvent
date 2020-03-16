@@ -6,11 +6,13 @@ import javax.persistence.Transient;
 
 import com.webank.weevent.governance.entity.base.TimerSchedulerBase;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 @EqualsAndHashCode(callSuper = true)
-@Data
+@Setter
+@Getter
 @Entity
 @Table(name = "t_timer_scheduler")
 public class TimerSchedulerEntity extends TimerSchedulerBase {
@@ -28,7 +30,7 @@ public class TimerSchedulerEntity extends TimerSchedulerBase {
     private String databaseUrl;
 
     @Transient
-    private String dataBaseType;
+    private Integer dataBaseType;
 
 
 }

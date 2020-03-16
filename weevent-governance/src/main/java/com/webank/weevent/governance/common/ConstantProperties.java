@@ -1,13 +1,8 @@
 package com.webank.weevent.governance.common;
 
-import lombok.Data;
-import org.springframework.stereotype.Component;
-
 /**
  * constants.
  */
-@Data
-@Component
 public class ConstantProperties {
 
     public static final String QUESTION_MARK = "?";
@@ -60,44 +55,5 @@ public class ConstantProperties {
 
     public final static String WEBASE_NODE_URL = "/node/nodeInfo/1";
 
-
     //weBase url end ===========================================================
-
-    public Integer maxRequestFail = 3;
-    public Long sleepWhenHttpMaxFail = 60000L; // default 1min
-
-    // COOKIE
-    public Integer cookieMaxAge = 86400; //  24 * 60 * 60 seconds
-
-
-    //project business constant==============================
-    public final static Integer RULE_DESTINATION_TOPIC = 1;
-    public final static Integer RULE_DESTINATION_DATABASE = 2;
-
-    public final static long NOT_DELETED = 0L;
-
-
-    public final static String CREATOR = "1";
-    public final static String AUTHORIZED = "2";
-
-    public final static Integer JSON = 1;
-
-    public final static Integer NOT_STARTED = 0;
-    public final static Integer RUNNING = 1;
-    public final static Integer IS_DELETED = 2;
-
-    //project business constant==============================
-
-
-    // databaseType================
-    public final static String H2_DATABASE = "1";
-    public final static String MYSQL_DATABASE = "2";
-    // databaseType ==============
-
-    // checkType================
-    public final static String CHECK_DATABASE = "1";
-    public final static String CHECK_TABLE = "2";
-    // checkType ==============
-
-
 }

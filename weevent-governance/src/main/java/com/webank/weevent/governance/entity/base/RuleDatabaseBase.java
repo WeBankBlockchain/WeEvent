@@ -4,8 +4,9 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotBlank;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 
 /**
@@ -13,7 +14,8 @@ import org.hibernate.validator.constraints.Length;
  *
  * @since 2019/10/15
  */
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = false)
 @MappedSuperclass
 public class RuleDatabaseBase extends BaseEntity {
@@ -56,9 +58,8 @@ public class RuleDatabaseBase extends BaseEntity {
     @Column(name = "system_tag")
     private Boolean systemTag;
 
-    @NotBlank
     @Column(name = "database_type")
-    private String databaseType;
+    private Integer databaseType;
 
     public RuleDatabaseBase() {
     }
@@ -68,7 +69,7 @@ public class RuleDatabaseBase extends BaseEntity {
                             @NotBlank String databaseUrl, @NotBlank String username,
                             @NotBlank String password, @NotBlank String datasourceName,
                             @Length(max = 256) String optionalParameter,
-                            Boolean systemTag, @NotBlank String databaseType) {
+                            Boolean systemTag, Integer databaseType) {
         this.userId = userId;
         this.brokerId = brokerId;
         this.databaseUrl = databaseUrl;

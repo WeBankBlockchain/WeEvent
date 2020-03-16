@@ -1,13 +1,15 @@
 package com.webank.weevent.governance.common;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * class about exception code and message.
  * 
  * @since 2019/05/23
  */
-@Data
+@Getter
+@Setter
 public class RetCode {
 
     private Integer code;

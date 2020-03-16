@@ -12,6 +12,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.ErrorCode;
 import com.webank.weevent.governance.common.GovernanceException;
@@ -20,8 +22,8 @@ import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.entity.TopicEntity;
 import com.webank.weevent.governance.entity.TopicPage;
 import com.webank.weevent.governance.entity.TopicPageEntity;
+import com.webank.weevent.governance.enums.IsDeleteEnum;
 import com.webank.weevent.governance.repository.TopicRepository;
-import com.webank.weevent.governance.utils.JsonUtil;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -61,7 +63,7 @@ public class TopicService {
         if (brokerEntity == null) {
             return false;
         }
-        CloseableHttpClient client = commonService.generateHttpClient(brokerEntity.getBrokerUrl());
+        CloseableHttpClient client = commonService.generateHttpClient();
         String url;
         try {
             if (groupId == null) {
@@ -76,7 +78,7 @@ public class TopicService {
             CloseableHttpResponse closeResponse = client.execute(get);
             String mes = EntityUtils.toString(closeResponse.getEntity());
             topicRepository.deleteTopicInfo(topic, new Date().getTime(), brokerId, groupId);
-            return JsonUtil.parseObject(mes, Boolean.class);
+            return JsonHelper.json2Object(mes, Boolean.class);
         } catch (Exception e) {
             log.error("close topic fail,topic :{},error:{}", topic, e.getMessage());
             throw new GovernanceException("close topic fail", e);
@@ -97,7 +99,7 @@ public class TopicService {
             return result;
         }
         // get event broker url
-        CloseableHttpClient client = commonService.generateHttpClient(brokerEntity.getBrokerUrl());
+        CloseableHttpClient client = commonService.generateHttpClient();
         String url;
         if (groupId != null) {
             url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_LIST)
@@ -113,7 +115,7 @@ public class TopicService {
         try {
             CloseableHttpResponse closeResponse = client.execute(get);
             String mes = EntityUtils.toString(closeResponse.getEntity());
-            result = JsonUtil.parseObject(mes, TopicPage.class);
+            result = JsonHelper.json2Object(mes, TopicPage.class);
             if (result == null || CollectionUtils.isEmpty(result.getTopicInfoList())) {
                 return result;
             }
@@ -123,7 +125,7 @@ public class TopicService {
             topicEntityList.forEach(it -> {
                 topicNameList.add(it.getTopicName());
             });
-            List<TopicEntity> topicEntities = topicRepository.findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(brokerId, groupId, topicNameList, ConstantProperties.NOT_DELETED);
+            List<TopicEntity> topicEntities = topicRepository.findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(brokerId, groupId, topicNameList, IsDeleteEnum.NOT_DELETED.getCode());
             if (CollectionUtils.isEmpty(topicEntities)) {
                 return result;
             }
@@ -151,7 +153,7 @@ public class TopicService {
         }
 
         try {
-            CloseableHttpClient client = commonService.generateHttpClient(broker.getBrokerUrl());
+            CloseableHttpClient client = commonService.generateHttpClient();
             // get event broker url
             String url = new StringBuffer(broker.getBrokerUrl()).append(ConstantProperties.BROKER_REST_STATE).append("?topic=")
                     .append(URLEncoder.encode(topic, "UTF-8")).toString();
@@ -163,10 +165,10 @@ public class TopicService {
             HttpGet get = commonService.getMethod(url, request);
             CloseableHttpResponse closeResponse = client.execute(get);
             String mes = EntityUtils.toString(closeResponse.getEntity());
-            TopicEntity result = JsonUtil.parseObject(mes, TopicEntity.class);
+            TopicEntity result = JsonHelper.json2Object(mes, TopicEntity.class);
             if (result != null) {
                 // get creator from database
-                List<TopicEntity> creators = topicRepository.findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(brokerId, groupId, new ArrayList<>(Collections.singletonList(topic)), ConstantProperties.NOT_DELETED);
+                List<TopicEntity> creators = topicRepository.findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(brokerId, groupId, new ArrayList<>(Collections.singletonList(topic)), IsDeleteEnum.NOT_DELETED.getCode());
                 if (CollectionUtils.isNotEmpty(creators)) {
                     result.setCreater(creators.get(0).getCreater());
                 }
@@ -200,7 +202,7 @@ public class TopicService {
             topicEntity.setGroupId(groupId);
             topicRepository.save(topicEntity);
 
-            CloseableHttpClient client = commonService.generateHttpClient(brokerEntity.getBrokerUrl());
+            CloseableHttpClient client = commonService.generateHttpClient();
             String url;
             if (groupId != null) {
                 url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_OPEN).append("?topic=").append(URLEncoder.encode(topic, "UTF-8"))
@@ -233,7 +235,7 @@ public class TopicService {
         log.info("url: {}", url);
         String mes;
         try {
-            CloseableHttpClient client = commonService.generateHttpClient(brokerUrl);
+            CloseableHttpClient client = commonService.generateHttpClient();
             HttpGet get = commonService.getMethod(url, request);
             CloseableHttpResponse closeResponse = client.execute(get);
             mes = EntityUtils.toString(closeResponse.getEntity());
@@ -242,12 +244,11 @@ public class TopicService {
             throw new GovernanceException(ErrorCode.BROKER_CONNECT_ERROR);
         }
         try {
-            return JsonUtil.parseObject(mes, Boolean.class);
-        } catch (Exception e) {
+            return JsonHelper.json2Object(mes, Boolean.class);
+        } catch (BrokerException e) {
             log.error("parse json fail,error:{}", e.getMessage());
-            Map result = JsonUtil.parseObject(mes, Map.class);
-            throw new GovernanceException((Integer) (result.get("code")), result.get("message").toString());
         }
+        return false;
     }
 
 
