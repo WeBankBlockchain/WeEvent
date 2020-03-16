@@ -84,6 +84,12 @@ public class FileChunksMeta {
         this.host = host;
     }
 
+    public void clearPrivacy() {
+        this.host = "";
+        this.fileName = "";
+        this.fileSize = 0;
+    }
+
     // this is for jackson Serializer/Deserializer
     private FileChunksMeta() {
     }
