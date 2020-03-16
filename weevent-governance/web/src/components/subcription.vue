@@ -102,7 +102,7 @@ export default {
       vm.loading = true
       let nodelist = ''
       nodelist = vm.nodes.join(',')
-      let url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&nodeInstances=' + nodelist
+      const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&nodeInstances=' + nodelist
       API.subscription(url).then(res => {
         if (res.data.code === 0) {
           let data = res.data.data
