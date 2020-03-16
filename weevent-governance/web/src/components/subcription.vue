@@ -14,7 +14,7 @@
     style="width: 100%">
     <el-table-column
       :label="$t('tableCont.machine')"
-      width='150'
+      width='230'
       prop='ip'
       >
     </el-table-column>
@@ -22,6 +22,9 @@
       label="Topic"
       width='150'
       prop='topicName'>
+      <template  slot-scope="scope">
+        <a :title='scope.row.topicName'>{{scope.row.topicName}}</a>
+      </template>
     </el-table-column>
     <el-table-column
       :label="$t('tableCont.subscribeId')"
@@ -86,7 +89,7 @@ export default {
         } else {
           this.$store.commit('set_Msg', this.$message({
             type: 'warning',
-            message: this.$t('common.reqException'),
+            message: res.data.message,
             duration: 0,
             showClose: true
           }))
@@ -99,7 +102,7 @@ export default {
       vm.loading = true
       let nodelist = ''
       nodelist = vm.nodes.join(',')
-      let url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&nodeIp=' + nodelist
+      let url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&nodeInstances=' + nodelist
       API.subscription(url).then(res => {
         if (res.data.code === 0) {
           let data = res.data.data
@@ -134,6 +137,12 @@ export default {
           }
           vm.tableData = [].concat(list)
         } else {
+          this.$store.commit('set_Msg', this.$message({
+            type: 'warning',
+            message: res.data.message,
+            duration: 0,
+            showClose: true
+          }))
           window.clearInterval(vm.getData)
         }
         vm.loading = false
@@ -185,13 +194,15 @@ export default {
       this.$router.push('./topicList')
     },
     selectShow (e) {
-      if (e.length === 0) {
-        this.nodes = []
-      }
       this.loading = true
-      setTimeout(fun => {
-        this.subscription()
-      }, 1000)
+      if (e.length === 0) {
+        this.loading = false
+        this.tableData = []
+      } else {
+        setTimeout(fun => {
+          this.subscription()
+        }, 1000)
+      }
     }
   },
   computed: {
@@ -206,8 +217,6 @@ export default {
     groupId (nVal) {
       if (nVal !== '-1') {
         this.getNodeList()
-        this.nodes = []
-        this.subscription()
       }
     }
   },
