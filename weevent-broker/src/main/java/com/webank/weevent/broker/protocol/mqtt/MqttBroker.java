@@ -58,6 +58,8 @@ public class MqttBroker {
         // websocket
         if (!StringUtils.isBlank(this.weEventConfig.getMqttServerPath())
                 && this.weEventConfig.getMqttPort() > 0) {
+            log.info("setup MQTT over websocket on port: {}", this.weEventConfig.getMqttPort());
+
             this.bossGroup = new NioEventLoopGroup();
             this.workerGroup = new NioEventLoopGroup();
 
@@ -67,6 +69,8 @@ public class MqttBroker {
 
         // tcp
         if (this.weEventConfig.getMqttTcpPort() > 0) {
+            log.info("setup MQTT over tcp on port: {}", this.weEventConfig.getMqttTcpPort());
+
             if (this.bossGroup == null) {
                 this.bossGroup = new NioEventLoopGroup();
             }
