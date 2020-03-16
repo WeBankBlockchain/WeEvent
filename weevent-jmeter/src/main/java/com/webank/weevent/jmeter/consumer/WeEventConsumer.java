@@ -70,6 +70,7 @@ public class WeEventConsumer extends AbstractJavaSamplerClient {
     public SampleResult runTest(JavaSamplerContext context) {
         SampleResult result = new SampleResult();
         result.setSampleLabel("consumer");
+        StringBuffer stringBuffer = new StringBuffer();
         try {
             result.sampleStart();
             String subscribeId = this.weEventClient.subscribe(this.topic, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
@@ -86,12 +87,17 @@ public class WeEventConsumer extends AbstractJavaSamplerClient {
             result.setSuccessful(true);
             result.setResponseMessage(subscribeId);
             result.setResponseData(subscribeId, Charset.defaultCharset().name());
-            result.setResponseHeaders("subscribe success");
-
-            this.weEventClient.unSubscribe(subscribeId);
+            stringBuffer.append("subscribe success.");
+            boolean flag = this.weEventClient.unSubscribe(subscribeId);
+            if (flag) {
+                stringBuffer.append("  unsubscribe success.");
+            } else {
+                stringBuffer.append("  unsubscribe fail.");
+            }
+            result.setResponseHeaders(stringBuffer.toString());
             result.sampleEnd();
         } catch (Exception e) {
-            getNewLogger().error("subscribe exception", e);
+            getNewLogger().error("exception", e);
             result.sampleEnd();
             result.setSuccessful(false);
             result.setResponseMessage(e.getMessage());
