@@ -9,7 +9,8 @@ import java.nio.charset.StandardCharsets;
 import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.broker.fisco.file.FileTransportService;
-import com.webank.weevent.broker.fisco.file.FileTransportStats;
+import com.webank.weevent.broker.fisco.file.dto.FileChunksMetaPlus;
+import com.webank.weevent.broker.fisco.file.dto.FileTransportStats;
 import com.webank.weevent.client.BaseResponse;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
@@ -120,8 +121,8 @@ public class FileRest {
 
     @RequestMapping(path = "/verify")
     @ResponseBody
-    public BaseResponse<FileChunksMeta> verify(@RequestParam(name = "eventId") String eventId,
-                                               @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+    public BaseResponse<FileChunksMetaPlus> verify(@RequestParam(name = "eventId") String eventId,
+                                                   @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         return BaseResponse.buildSuccess(this.fileTransportService.verify(eventId, groupId));
     }
 

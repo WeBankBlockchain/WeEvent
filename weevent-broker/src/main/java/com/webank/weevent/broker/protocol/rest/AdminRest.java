@@ -91,19 +91,19 @@ public class AdminRest {
     }
 
     @RequestMapping(path = "/listSubscription")
-    public BaseResponse<Map<String, List<SubscriptionInfo>>> listSubscription(@RequestParam(name = "nodeIp") String nodeIp,
+    public BaseResponse<Map<String, List<SubscriptionInfo>>> listSubscription(@RequestParam(name = "nodeInstances") String nodeInstances,
                                                                               @RequestParam(name = "groupId", required = false) String groupId) {
-        log.info("groupId:{}, nodeIp:{}", groupId, nodeIp);
-        if (StringUtils.isBlank(nodeIp)) {
-            log.error("nodeIp is empty.");
+        log.info("groupId:{}, nodeInstances:{}", groupId, nodeInstances);
+        if (StringUtils.isBlank(nodeInstances)) {
+            log.error("nodeInstances is empty.");
             return BaseResponse.buildFail(ErrorCode.CGI_INVALID_INPUT);
         }
 
         List<ServiceInstance> instances = this.discoveryClient.getInstances(this.appName);
 
         Map<String, List<SubscriptionInfo>> subscriptions = new HashMap<>();
-        String[] instanceIds = nodeIp.split(",");
-        for (String instanceId : instanceIds) {
+        String[] instanceList = nodeInstances.split(",");
+        for (String instanceId : instanceList) {
             Optional<ServiceInstance> instance = instances.stream().filter(item -> item.getInstanceId().equals(instanceId)).findFirst();
             if (instance.isPresent()) {
                 String url = String.format("%s/%s/admin/innerListSubscription", instance.get().getUri(), this.appName);
