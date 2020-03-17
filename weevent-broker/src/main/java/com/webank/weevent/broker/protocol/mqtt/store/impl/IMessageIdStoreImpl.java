@@ -5,14 +5,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.broker.protocol.mqtt.store.IMessageIdStore;
 
-import org.springframework.stereotype.Service;
-
 /**
  * @author websterchen
  * @version v1.0
  * @since 2019/6/8
  */
-@Service
 public class IMessageIdStoreImpl implements IMessageIdStore {
     private final int MIN_MSG_ID = 1;
     private final int MAX_MSG_ID = 65535;

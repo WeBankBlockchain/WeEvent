@@ -9,14 +9,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.webank.weevent.broker.protocol.mqtt.store.ISubscribeStore;
 import com.webank.weevent.broker.protocol.mqtt.store.dto.SubscribeStore;
 
-import org.springframework.stereotype.Service;
-
 /**
  * @author websterchen
  * @version v1.0
  * @since 2019/6/3
  */
-@Service
 public class ISubscribeStoreImpl implements ISubscribeStore {
     private Map<String, ConcurrentHashMap<String, SubscribeStore>> subscribeCache = new ConcurrentHashMap<>();
 
