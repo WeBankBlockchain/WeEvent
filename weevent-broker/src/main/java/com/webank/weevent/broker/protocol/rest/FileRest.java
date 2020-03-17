@@ -6,11 +6,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.broker.fisco.file.FileTransportService;
-import com.webank.weevent.broker.fisco.file.FileTransportStats;
+import com.webank.weevent.broker.fisco.file.dto.FileChunksMetaPlus;
+import com.webank.weevent.broker.fisco.file.dto.FileTransportStats;
 import com.webank.weevent.client.BaseResponse;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
@@ -22,7 +22,6 @@ import com.webank.weevent.core.fisco.util.WeEventUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -122,8 +121,8 @@ public class FileRest {
 
     @RequestMapping(path = "/verify")
     @ResponseBody
-    public BaseResponse<FileChunksMeta> verify(@RequestParam(name = "eventId") String eventId,
-                                               @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+    public BaseResponse<FileChunksMetaPlus> verify(@RequestParam(name = "eventId") String eventId,
+                                                   @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         return BaseResponse.buildSuccess(this.fileTransportService.verify(eventId, groupId));
     }
 
@@ -157,21 +156,5 @@ public class FileRest {
             log.error("write bytes to client error, fileId:{} chunkIdx:{}", fileId, chunkIdx, e);
             throw new BrokerException(ErrorCode.FILE_DOWNLOAD_ERROR);
         }
-    }
-
-    @ExceptionHandler(value = BrokerException.class)
-    public Object baseErrorHandler(HttpServletRequest req, BrokerException e) {
-        log.error("rest api, remote: {} uri: {}", req.getRemoteHost(), req.getRequestURL());
-        log.error("detect BrokerException", e);
-
-        return BaseResponse.buildException(e);
-    }
-
-    @ExceptionHandler(value = Exception.class)
-    public Object baseErrorHandler(HttpServletRequest req, Exception e) {
-        log.error("rest api, remote: {} uri: {}", req.getRemoteHost(), req.getRequestURL());
-        log.error("detect Exception", e);
-
-        return BaseResponse.buildException(e);
     }
 }
