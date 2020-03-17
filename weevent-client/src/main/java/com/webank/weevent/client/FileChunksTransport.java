@@ -54,7 +54,7 @@ public class FileChunksTransport {
         this.httpClient = HttpClientBuilder.create().build();
     }
 
-    public SendResult upload(String localFile, String topic, String groupId) throws BrokerException, IOException {
+    public SendResult upload(String localFile, String topic, String groupId) throws BrokerException, IOException, InterruptedException {
         log.info("try to upload file {}", localFile);
 
         File file = new File(localFile);
@@ -94,7 +94,7 @@ public class FileChunksTransport {
         return this.closeChunk(fileChunksMeta);
     }
 
-    private void uploadChunkDetails(RandomAccessFile f, FileChunksMeta fileChunksMeta, int chunkIdx) throws IOException, BrokerException {
+    private void uploadChunkDetails(RandomAccessFile f, FileChunksMeta fileChunksMeta, int chunkIdx) throws IOException, BrokerException, InterruptedException {
         int size = fileChunksMeta.getChunkSize();
         if (chunkIdx == fileChunksMeta.getChunkNum() - 1) {
             size = (int) (fileChunksMeta.getFileSize() % fileChunksMeta.getChunkSize());
@@ -107,27 +107,22 @@ public class FileChunksTransport {
             throw new BrokerException(ErrorCode.FILE_READ_EXCEPTION);
         }
 
-        boolean uploadChunkSuccess = this.uploadChunk(fileChunksMeta, chunkIdx, chunkData);
+        if (this.uploadChunk(fileChunksMeta, chunkIdx, chunkData)) {
+            log.info("upload file chunk data success, {}@{}", fileChunksMeta.getFileId(), chunkIdx);
+            return;
+        }
+
         // if chunk upload failed, sleep and retry again
-        if (!uploadChunkSuccess) {
-            for (int i = 1; i <= INVOKE_CGI_FAIL_RETRY_COUNT; i++) {
-                try {
-                    Thread.sleep(i * INVOKE_CGI_FAIL_SLEEP_MILLISECOND);
-                } catch (InterruptedException e) {
-                    log.error("retry {}th upload chunk failed due to thread interrupted {}@{}", i, fileChunksMeta.getFileId(), chunkIdx);
-                }
-                uploadChunkSuccess = this.uploadChunk(fileChunksMeta, chunkIdx, chunkData);
-                if (uploadChunkSuccess) {
-                    break;
-                }
-                if (i == CHUNK_RETRY_COUNT) {
-                    log.error("retry {}th upload chunk failed {}@{}", INVOKE_CGI_FAIL_RETRY_COUNT, fileChunksMeta.getFileId(), chunkIdx);
-                    throw new BrokerException(ErrorCode.FILE_UPLOAD_FAILED);
-                }
+        for (int i = 1; i <= INVOKE_CGI_FAIL_RETRY_COUNT; i++) {
+            Thread.sleep(i * INVOKE_CGI_FAIL_SLEEP_MILLISECOND);
+            if (this.uploadChunk(fileChunksMeta, chunkIdx, chunkData)) {
+                log.info("upload file chunk data success, {}@{}", fileChunksMeta.getFileId(), chunkIdx);
+                return;
             }
         }
 
-        log.info("upload file chunk data, {}@{}", fileChunksMeta.getFileId(), chunkIdx);
+        log.error("retry {}th upload chunk failed, {}@{}", INVOKE_CGI_FAIL_RETRY_COUNT, fileChunksMeta.getFileId(), chunkIdx);
+        throw new BrokerException(ErrorCode.FILE_UPLOAD_FAILED);
     }
 
     public String download(FileChunksMeta fileChunksMeta) throws BrokerException, IOException {
@@ -244,7 +239,7 @@ public class FileChunksTransport {
                 return chunkDataBytes;
             }
             log.info("download chunk success, {}@{} {}", fileId, chunkIdx, chunkDataBytes.length);
-        } catch (IOException  e) {
+        } catch (IOException e) {
             log.error("download chunk error, request url:{}", httpGet.getURI(), e);
         }
         return chunkDataBytes;
@@ -257,7 +252,7 @@ public class FileChunksTransport {
         }).getData();
     }
 
-    private boolean checkChunkFullUpload(RandomAccessFile f, FileChunksMeta local) {
+    private boolean checkChunkFullUpload(RandomAccessFile f, FileChunksMeta local) throws InterruptedException {
         boolean isFullUpload = false;
         for (int i = 0; i <= CHUNK_RETRY_COUNT; i++) {
             try {
