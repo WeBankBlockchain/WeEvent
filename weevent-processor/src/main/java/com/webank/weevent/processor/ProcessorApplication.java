@@ -48,7 +48,7 @@ public class ProcessorApplication {
     }
 
     @Autowired
-    public void setEnvironment(org.springframework.core.env.Environment env) {
+    public void setEnvironment(Environment env) {
         environment = env;
     }
 
