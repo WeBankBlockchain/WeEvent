@@ -142,47 +142,47 @@ function tar_gateway(){
     local target=$1
     yellow_echo "generate ${target}"
 
-    cp -r ${out_path}/modules/gateway ${current_path}/gateway-${version}
+    mkdir -p ${current_path}/weevent-gateway-${version}
+    cp -r ${out_path}/modules/gateway/* ${current_path}/weevent-gateway-${version}
     # no need install shell
-    rm -rf ${current_path}/gateway-${version}/install-gateway.sh
+    rm -rf ${current_path}/weevent-gateway-${version}/install-gateway.sh
 
     # do not tar the top dir
-    cd ${current_path}/gateway-${version}
-    tar -czpvf ${target} *
-    mv ${target} ${current_path}
+    cd ${current_path}
+    tar -czpvf ${target} ./weevent-gateway-${version}/
 
-    rm -rf ${current_path}/gateway-${version}
+    rm -rf ${current_path}/weevent-gateway-${version}
 }
 
 function tar_broker(){
     local target=$1
     yellow_echo "generate ${target}"
 
-    cp -r ${out_path}/modules/broker ${current_path}/broker-${version}
+    mkdir -p ${current_path}/weevent-broker-${version}
+    cp -r ${out_path}/modules/broker/* ${current_path}/weevent-broker-${version}
     # no need install shell
-    rm -rf ${current_path}/broker-${version}/install-broker.sh
+    rm -rf ${current_path}/weevent-broker-${version}/install-broker.sh
 
     # do not tar the top dir
-    cd ${current_path}/broker-${version}
-    tar -czpvf ${target} *
-    mv ${target} ${current_path}
+    cd ${current_path}
+    tar -czpvf ${target} ./weevent-broker-${version}/
 
-    rm -rf ${current_path}/broker-${version}
+    rm -rf ${current_path}/weevent-broker-${version}
 }
 function tar_governance(){
     local target=$1
     yellow_echo "generate ${target}"
 
-    cp -r ${out_path}/modules/governance ${current_path}/governance-${version}
+    mkdir -p ${current_path}/weevent-governance-${version}
+    cp -r ${out_path}/modules/governance/* ${current_path}/weevent-governance-${version}
     # no need install shell
-    rm -rf ${current_path}/governance-${version}/install-governance.sh
+    rm -rf ${current_path}/weevent-governance-${version}/install-governance.sh
 
     # do not tar the top dir
-    cd ${current_path}/governance-${version}
-    tar -czpvf ${target} *
-    mv ${target} ${current_path}
+    cd ${current_path}
+    tar -czpvf ${target} ./weevent-governance-${version}/
 
-    rm -rf ${current_path}/governance-${version}
+    rm -rf ${current_path}/weevent-governance-${version}
 }
 
 
@@ -190,16 +190,16 @@ function tar_processor(){
     local target=$1
     yellow_echo "generate ${target}"
 
-    cp -r ${out_path}/modules/processor ${current_path}/processor-${version}
+    mkdir -p ${current_path}/weevent-processor-${version}
+    cp -r ${out_path}/modules/processor/* ${current_path}/weevent-processor-${version}
     # no need install shell
-    rm -rf ${current_path}/processor-${version}/install-processor.sh
+    rm -rf ${current_path}/weevent-processor-${version}/install-processor.sh
 
     # do not tar the top dir
-    cd ${current_path}/processor-${version}
-    tar -czpvf ${target} *
-    mv ${target} ${current_path}
+    cd ${current_path}
+    tar -czpvf ${target} ./weevent-processor-${version}/
 
-    rm -rf ${current_path}/processor-${version}
+    rm -rf ${current_path}/weevent-processor-${version}
 }
 
 function tar_weevent(){
