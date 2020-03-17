@@ -1,12 +1,11 @@
-package com.webank.weevent.broker.protocol.mqtt.common.impl;
+package com.webank.weevent.broker.protocol.mqtt.store.impl;
 
-import com.webank.weevent.broker.protocol.mqtt.common.IAuthService;
+import com.webank.weevent.broker.protocol.mqtt.store.IAuthService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Service;
 
 /**
  * @author websterchen
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
  * @since 2019/6/1
  */
 @Slf4j
-@Service
 public class IAuthServiceImpl implements IAuthService {
     private String authAccount = "";
     private String authPassword = "";
