@@ -225,6 +225,7 @@ public class Web3SDK2Wrapper {
             // "false" to load only tx hash.
             BcosBlock bcosBlock = web3j.getBlockByNumber(new DefaultBlockParameterNumber(blockNum), false)
                     .sendAsync().get(timeout, TimeUnit.MILLISECONDS);
+            BigInteger timestamp = bcosBlock.getBlock().getTimestamp();
             List<String> transactionHashList = bcosBlock.getBlock().getTransactions().stream()
                     .map(transactionResult -> (String) transactionResult.get()).collect(Collectors.toList());
             if (transactionHashList.isEmpty()) {
@@ -247,7 +248,7 @@ public class Web3SDK2Wrapper {
                     Long version = supportedVersion.get(address);
                     log.debug("detect event in version: {}", version);
 
-                    WeEvent event = SupportedVersion.decodeWeEvent(receipt, version.intValue(), historyTopic);
+                    WeEvent event = SupportedVersion.decodeWeEvent(timestamp, receipt, version.intValue(), historyTopic);
                     if (event != null) {
                         log.debug("get a event from block chain: {}", event);
                         events.add(event);
