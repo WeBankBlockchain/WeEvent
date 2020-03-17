@@ -16,6 +16,7 @@ import lombok.Getter;
 
 /**
  * File chunk information.
+ * support file larger then 2G, be carefully fileSize
  *
  * @author matthewliu
  * @since 2020/02/12
@@ -35,10 +36,6 @@ public class FileChunksMeta {
     // groupId
     private String groupId;
 
-    // start time in second
-    private int startTime = 0;
-    // file receiver's host
-    private String host;
     // chunk size
     private int chunkSize = 0;
     // chunk num
@@ -47,6 +44,11 @@ public class FileChunksMeta {
     @JsonSerialize(using = BitSetJsonSerializer.class)
     @JsonDeserialize(using = BitSetJsonDeserializer.class)
     private BitSet chunkStatus;
+
+    // start time in unix timestamp
+    private int startTime = 0;
+    // file receiver's host
+    private String host;
 
     public FileChunksMeta(String fileId,
                           String fileName,
@@ -80,6 +82,12 @@ public class FileChunksMeta {
 
     public void setHost(String host) {
         this.host = host;
+    }
+
+    public void clearPrivacy() {
+        this.host = "";
+        this.fileName = "";
+        this.fileSize = 0;
     }
 
     // this is for jackson Serializer/Deserializer

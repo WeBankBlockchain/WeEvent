@@ -16,6 +16,7 @@ import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.client.TopicInfo;
 import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.client.WeEventPlus;
 import com.webank.weevent.core.fisco.util.DataTypeUtils;
 import com.webank.weevent.core.fisco.web3sdk.v2.solc10.Topic;
 import com.webank.weevent.core.fisco.web3sdk.v2.solc10.TopicController;
@@ -193,7 +194,7 @@ public class SupportedVersion {
         return true;
     }
 
-    public static WeEvent decodeWeEvent(TransactionReceipt receipt, int version, Map<String, Contract> historyTopic) throws BrokerException {
+    public static WeEvent decodeWeEvent(BigInteger timestamp, TransactionReceipt receipt, int version, Map<String, Contract> historyTopic) throws BrokerException {
         // support version list
         switch (version) {
             case 10:
@@ -203,14 +204,15 @@ public class SupportedVersion {
                 Tuple1<BigInteger> output = topic.getPublishWeEventOutput(receipt);
 
                 String topicName = input.getValue1();
-                WeEvent event = new WeEvent(topicName,
-                        input.getValue2().getBytes(StandardCharsets.UTF_8),
-                        JsonHelper.json2Object(input.getValue3(), new TypeReference<Map<String, String>>() {
-                        }));
+                Map<String, String> extensions = JsonHelper.json2Object(input.getValue3(), new TypeReference<Map<String, String>>() {
+                });
+                WeEventPlus weEventPlus = new WeEventPlus(timestamp.longValue(), receipt.getBlockNumber().longValue(), receipt.getTransactionHash(), receipt.getFrom());
+                extensions.put(WeEvent.WeEvent_PLUS, JsonHelper.object2Json(weEventPlus));
+
+                WeEvent event = new WeEvent(topicName, input.getValue2().getBytes(StandardCharsets.UTF_8), extensions);
                 event.setEventId(DataTypeUtils.encodeEventId(topicName,
                         receipt.getBlockNumber().intValue(),
                         output.getValue1().intValue()));
-
                 return event;
 
             default:
