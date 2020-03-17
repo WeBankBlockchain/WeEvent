@@ -41,6 +41,13 @@ public class WeEvent {
     public static final String WeEvent_TAG = "weevent-tag";
     public static final String WeEvent_SIGN = "weevent-sign";
     public static final String WeEvent_FILE = "weevent-file";
+
+    /**
+     * block chain information, see WeEventPlus
+     * It is assigned by system default.
+     */
+    public static final String WeEvent_PLUS = "weevent-plus";
+
     /**
      * Binding topic, like "com.weevent.test".
      */

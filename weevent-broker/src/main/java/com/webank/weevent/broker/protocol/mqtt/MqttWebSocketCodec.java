@@ -1,4 +1,4 @@
-package com.webank.weevent.broker.protocol.mqtt.common;
+package com.webank.weevent.broker.protocol.mqtt;
 
 import java.util.List;
 

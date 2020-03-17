@@ -1,10 +1,10 @@
-package com.webank.weevent.broker.protocol.rest;
+package com.webank.weevent.broker.filter;
 
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.webank.weevent.client.BaseResponse;
 import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.client.ErrorCode;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Global exception handler for restful.
+ * Global exception handler for controller.
  *
  * @author matthewliu
  * @since 2019/02/01
@@ -25,13 +25,13 @@ public class GlobalExceptionHandler {
     public Object baseErrorHandler(HttpServletRequest req, BrokerException e) {
         log.error("rest api BrokerException, remote: {} uri: {}", req.getRemoteHost(), req.getRequestURL());
         log.error("detect BrokerException", e);
-        return e;
+        return BaseResponse.buildException(e);
     }
 
     @ExceptionHandler(value = Exception.class)
     public Object baseErrorHandler(HttpServletRequest req, Exception e) {
         log.error("rest api Exception, remote: {} uri: {}", req.getRemoteHost(), req.getRequestURL());
         log.error("detect Exception", e);
-        return new BrokerException(ErrorCode.UNKNOWN_ERROR.getCode(), e.getMessage());
+        return BaseResponse.buildException(e);
     }
 }
