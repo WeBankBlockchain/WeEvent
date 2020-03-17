@@ -36,7 +36,7 @@ spring:
       enabled: true
       discovery:
         locator:
-          enabled: true
+          enabled: false
       httpclient:
         connect-timeout: 5000
         response-timeout: 10000
