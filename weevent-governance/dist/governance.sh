@@ -7,7 +7,7 @@ if [[ -z ${JAVA_HOME} ]];then
 fi
 
 server_name=weevent-governance
-bash_name=$(basename $0|awk -F'.' '{print $1}')
+bash_name=$(basename $0)
 APP_PARAMS="-Xbootclasspath/a:./conf -Djava.security.egd=file:/dev/./urandom -cp ./apps/* -Dloader.path=./lib,../lib org.springframework.boot.loader.PropertiesLauncher"
 
 ###############################################################################
@@ -59,7 +59,7 @@ start(){
 
     if [[ $(crontab -l | grep -w ${bash_name} | wc -l) -eq 0 ]]; then
          crontab -l > cron.backup
-         echo "* * * * * cd $(pwd); ./${bash_name}.sh monitor >> ./logs/monitor.log 2>&1" >> cron.backup
+         echo "* * * * * cd $(pwd); ./${bash_name} monitor >> ./logs/monitor.log 2>&1" >> cron.backup
          crontab cron.backup
          rm cron.backup
     fi
