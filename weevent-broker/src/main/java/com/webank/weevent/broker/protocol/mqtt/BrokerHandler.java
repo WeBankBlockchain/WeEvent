@@ -1,9 +1,8 @@
-package com.webank.weevent.broker.protocol.mqtt.handler;
+package com.webank.weevent.broker.protocol.mqtt;
 
 import java.io.IOException;
 
-import com.webank.weevent.broker.protocol.mqtt.command.ProtocolProcess;
-import com.webank.weevent.broker.protocol.mqtt.common.dto.SessionStore;
+import com.webank.weevent.broker.protocol.mqtt.store.dto.SessionStore;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
