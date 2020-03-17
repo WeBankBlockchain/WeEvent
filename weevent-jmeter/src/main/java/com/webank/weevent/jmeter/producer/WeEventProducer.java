@@ -46,7 +46,7 @@ public class WeEventProducer extends AbstractJavaSamplerClient {
     private WeEvent weEvent;
 
 
-    private String defaultUrl = "http://127.0.0.1:8080/weevent";
+    private String defaultUrl = "http://127.0.0.1:7000/weevent-broker";
 
     // Run every time the pressure thread starts
     @Override

@@ -2,6 +2,8 @@ package com.webank.weevent.broker.protocol.rest;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,6 +30,8 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -87,37 +91,44 @@ public class AdminRest {
     }
 
     @RequestMapping(path = "/listSubscription")
-    public BaseResponse<Map<String, SubscriptionInfo>> listSubscription(@RequestParam(name = "nodeIp") String nodeIp,
-                                                                        @RequestParam(name = "groupId", required = false) String groupId) {
-        log.info("groupId:{}, nodeIp:{}", groupId, nodeIp);
-        if (StringUtils.isBlank(nodeIp)) {
-            log.error("nodeIp is empty.");
+    public BaseResponse<Map<String, List<SubscriptionInfo>>> listSubscription(@RequestParam(name = "nodeInstances") String nodeInstances,
+                                                                              @RequestParam(name = "groupId", required = false) String groupId) {
+        log.info("groupId:{}, nodeInstances:{}", groupId, nodeInstances);
+        if (StringUtils.isBlank(nodeInstances)) {
+            log.error("nodeInstances is empty.");
             return BaseResponse.buildFail(ErrorCode.CGI_INVALID_INPUT);
         }
 
         List<ServiceInstance> instances = this.discoveryClient.getInstances(this.appName);
-        Optional<ServiceInstance> instance = instances.stream().filter(item -> item.getInstanceId().equals(nodeIp)).findFirst();
-        if (instance.isPresent()) {
-            String url = String.format("%s/%s/admin/innerListSubscription", instance.get().getUri(), this.appName);
-            if (!StringUtils.isBlank(groupId)) {
-                url += "?groupId=" + groupId;
-            }
-            log.info("url: {}", url);
 
-            SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-            RestTemplate rest = new RestTemplate(requestFactory);
-            BaseResponse<Map<String, SubscriptionInfo>> rsp = rest.exchange(url,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<BaseResponse<Map<String, SubscriptionInfo>>>() {
-                    }).getBody();
-            if (rsp != null) {
-                log.debug("innerListSubscription: {}", rsp);
-                return BaseResponse.buildSuccess(rsp.getData());
+        Map<String, List<SubscriptionInfo>> subscriptions = new HashMap<>();
+        String[] instanceList = nodeInstances.split(",");
+        for (String instanceId : instanceList) {
+            Optional<ServiceInstance> instance = instances.stream().filter(item -> item.getInstanceId().equals(instanceId)).findFirst();
+            if (instance.isPresent()) {
+                String url = String.format("%s/%s/admin/innerListSubscription", instance.get().getUri(), this.appName);
+                if (!StringUtils.isBlank(groupId)) {
+                    url += "?groupId=" + groupId;
+                }
+                log.info("url: {}", url);
+
+                SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+                RestTemplate rest = new RestTemplate(requestFactory);
+                ResponseEntity<BaseResponse<Map<String, SubscriptionInfo>>> rsp = rest.exchange(url,
+                        HttpMethod.GET,
+                        null,
+                        new ParameterizedTypeReference<BaseResponse<Map<String, SubscriptionInfo>>>() {
+                        });
+                if (rsp.getStatusCode() == HttpStatus.OK && rsp.getBody() != null) {
+                    log.debug("innerListSubscription: {}", rsp);
+                    subscriptions.put(instanceId, new ArrayList<>(rsp.getBody().getData().values()));
+                    continue;
+                }
             }
+            subscriptions.put(instanceId, Collections.emptyList());
         }
 
-        return BaseResponse.buildSuccess(null);
+        return BaseResponse.buildSuccess(subscriptions);
     }
 
     @RequestMapping(path = "/innerListSubscription")

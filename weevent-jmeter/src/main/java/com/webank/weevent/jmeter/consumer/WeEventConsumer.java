@@ -27,7 +27,7 @@ public class WeEventConsumer extends AbstractJavaSamplerClient {
 
     private IWeEventClient weEventClient;
 
-    private String defaultUrl = "http://127.0.0.1:8080/weevent";
+    private String defaultUrl = "http://127.0.0.1:7000/weevent-broker";
 
     // Run every time the pressure thread starts
     @Override
@@ -70,6 +70,7 @@ public class WeEventConsumer extends AbstractJavaSamplerClient {
     public SampleResult runTest(JavaSamplerContext context) {
         SampleResult result = new SampleResult();
         result.setSampleLabel("consumer");
+        StringBuffer stringBuffer = new StringBuffer();
         try {
             result.sampleStart();
             String subscribeId = this.weEventClient.subscribe(this.topic, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
@@ -83,14 +84,21 @@ public class WeEventConsumer extends AbstractJavaSamplerClient {
                     getNewLogger().error("subscribe Exception", e);
                 }
             });
-            result.setSuccessful(true);
-            result.setResponseMessage(subscribeId);
+            result.setResponseMessage("subscribeId: " + subscribeId);
             result.setResponseData(subscribeId, Charset.defaultCharset().name());
-            result.setResponseHeaders("true");
-
+            stringBuffer.append("subscribe success.");
+            boolean flag = this.weEventClient.unSubscribe(subscribeId);
+            if (flag) {
+                stringBuffer.append("  unsubscribe success.");
+                result.setSuccessful(true);
+            } else {
+                stringBuffer.append("  unsubscribe fail.");
+                result.setSuccessful(false);
+            }
+            result.setResponseHeaders(stringBuffer.toString());
             result.sampleEnd();
         } catch (Exception e) {
-            getNewLogger().error("subscribe exception", e);
+            getNewLogger().error("exception", e);
             result.sampleEnd();
             result.setSuccessful(false);
             result.setResponseMessage(e.getMessage());
