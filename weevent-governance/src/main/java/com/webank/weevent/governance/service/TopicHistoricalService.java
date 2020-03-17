@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.entity.BrokerEntity;
@@ -29,6 +30,7 @@ import com.webank.weevent.governance.repository.RuleDatabaseRepository;
 import com.webank.weevent.governance.repository.RuleEngineRepository;
 import com.webank.weevent.governance.repository.TopicHistoricalRepository;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -258,7 +260,17 @@ public class TopicHistoricalService {
                 log.info("the record is exists");
                 return false;
             }
-            topicHistoricalEntity.setLastUpdate(topicHistoricalEntity.getCreateDate());
+            WeEvent weevent = topicHistoricalEntity.getWeevent();
+            Map<String, String> extensions = weevent.getExtensions();
+            if (extensions.get(WeEvent.WeEvent_PLUS) != null) {
+                Map<String, String> map = JsonHelper.json2Object(extensions.get("weevent-plus"), new TypeReference<Map<String, String>>() {
+                });
+                long timestamp = Long.parseLong(map.get("timestamp"));
+                topicHistoricalEntity.setCreateDate(new Date(timestamp));
+                topicHistoricalEntity.setLastUpdate(new Date(timestamp));
+            }
+            topicHistoricalEntity.setEventId(weevent.getEventId());
+            topicHistoricalEntity.setTopicName(weevent.getTopic());
             TopicHistoricalEntity historicalEntity = topicHistoricalRepository.save(topicHistoricalEntity);
             log.info("insert historicalData success,id:{}", historicalEntity.getId());
             return true;
