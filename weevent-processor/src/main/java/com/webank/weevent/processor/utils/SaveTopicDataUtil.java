@@ -22,14 +22,11 @@ public class SaveTopicDataUtil {
     public final static String saveTopicUrl = "/historicalData/insertHistoricalData";
 
     public static String saveTopicData(WeEvent eventContent, CEPRule rule) {
+        Map<String, Object> topicHashMap = new HashMap<>();
         try {
-            Map<String, String> sqlvalue = CommonUtil.contactsql(rule, eventContent);
-            Map<String, String> topicHashMap = new HashMap<>();
-            topicHashMap.put(ConstantsHelper.EVENT_ID, sqlvalue.get(ConstantsHelper.EVENT_ID));
-            topicHashMap.put(ConstantsHelper.BROKER_ID, sqlvalue.get(ConstantsHelper.BROKER_ID));
-            topicHashMap.put(ConstantsHelper.GROUP_ID, sqlvalue.get(ConstantsHelper.GROUP_ID));
-            topicHashMap.put(ConstantsHelper.TOPIC_NAME, sqlvalue.get(ConstantsHelper.TOPIC_NAME));
-
+            topicHashMap.put("weevent", eventContent);
+            topicHashMap.put(ConstantsHelper.BROKER_ID, rule.getBrokerId());
+            topicHashMap.put(ConstantsHelper.GROUP_ID, rule.getGroupId());
             String urlFromDiscovery = getUrlFromDiscovery();
             String url = urlFromDiscovery + "/" + serviceId + saveTopicUrl;
             ResponseEntity<Boolean> mapResponseEntity = ProcessorApplication.restTemplate.postForEntity(url, topicHashMap, Boolean.class);
