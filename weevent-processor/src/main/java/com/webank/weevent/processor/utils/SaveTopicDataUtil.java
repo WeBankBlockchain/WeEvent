@@ -29,7 +29,7 @@ public class SaveTopicDataUtil {
         try {
             Map<String, String> sqlvalue = CommonUtil.contactsql(rule, eventContent);
             Map<String, String> extensions = eventContent.getExtensions();
-            if (extensions.get("weevent-plus") != null) {
+            if (extensions.get(WeEvent.WeEvent_PLUS) != null) {
                 Map<String, String> map = JsonHelper.json2Object(extensions.get("weevent-plus"), new TypeReference<Map<String, String>>() {
                 });
                 long timestamp = Long.parseLong(map.get("timestamp"));

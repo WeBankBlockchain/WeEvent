@@ -258,6 +258,7 @@ public class TopicHistoricalService {
                 log.info("the record is exists");
                 return false;
             }
+            topicHistoricalEntity.setLastUpdate(topicHistoricalEntity.getCreateDate());
             TopicHistoricalEntity historicalEntity = topicHistoricalRepository.save(topicHistoricalEntity);
             log.info("insert historicalData success,id:{}", historicalEntity.getId());
             return true;
