@@ -253,7 +253,7 @@ public class TopicHistoricalService {
 
     public boolean insertHistoricalData(TopicHistoricalEntity topicHistoricalEntity) {
         try {
-            int count = topicHistoricalRepository.countByBrokerIdAndGroupIdAndEventId(topicHistoricalEntity.getBrokerId(), topicHistoricalEntity.getGroupId(), topicHistoricalEntity.getEventId());
+            int count = topicHistoricalRepository.countByBrokerIdAndGroupIdAndEventId(topicHistoricalEntity.getBrokerId(), topicHistoricalEntity.getGroupId(), topicHistoricalEntity.getWeevent().getEventId());
             if (count > 0) {
                 log.info("the record is exists");
                 return false;
