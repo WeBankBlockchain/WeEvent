@@ -73,7 +73,7 @@ public class TopicHistoricalService {
     @Value("${spring.datasource.password}")
     private String dataBasePassword;
 
-    @Value("${spring.datasource.driverClassName}")
+    @Value("${spring.datasource.driver-class-name}")
     private String driverName;
 
 
