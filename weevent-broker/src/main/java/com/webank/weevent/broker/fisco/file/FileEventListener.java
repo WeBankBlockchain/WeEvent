@@ -1,6 +1,7 @@
 package com.webank.weevent.broker.fisco.file;
 
 
+import com.webank.weevent.broker.fisco.file.dto.FileEvent;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.FileChunksMeta;
 import com.webank.weevent.client.JsonHelper;

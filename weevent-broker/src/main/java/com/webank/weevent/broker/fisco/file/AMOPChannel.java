@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.webank.weevent.broker.fisco.file.dto.FileEvent;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.FileChunksMeta;
@@ -88,7 +89,7 @@ public class AMOPChannel extends ChannelPushCallback {
         }
 
         try {
-            File[] topics = resource.getFile().listFiles();
+            File[] topics = resource.getFile().listFiles((dir, name) -> name.endsWith(".pem"));
             if (topics != null) {
                 for (File topic : topics) {
                     List<Resource> pemResources = new ArrayList<>();

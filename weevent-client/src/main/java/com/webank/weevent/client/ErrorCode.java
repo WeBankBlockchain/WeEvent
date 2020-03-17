@@ -90,16 +90,16 @@ public enum ErrorCode {
     HTTPENTITY_TO_BYTEARRAY_ERROR(102104, "convert httpEntity to byte[] error"),
 
     //server error(200000, 300000)
+    UNKNOWN_ERROR(200000, "unknown error, see more details in log"),
+    CGI_INVALID_INPUT(200001, "invalid input param"),
     TOPIC_CONTROLLER_IS_NULL(200100, "get topic control address from CNS failed, please deploy it first"),
     CONSUMER_ALREADY_STARTED(200102, "consumer already started"),
     PRODUCER_SEND_CALLBACK_IS_NULL(200103, "producer send callback is null"),
     CONSUMER_LISTENER_IS_NULL(200104, "consumer listener is null"),
 
-
     WEB3SDK_INIT_SERVICE_ERROR(200200, "init web3sdk's service failed"),
     TRANSACTION_TIMEOUT(200201, "the transaction is timeout."),
     TRANSACTION_EXECUTE_ERROR(200202, "the transaction does not correctly executed."),
-    UNKNOWN_ERROR(200203, "unknown error, please check error log."),
     EVENT_COMPRESS_ERROR(200204, "event compress error"),
     GET_BLOCK_HEIGHT_ERROR(200205, "get block height failed due to InterruptedException|ExecutionException|TimeoutException|RuntimeException"),
     TRANSACTION_RECEIPT_IS_NULL(200206, "transaction reception is null"),
