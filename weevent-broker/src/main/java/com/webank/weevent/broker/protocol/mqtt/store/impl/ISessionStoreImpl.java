@@ -5,8 +5,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.broker.protocol.mqtt.store.dto.SessionStore;
 import com.webank.weevent.broker.protocol.mqtt.store.ISessionStore;
-import com.webank.weevent.broker.protocol.mqtt.store.dto.SessionStore;
-
 
 /**
  * @author websterchen

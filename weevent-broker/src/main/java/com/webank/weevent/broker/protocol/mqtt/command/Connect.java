@@ -4,7 +4,6 @@ import com.webank.weevent.broker.protocol.mqtt.store.IAuthService;
 import com.webank.weevent.broker.protocol.mqtt.store.dto.SessionStore;
 import com.webank.weevent.broker.protocol.mqtt.store.ISessionStore;
 import com.webank.weevent.broker.protocol.mqtt.store.ISubscribeStore;
-import com.webank.weevent.broker.protocol.mqtt.store.dto.SessionStore;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
