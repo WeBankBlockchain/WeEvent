@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -39,6 +40,8 @@ public class FileChunksTransport {
     // retry upload/download chunk times
     private static final int CHUNK_RETRY_COUNT = 5;
     private static final int HTTP_RESPONSE_STATUS_SUCCESS = 200;
+    private static final int INVOKE_CGI_FAIL_RETRY_COUNT = 20;
+    private static final int INVOKE_CGI_FAIL_SLEEP_MILLISECOND = 3000;
 
     public FileChunksTransport(String svrUrl) {
         this.svrUrl = svrUrl;
@@ -77,13 +80,7 @@ public class FileChunksTransport {
 
             // upload every single chunk data
             for (int chunkIdx = 0; chunkIdx < fileChunksMeta.getChunkNum(); chunkIdx++) {
-                try {
-                    this.uploadChunkDetails(f, fileChunksMeta, chunkIdx);
-                } catch (BrokerException e) {
-                    if (ErrorCode.FILE_READ_EXCEPTION.getCode() == e.getCode()) {
-                        throw e;
-                    }
-                }
+                this.uploadChunkDetails(f, fileChunksMeta, chunkIdx);
             }
 
             boolean chunkFullUpload = checkChunkFullUpload(f, fileChunksMeta);
@@ -94,7 +91,7 @@ public class FileChunksTransport {
         }
 
         log.info("upload file complete, {}", localFile);
-        return this.closeChunk(fileChunksMeta.getHost(), fileChunksMeta);
+        return this.closeChunk(fileChunksMeta);
     }
 
     private void uploadChunkDetails(RandomAccessFile f, FileChunksMeta fileChunksMeta, int chunkIdx) throws IOException, BrokerException {
@@ -109,7 +106,26 @@ public class FileChunksTransport {
             log.error("read file exception, chunkIdx: {}", chunkIdx);
             throw new BrokerException(ErrorCode.FILE_READ_EXCEPTION);
         }
-        this.uploadChunk(fileChunksMeta, chunkIdx, chunkData);
+
+        boolean uploadChunkSuccess = this.uploadChunk(fileChunksMeta, chunkIdx, chunkData);
+        // if chunk upload failed, sleep and retry again
+        if (!uploadChunkSuccess) {
+            for (int i = 1; i <= INVOKE_CGI_FAIL_RETRY_COUNT; i++) {
+                try {
+                    Thread.sleep(i * INVOKE_CGI_FAIL_SLEEP_MILLISECOND);
+                } catch (InterruptedException e) {
+                    log.error("retry {}th upload chunk failed due to thread interrupted {}@{}", i, fileChunksMeta.getFileId(), chunkIdx);
+                }
+                uploadChunkSuccess = this.uploadChunk(fileChunksMeta, chunkIdx, chunkData);
+                if (uploadChunkSuccess) {
+                    break;
+                }
+                if (i == CHUNK_RETRY_COUNT) {
+                    log.error("retry {}th upload chunk failed {}@{}", INVOKE_CGI_FAIL_RETRY_COUNT, fileChunksMeta.getFileId(), chunkIdx);
+                    throw new BrokerException(ErrorCode.FILE_UPLOAD_FAILED);
+                }
+            }
+        }
 
         log.info("upload file chunk data, {}@{}", fileChunksMeta.getFileId(), chunkIdx);
     }
@@ -174,32 +190,19 @@ public class FileChunksTransport {
             throw new BrokerException(ErrorCode.ENCODE_FILE_NAME_ERROR);
         }
 
-        byte[] responseResult = this.invokeCGI(httpGet);
-        BaseResponse<FileChunksMeta> baseResponse = JsonHelper.json2Object(responseResult, new TypeReference<BaseResponse<FileChunksMeta>>() {
-        });
-        if (ErrorCode.SUCCESS.getCode() != baseResponse.getCode()) {
-            log.error("open chunk failed, filedId:{} msg:{}", fileChunksMeta.getFileName(), baseResponse.getMessage());
-            throw new BrokerException(baseResponse.getCode(), baseResponse.getMessage());
-        }
-        return baseResponse.getData();
+        return this.invokeCGI(httpGet, new TypeReference<BaseResponse<FileChunksMeta>>() {
+        }).getData();
     }
 
 
     private FileChunksMeta getFileChunksInfo(String topic, String groupId, String fileId) throws BrokerException {
         HttpGet httpGet = new HttpGet(String.format("%s/listChunk?topic=%s&groupId=%s&fileId=%s", this.svrUrl, topic, groupId, fileId));
 
-        byte[] responseResult = this.invokeCGI(httpGet);
-        BaseResponse<FileChunksMeta> baseResponse = JsonHelper.json2Object(responseResult, new TypeReference<BaseResponse<FileChunksMeta>>() {
-        });
-
-        if (ErrorCode.SUCCESS.getCode() != baseResponse.getCode()) {
-            log.error("get chunk list failed, filedId:{} msg:{}", fileId, baseResponse.getMessage());
-            throw new BrokerException(baseResponse.getCode(), baseResponse.getMessage());
-        }
-        return baseResponse.getData();
+        return this.invokeCGI(httpGet, new TypeReference<BaseResponse<FileChunksMeta>>() {
+        }).getData();
     }
 
-    private void uploadChunk(FileChunksMeta local, int chunkIdx, byte[] chunkData) throws BrokerException {
+    private boolean uploadChunk(FileChunksMeta local, int chunkIdx, byte[] chunkData) {
         HttpPost httpPost = new HttpPost(this.svrUrl + "/uploadChunk");
 
         MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setMode(HttpMultipartMode.RFC6532);
@@ -211,43 +214,47 @@ public class FileChunksTransport {
         HttpEntity requestEntity = multipartEntityBuilder.build();
         httpPost.setEntity(requestEntity);
 
-        byte[] responseResult = this.invokeCGI(httpPost);
-        BaseResponse baseResponse = JsonHelper.json2Object(responseResult, BaseResponse.class);
-
-        if (ErrorCode.SUCCESS.getCode() != baseResponse.getCode()) {
-            log.error("upload chunk failed, {}@{} msg:{}", local.getFileId(), chunkIdx, baseResponse.getMessage());
+        try {
+            this.invokeCGI(httpPost, new TypeReference<BaseResponse<ObjectUtils.Null>>() {
+            });
+        } catch (BrokerException e) {
+            log.error("upload chunk failed, {}@{} ", local.getFileId(), chunkIdx);
+            return false;
         }
+        return true;
     }
 
     private byte[] downloadChunk(String host, String fileId, int chunkIdx) {
+        byte[] chunkDataBytes = new byte[0];
+        long requestStartTime = System.currentTimeMillis();
         HttpGet httpGet = new HttpGet(String.format("%s/downloadChunk?fileId=%s&chunkIdx=%s", this.svrUrl, fileId, chunkIdx));
         httpGet.addHeader("file_host", host);
-        byte[] chunkDataBytes = new byte[0];
-        try {
-            chunkDataBytes = this.invokeCGI(httpGet);
+
+        try (CloseableHttpResponse httpResponse = this.httpClient.execute(httpGet)) {
+            log.info("invokeCGI {} in {} millisecond, response:{}", httpGet.getURI(),
+                    System.currentTimeMillis() - requestStartTime, httpResponse.getStatusLine().toString());
+            if (HTTP_RESPONSE_STATUS_SUCCESS != httpResponse.getStatusLine().getStatusCode() || null == httpResponse.getEntity()) {
+                log.error("download chunk failed, {}@{}", fileId, chunkIdx);
+                return chunkDataBytes;
+            }
+
+            chunkDataBytes = EntityUtils.toByteArray(httpResponse.getEntity());
             if (chunkDataBytes.length == 0) {
                 log.error("download chunk failed, {}@{}", fileId, chunkIdx);
                 return chunkDataBytes;
             }
             log.info("download chunk success, {}@{} {}", fileId, chunkIdx, chunkDataBytes.length);
-        } catch (BrokerException e) {
-            return chunkDataBytes;
+        } catch (IOException  e) {
+            log.error("download chunk error, request url:{}", httpGet.getURI(), e);
         }
         return chunkDataBytes;
     }
 
-    private SendResult closeChunk(String host, FileChunksMeta local) throws BrokerException {
+    private SendResult closeChunk(FileChunksMeta local) throws BrokerException {
         HttpGet httpGet = new HttpGet(String.format("%s/closeChunk?topic=%s&groupId=%s&fileId=%s", this.svrUrl, local.getTopic(), local.getGroupId(), local.getFileId()));
 
-        byte[] responseResult = this.invokeCGI(httpGet);
-        BaseResponse<SendResult> baseResponse = JsonHelper.json2Object(responseResult, new TypeReference<BaseResponse<SendResult>>() {
-        });
-
-        if (ErrorCode.SUCCESS.getCode() != baseResponse.getCode()) {
-            log.error("close chunk failed, filedId:{} host:{} msg:{}", local.getFileId(), host, baseResponse.getMessage());
-            throw new BrokerException(baseResponse.getCode(), baseResponse.getMessage());
-        }
-        return baseResponse.getData();
+        return this.invokeCGI(httpGet, new TypeReference<BaseResponse<SendResult>>() {
+        }).getData();
     }
 
     private boolean checkChunkFullUpload(RandomAccessFile f, FileChunksMeta local) {
@@ -277,19 +284,29 @@ public class FileChunksTransport {
         return isFullUpload;
     }
 
-    private byte[] invokeCGI(HttpUriRequest request) throws BrokerException {
+    private <T> BaseResponse<T> invokeCGI(HttpUriRequest request, TypeReference<BaseResponse<T>> typeReference) throws BrokerException {
         long requestStartTime = System.currentTimeMillis();
         try (CloseableHttpResponse httpResponse = this.httpClient.execute(request)) {
             log.info("invokeCGI {} in {} millisecond, response:{}", request.getURI(),
                     System.currentTimeMillis() - requestStartTime, httpResponse.getStatusLine().toString());
             if (HTTP_RESPONSE_STATUS_SUCCESS != httpResponse.getStatusLine().getStatusCode()) {
+                log.error("invokeCGI failed, request url:{}, msg:{}", request.getURI(), httpResponse.getStatusLine().toString());
                 throw new BrokerException(ErrorCode.HTTP_RESPONSE_FAILED);
             }
             if (null == httpResponse.getEntity()) {
+                log.error("invokeCGI failed, httpResponse.getEntity is null, request url:{}", request.getURI());
                 throw new BrokerException(ErrorCode.HTTP_RESPONSE_ENTITY_EMPTY);
             }
 
-            return EntityUtils.toByteArray(httpResponse.getEntity());
+            byte[] responseResult = EntityUtils.toByteArray(httpResponse.getEntity());
+            BaseResponse<T> baseResponse = JsonHelper.json2Object(responseResult, typeReference);
+
+            if (ErrorCode.SUCCESS.getCode() != baseResponse.getCode()) {
+                log.error("invokeCGI failed, request url:{}, msg:{}", request.getURI(), baseResponse.getMessage());
+                throw new BrokerException(baseResponse.getCode(), baseResponse.getMessage());
+            }
+
+            return baseResponse;
         } catch (IOException e) {
             log.error("invokeCGI error, request url:{}", request.getURI(), e);
             throw new BrokerException(ErrorCode.HTTP_REQUEST_EXECUTE_ERROR);
