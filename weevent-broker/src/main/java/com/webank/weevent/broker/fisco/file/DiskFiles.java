@@ -28,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class DiskFiles {
+    public final String MetaFileSuffix = ".json";
     private final String path;
 
     public DiskFiles(String path) {
@@ -48,7 +49,7 @@ public class DiskFiles {
     }
 
     private String genLocalMetaFileName(String fileId) {
-        return this.genLocalFileName(fileId) + ".json";
+        return this.genLocalFileName(fileId) + MetaFileSuffix;
     }
 
     // save FileChunksMeta in UTF-8 format, fileName may be contain chinese character
@@ -209,7 +210,7 @@ public class DiskFiles {
             return fileChunksMetas;
         }
 
-        File[] files = topPath.listFiles((dir, name) -> name.endsWith(".json"));
+        File[] files = topPath.listFiles((dir, name) -> name.endsWith(MetaFileSuffix));
         if (files != null) {
             for (File file : files) {
                 try {

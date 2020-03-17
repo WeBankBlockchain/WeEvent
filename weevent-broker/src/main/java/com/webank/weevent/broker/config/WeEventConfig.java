@@ -32,8 +32,11 @@ public class WeEventConfig {
     @Value("${stomp.heartbeats:30}")
     private Integer stompHeartbeats;
 
-    @Value("${mqtt.broker.port:}")
+    @Value("${mqtt.broker.port:0}")
     private Integer mqttPort;
+
+    @Value("${mqtt.broker.tcp.port:0}")
+    private Integer mqttTcpPort;
 
     @Value("${mqtt.broker.sobacklog:511}")
     private Integer soBackLog;
