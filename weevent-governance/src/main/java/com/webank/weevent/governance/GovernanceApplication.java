@@ -55,7 +55,7 @@ public class GovernanceApplication {
 
 
     @Autowired
-    public void setEnvironment(org.springframework.core.env.Environment env) {
+    public void setEnvironment(Environment env) {
         environment = env;
     }
 
