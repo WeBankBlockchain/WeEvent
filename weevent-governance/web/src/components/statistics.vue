@@ -170,7 +170,7 @@ export default {
         } else {
           vm.$store.commit('set_Msg', vm.$message({
             type: 'warning',
-            message: this.$t('tableCont.getDataError'),
+            message: res.data.msg,
             duration: 0,
             showClose: true
           }))
