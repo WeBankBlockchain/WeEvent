@@ -2,7 +2,6 @@ package com.webank.weevent.governance.service;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -183,8 +182,7 @@ public class TopicHistoricalService {
             ruleDatabaseRepository.save(ruleDatabaseEntity);
 
             //Request broker to get all groups
-//            List<String> groupList = getGroupList(request, brokerEntity);
-            List<String> groupList = Collections.singletonList("1");
+            List<String> groupList = getGroupList(request, brokerEntity);
             for (String groupId : groupList) {
                 //get new tableName
                 groupId = groupId.replaceAll("\"", "");
