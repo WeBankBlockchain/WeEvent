@@ -1,6 +1,6 @@
 package com.webank.weevent.broker.protocol.mqtt.store;
 
-import com.webank.weevent.broker.protocol.mqtt.common.dto.SessionStore;
+import com.webank.weevent.broker.protocol.mqtt.store.dto.SessionStore;
 
 /**
  * @author websterchen
