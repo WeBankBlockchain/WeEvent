@@ -17,12 +17,12 @@ public interface RuleEngineRepository extends JpaRepository<RuleEngineEntity, Lo
     RuleEngineEntity findById(Integer id);
 
 
-    List<RuleEngineEntity> findAllByBrokerIdAndSystemTagAndDeleteAt(Integer brokerId,Boolean flag, Long deleteAt);
+    List<RuleEngineEntity> findAllByBrokerIdAndSystemTagAndDeleteAt(Integer brokerId, Boolean flag, Long deleteAt);
 
 
     List<RuleEngineEntity> findAllByBrokerIdAndDeleteAt(Integer brokerId, Long deleteAt);
 
-    int countAllByRuleDataBaseIdAndDeleteAt(Integer ruleDataBaseId,Long deleteAt);
+    int countAllByRuleDataBaseIdAndDeleteAt(Integer ruleDataBaseId, Long deleteAt);
 
     @Transactional
     @Modifying
