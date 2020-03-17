@@ -24,7 +24,7 @@ public class SaveTopicDataUtil {
     public static String saveTopicData(WeEvent eventContent, CEPRule rule) {
         Map<String, Object> topicHashMap = new HashMap<>();
         try {
-            topicHashMap.put("weevent", eventContent);
+            topicHashMap.put(ConstantsHelper.WEEVENT, eventContent);
             topicHashMap.put(ConstantsHelper.BROKER_ID, rule.getBrokerId());
             topicHashMap.put(ConstantsHelper.GROUP_ID, rule.getGroupId());
             String urlFromDiscovery = getUrlFromDiscovery();

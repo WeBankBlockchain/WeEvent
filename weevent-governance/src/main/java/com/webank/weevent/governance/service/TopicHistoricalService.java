@@ -262,13 +262,15 @@ public class TopicHistoricalService {
             }
             WeEvent weevent = topicHistoricalEntity.getWeevent();
             Map<String, String> extensions = weevent.getExtensions();
-            if (extensions.get(WeEvent.WeEvent_PLUS) != null) {
-                Map<String, String> map = JsonHelper.json2Object(extensions.get("weevent-plus"), new TypeReference<Map<String, String>>() {
-                });
-                long timestamp = Long.parseLong(map.get("timestamp"));
-                topicHistoricalEntity.setCreateDate(new Date(timestamp));
-                topicHistoricalEntity.setLastUpdate(new Date(timestamp));
+            if (extensions.get(WeEvent.WeEvent_PLUS) == null) {
+                log.error("weevent-plus is empty");
+                return false;
             }
+            Map<String, String> map = JsonHelper.json2Object(extensions.get(WeEvent.WeEvent_PLUS), new TypeReference<Map<String, String>>() {
+            });
+            long timestamp = Long.parseLong(map.get("timestamp"));
+            topicHistoricalEntity.setCreateDate(new Date(timestamp));
+            topicHistoricalEntity.setLastUpdate(new Date(timestamp));
             topicHistoricalEntity.setEventId(weevent.getEventId());
             topicHistoricalEntity.setTopicName(weevent.getTopic());
             TopicHistoricalEntity historicalEntity = topicHistoricalRepository.save(topicHistoricalEntity);
