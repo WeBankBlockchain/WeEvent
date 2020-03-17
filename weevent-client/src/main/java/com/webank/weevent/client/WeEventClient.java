@@ -359,7 +359,7 @@ public class WeEventClient implements IWeEventClient {
     }
 
     @Override
-    public SendResult publishFile(String topic, String localFile) throws BrokerException, IOException {
+    public SendResult publishFile(String topic, String localFile) throws BrokerException, IOException, InterruptedException {
         // upload file
         validateLocalFile(localFile);
         FileChunksTransport fileChunksTransport = new FileChunksTransport(this.brokerUrl + "/file");
