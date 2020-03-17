@@ -8,6 +8,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.governance.entity.base.TopicHistoricalBase;
 
 import lombok.EqualsAndHashCode;
@@ -48,6 +49,8 @@ public class TopicHistoricalEntity extends TopicHistoricalBase {
     @Transient
     private String tableName;
 
+    @Transient
+    private WeEvent weevent;
 
 
 }
