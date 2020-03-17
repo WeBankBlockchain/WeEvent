@@ -18,7 +18,4 @@ import lombok.Setter;
 public class FileChunksMetaPlus {
     private FileChunksMeta file;
     private WeEventPlus plus;
-
-    public FileChunksMetaPlus() {
-    }
 }

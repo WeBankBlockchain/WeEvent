@@ -13,10 +13,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class WeEventPlus {
-    long timestamp;
-    long height;
-    String txHash;
-    String sender;
+    private long timestamp;
+    private long height;
+    private String txHash;
+    private String sender;
 
     private WeEventPlus() {
     }

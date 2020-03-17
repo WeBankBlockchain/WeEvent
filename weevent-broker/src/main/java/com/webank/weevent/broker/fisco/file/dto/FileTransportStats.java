@@ -21,7 +21,4 @@ public class FileTransportStats {
     private Map<String, Map<String, List<FileChunksMetaStatus>>> sender = new HashMap<>();
     // groupId -> topic -> files
     private Map<String, Map<String, List<FileChunksMetaStatus>>> receiver = new HashMap<>();
-
-    public FileTransportStats() {
-    }
 }
