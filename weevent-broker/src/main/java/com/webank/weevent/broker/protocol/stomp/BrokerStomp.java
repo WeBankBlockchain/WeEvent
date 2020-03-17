@@ -90,7 +90,7 @@ public class BrokerStomp extends TextWebSocketHandler {
         this.authPassword = environment.getProperty("spring.security.user.password");
     }
 
-    @Autowired(required = false)
+    @Autowired
     public void setFileTransportService(FileTransportService fileTransportService) {
         this.fileTransportService = fileTransportService;
     }

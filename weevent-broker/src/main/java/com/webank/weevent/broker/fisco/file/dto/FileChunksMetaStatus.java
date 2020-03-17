@@ -1,4 +1,4 @@
-package com.webank.weevent.broker.fisco.file;
+package com.webank.weevent.broker.fisco.file.dto;
 
 
 import com.webank.weevent.client.BrokerException;
@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Getter
 @Setter
-public class FileChunksMetaPlus {
+public class FileChunksMetaStatus {
     private FileChunksMeta file;
 
     // cost time in second
@@ -30,10 +30,10 @@ public class FileChunksMetaPlus {
     // speed in Byte/s
     private String speed;
 
-    private FileChunksMetaPlus() {
+    private FileChunksMetaStatus() {
     }
 
-    public FileChunksMetaPlus(FileChunksMeta file) {
+    public FileChunksMetaStatus(FileChunksMeta file) {
         // deep clone
         try {
             byte[] json = JsonHelper.object2JsonBytes(file);
@@ -46,7 +46,7 @@ public class FileChunksMetaPlus {
         this.time = String.format("%ss", time);
         this.readyChunk = this.file.getChunkStatus().cardinality();
         this.process = String.format("%.2f%%", (float) (this.readyChunk * 100) / this.file.getChunkNum());
-        this.speed = String.format("%.2fB/s", (double) (this.readyChunk * this.file.getChunkSize()) / time);
+        this.speed = String.format("%.2fB/s", ((double) this.readyChunk * this.file.getChunkSize()) / time);
 
         // do not show chunk detail
         this.file.cleanChunkStatus();
