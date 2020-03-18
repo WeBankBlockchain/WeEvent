@@ -20,6 +20,7 @@ import com.webank.weevent.core.config.FiscoConfig;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.handler.ChannelConnections;
@@ -67,6 +68,7 @@ public class Web3SDKConnector {
         // init web3j with given group id
         try {
             log.info("begin to initialize web3sdk's Web3j, group id: {}", service.getGroupId());
+            StopWatch sw = StopWatch.createStarted();
 
             // special thread for TransactionSucCallback.onResponse, callback from IO thread directly if not setting
             //service.setThreadPool(poolTaskExecutor);
@@ -87,7 +89,8 @@ public class Web3SDKConnector {
             }
             chainID = version.getChainID();
 
-            log.info("initialize web3sdk success, group id: {}", service.getGroupId());
+            sw.stop();
+            log.info("initialize web3sdk success, group id: {} cost: {} ms", service.getGroupId(), sw.getTime());
             return web3j;
         } catch (Exception e) {
             log.error("init web3sdk failed", e);
