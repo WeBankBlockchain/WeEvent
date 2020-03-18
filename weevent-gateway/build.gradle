@@ -18,6 +18,8 @@ dependencies {
         exclude group: "commons-logging", module: "commons-logging"
     }
 
+    implementation("com.github.vladimir-bukhtoyarov:bucket4j-core:4.10.0")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
