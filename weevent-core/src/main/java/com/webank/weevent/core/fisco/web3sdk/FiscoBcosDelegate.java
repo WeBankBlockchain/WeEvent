@@ -5,9 +5,15 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
+import com.webank.weevent.client.SendResult;
+import com.webank.weevent.client.TopicInfo;
+import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.core.dto.ContractContext;
 import com.webank.weevent.core.dto.GroupGeneral;
@@ -18,11 +24,6 @@ import com.webank.weevent.core.dto.TbTransHash;
 import com.webank.weevent.core.fisco.constant.WeEventConstants;
 import com.webank.weevent.core.fisco.util.ParamCheckUtils;
 import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
-import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.client.ErrorCode;
-import com.webank.weevent.client.SendResult;
-import com.webank.weevent.client.TopicInfo;
-import com.webank.weevent.client.WeEvent;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -211,7 +212,11 @@ public class FiscoBcosDelegate {
         if (this.fiscoBcos != null) {
             return this.fiscoBcos.getTopicInfo(topicName);
         } else {
-            return this.fiscoBcos2Map.get(groupId).getTopicInfo(topicName, skipCache);
+            Optional<TopicInfo> topicInfo = this.fiscoBcos2Map.get(groupId).getTopicInfo(topicName, skipCache);
+            if (!topicInfo.isPresent()) {
+                throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
+            }
+            return topicInfo.get();
         }
     }
 
