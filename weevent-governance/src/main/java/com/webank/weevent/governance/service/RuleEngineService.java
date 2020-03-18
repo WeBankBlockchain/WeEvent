@@ -68,7 +68,7 @@ public class RuleEngineService {
     @Autowired
     private DAGDetectUtil dagDetectUtil;
 
-    @Autowired
+    @Autowired(required = false)
     private DiscoveryClient discoveryClient;
 
     @Autowired
