@@ -13,6 +13,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
+import com.webank.weevent.client.SendResult;
+import com.webank.weevent.client.TopicInfo;
+import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.core.dto.ContractContext;
 import com.webank.weevent.core.dto.GroupGeneral;
@@ -29,14 +34,10 @@ import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDK2Wrapper;
 import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
 import com.webank.weevent.core.fisco.web3sdk.v2.solc10.Topic;
 import com.webank.weevent.core.fisco.web3sdk.v2.solc10.TopicController;
-import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.client.ErrorCode;
-import com.webank.weevent.client.SendResult;
-import com.webank.weevent.client.TopicInfo;
-import com.webank.weevent.client.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.fisco.bcos.channel.client.TransactionSucCallback;
 import org.fisco.bcos.web3j.abi.FunctionReturnDecoder;
@@ -162,15 +163,8 @@ public class FiscoBcos2 {
     }
 
     public boolean isTopicExist(String topicName) throws BrokerException {
-        try {
-            getTopicInfo(topicName, false);
-            return true;
-        } catch (BrokerException e) {
-            if (e.getCode() == ErrorCode.TOPIC_NOT_EXIST.getCode()) {
-                return false;
-            }
-            throw e;
-        }
+        Optional<TopicInfo> topicInfo = getTopicInfo(topicName, false);
+        return topicInfo.isPresent();
     }
 
     public boolean createTopic(String topicName) throws BrokerException {
@@ -227,9 +221,9 @@ public class FiscoBcos2 {
         }
     }
 
-    public TopicInfo getTopicInfo(String topicName, boolean skipCache) throws BrokerException {
+    public Optional<TopicInfo> getTopicInfo(String topicName, boolean skipCache) throws BrokerException {
         if (!skipCache && this.topicInfo.containsKey(topicName)) {
-            return this.topicInfo.get(topicName);
+            return Optional.of(this.topicInfo.get(topicName));
         }
 
         try {
@@ -242,7 +236,7 @@ public class FiscoBcos2 {
 
             if (!topic.getValue1()) {
                 log.info("topic not exist, {}", topicName);
-                throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
+                return Optional.empty();
             }
 
             TopicInfo topicInfo = new TopicInfo();
@@ -254,7 +248,7 @@ public class FiscoBcos2 {
             topicInfo.setLastTimestamp(topic.getValue7().longValue());
 
             this.topicInfo.put(topicName, topicInfo);
-            return topicInfo;
+            return Optional.of(topicInfo);
         } catch (InterruptedException | ExecutionException e) {
             log.error("getTopicInfo failed due to web3sdk rpc error.", e);
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
@@ -279,61 +273,48 @@ public class FiscoBcos2 {
         throw new BrokerException(ErrorCode.EVENT_ID_NOT_EXIST);
     }
 
-    static class WeEventTransactionCallback extends TransactionSucCallback {
-        private String topicName;
-        private Topic topic;
-
-        public CompletableFuture<SendResult> future = new CompletableFuture<>();
-
-        WeEventTransactionCallback(String topicName, Topic topic) {
-            this.topicName = topicName;
-            this.topic = topic;
-        }
-
-        @Override
-        public void onResponse(TransactionReceipt receipt) {
-            SendResult sendResult = new SendResult();
-            sendResult.setTopic(this.topicName);
-
-            // success
-            if (receipt.isStatusOK()) {
-                Tuple1<BigInteger> result = this.topic.getPublishWeEventOutput(receipt);
-                int sequence = result.getValue1().intValue();
-                if (sequence == 0) {
-                    log.error("this FISCO-BCOS account has no permission to publish event");
-                    sendResult.setStatus(SendResult.SendResultStatus.NO_PERMISSION);
-                } else {
-                    sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
-                    sendResult.setEventId(DataTypeUtils.encodeEventId(this.topicName,
-                            receipt.getBlockNumber().intValue(),
-                            sequence));
-                }
-            } else { // error
-                if ("Transaction receipt timeout.".equals(receipt.getStatus())) {
-                    log.error("publish event failed due to transaction execution timeout. {}",
-                            StatusCode.getStatusMessage(receipt.getStatus(), receipt.getMessage()));
-                    sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
-                } else {
-                    log.error("publish event failed due to transaction execution error. {}",
-                            StatusCode.getStatusMessage(receipt.getStatus(), receipt.getMessage()));
-                    sendResult.setStatus(SendResult.SendResultStatus.ERROR);
-                }
-            }
-
-            log.info("publish result: {}", sendResult);
-            this.future.complete(sendResult);
-        }
-    }
-
     public CompletableFuture<SendResult> publishEvent(String topicName, String eventContent, String extensions) throws BrokerException {
         if (!isTopicExist(topicName)) {
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
         }
 
-        log.info("publish async...");
-        WeEventTransactionCallback weEventTransactionCallback = new WeEventTransactionCallback(topicName, this.topic);
-        this.topic.publishWeEvent(topicName, eventContent, extensions, weEventTransactionCallback);
-        return weEventTransactionCallback.future;
+        log.info("publish async ...");
+        StopWatch sw = StopWatch.createStarted();
+        CompletableFuture<SendResult> future = new CompletableFuture<>();
+        this.topic.publishWeEvent(topicName, eventContent, extensions, new TransactionSucCallback() {
+            @Override
+            public void onResponse(TransactionReceipt receipt) {
+                SendResult sendResult = new SendResult();
+                sendResult.setTopic(topicName);
+
+                // success
+                if (receipt.isStatusOK()) {
+                    Tuple1<BigInteger> result = topic.getPublishWeEventOutput(receipt);
+                    int sequence = result.getValue1().intValue();
+                    if (sequence == 0) {
+                        log.error("permission forbid to publish event");
+                        sendResult.setStatus(SendResult.SendResultStatus.NO_PERMISSION);
+                    } else {
+                        sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+                        sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, receipt.getBlockNumber().intValue(), sequence));
+                    }
+                } else { // error
+                    String detail = StatusCode.getStatusMessage(receipt.getStatus(), receipt.getMessage());
+                    if ("Transaction receipt timeout.".equals(receipt.getStatus())) {
+                        log.error("publish event failed due to transaction execution timeout. {}", detail);
+                        sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
+                    } else {
+                        log.error("publish event failed due to transaction execution error. {}", detail);
+                        sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+                    }
+                }
+
+                sw.stop();
+                log.info("publish async result, {} cost: {} ms", sendResult, sw.getTime());
+                future.complete(sendResult);
+            }
+        });
+        return future;
     }
 
     public CompletableFuture<SendResult> sendRawTransaction(String topicName, String transactionHex) {

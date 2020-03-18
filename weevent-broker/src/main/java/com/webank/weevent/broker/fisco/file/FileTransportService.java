@@ -23,6 +23,7 @@ import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.dto.ChannelResponse;
 
@@ -125,9 +126,12 @@ public class FileTransportService {
 
         // init if not exist
         log.info("AMOP channel is not exist, init for groupId: {}", groupId);
+        StopWatch sw = StopWatch.createStarted();
         Service service = Web3SDKConnector.initService(Long.valueOf(groupId), this.fiscoConfig);
         AMOPChannel channel = new AMOPChannel(this, service);
         this.groupChannels.put(groupId, channel);
+        sw.stop();
+        log.info("init AMOP channel cost: {} ms", sw.getTime());
         return channel;
     }
 
@@ -135,6 +139,10 @@ public class FileTransportService {
 
     // called by sender cgi
     public FileChunksMeta openChannel(FileChunksMeta fileChunksMeta) throws BrokerException {
+        if (!this.producer.exist(fileChunksMeta.getTopic(), fileChunksMeta.getGroupId())) {
+            log.error("topic:{} not exist, fileId: {}", fileChunksMeta.getTopic(), fileChunksMeta.getFileId());
+            throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
+        }
         if (this.fileTransportContexts.containsKey(fileChunksMeta.getFileId())) {
             log.error("already exist file context, fileId: {}", fileChunksMeta.getFileId());
             throw new BrokerException(ErrorCode.FILE_EXIST_CONTEXT);
