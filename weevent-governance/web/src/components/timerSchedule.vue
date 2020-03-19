@@ -147,6 +147,7 @@ export default {
         this.form.ruleDatabaseId = ''
         this.form.periodParams = ''
         this.form.parsingSql = ''
+        this.type = 1
         this.title = this.$t('timerSchedule.addScheduler')
         this.$refs.form.resetFields()
       }
