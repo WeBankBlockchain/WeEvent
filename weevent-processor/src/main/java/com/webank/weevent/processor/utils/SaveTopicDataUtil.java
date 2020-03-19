@@ -19,6 +19,8 @@ public class SaveTopicDataUtil {
 
     private final static String serviceId = "weevent-governance";
 
+    private final static String governanceServiceUrl = "http://127.0.0.1:7009";
+
     public final static String saveTopicUrl = "/historicalData/insertHistoricalData";
 
     public static String saveTopicData(WeEvent eventContent, CEPRule rule) {
@@ -47,7 +49,7 @@ public class SaveTopicDataUtil {
     public static String getUrlFromDiscovery() {
         List<ServiceInstance> serviceInstances = ProcessorApplication.discoveryClient.getInstances(serviceId);
         if (serviceInstances.isEmpty()) {
-            return "";
+            return governanceServiceUrl;
         }
         ServiceInstance serviceInstance = serviceInstances.get(new Random().nextInt(serviceInstances.size()));
         return serviceInstance.getUri().toString();
