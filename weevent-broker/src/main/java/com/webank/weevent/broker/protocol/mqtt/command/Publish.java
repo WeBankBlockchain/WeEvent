@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Publish {
     private IProducer iproducer;
-    int timeout;
+    private int timeout;
 
     public Publish(IProducer iproducer, int timeout) {
         this.iproducer = iproducer;
@@ -39,10 +39,14 @@ public class Publish {
         log.info("PUBLISH, {} Qos: {}", msg.variableHeader().topicName(), msg.fixedHeader().qosLevel());
 
         switch (msg.fixedHeader().qosLevel()) {
-            case AT_MOST_ONCE:
+            case AT_MOST_ONCE: {
+                this.publishMessage(msg, false);
+            }
+            break;
+
             case AT_LEAST_ONCE: {
                 boolean result = this.publishMessage(msg, false);
-                if (result && msg.fixedHeader().qosLevel() == MqttQoS.AT_LEAST_ONCE) {
+                if (result) {
                     this.sendPubAckMessage(channel, msg.variableHeader().packetId());
                 }
             }
