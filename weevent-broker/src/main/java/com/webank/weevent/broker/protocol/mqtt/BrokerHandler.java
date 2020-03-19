@@ -1,8 +1,8 @@
 package com.webank.weevent.broker.protocol.mqtt;
 
 import java.io.IOException;
-
-import com.webank.weevent.broker.protocol.mqtt.store.dto.SessionStore;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -10,20 +10,27 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.mqtt.MqttConnectMessage;
 import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader;
+import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttSubscribeMessage;
 import io.netty.handler.codec.mqtt.MqttUnsubscribeMessage;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
-import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 /**
+ * netty handler in MQTT.
  *
- **/
+ * @author matthewliu
+ * @since 2020/03/18
+ */
 @Slf4j
 public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
     private ProtocolProcess protocolProcess;
+
+    // channel id <-> clientId
+    private Map<String, String> authorChannels = new ConcurrentHashMap<>();
 
     public BrokerHandler(ProtocolProcess protocolProcess) {
         this.protocolProcess = protocolProcess;
@@ -31,47 +38,69 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, MqttMessage msg) throws Exception {
-        log.info("mqttMessage:{}", msg.toString());
+        String channelId = ctx.channel().id().asShortText();
+        log.debug("MQTT message in, channelId: {} {} {}", channelId, msg.fixedHeader(), msg.variableHeader());
+
+        // CONNECT is difficult
+        if (msg.fixedHeader().messageType() == MqttMessageType.CONNECT) {
+            if (this.authorChannels.containsKey(channelId)) {
+                log.error("MUST be CONNECT only once");
+                ctx.close();
+                return;
+            }
+
+            String clientId = protocolProcess.getConnect().processConnect(ctx.channel(), (MqttConnectMessage) msg);
+            if (StringUtils.isEmpty(clientId)) {
+                ctx.close();
+                return;
+            }
+
+            log.info("MQTT connected, channelId: {} clientId: {}", channelId, clientId);
+            this.authorChannels.put(channelId, clientId);
+            return;
+        }
+
+        if (!this.authorChannels.containsKey(channelId)) {
+            log.error("MUST CONNECT first, close");
+            ctx.close();
+            return;
+        }
+
+        String clientId = this.authorChannels.get(channelId);
+        if (!this.protocolProcess.getSessionStore().getSession(clientId).isPresent()) {
+            log.error("unknown clientId, close");
+            ctx.close();
+            return;
+        }
+
         switch (msg.fixedHeader().messageType()) {
-            case CONNECT:
-                protocolProcess.connect().processConnect(ctx.channel(), (MqttConnectMessage) msg);
-                break;
-            case CONNACK:
-                break;
-            case PUBLISH:
-                protocolProcess.publish().processPublish(ctx.channel(), (MqttPublishMessage) msg, false);
-                break;
-            case PUBACK: //for QOS1
-                protocolProcess.pubAck().processPubAck(ctx.channel(), (MqttMessageIdVariableHeader) msg.variableHeader());
-                break;
-            case PUBREC: //for QOS2 package 2
-                protocolProcess.pubRec().processPubRec(ctx.channel(), (MqttMessageIdVariableHeader) msg.variableHeader());
-                break;
-            case PUBREL: //for QOS2 package 3
-                protocolProcess.pubRel().processPubRel(ctx.channel(), (MqttMessageIdVariableHeader) msg.variableHeader());
-                break;
-            case PUBCOMP: //for QOS2 package 4
-                protocolProcess.pubComp().processPubComp(ctx.channel(), (MqttMessageIdVariableHeader) msg.variableHeader());
-                break;
-            case SUBSCRIBE:
-                protocolProcess.subscribe().processSubscribe(ctx.channel(), (MqttSubscribeMessage) msg);
-                break;
-            case SUBACK:
-                break;
-            case UNSUBSCRIBE:
-                protocolProcess.unSubscribe().processUnSubscribe(ctx.channel(), (MqttUnsubscribeMessage) msg);
-                break;
-            case UNSUBACK:
-                break;
             case PINGREQ:
-                protocolProcess.pingReq().processPingReq(ctx.channel(), msg);
+                this.protocolProcess.getPingReq().processPingReq(ctx.channel(), msg);
                 break;
-            case PINGRESP:
+
+            case PUBLISH:
+                this.protocolProcess.getPublish().processPublish(ctx.channel(), (MqttPublishMessage) msg);
                 break;
+
+            case PUBACK:
+                this.protocolProcess.getPubAck().processPubAck(ctx.channel(), (MqttMessageIdVariableHeader) msg.variableHeader());
+                break;
+
+            case SUBSCRIBE:
+                this.protocolProcess.getSubscribe().processSubscribe(ctx.channel(), clientId, (MqttSubscribeMessage) msg);
+                break;
+
+            case UNSUBSCRIBE:
+                this.protocolProcess.getUnSubscribe().processUnSubscribe(ctx.channel(), clientId, (MqttUnsubscribeMessage) msg);
+                break;
+
             case DISCONNECT:
-                protocolProcess.disConnect().processDisConnect(ctx.channel(), msg);
+                this.protocolProcess.getDisConnect().processDisConnect(ctx.channel(), clientId, msg);
                 break;
+
             default:
+                log.error("unSupport command, {}", msg.fixedHeader().messageType());
+                ctx.close();
                 break;
         }
     }
@@ -79,6 +108,8 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         if (cause instanceof IOException) {
+            String channelId = ctx.channel().id().asShortText();
+            log.error("IOException on channel, close channelId: {}", channelId);
             ctx.close();
         } else {
             super.exceptionCaught(ctx, cause);
@@ -90,14 +121,8 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
         if (evt instanceof IdleStateEvent) {
             IdleStateEvent idleStateEvent = (IdleStateEvent) evt;
             if (idleStateEvent.state() == IdleState.ALL_IDLE) {
-                Channel channel = ctx.channel();
-                String clientId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
-                if (this.protocolProcess.getSessionStore().containsKey(clientId)) {
-                    SessionStore sessionStore = this.protocolProcess.getSessionStore().get(clientId);
-                    if (sessionStore.getWillMessage() != null) {
-                        this.protocolProcess.publish().processPublish(ctx.channel(), sessionStore.getWillMessage(), true);
-                    }
-                }
+                String channelId = ctx.channel().id().asShortText();
+                log.info("channel idle too long, close channelId: {}", channelId);
                 ctx.close();
             }
         } else {
@@ -106,7 +131,25 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        this.protocolProcess.disConnect().processDisConnect(ctx.channel(), null);
+    public void channelInactive(ChannelHandlerContext ctx) {
+        String channelId = ctx.channel().id().asShortText();
+        log.info("channel closed, channelId: {}", channelId);
+        this.cleanChannel(channelId);
+    }
+
+    private void cleanChannel(String channelId) {
+        log.info("clean channel: {}", channelId);
+
+        if (this.authorChannels.containsKey(channelId)) {
+            String clientId = this.authorChannels.get(channelId);
+            this.protocolProcess.cleanSession(clientId);
+            this.authorChannels.remove(channelId);
+        }
+    }
+
+    public static void sendRemote(Channel channel, MqttMessage msg) {
+        String channelId = channel.id().asShortText();
+        log.info("send remote, channelId: {} {}", channelId, msg.fixedHeader());
+        channel.writeAndFlush(msg);
     }
 }
