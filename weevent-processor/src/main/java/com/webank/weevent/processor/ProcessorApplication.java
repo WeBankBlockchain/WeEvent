@@ -48,12 +48,12 @@ public class ProcessorApplication {
     }
 
     @Autowired
-    public void setEnvironment(org.springframework.core.env.Environment env) {
+    public void setEnvironment(Environment env) {
         environment = env;
     }
 
 
-    @Autowired
+    @Autowired(required = false)
     public void setDiscoveryClient(DiscoveryClient client) {
         discoveryClient = client;
     }

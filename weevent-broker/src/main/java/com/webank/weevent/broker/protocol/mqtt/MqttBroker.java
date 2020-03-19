@@ -4,9 +4,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import com.webank.weevent.broker.config.WeEventConfig;
-import com.webank.weevent.broker.protocol.mqtt.command.ProtocolProcess;
-import com.webank.weevent.broker.protocol.mqtt.common.MqttWebSocketCodec;
-import com.webank.weevent.broker.protocol.mqtt.handler.BrokerHandler;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -32,8 +29,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
- **/
+ * @author websterchen
+ * @version v1.0
+ * @since 2019/6/2
+ */
 @Slf4j
 @Component
 public class MqttBroker {
@@ -42,7 +41,7 @@ public class MqttBroker {
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
     private Channel websocketChannel;
-    private Channel mqttChannel;
+    private Channel tcpChannel;
 
     private ProtocolProcess protocolProcess;
 
@@ -58,14 +57,30 @@ public class MqttBroker {
 
     @PostConstruct
     public void start() throws Exception {
-        if (!StringUtils.isBlank(this.weEventConfig.getMqttServerPath())
-                && this.weEventConfig.getMqttPort() != null) {
+        // websocket
+        if (!StringUtils.isEmpty(this.weEventConfig.getMqttServerPath())
+                && this.weEventConfig.getMqttPort() > 0) {
+            log.info("setup MQTT over websocket on port: {}", this.weEventConfig.getMqttPort());
+
             this.bossGroup = new NioEventLoopGroup();
             this.workerGroup = new NioEventLoopGroup();
 
-            // websocket
             this.websocketChannel = webSocketServer(this.weEventConfig.getMqttPort(),
                     this.weEventConfig.getMqttServerPath());
+        }
+
+        // tcp
+        if (this.weEventConfig.getMqttTcpPort() > 0) {
+            log.info("setup MQTT over tcp on port: {}", this.weEventConfig.getMqttTcpPort());
+
+            if (this.bossGroup == null) {
+                this.bossGroup = new NioEventLoopGroup();
+            }
+            if (this.workerGroup == null) {
+                this.workerGroup = new NioEventLoopGroup();
+            }
+
+            this.tcpChannel = tcpServer(this.weEventConfig.getMqttTcpPort());
         }
     }
 
@@ -80,13 +95,14 @@ public class MqttBroker {
             this.workerGroup = null;
         }
 
-        if (this.mqttChannel != null) {
-            this.mqttChannel.closeFuture().syncUninterruptibly();
-            this.mqttChannel = null;
-        }
         if (this.websocketChannel != null) {
             this.websocketChannel.closeFuture().syncUninterruptibly();
             this.websocketChannel = null;
+        }
+
+        if (this.tcpChannel != null) {
+            this.tcpChannel.closeFuture().syncUninterruptibly();
+            this.tcpChannel = null;
         }
     }
 
@@ -121,6 +137,31 @@ public class MqttBroker {
                 .option(ChannelOption.SO_BACKLOG, this.weEventConfig.getSoBackLog())
                 .childOption(ChannelOption.SO_KEEPALIVE, this.weEventConfig.getSoKeepAlive());
 
+        return serverBootstrap.bind(port).sync().channel();
+    }
+
+    private Channel tcpServer(int port) throws Exception {
+        ServerBootstrap serverBootstrap = new ServerBootstrap();
+        serverBootstrap.group(this.bossGroup, this.workerGroup)
+                .channel(NioServerSocketChannel.class)
+                .handler(new LoggingHandler(LogLevel.DEBUG))
+                .childHandler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel socketChannel) throws Exception {
+                        ChannelPipeline channelPipeline = socketChannel.pipeline();
+                        channelPipeline.addFirst("idle", new IdleStateHandler(
+                                0,
+                                0,
+                                weEventConfig.getKeepAlive()));
+
+                        //channelPipeline.addLast("ssl", getSslHandler(sslContext, socketChannel.alloc()));
+                        channelPipeline.addLast("decoder", new MqttDecoder());
+                        channelPipeline.addLast("encoder", MqttEncoder.INSTANCE);
+                        channelPipeline.addLast("broker", new BrokerHandler(protocolProcess));
+                    }
+                })
+                .option(ChannelOption.SO_BACKLOG, weEventConfig.getSoBackLog())
+                .childOption(ChannelOption.SO_KEEPALIVE, weEventConfig.getSoKeepAlive());
         return serverBootstrap.bind(port).sync().channel();
     }
 }

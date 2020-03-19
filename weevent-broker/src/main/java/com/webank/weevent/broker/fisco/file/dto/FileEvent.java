@@ -1,4 +1,4 @@
-package com.webank.weevent.broker.fisco.file;
+package com.webank.weevent.broker.fisco.file.dto;
 
 
 import com.webank.weevent.client.FileChunksMeta;

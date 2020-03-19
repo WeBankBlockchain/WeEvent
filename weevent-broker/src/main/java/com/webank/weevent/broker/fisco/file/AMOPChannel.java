@@ -11,12 +11,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.webank.weevent.broker.fisco.file.dto.FileEvent;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.FileChunksMeta;
 import com.webank.weevent.client.JsonHelper;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
 import org.fisco.bcos.channel.client.ChannelPushCallback;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.dto.ChannelPush;
@@ -88,7 +90,7 @@ public class AMOPChannel extends ChannelPushCallback {
         }
 
         try {
-            File[] topics = resource.getFile().listFiles();
+            File[] topics = resource.getFile().listFiles((dir, name) -> name.endsWith(".pem"));
             if (topics != null) {
                 for (File topic : topics) {
                     List<Resource> pemResources = new ArrayList<>();
@@ -246,18 +248,20 @@ public class AMOPChannel extends ChannelPushCallback {
         ChannelRequest channelRequest = new ChannelRequest();
         channelRequest.setToTopic(topic);
         channelRequest.setMessageID(this.service.newSeq());
-        channelRequest.setTimeout(5000);
+        channelRequest.setTimeout(this.service.getConnectSeconds() * 1000);
         channelRequest.setContent(json);
 
-        log.info("send channel request, topic: {} id: {}", channelRequest.getToTopic(), channelRequest.getMessageID());
+        log.info("send channel request, topic: {} {} id: {}", channelRequest.getToTopic(), fileEvent.getEventType(), channelRequest.getMessageID());
         ChannelResponse rsp;
+        StopWatch sw = StopWatch.createStarted();
         if (this.senderTopics.containsKey(topic) && this.senderTopics.get(topic)) {
             log.info("over verified AMOP channel");
             rsp = this.service.sendChannelMessageForVerifyTopic(channelRequest);
         } else {
             rsp = this.service.sendChannelMessage2(channelRequest);
         }
-        log.info("receive channel response, id: {} result: {}-{}", rsp.getMessageID(), rsp.getErrorCode(), rsp.getErrorMessage());
+        sw.stop();
+        log.info("receive channel response, id: {} result: {}-{} cost: {}", rsp.getMessageID(), rsp.getErrorCode(), rsp.getErrorMessage(), sw.getTime());
         return rsp;
     }
 

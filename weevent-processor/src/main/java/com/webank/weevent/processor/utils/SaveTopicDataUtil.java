@@ -19,17 +19,16 @@ public class SaveTopicDataUtil {
 
     private final static String serviceId = "weevent-governance";
 
+    private final static String governanceServiceUrl = "http://127.0.0.1:7009";
+
     public final static String saveTopicUrl = "/historicalData/insertHistoricalData";
 
     public static String saveTopicData(WeEvent eventContent, CEPRule rule) {
+        Map<String, Object> topicHashMap = new HashMap<>();
         try {
-            Map<String, String> sqlvalue = CommonUtil.contactsql(rule, eventContent);
-            Map<String, String> topicHashMap = new HashMap<>();
-            topicHashMap.put(ConstantsHelper.EVENT_ID, sqlvalue.get(ConstantsHelper.EVENT_ID));
-            topicHashMap.put(ConstantsHelper.BROKER_ID, sqlvalue.get(ConstantsHelper.BROKER_ID));
-            topicHashMap.put(ConstantsHelper.GROUP_ID, sqlvalue.get(ConstantsHelper.GROUP_ID));
-            topicHashMap.put(ConstantsHelper.TOPIC_NAME, sqlvalue.get(ConstantsHelper.TOPIC_NAME));
-
+            topicHashMap.put(ConstantsHelper.WEEVENT, eventContent);
+            topicHashMap.put(ConstantsHelper.BROKER_ID, rule.getBrokerId());
+            topicHashMap.put(ConstantsHelper.GROUP_ID, rule.getGroupId());
             String urlFromDiscovery = getUrlFromDiscovery();
             String url = urlFromDiscovery + "/" + serviceId + saveTopicUrl;
             ResponseEntity<Boolean> mapResponseEntity = ProcessorApplication.restTemplate.postForEntity(url, topicHashMap, Boolean.class);
@@ -50,7 +49,7 @@ public class SaveTopicDataUtil {
     public static String getUrlFromDiscovery() {
         List<ServiceInstance> serviceInstances = ProcessorApplication.discoveryClient.getInstances(serviceId);
         if (serviceInstances.isEmpty()) {
-            return "";
+            return governanceServiceUrl;
         }
         ServiceInstance serviceInstance = serviceInstances.get(new Random().nextInt(serviceInstances.size()));
         return serviceInstance.getUri().toString();

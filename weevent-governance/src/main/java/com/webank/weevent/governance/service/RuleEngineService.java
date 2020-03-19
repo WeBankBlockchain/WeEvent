@@ -68,7 +68,7 @@ public class RuleEngineService {
     @Autowired
     private DAGDetectUtil dagDetectUtil;
 
-    @Autowired
+    @Autowired(required = false)
     private DiscoveryClient discoveryClient;
 
     @Autowired
@@ -162,7 +162,7 @@ public class RuleEngineService {
             }
             String deleteUrl = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_DELETE_CEP_RULE).append(ConstantProperties.QUESTION_MARK)
                     .append("id=").append(engineEntity.getId()).toString();
-            log.info("processor delete  begin");
+            log.info("processor delete  begin,id:{}", engineEntity.getId());
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, deleteUrl);
             String mes = EntityUtils.toString(closeResponse.getEntity());
             log.info("delete rule result:{}", mes);

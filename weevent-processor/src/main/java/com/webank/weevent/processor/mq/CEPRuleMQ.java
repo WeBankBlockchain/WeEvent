@@ -52,7 +52,7 @@ public class CEPRuleMQ {
     // client --><brokerurl,groupId>
     private static Map<IWeEventClient, Pair<String, String>> clientGroupMap = new ConcurrentHashMap<>();
 
-    private static CEPRuleMQ.DBThread dbThread = new CEPRuleMQ.DBThread();
+    private static DBThread dbThread = new DBThread();
 
     // statistic weevent
     public static StatisticWeEvent statisticWeEvent = new StatisticWeEvent();
