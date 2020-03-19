@@ -72,7 +72,7 @@ public class RestfullAdminTest extends JUnitTestBase {
         ResponseEntity<BaseResponse<Map<String, List<SubscriptionInfo>>>> rsp = admin.exchange(url + "listSubscription?groupId={groupId}&nodeInstances={nodeInstances}",
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<BaseResponse<Map<String, SubscriptionInfo>>>() {
+                new ParameterizedTypeReference<BaseResponse<Map<String, List<SubscriptionInfo>>>>() {
                 },
                 params);
         log.info("listSubscription, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
