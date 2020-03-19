@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.GovernanceApplication;
+import com.webank.weevent.governance.handler.LoginFailHandler;
 import com.webank.weevent.governance.utils.JwtUtils;
 
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,9 +26,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private AuthenticationSuccessHandler loginSuccessHandler;
 
-    public LoginFilter(AuthenticationManager authenticationManager, AuthenticationSuccessHandler loginSuccessHandler) {
+    private LoginFailHandler loginFailHandler;
+
+    public LoginFilter(AuthenticationManager authenticationManager, AuthenticationSuccessHandler loginSuccessHandler, LoginFailHandler loginFailHandler) {
         this.authenticationManager = authenticationManager;
         this.loginSuccessHandler = loginSuccessHandler;
+        this.loginFailHandler = loginFailHandler;
         setFilterProcessesUrl("/user/login");
     }
 
@@ -55,4 +59,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         loginSuccessHandler.onAuthenticationSuccess(request, response, authResult);
     }
 
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+        loginFailHandler.onAuthenticationFailure(request,response,failed);
+    }
 }
