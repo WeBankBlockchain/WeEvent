@@ -64,25 +64,3 @@ bootJar {
         }
     }
 }
-//mybatis generator plugin ------ start
-buildscript {
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath "gradle.plugin.com.arenagod.gradle:mybatis-generator-plugin:1.4"
-    }
-}
-
-apply plugin: "com.arenagod.gradle.MybatisGenerator"
-
-configurations {
-    mybatisGenerator
-}
-
-mybatisGenerator {
-    verbose = true
-    configFile = 'src/main/resources/tools/generatorConfig.xml'
-}
