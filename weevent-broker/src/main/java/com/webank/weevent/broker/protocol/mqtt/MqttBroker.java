@@ -29,8 +29,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
- **/
+ * @author websterchen
+ * @version v1.0
+ * @since 2019/6/2
+ */
 @Slf4j
 @Component
 public class MqttBroker {
@@ -56,7 +58,7 @@ public class MqttBroker {
     @PostConstruct
     public void start() throws Exception {
         // websocket
-        if (!StringUtils.isBlank(this.weEventConfig.getMqttServerPath())
+        if (!StringUtils.isEmpty(this.weEventConfig.getMqttServerPath())
                 && this.weEventConfig.getMqttPort() > 0) {
             log.info("setup MQTT over websocket on port: {}", this.weEventConfig.getMqttPort());
 
