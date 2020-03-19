@@ -33,7 +33,7 @@ public class ForwardProcessorFilter implements Filter {
         this.commonService = commonService;
     }
 
-    @Autowired
+    @Autowired(required = false)
     public void setDiscoveryClient(DiscoveryClient discoveryClient) {
         this.discoveryClient = discoveryClient;
     }
