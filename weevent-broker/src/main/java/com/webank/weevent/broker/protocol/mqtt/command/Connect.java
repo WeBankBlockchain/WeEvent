@@ -1,18 +1,21 @@
 package com.webank.weevent.broker.protocol.mqtt.command;
 
-import com.webank.weevent.broker.protocol.mqtt.store.IAuthService;
-import com.webank.weevent.broker.protocol.mqtt.store.dto.SessionStore;
-import com.webank.weevent.broker.protocol.mqtt.store.ISessionStore;
-import com.webank.weevent.broker.protocol.mqtt.store.ISubscribeStore;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
+
+import com.webank.weevent.broker.protocol.mqtt.BrokerHandler;
+import com.webank.weevent.broker.protocol.mqtt.store.AuthService;
+import com.webank.weevent.broker.protocol.mqtt.store.SessionContext;
+import com.webank.weevent.broker.protocol.mqtt.store.SessionStore;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import io.netty.handler.codec.mqtt.MqttConnAckMessage;
 import io.netty.handler.codec.mqtt.MqttConnAckVariableHeader;
 import io.netty.handler.codec.mqtt.MqttConnectMessage;
 import io.netty.handler.codec.mqtt.MqttConnectReturnCode;
 import io.netty.handler.codec.mqtt.MqttFixedHeader;
 import io.netty.handler.codec.mqtt.MqttIdentifierRejectedException;
+import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttMessageFactory;
 import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
@@ -20,8 +23,6 @@ import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
 import io.netty.handler.codec.mqtt.MqttQoS;
 import io.netty.handler.codec.mqtt.MqttUnacceptableProtocolVersionException;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.util.AttributeKey;
-import io.netty.util.CharsetUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 
@@ -32,100 +33,104 @@ import org.apache.commons.lang.StringUtils;
  */
 @Slf4j
 public class Connect {
-    private IAuthService iAuthService;
-    private ISessionStore iSessionStore;
-    private ISubscribeStore iSubscribeStore;
+    private AuthService authService;
+    private SessionStore sessionStore;
+    private int keepalive;
 
-    public Connect(ISubscribeStore iSubscribeStore, ISessionStore iSessionStore, IAuthService iAuthService) {
-        this.iSubscribeStore = iSubscribeStore;
-        this.iSessionStore = iSessionStore;
-        this.iAuthService = iAuthService;
+    public Connect(AuthService authService, SessionStore sessionStore, int keepalive) {
+        this.authService = authService;
+        this.sessionStore = sessionStore;
+        this.keepalive = keepalive;
     }
 
-    public void processConnect(Channel channel, MqttConnectMessage msg) {
-        log.debug("processConnect variableHeader:{} payLoadLen:{}", msg.variableHeader().toString(), msg.payload().toString().length());
+    // return clientId if accept
+    public String processConnect(Channel channel, MqttConnectMessage msg) {
+        MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_LEAST_ONCE, false, 0);
+
         if (msg.decoderResult().isFailure()) {
-            log.error("MqttConnectMessage decoder Error:{}", msg.decoderResult().toString());
+            log.error("decode message failed, {}", msg.decoderResult());
+
             Throwable cause = msg.decoderResult().cause();
             if (cause instanceof MqttUnacceptableProtocolVersionException) {
-                //Unsupported protocol
-                MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
-                        new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
+                // Unsupported protocol
+                MqttMessage rsp = MqttMessageFactory.newMessage(fixedHeader,
                         new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION, false), null);
-                channel.writeAndFlush(connAckMessage);
-                channel.close();
-                return;
+                BrokerHandler.sendRemote(channel, rsp);
             } else if (cause instanceof MqttIdentifierRejectedException) {
-                //clientId illegal
-                MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
-                        new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
+                // clientId illegal
+                MqttMessage rsp = MqttMessageFactory.newMessage(fixedHeader,
                         new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED, false), null);
-                channel.writeAndFlush(connAckMessage);
-                channel.close();
-                return;
+                BrokerHandler.sendRemote(channel, rsp);
             }
-            channel.close();
-            return;
+            return "";
         }
 
-        if (StringUtils.isBlank(msg.payload().clientIdentifier())) {
-            log.error("clientId is blank");
-            MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
-                    new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
+        String clientId = msg.payload().clientIdentifier();
+        if (StringUtils.isBlank(clientId)) {
+            log.error("clientId is empty, reject");
+
+            MqttMessage rsp = MqttMessageFactory.newMessage(fixedHeader,
                     new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED, false), null);
-            channel.writeAndFlush(connAckMessage);
-            channel.close();
-            return;
+            BrokerHandler.sendRemote(channel, rsp);
+            return "";
         }
 
-        //verify userName and password
+        // clean flag
+        if (!msg.variableHeader().isCleanSession()) {
+            log.error("only support clean session, reject");
+
+            MqttMessage rsp = MqttMessageFactory.newMessage(fixedHeader,
+                    new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION, false), null);
+            BrokerHandler.sendRemote(channel, rsp);
+            return "";
+        }
+
+        // verify userName and password
         String username = msg.payload().userName();
-        String password = msg.payload().passwordInBytes() == null ? null : new String(msg.payload().passwordInBytes(), CharsetUtil.UTF_8);
-        if (!iAuthService.verifyUserName(username, password)) {
-            log.error("verify userName error");
-            MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
-                    new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
+        String password = msg.payload().passwordInBytes() == null ? null : new String(msg.payload().passwordInBytes(), StandardCharsets.UTF_8);
+        if (!this.authService.verifyUserName(username, password)) {
+            log.error("verify account failed, reject");
+
+            MqttMessage rsp = MqttMessageFactory.newMessage(fixedHeader,
                     new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD, false), null);
-            channel.writeAndFlush(connAckMessage);
-            channel.close();
-            return;
+            BrokerHandler.sendRemote(channel, rsp);
+            return "";
         }
 
-        //if clientId session exist close it
-        if (iSessionStore.containsKey(msg.payload().clientIdentifier())) {
-            log.info("clientId exist close it");
-            SessionStore sessionStore = iSessionStore.get(msg.payload().clientIdentifier());
-            Channel previous = sessionStore.getChannel();
-            iSessionStore.remove(msg.payload().clientIdentifier());
-            iSubscribeStore.removeForClient(msg.payload().clientIdentifier());
-            previous.close();
-        }
+        // process heartbeat
+        int heartbeat = (int) (msg.variableHeader().keepAliveTimeSeconds() * 1.5f);
+        if (heartbeat > 0 && heartbeat < this.keepalive) {
+            log.info("use heart beat from client, {}", msg.variableHeader().keepAliveTimeSeconds());
 
-        //process willmessage
-        SessionStore sessionStore = new SessionStore(msg.payload().clientIdentifier(), channel, msg.variableHeader().isCleanSession(), null);
-        if (msg.variableHeader().isWillFlag()) {
-            MqttPublishMessage willMessage = (MqttPublishMessage) MqttMessageFactory.newMessage(
-                    new MqttFixedHeader(MqttMessageType.PUBLISH, false, MqttQoS.valueOf(msg.variableHeader().willQos()), msg.variableHeader().isWillRetain(), 0),
-                    new MqttPublishVariableHeader(msg.payload().willTopic(), 0), Unpooled.buffer().writeBytes(msg.payload().willMessageInBytes()));
-            sessionStore.setWillMessage(willMessage);
-        }
-
-        //process heartbeat
-        if (msg.variableHeader().keepAliveTimeSeconds() > 0) {
             if (channel.pipeline().names().contains("idle")) {
                 channel.pipeline().remove("idle");
             }
-            channel.pipeline().addFirst("idle", new IdleStateHandler(0, 0, Math.round(msg.variableHeader().keepAliveTimeSeconds() * 1.5f)));
+            channel.pipeline().addFirst("idle", new IdleStateHandler(0, 0, Math.min(heartbeat, this.keepalive)));
         }
-        //store session
-        iSessionStore.put(msg.payload().clientIdentifier(), sessionStore);
-        //add clientId to channel map
-        channel.attr(AttributeKey.valueOf("clientId")).set(msg.payload().clientIdentifier());
-        boolean sessionPresent = iSessionStore.containsKey(msg.payload().clientIdentifier()) && !msg.variableHeader().isCleanSession();
-        MqttConnAckMessage okResp = (MqttConnAckMessage) MqttMessageFactory.newMessage(
-                new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
-                new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_ACCEPTED, sessionPresent), null);
-        channel.writeAndFlush(okResp);
-        log.info("CONNECT - clientId: {}, cleanSession: {}", msg.payload().clientIdentifier(), msg.variableHeader().isCleanSession());
+
+        Optional<SessionContext> sessionContext = this.sessionStore.getSession(clientId);
+        if (sessionContext.isPresent()) {
+            log.error("clientId is exist, close the older");
+            sessionContext.get().getChannel().close();
+        }
+
+        // process will message
+        SessionContext sessionData = new SessionContext(clientId, channel, msg.variableHeader().isCleanSession(), null);
+        if (msg.variableHeader().isWillFlag()) {
+            log.info("get will message from client");
+
+            MqttPublishMessage willMessage = (MqttPublishMessage) MqttMessageFactory.newMessage(
+                    new MqttFixedHeader(MqttMessageType.PUBLISH, false, MqttQoS.valueOf(msg.variableHeader().willQos()), msg.variableHeader().isWillRetain(), 0),
+                    new MqttPublishVariableHeader(msg.payload().willTopic(), 0), Unpooled.buffer().writeBytes(msg.payload().willMessageInBytes()));
+            sessionData.setWillMessage(willMessage);
+        }
+
+        // store session
+        this.sessionStore.addSession(clientId, sessionData);
+        MqttMessage rsp = MqttMessageFactory.newMessage(fixedHeader,
+                new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_ACCEPTED, false), null);
+        BrokerHandler.sendRemote(channel, rsp);
+
+        return clientId;
     }
 }

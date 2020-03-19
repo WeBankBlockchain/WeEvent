@@ -5,32 +5,35 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-import com.webank.weevent.broker.protocol.mqtt.store.IMessageIdStore;
-import com.webank.weevent.broker.protocol.mqtt.store.ISessionStore;
-import com.webank.weevent.broker.protocol.mqtt.store.ISubscribeStore;
-import com.webank.weevent.broker.protocol.mqtt.store.dto.SubscribeStore;
-import com.webank.weevent.core.IConsumer;
-import com.webank.weevent.core.fisco.constant.WeEventConstants;
+import com.webank.weevent.broker.protocol.mqtt.BrokerHandler;
+import com.webank.weevent.broker.protocol.mqtt.store.MessageIdStore;
+import com.webank.weevent.broker.protocol.mqtt.store.SessionContext;
+import com.webank.weevent.broker.protocol.mqtt.store.SessionStore;
+import com.webank.weevent.broker.protocol.mqtt.store.SubscribeData;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.core.IConsumer;
+import com.webank.weevent.core.fisco.constant.WeEventConstants;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttFixedHeader;
+import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttMessageFactory;
 import io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader;
 import io.netty.handler.codec.mqtt.MqttMessageType;
-import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
 import io.netty.handler.codec.mqtt.MqttQoS;
-import io.netty.handler.codec.mqtt.MqttSubAckMessage;
 import io.netty.handler.codec.mqtt.MqttSubAckPayload;
 import io.netty.handler.codec.mqtt.MqttSubscribeMessage;
 import io.netty.handler.codec.mqtt.MqttTopicSubscription;
-import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author websterchen
@@ -39,24 +42,32 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class Subscribe {
-    private ISubscribeStore iSubscribeStore;
-    private IMessageIdStore iMessageIdStore;
-    private ISessionStore iSessionStore;
+    private SessionStore sessionStore;
+    private MessageIdStore messageIdStore;
     private IConsumer iConsumer;
 
-    public Subscribe(ISessionStore iSessionStore, ISubscribeStore iSubscribeStore, IMessageIdStore iMessageIdStore, IConsumer iConsumer) {
-        this.iSubscribeStore = iSubscribeStore;
-        this.iMessageIdStore = iMessageIdStore;
-        this.iSessionStore = iSessionStore;
+    public Subscribe(SessionStore sessionStore, MessageIdStore messageIdStore, IConsumer iConsumer) {
+        this.sessionStore = sessionStore;
+        this.messageIdStore = messageIdStore;
         this.iConsumer = iConsumer;
     }
 
-    public void processSubscribe(Channel channel, MqttSubscribeMessage msg) {
-        log.debug("processSubscribe variableHeader:{} payLoadLen:{}", msg.variableHeader().toString(), msg.payload().toString().length());
-        List<MqttTopicSubscription> topicSubscriptions = msg.payload().topicSubscriptions();
+    public void processSubscribe(Channel channel, String clientId, MqttSubscribeMessage msg) {
+        log.info("SUBSCRIBE, {}", msg.payload().topicSubscriptions());
 
-        String clientId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
-        List<Integer> mqttQoSList = new ArrayList<>();
+        Optional<MqttTopicSubscription> notSupport = msg.payload().topicSubscriptions().stream().filter(item -> item.qualityOfService() == MqttQoS.EXACTLY_ONCE).findAny();
+        if (notSupport.isPresent()) {
+            log.error("DOT NOT support Qos=2, close");
+            channel.close();
+            return;
+        }
+
+        List<String> topics = msg.payload().topicSubscriptions().stream().map(MqttTopicSubscription::topicName).collect(Collectors.toList());
+        if (topics.isEmpty()) {
+            log.error("empty topic, close");
+            channel.close();
+            return;
+        }
 
         // external params
         Map<IConsumer.SubscribeExt, String> ext = new HashMap<>();
@@ -64,87 +75,100 @@ public class Subscribe {
         InetSocketAddress socketAddress = (InetSocketAddress) channel.remoteAddress();
         ext.put(IConsumer.SubscribeExt.RemoteIP, socketAddress.getAddress().getHostAddress());
 
-        topicSubscriptions.forEach(topicSubscription -> {
-            String topicFilter = topicSubscription.topicName();
-            MqttQoS mqttQoS = topicSubscription.qualityOfService();
-            if (MqttQoS.AT_MOST_ONCE == mqttQoS || MqttQoS.EXACTLY_ONCE == mqttQoS) {
-                channel.close();
-                log.error("subscribe don't support QoS=0 or QoS=2");
-                return;
-            }
-            String subscriptionId = "";
-            try {
-                String groupId = "";
-                subscriptionId = this.iConsumer.subscribe(topicFilter,
-                        groupId,
-                        WeEvent.OFFSET_LAST,
-                        ext,
-                        new IConsumer.ConsumerListener() {
-                            @Override
-                            public void onEvent(String subscriptionId, WeEvent event) {
-                                log.info("consumer onEvent, subscriptionId: {} event: {}", subscriptionId, event);
-                                try {
-                                    // send to subscribe
-                                    sendPublishMessage(topicFilter, mqttQoS, JsonHelper.object2Json(event).getBytes(), false, false);
-                                } catch (BrokerException e) {
-                                    log.error("send publish message failed due to convert object to jsonString error", e);
-                                }
-                            }
+        MqttMessage rsp;
+        if (msg.payload().topicSubscriptions().size() == 1) {
+            String topic = msg.payload().topicSubscriptions().get(0).topicName();
+            MqttQoS qos = msg.payload().topicSubscriptions().get(0).qualityOfService();
 
-                            @Override
-                            public void onException(Throwable e) {
-                                log.error("consumer onException", e);
-                            }
-                        });
-            } catch (BrokerException e) {
-                log.error("subscribe exception:{}", e.getMessage());
+            String subscriptionId = this.subscribe(topic, "", ext, clientId);
+            if (StringUtils.isEmpty(subscriptionId)) {
+                qos = MqttQoS.FAILURE;
+            } else {
+                SubscribeData subscribeData = new SubscribeData(clientId, subscriptionId, topic, qos);
+                Optional<SessionContext> sessionContext = this.sessionStore.getSession(clientId);
+                sessionContext.ifPresent(context -> context.getSubscribeDataList().add(subscribeData));
             }
 
-            SubscribeStore subscribeStore = new SubscribeStore(clientId, subscriptionId, topicFilter, mqttQoS.value());
-            iSubscribeStore.put(topicFilter, subscribeStore);
-            mqttQoSList.add(mqttQoS.value());
-            log.debug("SUBSCRIBE - clientId: {}, topFilter: {}, QoS: {} subscriptionId:{}", clientId, topicFilter, mqttQoS.value(), subscriptionId);
-        });
+            rsp = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.SUBACK, false, qos, false, 0),
+                    MqttMessageIdVariableHeader.from(msg.variableHeader().messageId()), null);
+        } else {
+            // subscribe one by one, because unsubscribe need support one by one
+            List<Integer> mqttQoSList = new ArrayList<>();
 
-        MqttSubAckMessage subAckMessage = (MqttSubAckMessage) MqttMessageFactory.newMessage(
-                new MqttFixedHeader(MqttMessageType.SUBACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
-                MqttMessageIdVariableHeader.from(msg.variableHeader().messageId()),
-                new MqttSubAckPayload(mqttQoSList));
-        channel.writeAndFlush(subAckMessage);
+            msg.payload().topicSubscriptions().forEach(item -> {
+                String subscriptionId = this.subscribe(item.topicName(), "", ext, clientId);
+                if (StringUtils.isEmpty(subscriptionId)) {
+                    mqttQoSList.add(MqttQoS.FAILURE.ordinal());
+                } else {
+                    SubscribeData subscribeData = new SubscribeData(clientId, subscriptionId, item.topicName(), item.qualityOfService());
+                    Optional<SessionContext> sessionContext = this.sessionStore.getSession(clientId);
+                    sessionContext.ifPresent(context -> context.getSubscribeDataList().add(subscribeData));
+                    mqttQoSList.add(item.qualityOfService().ordinal());
+                }
+            });
+
+            rsp = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.SUBACK, false, MqttQoS.AT_LEAST_ONCE, false, 0),
+                    MqttMessageIdVariableHeader.from(msg.variableHeader().messageId()),
+                    new MqttSubAckPayload(mqttQoSList));
+        }
+
+        BrokerHandler.sendRemote(channel, rsp);
     }
 
-    private void sendPublishMessage(String topic, MqttQoS mqttQoS, byte[] messageBytes, boolean retain, boolean dup) {
-        List<SubscribeStore> subscribeStores = iSubscribeStore.searchByTopic(topic);
-        subscribeStores.forEach(subscribeStore -> {
-            if (iSessionStore.containsKey(subscribeStore.getClientId())) {
-                //get subscribe QOS value
-                MqttQoS respQoS = mqttQoS.value() > subscribeStore.getMqttQoS() ? MqttQoS.valueOf(subscribeStore.getMqttQoS()) : mqttQoS;
-                if (respQoS == MqttQoS.AT_MOST_ONCE) {
-                    MqttPublishMessage publishMessage = (MqttPublishMessage) MqttMessageFactory.newMessage(
-                            new MqttFixedHeader(MqttMessageType.PUBLISH, dup, respQoS, retain, 0),
-                            new MqttPublishVariableHeader(topic, 0), Unpooled.buffer().writeBytes(messageBytes));
-                    log.debug("PUBLISH - clientId: {}, topic: {}, Qos: {}", subscribeStore.getClientId(), topic, respQoS.value());
-                    iSessionStore.get(subscribeStore.getClientId()).getChannel().writeAndFlush(publishMessage);
-                }
+    private String subscribe(String topic, String groupId, Map<IConsumer.SubscribeExt, String> ext, String clientId) {
+        try {
+            String subscriptionId = this.iConsumer.subscribe(topic,
+                    groupId,
+                    WeEvent.OFFSET_LAST,
+                    ext,
+                    new IConsumer.ConsumerListener() {
+                        @Override
+                        public void onEvent(String subscriptionId, WeEvent event) {
+                            // send to subscribe
+                            sendEvent(clientId, subscriptionId, event);
+                        }
 
-                if (respQoS == MqttQoS.AT_LEAST_ONCE) {
-                    int messageId = iMessageIdStore.getNextMessageId();
-                    MqttPublishMessage publishMessage = (MqttPublishMessage) MqttMessageFactory.newMessage(
-                            new MqttFixedHeader(MqttMessageType.PUBLISH, dup, respQoS, retain, 0),
-                            new MqttPublishVariableHeader(topic, messageId), Unpooled.buffer().writeBytes(messageBytes));
-                    log.debug("PUBLISH AT_LEAST_ONCE- clientId: {}, topic: {}, Qos: {}, messageId: {}", subscribeStore.getClientId(), topic, respQoS.value(), messageId);
-                    iSessionStore.get(subscribeStore.getClientId()).getChannel().writeAndFlush(publishMessage);
-                }
+                        @Override
+                        public void onException(Throwable e) {
+                            log.error("consumer onException", e);
+                        }
+                    });
 
-                if (respQoS == MqttQoS.EXACTLY_ONCE) {
-                    int messageId = iMessageIdStore.getNextMessageId();
-                    MqttPublishMessage publishMessage = (MqttPublishMessage) MqttMessageFactory.newMessage(
-                            new MqttFixedHeader(MqttMessageType.PUBLISH, dup, respQoS, retain, 0),
-                            new MqttPublishVariableHeader(topic, messageId), Unpooled.buffer().writeBytes(messageBytes));
-                    log.debug("PUBLISH EXACTLY_ONCE- clientId: {}, topic: {}, Qos: {}, messageId: {}", subscribeStore.getClientId(), topic, respQoS.value(), messageId);
-                    iSessionStore.get(subscribeStore.getClientId()).getChannel().writeAndFlush(publishMessage);
+            log.info("subscribe success, subscriptionId: {}", subscriptionId);
+            return subscriptionId;
+        } catch (BrokerException e) {
+            log.error("subscribe exception: {}", e.getMessage());
+            return "";
+        }
+    }
+
+    private void sendEvent(String clientId, String subscriptionId, WeEvent event) {
+        ByteBuf payload = Unpooled.buffer();
+        try {
+            byte[] content = JsonHelper.object2JsonBytes(event.getContent());
+            payload.writeBytes(content);
+        } catch (BrokerException e) {
+            log.error("json encode failed, {}", e.getMessage());
+            return;
+        }
+
+        Optional<SessionContext> sessionContext = this.sessionStore.getSession(clientId);
+        sessionContext.ifPresent(context -> {
+            Optional<SubscribeData> subscribeDataOptional = context.getSubscribeDataList().stream().filter(item -> item.getSubscriptionId().equals(subscriptionId)).findFirst();
+            subscribeDataOptional.ifPresent(subscribe -> {
+                switch (subscribe.getMqttQoS()) {
+                    case AT_MOST_ONCE:
+                    case AT_LEAST_ONCE:
+                        MqttMessage rsp = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.PUBLISH, false, subscribe.getMqttQoS(), false, 0),
+                                new MqttPublishVariableHeader(subscribe.getTopic(), this.messageIdStore.getNextMessageId()), payload);
+                        BrokerHandler.sendRemote(context.getChannel(), rsp);
+                        break;
+
+                    case EXACTLY_ONCE:
+                    default:
+                        log.error("DOT NOT support Qos=2");
                 }
-            }
+            });
         });
     }
 }
