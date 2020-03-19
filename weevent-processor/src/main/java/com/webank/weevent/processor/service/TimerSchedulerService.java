@@ -52,7 +52,7 @@ public class TimerSchedulerService {
             while (jobKeyIterator.hasNext()) {
                 JobKey jobKey = jobKeyIterator.next();
                 if (null != scheduler.getJobDetail(jobKey).getJobDataMap().get("timer")) {
-                    TimerScheduler timer = (TimerScheduler) scheduler.getJobDetail(jobKey).getJobDataMap().get("timer");
+                    TimerScheduler timer = JsonHelper.json2Object(scheduler.getJobDetail(jobKey).getJobDataMap().get("timer").toString(),TimerScheduler.class);
                     // if the current is delete
                     timerSchedulerList.add(timer);
                     timerSchedulerMap.put(timer.getId(), timer);
@@ -88,7 +88,7 @@ public class TimerSchedulerService {
             return ConstantsHelper.RET_FAIL;
         } catch (Exception e) {
             log.error("e:{}", e.toString());
-            return RetCode.mark(0, e.toString());
+            return RetCode.mark(1, e.toString());
         }
     }
 

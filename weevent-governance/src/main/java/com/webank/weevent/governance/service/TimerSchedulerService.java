@@ -50,7 +50,7 @@ public class TimerSchedulerService {
     private static final int PROCESSOR_SUCCESS_CODE = 0;
 
 
-    @Autowired
+    @Autowired(required = false)
     private DiscoveryClient discoveryClient;
 
     public List<TimerSchedulerEntity> getTimerSchedulerList(HttpServletRequest request, TimerSchedulerEntity timerSchedulerEntity) throws GovernanceException {
