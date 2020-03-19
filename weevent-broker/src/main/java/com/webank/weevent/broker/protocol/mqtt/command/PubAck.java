@@ -1,10 +1,9 @@
 package com.webank.weevent.broker.protocol.mqtt.command;
 
-import com.webank.weevent.broker.protocol.mqtt.store.IMessageIdStore;
+import com.webank.weevent.broker.protocol.mqtt.store.MessageIdStore;
 
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader;
-import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -14,15 +13,15 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class PubAck {
-    private IMessageIdStore iMessageIdStore;
+    private MessageIdStore messageIdStore;
 
-    public PubAck(IMessageIdStore iMessageIdStore) {
-        this.iMessageIdStore = iMessageIdStore;
+    public PubAck(MessageIdStore messageIdStore) {
+        this.messageIdStore = messageIdStore;
     }
 
     public void processPubAck(Channel channel, MqttMessageIdVariableHeader variableHeader) {
         int messageId = variableHeader.messageId();
-        log.debug("PUBACK - clientId: {}, messageId: {}", (String) channel.attr(AttributeKey.valueOf("clientId")).get(), messageId);
-        iMessageIdStore.releaseMessageId(messageId);
+        log.debug("PUBACK {}", messageId);
+        this.messageIdStore.releaseMessageId(messageId);
     }
 }
