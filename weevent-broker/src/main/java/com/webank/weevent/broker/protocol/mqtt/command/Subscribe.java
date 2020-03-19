@@ -55,9 +55,9 @@ public class Subscribe {
     public void processSubscribe(Channel channel, String clientId, MqttSubscribeMessage msg) {
         log.info("SUBSCRIBE, {}", msg.payload().topicSubscriptions());
 
-        Optional<MqttTopicSubscription> notSupport = msg.payload().topicSubscriptions().stream().filter(item -> item.qualityOfService() != MqttQoS.AT_LEAST_ONCE).findAny();
+        Optional<MqttTopicSubscription> notSupport = msg.payload().topicSubscriptions().stream().filter(item -> item.qualityOfService() == MqttQoS.EXACTLY_ONCE).findAny();
         if (notSupport.isPresent()) {
-            log.error("support Qos = 1 only, close");
+            log.error("DOT NOT support Qos=2, close");
             channel.close();
             return;
         }
@@ -157,6 +157,7 @@ public class Subscribe {
             Optional<SubscribeData> subscribeDataOptional = context.getSubscribeDataList().stream().filter(item -> item.getSubscriptionId().equals(subscriptionId)).findFirst();
             subscribeDataOptional.ifPresent(subscribe -> {
                 switch (subscribe.getMqttQoS()) {
+                    case AT_MOST_ONCE:
                     case AT_LEAST_ONCE:
                         MqttMessage rsp = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.PUBLISH, false, subscribe.getMqttQoS(), false, 0),
                                 new MqttPublishVariableHeader(subscribe.getTopic(), this.messageIdStore.getNextMessageId()), payload);
@@ -164,9 +165,8 @@ public class Subscribe {
                         break;
 
                     case EXACTLY_ONCE:
-                    case AT_MOST_ONCE:
                     default:
-                        log.error("support Qos = 1 only");
+                        log.error("DOT NOT support Qos=2");
                 }
             });
         });

@@ -36,21 +36,21 @@ public class Publish {
     }
 
     public void processPublish(Channel channel, MqttPublishMessage msg) {
-        log.info("PUBLISH, {}", msg.variableHeader().topicName());
+        log.info("PUBLISH, {} Qos: {}", msg.variableHeader().topicName(), msg.fixedHeader().qosLevel());
 
         switch (msg.fixedHeader().qosLevel()) {
+            case AT_MOST_ONCE:
             case AT_LEAST_ONCE: {
                 boolean result = this.publishMessage(msg, false);
-                if (result) {
+                if (result && msg.fixedHeader().qosLevel() == MqttQoS.AT_LEAST_ONCE) {
                     this.sendPubAckMessage(channel, msg.variableHeader().packetId());
                 }
             }
             break;
 
-            case AT_MOST_ONCE:
             case EXACTLY_ONCE:
             default: {
-                log.error("support QoS = 1 only, close");
+                log.error("DOT NOT support Qos=2, close");
                 channel.close();
             }
         }
