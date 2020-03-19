@@ -1,20 +1,22 @@
 package com.webank.weevent.broker.protocol.mqtt.command;
 
-import java.util.List;
+import java.util.Optional;
 
-import com.webank.weevent.broker.protocol.mqtt.store.ISubscribeStore;
-import com.webank.weevent.core.IConsumer;
+import com.webank.weevent.broker.protocol.mqtt.BrokerHandler;
+import com.webank.weevent.broker.protocol.mqtt.store.SessionContext;
+import com.webank.weevent.broker.protocol.mqtt.store.SessionStore;
+import com.webank.weevent.broker.protocol.mqtt.store.SubscribeData;
 import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.core.IConsumer;
 
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttFixedHeader;
+import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttMessageFactory;
 import io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader;
 import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttQoS;
-import io.netty.handler.codec.mqtt.MqttUnsubAckMessage;
 import io.netty.handler.codec.mqtt.MqttUnsubscribeMessage;
-import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -24,33 +26,41 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class UnSubscribe {
-    private ISubscribeStore iSubscribeStore;
+    private SessionStore sessionStore;
     private IConsumer iConsumer;
 
-    public UnSubscribe(ISubscribeStore iSubscribeStore, IConsumer iConsumer) {
-        this.iSubscribeStore = iSubscribeStore;
+    public UnSubscribe(SessionStore sessionStore, IConsumer iConsumer) {
+        this.sessionStore = sessionStore;
         this.iConsumer = iConsumer;
     }
 
-    public void processUnSubscribe(Channel channel, MqttUnsubscribeMessage msg) {
-        log.debug("processUnSubscribe: variableHeader:{} payLoadLen:{}", msg.variableHeader().toString(), msg.payload().toString().length());
-        List<String> topicFilters = msg.payload().topics();
-        String clientId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
-        topicFilters.forEach(topicFilter -> {
-            try {
-                if (null != iSubscribeStore.get(topicFilter, clientId)) {
-                    iConsumer.unSubscribe(iSubscribeStore.get(topicFilter, clientId).getSubscriptionId());
-                }
-            } catch (BrokerException e) {
-                log.error("UNSUBSCRIBE error - subscriptionId: {}", iSubscribeStore.get(topicFilter, clientId).getSubscriptionId());
-            }
+    public void processUnSubscribe(Channel channel, String clientId, MqttUnsubscribeMessage msg) {
+        log.info("UNSUBSCRIBE, {}", msg.payload().topics());
 
-            iSubscribeStore.remove(topicFilter, clientId);
-            log.debug("UNSUBSCRIBE - clientId: {}, topicFilter: {}", clientId, topicFilter);
+        if (msg.payload().topics().isEmpty()) {
+            log.error("empty topic, skip message");
+            channel.close();
+            return;
+        }
+
+        Optional<SessionContext> sessionContext = this.sessionStore.getSession(clientId);
+        sessionContext.ifPresent(context -> {
+            msg.payload().topics().forEach(topic -> {
+                Optional<SubscribeData> subscribeData = context.getSubscribeDataList().stream().filter(item -> item.getTopic().equals(topic)).findFirst();
+                subscribeData.ifPresent(subscribe -> {
+                    try {
+                        log.info("clientId: {}, unSubscribe topic: {} {}", clientId, topic, subscribe.getSubscriptionId());
+                        this.iConsumer.unSubscribe(subscribe.getSubscriptionId());
+                    } catch (BrokerException e) {
+                        log.error("unSubscribe failed", e);
+                    }
+                    context.getSubscribeDataList().remove(subscribe);
+                });
+            });
         });
-        MqttUnsubAckMessage unsubAckMessage = (MqttUnsubAckMessage) MqttMessageFactory.newMessage(
-                new MqttFixedHeader(MqttMessageType.UNSUBACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
+
+        MqttMessage rsp = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.UNSUBACK, false, MqttQoS.AT_LEAST_ONCE, false, 0),
                 MqttMessageIdVariableHeader.from(msg.variableHeader().messageId()), null);
-        channel.writeAndFlush(unsubAckMessage);
+        BrokerHandler.sendRemote(channel, rsp);
     }
 }
