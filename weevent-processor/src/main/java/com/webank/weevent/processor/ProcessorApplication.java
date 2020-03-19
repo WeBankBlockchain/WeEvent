@@ -53,7 +53,7 @@ public class ProcessorApplication {
     }
 
 
-    @Autowired
+    @Autowired(required = false)
     public void setDiscoveryClient(DiscoveryClient client) {
         discoveryClient = client;
     }
