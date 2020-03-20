@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -135,20 +136,11 @@ public class CommonUtil {
         try {
             Map<String, Object> map = JsonHelper.json2Object(objJson, new TypeReference<Map<String, Object>>() {
             });
-
-            if (JsonHelper.isValid(objJson)) {
-                for (Map.Entry<String, Object> entry : map.entrySet()) {
-                    keys.add(entry.getKey());
-                }
-            } else {
-                keys = null;
-            }
-
+            return Arrays.asList(map.keySet().toArray(new String[]{}));
         } catch (Exception e) {
-            keys = null;
-            log.info("json get key error");
+            log.info("json get key error", e);
+            return Collections.emptyList();
         }
-        return keys;
     }
 
     public static boolean checkJson(String content, String objJson) {
