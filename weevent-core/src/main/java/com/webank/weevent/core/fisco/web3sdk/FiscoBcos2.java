@@ -3,7 +3,7 @@ package com.webank.weevent.core.fisco.web3sdk;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -324,7 +324,7 @@ public class FiscoBcos2 {
 
             Optional<TransactionReceipt> receiptOptional = getTransactionReceiptRequest(ethSendTransaction.getTransactionHash());
             if (receiptOptional.isPresent()) {
-                List<TypeReference<?>> referencesList = Arrays.asList(new TypeReference<Uint256>() {
+                List<TypeReference<?>> referencesList = Collections.singletonList(new TypeReference<Uint256>() {
                 });
                 List<Type> returnList = FunctionReturnDecoder.decode(
                         String.valueOf(receiptOptional.get().getOutput()),
@@ -440,7 +440,7 @@ public class FiscoBcos2 {
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
 
-        List<TypeReference<?>> referencesList = Arrays.asList(new TypeReference<Uint32>() {
+        List<TypeReference<?>> referencesList = Collections.singletonList(new TypeReference<Uint32>() {
         });
         List<Type> returnList = FunctionReturnDecoder.decode(
                 String.valueOf(transactionReceipt.getOutput()),
@@ -479,7 +479,7 @@ public class FiscoBcos2 {
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
 
-        List<TypeReference<?>> referencesList = Arrays.asList(new TypeReference<Uint32>() {
+        List<TypeReference<?>> referencesList = Collections.singletonList(new TypeReference<Uint32>() {
         });
         List<Type> returnList = FunctionReturnDecoder.decode(
                 String.valueOf(transactionReceipt.getOutput()),

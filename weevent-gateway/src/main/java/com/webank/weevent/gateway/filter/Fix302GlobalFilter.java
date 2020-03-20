@@ -2,7 +2,7 @@ package com.webank.weevent.gateway.filter;
 
 
 import java.net.URI;
-import java.util.ArrayList;
+import java.util.Collections;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -44,11 +44,7 @@ public class Fix302GlobalFilter implements GlobalFilter, Ordered {
                                     .host(requestUri.getHost())
                                     .port(requestUri.getPort());
                             String newLocation = uriComponentsBuilder.build().toUri().toString();
-                            headers.put(HttpHeaders.LOCATION, new ArrayList<String>() {
-                                {
-                                    add(newLocation);
-                                }
-                            });
+                            headers.put(HttpHeaders.LOCATION, Collections.singletonList(newLocation));
 
                             log.info("301/302 redirect in R: {}, FIX location {} -> {}", requestUri, location, newLocation);
                         }
