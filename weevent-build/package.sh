@@ -111,6 +111,10 @@ function copy_install_file(){
     mkdir -p ${out_path}/modules/processor
     cp ${current_path}/modules/processor/install-processor.sh ${out_path}/modules/processor
     cp -r ${top_path}/weevent-processor/dist/* ${out_path}/modules/processor
+
+    mkdir -p ${out_path}/modules/zookeeper
+    tar -zxf ${current_path}/modules/zookeeper/apache-zookeeper-3.6.0-bin.tar.gz -C ${out_path}/modules/zookeeper
+    cp ${current_path}/modules/zookeeper/install-zookeeper.sh ${out_path}/modules/zookeeper
 }
 
 # switch to prod.properties, remove dev.properties
