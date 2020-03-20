@@ -27,6 +27,7 @@ public abstract class StoppableTask implements Runnable {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
             log.warn("got InterruptedException in idle");
+            Thread.currentThread().interrupt();
         }
     }
 
