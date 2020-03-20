@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -141,11 +142,11 @@ public class CommonUtil {
                     keys.add(entry.getKey());
                 }
             } else {
-                keys = null;
+                keys = Collections.emptyList();
             }
 
         } catch (Exception e) {
-            keys = null;
+            keys = Collections.emptyList();
             log.info("json get key error");
         }
         return keys;
