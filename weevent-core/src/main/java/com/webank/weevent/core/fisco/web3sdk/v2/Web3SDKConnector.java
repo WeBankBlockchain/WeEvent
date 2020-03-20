@@ -9,6 +9,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -133,7 +134,7 @@ public class Web3SDKConnector {
             ChannelConnections channelConnections = new ChannelConnections();
             channelConnections.setGroupId(groupId.intValue());
             channelConnections.setConnectionsStr(Arrays.asList(fiscoConfig.getNodes().split(";")));
-            connectionsConfig.setAllChannelConnections(Arrays.asList(channelConnections));
+            connectionsConfig.setAllChannelConnections(Collections.singletonList(channelConnections));
 
             service.setAllChannelConnections(connectionsConfig);
             return service;
