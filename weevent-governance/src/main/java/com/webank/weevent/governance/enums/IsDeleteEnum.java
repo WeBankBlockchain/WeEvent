@@ -15,14 +15,5 @@ public enum IsDeleteEnum {
         this.value = value;
     }
 
-    public String getValueByCode(Long code) {
-        for (IsDeleteEnum isDeleteEnum : IsDeleteEnum.values()) {
-            if (isDeleteEnum.code.equals(code)) {
-                return isDeleteEnum.value;
-            }
-        }
-        return null;
-    }
-
 
 }
