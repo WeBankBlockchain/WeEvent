@@ -453,7 +453,9 @@ public class CEPRuleMQ {
                         }
                     }
                 } catch (InterruptedException e) {
-                    log.info(e.toString());
+                    log.info("insert is fail,{}", e.toString());
+                    Thread.currentThread().interrupt();
+                    break;
                 }
             }
         }
