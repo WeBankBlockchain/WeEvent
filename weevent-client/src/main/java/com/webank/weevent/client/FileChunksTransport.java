@@ -41,7 +41,7 @@ public class FileChunksTransport {
     private static final int CHUNK_RETRY_COUNT = 5;
     private static final int HTTP_RESPONSE_STATUS_SUCCESS = 200;
     private static final int INVOKE_CGI_FAIL_RETRY_COUNT = 20;
-    private static final int INVOKE_CGI_FAIL_SLEEP_MILLISECOND = 3000;
+    private static final long INVOKE_CGI_FAIL_SLEEP_MILLISECOND = 3000;
 
     public FileChunksTransport(String svrUrl) {
         this.svrUrl = svrUrl;
@@ -114,7 +114,7 @@ public class FileChunksTransport {
 
         // if chunk upload failed, sleep and retry again
         for (int i = 1; i <= INVOKE_CGI_FAIL_RETRY_COUNT; i++) {
-            Thread.sleep(i * INVOKE_CGI_FAIL_SLEEP_MILLISECOND);
+            Thread.sleep(INVOKE_CGI_FAIL_SLEEP_MILLISECOND * i);
             if (this.uploadChunk(fileChunksMeta, chunkIdx, chunkData)) {
                 log.info("upload file chunk data success, {}@{}", fileChunksMeta.getFileId(), chunkIdx);
                 return;
@@ -181,7 +181,7 @@ public class FileChunksTransport {
                     fileChunksMeta.getFileSize(),
                     fileChunksMeta.getFileMd5()));
         } catch (UnsupportedEncodingException e) {
-            log.error("encode fileName error, fileName:{}", fileChunksMeta.getFileName(), e);
+            log.error("encode fileName error, fileName: {}", fileChunksMeta.getFileName(), e);
             throw new BrokerException(ErrorCode.ENCODE_FILE_NAME_ERROR);
         }
 

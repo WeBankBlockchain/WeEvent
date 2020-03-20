@@ -196,6 +196,7 @@ public class MainEventLoop extends StoppableTask {
             }
         } catch (InterruptedException e) {
             log.error("new block event queue failed", e);
+            Thread.currentThread().interrupt();
         }
     }
 

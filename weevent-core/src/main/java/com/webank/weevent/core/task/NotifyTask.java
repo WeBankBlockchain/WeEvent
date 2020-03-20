@@ -9,10 +9,10 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
-import com.webank.weevent.core.IConsumer;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.core.IConsumer;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -74,6 +74,7 @@ public class NotifyTask extends StoppableTask {
             }
         } catch (InterruptedException e) {
             log.error("offer notify queue failed", e);
+            Thread.currentThread().interrupt();
         }
     }
 
