@@ -52,7 +52,7 @@ public class CEPRuleMQ {
     // client --><brokerurl,groupId>
     private static Map<IWeEventClient, Pair<String, String>> clientGroupMap = new ConcurrentHashMap<>();
 
-    private static DBThread dbThread = new DBThread();
+    private static DBThread dbThread = new DBThread(true);
 
     // statistic weevent
     public static StatisticWeEvent statisticWeEvent = new StatisticWeEvent();
@@ -435,9 +435,14 @@ public class CEPRuleMQ {
     }
 
     private static class DBThread implements Runnable {
+        private volatile boolean flag = false;
+
+        DBThread(boolean flag) {
+            this.flag = flag;
+        }
 
         public void run() {
-            while (true) {
+            while (flag) {
                 try {
                     // if the quene is null,then the thread sleep 1s
                     long ideaTime = 1000L;
@@ -453,9 +458,9 @@ public class CEPRuleMQ {
                         }
                     }
                 } catch (InterruptedException e) {
-                    log.info("insert is fail,{}", e.toString());
+                    log.info("insert  fail,{}", e.toString());
                     Thread.currentThread().interrupt();
-                    break;
+                    flag = false;
                 }
             }
         }

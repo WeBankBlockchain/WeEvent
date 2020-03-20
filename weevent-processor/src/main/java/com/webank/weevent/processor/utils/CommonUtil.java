@@ -134,22 +134,18 @@ public class CommonUtil {
     public static List<String> getKeys(String objJson) {
         List<String> keys = new ArrayList<>();
         try {
-            Map<String, Object> map = JsonHelper.json2Object(objJson, new TypeReference<Map<String, Object>>() {
-            });
-
             if (JsonHelper.isValid(objJson)) {
+                Map<String, Object> map = JsonHelper.json2Object(objJson, new TypeReference<Map<String, Object>>() {
+                });
                 for (Map.Entry<String, Object> entry : map.entrySet()) {
                     keys.add(entry.getKey());
                 }
-            } else {
-                keys = Collections.emptyList();
             }
-
+            return keys;
         } catch (Exception e) {
-            keys = Collections.emptyList();
-            log.info("json get key error");
+            log.info("json get key error", e);
+            return Collections.emptyList();
         }
-        return keys;
     }
 
     public static boolean checkJson(String content, String objJson) {
