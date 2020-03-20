@@ -8,12 +8,14 @@ import javax.sql.DataSource;
 
 import com.webank.weevent.processor.ProcessorApplication;
 
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.Scheduler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
 @Configuration
+@Slf4j
 public class QuartzConfig {
 
     private JobFactory jobFactory;
@@ -28,10 +30,9 @@ public class QuartzConfig {
     @Bean
     public SchedulerFactoryBean schedulerFactoryBean() {
         SchedulerFactoryBean factory = new SchedulerFactoryBean();
-        try {
-            if (this.getClass().getClassLoader().getResource("processor.properties") != null) {
-                String fileUtl = this.getClass().getClassLoader().getResource("processor.properties").getPath();
-                FileInputStream in = new FileInputStream(fileUtl);
+        if (this.getClass().getClassLoader().getResource("processor.properties") != null) {
+            String fileUtl = this.getClass().getClassLoader().getResource("processor.properties").getPath();
+            try (FileInputStream in = new FileInputStream(fileUtl)) {
                 Properties quartzPropertie = new Properties();
                 quartzPropertie.load(in);
                 quartzPropertie.setProperty("org.quartz.jobStore.class", "org.quartz.impl.jdbcjobstore.JobStoreTX");
@@ -54,14 +55,11 @@ public class QuartzConfig {
                 // use Spring datasource
                 factory.setDataSource((DataSource) ProcessorApplication.applicationContext.getBean(DataSource.class));
                 factory.setJobFactory(jobFactory);
-
-                in.close();
+            } catch (IOException e) {
+                log.error("create SchedulerFactory fail", e);
+                e.printStackTrace();
             }
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-
         return factory;
     }
 
