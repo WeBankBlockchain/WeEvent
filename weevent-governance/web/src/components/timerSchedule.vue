@@ -63,7 +63,7 @@
         <div class='no_dbList' v-show="dbList.length === 0">{{$t('timerSchedule.noDbList')}} <span @click="creatDB" >{{$t('ruleDetail.setGuide')}}</span></div>
       </el-form-item>
       <el-form-item :label="$t('timerSchedule.periodParams') + ':'" prop='periodParams'>
-        <el-input v-model.trim="form.periodParams" autocomplete="off" placeholder="*/5 * * * * ?"></el-input>
+        <el-input v-model="form.periodParams" autocomplete="off" placeholder="*/5 * * * * ?"></el-input>
       </el-form-item>
       <el-form-item :label="$t('timerSchedule.parsingSql') + ':'" prop='parsingSql'>
         <el-input v-model.trim="form.parsingSql" autocomplete="off" type='textarea' :rows='5' placeholder="select count(1) from TIMER_SCHEDULER_JOB"></el-input>
@@ -143,13 +143,13 @@ export default {
   watch: {
     showlog (nVal) {
       if (!nVal) {
+        this.$refs.form.resetFields()
         this.form.schedulerName = ''
         this.form.ruleDatabaseId = ''
         this.form.periodParams = ''
         this.form.parsingSql = ''
         this.type = 1
         this.title = this.$t('timerSchedule.addScheduler')
-        this.$refs.form.resetFields()
       }
     }
   },
