@@ -27,6 +27,7 @@ import com.webank.weevent.processor.model.CEPRule;
 import com.fasterxml.jackson.core.type.TypeReference;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.dbcp2.BasicDataSourceFactory;
 import org.springframework.util.StringUtils;
@@ -68,6 +69,7 @@ public class CommonUtil {
                 ds.setInitialSize(Integer.parseInt(Objects.requireNonNull(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.initial-size"))));
                 ds.setMinIdle(Integer.parseInt(Objects.requireNonNull(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.min-idle"))));
                 ds.setMaxWaitMillis(Integer.parseInt(Objects.requireNonNull(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.max-wait-millis"))));
+                ds.setMaxTotal(Integer.parseInt(Objects.requireNonNull(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.max-total"))));
 
                 return ds.getConnection();
             }
@@ -152,11 +154,12 @@ public class CommonUtil {
     public static boolean checkJson(String content, String objJson) {
         boolean tag = true;
         //parsing and match
-        if (!StringUtils.isEmpty(content)
-                && !StringUtils.isEmpty(objJson)) {
+        if (!StringUtils.isEmpty(content) && !StringUtils.isEmpty(objJson)) {
             List<String> contentKeys = getKeys(content);
             List<String> objJsonKeys = getKeys(objJson);
-
+            if (CollectionUtils.isEmpty(objJsonKeys)) {
+                return false;
+            }
             for (String contentKey : contentKeys) {
                 if (!((objJsonKeys.contains(contentKey)) || "eventId".equals(contentKey))) {
                     tag = false;

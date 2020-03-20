@@ -16,14 +16,5 @@ public enum CheckTypeEnum {
         this.value = value;
     }
 
-    public String getValueByCode(Integer code) {
-        for (CheckTypeEnum isDeleteEnum : CheckTypeEnum.values()) {
-            if (isDeleteEnum.code.equals(code)) {
-                return isDeleteEnum.value;
-            }
-        }
-        return null;
-    }
-
 
 }
