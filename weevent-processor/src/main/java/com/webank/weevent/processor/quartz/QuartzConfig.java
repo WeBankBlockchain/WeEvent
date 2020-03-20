@@ -56,6 +56,7 @@ public class QuartzConfig {
                 factory.setDataSource((DataSource) ProcessorApplication.applicationContext.getBean(DataSource.class));
                 factory.setJobFactory(jobFactory);
             } catch (IOException e) {
+                log.error("create SchedulerFactory fail", e);
                 e.printStackTrace();
             }
         }

@@ -69,7 +69,6 @@ public class CommonUtil {
                 ds.setInitialSize(Integer.parseInt(Objects.requireNonNull(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.initial-size"))));
                 ds.setMinIdle(Integer.parseInt(Objects.requireNonNull(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.min-idle"))));
                 ds.setMaxWaitMillis(Integer.parseInt(Objects.requireNonNull(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.max-wait-millis"))));
-                ds.setMaxIdle(Integer.parseInt(Objects.requireNonNull(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.max-idle"))));
                 ds.setMaxTotal(Integer.parseInt(Objects.requireNonNull(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.max-total"))));
 
                 return ds.getConnection();

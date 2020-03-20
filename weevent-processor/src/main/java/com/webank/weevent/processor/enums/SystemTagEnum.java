@@ -16,14 +16,4 @@ public enum SystemTagEnum {
         this.value = value;
     }
 
-    public String getValueByCode(String code) {
-        for (SystemTagEnum isDeleteEnum : SystemTagEnum.values()) {
-            if (isDeleteEnum.code.equals(code)) {
-                return isDeleteEnum.value;
-            }
-        }
-        return null;
-    }
-
-
 }
