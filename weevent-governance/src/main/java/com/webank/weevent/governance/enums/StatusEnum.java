@@ -17,14 +17,4 @@ public enum StatusEnum {
         this.value = value;
     }
 
-    public String getValueByCode(Integer code) {
-        for (StatusEnum isDeleteEnum : StatusEnum.values()) {
-            if (isDeleteEnum.code.equals(code)) {
-                return isDeleteEnum.value;
-            }
-        }
-        return null;
-    }
-
-
 }
