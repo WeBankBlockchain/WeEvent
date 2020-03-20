@@ -161,8 +161,9 @@ public class WebSocketTransport extends WebSocketClient {
             this.send(req);
             return response.get(this.timeout, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            log.error("stomp command invoke Interrupted, seq: " + asyncSeq, e);
-            throw WeEventConnectionFactory.error2JMSException(ErrorCode.SDK_JMS_EXCEPTION_STOMP_EXECUTE);
+            log.error("stomp command invoke Interrupted, seq: " + asyncSeq);
+            Thread.currentThread().interrupt();
+            return null;
         } catch (TimeoutException e) {
             log.error("stomp command invoke timeout, seq: " + asyncSeq, e);
             throw WeEventConnectionFactory.error2JMSException(ErrorCode.SDK_JMS_EXCEPTION_STOMP_TIMEOUT);
@@ -382,7 +383,8 @@ public class WebSocketTransport extends WebSocketClient {
                     }
                 }
             } catch (InterruptedException e) {
-                log.error("auto reconnect failed", e);
+                log.error("InterruptedException while auto reconnect");
+                Thread.currentThread().interrupt();
             }
 
             for (Map.Entry<String, WeEventTopic> subscription : this.webSocketTransport.subscription2EventCache.entrySet()) {
