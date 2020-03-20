@@ -47,15 +47,20 @@ public class DataBaseUtil {
 
                     StringBuffer query = insertExpression.append(values);
                     log.info("query:{}", query);
-                    PreparedStatement preparedStmt = conn.prepareStatement(query.toString());
-                    for (int t = 0; t < keys.size(); t++) {
-                        preparedStmt.setString(t + 1, sqlvalue.get(keys.get(t)));
+                    int res = 0;
+                    try (PreparedStatement preparedStmt = conn.prepareStatement(query.toString())) {
+                        for (int t = 0; t < keys.size(); t++) {
+                            preparedStmt.setString(t + 1, sqlvalue.get(keys.get(t)));
+                        }
+                        log.info("preparedStmt:{}", preparedStmt.toString());
+                        // execute the prepared statement
+                        res = preparedStmt.executeUpdate();
+                        preparedStmt.close();
+                        conn.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
                     }
-                    log.info("preparedStmt:{}", preparedStmt.toString());
-                    // execute the prepared statement
-                    int res = preparedStmt.executeUpdate();
-                    preparedStmt.close();
-                    conn.close();
+
 
                     if (res > 0) {
                         log.info("insert db success...");
