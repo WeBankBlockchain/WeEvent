@@ -10,10 +10,16 @@ fi
 for module in $(ls -l|grep ^d|awk '{print $9}');
 do
     # every directory is a single module
-    if [[ ${module} != "lib" ]];then
+    if [[ ${module} != "lib" &&  ${module} != "zookeeper" ]];then
         cd ${module};
         ./${module}.sh start;
     fi
+
+    if [[ ${module} = "zookeeper" ]];then
+        cd ${current_path}/zookeeper/apache-zookeeper-3.6.0-bin/bin/;
+        ./zkServer.sh start;
+    fi
+
     cd ${current_path}
 done
 
