@@ -163,6 +163,7 @@ public class WebSocketTransport extends WebSocketClient {
         } catch (InterruptedException e) {
             log.error("stomp command invoke Interrupted, seq: " + asyncSeq);
             Thread.currentThread().interrupt();
+            return null;
         } catch (TimeoutException e) {
             log.error("stomp command invoke timeout, seq: " + asyncSeq, e);
             throw WeEventConnectionFactory.error2JMSException(ErrorCode.SDK_JMS_EXCEPTION_STOMP_TIMEOUT);
