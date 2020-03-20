@@ -386,7 +386,7 @@ public class FabricSDKWrapper {
             long lastestblcokNum = blockInfo.getBlockNumber();
 
             int blockSize = ((int) lastestblcokNum <= pageIndex * pageSize) ? ((int) lastestblcokNum - ((pageIndex - 1) * pageSize)) : pageSize;
-            long blockNumberIndex = (pageIndex - 1) * pageSize + 1;
+            long blockNumberIndex = (long) pageSize * (pageIndex - 1) + 1;
 
             List<Long> blockNums = new ArrayList<>();
             for (int i = 0; i < blockSize; i++) {
