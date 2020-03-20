@@ -57,7 +57,7 @@
           <el-input v-model.trim="form.brokerUrl" autocomplete="off"  :placeholder="$t('serverSet.borkerPlaceholder')" :disabled="isEdit"></el-input>
           <p class='version' v-show="version" v-html="version"></p>
         </el-form-item>
-        <el-form-item :label="$t('serverSet.webaseURLAddress') + ' :'" prop='webaseUrl'>
+        <el-form-item :label="$t('serverSet.webaseURLAddress') + ' :'" >
           <el-input v-model.trim="form.webaseUrl" autocomplete="off"  :placeholder="$t('serverSet.webasePlaceholder')"></el-input>
         </el-form-item>
         <el-form-item :label="$t('serverSet.authorized') + ' :'" v-show='showAccount'>
@@ -127,13 +127,6 @@ export default {
         }
       }
     }
-    var checkWeBase = (rule, value, callback) => {
-      if (value === '') {
-        callback()
-      } else {
-        callback()
-      }
-    }
     return {
       version: '',
       showVersion: false,
@@ -156,9 +149,6 @@ export default {
         ],
         brokerUrl: [
           { required: true, validator: checkBroker, trigger: 'blur' }
-        ],
-        webaseUrl: [
-          { validator: checkWeBase, trigger: 'blur' }
         ]
       }
     }
