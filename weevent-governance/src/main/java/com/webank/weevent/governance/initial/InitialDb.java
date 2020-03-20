@@ -120,6 +120,6 @@ public class InitialDb implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        log.error("resource is close");
+        log.info("resource is close");
     }
 }
