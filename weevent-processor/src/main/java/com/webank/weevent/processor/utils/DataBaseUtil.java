@@ -55,10 +55,8 @@ public class DataBaseUtil {
                         log.info("preparedStmt:{}", preparedStmt.toString());
                         // execute the prepared statement
                         res = preparedStmt.executeUpdate();
-                        preparedStmt.close();
-                        conn.close();
                     } catch (SQLException e) {
-                        e.printStackTrace();
+                        log.error("insert db fail", e);
                     }
 
 
