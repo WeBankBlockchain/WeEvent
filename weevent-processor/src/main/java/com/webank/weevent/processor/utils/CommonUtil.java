@@ -134,14 +134,9 @@ public class CommonUtil {
     public static List<String> getKeys(String objJson) {
         List<String> keys = new ArrayList<>();
         try {
-            if (JsonHelper.isValid(objJson)) {
-                Map<String, Object> map = JsonHelper.json2Object(objJson, new TypeReference<Map<String, Object>>() {
-                });
-                for (Map.Entry<String, Object> entry : map.entrySet()) {
-                    keys.add(entry.getKey());
-                }
-            }
-            return keys;
+            Map<String, Object> map = JsonHelper.json2Object(objJson, new TypeReference<Map<String, Object>>() {
+            });
+            return Arrays.asList(map.keySet().toArray(new String[]{}));
         } catch (Exception e) {
             log.info("json get key error", e);
             return Collections.emptyList();
