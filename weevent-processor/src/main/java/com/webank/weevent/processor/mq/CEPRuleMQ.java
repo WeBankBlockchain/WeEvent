@@ -435,9 +435,10 @@ public class CEPRuleMQ {
     }
 
     private static class DBThread implements Runnable {
+        private volatile boolean flag = false;
 
         public void run() {
-            while (true) {
+            while (!flag) {
                 try {
                     // if the quene is null,then the thread sleep 1s
                     long ideaTime = 1000L;
@@ -453,7 +454,9 @@ public class CEPRuleMQ {
                         }
                     }
                 } catch (InterruptedException e) {
-                    log.info(e.toString());
+                    log.info("insert  fail,{}", e.toString());
+                    Thread.currentThread().interrupt();
+                    flag = true;
                 }
             }
         }

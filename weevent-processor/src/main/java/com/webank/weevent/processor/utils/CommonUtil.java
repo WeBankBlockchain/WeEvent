@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -27,6 +28,7 @@ import com.webank.weevent.processor.model.CEPRule;
 import com.fasterxml.jackson.core.type.TypeReference;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.dbcp2.BasicDataSourceFactory;
 import org.springframework.util.StringUtils;
@@ -68,6 +70,7 @@ public class CommonUtil {
                 ds.setInitialSize(Integer.parseInt(Objects.requireNonNull(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.initial-size"))));
                 ds.setMinIdle(Integer.parseInt(Objects.requireNonNull(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.min-idle"))));
                 ds.setMaxWaitMillis(Integer.parseInt(Objects.requireNonNull(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.max-wait-millis"))));
+                ds.setMaxTotal(Integer.parseInt(Objects.requireNonNull(ProcessorApplication.environment.getProperty("spring.datasource.dbcp2.max-total"))));
 
                 return ds.getConnection();
             }
@@ -133,30 +136,22 @@ public class CommonUtil {
         try {
             Map<String, Object> map = JsonHelper.json2Object(objJson, new TypeReference<Map<String, Object>>() {
             });
-
-            if (JsonHelper.isValid(objJson)) {
-                for (Map.Entry<String, Object> entry : map.entrySet()) {
-                    keys.add(entry.getKey());
-                }
-            } else {
-                keys = null;
-            }
-
+            return Arrays.asList(map.keySet().toArray(new String[]{}));
         } catch (Exception e) {
-            keys = null;
-            log.info("json get key error");
+            log.info("json get key error", e);
+            return Collections.emptyList();
         }
-        return keys;
     }
 
     public static boolean checkJson(String content, String objJson) {
         boolean tag = true;
         //parsing and match
-        if (!StringUtils.isEmpty(content)
-                && !StringUtils.isEmpty(objJson)) {
+        if (!StringUtils.isEmpty(content) && !StringUtils.isEmpty(objJson)) {
             List<String> contentKeys = getKeys(content);
             List<String> objJsonKeys = getKeys(objJson);
-
+            if (CollectionUtils.isEmpty(objJsonKeys)) {
+                return false;
+            }
             for (String contentKey : contentKeys) {
                 if (!((objJsonKeys.contains(contentKey)) || "eventId".equals(contentKey))) {
                     tag = false;

@@ -15,6 +15,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
+import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.dto.GroupGeneral;
 import com.webank.weevent.core.dto.ListPage;
 import com.webank.weevent.core.dto.TbBlock;
@@ -23,10 +27,6 @@ import com.webank.weevent.core.dto.TbTransHash;
 import com.webank.weevent.core.fisco.constant.WeEventConstants;
 import com.webank.weevent.core.fisco.util.DataTypeUtils;
 import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegate;
-import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.client.ErrorCode;
-import com.webank.weevent.client.JsonHelper;
-import com.webank.weevent.client.WeEvent;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
@@ -369,14 +369,13 @@ public class Web3SDK2Wrapper {
                 blockCount = 1;
                 getTbBlockList(tbBlocks, block);
             } else {
-                Integer blockNum = web3j.getBlockNumber().sendAsync().get(timeout, TimeUnit.MILLISECONDS).getBlockNumber().intValue();
-
-                if (pageIndex < 1 || (pageIndex - 1) * pageSize > blockNum.longValue()) {
+                int blockNum = web3j.getBlockNumber().sendAsync().get(timeout, TimeUnit.MILLISECONDS).getBlockNumber().intValue();
+                if (pageIndex < 1 || (pageIndex - 1) * pageSize > blockNum) {
                     log.error("pageIndex error.");
                     throw new BrokerException("pageIndex error.");
                 }
-                Integer blockSize = (blockNum.longValue() <= pageIndex * pageSize) ? (blockNum - ((pageIndex - 1) * pageSize)) : pageSize;
-                long blockNumberIndex = (pageIndex - 1) * pageSize + 1;
+                int blockSize = (blockNum <= pageIndex * pageSize) ? (blockNum - ((pageIndex - 1) * pageSize)) : pageSize;
+                long blockNumberIndex = (long) pageSize * (pageIndex - 1) + 1;
 
                 List<Long> blockNums = new ArrayList<>();
                 for (int i = 0; i < blockSize; i++) {
