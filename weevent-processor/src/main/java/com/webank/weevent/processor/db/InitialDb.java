@@ -29,9 +29,14 @@ public class InitialDb implements AutoCloseable {
     private static Properties properties;
 
     public static void main(String[] args) throws Exception {
-        InitialDb initialDb = new InitialDb();
-        properties = initialDb.getProperties();
-        initialDb.createDataBase();
+        try (InitialDb initialDb = new InitialDb()) {
+            properties = initialDb.getProperties();
+            initialDb.createDataBase();
+        } catch (Exception e) {
+            log.error("create database fail", e);
+            throw new Exception("create database fail", e);
+        }
+
     }
 
     private void createDataBase() throws Exception {
@@ -80,8 +85,8 @@ public class InitialDb implements AutoCloseable {
         }
         String[] sqlArr = sqlBuffer.toString().split("(;\\s*\\r\\n)|(;\\s*\\n)");
 
-        for (int i = 0; i < sqlArr.length; i++) {
-            String sql = sqlArr[i].replaceAll("--.*", "").trim();
+        for (String s : sqlArr) {
+            String sql = s.replaceAll("--.*", "").trim();
             if (!("").equals(sql)) {
                 sqlList.add(sql);
             }

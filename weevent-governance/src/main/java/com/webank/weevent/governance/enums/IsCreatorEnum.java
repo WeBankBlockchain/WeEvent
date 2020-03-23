@@ -16,14 +16,4 @@ public enum IsCreatorEnum {
         this.value = value;
     }
 
-    public String getValueByCode(Integer code) {
-        for (IsCreatorEnum isDeleteEnum : IsCreatorEnum.values()) {
-            if (isDeleteEnum.code.equals(code)) {
-                return isDeleteEnum.value;
-            }
-        }
-        return null;
-    }
-
-
 }
