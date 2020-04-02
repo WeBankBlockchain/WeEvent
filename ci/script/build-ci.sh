@@ -1,53 +1,85 @@
 #!/bin/bash
 
-nodes=$NODEPORT
+current_path=$(pwd)
+java_home_path=$(echo ${JAVA_HOME})
 
-function gradleBroker(){
-
-    cd weevent-broker
-    gradle build -x test
+function updateOpenssl(){
+    # update openssl version
+    echo "updateOpenssl"
+    cd ~
+    sudo apt-get install -y openssl curl
+    sudo apt-get update && sudo apt-get upgrade -y
+    sudo apt-get install gcc make -y
+    curl https://ftp.openssl.org/source/old/1.0.2/openssl-1.0.2j.tar.gz | tar xz && cd openssl-1.0.2j && sudo ./config && sudo make && sudo make install
+    sudo ln -sf /usr/local/ssl/bin/openssl /usr/bin/openssl
+    openssl version
 }
 
+function installFisco(){
+    #install and start fisco bcos
+    cd ~ && mkdir -p fisco && cd fisco
+    curl -LO https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v2.2.0/build_chain.sh && chmod u+x build_chain.sh
+    bash build_chain.sh -l "127.0.0.1:4" -p 30300,20200,8545 -i
+    bash nodes/127.0.0.1/start_all.sh
 
-function updateFisco(){
-    cd dist
-    ls
-    cp ./conf/fisco.properties ./conf/fisco.properties.default
-    # set the nodes
-    sed -i "/nodes=/cnodes=${nodes}" ./conf/fisco.properties
+    #copy file
+    cp ${HOME}/fisco/nodes/127.0.0.1/sdk/* ${current_path}/weevent-broker/src/main/resources/v2/
+    cp ${HOME}/fisco/nodes/127.0.0.1/sdk/* ${current_path}/weevent-core/src/main/resources/
+}
+
+function installZookeeper(){
+    #unzip file
+    cd ${current_path}/weevent-build/modules/zookeeper/
+    tar -zxf apache-zookeeper-3.6.0-bin.tar.gz
+
+    #modify configuration
+    sed -i '158s#\\#"-Dzookeeper.admin.enableServer=false" \\#' ${current_path}/weevent-build/modules/zookeeper/apache-zookeeper-3.6.0-bin/bin/zkServer.sh
+    chmod +x ${current_path}/weevent-build/modules/zookeeper/apache-zookeeper-3.6.0-bin/bin/zkServer.sh
+    cp ${current_path}/weevent-build/modules/zookeeper/apache-zookeeper-3.6.0-bin/conf/zoo_sample.cfg ${current_path}/weevent-build/modules/zookeeper/apache-zookeeper-3.6.0-bin/conf/zoo.cfg
+    sed -i '$a\dataDir=/tmp/zk_data' ${current_path}/weevent-build/modules/zookeeper/apache-zookeeper-3.6.0-bin/conf/zoo.cfg
+    sed -i '$a\dataLogDir=/tmp/zk_logs' ${current_path}/weevent-build/modules/zookeeper/apache-zookeeper-3.6.0-bin/conf/zoo.cfg
+
+    #start zookeeper
+    cd ${current_path}/weevent-build/modules/zookeeper/apache-zookeeper-3.6.0-bin/bin/
+    ./zkServer.sh start
+}
+
+function gradleBuild(){
+    cd ${current_path}
+    ./gradlew build -x test
 }
 
 # deploy contract and get the address
-function getContractAddress(){
+function deployContract(){
+    # modify configuration
+    cd ${current_path}/weevent-broker/dist/
+    if [[ -e deploy-topic-control.sh ]];then
+        sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" deploy-topic-control.sh
+    fi
     # deploy contract
-    chomod +x /weevent-broker/dist/deploy-topic-control.sh
-    ./weevent-broker/dist/deploy-topic-control.sh 1
-    # get address
-    contractAddress=$(cat ./address.txt)
-    # set topic-controller.address
-    echo "contract_address:"$contractAddress
-    sed -i "/topic-controller.address=/ctopic-controller.address=${contractAddress}" ./conf/fisco.properties
+    chmod +x deploy-topic-control.sh
+    ./deploy-topic-control.sh
 }
 
-function checkService() {
+function startBrokerService() {
+    # modify configuration
+    cd ${current_path}/weevent-broker/dist/
+    if [[ -e broker.sh ]];then
+        sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" broker.sh
+    fi
+
     # start broker service
+    chmod +x broker.sh
     ./broker.sh start
-    ./check-service.sh
-}
-
-# clean up useless staff
-function cleanup(){
-    # reset the fisco
-    rm -rf  ./conf/fisco.properties
-    mv ./conf/fisco.properties.default ./conf/fisco.properties
 }
 
 function main(){
-    gradleBroker
-    updateFisco
-    getContractAddress
-    checkService
-    cleanup
+    updateOpenssl
+    installFisco
+    installZookeeper
+    gradleBuild
+    deployContract
+    startBrokerService
 }
 
 main

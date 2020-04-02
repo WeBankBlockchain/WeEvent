@@ -39,6 +39,7 @@ public class JsonRpcTest extends JUnitTestBase {
 
         JsonRpcHttpClient client = new JsonRpcHttpClient(new URL(url));
         this.iBrokerRpc = ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);
+        iBrokerRpc.open(this.jsonTopic, this.groupId);
         this.eventId = iBrokerRpc.publish(this.jsonTopic, this.groupId, this.content.getBytes(), new HashMap<>()).getEventId();
 
         client.setExceptionResolver(response -> {
@@ -120,6 +121,7 @@ public class JsonRpcTest extends JUnitTestBase {
 
     @Test
     public void testPublishNoGroupIdExt() throws BrokerException {
+        iBrokerRpc.open(this.jsonTopic, "");
         SendResult publish = iBrokerRpc.publish(this.jsonTopic, "", "Hello World!".getBytes(), new HashMap<>());
         log.info("publish: " + publish);
         Assert.assertNotNull(publish.getEventId());
@@ -129,6 +131,7 @@ public class JsonRpcTest extends JUnitTestBase {
     public void testPublishWithGroupIdNoExt() throws BrokerException {
         Map<String, String> ext = new HashMap<>();
         ext.put("weevent-jsonrpctest1", "json rpc ext value1");
+        iBrokerRpc.open(this.jsonTopic, this.groupId);
         SendResult publish = iBrokerRpc.publish(this.jsonTopic, this.groupId, this.content.getBytes(), ext);
         log.info("publish: " + publish);
         Assert.assertNotNull(publish.getEventId());
@@ -139,6 +142,7 @@ public class JsonRpcTest extends JUnitTestBase {
         Map<String, String> ext = new HashMap<>();
         ext.put("weevent-jsonrpctest1", "json rpc ext value1");
         ext.put("weevent-jsonrpctest2", "json rpc ext value2");
+        iBrokerRpc.open(this.jsonTopic, "");
         SendResult publish = iBrokerRpc.publish(this.jsonTopic, "", this.content.getBytes(), new HashMap<>());
         log.info("publish: " + publish);
         Assert.assertNotNull(publish.getEventId());
@@ -149,6 +153,7 @@ public class JsonRpcTest extends JUnitTestBase {
         Map<String, String> ext = new HashMap<>();
         ext.put("weevent-jsonrpctest1", "json rpc ext value1");
         ext.put("weevent-jsonrpctest2", "json rpc ext value2");
+        iBrokerRpc.open(this.jsonTopic, this.groupId);
         SendResult publish = iBrokerRpc.publish(this.jsonTopic, this.groupId, this.content.getBytes(), ext);
         log.info("publish: " + publish);
         Assert.assertNotNull(publish.getEventId());
@@ -157,6 +162,7 @@ public class JsonRpcTest extends JUnitTestBase {
     @Test
     public void testPublishContentEq10K() throws BrokerException {
         String str = get10KStr();
+        iBrokerRpc.open(this.jsonTopic, this.groupId);
         SendResult publish = iBrokerRpc.publish(this.jsonTopic, this.groupId, str.getBytes(), extension);
         log.info("publish: " + publish);
         Assert.assertNotNull(publish.getEventId());
@@ -166,6 +172,7 @@ public class JsonRpcTest extends JUnitTestBase {
     public void testPublishContentGt10K() {
         String str = get10KStr() + "s";
         try {
+            iBrokerRpc.open(this.jsonTopic, this.groupId);
             SendResult publish = iBrokerRpc.publish(this.jsonTopic, this.groupId, str.getBytes(), extension);
             Assert.assertNull(publish);
         } catch (BrokerException e) {
@@ -178,6 +185,7 @@ public class JsonRpcTest extends JUnitTestBase {
     public void testPublishExtEq1K() {
         Map<String, String> ext = get1KMap();
         try {
+            iBrokerRpc.open(this.jsonTopic, this.groupId);
             SendResult publish = iBrokerRpc.publish(this.jsonTopic, this.groupId, this.content.getBytes(), ext);
             log.info("publish: " + publish);
             Assert.assertNotNull(publish.getEventId());
@@ -192,6 +200,7 @@ public class JsonRpcTest extends JUnitTestBase {
         Map<String, String> ext = get1KMap();
         ext.put("weevent-key2", "value2");
         try {
+            iBrokerRpc.open(this.jsonTopic, this.groupId);
             SendResult publish = iBrokerRpc.publish(this.jsonTopic, this.groupId, this.content.getBytes(), ext);
             Assert.assertNull(publish);
         } catch (BrokerException e) {
