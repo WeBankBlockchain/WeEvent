@@ -40,8 +40,6 @@ public class JsonRpcTest extends JUnitTestBase {
 
         JsonRpcHttpClient client = new JsonRpcHttpClient(new URL(url));
         this.iBrokerRpc = ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);
-        iBrokerRpc.open(this.jsonTopic, this.groupId);
-        iBrokerRpc.open(this.jsonTopic, "");
         this.eventId = iBrokerRpc.publish(this.jsonTopic, this.groupId, this.content.getBytes(), new HashMap<>()).getEventId();
 
         client.setExceptionResolver(response -> {
@@ -53,27 +51,29 @@ public class JsonRpcTest extends JUnitTestBase {
 
     @Test
     public void testOpenNoGroupId() throws BrokerException {
-        boolean open = iBrokerRpc.open(this.testTopic, "");
+        boolean open = iBrokerRpc.open(this.jsonTopic, "");
         log.info("open topic : " + open);
         Assert.assertTrue(open);
     }
 
     @Test
     public void testOpenWithGroupId() throws BrokerException {
-        boolean open = iBrokerRpc.open(this.testTopic, this.groupId);
+        boolean open = iBrokerRpc.open(this.jsonTopic, this.groupId);
         log.info("open topic : " + open);
         Assert.assertTrue(open);
     }
 
     @Test
     public void testCloseNoGroupId() throws BrokerException {
-        boolean open = iBrokerRpc.close(this.testTopic, "");
-        log.info("close topic : " + open);
-        Assert.assertTrue(open);
+        iBrokerRpc.open(this.testTopic, "");
+        boolean close = iBrokerRpc.close(this.testTopic, "");
+        log.info("close topic : " + close);
+        Assert.assertTrue(close);
     }
 
     @Test
     public void testCloseWithGroupId() throws BrokerException {
+        iBrokerRpc.open(this.testTopic, this.groupId);
         boolean open = iBrokerRpc.close(this.testTopic, this.groupId);
         log.info("close topic : " + open);
         Assert.assertTrue(open);
