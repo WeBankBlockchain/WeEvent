@@ -2,6 +2,7 @@ package com.webank.weevent;
 
 import java.util.concurrent.TimeUnit;
 
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -29,7 +30,7 @@ public class JUnitTestBase {
     public Timeout timeout = new Timeout(120, TimeUnit.SECONDS);
 
     @Test
-    public void testCaseVoid() {
-
+    public void testBuild() {
+        Assert.assertTrue(true);
     }
 }
