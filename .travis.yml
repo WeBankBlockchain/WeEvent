@@ -25,8 +25,7 @@ cache:
     - $HOME/.gradle/wrapper/
 
 script:
-  - chmod +x project/build-ci.sh
-  - project/build-ci.sh
+  - /bin/bash project/build-ci.sh
   - chmod +x ./gradlew
   - ./gradlew build
   - ./gradlew check
