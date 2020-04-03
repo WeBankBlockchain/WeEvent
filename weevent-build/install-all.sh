@@ -150,6 +150,7 @@ function install_module(){
         yellow_echo "install module zookeeper"
         ./install-zookeeper.sh --out_path ${out_path}/zookeeper --zookeeper_port $(echo ${zookeeper_connect_string} | cut -d ":" -f2)
         zookeeper_connect_string=$(echo ${zookeeper_connect_string} | sed 's/.*:/127.0.0.1:/')
+        check_result "install zookeeper"
     fi
 
     yellow_echo "install module gateway"
