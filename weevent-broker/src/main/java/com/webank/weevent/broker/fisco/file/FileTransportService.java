@@ -20,7 +20,7 @@ import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.client.WeEventPlus;
 import com.webank.weevent.core.IProducer;
 import com.webank.weevent.core.config.FiscoConfig;
-import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
+import com.webank.weevent.core.fisco.web3sdk.Web3SDKConnector;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;

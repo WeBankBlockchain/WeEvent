@@ -1,4 +1,4 @@
-package com.webank.weevent.core.fisco.web3sdk.v2;
+package com.webank.weevent.core.fisco.web3sdk;
 
 
 import java.util.HashMap;

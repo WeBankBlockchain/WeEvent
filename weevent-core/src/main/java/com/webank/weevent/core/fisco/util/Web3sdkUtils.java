@@ -12,11 +12,10 @@ import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.core.fisco.constant.WeEventConstants;
-import com.webank.weevent.core.fisco.web3sdk.v1.Web3SDKWrapper;
-import com.webank.weevent.core.fisco.web3sdk.v2.CRUDAddress;
-import com.webank.weevent.core.fisco.web3sdk.v2.SupportedVersion;
-import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDK2Wrapper;
-import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
+import com.webank.weevent.core.fisco.web3sdk.CRUDAddress;
+import com.webank.weevent.core.fisco.web3sdk.SupportedVersion;
+import com.webank.weevent.core.fisco.web3sdk.Web3SDK2Wrapper;
+import com.webank.weevent.core.fisco.web3sdk.Web3SDKConnector;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -68,11 +67,7 @@ public class Web3sdkUtils {
             }
 
             if (fiscoConfig.getVersion().startsWith(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {    // 2.0x
-                if (!deployV2Contract(fiscoConfig)) {
-                    systemExit(1);
-                }
-            } else if (fiscoConfig.getVersion().startsWith(WeEventConstants.FISCO_BCOS_1_X_VERSION_PREFIX)) {    // 1.x
-                if (!deployV1Contract(fiscoConfig)) {
+                if (!deployContract(fiscoConfig)) {
                     systemExit(1);
                 }
             } else {
@@ -88,7 +83,7 @@ public class Web3sdkUtils {
         systemExit(0);
     }
 
-    private static boolean deployV2Contract(FiscoConfig fiscoConfig) throws BrokerException {
+    private static boolean deployContract(FiscoConfig fiscoConfig) throws BrokerException {
         org.fisco.bcos.web3j.crypto.Credentials credentials = Web3SDKConnector.getCredentials(fiscoConfig);
 
         Map<Long, org.fisco.bcos.web3j.protocol.Web3j> groups = new HashMap<>();
@@ -184,32 +179,6 @@ public class Web3sdkUtils {
         }
 
         return result;
-    }
-
-    private static boolean deployV1Contract(FiscoConfig fiscoConfig) throws BrokerException {
-        org.bcos.web3j.crypto.Credentials credentials = Web3SDKWrapper.getCredentials(fiscoConfig);
-        org.bcos.web3j.protocol.Web3j web3j = Web3SDKWrapper.initWeb3j(fiscoConfig);
-
-        // check exist first
-        String original = Web3SDKWrapper.getAddress(web3j, credentials, fiscoConfig.getProxyAddress(), fiscoConfig.getWeb3sdkTimeout());
-        if (!StringUtils.isBlank(original)) {
-            log.info("topic control address already exist, address: {}", original);
-            System.out.println(nowTime() + " topic control address: " + original);
-            return false;
-        }
-
-        // deploy topic control
-        String address = Web3SDKWrapper.deployTopicControl(web3j, credentials, fiscoConfig.getWeb3sdkTimeout());
-        log.info("deploy topic control address success, address: {}", address);
-
-        // save topic control address into CNS
-        boolean result = Web3SDKWrapper.addAddress(web3j, credentials, fiscoConfig.getProxyAddress(), address, fiscoConfig.getWeb3sdkTimeout());
-        log.info("save topic control address into CNS, result: {}", result);
-        if (result) {
-            System.out.println(nowTime() + " topic control address: " + address + "\tnew");
-        }
-
-        return true;
     }
 
     private static String nowTime() {

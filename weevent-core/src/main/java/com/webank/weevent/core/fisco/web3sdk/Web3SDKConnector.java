@@ -1,4 +1,4 @@
-package com.webank.weevent.core.fisco.web3sdk.v2;
+package com.webank.weevent.core.fisco.web3sdk;
 
 
 import java.io.IOException;
@@ -127,9 +127,9 @@ public class Web3SDKConnector {
             // connect key and string
             GroupChannelConnectionsConfig connectionsConfig = new GroupChannelConnectionsConfig();
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-            connectionsConfig.setCaCert(resolver.getResource("classpath:" + fiscoConfig.getV2CaCrtPath()));
-            connectionsConfig.setSslCert(resolver.getResource("classpath:" + fiscoConfig.getV2NodeCrtPath()));
-            connectionsConfig.setSslKey(resolver.getResource("classpath:" + fiscoConfig.getV2NodeKeyPath()));
+            connectionsConfig.setCaCert(resolver.getResource("classpath:" + fiscoConfig.getCaCrtPath()));
+            connectionsConfig.setSslCert(resolver.getResource("classpath:" + fiscoConfig.getNodeCrtPath()));
+            connectionsConfig.setSslKey(resolver.getResource("classpath:" + fiscoConfig.getNodeKeyPath()));
 
             ChannelConnections channelConnections = new ChannelConnections();
             channelConnections.setGroupId(groupId.intValue());
@@ -174,7 +174,7 @@ public class Web3SDKConnector {
 
             try {
                 PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-                Resource resource = resolver.getResource("classpath:" + fiscoConfig.getV2PemKeyPath());
+                Resource resource = resolver.getResource("classpath:" + fiscoConfig.getPemKeyPath());
 
                 PEMManager pemManager = new PEMManager();
                 pemManager.load(resource.getInputStream());
