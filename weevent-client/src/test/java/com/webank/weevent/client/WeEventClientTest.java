@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -164,6 +165,7 @@ public class WeEventClientTest {
     }
 
     @Test
+    @Ignore
     public void testPublishFile() throws Exception {
         boolean result = this.weEventClient.open("com.weevent.file");
         Assert.assertTrue(result);
