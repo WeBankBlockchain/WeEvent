@@ -3,6 +3,7 @@ package com.webank.weevent.client;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -28,6 +29,7 @@ public class FileChunksTransportTest {
      * Method: upload(String localFile)
      */
     @Test
+    @Ignore
     public void testUpload() throws Exception {
         SendResult sendResult = this.fileChunksTransport.upload("src/main/resources/log4j2.xml", "com.weevent.file", WeEvent.DEFAULT_GROUP_ID);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
@@ -37,6 +39,7 @@ public class FileChunksTransportTest {
      * Method: download(String host, String fileId)
      */
     @Test
+    @Ignore
     public void testDownload() throws Exception {
         SendResult sendResult = this.fileChunksTransport.upload("src/main/resources/log4j2.xml", "com.weevent.file", WeEvent.DEFAULT_GROUP_ID);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
