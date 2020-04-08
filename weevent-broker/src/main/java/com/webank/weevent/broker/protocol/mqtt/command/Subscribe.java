@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.webank.weevent.broker.protocol.mqtt.BrokerHandler;
+import com.webank.weevent.broker.protocol.mqtt.ProtocolProcess;
 import com.webank.weevent.broker.protocol.mqtt.store.MessageIdStore;
 import com.webank.weevent.broker.protocol.mqtt.store.SessionContext;
 import com.webank.weevent.broker.protocol.mqtt.store.SessionStore;
@@ -75,7 +76,7 @@ public class Subscribe {
         InetSocketAddress socketAddress = (InetSocketAddress) channel.remoteAddress();
         ext.put(IConsumer.SubscribeExt.RemoteIP, socketAddress.getAddress().getHostAddress());
 
-        MqttMessage rsp;
+        List<Integer> mqttQoSList = new ArrayList<>();
         if (msg.payload().topicSubscriptions().size() == 1) {
             String topic = msg.payload().topicSubscriptions().get(0).topicName();
             MqttQoS qos = msg.payload().topicSubscriptions().get(0).qualityOfService();
@@ -89,12 +90,9 @@ public class Subscribe {
                 sessionContext.ifPresent(context -> context.getSubscribeDataList().add(subscribeData));
             }
 
-            rsp = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.SUBACK, false, qos, false, 0),
-                    MqttMessageIdVariableHeader.from(msg.variableHeader().messageId()), null);
+            mqttQoSList.add(qos.ordinal());
         } else {
             // subscribe one by one, because unsubscribe need support one by one
-            List<Integer> mqttQoSList = new ArrayList<>();
-
             msg.payload().topicSubscriptions().forEach(item -> {
                 String subscriptionId = this.subscribe(item.topicName(), "", ext, clientId);
                 if (StringUtils.isEmpty(subscriptionId)) {
@@ -106,12 +104,9 @@ public class Subscribe {
                     mqttQoSList.add(item.qualityOfService().ordinal());
                 }
             });
-
-            rsp = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.SUBACK, false, MqttQoS.AT_LEAST_ONCE, false, 0),
-                    MqttMessageIdVariableHeader.from(msg.variableHeader().messageId()),
-                    new MqttSubAckPayload(mqttQoSList));
         }
 
+        MqttMessage rsp = genSubAck(msg.variableHeader().messageId(), mqttQoSList);
         BrokerHandler.sendRemote(channel, rsp);
     }
 
@@ -142,10 +137,18 @@ public class Subscribe {
         }
     }
 
+    private MqttMessage genSubAck(int messageId, List<Integer> mqttQoSList) {
+        return MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.SUBACK, false, MqttQoS.AT_LEAST_ONCE, false, ProtocolProcess.fixLengthOfMessageId + mqttQoSList.size()),
+                MqttMessageIdVariableHeader.from(messageId),
+                new MqttSubAckPayload(mqttQoSList));
+    }
+
     private void sendEvent(String clientId, String subscriptionId, WeEvent event) {
         ByteBuf payload = Unpooled.buffer();
+        int payloadSize;
         try {
             byte[] content = JsonHelper.object2JsonBytes(event.getContent());
+            payloadSize = content.length;
             payload.writeBytes(content);
         } catch (BrokerException e) {
             log.error("json encode failed, {}", e.getMessage());
@@ -153,13 +156,15 @@ public class Subscribe {
         }
 
         Optional<SessionContext> sessionContext = this.sessionStore.getSession(clientId);
+        int finalPayloadSize = payloadSize;
         sessionContext.ifPresent(context -> {
             Optional<SubscribeData> subscribeDataOptional = context.getSubscribeDataList().stream().filter(item -> item.getSubscriptionId().equals(subscriptionId)).findFirst();
             subscribeDataOptional.ifPresent(subscribe -> {
                 switch (subscribe.getMqttQoS()) {
                     case AT_MOST_ONCE:
                     case AT_LEAST_ONCE:
-                        MqttMessage rsp = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.PUBLISH, false, subscribe.getMqttQoS(), false, 0),
+                        int remaining = ProtocolProcess.fixLengthOfMessageId + subscribe.getTopic().length() + finalPayloadSize;
+                        MqttMessage rsp = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.PUBLISH, false, subscribe.getMqttQoS(), false, remaining),
                                 new MqttPublishVariableHeader(subscribe.getTopic(), this.messageIdStore.getNextMessageId()), payload);
                         BrokerHandler.sendRemote(context.getChannel(), rsp);
                         break;
