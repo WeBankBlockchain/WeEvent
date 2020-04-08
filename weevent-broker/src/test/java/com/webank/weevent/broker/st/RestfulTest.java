@@ -21,7 +21,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 @Slf4j
-public class RestfullTest extends JUnitTestBase {
+public class RestfulTest extends JUnitTestBase {
 
     private String url;
     private RestTemplate rest = null;

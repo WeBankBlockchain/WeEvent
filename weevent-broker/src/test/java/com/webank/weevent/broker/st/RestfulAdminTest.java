@@ -19,7 +19,7 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 @Slf4j
-public class RestfullAdminTest extends JUnitTestBase {
+public class RestfulAdminTest extends JUnitTestBase {
 
     private String url;
     private RestTemplate admin = null;

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.webank.weevent.broker.protocol.mqtt.BrokerHandler;
+import com.webank.weevent.broker.protocol.mqtt.ProtocolProcess;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.SendResult;
 import com.webank.weevent.client.WeEvent;
@@ -82,7 +83,7 @@ public class Publish {
     }
 
     private void sendPubAckMessage(Channel channel, int messageId) {
-        MqttMessage rsp = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.PUBACK, false, MqttQoS.AT_LEAST_ONCE, false, 0),
+        MqttMessage rsp = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.PUBACK, false, MqttQoS.AT_LEAST_ONCE, false, ProtocolProcess.fixLengthOfMessageId),
                 MqttMessageIdVariableHeader.from(messageId), null);
         BrokerHandler.sendRemote(channel, rsp);
     }
