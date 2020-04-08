@@ -52,8 +52,8 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     // JMS sample
     testImplementation("javax.jms:jms:${jmsVersion}")
-    // jmock
-    testImplementation("org.jmockit:jmockit:${jmockVersion}")
+    // mqtt
+    testImplementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:${PahoClientVersion}")
 }
 
 gitProperties {
