@@ -3,6 +3,7 @@ package com.webank.weevent.broker.protocol.mqtt.command;
 import java.util.Optional;
 
 import com.webank.weevent.broker.protocol.mqtt.BrokerHandler;
+import com.webank.weevent.broker.protocol.mqtt.ProtocolProcess;
 import com.webank.weevent.broker.protocol.mqtt.store.SessionContext;
 import com.webank.weevent.broker.protocol.mqtt.store.SessionStore;
 import com.webank.weevent.broker.protocol.mqtt.store.SubscribeData;
@@ -59,7 +60,7 @@ public class UnSubscribe {
             });
         });
 
-        MqttMessage rsp = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.UNSUBACK, false, MqttQoS.AT_LEAST_ONCE, false, 0),
+        MqttMessage rsp = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.UNSUBACK, false, MqttQoS.AT_LEAST_ONCE, false, ProtocolProcess.fixLengthOfMessageId),
                 MqttMessageIdVariableHeader.from(msg.variableHeader().messageId()), null);
         BrokerHandler.sendRemote(channel, rsp);
     }
