@@ -7,12 +7,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.mqtt.MqttConnAckVariableHeader;
 import io.netty.handler.codec.mqtt.MqttConnectMessage;
+import io.netty.handler.codec.mqtt.MqttConnectReturnCode;
+import io.netty.handler.codec.mqtt.MqttFixedHeader;
+import io.netty.handler.codec.mqtt.MqttIdentifierRejectedException;
 import io.netty.handler.codec.mqtt.MqttMessage;
+import io.netty.handler.codec.mqtt.MqttMessageFactory;
 import io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader;
 import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
+import io.netty.handler.codec.mqtt.MqttQoS;
 import io.netty.handler.codec.mqtt.MqttSubscribeMessage;
+import io.netty.handler.codec.mqtt.MqttUnacceptableProtocolVersionException;
 import io.netty.handler.codec.mqtt.MqttUnsubscribeMessage;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
@@ -41,7 +48,31 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
         String channelId = ctx.channel().id().asShortText();
         log.debug("MQTT message in, channelId: {} {} {}", channelId, msg.fixedHeader(), msg.variableHeader());
 
-        // CONNECT is difficult
+        if (msg.decoderResult().isFailure()) {
+            log.error("decode message failed, {}", msg.decoderResult());
+
+            if (msg.fixedHeader().messageType() == MqttMessageType.CONNECT) {
+                MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_LEAST_ONCE, false, 0);
+
+                Throwable cause = msg.decoderResult().cause();
+                if (cause instanceof MqttUnacceptableProtocolVersionException) {
+                    // Unsupported protocol
+                    MqttMessage rsp = MqttMessageFactory.newMessage(fixedHeader,
+                            new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION, false), null);
+                    BrokerHandler.sendRemote(ctx.channel(), rsp);
+                } else if (cause instanceof MqttIdentifierRejectedException) {
+                    // clientId illegal
+                    MqttMessage rsp = MqttMessageFactory.newMessage(fixedHeader,
+                            new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED, false), null);
+                    BrokerHandler.sendRemote(ctx.channel(), rsp);
+                }
+            }
+
+            ctx.close();
+            return;
+        }
+
+        // CONNECT is different from the other command
         if (msg.fixedHeader().messageType() == MqttMessageType.CONNECT) {
             if (this.authorChannels.containsKey(channelId)) {
                 log.error("MUST be CONNECT only once");
@@ -49,7 +80,7 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
                 return;
             }
 
-            String clientId = protocolProcess.getConnect().processConnect(ctx.channel(), (MqttConnectMessage) msg);
+            String clientId = this.protocolProcess.getConnect().processConnect(ctx.channel(), (MqttConnectMessage) msg);
             if (StringUtils.isEmpty(clientId)) {
                 ctx.close();
                 return;
@@ -99,9 +130,8 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
                 break;
 
             default:
-                log.error("unSupport command, {}", msg.fixedHeader().messageType());
+                log.error("DO NOT support command, {}", msg.fixedHeader().messageType());
                 ctx.close();
-                break;
         }
     }
 
