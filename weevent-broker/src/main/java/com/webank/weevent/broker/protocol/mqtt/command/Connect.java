@@ -14,14 +14,12 @@ import io.netty.handler.codec.mqtt.MqttConnAckVariableHeader;
 import io.netty.handler.codec.mqtt.MqttConnectMessage;
 import io.netty.handler.codec.mqtt.MqttConnectReturnCode;
 import io.netty.handler.codec.mqtt.MqttFixedHeader;
-import io.netty.handler.codec.mqtt.MqttIdentifierRejectedException;
 import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttMessageFactory;
 import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
 import io.netty.handler.codec.mqtt.MqttQoS;
-import io.netty.handler.codec.mqtt.MqttUnacceptableProtocolVersionException;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -46,24 +44,6 @@ public class Connect {
     // return clientId if accept
     public String processConnect(Channel channel, MqttConnectMessage msg) {
         MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_LEAST_ONCE, false, 0);
-
-        if (msg.decoderResult().isFailure()) {
-            log.error("decode message failed, {}", msg.decoderResult());
-
-            Throwable cause = msg.decoderResult().cause();
-            if (cause instanceof MqttUnacceptableProtocolVersionException) {
-                // Unsupported protocol
-                MqttMessage rsp = MqttMessageFactory.newMessage(fixedHeader,
-                        new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION, false), null);
-                BrokerHandler.sendRemote(channel, rsp);
-            } else if (cause instanceof MqttIdentifierRejectedException) {
-                // clientId illegal
-                MqttMessage rsp = MqttMessageFactory.newMessage(fixedHeader,
-                        new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED, false), null);
-                BrokerHandler.sendRemote(channel, rsp);
-            }
-            return "";
-        }
 
         String clientId = msg.payload().clientIdentifier();
         if (StringUtils.isBlank(clientId)) {
