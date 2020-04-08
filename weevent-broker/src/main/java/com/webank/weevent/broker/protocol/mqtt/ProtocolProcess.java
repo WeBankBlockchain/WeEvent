@@ -34,6 +34,9 @@ import org.springframework.stereotype.Component;
 @Getter
 @Component
 public class ProtocolProcess {
+    // fix length of message id in variableHeader
+    public static int fixLengthOfMessageId = 2;
+
     private Connect connect;
     private PingReq pingReq;
     private Publish publish;
