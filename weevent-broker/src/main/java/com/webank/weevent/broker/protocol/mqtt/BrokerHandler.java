@@ -43,11 +43,8 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
         this.protocolProcess = protocolProcess;
     }
 
-    @Override
-    protected void channelRead0(ChannelHandlerContext ctx, MqttMessage msg) throws Exception {
-        String channelId = ctx.channel().id().asShortText();
-        log.debug("MQTT message in, channelId: {} {} {}", channelId, msg.fixedHeader(), msg.variableHeader());
-
+    // return false if invalid
+    private boolean validMessage(ChannelHandlerContext ctx, MqttMessage msg) {
         if (msg.decoderResult().isFailure()) {
             log.error("decode message failed, {}", msg.decoderResult());
 
@@ -68,26 +65,42 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
                 }
             }
 
+            return false;
+        }
+
+        return true;
+    }
+
+    private void processConnect(ChannelHandlerContext ctx, MqttMessage msg, String channelId) {
+        if (this.authorChannels.containsKey(channelId)) {
+            log.error("MUST be CONNECT only once");
+            ctx.close();
+            return;
+        }
+
+        String clientId = this.protocolProcess.getConnect().processConnect(ctx.channel(), (MqttConnectMessage) msg);
+        if (StringUtils.isEmpty(clientId)) {
+            ctx.close();
+            return;
+        }
+
+        log.info("MQTT connected, channelId: {} clientId: {}", channelId, clientId);
+        this.authorChannels.put(channelId, clientId);
+    }
+
+    @Override
+    protected void channelRead0(ChannelHandlerContext ctx, MqttMessage msg) {
+        String channelId = ctx.channel().id().asShortText();
+        log.debug("MQTT message in, channelId: {} {} {}", channelId, msg.fixedHeader(), msg.variableHeader());
+
+        if (!this.validMessage(ctx, msg)) {
             ctx.close();
             return;
         }
 
         // CONNECT is different from the other command
         if (msg.fixedHeader().messageType() == MqttMessageType.CONNECT) {
-            if (this.authorChannels.containsKey(channelId)) {
-                log.error("MUST be CONNECT only once");
-                ctx.close();
-                return;
-            }
-
-            String clientId = this.protocolProcess.getConnect().processConnect(ctx.channel(), (MqttConnectMessage) msg);
-            if (StringUtils.isEmpty(clientId)) {
-                ctx.close();
-                return;
-            }
-
-            log.info("MQTT connected, channelId: {} clientId: {}", channelId, clientId);
-            this.authorChannels.put(channelId, clientId);
+            this.processConnect(ctx, msg, channelId);
             return;
         }
 
@@ -132,6 +145,7 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
             default:
                 log.error("DO NOT support command, {}", msg.fixedHeader().messageType());
                 ctx.close();
+                break;
         }
     }
 
