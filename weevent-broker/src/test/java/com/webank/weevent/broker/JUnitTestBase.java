@@ -24,9 +24,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @SpringBootTest(classes = BrokerApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class JUnitTestBase {
     protected String groupId = WeEvent.DEFAULT_GROUP_ID;
-    protected String channelName = "mychannel";
     protected String topicName = "com.weevent.test";
-    protected long transactionTimeout = 30000;
 
     @Rule
     public TestName testName = new TestName();
