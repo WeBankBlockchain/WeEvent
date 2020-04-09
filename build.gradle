@@ -66,7 +66,8 @@ ext {
     WebSocketVersion = "1.4.0"
     // JWTVersion
     JWTVersion = "3.8.0"
-
+    // MQTT paho client
+    PahoClientVersion = "1.2.2"
     // jmeter
     jmeterVersion = "5.0"
 }
@@ -201,7 +202,7 @@ task codeCoverageReport(type: JacocoReport) {
     executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
 
     subprojects.each {
-        sourceSets((SourceSet)it.sourceSets["main"])
+        sourceSets((SourceSet) it.sourceSets["main"])
     }
 
     reports {

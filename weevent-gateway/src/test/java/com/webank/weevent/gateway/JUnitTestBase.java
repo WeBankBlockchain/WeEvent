@@ -1,8 +1,6 @@
-package com.webank.weevent.broker;
+package com.webank.weevent.gateway;
 
 import java.util.concurrent.TimeUnit;
-
-import com.webank.weevent.client.WeEvent;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -21,11 +19,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * @since 2019/02/14
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = BrokerApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = GatewayApplication.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class JUnitTestBase {
-    protected String groupId = WeEvent.DEFAULT_GROUP_ID;
-    protected String topicName = "com.weevent.test";
-
     @Rule
     public TestName testName = new TestName();
 
