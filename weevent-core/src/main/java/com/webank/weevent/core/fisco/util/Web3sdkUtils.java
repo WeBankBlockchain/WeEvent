@@ -14,7 +14,7 @@ import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.core.fisco.constant.WeEventConstants;
 import com.webank.weevent.core.fisco.web3sdk.CRUDAddress;
 import com.webank.weevent.core.fisco.web3sdk.SupportedVersion;
-import com.webank.weevent.core.fisco.web3sdk.Web3SDK2Wrapper;
+import com.webank.weevent.core.fisco.web3sdk.Web3SDKWrapper;
 import com.webank.weevent.core.fisco.web3sdk.Web3SDKConnector;
 
 import lombok.Getter;
@@ -158,7 +158,7 @@ public class Web3sdkUtils {
         }
 
         // deploy topic control
-        String topicControlAddress = Web3SDK2Wrapper.deployTopicControl(web3j, credentials, timeout);
+        String topicControlAddress = Web3SDKWrapper.deployTopicControl(web3j, credentials, timeout);
         log.info("deploy topic control success, group: {} version: {} address: {}", groupId, SupportedVersion.nowVersion, topicControlAddress);
 
         // flush topic info from low into new version

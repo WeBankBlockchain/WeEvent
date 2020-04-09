@@ -26,6 +26,8 @@ import com.webank.weevent.core.dto.TbNode;
 import com.webank.weevent.core.dto.TbTransHash;
 import com.webank.weevent.core.fisco.constant.WeEventConstants;
 import com.webank.weevent.core.fisco.util.DataTypeUtils;
+import com.webank.weevent.core.fisco.web3sdk.solc10.Topic;
+import com.webank.weevent.core.fisco.web3sdk.solc10.TopicController;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +58,7 @@ import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
  * @since 2019/04/22
  */
 @Slf4j
-public class Web3SDK2Wrapper {
+public class Web3SDKWrapper {
     // partial key of FISCO block info
     public final static String BLOCK_NUMBER = "blockNumber";
     public final static String NODE_ID = "nodeId";
@@ -151,8 +153,8 @@ public class Web3SDK2Wrapper {
 
         try {
             // deploy Topic.sol in highest version(Web3SDK2Wrapper.nowVersion)
-            RemoteCall<com.webank.weevent.core.fisco.web3sdk.solc10.Topic> f1 = com.webank.weevent.core.fisco.web3sdk.solc10.Topic.deploy(web3j, credentials, gasProvider);
-            com.webank.weevent.core.fisco.web3sdk.solc10.Topic topic = f1.sendAsync().get(timeout, TimeUnit.MILLISECONDS);
+            RemoteCall<Topic> f1 = Topic.deploy(web3j, credentials, gasProvider);
+            Topic topic = f1.sendAsync().get(timeout, TimeUnit.MILLISECONDS);
             log.info("topic contract address: {}", topic.getContractAddress());
             if (topic.getContractAddress().equals(WeEventConstants.ADDRESS_EMPTY)) {
                 log.error("contract address is empty after Topic.deploy(...)");
@@ -160,8 +162,8 @@ public class Web3SDK2Wrapper {
             }
 
             // deploy TopicController.sol in nowVersion
-            RemoteCall<com.webank.weevent.core.fisco.web3sdk.solc10.TopicController> f2 = com.webank.weevent.core.fisco.web3sdk.solc10.TopicController.deploy(web3j, credentials, gasProvider, topic.getContractAddress());
-            com.webank.weevent.core.fisco.web3sdk.solc10.TopicController topicController = f2.sendAsync().get(timeout, TimeUnit.MILLISECONDS);
+            RemoteCall<TopicController> f2 = TopicController.deploy(web3j, credentials, gasProvider, topic.getContractAddress());
+            TopicController topicController = f2.sendAsync().get(timeout, TimeUnit.MILLISECONDS);
             log.info("topic control contract address: {}", topicController.getContractAddress());
             if (topicController.getContractAddress().equals(WeEventConstants.ADDRESS_EMPTY)) {
                 log.error("contract address is empty after TopicController.deploy(...)");

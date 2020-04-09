@@ -129,7 +129,7 @@ public class FiscoBcos {
     }
 
     public void setListener(FiscoBcosDelegate.IBlockEventListener listener) {
-        Web3SDK2Wrapper.setBlockNotifyCallBack(this.web3j, listener);
+        Web3SDKWrapper.setBlockNotifyCallBack(this.web3j, listener);
     }
 
     public List<String> listGroupId() throws BrokerException {
@@ -155,7 +155,7 @@ public class FiscoBcos {
             throw new BrokerException(ErrorCode.LOAD_CONTRACT_ERROR);
         }
 
-        return Web3SDK2Wrapper.loadContract(contractAddress, this.web3j, this.credentials, cls);
+        return Web3SDKWrapper.loadContract(contractAddress, this.web3j, this.credentials, cls);
     }
 
     public boolean isTopicExist(String topicName) throws BrokerException {
@@ -374,7 +374,7 @@ public class FiscoBcos {
      * @return 0L if net error
      */
     public Long getBlockHeight() throws BrokerException {
-        return Web3SDK2Wrapper.getBlockHeight(this.web3j, this.timeout);
+        return Web3SDKWrapper.getBlockHeight(this.web3j, this.timeout);
     }
 
     /*
@@ -384,29 +384,29 @@ public class FiscoBcos {
      * @return java.lang.Integer null if net error
      */
     public List<WeEvent> loop(Long blockNum) throws BrokerException {
-        return Web3SDK2Wrapper.loop(this.web3j, blockNum, this.historyTopicVersion, this.historyTopicContract, this.timeout);
+        return Web3SDKWrapper.loop(this.web3j, blockNum, this.historyTopicVersion, this.historyTopicContract, this.timeout);
     }
 
     public GroupGeneral getGroupGeneral() throws BrokerException {
-        return Web3SDK2Wrapper.getGroupGeneral(this.web3j, this.timeout);
+        return Web3SDKWrapper.getGroupGeneral(this.web3j, this.timeout);
     }
 
     public ListPage<TbTransHash> queryTransList(String transHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize) throws BrokerException {
-        return Web3SDK2Wrapper.queryTransList(this.web3j, transHash, blockNumber, pageIndex, pageSize, this.timeout);
+        return Web3SDKWrapper.queryTransList(this.web3j, transHash, blockNumber, pageIndex, pageSize, this.timeout);
     }
 
     public ListPage<TbBlock> queryBlockList(String transHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize) throws BrokerException {
-        return Web3SDK2Wrapper.queryBlockList(this.web3j, transHash, blockNumber, pageIndex, pageSize, this.timeout);
+        return Web3SDKWrapper.queryBlockList(this.web3j, transHash, blockNumber, pageIndex, pageSize, this.timeout);
     }
 
     public ListPage<TbNode> queryNodeList() throws BrokerException {
-        return Web3SDK2Wrapper.queryNodeList(this.web3j, this.timeout);
+        return Web3SDKWrapper.queryNodeList(this.web3j, this.timeout);
     }
 
     public ContractContext getContractContext() {
         ContractContext contractContext = new ContractContext();
-        contractContext.setGasLimit(Web3SDK2Wrapper.gasProvider.getGasLimit("").longValue());
-        contractContext.setGasPrice(Web3SDK2Wrapper.gasProvider.getGasPrice("").longValue());
+        contractContext.setGasLimit(Web3SDKWrapper.gasProvider.getGasLimit("").longValue());
+        contractContext.setGasPrice(Web3SDKWrapper.gasProvider.getGasPrice("").longValue());
         contractContext.setTopicAddress(this.topic.getContractAddress());
         contractContext.setBlockNumber(web3j.getBlockNumberCache().longValue() - BlockLimit.blockLimit);
         contractContext.setBlockLimit(web3j.getBlockNumberCache().longValue());
