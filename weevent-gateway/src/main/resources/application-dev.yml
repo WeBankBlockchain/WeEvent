@@ -52,6 +52,13 @@ spring:
           uri: lb://weevent-broker
           predicates:
             - Path=/weevent-broker/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                keyResolver: "#{@UriKeyResolver}"
+                local-memory-rate-limiter:
+                  replenish-rate: 100
+                  burst-capacity: 200
         # governance
         - id: weevent-governance
           uri: lb://weevent-governance
