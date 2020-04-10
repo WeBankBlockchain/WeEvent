@@ -1,8 +1,6 @@
 # web container
 server:
   port: 8080
-  servlet:
-    context-path: /
   ssl:
     enabled: false
     key-store: classpath:server.p12
