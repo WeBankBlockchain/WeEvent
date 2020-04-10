@@ -13,11 +13,9 @@ coverage:
       default:
         enabled: no
         if_not_found: success
-
-ignore:
-  - "weevent-jmeter/**/*"  # ignore folders and all its contents
-  - "weevent-jmeter/src/main/java/com/webank/weevent/jmeter/consumer/WeEventConsumer.java"  # ignore file
-  - "weevent-jmeter/src/main/java/com/webank/weevent/jmeter/producer/WeEventProducer.java"  # ignore file
+codecov:
+  ignore:
+    - "weevent-jmeter/**/*"  # ignore folders and all its contents
 
 comment:
   layout: "reach, diff, flags, files"
