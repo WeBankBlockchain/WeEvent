@@ -15,6 +15,7 @@ import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Bucket4j;
 import io.github.bucket4j.ConsumptionProbe;
 import io.github.bucket4j.Refill;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.ratelimit.AbstractRateLimiter;
 import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
 import org.springframework.validation.annotation.Validated;
@@ -26,6 +27,7 @@ import reactor.core.publisher.Mono;
  * @author matthewliu
  * @since 2020/03/18
  */
+@Slf4j
 public class LocalMemoryLimiter extends AbstractRateLimiter<LocalMemoryLimiter.Config> {
     /*
     filters:
@@ -80,6 +82,7 @@ public class LocalMemoryLimiter extends AbstractRateLimiter<LocalMemoryLimiter.C
             // the limit is not exceeded
             return Mono.just(new Response(true, Collections.emptyMap()));
         } else {
+            log.warn("request rate limited");
             // limit is exceeded
             return Mono.just(new Response(false, getHeaders(routeConfig, 0)));
         }
