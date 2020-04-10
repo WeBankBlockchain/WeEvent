@@ -52,7 +52,7 @@ public class SupportedVersion {
         // support version list
         switch (version) {
             case 10:
-                TopicController topicController = (TopicController) Web3SDKWrapper.loadContract(controlAddress, web3j, credentials, TopicController.class);
+                TopicController topicController = (TopicController) Web3SDK2Wrapper.loadContract(controlAddress, web3j, credentials, TopicController.class);
                 String address = "";
                 try {
                     address = topicController.getTopicAddress().sendAsync().get(timeout, TimeUnit.MILLISECONDS);
@@ -63,7 +63,7 @@ public class SupportedVersion {
                     log.error("getTopicAddress failed due to transaction timeout. ", e);
                     throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
                 }
-                Topic topic = (Topic) Web3SDKWrapper.loadContract(address, web3j, credentials, Topic.class);
+                Topic topic = (Topic) Web3SDK2Wrapper.loadContract(address, web3j, credentials, Topic.class);
 
                 return new ImmutablePair<>(topicController, topic);
 
@@ -78,7 +78,7 @@ public class SupportedVersion {
         int total;
         switch (version.intValue()) {
             case 10:
-                TopicController lowControl = (TopicController) Web3SDKWrapper.loadContract(address, web3j, credentials, TopicController.class);
+                TopicController lowControl = (TopicController) Web3SDK2Wrapper.loadContract(address, web3j, credentials, TopicController.class);
                 final int pageSize = 100;
                 for (int i = 0; true; i++) {
                     try {

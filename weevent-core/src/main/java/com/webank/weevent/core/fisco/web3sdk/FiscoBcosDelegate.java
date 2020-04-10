@@ -42,7 +42,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Slf4j
 public class FiscoBcosDelegate {
     // access to version 2.x
-    private Map<Long, FiscoBcos> fiscoBcos2Map = new ConcurrentHashMap<>();
+    private Map<Long, FiscoBcos2> fiscoBcos2Map = new ConcurrentHashMap<>();
 
     // binding thread pool
     public ThreadPoolTaskExecutor threadPool;
@@ -87,9 +87,9 @@ public class FiscoBcosDelegate {
 
             // 1 is always exist
             Long defaultGId = Long.valueOf(WeEvent.DEFAULT_GROUP_ID);
-            FiscoBcos defaultFiscoBcos = new FiscoBcos(config);
-            defaultFiscoBcos.init(defaultGId);
-            this.fiscoBcos2Map.put(defaultGId, defaultFiscoBcos);
+            FiscoBcos2 defaultFiscoBcos2 = new FiscoBcos2(config);
+            defaultFiscoBcos2.init(defaultGId);
+            this.fiscoBcos2Map.put(defaultGId, defaultFiscoBcos2);
             // this call need default group has been initialized
             List<String> groups = this.listGroupId();
 
@@ -97,9 +97,9 @@ public class FiscoBcosDelegate {
             groups.remove(WeEvent.DEFAULT_GROUP_ID);
             for (String groupId : groups) {
                 Long gid = Long.valueOf(groupId);
-                FiscoBcos fiscoBcos = new FiscoBcos(config);
-                fiscoBcos.init(gid);
-                this.fiscoBcos2Map.put(gid, fiscoBcos);
+                FiscoBcos2 fiscoBcos2 = new FiscoBcos2(config);
+                fiscoBcos2.init(gid);
+                this.fiscoBcos2Map.put(gid, fiscoBcos2);
             }
 
             log.info("all group in nodes: {}", this.fiscoBcos2Map.keySet());
@@ -126,7 +126,7 @@ public class FiscoBcosDelegate {
     public void setListener(@NonNull IBlockEventListener listener) {
         log.info("set IBlockEventListener for every group for FISCO-BCOS 2.x");
 
-        for (Map.Entry<Long, FiscoBcos> entry : fiscoBcos2Map.entrySet()) {
+        for (Map.Entry<Long, FiscoBcos2> entry : fiscoBcos2Map.entrySet()) {
             entry.getValue().setListener(listener);
         }
     }

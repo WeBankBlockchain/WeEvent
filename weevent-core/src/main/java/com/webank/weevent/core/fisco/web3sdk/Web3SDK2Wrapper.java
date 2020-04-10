@@ -58,7 +58,7 @@ import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
  * @since 2019/04/22
  */
 @Slf4j
-public class Web3SDKWrapper {
+public class Web3SDK2Wrapper {
     // partial key of FISCO block info
     public final static String BLOCK_NUMBER = "blockNumber";
     public final static String NODE_ID = "nodeId";

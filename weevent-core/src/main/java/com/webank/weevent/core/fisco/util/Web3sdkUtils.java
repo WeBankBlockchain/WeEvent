@@ -14,7 +14,7 @@ import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.core.fisco.constant.WeEventConstants;
 import com.webank.weevent.core.fisco.web3sdk.CRUDAddress;
 import com.webank.weevent.core.fisco.web3sdk.SupportedVersion;
-import com.webank.weevent.core.fisco.web3sdk.Web3SDKWrapper;
+import com.webank.weevent.core.fisco.web3sdk.Web3SDK2Wrapper;
 import com.webank.weevent.core.fisco.web3sdk.Web3SDKConnector;
 
 import lombok.Getter;
@@ -67,7 +67,7 @@ public class Web3sdkUtils {
             }
 
             if (fiscoConfig.getVersion().startsWith(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {    // 2.0x
-                if (!deployContract(fiscoConfig)) {
+                if (!deployV2Contract(fiscoConfig)) {
                     systemExit(1);
                 }
             } else {
@@ -83,7 +83,7 @@ public class Web3sdkUtils {
         systemExit(0);
     }
 
-    private static boolean deployContract(FiscoConfig fiscoConfig) throws BrokerException {
+    private static boolean deployV2Contract(FiscoConfig fiscoConfig) throws BrokerException {
         org.fisco.bcos.web3j.crypto.Credentials credentials = Web3SDKConnector.getCredentials(fiscoConfig);
 
         Map<Long, org.fisco.bcos.web3j.protocol.Web3j> groups = new HashMap<>();
@@ -158,7 +158,7 @@ public class Web3sdkUtils {
         }
 
         // deploy topic control
-        String topicControlAddress = Web3SDKWrapper.deployTopicControl(web3j, credentials, timeout);
+        String topicControlAddress = Web3SDK2Wrapper.deployTopicControl(web3j, credentials, timeout);
         log.info("deploy topic control success, group: {} version: {} address: {}", groupId, SupportedVersion.nowVersion, topicControlAddress);
 
         // flush topic info from low into new version

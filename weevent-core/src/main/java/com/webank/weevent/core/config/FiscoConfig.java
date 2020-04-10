@@ -50,9 +50,6 @@ public class FiscoConfig {
 
     @Value("${web3sdk.encrypt-type:ECDSA_TYPE}")
     private String web3sdkEncryptType;
-    
-    @Value("${proxy.address:}")
-    private String proxyAddress;
 
     @Value("${ca-crt-path:ca.crt}")
     private String CaCrtPath;
