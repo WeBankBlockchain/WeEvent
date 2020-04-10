@@ -14,15 +14,12 @@ import org.springframework.cloud.client.ServiceInstance;
 @Getter
 @Setter
 public class NamingService {
-    String serviceId;
-    String instanceId;
-    boolean secure;
-    String host;
-    int port;
-    String uri;
-
-    public NamingService() {
-    }
+    private String serviceId;
+    private String instanceId;
+    private boolean secure;
+    private String host;
+    private int port;
+    private String uri;
 
     public static NamingService convert(ServiceInstance instance) {
         NamingService namingService = new NamingService();

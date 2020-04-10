@@ -77,7 +77,7 @@ public class GatewayApplicationTest extends JUnitTestBase {
             HttpHeaders headers = new HttpHeaders();
             headers.add("file_host", "not_exist");
             HttpEntity<?> requestEntity = new HttpEntity<>(headers);
-            ResponseEntity<String> rsp = this.restTemplate.exchange(this.url + "/weevent-broker/admin/getVersion",
+            this.restTemplate.exchange(this.url + "/weevent-broker/admin/getVersion",
                     HttpMethod.GET,
                     requestEntity,
                     String.class,
