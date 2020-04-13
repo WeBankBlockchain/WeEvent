@@ -26,6 +26,7 @@ import org.junit.Test;
 public class JsonRpcTest extends JUnitTestBase {
     private IBrokerRpc iBrokerRpc;
     private String jsonTopic = "com.weevent.test";
+    private String testTopic = "com.weevent.testTopic";
     private String eventId;
     private Map<String, String> extension = new HashMap<>();
     private String content = "Hello json rpc";
@@ -40,6 +41,8 @@ public class JsonRpcTest extends JUnitTestBase {
 
         JsonRpcHttpClient client = new JsonRpcHttpClient(new URL(url));
         this.iBrokerRpc = ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);
+        iBrokerRpc.open(this.jsonTopic, "");
+        iBrokerRpc.open(this.jsonTopic, this.groupId);
         this.eventId = iBrokerRpc.publish(this.jsonTopic, this.groupId, this.content.getBytes(), new HashMap<>()).getEventId();
 
         client.setExceptionResolver(response -> {
