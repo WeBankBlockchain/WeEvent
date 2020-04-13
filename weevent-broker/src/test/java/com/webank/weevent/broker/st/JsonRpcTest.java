@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.webank.weevent.broker.JUnitTestBase;
+import com.webank.weevent.client.BaseResponse;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.SendResult;
@@ -50,72 +51,72 @@ public class JsonRpcTest extends JUnitTestBase {
 
     @Test
     public void testOpenNoGroupId() throws BrokerException {
-        boolean open = iBrokerRpc.open(this.jsonTopic, "");
-        log.info("open topic : " + open);
-        Assert.assertTrue(open);
+        BaseResponse<Boolean> baseResponse = iBrokerRpc.open(this.jsonTopic, "");
+        log.info("open topic : " + baseResponse);
+        Assert.assertTrue(baseResponse.getData());
     }
 
     @Test
     public void testOpenWithGroupId() throws BrokerException {
-        boolean open = iBrokerRpc.open(this.jsonTopic, this.groupId);
-        log.info("open topic : " + open);
-        Assert.assertTrue(open);
+        BaseResponse<Boolean> baseResponse = iBrokerRpc.open(this.jsonTopic, this.groupId);
+        log.info("open topic : " + baseResponse);
+        Assert.assertTrue(baseResponse.getData());
     }
 
     @Test
     public void testCloseNoGroupId() throws BrokerException {
-        boolean open = iBrokerRpc.close(this.jsonTopic, "");
-        log.info("close topic : " + open);
-        Assert.assertTrue(open);
+        BaseResponse<Boolean> baseResponse = iBrokerRpc.close(this.jsonTopic, "");
+        log.info("close topic : " + baseResponse);
+        Assert.assertTrue(baseResponse.getData());
     }
 
     @Test
     public void testCloseWithGroupId() throws BrokerException {
-        boolean open = iBrokerRpc.close(this.jsonTopic, this.groupId);
-        log.info("close topic : " + open);
-        Assert.assertTrue(open);
+        BaseResponse<Boolean> baseResponse = iBrokerRpc.close(this.jsonTopic, this.groupId);
+        log.info("close topic : " + baseResponse);
+        Assert.assertTrue(baseResponse.getData());
     }
 
     @Test
     public void testExistNoGroupId() throws BrokerException {
-        boolean exist = iBrokerRpc.exist(this.jsonTopic, "");
-        log.info("topic exist : " + exist);
-        Assert.assertTrue(exist);
+        BaseResponse<Boolean> baseResponse = iBrokerRpc.exist(this.jsonTopic, "");
+        log.info("topic exist : " + baseResponse);
+        Assert.assertTrue(baseResponse.getData());
     }
 
     @Test
     public void testExistWithGroupId() throws BrokerException {
-        boolean exist = iBrokerRpc.exist(this.jsonTopic, this.groupId);
-        log.info("topic exist : " + exist);
-        Assert.assertTrue(exist);
+        BaseResponse<Boolean> baseResponse = iBrokerRpc.exist(this.jsonTopic, this.groupId);
+        log.info("topic exist : " + baseResponse);
+        Assert.assertTrue(baseResponse.getData());
     }
 
     @Test
     public void testStateNoGroupId() throws BrokerException {
-        TopicInfo state = iBrokerRpc.state(this.jsonTopic, "");
-        log.info("state : " + state);
-        Assert.assertNotNull(state.getCreatedTimestamp());
+        BaseResponse<TopicInfo> baseResponse = iBrokerRpc.state(this.jsonTopic, "");
+        log.info("state : " + baseResponse);
+        Assert.assertNotNull(baseResponse.getData().getCreatedTimestamp());
     }
 
     @Test
     public void testStateWithGroupId() throws BrokerException {
-        TopicInfo state = iBrokerRpc.state(this.jsonTopic, this.groupId);
-        log.info("state : " + state);
-        Assert.assertNotNull(state.getCreatedTimestamp());
+        BaseResponse<TopicInfo> baseResponse = iBrokerRpc.state(this.jsonTopic, this.groupId);
+        log.info("state : " + baseResponse);
+        Assert.assertNotNull(baseResponse.getData().getCreatedTimestamp());
     }
 
     @Test
     public void testListNoGroupId() throws BrokerException {
-        TopicPage list = iBrokerRpc.list(0, 10, "");
-        log.info("list topic : " + list);
-        Assert.assertTrue(list.getTotal() > 0);
+        BaseResponse<TopicPage> baseResponse = iBrokerRpc.list(0, 10, "");
+        log.info("list topic : " + baseResponse);
+        Assert.assertTrue(baseResponse.getData().getTotal() > 0);
     }
 
     @Test
     public void testListWithGroupId() throws BrokerException {
-        TopicPage list = iBrokerRpc.list(0, 10, this.groupId);
-        log.info("list topic : " + list);
-        Assert.assertTrue(list.getTotal() > 0);
+        BaseResponse<TopicPage> baseResponse = iBrokerRpc.list(0, 10, this.groupId);
+        log.info("list topic : " + baseResponse);
+        Assert.assertTrue(baseResponse.getData().getTotal() > 0);
     }
 
     @Test
@@ -202,16 +203,16 @@ public class JsonRpcTest extends JUnitTestBase {
 
     @Test
     public void testGetEventNoGroupId() throws BrokerException {
-        WeEvent event = iBrokerRpc.getEvent(this.eventId, "");
-        log.info("getEvent : " + event);
-        Assert.assertEquals(this.content, new String(event.getContent()));
+        BaseResponse<WeEvent> baseResponse = iBrokerRpc.getEvent(this.eventId, "");
+        log.info("getEvent : " + baseResponse);
+        Assert.assertEquals(this.content, new String(baseResponse.getData().getContent()));
     }
 
     @Test
     public void testGetEventWithGroupId() throws BrokerException {
-        WeEvent event = iBrokerRpc.getEvent(this.eventId, this.groupId);
-        log.info("getEvent : " + event);
-        Assert.assertEquals(this.content, new String(event.getContent()));
+        BaseResponse<WeEvent> baseResponse = iBrokerRpc.getEvent(this.eventId, this.groupId);
+        log.info("getEvent : " + baseResponse);
+        Assert.assertEquals(this.content, new String(baseResponse.getData().getContent()));
     }
 
     // get 10K string

@@ -71,7 +71,7 @@ public class WeEventProducer extends AbstractJavaSamplerClient {
             weEvent = new WeEvent(this.topic, buffer.toString().getBytes(), this.extensions);
             getNewLogger().info("weEvent:{}", weEvent);
 
-            boolean result = this.weEventClient.open(this.topic);
+            boolean result = this.weEventClient.open(this.topic).getData();
             getNewLogger().info("open topic result: {}", result);
         } catch (BrokerException e) {
             getNewLogger().error("open ClientException", e);

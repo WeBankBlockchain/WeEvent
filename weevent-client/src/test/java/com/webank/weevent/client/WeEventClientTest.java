@@ -80,7 +80,7 @@ public class WeEventClientTest {
         });
 
         Assert.assertFalse(subscribeId.isEmpty());
-        Thread.sleep(10000);
+        Thread.sleep(5000);
     }
 
     /**
@@ -102,8 +102,8 @@ public class WeEventClientTest {
      */
     @Test
     public void testOpen() throws Exception {
-        boolean result = this.weEventClient.open(this.topicName);
-        Assert.assertTrue(result);
+        BaseResponse<Boolean> response = this.weEventClient.open(this.topicName);
+        Assert.assertTrue(response.getData());
     }
 
     /**
@@ -124,8 +124,8 @@ public class WeEventClientTest {
      */
     @Test
     public void testClose() throws Exception {
-        boolean result = this.weEventClient.close(topicName);
-        Assert.assertTrue(result);
+        BaseResponse<Boolean> response = this.weEventClient.close(topicName);
+        Assert.assertTrue(response.getData());
     }
 
     /**
@@ -133,8 +133,8 @@ public class WeEventClientTest {
      */
     @Test
     public void testExist() throws Exception {
-        boolean result = this.weEventClient.exist(this.topicName);
-        Assert.assertTrue(result);
+        BaseResponse<Boolean> response = this.weEventClient.exist(this.topicName);
+        Assert.assertTrue(response.getData());
     }
 
     /**
@@ -142,8 +142,9 @@ public class WeEventClientTest {
      */
     @Test
     public void testList() throws Exception {
-        TopicPage list = this.weEventClient.list(0, 10);
-        Assert.assertTrue(list.getTotal() > 0);
+        BaseResponse<TopicPage> response = this.weEventClient.list(0, 10);
+        Assert.assertEquals(0, response.getCode());
+        Assert.assertTrue(response.getData().getTotal() > 0);
     }
 
     /**
@@ -151,8 +152,9 @@ public class WeEventClientTest {
      */
     @Test
     public void testState() throws Exception {
-        TopicInfo info = this.weEventClient.state(this.topicName);
-        Assert.assertEquals(info.getTopicName(), this.topicName);
+        BaseResponse<TopicInfo> response = this.weEventClient.state(this.topicName);
+        Assert.assertEquals(0, response.getCode());
+        Assert.assertEquals(response.getData().getTopicName(), this.topicName);
     }
 
     /**
@@ -165,36 +167,33 @@ public class WeEventClientTest {
 
     @Test
     public void testPublishFile() throws Exception {
-        boolean result = this.weEventClient.open("com.weevent.file");
-        Assert.assertTrue(result);
+        BaseResponse<Boolean> response = this.weEventClient.open("com.weevent.file");
+        Assert.assertTrue(response.getData());
 
         SendResult sendResult = this.weEventClient.publishFile("com.weevent.file",
                 new File("src/main/resources/log4j2.xml").getAbsolutePath());
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 
-    /**@Test
-    public void testSubscribeFile() throws Exception {
-        boolean result = this.weEventClient.open("com.weevent.file");
-        Assert.assertTrue(result);
+    /**@Test public void testSubscribeFile() throws Exception {
+    boolean result = this.weEventClient.open("com.weevent.file");
+    Assert.assertTrue(result);
 
 
-        String subscriptionId = this.weEventClient.subscribeFile("com.weevent.file", "./logs", new IWeEventClient.FileListener() {
-            @Override
-            public void onFile(String subscriptionId, String localFile) {
-                Assert.assertFalse(subscriptionId.isEmpty());
-                Assert.assertFalse(localFile.isEmpty());
+    String subscriptionId = this.weEventClient.subscribeFile("com.weevent.file", "./logs", new IWeEventClient.FileListener() {
+    @Override public void onFile(String subscriptionId, String localFile) {
+    Assert.assertFalse(subscriptionId.isEmpty());
+    Assert.assertFalse(localFile.isEmpty());
 
-                // file data stored in localFile
-            }
+    // file data stored in localFile
+    }
 
-            @Override
-            public void onException(Throwable e) {
+    @Override public void onException(Throwable e) {
 
-            }
-        });
+    }
+    });
 
-        Assert.assertFalse(subscriptionId.isEmpty());
-        this.weEventClient.unSubscribe(subscriptionId);
+    Assert.assertFalse(subscriptionId.isEmpty());
+    this.weEventClient.unSubscribe(subscriptionId);
     }*/
 }
