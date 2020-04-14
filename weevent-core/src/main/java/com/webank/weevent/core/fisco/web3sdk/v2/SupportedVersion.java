@@ -199,7 +199,7 @@ public class SupportedVersion {
         // support version list
         switch (version) {
             case 10:
-                // v10 is com.webank.weevent.broker.fisco.web3sdk.solc10.Topic
+                // v10 is com.webank.weevent.broker.fisco.web3sdk.v2.solc10.Topic
                 Topic topic = (Topic) historyTopic.get(receipt.getTo());
                 Tuple3<String, String, String> input = topic.getPublishWeEventInput(receipt);
                 Tuple1<BigInteger> output = topic.getPublishWeEventOutput(receipt);
