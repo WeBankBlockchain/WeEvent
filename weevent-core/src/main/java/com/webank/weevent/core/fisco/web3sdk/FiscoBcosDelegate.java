@@ -23,6 +23,7 @@ import com.webank.weevent.core.dto.TbNode;
 import com.webank.weevent.core.dto.TbTransHash;
 import com.webank.weevent.core.fisco.constant.WeEventConstants;
 import com.webank.weevent.core.fisco.util.ParamCheckUtils;
+import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;

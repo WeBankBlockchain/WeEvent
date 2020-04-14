@@ -7,7 +7,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.core.config.FabricConfig;
-import com.webank.weevent.core.fisco.web3sdk.Web3SDKConnector;
+import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.SendResult;
 import com.webank.weevent.client.WeEvent;

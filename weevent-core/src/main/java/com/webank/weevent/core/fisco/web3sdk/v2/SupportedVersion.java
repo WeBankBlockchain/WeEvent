@@ -1,4 +1,4 @@
-package com.webank.weevent.core.fisco.web3sdk;
+package com.webank.weevent.core.fisco.web3sdk.v2;
 
 
 import java.math.BigInteger;
@@ -19,8 +19,8 @@ import com.webank.weevent.client.TopicInfo;
 import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.client.WeEventPlus;
 import com.webank.weevent.core.fisco.util.DataTypeUtils;
-import com.webank.weevent.core.fisco.web3sdk.solc10.Topic;
-import com.webank.weevent.core.fisco.web3sdk.solc10.TopicController;
+import com.webank.weevent.core.fisco.web3sdk.v2.solc10.Topic;
+import com.webank.weevent.core.fisco.web3sdk.v2.solc10.TopicController;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;

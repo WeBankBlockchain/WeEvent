@@ -1,4 +1,4 @@
-package com.webank.weevent.core.fisco.web3sdk;
+package com.webank.weevent.core.fisco.web3sdk.v2;
 
 
 import java.io.IOException;
@@ -26,8 +26,9 @@ import com.webank.weevent.core.dto.TbNode;
 import com.webank.weevent.core.dto.TbTransHash;
 import com.webank.weevent.core.fisco.constant.WeEventConstants;
 import com.webank.weevent.core.fisco.util.DataTypeUtils;
-import com.webank.weevent.core.fisco.web3sdk.solc10.Topic;
-import com.webank.weevent.core.fisco.web3sdk.solc10.TopicController;
+import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegate;
+import com.webank.weevent.core.fisco.web3sdk.v2.solc10.Topic;
+import com.webank.weevent.core.fisco.web3sdk.v2.solc10.TopicController;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;

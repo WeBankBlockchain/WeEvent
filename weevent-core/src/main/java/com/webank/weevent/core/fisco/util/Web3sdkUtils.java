@@ -12,10 +12,10 @@ import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.core.fisco.constant.WeEventConstants;
-import com.webank.weevent.core.fisco.web3sdk.CRUDAddress;
-import com.webank.weevent.core.fisco.web3sdk.SupportedVersion;
-import com.webank.weevent.core.fisco.web3sdk.Web3SDK2Wrapper;
-import com.webank.weevent.core.fisco.web3sdk.Web3SDKConnector;
+import com.webank.weevent.core.fisco.web3sdk.v2.CRUDAddress;
+import com.webank.weevent.core.fisco.web3sdk.v2.SupportedVersion;
+import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDK2Wrapper;
+import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
 
 import lombok.Getter;
 import lombok.Setter;
