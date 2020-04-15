@@ -2,9 +2,6 @@ package com.webank.weevent.broker.protocol.jsonrpc;
 
 import java.util.Map;
 
-import com.webank.weevent.client.BaseResponse;
-import com.webank.weevent.core.IProducer;
-import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.client.SendResult;
@@ -12,6 +9,8 @@ import com.webank.weevent.client.TopicInfo;
 import com.webank.weevent.client.TopicPage;
 import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.client.jsonrpc.IBrokerRpc;
+import com.webank.weevent.core.IProducer;
+import com.webank.weevent.core.config.FiscoConfig;
 
 import com.googlecode.jsonrpc4j.JsonRpcParam;
 import com.googlecode.jsonrpc4j.JsonRpcService;
@@ -55,51 +54,51 @@ public class BrokerRpc implements IBrokerRpc {
     }
 
     @Override
-    public BaseResponse<WeEvent> getEvent(@JsonRpcParam(value = "eventId") String eventId,
-                                          @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
+    public WeEvent getEvent(@JsonRpcParam(value = "eventId") String eventId,
+                            @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
         log.info("eventId:{} groupId:{}", eventId, groupId);
 
-        return BaseResponse.buildSuccess(this.producer.getEvent(eventId, groupId));
+        return this.producer.getEvent(eventId, groupId);
     }
 
     @Override
-    public BaseResponse<Boolean> open(@JsonRpcParam(value = "topic") String topic,
-                                      @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
+    public boolean open(@JsonRpcParam(value = "topic") String topic,
+                        @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
         log.info("topic:{} groupId:{}", topic, groupId);
 
-        return BaseResponse.buildSuccess(this.producer.open(topic, groupId));
+        return this.producer.open(topic, groupId);
     }
 
     @Override
-    public BaseResponse<Boolean> close(@JsonRpcParam(value = "topic") String topic,
-                                       @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
+    public boolean close(@JsonRpcParam(value = "topic") String topic,
+                         @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
         log.info("topic:{} groupId:{}", topic, groupId);
 
-        return BaseResponse.buildSuccess(this.producer.close(topic, groupId));
+        return this.producer.close(topic, groupId);
     }
 
     @Override
-    public BaseResponse<Boolean> exist(@JsonRpcParam(value = "topic") String topic,
-                                       @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
+    public boolean exist(@JsonRpcParam(value = "topic") String topic,
+                         @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
         log.info("topic:{} groupId:{}", topic, groupId);
 
-        return BaseResponse.buildSuccess(this.producer.exist(topic, groupId));
+        return this.producer.exist(topic, groupId);
     }
 
     @Override
-    public BaseResponse<TopicPage> list(@JsonRpcParam(value = "pageIndex") Integer pageIndex,
-                                        @JsonRpcParam(value = "pageSize") Integer pageSize,
-                                        @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
+    public TopicPage list(@JsonRpcParam(value = "pageIndex") Integer pageIndex,
+                          @JsonRpcParam(value = "pageSize") Integer pageSize,
+                          @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
         log.info("pageIndex:{} pageSize:{} groupId:{}", pageIndex, pageSize, groupId);
 
-        return BaseResponse.buildSuccess(this.producer.list(pageIndex, pageSize, groupId));
+        return this.producer.list(pageIndex, pageSize, groupId);
     }
 
     @Override
-    public BaseResponse<TopicInfo> state(@JsonRpcParam(value = "topic") String topic,
-                                         @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
+    public TopicInfo state(@JsonRpcParam(value = "topic") String topic,
+                           @JsonRpcParam(value = "groupId") String groupId) throws BrokerException {
         log.info("topic:{} groupId:{}", topic, groupId);
 
-        return BaseResponse.buildSuccess(this.producer.state(topic, groupId));
+        return this.producer.state(topic, groupId);
     }
 }

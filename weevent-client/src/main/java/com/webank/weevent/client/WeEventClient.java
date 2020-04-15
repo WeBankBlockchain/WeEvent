@@ -85,36 +85,36 @@ public class WeEventClient implements IWeEventClient {
     }
 
     @Override
-    public BaseResponse<Boolean> open(String topic) throws BrokerException {
+    public boolean open(String topic) throws BrokerException {
         validateParam(topic);
         return this.brokerRpc.open(topic, this.groupId);
     }
 
     @Override
-    public BaseResponse<Boolean> close(String topic) throws BrokerException {
+    public boolean close(String topic) throws BrokerException {
         validateParam(topic);
         return this.brokerRpc.close(topic, this.groupId);
     }
 
     @Override
-    public BaseResponse<Boolean> exist(String topic) throws BrokerException {
+    public boolean exist(String topic) throws BrokerException {
         validateParam(topic);
         return this.brokerRpc.exist(topic, this.groupId);
     }
 
     @Override
-    public BaseResponse<TopicPage> list(Integer pageIndex, Integer pageSize) throws BrokerException {
+    public TopicPage list(Integer pageIndex, Integer pageSize) throws BrokerException {
         return this.brokerRpc.list(pageIndex, pageSize, this.groupId);
     }
 
     @Override
-    public BaseResponse<TopicInfo> state(String topic) throws BrokerException {
+    public TopicInfo state(String topic) throws BrokerException {
         validateParam(topic);
         return this.brokerRpc.state(topic, this.groupId);
     }
 
     @Override
-    public BaseResponse<WeEvent> getEvent(String eventId) throws BrokerException {
+    public WeEvent getEvent(String eventId) throws BrokerException {
         validateParam(eventId);
         return this.brokerRpc.getEvent(eventId, this.groupId);
     }

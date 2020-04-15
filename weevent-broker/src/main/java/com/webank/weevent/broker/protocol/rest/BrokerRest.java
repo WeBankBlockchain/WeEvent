@@ -4,16 +4,15 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import com.webank.weevent.client.BaseResponse;
-import com.webank.weevent.core.IProducer;
-import com.webank.weevent.core.fisco.constant.WeEventConstants;
-import com.webank.weevent.core.fisco.util.WeEventUtils;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.SendResult;
 import com.webank.weevent.client.TopicInfo;
 import com.webank.weevent.client.TopicPage;
 import com.webank.weevent.client.WeEvent;
-import com.webank.weevent.client.jsonrpc.IBrokerRpc;
+import com.webank.weevent.core.IProducer;
+import com.webank.weevent.core.fisco.constant.WeEventConstants;
+import com.webank.weevent.core.fisco.util.WeEventUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RequestMapping(value = "/rest")
 @RestController
-public class BrokerRest implements IBrokerRpc {
+public class BrokerRest {
     private IProducer producer;
 
     @Autowired
@@ -65,7 +64,6 @@ public class BrokerRest implements IBrokerRpc {
         return this.producer.publish(event, groupId);
     }
 
-    @Override
     @RequestMapping(path = "/getEvent")
     public BaseResponse<WeEvent> getEvent(@RequestParam(name = "eventId") String eventId,
                                          @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
@@ -74,7 +72,6 @@ public class BrokerRest implements IBrokerRpc {
         return BaseResponse.buildSuccess(this.producer.getEvent(eventId, groupId));
     }
 
-    @Override
     @RequestMapping(path = "/open")
     public BaseResponse<Boolean> open(@RequestParam(name = "topic") String topic,
                                       @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
@@ -83,7 +80,6 @@ public class BrokerRest implements IBrokerRpc {
         return BaseResponse.buildSuccess(this.producer.open(topic, groupId));
     }
 
-    @Override
     @RequestMapping(path = "/close")
     public BaseResponse<Boolean> close(@RequestParam(name = "topic") String topic,
                                        @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
@@ -92,7 +88,6 @@ public class BrokerRest implements IBrokerRpc {
         return BaseResponse.buildSuccess(this.producer.close(topic, groupId));
     }
 
-    @Override
     @RequestMapping(path = "/exist")
     public BaseResponse<Boolean> exist(@RequestParam(name = "topic") String topic,
                                        @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
@@ -101,7 +96,6 @@ public class BrokerRest implements IBrokerRpc {
         return BaseResponse.buildSuccess(this.producer.exist(topic, groupId));
     }
 
-    @Override
     @RequestMapping(path = "/list")
     public BaseResponse<TopicPage> list(@RequestParam(name = "pageIndex") Integer pageIndex,
                                         @RequestParam(name = "pageSize") Integer pageSize,
@@ -111,7 +105,6 @@ public class BrokerRest implements IBrokerRpc {
         return BaseResponse.buildSuccess(this.producer.list(pageIndex, pageSize, groupId));
     }
 
-    @Override
     @RequestMapping(path = "/state")
     public BaseResponse<TopicInfo> state(@RequestParam(name = "topic") String topic,
                                          @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
