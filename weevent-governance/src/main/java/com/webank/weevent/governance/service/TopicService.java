@@ -34,6 +34,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -238,7 +239,7 @@ public class TopicService {
         try (CloseableHttpResponse httpResponse = httpClient.execute(get)) {
             log.info("invokeBrokerCGI {} in {} millisecond, response:{}", url,
                     System.currentTimeMillis() - requestStartTime, httpResponse.getStatusLine().toString());
-            if (ConstantProperties.HTTP_RESPONSE_STATUS_SUCCESS != httpResponse.getStatusLine().getStatusCode()
+            if (HttpStatus.OK.value() != httpResponse.getStatusLine().getStatusCode()
                     || null == httpResponse.getEntity()) {
                 log.error("invokeBrokerCGI failed, request url:{}, msg:{}", url, httpResponse.getStatusLine().toString());
                 throw new GovernanceException("invokeBrokerCGI failed");

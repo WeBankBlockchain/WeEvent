@@ -57,5 +57,4 @@ public class ConstantProperties {
 
     //weBase url end ===========================================================
 
-    public static final int HTTP_RESPONSE_STATUS_SUCCESS = 200;
 }
