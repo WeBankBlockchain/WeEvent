@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +11,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.webank.weevent.client.BaseResponse;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.governance.common.ConstantProperties;
@@ -25,6 +25,7 @@ import com.webank.weevent.governance.entity.TopicPageEntity;
 import com.webank.weevent.governance.enums.IsDeleteEnum;
 import com.webank.weevent.governance.repository.TopicRepository;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +34,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,7 +46,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Slf4j
 public class TopicService {
-
 
     @Autowired
     private TopicRepository topicRepository;
@@ -63,7 +64,6 @@ public class TopicService {
         if (brokerEntity == null) {
             return false;
         }
-        CloseableHttpClient client = commonService.generateHttpClient();
         String url;
         try {
             if (groupId == null) {
@@ -73,16 +73,15 @@ public class TopicService {
                 url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_CLOSE).append("?topic=").append(URLEncoder.encode(topic, "UTF-8"))
                         .append("&groupId=").append(groupId).toString();
             }
-            log.info("url:{}", url);
-            HttpGet get = commonService.getMethod(url, request);
-            CloseableHttpResponse closeResponse = client.execute(get);
-            String mes = EntityUtils.toString(closeResponse.getEntity());
-            topicRepository.deleteTopicInfo(topic, new Date().getTime(), brokerId, groupId);
-            return JsonHelper.json2Object(mes, Boolean.class);
         } catch (Exception e) {
             log.error("close topic fail,topic :{},error:{}", topic, e.getMessage());
             throw new GovernanceException("close topic fail", e);
         }
+
+        log.info("url:{}", url);
+
+        return invokeBrokerCGI(request, url, new TypeReference<BaseResponse<Boolean>>() {
+        }).getData();
     }
 
     public TopicPage getTopics(TopicPageEntity topicPageEntity, HttpServletRequest request,
@@ -99,7 +98,6 @@ public class TopicService {
             return result;
         }
         // get event broker url
-        CloseableHttpClient client = commonService.generateHttpClient();
         String url;
         if (groupId != null) {
             url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_LIST)
@@ -111,38 +109,27 @@ public class TopicService {
         }
         log.info("url: {}", url);
 
-        HttpGet get = commonService.getMethod(url, request);
-        try {
-            CloseableHttpResponse closeResponse = client.execute(get);
-            String mes = EntityUtils.toString(closeResponse.getEntity());
-            result = JsonHelper.json2Object(mes, TopicPage.class);
-            if (result == null || CollectionUtils.isEmpty(result.getTopicInfoList())) {
-                return result;
-            }
-            //get creator
-            List<TopicEntity> topicEntityList = result.getTopicInfoList();
-            List<String> topicNameList = new ArrayList<>();
-            topicEntityList.forEach(it -> {
-                topicNameList.add(it.getTopicName());
-            });
-            List<TopicEntity> topicEntities = topicRepository.findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(brokerId, groupId, topicNameList, IsDeleteEnum.NOT_DELETED.getCode());
-            if (CollectionUtils.isEmpty(topicEntities)) {
-                return result;
-            }
-            Map<String, String> creatorMap = new HashMap<>();
-            topicEntities.forEach(it -> {
-                creatorMap.put(getKey(brokerId, groupId, it.getTopicName()), it.getCreater());
-            });
-            // set creator
-            topicEntityList.forEach(it -> {
-                it.setCreater(creatorMap.get(getKey(brokerId, groupId, it.getTopicName())));
-            });
-            result.setTopicInfoList(topicEntityList);
+        TopicPage topicPage = invokeBrokerCGI(request, url, new TypeReference<BaseResponse<TopicPage>>() {
+        }).getData();
+
+        if (topicPage == null || CollectionUtils.isEmpty(topicPage.getTopicInfoList())) {
             return result;
-        } catch (Exception e) {
-            log.error("get topics fail,brokerId :{},error:{}", brokerId, e.getMessage());
-            throw new GovernanceException("get topics fail", e);
         }
+        //get creator
+        List<TopicEntity> topicEntityList = topicPage.getTopicInfoList();
+        List<String> topicNameList = new ArrayList<>();
+        topicEntityList.forEach(it -> topicNameList.add(it.getTopicName()));
+        List<TopicEntity> topicEntities = topicRepository.findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(brokerId, groupId, topicNameList, IsDeleteEnum.NOT_DELETED.getCode());
+        if (CollectionUtils.isEmpty(topicEntities)) {
+            return topicPage;
+        }
+        Map<String, String> creatorMap = new HashMap<>();
+        topicEntities.forEach(it -> creatorMap.put(getKey(brokerId, groupId, it.getTopicName()), it.getCreater()));
+        // set creator
+        topicEntityList.forEach(it -> it.setCreater(creatorMap.get(getKey(brokerId, groupId, it.getTopicName()))));
+        topicPage.setTopicInfoList(topicEntityList);
+
+        return topicPage;
     }
 
     public TopicEntity getTopicInfo(Integer brokerId, String topic, String groupId, HttpServletRequest request) throws GovernanceException {
@@ -151,34 +138,32 @@ public class TopicService {
             log.error("get topicInfo failed, brokerId:{}, topic:{}, groupId:{}.", brokerId, topic, groupId);
             throw new GovernanceException("broker is not exists");
         }
-
+        String url;
         try {
-            CloseableHttpClient client = commonService.generateHttpClient();
             // get event broker url
-            String url = new StringBuffer(broker.getBrokerUrl()).append(ConstantProperties.BROKER_REST_STATE).append("?topic=")
+            url = new StringBuffer(broker.getBrokerUrl()).append(ConstantProperties.BROKER_REST_STATE).append("?topic=")
                     .append(URLEncoder.encode(topic, "UTF-8")).toString();
             if (!StringUtils.isBlank(groupId)) {
                 url = new StringBuffer(url).append("&groupId=").append(groupId).toString();
-            }
-
-            log.info("getTopicInfo url:{}", url);
-            HttpGet get = commonService.getMethod(url, request);
-            CloseableHttpResponse closeResponse = client.execute(get);
-            String mes = EntityUtils.toString(closeResponse.getEntity());
-            TopicEntity result = JsonHelper.json2Object(mes, TopicEntity.class);
-            if (result != null) {
-                // get creator from database
-                List<TopicEntity> creators = topicRepository.findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(brokerId, groupId, new ArrayList<>(Collections.singletonList(topic)), IsDeleteEnum.NOT_DELETED.getCode());
-                if (CollectionUtils.isNotEmpty(creators)) {
-                    result.setCreater(creators.get(0).getCreater());
-                }
-                return result;
             }
         } catch (Exception e) {
             log.error("get topicInfo failed, error:{}", e.getMessage());
             throw new GovernanceException(ErrorCode.BROKER_CONNECT_ERROR);
         }
-        return null;
+        log.info("getTopicInfo url:{}", url);
+
+        TopicEntity topicEntity = invokeBrokerCGI(request, url, new TypeReference<BaseResponse<TopicEntity>>() {
+        }).getData();
+
+        if (topicEntity != null) {
+            // get creator from database
+            List<TopicEntity> creators = topicRepository.findAllByBrokerIdAndGroupIdAndTopicNameInAndDeleteAt(brokerId, groupId, new ArrayList<>(Collections.singletonList(topic)), IsDeleteEnum.NOT_DELETED.getCode());
+            if (CollectionUtils.isNotEmpty(creators)) {
+                topicEntity.setCreater(creators.get(0).getCreater());
+            }
+        }
+
+        return topicEntity;
     }
 
     @Transactional(rollbackFor = Throwable.class)
@@ -188,7 +173,7 @@ public class TopicService {
         if (brokerEntity == null) {
             return null;
         }
-        String mes;
+        String url;
         try {
             boolean exist = exist(topic, brokerEntity.getBrokerUrl(), groupId, request);
             if (exist) {
@@ -202,23 +187,21 @@ public class TopicService {
             topicEntity.setGroupId(groupId);
             topicRepository.save(topicEntity);
 
-            CloseableHttpClient client = commonService.generateHttpClient();
-            String url;
             if (groupId != null) {
                 url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_OPEN).append("?topic=").append(URLEncoder.encode(topic, "UTF-8"))
                         .append("&groupId=").append(groupId).toString();
             } else {
                 url = new StringBuffer(brokerEntity.getBrokerUrl()).append(ConstantProperties.BROKER_REST_OPEN).append("?topic=").append(URLEncoder.encode(topic, "UTF-8")).toString();
             }
-            log.info("url: {}", url);
-            HttpGet get = commonService.getMethod(url, request);
-            CloseableHttpResponse closeResponse = client.execute(get);
-            mes = EntityUtils.toString(closeResponse.getEntity());
-            return new GovernanceResult(Boolean.valueOf(mes));
         } catch (Exception e) {
             log.error("open topic fail,error:{}", e.getMessage());
             throw new GovernanceException("open topic fail,error", e);
         }
+        log.info("url: {}", url);
+
+        return new GovernanceResult(invokeBrokerCGI(request, url, new TypeReference<BaseResponse<Boolean>>() {
+        }).getData());
+
     }
 
     @Transactional(rollbackFor = Throwable.class)
@@ -233,27 +216,48 @@ public class TopicService {
         }
 
         log.info("url: {}", url);
-        String mes;
-        try {
-            CloseableHttpClient client = commonService.generateHttpClient();
-            HttpGet get = commonService.getMethod(url, request);
-            CloseableHttpResponse closeResponse = client.execute(get);
-            mes = EntityUtils.toString(closeResponse.getEntity());
-        } catch (Exception e) {
-            log.error("broker connect error,error:{}", e.getMessage());
-            throw new GovernanceException(ErrorCode.BROKER_CONNECT_ERROR);
-        }
-        try {
-            return JsonHelper.json2Object(mes, Boolean.class);
-        } catch (BrokerException e) {
-            log.error("parse json fail,error:{}", e.getMessage());
-        }
-        return false;
+
+        return invokeBrokerCGI(request, url, new TypeReference<BaseResponse<Boolean>>() {
+        }).getData();
     }
 
 
     private String getKey(Integer brokerId, String groupId, String topicName) {
         return new StringBuilder(brokerId).append(SPLIT).append(topicName).append(SPLIT).append(groupId).toString();
+    }
+
+    private <T> BaseResponse<T> invokeBrokerCGI(HttpServletRequest request, String url, TypeReference<BaseResponse<T>> typeReference) throws GovernanceException {
+        CloseableHttpClient httpClient = commonService.generateHttpClient();
+        HttpGet get = commonService.getMethod(url, request);
+
+        if (StringUtils.isBlank(url)) {
+            log.error("invokeBrokerCGI failed, request url is null");
+            throw new GovernanceException("request url is null");
+        }
+
+        long requestStartTime = System.currentTimeMillis();
+        try (CloseableHttpResponse httpResponse = httpClient.execute(get)) {
+            log.info("invokeBrokerCGI {} in {} millisecond, response:{}", url,
+                    System.currentTimeMillis() - requestStartTime, httpResponse.getStatusLine().toString());
+            if (HttpStatus.OK.value() != httpResponse.getStatusLine().getStatusCode()
+                    || null == httpResponse.getEntity()) {
+                log.error("invokeBrokerCGI failed, request url:{}, msg:{}", url, httpResponse.getStatusLine().toString());
+                throw new GovernanceException("invokeBrokerCGI failed");
+            }
+
+            byte[] responseResult = EntityUtils.toByteArray(httpResponse.getEntity());
+            BaseResponse<T> baseResponse = JsonHelper.json2Object(responseResult, typeReference);
+
+            if (ErrorCode.SUCCESS.getCode() != baseResponse.getCode()) {
+                log.error("invokeBrokerCGI failed, request url:{}, msg:{}", url, baseResponse.getMessage());
+                throw new GovernanceException(baseResponse.getCode(), baseResponse.getMessage());
+            }
+
+            return baseResponse;
+        } catch (IOException | BrokerException e) {
+            log.error("invokeBrokerCGI error, request url:{}", url, e);
+            throw new GovernanceException(ErrorCode.HTTP_REQUEST_EXECUTE_ERROR);
+        }
     }
 
 }
