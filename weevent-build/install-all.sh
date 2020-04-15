@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# install WeEvent service, support FISCO-BCOS 1.3 and 2.0
+# install WeEvent service, support FISCO-BCOS 2.x
 #
 ################################################################################
 
