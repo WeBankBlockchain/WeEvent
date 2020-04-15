@@ -14,6 +14,7 @@ public enum ErrorCode {
     NO_MAILBOX_CONFIGURED(100107, "no mailbox configured"),
     BROKER_REPEAT(100108, "the brokerUrl already has a record in the database"),
     TOPIC_EXISTS(100109, "topic already exists"),
+    HTTP_REQUEST_EXECUTE_ERROR(100110, "http request execute failed"),
     ;
 
 
