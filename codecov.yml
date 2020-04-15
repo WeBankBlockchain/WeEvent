@@ -13,6 +13,9 @@ coverage:
       default:
         enabled: no
         if_not_found: success
+codecov:
+  ignore:
+    - "weevent-jmeter/**/*"  # ignore folders and all its contents
 
 comment:
   layout: "reach, diff, flags, files"
