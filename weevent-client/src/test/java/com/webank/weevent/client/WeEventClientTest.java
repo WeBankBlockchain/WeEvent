@@ -81,7 +81,7 @@ public class WeEventClientTest {
         });
 
         Assert.assertFalse(subscribeId.isEmpty());
-        Thread.sleep(10000);
+        Thread.sleep(5000);
     }
 
     /**
@@ -103,8 +103,8 @@ public class WeEventClientTest {
      */
     @Test
     public void testOpen() throws Exception {
-        boolean result = this.weEventClient.open(this.topicName);
-        Assert.assertTrue(result);
+        BaseResponse<Boolean> response = this.weEventClient.open(this.topicName);
+        Assert.assertTrue(response.getData());
     }
 
     /**
@@ -125,8 +125,8 @@ public class WeEventClientTest {
      */
     @Test
     public void testClose() throws Exception {
-        boolean result = this.weEventClient.close(topicName);
-        Assert.assertTrue(result);
+        BaseResponse<Boolean> response = this.weEventClient.close(topicName);
+        Assert.assertTrue(response.getData());
     }
 
     /**
@@ -134,8 +134,8 @@ public class WeEventClientTest {
      */
     @Test
     public void testExist() throws Exception {
-        boolean result = this.weEventClient.exist(this.topicName);
-        Assert.assertTrue(result);
+        BaseResponse<Boolean> response = this.weEventClient.exist(this.topicName);
+        Assert.assertTrue(response.getData());
     }
 
     /**
@@ -143,8 +143,9 @@ public class WeEventClientTest {
      */
     @Test
     public void testList() throws Exception {
-        TopicPage list = this.weEventClient.list(0, 10);
-        Assert.assertTrue(list.getTotal() > 0);
+        BaseResponse<TopicPage> response = this.weEventClient.list(0, 10);
+        Assert.assertEquals(0, response.getCode());
+        Assert.assertTrue(response.getData().getTotal() > 0);
     }
 
     /**
@@ -152,8 +153,9 @@ public class WeEventClientTest {
      */
     @Test
     public void testState() throws Exception {
-        TopicInfo info = this.weEventClient.state(this.topicName);
-        Assert.assertEquals(info.getTopicName(), this.topicName);
+        BaseResponse<TopicInfo> response = this.weEventClient.state(this.topicName);
+        Assert.assertEquals(0, response.getCode());
+        Assert.assertEquals(response.getData().getTopicName(), this.topicName);
     }
 
     /**
@@ -167,17 +169,18 @@ public class WeEventClientTest {
     @Test
     @Ignore
     public void testPublishFile() throws Exception {
-        boolean result = this.weEventClient.open("com.weevent.file");
-        Assert.assertTrue(result);
+        BaseResponse<Boolean> response = this.weEventClient.open("com.weevent.file");
+        Assert.assertTrue(response.getData());
 
         SendResult sendResult = this.weEventClient.publishFile("com.weevent.file",
                 new File("src/main/resources/log4j2.xml").getAbsolutePath());
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 
-    /**@Test
+    @Ignore
+    @Test
     public void testSubscribeFile() throws Exception {
-        boolean result = this.weEventClient.open("com.weevent.file");
+        boolean result = this.weEventClient.open("com.weevent.file").getData();
         Assert.assertTrue(result);
 
 
@@ -198,5 +201,5 @@ public class WeEventClientTest {
 
         Assert.assertFalse(subscriptionId.isEmpty());
         this.weEventClient.unSubscribe(subscriptionId);
-    }*/
+    }
 }

@@ -42,7 +42,7 @@ public class WeEventConsumer extends AbstractJavaSamplerClient {
             this.groupId = context.getParameter("groupId") == null ? WeEvent.DEFAULT_GROUP_ID : context.getParameter("groupId");
             this.weEventClient = new IWeEventClient.Builder().brokerUrl(defaultUrl).groupId(this.groupId).build();
             getNewLogger().info("weEventClient:{}", this.weEventClient);
-            boolean result = this.weEventClient.open(this.topic);
+            boolean result = this.weEventClient.open(this.topic).getData();
             getNewLogger().info("open topic result: {}", result);
         } catch (BrokerException e) {
             getNewLogger().error("open ClientException", e);

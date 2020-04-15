@@ -61,28 +61,28 @@ public interface IWeEventClient {
      * Open a topic
      *
      * @param topic topic name
-     * @return true if success
+     * @return BaseResponse BaseResponse
      * @throws BrokerException broker exception
      */
-    boolean open(String topic) throws BrokerException;
+    BaseResponse<Boolean> open(String topic) throws BrokerException;
 
     /**
      * Close a topic.
      *
      * @param topic topic name
-     * @return true if success
+     * @return BaseResponse BaseResponse
      * @throws BrokerException broker exception
      */
-    boolean close(String topic) throws BrokerException;
+    BaseResponse<Boolean> close(String topic) throws BrokerException;
 
     /**
      * Check a topic is exist or not.
      *
      * @param topic topic name
-     * @return true if exist
+     * @return BaseResponse BaseResponse
      * @throws BrokerException broker exception
      */
-    boolean exist(String topic) throws BrokerException;
+    BaseResponse<Boolean> exist(String topic) throws BrokerException;
 
     /**
      * Publish an event to topic.
@@ -173,28 +173,28 @@ public interface IWeEventClient {
      *
      * @param pageIndex page index, from 0
      * @param pageSize page size, [10, 100)
-     * @return topic list
+     * @return BaseResponse topic list
      * @throws BrokerException broker exception
      */
-    TopicPage list(Integer pageIndex, Integer pageSize) throws BrokerException;
+    BaseResponse<TopicPage> list(Integer pageIndex, Integer pageSize) throws BrokerException;
 
     /**
      * Get a topic information.
      *
      * @param topic topic name
-     * @return topic information
+     * @return BaseResponse information
      * @throws BrokerException broker exception
      */
-    TopicInfo state(String topic) throws BrokerException;
+    BaseResponse<TopicInfo> state(String topic) throws BrokerException;
 
     /**
      * Get an event information.
      *
      * @param eventId event id
-     * @return WeEvent
+     * @return BaseResponse WeEvent
      * @throws BrokerException broker exception
      */
-    WeEvent getEvent(String eventId) throws BrokerException;
+    BaseResponse<WeEvent> getEvent(String eventId) throws BrokerException;
 
     // The following's is for big file's Pub/Sub
 

@@ -18,7 +18,7 @@ public class FileChunksTransportTest {
 
     @Before
     public void before() throws Exception {
-        this.fileChunksTransport = new FileChunksTransport("http://localhost:7000/weevent-broker/file", "./logs");
+        this.fileChunksTransport = new FileChunksTransport(HttpClientUtils.buildHttpClient(), "http://localhost:7000/weevent-broker/file", "./logs");
     }
 
     @After
