@@ -1,4 +1,4 @@
-package com.webank.weevent.broker.protocol.stomp;
+package com.webank.weevent.broker.filter;
 
 import java.util.Map;
 
@@ -13,11 +13,13 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 
 
 @Slf4j
-public class HandShakeWebSocketInterceptor implements HandshakeInterceptor {
-    private String ipWhitelist;
+public class WebSocketHandShakeInterceptor implements HandshakeInterceptor {
+    private final String ipWhiteList;
+    private final static String UNKNOWN = "unknown";
 
-    HandShakeWebSocketInterceptor(String ipWhitelist) {
-        this.ipWhitelist = ipWhitelist;
+    WebSocketHandShakeInterceptor(String ipWhiteList) {
+        log.info("client ip white list: {}", ipWhiteList);
+        this.ipWhiteList = ipWhiteList;
     }
 
     /**
@@ -30,14 +32,14 @@ public class HandShakeWebSocketInterceptor implements HandshakeInterceptor {
         ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
         String ip = servletRequest.getServletRequest().getHeader("X-Forwarded-For");
         log.debug("ServerHttpRequest host: {}", ip);
-        if (StringUtils.isBlank(ip) || ip.equalsIgnoreCase("unknown")) {
+        if (StringUtils.isBlank(ip) || UNKNOWN.equalsIgnoreCase(ip)) {
             log.debug("unknown ServerHttpRequest host");
             return servletRequest.getRemoteAddress().getHostString();
         }
 
         String[] ips = ip.split(",");
         for (String strIp : ips) {
-            if (!strIp.equalsIgnoreCase("unknown")) {
+            if (!UNKNOWN.equalsIgnoreCase(strIp)) {
                 return strIp;
             }
         }
@@ -48,24 +50,24 @@ public class HandShakeWebSocketInterceptor implements HandshakeInterceptor {
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
                                    Map<String, Object> attributes) {
-        String ip = getIpAddress(request);
-        if (this.ipWhitelist.equals("")) {
+        if (StringUtils.isBlank(this.ipWhiteList)) {
             return true;
         }
 
-        if (request instanceof ServletServerHttpRequest) {
-            log.debug("ip white list: {} client ip: {}", this.ipWhitelist, ip);
-            if (ip.contains("0:0:0:0") || ip.contains("127.0.0.1") || ip.contains("localhost")) {
-                return true;
-            }
-
-            if (!this.ipWhitelist.contains(ip)) {
-                response.setStatusCode(HttpStatus.FORBIDDEN);
-                response.close();
-                log.error("forbid, client ip is not in white list, {} -> {}", ip, this.ipWhitelist);
-                return false;
-            }
+        String ip = this.getIpAddress(request);
+        log.debug("ip white list: {} client ip: {}", this.ipWhiteList, ip);
+        if (ip.contains("0:0:0:0") || ip.contains("127.0.0.1") || ip.contains("localhost")) {
+            return true;
         }
+
+        if (!this.ipWhiteList.contains(ip)) {
+            log.error("forbid, client ip is not in white list, {} -> {}", ip, this.ipWhiteList);
+
+            response.setStatusCode(HttpStatus.FORBIDDEN);
+            response.close();
+            return false;
+        }
+
         return true;
     }
 
