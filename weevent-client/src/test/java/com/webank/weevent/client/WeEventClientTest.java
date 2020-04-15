@@ -175,19 +175,28 @@ public class WeEventClientTest {
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 
-    /**@Test public void testSubscribeFile() throws Exception {
-    boolean result = this.weEventClient.open("com.weevent.file");
-    Assert.assertTrue(result);
-    String subscriptionId = this.weEventClient.subscribeFile("com.weevent.file", "./logs", new IWeEventClient.FileListener() {
-    @Override public void onFile(String subscriptionId, String localFile) {
-    Assert.assertFalse(subscriptionId.isEmpty());
-    Assert.assertFalse(localFile.isEmpty());
-    // file data stored in localFile
-    }
-    @Override public void onException(Throwable e) {
-    }
-    });
-    Assert.assertFalse(subscriptionId.isEmpty());
-    this.weEventClient.unSubscribe(subscriptionId);
+    /**@Test
+    public void testSubscribeFile() throws Exception {
+        boolean result = this.weEventClient.open("com.weevent.file");
+        Assert.assertTrue(result);
+
+
+        String subscriptionId = this.weEventClient.subscribeFile("com.weevent.file", "./logs", new IWeEventClient.FileListener() {
+            @Override
+            public void onFile(String subscriptionId, String localFile) {
+                Assert.assertFalse(subscriptionId.isEmpty());
+                Assert.assertFalse(localFile.isEmpty());
+
+                // file data stored in localFile
+            }
+
+            @Override
+            public void onException(Throwable e) {
+
+            }
+        });
+
+        Assert.assertFalse(subscriptionId.isEmpty());
+        this.weEventClient.unSubscribe(subscriptionId);
     }*/
 }

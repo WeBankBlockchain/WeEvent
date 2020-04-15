@@ -56,5 +56,4 @@ public class ConstantProperties {
     public final static String WEBASE_NODE_URL = "/node/nodeInfo/1";
 
     //weBase url end ===========================================================
-
 }
