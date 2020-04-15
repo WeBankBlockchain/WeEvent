@@ -19,11 +19,12 @@ function installFisco(){
     #install and start fisco bcos
     cd ~ && mkdir -p fisco && cd fisco
     curl -LO https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v2.2.0/build_chain.sh && chmod u+x build_chain.sh
-    bash build_chain.sh -l "127.0.0.1:4" -p 30300,20200,8545 -i
+    curl -LO https://www.fisco.com.cn/cdn/fisco-bcos/releases/download/v2.2.0/fisco-bcos.tar.gz && tar -zxf fisco-bcos.tar.gz
+    bash build_chain.sh -l "127.0.0.1:4" -e ./fisco-bcos -p 30300,20200,8545 -i
     bash nodes/127.0.0.1/start_all.sh
 
     #copy file
-    cp ${HOME}/fisco/nodes/127.0.0.1/sdk/* ${current_path}/weevent-broker/src/main/resources/v2/
+    cp ${HOME}/fisco/nodes/127.0.0.1/sdk/* ${current_path}/weevent-broker/src/main/resources/
     cp ${HOME}/fisco/nodes/127.0.0.1/sdk/* ${current_path}/weevent-core/src/main/resources/
 }
 
