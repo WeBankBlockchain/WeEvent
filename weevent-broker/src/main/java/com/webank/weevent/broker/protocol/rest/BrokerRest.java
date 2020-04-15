@@ -3,16 +3,16 @@ package com.webank.weevent.broker.protocol.rest;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import com.webank.weevent.core.IProducer;
-import com.webank.weevent.core.fisco.constant.WeEventConstants;
-import com.webank.weevent.core.fisco.util.WeEventUtils;
+import com.webank.weevent.client.BaseResponse;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.SendResult;
 import com.webank.weevent.client.TopicInfo;
 import com.webank.weevent.client.TopicPage;
 import com.webank.weevent.client.WeEvent;
-import com.webank.weevent.client.jsonrpc.IBrokerRpc;
+import com.webank.weevent.core.IProducer;
+import com.webank.weevent.core.fisco.constant.WeEventConstants;
+import com.webank.weevent.core.fisco.util.WeEventUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RequestMapping(value = "/rest")
 @RestController
-public class BrokerRest implements IBrokerRpc {
+public class BrokerRest {
     private IProducer producer;
 
     @Autowired
@@ -64,58 +64,52 @@ public class BrokerRest implements IBrokerRpc {
         return this.producer.publish(event, groupId);
     }
 
-    @Override
     @RequestMapping(path = "/getEvent")
-    public WeEvent getEvent(@RequestParam(name = "eventId") String eventId,
-                            @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+    public BaseResponse<WeEvent> getEvent(@RequestParam(name = "eventId") String eventId,
+                                         @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         log.info("eventId:{} groupId:{}", eventId, groupId);
 
-        return this.producer.getEvent(eventId, groupId);
+        return BaseResponse.buildSuccess(this.producer.getEvent(eventId, groupId));
     }
 
-    @Override
     @RequestMapping(path = "/open")
-    public boolean open(@RequestParam(name = "topic") String topic,
-                        @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+    public BaseResponse<Boolean> open(@RequestParam(name = "topic") String topic,
+                                      @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         log.info("topic:{} groupId:{}", topic, groupId);
 
-        return this.producer.open(topic, groupId);
+        return BaseResponse.buildSuccess(this.producer.open(topic, groupId));
     }
 
-    @Override
     @RequestMapping(path = "/close")
-    public boolean close(@RequestParam(name = "topic") String topic,
-                         @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+    public BaseResponse<Boolean> close(@RequestParam(name = "topic") String topic,
+                                       @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         log.info("topic:{} groupId:{}", topic, groupId);
 
-        return this.producer.close(topic, groupId);
+        return BaseResponse.buildSuccess(this.producer.close(topic, groupId));
     }
 
-    @Override
     @RequestMapping(path = "/exist")
-    public boolean exist(@RequestParam(name = "topic") String topic,
-                         @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+    public BaseResponse<Boolean> exist(@RequestParam(name = "topic") String topic,
+                                       @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         log.info("topic:{} groupId:{}", topic, groupId);
 
-        return this.producer.exist(topic, groupId);
+        return BaseResponse.buildSuccess(this.producer.exist(topic, groupId));
     }
 
-    @Override
     @RequestMapping(path = "/list")
-    public TopicPage list(@RequestParam(name = "pageIndex") Integer pageIndex,
-                          @RequestParam(name = "pageSize") Integer pageSize,
-                          @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+    public BaseResponse<TopicPage> list(@RequestParam(name = "pageIndex") Integer pageIndex,
+                                        @RequestParam(name = "pageSize") Integer pageSize,
+                                        @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         log.info("pageIndex:{} pageSize:{} groupId:{}", pageIndex, pageSize, groupId);
 
-        return this.producer.list(pageIndex, pageSize, groupId);
+        return BaseResponse.buildSuccess(this.producer.list(pageIndex, pageSize, groupId));
     }
 
-    @Override
     @RequestMapping(path = "/state")
-    public TopicInfo state(@RequestParam(name = "topic") String topic,
-                           @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+    public BaseResponse<TopicInfo> state(@RequestParam(name = "topic") String topic,
+                                         @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         log.info("topic:{} groupId:{}", topic, groupId);
 
-        return this.producer.state(topic, groupId);
+        return BaseResponse.buildSuccess(this.producer.state(topic, groupId));
     }
 }

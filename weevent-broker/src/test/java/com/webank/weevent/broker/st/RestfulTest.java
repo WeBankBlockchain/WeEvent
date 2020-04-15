@@ -1,6 +1,7 @@
 package com.webank.weevent.broker.st;
 
 import com.webank.weevent.broker.JUnitTestBase;
+import com.webank.weevent.client.BaseResponse;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.SendResult;
 import com.webank.weevent.client.TopicInfo;
@@ -11,8 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -38,7 +41,9 @@ public class RestfulTest extends JUnitTestBase {
         url = "http://localhost:7000/weevent-broker/rest/";
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         this.rest = new RestTemplate(requestFactory);
-        rest.getForEntity(url + "open?topic={topic}", Boolean.class, this.restTopic);
+
+        this.rest.exchange(url + "open?topic={topic}&groupId={groupId}", HttpMethod.GET, null, new ParameterizedTypeReference<BaseResponse<Boolean>>() {
+        }, this.restTopic, WeEvent.DEFAULT_GROUP_ID);
 
         eventId = rest.getForEntity(url + "publish?topic={topic}&content={content}", SendResult.class, this.restTopic,
                 this.content).getBody().getEventId();
@@ -46,99 +51,114 @@ public class RestfulTest extends JUnitTestBase {
 
     @Test
     public void testOpenNoGroupId() {
-        ResponseEntity<Boolean> rsp = rest.getForEntity(url + "open?topic={topic}", Boolean.class, this.restTopic);
+        ResponseEntity<BaseResponse<Boolean>> rsp = this.rest.exchange(url + "open?topic={topic}", HttpMethod.GET, null, new ParameterizedTypeReference<BaseResponse<Boolean>>() {
+        }, this.restTopic);
+
         Assert.assertEquals(200, rsp.getStatusCodeValue());
-        Assert.assertTrue(rsp.getBody());
+        Assert.assertTrue(rsp.getBody().getData());
     }
 
     @Test
     public void testOpenWithGroupId() {
-        ResponseEntity<Boolean> rsp = rest.getForEntity(url + "open?topic={topic}&groupId={groupId}", Boolean.class,
-                this.restTopic, WeEvent.DEFAULT_GROUP_ID);
+        ResponseEntity<BaseResponse<Boolean>> rsp = this.rest.exchange(url + "open?topic={topic}&groupId={groupId}", HttpMethod.GET, null, new ParameterizedTypeReference<BaseResponse<Boolean>>() {
+        }, this.restTopic, WeEvent.DEFAULT_GROUP_ID);
+
         Assert.assertEquals(200, rsp.getStatusCodeValue());
-        Assert.assertTrue(rsp.getBody());
+        Assert.assertTrue(rsp.getBody().getData());
     }
 
     @Test
     public void testCloseNoGroupId() {
-        ResponseEntity<Boolean> rsp = rest.getForEntity(url + "close?topic={topic}", Boolean.class, this.restTopic);
+        ResponseEntity<BaseResponse<Boolean>> rsp = this.rest.exchange(url + "close?topic={topic}", HttpMethod.GET, null, new ParameterizedTypeReference<BaseResponse<Boolean>>() {
+        }, this.restTopic);
+
         Assert.assertEquals(200, rsp.getStatusCodeValue());
-        Assert.assertTrue(rsp.getBody());
+        Assert.assertTrue(rsp.getBody().getData());
     }
 
     @Test
     public void testCloseContainGroupId() {
-        ResponseEntity<Boolean> rsp = rest.getForEntity(url + "close?topic={topic}&groupId={groupId}", Boolean.class,
-                this.restTopic, WeEvent.DEFAULT_GROUP_ID);
+        ResponseEntity<BaseResponse<Boolean>> rsp = this.rest.exchange(url + "close?topic={topic}&groupId={groupId}", HttpMethod.GET, null, new ParameterizedTypeReference<BaseResponse<Boolean>>() {
+        }, this.restTopic, WeEvent.DEFAULT_GROUP_ID);
+
         Assert.assertEquals(200, rsp.getStatusCodeValue());
-        Assert.assertTrue(rsp.getBody());
+        Assert.assertTrue(rsp.getBody().getData());
     }
 
     @Test
     public void testExistNoGroupId() {
-        ResponseEntity<Boolean> rsp = rest.getForEntity(url + "exist?topic={topic}", Boolean.class, this.restTopic);
+        ResponseEntity<BaseResponse<Boolean>> rsp = this.rest.exchange(url + "exist?topic={topic}", HttpMethod.GET, null, new ParameterizedTypeReference<BaseResponse<Boolean>>() {
+        }, this.restTopic);
+
         Assert.assertEquals(200, rsp.getStatusCodeValue());
-        Assert.assertTrue(rsp.getBody());
+        Assert.assertTrue(rsp.getBody().getData());
     }
 
     @Test
     public void testExistContainGroupId() {
-        ResponseEntity<Boolean> rsp = rest.getForEntity(url + "exist?topic={topic}&groupId={groupId}", Boolean.class,
-                this.restTopic, WeEvent.DEFAULT_GROUP_ID);
+        ResponseEntity<BaseResponse<Boolean>> rsp = this.rest.exchange(url + "exist?topic={topic}&groupId={groupId}", HttpMethod.GET, null, new ParameterizedTypeReference<BaseResponse<Boolean>>() {
+        }, this.restTopic, WeEvent.DEFAULT_GROUP_ID);
+
         Assert.assertEquals(200, rsp.getStatusCodeValue());
-        Assert.assertTrue(rsp.getBody());
+        Assert.assertTrue(rsp.getBody().getData());
     }
 
     @Test
     public void testStateNoGroupId() {
-        ResponseEntity<TopicInfo> rsp = rest.getForEntity(url + "state?topic={topic}", TopicInfo.class, this.restTopic);
+        ResponseEntity<BaseResponse<TopicInfo>> rsp = rest.exchange(url + "state?topic={topic}", HttpMethod.GET, null, new ParameterizedTypeReference<BaseResponse<TopicInfo>>() {
+        }, this.restTopic);
+
         log.info("state, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
         Assert.assertEquals(200, rsp.getStatusCodeValue());
-        Assert.assertEquals(this.restTopic, rsp.getBody().getTopicName());
+        Assert.assertEquals(this.restTopic, rsp.getBody().getData().getTopicName());
     }
 
     @Test
     public void testStateWithGroupId() {
-        ResponseEntity<TopicInfo> rsp = rest.getForEntity(url + "state?topic={topic}&groupId={groupId}",
-                TopicInfo.class, this.restTopic, WeEvent.DEFAULT_GROUP_ID);
+        ResponseEntity<BaseResponse<TopicInfo>> rsp = rest.exchange(url + "state?topic={topic}&groupId={groupId}", HttpMethod.GET, null, new ParameterizedTypeReference<BaseResponse<TopicInfo>>() {
+        }, this.restTopic, WeEvent.DEFAULT_GROUP_ID);
+
         log.info("state, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
         Assert.assertEquals(200, rsp.getStatusCodeValue());
-        Assert.assertEquals(this.restTopic, rsp.getBody().getTopicName());
+        Assert.assertEquals(this.restTopic, rsp.getBody().getData().getTopicName());
     }
 
     @Test
     public void testListNoGroupId() {
-        ResponseEntity<TopicPage> rsp = rest.getForEntity(url + "list?pageIndex={pageIndex}&pageSize={pageSize}",
-                TopicPage.class, "0", "10");
+        ResponseEntity<BaseResponse<TopicPage>> rsp = rest.exchange(url + "list?pageIndex={pageIndex}&pageSize={pageSize}", HttpMethod.GET, null, new ParameterizedTypeReference<BaseResponse<TopicPage>>() {
+        }, "0", "10");
+
         Assert.assertEquals(200, rsp.getStatusCodeValue());
-        Assert.assertTrue(rsp.getBody().getTotal() > 0);
+        Assert.assertTrue(rsp.getBody().getData().getTotal() > 0);
     }
 
     @Test
     public void testListWithGroupId() {
-        ResponseEntity<TopicPage> rsp = rest.getForEntity(
-                url + "list?pageIndex={pageIndex}&pageSize={pageSize}&groupId={groupId}", TopicPage.class, "0", "10",
-                WeEvent.DEFAULT_GROUP_ID);
+        ResponseEntity<BaseResponse<TopicPage>> rsp = rest.exchange(url + "list?pageIndex={pageIndex}&pageSize={pageSize}&groupId={groupId}", HttpMethod.GET, null, new ParameterizedTypeReference<BaseResponse<TopicPage>>() {
+        }, "0", "10", WeEvent.DEFAULT_GROUP_ID);
+
         Assert.assertEquals(200, rsp.getStatusCodeValue());
-        Assert.assertTrue(rsp.getBody().getTotal() > 0);
+        Assert.assertTrue(rsp.getBody().getData().getTotal() > 0);
     }
 
     @Test
     public void testGetEventNoGroupId() {
-        ResponseEntity<WeEvent> rsp = rest.getForEntity(url + "getEvent?eventId={eventId}", WeEvent.class,
-                this.eventId);
+        ResponseEntity<BaseResponse<WeEvent>> rsp = rest.exchange(url + "getEvent?eventId={eventId}", HttpMethod.GET, null, new ParameterizedTypeReference<BaseResponse<WeEvent>>() {
+        }, this.eventId);
+
         Assert.assertEquals(200, rsp.getStatusCodeValue());
-        WeEvent event = rsp.getBody();
+        WeEvent event = rsp.getBody().getData();
         String returnContent = new String(event.getContent());
         Assert.assertEquals(this.content, returnContent);
     }
 
     @Test
     public void testGetEventWithGroupId() {
-        ResponseEntity<WeEvent> rsp = rest.getForEntity(url + "getEvent?eventId={eventId}&groupId={groupId}",
-                WeEvent.class, this.eventId, WeEvent.DEFAULT_GROUP_ID);
+        ResponseEntity<BaseResponse<WeEvent>> rsp = rest.exchange(url + "getEvent?eventId={eventId}&groupId={groupId}", HttpMethod.GET, null, new ParameterizedTypeReference<BaseResponse<WeEvent>>() {
+        }, this.eventId, WeEvent.DEFAULT_GROUP_ID);
+
         Assert.assertEquals(200, rsp.getStatusCodeValue());
-        WeEvent event = rsp.getBody();
+        WeEvent event = rsp.getBody().getData();
         String returnContent = new String(event.getContent());
         Assert.assertEquals(this.content, returnContent);
     }
