@@ -159,7 +159,7 @@ public class MainEventLoop extends StoppableTask {
     }
 
     /**
-     * normal loop, like in FISCO-BCOS 1.3
+     * normal loop
      *
      * @throws BrokerException BrokerException
      */
