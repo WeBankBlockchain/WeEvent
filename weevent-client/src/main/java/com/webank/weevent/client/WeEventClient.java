@@ -40,7 +40,6 @@ public class WeEventClient implements IWeEventClient {
     private final String groupId;
     private final String userName;
     private final String password;
-    private final int timeout;
 
     // default STOMP url, ws://localhost:8080/weevent-broker/stomp
     private WeEventConnectionFactory connectionFactory;
@@ -51,14 +50,13 @@ public class WeEventClient implements IWeEventClient {
     // httpClient
     private CloseableHttpClient httpClient;
 
-    WeEventClient(String brokerUrl, String groupId, String userName, String password, int timeout) throws BrokerException {
+    WeEventClient(String brokerUrl, String groupId, String userName, String password) throws BrokerException {
         validateParam(brokerUrl);
 
         this.brokerUrl = brokerUrl;
         this.groupId = groupId;
         this.userName = userName;
         this.password = password;
-        this.timeout = timeout;
         this.httpClient = HttpClientUtils.buildHttpClient();
 
         buildJms();

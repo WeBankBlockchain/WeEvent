@@ -24,8 +24,6 @@ public interface IWeEventClient {
         // stomp's account&password
         private String userName = "";
         private String password = "";
-        // rpc timeout, ms
-        private int timeout = 5000;
 
         public Builder brokerUrl(String brokerUrl) {
             this.brokerUrl = brokerUrl;
@@ -47,13 +45,8 @@ public interface IWeEventClient {
             return this;
         }
 
-        public Builder timeout(int timeout) {
-            this.timeout = timeout;
-            return this;
-        }
-
         public IWeEventClient build() throws BrokerException {
-            return new WeEventClient(this.brokerUrl, this.groupId, this.userName, this.password, this.timeout);
+            return new WeEventClient(this.brokerUrl, this.groupId, this.userName, this.password);
         }
     }
 
