@@ -128,8 +128,8 @@ public class Web3SDKConnector {
             GroupChannelConnectionsConfig connectionsConfig = new GroupChannelConnectionsConfig();
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
             connectionsConfig.setCaCert(resolver.getResource("classpath:" + fiscoConfig.getCaCrtPath()));
-            connectionsConfig.setSslCert(resolver.getResource("classpath:" + fiscoConfig.getNodeCrtPath()));
-            connectionsConfig.setSslKey(resolver.getResource("classpath:" + fiscoConfig.getNodeKeyPath()));
+            connectionsConfig.setSslCert(resolver.getResource("classpath:" + fiscoConfig.getSdkCrtPath()));
+            connectionsConfig.setSslKey(resolver.getResource("classpath:" + fiscoConfig.getSdkKeyPath()));
 
             ChannelConnections channelConnections = new ChannelConnections();
             channelConnections.setGroupId(groupId.intValue());
