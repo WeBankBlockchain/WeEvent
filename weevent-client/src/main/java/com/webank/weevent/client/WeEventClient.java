@@ -83,17 +83,10 @@ public class WeEventClient implements IWeEventClient {
     @Override
     public boolean open(String topic) throws BrokerException {
         validateParam(topic);
-        // return this.brokerRpc.open(topic, this.groupId);
-        HttpGet httpGet;
-        try {
-            httpGet = new HttpGet(String.format("%s/open?topic=%s&groupId=%s",
-                    this.brokerUrl.concat("/rest"),
-                    URLEncoder.encode(topic, StandardCharsets.UTF_8.toString()),
-                    this.groupId));
-        } catch (UnsupportedEncodingException e) {
-            log.error("Encode topic error", e);
-            throw new BrokerException(ErrorCode.ENCODE_TOPIC_ERROR);
-        }
+        HttpGet httpGet = new HttpGet(String.format("%s/open?topic=%s&groupId=%s",
+                this.brokerUrl.concat("/rest"),
+                encodeTopic(topic),
+                this.groupId));
 
         return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<Boolean>>() {
         }).getData();
@@ -102,17 +95,10 @@ public class WeEventClient implements IWeEventClient {
     @Override
     public boolean close(String topic) throws BrokerException {
         validateParam(topic);
-        // return this.brokerRpc.close(topic, this.groupId);
-        HttpGet httpGet;
-        try {
-            httpGet = new HttpGet(String.format("%s/close?topic=%s&groupId=%s",
-                    this.brokerUrl.concat("/rest"),
-                    URLEncoder.encode(topic, StandardCharsets.UTF_8.toString()),
-                    this.groupId));
-        } catch (UnsupportedEncodingException e) {
-            log.error("Encode topic error", e);
-            throw new BrokerException(ErrorCode.ENCODE_TOPIC_ERROR);
-        }
+        HttpGet httpGet = new HttpGet(String.format("%s/close?topic=%s&groupId=%s",
+                this.brokerUrl.concat("/rest"),
+                encodeTopic(topic),
+                this.groupId));
 
         return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<Boolean>>() {
         }).getData();
@@ -121,17 +107,11 @@ public class WeEventClient implements IWeEventClient {
     @Override
     public boolean exist(String topic) throws BrokerException {
         validateParam(topic);
-        // return this.brokerRpc.exist(topic, this.groupId);
-        HttpGet httpGet;
-        try {
-            httpGet = new HttpGet(String.format("%s/exist?topic=%s&groupId=%s",
-                    this.brokerUrl.concat("/rest"),
-                    URLEncoder.encode(topic, StandardCharsets.UTF_8.toString()),
-                    this.groupId));
-        } catch (UnsupportedEncodingException e) {
-            log.error("Encode topic error", e);
-            throw new BrokerException(ErrorCode.ENCODE_TOPIC_ERROR);
-        }
+        HttpGet httpGet = new HttpGet(String.format("%s/exist?topic=%s&groupId=%s",
+                this.brokerUrl.concat("/rest"),
+                encodeTopic(topic),
+                this.groupId));
+
 
         return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<Boolean>>() {
         }).getData();
@@ -139,7 +119,6 @@ public class WeEventClient implements IWeEventClient {
 
     @Override
     public TopicPage list(Integer pageIndex, Integer pageSize) throws BrokerException {
-        // return this.brokerRpc.list(pageIndex, pageSize, this.groupId);
         HttpGet httpGet = new HttpGet(String.format("%s/list?pageIndex=%s&pageSize=%s&groupId=%s", this.brokerUrl.concat("/rest"), pageIndex, pageSize, this.groupId));
 
         return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<TopicPage>>() {
@@ -149,17 +128,10 @@ public class WeEventClient implements IWeEventClient {
     @Override
     public TopicInfo state(String topic) throws BrokerException {
         validateParam(topic);
-        // return this.brokerRpc.state(topic, this.groupId);
-        HttpGet httpGet;
-        try {
-            httpGet = new HttpGet(String.format("%s/state?topic=%s&groupId=%s",
-                    this.brokerUrl.concat("/rest"),
-                    URLEncoder.encode(topic, StandardCharsets.UTF_8.toString()),
-                    this.groupId));
-        } catch (UnsupportedEncodingException e) {
-            log.error("encode topic error", e);
-            throw new BrokerException(ErrorCode.ENCODE_TOPIC_ERROR);
-        }
+        HttpGet httpGet = new HttpGet(String.format("%s/state?topic=%s&groupId=%s",
+                this.brokerUrl.concat("/rest"),
+                encodeTopic(topic),
+                this.groupId));
 
         return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<TopicInfo>>() {
         }).getData();
@@ -168,7 +140,6 @@ public class WeEventClient implements IWeEventClient {
     @Override
     public WeEvent getEvent(String eventId) throws BrokerException {
         validateParam(eventId);
-        // return this.brokerRpc.getEvent(eventId, this.groupId);
         HttpGet httpGet;
         try {
             httpGet = new HttpGet(String.format("%s/getEvent?eventId=%s&groupId=%s",
@@ -446,5 +417,14 @@ public class WeEventClient implements IWeEventClient {
         fileEventListener.setSubscriptionId(subscriptionId);
 
         return subscriptionId;
+    }
+
+    private String encodeTopic(String topic) throws BrokerException {
+        try {
+            return URLEncoder.encode(topic, StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException e) {
+            log.error("encode topic error", e);
+            throw new BrokerException(ErrorCode.ENCODE_TOPIC_ERROR);
+        }
     }
 }
