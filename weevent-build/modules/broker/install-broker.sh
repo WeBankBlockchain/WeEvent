@@ -38,11 +38,11 @@ copy_file
 
 sed -i "s/^.*nodes=.*$/nodes=${channel_info}/g" ${out_path}/conf/fisco.properties
 echo "set channel_info success"
-if [[ -f ${block_chain_node_path}/ca.crt ]] && [[ -f ${block_chain_node_path}/node.crt ]] && [[ -f ${block_chain_node_path}/node.key ]]; then
-    rm -rf ${out_path}/conf/ca.crt ${out_path}/conf/node.crt ${out_path}/conf/node.key
-    cp ${block_chain_node_path}/ca.crt ${block_chain_node_path}/node.crt ${block_chain_node_path}/node.key ${out_path}/conf/
+if [[ -f ${block_chain_node_path}/ca.crt ]] && [[ -f ${block_chain_node_path}/sdk.crt ]] && [[ -f ${block_chain_node_path}/sdk.key ]]; then
+    rm -rf ${out_path}/conf/ca.crt ${out_path}/conf/sdk.crt ${out_path}/conf/sdk.key
+    cp ${block_chain_node_path}/ca.crt ${block_chain_node_path}/sdk.crt ${block_chain_node_path}/sdk.key ${out_path}/conf/
 else
-    echo "ca.crt or node.crt or node.key is not exist."
+    echo "ca.crt or sdk.crt or sdk.key is not exist."
     exit 1
 fi
 
