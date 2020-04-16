@@ -54,11 +54,11 @@ public class FiscoConfig {
     @Value("${ca-crt-path:ca.crt}")
     private String CaCrtPath;
 
-    @Value("${node-crt-path:node.crt}")
-    private String NodeCrtPath;
+    @Value("${sdk-crt-path:sdk.crt}")
+    private String SdkCrtPath;
 
-    @Value("${node-key-path:node.key}")
-    private String NodeKeyPath;
+    @Value("${sdk-key-path:sdk.key}")
+    private String SdkKeyPath;
 
     @Value("${pem-key-path:privateKey.pem}")
     private String PemKeyPath;
