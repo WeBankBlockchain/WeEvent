@@ -134,8 +134,6 @@ public class WebSocketMqtt extends BinaryWebSocketHandler implements SubProtocol
 
     // decode mqtt message from websocket BinaryMessage
     private static MqttMessage decode(BinaryMessage message) throws BrokerException {
-        log.info("DECODE: {}", message.getPayload().array());
-
         try {
             ByteBufAllocator allocator = new UnpooledByteBufAllocator(false);
             ByteBuf byteBuf = allocator.buffer(message.getPayloadLength());

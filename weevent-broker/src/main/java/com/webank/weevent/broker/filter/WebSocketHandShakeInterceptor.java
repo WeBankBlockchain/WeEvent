@@ -50,6 +50,7 @@ public class WebSocketHandShakeInterceptor implements HandshakeInterceptor {
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
                                    Map<String, Object> attributes) {
+        // this is not effective, use -Dorg.apache.tomcat.websocket.DISABLE_BUILTIN_EXTENSIONS=true instead if needed
         /*
         if ("mqtt".equalsIgnoreCase(request.getHeaders().getFirst(WebSocketHttpHeaders.SEC_WEBSOCKET_PROTOCOL))) {
             log.info("MQTT over websocket DO NOT support {}, close it", WebSocketHttpHeaders.SEC_WEBSOCKET_EXTENSIONS);
@@ -57,7 +58,7 @@ public class WebSocketHandShakeInterceptor implements HandshakeInterceptor {
             request.getHeaders().remove(WebSocketHttpHeaders.SEC_WEBSOCKET_EXTENSIONS);
         }
         */
-        
+
         if (StringUtils.isBlank(this.ipWhiteList)) {
             return true;
         }
