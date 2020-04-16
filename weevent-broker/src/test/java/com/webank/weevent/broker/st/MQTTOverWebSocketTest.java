@@ -30,7 +30,7 @@ public class MQTTOverWebSocketTest extends JUnitTestBase {
 
         @Override
         public void messageArrived(String topic, MqttMessage message) {
-            log.info("received message, size: {}", message.getPayload().length);
+            log.info("received message, {}", message.getPayload());
             received++;
         }
     }
@@ -59,12 +59,34 @@ public class MQTTOverWebSocketTest extends JUnitTestBase {
     }
 
     @Test
-    public void testPing() {
+    public void testConnectWithDefaultVersion() {
         try {
-            Thread.sleep(this.actionTimeout * 3);
+            String clientId = UUID.randomUUID().toString();
+            MqttClient mqttClient = new MqttClient(this.url, clientId, null);
+            MqttConnectOptions connOpts = new MqttConnectOptions();
+            connOpts.setConnectionTimeout(this.actionTimeout);
+            mqttClient.connect(connOpts);
 
             Assert.assertTrue(true);
-        } catch (InterruptedException e) {
+        } catch (MqttException e) {
+            log.error("exception", e);
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void testConnect31() {
+        try {
+            // client id must less then 23 bytes in 3.1
+            String clientId = UUID.randomUUID().toString().split("-")[0];
+            MqttClient mqttClient = new MqttClient(this.url, clientId, null);
+            MqttConnectOptions connOpts = new MqttConnectOptions();
+            connOpts.setConnectionTimeout(this.actionTimeout);
+            connOpts.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1);
+            mqttClient.connect(connOpts);
+
+            Assert.assertTrue(true);
+        } catch (MqttException e) {
             log.error("exception", e);
             Assert.fail();
         }
@@ -84,7 +106,48 @@ public class MQTTOverWebSocketTest extends JUnitTestBase {
     }
 
     @Test
-    public void testPublish() {
+    public void testConnect2Times() {
+        String clientId = UUID.randomUUID().toString();
+
+        try {
+            MqttClient mqttClient = new MqttClient(this.url, clientId, null);
+            MqttConnectOptions connOpts = new MqttConnectOptions();
+            connOpts.setConnectionTimeout(this.actionTimeout);
+            mqttClient.connect(connOpts);
+
+            Assert.assertTrue(true);
+        } catch (MqttException e) {
+            log.error("exception", e);
+            Assert.fail();
+        }
+
+        try {
+            MqttClient mqttClient2 = new MqttClient(this.url, clientId, null);
+            MqttConnectOptions connOpts = new MqttConnectOptions();
+            connOpts.setConnectionTimeout(this.actionTimeout);
+            mqttClient2.connect(connOpts);
+
+            Assert.assertTrue(true);
+        } catch (MqttException e) {
+            log.error("exception", e);
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void testPing() {
+        try {
+            Thread.sleep(this.actionTimeout * 3);
+
+            Assert.assertTrue(true);
+        } catch (InterruptedException e) {
+            log.error("exception", e);
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void testPublishQos0() {
         try {
             MqttMessage message = new MqttMessage(this.content.getBytes(StandardCharsets.UTF_8));
             message.setQos(0);
