@@ -50,6 +50,14 @@ public class WebSocketHandShakeInterceptor implements HandshakeInterceptor {
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
                                    Map<String, Object> attributes) {
+        /*
+        if ("mqtt".equalsIgnoreCase(request.getHeaders().getFirst(WebSocketHttpHeaders.SEC_WEBSOCKET_PROTOCOL))) {
+            log.info("MQTT over websocket DO NOT support {}, close it", WebSocketHttpHeaders.SEC_WEBSOCKET_EXTENSIONS);
+
+            request.getHeaders().remove(WebSocketHttpHeaders.SEC_WEBSOCKET_EXTENSIONS);
+        }
+        */
+        
         if (StringUtils.isBlank(this.ipWhiteList)) {
             return true;
         }
@@ -74,6 +82,6 @@ public class WebSocketHandShakeInterceptor implements HandshakeInterceptor {
     @Override
     public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
                                Exception exception) {
-
+        // useless
     }
 }
