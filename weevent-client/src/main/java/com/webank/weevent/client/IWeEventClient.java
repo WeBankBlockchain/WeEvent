@@ -58,6 +58,15 @@ public interface IWeEventClient {
     }
 
     /**
+     * instance Builder
+     *
+     * @return Builder
+     */
+    static Builder builder() {
+        return new Builder();
+    }
+
+    /**
      * Open a topic
      *
      * @param topic topic name
@@ -207,8 +216,9 @@ public interface IWeEventClient {
      * @return send result, SendResult.SUCCESS if success, and return SendResult.eventId
      * @throws BrokerException broker exception
      * @throws IOException IOException
+     * @throws InterruptedException InterruptedException
      */
-    SendResult publishFile(String topic, String localFile) throws BrokerException, IOException;
+    SendResult publishFile(String topic, String localFile) throws BrokerException, IOException, InterruptedException;
 
     /**
      * Interface for file notify callback

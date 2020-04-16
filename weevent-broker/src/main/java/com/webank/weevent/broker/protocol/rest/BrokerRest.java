@@ -1,8 +1,5 @@
 package com.webank.weevent.broker.protocol.rest;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -70,61 +67,33 @@ public class BrokerRest {
     @RequestMapping(path = "/getEvent")
     public BaseResponse<WeEvent> getEvent(@RequestParam(name = "eventId") String eventId,
                                           @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
-        String decodeEventId;
-        try {
-            decodeEventId = URLDecoder.decode(eventId, StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException e) {
-            log.error("decode eventId error", e);
-            throw new BrokerException(ErrorCode.DECODE_EVENT_ID_ERROR);
-        }
-        log.info("eventId:{} groupId:{}", decodeEventId, groupId);
+        log.info("eventId:{} groupId:{}", eventId, groupId);
 
-        return BaseResponse.buildSuccess(this.producer.getEvent(decodeEventId, groupId));
+        return BaseResponse.buildSuccess(this.producer.getEvent(eventId, groupId));
     }
 
     @RequestMapping(path = "/open")
     public BaseResponse<Boolean> open(@RequestParam(name = "topic") String topic,
                                       @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
-        String decodeTopic;
-        try {
-            decodeTopic = URLDecoder.decode(topic, StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException e) {
-            log.error("decode topic error", e);
-            throw new BrokerException(ErrorCode.DECODE_TOPIC_ERROR);
-        }
-        log.info("topic:{} groupId:{}", decodeTopic, groupId);
+        log.info("topic:{} groupId:{}", topic, groupId);
 
-        return BaseResponse.buildSuccess(this.producer.open(decodeTopic, groupId));
+        return BaseResponse.buildSuccess(this.producer.open(topic, groupId));
     }
 
     @RequestMapping(path = "/close")
     public BaseResponse<Boolean> close(@RequestParam(name = "topic") String topic,
                                        @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
-        String decodeTopic;
-        try {
-            decodeTopic = URLDecoder.decode(topic, StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException e) {
-            log.error("decode topic error", e);
-            throw new BrokerException(ErrorCode.DECODE_TOPIC_ERROR);
-        }
-        log.info("topic:{} groupId:{}", decodeTopic, groupId);
+        log.info("topic:{} groupId:{}", topic, groupId);
 
-        return BaseResponse.buildSuccess(this.producer.close(decodeTopic, groupId));
+        return BaseResponse.buildSuccess(this.producer.close(topic, groupId));
     }
 
     @RequestMapping(path = "/exist")
     public BaseResponse<Boolean> exist(@RequestParam(name = "topic") String topic,
                                        @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
-        String decodeTopic;
-        try {
-            decodeTopic = URLDecoder.decode(topic, StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException e) {
-            log.error("decode topic error", e);
-            throw new BrokerException(ErrorCode.DECODE_TOPIC_ERROR);
-        }
-        log.info("topic:{} groupId:{}", decodeTopic, groupId);
+        log.info("topic:{} groupId:{}", topic, groupId);
 
-        return BaseResponse.buildSuccess(this.producer.exist(decodeTopic, groupId));
+        return BaseResponse.buildSuccess(this.producer.exist(topic, groupId));
     }
 
     @RequestMapping(path = "/list")
@@ -139,15 +108,8 @@ public class BrokerRest {
     @RequestMapping(path = "/state")
     public BaseResponse<TopicInfo> state(@RequestParam(name = "topic") String topic,
                                          @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
-        String decodeTopic;
-        try {
-            decodeTopic = URLDecoder.decode(topic, StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException e) {
-            log.error("decode topic error", e);
-            throw new BrokerException(ErrorCode.DECODE_TOPIC_ERROR);
-        }
-        log.info("topic:{} groupId:{}", decodeTopic, groupId);
+        log.info("topic:{} groupId:{}", topic, groupId);
 
-        return BaseResponse.buildSuccess(this.producer.state(decodeTopic, groupId));
+        return BaseResponse.buildSuccess(this.producer.state(topic, groupId));
     }
 }

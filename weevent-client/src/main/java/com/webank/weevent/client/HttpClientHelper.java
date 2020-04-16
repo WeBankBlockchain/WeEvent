@@ -12,25 +12,29 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 
-/**
- * HttpClient utils
- */
-
 @Slf4j
-public class HttpClientUtils {
+public class HttpClientHelper {
 
-    public static CloseableHttpClient buildHttpClient() {
-        return HttpClientBuilder.create().build();
+    private final int timeout;
+    private CloseableHttpClient httpClient;
+
+    public HttpClientHelper(int timeout) {
+        this.timeout = timeout;
+        this.httpClient = HttpClientBuilder.create().build();
     }
 
-    public static <T> BaseResponse<T> invokeCGI(CloseableHttpClient httpClient, HttpRequestBase request, TypeReference<BaseResponse<T>> typeReference, int timeout) throws BrokerException {
+    public CloseableHttpClient buildHttpClient() {
+        return this.httpClient;
+    }
+
+    public <T> BaseResponse<T> invokeCGI(HttpRequestBase request, TypeReference<BaseResponse<T>> typeReference) throws BrokerException {
         long requestStartTime = System.currentTimeMillis();
         RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectTimeout(timeout)
-                .setSocketTimeout(timeout)
+                .setConnectTimeout(this.timeout)
+                .setSocketTimeout(this.timeout)
                 .build();
         request.setConfig(requestConfig);
-        try (CloseableHttpResponse httpResponse = httpClient.execute(request)) {
+        try (CloseableHttpResponse httpResponse = this.httpClient.execute(request)) {
             log.info("invokeCGI {} in {} millisecond, response:{}", request.getURI(),
                     System.currentTimeMillis() - requestStartTime, httpResponse.getStatusLine().toString());
             if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode()) {

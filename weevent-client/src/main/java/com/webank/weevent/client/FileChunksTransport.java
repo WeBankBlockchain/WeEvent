@@ -20,7 +20,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.springframework.util.DigestUtils;
 
@@ -35,21 +34,21 @@ public class FileChunksTransport {
     //like http://localhost:8080/weevent-broker/file
     private String svrUrl;
     private String downloadFilePath = "";
-    private CloseableHttpClient httpClient;
+    private HttpClientHelper httpClientHelper;
     // retry upload/download chunk times
     private static final int CHUNK_RETRY_COUNT = 5;
     private static final int INVOKE_CGI_FAIL_RETRY_COUNT = 20;
     private static final long INVOKE_CGI_FAIL_SLEEP_MILLISECOND = 3000;
 
-    public FileChunksTransport(CloseableHttpClient httpClient, String svrUrl) {
+    public FileChunksTransport(HttpClientHelper httpClientHelper, String svrUrl) {
         this.svrUrl = svrUrl;
-        this.httpClient = httpClient;
+        this.httpClientHelper = httpClientHelper;
     }
 
-    public FileChunksTransport(CloseableHttpClient httpClient, String svrUrl, String downloadFilePath) {
+    public FileChunksTransport(HttpClientHelper httpClientHelper, String svrUrl, String downloadFilePath) {
         this.svrUrl = svrUrl;
         this.downloadFilePath = downloadFilePath;
-        this.httpClient = httpClient;
+        this.httpClientHelper = httpClientHelper;
     }
 
     public SendResult upload(String localFile, String topic, String groupId) throws BrokerException, IOException, InterruptedException {
@@ -183,7 +182,7 @@ public class FileChunksTransport {
             throw new BrokerException(ErrorCode.ENCODE_FILE_NAME_ERROR);
         }
 
-        return HttpClientUtils.invokeCGI(this.httpClient, httpGet, new TypeReference<BaseResponse<FileChunksMeta>>() {
+        return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<FileChunksMeta>>() {
         }).getData();
     }
 
@@ -191,7 +190,7 @@ public class FileChunksTransport {
     private FileChunksMeta getFileChunksInfo(String topic, String groupId, String fileId) throws BrokerException {
         HttpGet httpGet = new HttpGet(String.format("%s/listChunk?topic=%s&groupId=%s&fileId=%s", this.svrUrl, topic, groupId, fileId));
 
-        return HttpClientUtils.invokeCGI(this.httpClient, httpGet, new TypeReference<BaseResponse<FileChunksMeta>>() {
+        return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<FileChunksMeta>>() {
         }).getData();
     }
 
@@ -208,7 +207,7 @@ public class FileChunksTransport {
         httpPost.setEntity(requestEntity);
 
         try {
-            HttpClientUtils.invokeCGI(this.httpClient, httpPost, new TypeReference<BaseResponse<ObjectUtils.Null>>() {
+            this.httpClientHelper.invokeCGI(httpPost, new TypeReference<BaseResponse<ObjectUtils.Null>>() {
             });
         } catch (BrokerException e) {
             log.error("upload chunk failed, {}@{} ", local.getFileId(), chunkIdx);
@@ -223,7 +222,7 @@ public class FileChunksTransport {
         HttpGet httpGet = new HttpGet(String.format("%s/downloadChunk?fileId=%s&chunkIdx=%s", this.svrUrl, fileId, chunkIdx));
         httpGet.addHeader("file_host", host);
 
-        try (CloseableHttpResponse httpResponse = this.httpClient.execute(httpGet)) {
+        try (CloseableHttpResponse httpResponse = this.httpClientHelper.buildHttpClient().execute(httpGet)) {
             log.info("invokeCGI {} in {} millisecond, response:{}", httpGet.getURI(),
                     System.currentTimeMillis() - requestStartTime, httpResponse.getStatusLine().toString());
             if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode() || null == httpResponse.getEntity()) {
@@ -246,7 +245,7 @@ public class FileChunksTransport {
     private SendResult closeChunk(FileChunksMeta local) throws BrokerException {
         HttpGet httpGet = new HttpGet(String.format("%s/closeChunk?topic=%s&groupId=%s&fileId=%s", this.svrUrl, local.getTopic(), local.getGroupId(), local.getFileId()));
 
-        return HttpClientUtils.invokeCGI(this.httpClient, httpGet, new TypeReference<BaseResponse<SendResult>>() {
+        return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<SendResult>>() {
         }).getData();
     }
 

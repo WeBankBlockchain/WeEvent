@@ -32,7 +32,6 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
 
 @Slf4j
 public class WeEventClient implements IWeEventClient {
@@ -47,17 +46,16 @@ public class WeEventClient implements IWeEventClient {
     private TopicConnection connection;
     // (subscriptionId <-> TopicSession)
     private Map<String, TopicSession> sessionMap;
-    // httpClient
-    private CloseableHttpClient httpClient;
+    private HttpClientHelper httpClientHelper;
 
-    WeEventClient(String brokerUrl, String groupId, String userName, String password) throws BrokerException {
+    WeEventClient(String brokerUrl, String groupId, String userName, String password, int timeout) throws BrokerException {
         validateParam(brokerUrl);
 
         this.brokerUrl = brokerUrl;
         this.groupId = groupId;
         this.userName = userName;
         this.password = password;
-        this.httpClient = HttpClientUtils.buildHttpClient();
+        this.httpClientHelper = new HttpClientHelper(timeout);
 
         buildJms();
     }
@@ -83,7 +81,7 @@ public class WeEventClient implements IWeEventClient {
     }
 
     @Override
-    public BaseResponse<Boolean> open(String topic) throws BrokerException {
+    public boolean open(String topic) throws BrokerException {
         validateParam(topic);
         // return this.brokerRpc.open(topic, this.groupId);
         HttpGet httpGet;
@@ -97,12 +95,12 @@ public class WeEventClient implements IWeEventClient {
             throw new BrokerException(ErrorCode.ENCODE_TOPIC_ERROR);
         }
 
-        return HttpClientUtils.invokeCGI(this.httpClient, httpGet, new TypeReference<BaseResponse<Boolean>>() {
-        });
+        return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<Boolean>>() {
+        }).getData();
     }
 
     @Override
-    public BaseResponse<Boolean> close(String topic) throws BrokerException {
+    public boolean close(String topic) throws BrokerException {
         validateParam(topic);
         // return this.brokerRpc.close(topic, this.groupId);
         HttpGet httpGet;
@@ -116,12 +114,12 @@ public class WeEventClient implements IWeEventClient {
             throw new BrokerException(ErrorCode.ENCODE_TOPIC_ERROR);
         }
 
-        return HttpClientUtils.invokeCGI(this.httpClient, httpGet, new TypeReference<BaseResponse<Boolean>>() {
-        });
+        return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<Boolean>>() {
+        }).getData();
     }
 
     @Override
-    public BaseResponse<Boolean> exist(String topic) throws BrokerException {
+    public boolean exist(String topic) throws BrokerException {
         validateParam(topic);
         // return this.brokerRpc.exist(topic, this.groupId);
         HttpGet httpGet;
@@ -135,21 +133,21 @@ public class WeEventClient implements IWeEventClient {
             throw new BrokerException(ErrorCode.ENCODE_TOPIC_ERROR);
         }
 
-        return HttpClientUtils.invokeCGI(this.httpClient, httpGet, new TypeReference<BaseResponse<Boolean>>() {
-        });
+        return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<Boolean>>() {
+        }).getData();
     }
 
     @Override
-    public BaseResponse<TopicPage> list(Integer pageIndex, Integer pageSize) throws BrokerException {
+    public TopicPage list(Integer pageIndex, Integer pageSize) throws BrokerException {
         // return this.brokerRpc.list(pageIndex, pageSize, this.groupId);
         HttpGet httpGet = new HttpGet(String.format("%s/list?pageIndex=%s&pageSize=%s&groupId=%s", this.brokerUrl.concat("/rest"), pageIndex, pageSize, this.groupId));
 
-        return HttpClientUtils.invokeCGI(this.httpClient, httpGet, new TypeReference<BaseResponse<TopicPage>>() {
-        });
+        return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<TopicPage>>() {
+        }).getData();
     }
 
     @Override
-    public BaseResponse<TopicInfo> state(String topic) throws BrokerException {
+    public TopicInfo state(String topic) throws BrokerException {
         validateParam(topic);
         // return this.brokerRpc.state(topic, this.groupId);
         HttpGet httpGet;
@@ -163,12 +161,12 @@ public class WeEventClient implements IWeEventClient {
             throw new BrokerException(ErrorCode.ENCODE_TOPIC_ERROR);
         }
 
-        return HttpClientUtils.invokeCGI(this.httpClient, httpGet, new TypeReference<BaseResponse<TopicInfo>>() {
-        });
+        return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<TopicInfo>>() {
+        }).getData();
     }
 
     @Override
-    public BaseResponse<WeEvent> getEvent(String eventId) throws BrokerException {
+    public WeEvent getEvent(String eventId) throws BrokerException {
         validateParam(eventId);
         // return this.brokerRpc.getEvent(eventId, this.groupId);
         HttpGet httpGet;
@@ -182,8 +180,8 @@ public class WeEventClient implements IWeEventClient {
             throw new BrokerException(ErrorCode.ENCODE_EVENT_ID_ERROR);
         }
 
-        return HttpClientUtils.invokeCGI(this.httpClient, httpGet, new TypeReference<BaseResponse<WeEvent>>() {
-        });
+        return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<WeEvent>>() {
+        }).getData();
     }
 
     @Override
@@ -394,7 +392,7 @@ public class WeEventClient implements IWeEventClient {
     public SendResult publishFile(String topic, String localFile) throws BrokerException, IOException, InterruptedException {
         // upload file
         validateLocalFile(localFile);
-        FileChunksTransport fileChunksTransport = new FileChunksTransport(this.httpClient, this.brokerUrl + "/file");
+        FileChunksTransport fileChunksTransport = new FileChunksTransport(this.httpClientHelper, this.brokerUrl + "/file");
         SendResult sendResult = fileChunksTransport.upload(localFile, topic, this.groupId);
 
         log.info("publish file result: {}", sendResult);
@@ -442,7 +440,7 @@ public class WeEventClient implements IWeEventClient {
     public String subscribeFile(String topic, String filePath, FileListener fileListener) throws BrokerException {
         // subscribe file event
         validateLocalFile(filePath);
-        FileChunksTransport fileChunksTransport = new FileChunksTransport(this.httpClient, this.brokerUrl + "/file", filePath);
+        FileChunksTransport fileChunksTransport = new FileChunksTransport(this.httpClientHelper, this.brokerUrl + "/file", filePath);
         FileEventListener fileEventListener = new FileEventListener(fileChunksTransport, fileListener);
         String subscriptionId = this.dealSubscribe(topic, WeEvent.OFFSET_LAST, "", true, fileEventListener);
         fileEventListener.setSubscriptionId(subscriptionId);

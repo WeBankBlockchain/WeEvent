@@ -116,7 +116,7 @@ public class CEPRuleMQ {
             // set group id
             String groupId = rule.getGroupId();
             IWeEventClient client;
-            IWeEventClient.Builder builder = new IWeEventClient.Builder();
+            IWeEventClient.Builder builder = IWeEventClient.builder();
             builder.brokerUrl(baseUrl);
             if (null != groupId) {
                 builder.groupId(groupId);
