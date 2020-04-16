@@ -98,7 +98,7 @@ public class WebSocketMqtt extends BinaryWebSocketHandler implements SubProtocol
                     willMessage);
 
             MqttConnAckMessage rsp = this.protocolProcess.processConnect((MqttConnectMessage) msg, sessionData);
-            this.send2Remote(session, rsp);
+            send2Remote(session, rsp);
             if (rsp.variableHeader().connectReturnCode() != MqttConnectReturnCode.CONNECTION_ACCEPTED) {
                 this.closeSession(session);
             }
@@ -134,6 +134,8 @@ public class WebSocketMqtt extends BinaryWebSocketHandler implements SubProtocol
 
     // decode mqtt message from websocket BinaryMessage
     private static MqttMessage decode(BinaryMessage message) throws BrokerException {
+        log.info("DECODE: {}", message.getPayload().array());
+
         try {
             ByteBufAllocator allocator = new UnpooledByteBufAllocator(false);
             ByteBuf byteBuf = allocator.buffer(message.getPayloadLength());
@@ -199,7 +201,7 @@ public class WebSocketMqtt extends BinaryWebSocketHandler implements SubProtocol
     }
 
     @Override
-    protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
+    protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
         try {
             MqttMessage msg = decode(message);
             if (msg.decoderResult().isFailure()) {
