@@ -4,8 +4,10 @@ import java.io.IOException;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
@@ -16,18 +18,22 @@ import org.apache.http.util.EntityUtils;
 
 @Slf4j
 public class HttpClientUtils {
-    private static final int HTTP_RESPONSE_STATUS_SUCCESS = 200;
 
     public static CloseableHttpClient buildHttpClient() {
         return HttpClientBuilder.create().build();
     }
 
-    public static <T> BaseResponse<T> invokeCGI(CloseableHttpClient httpClient, HttpUriRequest request, TypeReference<BaseResponse<T>> typeReference) throws BrokerException {
+    public static <T> BaseResponse<T> invokeCGI(CloseableHttpClient httpClient, HttpRequestBase request, TypeReference<BaseResponse<T>> typeReference, int timeout) throws BrokerException {
         long requestStartTime = System.currentTimeMillis();
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectTimeout(timeout)
+                .setSocketTimeout(timeout)
+                .build();
+        request.setConfig(requestConfig);
         try (CloseableHttpResponse httpResponse = httpClient.execute(request)) {
             log.info("invokeCGI {} in {} millisecond, response:{}", request.getURI(),
                     System.currentTimeMillis() - requestStartTime, httpResponse.getStatusLine().toString());
-            if (HTTP_RESPONSE_STATUS_SUCCESS != httpResponse.getStatusLine().getStatusCode()) {
+            if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode()) {
                 log.error("invokeCGI failed, request url:{}, msg:{}", request.getURI(), httpResponse.getStatusLine().toString());
                 throw new BrokerException(ErrorCode.HTTP_RESPONSE_FAILED);
             }
