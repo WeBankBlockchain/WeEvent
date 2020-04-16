@@ -69,8 +69,7 @@ function startBrokerService() {
         sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" broker.sh
     fi
 
-    # open mqtt port
-    sed -i "s/#mqtt.broker.port/mqtt.broker.port/g" ./conf/weevent.properties
+    # open mqtt tcp port
     sed -i "s/#mqtt.broker.tcp.port/mqtt.broker.tcp.port/g" ./conf/weevent.properties
 
     # start broker service
