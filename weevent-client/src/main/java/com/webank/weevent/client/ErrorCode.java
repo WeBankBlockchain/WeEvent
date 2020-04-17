@@ -83,9 +83,7 @@ public enum ErrorCode {
     ENCODE_FILE_NAME_ERROR(102015, "encode file name error"),
     DECODE_FILE_NAME_ERROR(102016, "decode file name error"),
     ENCODE_TOPIC_ERROR(102017, "encode topic error"),
-    DECODE_TOPIC_ERROR(102018, "decode topic error"),
-    ENCODE_EVENT_ID_ERROR(102019, "encode event id error"),
-    DECODE_EVENT_ID_ERROR(102020, "decode event id error"),
+    ENCODE_EVENT_ID_ERROR(102018, "encode event id error"),
 
     HTTP_REQUEST_EXECUTE_ERROR(102100, "http request execute failed"),
     BUILD_HTTP_URL_ERROR(102101, "build http url failed"),
