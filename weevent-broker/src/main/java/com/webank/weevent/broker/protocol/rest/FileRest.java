@@ -49,7 +49,7 @@ public class FileRest {
                                                   @RequestParam(name = "groupId") String groupId,
                                                   @RequestParam(name = "fileName") String fileName,
                                                   @RequestParam(name = "fileSize") long fileSize,
-                                                  @RequestParam(name = "md5") String md5) throws BrokerException, UnsupportedEncodingException {
+                                                  @RequestParam(name = "md5") String md5) throws BrokerException {
         log.info("groupId:{} md5:{}", groupId, md5);
 
         ParamCheckUtils.validateFileName(fileName);
@@ -57,12 +57,18 @@ public class FileRest {
         ParamCheckUtils.validateFileMd5(md5);
 
         // create FileChunksMeta
-        FileChunksMeta fileChunksMeta = new FileChunksMeta(WeEventUtils.generateUuid(),
-                URLDecoder.decode(fileName, StandardCharsets.UTF_8.toString()),
-                fileSize,
-                md5,
-                topic,
-                groupId);
+        FileChunksMeta fileChunksMeta;
+        try {
+            fileChunksMeta = new FileChunksMeta(WeEventUtils.generateUuid(),
+                    URLDecoder.decode(fileName, StandardCharsets.UTF_8.toString()),
+                    fileSize,
+                    md5,
+                    topic,
+                    groupId);
+        } catch (UnsupportedEncodingException e) {
+            log.error("decode fileName error", e);
+            throw new BrokerException(ErrorCode.DECODE_FILE_NAME_ERROR);
+        }
 
         // create AMOP channel with FileTransportSender
         FileChunksMeta remoteFileChunksMeta = this.fileTransportService.openChannel(fileChunksMeta);
