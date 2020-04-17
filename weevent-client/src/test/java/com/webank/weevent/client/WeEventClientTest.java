@@ -25,6 +25,7 @@ import org.junit.rules.TestName;
 public class WeEventClientTest {
 
     private Map<String, String> extensions = new HashMap<>();
+    private final long FIVE_SECOND= 5000L;
 
     @Rule
     public TestName testName = new TestName();
@@ -81,7 +82,7 @@ public class WeEventClientTest {
         });
 
         Assert.assertFalse(subscribeId.isEmpty());
-        Thread.sleep(5000);
+        Thread.sleep(this.FIVE_SECOND);
     }
 
     /**

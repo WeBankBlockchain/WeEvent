@@ -22,6 +22,7 @@ import org.junit.rules.TestName;
 @Slf4j
 public class WeEventClientGroupIdTest {
     private Map<String, String> extensions = new HashMap<>();
+    private final long FIVE_SECOND= 5000L;
     @Rule
     public TestName testName = new TestName();
 
@@ -164,7 +165,7 @@ public class WeEventClientGroupIdTest {
             }
         });
         Assert.assertFalse(subscriptionId.isEmpty());
-        Thread.sleep(5000);
+        Thread.sleep(this.FIVE_SECOND);
     }
 
     /**
@@ -186,7 +187,7 @@ public class WeEventClientGroupIdTest {
         });
 
         Assert.assertFalse(subscriptionId.isEmpty());
-        Thread.sleep(5000);
+        Thread.sleep(this.FIVE_SECOND);
     }
 
 
@@ -209,7 +210,7 @@ public class WeEventClientGroupIdTest {
         });
 
         Assert.assertFalse(subscriptionId.isEmpty());
-        Thread.sleep(5000);
+        Thread.sleep(this.FIVE_SECOND);
     }
 
     /**

@@ -36,6 +36,7 @@ import org.apache.http.client.methods.HttpGet;
 @Slf4j
 public class WeEventClient implements IWeEventClient {
     private final String brokerUrl;
+    private final String brokerRestfulUrl;
     private final String groupId;
     private final String userName;
     private final String password;
@@ -52,6 +53,7 @@ public class WeEventClient implements IWeEventClient {
         validateParam(brokerUrl);
 
         this.brokerUrl = brokerUrl;
+        this.brokerRestfulUrl = brokerUrl.concat("/rest");
         this.groupId = groupId;
         this.userName = userName;
         this.password = password;
@@ -84,7 +86,7 @@ public class WeEventClient implements IWeEventClient {
     public boolean open(String topic) throws BrokerException {
         validateParam(topic);
         HttpGet httpGet = new HttpGet(String.format("%s/open?topic=%s&groupId=%s",
-                this.brokerUrl.concat("/rest"),
+                this.brokerRestfulUrl,
                 encodeTopic(topic),
                 this.groupId));
 
@@ -96,7 +98,7 @@ public class WeEventClient implements IWeEventClient {
     public boolean close(String topic) throws BrokerException {
         validateParam(topic);
         HttpGet httpGet = new HttpGet(String.format("%s/close?topic=%s&groupId=%s",
-                this.brokerUrl.concat("/rest"),
+                this.brokerRestfulUrl,
                 encodeTopic(topic),
                 this.groupId));
 
@@ -108,7 +110,7 @@ public class WeEventClient implements IWeEventClient {
     public boolean exist(String topic) throws BrokerException {
         validateParam(topic);
         HttpGet httpGet = new HttpGet(String.format("%s/exist?topic=%s&groupId=%s",
-                this.brokerUrl.concat("/rest"),
+                this.brokerRestfulUrl,
                 encodeTopic(topic),
                 this.groupId));
 
@@ -119,7 +121,7 @@ public class WeEventClient implements IWeEventClient {
 
     @Override
     public TopicPage list(Integer pageIndex, Integer pageSize) throws BrokerException {
-        HttpGet httpGet = new HttpGet(String.format("%s/list?pageIndex=%s&pageSize=%s&groupId=%s", this.brokerUrl.concat("/rest"), pageIndex, pageSize, this.groupId));
+        HttpGet httpGet = new HttpGet(String.format("%s/list?pageIndex=%s&pageSize=%s&groupId=%s", this.brokerRestfulUrl, pageIndex, pageSize, this.groupId));
 
         return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<TopicPage>>() {
         }).getData();
@@ -129,7 +131,7 @@ public class WeEventClient implements IWeEventClient {
     public TopicInfo state(String topic) throws BrokerException {
         validateParam(topic);
         HttpGet httpGet = new HttpGet(String.format("%s/state?topic=%s&groupId=%s",
-                this.brokerUrl.concat("/rest"),
+                this.brokerRestfulUrl,
                 encodeTopic(topic),
                 this.groupId));
 
@@ -143,7 +145,7 @@ public class WeEventClient implements IWeEventClient {
         HttpGet httpGet;
         try {
             httpGet = new HttpGet(String.format("%s/getEvent?eventId=%s&groupId=%s",
-                    this.brokerUrl.concat("/rest"),
+                    this.brokerRestfulUrl,
                     URLEncoder.encode(eventId, StandardCharsets.UTF_8.toString()),
                     this.groupId));
         } catch (UnsupportedEncodingException e) {
