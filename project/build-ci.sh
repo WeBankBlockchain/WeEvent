@@ -72,7 +72,8 @@ function startBrokerService() {
     bash broker.sh start
 
     # open mqtt tcp port for junit test
-    sed -i "s/#mqtt.broker.tcp.port/mqtt.broker.tcp.port/g" ./conf/weevent.properties
+    cd ${current_path}/weevent-broker
+    sed -i "s/#mqtt.broker.tcp.port/mqtt.broker.tcp.port/g" ./src/main/resources/weevent.properties
 }
 
 function main(){
