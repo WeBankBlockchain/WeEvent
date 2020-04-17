@@ -19,7 +19,7 @@ import org.junit.Test;
 @Slf4j
 public class MQTTOverWebSocketTest extends JUnitTestBase {
 
-    private final String url = "ws://localhost:7000/weevent-broker/mqtt";
+    private String url;
     private final int actionTimeout = 3000;
 
     private MqttClient mqttClient;
@@ -40,6 +40,8 @@ public class MQTTOverWebSocketTest extends JUnitTestBase {
         log.info("=============================={}.{}==============================",
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
+
+        this.url = "ws://localhost:" + this.listenPort + "/weevent-broker/mqtt";
 
         String clientId = UUID.randomUUID().toString();
         this.mqttClient = new MqttClient(this.url, clientId, null);

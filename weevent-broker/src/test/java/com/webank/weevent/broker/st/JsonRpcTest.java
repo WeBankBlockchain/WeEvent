@@ -36,7 +36,7 @@ public class JsonRpcTest extends JUnitTestBase {
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
-        String url = "http://localhost:7000/weevent-broker/jsonrpc";
+        String url = "http://localhost:" + this.listenPort + "/weevent-broker/jsonrpc";
 
         JsonRpcHttpClient client = new JsonRpcHttpClient(new URL(url));
         this.iBrokerRpc = ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);
