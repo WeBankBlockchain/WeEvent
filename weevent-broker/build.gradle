@@ -25,9 +25,6 @@ dependencies {
     // stomp
     implementation("org.springframework.boot:spring-boot-starter-websocket")
 
-    // mqtt
-    implementation("org.springframework.integration:spring-integration-mqtt:${spring5Version}")
-
     // json rpc, https://mvnrepository.com/artifact/com.github.briandilley.jsonrpc4j/jsonrpc4j
     implementation("com.github.briandilley.jsonrpc4j:jsonrpc4j:${jsonrpc4jVersion}")
 
