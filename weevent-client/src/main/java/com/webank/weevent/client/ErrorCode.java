@@ -136,6 +136,13 @@ public enum ErrorCode {
     FILE_SENDER_RECEIVER_CONFLICT(200509, "can't publish and subscribe a file in the same node"),
     FILE_EXIST_CONTEXT(200510, "exist file context"),
     FILE_INIT_VERIFY_FAILED(200511, "initialize PEM for verify topic failed"),
+
+    MQTT_UNKNOWN_COMMAND(200600, "unknown mqtt command"),
+    MQTT_ENCODE_FAILED(200601, "encode mqtt message failed"),
+    MQTT_DECODE_FAILED(200602, "decode mqtt message failed"),
+    MQTT_CONNECT_CONFLICT(200610, "connect command conflict with specification 3.1.1"),
+    MQTT_UNKNOWN_CLIENT_ID(200611, "unknown client id"),
+    MQTT_NOT_SUPPORT_QOS2(200612, "do not support qos=2"),
     ;
 
     /**
