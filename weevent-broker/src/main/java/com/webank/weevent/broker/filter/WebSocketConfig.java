@@ -1,7 +1,9 @@
-package com.webank.weevent.broker.protocol.stomp;
+package com.webank.weevent.broker.filter;
 
 
 import com.webank.weevent.broker.config.WeEventConfig;
+import com.webank.weevent.broker.protocol.mqtt.WebSocketMqtt;
+import com.webank.weevent.broker.protocol.stomp.BrokerStomp;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +25,12 @@ import org.springframework.web.socket.server.standard.ServletServerContainerFact
 @Slf4j
 @Configuration
 @EnableWebSocket
-public class StompConfig implements WebSocketConfigurer {
+public class WebSocketConfig implements WebSocketConfigurer {
     private WeEventConfig weEventConfig;
     private BrokerStomp brokerStomp;
+    private WebSocketMqtt webSocketMqtt;
+    // max topic content's length is 10k
+    private final int maxSize = 16 * 1024;
 
     @Autowired
     public void setWeEventConfig(WeEventConfig weEventConfig) {
@@ -37,17 +42,22 @@ public class StompConfig implements WebSocketConfigurer {
         this.brokerStomp = brokerStomp;
     }
 
+    @Autowired
+    public void setWebSocketMqtt(WebSocketMqtt webSocketMqtt) {
+        this.webSocketMqtt = webSocketMqtt;
+    }
+
     @Bean
     public ServletServerContainerFactoryBean createWebSocketContainer() {
         ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
-        // max topic content's length is 10k
-        container.setMaxTextMessageBufferSize(16 * 1024);
+        container.setMaxTextMessageBufferSize(maxSize);
+        container.setMaxBinaryMessageBufferSize(maxSize);
         return container;
     }
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        HandShakeWebSocketInterceptor handShakeWebSocketInterceptor = interceptorWebSocket();
+        WebSocketHandShakeInterceptor handShakeWebSocketInterceptor = interceptorWebSocket();
 
         registry.addHandler(this.brokerStomp, "/sockjs")
                 .addInterceptors(handShakeWebSocketInterceptor)
@@ -58,6 +68,10 @@ public class StompConfig implements WebSocketConfigurer {
         registry.addHandler(this.brokerStomp, "/stomp")
                 .addInterceptors(handShakeWebSocketInterceptor)
                 .setAllowedOrigins("*");
+
+        registry.addHandler(this.webSocketMqtt, "/mqtt")
+                .addInterceptors(handShakeWebSocketInterceptor)
+                .setAllowedOrigins("*");
     }
 
     /**
@@ -65,9 +79,7 @@ public class StompConfig implements WebSocketConfigurer {
      *
      * @return HandShakeWebSocketInterceptor
      */
-    private HandShakeWebSocketInterceptor interceptorWebSocket() {
-        log.info("client ip white list: {}", this.weEventConfig.getIpWhiteList());
-
-        return new HandShakeWebSocketInterceptor(this.weEventConfig.getIpWhiteList());
+    private WebSocketHandShakeInterceptor interceptorWebSocket() {
+        return new WebSocketHandShakeInterceptor(this.weEventConfig.getIpWhiteList());
     }
 }
