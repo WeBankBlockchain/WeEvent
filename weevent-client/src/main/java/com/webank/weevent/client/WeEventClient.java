@@ -3,8 +3,9 @@ package com.webank.weevent.client;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
@@ -25,42 +26,39 @@ import com.webank.weevent.client.jms.WeEventConnectionFactory;
 import com.webank.weevent.client.jms.WeEventTopic;
 import com.webank.weevent.client.jms.WeEventTopicPublisher;
 import com.webank.weevent.client.jms.WeEventTopicSubscriber;
-import com.webank.weevent.client.jsonrpc.IBrokerRpc;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
-import com.googlecode.jsonrpc4j.ProxyUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.methods.HttpGet;
 
 @Slf4j
 public class WeEventClient implements IWeEventClient {
     private final String brokerUrl;
+    private final String brokerRestfulUrl;
     private final String groupId;
     private final String userName;
     private final String password;
-    private final int timeout;
 
-    // json rpc proxy
-    private IBrokerRpc brokerRpc;
     // default STOMP url, ws://localhost:8080/weevent-broker/stomp
     private WeEventConnectionFactory connectionFactory;
     // stomp connection
     private TopicConnection connection;
     // (subscriptionId <-> TopicSession)
     private Map<String, TopicSession> sessionMap;
+    private HttpClientHelper httpClientHelper;
 
     WeEventClient(String brokerUrl, String groupId, String userName, String password, int timeout) throws BrokerException {
         validateParam(brokerUrl);
 
         this.brokerUrl = brokerUrl;
+        this.brokerRestfulUrl = brokerUrl.concat("/rest");
         this.groupId = groupId;
         this.userName = userName;
         this.password = password;
-        this.timeout = timeout;
+        this.httpClientHelper = new HttpClientHelper(timeout);
 
-        buildRpc();
         buildJms();
     }
 
@@ -87,36 +85,76 @@ public class WeEventClient implements IWeEventClient {
     @Override
     public boolean open(String topic) throws BrokerException {
         validateParam(topic);
-        return this.brokerRpc.open(topic, this.groupId);
+        HttpGet httpGet = new HttpGet(String.format("%s/open?topic=%s&groupId=%s",
+                this.brokerRestfulUrl,
+                encodeTopic(topic),
+                this.groupId));
+
+        return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<Boolean>>() {
+        }).getData();
     }
 
     @Override
     public boolean close(String topic) throws BrokerException {
         validateParam(topic);
-        return this.brokerRpc.close(topic, this.groupId);
+        HttpGet httpGet = new HttpGet(String.format("%s/close?topic=%s&groupId=%s",
+                this.brokerRestfulUrl,
+                encodeTopic(topic),
+                this.groupId));
+
+        return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<Boolean>>() {
+        }).getData();
     }
 
     @Override
     public boolean exist(String topic) throws BrokerException {
         validateParam(topic);
-        return this.brokerRpc.exist(topic, this.groupId);
+        HttpGet httpGet = new HttpGet(String.format("%s/exist?topic=%s&groupId=%s",
+                this.brokerRestfulUrl,
+                encodeTopic(topic),
+                this.groupId));
+
+
+        return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<Boolean>>() {
+        }).getData();
     }
 
     @Override
     public TopicPage list(Integer pageIndex, Integer pageSize) throws BrokerException {
-        return this.brokerRpc.list(pageIndex, pageSize, this.groupId);
+        HttpGet httpGet = new HttpGet(String.format("%s/list?pageIndex=%s&pageSize=%s&groupId=%s", this.brokerRestfulUrl, pageIndex, pageSize, this.groupId));
+
+        return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<TopicPage>>() {
+        }).getData();
     }
 
     @Override
     public TopicInfo state(String topic) throws BrokerException {
         validateParam(topic);
-        return this.brokerRpc.state(topic, this.groupId);
+        HttpGet httpGet = new HttpGet(String.format("%s/state?topic=%s&groupId=%s",
+                this.brokerRestfulUrl,
+                encodeTopic(topic),
+                this.groupId));
+
+        return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<TopicInfo>>() {
+        }).getData();
     }
 
     @Override
     public WeEvent getEvent(String eventId) throws BrokerException {
         validateParam(eventId);
-        return this.brokerRpc.getEvent(eventId, this.groupId);
+        HttpGet httpGet;
+        try {
+            httpGet = new HttpGet(String.format("%s/getEvent?eventId=%s&groupId=%s",
+                    this.brokerRestfulUrl,
+                    URLEncoder.encode(eventId, StandardCharsets.UTF_8.toString()),
+                    this.groupId));
+        } catch (UnsupportedEncodingException e) {
+            log.error("Encode eventId error", e);
+            throw new BrokerException(ErrorCode.ENCODE_EVENT_ID_ERROR);
+        }
+
+        return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<WeEvent>>() {
+        }).getData();
     }
 
     @Override
@@ -272,41 +310,6 @@ public class WeEventClient implements IWeEventClient {
         }
     }
 
-    private void buildRpc() throws BrokerException {
-        String jsonRpcUrl = this.brokerUrl + "/jsonrpc";
-        log.info("broker's json rpc url: {}", jsonRpcUrl);
-
-        URL url;
-        try {
-            url = new URL(jsonRpcUrl);
-        } catch (MalformedURLException e) {
-            log.error("invalid url format", e);
-            throw new BrokerException(ErrorCode.PARAM_ISBLANK);
-        }
-
-        JsonRpcHttpClient client = new JsonRpcHttpClient(url);
-        client.setConnectionTimeoutMillis(this.timeout);
-        client.setReadTimeoutMillis(this.timeout);
-
-        // ssl
-        if (jsonRpcUrl.contains("https://")) {
-            SSLContext sslContext = getSSLContext();
-            client.setSslContext(sslContext);
-            // dot not verify HostName
-            client.setHostNameVerifier((hostname, sslsession) -> true);
-        }
-
-        // custom Exception
-        // {"jsonrpc":"2.0","id":"1","error":{"code":100106,"message":"topic name contain invalid char, ascii must be in[32, 128] except wildcard(+,#)"}}
-        client.setExceptionResolver(response -> {
-            log.error("Exception in json rpc invoke, {}", response.toString());
-            JsonNode error = response.get("error");
-            return new BrokerException(error.get("code").intValue(), error.get("message").textValue());
-        });
-
-        this.brokerRpc = ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);
-    }
-
     private void buildJms() throws BrokerException {
         String stompUrl = getStompUrl(this.brokerUrl);
         log.info("broker's stomp url: {}", stompUrl);
@@ -362,7 +365,7 @@ public class WeEventClient implements IWeEventClient {
     public SendResult publishFile(String topic, String localFile) throws BrokerException, IOException, InterruptedException {
         // upload file
         validateLocalFile(localFile);
-        FileChunksTransport fileChunksTransport = new FileChunksTransport(this.brokerUrl + "/file");
+        FileChunksTransport fileChunksTransport = new FileChunksTransport(this.httpClientHelper, this.brokerUrl + "/file");
         SendResult sendResult = fileChunksTransport.upload(localFile, topic, this.groupId);
 
         log.info("publish file result: {}", sendResult);
@@ -410,11 +413,20 @@ public class WeEventClient implements IWeEventClient {
     public String subscribeFile(String topic, String filePath, FileListener fileListener) throws BrokerException {
         // subscribe file event
         validateLocalFile(filePath);
-        FileChunksTransport fileChunksTransport = new FileChunksTransport(this.brokerUrl + "/file", filePath);
+        FileChunksTransport fileChunksTransport = new FileChunksTransport(this.httpClientHelper, this.brokerUrl + "/file", filePath);
         FileEventListener fileEventListener = new FileEventListener(fileChunksTransport, fileListener);
         String subscriptionId = this.dealSubscribe(topic, WeEvent.OFFSET_LAST, "", true, fileEventListener);
         fileEventListener.setSubscriptionId(subscriptionId);
 
         return subscriptionId;
+    }
+
+    private String encodeTopic(String topic) throws BrokerException {
+        try {
+            return URLEncoder.encode(topic, StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException e) {
+            log.error("encode topic error", e);
+            throw new BrokerException(ErrorCode.ENCODE_TOPIC_ERROR);
+        }
     }
 }
