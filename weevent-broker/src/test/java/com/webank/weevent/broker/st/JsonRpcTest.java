@@ -36,7 +36,7 @@ public class JsonRpcTest extends JUnitTestBase {
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
-        String url = "http://localhost:7000/weevent-broker/jsonrpc";
+        String url = "http://localhost:" + this.listenPort + "/weevent-broker/jsonrpc";
 
         JsonRpcHttpClient client = new JsonRpcHttpClient(new URL(url));
         this.iBrokerRpc = ProxyUtil.createClientProxy(client.getClass().getClassLoader(), IBrokerRpc.class, client);
@@ -144,7 +144,7 @@ public class JsonRpcTest extends JUnitTestBase {
         Map<String, String> ext = new HashMap<>();
         ext.put("weevent-jsonrpctest1", "json rpc ext value1");
         ext.put("weevent-jsonrpctest2", "json rpc ext value2");
-        SendResult publish = iBrokerRpc.publish(this.jsonTopic, "", this.content.getBytes(), new HashMap<>());
+        SendResult publish = iBrokerRpc.publish(this.jsonTopic, "", this.content.getBytes(), ext);
         log.info("publish: " + publish);
         Assert.assertNotNull(publish.getEventId());
     }
