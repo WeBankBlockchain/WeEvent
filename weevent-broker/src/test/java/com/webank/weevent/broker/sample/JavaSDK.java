@@ -18,7 +18,7 @@ public class JavaSDK {
         System.out.println("This is WeEvent Java SDK sample.");
         try {
             // get client
-            IWeEventClient client = new IWeEventClient.Builder().brokerUrl("http://localhost:7000/weevent-broker").groupId(WeEvent.DEFAULT_GROUP_ID).build();
+            IWeEventClient client = IWeEventClient.builder().brokerUrl("http://localhost:7000/weevent-broker").groupId(WeEvent.DEFAULT_GROUP_ID).build();
 
             // ensure topic exist
             String topicName = "com.weevent.test";

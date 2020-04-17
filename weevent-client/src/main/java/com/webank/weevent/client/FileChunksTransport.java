@@ -13,15 +13,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.springframework.util.DigestUtils;
 
@@ -36,22 +34,21 @@ public class FileChunksTransport {
     //like http://localhost:8080/weevent-broker/file
     private String svrUrl;
     private String downloadFilePath = "";
-    private CloseableHttpClient httpClient;
+    private HttpClientHelper httpClientHelper;
     // retry upload/download chunk times
     private static final int CHUNK_RETRY_COUNT = 5;
-    private static final int HTTP_RESPONSE_STATUS_SUCCESS = 200;
     private static final int INVOKE_CGI_FAIL_RETRY_COUNT = 20;
     private static final long INVOKE_CGI_FAIL_SLEEP_MILLISECOND = 3000;
 
-    public FileChunksTransport(String svrUrl) {
+    public FileChunksTransport(HttpClientHelper httpClientHelper, String svrUrl) {
         this.svrUrl = svrUrl;
-        this.httpClient = HttpClientBuilder.create().build();
+        this.httpClientHelper = httpClientHelper;
     }
 
-    public FileChunksTransport(String svrUrl, String downloadFilePath) {
+    public FileChunksTransport(HttpClientHelper httpClientHelper, String svrUrl, String downloadFilePath) {
         this.svrUrl = svrUrl;
         this.downloadFilePath = downloadFilePath;
-        this.httpClient = HttpClientBuilder.create().build();
+        this.httpClientHelper = httpClientHelper;
     }
 
     public SendResult upload(String localFile, String topic, String groupId) throws BrokerException, IOException, InterruptedException {
@@ -185,7 +182,7 @@ public class FileChunksTransport {
             throw new BrokerException(ErrorCode.ENCODE_FILE_NAME_ERROR);
         }
 
-        return this.invokeCGI(httpGet, new TypeReference<BaseResponse<FileChunksMeta>>() {
+        return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<FileChunksMeta>>() {
         }).getData();
     }
 
@@ -193,7 +190,7 @@ public class FileChunksTransport {
     private FileChunksMeta getFileChunksInfo(String topic, String groupId, String fileId) throws BrokerException {
         HttpGet httpGet = new HttpGet(String.format("%s/listChunk?topic=%s&groupId=%s&fileId=%s", this.svrUrl, topic, groupId, fileId));
 
-        return this.invokeCGI(httpGet, new TypeReference<BaseResponse<FileChunksMeta>>() {
+        return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<FileChunksMeta>>() {
         }).getData();
     }
 
@@ -210,7 +207,7 @@ public class FileChunksTransport {
         httpPost.setEntity(requestEntity);
 
         try {
-            this.invokeCGI(httpPost, new TypeReference<BaseResponse<ObjectUtils.Null>>() {
+            this.httpClientHelper.invokeCGI(httpPost, new TypeReference<BaseResponse<ObjectUtils.Null>>() {
             });
         } catch (BrokerException e) {
             log.error("upload chunk failed, {}@{} ", local.getFileId(), chunkIdx);
@@ -225,10 +222,10 @@ public class FileChunksTransport {
         HttpGet httpGet = new HttpGet(String.format("%s/downloadChunk?fileId=%s&chunkIdx=%s", this.svrUrl, fileId, chunkIdx));
         httpGet.addHeader("file_host", host);
 
-        try (CloseableHttpResponse httpResponse = this.httpClient.execute(httpGet)) {
+        try (CloseableHttpResponse httpResponse = this.httpClientHelper.buildHttpClient().execute(httpGet)) {
             log.info("invokeCGI {} in {} millisecond, response:{}", httpGet.getURI(),
                     System.currentTimeMillis() - requestStartTime, httpResponse.getStatusLine().toString());
-            if (HTTP_RESPONSE_STATUS_SUCCESS != httpResponse.getStatusLine().getStatusCode() || null == httpResponse.getEntity()) {
+            if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode() || null == httpResponse.getEntity()) {
                 log.error("download chunk failed, {}@{}", fileId, chunkIdx);
                 return chunkDataBytes;
             }
@@ -248,7 +245,7 @@ public class FileChunksTransport {
     private SendResult closeChunk(FileChunksMeta local) throws BrokerException {
         HttpGet httpGet = new HttpGet(String.format("%s/closeChunk?topic=%s&groupId=%s&fileId=%s", this.svrUrl, local.getTopic(), local.getGroupId(), local.getFileId()));
 
-        return this.invokeCGI(httpGet, new TypeReference<BaseResponse<SendResult>>() {
+        return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<SendResult>>() {
         }).getData();
     }
 
@@ -277,34 +274,5 @@ public class FileChunksTransport {
             }
         }
         return isFullUpload;
-    }
-
-    private <T> BaseResponse<T> invokeCGI(HttpUriRequest request, TypeReference<BaseResponse<T>> typeReference) throws BrokerException {
-        long requestStartTime = System.currentTimeMillis();
-        try (CloseableHttpResponse httpResponse = this.httpClient.execute(request)) {
-            log.info("invokeCGI {} in {} millisecond, response:{}", request.getURI(),
-                    System.currentTimeMillis() - requestStartTime, httpResponse.getStatusLine().toString());
-            if (HTTP_RESPONSE_STATUS_SUCCESS != httpResponse.getStatusLine().getStatusCode()) {
-                log.error("invokeCGI failed, request url:{}, msg:{}", request.getURI(), httpResponse.getStatusLine().toString());
-                throw new BrokerException(ErrorCode.HTTP_RESPONSE_FAILED);
-            }
-            if (null == httpResponse.getEntity()) {
-                log.error("invokeCGI failed, httpResponse.getEntity is null, request url:{}", request.getURI());
-                throw new BrokerException(ErrorCode.HTTP_RESPONSE_ENTITY_EMPTY);
-            }
-
-            byte[] responseResult = EntityUtils.toByteArray(httpResponse.getEntity());
-            BaseResponse<T> baseResponse = JsonHelper.json2Object(responseResult, typeReference);
-
-            if (ErrorCode.SUCCESS.getCode() != baseResponse.getCode()) {
-                log.error("invokeCGI failed, request url:{}, msg:{}", request.getURI(), baseResponse.getMessage());
-                throw new BrokerException(baseResponse.getCode(), baseResponse.getMessage());
-            }
-
-            return baseResponse;
-        } catch (IOException e) {
-            log.error("invokeCGI error, request url:{}", request.getURI(), e);
-            throw new BrokerException(ErrorCode.HTTP_REQUEST_EXECUTE_ERROR);
-        }
     }
 }
