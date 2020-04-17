@@ -19,38 +19,42 @@ import org.junit.Test;
 @Slf4j
 public class MQTTTest extends JUnitTestBase {
 
-    private final String url = "tcp://localhost:7002";
+    private final String url = "tcp://localhost:7001";
     private final int actionTimeout = 3000;
 
     private MqttClient mqttClient;
-    private String content = "hello mqtt";
+    private String content = "hello mqtt via tcp";
+
+    static class MessageListener implements IMqttMessageListener {
+        public int received = 0;
+
+        @Override
+        public void messageArrived(String topic, MqttMessage message) {
+            log.info("received message, {}", message.getPayload());
+            received++;
+        }
+    }
 
     @Before
-    public void before() {
+    public void before() throws Exception {
         log.info("=============================={}.{}==============================",
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
-        try {
-            String clientId = UUID.randomUUID().toString();
-            this.mqttClient = new MqttClient(this.url, clientId, null);
-            MqttConnectOptions connOpts = new MqttConnectOptions();
-            connOpts.setConnectionTimeout(this.actionTimeout);
-            connOpts.setKeepAliveInterval(this.actionTimeout);
-            connOpts.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1_1);
-            connOpts.setCleanSession(true);
-            this.mqttClient.connect(connOpts);
-        } catch (MqttException e) {
-            log.error("exception", e);
-        }
+        String clientId = UUID.randomUUID().toString();
+        this.mqttClient = new MqttClient(this.url, clientId, null);
+        MqttConnectOptions connOpts = new MqttConnectOptions();
+        connOpts.setConnectionTimeout(this.actionTimeout);
+        connOpts.setKeepAliveInterval(this.actionTimeout);
+        connOpts.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1_1);
+        connOpts.setCleanSession(true);
+        this.mqttClient.connect(connOpts);
     }
 
     @After
-    public void after() {
-        try {
+    public void after() throws Exception {
+        if (this.mqttClient != null && this.mqttClient.isConnected()) {
             this.mqttClient.disconnect();
-        } catch (MqttException e) {
-            log.error("exception", e);
         }
     }
 
@@ -206,13 +210,14 @@ public class MQTTTest extends JUnitTestBase {
     @Test
     public void testSubscribe() {
         try {
-            this.mqttClient.subscribeWithResponse(this.topicName, (topic, message) -> log.info("received message, {}", message.getPayload())).waitForCompletion();
+            MessageListener listener = new MessageListener();
+            this.mqttClient.subscribeWithResponse(this.topicName, listener).waitForCompletion();
 
             MqttMessage message = new MqttMessage(this.content.getBytes(StandardCharsets.UTF_8));
             this.mqttClient.publish(this.topicName, message);
 
             Thread.sleep(this.actionTimeout);
-            Assert.assertTrue(true);
+            Assert.assertTrue(listener.received > 0);
         } catch (Exception e) {
             log.error("exception", e);
             Assert.fail();
@@ -222,13 +227,14 @@ public class MQTTTest extends JUnitTestBase {
     @Test
     public void testSubscribeWildcard() {
         try {
-            this.mqttClient.subscribeWithResponse("com/#", (topic, message) -> log.info("received message, {}", message.getPayload())).waitForCompletion();
+            MessageListener listener = new MessageListener();
+            this.mqttClient.subscribeWithResponse("#", listener).waitForCompletion();
 
             MqttMessage message = new MqttMessage(this.content.getBytes(StandardCharsets.UTF_8));
             this.mqttClient.publish(this.topicName, message);
 
             Thread.sleep(this.actionTimeout);
-            Assert.assertTrue(true);
+            Assert.assertTrue(listener.received > 0);
         } catch (Exception e) {
             log.error("exception", e);
             Assert.fail();
@@ -238,15 +244,15 @@ public class MQTTTest extends JUnitTestBase {
     @Test
     public void testSubscribeBatch() {
         try {
+            MessageListener listener = new MessageListener();
             String[] topics = {this.topicName, "com.weevent"};
-            IMqttMessageListener listener = (topic, message) -> log.info("received message, {}", message.getPayload());
             this.mqttClient.subscribeWithResponse(topics, new IMqttMessageListener[]{listener, listener}).waitForCompletion();
 
             MqttMessage message = new MqttMessage(this.content.getBytes(StandardCharsets.UTF_8));
             this.mqttClient.publish(this.topicName, message);
 
             Thread.sleep(this.actionTimeout);
-            Assert.assertTrue(true);
+            Assert.assertTrue(listener.received > 0);
         } catch (Exception e) {
             log.error("exception", e);
             Assert.fail();
@@ -256,13 +262,14 @@ public class MQTTTest extends JUnitTestBase {
     @Test
     public void testSubscribeQos0() {
         try {
-            this.mqttClient.subscribeWithResponse(this.topicName, (topic, message) -> log.info("received message, {}", message.getPayload())).waitForCompletion();
+            MessageListener listener = new MessageListener();
+            this.mqttClient.subscribeWithResponse(this.topicName, listener).waitForCompletion();
 
             MqttMessage message = new MqttMessage(this.content.getBytes(StandardCharsets.UTF_8));
             this.mqttClient.publish(this.topicName, message);
 
             Thread.sleep(this.actionTimeout);
-            Assert.assertTrue(true);
+            Assert.assertTrue(listener.received > 0);
         } catch (Exception e) {
             log.error("exception", e);
             Assert.fail();
@@ -272,7 +279,8 @@ public class MQTTTest extends JUnitTestBase {
     @Test(expected = MqttException.class)
     public void testSubscribeQos2() throws MqttException {
         try {
-            this.mqttClient.subscribeWithResponse(this.topicName, 2, (topic, message) -> log.info("received message, {}", message.getPayload())).waitForCompletion();
+            MessageListener listener = new MessageListener();
+            this.mqttClient.subscribeWithResponse(this.topicName, 2, listener).waitForCompletion();
 
             Thread.sleep(this.actionTimeout);
             Assert.assertTrue(true);
