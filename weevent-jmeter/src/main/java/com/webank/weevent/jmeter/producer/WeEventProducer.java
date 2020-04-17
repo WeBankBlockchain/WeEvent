@@ -60,7 +60,7 @@ public class WeEventProducer extends AbstractJavaSamplerClient {
             this.format = context.getParameter("format") == null ? this.format : context.getParameter("format");
             this.groupId = context.getParameter("groupId") == null ? WeEvent.DEFAULT_GROUP_ID : context.getParameter("groupId");
             extensions.put(WeEvent.WeEvent_FORMAT, format);
-            this.weEventClient = new IWeEventClient.Builder().brokerUrl(defaultUrl).groupId(this.groupId).build();
+            this.weEventClient = IWeEventClient.builder().brokerUrl(defaultUrl).groupId(this.groupId).build();
             getNewLogger().info("weEventClient:{}", this.weEventClient);
 
             StringBuffer buffer = new StringBuffer();
