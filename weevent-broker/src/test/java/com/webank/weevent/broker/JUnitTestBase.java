@@ -10,8 +10,8 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
@@ -27,7 +27,7 @@ public class JUnitTestBase {
     protected String groupId = WeEvent.DEFAULT_GROUP_ID;
     protected String topicName = "com.weevent.test";
 
-    @Value("${server.port}")
+    @LocalServerPort
     public String listenPort;
 
     @Rule
