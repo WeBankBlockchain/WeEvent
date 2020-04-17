@@ -2,7 +2,6 @@ package com.webank.weevent.broker.protocol.mqtt.command;
 
 import java.util.Optional;
 
-import com.webank.weevent.broker.protocol.mqtt.BrokerHandler;
 import com.webank.weevent.broker.protocol.mqtt.ProtocolProcess;
 import com.webank.weevent.broker.protocol.mqtt.store.SessionContext;
 import com.webank.weevent.broker.protocol.mqtt.store.SessionStore;
@@ -10,7 +9,6 @@ import com.webank.weevent.broker.protocol.mqtt.store.SubscribeData;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.core.IConsumer;
 
-import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttFixedHeader;
 import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttMessageFactory;
@@ -26,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
  * @since 2019/6/5
  */
 @Slf4j
-public class UnSubscribe {
+public class UnSubscribe implements MqttCommand {
     private SessionStore sessionStore;
     private IConsumer iConsumer;
 
@@ -35,13 +33,14 @@ public class UnSubscribe {
         this.iConsumer = iConsumer;
     }
 
-    public void processUnSubscribe(Channel channel, String clientId, MqttUnsubscribeMessage msg) {
+    @Override
+    public Optional<MqttMessage> process(MqttMessage req, String clientId, String remoteIp) throws BrokerException {
+        MqttUnsubscribeMessage msg = (MqttUnsubscribeMessage) req;
         log.info("UNSUBSCRIBE, {}", msg.payload().topics());
 
         if (msg.payload().topics().isEmpty()) {
-            log.error("empty topic, skip message");
-            channel.close();
-            return;
+            log.error("empty topic, skip it");
+            return Optional.empty();
         }
 
         Optional<SessionContext> sessionContext = this.sessionStore.getSession(clientId);
@@ -62,6 +61,6 @@ public class UnSubscribe {
 
         MqttMessage rsp = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.UNSUBACK, false, MqttQoS.AT_LEAST_ONCE, false, ProtocolProcess.fixLengthOfMessageId),
                 MqttMessageIdVariableHeader.from(msg.variableHeader().messageId()), null);
-        BrokerHandler.sendRemote(channel, rsp);
+        return Optional.of(rsp);
     }
 }
