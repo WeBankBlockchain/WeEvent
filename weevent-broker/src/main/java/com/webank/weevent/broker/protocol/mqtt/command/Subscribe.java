@@ -1,6 +1,5 @@
 package com.webank.weevent.broker.protocol.mqtt.command;
 
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,13 +7,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.webank.weevent.broker.protocol.mqtt.BrokerHandler;
 import com.webank.weevent.broker.protocol.mqtt.ProtocolProcess;
 import com.webank.weevent.broker.protocol.mqtt.store.MessageIdStore;
 import com.webank.weevent.broker.protocol.mqtt.store.SessionContext;
 import com.webank.weevent.broker.protocol.mqtt.store.SessionStore;
 import com.webank.weevent.broker.protocol.mqtt.store.SubscribeData;
 import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.IConsumer;
@@ -22,7 +21,6 @@ import com.webank.weevent.core.fisco.constant.WeEventConstants;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttFixedHeader;
 import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttMessageFactory;
@@ -42,7 +40,7 @@ import org.apache.commons.lang3.StringUtils;
  * @since 2019/6/5
  */
 @Slf4j
-public class Subscribe {
+public class Subscribe implements MqttCommand {
     private SessionStore sessionStore;
     private MessageIdStore messageIdStore;
     private IConsumer iConsumer;
@@ -53,28 +51,27 @@ public class Subscribe {
         this.iConsumer = iConsumer;
     }
 
-    public void processSubscribe(Channel channel, String clientId, MqttSubscribeMessage msg) {
+    @Override
+    public Optional<MqttMessage> process(MqttMessage req, String clientId, String remoteIp) throws BrokerException {
+        MqttSubscribeMessage msg = (MqttSubscribeMessage) req;
         log.info("SUBSCRIBE, {}", msg.payload().topicSubscriptions());
 
         Optional<MqttTopicSubscription> notSupport = msg.payload().topicSubscriptions().stream().filter(item -> item.qualityOfService() == MqttQoS.EXACTLY_ONCE).findAny();
         if (notSupport.isPresent()) {
             log.error("DOT NOT support Qos=2, close");
-            channel.close();
-            return;
+            throw new BrokerException(ErrorCode.MQTT_NOT_SUPPORT_QOS2);
         }
 
         List<String> topics = msg.payload().topicSubscriptions().stream().map(MqttTopicSubscription::topicName).collect(Collectors.toList());
         if (topics.isEmpty()) {
-            log.error("empty topic, close");
-            channel.close();
-            return;
+            log.error("empty topic, skip it");
+            return Optional.empty();
         }
 
         // external params
         Map<IConsumer.SubscribeExt, String> ext = new HashMap<>();
         ext.put(IConsumer.SubscribeExt.InterfaceType, WeEventConstants.MQTTTYPE);
-        InetSocketAddress socketAddress = (InetSocketAddress) channel.remoteAddress();
-        ext.put(IConsumer.SubscribeExt.RemoteIP, socketAddress.getAddress().getHostAddress());
+        ext.put(IConsumer.SubscribeExt.RemoteIP, remoteIp);
 
         List<Integer> mqttQoSList = new ArrayList<>();
         if (msg.payload().topicSubscriptions().size() == 1) {
@@ -107,7 +104,7 @@ public class Subscribe {
         }
 
         MqttMessage rsp = genSubAck(msg.variableHeader().messageId(), mqttQoSList);
-        BrokerHandler.sendRemote(channel, rsp);
+        return Optional.of(rsp);
     }
 
     private String subscribe(String topic, String groupId, Map<IConsumer.SubscribeExt, String> ext, String clientId) {
@@ -164,9 +161,10 @@ public class Subscribe {
                     case AT_MOST_ONCE:
                     case AT_LEAST_ONCE:
                         int remaining = ProtocolProcess.fixLengthOfMessageId + subscribe.getTopic().length() + finalPayloadSize;
+                        //subscribe.getTopic() may be contain wildcard, use original topic in WeEvent
                         MqttMessage rsp = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.PUBLISH, false, subscribe.getMqttQoS(), false, remaining),
-                                new MqttPublishVariableHeader(subscribe.getTopic(), this.messageIdStore.getNextMessageId()), payload);
-                        BrokerHandler.sendRemote(context.getChannel(), rsp);
+                                new MqttPublishVariableHeader(event.getTopic(), this.messageIdStore.getNextMessageId()), payload);
+                        context.sendRemote(rsp);
                         break;
 
                     case EXACTLY_ONCE:

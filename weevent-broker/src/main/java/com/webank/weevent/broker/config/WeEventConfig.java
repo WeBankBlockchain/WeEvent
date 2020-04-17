@@ -32,23 +32,11 @@ public class WeEventConfig {
     @Value("${stomp.heartbeats:30}")
     private Integer stompHeartbeats;
 
-    @Value("${mqtt.broker.port:0}")
-    private Integer mqttPort;
-
     @Value("${mqtt.broker.tcp.port:0}")
     private Integer mqttTcpPort;
 
-    @Value("${mqtt.broker.sobacklog:511}")
-    private Integer soBackLog;
-
-    @Value("${mqtt.broker.sokeepalive:true}")
-    private Boolean soKeepAlive;
-
     @Value("${mqtt.broker.keepalive:60}")
     private Integer keepAlive;
-
-    @Value("${mqtt.broker.path:}")
-    private String mqttServerPath;
 
     @Value("${file.path:./logs/file}")
     private String filePath;
