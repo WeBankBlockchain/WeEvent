@@ -1,6 +1,9 @@
 package com.webank.weevent.broker.protocol.mqtt.command;
 
-import io.netty.channel.Channel;
+import java.util.Optional;
+
+import com.webank.weevent.client.BrokerException;
+
 import io.netty.handler.codec.mqtt.MqttMessage;
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,9 +13,10 @@ import lombok.extern.slf4j.Slf4j;
  * @since 2019/6/5
  */
 @Slf4j
-public class DisConnect {
-    public void processDisConnect(Channel channel, String clientId, MqttMessage msg) {
+public class DisConnect implements MqttCommand {
+    @Override
+    public Optional<MqttMessage> process(MqttMessage req, String clientId, String remoteIp) throws BrokerException {
         log.info("DISCONNECT, close {}", clientId);
-        channel.close();
+        return Optional.empty();
     }
 }

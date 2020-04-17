@@ -2,16 +2,16 @@ package com.webank.weevent.broker.protocol.mqtt.command;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
-import com.webank.weevent.broker.protocol.mqtt.BrokerHandler;
 import com.webank.weevent.broker.protocol.mqtt.ProtocolProcess;
 import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.SendResult;
 import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.IProducer;
 import com.webank.weevent.core.fisco.constant.WeEventConstants;
 
-import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttFixedHeader;
 import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttMessageFactory;
@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
  * @since 2019/6/3
  */
 @Slf4j
-public class Publish {
+public class Publish implements MqttCommand {
     private IProducer iproducer;
     private int timeout;
 
@@ -36,27 +36,32 @@ public class Publish {
         this.timeout = timeout;
     }
 
-    public void processPublish(Channel channel, MqttPublishMessage msg) {
+    @Override
+    public Optional<MqttMessage> process(MqttMessage req, String clientId, String remoteIp) throws BrokerException {
+        MqttPublishMessage msg = (MqttPublishMessage) req;
         log.info("PUBLISH, {} Qos: {}", msg.variableHeader().topicName(), msg.fixedHeader().qosLevel());
 
         switch (msg.fixedHeader().qosLevel()) {
             case AT_MOST_ONCE: {
                 this.publishMessage(msg, false);
+                return Optional.empty();
             }
-            break;
 
             case AT_LEAST_ONCE: {
                 boolean result = this.publishMessage(msg, false);
                 if (result) {
-                    this.sendPubAckMessage(channel, msg.variableHeader().packetId());
+                    MqttMessage rsp = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.PUBACK, false, MqttQoS.AT_LEAST_ONCE, false, ProtocolProcess.fixLengthOfMessageId),
+                            MqttMessageIdVariableHeader.from(msg.variableHeader().packetId()), null);
+                    return Optional.of(rsp);
                 }
+
+                return Optional.empty();
             }
-            break;
 
             case EXACTLY_ONCE:
             default: {
                 log.error("DOT NOT support Qos=2, close");
-                channel.close();
+                throw new BrokerException(ErrorCode.MQTT_NOT_SUPPORT_QOS2);
             }
         }
     }
@@ -80,11 +85,5 @@ public class Publish {
             log.error("exception in publish", e);
             return new SendResult(SendResult.SendResultStatus.ERROR);
         }
-    }
-
-    private void sendPubAckMessage(Channel channel, int messageId) {
-        MqttMessage rsp = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.PUBACK, false, MqttQoS.AT_LEAST_ONCE, false, ProtocolProcess.fixLengthOfMessageId),
-                MqttMessageIdVariableHeader.from(messageId), null);
-        BrokerHandler.sendRemote(channel, rsp);
     }
 }

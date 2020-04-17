@@ -10,12 +10,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 
-import com.webank.weevent.core.IConsumer;
-import com.webank.weevent.core.fisco.constant.WeEventConstants;
-import com.webank.weevent.core.fisco.util.DataTypeUtils;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.core.IConsumer;
+import com.webank.weevent.core.fisco.constant.WeEventConstants;
+import com.webank.weevent.core.fisco.util.DataTypeUtils;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -309,7 +309,7 @@ public class Subscription {
         if (StringUtils.isBlank(pattern)) {
             return false;
         }
-        return pattern.contains("" + WeEvent.WILD_CARD_ALL_LAYER) || pattern.contains("" + WeEvent.WILD_CARD_ONE_LAYER);
+        return pattern.contains(WeEvent.WILD_CARD_ALL_LAYER) || pattern.contains(WeEvent.WILD_CARD_ONE_LAYER);
     }
 
     /*
