@@ -22,6 +22,7 @@ import org.junit.rules.TestName;
 @Slf4j
 public class WeEventClientGroupIdTest {
     private Map<String, String> extensions = new HashMap<>();
+    private final long FIVE_SECOND= 5000L;
     @Rule
     public TestName testName = new TestName();
 
@@ -36,7 +37,7 @@ public class WeEventClientGroupIdTest {
                 this.testName.getMethodName());
 
         this.extensions.put(WeEvent.WeEvent_TAG, "test");
-        this.weEventClient = new IWeEventClient.Builder().brokerUrl("http://localhost:7000/weevent-broker").groupId(WeEvent.DEFAULT_GROUP_ID).build();
+        this.weEventClient = IWeEventClient.builder().brokerUrl("http://localhost:7000/weevent-broker").groupId(WeEvent.DEFAULT_GROUP_ID).build();
         this.weEventClient.open(this.topicName);
     }
 
@@ -79,9 +80,8 @@ public class WeEventClientGroupIdTest {
         SendResult sendResult = this.weEventClient.publish(weEvent);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
 
-        WeEvent event = this.weEventClient.getEvent(sendResult.getEventId());
-        Assert.assertNotNull(event);
-        Assert.assertEquals(this.topicName, event.getTopic());
+        WeEvent weEventResponse = this.weEventClient.getEvent(sendResult.getEventId());
+        Assert.assertEquals(this.topicName, weEventResponse.getTopic());
     }
 
     /**
@@ -96,11 +96,11 @@ public class WeEventClientGroupIdTest {
         SendResult sendResult = this.weEventClient.publish(weEvent);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
 
-        WeEvent event = this.weEventClient.getEvent(sendResult.getEventId());
-        Assert.assertNotNull(event);
-        Assert.assertNotNull(event.getExtensions());
-        Assert.assertEquals("test", event.getExtensions().get(WeEvent.WeEvent_TAG));
-        Assert.assertEquals("json", event.getExtensions().get(WeEvent.WeEvent_FORMAT));
+        WeEvent weEventResponse = this.weEventClient.getEvent(sendResult.getEventId());
+
+        Assert.assertNotNull(weEventResponse.getExtensions());
+        Assert.assertEquals("test", weEventResponse.getExtensions().get(WeEvent.WeEvent_TAG));
+        Assert.assertEquals("json", weEventResponse.getExtensions().get(WeEvent.WeEvent_FORMAT));
 
     }
 
@@ -165,7 +165,7 @@ public class WeEventClientGroupIdTest {
             }
         });
         Assert.assertFalse(subscriptionId.isEmpty());
-        Thread.sleep(60000);
+        Thread.sleep(this.FIVE_SECOND);
     }
 
     /**
@@ -187,7 +187,7 @@ public class WeEventClientGroupIdTest {
         });
 
         Assert.assertFalse(subscriptionId.isEmpty());
-        Thread.sleep(60000);
+        Thread.sleep(this.FIVE_SECOND);
     }
 
 
@@ -210,7 +210,7 @@ public class WeEventClientGroupIdTest {
         });
 
         Assert.assertFalse(subscriptionId.isEmpty());
-        Thread.sleep(60000);
+        Thread.sleep(this.FIVE_SECOND);
     }
 
     /**
@@ -292,7 +292,6 @@ public class WeEventClientGroupIdTest {
         Assert.assertTrue(result);
     }
 
-
     /**
      * Method: exist(String topic)
      */
@@ -307,8 +306,8 @@ public class WeEventClientGroupIdTest {
      */
     @Test
     public void testListGroupId() throws Exception {
-        TopicPage list = this.weEventClient.list(0, 10);
-        Assert.assertTrue(list.getTotal() > 0);
+        TopicPage topicPage = this.weEventClient.list(0, 10);
+        Assert.assertTrue(topicPage.getTotal() > 0);
     }
 
 
@@ -317,8 +316,8 @@ public class WeEventClientGroupIdTest {
      */
     @Test
     public void testList() throws Exception {
-        TopicPage list = this.weEventClient.list(0, 10);
-        Assert.assertTrue(list.getTotal() > 0);
+        TopicPage topicPage = this.weEventClient.list(0, 10);
+        Assert.assertTrue(topicPage.getTotal() > 0);
     }
 
     /**
@@ -326,8 +325,8 @@ public class WeEventClientGroupIdTest {
      */
     @Test
     public void testStateGroupId() throws Exception {
-        TopicInfo info = this.weEventClient.state(this.topicName);
-        Assert.assertEquals(info.getTopicName(), this.topicName);
+        TopicInfo topicInfo = this.weEventClient.state(this.topicName);
+        Assert.assertEquals(topicInfo.getTopicName(), this.topicName);
     }
 
     /**
@@ -335,8 +334,8 @@ public class WeEventClientGroupIdTest {
      */
     @Test
     public void testState() throws Exception {
-        TopicInfo info = this.weEventClient.state(this.topicName);
-        Assert.assertEquals(info.getTopicName(), this.topicName);
+        TopicInfo topicInfo = this.weEventClient.state(this.topicName);
+        Assert.assertEquals(topicInfo.getTopicName(), this.topicName);
     }
 
     /**
