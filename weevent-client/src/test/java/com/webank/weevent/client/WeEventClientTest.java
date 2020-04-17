@@ -25,6 +25,7 @@ import org.junit.rules.TestName;
 public class WeEventClientTest {
 
     private Map<String, String> extensions = new HashMap<>();
+    private final long FIVE_SECOND= 5000L;
 
     @Rule
     public TestName testName = new TestName();
@@ -40,7 +41,7 @@ public class WeEventClientTest {
                 this.testName.getMethodName());
 
         this.extensions.put(WeEvent.WeEvent_TAG, "test");
-        this.weEventClient = new IWeEventClient.Builder().brokerUrl("http://localhost:7000/weevent-broker").build();
+        this.weEventClient = IWeEventClient.builder().brokerUrl("http://localhost:7000/weevent-broker").build();
         this.weEventClient.open(this.topicName);
     }
 
@@ -81,7 +82,7 @@ public class WeEventClientTest {
         });
 
         Assert.assertFalse(subscribeId.isEmpty());
-        Thread.sleep(10000);
+        Thread.sleep(this.FIVE_SECOND);
     }
 
     /**
@@ -143,8 +144,8 @@ public class WeEventClientTest {
      */
     @Test
     public void testList() throws Exception {
-        TopicPage list = this.weEventClient.list(0, 10);
-        Assert.assertTrue(list.getTotal() > 0);
+        TopicPage topicPage = this.weEventClient.list(0, 10);
+        Assert.assertTrue(topicPage.getTotal() > 0);
     }
 
     /**
@@ -152,8 +153,8 @@ public class WeEventClientTest {
      */
     @Test
     public void testState() throws Exception {
-        TopicInfo info = this.weEventClient.state(this.topicName);
-        Assert.assertEquals(info.getTopicName(), this.topicName);
+        TopicInfo topicInfo = this.weEventClient.state(this.topicName);
+        Assert.assertEquals(topicInfo.getTopicName(), this.topicName);
     }
 
     /**
@@ -175,7 +176,8 @@ public class WeEventClientTest {
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 
-    /**@Test
+    @Ignore
+    @Test
     public void testSubscribeFile() throws Exception {
         boolean result = this.weEventClient.open("com.weevent.file");
         Assert.assertTrue(result);
@@ -198,5 +200,5 @@ public class WeEventClientTest {
 
         Assert.assertFalse(subscriptionId.isEmpty());
         this.weEventClient.unSubscribe(subscriptionId);
-    }*/
+    }
 }
