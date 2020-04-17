@@ -58,6 +58,15 @@ public interface IWeEventClient {
     }
 
     /**
+     * instance Builder
+     *
+     * @return Builder
+     */
+    static Builder builder() {
+        return new Builder();
+    }
+
+    /**
      * Open a topic
      *
      * @param topic topic name

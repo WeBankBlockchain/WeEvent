@@ -66,7 +66,7 @@ public class BrokerRest {
 
     @RequestMapping(path = "/getEvent")
     public BaseResponse<WeEvent> getEvent(@RequestParam(name = "eventId") String eventId,
-                                         @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
+                                          @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         log.info("eventId:{} groupId:{}", eventId, groupId);
 
         return BaseResponse.buildSuccess(this.producer.getEvent(eventId, groupId));
