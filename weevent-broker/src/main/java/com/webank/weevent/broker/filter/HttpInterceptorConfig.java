@@ -24,26 +24,27 @@ public class HttpInterceptorConfig implements WebMvcConfigurer {
 
     static class HttpInterceptor implements HandlerInterceptor {
         private final String ipWhiteList;
+        private final static String UNKNOWN = "unknown";
 
         HttpInterceptor(String ipWhiteList) {
+            log.info("client ip white list: {}", ipWhiteList);
             this.ipWhiteList = ipWhiteList;
         }
 
         private String getIpAddress(HttpServletRequest request) {
             String ip = request.getHeader("X-Forwarded-For");
             log.debug("HttpServletRequest [X-Forwarded-For]: {}", ip);
-            if (StringUtils.isBlank(ip) || ip.equalsIgnoreCase("unknown")) {
+            if (StringUtils.isBlank(ip) || UNKNOWN.equalsIgnoreCase(ip)) {
                 log.debug("HttpServletRequest [getRemoteAddr]: {}", ip);
                 return request.getRemoteAddr();
             }
 
             String[] ips = ip.split(",");
             for (String strIp : ips) {
-                if (!strIp.equalsIgnoreCase("unknown")) {
+                if (!UNKNOWN.equalsIgnoreCase(strIp)) {
                     return strIp;
                 }
             }
-
             return "";
         }
 
@@ -58,6 +59,7 @@ public class HttpInterceptorConfig implements WebMvcConfigurer {
             if (ip.contains("0:0:0:0") || ip.contains("127.0.0.1") || ip.contains("localhost")) {
                 return true;
             }
+
             if (!this.ipWhiteList.contains(ip)) {
                 log.error("forbid, client ip not in white list, {} -> {}", ip, this.ipWhiteList);
                 httpServletResponse.setStatus(403);
@@ -73,8 +75,6 @@ public class HttpInterceptorConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        log.info("client ip white list: {}", this.weEventConfig.getIpWhiteList());
-
         HttpInterceptor httpInterceptor = new HttpInterceptor(this.weEventConfig.getIpWhiteList());
         registry.addInterceptor(httpInterceptor).addPathPatterns("/**");
     }
