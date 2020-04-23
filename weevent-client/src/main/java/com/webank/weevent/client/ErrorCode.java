@@ -122,9 +122,8 @@ public enum ErrorCode {
 
     ZOOKEEPER_ERROR(200400, "access zookeeper failed"),
     ZOOKEEPER_INVALID_PATH(200401, "invalid zookeeper path"),
-    ZOOKEEPER_UNKNOWN_FILE(200402, "unknown file id in zookeeper"),
-    ZOOKEEPER_EXIST_FILE(200403, "file id already exist in zookeeper"),
-    ZOOKEEPER_NOT_SUPPORT_FILE_SUBSCRIPTION(200404, "DO NOT SUPPORT file transport without zookeeper"),
+    ZOOKEEPER_UNKNOWN_KEY(200402, "unknown key in zookeeper"),
+    ZOOKEEPER_EXIST_KEY(200403, "key already exist in zookeeper"),
 
     FILE_NOT_EXIST_PATH(200500, "not exist file path"),
     FILE_INVALID_FILE_CHUNK_SIZE(200501, "file chunk size must be in (0, 2M)"),

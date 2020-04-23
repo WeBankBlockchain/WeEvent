@@ -5,8 +5,10 @@ import java.util.UUID;
 
 import com.webank.weevent.broker.JUnitTestBase;
 
+import io.netty.handler.codec.mqtt.MqttQoS;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -23,7 +25,8 @@ public class MQTTOverWebSocketTest extends JUnitTestBase {
     private final int actionTimeout = 3000;
 
     private MqttClient mqttClient;
-    private String content = "hello mqtt via websocket";
+    private final String content = "hello mqtt via websocket";
+    private MqttConnectOptions cleanupOptions;
 
     static class MessageListener implements IMqttMessageListener {
         public int received = 0;
@@ -44,13 +47,15 @@ public class MQTTOverWebSocketTest extends JUnitTestBase {
         this.url = "ws://localhost:" + this.listenPort + "/weevent-broker/mqtt";
 
         String clientId = UUID.randomUUID().toString();
+
+        this.cleanupOptions = new MqttConnectOptions();
+        this.cleanupOptions.setConnectionTimeout(this.actionTimeout);
+        this.cleanupOptions.setKeepAliveInterval(this.actionTimeout);
+        this.cleanupOptions.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1_1);
+        this.cleanupOptions.setCleanSession(true);
+
         this.mqttClient = new MqttClient(this.url, clientId, null);
-        MqttConnectOptions connOpts = new MqttConnectOptions();
-        connOpts.setConnectionTimeout(this.actionTimeout);
-        connOpts.setKeepAliveInterval(this.actionTimeout);
-        connOpts.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1_1);
-        connOpts.setCleanSession(true);
-        this.mqttClient.connect(connOpts);
+        this.mqttClient.connect(this.cleanupOptions);
     }
 
     @After
@@ -113,9 +118,7 @@ public class MQTTOverWebSocketTest extends JUnitTestBase {
 
         try {
             MqttClient mqttClient = new MqttClient(this.url, clientId, null);
-            MqttConnectOptions connOpts = new MqttConnectOptions();
-            connOpts.setConnectionTimeout(this.actionTimeout);
-            mqttClient.connect(connOpts);
+            mqttClient.connect(this.cleanupOptions);
 
             Assert.assertTrue(true);
         } catch (MqttException e) {
@@ -125,9 +128,29 @@ public class MQTTOverWebSocketTest extends JUnitTestBase {
 
         try {
             MqttClient mqttClient2 = new MqttClient(this.url, clientId, null);
-            MqttConnectOptions connOpts = new MqttConnectOptions();
-            connOpts.setConnectionTimeout(this.actionTimeout);
-            mqttClient2.connect(connOpts);
+            mqttClient2.connect(this.cleanupOptions);
+
+            Assert.assertTrue(true);
+        } catch (MqttException e) {
+            log.error("exception", e);
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void testWill() {
+        try {
+            String clientId = UUID.randomUUID().toString();
+            MqttClient mqttClient = new MqttClient(this.url, clientId, null);
+
+            MqttConnectOptions connectOptions = new MqttConnectOptions();
+            connectOptions.setConnectionTimeout(this.actionTimeout);
+            connectOptions.setKeepAliveInterval(this.actionTimeout);
+            connectOptions.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1_1);
+            connectOptions.setWill(this.topicName, this.content.getBytes(), 1, false);
+            connectOptions.setCleanSession(true);
+            mqttClient.connect(this.cleanupOptions);
+            mqttClient.disconnect();
 
             Assert.assertTrue(true);
         } catch (MqttException e) {
@@ -155,9 +178,8 @@ public class MQTTOverWebSocketTest extends JUnitTestBase {
             message.setQos(0);
             this.mqttClient.publish(this.topicName, message);
 
-            Thread.sleep(this.actionTimeout);
             Assert.assertTrue(true);
-        } catch (Exception e) {
+        } catch (MqttException e) {
             log.error("exception", e);
             Assert.fail();
         }
@@ -167,14 +189,31 @@ public class MQTTOverWebSocketTest extends JUnitTestBase {
     public void testSubscribe() {
         try {
             MessageListener listener = new MessageListener();
-            this.mqttClient.subscribeWithResponse(this.topicName, listener).waitForCompletion();
+            IMqttToken token = this.mqttClient.subscribeWithResponse(this.topicName, listener);
+            token.waitForCompletion();
+
+            Assert.assertEquals(token.getGrantedQos()[0], MqttQoS.AT_LEAST_ONCE.value());
 
             MqttMessage message = new MqttMessage(this.content.getBytes(StandardCharsets.UTF_8));
             this.mqttClient.publish(this.topicName, message);
 
             Thread.sleep(this.actionTimeout);
             Assert.assertTrue(listener.received > 0);
-        } catch (Exception e) {
+        } catch (MqttException | InterruptedException e) {
+            log.error("exception", e);
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void testSubscribeNotExist() {
+        try {
+            MQTTTest.MessageListener listener = new MQTTTest.MessageListener();
+            IMqttToken token = this.mqttClient.subscribeWithResponse("not_exist", listener);
+            token.waitForCompletion();
+
+            Assert.assertNotEquals(token.getGrantedQos()[0], MqttQoS.AT_LEAST_ONCE.value());
+        } catch (MqttException e) {
             log.error("exception", e);
             Assert.fail();
         }
@@ -184,6 +223,18 @@ public class MQTTOverWebSocketTest extends JUnitTestBase {
     public void testDisconnect() {
         try {
             this.mqttClient.disconnect();
+            Assert.assertTrue(true);
+        } catch (MqttException e) {
+            log.error("exception", e);
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void testClose() {
+        try {
+            this.mqttClient.disconnect();
+            this.mqttClient.close();
 
             Assert.assertTrue(true);
         } catch (MqttException e) {

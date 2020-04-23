@@ -12,15 +12,19 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SubscribeData {
-    private String clientId;
-    private String subscriptionId;
-    private String topic;
-    private MqttQoS mqttQoS;
+    private final String clientId;
+    private final MqttQoS mqttQoS;
+    private final String topic;
+    // always empty
+    private final String groupId;
 
-    public SubscribeData(String clientId, String subscriptionId, String topic, MqttQoS mqttQoS) {
+    private String subscriptionId = "";
+    private String offset = "";
+
+    public SubscribeData(String clientId, String topic, MqttQoS mqttQoS) {
         this.clientId = clientId;
-        this.subscriptionId = subscriptionId;
         this.topic = topic;
+        this.groupId = "";
         this.mqttQoS = mqttQoS;
     }
 }
