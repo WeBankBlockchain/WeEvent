@@ -25,12 +25,12 @@ import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 public class RestfulTest extends JUnitTestBase {
+    private final String topicName = "com.weevent.test";
 
     private String url;
     private RestTemplate rest = null;
     private String eventId = "";
-    private String restTopic = "com.weevent.test";
-    private String content = "hello restful";
+    private final String content = "hello restful";
 
     @Before
     public void before() {
@@ -44,9 +44,9 @@ public class RestfulTest extends JUnitTestBase {
         this.rest = new RestTemplate(requestFactory);
 
         this.rest.exchange(url + "open?topic={topic}&groupId={groupId}", HttpMethod.GET, null, new ParameterizedTypeReference<BaseResponse<Boolean>>() {
-        }, this.restTopic, WeEvent.DEFAULT_GROUP_ID);
+        }, this.topicName, WeEvent.DEFAULT_GROUP_ID);
 
-        SendResult sendResult = rest.getForEntity(url + "publish?topic={topic}&content={content}", SendResult.class, this.restTopic,
+        SendResult sendResult = rest.getForEntity(url + "publish?topic={topic}&content={content}", SendResult.class, this.topicName,
                 this.content).getBody();
         Assert.assertNotNull(sendResult);
         this.eventId = sendResult.getEventId();
@@ -55,7 +55,7 @@ public class RestfulTest extends JUnitTestBase {
     @Test
     public void testOpenNoGroupId() {
         ResponseEntity<BaseResponse<Boolean>> rsp = this.rest.exchange(url + "open?topic={topic}", HttpMethod.GET, null, new ParameterizedTypeReference<BaseResponse<Boolean>>() {
-        }, this.restTopic);
+        }, this.topicName);
 
         Assert.assertEquals(200, rsp.getStatusCodeValue());
         Assert.assertNotNull(rsp.getBody());
@@ -65,7 +65,7 @@ public class RestfulTest extends JUnitTestBase {
     @Test
     public void testOpenWithGroupId() {
         ResponseEntity<BaseResponse<Boolean>> rsp = this.rest.exchange(url + "open?topic={topic}&groupId={groupId}", HttpMethod.GET, null, new ParameterizedTypeReference<BaseResponse<Boolean>>() {
-        }, this.restTopic, WeEvent.DEFAULT_GROUP_ID);
+        }, this.topicName, WeEvent.DEFAULT_GROUP_ID);
 
         Assert.assertEquals(200, rsp.getStatusCodeValue());
         Assert.assertNotNull(rsp.getBody());
@@ -75,7 +75,7 @@ public class RestfulTest extends JUnitTestBase {
     @Test
     public void testCloseNoGroupId() {
         ResponseEntity<BaseResponse<Boolean>> rsp = this.rest.exchange(url + "close?topic={topic}", HttpMethod.GET, null, new ParameterizedTypeReference<BaseResponse<Boolean>>() {
-        }, this.restTopic);
+        }, this.topicName);
 
         Assert.assertEquals(200, rsp.getStatusCodeValue());
         Assert.assertNotNull(rsp.getBody());
@@ -85,7 +85,7 @@ public class RestfulTest extends JUnitTestBase {
     @Test
     public void testCloseContainGroupId() {
         ResponseEntity<BaseResponse<Boolean>> rsp = this.rest.exchange(url + "close?topic={topic}&groupId={groupId}", HttpMethod.GET, null, new ParameterizedTypeReference<BaseResponse<Boolean>>() {
-        }, this.restTopic, WeEvent.DEFAULT_GROUP_ID);
+        }, this.topicName, WeEvent.DEFAULT_GROUP_ID);
 
         Assert.assertEquals(200, rsp.getStatusCodeValue());
         Assert.assertNotNull(rsp.getBody());
@@ -95,7 +95,7 @@ public class RestfulTest extends JUnitTestBase {
     @Test
     public void testExistNoGroupId() {
         ResponseEntity<BaseResponse<Boolean>> rsp = this.rest.exchange(url + "exist?topic={topic}", HttpMethod.GET, null, new ParameterizedTypeReference<BaseResponse<Boolean>>() {
-        }, this.restTopic);
+        }, this.topicName);
 
         Assert.assertEquals(200, rsp.getStatusCodeValue());
         Assert.assertNotNull(rsp.getBody());
@@ -105,7 +105,7 @@ public class RestfulTest extends JUnitTestBase {
     @Test
     public void testExistContainGroupId() {
         ResponseEntity<BaseResponse<Boolean>> rsp = this.rest.exchange(url + "exist?topic={topic}&groupId={groupId}", HttpMethod.GET, null, new ParameterizedTypeReference<BaseResponse<Boolean>>() {
-        }, this.restTopic, WeEvent.DEFAULT_GROUP_ID);
+        }, this.topicName, WeEvent.DEFAULT_GROUP_ID);
 
         Assert.assertEquals(200, rsp.getStatusCodeValue());
         Assert.assertNotNull(rsp.getBody());
@@ -115,23 +115,23 @@ public class RestfulTest extends JUnitTestBase {
     @Test
     public void testStateNoGroupId() {
         ResponseEntity<BaseResponse<TopicInfo>> rsp = rest.exchange(url + "state?topic={topic}", HttpMethod.GET, null, new ParameterizedTypeReference<BaseResponse<TopicInfo>>() {
-        }, this.restTopic);
+        }, this.topicName);
         log.info("state, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
 
         Assert.assertEquals(200, rsp.getStatusCodeValue());
         Assert.assertNotNull(rsp.getBody());
-        Assert.assertEquals(this.restTopic, rsp.getBody().getData().getTopicName());
+        Assert.assertEquals(this.topicName, rsp.getBody().getData().getTopicName());
     }
 
     @Test
     public void testStateWithGroupId() {
         ResponseEntity<BaseResponse<TopicInfo>> rsp = rest.exchange(url + "state?topic={topic}&groupId={groupId}", HttpMethod.GET, null, new ParameterizedTypeReference<BaseResponse<TopicInfo>>() {
-        }, this.restTopic, WeEvent.DEFAULT_GROUP_ID);
+        }, this.topicName, WeEvent.DEFAULT_GROUP_ID);
         log.info("state, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
 
         Assert.assertEquals(200, rsp.getStatusCodeValue());
         Assert.assertNotNull(rsp.getBody());
-        Assert.assertEquals(this.restTopic, rsp.getBody().getData().getTopicName());
+        Assert.assertEquals(this.topicName, rsp.getBody().getData().getTopicName());
     }
 
     @Test
@@ -181,7 +181,7 @@ public class RestfulTest extends JUnitTestBase {
     @Test
     public void testPublishNoGroupId() {
         ResponseEntity<SendResult> rsp = rest.getForEntity(url + "publish?topic={topic}&content={content}",
-                SendResult.class, this.restTopic, this.content);
+                SendResult.class, this.topicName, this.content);
         log.info("publish, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
 
         Assert.assertEquals(200, rsp.getStatusCodeValue());
@@ -192,7 +192,7 @@ public class RestfulTest extends JUnitTestBase {
     @Test
     public void testPublishContainGroupId() {
         ResponseEntity<SendResult> rsp = rest.getForEntity(
-                url + "publish?topic={topic}&content={content}&groupId={groupId}", SendResult.class, this.restTopic,
+                url + "publish?topic={topic}&content={content}&groupId={groupId}", SendResult.class, this.topicName,
                 this.content, WeEvent.DEFAULT_GROUP_ID);
         log.info("publish, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
 
@@ -204,7 +204,7 @@ public class RestfulTest extends JUnitTestBase {
     @Test
     public void testPublishContentIs10K() {
         MultiValueMap<String, String> eventData = new LinkedMultiValueMap<>();
-        eventData.add("topic", this.restTopic);
+        eventData.add("topic", this.topicName);
         eventData.add("content", get10KStr());
 
         HttpHeaders headers = new HttpHeaders();
@@ -223,7 +223,7 @@ public class RestfulTest extends JUnitTestBase {
     @Test
     public void testPublishContentGt10K() {
         MultiValueMap<String, String> eventData = new LinkedMultiValueMap<>();
-        eventData.add("topic", this.restTopic);
+        eventData.add("topic", this.topicName);
         eventData.add("content", get10KStr() + "s");
 
         HttpHeaders headers = new HttpHeaders();
@@ -243,7 +243,7 @@ public class RestfulTest extends JUnitTestBase {
     public void testPublishNoGroupIdContainExt() {
         ResponseEntity<SendResult> rsp = rest.getForEntity(
                 url + "publish?topic={topic}&content={content}&weevent-test1={value1}&weevent-test2={value2}",
-                SendResult.class, this.restTopic, this.content, "test1value", "test2vlaue");
+                SendResult.class, this.topicName, this.content, "test1value", "test2vlaue");
         log.info("publish, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
         Assert.assertEquals(200, rsp.getStatusCodeValue());
         Assert.assertNotNull(rsp.getBody());
@@ -254,7 +254,7 @@ public class RestfulTest extends JUnitTestBase {
     public void testPublishContainGroupIdContainExt() {
         ResponseEntity<SendResult> rsp = rest.getForEntity(url
                         + "publish?topic={topic}&content={content}&weevent-test1={value1}&weevent-test2={value2}&groupId={groupId}",
-                SendResult.class, this.restTopic, this.content, "test1value", "test2vlaue", WeEvent.DEFAULT_GROUP_ID);
+                SendResult.class, this.topicName, this.content, "test1value", "test2vlaue", WeEvent.DEFAULT_GROUP_ID);
         log.info("publish, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
         Assert.assertEquals(200, rsp.getStatusCodeValue());
         Assert.assertNotNull(rsp.getBody());
