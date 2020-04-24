@@ -72,12 +72,16 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
                             @NonNull ConsumerListener listener) throws BrokerException {
         this.validateChannelName(channelName);
         ParamCheckUtils.validateOffset(offset);
+
+        Long currentBlock = fabricDelegate.getBlockHeight(channelName);
         // topic pattern
         if (Subscription.isTopicPattern(topic)) {
             Subscription.validateTopicPattern(topic);
-            if (isEventId(offset)) {
+            if (StringUtils.isNumeric(offset)) {
+                ParamCheckUtils.validateBlockHeight(offset, currentBlock);
+            } else if (isEventId(offset)) {
                 // not a topic name
-                ParamCheckUtils.validateEventId("", offset, fabricDelegate.getBlockHeight(channelName));
+                ParamCheckUtils.validateEventId("", offset, currentBlock);
             }
         } else {    // topic name
             ParamCheckUtils.validateTopicName(topic);
@@ -87,8 +91,10 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
                 throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
             }
 
-            if (isEventId(offset)) {
-                ParamCheckUtils.validateEventId(topic, offset, fabricDelegate.getBlockHeight(channelName));
+            if (StringUtils.isNumeric(offset)) {
+                ParamCheckUtils.validateBlockHeight(offset, currentBlock);
+            } else if (isEventId(offset)) {
+                ParamCheckUtils.validateEventId(topic, offset, currentBlock);
             }
         }
 
@@ -108,11 +114,12 @@ public class FabricBroker4Consumer extends FabricTopicAdmin implements IConsumer
         this.validateChannelName(channelName);
         ParamCheckUtils.validateOffset(offset);
 
-        if (isEventId(offset)) {
+        Long currentBlock = fabricDelegate.getBlockHeight(channelName);
+        if (StringUtils.isNumeric(offset)) {
+            ParamCheckUtils.validateBlockHeight(offset, currentBlock);
+        } else if (isEventId(offset)) {
             // do not validate topic name and eventId if more then one topic
-            ParamCheckUtils.validateEventId(topics.length > 1 ? "" : topics[0],
-                    offset,
-                    fabricDelegate.getBlockHeight(channelName));
+            ParamCheckUtils.validateEventId(topics.length > 1 ? "" : topics[0], offset, currentBlock);
         }
 
         for (String topic : topics) {
