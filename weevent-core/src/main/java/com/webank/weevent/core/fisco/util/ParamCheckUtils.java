@@ -1,18 +1,15 @@
 package com.webank.weevent.core.fisco.util;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import com.webank.weevent.core.fisco.constant.WeEventConstants;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.core.fisco.constant.WeEventConstants;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -56,6 +53,13 @@ public class ParamCheckUtils {
             UUID.fromString(subscriptionId);
         } catch (IllegalArgumentException e) {
             throw new BrokerException(ErrorCode.SUBSCRIPTIONID_FORMAT_INVALID);
+        }
+    }
+
+    public static void validateBlockHeight(String blockHeight, Long currentBlock) throws BrokerException {
+        long block = Long.parseLong(blockHeight);
+        if (block <= 0 || block > currentBlock) {
+            throw new BrokerException(ErrorCode.INVALID_BLOCK_HEIGHT);
         }
     }
 
@@ -108,12 +112,6 @@ public class ParamCheckUtils {
         }
     }
 
-    public static void validateChannelName(String channelName, List<String> channelNames) throws BrokerException {
-        if (!channelNames.contains(channelName)) {
-            throw new BrokerException(ErrorCode.FABRICSDK_CHANNEL_NAME_INVALID);
-        }
-    }
-
     public static void validateEventContent(String eventContent) throws BrokerException {
         if (StringUtils.isBlank(eventContent)) {
             throw new BrokerException(ErrorCode.EVENT_CONTENT_IS_BLANK);
@@ -121,18 +119,6 @@ public class ParamCheckUtils {
 
         if (eventContent.length() > WeEventConstants.EVENT_CONTENT_MAX_LENGTH) {
             throw new BrokerException(ErrorCode.EVENT_CONTENT_EXCEEDS_MAX_LENGTH);
-        }
-    }
-
-    // check format then try to connect
-    public static void validateUrl(String url) throws BrokerException {
-        try {
-            URL conn = new URL(url);
-            conn.openConnection().connect();
-        } catch (MalformedURLException e) {
-            throw new BrokerException(ErrorCode.URL_INVALID_FORMAT);
-        } catch (IOException e) {
-            throw new BrokerException(ErrorCode.URL_CONNECT_FAILED);
         }
     }
 

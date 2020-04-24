@@ -82,7 +82,10 @@ public interface IConsumer extends IEventTopic {
 
     /**
      * This support single topic subscribe
-     * from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
+     * offset details:
+     * WeEvent.OFFSET_FIRST, get event from head of queue
+     * WeEvent.OFFSET_LAST, get event from tail of queue
+     * eventID/blockHeight, get event after the eventID or blockHeight
      *
      * @param topic topic name
      * @param groupId groupId
@@ -101,7 +104,7 @@ public interface IConsumer extends IEventTopic {
      *
      * @param topics topic list
      * @param groupId groupId
-     * @param offset, from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
+     * @param offset offset
      * @param ext extension params in this invoke, see SubscribeExt
      * @param listener callback
      * @return subscription Id

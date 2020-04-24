@@ -36,7 +36,7 @@ import org.springframework.web.socket.handler.BinaryWebSocketHandler;
 
 /**
  * Mqtt 3.1.1 protocol.
- * see at http://public.dhe.ibm.com/software/dw/webservices/ws-mqtt/mqtt-v3r1.html.
+ * see at http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html.
  * or https://mcxiaoke.gitbooks.io/mqtt-cn/content.
  * It's different from stomp:
  * 1. mqtt is binary protocol.

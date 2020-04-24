@@ -10,6 +10,7 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -20,17 +21,18 @@ import org.springframework.web.socket.WebSocketSession;
  * @since 2020/03/18
  */
 @Getter
+@Setter
 @Slf4j
 public class SessionContext {
     private final String sessionId;
     private final String clientId;
     private final boolean cleanSession;
-    private final MqttPublishMessage willMessage;
+    private MqttPublishMessage willMessage;
 
-    // fi from websocket
-    private final WebSocketSession session;
+    // if from websocket
+    private WebSocketSession session;
     // if from tcp
-    private final Channel channel;
+    private Channel channel;
 
     // subscription on session
     private final List<SubscribeData> subscribeDataList = new ArrayList<>();
@@ -57,6 +59,13 @@ public class SessionContext {
         this.session = null;
     }
 
+    public void discardWillMessage() {
+        if (this.willMessage != null) {
+            log.info("discard will message");
+            this.willMessage = null;
+        }
+    }
+
     public void sendRemote(MqttMessage rsp) {
         if (this.session != null) {
             WebSocketMqtt.send2Remote(this.session, rsp);
@@ -71,10 +80,12 @@ public class SessionContext {
     public void closeSession() {
         try {
             if (this.session != null) {
+                log.info("close session connection");
                 this.session.close();
             }
 
             if (this.channel != null) {
+                log.info("close session connection");
                 this.channel.close();
             }
         } catch (Exception e) {
