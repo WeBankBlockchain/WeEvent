@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class TcpHandler extends SimpleChannelInboundHandler<MqttMessage> {
-    private ProtocolProcess protocolProcess;
+    private final ProtocolProcess protocolProcess;
 
     public TcpHandler(ProtocolProcess protocolProcess) {
         this.protocolProcess = protocolProcess;
