@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.webank.weevent.broker.JUnitTestBase;
 import com.webank.weevent.client.BaseResponse;
+import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.dto.SubscriptionInfo;
 
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 public class RestfulAdminTest extends JUnitTestBase {
+    private final String groupId = WeEvent.DEFAULT_GROUP_ID;
 
     private String url;
     private RestTemplate admin = null;
