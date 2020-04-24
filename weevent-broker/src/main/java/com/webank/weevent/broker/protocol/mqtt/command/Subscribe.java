@@ -8,25 +8,18 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.webank.weevent.broker.protocol.mqtt.ProtocolProcess;
-import com.webank.weevent.broker.protocol.mqtt.store.MessageIdStore;
-import com.webank.weevent.broker.protocol.mqtt.store.SessionContext;
 import com.webank.weevent.broker.protocol.mqtt.store.SessionStore;
 import com.webank.weevent.broker.protocol.mqtt.store.SubscribeData;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
-import com.webank.weevent.client.JsonHelper;
-import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.IConsumer;
 import com.webank.weevent.core.fisco.constant.WeEventConstants;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.mqtt.MqttFixedHeader;
 import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttMessageFactory;
 import io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader;
 import io.netty.handler.codec.mqtt.MqttMessageType;
-import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
 import io.netty.handler.codec.mqtt.MqttQoS;
 import io.netty.handler.codec.mqtt.MqttSubAckPayload;
 import io.netty.handler.codec.mqtt.MqttSubscribeMessage;
@@ -41,14 +34,10 @@ import org.apache.commons.lang3.StringUtils;
  */
 @Slf4j
 public class Subscribe implements MqttCommand {
-    private SessionStore sessionStore;
-    private MessageIdStore messageIdStore;
-    private IConsumer iConsumer;
+    private final SessionStore sessionStore;
 
-    public Subscribe(SessionStore sessionStore, MessageIdStore messageIdStore, IConsumer iConsumer) {
+    public Subscribe(SessionStore sessionStore) {
         this.sessionStore = sessionStore;
-        this.messageIdStore = messageIdStore;
-        this.iConsumer = iConsumer;
     }
 
     @Override
@@ -78,26 +67,22 @@ public class Subscribe implements MqttCommand {
             String topic = msg.payload().topicSubscriptions().get(0).topicName();
             MqttQoS qos = msg.payload().topicSubscriptions().get(0).qualityOfService();
 
-            String subscriptionId = this.subscribe(topic, "", ext, clientId);
+            // do subscribe
+            SubscribeData subscribeData = new SubscribeData(clientId, topic, qos);
+            String subscriptionId = this.sessionStore.subscribe(subscribeData, ext);
             if (StringUtils.isEmpty(subscriptionId)) {
                 qos = MqttQoS.FAILURE;
-            } else {
-                SubscribeData subscribeData = new SubscribeData(clientId, subscriptionId, topic, qos);
-                Optional<SessionContext> sessionContext = this.sessionStore.getSession(clientId);
-                sessionContext.ifPresent(context -> context.getSubscribeDataList().add(subscribeData));
             }
-
             mqttQoSList.add(qos.ordinal());
         } else {
             // subscribe one by one, because unsubscribe need support one by one
             msg.payload().topicSubscriptions().forEach(item -> {
-                String subscriptionId = this.subscribe(item.topicName(), "", ext, clientId);
+                // do subscribe
+                SubscribeData subscribeData = new SubscribeData(clientId, item.topicName(), item.qualityOfService());
+                String subscriptionId = this.sessionStore.subscribe(subscribeData, ext);
                 if (StringUtils.isEmpty(subscriptionId)) {
                     mqttQoSList.add(MqttQoS.FAILURE.ordinal());
                 } else {
-                    SubscribeData subscribeData = new SubscribeData(clientId, subscriptionId, item.topicName(), item.qualityOfService());
-                    Optional<SessionContext> sessionContext = this.sessionStore.getSession(clientId);
-                    sessionContext.ifPresent(context -> context.getSubscribeDataList().add(subscribeData));
                     mqttQoSList.add(item.qualityOfService().ordinal());
                 }
             });
@@ -107,71 +92,9 @@ public class Subscribe implements MqttCommand {
         return Optional.of(rsp);
     }
 
-    private String subscribe(String topic, String groupId, Map<IConsumer.SubscribeExt, String> ext, String clientId) {
-        try {
-            String subscriptionId = this.iConsumer.subscribe(topic,
-                    groupId,
-                    WeEvent.OFFSET_LAST,
-                    ext,
-                    new IConsumer.ConsumerListener() {
-                        @Override
-                        public void onEvent(String subscriptionId, WeEvent event) {
-                            // send to subscribe
-                            sendEvent(clientId, subscriptionId, event);
-                        }
-
-                        @Override
-                        public void onException(Throwable e) {
-                            log.error("consumer onException", e);
-                        }
-                    });
-
-            log.info("subscribe success, subscriptionId: {}", subscriptionId);
-            return subscriptionId;
-        } catch (BrokerException e) {
-            log.error("subscribe exception: {}", e.getMessage());
-            return "";
-        }
-    }
-
     private MqttMessage genSubAck(int messageId, List<Integer> mqttQoSList) {
         return MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.SUBACK, false, MqttQoS.AT_LEAST_ONCE, false, ProtocolProcess.fixLengthOfMessageId + mqttQoSList.size()),
                 MqttMessageIdVariableHeader.from(messageId),
                 new MqttSubAckPayload(mqttQoSList));
-    }
-
-    private void sendEvent(String clientId, String subscriptionId, WeEvent event) {
-        ByteBuf payload = Unpooled.buffer();
-        int payloadSize;
-        try {
-            byte[] content = JsonHelper.object2JsonBytes(event.getContent());
-            payloadSize = content.length;
-            payload.writeBytes(content);
-        } catch (BrokerException e) {
-            log.error("json encode failed, {}", e.getMessage());
-            return;
-        }
-
-        Optional<SessionContext> sessionContext = this.sessionStore.getSession(clientId);
-        int finalPayloadSize = payloadSize;
-        sessionContext.ifPresent(context -> {
-            Optional<SubscribeData> subscribeDataOptional = context.getSubscribeDataList().stream().filter(item -> item.getSubscriptionId().equals(subscriptionId)).findFirst();
-            subscribeDataOptional.ifPresent(subscribe -> {
-                switch (subscribe.getMqttQoS()) {
-                    case AT_MOST_ONCE:
-                    case AT_LEAST_ONCE:
-                        int remaining = ProtocolProcess.fixLengthOfMessageId + subscribe.getTopic().length() + finalPayloadSize;
-                        //subscribe.getTopic() may be contain wildcard, use original topic in WeEvent
-                        MqttMessage rsp = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.PUBLISH, false, subscribe.getMqttQoS(), false, remaining),
-                                new MqttPublishVariableHeader(event.getTopic(), this.messageIdStore.getNextMessageId()), payload);
-                        context.sendRemote(rsp);
-                        break;
-
-                    case EXACTLY_ONCE:
-                    default:
-                        log.error("DOT NOT support Qos=2");
-                }
-            });
-        });
     }
 }

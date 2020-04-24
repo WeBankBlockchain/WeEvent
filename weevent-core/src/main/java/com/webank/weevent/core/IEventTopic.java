@@ -2,6 +2,10 @@ package com.webank.weevent.core;
 
 import java.util.List;
 
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.TopicInfo;
+import com.webank.weevent.client.TopicPage;
+import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.dto.ContractContext;
 import com.webank.weevent.core.dto.GroupGeneral;
 import com.webank.weevent.core.dto.ListPage;
@@ -9,10 +13,6 @@ import com.webank.weevent.core.dto.QueryEntity;
 import com.webank.weevent.core.dto.TbBlock;
 import com.webank.weevent.core.dto.TbNode;
 import com.webank.weevent.core.dto.TbTransHash;
-import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.client.TopicInfo;
-import com.webank.weevent.client.TopicPage;
-import com.webank.weevent.client.WeEvent;
 
 /**
  * Base interface for topic admin.
@@ -82,6 +82,14 @@ public interface IEventTopic {
      * @throws BrokerException BrokerException
      */
     TopicInfo state(String topic, String groupId) throws BrokerException;
+
+    /**
+     * get block height
+     *
+     * @return block height
+     * @throws BrokerException BrokerException
+     */
+    Long getBlockHeight(String groupId) throws BrokerException;
 
     /**
      * list group id in system

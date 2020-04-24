@@ -9,6 +9,7 @@ import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * History event loop task within unique thread.
@@ -47,7 +48,8 @@ public class HistoryEventLoop extends StoppableTask {
         this.blockChain = blockChain;
         this.subscription = subscription;
 
-        if (lastBlock != 0) {
+        // if offset is block height, filter next block directly
+        if (lastBlock != 0 && !StringUtils.isNumeric(this.subscription.getOffset())) {
             this.dispatchTargetBlock(lastBlock, this.subscription.getOffset());
         }
         this.lastBlock = lastBlock;
