@@ -34,17 +34,17 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     /**
      * Subscription ID <-> Subscription
      */
-    private Map<String, Subscription> subscriptions = new ConcurrentHashMap<>();
+    private final Map<String, Subscription> subscriptions = new ConcurrentHashMap<>();
 
     /**
      * Group ID <-> MainEventLoop
      */
-    private Map<Long, MainEventLoop> mainEventLoops = new ConcurrentHashMap<>();
+    private final Map<Long, MainEventLoop> mainEventLoops = new ConcurrentHashMap<>();
 
     /**
      * daemon executor
      */
-    private Executor executor;
+    private final Executor executor;
 
     /**
      * Whether the Consumer has started
@@ -54,7 +54,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     /**
      * idle time if no new block
      */
-    private int idleTime;
+    private final int idleTime;
 
     public FiscoBcosBroker4Consumer(FiscoBcosDelegate fiscoBcosDelegate) {
         super(fiscoBcosDelegate);
@@ -77,12 +77,15 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         this.validateGroupId(groupId);
         ParamCheckUtils.validateOffset(offset);
 
+        Long currentBlock = fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId));
         // topic pattern
         if (Subscription.isTopicPattern(topic)) {
             Subscription.validateTopicPattern(topic);
-            if (isEventId(offset)) {
+            if (StringUtils.isNumeric(offset)) {
+                ParamCheckUtils.validateBlockHeight(offset, currentBlock);
+            } else if (isEventId(offset)) {
                 // not a topic name
-                ParamCheckUtils.validateEventId("", offset, fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId)));
+                ParamCheckUtils.validateEventId("", offset, currentBlock);
             }
         } else {    // topic name
             ParamCheckUtils.validateTopicName(topic);
@@ -92,8 +95,10 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
                 throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
             }
 
-            if (isEventId(offset)) {
-                ParamCheckUtils.validateEventId(topic, offset, fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId)));
+            if (StringUtils.isNumeric(offset)) {
+                ParamCheckUtils.validateBlockHeight(offset, currentBlock);
+            } else if (isEventId(offset)) {
+                ParamCheckUtils.validateEventId(topic, offset, currentBlock);
             }
         }
 
@@ -114,11 +119,12 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         this.validateGroupId(groupId);
         ParamCheckUtils.validateOffset(offset);
 
-        if (isEventId(offset)) {
+        Long currentBlock = fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId));
+        if (StringUtils.isNumeric(offset)) {
+            ParamCheckUtils.validateBlockHeight(offset, currentBlock);
+        } else if (isEventId(offset)) {
             // do not validate topic name and eventId if more then one topic
-            ParamCheckUtils.validateEventId(topics.length > 1 ? "" : topics[0],
-                    offset,
-                    fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId)));
+            ParamCheckUtils.validateEventId(topics.length > 1 ? "" : topics[0], offset, currentBlock);
         }
 
         for (String topic : topics) {
@@ -209,7 +215,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         this.mainEventLoops.get(Long.valueOf(subscription.getGroupId())).removeSubscription(subscription);
         this.subscriptions.remove(subscriptionId);
 
-        log.info("unSubscribe success, subscriptionId {}", subscriptionId);
+        log.info("unSubscribe success, subscriptionId: {}", subscriptionId);
         return true;
     }
 
@@ -274,11 +280,6 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     @Override
     public int getIdleTime() {
         return this.idleTime;
-    }
-
-    @Override
-    public Long getBlockHeight(String groupId) throws BrokerException {
-        return fiscoBcosDelegate.getBlockHeight(Long.valueOf(groupId));
     }
 
     @Override

@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class PubAck implements MqttCommand {
-    private MessageIdStore messageIdStore;
+    private final MessageIdStore messageIdStore;
 
     public PubAck(MessageIdStore messageIdStore) {
         this.messageIdStore = messageIdStore;
@@ -26,6 +26,7 @@ public class PubAck implements MqttCommand {
         MqttPubAckMessage msg = (MqttPubAckMessage) req;
         int messageId = msg.variableHeader().messageId();
         log.info("PUBACK, message Id: {}", messageId);
+
         this.messageIdStore.releaseMessageId(messageId);
         return Optional.empty();
     }
