@@ -1,7 +1,6 @@
 package com.webank.weevent.broker.protocol.mqtt.command;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 
 import com.webank.weevent.broker.protocol.mqtt.store.AuthService;
 import com.webank.weevent.broker.protocol.mqtt.store.SessionContext;
@@ -25,8 +24,8 @@ import org.apache.commons.lang.StringUtils;
  */
 @Slf4j
 public class Connect {
-    private AuthService authService;
-    private SessionStore sessionStore;
+    private final AuthService authService;
+    private final SessionStore sessionStore;
 
     public Connect(AuthService authService, SessionStore sessionStore) {
         this.authService = authService;
@@ -43,13 +42,6 @@ public class Connect {
                     new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED, false), null);
         }
 
-        // clean flag
-        if (!msg.variableHeader().isCleanSession()) {
-            log.error("only support clean session, reject");
-            return MqttMessageFactory.newMessage(fixedHeader,
-                    new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION, false), null);
-        }
-
         // verify userName and password
         String username = msg.payload().userName();
         String password = msg.payload().passwordInBytes() == null ? null : new String(msg.payload().passwordInBytes(), StandardCharsets.UTF_8);
@@ -59,14 +51,13 @@ public class Connect {
                     new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD, false), null);
         }
 
-        Optional<SessionContext> sessionContext = this.sessionStore.getSession(clientId);
-        if (sessionContext.isPresent()) {
-            log.info("clientId is exist, close the older");
-            sessionContext.get().closeSession();
+        if (this.sessionStore.existSession(clientId)) {
+            log.info("exist client id, force to delete the older");
+            this.sessionStore.removeSession(clientId);
         }
 
-        // store session
-        this.sessionStore.addSession(sessionData.getClientId(), sessionData);
+        // store new session
+        this.sessionStore.addSession(clientId, sessionData);
 
         log.info("MQTT connected, clientId: {}", clientId);
         return MqttMessageFactory.newMessage(fixedHeader,
