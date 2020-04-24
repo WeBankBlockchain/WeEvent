@@ -62,7 +62,7 @@ public class Connect {
         }
 
         // store new session
-        this.sessionStore.addSession(sessionData.getClientId(), sessionData);
+        this.sessionStore.addSession(clientId, sessionData);
 
         log.info("MQTT connected, clientId: {}", clientId);
         return MqttMessageFactory.newMessage(fixedHeader,

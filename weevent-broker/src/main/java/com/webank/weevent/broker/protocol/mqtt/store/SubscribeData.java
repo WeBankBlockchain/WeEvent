@@ -12,11 +12,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SubscribeData {
-    private final String clientId;
-    private final MqttQoS mqttQoS;
-    private final String topic;
+    private String clientId;
+    private MqttQoS mqttQoS;
+    private String topic;
     // always empty
-    private final String groupId;
+    private String groupId;
 
     private String subscriptionId = "";
     private String offset = "";
@@ -26,5 +26,21 @@ public class SubscribeData {
         this.topic = topic;
         this.groupId = "";
         this.mqttQoS = mqttQoS;
+    }
+
+    // jackson need
+    private SubscribeData() {
+    }
+
+    @Override
+    public String toString() {
+        return "SubscribeData{" +
+                "clientId='" + clientId + '\'' +
+                ", mqttQoS=" + mqttQoS +
+                ", topic='" + topic + '\'' +
+                ", groupId='" + groupId + '\'' +
+                ", subscriptionId='" + subscriptionId + '\'' +
+                ", offset='" + offset + '\'' +
+                '}';
     }
 }

@@ -446,12 +446,14 @@ public class MQTTTest extends JUnitTestBase {
 
         // reconnect subscribe get the offline message
         try {
+            Thread.sleep(this.actionTimeout);
+
             MqttClient client2 = new MqttClient(this.url, clientId, null);
             client2.connect(this.persistOptions);
 
             // subscription
             MessageListener listener = new MessageListener();
-            this.mqttClient.subscribeWithResponse(this.topicName, listener).waitForCompletion();
+            client2.subscribeWithResponse(this.topicName, listener).waitForCompletion();
 
             Thread.sleep(this.actionTimeout);
             // received lost message

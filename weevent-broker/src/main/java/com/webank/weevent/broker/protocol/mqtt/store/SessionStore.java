@@ -25,7 +25,6 @@ import io.netty.handler.codec.mqtt.MqttMessageFactory;
 import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
-import io.netty.handler.codec.mqtt.MqttQoS;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -65,24 +64,26 @@ public class SessionStore {
 
     // initialize session in CONNECT, subscribeDataList is always empty right now
     public boolean addSession(String clientId, SessionContext sessionContext) {
-        if (this.sessionContexts.containsKey(clientId)) {
-            return false;
-        }
+        log.info("add session context, client id: {}", clientId);
 
         this.sessionContexts.put(clientId, sessionContext);
 
         // may be have persist session data in zookeeper
         if (!sessionContext.isCleanSession()) {
             if (this.zkStore != null) {
-                log.info("try to reload persist session from zookeeper");
-
                 try {
                     Optional<PersistSession> data = this.zkStore.get(clientId);
                     PersistSession value;
-                    value = data.orElseGet(() -> new PersistSession(clientId));
+                    if (data.isPresent()) {
+                        value = data.get();
+                        log.info("reload persist session from zookeeper, {}", JsonHelper.object2Json(value));
+                    } else {
+                        value = new PersistSession(clientId);
+                    }
                     this.persistSessions.put(clientId, value);
                 } catch (BrokerException e) {
-                    log.error("load persist session from zookeeper failed", e);
+                    log.error("reload persist session from zookeeper failed", e);
+                    return false;
                 }
             }
         }
@@ -93,9 +94,9 @@ public class SessionStore {
     // finalize session when DISCONNECT or connection closed
     public void removeSession(String clientId) {
         if (this.sessionContexts.containsKey(clientId)) {
-            log.info("begin to clean session context, client id: {}", clientId);
+            log.info("clean session context, client id: {}", clientId);
 
-            SessionContext session = this.sessionContexts.get(clientId);
+            SessionContext session = this.sessionContexts.remove(clientId);
             this.cleanContext(session);
             session.closeSession();
         }
@@ -113,30 +114,41 @@ public class SessionStore {
         }
     }
 
+    private Optional<SubscribeData> getSubscription(String clientId, String topic) {
+        if (!this.sessionContexts.containsKey(clientId)) {
+            return Optional.empty();
+        }
+
+        return this.sessionContexts.get(clientId).getSubscribeDataList().stream().filter(subscribeData -> subscribeData.getTopic().equals(topic)).findAny();
+    }
+
     public String subscribe(SubscribeData subscribeData, Map<IConsumer.SubscribeExt, String> ext) {
+        Optional<SubscribeData> exist = this.getSubscription(subscribeData.getClientId(), subscribeData.getTopic());
+        if (exist.isPresent()) {
+            log.info("already exist subscription, skip this");
+            return exist.get().getSubscriptionId();
+        }
+
         try {
             String offset = WeEvent.OFFSET_LAST;
-            if (subscribeData.getMqttQoS() == MqttQoS.AT_LEAST_ONCE) {
-                if (this.persistSessions.containsKey(subscribeData.getClientId())) {
-                    Optional<SubscribeData> exist = this.persistSessions.get(subscribeData.getClientId()).getSubscribeDataList().stream().filter(subscribe -> subscribe.getTopic().equals(subscribeData.getTopic())).findFirst();
-                    if (exist.isPresent()) {
-                        offset = exist.get().getOffset();
-
-                        log.info("get offset from persist session, {} -> {}", exist.get().getTopic(), offset);
-                    }
+            // get subscription id and offset from persist session
+            if (this.persistSessions.containsKey(subscribeData.getClientId())) {
+                Optional<SubscribeData> persist = this.persistSessions.get(subscribeData.getClientId()).getSubscribeDataList().stream().filter(subscribe -> subscribe.getTopic().equals(subscribeData.getTopic())).findFirst();
+                if (persist.isPresent()) {
+                    SubscribeData original = persist.get();
+                    ext.put(IConsumer.SubscribeExt.SubscriptionId, original.getSubscriptionId());
+                    offset = original.getOffset();
+                    log.info("get data from persist session, topic: {} offset: {} subscriptionId: {}", original.getTopic(), offset, original.getSubscriptionId());
                 }
             }
 
-            String subscriptionId = this.consumer.subscribe(subscribeData.getTopic(),
+            String sid = this.consumer.subscribe(subscribeData.getTopic(),
                     subscribeData.getGroupId(),
                     offset,
                     ext,
                     new IConsumer.ConsumerListener() {
                         @Override
                         public void onEvent(String subscriptionId, WeEvent event) {
-                            // update offset
-                            subscribeData.setOffset(event.getEventId());
-
                             // send to subscribe
                             int messageId = messageIdStore.getNextMessageId();
                             sendEvent(subscribeData.getClientId(), subscriptionId, event, messageId);
@@ -148,31 +160,34 @@ public class SessionStore {
                         }
                     });
 
-            log.info("subscribe success, subscriptionId: {}", subscriptionId);
+            log.info("subscribe success, subscriptionId: {}", sid);
 
-            subscribeData.setSubscriptionId(subscriptionId);
-            Optional<SessionContext> sessionContext = this.getSession(subscribeData.getClientId());
-            sessionContext.ifPresent(context -> context.getSubscribeDataList().add(subscribeData));
-            return subscriptionId;
+            // save subscriptionId and offset
+            subscribeData.setSubscriptionId(sid);
+            Long currentBlock = this.consumer.getBlockHeight(subscribeData.getGroupId());
+            subscribeData.setOffset(currentBlock.toString());
+
+            // update SessionContext
+            this.getSession(subscribeData.getClientId()).ifPresent(context -> context.getSubscribeDataList().add(subscribeData));
+            return sid;
         } catch (BrokerException e) {
-            log.error("subscribe exception: {}", e.getMessage());
+            log.error("subscribe exception", e);
             return "";
         }
     }
 
     public void unSubscribe(String clientId, List<String> topics) {
-        Optional<SessionContext> sessionContext = this.getSession(clientId);
-        sessionContext.ifPresent(context -> {
+        this.getSession(clientId).ifPresent(context -> {
             topics.forEach(topic -> {
                 Optional<SubscribeData> subscribeData = context.getSubscribeDataList().stream().filter(item -> item.getTopic().equals(topic)).findFirst();
                 subscribeData.ifPresent(subscribe -> {
                     try {
-                        log.info("clientId: {}, unSubscribe topic: {} {}", clientId, topic, subscribe.getSubscriptionId());
+                        log.info("unSubscribe, clientId: {} topic: {} subscriptionId: {}", clientId, topic, subscribe.getSubscriptionId());
                         this.consumer.unSubscribe(subscribe.getSubscriptionId());
+                        context.getSubscribeDataList().remove(subscribe);
                     } catch (BrokerException e) {
                         log.error("unSubscribe failed", e);
                     }
-                    context.getSubscribeDataList().remove(subscribe);
                 });
             });
         });
@@ -216,26 +231,35 @@ public class SessionStore {
             return;
         }
 
-        Optional<SessionContext> sessionContext = this.getSession(clientId);
         int finalPayloadSize = payloadSize;
-        sessionContext.ifPresent(context -> {
-            Optional<SubscribeData> subscribeDataOptional = context.getSubscribeDataList().stream().filter(item -> item.getSubscriptionId().equals(subscriptionId)).findFirst();
-            subscribeDataOptional.ifPresent(subscribe -> {
-                switch (subscribe.getMqttQoS()) {
-                    case AT_MOST_ONCE:
-                    case AT_LEAST_ONCE:
-                        int remaining = ProtocolProcess.fixLengthOfMessageId + subscribe.getTopic().length() + finalPayloadSize;
-                        //subscribe.getTopic() may be contain wildcard, use original topic in WeEvent
-                        MqttMessage rsp = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.PUBLISH, false, subscribe.getMqttQoS(), false, remaining),
-                                new MqttPublishVariableHeader(event.getTopic(), messageId), payload);
-                        context.sendRemote(rsp);
-                        break;
+        this.getSession(clientId).ifPresent(context -> {
+            log.debug("subscription list in session context, {}", context.getSubscribeDataList());
 
-                    case EXACTLY_ONCE:
-                    default:
-                        log.error("DOT NOT support Qos=2");
-                }
-            });
+            context.getSubscribeDataList()
+                    .stream()
+                    .filter(item -> item.getSubscriptionId().equals(subscriptionId))
+                    .findFirst()
+                    .ifPresent(subscribe -> {
+                        switch (subscribe.getMqttQoS()) {
+                            case AT_MOST_ONCE:
+                            case AT_LEAST_ONCE:
+                                log.info("PUBLISH subscribe message to client, client id: {} {} {}", clientId, messageId, event);
+
+                                // update offset
+                                subscribe.setOffset(event.getEventId());
+
+                                int remaining = ProtocolProcess.fixLengthOfMessageId + subscribe.getTopic().length() + finalPayloadSize;
+                                //subscribe.getTopic() may be contain wildcard, use original topic in WeEvent
+                                MqttMessage rsp = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.PUBLISH, false, subscribe.getMqttQoS(), false, remaining),
+                                        new MqttPublishVariableHeader(event.getTopic(), messageId), payload);
+                                context.sendRemote(rsp);
+                                break;
+
+                            case EXACTLY_ONCE:
+                            default:
+                                log.error("DOT NOT support Qos=2");
+                        }
+                    });
         });
     }
 
@@ -245,6 +269,7 @@ public class SessionStore {
             this.publishMessage(sessionContext.getWillMessage(), true);
         }
 
+        // deal with persist session
         if (sessionContext.isCleanSession()) {
             // clean persist state in local memory
             this.persistSessions.remove(sessionContext.getClientId());
@@ -252,29 +277,30 @@ public class SessionStore {
             // clean persist state in zookeeper
             if (this.zkStore != null) {
                 try {
-                    log.info("clean session flag = true, clean persist state");
                     if (this.zkStore.exist(sessionContext.getClientId())) {
+                        log.info("clean persist state in zookeeper, {}", sessionContext.getClientId());
+
                         this.zkStore.remove(sessionContext.getClientId());
                     }
                 } catch (BrokerException e) {
-                    log.error("remove zookeeper data failed", e);
+                    log.error("delete data in zookeeper failed", e);
                 }
             }
         } else {
-            PersistSession data = this.persistSessions.get(sessionContext.getClientId());
-            data.setSubscribeDataList(sessionContext.getSubscribeDataList());
-
-            if (this.zkStore != null) {
-                log.info("flush persist session into zookeeper");
-
+            if (this.zkStore != null && !sessionContext.getSubscribeDataList().isEmpty()) {
                 try {
+                    PersistSession data = this.persistSessions.get(sessionContext.getClientId());
+                    data.setSubscribeDataList(sessionContext.getSubscribeDataList());
+
+                    log.info("flush persist session into zookeeper, {}", JsonHelper.object2Json(data));
                     this.zkStore.set(sessionContext.getClientId(), data);
                 } catch (BrokerException e) {
-                    log.error("flush zookeeper data failed", e);
+                    log.error("flush data in zookeeper failed", e);
                 }
             }
         }
 
+        log.debug("try to clean subscription list, {}", sessionContext.getSubscribeDataList());
         sessionContext.getSubscribeDataList().forEach(subscribeData -> {
             try {
                 log.info("unSubscribe topic: {} {}", subscribeData.getTopic(), subscribeData.getSubscriptionId());
@@ -283,7 +309,5 @@ public class SessionStore {
                 log.error("unSubscribe failed, {}", e.getMessage());
             }
         });
-
-        this.sessionContexts.remove(sessionContext.getClientId());
     }
 }

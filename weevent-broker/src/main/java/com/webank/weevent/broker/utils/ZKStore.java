@@ -7,7 +7,6 @@ import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.JsonHelper;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
@@ -24,16 +23,19 @@ import org.apache.zookeeper.CreateMode;
  */
 @Slf4j
 public class ZKStore<T> {
+    private final Class<T> clz;
     private final String zkPath;
     private final CuratorFramework zkClient;
 
-    public ZKStore(String zkPath, String connectString) throws BrokerException {
+    public ZKStore(Class<T> clz, String zkPath, String connectString) throws BrokerException {
         log.info("try to access zookeeper, {}@{}", zkPath, connectString);
+
+        this.clz = clz;
 
         try {
             PathUtils.validatePath(zkPath);
         } catch (IllegalArgumentException e) {
-            log.error("invalid zookeeper path", e);
+            log.error("invalid zookeeper path, {}", e.getMessage());
             throw new BrokerException(ErrorCode.ZOOKEEPER_INVALID_PATH);
         }
 
@@ -49,14 +51,15 @@ public class ZKStore<T> {
 
         try {
             this.zkClient.start();
+
+            log.info("ensure zookeeper root path, {}", zkPath);
             // ensure path
             if (this.zkClient.checkExists().forPath(zkPath) == null) {
+                log.debug("create not exist path, {}", zkPath);
                 this.zkClient.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(zkPath);
             }
-
-            log.info("ensure zookeeper root path for file, {}", zkPath);
         } catch (Exception e) {
-            log.error("ensure zookeeper root path for file failed", e);
+            log.error("ensure zookeeper root path failed, {}", e.getMessage());
             throw new BrokerException(ErrorCode.ZOOKEEPER_ERROR);
         }
 
@@ -126,7 +129,7 @@ public class ZKStore<T> {
         try {
             return this.zkClient.checkExists().forPath(zkPath) != null;
         } catch (Exception e) {
-            log.error("access zookeeper failed", e);
+            log.error("access zookeeper failed, {}", e.getMessage());
             throw new BrokerException(ErrorCode.ZOOKEEPER_ERROR);
         }
     }
@@ -138,7 +141,7 @@ public class ZKStore<T> {
             byte[] json = JsonHelper.object2JsonBytes(value);
             this.zkClient.create().withMode(CreateMode.PERSISTENT).forPath(zkPath, json);
         } catch (Exception e) {
-            log.error("access zookeeper failed", e);
+            log.error("access zookeeper failed, {}", e.getMessage());
             throw new BrokerException(ErrorCode.ZOOKEEPER_ERROR);
         }
     }
@@ -148,12 +151,12 @@ public class ZKStore<T> {
         try {
             nodeData = this.zkClient.getData().forPath(zkPath);
         } catch (Exception e) {
-            log.error("access zookeeper failed", e);
+            log.error("access zookeeper failed, {}", e.getMessage());
             throw new BrokerException(ErrorCode.ZOOKEEPER_ERROR);
         }
 
-        return JsonHelper.json2Object(nodeData, new TypeReference<T>() {
-        });
+        // Type erasure
+        return JsonHelper.json2Object(nodeData, this.clz);
     }
 
     private void zkUpdate(String zkPath, T value) throws BrokerException {
@@ -163,7 +166,7 @@ public class ZKStore<T> {
             byte[] json = JsonHelper.object2JsonBytes(value);
             this.zkClient.setData().forPath(zkPath, json);
         } catch (Exception e) {
-            log.error("access zookeeper failed", e);
+            log.error("access zookeeper failed, {}", e.getMessage());
             throw new BrokerException(ErrorCode.ZOOKEEPER_ERROR);
         }
     }
@@ -175,7 +178,7 @@ public class ZKStore<T> {
         try {
             this.zkClient.delete().guaranteed().forPath(zkPath);
         } catch (Exception e) {
-            log.error("access zookeeper failed", e);
+            log.error("access zookeeper failed, {}", e.getMessage());
             throw new BrokerException(ErrorCode.ZOOKEEPER_ERROR);
         }
     }

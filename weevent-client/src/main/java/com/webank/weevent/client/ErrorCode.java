@@ -36,6 +36,7 @@ public enum ErrorCode {
     EVENT_ID_IS_MISMATCH(100304, "eventId is mismatch with block chain"),
     EVENT_GROUP_ID_NOT_FOUND(100305, "event group id is not found"),
     EVENT_GROUP_ID_INVALID(100306, "event group id should be a string start from 1"),
+    INVALID_BLOCK_HEIGHT(100307, "invalid block height"),
 
     OFFSET_IS_BLANK(100500, "subscribe interface offset param is blank"),
     URL_INVALID_FORMAT(100501, "invalid url format"),
