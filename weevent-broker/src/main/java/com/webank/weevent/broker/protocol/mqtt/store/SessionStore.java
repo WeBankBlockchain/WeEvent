@@ -64,46 +64,45 @@ public class SessionStore {
 
     // initialize session in CONNECT, subscribeDataList is always empty right now
     public boolean addSession(String clientId, SessionContext sessionContext) {
-        // synchronized, same clientId may be access in different connection
-        synchronized (this.sessionContexts) {
-            log.info("add session context, client id: {}", clientId);
-            this.sessionContexts.put(clientId, sessionContext);
+        log.info("add session context, client id: {}", clientId);
+        this.sessionContexts.put(clientId, sessionContext);
+
+        if (!sessionContext.isCleanSession()) {
+            PersistSession value = new PersistSession(clientId);
+
+            // persist data in local memory
+            if (this.persistSessions.containsKey(clientId)) {
+                value = this.persistSessions.get(clientId);
+            }
 
             // may be have persist session data in zookeeper
-            if (!sessionContext.isCleanSession()) {
-                if (this.zkStore != null) {
-                    try {
-                        Optional<PersistSession> data = this.zkStore.get(clientId);
-                        PersistSession value;
-                        if (data.isPresent()) {
-                            value = data.get();
-                            log.info("reload persist session from zookeeper, {}", JsonHelper.object2Json(value));
-                        } else {
-                            value = new PersistSession(clientId);
-                        }
-                        this.persistSessions.put(clientId, value);
-                    } catch (BrokerException e) {
-                        log.error("reload persist session from zookeeper failed, {}", e.toString());
-                        return false;
+            if (this.zkStore != null) {
+                try {
+                    Optional<PersistSession> data = this.zkStore.get(clientId);
+                    if (data.isPresent()) {
+                        value = data.get();
+                        log.info("reload persist session from zookeeper, {}", JsonHelper.object2Json(value));
                     }
+                } catch (BrokerException e) {
+                    log.error("reload persist session from zookeeper failed, {}", e.toString());
+                    return false;
                 }
             }
 
-            return true;
+            this.persistSessions.put(clientId, value);
         }
+
+        return true;
     }
 
     // finalize session when DISCONNECT or connection closed
     public void removeSession(String clientId) {
-        // synchronized, same clientId may be access in different connection
-        synchronized (this.sessionContexts) {
-            if (this.sessionContexts.containsKey(clientId)) {
-                log.info("clean session context, client id: {}", clientId);
+        if (this.sessionContexts.containsKey(clientId)) {
+            log.info("clean session context, client id: {}", clientId);
 
-                SessionContext session = this.sessionContexts.remove(clientId);
-                this.cleanContext(session);
-                session.closeSession();
-            }
+            SessionContext session = this.sessionContexts.remove(clientId);
+            this.cleanContext(session);
+            session.closeSession();
         }
     }
 
@@ -292,15 +291,19 @@ public class SessionStore {
                 }
             }
         } else {
-            if (this.zkStore != null && !sessionContext.getSubscribeDataList().isEmpty()) {
-                try {
-                    PersistSession data = this.persistSessions.get(sessionContext.getClientId());
-                    data.setSubscribeDataList(sessionContext.getSubscribeDataList());
+            if (!sessionContext.getSubscribeDataList().isEmpty()) {
+                // update local memory
+                PersistSession data = this.persistSessions.get(sessionContext.getClientId());
+                data.setSubscribeDataList(sessionContext.getSubscribeDataList());
 
-                    log.info("flush persist session into zookeeper, {}", JsonHelper.object2Json(data));
-                    this.zkStore.set(sessionContext.getClientId(), data);
-                } catch (BrokerException e) {
-                    log.error("flush data in zookeeper failed, {}", e.toString());
+                // may be need update zookeeper
+                if (this.zkStore != null) {
+                    try {
+                        log.info("flush persist session into zookeeper, {}", JsonHelper.object2Json(data));
+                        this.zkStore.set(sessionContext.getClientId(), data);
+                    } catch (BrokerException e) {
+                        log.error("flush data in zookeeper failed, {}", e.toString());
+                    }
                 }
             }
         }

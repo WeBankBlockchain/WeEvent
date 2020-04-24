@@ -51,13 +51,8 @@ public class Connect {
                     new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD, false), null);
         }
 
-        // clean flag
-        boolean cleanSession = msg.variableHeader().isCleanSession();
-        log.info("clean session flag in CONNECT: {}", cleanSession);
-        if (cleanSession) {
-            log.info("try to delete the older session");
-
-            // delete the older
+        if (this.sessionStore.existSession(clientId)) {
+            log.info("exist client id, force to delete the older");
             this.sessionStore.removeSession(clientId);
         }
 
