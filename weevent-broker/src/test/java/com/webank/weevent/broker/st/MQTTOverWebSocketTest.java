@@ -4,7 +4,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import com.webank.weevent.broker.JUnitTestBase;
-import com.webank.weevent.client.WeEvent;
 
 import io.netty.handler.codec.mqtt.MqttQoS;
 import lombok.extern.slf4j.Slf4j;

@@ -48,11 +48,9 @@ public class HistoryEventLoop extends StoppableTask {
         this.blockChain = blockChain;
         this.subscription = subscription;
 
-        if (lastBlock != 0) {
-            // if offset is block height, filter next block directly
-            if (!StringUtils.isNumeric(this.subscription.getOffset())) {
-                this.dispatchTargetBlock(lastBlock, this.subscription.getOffset());
-            }
+        // if offset is block height, filter next block directly
+        if (lastBlock != 0 && !StringUtils.isNumeric(this.subscription.getOffset())) {
+            this.dispatchTargetBlock(lastBlock, this.subscription.getOffset());
         }
         this.lastBlock = lastBlock;
 

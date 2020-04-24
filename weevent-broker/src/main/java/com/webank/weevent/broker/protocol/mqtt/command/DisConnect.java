@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class DisConnect implements MqttCommand {
-    SessionStore sessionStore;
+    private SessionStore sessionStore;
 
     public DisConnect(SessionStore sessionStore) {
         this.sessionStore = sessionStore;

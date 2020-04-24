@@ -246,7 +246,7 @@ public class SessionStore {
                     .ifPresent(subscribe -> {
                         switch (subscribe.getMqttQoS()) {
                             case AT_MOST_ONCE:
-                            case AT_LEAST_ONCE:
+                            case AT_LEAST_ONCE: {
                                 log.info("PUBLISH subscribe message to client, client id: {} {} {}", clientId, messageId, event);
 
                                 // update offset
@@ -257,7 +257,8 @@ public class SessionStore {
                                 MqttMessage rsp = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.PUBLISH, false, subscribe.getMqttQoS(), false, remaining),
                                         new MqttPublishVariableHeader(event.getTopic(), messageId), payload);
                                 context.sendRemote(rsp);
-                                break;
+                            }
+                            break;
 
                             case EXACTLY_ONCE:
                             default:
