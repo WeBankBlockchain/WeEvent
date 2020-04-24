@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import com.webank.weevent.broker.JUnitTestBase;
+import com.webank.weevent.client.WeEvent;
 
 import io.netty.handler.codec.mqtt.MqttQoS;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import org.junit.Test;
 
 @Slf4j
 public class MQTTOverWebSocketTest extends JUnitTestBase {
+    private final String topicName = "com.weevent.test";
 
     private String url;
     private final int actionTimeout = 3000;

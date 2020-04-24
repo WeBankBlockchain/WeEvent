@@ -20,6 +20,7 @@ import org.junit.Test;
 
 @Slf4j
 public class MQTTTest extends JUnitTestBase {
+    private final String topicName = "com.weevent.test";
 
     private final String url = "tcp://localhost:7001";
     private final int actionTimeout = 3000;
@@ -446,8 +447,6 @@ public class MQTTTest extends JUnitTestBase {
 
         // reconnect subscribe get the offline message
         try {
-            Thread.sleep(this.actionTimeout);
-
             MqttClient client2 = new MqttClient(this.url, clientId, null);
             client2.connect(this.persistOptions);
 

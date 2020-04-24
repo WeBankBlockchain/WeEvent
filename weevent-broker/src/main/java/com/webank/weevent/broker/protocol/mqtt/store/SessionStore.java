@@ -64,41 +64,46 @@ public class SessionStore {
 
     // initialize session in CONNECT, subscribeDataList is always empty right now
     public boolean addSession(String clientId, SessionContext sessionContext) {
-        log.info("add session context, client id: {}", clientId);
+        // synchronized, same clientId may be access in different connection
+        synchronized (this.sessionContexts) {
+            log.info("add session context, client id: {}", clientId);
+            this.sessionContexts.put(clientId, sessionContext);
 
-        this.sessionContexts.put(clientId, sessionContext);
-
-        // may be have persist session data in zookeeper
-        if (!sessionContext.isCleanSession()) {
-            if (this.zkStore != null) {
-                try {
-                    Optional<PersistSession> data = this.zkStore.get(clientId);
-                    PersistSession value;
-                    if (data.isPresent()) {
-                        value = data.get();
-                        log.info("reload persist session from zookeeper, {}", JsonHelper.object2Json(value));
-                    } else {
-                        value = new PersistSession(clientId);
+            // may be have persist session data in zookeeper
+            if (!sessionContext.isCleanSession()) {
+                if (this.zkStore != null) {
+                    try {
+                        Optional<PersistSession> data = this.zkStore.get(clientId);
+                        PersistSession value;
+                        if (data.isPresent()) {
+                            value = data.get();
+                            log.info("reload persist session from zookeeper, {}", JsonHelper.object2Json(value));
+                        } else {
+                            value = new PersistSession(clientId);
+                        }
+                        this.persistSessions.put(clientId, value);
+                    } catch (BrokerException e) {
+                        log.error("reload persist session from zookeeper failed, {}", e.toString());
+                        return false;
                     }
-                    this.persistSessions.put(clientId, value);
-                } catch (BrokerException e) {
-                    log.error("reload persist session from zookeeper failed", e);
-                    return false;
                 }
             }
-        }
 
-        return true;
+            return true;
+        }
     }
 
     // finalize session when DISCONNECT or connection closed
     public void removeSession(String clientId) {
-        if (this.sessionContexts.containsKey(clientId)) {
-            log.info("clean session context, client id: {}", clientId);
+        // synchronized, same clientId may be access in different connection
+        synchronized (this.sessionContexts) {
+            if (this.sessionContexts.containsKey(clientId)) {
+                log.info("clean session context, client id: {}", clientId);
 
-            SessionContext session = this.sessionContexts.remove(clientId);
-            this.cleanContext(session);
-            session.closeSession();
+                SessionContext session = this.sessionContexts.remove(clientId);
+                this.cleanContext(session);
+                session.closeSession();
+            }
         }
     }
 
@@ -171,7 +176,7 @@ public class SessionStore {
             this.getSession(subscribeData.getClientId()).ifPresent(context -> context.getSubscribeDataList().add(subscribeData));
             return sid;
         } catch (BrokerException e) {
-            log.error("subscribe exception", e);
+            log.error("subscribe failed, {}", e.toString());
             return "";
         }
     }
@@ -186,7 +191,7 @@ public class SessionStore {
                         this.consumer.unSubscribe(subscribe.getSubscriptionId());
                         context.getSubscribeDataList().remove(subscribe);
                     } catch (BrokerException e) {
-                        log.error("unSubscribe failed", e);
+                        log.error("unSubscribe failed, {}", e.toString());
                     }
                 });
             });
@@ -214,7 +219,7 @@ public class SessionStore {
             SendResult sendResult = this.producer.publish(event, "", this.timeout);
             return sendResult.getStatus() == SendResult.SendResultStatus.SUCCESS;
         } catch (BrokerException e) {
-            log.error("exception in publish", e);
+            log.error("exception in publish, {}", e.toString());
             return false;
         }
     }
@@ -227,7 +232,7 @@ public class SessionStore {
             payloadSize = content.length;
             payload.writeBytes(content);
         } catch (BrokerException e) {
-            log.error("json encode failed, {}", e.getMessage());
+            log.error("json encode failed, {}", e.toString());
             return;
         }
 
@@ -263,7 +268,7 @@ public class SessionStore {
         });
     }
 
-    private synchronized void cleanContext(SessionContext sessionContext) {
+    private void cleanContext(SessionContext sessionContext) {
         if (sessionContext.getWillMessage() != null) {
             log.info("publish will message");
             this.publishMessage(sessionContext.getWillMessage(), true);
@@ -283,7 +288,7 @@ public class SessionStore {
                         this.zkStore.remove(sessionContext.getClientId());
                     }
                 } catch (BrokerException e) {
-                    log.error("delete data in zookeeper failed", e);
+                    log.error("delete data in zookeeper failed, {}", e.toString());
                 }
             }
         } else {
@@ -295,7 +300,7 @@ public class SessionStore {
                     log.info("flush persist session into zookeeper, {}", JsonHelper.object2Json(data));
                     this.zkStore.set(sessionContext.getClientId(), data);
                 } catch (BrokerException e) {
-                    log.error("flush data in zookeeper failed", e);
+                    log.error("flush data in zookeeper failed, {}", e.toString());
                 }
             }
         }
@@ -306,7 +311,7 @@ public class SessionStore {
                 log.info("unSubscribe topic: {} {}", subscribeData.getTopic(), subscribeData.getSubscriptionId());
                 this.consumer.unSubscribe(subscribeData.getSubscriptionId());
             } catch (BrokerException e) {
-                log.error("unSubscribe failed, {}", e.getMessage());
+                log.error("unSubscribe failed, {}", e.toString());
             }
         });
     }
