@@ -3,11 +3,7 @@ package com.webank.weevent.broker.protocol.mqtt.command;
 import java.util.Optional;
 
 import com.webank.weevent.broker.protocol.mqtt.ProtocolProcess;
-import com.webank.weevent.broker.protocol.mqtt.store.SessionContext;
 import com.webank.weevent.broker.protocol.mqtt.store.SessionStore;
-import com.webank.weevent.broker.protocol.mqtt.store.SubscribeData;
-import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.core.IConsumer;
 
 import io.netty.handler.codec.mqtt.MqttFixedHeader;
 import io.netty.handler.codec.mqtt.MqttMessage;
@@ -25,16 +21,14 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class UnSubscribe implements MqttCommand {
-    private SessionStore sessionStore;
-    private IConsumer iConsumer;
+    private final SessionStore sessionStore;
 
-    public UnSubscribe(SessionStore sessionStore, IConsumer iConsumer) {
+    public UnSubscribe(SessionStore sessionStore) {
         this.sessionStore = sessionStore;
-        this.iConsumer = iConsumer;
     }
 
     @Override
-    public Optional<MqttMessage> process(MqttMessage req, String clientId, String remoteIp) throws BrokerException {
+    public Optional<MqttMessage> process(MqttMessage req, String clientId, String remoteIp) {
         MqttUnsubscribeMessage msg = (MqttUnsubscribeMessage) req;
         log.info("UNSUBSCRIBE, {}", msg.payload().topics());
 
@@ -43,21 +37,7 @@ public class UnSubscribe implements MqttCommand {
             return Optional.empty();
         }
 
-        Optional<SessionContext> sessionContext = this.sessionStore.getSession(clientId);
-        sessionContext.ifPresent(context -> {
-            msg.payload().topics().forEach(topic -> {
-                Optional<SubscribeData> subscribeData = context.getSubscribeDataList().stream().filter(item -> item.getTopic().equals(topic)).findFirst();
-                subscribeData.ifPresent(subscribe -> {
-                    try {
-                        log.info("clientId: {}, unSubscribe topic: {} {}", clientId, topic, subscribe.getSubscriptionId());
-                        this.iConsumer.unSubscribe(subscribe.getSubscriptionId());
-                    } catch (BrokerException e) {
-                        log.error("unSubscribe failed", e);
-                    }
-                    context.getSubscribeDataList().remove(subscribe);
-                });
-            });
-        });
+        this.sessionStore.unSubscribe(clientId, msg.payload().topics());
 
         MqttMessage rsp = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.UNSUBACK, false, MqttQoS.AT_LEAST_ONCE, false, ProtocolProcess.fixLengthOfMessageId),
                 MqttMessageIdVariableHeader.from(msg.variableHeader().messageId()), null);
