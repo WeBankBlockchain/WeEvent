@@ -429,7 +429,7 @@ public class MQTTTest extends JUnitTestBase {
             client1.subscribeWithResponse(this.topicName, listener).waitForCompletion();
 
             client1.disconnect();
-
+            client1.close();
             Assert.assertTrue(true);
         } catch (MqttException e) {
             log.error("exception", e);
@@ -447,6 +447,8 @@ public class MQTTTest extends JUnitTestBase {
 
         // reconnect subscribe get the offline message
         try {
+            Thread.sleep(this.actionTimeout);
+            
             MqttClient client2 = new MqttClient(this.url, clientId, null);
             client2.connect(this.persistOptions);
 
