@@ -444,11 +444,6 @@ public class BrokerStomp extends TextWebSocketHandler {
         if (isFile) {
             log.info("this is a subscription extended for file");
 
-            if (this.fileTransportService == null) {
-                log.error("NOT FOUND zookeeper for file subscription, skip it");
-                throw new BrokerException(ErrorCode.ZOOKEEPER_NOT_SUPPORT_FILE_SUBSCRIPTION);
-            }
-
             listener = new FileEventListener(this.fileTransportService, topic, groupId) {
                 @Override
                 public void send(String subscriptionId, WeEvent event) {
