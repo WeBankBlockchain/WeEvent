@@ -2,6 +2,11 @@ package com.webank.weevent.core.fabric;
 
 import java.util.List;
 
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
+import com.webank.weevent.client.TopicInfo;
+import com.webank.weevent.client.TopicPage;
+import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.IEventTopic;
 import com.webank.weevent.core.dto.ContractContext;
 import com.webank.weevent.core.dto.GroupGeneral;
@@ -12,11 +17,6 @@ import com.webank.weevent.core.dto.TbNode;
 import com.webank.weevent.core.dto.TbTransHash;
 import com.webank.weevent.core.fabric.sdk.FabricDelegate;
 import com.webank.weevent.core.fisco.util.ParamCheckUtils;
-import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.client.ErrorCode;
-import com.webank.weevent.client.TopicInfo;
-import com.webank.weevent.client.TopicPage;
-import com.webank.weevent.client.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -101,6 +101,13 @@ public class FabricTopicAdmin implements IEventTopic {
     public List<String> listGroupId() {
 
         return fabricDelegate.listChannel();
+    }
+
+    @Override
+    public Long getBlockHeight(String channelName) throws BrokerException {
+        validateChannelName(channelName);
+
+        return fabricDelegate.getBlockHeight(channelName);
     }
 
     @Override
