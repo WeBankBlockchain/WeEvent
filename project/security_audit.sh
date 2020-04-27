@@ -50,8 +50,6 @@ scan_code()
         rm /tmp/report.json
     done
     if [ ${count} -ne 0 ]; then
-        echo "######### ERROR: Scan code failed, please adjust them before commit,please check if
-                                contains sensistive information or add them to white list"
        echo -e "\033[32m ######### ERROR: Scan code failed, please adjust them before commit,please check if contains sensistive information or add them to white list  \033[0m"
 
         exit 1
