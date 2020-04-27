@@ -31,10 +31,10 @@ cache:
 
 script:
   - /bin/bash project/security_audit.sh
-  - /bin/bash project/build-ci.sh
-  - chmod +x ./gradlew
-  - ./gradlew build
-  - ./gradlew check
-  - ./gradlew codeCoverageReport
+#  - /bin/bash project/build-ci.sh
+#  - chmod +x ./gradlew
+#  - ./gradlew build
+#  - ./gradlew check
+#  - ./gradlew codeCoverageReport
 after_success:
   - bash <(curl -s https://codecov.io/bash) -f "./build/customJacocoReportDir/codeCoverageReport/codeCoverageReport.xml"
