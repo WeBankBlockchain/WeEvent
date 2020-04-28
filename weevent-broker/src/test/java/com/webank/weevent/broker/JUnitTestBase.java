@@ -2,8 +2,6 @@ package com.webank.weevent.broker;
 
 import java.util.concurrent.TimeUnit;
 
-import com.webank.weevent.client.WeEvent;
-
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -24,9 +22,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = BrokerApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class JUnitTestBase {
-    protected String groupId = WeEvent.DEFAULT_GROUP_ID;
-    protected String topicName = "com.weevent.test";
-
     @LocalServerPort
     public String listenPort;
 

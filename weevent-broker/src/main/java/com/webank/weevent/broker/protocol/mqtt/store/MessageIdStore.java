@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MessageIdStore {
     private final int MIN_MSG_ID = 1;
     private final int MAX_MSG_ID = 65535;
-    private Map<Integer, Integer> messageIdCache = new ConcurrentHashMap<>();
+    private final Map<Integer, Integer> messageIdCache = new ConcurrentHashMap<>();
     private int nextMsgId = MIN_MSG_ID - 1;
 
     public int getNextMessageId() {

@@ -58,7 +58,7 @@ public class Subscription {
     private String groupId;
 
     /**
-     * event offset.
+     * event offset, it's an eventId or block height.
      */
     private String offset;
 
@@ -143,8 +143,10 @@ public class Subscription {
         if (!WeEvent.OFFSET_LAST.equals(this.offset)) {
             log.info("need history event loop, {}", this);
 
-            Long lastBlock;
-            if (WeEvent.OFFSET_FIRST.equals(this.offset)) {
+            long lastBlock;
+            if (StringUtils.isNumeric(offset)) {
+                lastBlock = Long.parseLong(offset);
+            } else if (WeEvent.OFFSET_FIRST.equals(this.offset)) {
                 lastBlock = 0L;
             } else {
                 lastBlock = DataTypeUtils.decodeBlockNumber(offset);
@@ -230,11 +232,10 @@ public class Subscription {
     // can not doStart again after doStop
     public synchronized void doStop() {
         this.notifyTask.doExit();
+        stopHistory();
 
         // wait task exit really
         StoppableTask.idle(this.idleTime);
-
-        stopHistory();
 
         // call onClose
         this.notifyTask.getConsumerListener().onClose(this.uuid);

@@ -4,6 +4,12 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
+import com.webank.weevent.client.SendResult;
+import com.webank.weevent.client.TopicInfo;
+import com.webank.weevent.client.TopicPage;
+import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.IProducer;
 import com.webank.weevent.core.JUnitTestBase;
 import com.webank.weevent.core.config.FiscoConfig;
@@ -14,12 +20,6 @@ import com.webank.weevent.core.dto.TbBlock;
 import com.webank.weevent.core.dto.TbNode;
 import com.webank.weevent.core.dto.TbTransHash;
 import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegate;
-import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.client.ErrorCode;
-import com.webank.weevent.client.SendResult;
-import com.webank.weevent.client.TopicInfo;
-import com.webank.weevent.client.TopicPage;
-import com.webank.weevent.client.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.crypto.Credentials;
@@ -38,13 +38,15 @@ import org.junit.Test;
  */
 @Slf4j
 public class FiscoBcosTopicAdminTest extends JUnitTestBase {
-    private String topicName = "com.weevent.test";
+    private final String groupId = WeEvent.DEFAULT_GROUP_ID;
+    private final String topicName = "com.weevent.test";
+
     private String eventId = "";
     private QueryEntity queryEntity;
-    private String groupId = WeEvent.DEFAULT_GROUP_ID;
+
     private final BigInteger blockNumber = BigInteger.valueOf(1);
     private IProducer iProducer;
-    private long transactionTimeout = 30000;
+    private final long transactionTimeout = 10;
 
     @Before
     public void before() throws Exception {
@@ -59,7 +61,7 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
         this.iProducer = new FiscoBcosBroker4Producer(fiscoBcosDelegate);
 
         Assert.assertTrue(this.iProducer.startProducer());
-        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
+        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.groupId).get(transactionTimeout, TimeUnit.SECONDS);
         Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
         this.eventId = sendResult.getEventId();
     }
@@ -1089,6 +1091,12 @@ public class FiscoBcosTopicAdminTest extends JUnitTestBase {
     public void testGetOperatorList() throws BrokerException {
         List<String> operatorList = this.iProducer.listOperator(this.groupId, this.topicName);
         Assert.assertTrue(operatorList.size() >= 1);
+    }
+
+    @Test
+    public void testGetBlockHeight() throws BrokerException {
+        Long blockHeight = this.iProducer.getBlockHeight(this.groupId);
+        Assert.assertTrue(blockHeight >= 1);
     }
 
     private Credentials getExternalAccountCredentials() {
