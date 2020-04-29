@@ -42,6 +42,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 /**
  * Stomp 1.1 protocol.
+ * see at https://stomp.github.io/stomp-specification-1.1.html.
  * Support sockjs + stomp.js client.
  * see at https://github.com/sockjs/sockjs-client and https://github.com/stomp-js/stompjs.
  *
@@ -443,11 +444,6 @@ public class BrokerStomp extends TextWebSocketHandler {
         if (isFile) {
             log.info("this is a subscription extended for file");
 
-            if (this.fileTransportService == null) {
-                log.error("NOT FOUND zookeeper for file subscription, skip it");
-                throw new BrokerException(ErrorCode.ZOOKEEPER_NOT_SUPPORT_FILE_SUBSCRIPTION);
-            }
-
             listener = new FileEventListener(this.fileTransportService, topic, groupId) {
                 @Override
                 public void send(String subscriptionId, WeEvent event) {
@@ -578,7 +574,7 @@ public class BrokerStomp extends TextWebSocketHandler {
 
         List<Message<byte[]>> stompMsg = new StompDecoder().decode(ByteBuffer.wrap(message.getPayload().getBytes(StandardCharsets.UTF_8)));
         for (Message<byte[]> msg : stompMsg) {
-            handleSingleMessage(msg, session);
+            this.handleSingleMessage(msg, session);
         }
     }
 }

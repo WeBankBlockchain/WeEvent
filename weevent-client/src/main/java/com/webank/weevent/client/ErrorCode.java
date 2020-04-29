@@ -36,6 +36,7 @@ public enum ErrorCode {
     EVENT_ID_IS_MISMATCH(100304, "eventId is mismatch with block chain"),
     EVENT_GROUP_ID_NOT_FOUND(100305, "event group id is not found"),
     EVENT_GROUP_ID_INVALID(100306, "event group id should be a string start from 1"),
+    INVALID_BLOCK_HEIGHT(100307, "invalid block height"),
 
     OFFSET_IS_BLANK(100500, "subscribe interface offset param is blank"),
     URL_INVALID_FORMAT(100501, "invalid url format"),
@@ -82,6 +83,8 @@ public enum ErrorCode {
     LOCAL_FILE_NOT_EXIST(102014, "local file not exist"),
     ENCODE_FILE_NAME_ERROR(102015, "encode file name error"),
     DECODE_FILE_NAME_ERROR(102016, "decode file name error"),
+    ENCODE_TOPIC_ERROR(102017, "encode topic error"),
+    ENCODE_EVENT_ID_ERROR(102018, "encode event id error"),
 
     HTTP_REQUEST_EXECUTE_ERROR(102100, "http request execute failed"),
     BUILD_HTTP_URL_ERROR(102101, "build http url failed"),
@@ -120,9 +123,8 @@ public enum ErrorCode {
 
     ZOOKEEPER_ERROR(200400, "access zookeeper failed"),
     ZOOKEEPER_INVALID_PATH(200401, "invalid zookeeper path"),
-    ZOOKEEPER_UNKNOWN_FILE(200402, "unknown file id in zookeeper"),
-    ZOOKEEPER_EXIST_FILE(200403, "file id already exist in zookeeper"),
-    ZOOKEEPER_NOT_SUPPORT_FILE_SUBSCRIPTION(200404, "DO NOT SUPPORT file transport without zookeeper"),
+    ZOOKEEPER_UNKNOWN_KEY(200402, "unknown key in zookeeper"),
+    ZOOKEEPER_EXIST_KEY(200403, "key already exist in zookeeper"),
 
     FILE_NOT_EXIST_PATH(200500, "not exist file path"),
     FILE_INVALID_FILE_CHUNK_SIZE(200501, "file chunk size must be in (0, 2M)"),
@@ -136,6 +138,13 @@ public enum ErrorCode {
     FILE_SENDER_RECEIVER_CONFLICT(200509, "can't publish and subscribe a file in the same node"),
     FILE_EXIST_CONTEXT(200510, "exist file context"),
     FILE_INIT_VERIFY_FAILED(200511, "initialize PEM for verify topic failed"),
+
+    MQTT_UNKNOWN_COMMAND(200600, "unknown mqtt command"),
+    MQTT_ENCODE_FAILED(200601, "encode mqtt message failed"),
+    MQTT_DECODE_FAILED(200602, "decode mqtt message failed"),
+    MQTT_CONNECT_CONFLICT(200610, "connect command conflict with specification 3.1.1"),
+    MQTT_UNKNOWN_CLIENT_ID(200611, "unknown client id"),
+    MQTT_NOT_SUPPORT_QOS2(200612, "do not support qos=2"),
     ;
 
     /**
