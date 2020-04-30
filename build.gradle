@@ -39,7 +39,7 @@ ext {
     protobufVersion = "3.6.1"
 
     // lombok
-    lombokVersion = "1.16.14"
+    lombokVersion = "1.18.12"
     // junit
     junitVersion = "4.12"
     // netty-all
@@ -70,6 +70,9 @@ ext {
     PahoClientVersion = "1.2.2"
     // jmeter
     jmeterVersion = "5.0"
+    // jackson
+    jacksonVersion = "2.11.0"
+
 }
 
 buildscript {
