@@ -39,7 +39,7 @@ public class JsonHelper {
         try {
             return OBJECT_MAPPER.writeValueAsString(object);
         } catch (JsonProcessingException e) {
-            log.error("convert object to jsonString failed ", e);
+            log.error("json encode failed", e);
             throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
         }
     }
@@ -55,7 +55,7 @@ public class JsonHelper {
         try {
             return OBJECT_MAPPER.writeValueAsBytes(object);
         } catch (JsonProcessingException e) {
-            log.error("convert object to jsonString failed ", e);
+            log.error("json encode failed", e);
             throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
         }
     }
@@ -73,7 +73,7 @@ public class JsonHelper {
         try {
             return OBJECT_MAPPER.readValue(jsonString, valueType);
         } catch (IOException e) {
-            log.error("convert jsonString to object failed ", e);
+            log.error("json decode failed", e);
             throw new BrokerException(ErrorCode.JSON_DECODE_EXCEPTION);
         }
     }
@@ -91,8 +91,8 @@ public class JsonHelper {
         try {
             return OBJECT_MAPPER.readValue(jsonString, typeReference);
         } catch (IOException e) {
-            log.error("convert jsonString to object failed ", e);
-            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
+            log.error("json decode failed", e);
+            throw new BrokerException(ErrorCode.JSON_DECODE_EXCEPTION);
         }
     }
 
@@ -109,7 +109,7 @@ public class JsonHelper {
         try {
             return OBJECT_MAPPER.readValue(json, valueType);
         } catch (IOException e) {
-            log.error("convert jsonString to object failed ", e);
+            log.error("json decode failed", e);
             throw new BrokerException(ErrorCode.JSON_DECODE_EXCEPTION);
         }
     }
@@ -127,8 +127,8 @@ public class JsonHelper {
         try {
             return OBJECT_MAPPER.readValue(json, typeReference);
         } catch (IOException e) {
-            log.error("parse extensions failed", e);
-            throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
+            log.error("json decode failed", e);
+            throw new BrokerException(ErrorCode.JSON_DECODE_EXCEPTION);
         }
     }
 

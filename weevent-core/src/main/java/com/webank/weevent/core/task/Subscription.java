@@ -71,25 +71,21 @@ public class Subscription {
     /**
      * subscribe from which protocol, restful or json rpc, etc.
      */
-    @ToString.Exclude
     private String interfaceType;
 
     /**
      * subscribe from which ip
      */
-    @ToString.Exclude
     private String remoteIp;
 
     /**
      * subscribe topic TimeStamp.
      */
-    @ToString.Exclude
     private Date createTimeStamp = new Date();
 
     /**
      * idle time
      */
-    @ToString.Exclude
     private int idleTime;
 
     /**
@@ -108,19 +104,16 @@ public class Subscription {
      * helper to avoid repeat notify if exist HistoryEventLoop
      * (eventId <-> timestamp), value is not used yet
      */
-    @ToString.Exclude
     private Map<String, Long> mergeCache;
 
     /**
      * merge cache block area
      */
-    @ToString.Exclude
     private int mergeBlock = 8;
 
     /**
      * first block in HistoryEventLoop dispatch
      */
-    @ToString.Exclude
     private Long historyBlock = 0L;
 
     public Subscription(IBlockChain blockChain, String uuid, String[] topics, String groupId, String offset, String tag, IConsumer.ConsumerListener listener) throws BrokerException {
