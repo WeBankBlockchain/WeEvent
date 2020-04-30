@@ -2,7 +2,6 @@ package com.webank.weevent.core.task;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +18,7 @@ import com.webank.weevent.core.fisco.util.DataTypeUtils;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -41,6 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 @Slf4j
 @Getter
 @Setter
+@ToString
 public class Subscription {
     /**
      * Subscription ID
@@ -90,11 +91,13 @@ public class Subscription {
     /**
      * Event notify task.
      */
+    @ToString.Exclude
     private NotifyTask notifyTask;
 
     /**
      * optional, if offset != WeEvent.OFFSET_LAST then need a event loop to fetch history event
      */
+    @ToString.Exclude
     private HistoryEventLoop historyEventLoop;
 
     /**
@@ -112,17 +115,6 @@ public class Subscription {
      * first block in HistoryEventLoop dispatch
      */
     private Long historyBlock = 0L;
-
-    @Override
-    public String toString() {
-        return "Subscription{" +
-                "uuid='" + this.uuid + '\'' +
-                ", topic='" + Arrays.toString(this.topics) + '\'' +
-                ", groupId='" + this.groupId + '\'' +
-                ", offset='" + this.offset + '\'' +
-                ", tag='" + this.tag + '\'' +
-                '}';
-    }
 
     public Subscription(IBlockChain blockChain, String uuid, String[] topics, String groupId, String offset, String tag, IConsumer.ConsumerListener listener) throws BrokerException {
         if (StringUtils.isBlank(uuid)) {

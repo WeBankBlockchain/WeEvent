@@ -2,8 +2,8 @@ apply plugin: "io.spring.dependency-management"
 apply plugin: "signing"
 
 dependencies {
-    // json rpc
-    implementation("com.github.briandilley.jsonrpc4j:jsonrpc4j:${jsonrpc4jVersion}")
+    // jackson
+    implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
 
     // jms
     implementation("javax.jms:jms:${jmsVersion}")
