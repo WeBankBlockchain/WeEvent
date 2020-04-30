@@ -3,6 +3,7 @@ package com.webank.weevent.broker.protocol.mqtt.store;
 import io.netty.handler.codec.mqtt.MqttQoS;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * @author websterchen
@@ -11,6 +12,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@ToString
 public class SubscribeData {
     private String clientId;
     private MqttQoS mqttQoS;
@@ -32,15 +34,4 @@ public class SubscribeData {
     private SubscribeData() {
     }
 
-    @Override
-    public String toString() {
-        return "SubscribeData{" +
-                "clientId='" + clientId + '\'' +
-                ", mqttQoS=" + mqttQoS +
-                ", topic='" + topic + '\'' +
-                ", groupId='" + groupId + '\'' +
-                ", subscriptionId='" + subscriptionId + '\'' +
-                ", offset='" + offset + '\'' +
-                '}';
-    }
 }
