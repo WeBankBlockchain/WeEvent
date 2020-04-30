@@ -62,7 +62,7 @@ public class WeEvent {
 
     /**
      * event's custom header.
-     * null if not set. all data length in total must be less then 1k.
+     * all data length in total must be less then 1k.
      */
     private Map<String, String> extensions;
 
