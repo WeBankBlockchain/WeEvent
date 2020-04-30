@@ -86,6 +86,7 @@ public interface IEventTopic {
     /**
      * get block height
      *
+     * @param groupId group id
      * @return block height
      * @throws BrokerException BrokerException
      */

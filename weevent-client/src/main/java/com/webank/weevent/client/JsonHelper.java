@@ -127,7 +127,7 @@ public class JsonHelper {
         try {
             return OBJECT_MAPPER.readValue(json, typeReference);
         } catch (IOException e) {
-            log.error("parse extensions failed");
+            log.error("parse extensions failed", e);
             throw new BrokerException(ErrorCode.JSON_ENCODE_EXCEPTION);
         }
     }

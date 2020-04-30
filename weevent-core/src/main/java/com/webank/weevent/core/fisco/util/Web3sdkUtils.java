@@ -19,12 +19,14 @@ import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Getter
 @Setter
+@ToString
 class EchoAddress {
     private Long version;
     private String address;
@@ -34,11 +36,6 @@ class EchoAddress {
         this.version = version;
         this.address = address;
         this.isNew = isNew;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("version: %d\taddress: %s\tnew: %b", this.version, this.address, this.isNew);
     }
 }
 
