@@ -60,13 +60,11 @@ scan_code()
 install_cobra() {
 
    git clone https://github.com/WhaleShark-Team/cobra.git
-   echo -e "\033[32m 开始删除 \033[0m"
-   pwd
+   ls  cobra/rules/
    rm  -rf cobra/rules/*
    cp  project/rules/*.xml  cobra/rules/
-   echo -e "\033[32m 复制成功 \033[0m"
+   echo "复制后"
    ls  cobra/rules/
-   echo -e "\033[32m 删除结束 \033[0m"
    pip install -r cobra/requirements.txt
    cp  cobra/config.template cobra/config
   }
