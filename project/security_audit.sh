@@ -60,10 +60,8 @@ scan_code()
 install_cobra() {
 
    git clone https://github.com/WhaleShark-Team/cobra.git
-   ls  cobra/rules/
    rm  -rf cobra/rules/*
    cp  project/rules/*.xml  cobra/rules/
-   echo "复制后"
    ls  cobra/rules/
    pip install -r cobra/requirements.txt
    cp  cobra/config.template cobra/config
