@@ -58,9 +58,11 @@ scan_code()
 }
 
 install_cobra() {
+   pwd
+   ll
    git clone https://github.com/WhaleShark-Team/cobra.git
    echo -e "\033[32m 开始删除 \033[0m"
-   rm  -rf cobra/rules
+   rm  -rf cobra/rules/*
    cp  project/rules  cobra/
    cd  cobra/rules/
    ls
