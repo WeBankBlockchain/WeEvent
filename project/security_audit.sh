@@ -2,7 +2,7 @@
 
 set -e
 
-scan_code_script="project/cobra_local/cobra.py -f json -o /tmp/report.json -t "
+scan_code_script="cobra/cobra.py -f json -o /tmp/report.json -t "
 
 # add white list here example:ignore_files=(a b c d/a.propertieds e/*)
 ignore_files=(
@@ -58,9 +58,11 @@ scan_code()
 }
 
 install_cobra() {
-   #git clone https://github.com/WhaleShark-Team/cobra.git
-   pip install -r project/cobra_local/requirements.txt
-   #cp cobra/config.template cobra/config
+   git clone https://github.com/WhaleShark-Team/cobra.git
+   rm  -rf cobra/rules/*
+   cp  project/rules/*  cobra/rules/
+   pip install -r cobra/requirements.txt
+   cp  cobra/config.template cobra/config
   }
 
 install_cobra
