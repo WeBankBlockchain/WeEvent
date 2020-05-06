@@ -64,8 +64,8 @@ install_cobra() {
    pwd
    rm  -rf cobra/rules/*
    cp  project/rules/*.xml  cobra/rules/
-   cd  cobra/rules/
-   ls
+   echo -e "\033[32m 复制成功 \033[0m"
+   ls  cobra/rules/
    echo -e "\033[32m 删除结束 \033[0m"
    pip install -r cobra/requirements.txt
    cp  cobra/config.template cobra/config
