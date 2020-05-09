@@ -10,11 +10,10 @@
         <result column="user_id" property="userId" jdbcType="INTEGER"/>
         <result column="name" property="name" jdbcType="VARCHAR"/>
         <result column="broker_url" property="brokerUrl" jdbcType="VARCHAR"/>
-        <result column="webase_url" property="webaseUrl" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,create_date,last_update, user_id, name, broker_url, webase_url
+        id,create_date,last_update, user_id, name, broker_url
     </sql>
 
     <select id="getBrokers" resultMap="BaseResultMap">
