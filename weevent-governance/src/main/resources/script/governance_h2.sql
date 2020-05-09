@@ -26,7 +26,6 @@ create TABLE t_account (
 	delete_at BIGINT NOT NULL,
 	NAME VARCHAR (255),
 	user_id INTEGER CHECK (user_id >= 1),
-	webase_url VARCHAR (255),
 	PRIMARY KEY (id)
 );
  create TABLE t_permission (

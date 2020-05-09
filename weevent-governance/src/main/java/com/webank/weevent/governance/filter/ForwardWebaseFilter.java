@@ -38,20 +38,13 @@ public class ForwardWebaseFilter implements Filter {
         HttpServletResponse res = (HttpServletResponse) response;
         String idStr = request.getParameter("brokerId");
         String originUrl = req.getRequestURI();
-        // get tail of webase url
         String subStrUrl = originUrl.substring(originUrl.indexOf("/webase-node-mgr/") + "/webase-node-mgr".length());
 
         Integer id = Integer.parseInt(idStr);
         BrokerEntity brokerEntity = brokerService.getBroker(id);
-        String webaseUrl = brokerEntity.getWebaseUrl();
         String newUrl;
         String weEventUrl = mappingWeEventUrl(subStrUrl);
-        if (webaseUrl == null || webaseUrl.length() == 0) {
-            newUrl = brokerEntity.getBrokerUrl() + "/admin" + weEventUrl;
-        } else {
-            // get complete url of webase
-            newUrl = webaseUrl + subStrUrl;
-        }
+        newUrl = brokerEntity.getBrokerUrl() + "/admin" + weEventUrl;
         // get client according url
         CloseableHttpResponse closeResponse = commonService.getCloseResponse(req, newUrl);
         commonService.writeResponse(closeResponse, res);
