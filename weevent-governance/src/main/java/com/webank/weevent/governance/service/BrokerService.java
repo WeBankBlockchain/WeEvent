@@ -1,14 +1,5 @@
 package com.webank.weevent.governance.service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.ErrorCode;
@@ -21,13 +12,7 @@ import com.webank.weevent.governance.entity.RuleEngineEntity;
 import com.webank.weevent.governance.enums.IsCreatorEnum;
 import com.webank.weevent.governance.enums.IsDeleteEnum;
 import com.webank.weevent.governance.mapper.BrokerMapper;
-import com.webank.weevent.governance.repository.BrokerRepository;
-import com.webank.weevent.governance.repository.PermissionRepository;
-import com.webank.weevent.governance.repository.RuleDatabaseRepository;
-import com.webank.weevent.governance.repository.RuleEngineRepository;
-import com.webank.weevent.governance.repository.TopicHistoricalRepository;
-import com.webank.weevent.governance.repository.TopicRepository;
-
+import com.webank.weevent.governance.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,6 +24,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * BrokerService
@@ -52,6 +45,7 @@ public class BrokerService {
 
     @Autowired
     private BrokerRepository brokerRepository;
+
 
     @Autowired
     private BrokerMapper brokerMapper;
