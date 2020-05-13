@@ -1,18 +1,15 @@
 package com.webank.weevent.core.fisco.util;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import com.webank.weevent.core.fisco.constant.WeEventConstants;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.core.fisco.constant.WeEventConstants;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -59,6 +56,13 @@ public class ParamCheckUtils {
         }
     }
 
+    public static void validateBlockHeight(String blockHeight, Long currentBlock) throws BrokerException {
+        long block = Long.parseLong(blockHeight);
+        if (block <= 0 || block > currentBlock) {
+            throw new BrokerException(ErrorCode.INVALID_BLOCK_HEIGHT);
+        }
+    }
+
     public static void validateEventId(String topicName, String eventId, Long blockHeight) throws BrokerException {
         if (StringUtils.isBlank(eventId)) {
             throw new BrokerException(ErrorCode.EVENT_ID_IS_ILLEGAL);
@@ -97,18 +101,14 @@ public class ParamCheckUtils {
             if (event.getExtensions().toString().length() > WeEventConstants.EVENT_EXTENSIONS_MAX_LENGTH) {
                 throw new BrokerException(ErrorCode.EVENT_EXTENSIONS_EXCEEDS_MAX_LENGTH);
             }
+        } else {
+            throw new BrokerException(ErrorCode.EVENT_EXTENSIONS_IS_NUll);
         }
     }
 
     public static void validateGroupId(String groupId, List<String> groups) throws BrokerException {
         if (!groups.contains(groupId)) {
             throw new BrokerException(ErrorCode.WEB3SDK_UNKNOWN_GROUP);
-        }
-    }
-
-    public static void validateChannelName(String channelName, List<String> channelNames) throws BrokerException {
-        if (!channelNames.contains(channelName)) {
-            throw new BrokerException(ErrorCode.FABRICSDK_CHANNEL_NAME_INVALID);
         }
     }
 
@@ -119,18 +119,6 @@ public class ParamCheckUtils {
 
         if (eventContent.length() > WeEventConstants.EVENT_CONTENT_MAX_LENGTH) {
             throw new BrokerException(ErrorCode.EVENT_CONTENT_EXCEEDS_MAX_LENGTH);
-        }
-    }
-
-    // check format then try to connect
-    public static void validateUrl(String url) throws BrokerException {
-        try {
-            URL conn = new URL(url);
-            conn.openConnection().connect();
-        } catch (MalformedURLException e) {
-            throw new BrokerException(ErrorCode.URL_INVALID_FORMAT);
-        } catch (IOException e) {
-            throw new BrokerException(ErrorCode.URL_CONNECT_FAILED);
         }
     }
 

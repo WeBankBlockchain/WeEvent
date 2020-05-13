@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# install WeEvent service, support FISCO-BCOS 1.3 and 2.0
+# install WeEvent service, support FISCO-BCOS 2.x
 #
 ################################################################################
 
@@ -57,6 +57,7 @@ function set_global_param(){
         block_chain_node_path=$(realpath -m ${block_chain_node_path})
     fi
     gateway_port=$(properties_get "gateway.port")
+    zookeeper=$(properties_get "zookeeper.default")
     zookeeper_connect_string=$(properties_get "zookeeper.connect-string")
 
     broker_port=$(properties_get "broker.port")
@@ -121,6 +122,9 @@ function check_param(){
     if [[ ${processor_enable} = "true" ]];then
         check_port ${processor_port}
     fi
+    if [[ ${zookeeper} = "true" ]];then
+        check_port $(echo ${zookeeper_connect_string} | cut -d ":" -f2)
+    fi
     if [[ -d ${block_chain_node_path} ]]; then
         check_telnet ${block_chain_channel}
         echo "param ok"
@@ -141,6 +145,14 @@ function check_result(){
 }
 
 function install_module(){
+    cd ${current_path}/modules/zookeeper
+    if [[ ${zookeeper} = "true" ]];then
+        yellow_echo "install module zookeeper"
+        ./install-zookeeper.sh --out_path ${out_path}/zookeeper --zookeeper_port $(echo ${zookeeper_connect_string} | cut -d ":" -f2)
+        zookeeper_connect_string=$(echo ${zookeeper_connect_string} | sed 's/.*:/127.0.0.1:/')
+        check_result "install zookeeper"
+    fi
+
     yellow_echo "install module gateway"
     cd ${current_path}/modules/gateway
     ./install-gateway.sh --out_path ${out_path}/gateway --gateway_port ${gateway_port} --zookeeper_connect_string ${zookeeper_connect_string}

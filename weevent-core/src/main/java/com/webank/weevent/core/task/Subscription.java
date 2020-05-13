@@ -2,7 +2,6 @@ package com.webank.weevent.core.task;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -10,15 +9,16 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 
-import com.webank.weevent.core.IConsumer;
-import com.webank.weevent.core.fisco.constant.WeEventConstants;
-import com.webank.weevent.core.fisco.util.DataTypeUtils;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.core.IConsumer;
+import com.webank.weevent.core.fisco.constant.WeEventConstants;
+import com.webank.weevent.core.fisco.util.DataTypeUtils;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -41,6 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 @Slf4j
 @Getter
 @Setter
+@ToString
 public class Subscription {
     /**
      * Subscription ID
@@ -58,7 +59,7 @@ public class Subscription {
     private String groupId;
 
     /**
-     * event offset.
+     * event offset, it's an eventId or block height.
      */
     private String offset;
 
@@ -90,11 +91,13 @@ public class Subscription {
     /**
      * Event notify task.
      */
+    @ToString.Exclude
     private NotifyTask notifyTask;
 
     /**
      * optional, if offset != WeEvent.OFFSET_LAST then need a event loop to fetch history event
      */
+    @ToString.Exclude
     private HistoryEventLoop historyEventLoop;
 
     /**
@@ -112,17 +115,6 @@ public class Subscription {
      * first block in HistoryEventLoop dispatch
      */
     private Long historyBlock = 0L;
-
-    @Override
-    public String toString() {
-        return "Subscription{" +
-                "uuid='" + this.uuid + '\'' +
-                ", topic='" + Arrays.toString(this.topics) + '\'' +
-                ", groupId='" + this.groupId + '\'' +
-                ", offset='" + this.offset + '\'' +
-                ", tag='" + this.tag + '\'' +
-                '}';
-    }
 
     public Subscription(IBlockChain blockChain, String uuid, String[] topics, String groupId, String offset, String tag, IConsumer.ConsumerListener listener) throws BrokerException {
         if (StringUtils.isBlank(uuid)) {
@@ -143,8 +135,10 @@ public class Subscription {
         if (!WeEvent.OFFSET_LAST.equals(this.offset)) {
             log.info("need history event loop, {}", this);
 
-            Long lastBlock;
-            if (WeEvent.OFFSET_FIRST.equals(this.offset)) {
+            long lastBlock;
+            if (StringUtils.isNumeric(offset)) {
+                lastBlock = Long.parseLong(offset);
+            } else if (WeEvent.OFFSET_FIRST.equals(this.offset)) {
                 lastBlock = 0L;
             } else {
                 lastBlock = DataTypeUtils.decodeBlockNumber(offset);
@@ -230,11 +224,10 @@ public class Subscription {
     // can not doStart again after doStop
     public synchronized void doStop() {
         this.notifyTask.doExit();
+        stopHistory();
 
         // wait task exit really
         StoppableTask.idle(this.idleTime);
-
-        stopHistory();
 
         // call onClose
         this.notifyTask.getConsumerListener().onClose(this.uuid);
@@ -288,8 +281,7 @@ public class Subscription {
                     if (StringUtils.isBlank(tag)) {
                         to.add(event);
                     } else {    // subscription in tag plus
-                        if (event.getExtensions() != null
-                                && tag.equals(event.getExtensions().get(WeEvent.WeEvent_TAG))) {
+                        if (tag.equals(event.getExtensions().get(WeEvent.WeEvent_TAG))) {
                             to.add(event);
                         }
                     }
@@ -310,7 +302,7 @@ public class Subscription {
         if (StringUtils.isBlank(pattern)) {
             return false;
         }
-        return pattern.contains("" + WeEvent.WILD_CARD_ALL_LAYER) || pattern.contains("" + WeEvent.WILD_CARD_ONE_LAYER);
+        return pattern.contains(WeEvent.WILD_CARD_ALL_LAYER) || pattern.contains(WeEvent.WILD_CARD_ONE_LAYER);
     }
 
     /*

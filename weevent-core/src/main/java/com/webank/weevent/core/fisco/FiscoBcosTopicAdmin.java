@@ -2,6 +2,11 @@ package com.webank.weevent.core.fisco;
 
 import java.util.List;
 
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
+import com.webank.weevent.client.TopicInfo;
+import com.webank.weevent.client.TopicPage;
+import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.IEventTopic;
 import com.webank.weevent.core.dto.ContractContext;
 import com.webank.weevent.core.dto.GroupGeneral;
@@ -12,11 +17,6 @@ import com.webank.weevent.core.dto.TbNode;
 import com.webank.weevent.core.dto.TbTransHash;
 import com.webank.weevent.core.fisco.util.ParamCheckUtils;
 import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegate;
-import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.client.ErrorCode;
-import com.webank.weevent.client.TopicInfo;
-import com.webank.weevent.client.TopicPage;
-import com.webank.weevent.client.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -136,6 +136,13 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
     @Override
     public List<String> listGroupId() throws BrokerException {
         return fiscoBcosDelegate.listGroupId();
+    }
+
+    @Override
+    public Long getBlockHeight(String groupIdStr) throws BrokerException {
+        String groupId = selectGroupId(groupIdStr);
+        this.validateGroupId(groupId);
+        return fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId));
     }
 
     public void validateGroupId(String groupId) throws BrokerException {

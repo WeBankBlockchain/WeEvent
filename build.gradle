@@ -31,8 +31,7 @@ ext {
 
     // org.fisco-bcos.web3sdk
     web3sdkVersion = [
-            fiscoV1: "1.2.5",
-            fiscoV2: "2.2.3"
+            fisco: "2.2.3"
     ]
     // fabric
     fabricVersion = "1.4.4"
@@ -40,7 +39,7 @@ ext {
     protobufVersion = "3.6.1"
 
     // lombok
-    lombokVersion = "1.16.14"
+    lombokVersion = "1.18.12"
     // junit
     junitVersion = "4.12"
     // netty-all
@@ -67,9 +66,13 @@ ext {
     WebSocketVersion = "1.4.0"
     // JWTVersion
     JWTVersion = "3.8.0"
-
+    // MQTT paho client
+    PahoClientVersion = "1.2.2"
     // jmeter
     jmeterVersion = "5.0"
+    // jackson
+    jacksonVersion = "2.9.10.1"
+
 }
 
 buildscript {
@@ -118,6 +121,7 @@ allprojects {
         //maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         mavenLocal()
         mavenCentral()
+        jcenter()
     }
 
     // encoding type
@@ -180,11 +184,37 @@ allprojects {
     }
 }
 
-jacocoTestReport {
-    reports {
-        xml.enabled true
-        html.enabled false
+subprojects {
+    dependencies {
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.2.0'
+        testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.2.0'
     }
 }
 
-check.dependsOn jacocoTestReport
+test {
+    useJUnitPlatform()
+}
+
+jacoco {
+    toolVersion = "0.8.5"
+    reportsDir = file("$buildDir/customJacocoReportDir")
+}
+
+
+task codeCoverageReport(type: JacocoReport) {
+    executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
+
+    subprojects.each {
+        sourceSets((SourceSet) it.sourceSets["main"])
+    }
+
+    reports {
+        xml.enabled true
+        html.enabled true
+        csv.enabled true
+    }
+}
+
+codeCoverageReport.dependsOn {
+    subprojects*.test
+}

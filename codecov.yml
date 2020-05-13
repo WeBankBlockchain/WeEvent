@@ -1,11 +1,8 @@
-codecov:
-  token: $CODECOV_TOKEN
-
 coverage:
   status:
     project:
       default:
-        target: 60%
+        target: 30%
         threshold: null
         if_not_found: success
     patch:
@@ -16,4 +13,15 @@ coverage:
       default:
         enabled: no
         if_not_found: success
+codecov:
+  ignore:
+    - "weevent-jmeter/**/*"  # ignore folders and all its contents
+
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
+  require_changes: false  # if true: only post the comment if coverage changes
+  require_base: no        # [yes :: must have a base report to post]
+  require_head: yes       # [yes :: must have a head report to post]
+  branches: null
 

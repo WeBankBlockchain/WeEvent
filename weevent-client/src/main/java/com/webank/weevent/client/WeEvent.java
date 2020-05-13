@@ -1,6 +1,7 @@
 package com.webank.weevent.client;
 
 
+import java.util.HashMap;
 import java.util.Map;
 
 import lombok.Getter;
@@ -61,7 +62,7 @@ public class WeEvent {
 
     /**
      * event's custom header.
-     * null if not set. all data length in total must be less then 1k.
+     * all data length in total must be less then 1k.
      */
     private Map<String, String> extensions;
 
@@ -86,6 +87,7 @@ public class WeEvent {
     public WeEvent(String topic, byte[] content) {
         this.topic = topic;
         this.content = content;
+        this.extensions = new HashMap<>();
     }
 
     /**

@@ -50,33 +50,18 @@ public class FiscoConfig {
 
     @Value("${web3sdk.encrypt-type:ECDSA_TYPE}")
     private String web3sdkEncryptType;
-    
-    @Value("${proxy.address:}")
-    private String proxyAddress;
 
-    @Value("${v1.ca-crt-path:ca.crt}")
-    private String v1CaCrtPath;
+    @Value("${ca-crt-path:ca.crt}")
+    private String CaCrtPath;
 
-    @Value("${v1.client-crt-password:123456}")
-    private String v1ClientCrtPassword;
+    @Value("${sdk-crt-path:sdk.crt}")
+    private String SdkCrtPath;
 
-    @Value("${v1.client-key-store-path:client.keystore}")
-    private String v1ClientKeyStorePath;
+    @Value("${sdk-key-path:sdk.key}")
+    private String SdkKeyPath;
 
-    @Value("${v1.key-store-password:123456}")
-    private String v1KeyStorePassword;
-
-    @Value("${v2.ca-crt-path:ca.crt}")
-    private String v2CaCrtPath;
-
-    @Value("${v2.node-crt-path:node.crt}")
-    private String v2NodeCrtPath;
-
-    @Value("${v2.node-key-path:node.key}")
-    private String v2NodeKeyPath;
-
-    @Value("${v2.pem-key-path:privateKey.pem}")
-    private String v2PemKeyPath;
+    @Value("${pem-key-path:privateKey.pem}")
+    private String PemKeyPath;
 
     @Value("${consumer.idle-time:1000}")
     private Integer consumerIdleTime;

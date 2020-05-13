@@ -2,8 +2,6 @@ package com.webank.weevent.broker;
 
 import java.util.concurrent.TimeUnit;
 
-import com.webank.weevent.client.WeEvent;
-
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -11,6 +9,7 @@ import org.junit.rules.TestName;
 import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
@@ -21,12 +20,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * @since 2019/02/14
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = BrokerApplication.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(classes = BrokerApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class JUnitTestBase {
-    protected String groupId = WeEvent.DEFAULT_GROUP_ID;
-    protected String channelName = "mychannel";
-    protected String topicName = "com.weevent.test";
-    protected long transactionTimeout = 30000;
+    @LocalServerPort
+    public String listenPort;
 
     @Rule
     public TestName testName = new TestName();

@@ -10,8 +10,8 @@ import org.apache.commons.lang.StringUtils;
  */
 @Slf4j
 public class AuthService {
-    private String authAccount;
-    private String authPassword;
+    private final String authAccount;
+    private final String authPassword;
 
     public AuthService(String authAccount, String authPassword) {
         this.authAccount = authAccount;
