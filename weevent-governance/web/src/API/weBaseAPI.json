@@ -1,34 +1,34 @@
 {
   "getAll": {
     "methods": "get",
-    "url": "webase-node-mgr/group/all"
+    "url": "weevent-broker-mgr/group/all"
   },
   "nodeList": {
     "methods": "get",
-    "url": "webase-node-mgr/node/nodeList"
+    "url": "weevent-broker-mgr/node/nodeList"
   },
   "general": {
     "methods": "get",
-    "url": "webase-node-mgr/group/general"
+    "url": "weevent-broker-mgr/group/general"
   },
   "transDaily": {
     "methods": "get",
-    "url": "webase-node-mgr/group/transDaily"
+    "url": "weevent-broker-mgr/group/transDaily"
   },
   "transList": {
     "methods": "get",
-    "url": "webase-node-mgr/transaction/transList"
+    "url": "weevent-broker-mgr/transaction/transList"
   },
   "blockList": {
     "methods": "get",
-    "url": "webase-node-mgr/block/blockList"
+    "url": "weevent-broker-mgr/block/blockList"
   },
   "blockByNumber": {
     "methods": "get",
-    "url": "webase-node-mgr/block/blockByNumber"
+    "url": "weevent-broker-mgr/block/blockByNumber"
   },
   "getEvent": {
     "methods": "get",
-    "url": "webase-node-mgr/block/transactionReceipt"
+    "url": "weevent-broker-mgr/block/transactionReceipt"
   }
 }

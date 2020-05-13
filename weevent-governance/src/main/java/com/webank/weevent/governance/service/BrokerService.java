@@ -110,7 +110,7 @@ public class BrokerService {
     @Transactional(rollbackFor = Throwable.class)
     public GovernanceResult addBroker(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
-        //check both broker and webase serverUrl
+        //check  broker  serverUrl
         ErrorCode errorCode = checkServerByBrokerEntity(brokerEntity, request);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             throw new GovernanceException(errorCode);
@@ -191,7 +191,7 @@ public class BrokerService {
     @Transactional(rollbackFor = Throwable.class)
     public GovernanceResult updateBroker(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
-        //check both broker and webase serverUrl
+        //check  broker  serverUrl
         ErrorCode errorCode = checkServerByBrokerEntity(brokerEntity, request);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             throw new GovernanceException(errorCode);
@@ -236,22 +236,14 @@ public class BrokerService {
         if (StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
             return ErrorCode.ILLEGAL_INPUT;
         }
-        String version = this.getVersion(request, brokerEntity.getBrokerUrl());
-        if (version != null && !version.startsWith(weEventVersion) && StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
-            return ErrorCode.WEBASE_REQUIRED;
-        }
         //checkServerUrl
         return check(brokerEntity, request);
     }
 
     public ErrorCode checkServerByUrl(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
-        //check broker or webase serverUrl
-        if (StringUtils.isBlank(brokerEntity.getBrokerUrl()) && StringUtils.isBlank(brokerEntity.getWebaseUrl())) {
+        //check broker  serverUrl
+        if (StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
             return ErrorCode.ILLEGAL_INPUT;
-        }
-        String version = this.getVersion(request, brokerEntity.getBrokerUrl());
-        if (version != null && !version.startsWith(weEventVersion) && StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
-            return ErrorCode.WEBASE_REQUIRED;
         }
         return check(brokerEntity, request);
     }
@@ -267,17 +259,6 @@ public class BrokerService {
                 return ErrorCode.BROKER_CONNECT_ERROR;
             }
         }
-        if (!StringUtils.isBlank(brokerEntity.getWebaseUrl())) {
-            String WebaseServerUrl = brokerEntity.getWebaseUrl();
-            log.info("check WeBase server, url:{}", WebaseServerUrl);
-            try {
-                checkUrl(WebaseServerUrl, ConstantProperties.WEBASE_NODE_URL, request);
-            } catch (GovernanceException e) {
-                log.error("check WeBase server failed. e", e);
-                return ErrorCode.WEBASE_CONNECT_ERROR;
-            }
-        }
-
         return ErrorCode.SUCCESS;
     }
 

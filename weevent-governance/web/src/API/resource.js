@@ -1,5 +1,6 @@
 import BaseModel from './BaseModel'
 import api from './api.json'
+// change the servers of weBase tobe weevent-broker from 1.3 version
 import weBaseAPI from './weBaseAPI'
 
 class ResoruceService extends BaseModel {
