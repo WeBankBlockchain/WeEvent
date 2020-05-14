@@ -7,21 +7,21 @@
             <p class='title_name'>{{node}}</p>
             <p class='number'>{{$t('overview.nodeNum')}}</p>
           </div>
-          <img src="../../assets/image/overview/banner-icon1.svg" alt="">
+          <img src="../assets/image/overview/banner-icon1.svg" alt="">
         </div>
         <div class="num_part">
           <div @click='toBlock'>
             <p class='title_name'>{{block}}</p>
             <p class='number'>{{$t('overview.blockNum')}}</p>
           </div>
-          <img src="../../assets/image/overview/banner-icon2.svg" alt="">
+          <img src="../assets/image/overview/banner-icon2.svg" alt="">
         </div>
         <div class="num_part">
           <div  @click='toBlock'>
             <p class='title_name'>{{transaction}}</p>
             <p class='number'>{{$t('overview.transactionNum')}}</p>
           </div>
-          <img src="../../assets/image/overview/banner-icon3.svg" alt="">
+          <img src="../assets/image/overview/banner-icon3.svg" alt="">
         </div>
       </div>
     </div>
@@ -29,7 +29,7 @@
   </div>
 </template>
 <script>
-import API from '../../API/resource.js'
+import API from '../API/resource.js'
 import chart from './chart.vue'
 export default {
   components: {

@@ -18,8 +18,8 @@
 </template>
 <script>
 import Highcharts from 'highcharts/highstock'
-import { getLastWeek, getTimeList } from '../../utils/formatTime'
-import API from '../../API/resource.js'
+import { getLastWeek, getTimeList } from '../utils/formatTime'
+import API from '../API/resource.js'
 require('highcharts/modules/no-data-to-display.js')(Highcharts)
 export default{
   data () {

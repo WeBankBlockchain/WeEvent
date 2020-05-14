@@ -67,7 +67,7 @@
   </div>
 </template>
 <script>
-import API from '../../API/resource.js'
+import API from '../API/resource.js'
 export default {
   data () {
     return {

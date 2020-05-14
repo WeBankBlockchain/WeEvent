@@ -1,7 +1,7 @@
 import BaseModel from './BaseModel'
 import api from './api.json'
 // change the servers of weBase tobe weevent-broker from 1.3 version
-import weBaseAPI from './weBaseAPI'
+import blockChainAPI from './blockChainAPI'
 
 class ResoruceService extends BaseModel {
   login (data) {
@@ -44,28 +44,28 @@ class ResoruceService extends BaseModel {
     return this.request(api.deleteServer, data)
   }
   getAll (data) {
-    return this.request(weBaseAPI.getAll, data)
+    return this.request(blockChainAPI.getAll, data)
   }
   nodeList (data) {
-    return this.request(weBaseAPI.nodeList, data)
+    return this.request(blockChainAPI.nodeList, data)
   }
   general (data) {
-    return this.request(weBaseAPI.general, data)
+    return this.request(blockChainAPI.general, data)
   }
   transDaily (data) {
-    return this.request(weBaseAPI.transDaily, data)
+    return this.request(blockChainAPI.transDaily, data)
   }
   transList (data) {
-    return this.request(weBaseAPI.transList, data)
+    return this.request(blockChainAPI.transList, data)
   }
   blockList (data) {
-    return this.request(weBaseAPI.blockList, data)
+    return this.request(blockChainAPI.blockList, data)
   }
   blockByNumber (data) {
-    return this.request(weBaseAPI.blockByNumber, data)
+    return this.request(blockChainAPI.blockByNumber, data)
   }
   getEvent (data) {
-    return this.request(weBaseAPI.getEvent, data)
+    return this.request(blockChainAPI.getEvent, data)
   }
   checkExsit (data) {
     return this.request(api.checkExsit, data)
