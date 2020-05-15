@@ -44,6 +44,7 @@ dependencies {
     // depend project
     implementation(project(":weevent-client"))
     implementation(project(":weevent-core"))
+    implementation(project(":weevent-jms"))
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     // JMS sample

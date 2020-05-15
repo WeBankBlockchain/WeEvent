@@ -1,4 +1,4 @@
-package com.webank.weevent.client.jms;
+package com.webank.weevent.jms;
 
 
 import javax.jms.JMSException;
@@ -59,49 +59,50 @@ public class WeEventTopicSubscriber implements TopicSubscriber, CommandDispatche
     // TopicSubscriber override methods
 
     @Override
-    public Topic getTopic() throws JMSException {
+    public Topic getTopic() {
         return this.topic;
     }
 
     @Override
-    public boolean getNoLocal() throws JMSException {
+    public boolean getNoLocal() {
         return false;
     }
 
     // MessageConsumer override methods
 
     @Override
-    public String getMessageSelector() throws JMSException {
+    public String getMessageSelector() {
         return null;
     }
 
     @Override
-    public MessageListener getMessageListener() throws JMSException {
+    public MessageListener getMessageListener() {
         return this.messageListener;
     }
 
     @Override
-    public void setMessageListener(MessageListener messageListener) throws JMSException {
+    public void setMessageListener(MessageListener messageListener) {
         this.messageListener = messageListener;
     }
 
     @Override
-    public Message receive() throws JMSException {
+    public Message receive() {
         return null;
     }
 
     @Override
-    public Message receive(long l) throws JMSException {
+    public Message receive(long l) {
         return null;
     }
 
     @Override
-    public Message receiveNoWait() throws JMSException {
+    public Message receiveNoWait() {
         return null;
     }
 
     @Override
-    public void close() throws JMSException {
+    public void close() {
 
     }
+
 }

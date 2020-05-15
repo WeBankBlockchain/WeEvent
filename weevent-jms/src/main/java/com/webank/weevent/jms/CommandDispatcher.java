@@ -1,4 +1,4 @@
-package com.webank.weevent.client.jms;
+package com.webank.weevent.jms;
 
 
 /**
@@ -7,6 +7,7 @@ package com.webank.weevent.client.jms;
  * @author matthewliu
  * @since 2019/04/11
  */
+
 public interface CommandDispatcher {
     void dispatch(WeEventStompCommand command);
 }

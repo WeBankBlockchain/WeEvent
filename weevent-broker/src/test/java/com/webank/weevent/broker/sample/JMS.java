@@ -12,9 +12,9 @@ import javax.jms.TopicPublisher;
 import javax.jms.TopicSession;
 import javax.jms.TopicSubscriber;
 
-import com.webank.weevent.client.WeEvent;
-import com.webank.weevent.client.jms.WeEventConnectionFactory;
-import com.webank.weevent.client.jms.WeEventTopic;
+import com.webank.weevent.jms.WeEventConnectionFactory;
+
+import lombok.extern.slf4j.Slf4j;
 
 
 /**
@@ -23,12 +23,13 @@ import com.webank.weevent.client.jms.WeEventTopic;
  * @author matthewliu
  * @since 2019/04/08
  */
+@Slf4j
 public class JMS {
     private final static String topicName = "com.weevent.test";
 
     private static void publish() throws JMSException {
         // get topic connection
-        TopicConnectionFactory connectionFactory = new WeEventConnectionFactory(WeEventConnectionFactory.defaultBrokerUrl);
+        TopicConnectionFactory connectionFactory = new WeEventConnectionFactory();
         TopicConnection connection = connectionFactory.createTopicConnection();
 
         // start connection
@@ -52,7 +53,7 @@ public class JMS {
 
     private static void subscribe() throws JMSException {
         // get topic connection
-        TopicConnectionFactory connectionFactory = new WeEventConnectionFactory(WeEventConnectionFactory.defaultBrokerUrl);
+        TopicConnectionFactory connectionFactory = new WeEventConnectionFactory();
         TopicConnection connection = connectionFactory.createTopicConnection();
 
         // start connection
@@ -62,9 +63,6 @@ public class JMS {
 
         // create topic
         Topic topic = session.createTopic(topicName);
-        // optional, default is OFFSET_LAST
-        ((WeEventTopic) topic).setOffset(WeEvent.OFFSET_LAST);
-        ((WeEventTopic) topic).setGroupId(WeEvent.DEFAULT_GROUP_ID);//if not set default 1
 
         // create subscriber
         TopicSubscriber subscriber = session.createSubscriber(topic);

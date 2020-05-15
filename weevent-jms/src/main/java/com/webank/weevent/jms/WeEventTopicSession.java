@@ -1,4 +1,4 @@
-package com.webank.weevent.client.jms;
+package com.webank.weevent.jms;
 
 
 import java.io.Serializable;
@@ -24,9 +24,12 @@ import javax.jms.TopicPublisher;
 import javax.jms.TopicSession;
 import javax.jms.TopicSubscriber;
 
+import com.webank.weevent.client.ErrorCode;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * WeEvent JMS TopicSession.
@@ -40,7 +43,8 @@ import lombok.extern.slf4j.Slf4j;
 public class WeEventTopicSession implements TopicSession {
     private WeEventTopicConnection topicConnection;
 
-    public WeEventTopicSession(WeEventTopicConnection connection, String uniqueID) {
+
+    public WeEventTopicSession(WeEventTopicConnection connection) {
         this.topicConnection = connection;
         connection.addSession(this);
     }
@@ -61,6 +65,7 @@ public class WeEventTopicSession implements TopicSession {
 
     @Override
     public Topic createTopic(String topicName) throws JMSException {
+        this.topicConnection.createTopic(topicName);
         return new WeEventTopic(topicName);
     }
 
@@ -71,7 +76,6 @@ public class WeEventTopicSession implements TopicSession {
             this.topicConnection.createSubscriber(subscriber);
             return subscriber;
         }
-
         throw new JMSException(WeEventConnectionFactory.NotSupportTips);
     }
 
@@ -92,6 +96,9 @@ public class WeEventTopicSession implements TopicSession {
 
     @Override
     public TopicPublisher createPublisher(Topic topic) throws JMSException {
+        if (StringUtils.isBlank(topic.getTopicName())) {
+            throw WeEventConnectionFactory.error2JMSException(ErrorCode.TOPIC_IS_BLANK);
+        }
         if (topic instanceof WeEventTopic) {
             return new WeEventTopicPublisher(this, (WeEventTopic) topic);
         }
@@ -112,7 +119,7 @@ public class WeEventTopicSession implements TopicSession {
     // Session override methods
 
     @Override
-    public BytesMessage createBytesMessage() throws JMSException {
+    public BytesMessage createBytesMessage() {
         return new WeEventBytesMessage();
     }
 
@@ -152,12 +159,12 @@ public class WeEventTopicSession implements TopicSession {
     }
 
     @Override
-    public boolean getTransacted() throws JMSException {
+    public boolean getTransacted() {
         return false;
     }
 
     @Override
-    public int getAcknowledgeMode() throws JMSException {
+    public int getAcknowledgeMode() {
         return Session.AUTO_ACKNOWLEDGE;
     }
 

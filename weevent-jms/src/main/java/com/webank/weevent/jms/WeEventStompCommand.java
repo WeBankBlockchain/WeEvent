@@ -1,4 +1,4 @@
-package com.webank.weevent.client.jms;
+package com.webank.weevent.jms;
 
 
 import java.nio.charset.StandardCharsets;
@@ -109,7 +109,7 @@ public class WeEventStompCommand {
     }
 
     // payload is WeEvent
-    public String encodeSend(Long id, WeEventTopic topic, WeEvent weEvent) throws JMSException {
+    public String encodeSend(Long id, WeEventTopic topic, WeEvent weEvent) {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SEND);
         accessor.setDestination(topic.getTopicName());
         accessor.setContentType(new MimeType("text", "plain", StandardCharsets.UTF_8));
