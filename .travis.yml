@@ -18,7 +18,7 @@ matrix:
 # modify your email to recieve the result
 notifications:
   email:
-    - 358489360@qq.com
+    - weevent@webank.com
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
