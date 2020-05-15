@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cobra document="https://github.com/WhaleShark-Team/cobra">
+    <name value="硬编码内部地址"/>
+    <language value="*"/>
+    <match mode="regex-only-match"><![CDATA[((\.webank|\.weoa)\.com)]]></match>
+    <repair block="in-current-line"><![CDATA[(www.webank.com|www.weoa.com|maven)]]></repair>
+    <level value="3"/>
+    <test>
+        <case assert="true"><![CDATA[http://www.webank.com]]></case>
+        <case assert="false"><![CDATA[http://www.google.com]]></case>
+    </test>
+    <solution>
+        ## 安全风险
+        泄漏敏感信息
+        暴露内网信息或接口地址。
+
+        ## 修复方案
+        删除
+    </solution>
+    <status value="on"/>
+    <author name="thiknzheng" email="thiknzheng@webank.com"/>
+</cobra>
