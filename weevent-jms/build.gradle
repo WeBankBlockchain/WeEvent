@@ -4,8 +4,6 @@ apply plugin: "signing"
 dependencies {
     // jms
     implementation("javax.jms:jms:${jmsVersion}")
-    implementation("org.springframework:spring-messaging:${spring5Version}")
-    implementation("org.springframework.data:spring-data-commons:${springDataCommonsVersion}")
 
     // depend project
     implementation(project(":weevent-client"))

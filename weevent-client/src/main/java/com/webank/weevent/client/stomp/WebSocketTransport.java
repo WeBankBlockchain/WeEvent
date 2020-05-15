@@ -61,7 +61,7 @@ public class WebSocketTransport extends WebSocketClient {
     private Map<String, Long> sequence2Id = new ConcurrentHashMap<>();
 
     //(subscription <-> <WeEvent topic, IWeEventClient.EventListener>)
-    private Map<String, Pair<WeEventTopic, IWeEventClient.EventListener>> subscription2EventCache = new ConcurrentHashMap<>();
+    private Map<String, Pair<TopicContent, IWeEventClient.EventListener>> subscription2EventCache = new ConcurrentHashMap<>();
 
     private Pair<String, String> account;
 
@@ -192,7 +192,7 @@ public class WebSocketTransport extends WebSocketClient {
     }
 
     // return eventId
-    public String stompSend(WeEventTopic topic, WeEvent event) throws BrokerException {
+    public String stompSend(TopicContent topic, WeEvent event) throws BrokerException {
         // header id equal asyncSeq
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         Long asyncSeq = (this.sequence.incrementAndGet());
@@ -208,7 +208,7 @@ public class WebSocketTransport extends WebSocketClient {
     }
 
     // return subscriptionId
-    public String stompSubscribe(WeEventTopic topic, IWeEventClient.EventListener listener) throws BrokerException {
+    public String stompSubscribe(TopicContent topic, IWeEventClient.EventListener listener) throws BrokerException {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         Long asyncSeq = this.sequence.incrementAndGet();
         String req = stompCommand.encodeSubscribe(topic, asyncSeq);
@@ -357,7 +357,7 @@ public class WebSocketTransport extends WebSocketClient {
                 Thread.currentThread().interrupt();
             }
 
-            for (Map.Entry<String, Pair<WeEventTopic, IWeEventClient.EventListener>> subscription : this.webSocketTransport.subscription2EventCache.entrySet()) {
+            for (Map.Entry<String, Pair<TopicContent, IWeEventClient.EventListener>> subscription : this.webSocketTransport.subscription2EventCache.entrySet()) {
                 try {
                     log.info("subscription cache:{}", subscription.toString());
                     this.webSocketTransport.stompSubscribe(subscription.getValue().getFirst(), subscription.getValue().getSecond());

@@ -1,8 +1,6 @@
 package com.webank.weevent.jms;
 
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.UUID;
 
 import javax.jms.Connection;
@@ -34,12 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 public class WeEventConnectionFactory implements ConnectionFactory, QueueConnectionFactory, TopicConnectionFactory {
     public final static String NotSupportTips = "not support, only support pub/sub model in bytes message, no ack and transaction";
 
-    public final static String defaultBrokerUrl = "ws://localhost:7000/weevent-broker/stomp";
-
-    // JMS provider
-    private URI brokerUri;
-
-    private String brokerHttpUrl;
+    private String brokerUrl;
 
     private String groupId;
 
@@ -51,7 +44,7 @@ public class WeEventConnectionFactory implements ConnectionFactory, QueueConnect
     private String clientID;
 
     // stomp timeout
-    private int timeout;
+    private int timeout = 10;
 
     public static JMSException error2JMSException(ErrorCode errorCode) {
         return new JMSException(errorCode.getCodeDesc(), String.valueOf(errorCode.getCode()));
@@ -65,71 +58,40 @@ public class WeEventConnectionFactory implements ConnectionFactory, QueueConnect
         return UUID.randomUUID().toString();
     }
 
-    public WeEventConnectionFactory() throws JMSException {
-        this.setBrokerUri(createUri(defaultBrokerUrl));
+    public WeEventConnectionFactory(String brokerUrl) {
+        this.brokerUrl = brokerUrl;
         this.groupId = WeEvent.DEFAULT_GROUP_ID;
-        this.brokerHttpUrl = getHttpUrl(defaultBrokerUrl);
     }
 
-    public WeEventConnectionFactory(String brokerUrl, String groupId) throws JMSException {
-        this.setBrokerUri(createUri(brokerUrl));
+    public WeEventConnectionFactory(String brokerUrl, String groupId) {
+        this.brokerUrl = brokerUrl;
         this.groupId = groupId;
-        this.brokerHttpUrl = getHttpUrl(brokerUrl);
     }
 
-    public WeEventConnectionFactory(String userName, String password, String groupId) throws JMSException {
-        this.setUserName(userName);
-        this.setPassword(password);
-        this.groupId = groupId;
-        this.setBrokerUri(createUri(defaultBrokerUrl));
-        this.brokerHttpUrl = getHttpUrl(defaultBrokerUrl);
-    }
-
-    public WeEventConnectionFactory(String userName, String password, String brokerUrl, String groupId) throws JMSException {
-        this.setUserName(userName);
-        this.setPassword(password);
-        this.groupId = groupId;
-        this.setBrokerUri(createUri(brokerUrl));
-        this.brokerHttpUrl = getHttpUrl(brokerUrl);
-    }
-
-    private void setUserName(String userName) {
+    public WeEventConnectionFactory(String brokerUrl, String userName, String password) {
+        this.brokerUrl = brokerUrl;
+        this.groupId = WeEvent.DEFAULT_GROUP_ID;
         this.userName = userName;
-    }
-
-    private void setPassword(String password) {
         this.password = password;
     }
+
+    public WeEventConnectionFactory(String brokerUrl, String groupId, String userName, String password) {
+        this.brokerUrl = brokerUrl;
+        this.groupId = groupId;
+        this.userName = userName;
+        this.password = password;
+    }
+
 
     private void setTimeout(int timeout) {
         this.timeout = timeout;
     }
 
-    private void setBrokerUri(URI uri) {
-        this.brokerUri = uri;
-        this.timeout = 10;
-    }
-
-    private URI createUri(String url) throws JMSException {
-        try {
-            return new URI(url);
-        } catch (URISyntaxException e) {
-            throw new JMSException("invalid url format, eg: " + defaultBrokerUrl);
-        }
-    }
-
-    public void setClientID(String clientID) {
-        this.clientID = clientID;
-    }
-
     public WeEventTopicConnection createWeEventTopicConnection(String userName, String password) throws JMSException {
-        if (this.brokerUri == null) {
-            throw new JMSException("unknown broker url");
-        }
 
         IWeEventClient client;
         try {
-            client = IWeEventClient.builder().brokerUrl(this.brokerHttpUrl).groupId(this.groupId).userName(userName).password(password).build();
+            client = IWeEventClient.builder().brokerUrl(this.brokerUrl).groupId(this.groupId).userName(this.userName).password(this.password).timeout(this.timeout).build();
         } catch (BrokerException e) {
             log.error("build IWeEvent error", e);
             throw exp2JMSException(e);
@@ -146,16 +108,8 @@ public class WeEventConnectionFactory implements ConnectionFactory, QueueConnect
         return connection;
     }
 
-    public String getHttpUrl(String brokerUrl) throws JMSException {
-        String httpUrl;
-        if (brokerUrl.contains("ws://") && brokerUrl.contains("/stomp")) {
-            httpUrl = brokerUrl.replace("ws://", "http://").replace("/stomp", "");
-        } else if (brokerUrl.contains("wss://")) {
-            httpUrl = brokerUrl.replace("wss://", "https://").replace("/stomp", "");
-        } else {
-            throw error2JMSException(ErrorCode.PARAM_ISBLANK);
-        }
-        return httpUrl;
+    public void setClientID(String clientID) {
+        this.clientID = clientID;
     }
 
     // TopicConnectionFactory override methods

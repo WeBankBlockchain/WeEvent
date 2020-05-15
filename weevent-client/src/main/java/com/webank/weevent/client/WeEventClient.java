@@ -19,7 +19,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import com.webank.weevent.client.stomp.WeEventTopic;
+import com.webank.weevent.client.stomp.TopicContent;
 import com.webank.weevent.client.stomp.WebSocketTransport;
 import com.webank.weevent.client.stomp.WebSocketTransportFactory;
 
@@ -153,7 +153,7 @@ public class WeEventClient implements IWeEventClient {
         SendResult sendResult = new SendResult();
         sendResult.setTopic(weEvent.getTopic());
         try {
-            WeEventTopic weEventTopic = new WeEventTopic(weEvent.getTopic());
+            TopicContent weEventTopic = new TopicContent(weEvent.getTopic());
             weEventTopic.setGroupId(this.groupId);
 
             // publish
@@ -206,7 +206,7 @@ public class WeEventClient implements IWeEventClient {
         validateParam(offset);
 
         // extend param
-        WeEventTopic weEventTopic = new WeEventTopic(topic);
+        TopicContent weEventTopic = new TopicContent(topic);
         weEventTopic.setOffset(offset);
         weEventTopic.setGroupId(this.groupId);
         if (StringUtils.isNotBlank(subscriptionId)) {

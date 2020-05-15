@@ -7,6 +7,8 @@ import javax.jms.MessageListener;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
 
+import com.webank.weevent.client.WeEvent;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -43,13 +45,13 @@ public class WeEventTopicSubscriber implements TopicSubscriber, CommandDispatche
     }
 
     @Override
-    public void dispatch(WeEventStompCommand command) {
+    public void dispatch(WeEvent event) {
         WeEventBytesMessage message = new WeEventBytesMessage();
         try {
-            message.setJMSMessageID(command.getEvent().getEventId());
-            message.writeBytes(command.getEvent().getContent());
-            message.setExtensions(command.getEvent().getExtensions());
-            message.setJMSDestination(command.getTopic());
+            message.setJMSMessageID(event.getEventId());
+            message.writeBytes(event.getContent());
+            message.setExtensions(event.getExtensions());
+            message.setJMSDestination(new WeEventTopic(event.getTopic()));
             this.messageListener.onMessage(message);
         } catch (JMSException e) {
             log.error("write WeEvent into BytesMessage failed", e);

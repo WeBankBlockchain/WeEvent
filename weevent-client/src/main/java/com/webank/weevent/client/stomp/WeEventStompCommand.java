@@ -35,7 +35,7 @@ public class WeEventStompCommand {
     private final static int stompHeartBeat = 30;
 
     private String subscriptionId;
-    private WeEventTopic topic;
+    private TopicContent topic;
     private WeEvent event;
     private String headerId;
 
@@ -80,7 +80,7 @@ public class WeEventStompCommand {
         return encodeRaw(accessor);
     }
 
-    public String encodeSubscribe(WeEventTopic topic, Long id) {
+    public String encodeSubscribe(TopicContent topic, Long id) {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
         accessor.setDestination(topic.getTopicName());
         accessor.setNativeHeader("eventId", topic.getOffset());
@@ -108,7 +108,7 @@ public class WeEventStompCommand {
     }
 
     // payload is WeEvent
-    public String encodeSend(Long id, WeEventTopic topic, WeEvent weEvent) {
+    public String encodeSend(Long id, TopicContent topic, WeEvent weEvent) {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SEND);
         accessor.setDestination(topic.getTopicName());
         accessor.setContentType(new MimeType("text", "plain", StandardCharsets.UTF_8));

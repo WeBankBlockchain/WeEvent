@@ -1,4 +1,4 @@
-package com.webank.weevent.broker.sample;
+package sample;
 
 import java.nio.charset.StandardCharsets;
 
@@ -26,10 +26,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JMS {
     private final static String topicName = "com.weevent.test";
+    private final static String defaultBrokerUrl = "http://localhost:7000/weevent-broker";
 
     private static void publish() throws JMSException {
         // get topic connection
-        TopicConnectionFactory connectionFactory = new WeEventConnectionFactory();
+        TopicConnectionFactory connectionFactory = new WeEventConnectionFactory(defaultBrokerUrl);
         TopicConnection connection = connectionFactory.createTopicConnection();
 
         // start connection
@@ -53,7 +54,7 @@ public class JMS {
 
     private static void subscribe() throws JMSException {
         // get topic connection
-        TopicConnectionFactory connectionFactory = new WeEventConnectionFactory();
+        TopicConnectionFactory connectionFactory = new WeEventConnectionFactory(defaultBrokerUrl);
         TopicConnection connection = connectionFactory.createTopicConnection();
 
         // start connection

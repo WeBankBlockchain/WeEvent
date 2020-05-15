@@ -34,7 +34,7 @@ import org.apache.commons.lang3.StringUtils;
  * @since 2019/03/25
  */
 @Slf4j
-public class WeEventTopicConnection implements TopicConnection, CommandDispatcher {
+public class WeEventTopicConnection implements TopicConnection {
     private String userName = "";
     private String password = "";
     private String clientID = "";
@@ -63,13 +63,6 @@ public class WeEventTopicConnection implements TopicConnection, CommandDispatche
 
     public void removeSession(WeEventTopicSession session) {
         this.sessions.remove(session);
-    }
-
-    @Override
-    public void dispatch(WeEventStompCommand command) {
-        if (this.subscribers.containsKey(command.getSubscriptionId())) {
-            this.subscribers.get(command.getSubscriptionId()).dispatch(command);
-        }
     }
 
     public void createTopic(String topicName) throws JMSException {
@@ -117,10 +110,7 @@ public class WeEventTopicConnection implements TopicConnection, CommandDispatche
                 @Override
                 public void onEvent(WeEvent event) {
                     log.info("onEvent: {}", event.toString());
-                    WeEventStompCommand command = new WeEventStompCommand();
-                    command.setEvent(event);
-                    command.setTopic(new WeEventTopic(event.getTopic()));
-                    subscriber.dispatch(command);
+                    subscriber.dispatch(event);
                 }
 
                 @Override
@@ -146,12 +136,6 @@ public class WeEventTopicConnection implements TopicConnection, CommandDispatche
             log.error("unSubscribe failed.", e);
             throw WeEventConnectionFactory.exp2JMSException(e);
         }
-    }
-
-    private WeEventStompCommand convertWeEventToCommand(WeEvent event) {
-        WeEventStompCommand command = new WeEventStompCommand();
-        command.setTopic(new WeEventTopic(event.getTopic()));
-        return command;
     }
 
     // TopicConnection override methods

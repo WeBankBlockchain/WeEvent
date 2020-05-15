@@ -5,14 +5,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * WeEvent Topic.
+ * WeEvent Topic Content.
  *
  * @author matthewliu
  * @since 2019/03/25
  */
 @Getter
 @Setter
-public class WeEventTopic {
+public class TopicContent {
     private final String topicName;
 
     private String offset;
@@ -20,7 +20,7 @@ public class WeEventTopic {
     private String continueSubscriptionId;
     private boolean isFile;
 
-    public WeEventTopic(String topicName) {
+    public TopicContent(String topicName) {
         this.topicName = topicName;
     }
 

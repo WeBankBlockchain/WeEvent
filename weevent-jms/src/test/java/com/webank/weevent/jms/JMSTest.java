@@ -23,7 +23,7 @@ import org.junit.rules.TestName;
 public class JMSTest {
 
     private final String topicName = "com.weevent.test";
-    private final String defaultBrokerUrl = "ws://localhost:7000/weevent-broker/stomp";
+    private final String defaultBrokerUrl = "http://localhost:7000/weevent-broker";
     private TopicConnectionFactory connectionFactory;
     private TopicConnection connection;
     private WeEventTopicSession session;
@@ -40,7 +40,7 @@ public class JMSTest {
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
-        this.connectionFactory = new WeEventConnectionFactory();
+        this.connectionFactory = new WeEventConnectionFactory(this.defaultBrokerUrl);
         this.connection = this.connectionFactory.createTopicConnection();
         this.session = (WeEventTopicSession) this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
         this.topic = (WeEventTopic) this.session.createTopic(this.topicName);
@@ -80,7 +80,7 @@ public class JMSTest {
      */
     @Test
     public void testConnectionWithUserNamePassword() throws JMSException {
-        this.connectionFactory = new WeEventConnectionFactory("", "", this.defaultBrokerUrl, WeEvent.DEFAULT_GROUP_ID);
+        this.connectionFactory = new WeEventConnectionFactory(this.defaultBrokerUrl, WeEvent.DEFAULT_GROUP_ID, "", "");
         this.connection = this.connectionFactory.createTopicConnection();
         this.session = (WeEventTopicSession) this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
         this.topic = (WeEventTopic) this.session.createTopic(this.topicName);
