@@ -1,7 +1,7 @@
 sudo: false
 dist: trusty
 
-# safelist
+
 branches:
   only:
     - master
@@ -10,10 +10,15 @@ branches:
 language: java
 jdk:
   - oraclejdk8
+matrix:
+  include:
+    - language: python
+      python: 3.6
 
+# modify your email to recieve the result
 notifications:
   email:
-    - chent1993@163.com
+    - weevent@webank.com
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -25,11 +30,11 @@ cache:
     - $HOME/.gradle/wrapper/
 
 script:
+  - /bin/bash project/security_audit.sh
   - /bin/bash project/build-ci.sh
   - chmod +x ./gradlew
   - ./gradlew build
   - ./gradlew check
   - ./gradlew codeCoverageReport
-
 after_success:
   - bash <(curl -s https://codecov.io/bash) -f "./build/customJacocoReportDir/codeCoverageReport/codeCoverageReport.xml"

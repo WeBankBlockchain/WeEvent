@@ -84,7 +84,6 @@ public class BrokerService {
 
     private final static String HTTP_GET_SUCCESS_CODE = "0";
 
-    private final static String weEventVersion = "2";
 
 
     public List<BrokerEntity> getBrokers(HttpServletRequest request, String accountId) {
@@ -110,7 +109,7 @@ public class BrokerService {
     @Transactional(rollbackFor = Throwable.class)
     public GovernanceResult addBroker(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
-        //check both broker and webase serverUrl
+        //check  broker serverUrl
         ErrorCode errorCode = checkServerByBrokerEntity(brokerEntity, request);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             throw new GovernanceException(errorCode);
@@ -191,7 +190,7 @@ public class BrokerService {
     @Transactional(rollbackFor = Throwable.class)
     public GovernanceResult updateBroker(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
-        //check both broker and webase serverUrl
+        //check  broker  serverUrl
         ErrorCode errorCode = checkServerByBrokerEntity(brokerEntity, request);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             throw new GovernanceException(errorCode);
@@ -236,23 +235,17 @@ public class BrokerService {
         if (StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
             return ErrorCode.ILLEGAL_INPUT;
         }
-        String version = this.getVersion(request, brokerEntity.getBrokerUrl());
-        if (version != null && !version.startsWith(weEventVersion) && StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
-            return ErrorCode.WEBASE_REQUIRED;
-        }
+
         //checkServerUrl
         return check(brokerEntity, request);
     }
 
     public ErrorCode checkServerByUrl(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
-        //check broker or webase serverUrl
-        if (StringUtils.isBlank(brokerEntity.getBrokerUrl()) && StringUtils.isBlank(brokerEntity.getWebaseUrl())) {
+        //check broker  serverUrl
+        if (StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
             return ErrorCode.ILLEGAL_INPUT;
         }
-        String version = this.getVersion(request, brokerEntity.getBrokerUrl());
-        if (version != null && !version.startsWith(weEventVersion) && StringUtils.isBlank(brokerEntity.getBrokerUrl())) {
-            return ErrorCode.WEBASE_REQUIRED;
-        }
+
         return check(brokerEntity, request);
     }
 
@@ -267,17 +260,6 @@ public class BrokerService {
                 return ErrorCode.BROKER_CONNECT_ERROR;
             }
         }
-        if (!StringUtils.isBlank(brokerEntity.getWebaseUrl())) {
-            String WebaseServerUrl = brokerEntity.getWebaseUrl();
-            log.info("check WeBase server, url:{}", WebaseServerUrl);
-            try {
-                checkUrl(WebaseServerUrl, ConstantProperties.WEBASE_NODE_URL, request);
-            } catch (GovernanceException e) {
-                log.error("check WeBase server failed. e", e);
-                return ErrorCode.WEBASE_CONNECT_ERROR;
-            }
-        }
-
         return ErrorCode.SUCCESS;
     }
 
@@ -302,19 +284,6 @@ public class BrokerService {
         if (!HTTP_GET_SUCCESS_CODE.equals(String.valueOf(jsonObject.get("code")))) {
             log.error("url {}, connect fail.", headUrl);
             throw new GovernanceException("url " + headUrl + " connect fail");
-        }
-    }
-
-    public String getVersion(HttpServletRequest request, String brokerUrl) throws GovernanceException {
-        String versionUrl = brokerUrl + ConstantProperties.BROKER_LIST_URL;
-        try {
-            CloseableHttpResponse versionResponse = commonService.getCloseResponse(request, versionUrl);
-            String mes = EntityUtils.toString(versionResponse.getEntity());
-            Map map = JsonHelper.json2Object(mes, Map.class);
-            return map.get("weEventVersion") == null ? null : map.get("weEventVersion").toString();
-        } catch (Exception e) {
-            log.error("get version fail,error:", e);
-            throw new GovernanceException("get version fail,error:{}");
         }
     }
 
