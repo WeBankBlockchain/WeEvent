@@ -24,10 +24,6 @@
             prop='brokerUrl'>
           </el-table-column>
           <el-table-column
-            :label="$t('serverSet.webaseURLAddress')"
-            prop='webaseUrl'>
-          </el-table-column>
-          <el-table-column
             width='100'
            :label="$t('common.action')">
             <template slot-scope='scope'>
@@ -56,9 +52,6 @@
         <el-form-item :label="$t('serverSet.brokerURLAddress') + ' :'" prop='brokerUrl'>
           <el-input v-model.trim="form.brokerUrl" autocomplete="off"  :placeholder="$t('serverSet.borkerPlaceholder')" :disabled="isEdit"></el-input>
           <p class='version' v-show="version" v-html="version"></p>
-        </el-form-item>
-        <el-form-item :label="$t('serverSet.webaseURLAddress') + ' :'" >
-          <el-input v-model.trim="form.webaseUrl" autocomplete="off"  :placeholder="$t('serverSet.webasePlaceholder')"></el-input>
         </el-form-item>
         <el-form-item :label="$t('serverSet.authorized') + ' :'" v-show='showAccount'>
           <el-select
@@ -139,7 +132,6 @@ export default {
       form: {
         name: '',
         brokerUrl: '',
-        webaseUrl: '',
         userIdList: []
       },
       brokerId: '',
@@ -159,7 +151,6 @@ export default {
         this.$refs.form.resetFields()
         this.$set(this.form, 'name', '')
         this.$set(this.form, 'brokerUrl', '')
-        this.$set(this.form, 'webaseUrl', '')
         this.$set(this.form, 'userIdList', [])
         this.version = ''
         this.brokerId = ''
@@ -198,8 +189,7 @@ export default {
     addServer () {
       let data = {
         name: this.form.name,
-        brokerUrl: this.form.brokerUrl,
-        webaseUrl: this.form.webaseUrl
+        brokerUrl: this.form.brokerUrl
       }
       data.userIdList = [].concat(this.form.userIdList)
       API.addServer(data).then(res => {
@@ -239,7 +229,16 @@ export default {
     getServer () {
       API.getServer('').then(res => {
         if (res.status === 200) {
-          this.server = [].concat(res.data)
+          if (res.data.cause) {
+            this.$store.commit('set_Msg', this.$message({
+              type: 'warning',
+              message: res.data.message,
+              duration: 0,
+              showClose: true
+            }))
+          } else {
+            this.server = [].concat(res.data)
+          }
         }
       })
     },
@@ -248,7 +247,6 @@ export default {
       let data = {
         name: this.form.name,
         brokerUrl: this.form.brokerUrl,
-        webaseUrl: this.form.webaseUrl,
         id: this.brokerId
       }
       data.userIdList = [].concat(this.form.userIdList)
@@ -290,7 +288,6 @@ export default {
       let vm = this
       vm.$set(this.form, 'name', e.name)
       vm.$set(this.form, 'brokerUrl', e.brokerUrl)
-      vm.$set(this.form, 'webaseUrl', e.webaseUrl)
       vm.$set(this.form, 'userIdList', [])
       vm.brokerId = e.id
       if (e.isCreator === '1') {
