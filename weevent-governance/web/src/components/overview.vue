@@ -66,7 +66,7 @@ export default {
   },
   methods: {
     general () {
-      let url = '/' + this.groupId + '?brokerId=' + this.brokerId
+      const url = '/' + this.groupId + '?brokerId=' + this.brokerId
       API.general(url).then(res => {
         if (res.data.code === 0) {
           this.node = res.data.data.nodeCount

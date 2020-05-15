@@ -21,7 +21,7 @@ import Highcharts from 'highcharts/highstock'
 import { getLastWeek, getTimeList } from '../utils/formatTime'
 import API from '../API/resource.js'
 require('highcharts/modules/no-data-to-display.js')(Highcharts)
-export default{
+export default {
   data () {
     return {
       pickerOptions: {
@@ -78,18 +78,18 @@ export default{
   methods: {
     beginDate () {
       let vm = this
-      let data = {
+      const data = {
         'beginDate': vm.selectTime[0],
         'endDate': vm.selectTime[1],
         'groupId': localStorage.getItem('groupId'),
         'brokerId': localStorage.getItem('brokerId')
       }
       vm.option.series[0].data = []
-      let chart = new Promise(function (resolve, reject) {
+      const chart = new Promise(function (resolve, reject) {
         API.eventList(data).then(res => {
           if (res.data.status === 200) {
             let max = 20
-            let data = res.data.data
+            const data = res.data.data
             let time = [].concat(vm.option.xAxis.categories)
             for (let i = 0; i < time.length; i++) {
               vm.option.series[0].data[i] = 0
@@ -104,8 +104,8 @@ export default{
             resolve(true)
           } else {
             let max = 20
-            let data = []
-            let time = [].concat(vm.option.xAxis.categories)
+            const data = []
+            const time = [].concat(vm.option.xAxis.categories)
             for (let i = 0; i < time.length; i++) {
               vm.option.series[0].data[i] = 0
               for (let x = 0; x < data.length; x++) {
@@ -147,16 +147,16 @@ export default{
       if (e === null) {
         vm.getDate()
       } else {
-        let timeList = getTimeList(e[0], e[1])
+        const timeList = getTimeList(e[0], e[1])
         vm.option.xAxis.categories = [].concat(timeList)
       }
       this.beginDate()
     },
     getDate () {
       let data = getLastWeek()
-      let start = new Date(data[0]).getTime()
-      let end = new Date(data[data.length - 1]).getTime()
-      let vm = this
+      const start = new Date(data[0]).getTime()
+      const end = new Date(data[data.length - 1]).getTime()
+      const vm = this
       vm.selectTime = []
       vm.selectTime.push(start)
       vm.selectTime.push(end)

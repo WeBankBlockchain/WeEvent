@@ -84,7 +84,7 @@ export default {
     },
     getNode () {
       this.loading = true
-      let url = '/' + localStorage.getItem('groupId') + '/1/10?brokerId=' + localStorage.getItem('brokerId')
+      const url = '/' + localStorage.getItem('groupId') + '/1/10?brokerId=' + localStorage.getItem('brokerId')
       // let url = '/' + localStorage.getItem('groupId') + '/?brokerId=' + localStorage.getItem('brokerId')
       API.nodeList(url).then(res => {
         if (res.status === 200) {

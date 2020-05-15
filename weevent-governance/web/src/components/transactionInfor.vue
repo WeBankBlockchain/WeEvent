@@ -112,7 +112,7 @@ export default {
       this.total = 0
       API.transList(url).then(res => {
         if (res.data.code === 0) {
-          let tableData = res.data.data.pageData
+          const tableData = res.data.data.pageData
           tableData.forEach(e => {
             this.$set(e, 'logs', { 'address': '', 'topics': [], 'hasEvent': false })
           })

@@ -76,9 +76,9 @@ export default {
       API.blockList(url).then(res => {
         if (res.status === 200) {
           this.total = res.data.data.total
-          let last = Math.ceil(res.data.data.total / 10)
+          const last = Math.ceil(res.data.data.total / 10)
           this.pageIndex = last
-          let url = '/' + this.groupId + '/' + last + '/10?brokerId=' + this.brokerId
+          const url = '/' + this.groupId + '/' + last + '/10?brokerId=' + this.brokerId
           API.blockList(url).then(res => {
             if (res.status === 200) {
               this.tableData = res.data.data.pageData.reverse()
@@ -90,7 +90,7 @@ export default {
     },
     blockList () {
       this.loading = true
-      let url = '/' + this.groupId + '/' + this.pageIndex + '/10?brokerId=' + this.brokerId
+      const url = '/' + this.groupId + '/' + this.pageIndex + '/10?brokerId=' + this.brokerId
       API.blockList(url).then(res => {
         if (res.status === 200) {
           this.tableData = res.data.data.pageData.reverse()
