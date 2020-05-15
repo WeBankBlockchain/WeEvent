@@ -72,7 +72,7 @@ export default {
     },
     getLastData () {
       this.loading = true
-      let url = '/' + this.groupId + '/' + this.pageIndex + '/10?brokerId=' + this.brokerId
+      const url = '/' + this.groupId + '/' + this.pageIndex + '/10?brokerId=' + this.brokerId
       API.blockList(url).then(res => {
         if (res.status === 200) {
           this.total = res.data.data.total

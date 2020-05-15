@@ -90,7 +90,7 @@ export default {
           if (res.data.status === 200) {
             let max = 20
             const data = res.data.data
-            let time = [].concat(vm.option.xAxis.categories)
+            const time = [].concat(vm.option.xAxis.categories)
             for (let i = 0; i < time.length; i++) {
               vm.option.series[0].data[i] = 0
               for (let x = 0; x < data.length; x++) {
@@ -143,7 +143,7 @@ export default {
       })
     },
     getTime (e) {
-      let vm = this
+      const vm = this
       if (e === null) {
         vm.getDate()
       } else {
@@ -153,7 +153,7 @@ export default {
       this.beginDate()
     },
     getDate () {
-      let data = getLastWeek()
+      const data = getLastWeek()
       const start = new Date(data[0]).getTime()
       const end = new Date(data[data.length - 1]).getTime()
       const vm = this
