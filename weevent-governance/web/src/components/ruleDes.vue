@@ -4,7 +4,7 @@
      {{$t('ruleDes.desTitle')}}
     </h3>
     <el-timeline>
-      <el-timeline-item :timestamp="$t('ruleDes.desTitle')" placement="top">
+      <el-timeline-item :timestamp="$t('ruleDes.creatOption')" placement="top">
         <el-card v-show="active === 1">
           <p>{{$t('ruleDes.creatOptionDes')}}</p>
           <img src="../assets/image/step1.png" alt="">
