@@ -305,5 +305,15 @@ module.exports = {
     'enterSQL': 'please input Parsing Sql',
     'selectDB': 'please Select Database',
     'errorCorn': 'Error Period Params'
+  },
+  ruleDes: {
+    'conditionDes': 'Conditional tatement description',
+    'desTitle': 'By filtering the condition bar on the operation page, the user can generate the corresponding rule trigger condition in the SQL statement',
+    'creatOption': 'Create conditional statement',
+    'creatOptionDes': 'Click the "Add" button on the right to generate a blank conditional statement column, and click multiple times to add multiple items. The conditional statements are spliced by the relationship characters "and" "or"',
+    'editOption': 'Edit conditional statement',
+    'editOptionDes': 'The user can select the corresponding key and set its corresponding content interval. At the same time, it supports the selection of built-in functions (optional) to perform corresponding function processing on the key.<br/>E.g: abs(age) >= 20',
+    'optionMap': 'Conditional structure content editing',
+    'optionMapDes': 'For complex conditional statements, the page now supports not only the horizontal association of conditional statements, but also the nesting of conditional statements Click the "Add" button at the end of each condition bar to generate a corresponding sub-option bar. Changing the option bar will form a nesting relationship with its parent<br/>E.g: (abs(age) >= 20 and name != "Kevin") or age >= 30'
   }
 }
