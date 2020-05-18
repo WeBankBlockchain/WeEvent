@@ -30,7 +30,7 @@ cache:
     - $HOME/.gradle/wrapper/
 
 script:
-  - /bin/bash project/security_audit.sh
+  #- /bin/bash project/security_audit.sh
   - /bin/bash project/build-ci.sh
   - chmod +x ./gradlew
   - ./gradlew build

@@ -81,8 +81,6 @@ function startBrokerService() {
     # open mqtt tcp port for junit test
     cd ${current_path}/weevent-broker
     sed -i "s/#mqtt.broker.tcp.port/mqtt.broker.tcp.port/g" ./src/main/resources/weevent.properties
-    sleep 30s
-    netstat -nltp
 }
 
 function main(){
