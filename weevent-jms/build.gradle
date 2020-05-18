@@ -2,21 +2,13 @@ apply plugin: "io.spring.dependency-management"
 apply plugin: "signing"
 
 dependencies {
-    // jackson
-    implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
+    // jms
+    implementation("javax.jms:jms:${jmsVersion}")
 
-    // stomp, see https://github.com/TooTallNate/Java-WebSocket
-    implementation("org.java-websocket:Java-WebSocket:${WebSocketVersion}")
-    implementation("org.springframework.data:spring-data-commons:${springDataCommonsVersion}")
-    implementation("org.springframework:spring-messaging:${spring5Version}")
+    // depend project
+    implementation(project(":weevent-client"))
 
-    // httpclient
-    implementation("org.apache.httpcomponents:httpclient:${httpclientVersion}")
-
-    // httpmime
-    implementation("org.apache.httpcomponents:httpmime:${httpclientVersion}")
-
-    // event-client.log for test
+    // log for test
     testImplementation("org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}")
 }
 
