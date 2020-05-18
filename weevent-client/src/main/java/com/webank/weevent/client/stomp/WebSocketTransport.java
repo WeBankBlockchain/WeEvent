@@ -403,11 +403,9 @@ public class WebSocketTransport extends WebSocketClient {
         this.connected = false;
         this.cleanup();
         // reconnect if connection lost
-        if (remote) {
-            if (!this.connectFlag) {
-                WSThread wSThread = new WSThread(this);
-                wSThread.start();
-            }
+        if (remote && !this.connectFlag) {
+            WSThread wSThread = new WSThread(this);
+            wSThread.start();
         }
     }
 

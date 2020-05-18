@@ -68,26 +68,7 @@ public class WeEventConnectionFactory implements ConnectionFactory, QueueConnect
         this.groupId = groupId;
     }
 
-    public WeEventConnectionFactory(String brokerUrl, String userName, String password) {
-        this.brokerUrl = brokerUrl;
-        this.groupId = WeEvent.DEFAULT_GROUP_ID;
-        this.userName = userName;
-        this.password = password;
-    }
-
-    public WeEventConnectionFactory(String brokerUrl, String groupId, String userName, String password) {
-        this.brokerUrl = brokerUrl;
-        this.groupId = groupId;
-        this.userName = userName;
-        this.password = password;
-    }
-
-
-    private void setTimeout(int timeout) {
-        this.timeout = timeout;
-    }
-
-    public WeEventTopicConnection createWeEventTopicConnection(String userName, String password) throws JMSException {
+    public WeEventTopicConnection createWeEventTopicConnection() throws JMSException {
 
         IWeEventClient client;
         try {
@@ -99,10 +80,6 @@ public class WeEventConnectionFactory implements ConnectionFactory, QueueConnect
         WeEventTopicConnection connection = new WeEventTopicConnection(client);
         if (this.clientID != null) {
             connection.setClientID(this.clientID);
-        }
-        if (userName != null && password != null) {
-            connection.setUserName(userName);
-            connection.setPassword(password);
         }
 
         return connection;
@@ -116,12 +93,14 @@ public class WeEventConnectionFactory implements ConnectionFactory, QueueConnect
 
     @Override
     public TopicConnection createTopicConnection() throws JMSException {
-        return createWeEventTopicConnection(this.userName, this.password);
+        return createWeEventTopicConnection();
     }
 
     @Override
     public TopicConnection createTopicConnection(String userName, String password) throws JMSException {
-        return createWeEventTopicConnection(userName, password);
+        this.userName = userName;
+        this.password = password;
+        return createWeEventTopicConnection();
     }
 
     // QueueConnectionFactory override methods

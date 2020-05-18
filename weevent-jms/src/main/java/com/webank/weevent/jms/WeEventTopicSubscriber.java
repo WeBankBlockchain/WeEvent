@@ -104,7 +104,7 @@ public class WeEventTopicSubscriber implements TopicSubscriber, CommandDispatche
 
     @Override
     public void close() {
-
+        log.info("close subscribe.");
     }
 
 }

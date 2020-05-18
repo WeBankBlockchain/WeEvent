@@ -1,4 +1,4 @@
-package sample;
+package com.webank.weevent.jms;
 
 import java.nio.charset.StandardCharsets;
 
@@ -12,8 +12,6 @@ import javax.jms.TopicPublisher;
 import javax.jms.TopicSession;
 import javax.jms.TopicSubscriber;
 
-import com.webank.weevent.jms.WeEventConnectionFactory;
-
 
 /**
  * Samples of JMS interface.
@@ -21,7 +19,7 @@ import com.webank.weevent.jms.WeEventConnectionFactory;
  * @author matthewliu
  * @since 2019/04/08
  */
-public class JMS {
+public class JMSSample {
     private final static String topicName = "com.weevent.test";
     private final static String defaultBrokerUrl = "http://localhost:7000/weevent-broker";
 

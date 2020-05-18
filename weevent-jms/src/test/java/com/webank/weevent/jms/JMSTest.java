@@ -80,8 +80,9 @@ public class JMSTest {
      */
     @Test
     public void testConnectionWithUserNamePassword() throws JMSException {
-        this.connectionFactory = new WeEventConnectionFactory(this.defaultBrokerUrl, WeEvent.DEFAULT_GROUP_ID, "", "");
-        this.connection = this.connectionFactory.createTopicConnection();
+        this.connectionFactory = new WeEventConnectionFactory(this.defaultBrokerUrl, WeEvent.DEFAULT_GROUP_ID);
+        // userName:"", password:""
+        this.connection = this.connectionFactory.createTopicConnection("", "");
         this.session = (WeEventTopicSession) this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
         this.topic = (WeEventTopic) this.session.createTopic(this.topicName);
         Assert.assertTrue(true);

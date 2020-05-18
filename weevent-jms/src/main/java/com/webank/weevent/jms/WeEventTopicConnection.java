@@ -35,8 +35,6 @@ import org.apache.commons.lang3.StringUtils;
  */
 @Slf4j
 public class WeEventTopicConnection implements TopicConnection {
-    private String userName = "";
-    private String password = "";
     private String clientID = "";
     private IWeEventClient client;
 
@@ -47,14 +45,6 @@ public class WeEventTopicConnection implements TopicConnection {
         this.sessions = new ArrayList<>();
         this.subscribers = new HashMap<>();
         this.client = client;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public void addSession(WeEventTopicSession session) {

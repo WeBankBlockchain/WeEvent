@@ -50,7 +50,7 @@ public class WeEventTopicSession implements TopicSession {
     }
 
     public void start() {
-
+        log.info("start topic session.");
     }
 
     public void stop() {
@@ -200,7 +200,7 @@ public class WeEventTopicSession implements TopicSession {
 
     @Override
     public void run() {
-
+        log.info("run task.");
     }
 
     @Override
