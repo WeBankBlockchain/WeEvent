@@ -8,13 +8,9 @@ import java.nio.charset.StandardCharsets;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.weevent.broker.fisco.file.FileTransportService;
-import com.webank.weevent.broker.fisco.file.dto.FileChunksMetaPlus;
-import com.webank.weevent.broker.fisco.file.dto.FileTransportStats;
 import com.webank.weevent.client.BaseResponse;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
-import com.webank.weevent.client.FileChunksMeta;
 import com.webank.weevent.client.SendResult;
 import com.webank.weevent.core.fisco.util.ParamCheckUtils;
 import com.webank.weevent.core.fisco.util.WeEventUtils;
@@ -36,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping(value = "/file")
 @Controller
 public class FileRest {
+    /*
     private FileTransportService fileTransportService;
 
     @Autowired
@@ -163,4 +160,5 @@ public class FileRest {
             throw new BrokerException(ErrorCode.FILE_DOWNLOAD_ERROR);
         }
     }
+     */
 }

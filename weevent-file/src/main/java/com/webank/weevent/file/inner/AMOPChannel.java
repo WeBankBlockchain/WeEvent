@@ -1,22 +1,12 @@
-package com.webank.weevent.broker.fisco.file;
+package com.webank.weevent.file.inner;
 
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import com.webank.weevent.broker.fisco.file.dto.FileEvent;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
-import com.webank.weevent.client.FileChunksMeta;
 import com.webank.weevent.client.JsonHelper;
-
+import com.webank.weevent.file.IWeEventFileClient;
+import com.webank.weevent.file.dto.FileEvent;
+import com.webank.weevent.file.service.FileChunksMeta;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
 import org.fisco.bcos.channel.client.ChannelPushCallback;
@@ -29,6 +19,11 @@ import org.fisco.bcos.channel.handler.AMOPVerifyTopicToKeyInfo;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * AMOP channel for file transport.
@@ -47,13 +42,18 @@ public class AMOPChannel extends ChannelPushCallback {
     // topic in AMOP(WeEvent's topic hash) <-> true if verified topic, used by sender
     private Map<String, Boolean> senderTopics = new ConcurrentHashMap<>();
     // topic in AMOP(WeEvent's topic hash) <-> true if verified topic, used by receiver
+
+    private Map<String, Service> subVerifyTopics = new ConcurrentHashMap<>();
     private Map<String, Boolean> subTopics = new ConcurrentHashMap<>();
+
+    public Map<String, IWeEventFileClient.FileListener> topicListenerMap = new ConcurrentHashMap<>();
 
     /**
      * Create a AMOP channel on service for subscribe topic
      *
      * @param fileTransportService component class
      * @param service initialized service
+     * @throws BrokerException exception
      */
     public AMOPChannel(FileTransportService fileTransportService, Service service) throws BrokerException {
         this.fileTransportService = fileTransportService;
@@ -61,7 +61,7 @@ public class AMOPChannel extends ChannelPushCallback {
         this.service.setPushCallback(this);
 
         // init verify topic information, MUST be call before service.run
-        this.initVerifyTopic(this.service.getGroupId());
+        //this.initVerifyTopic(this.service.getGroupId());
 
         try {
             this.service.run();
@@ -90,11 +90,11 @@ public class AMOPChannel extends ChannelPushCallback {
         }
 
         try {
-            File[] topics = resource.getFile().listFiles((dir, name) -> name.endsWith(".pem"));
+            File[] topics = resource.getFile().listFiles();
             if (topics != null) {
                 for (File topic : topics) {
                     List<Resource> pemResources = new ArrayList<>();
-                    File[] pems = topic.listFiles();
+                    File[] pems = topic.listFiles((dir, name) -> name.endsWith(".pem"));
                     if (pems != null) {
                         for (File pem : pems) {
                             pemResources.add(new FileSystemResource(pem.getPath()));
@@ -116,7 +116,7 @@ public class AMOPChannel extends ChannelPushCallback {
         return resources;
     }
 
-    private void initVerifyTopic(int groupId) throws BrokerException {
+    public void initVerifyTopic(int groupId) throws BrokerException {
         AMOPVerifyTopicToKeyInfo verifyTopicToKeyInfo = new AMOPVerifyTopicToKeyInfo();
         ConcurrentHashMap<String, AMOPVerifyKeyInfo> topicToKeyInfo = new ConcurrentHashMap<>();
         AMOPVerifyKeyInfo verifyKeyInfo = new AMOPVerifyKeyInfo();
@@ -139,7 +139,7 @@ public class AMOPChannel extends ChannelPushCallback {
             }
             verifyKeyInfo.setPrivateKey(resource.getValue().get(0));
 
-            this.subTopics.put(resource.getKey(), true);
+            this.subVerifyTopics.put(resource.getKey(), this.service);
             topicToKeyInfo.put(resource.getKey(), verifyKeyInfo);
             this.service.setNeedVerifyTopics(resource.getKey());
         }
@@ -148,32 +148,38 @@ public class AMOPChannel extends ChannelPushCallback {
         this.service.setTopic2KeyInfo(verifyTopicToKeyInfo);
     }
 
-    private Set<String> getAMOPTopicNames() {
+    public Set<String> getAMOPTopicNames() {
         Set<String> topics = new HashSet<>();
         for (Map.Entry<String, Boolean> topic : this.subTopics.entrySet()) {
-            if (topic.getValue()) {
-                topics.add(this.service.getNeedVerifyTopics(topic.getKey()));
-            } else {
-                topics.add(topic.getKey());
-            }
+            topics.add(topic.getKey());
+        }
+        for (Map.Entry<String, Service> topic : this.subVerifyTopics.entrySet()) {
+            topics.add(this.service.getNeedVerifyTopics(topic.getKey()));
         }
         return topics;
     }
 
-    public void subTopic(String topic) throws BrokerException {
+    public void subTopic(String topic, String groupId, IWeEventFileClient.FileListener fileListener) throws BrokerException {
         if (this.senderTopics.containsKey(topic)) {
             log.error("this is already sender side for topic: {}", topic);
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
         }
 
-        // verified topic DO NOT need/support dynamic subscribe
-        if (this.subTopics.containsKey(topic) && this.subTopics.get(topic)) {
-            return;
+        // verified topic init
+        log.info("init verify topic");
+        this.initVerifyTopic(Integer.parseInt(groupId));
+
+        try {
+            this.service.run();
+        } catch (Exception e) {
+            log.error("service run failed", e);
+            throw new BrokerException(ErrorCode.WEB3SDK_INIT_SERVICE_ERROR);
         }
 
-        if (!this.subTopics.containsKey(topic)) {
+        if (!this.subVerifyTopics.containsKey(topic) && !this.subTopics.containsKey(topic)) {
             log.info("subscribe topic on AMOP channel, {}", topic);
             this.subTopics.put(topic, false);
+            this.topicListenerMap.put(topic, fileListener);
 
             this.service.setTopics(this.getAMOPTopicNames());
             this.service.updateTopicsToNode();
@@ -181,17 +187,23 @@ public class AMOPChannel extends ChannelPushCallback {
     }
 
     public void unSubTopic(String topic) {
-        if (this.subTopics.containsKey(topic)) {
-            // verified topic DO NOT need/support dynamic subscribe
-            if (this.subTopics.get(topic)) {
-                return;
-            }
-
-            log.info("unSubscribe topic on AMOP channel, {}", topic);
-            this.subTopics.remove(topic);
+        if (subVerifyTopics.containsKey(topic)) {
+            log.info("unSubscribe verified topic on AMOP channel, {}", topic);
+            subVerifyTopics.remove(topic);
+            this.topicListenerMap.remove(topic);
 
             this.service.setTopics(this.getAMOPTopicNames());
             this.service.updateTopicsToNode();
+        } else {
+            if (this.subTopics.containsKey(topic)) {
+                // 认证的topic支持动态订阅不支持动态取消订阅,用户取消订阅的时候前端页面要显示这个
+                log.info("unSubscribe topic on AMOP channel, {}", topic);
+                this.subTopics.remove(topic);
+                this.topicListenerMap.remove(topic);
+
+                this.service.setTopics(this.getAMOPTopicNames());
+                this.service.updateTopicsToNode();
+            }
         }
     }
 
@@ -239,7 +251,7 @@ public class AMOPChannel extends ChannelPushCallback {
     }
 
     public ChannelResponse sendEvent(String topic, FileEvent fileEvent) throws BrokerException {
-        if (this.subTopics.containsKey(topic)) {
+        if (this.subTopics.containsKey(topic) || this.subVerifyTopics.containsKey(topic)) {
             log.error("this is already receiver side for topic: {}", topic);
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
         }
@@ -269,7 +281,7 @@ public class AMOPChannel extends ChannelPushCallback {
     @Override
     public void onPush(ChannelPush push) {
         if (!this.getAMOPTopicNames().contains(push.getTopic())) {
-            log.error("unknown topic on channel, {} -> {}", push.getTopic(), this.subTopics.keySet());
+            log.error("unknown topic on channel, {} -> {}", push.getTopic(), this.subTopics.keySet().addAll(this.subVerifyTopics.keySet()));
             push.sendResponse(AMOPChannel.toChannelResponse(ErrorCode.UNKNOWN_ERROR));
             return;
         }
@@ -290,7 +302,7 @@ public class AMOPChannel extends ChannelPushCallback {
                 log.info("get {}, try to initialize context for receiving file", fileEvent.getEventType());
                 try {
                     FileChunksMeta fileChunksMeta = this.fileTransportService.prepareReceiveFile(fileEvent.getFileChunksMeta());
-                    log.info("create file context success, fileId: {}", fileEvent.getFileId());
+                    log.info("create file context success, fileName: {}", fileEvent.getFileChunksMeta().getFileName());
 
                     byte[] json = JsonHelper.object2JsonBytes(fileChunksMeta);
                     channelResponse = AMOPChannel.toChannelResponse(ErrorCode.SUCCESS, json);
@@ -334,6 +346,10 @@ public class AMOPChannel extends ChannelPushCallback {
                     FileChunksMeta fileChunksMeta = this.fileTransportService.cleanUpReceivedFile(fileEvent.getFileId());
                     byte[] json = JsonHelper.object2JsonBytes(fileChunksMeta);
                     channelResponse = AMOPChannel.toChannelResponse(ErrorCode.SUCCESS, json);
+
+                    //
+                    IWeEventFileClient.FileListener fileListener= this.topicListenerMap.get(fileChunksMeta.getTopic());
+                    fileListener.onFile(fileChunksMeta.getTopic(),fileChunksMeta.getFileName());
                 } catch (BrokerException e) {
                     log.error("clean up not complete file failed", e);
                     channelResponse = AMOPChannel.toChannelResponse(e);

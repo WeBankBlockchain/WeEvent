@@ -3,6 +3,13 @@
 current_path=$(pwd)
 java_home_path=$(echo ${JAVA_HOME})
 
+function modifyMavenRepo(){
+  cd ${current_path}
+  sed -i "s/maven { url/\/\/maven { url/g" ./build.gradle
+  sed -i 'N;76a/*' ./build.gradle
+  sed -i 'N;80a*/' ./build.gradle
+}
+
 function updateOpenssl(){
     # update openssl version
     echo "updateOpenssl"
@@ -77,6 +84,7 @@ function startBrokerService() {
 }
 
 function main(){
+    modifyMavenRepo
     updateOpenssl
     installFisco
     installZookeeper

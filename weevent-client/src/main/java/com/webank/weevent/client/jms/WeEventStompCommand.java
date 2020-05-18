@@ -85,9 +85,7 @@ public class WeEventStompCommand {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
         accessor.setDestination(topic.getTopicName());
         accessor.setNativeHeader("eventId", topic.getOffset());
-        if (topic.isFile()) {
-            accessor.setNativeHeader(WeEvent.WeEvent_FILE, "1");
-        }
+
         accessor.setNativeHeader(StompHeaderAccessor.STOMP_ID_HEADER, Long.toString(id));
         if (!StringUtils.isBlank(topic.getGroupId())) {
             accessor.setNativeHeader("groupId", topic.getGroupId());

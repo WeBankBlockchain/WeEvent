@@ -1,13 +1,12 @@
-package com.webank.weevent.broker.fisco.file;
+package com.webank.weevent.file.inner;
 
 
-import com.webank.weevent.broker.fisco.file.dto.FileEvent;
 import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.client.FileChunksMeta;
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.client.WeEvent;
-import com.webank.weevent.core.IConsumer;
-
+import com.webank.weevent.file.IWeEventFileClient;
+import com.webank.weevent.file.dto.FileEvent;
+import com.webank.weevent.file.service.FileChunksMeta;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
@@ -18,19 +17,21 @@ import org.springframework.util.StringUtils;
  * @since 2020/02/16
  */
 @Slf4j
-public abstract class FileEventListener implements IConsumer.ConsumerListener, NotifyWeEvent {
+public class FileEventListener {
     private final FileTransportService fileTransportService;
     private final String topic;
     private final String groupId;
+    private final IWeEventFileClient.FileListener fileListener;
 
-    public FileEventListener(FileTransportService fileTransportService, String topic, String groupId) throws BrokerException {
+    public FileEventListener(FileTransportService fileTransportService, String topic, String groupId, IWeEventFileClient.FileListener fileListener) throws BrokerException {
         this.fileTransportService = fileTransportService;
         this.topic = topic;
         this.groupId = groupId;
+        this.fileListener = fileListener;
 
         // subscribe topic on AMOP channel
         AMOPChannel channel = this.fileTransportService.getChannel(this.groupId);
-        channel.subTopic(this.topic);
+        channel.subTopic(this.topic, this.groupId, fileListener);
     }
 
     public static boolean isFileEvent(WeEvent event) {
@@ -39,7 +40,6 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
                 && "json".equals(event.getExtensions().get(WeEvent.WeEvent_FORMAT));
     }
 
-    @Override
     public void onEvent(String subscriptionId, WeEvent event) {
         log.info("received file event on WeEvent, subscriptionId: {} {}", subscriptionId, event);
 
@@ -70,11 +70,6 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
                 if (!fileChunksMeta.checkChunkFull()) {
                     log.error("FATAL: FileChunksMeta is not full");
                 }
-
-                byte[] json = JsonHelper.object2JsonBytes(fileChunksMeta);
-                WeEvent weEvent = new WeEvent(event.getTopic(), json, event.getExtensions());
-                log.info("try to send file received WeEvent to client, {}", weEvent);
-                this.send(subscriptionId, weEvent);
             } catch (BrokerException e) {
                 log.error("change received WeEvent failed, send original", e);
                 this.send(subscriptionId, event);
@@ -82,12 +77,10 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
         }
     }
 
-    @Override
     public void onException(Throwable e) {
         log.error("file event on WeEvent onException", e);
     }
 
-    @Override
     public void onClose(String subscriptionId) {
         log.info("subscription: {} closed, try to unsub topic on AMOP", subscriptionId);
 
@@ -98,5 +91,9 @@ public abstract class FileEventListener implements IConsumer.ConsumerListener, N
         } catch (BrokerException e) {
             log.error("AMOPChannel.unSubTopic failed", e);
         }
+    }
+
+    public void send(String subscriptionId, WeEvent event) {
+
     }
 }

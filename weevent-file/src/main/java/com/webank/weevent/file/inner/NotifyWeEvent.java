@@ -1,4 +1,4 @@
-package com.webank.weevent.broker.fisco.file;
+package com.webank.weevent.file.inner;
 
 
 import com.webank.weevent.client.WeEvent;

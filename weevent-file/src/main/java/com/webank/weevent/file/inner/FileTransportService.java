@@ -1,31 +1,25 @@
-package com.webank.weevent.broker.fisco.file;
+package com.webank.weevent.file.inner;
 
+
+import com.webank.weevent.client.*;
+import com.webank.weevent.core.IProducer;
+import com.webank.weevent.core.config.FiscoConfig;
+import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
+import com.webank.weevent.file.dto.FileChunksMetaPlus;
+import com.webank.weevent.file.dto.FileChunksMetaStatus;
+import com.webank.weevent.file.dto.FileEvent;
+import com.webank.weevent.file.dto.FileTransportStats;
+import com.webank.weevent.file.service.FileChunksMeta;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
+import org.fisco.bcos.channel.client.Service;
+import org.fisco.bcos.channel.dto.ChannelResponse;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-
-import com.webank.weevent.broker.fisco.file.dto.FileChunksMetaPlus;
-import com.webank.weevent.broker.fisco.file.dto.FileChunksMetaStatus;
-import com.webank.weevent.broker.fisco.file.dto.FileEvent;
-import com.webank.weevent.broker.fisco.file.dto.FileTransportStats;
-import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.client.ErrorCode;
-import com.webank.weevent.client.FileChunksMeta;
-import com.webank.weevent.client.JsonHelper;
-import com.webank.weevent.client.SendResult;
-import com.webank.weevent.client.WeEvent;
-import com.webank.weevent.client.WeEventPlus;
-import com.webank.weevent.core.IProducer;
-import com.webank.weevent.core.config.FiscoConfig;
-import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
-
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.time.StopWatch;
-import org.fisco.bcos.channel.client.Service;
-import org.fisco.bcos.channel.dto.ChannelResponse;
 
 /**
  * File transport service base on AMOP.
@@ -106,7 +100,7 @@ public class FileTransportService {
             // receiver
             List<FileChunksMeta> localFiles = this.diskFiles.listNotCompleteFiles(all);
             Map<String, List<FileChunksMetaStatus>> receivers = new HashMap<>();
-            for (String topic : amopChannel.getSubTopics().keySet()) {
+            for (String topic : amopChannel.getAMOPTopicNames()) {
                 List<FileChunksMetaStatus> filePlus = localFiles.stream()
                         .filter(item -> item.getTopic().equals(topic))
                         .map(FileChunksMetaStatus::new)
@@ -129,6 +123,8 @@ public class FileTransportService {
         StopWatch sw = StopWatch.createStarted();
         Service service = Web3SDKConnector.initService(Long.valueOf(groupId), this.fiscoConfig);
         AMOPChannel channel = new AMOPChannel(this, service);
+
+
         this.groupChannels.put(groupId, channel);
         sw.stop();
         log.info("init AMOP channel cost: {} ms", sw.getTime());
@@ -245,11 +241,10 @@ public class FileTransportService {
     }
 
     public FileChunksMeta prepareReceiveFile(FileChunksMeta fileChunksMeta) throws BrokerException {
-        String fileId = fileChunksMeta.getFileId();
-        log.info("initialize file context for receiving, fileId: {}", fileId);
+        log.info("initialize file context for receiving, fileName: {}", fileChunksMeta.getFileName());
 
         // create local file
-        this.diskFiles.createFixedLengthFile(fileId, fileChunksMeta.getFileSize());
+        this.diskFiles.createFixedLengthFile(fileChunksMeta);
         // initialize chunk size
         fileChunksMeta.initChunkSize(this.fileChunkSize);
         // set local host

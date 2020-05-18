@@ -1,26 +1,20 @@
-package com.webank.weevent.client;
-
+package com.webank.weevent.file.service;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
+import com.webank.weevent.client.SendResult;
+import com.webank.weevent.core.fisco.util.ParamCheckUtils;
+import com.webank.weevent.core.fisco.util.WeEventUtils;
+import com.webank.weevent.file.inner.FileTransportService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.util.EntityUtils;
 import org.springframework.util.DigestUtils;
 
 /**
@@ -31,25 +25,19 @@ import org.springframework.util.DigestUtils;
  */
 @Slf4j
 public class FileChunksTransport {
-    //like http://localhost:8080/weevent-broker/file
-    private String svrUrl;
-    private String downloadFilePath = "";
-    private HttpClientHelper httpClientHelper;
+    private FileTransportService fileTransportService;
+    //private String downloadFilePath = "";
+
     // retry upload/download chunk times
     private static final int CHUNK_RETRY_COUNT = 5;
     private static final int INVOKE_CGI_FAIL_RETRY_COUNT = 20;
     private static final long INVOKE_CGI_FAIL_SLEEP_MILLISECOND = 3000;
 
-    public FileChunksTransport(HttpClientHelper httpClientHelper, String svrUrl) {
-        this.svrUrl = svrUrl;
-        this.httpClientHelper = httpClientHelper;
+    public FileChunksTransport(FileTransportService fileTransportService) {
+        this.fileTransportService = fileTransportService;
     }
 
-    public FileChunksTransport(HttpClientHelper httpClientHelper, String svrUrl, String downloadFilePath) {
-        this.svrUrl = svrUrl;
-        this.downloadFilePath = downloadFilePath;
-        this.httpClientHelper = httpClientHelper;
-    }
+
 
     public SendResult upload(String localFile, String topic, String groupId) throws BrokerException, IOException, InterruptedException {
         log.info("try to upload file {}", localFile);
@@ -109,6 +97,7 @@ public class FileChunksTransport {
             return;
         }
 
+        /*
         // if chunk upload failed, sleep and retry again
         for (int i = 1; i <= INVOKE_CGI_FAIL_RETRY_COUNT; i++) {
             Thread.sleep(INVOKE_CGI_FAIL_SLEEP_MILLISECOND * i);
@@ -117,11 +106,13 @@ public class FileChunksTransport {
                 return;
             }
         }
+         */
 
         log.error("retry {}th upload chunk failed, {}@{}", INVOKE_CGI_FAIL_RETRY_COUNT, fileChunksMeta.getFileId(), chunkIdx);
         throw new BrokerException(ErrorCode.FILE_UPLOAD_FAILED);
     }
 
+    /*
     public String download(FileChunksMeta fileChunksMeta) throws BrokerException, IOException {
         String fileId = fileChunksMeta.getFileId();
         String host = fileChunksMeta.getHost();
@@ -167,87 +158,86 @@ public class FileChunksTransport {
         log.info("download file success, {} -> {}", fileId, fileName);
         return fileName;
     }
+     */
 
     private FileChunksMeta openFileChunksInfo(FileChunksMeta fileChunksMeta) throws BrokerException {
-        HttpGet httpGet;
+        // 1. 验证参数合法性
+        ParamCheckUtils.validateFileName(fileChunksMeta.getFileName());
+        ParamCheckUtils.validateFileSize(fileChunksMeta.getFileSize());
+        ParamCheckUtils.validateFileMd5(fileChunksMeta.getFileMd5());
+
+
+        // 2. 构造参数
+        FileChunksMeta newFileChunksMeta;
         try {
-            httpGet = new HttpGet(String.format("%s/openChunk?topic=%s&groupId=%s&fileName=%s&fileSize=%s&md5=%s", this.svrUrl,
-                    fileChunksMeta.getTopic(),
-                    fileChunksMeta.getGroupId(),
-                    URLEncoder.encode(fileChunksMeta.getFileName(), StandardCharsets.UTF_8.toString()),
-                    fileChunksMeta.getFileSize(),
-                    fileChunksMeta.getFileMd5()));
+            newFileChunksMeta = new FileChunksMeta(WeEventUtils.generateUuid(),
+                URLDecoder.decode(fileChunksMeta.getFileName(), StandardCharsets.UTF_8.toString()),
+                fileChunksMeta.getFileSize(),
+                fileChunksMeta.getFileMd5(),
+                fileChunksMeta.getTopic(),
+                fileChunksMeta.getGroupId());
         } catch (UnsupportedEncodingException e) {
-            log.error("encode fileName error, fileName: {}", fileChunksMeta.getFileName(), e);
-            throw new BrokerException(ErrorCode.ENCODE_FILE_NAME_ERROR);
+            log.error("decode fileName error", e);
+            throw new BrokerException(ErrorCode.DECODE_FILE_NAME_ERROR);
         }
 
-        return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<FileChunksMeta>>() {
-        }).getData();
+        // 2. create AMOP channel with FileTransportSender
+        FileChunksMeta remoteFileChunksMeta = this.fileTransportService.openChannel(newFileChunksMeta);
+        return remoteFileChunksMeta;
     }
 
 
     private FileChunksMeta getFileChunksInfo(String topic, String groupId, String fileId) throws BrokerException {
-        HttpGet httpGet = new HttpGet(String.format("%s/listChunk?topic=%s&groupId=%s&fileId=%s", this.svrUrl, topic, groupId, fileId));
+        // 1. 验证参数有效性
+        ParamCheckUtils.validateFileId(fileId);
 
-        return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<FileChunksMeta>>() {
-        }).getData();
+        // 2. 调用服务
+
+
+
+        FileChunksMeta fileChunksMeta = fileTransportService.getReceiverFileChunksMeta(topic, groupId, fileId);
+
+        return fileChunksMeta;
     }
 
-    private boolean uploadChunk(FileChunksMeta local, int chunkIdx, byte[] chunkData) {
-        HttpPost httpPost = new HttpPost(this.svrUrl + "/uploadChunk");
+    private boolean uploadChunk(FileChunksMeta local, int chunkIdx, byte[] chunkData) throws BrokerException {
+        // 1. 验证参数有效性
+        ParamCheckUtils.validateFileId(local.getFileId());
+        ParamCheckUtils.validateChunkIdx(chunkIdx);
+        ParamCheckUtils.validateChunkData(chunkData);
 
-        MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setMode(HttpMultipartMode.RFC6532);
-        multipartEntityBuilder.addTextBody("topic", local.getTopic());
-        multipartEntityBuilder.addTextBody("groupId", local.getGroupId());
-        multipartEntityBuilder.addTextBody("fileId", local.getFileId());
-        multipartEntityBuilder.addTextBody("chunkIdx", String.valueOf(chunkIdx));
-        multipartEntityBuilder.addBinaryBody("chunkData", chunkData, ContentType.DEFAULT_BINARY, local.getFileId());
-        HttpEntity requestEntity = multipartEntityBuilder.build();
-        httpPost.setEntity(requestEntity);
+        // 2. 调用服务
+        fileTransportService.sendChunkData(local.getTopic(), local.getGroupId(), local.getFileId(), chunkIdx, chunkData);
 
-        try {
-            this.httpClientHelper.invokeCGI(httpPost, new TypeReference<BaseResponse<ObjectUtils.Null>>() {
-            });
-        } catch (BrokerException e) {
-            log.error("upload chunk failed, {}@{} ", local.getFileId(), chunkIdx);
-            return false;
-        }
         return true;
     }
 
-    private byte[] downloadChunk(String host, String fileId, int chunkIdx) {
-        byte[] chunkDataBytes = new byte[0];
-        long requestStartTime = System.currentTimeMillis();
-        HttpGet httpGet = new HttpGet(String.format("%s/downloadChunk?fileId=%s&chunkIdx=%s", this.svrUrl, fileId, chunkIdx));
-        httpGet.addHeader("file_host", host);
+    private byte[] downloadChunk(String host, String fileId, int chunkIdx) throws BrokerException {
+        // 1. 验证参数有效性
+        ParamCheckUtils.validateFileId(fileId);
+        ParamCheckUtils.validateChunkIdx(chunkIdx);
 
-        try (CloseableHttpResponse httpResponse = this.httpClientHelper.buildHttpClient().execute(httpGet)) {
-            log.info("invokeCGI {} in {} millisecond, response:{}", httpGet.getURI(),
-                    System.currentTimeMillis() - requestStartTime, httpResponse.getStatusLine().toString());
-            if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode() || null == httpResponse.getEntity()) {
-                log.error("download chunk failed, {}@{}", fileId, chunkIdx);
-                return chunkDataBytes;
-            }
-
-            chunkDataBytes = EntityUtils.toByteArray(httpResponse.getEntity());
-            if (chunkDataBytes.length == 0) {
-                log.error("download chunk failed, {}@{}", fileId, chunkIdx);
-                return chunkDataBytes;
-            }
-            log.info("download chunk success, {}@{} {}", fileId, chunkIdx, chunkDataBytes.length);
-        } catch (IOException e) {
-            log.error("download chunk error, request url:{}", httpGet.getURI(), e);
+        // 2. 调用服务
+        byte[] downloadChunkBytes = this.fileTransportService.downloadChunk(fileId, chunkIdx);
+        if (downloadChunkBytes.length == 0) {
+            throw new BrokerException(ErrorCode.FILE_DOWNLOAD_ERROR);
         }
-        return chunkDataBytes;
+
+        return downloadChunkBytes;
     }
 
     private SendResult closeChunk(FileChunksMeta local) throws BrokerException {
-        HttpGet httpGet = new HttpGet(String.format("%s/closeChunk?topic=%s&groupId=%s&fileId=%s", this.svrUrl, local.getTopic(), local.getGroupId(), local.getFileId()));
+        // 1. 验证参数有效性
+        ParamCheckUtils.validateFileId(local.getFileId());
 
-        return this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<SendResult>>() {
-        }).getData();
+        // 2. 调用服务
+        // close channel and send WeEvent
+        SendResult sendResult = this.fileTransportService.closeChannel(local.getTopic(), local.getGroupId(), local.getFileId());
+
+        return sendResult;
     }
+
+
 
     private boolean checkChunkFullUpload(RandomAccessFile f, FileChunksMeta local) throws InterruptedException {
         boolean isFullUpload = false;
