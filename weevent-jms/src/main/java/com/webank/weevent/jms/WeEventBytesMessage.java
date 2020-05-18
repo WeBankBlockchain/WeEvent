@@ -1,4 +1,4 @@
-package com.webank.weevent.client.jms;
+package com.webank.weevent.jms;
 
 
 import java.util.Enumeration;
@@ -38,7 +38,7 @@ public class WeEventBytesMessage implements BytesMessage {
     // BytesMessage override methods
 
     @Override
-    public long getBodyLength() throws JMSException {
+    public long getBodyLength() {
         if (this.bytes == null) {
             return 0;
         }
