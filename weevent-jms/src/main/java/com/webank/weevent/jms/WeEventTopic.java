@@ -1,4 +1,4 @@
-package com.webank.weevent.client.jms;
+package com.webank.weevent.jms;
 
 
 import javax.jms.Topic;
@@ -57,4 +57,5 @@ public class WeEventTopic implements Topic {
     public void setFile(boolean file) {
         this.isFile = file;
     }
+
 }
