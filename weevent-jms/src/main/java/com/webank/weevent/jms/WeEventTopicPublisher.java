@@ -1,4 +1,4 @@
-package com.webank.weevent.client.jms;
+package com.webank.weevent.jms;
 
 
 import javax.jms.BytesMessage;
@@ -28,7 +28,7 @@ public class WeEventTopicPublisher implements TopicPublisher {
 
     // TopicPublisher override methods
     @Override
-    public Topic getTopic() throws JMSException {
+    public Topic getTopic() {
         return this.topic;
     }
 
@@ -64,7 +64,7 @@ public class WeEventTopicPublisher implements TopicPublisher {
     }
 
     @Override
-    public boolean getDisableMessageID() throws JMSException {
+    public boolean getDisableMessageID() {
         return false;
     }
 
@@ -74,7 +74,7 @@ public class WeEventTopicPublisher implements TopicPublisher {
     }
 
     @Override
-    public boolean getDisableMessageTimestamp() throws JMSException {
+    public boolean getDisableMessageTimestamp() {
         return false;
     }
 
@@ -84,7 +84,7 @@ public class WeEventTopicPublisher implements TopicPublisher {
     }
 
     @Override
-    public int getDeliveryMode() throws JMSException {
+    public int getDeliveryMode() {
         return 0;
     }
 
@@ -94,7 +94,7 @@ public class WeEventTopicPublisher implements TopicPublisher {
     }
 
     @Override
-    public int getPriority() throws JMSException {
+    public int getPriority() {
         return 0;
     }
 
@@ -104,17 +104,17 @@ public class WeEventTopicPublisher implements TopicPublisher {
     }
 
     @Override
-    public long getTimeToLive() throws JMSException {
+    public long getTimeToLive() {
         return 0;
     }
 
     @Override
-    public Destination getDestination() throws JMSException {
+    public Destination getDestination() {
         return this.topic;
     }
 
     @Override
-    public void close() throws JMSException {
+    public void close() {
         log.info("close WeEventTopicPublisher.");
     }
 

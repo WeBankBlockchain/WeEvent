@@ -1,11 +1,10 @@
-package com.webank.weevent.client.jms;
+package com.webank.weevent.client.stomp;
 
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-import javax.jms.JMSException;
-
+import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.WeEvent;
 
@@ -36,7 +35,7 @@ public class WeEventStompCommand {
     private final static int stompHeartBeat = 30;
 
     private String subscriptionId;
-    private WeEventTopic topic;
+    private TopicContent topic;
     private WeEvent event;
     private String headerId;
 
@@ -65,10 +64,10 @@ public class WeEventStompCommand {
         accessor.setAcceptVersion(stompVersion);
         accessor.setHeartbeat(stompHeartBeat, 0);
 
-        if (!userName.isEmpty()) {
+        if (StringUtils.isNotBlank(userName)) {
             accessor.setLogin(userName);
         }
-        if (!password.isEmpty()) {
+        if (StringUtils.isNotBlank(password)) {
             accessor.setPasscode(password);
         }
 
@@ -81,7 +80,7 @@ public class WeEventStompCommand {
         return encodeRaw(accessor);
     }
 
-    public String encodeSubscribe(WeEventTopic topic, Long id) {
+    public String encodeSubscribe(TopicContent topic, Long id) {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
         accessor.setDestination(topic.getTopicName());
         accessor.setNativeHeader("eventId", topic.getOffset());
@@ -107,7 +106,7 @@ public class WeEventStompCommand {
     }
 
     // payload is WeEvent
-    public String encodeSend(Long id, WeEventTopic topic, WeEvent weEvent) throws JMSException {
+    public String encodeSend(Long id, TopicContent topic, WeEvent weEvent) {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SEND);
         accessor.setDestination(topic.getTopicName());
         accessor.setContentType(new MimeType("text", "plain", StandardCharsets.UTF_8));
@@ -123,14 +122,14 @@ public class WeEventStompCommand {
         return encodeRaw(accessor, weEvent.getContent());
     }
 
-    public void checkError(StompHeaderAccessor stompHeaderAccessor) throws JMSException {
+    public void checkError(StompHeaderAccessor stompHeaderAccessor) throws BrokerException {
         if (StompCommand.ERROR == stompHeaderAccessor.getCommand()) {
             String message = stompHeaderAccessor.getMessage();
             log.error("message in ERROR frame, {}", message);
             if (!StringUtils.isEmpty(message)) {
-                throw new JMSException(message);
+                throw new BrokerException(message);
             } else {
-                throw WeEventConnectionFactory.error2JMSException(ErrorCode.SDK_JMS_EXCEPTION_STOMP_EXECUTE);
+                throw new BrokerException(ErrorCode.SDK_JMS_EXCEPTION_STOMP_EXECUTE);
             }
         }
     }
