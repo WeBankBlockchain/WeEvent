@@ -252,7 +252,7 @@ public class Web3SDK2Wrapper {
 
                     WeEvent event = SupportedVersion.decodeWeEvent(timestamp, receipt, version.intValue(), historyTopic);
                     if (event != null) {
-                        log.debug("get a event from block chain: {}", event);
+                        log.debug("get an event from block chain: {}", event);
                         events.add(event);
                     }
                 }

@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
@@ -16,6 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.IWeEventClient;
+import com.webank.weevent.client.SendResult;
 import com.webank.weevent.client.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
@@ -205,6 +207,43 @@ public class WebSocketTransport extends WebSocketClient {
 
         // handler stompResponse
         return stompHeaderAccessor.getFirstNativeHeader("eventId");
+    }
+
+    // return CompletableFuture
+    public CompletableFuture<SendResult> stompSendAsync(TopicContent topic, WeEvent event) throws BrokerException {
+        // header id equal asyncSeq
+        WeEventStompCommand stompCommand = new WeEventStompCommand();
+        Long asyncSeq = (this.sequence.incrementAndGet());
+        String req = stompCommand.encodeSend(asyncSeq, topic, event);
+        this.sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
+
+        CompletableFuture<SendResult> future = CompletableFuture.supplyAsync(() -> {
+            // asyncSeq use for synchronous to asynchronous
+            ResponseFuture response = new ResponseFuture(asyncSeq);
+
+            SendResult sendResult = new SendResult();
+            sendResult.setTopic(event.getTopic());
+
+            log.info("stomp request, seq: {} size: {}", asyncSeq, req.length());
+            this.send(req);
+            try {
+                Message<?> stompResponse = response.get();
+                StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(stompResponse);
+                stompCommand.checkError(stompHeaderAccessor);
+                sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+                sendResult.setEventId(stompHeaderAccessor.getFirstNativeHeader("eventId"));
+            } catch (InterruptedException e) {
+                log.error("stomp command invoke Interrupted, seq: " + asyncSeq);
+                sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+                Thread.currentThread().interrupt();
+            } catch (BrokerException e) {
+                log.error("stomp command invoke error, seq: " + asyncSeq, e);
+                sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+            }
+            return sendResult;
+        });
+
+        return future;
     }
 
     // return subscriptionId

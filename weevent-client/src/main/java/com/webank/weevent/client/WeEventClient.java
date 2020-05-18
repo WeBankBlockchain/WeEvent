@@ -14,6 +14,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -171,6 +172,18 @@ public class WeEventClient implements IWeEventClient {
         }
 
         return sendResult;
+    }
+
+    @Override
+    public CompletableFuture<SendResult> publishAsync(WeEvent weEvent) throws BrokerException {
+        validateWeEvent(weEvent);
+        log.info("start to publish: {}", weEvent);
+
+        TopicContent weEventTopic = new TopicContent(weEvent.getTopic());
+        weEventTopic.setGroupId(this.groupId);
+
+        checkConnected();
+        return this.transport.stompSendAsync(weEventTopic, weEvent);
     }
 
     @Override
