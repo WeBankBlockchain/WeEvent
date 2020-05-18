@@ -1,4 +1,4 @@
-package com.webank.weevent.client.jms;
+package com.webank.weevent.jms;
 
 
 import javax.jms.JMSException;
@@ -6,6 +6,8 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
+
+import com.webank.weevent.client.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,13 +45,13 @@ public class WeEventTopicSubscriber implements TopicSubscriber, CommandDispatche
     }
 
     @Override
-    public void dispatch(WeEventStompCommand command) {
+    public void dispatch(WeEvent event) {
         WeEventBytesMessage message = new WeEventBytesMessage();
         try {
-            message.setJMSMessageID(command.getEvent().getEventId());
-            message.writeBytes(command.getEvent().getContent());
-            message.setExtensions(command.getEvent().getExtensions());
-            message.setJMSDestination(command.getTopic());
+            message.setJMSMessageID(event.getEventId());
+            message.writeBytes(event.getContent());
+            message.setExtensions(event.getExtensions());
+            message.setJMSDestination(new WeEventTopic(event.getTopic()));
             this.messageListener.onMessage(message);
         } catch (JMSException e) {
             log.error("write WeEvent into BytesMessage failed", e);
@@ -59,49 +61,50 @@ public class WeEventTopicSubscriber implements TopicSubscriber, CommandDispatche
     // TopicSubscriber override methods
 
     @Override
-    public Topic getTopic() throws JMSException {
+    public Topic getTopic() {
         return this.topic;
     }
 
     @Override
-    public boolean getNoLocal() throws JMSException {
+    public boolean getNoLocal() {
         return false;
     }
 
     // MessageConsumer override methods
 
     @Override
-    public String getMessageSelector() throws JMSException {
+    public String getMessageSelector() {
         return null;
     }
 
     @Override
-    public MessageListener getMessageListener() throws JMSException {
+    public MessageListener getMessageListener() {
         return this.messageListener;
     }
 
     @Override
-    public void setMessageListener(MessageListener messageListener) throws JMSException {
+    public void setMessageListener(MessageListener messageListener) {
         this.messageListener = messageListener;
     }
 
     @Override
-    public Message receive() throws JMSException {
+    public Message receive() {
         return null;
     }
 
     @Override
-    public Message receive(long l) throws JMSException {
+    public Message receive(long l) {
         return null;
     }
 
     @Override
-    public Message receiveNoWait() throws JMSException {
+    public Message receiveNoWait() {
         return null;
     }
 
     @Override
-    public void close() throws JMSException {
-
+    public void close() {
+        log.info("close subscribe.");
     }
+
 }
