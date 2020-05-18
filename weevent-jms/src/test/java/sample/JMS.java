@@ -14,8 +14,6 @@ import javax.jms.TopicSubscriber;
 
 import com.webank.weevent.jms.WeEventConnectionFactory;
 
-import lombok.extern.slf4j.Slf4j;
-
 
 /**
  * Samples of JMS interface.
@@ -23,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
  * @author matthewliu
  * @since 2019/04/08
  */
-@Slf4j
 public class JMS {
     private final static String topicName = "com.weevent.test";
     private final static String defaultBrokerUrl = "http://localhost:7000/weevent-broker";
