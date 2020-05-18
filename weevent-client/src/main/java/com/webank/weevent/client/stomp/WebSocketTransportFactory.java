@@ -1,10 +1,9 @@
-package com.webank.weevent.client.jms;
+package com.webank.weevent.client.stomp;
 
 
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
-import javax.jms.JMSException;
 import javax.net.ssl.SSLContext;
 
 import com.webank.weevent.client.BrokerException;
@@ -27,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 public class WebSocketTransportFactory {
     private static int heartbeat = 30;
 
-    public static WebSocketTransport create(URI uri, int timeout) throws JMSException {
+    public static WebSocketTransport create(URI uri, int timeout) throws BrokerException {
         try {
             WebSocketTransport client = new WebSocketTransport(uri);
             if (uri.toString().startsWith("wss")) {
@@ -45,18 +44,15 @@ public class WebSocketTransportFactory {
             boolean result = client.connectBlocking(timeout, TimeUnit.SECONDS);
             if (!result) {
                 log.error("connect to remote failed, {}", uri.toString());
-                throw WeEventConnectionFactory.error2JMSException(ErrorCode.URL_CONNECT_FAILED);
+                throw new BrokerException(ErrorCode.URL_CONNECT_FAILED);
             }
 
             log.info("connect to remote success, {}", uri.toString());
             return client;
-        } catch (BrokerException e) {
-            log.error("connect to remote failed, {}", uri.toString());
-            throw WeEventConnectionFactory.exp2JMSException(e);
         } catch (InterruptedException e) {
             log.error("interrupted while connecting, {}", uri.toString());
             Thread.currentThread().interrupt();
-            throw WeEventConnectionFactory.error2JMSException(ErrorCode.URL_CONNECT_FAILED);
+            throw new BrokerException(ErrorCode.URL_CONNECT_FAILED);
         }
     }
 }

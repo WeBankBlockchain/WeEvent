@@ -193,8 +193,8 @@ public class StompTest extends JUnitTestBase {
     }
 
     @Test
-    public void testSend() {
-        this.stompSession.subscribe(this.header, new StompFrameHandler() {
+    public void testSend() throws InterruptedException {
+        StompSession.Subscription subscription = this.stompSession.subscribe(this.header, new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
                 return String.class;
@@ -206,7 +206,17 @@ public class StompTest extends JUnitTestBase {
             }
         });
 
+        Thread.sleep(wait3s);
+        subscription.addReceiptTask(() -> {
+            log.info("subscribe success");
+        });
+
         StompSession.Receiptable receipt = this.stompSession.send(topic, "hello WeEvent from web socket");
+        Thread.sleep(wait3s);
+        receipt.addReceiptTask(() -> {
+            log.info("publish event success.");
+        });
+
         Assert.assertNotNull(receipt.getReceiptId());
     }
 
