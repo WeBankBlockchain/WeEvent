@@ -316,7 +316,7 @@ export default {
       functionArray: []
     }
   },
-  components: {tree, ruleDes},
+  components: { tree, ruleDes },
   computed: {
     brokerId () {
       return this.$store.state.brokerId
