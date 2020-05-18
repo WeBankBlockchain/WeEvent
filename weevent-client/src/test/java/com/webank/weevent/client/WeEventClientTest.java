@@ -89,7 +89,7 @@ public class WeEventClientTest {
 
             @Override
             public void onException(Throwable e) {
-                log.error("onException", e);
+                log.error("onException:", e);
                 Assert.fail();
             }
         });
