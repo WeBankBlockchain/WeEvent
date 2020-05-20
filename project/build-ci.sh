@@ -84,7 +84,6 @@ function startBrokerService() {
 }
 
 function main(){
-    modifyMavenRepo
     updateOpenssl
     installFisco
     installZookeeper

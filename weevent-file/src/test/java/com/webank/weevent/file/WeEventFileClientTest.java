@@ -1,47 +1,47 @@
 package com.webank.weevent.file;
 
-import com.webank.weevent.client.IWeEventClient;
 import com.webank.weevent.client.SendResult;
 import com.webank.weevent.core.config.FiscoConfig;
-import com.webank.weevent.file.inner.FileTransportService;
+import com.webank.weevent.file.dto.FileTransportStats;
+import com.webank.weevent.file.service.FileChunksMeta;
 import com.webank.weevent.file.service.WeEventFileClient;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TestName;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @Slf4j
 public class WeEventFileClientTest {
 
-    private Map<String, String> extensions = new HashMap<>();
-    private final long FIVE_SECOND= 5000L;
-
-    @Rule
-    public TestName testName = new TestName();
-
     private String topicName = "com.weevent.test";
-    private IWeEventClient weEventClient;
-
-
-    private FileTransportService fileTransportService;
+    private String groupId = "1";
+    private String receiverFilePath = "./logs";
+    // chunk size 1MB
+    private int fileChunkSize = 1048576;
     private FiscoConfig fiscoConfig;
+
+
+    @Before
+    public void before() {
+        this.fiscoConfig = new FiscoConfig();
+        this.fiscoConfig.load("");
+    }
 
 
     @Test
     @Ignore
     public void testPublishFile() throws Exception {
-        FiscoConfig fiscoConfig = new FiscoConfig();
-        Assert.assertTrue(fiscoConfig.load(""));
-        WeEventFileClient weEventFileClient = new WeEventFileClient("1", fiscoConfig);
+        WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.receiverFilePath, this.fileChunkSize, this.fiscoConfig);
 
-        SendResult sendResult = weEventFileClient.publishFile("com.weevent.file",
-                new File("src/main/resources/apache-jmeter-5.1.1.zip").getAbsolutePath());
+        weEventFileClient.openTransport4Sender(topicName);
+        SendResult sendResult = weEventFileClient.publishFile(this.topicName,
+                new File("src/main/resources/ca.crt").getAbsolutePath());
 
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
@@ -49,24 +49,87 @@ public class WeEventFileClientTest {
     @Test
     @Ignore
     public void testSubscribeFile() throws Exception {
-        FiscoConfig fiscoConfig = new FiscoConfig();
-        fiscoConfig.load("");
         IWeEventFileClient.FileListener fileListener = new IWeEventFileClient.FileListener() {
             @Override
             public void onFile(String topicName, String fileName) {
                 log.info("+++++++topic name: {}, file name: {}", topicName, fileName);
-                System.out.println(new File("./logs1"+fileName).getAbsolutePath());
+                System.out.println(new File(receiverFilePath +fileName).getAbsolutePath());
             }
 
             @Override
             public void onException(Throwable e) {
-
+                e.printStackTrace();
             }
         };
 
-        WeEventFileClient weEventFileClient = new WeEventFileClient("1", "./logs1", fiscoConfig);
-        weEventFileClient.subscribeFile("com.weevent.file", "./logs1", fileListener);
+        WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.receiverFilePath, this.fileChunkSize, this.fiscoConfig);
+        weEventFileClient.openTransport4Receiver(this.topicName, fileListener);
 
-        Thread.sleep(1000*60*10);
+        Thread.sleep(1000*60*5);
+    }
+
+    @Test
+    @Ignore
+    public void testPublishFileWithVerify() throws Exception {
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        Resource resource = resolver.getResource("classpath:" + "0x2809a9902e47d6fcaabe6d0183855d9201c93af1.public.pem");
+
+        WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.receiverFilePath, this.fileChunkSize, this.fiscoConfig);
+
+        weEventFileClient.openTransport4Sender(this.topicName, resource.getInputStream());
+
+        // handshake time delay for web3sdk
+        Thread.sleep(1000*10);
+
+        SendResult sendResult = weEventFileClient.publishFile("com.weevent.file",
+                new File("src/main/resources/ca.crt").getAbsolutePath());
+
+        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
+    }
+
+    @Test
+    @Ignore
+    public void testSubscribeFileWithVerify() throws Exception {
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        Resource resource = resolver.getResource("classpath:" + "0x2809a9902e47d6fcaabe6d0183855d9201c93af1.pem");
+
+        IWeEventFileClient.FileListener fileListener = new IWeEventFileClient.FileListener() {
+            @Override
+            public void onFile(String topicName, String fileName) {
+                log.info("+++++++topic name: {}, file name: {}", topicName, fileName);
+                System.out.println(new File(receiverFilePath +fileName).getAbsolutePath());
+            }
+
+            @Override
+            public void onException(Throwable e) {
+                e.printStackTrace();
+            }
+        };
+
+        WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.receiverFilePath, this.fileChunkSize, this.fiscoConfig);
+        weEventFileClient.openTransport4Receiver("com.weevent.file", fileListener, resource.getInputStream());
+
+        Thread.sleep(1000*60*5);
+    }
+
+    @Test
+    @Ignore
+    public void testCloseTransport() {
+        WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.receiverFilePath,this.fileChunkSize, this.fiscoConfig);
+        weEventFileClient.closeTransport(this.topicName);
+    }
+
+    @Test
+    @Ignore
+    public void testListFile() {
+        WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.receiverFilePath, this.fileChunkSize, this.fiscoConfig);
+        List<FileChunksMeta> fileChunksMetaList = weEventFileClient.listFiles(this.topicName);
+    }
+
+    @Test
+    @Ignore
+    public void testStatus() {
+        WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.receiverFilePath, this.fileChunkSize, this.fiscoConfig);
+        FileTransportStats fileTransportStats = weEventFileClient.status(this.topicName);
     }
 }

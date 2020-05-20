@@ -1,40 +1,65 @@
 package com.webank.weevent.file;
 
-import com.webank.weevent.client.*;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.SendResult;
 import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.file.dto.FileTransportStats;
 import com.webank.weevent.file.service.FileChunksMeta;
-import lombok.NonNull;
+import com.webank.weevent.file.service.WeEventFileClient;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 public interface IWeEventFileClient {
-    public static IWeEventFileClient build(FiscoConfig fiscoConfig, String groupId) {
-        return null;
+    public static IWeEventFileClient build(String groupId, String filePath, int fileChunkSize, FiscoConfig fiscoConfig) {
+        return new WeEventFileClient(groupId, filePath, fileChunkSize, fiscoConfig);
     }
 
     /**
-     * publish file
-     *
      * @param topic topic name
-     * @throws BrokerException exception
      */
-    void openTransport4Sender(String topic) throws BrokerException;
+    void openTransport4Sender(String topic);
+
+    /**
+     * @param topic topic name
+     * @param publicPem public pem inputstream
+     * @throws BrokerException broker exception
+     */
     void openTransport4Sender(String topic, InputStream publicPem) throws BrokerException;
-    void openTransport4Sender(String topic, String publicPem);
 
-
-    /**l
-     * subscribe file
-     *
+    /**
      * @param topic topic name
-     * @param filePath receive file in filePath
-     * @param fileListener file listener call back
+     * @param publicPem public pem path string
+     * @throws BrokerException broker exception
+     * @throws IOException IOException
      */
-    void openTransport4Receiver(String topic, String filePath, FileListener fileListener);
-    void openTransport4Receiver(String topic, String filePath, FileListener fileListener, InputStream privatePem);
-    void openTransport4Receiver(String topic, String filePath, FileListener fileListener, String privatePem);
+    void openTransport4Sender(String topic, String publicPem) throws BrokerException, IOException;
+
+
+    /**
+     * @param topic topic name
+     * @param fileListener notify interface
+     * @throws BrokerException broker exception
+     */
+    void openTransport4Receiver(String topic, FileListener fileListener) throws BrokerException;
+
+    /**
+     * @param topic topic name
+     * @param fileListener notify interface
+     * @param privatePem private key pem inputstream
+     * @throws BrokerException broker exception
+     */
+    void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem) throws BrokerException;
+
+    /**
+     * @param topic topic name
+     * @param fileListener notify interface
+     * @param privatePem private key pem path string
+     * @throws IOException IOException
+     * @throws BrokerException InterruptedException
+     */
+    void openTransport4Receiver(String topic, FileListener fileListener, String privatePem) throws IOException, BrokerException;
 
     /**
      * invoke unSubTopic
@@ -42,8 +67,18 @@ public interface IWeEventFileClient {
      * @param topic topic name
      */
     void closeTransport(String topic);
+
+    /**
+     * @param topic topic name
+     * @return filetransportstatus
+     */
     FileTransportStats status(String topic);
-    FileChunksMeta listFiles(String topic);
+
+    /**
+     * @param topic topic name
+     * @return filechunksmeta list
+     */
+    List<FileChunksMeta> listFiles(String topic);
 
     /**
      * Publish a file to topic.
@@ -77,14 +112,4 @@ public interface IWeEventFileClient {
          */
         void onException(Throwable e);
     }
-
-    /**
-     * Subscribe file from topic.
-     *
-     * @param topic topic name
-     * @param filePath file path to store arriving file
-     * @param fileListener notify interface
-     * @throws BrokerException broker exception
-     */
-    void  subscribeFile(String topic, String filePath, @NonNull FileListener fileListener) throws BrokerException;
 }
