@@ -2,8 +2,6 @@ package com.webank.weevent.file;
 
 import com.webank.weevent.client.SendResult;
 import com.webank.weevent.core.config.FiscoConfig;
-import com.webank.weevent.file.dto.FileTransportStats;
-import com.webank.weevent.file.service.FileChunksMeta;
 import com.webank.weevent.file.service.WeEventFileClient;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
@@ -14,7 +12,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.io.File;
-import java.util.List;
 
 @Slf4j
 public class WeEventFileClientTest {
