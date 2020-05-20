@@ -305,5 +305,15 @@ module.exports = {
     'enterSQL': '请填写SQl文本',
     'selectDB': '请选择数据源',
     'errorCorn': '参数无效'
+  },
+  ruleDes: {
+    'conditionDes': '过滤条件说明',
+    'desTitle': '通过操作页面上的条件栏，用户可以在SQL语句中生成相应的规则触发条件',
+    'creatOption': '创建条件语句',
+    'creatOptionDes': '单击右侧的“添加”按钮可以生成空白的条件语句列，多次点击可以添加多个条件语句。各条件语句由关系字符 “and” “or”进行拼接',
+    'editOption': '编辑条件语句',
+    'editOptionDes': '用户可以通过选择Key并设置相应的关系符及值即可生成相应的条件语句，同时还支持内置函数对key进行处理。<br/>例如: abs(age) >= 20',
+    'optionMap': '条件语句结构编辑',
+    'optionMapDes': '对于复杂的条件语句，该页面现在不仅支持条件语句的水平关联，还支持条件语句的嵌套。单击每个条件栏末尾的“添加”按钮以生成相应的子选项栏, 该选项栏将与其父级形成嵌套关系<br/>例如: (abs(age) >= 20 and name != "Kevin") or age >= 30'
   }
 }
