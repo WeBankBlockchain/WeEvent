@@ -6,7 +6,6 @@ import java.util.concurrent.Executor;
 
 import com.webank.weevent.broker.config.WeEventConfig;
 import com.webank.weevent.broker.filter.HttpInterceptorConfig;
-import com.webank.weevent.broker.fisco.file.FileTransportService;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.core.IConsumer;
 import com.webank.weevent.core.IProducer;
@@ -33,7 +32,6 @@ import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactor
 import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.env.Environment;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -177,18 +175,6 @@ public class BrokerApplication {
         FabricBroker4Consumer fabricBroker4Consumer = new FabricBroker4Consumer(fabricDelegate);
         fabricBroker4Consumer.startConsumer();
         return fabricBroker4Consumer;
-    }
-
-    @Bean
-    public FileTransportService getFileService(FiscoConfig fiscoConfig,
-                                               IProducer iProducer,
-                                               Environment environment,
-                                               WeEventConfig weEventConfig) throws BrokerException {
-        return new FileTransportService(fiscoConfig,
-                iProducer,
-                environment.getProperty("spring.cloud.zookeeper.discovery.instance-id"),
-                weEventConfig.getFilePath(),
-                weEventConfig.getFileChunkSize());
     }
 
     // http filter

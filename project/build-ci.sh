@@ -3,6 +3,13 @@
 current_path=$(pwd)
 java_home_path=$(echo ${JAVA_HOME})
 
+function modifyMavenRepo(){
+  cd ${current_path}
+  sed -i 'N;118a*/' ./build.gradle
+  sed -i 'N;82a*/' ./build.gradle
+  sed -i '/repositories {/a\/*' ./build.gradle
+}
+
 function updateOpenssl(){
     # update openssl version
     echo "updateOpenssl"

@@ -2,30 +2,25 @@ package com.webank.weevent.client;
 
 
 import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import javax.jms.JMSException;
-import javax.jms.Session;
-import javax.jms.Topic;
-import javax.jms.TopicConnection;
-import javax.jms.TopicSession;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import com.webank.weevent.client.jms.WeEventBytesMessage;
-import com.webank.weevent.client.jms.WeEventConnectionFactory;
-import com.webank.weevent.client.jms.WeEventTopic;
-import com.webank.weevent.client.jms.WeEventTopicPublisher;
-import com.webank.weevent.client.jms.WeEventTopicSubscriber;
+import com.webank.weevent.client.stomp.TopicContent;
+import com.webank.weevent.client.stomp.WebSocketTransport;
+import com.webank.weevent.client.stomp.WebSocketTransportFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.NonNull;
@@ -42,12 +37,10 @@ public class WeEventClient implements IWeEventClient {
     private final String password;
 
     // default STOMP url, ws://localhost:8080/weevent-broker/stomp
-    private WeEventConnectionFactory connectionFactory;
-    // stomp connection
-    private TopicConnection connection;
-    // (subscriptionId <-> TopicSession)
-    private Map<String, TopicSession> sessionMap;
+    private final String brokerStompUrl = "ws://localhost:7000/weevent-broker/stomp";
+    private List<String> subscribeIdList;
     private HttpClientHelper httpClientHelper;
+    private WebSocketTransport transport;
 
     WeEventClient(String brokerUrl, String groupId, String userName, String password, int timeout) throws BrokerException {
         validateParam(brokerUrl);
@@ -58,24 +51,18 @@ public class WeEventClient implements IWeEventClient {
         this.userName = userName;
         this.password = password;
         this.httpClientHelper = new HttpClientHelper(timeout);
+        this.subscribeIdList = Collections.synchronizedList(new ArrayList<>());
 
-        buildJms();
+        buildStomp();
     }
 
     @Override
     public boolean unSubscribe(String subscriptionId) throws BrokerException {
         validateParam(subscriptionId);
 
-        if (this.sessionMap.containsKey(subscriptionId)) {
-            TopicSession session = this.sessionMap.get(subscriptionId);
-            try {
-                session.unsubscribe(subscriptionId);
-            } catch (JMSException e) {
-                log.error("jms exception", e);
-                throw jms2BrokerException(e);
-            }
-
-            this.sessionMap.remove(subscriptionId);
+        if (this.subscribeIdList.contains(subscriptionId) && this.transport.isConnected()) {
+            this.transport.stompUnSubscribe(subscriptionId);
+            this.subscribeIdList.remove(subscriptionId);
             return true;
         }
 
@@ -165,27 +152,18 @@ public class WeEventClient implements IWeEventClient {
         SendResult sendResult = new SendResult();
         sendResult.setTopic(weEvent.getTopic());
         try {
-            TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-            // create topic
-            WeEventTopic weEventTopic = (WeEventTopic) session.createTopic(weEvent.getTopic());
+            TopicContent weEventTopic = new TopicContent(weEvent.getTopic());
             weEventTopic.setGroupId(this.groupId);
 
-            // create bytesMessage
-            WeEventBytesMessage weEventBytesMessage = new WeEventBytesMessage();
-            weEventBytesMessage.writeBytes(weEvent.getContent());
-            weEventBytesMessage.setExtensions(weEvent.getExtensions());
             // publish
-            WeEventTopicPublisher publisher = (WeEventTopicPublisher) session.createPublisher(weEventTopic);
-            publisher.publish(weEventBytesMessage);
+            checkConnected();
+            String eventId = this.transport.stompSend(weEventTopic, weEvent);
 
             // return
             sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
-            sendResult.setEventId(weEventBytesMessage.getJMSMessageID());
+            sendResult.setEventId(eventId);
 
-            log.info("publish success, eventID: {}", weEventBytesMessage.getJMSMessageID());
-        } catch (JMSException e) {
-            log.error("jms exception", e);
-            throw jms2BrokerException(e);
+            log.info("publish success, eventID: {}", eventId);
         } catch (Exception e) {
             log.error("publish failed", e);
             sendResult.setStatus(SendResult.SendResultStatus.ERROR);
@@ -197,76 +175,48 @@ public class WeEventClient implements IWeEventClient {
     @Override
     public String subscribe(String topic, String offset, @NonNull EventListener listener) throws BrokerException {
 
-        return dealSubscribe(topic, offset, null, false, listener);
+        return dealSubscribe(topic, offset, null, listener);
     }
 
     @Override
     public String subscribe(String topic, String offset, String subscriptionId,
                             @NonNull EventListener listener) throws BrokerException {
 
-        return dealSubscribe(topic, offset, subscriptionId, false, listener);
+        return dealSubscribe(topic, offset, subscriptionId, listener);
     }
 
     @Override
     public String subscribe(String[] topics, String offset, @NonNull EventListener listener) throws BrokerException {
 
         String topic = StringUtils.join(topics, WeEvent.MULTIPLE_TOPIC_SEPARATOR);
-        return dealSubscribe(topic, offset, "", false, listener);
+        return dealSubscribe(topic, offset, "", listener);
     }
 
     @Override
     public String subscribe(String[] topics, String offset, String subscriptionId,
                             @NonNull EventListener listener) throws BrokerException {
         String topic = StringUtils.join(topics, WeEvent.MULTIPLE_TOPIC_SEPARATOR);
-        return dealSubscribe(topic, offset, subscriptionId, false, listener);
+        return dealSubscribe(topic, offset, subscriptionId, listener);
     }
 
-    private String dealSubscribe(String topic, String offset, String subscriptionId, boolean isFile, EventListener listener) throws BrokerException {
-        try {
-            validateParam(topic);
-            validateParam(offset);
-            TopicSession session = this.connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-            // create topic
-            Topic destination = session.createTopic(topic);
 
-            // extend param
-            WeEventTopic weEventTopic = (WeEventTopic) destination;
-            weEventTopic.setOffset(offset);
-            weEventTopic.setGroupId(this.groupId);
-            if (!StringUtils.isBlank(subscriptionId)) {
-                weEventTopic.setContinueSubscriptionId(subscriptionId);
-            }
-            weEventTopic.setFile(isFile);
+    private String dealSubscribe(String topic, String offset, String subscriptionId, EventListener
+            listener) throws BrokerException {
+        validateParam(topic);
+        validateParam(offset);
 
-            // create subscriber
-            WeEventTopicSubscriber subscriber = (WeEventTopicSubscriber) session.createSubscriber(destination);
-
-            // create listener
-            subscriber.setMessageListener(bytesMessage -> {
-                        if (bytesMessage instanceof WeEventBytesMessage) {
-                            try {
-                                WeEventBytesMessage message = (WeEventBytesMessage) bytesMessage;
-                                byte[] body = new byte[(int) message.getBodyLength()];
-                                message.readBytes(body);
-
-                                Topic jmsDestination = (Topic) message.getJMSDestination();
-                                WeEvent event = new WeEvent(jmsDestination.getTopicName(), body, message.getExtensions());
-                                event.setEventId(message.getJMSMessageID());
-                                listener.onEvent(event);
-                            } catch (JMSException e) {
-                                log.error("onMessage exception", e);
-                                listener.onException(jms2BrokerException(e));
-                            }
-                        }
-                    }
-            );
-
-            this.sessionMap.put(subscriber.getSubscriptionId(), session);
-            return subscriber.getSubscriptionId();
-        } catch (JMSException e) {
-            log.error("jms exception", e);
-            throw jms2BrokerException(e);
+        // extend param
+        TopicContent weEventTopic = new TopicContent(topic);
+        weEventTopic.setOffset(offset);
+        weEventTopic.setGroupId(this.groupId);
+        if (StringUtils.isNotBlank(subscriptionId)) {
+            weEventTopic.setContinueSubscriptionId(subscriptionId);
         }
+
+        // create subscriber
+        String subscribeId = this.transport.stompSubscribe(weEventTopic, listener);
+        this.subscribeIdList.add(subscribeId);
+        return subscribeId;
     }
 
     private String getStompUrl(String brokerUrl) throws BrokerException {
@@ -310,20 +260,12 @@ public class WeEventClient implements IWeEventClient {
         }
     }
 
-    private void buildJms() throws BrokerException {
+    private void buildStomp() throws BrokerException {
         String stompUrl = getStompUrl(this.brokerUrl);
         log.info("broker's stomp url: {}", stompUrl);
-
-        try {
-            if (this.connectionFactory == null) {
-                this.connectionFactory = new WeEventConnectionFactory(this.userName, this.password, stompUrl);
-            }
-            this.sessionMap = new ConcurrentHashMap<>();
-            this.connection = this.connectionFactory.createTopicConnection();
-            this.connection.start();
-        } catch (JMSException e) {
-            log.error("init jms connection factory failed", e);
-            throw jms2BrokerException(e);
+        this.transport = WebSocketTransportFactory.create(createUri(stompUrl), 10);
+        if (!this.transport.isConnected()) {
+            this.transport.stompConnect(this.userName, this.password);
         }
     }
 
@@ -344,82 +286,6 @@ public class WeEventClient implements IWeEventClient {
         }
     }
 
-    private static void validateLocalFile(String filePath) throws BrokerException {
-        if (StringUtils.isBlank(filePath)) {
-            throw new BrokerException(ErrorCode.LOCAL_FILE_IS_EMPTY);
-        }
-        if (!(new File(filePath)).exists()) {
-            throw new BrokerException(ErrorCode.LOCAL_FILE_NOT_EXIST);
-        }
-    }
-
-    private static BrokerException jms2BrokerException(JMSException e) {
-        if (StringUtils.isBlank(e.getErrorCode())) {
-            return new BrokerException(e.getMessage());
-        } else {
-            return new BrokerException(Integer.parseInt(e.getErrorCode()), e.getMessage());
-        }
-    }
-
-    @Override
-    public SendResult publishFile(String topic, String localFile) throws BrokerException, IOException, InterruptedException {
-        // upload file
-        validateLocalFile(localFile);
-        FileChunksTransport fileChunksTransport = new FileChunksTransport(this.httpClientHelper, this.brokerUrl + "/file");
-        SendResult sendResult = fileChunksTransport.upload(localFile, topic, this.groupId);
-
-        log.info("publish file result: {}", sendResult);
-        return sendResult;
-
-    }
-
-    static class FileEventListener implements EventListener {
-        private final FileChunksTransport fileChunksTransport;
-        private final FileListener fileListener;
-
-        private String subscriptionId;
-
-        public FileEventListener(FileChunksTransport fileChunksTransport, FileListener fileListener) {
-            this.fileChunksTransport = fileChunksTransport;
-            this.fileListener = fileListener;
-        }
-
-        public void setSubscriptionId(String subscriptionId) {
-            this.subscriptionId = subscriptionId;
-        }
-
-        @Override
-        public void onEvent(WeEvent event) {
-            // download file
-            String localFile = null;
-            try {
-                FileChunksMeta fileChunksMeta = JsonHelper.json2Object(event.getContent(), FileChunksMeta.class);
-
-                localFile = this.fileChunksTransport.download(fileChunksMeta);
-            } catch (BrokerException | IOException e) {
-                log.error("detect exception", e);
-                this.onException(e);
-            }
-            this.fileListener.onFile(this.subscriptionId, localFile);
-        }
-
-        @Override
-        public void onException(Throwable e) {
-            this.fileListener.onException(e);
-        }
-    }
-
-    @Override
-    public String subscribeFile(String topic, String filePath, FileListener fileListener) throws BrokerException {
-        // subscribe file event
-        validateLocalFile(filePath);
-        FileChunksTransport fileChunksTransport = new FileChunksTransport(this.httpClientHelper, this.brokerUrl + "/file", filePath);
-        FileEventListener fileEventListener = new FileEventListener(fileChunksTransport, fileListener);
-        String subscriptionId = this.dealSubscribe(topic, WeEvent.OFFSET_LAST, "", true, fileEventListener);
-        fileEventListener.setSubscriptionId(subscriptionId);
-
-        return subscriptionId;
-    }
 
     private String encodeTopic(String topic) throws BrokerException {
         try {
@@ -429,4 +295,19 @@ public class WeEventClient implements IWeEventClient {
             throw new BrokerException(ErrorCode.ENCODE_TOPIC_ERROR);
         }
     }
+
+    private void checkConnected() throws BrokerException {
+        if (!this.transport.isConnected()) {
+            throw new BrokerException(ErrorCode.SDK_STOMP_CONNECTION_BREAKDOWN);
+        }
+    }
+
+    private URI createUri(String url) throws BrokerException {
+        try {
+            return new URI(url);
+        } catch (URISyntaxException e) {
+            throw new BrokerException("invalid url format, eg: " + brokerStompUrl);
+        }
+    }
+
 }
