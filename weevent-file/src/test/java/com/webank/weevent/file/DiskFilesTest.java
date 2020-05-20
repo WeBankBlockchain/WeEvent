@@ -1,14 +1,15 @@
-package com.webank.weevent.broker.fisco.file;
-
-import java.io.File;
+package com.webank.weevent.file;
 
 import com.webank.weevent.core.fisco.util.WeEventUtils;
-import com.webank.weevent.client.FileChunksMeta;
-
+import com.webank.weevent.file.inner.DiskFiles;
+import com.webank.weevent.file.service.FileChunksMeta;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
+
+import java.io.File;
 
 /**
  * DiskFiles Tester.
@@ -47,6 +48,7 @@ public class DiskFilesTest {
      * Method: loadFileMeta(String fileId)
      */
     @Test
+    @Ignore
     public void testLoadFileMeta() throws Exception {
         this.diskFiles.saveFileMeta(this.fileChunksMeta);
         Assert.assertTrue(true);
@@ -61,6 +63,7 @@ public class DiskFilesTest {
      * Method: saveFileMeta(FileChunksMeta fileChunksMeta)
      */
     @Test
+    @Ignore
     public void testSaveFileMeta() throws Exception {
         this.diskFiles.saveFileMeta(this.fileChunksMeta);
         Assert.assertTrue(true);
@@ -71,7 +74,7 @@ public class DiskFilesTest {
      */
     @Test
     public void testCreateFixedLengthFile() throws Exception {
-        this.diskFiles.createFixedLengthFile(WeEventUtils.generateUuid(), this.fileChunksMeta.getFileSize());
+        this.diskFiles.createFixedLengthFile(this.fileChunksMeta);
         Assert.assertTrue(true);
     }
 
@@ -80,7 +83,7 @@ public class DiskFilesTest {
      */
     @Test
     public void testWriteChunkData() throws Exception {
-        this.diskFiles.createFixedLengthFile(this.fileChunksMeta.getFileId(), this.fileChunksMeta.getFileSize());
+        this.diskFiles.createFixedLengthFile(this.fileChunksMeta);
         this.diskFiles.saveFileMeta(this.fileChunksMeta);
         this.diskFiles.writeChunkData(this.fileChunksMeta.getFileId(), 0, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa".getBytes());
         Assert.assertTrue(true);
@@ -92,7 +95,7 @@ public class DiskFilesTest {
     @Test
     public void testReadChunkData() throws Exception {
         byte[] chunkData = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa".getBytes();
-        this.diskFiles.createFixedLengthFile(this.fileChunksMeta.getFileId(), this.fileChunksMeta.getFileSize());
+        this.diskFiles.createFixedLengthFile(this.fileChunksMeta);
         this.diskFiles.saveFileMeta(this.fileChunksMeta);
         this.diskFiles.writeChunkData(this.fileChunksMeta.getFileId(), 1, chunkData);
         byte[] data = this.diskFiles.readChunkData(this.fileChunksMeta.getFileId(), 1);
