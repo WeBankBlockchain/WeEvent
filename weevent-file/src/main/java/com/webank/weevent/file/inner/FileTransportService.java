@@ -1,31 +1,26 @@
-package com.webank.weevent.broker.fisco.file;
+package com.webank.weevent.file.inner;
 
 
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
+import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.client.SendResult;
+import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.core.IProducer;
+import com.webank.weevent.core.config.FiscoConfig;
+import com.webank.weevent.file.dto.FileChunksMetaStatus;
+import com.webank.weevent.file.dto.FileEvent;
+import com.webank.weevent.file.dto.FileTransportStats;
+import com.webank.weevent.file.service.FileChunksMeta;
+import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.channel.dto.ChannelResponse;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-
-import com.webank.weevent.broker.fisco.file.dto.FileChunksMetaPlus;
-import com.webank.weevent.broker.fisco.file.dto.FileChunksMetaStatus;
-import com.webank.weevent.broker.fisco.file.dto.FileEvent;
-import com.webank.weevent.broker.fisco.file.dto.FileTransportStats;
-import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.client.ErrorCode;
-import com.webank.weevent.client.FileChunksMeta;
-import com.webank.weevent.client.JsonHelper;
-import com.webank.weevent.client.SendResult;
-import com.webank.weevent.client.WeEvent;
-import com.webank.weevent.client.WeEventPlus;
-import com.webank.weevent.core.IProducer;
-import com.webank.weevent.core.config.FiscoConfig;
-import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
-
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.time.StopWatch;
-import org.fisco.bcos.channel.client.Service;
-import org.fisco.bcos.channel.dto.ChannelResponse;
 
 /**
  * File transport service base on AMOP.
@@ -43,16 +38,17 @@ public class FileTransportService {
     private final DiskFiles diskFiles;
 
     // following ONLY used in sender side
-    // groupId <-> AMOPChannel
-    private Map<String, AMOPChannel> groupChannels = new ConcurrentHashMap<>();
+    private AMOPChannel channel;
     // fileId <-> FileChunksMeta
     private Map<String, FileChunksMeta> fileTransportContexts = new ConcurrentHashMap<>();
 
+    // fileTransportService for common transport
     public FileTransportService(FiscoConfig fiscoConfig,
                                 IProducer iProducer,
                                 String host,
                                 String filePath,
-                                int fileChunkSize) throws BrokerException {
+                                int fileChunkSize,
+                                String groupId) throws BrokerException {
         this.fiscoConfig = fiscoConfig;
         this.producer = iProducer;
         this.timeout = fiscoConfig.getWeb3sdkTimeout();
@@ -65,79 +61,61 @@ public class FileTransportService {
         this.host = host;
         this.fileChunkSize = fileChunkSize;
         this.diskFiles = new DiskFiles(filePath);
+
+        // init common amop channel
+        log.info("init AMOP channel for common transport, groupId: {}", groupId);
+        AMOPChannel channel = new AMOPChannel(this, groupId);
+        this.channel = channel;
     }
 
-    public FileChunksMetaPlus verify(String eventId, String groupId) throws BrokerException {
-        WeEvent event = this.producer.getEvent(eventId, groupId);
-        if (FileEventListener.isFileEvent(event)) {
-            FileEvent fileEvent = JsonHelper.json2Object(event.getContent(), FileEvent.class);
+    public AMOPChannel getChannel() {
+        return this.channel;
+    }
 
-            FileChunksMetaPlus fileChunksMetaPlus = new FileChunksMetaPlus();
-            fileChunksMetaPlus.setFile(fileEvent.getFileChunksMeta());
-            if (event.getExtensions().containsKey(WeEvent.WeEvent_PLUS)) {
-                WeEventPlus weEventPlus = JsonHelper.json2Object(event.getExtensions().get(WeEvent.WeEvent_PLUS), WeEventPlus.class);
-                fileChunksMetaPlus.setPlus(weEventPlus);
+    public FiscoConfig getFiscoConfig() {
+        return fiscoConfig;
+    }
+
+    public List<FileChunksMeta> getFileChunksMeta(String topic) {
+        List<FileChunksMeta> fileChunksMetaList = new ArrayList<>();
+        for (FileChunksMeta fileChunksMeta : this.fileTransportContexts.values()) {
+            if (fileChunksMeta.getTopic().equals(topic)) {
+                fileChunksMetaList.add(fileChunksMeta);
             }
-            return fileChunksMetaPlus;
         }
-
-        log.error("it is not a file event");
-        return null;
+        return fileChunksMetaList;
     }
 
-    public FileTransportStats stats(boolean all) {
+    public FileTransportStats stats(boolean all, String groupId) {
         FileTransportStats fileTransportStats = new FileTransportStats();
 
-        for (Map.Entry<String, AMOPChannel> groupEntry : groupChannels.entrySet()) {
-            String groupId = groupEntry.getKey();
-            AMOPChannel amopChannel = groupEntry.getValue();
-
-            // sender
-            Map<String, List<FileChunksMetaStatus>> senders = new HashMap<>();
-            for (String topic : amopChannel.getSenderTopics().keySet()) {
-                List<FileChunksMetaStatus> filePlus = fileTransportContexts.values().stream()
-                        .filter(item -> item.getTopic().equals(topic))
-                        .map(FileChunksMetaStatus::new)
-                        .collect(Collectors.toList());
-                senders.put(topic, filePlus);
-            }
-            fileTransportStats.getSender().put(groupId, senders);
-
-            // receiver
-            List<FileChunksMeta> localFiles = this.diskFiles.listNotCompleteFiles(all);
-            Map<String, List<FileChunksMetaStatus>> receivers = new HashMap<>();
-            for (String topic : amopChannel.getSubTopics().keySet()) {
-                List<FileChunksMetaStatus> filePlus = localFiles.stream()
-                        .filter(item -> item.getTopic().equals(topic))
-                        .map(FileChunksMetaStatus::new)
-                        .collect(Collectors.toList());
-                receivers.put(topic, filePlus);
-            }
-            fileTransportStats.getReceiver().put(groupId, receivers);
+        // sender
+        Map<String, List<FileChunksMetaStatus>> senders = new HashMap<>();
+        for (String topic : channel.getSenderTopics()) {
+            List<FileChunksMetaStatus> filePlus = fileTransportContexts.values().stream()
+                    .filter(item -> item.getTopic().equals(topic))
+                    .map(FileChunksMetaStatus::new)
+                    .collect(Collectors.toList());
+            senders.put(topic, filePlus);
         }
+        fileTransportStats.getSender().put(groupId, senders);
+
+        // receiver
+        List<FileChunksMeta> localFiles = this.diskFiles.listNotCompleteFiles(all);
+        Map<String, List<FileChunksMetaStatus>> receivers = new HashMap<>();
+        for (String topic : channel.getSubTopics()) {
+            List<FileChunksMetaStatus> filePlus = localFiles.stream()
+                    .filter(item -> item.getTopic().equals(topic))
+                    .map(FileChunksMetaStatus::new)
+                    .collect(Collectors.toList());
+            receivers.put(topic, filePlus);
+        }
+        fileTransportStats.getReceiver().put(groupId, receivers);
+
 
         return fileTransportStats;
     }
 
-    public AMOPChannel getChannel(String groupId) throws BrokerException {
-        if (this.groupChannels.containsKey(groupId)) {
-            return this.groupChannels.get(groupId);
-        }
-
-        // init if not exist
-        log.info("AMOP channel is not exist, init for groupId: {}", groupId);
-        StopWatch sw = StopWatch.createStarted();
-        Service service = Web3SDKConnector.initService(Long.valueOf(groupId), this.fiscoConfig);
-        AMOPChannel channel = new AMOPChannel(this, service);
-        this.groupChannels.put(groupId, channel);
-        sw.stop();
-        log.info("init AMOP channel cost: {} ms", sw.getTime());
-        return channel;
-    }
-
-    // CGI interface
-
-    // called by sender cgi
     public FileChunksMeta openChannel(FileChunksMeta fileChunksMeta) throws BrokerException {
         if (!this.producer.exist(fileChunksMeta.getTopic(), fileChunksMeta.getGroupId())) {
             log.error("topic:{} not exist, fileId: {}", fileChunksMeta.getTopic(), fileChunksMeta.getFileId());
@@ -154,7 +132,7 @@ public class FileTransportService {
         // fileChunksMeta.setHost(this.host);
 
         // create chunk meta in receiver
-        AMOPChannel channel = this.getChannel(fileChunksMeta.getGroupId());
+        //AMOPChannel channel = this.getChannel(fileChunksMeta.getGroupId());
         FileChunksMeta remoteFileChunksMeta = channel.createReceiverFileContext(fileChunksMeta);
         // it's not used in sender side
         remoteFileChunksMeta.setHost("");
@@ -181,7 +159,7 @@ public class FileTransportService {
     // get remote chunk meta from receiver
     public FileChunksMeta getReceiverFileChunksMeta(String topic, String groupId, String fileId) throws BrokerException {
         // get remote chunk meta from receiver
-        AMOPChannel channel = this.getChannel(groupId);
+        //AMOPChannel channel = this.getChannel(groupId);
         FileChunksMeta remoteFileChunksMeta = channel.getReceiverFileContext(topic, fileId);
         if (remoteFileChunksMeta == null) {
             log.error("not exist receive file context");
@@ -198,7 +176,7 @@ public class FileTransportService {
         this.fileTransportContexts.remove(fileId);
 
         // clean up receiver context
-        AMOPChannel channel = this.getChannel(groupId);
+        //AMOPChannel channel = this.getChannel(groupId);
         FileChunksMeta fileChunksMeta = channel.cleanUpReceiverFileContext(topic, fileId);
 
         // send sign to WeEvent
@@ -224,7 +202,7 @@ public class FileTransportService {
         fileEvent.setChunkIndex(chunkIndex);
         fileEvent.setChunkData(data);
 
-        AMOPChannel channel = this.getChannel(groupId);
+        //AMOPChannel channel = this.getChannel(groupId);
         ChannelResponse rsp = channel.sendEvent(topic, fileEvent);
         if (rsp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
             log.info("sender chunk data to remote success");
@@ -245,11 +223,10 @@ public class FileTransportService {
     }
 
     public FileChunksMeta prepareReceiveFile(FileChunksMeta fileChunksMeta) throws BrokerException {
-        String fileId = fileChunksMeta.getFileId();
-        log.info("initialize file context for receiving, fileId: {}", fileId);
+        log.info("initialize file context for receiving, fileName: {}", fileChunksMeta.getFileName());
 
         // create local file
-        this.diskFiles.createFixedLengthFile(fileId, fileChunksMeta.getFileSize());
+        this.diskFiles.createFixedLengthFile(fileChunksMeta);
         // initialize chunk size
         fileChunksMeta.initChunkSize(this.fileChunkSize);
         // set local host
