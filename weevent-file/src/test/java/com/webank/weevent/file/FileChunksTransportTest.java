@@ -1,12 +1,9 @@
 package com.webank.weevent.file;
 
-import com.webank.weevent.client.HttpClientHelper;
 import com.webank.weevent.client.SendResult;
 import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.file.service.FileChunksTransport;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -19,18 +16,6 @@ import org.junit.Test;
  */
 public class FileChunksTransportTest {
     private FileChunksTransport fileChunksTransport;
-
-    /*
-    @Before
-    public void before() throws Exception {
-        this.fileChunksTransport = new FileChunksTransport(new HttpClientHelper(5000), "http://localhost:7000/weevent-broker/file", "./logs");
-    }
-
-    @After
-    public void after() throws Exception {
-    }
-
-     */
 
     /**
      * Method: upload(String localFile)

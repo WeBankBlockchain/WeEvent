@@ -26,7 +26,6 @@ import org.springframework.util.DigestUtils;
 @Slf4j
 public class FileChunksTransport {
     private FileTransportService fileTransportService;
-    private String downloadFilePath = "";
 
     // retry upload/download chunk times
     private static final int CHUNK_RETRY_COUNT = 5;
@@ -136,18 +135,6 @@ public class FileChunksTransport {
         fileTransportService.sendChunkData(local.getTopic(), local.getGroupId(), local.getFileId(), chunkIdx, chunkData);
 
         return true;
-    }
-
-    private byte[] downloadChunk(String host, String fileId, int chunkIdx) throws BrokerException {
-        ParamCheckUtils.validateFileId(fileId);
-        ParamCheckUtils.validateChunkIdx(chunkIdx);
-
-        byte[] downloadChunkBytes = this.fileTransportService.downloadChunk(fileId, chunkIdx);
-        if (downloadChunkBytes.length == 0) {
-            throw new BrokerException(ErrorCode.FILE_DOWNLOAD_ERROR);
-        }
-
-        return downloadChunkBytes;
     }
 
     private SendResult closeChunk(FileChunksMeta local) throws BrokerException {

@@ -17,13 +17,8 @@ import org.fisco.bcos.channel.dto.ChannelRequest;
 import org.fisco.bcos.channel.dto.ChannelResponse;
 import org.fisco.bcos.channel.handler.AMOPVerifyKeyInfo;
 import org.fisco.bcos.channel.handler.AMOPVerifyTopicToKeyInfo;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

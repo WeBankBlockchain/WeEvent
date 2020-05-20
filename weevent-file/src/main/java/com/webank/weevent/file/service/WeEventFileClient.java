@@ -37,8 +37,6 @@ public class WeEventFileClient implements IWeEventFileClient {
     private final String groupId;
     private String filePath ="";
     private FiscoConfig config;
-    private IProducer iProducer;
-    private IConsumer iConsumer;
     private FileTransportService fileTransportService;
     private int fileChunkSize;
 
@@ -58,15 +56,13 @@ public class WeEventFileClient implements IWeEventFileClient {
             // 创建生产者
             IProducer iProducer = fiscoBcosInstance.buildProducer();
             iProducer.startProducer();
-            this.iProducer = iProducer;
 
             // 创建消费者
             IConsumer iConsumer = fiscoBcosInstance.buildConsumer();
             iConsumer.startConsumer();
-            this.iConsumer = iConsumer;
 
             // 创建FileTransportService实例
-            FileTransportService fileTransportService = new FileTransportService(this.config, this.iProducer, "", this.filePath, this.fileChunkSize, this.groupId);
+            FileTransportService fileTransportService = new FileTransportService(this.config, iProducer, "", this.filePath, this.fileChunkSize, this.groupId);
             this.fileTransportService = fileTransportService;
 
         } catch (BrokerException e) {
