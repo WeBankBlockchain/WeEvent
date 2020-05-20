@@ -1,24 +1,18 @@
-package com.webank.weevent.broker.fisco.file;
+package com.webank.weevent.file.inner;
 
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.RandomAccessFile;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
-import com.webank.weevent.client.FileChunksMeta;
 import com.webank.weevent.client.JsonHelper;
-
+import com.webank.weevent.file.service.FileChunksMeta;
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Files stored in local disk.
@@ -30,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DiskFiles {
     public final String MetaFileSuffix = ".json";
     private final String path;
+    private Map<String, FileChunksMeta> fileIdChunksMeta = new ConcurrentHashMap<>();
 
     public DiskFiles(String path) {
         File localPath = new File(path);
@@ -45,7 +40,11 @@ public class DiskFiles {
     }
 
     private String genLocalFileName(String fileId) {
-        return this.path + "/" + fileId;
+        FileChunksMeta fileChunksMeta = fileIdChunksMeta.get(fileId);
+        if (fileChunksMeta == null) {
+            log.error("the fileChunksMeta corresponding to fieldId not exist, {}", fileId);
+        }
+        return this.path + "/" + fileChunksMeta.getFileName();
     }
 
     private String genLocalMetaFileName(String fileId) {
@@ -99,22 +98,25 @@ public class DiskFiles {
         }
     }
 
-    public void createFixedLengthFile(String fileId, long size) throws BrokerException {
+    public void createFixedLengthFile(FileChunksMeta fileChunksMeta) throws BrokerException {
+        // record fileId - FileChunksMeta
+        this.fileIdChunksMeta.put(fileChunksMeta.getFileId(), fileChunksMeta);
+
         // ensure path exist and disk space
         File path = new File(this.path);
         if (!path.exists()) {
             log.error("not exist local file path, {}", this.path);
             throw new BrokerException(ErrorCode.FILE_NOT_EXIST_PATH);
         }
-        if (path.getFreeSpace() < size + 1024 * 1024) {
-            log.error("not enough disk space, {} -> free {}", size, path.getFreeSpace());
+        if (path.getFreeSpace() < fileChunksMeta.getFileSize() + 1024 * 1024) {
+            log.error("not enough disk space, {} -> free {}", fileChunksMeta.getFileSize(), path.getFreeSpace());
             throw new BrokerException(ErrorCode.FILE_NOT_ENOUGH_SPACE);
         }
 
-        String localFile = this.genLocalFileName(fileId);
-        log.info("create local file for receiving file, {} size: {}", localFile, size);
+        String localFile = this.genLocalFileName(fileChunksMeta.getFileId());
+        log.info("create local file for receiving file, {} size: {}", localFile, fileChunksMeta.getFileSize());
         try (RandomAccessFile file = new RandomAccessFile(localFile, "rw")) {
-            file.setLength(size);
+            file.setLength(fileChunksMeta.getFileSize());
         } catch (IOException e) {
             log.error("create fixed length file failed", e);
             throw new BrokerException(ErrorCode.FILE_WRITE_EXCEPTION);
