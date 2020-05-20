@@ -1,4 +1,4 @@
-package com.webank.weevent.broker.fisco.file.dto;
+package com.webank.weevent.file.dto;
 
 
 import java.util.HashMap;
