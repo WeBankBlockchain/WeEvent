@@ -160,7 +160,6 @@ public class AMOPChannel extends ChannelPushCallback {
 
     public void unSubTopic(String topic) {
         if (subVerifyTopics.containsKey(topic)) {
-            // 认证的topic支持动态订阅不支持动态取消订阅,用户取消订阅的时候前端页面要显示这个
             log.info("unSubscribe verify topic on AMOP channel, {}", topic);
             service = this.subVerifyTopics.remove(topic);
             service = null;

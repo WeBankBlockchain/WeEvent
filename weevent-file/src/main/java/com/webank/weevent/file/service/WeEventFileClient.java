@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WeEventFileClient implements IWeEventFileClient {
 
     private final String groupId;
-    private String filePath ="";
+    private String filePath = "";
     private FiscoConfig config;
     private FileTransportService fileTransportService;
     private int fileChunkSize;
@@ -50,18 +50,18 @@ public class WeEventFileClient implements IWeEventFileClient {
 
     public void init() {
         try {
-            // 获取FISCO实例
+            // create fisco instance
             FiscoBcosInstance fiscoBcosInstance = new FiscoBcosInstance(this.config);
 
-            // 创建生产者
+            // create producer
             IProducer iProducer = fiscoBcosInstance.buildProducer();
             iProducer.startProducer();
 
-            // 创建消费者
+            // create consumer
             IConsumer iConsumer = fiscoBcosInstance.buildConsumer();
             iConsumer.startConsumer();
 
-            // 创建FileTransportService实例
+            // create FileTransportService instance
             FileTransportService fileTransportService = new FileTransportService(this.config, iProducer, "", this.filePath, this.fileChunkSize, this.groupId);
             this.fileTransportService = fileTransportService;
 
@@ -165,7 +165,6 @@ public class WeEventFileClient implements IWeEventFileClient {
     public void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem) throws BrokerException {
         // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
-
 
         amopChannel.subTopic(topic, groupId, privatePem, fileListener);
     }
