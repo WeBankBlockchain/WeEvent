@@ -1,7 +1,6 @@
 package com.webank.weevent.client;
 
 
-import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -14,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeoutException;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -151,30 +149,12 @@ public class WeEventClient implements IWeEventClient {
         validateWeEvent(weEvent);
         log.info("start to publish: {}", weEvent);
 
-        SendResult sendResult = new SendResult();
-        sendResult.setTopic(weEvent.getTopic());
-        try {
-            TopicContent weEventTopic = new TopicContent(weEvent.getTopic());
-            weEventTopic.setGroupId(this.groupId);
+        TopicContent weEventTopic = new TopicContent(weEvent.getTopic());
+        weEventTopic.setGroupId(this.groupId);
 
-            // publish
-            checkConnected();
-            String eventId = this.transport.stompSend(weEventTopic, weEvent);
-
-            // return
-            sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
-            sendResult.setEventId(eventId);
-
-            log.info("publish event success, eventID: {}", eventId);
-        } catch (TimeoutException e) {
-            log.error("publish event timeout. event:{}", weEvent, e);
-            sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
-        } catch (Exception e) {
-            log.error("publish event failed. event:{}", weEvent, e);
-            sendResult.setStatus(SendResult.SendResultStatus.ERROR);
-        }
-
-        return sendResult;
+        checkConnected();
+        // publish
+        return this.transport.stompSend(weEventTopic, weEvent);
     }
 
     @Override
