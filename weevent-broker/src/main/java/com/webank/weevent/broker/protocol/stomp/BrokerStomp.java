@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.broker.config.WeEventConfig;
-import com.webank.weevent.broker.fisco.file.FileEventListener;
-import com.webank.weevent.broker.fisco.file.FileTransportService;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.SendResult;
@@ -60,8 +58,6 @@ public class BrokerStomp extends TextWebSocketHandler {
     private String authAccount = "";
     private String authPassword = "";
 
-    private FileTransportService fileTransportService;
-
     // session id <-> (subscription id in stomp's header <-> (subscription id in consumer, topic))
     private static Map<String, Map<String, Pair<String, String>>> sessionContext = new HashMap<>();
 
@@ -89,11 +85,6 @@ public class BrokerStomp extends TextWebSocketHandler {
     public void setAuthAccount(Environment environment) {
         this.authAccount = environment.getProperty("spring.security.user.name");
         this.authPassword = environment.getProperty("spring.security.user.password");
-    }
-
-    @Autowired
-    public void setFileTransportService(FileTransportService fileTransportService) {
-        this.fileTransportService = fileTransportService;
     }
 
     private void handleSingleMessage(Message<byte[]> msg, WebSocketSession session) {
@@ -441,29 +432,18 @@ public class BrokerStomp extends TextWebSocketHandler {
         }
 
         IConsumer.ConsumerListener listener;
-        if (isFile) {
-            log.info("this is a subscription extended for file");
+        listener = new IConsumer.ConsumerListener() {
+            @Override
+            public void onEvent(String subscriptionId, WeEvent event) {
+                log.info("consumer onEvent, subscriptionId: {} event: {}", subscriptionId, event);
+                handleOnEvent(headerIdStr, subscriptionId, event, session);
+            }
 
-            listener = new FileEventListener(this.fileTransportService, topic, groupId) {
-                @Override
-                public void send(String subscriptionId, WeEvent event) {
-                    handleOnEvent(headerIdStr, subscriptionId, event, session);
-                }
-            };
-        } else {
-            listener = new IConsumer.ConsumerListener() {
-                @Override
-                public void onEvent(String subscriptionId, WeEvent event) {
-                    log.info("consumer onEvent, subscriptionId: {} event: {}", subscriptionId, event);
-                    handleOnEvent(headerIdStr, subscriptionId, event, session);
-                }
-
-                @Override
-                public void onException(Throwable e) {
-                    log.error("consumer onException", e);
-                }
-            };
-        }
+            @Override
+            public void onException(Throwable e) {
+                log.error("consumer onException", e);
+            }
+        };
 
         // support both single/multiple topic
         String subscriptionId = this.iconsumer.subscribe(curTopicList, groupId, subEventId, ext, listener);
