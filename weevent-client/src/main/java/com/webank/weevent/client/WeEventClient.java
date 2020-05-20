@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeoutException;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -165,9 +166,12 @@ public class WeEventClient implements IWeEventClient {
             sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
             sendResult.setEventId(eventId);
 
-            log.info("publish success, eventID: {}", eventId);
+            log.info("publish event success, eventID: {}", eventId);
+        } catch (TimeoutException e) {
+            log.error("publish event timeout. event:{}", weEvent, e);
+            sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
         } catch (Exception e) {
-            log.error("publish failed", e);
+            log.error("publish event failed. event:{}", weEvent, e);
             sendResult.setStatus(SendResult.SendResultStatus.ERROR);
         }
 
@@ -177,7 +181,7 @@ public class WeEventClient implements IWeEventClient {
     @Override
     public CompletableFuture<SendResult> publishAsync(WeEvent weEvent) throws BrokerException {
         validateWeEvent(weEvent);
-        log.info("start to publish: {}", weEvent);
+        log.info("start to publish event by async: {}", weEvent);
 
         TopicContent weEventTopic = new TopicContent(weEvent.getTopic());
         weEventTopic.setGroupId(this.groupId);

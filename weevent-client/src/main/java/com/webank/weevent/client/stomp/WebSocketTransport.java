@@ -70,11 +70,14 @@ public class WebSocketTransport extends WebSocketClient {
     // is reconnect thread already exist
     private boolean connectFlag = false;
 
-    class ResponseFuture implements Future<Message<?>> {
+    // async stomp send timeout
+    private final long transactionTimeout = 5;
+
+    class ResponseFuture implements Future<StompHeaderAccessor> {
         private CountDownLatch latch = new CountDownLatch(1);
 
         private Long key;
-        private Message<?> response;
+        private StompHeaderAccessor stompHeaderAccessor;
 
         ResponseFuture(Long key) {
             this.key = key;
@@ -82,7 +85,7 @@ public class WebSocketTransport extends WebSocketClient {
         }
 
         public void setResponse(Message<?> response) {
-            this.response = response;
+            this.stompHeaderAccessor = StompHeaderAccessor.wrap(response);
             futures.remove(this.key);
 
             this.latch.countDown();
@@ -106,16 +109,17 @@ public class WebSocketTransport extends WebSocketClient {
         }
 
         @Override
-        public Message<?> get() throws InterruptedException {
+        public StompHeaderAccessor get() throws InterruptedException {
             latch.await();
-            return this.response;
+
+            return this.stompHeaderAccessor;
         }
 
         @Override
-        public Message<?> get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
+        public StompHeaderAccessor get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
             if (latch.await(timeout, unit)) {
-                if (this.response != null) {
-                    return this.response;
+                if (this.stompHeaderAccessor != null) {
+                    return this.stompHeaderAccessor;
                 } else {
                     log.error("empty response");
                     throw new TimeoutException();
@@ -143,35 +147,32 @@ public class WebSocketTransport extends WebSocketClient {
     }
 
     // Stomp command
-    public Message<?> stompRequest(String req, Long asyncSeq) throws BrokerException {
+    private ResponseFuture stompRequestAsync(String req, Long asyncSeq) {
         log.info("stomp request, seq: {} size: {}", asyncSeq, req.length());
 
-        try {
-            // asyncSeq use for synchronous to asynchronous
-            ResponseFuture response = new ResponseFuture(asyncSeq);
-
-            // .send(String text) is Text Message, .send(byte[] data) is Binary Message
-            log.debug("STOMP post text: {}", req);
-            this.send(req);
-            return response.get(this.timeout, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            log.error("stomp command invoke Interrupted, seq: " + asyncSeq);
-            Thread.currentThread().interrupt();
-            return null;
-        } catch (TimeoutException e) {
-            log.error("stomp command invoke timeout, seq: " + asyncSeq, e);
-            throw new BrokerException(ErrorCode.SDK_JMS_EXCEPTION_STOMP_TIMEOUT);
-        }
+        // asyncSeq use for synchronous to asynchronous
+        ResponseFuture response = new ResponseFuture(asyncSeq);
+        // .send(String text) is Text Message, .send(byte[] data) is Binary Message
+        log.debug("STOMP post text: {}", req);
+        this.send(req);
+        return response;
     }
-
 
     public void stompConnect(String userName, String password) throws BrokerException {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         String req = stompCommand.encodeConnect(userName, password);
 
         this.sequence2Id.put(Long.toString(0L), 0L);
-        Message<?> stompResponse = this.stompRequest(req, 0L);
-        StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(stompResponse);
+        StompHeaderAccessor stompHeaderAccessor;
+        try {
+            stompHeaderAccessor = this.stompRequestAsync(req, 0L).get(this.transactionTimeout, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            log.error("connect stomp execute error", e);
+            throw new BrokerException(ErrorCode.SDK_EXCEPTION_STOMP_EXECUTE);
+        } catch (TimeoutException e) {
+            log.error("connect stomp timeout", e);
+            throw new BrokerException(ErrorCode.SDK_EXCEPTION_STOMP_TIMEOUT);
+        }
         stompCommand.checkError(stompHeaderAccessor);
         this.account = Pair.of(userName, password);
 
@@ -182,27 +183,25 @@ public class WebSocketTransport extends WebSocketClient {
         this.connected = true;
     }
 
-    public void stompDisconnect() throws BrokerException {
+    public void stompDisconnect() throws BrokerException, InterruptedException, TimeoutException {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         Long asyncSeq = this.sequence.incrementAndGet();
         String req = stompCommand.encodeDisConnect(asyncSeq);
         this.sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
 
-        Message<?> stompResponse = this.stompRequest(req, asyncSeq);
-        StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(stompResponse);
+        StompHeaderAccessor stompHeaderAccessor = this.stompRequestAsync(req, asyncSeq).get(this.transactionTimeout, TimeUnit.SECONDS);
         stompCommand.checkError(stompHeaderAccessor);
     }
 
     // return eventId
-    public String stompSend(TopicContent topic, WeEvent event) throws BrokerException {
+    public String stompSend(TopicContent topic, WeEvent event) throws BrokerException, InterruptedException, TimeoutException {
         // header id equal asyncSeq
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         Long asyncSeq = (this.sequence.incrementAndGet());
         String req = stompCommand.encodeSend(asyncSeq, topic, event);
         this.sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
 
-        Message<?> stompResponse = this.stompRequest(req, asyncSeq);
-        StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(stompResponse);
+        StompHeaderAccessor stompHeaderAccessor = this.stompRequestAsync(req, asyncSeq).get(this.transactionTimeout, TimeUnit.SECONDS);
         stompCommand.checkError(stompHeaderAccessor);
 
         // handler stompResponse
@@ -210,40 +209,28 @@ public class WebSocketTransport extends WebSocketClient {
     }
 
     // return CompletableFuture
-    public CompletableFuture<SendResult> stompSendAsync(TopicContent topic, WeEvent event) throws BrokerException {
+    public CompletableFuture<SendResult> stompSendAsync(TopicContent topic, WeEvent event) {
         // header id equal asyncSeq
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         Long asyncSeq = (this.sequence.incrementAndGet());
         String req = stompCommand.encodeSend(asyncSeq, topic, event);
         this.sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
 
-        CompletableFuture<SendResult> future = CompletableFuture.supplyAsync(() -> {
-            // asyncSeq use for synchronous to asynchronous
-            ResponseFuture response = new ResponseFuture(asyncSeq);
-
+        return CompletableFuture.supplyAsync(() -> {
             SendResult sendResult = new SendResult();
             sendResult.setTopic(event.getTopic());
-
-            log.info("stomp request, seq: {} size: {}", asyncSeq, req.length());
-            this.send(req);
             try {
-                Message<?> stompResponse = response.get();
-                StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(stompResponse);
+                StompHeaderAccessor stompHeaderAccessor = this.stompRequestAsync(req, asyncSeq).get();
+
                 stompCommand.checkError(stompHeaderAccessor);
                 sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
                 sendResult.setEventId(stompHeaderAccessor.getFirstNativeHeader("eventId"));
-            } catch (InterruptedException e) {
-                log.error("stomp command invoke Interrupted, seq: " + asyncSeq);
-                sendResult.setStatus(SendResult.SendResultStatus.ERROR);
-                Thread.currentThread().interrupt();
-            } catch (BrokerException e) {
+            } catch (BrokerException | InterruptedException e) {
                 log.error("stomp command invoke error, seq: " + asyncSeq, e);
                 sendResult.setStatus(SendResult.SendResultStatus.ERROR);
             }
             return sendResult;
         });
-
-        return future;
     }
 
     // return subscriptionId
@@ -253,8 +240,16 @@ public class WebSocketTransport extends WebSocketClient {
         String req = stompCommand.encodeSubscribe(topic, asyncSeq);
         this.sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
 
-        Message<?> stompResponse = this.stompRequest(req, asyncSeq);
-        StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(stompResponse);
+        StompHeaderAccessor stompHeaderAccessor;
+        try {
+            stompHeaderAccessor = this.stompRequestAsync(req, asyncSeq).get(this.transactionTimeout, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            log.error("subscribe topic over stomp execute error", e);
+            throw new BrokerException(ErrorCode.SDK_EXCEPTION_STOMP_EXECUTE);
+        } catch (TimeoutException e) {
+            log.error("subscribe topic over stomp timeout", e);
+            throw new BrokerException(ErrorCode.SDK_EXCEPTION_STOMP_TIMEOUT);
+        }
         stompCommand.checkError(stompHeaderAccessor);
 
         // cache the subscription id and the WeEventTopic,the subscription2EventCache which can use for reconnect
@@ -277,8 +272,16 @@ public class WebSocketTransport extends WebSocketClient {
         Long asyncSeq = this.sequence.incrementAndGet();
         this.sequence2Id.put(headerId, asyncSeq);
 
-        Message<?> stompResponse = this.stompRequest(req, asyncSeq);
-        StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(stompResponse);
+        StompHeaderAccessor stompHeaderAccessor;
+        try {
+            stompHeaderAccessor = this.stompRequestAsync(req, asyncSeq).get(this.transactionTimeout, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            log.error("unsubscribe topic over stomp execute error", e);
+            throw new BrokerException(ErrorCode.SDK_EXCEPTION_STOMP_EXECUTE);
+        } catch (TimeoutException e) {
+            log.error("unsubscribe topic over stomp timeout", e);
+            throw new BrokerException(ErrorCode.SDK_EXCEPTION_STOMP_TIMEOUT);
+        }
         stompCommand.checkError(stompHeaderAccessor);
     }
 
