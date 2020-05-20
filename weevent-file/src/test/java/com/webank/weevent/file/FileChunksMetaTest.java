@@ -1,5 +1,6 @@
-package com.webank.weevent.client;
+package com.webank.weevent.file;
 
+import com.webank.weevent.file.service.FileChunksMeta;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
