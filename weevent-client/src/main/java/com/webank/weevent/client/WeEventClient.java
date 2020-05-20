@@ -2,7 +2,6 @@ package com.webank.weevent.client;
 
 
 import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -176,31 +175,32 @@ public class WeEventClient implements IWeEventClient {
     @Override
     public String subscribe(String topic, String offset, @NonNull EventListener listener) throws BrokerException {
 
-        return dealSubscribe(topic, offset, null, false, listener);
+        return dealSubscribe(topic, offset, null, listener);
     }
 
     @Override
     public String subscribe(String topic, String offset, String subscriptionId,
                             @NonNull EventListener listener) throws BrokerException {
 
-        return dealSubscribe(topic, offset, subscriptionId, false, listener);
+        return dealSubscribe(topic, offset, subscriptionId, listener);
     }
 
     @Override
     public String subscribe(String[] topics, String offset, @NonNull EventListener listener) throws BrokerException {
 
         String topic = StringUtils.join(topics, WeEvent.MULTIPLE_TOPIC_SEPARATOR);
-        return dealSubscribe(topic, offset, "", false, listener);
+        return dealSubscribe(topic, offset, "", listener);
     }
 
     @Override
     public String subscribe(String[] topics, String offset, String subscriptionId,
                             @NonNull EventListener listener) throws BrokerException {
         String topic = StringUtils.join(topics, WeEvent.MULTIPLE_TOPIC_SEPARATOR);
-        return dealSubscribe(topic, offset, subscriptionId, false, listener);
+        return dealSubscribe(topic, offset, subscriptionId, listener);
     }
 
-    private String dealSubscribe(String topic, String offset, String subscriptionId, boolean isFile, EventListener
+
+    private String dealSubscribe(String topic, String offset, String subscriptionId, EventListener
             listener) throws BrokerException {
         validateParam(topic);
         validateParam(offset);
@@ -212,7 +212,6 @@ public class WeEventClient implements IWeEventClient {
         if (StringUtils.isNotBlank(subscriptionId)) {
             weEventTopic.setContinueSubscriptionId(subscriptionId);
         }
-        weEventTopic.setFile(isFile);
 
         // create subscriber
         String subscribeId = this.transport.stompSubscribe(weEventTopic, listener);
@@ -287,75 +286,6 @@ public class WeEventClient implements IWeEventClient {
         }
     }
 
-    private static void validateLocalFile(String filePath) throws BrokerException {
-        if (StringUtils.isBlank(filePath)) {
-            throw new BrokerException(ErrorCode.LOCAL_FILE_IS_EMPTY);
-        }
-        if (!(new File(filePath)).exists()) {
-            throw new BrokerException(ErrorCode.LOCAL_FILE_NOT_EXIST);
-        }
-    }
-
-    @Override
-    public SendResult publishFile(String topic, String localFile) throws
-            BrokerException, IOException, InterruptedException {
-        // upload file
-        validateLocalFile(localFile);
-        FileChunksTransport fileChunksTransport = new FileChunksTransport(this.httpClientHelper, this.brokerUrl + "/file");
-        SendResult sendResult = fileChunksTransport.upload(localFile, topic, this.groupId);
-
-        log.info("publish file result: {}", sendResult);
-        return sendResult;
-
-    }
-
-    static class FileEventListener implements EventListener {
-        private final FileChunksTransport fileChunksTransport;
-        private final FileListener fileListener;
-
-        private String subscriptionId;
-
-        public FileEventListener(FileChunksTransport fileChunksTransport, FileListener fileListener) {
-            this.fileChunksTransport = fileChunksTransport;
-            this.fileListener = fileListener;
-        }
-
-        public void setSubscriptionId(String subscriptionId) {
-            this.subscriptionId = subscriptionId;
-        }
-
-        @Override
-        public void onEvent(WeEvent event) {
-            // download file
-            String localFile = null;
-            try {
-                FileChunksMeta fileChunksMeta = JsonHelper.json2Object(event.getContent(), FileChunksMeta.class);
-
-                localFile = this.fileChunksTransport.download(fileChunksMeta);
-            } catch (BrokerException | IOException e) {
-                log.error("detect exception", e);
-                this.onException(e);
-            }
-            this.fileListener.onFile(this.subscriptionId, localFile);
-        }
-
-        @Override
-        public void onException(Throwable e) {
-            this.fileListener.onException(e);
-        }
-    }
-
-    @Override
-    public String subscribeFile(String topic, String filePath, FileListener fileListener) throws BrokerException {
-        // subscribe file event
-        validateLocalFile(filePath);
-        FileChunksTransport fileChunksTransport = new FileChunksTransport(this.httpClientHelper, this.brokerUrl + "/file", filePath);
-        FileEventListener fileEventListener = new FileEventListener(fileChunksTransport, fileListener);
-        String subscriptionId = this.dealSubscribe(topic, WeEvent.OFFSET_LAST, "", true, fileEventListener);
-        fileEventListener.setSubscriptionId(subscriptionId);
-
-        return subscriptionId;
-    }
 
     private String encodeTopic(String topic) throws BrokerException {
         try {
