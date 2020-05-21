@@ -8,6 +8,9 @@ var type = 1
 var subID = ''
 var pubCon = '0'
 var subCon = '0'
+var options = {
+    transports: ["websocket", "xhr", "xhr_send", "xhr_streaming", "eventsource", "htmlfile"]
+}
 
 function setConnected(connected) {
     // $("#connect").prop("disabled", connected);
@@ -24,7 +27,7 @@ function setConnected(connected) {
 // Publish connect
 function connect() {
     url = $("#url").val();
-    var socket = new SockJS(url); //'/gs-guide-websocket'
+    var socket = new SockJS(url, "", options); //'/gs-guide-websocket'
     stompClient = StompJs.Stomp.over(socket);
     if(login||passcode){
         stompClient.connect(login, passcode, function (frame) {
@@ -115,7 +118,8 @@ function sendName() {
 // Subscribe connetc
 function subscribeConnect() {
     var subscribetopic = $("#url").val();
-    var socket = new SockJS(subscribetopic); //'/gs-guide-websocket'
+    var socket = new SockJS(subscribetopic, "", options); //'/gs-guide-websocket'
+
     stompClientSub = StompJs.Stomp.over(socket);
     subCon = '1'
     if (login||passcode){
@@ -445,9 +449,18 @@ function checkSubInput () {
     }
 }
 
+function myBrowser () {
+    var userAgent = navigator.userAgent; //取得浏览器的userAgent字符串
+    if (userAgent.indexOf("Chrome") > -1){
+        return "Chrome"
+    } else {
+        confirm('为确保程序的正常运行,请切换至Chrome浏览器')
+    }
+}
+
 $(function () {
     window.uuid = get_uuid();
-
+    myBrowser();
     console.log = (function (oriLogFunc) {
         return function (str) {
             oriLogFunc.call(console, "--:" + str);
