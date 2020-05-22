@@ -29,6 +29,8 @@ notifications:
 #    - $HOME/.gradle/caches/
 #    - $HOME/.gradle/wrapper/
 
+install: echo "skip 'gradle assemble' step"
+
 script:
   #- /bin/bash project/security_audit.sh
   - /bin/bash project/build-ci.sh
