@@ -6,8 +6,10 @@ import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.client.SendResult;
 import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.client.WeEventPlus;
 import com.webank.weevent.core.IProducer;
 import com.webank.weevent.core.config.FiscoConfig;
+import com.webank.weevent.file.dto.FileChunksMetaPlus;
 import com.webank.weevent.file.dto.FileChunksMetaStatus;
 import com.webank.weevent.file.dto.FileEvent;
 import com.webank.weevent.file.dto.FileTransportStats;
@@ -84,6 +86,30 @@ public class FileTransportService {
             }
         }
         return fileChunksMetaList;
+    }
+
+    public FileChunksMetaPlus verify(String eventId, String groupId) throws BrokerException {
+        WeEvent event = this.producer.getEvent(eventId, groupId);
+        if (this.isFileEvent(event)) {
+            FileEvent fileEvent = JsonHelper.json2Object(event.getContent(), FileEvent.class);
+
+            FileChunksMetaPlus fileChunksMetaPlus = new FileChunksMetaPlus();
+            fileChunksMetaPlus.setFile(fileEvent.getFileChunksMeta());
+            if (event.getExtensions().containsKey(WeEvent.WeEvent_PLUS)) {
+                WeEventPlus weEventPlus = JsonHelper.json2Object(event.getExtensions().get(WeEvent.WeEvent_PLUS), WeEventPlus.class);
+                fileChunksMetaPlus.setPlus(weEventPlus);
+            }
+            return fileChunksMetaPlus;
+        }
+
+        log.error("it is not a file event");
+        return null;
+    }
+
+    private boolean isFileEvent(WeEvent event) {
+        return event.getExtensions().containsKey(WeEvent.WeEvent_FILE)
+                && event.getExtensions().containsKey(WeEvent.WeEvent_FORMAT)
+                && "json".equals(event.getExtensions().get(WeEvent.WeEvent_FORMAT));
     }
 
     public FileTransportStats stats(boolean all, String groupId) {
@@ -171,7 +197,7 @@ public class FileTransportService {
         return remoteFileChunksMeta;
     }
 
-    public SendResult closeChannel(String topic, String groupId, String fileId) throws BrokerException {
+    public FileChunksMeta closeChannel(String topic, String fileId) throws BrokerException {
         log.info("close AMOP sender channel for file, fileId: {}", fileId);
         this.fileTransportContexts.remove(fileId);
 
@@ -179,8 +205,12 @@ public class FileTransportService {
         //AMOPChannel channel = this.getChannel(groupId);
         FileChunksMeta fileChunksMeta = channel.cleanUpReceiverFileContext(topic, fileId);
 
+        return fileChunksMeta;
+    }
+
+    public SendResult sendSign(FileChunksMeta fileChunksMeta) throws BrokerException {
         // send sign to WeEvent
-        FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileTransport, fileId);
+        FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileTransport, fileChunksMeta.getFileId());
         // not need detail
         fileChunksMeta.clearPrivacy();
         fileEvent.setFileChunksMeta(fileChunksMeta);

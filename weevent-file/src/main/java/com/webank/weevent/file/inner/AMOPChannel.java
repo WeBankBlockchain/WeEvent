@@ -352,12 +352,16 @@ public class AMOPChannel extends ChannelPushCallback {
     private static ChannelResponse toChannelResponse(BrokerException e) {
         ChannelResponse reply = new ChannelResponse();
         reply.setErrorCode(e.getCode());
-        reply.setErrorMessage(e.getMessage());
-        reply.setContent("".getBytes());
+        reply.setContent(e.getMessage());
         return reply;
     }
 
     public static BrokerException toBrokerException(ChannelResponse reply) {
-        return new BrokerException(reply.getErrorCode(), reply.getErrorMessage());
+        if (reply.getErrorCode() < 100000) {
+            return new BrokerException(reply.getErrorCode(), reply.getErrorMessage());
+        } else {
+            return new BrokerException(reply.getErrorCode(), ErrorCode.getDescByCode(reply.getErrorCode()));
+        }
+
     }
 }

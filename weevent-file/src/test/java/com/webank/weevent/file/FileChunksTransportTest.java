@@ -1,7 +1,7 @@
 package com.webank.weevent.file;
 
-import com.webank.weevent.client.SendResult;
 import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.file.service.FileChunksMeta;
 import com.webank.weevent.file.service.FileChunksTransport;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -23,8 +23,8 @@ public class FileChunksTransportTest {
     @Test
     @Ignore
     public void testUpload() throws Exception {
-        SendResult sendResult = this.fileChunksTransport.upload("src/main/resources/log4j2.xml", "com.weevent.file", WeEvent.DEFAULT_GROUP_ID);
-        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
+        FileChunksMeta fileChunksMeta = this.fileChunksTransport.upload("src/main/resources/log4j2.xml", "com.weevent.file", WeEvent.DEFAULT_GROUP_ID, true);
+        Assert.assertNotNull(fileChunksMeta);
     }
 
     /**
@@ -33,8 +33,8 @@ public class FileChunksTransportTest {
     @Test
     @Ignore
     public void testDownload() throws Exception {
-        SendResult sendResult = this.fileChunksTransport.upload("src/main/resources/log4j2.xml", "com.weevent.file", WeEvent.DEFAULT_GROUP_ID);
-        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
+        FileChunksMeta fileChunksMeta = this.fileChunksTransport.upload("src/main/resources/log4j2.xml", "com.weevent.file", WeEvent.DEFAULT_GROUP_ID, true);
+        Assert.assertNotNull(fileChunksMeta);
 
         // String localFile = this.fileChunksTransport.download("http://localhost:7000", "fileId");
         // Assert.assertFalse(localFile.isEmpty());
