@@ -3,7 +3,10 @@ package com.webank.weevent.file;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.SendResult;
 import com.webank.weevent.core.config.FiscoConfig;
+<<<<<<< HEAD
 import com.webank.weevent.file.dto.FileChunksMetaPlus;
+=======
+>>>>>>> 6b2c224c3d56665f145168723ce12f434605c217
 import com.webank.weevent.file.dto.FileTransportStats;
 import com.webank.weevent.file.service.FileChunksMeta;
 import com.webank.weevent.file.service.WeEventFileClient;
@@ -76,6 +79,7 @@ public interface IWeEventFileClient {
     void openTransport4Receiver(String topic, FileListener fileListener, String privatePem) throws IOException, BrokerException;
 
     /**
+
      * Interface for file notify callback
      */
     interface FileListener {

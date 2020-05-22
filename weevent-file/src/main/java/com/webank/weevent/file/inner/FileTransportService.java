@@ -1,6 +1,5 @@
 package com.webank.weevent.file.inner;
 
-
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.JsonHelper;
