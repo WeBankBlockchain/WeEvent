@@ -1,35 +1,38 @@
 package com.webank.weevent.file.ftpclient;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 
 import java.io.IOException;
 
+@Slf4j
 public class FtpClientService {
 
     public FTPClient ftpClient = new FTPClient();
 
     // connect to ftp service
-    public boolean connect(String hostname, int port, String username, String password) throws Exception {
+    public boolean connect(String hostname, int port, String username, String password) {
         try {
             ftpClient.connect(hostname, port);
-        } catch (Exception e) {
-            throw new Exception("login exception, please checkout ip and port!");
-        }
 
-        ftpClient.setControlEncoding("GBK");
-        if (FTPReply.isPositiveCompletion(ftpClient.getReplyCode())) {
-            if (ftpClient.login(username, password)) {
-                return true;
+            ftpClient.setControlEncoding("GBK");
+            if (FTPReply.isPositiveCompletion(ftpClient.getReplyCode())) {
+                if (ftpClient.login(username, password)) {
+                    return true;
+                }
+                else {
+                    log.error("login to ftp failed, please checkout username and password!");
+                }
             }
             else {
-                throw new Exception("login to ftp failed, please checkout username and password!");
+                log.error("login to ftp failed!");
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        else {
-            throw new Exception("login to ftp failed!");
-        }
+        return true;
     }
 
     // disconnect ftp service

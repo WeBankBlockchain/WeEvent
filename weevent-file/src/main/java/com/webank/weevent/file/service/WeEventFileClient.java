@@ -264,10 +264,8 @@ public class WeEventFileClient implements IWeEventFileClient {
         File file = new File(this.filePath);
         File[] files = file.listFiles();
         for (File f : files) {
-            if (f.isFile()) {
-                if (f.getName().endsWith(".json")) {
-                    fileList.add(f);
-                }
+            if (f.isFile() && f.getName().endsWith(".json")) {
+                fileList.add(f);
             }
         }
 

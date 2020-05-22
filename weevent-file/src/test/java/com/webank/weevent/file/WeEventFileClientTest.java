@@ -29,7 +29,7 @@ public class WeEventFileClientTest {
     // chunk size 1MB
     private int fileChunkSize = 1048576;
     private FiscoConfig fiscoConfig;
-    WeEventFileClient weEventFileClient4Status;
+    private WeEventFileClient weEventFileClient4Status;
 
 
     @Before
@@ -156,7 +156,7 @@ public class WeEventFileClientTest {
             //publish file
             weEventFileClient.openTransport4Sender(this.topic);
             try {
-                FileChunksMeta fileChunksMeta = weEventFileClient.publishFile(topic,
+                weEventFileClient.publishFile(topic,
                         new File("src/main/resources/bigfile.zip").getAbsolutePath(), true);
             } catch(Exception e) {
                 e.printStackTrace();
