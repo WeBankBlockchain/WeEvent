@@ -29,14 +29,12 @@ public class WeEventFileClientTest {
     // chunk size 1MB
     private int fileChunkSize = 1048576;
     private FiscoConfig fiscoConfig;
-    private WeEventFileClient weEventFileClient4Status;
 
 
     @Before
     public void before() {
         this.fiscoConfig = new FiscoConfig();
         this.fiscoConfig.load("");
-        this.weEventFileClient4Status = new WeEventFileClient(this.groupId, this.receiverFilePath, this.fileChunkSize, this.fiscoConfig);
     }
 
 
