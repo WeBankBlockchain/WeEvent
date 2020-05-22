@@ -5,8 +5,8 @@ java_home_path=$(echo ${JAVA_HOME})
 
 function modifyMavenRepo(){
   cd ${current_path}
-  original_str='maven.aliyun.com/nexus/content/groups/public'
-  replace_str='mvnrepository.com'
+  original_str='http://maven.aliyun.com/nexus/content/groups/public/'
+  replace_str='https://repo1.maven.org/maven2/'
   sed -i "s~$original_str~$replace_str~" ./build.gradle
 }
 
@@ -84,6 +84,7 @@ function startBrokerService() {
 }
 
 function main(){
+    modifyMavenRepo
     updateOpenssl
     installFisco
     installZookeeper
