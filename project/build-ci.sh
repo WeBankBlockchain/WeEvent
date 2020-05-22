@@ -8,7 +8,6 @@ function modifyMavenRepo(){
   original_str='http://maven.aliyun.com/nexus/content/groups/public/'
   replace_str='https://repo1.maven.org/maven2/'
   sed -i "s~$original_str~$replace_str~" ./build.gradle
-  cat ./build.gradle | grep 'url'
 }
 
 function updateOpenssl(){

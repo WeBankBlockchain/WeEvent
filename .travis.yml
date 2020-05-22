@@ -29,7 +29,7 @@ notifications:
 #    - $HOME/.gradle/caches/
 #    - $HOME/.gradle/wrapper/
 
-install: echo "skip 'gradle assemble' step"
+install: skip
 
 script:
   #- /bin/bash project/security_audit.sh
