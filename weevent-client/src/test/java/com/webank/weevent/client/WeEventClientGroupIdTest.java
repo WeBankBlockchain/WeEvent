@@ -105,7 +105,7 @@ public class WeEventClientGroupIdTest {
     }
 
     /**
-     * test empty content、extensions
+     * test empty content and extensions
      */
     @Test(expected = BrokerException.class)
     public void testPublish001() throws Exception {
