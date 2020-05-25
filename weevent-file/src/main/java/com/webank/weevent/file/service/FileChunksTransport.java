@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
-import com.webank.weevent.client.SendResult;
 import com.webank.weevent.core.fisco.util.ParamCheckUtils;
 import com.webank.weevent.core.fisco.util.WeEventUtils;
 import com.webank.weevent.file.inner.FileTransportService;
@@ -34,7 +33,7 @@ public class FileChunksTransport {
         this.fileTransportService = fileTransportService;
     }
 
-    public SendResult upload(String localFile, String topic, String groupId) throws BrokerException, IOException, InterruptedException {
+    public FileChunksMeta upload(String localFile, String topic, String groupId, boolean overwrite) throws BrokerException, IOException, InterruptedException {
         log.info("try to upload file {}", localFile);
 
         File file = new File(localFile);
@@ -54,7 +53,8 @@ public class FileChunksTransport {
                     file.length(),
                     md5,
                     topic,
-                    groupId);
+                    groupId,
+                    overwrite);
             // get chunk information
             fileChunksMeta = this.openFileChunksInfo(fileChunksMeta);
 
@@ -108,7 +108,7 @@ public class FileChunksTransport {
                 fileChunksMeta.getFileSize(),
                 fileChunksMeta.getFileMd5(),
                 fileChunksMeta.getTopic(),
-                fileChunksMeta.getGroupId());
+                fileChunksMeta.getGroupId(), fileChunksMeta.isOverwrite());
         } catch (UnsupportedEncodingException e) {
             log.error("decode fileName error", e);
             throw new BrokerException(ErrorCode.DECODE_FILE_NAME_ERROR);
@@ -137,13 +137,13 @@ public class FileChunksTransport {
         return true;
     }
 
-    private SendResult closeChunk(FileChunksMeta local) throws BrokerException {
+    private FileChunksMeta closeChunk(FileChunksMeta local) throws BrokerException {
         ParamCheckUtils.validateFileId(local.getFileId());
 
-        // close channel and send WeEvent
-        SendResult sendResult = this.fileTransportService.closeChannel(local.getTopic(), local.getGroupId(), local.getFileId());
+        // close channel
+        FileChunksMeta fileChunksMeta = this.fileTransportService.closeChannel(local.getTopic(), local.getFileId());
 
-        return sendResult;
+        return fileChunksMeta;
     }
 
     private boolean checkChunkFullUpload(RandomAccessFile f, FileChunksMeta local) throws InterruptedException {

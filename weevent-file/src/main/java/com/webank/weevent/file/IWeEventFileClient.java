@@ -3,6 +3,7 @@ package com.webank.weevent.file;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.SendResult;
 import com.webank.weevent.core.config.FiscoConfig;
+import com.webank.weevent.file.dto.FileChunksMetaPlus;
 import com.webank.weevent.file.dto.FileTransportStats;
 import com.webank.weevent.file.service.FileChunksMeta;
 import com.webank.weevent.file.service.WeEventFileClient;
@@ -36,6 +37,19 @@ public interface IWeEventFileClient {
      */
     void openTransport4Sender(String topic, String publicPem) throws BrokerException, IOException;
 
+    /**
+     * Publish a file to topic.
+     * The file's data DO NOT stored in block chain. Yes, it's not persist, may be deleted sometime after subscribe notify.
+     *
+     * @param topic binding topic
+     * @param localFile local file to be send
+     * @param overwrite if receiver has this file, overwrite it?
+     * @return send result, SendResult.SUCCESS if success, and return SendResult.eventId
+     * @throws BrokerException broker exception
+     * @throws IOException IOException
+     * @throws InterruptedException InterruptedException
+     */
+    FileChunksMeta publishFile(String topic, String localFile, boolean overwrite) throws BrokerException, IOException, InterruptedException;
 
     /**
      * @param topic topic name
@@ -62,38 +76,7 @@ public interface IWeEventFileClient {
     void openTransport4Receiver(String topic, FileListener fileListener, String privatePem) throws IOException, BrokerException;
 
     /**
-     * invoke unSubTopic
-     *
-     * @param topic topic name
-     */
-    void closeTransport(String topic);
 
-    /**
-     * @param topic topic name
-     * @return filetransportstatus
-     */
-    FileTransportStats status(String topic);
-
-    /**
-     * @param topic topic name
-     * @return filechunksmeta list
-     */
-    List<FileChunksMeta> listFiles(String topic);
-
-    /**
-     * Publish a file to topic.
-     * The file's data DO NOT stored in block chain. Yes, it's not persist, may be deleted sometime after subscribe notify.
-     *
-     * @param topic binding topic
-     * @param localFile local file to be send
-     * @return send result, SendResult.SUCCESS if success, and return SendResult.eventId
-     * @throws BrokerException broker exception
-     * @throws IOException IOException
-     * @throws InterruptedException InterruptedException
-     */
-    SendResult publishFile(String topic, String localFile) throws BrokerException, IOException, InterruptedException;
-
-    /**
      * Interface for file notify callback
      */
     interface FileListener {
@@ -112,4 +95,39 @@ public interface IWeEventFileClient {
          */
         void onException(Throwable e);
     }
+
+    /**
+     * invoke unSubTopic
+     *
+     * @param topic topic name
+     */
+    void closeTransport(String topic);
+
+    /**
+     * @param topic topic name
+     * @return filetransportstatus
+     */
+    FileTransportStats status(String topic);
+
+    /**
+     * @param topic topic name
+     * @return filechunksmeta list
+     * @throws BrokerException broker exception
+     */
+    List<FileChunksMeta> listFiles(String topic) throws BrokerException;
+
+    /**
+     * @param fileChunksMeta fileChunksMeta
+     * @return send result and eventId
+     * @throws BrokerException broker exception
+     */
+    SendResult sign(FileChunksMeta fileChunksMeta) throws BrokerException;
+
+    /**
+     * @param eventId eventId return by sign
+     * @param groupId group id
+     * @return file and block information
+     * @throws BrokerException broker exception
+     */
+    FileChunksMetaPlus verify(String eventId, String groupId) throws BrokerException;
 }
