@@ -99,19 +99,33 @@ public class DiskFiles {
     }
 
     public void createFixedLengthFile(FileChunksMeta fileChunksMeta) throws BrokerException {
-        // record fileId - FileChunksMeta
-        this.fileIdChunksMeta.put(fileChunksMeta.getFileId(), fileChunksMeta);
-
         // ensure path exist and disk space
         File path = new File(this.path);
         if (!path.exists()) {
             log.error("not exist local file path, {}", this.path);
             throw new BrokerException(ErrorCode.FILE_NOT_EXIST_PATH);
+        } else {
+            // This file exists in the directory, and do not allow overwriting
+            if (!fileChunksMeta.isOverwrite()) {
+                File[] fileList = path.listFiles();
+                if (fileList != null) {
+                    for (File file : fileList) {
+                        if (file.getName().equals(fileChunksMeta.getFileName())) {
+                            log.error("file exists in the directory, and do not allow overwrite, filename:{}", fileChunksMeta.getFileName());
+                            throw new BrokerException(ErrorCode.FILE_EXIST_AND_NOT_ALLOW_OVERWRITE);
+                        }
+                    }
+                }
+            }
         }
+
         if (path.getFreeSpace() < fileChunksMeta.getFileSize() + 1024 * 1024) {
             log.error("not enough disk space, {} -> free {}", fileChunksMeta.getFileSize(), path.getFreeSpace());
             throw new BrokerException(ErrorCode.FILE_NOT_ENOUGH_SPACE);
         }
+
+        // record fileId - FileChunksMeta
+        this.fileIdChunksMeta.put(fileChunksMeta.getFileId(), fileChunksMeta);
 
         String localFile = this.genLocalFileName(fileChunksMeta.getFileId());
         log.info("create local file for receiving file, {} size: {}", localFile, fileChunksMeta.getFileSize());
