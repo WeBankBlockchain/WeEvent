@@ -160,7 +160,6 @@ public class AMOPChannel extends ChannelPushCallback {
 
     public void unSubTopic(String topic) {
         if (subVerifyTopics.containsKey(topic)) {
-            // 认证的topic支持动态订阅不支持动态取消订阅,用户取消订阅的时候前端页面要显示这个
             log.info("unSubscribe verify topic on AMOP channel, {}", topic);
             service = this.subVerifyTopics.remove(topic);
             service = null;
@@ -353,12 +352,16 @@ public class AMOPChannel extends ChannelPushCallback {
     private static ChannelResponse toChannelResponse(BrokerException e) {
         ChannelResponse reply = new ChannelResponse();
         reply.setErrorCode(e.getCode());
-        reply.setErrorMessage(e.getMessage());
-        reply.setContent("".getBytes());
+        reply.setContent(e.getMessage());
         return reply;
     }
 
     public static BrokerException toBrokerException(ChannelResponse reply) {
-        return new BrokerException(reply.getErrorCode(), reply.getErrorMessage());
+        if (reply.getErrorCode() < 100000) {
+            return new BrokerException(reply.getErrorCode(), reply.getErrorMessage());
+        } else {
+            return new BrokerException(reply.getErrorCode(), ErrorCode.getDescByCode(reply.getErrorCode()));
+        }
+
     }
 }
