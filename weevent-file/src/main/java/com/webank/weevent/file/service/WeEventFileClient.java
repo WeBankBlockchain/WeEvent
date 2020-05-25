@@ -9,9 +9,11 @@ import com.webank.weevent.core.IProducer;
 import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
 import com.webank.weevent.file.IWeEventFileClient;
+import com.webank.weevent.file.dto.FileChunksMetaPlus;
 import com.webank.weevent.file.dto.FileChunksMetaStatus;
 import com.webank.weevent.file.dto.FileTransportStats;
 import com.webank.weevent.file.inner.AMOPChannel;
+import com.webank.weevent.file.inner.DiskFiles;
 import com.webank.weevent.file.inner.FileTransportService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -20,9 +22,9 @@ import org.fisco.bcos.channel.handler.AMOPVerifyKeyInfo;
 import org.fisco.bcos.channel.handler.AMOPVerifyTopicToKeyInfo;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -35,7 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WeEventFileClient implements IWeEventFileClient {
 
     private final String groupId;
-    private String filePath ="";
+    private String filePath = "";
     private FiscoConfig config;
     private FileTransportService fileTransportService;
     private int fileChunkSize;
@@ -50,18 +52,18 @@ public class WeEventFileClient implements IWeEventFileClient {
 
     public void init() {
         try {
-            // 获取FISCO实例
+            // create fisco instance
             FiscoBcosInstance fiscoBcosInstance = new FiscoBcosInstance(this.config);
 
-            // 创建生产者
+            // create producer
             IProducer iProducer = fiscoBcosInstance.buildProducer();
             iProducer.startProducer();
 
-            // 创建消费者
+            // create consumer
             IConsumer iConsumer = fiscoBcosInstance.buildConsumer();
             iConsumer.startConsumer();
 
-            // 创建FileTransportService实例
+            // create FileTransportService instance
             FileTransportService fileTransportService = new FileTransportService(this.config, iProducer, "", this.filePath, this.fileChunkSize, this.groupId);
             this.fileTransportService = fileTransportService;
 
@@ -128,7 +130,6 @@ public class WeEventFileClient implements IWeEventFileClient {
         amopChannel.senderVerifyTopics.put(topic, service);
     }
 
-
     /**
      * @param topic topic name
      * @param publicPemPath public pem path string
@@ -136,14 +137,36 @@ public class WeEventFileClient implements IWeEventFileClient {
      * @throws IOException exception
      */
     public void openTransport4Sender(String topic, String publicPemPath) throws BrokerException, IOException {
-        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        Resource resource = resolver.getResource("classpath:" + publicPemPath);
+        File file = new File(publicPemPath);
+        if (!file.isFile()) {
+            log.error("public key file path string isn't a file.");
+            throw new BrokerException(ErrorCode.FILE_NOT_EXIST);
+        }
+        InputStream inputStream = new FileInputStream(file);
 
-        openTransport4Sender(topic, resource.getInputStream());
+        openTransport4Sender(topic, inputStream);
     }
 
+    /**
+     * Publish a file to topic.
+     * The file's data DO NOT stored in block chain. Yes, it's not persist, may be deleted sometime after subscribe notify.
+     *
+     * @param topic binding topic
+     * @param localFile local file to be send
+     * @return send result, SendResult.SUCCESS if success, and return SendResult.eventId
+     * @throws BrokerException broker exception
+     * @throws IOException IOException
+     * @throws InterruptedException InterruptedException
+     */
+    @Override
+    public FileChunksMeta publishFile(String topic, String localFile, boolean overwrite) throws BrokerException, IOException, InterruptedException {
+        // upload file
+        validateLocalFile(localFile);
 
-
+        FileChunksTransport fileChunksTransport = new FileChunksTransport(this.fileTransportService);
+        FileChunksMeta fileChunksMeta = fileChunksTransport.upload(localFile, topic, this.groupId, overwrite);
+        return fileChunksMeta;
+    }
 
     /**
      * @param topic topic name
@@ -166,7 +189,6 @@ public class WeEventFileClient implements IWeEventFileClient {
         // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
 
-
         amopChannel.subTopic(topic, groupId, privatePem, fileListener);
     }
 
@@ -178,10 +200,14 @@ public class WeEventFileClient implements IWeEventFileClient {
      * @throws BrokerException InterruptedException
      */
     public void openTransport4Receiver(String topic, FileListener fileListener, String privatePemPath) throws IOException, BrokerException {
-        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        Resource resource = resolver.getResource("classpath:" + privatePemPath);
+        File file = new File(privatePemPath);
+        if (!file.isFile()) {
+            log.error("private key file path string isn't a file.");
+            throw new BrokerException(ErrorCode.FILE_NOT_EXIST);
+        }
+        InputStream inputStream = new FileInputStream(file);
 
-        openTransport4Receiver(topic, fileListener, resource.getInputStream());
+        openTransport4Receiver(topic, fileListener, inputStream);
     }
 
     /**
@@ -193,37 +219,6 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
-     * @param topic topic name
-     * @return filechunksmeta  filechunksmeta
-     */
-    public List<FileChunksMeta> listFiles(String topic) {
-        List<FileChunksMeta> fileChunksMetas = this.fileTransportService.getFileChunksMeta(topic);
-        return fileChunksMetas;
-    }
-
-
-    /**
-     * Publish a file to topic.
-     * The file's data DO NOT stored in block chain. Yes, it's not persist, may be deleted sometime after subscribe notify.
-     *
-     * @param topic binding topic
-     * @param localFile local file to be send
-     * @return send result, SendResult.SUCCESS if success, and return SendResult.eventId
-     * @throws BrokerException broker exception
-     * @throws IOException IOException
-     * @throws InterruptedException InterruptedException
-     */
-    @Override
-    public SendResult publishFile(String topic, String localFile) throws BrokerException, IOException, InterruptedException {
-        // upload file
-        validateLocalFile(localFile);
-
-        FileChunksTransport fileChunksTransport = new FileChunksTransport(this.fileTransportService);
-        SendResult sendResult = fileChunksTransport.upload(localFile, topic, this.groupId);
-        return sendResult;
-    }
-
-    /**
      * @param topicName topic name
      * @return transport status
      */
@@ -232,6 +227,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         FileTransportStats fileTransportStats = this.fileTransportService.stats(true, this.groupId);
         if (fileTransportStats == null) {
             log.error("get status error");
+            return null;
         }
 
         // sender
@@ -245,8 +241,8 @@ public class WeEventFileClient implements IWeEventFileClient {
         // receiver
         Map<String, List<FileChunksMetaStatus>> receiverTopicStatusMap = new HashMap<>();
         List<FileChunksMetaStatus> receiverFileChunksMetaStatusList = new ArrayList<>();
-        receiverFileChunksMetaStatusList = fileTransportStats.getSender().get(groupId).get(topicName);
-        senderTopicStatusMap.put(topicName, receiverFileChunksMetaStatusList);
+        receiverFileChunksMetaStatusList = fileTransportStats.getReceiver().get(groupId).get(topicName);
+        receiverTopicStatusMap.put(topicName, receiverFileChunksMetaStatusList);
         Map<String, Map<String, List<FileChunksMetaStatus>>> receiver = new HashMap<>();
         receiver.put(groupId, receiverTopicStatusMap);
 
@@ -255,6 +251,54 @@ public class WeEventFileClient implements IWeEventFileClient {
         retFileTransportStats.setReceiver(receiver);
 
         return retFileTransportStats;
+    }
+
+    /**
+     * @param topic topic name
+     * @return filechunksmeta  filechunksmeta
+     * @throws BrokerException broker exception
+     */
+    public List<FileChunksMeta> listFiles(String topic) throws BrokerException {
+        // get json from disk
+        List<File> fileList = new ArrayList<>();
+        File file = new File(this.filePath);
+        File[] files = file.listFiles();
+        for (File f : files) {
+            if (f.isFile() && f.getName().endsWith(".json")) {
+                fileList.add(f);
+            }
+        }
+
+        List<FileChunksMeta> fileChunksMetaList = new ArrayList<>();
+        DiskFiles diskFiles = new DiskFiles(this.filePath);
+        for (File f : fileList) {
+            FileChunksMeta fileChunksMeta = diskFiles.loadFileMeta(f);
+            if (fileChunksMeta.getTopic().equals(topic)) {
+                fileChunksMetaList.add(fileChunksMeta);
+            }
+        }
+
+        return fileChunksMetaList;
+    }
+
+    /**
+     * @param fileChunksMeta fileChunksMeta
+     * @return send result and eventId
+     * @throws BrokerException broker exception
+     */
+    public SendResult sign(FileChunksMeta fileChunksMeta) throws BrokerException {
+        return this.fileTransportService.sendSign(fileChunksMeta);
+    }
+
+    /**
+     * @param eventId eventId return by sign
+     * @param groupId group id
+     * @return file and block information
+     * @throws BrokerException broker exception
+     */
+    public FileChunksMetaPlus verify(String eventId, String groupId) throws BrokerException {
+        return this.fileTransportService.verify(eventId, groupId);
+
     }
 
     private static void validateLocalFile(String filePath) throws BrokerException {
