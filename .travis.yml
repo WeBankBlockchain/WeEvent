@@ -29,11 +29,13 @@ notifications:
 #    - $HOME/.gradle/caches/
 #    - $HOME/.gradle/wrapper/
 
+install: skip
+
 script:
   #- /bin/bash project/security_audit.sh
   - /bin/bash project/build-ci.sh
   - chmod +x ./gradlew
-  - ./gradlew build
+  - ./gradlew test
   - ./gradlew check
   - ./gradlew codeCoverageReport
 after_success:

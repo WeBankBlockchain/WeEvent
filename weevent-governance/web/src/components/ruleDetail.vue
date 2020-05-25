@@ -65,6 +65,7 @@
           </el-select>
         </el-form-item>
         <el-form-item :label="$t('ruleDetail.condition') + ' :'">
+          <i class='des_icon el-icon-question' @click='showRuleDes = true'></i>
           <div style='text-align:right'>
             <span class='el-icon-plus' @click='addConditionItem'></span>
           </div>
@@ -122,11 +123,15 @@
         <el-button  size="small" @click="createSQL = !createSQL">{{$t('common.cancel')}}</el-button>
       </div>
     </el-dialog>
+    <el-dialog :title="$t('ruleDes.conditionDes')" :visible.sync="showRuleDes" :fullscreen='true' :close-on-press-escape='true'>
+      <ruleDes></ruleDes>
+    </el-dialog>
   </div>
 </template>
 <script>
 import API from '../API/resource'
 import tree from './tree.vue'
+import ruleDes from './ruleDes'
 import { checkRule } from '../utils/checkRule'
 import { checkLoad } from '../utils/checkLoad'
 export default {
@@ -224,6 +229,7 @@ export default {
       }
     }
     return {
+      showRuleDes: false,
       selAll: false,
       createRule: false,
       createSQL: false,
@@ -310,7 +316,7 @@ export default {
       functionArray: []
     }
   },
-  components: {tree},
+  components: { tree, ruleDes },
   computed: {
     brokerId () {
       return this.$store.state.brokerId
