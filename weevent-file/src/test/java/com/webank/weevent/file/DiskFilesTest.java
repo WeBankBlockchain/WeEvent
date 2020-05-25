@@ -31,7 +31,8 @@ public class DiskFilesTest {
                 100,
                 "fce6f5f5d390fc1928c48eeb4e9271e9",
                 "com.weevent.file",
-                "1");
+                "1",
+                true);
         this.fileChunksMeta.initChunkSize(32);
     }
 
