@@ -524,13 +524,11 @@ section {
 }
 
 .leftbox {
-    background-color: #6c777714;
     float: left;
     background-color: #f5f5f5;
 }
 
 .rightbox {
-    background-color: #6c777714;
     float: right;
     background-color: #f5f5f5;
 }
