@@ -37,7 +37,8 @@ public class FileChunksMetaTest {
                 100,
                 "5291aeb50bddf9ef9ad8824ee7df34ba",
                 "com.weevent.test",
-                "1");
+                "1",
+                true);
         fileChunksMeta.initChunkSize(1024);
         Assert.assertEquals(1, fileChunksMeta.getChunkNum());
     }
@@ -52,7 +53,8 @@ public class FileChunksMetaTest {
                 1024,
                 "5291aeb50bddf9ef9ad8824ee7df34ba",
                 "com.weevent.test",
-                "1");
+                "1",
+                true);
         fileChunksMeta.initChunkSize(1024);
         Assert.assertEquals(1, fileChunksMeta.getChunkNum());
     }
@@ -67,7 +69,8 @@ public class FileChunksMetaTest {
                 1025,
                 "5291aeb50bddf9ef9ad8824ee7df34ba",
                 "com.weevent.test",
-                "1");
+                "1",
+                true);
         fileChunksMeta.initChunkSize(1024);
         Assert.assertEquals(2, fileChunksMeta.getChunkNum());
     }
@@ -82,7 +85,8 @@ public class FileChunksMetaTest {
                 2048,
                 "5291aeb50bddf9ef9ad8824ee7df34ba",
                 "com.weevent.test",
-                "1");
+                "1",
+                true);
         fileChunksMeta.initChunkSize(1024);
         Assert.assertEquals(2, fileChunksMeta.getChunkNum());
     }
@@ -97,7 +101,8 @@ public class FileChunksMetaTest {
                 1023,
                 "5291aeb50bddf9ef9ad8824ee7df34ba",
                 "com.weevent.test",
-                "1");
+                "1",
+                true);
         fileChunksMeta.initChunkSize(1048576);
         Assert.assertEquals(1, fileChunksMeta.getChunkNum());
     }
@@ -112,7 +117,8 @@ public class FileChunksMetaTest {
                 1048576,
                 "5291aeb50bddf9ef9ad8824ee7df34ba",
                 "com.weevent.test",
-                "1");
+                "1",
+                true);
         fileChunksMeta.initChunkSize(1048576);
         Assert.assertEquals(1, fileChunksMeta.getChunkNum());
     }
@@ -127,7 +133,8 @@ public class FileChunksMetaTest {
                 8589934592L,
                 "5291aeb50bddf9ef9ad8824ee7df34ba",
                 "com.weevent.test",
-                "1");
+                "1",
+                true);
         fileChunksMeta.initChunkSize(1048576);
         Assert.assertEquals(8192, fileChunksMeta.getChunkNum());
     }
