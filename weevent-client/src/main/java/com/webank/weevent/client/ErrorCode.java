@@ -139,6 +139,7 @@ public enum ErrorCode {
     FILE_SENDER_RECEIVER_CONFLICT(200509, "can't publish and subscribe a file in the same node"),
     FILE_EXIST_CONTEXT(200510, "exist file context"),
     FILE_INIT_VERIFY_FAILED(200511, "initialize PEM for verify topic failed"),
+    FILE_EXIST_AND_NOT_ALLOW_OVERWRITE(200512, "The file already exists in the directory, and do not allow overwrite"),
 
     MQTT_UNKNOWN_COMMAND(200600, "unknown mqtt command"),
     MQTT_ENCODE_FAILED(200601, "encode mqtt message failed"),
@@ -185,5 +186,18 @@ public enum ErrorCode {
      */
     public String getCodeDesc() {
         return codeDesc;
+    }
+
+    /**
+     * @param code error code
+     * @return error desc
+     */
+    public static String getDescByCode(int code) {
+        for (ErrorCode errorCode : ErrorCode.values()) {
+            if (code == errorCode.getCode()) {
+                return errorCode.getCodeDesc();
+            }
+        }
+        return "";
     }
 }
