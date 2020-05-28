@@ -49,8 +49,8 @@ public class FtpClientServiceTest {
         if (!uploadFile.exists()) {
             System.out.println("read file failed!");
         }
-        boolean upload = ftpClientService.upLoadFile(uploadFile);
-        Assert.assertTrue(upload);
+        ftpClientService.upLoadFile(uploadFile);
+        Assert.assertTrue(true);
     }
 
     @Test

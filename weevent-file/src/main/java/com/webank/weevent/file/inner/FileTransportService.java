@@ -44,12 +44,13 @@ public class FileTransportService {
     private Map<String, FileChunksMeta> fileTransportContexts = new ConcurrentHashMap<>();
 
     // fileTransportService for common transport
-    public FileTransportService(FiscoConfig fiscoConfig,
-                                IProducer iProducer,
-                                String host,
-                                String filePath,
-                                int fileChunkSize,
-                                String groupId) throws BrokerException {
+    public FileTransportService(
+            FiscoConfig fiscoConfig,
+            IProducer iProducer,
+            String host,
+            String filePath,
+            int fileChunkSize,
+            String groupId) throws BrokerException {
         this.fiscoConfig = fiscoConfig;
         this.producer = iProducer;
         this.timeout = fiscoConfig.getWeb3sdkTimeout();

@@ -20,7 +20,6 @@ import java.util.List;
 @Slf4j
 public class FtpClientService {
     private static final String PATH_SEPARATOR = "/";
-
     public FTPClient ftpClient = new FTPClient();
     private String defaultDir = "";
 
@@ -84,10 +83,9 @@ public class FtpClientService {
      * upload a file or directory in ftp default directory
      *
      * @param uploadFile file or directory
-     * @return true-success, false-fail
      * @throws BrokerException BrokerException
      */
-    public boolean upLoadFile(File uploadFile) throws BrokerException {
+    public void upLoadFile(File uploadFile) throws BrokerException {
         if (!this.ftpClient.isConnected() || !this.ftpClient.isAvailable()) {
             log.error("ftp client not connected to a server");
             throw new BrokerException(ErrorCode.FTP_CLIENT_NOT_CONNECT_TO_SERVER);
@@ -106,19 +104,22 @@ public class FtpClientService {
                 FileInputStream inputStream = new FileInputStream(uploadFile);
                 this.ftpClient.storeFile(uploadFile.getName(), inputStream);
                 inputStream.close();
-                log.info("file upload success, {}", uploadFile.getName());
+                log.info("file upload success, file name: {}", uploadFile.getName());
             } else {
-                // upload directory
-                boolean makeDir = this.ftpClient.makeDirectory(uploadFile.getName());
-                if (!makeDir) {
-                    log.error("make ftp directory failed, {}", uploadFile.getName());
-                    throw new BrokerException(ErrorCode.FTP_MAKE_DIR_FAILED);
-                }
-                // change working directory
-                boolean changeDir = this.ftpClient.changeWorkingDirectory(uploadFile.getName());
-                if (!changeDir) {
-                    log.error("change working directory failed, {}", uploadFile.getName());
-                    throw new BrokerException(ErrorCode.FTP_CHANGE_WORKING_DIR_FAILED);
+                // upload directory, if directory not exist, create it
+                boolean dirExist = this.ftpClient.changeWorkingDirectory(uploadFile.getName());
+                if (!dirExist) {
+                    boolean makeDir = this.ftpClient.makeDirectory(uploadFile.getName());
+                    if (!makeDir) {
+                        log.error("make ftp directory failed, {}", uploadFile.getName());
+                        throw new BrokerException(ErrorCode.FTP_MAKE_DIR_FAILED);
+                    }
+                    // change word directory
+                    boolean changeDir = this.ftpClient.changeWorkingDirectory(uploadFile.getName());
+                    if (!changeDir) {
+                        log.error("change working directory failed, {}", uploadFile.getName());
+                        throw new BrokerException(ErrorCode.FTP_CHANGE_WORKING_DIR_FAILED);
+                    }
                 }
 
                 File[] listFiles = uploadFile.listFiles();
@@ -149,7 +150,27 @@ public class FtpClientService {
         } catch (IOException e) {
             throw new BrokerException(e.getMessage());
         }
-        return true;
+    }
+
+    /**
+     * upload a file or directory in ftp default directory
+     *
+     * @param uploadFilePath upload file path
+     * @throws BrokerException BrokerException
+     */
+    public void upLoadFile(String uploadFilePath) throws BrokerException {
+        File uploadFile = new File(uploadFilePath);
+        this.upLoadFile(uploadFile);
+    }
+
+    /**
+     * @param remotePath ftp server file path
+     * @param uploadFilePath upload file path
+     * @throws BrokerException BrokerException
+     */
+    public void upLoadFile(String remotePath, String uploadFilePath) throws BrokerException {
+        File uploadFile = new File(uploadFilePath);
+        this.upLoadFile(remotePath, uploadFile);
     }
 
     /**
@@ -157,7 +178,7 @@ public class FtpClientService {
      *
      * @param remotePath ftp server directory
      * @param uploadFile local file or directory
-     * @throws BrokerException
+     * @throws BrokerException BrokerException
      */
     public void upLoadFile(String remotePath, File uploadFile) throws BrokerException {
         if (!this.ftpClient.isConnected() || !this.ftpClient.isAvailable()) {
@@ -178,17 +199,20 @@ public class FtpClientService {
             this.ftpClient.enterLocalPassiveMode();
             this.ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
 
-            // create directory
-            boolean makeDir = this.ftpClient.makeDirectory(remotePath);
-            if (!makeDir) {
-                log.error("make ftp directory failed, {}", remotePath);
-                throw new BrokerException(ErrorCode.FTP_MAKE_DIR_FAILED);
-            }
-            // change word directory
-            boolean changeDir = this.ftpClient.changeWorkingDirectory(remotePath);
-            if (!changeDir) {
-                log.error("change working directory failed, {}", remotePath);
-                throw new BrokerException(ErrorCode.FTP_CHANGE_WORKING_DIR_FAILED);
+            // create directory, if directory not exist, create it
+            boolean dirExist = this.ftpClient.changeWorkingDirectory(remotePath);
+            if (!dirExist) {
+                boolean makeDir = this.ftpClient.makeDirectory(remotePath);
+                if (!makeDir) {
+                    log.error("make ftp directory failed, {}", remotePath);
+                    throw new BrokerException(ErrorCode.FTP_MAKE_DIR_FAILED);
+                }
+                // change word directory
+                boolean changeDir = this.ftpClient.changeWorkingDirectory(remotePath);
+                if (!changeDir) {
+                    log.error("change working directory failed, {}", remotePath);
+                    throw new BrokerException(ErrorCode.FTP_CHANGE_WORKING_DIR_FAILED);
+                }
             }
 
             this.upLoadFile(uploadFile);
@@ -203,8 +227,7 @@ public class FtpClientService {
      *
      * @param remoteFilePath file path in ftp server
      * @param localPath local path for download file
-     * @throws IOException
-     * @throws BrokerException
+     * @throws BrokerException BrokerException
      */
     public void downLoadFile(String remoteFilePath, String localPath) throws BrokerException {
         if (!this.ftpClient.isConnected() || !this.ftpClient.isAvailable()) {
@@ -271,6 +294,9 @@ public class FtpClientService {
                 outputStream.flush();
                 outputStream.close();
                 log.info("file download success, {}", ftpFile.getName());
+            } else {
+                log.error("remote file name error, {}", remoteFilePath);
+                throw new BrokerException(ErrorCode.FTP_UNKNOWN_REMOTE_FILE);
             }
         } catch (IOException e) {
             throw new BrokerException(e.getMessage());
@@ -345,7 +371,7 @@ public class FtpClientService {
             FTPFile[] ftpFiles = ftpClient.listFiles();
             if (ftpFiles != null && ftpFiles.length > 0) {
                 for (FTPFile file : ftpFiles) {
-                    String path = remoteDirPath + "/" + file.getName();
+                    String path = remoteDirPath + PATH_SEPARATOR + file.getName();
                     if (file.isFile()) {
                         filePathList.add(path);
                     } else {

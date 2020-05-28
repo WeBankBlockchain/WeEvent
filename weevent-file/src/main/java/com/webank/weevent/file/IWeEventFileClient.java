@@ -17,6 +17,10 @@ public interface IWeEventFileClient {
         return new WeEventFileClient(groupId, filePath, fileChunkSize, fiscoConfig);
     }
 
+    public static IWeEventFileClient build(String groupId, String filePath, String host, int port, String userName, String passWord, String ftpReceivePath, int fileChunkSize, FiscoConfig fiscoConfig) {
+        return new WeEventFileClient(groupId, filePath, host, port, userName, passWord, ftpReceivePath, fileChunkSize, fiscoConfig);
+    }
+
     /**
      * @param topic topic name
      */
@@ -50,6 +54,26 @@ public interface IWeEventFileClient {
      * @throws InterruptedException InterruptedException
      */
     FileChunksMeta publishFile(String topic, String localFile, boolean overwrite) throws BrokerException, IOException, InterruptedException;
+
+    /**
+     * Interface for event notify callback
+     */
+    interface EventListener {
+        /**
+         * Called while new event arrived.
+         *
+         * @param topic topic name
+         * @param fileName file name
+         */
+        void onEvent(String topic, String fileName);
+
+        /**
+         * Called while raise exception.
+         *
+         * @param e the e
+         */
+        void onException(Throwable e);
+    }
 
     /**
      * @param topic topic name

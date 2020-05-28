@@ -150,15 +150,16 @@ public enum ErrorCode {
 
     FTP_INVALID_USERNAME_PASSWD(200700, "invalid username or password"),
     FTP_INVALID_HOST_PORT(200701, "invalid host or port"),
-    FTP_LOGIN_FAILED(200703, "ftp login failed"),
-    FTP_CLIENT_NOT_CONNECT_TO_SERVER(200704, "ftp client not connected to a server"),
+    FTP_LOGIN_FAILED(200702, "ftp login failed"),
+    FTP_CLIENT_NOT_CONNECT_TO_SERVER(200703, "ftp client not connected to a server"),
     FTP_NOT_EXIST_PATH(200704, "ftp not exist file path"),
     FTP_UPLOAD_FILE_FAILED(200705, "ftp upload file failed"),
     FTP_CHANGE_WORKING_DIR_FAILED(200706, "ftp change working directory failed"),
     FTP_MAKE_DIR_FAILED(200707, "make directory failed"),
     FTP_UNKNOWN_ERROR(200708, "unknown ftp error"),
     FTP_INVALID_REMOTE_PATH(200709, "remote path invalid"),
-    FTP_RETRIEVE_FILE_FAILED(200709, "remote path invalid"),
+    FTP_RETRIEVE_FILE_FAILED(200710, "remote path invalid"),
+    FTP_UNKNOWN_REMOTE_FILE(200711, "unknown remote file"),
     ;
 
     /**

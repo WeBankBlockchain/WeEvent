@@ -12,6 +12,7 @@ import com.webank.weevent.file.IWeEventFileClient;
 import com.webank.weevent.file.dto.FileChunksMetaPlus;
 import com.webank.weevent.file.dto.FileChunksMetaStatus;
 import com.webank.weevent.file.dto.FileTransportStats;
+import com.webank.weevent.file.ftpclient.FtpClientService;
 import com.webank.weevent.file.inner.AMOPChannel;
 import com.webank.weevent.file.inner.DiskFiles;
 import com.webank.weevent.file.inner.FileTransportService;
@@ -36,17 +37,44 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class WeEventFileClient implements IWeEventFileClient {
 
+    private static final String PATH_SEPARATOR = "/";
     private final String groupId;
-    private String filePath = "";
+    private String localReceivePath = "";
     private FiscoConfig config;
     private FileTransportService fileTransportService;
     private int fileChunkSize;
+    private FtpInfo ftpInfo;
 
-    public WeEventFileClient(String groupId, String receiveFilePath, int fileChunkSize, FiscoConfig config) {
+    public class FtpInfo {
+        private String host;
+        private int port;
+        private String userName;
+        private String passWord;
+        private String ftpReceivePath;
+
+        public FtpInfo(String host, int port, String userName, String passWord, String ftpReceivePath) {
+            this.host = host;
+            this.port = port;
+            this.userName = userName;
+            this.passWord = passWord;
+            this.ftpReceivePath = ftpReceivePath;
+        }
+    }
+
+    public WeEventFileClient(String groupId, String localReceivePath, int fileChunkSize, FiscoConfig fiscoConfig) {
         this.groupId = groupId;
-        this.filePath = receiveFilePath;
+        this.localReceivePath = localReceivePath;
         this.fileChunkSize = fileChunkSize;
-        this.config = config;
+        this.config = fiscoConfig;
+        init();
+    }
+
+    public WeEventFileClient(String groupId, String localReceivePath, String host, int port, String userName, String passWord, String ftpReceivePath, int fileChunkSize, FiscoConfig fiscoConfig) {
+        this.groupId = groupId;
+        this.localReceivePath = localReceivePath;
+        this.ftpInfo = new FtpInfo(host, port, userName, passWord, ftpReceivePath);
+        this.fileChunkSize = fileChunkSize;
+        this.config = fiscoConfig;
         init();
     }
 
@@ -64,7 +92,7 @@ public class WeEventFileClient implements IWeEventFileClient {
             iConsumer.startConsumer();
 
             // create FileTransportService instance
-            FileTransportService fileTransportService = new FileTransportService(this.config, iProducer, "", this.filePath, this.fileChunkSize, this.groupId);
+            FileTransportService fileTransportService = new FileTransportService(this.config, iProducer, "", this.localReceivePath, this.fileChunkSize, this.groupId);
             this.fileTransportService = fileTransportService;
 
         } catch (BrokerException e) {
@@ -152,20 +180,32 @@ public class WeEventFileClient implements IWeEventFileClient {
      * The file's data DO NOT stored in block chain. Yes, it's not persist, may be deleted sometime after subscribe notify.
      *
      * @param topic binding topic
-     * @param localFile local file to be send
+     * @param filePath local file to be send
      * @return send result, SendResult.SUCCESS if success, and return SendResult.eventId
      * @throws BrokerException broker exception
      * @throws IOException IOException
      * @throws InterruptedException InterruptedException
      */
     @Override
-    public FileChunksMeta publishFile(String topic, String localFile, boolean overwrite) throws BrokerException, IOException, InterruptedException {
-        // upload file
-        validateLocalFile(localFile);
+    public FileChunksMeta publishFile(String topic, String filePath, boolean overwrite) throws BrokerException, IOException, InterruptedException {
 
-        FileChunksTransport fileChunksTransport = new FileChunksTransport(this.fileTransportService);
-        FileChunksMeta fileChunksMeta = fileChunksTransport.upload(localFile, topic, this.groupId, overwrite);
-        return fileChunksMeta;
+        if (this.ftpInfo == null) {
+            // publish local file
+            validateLocalFile(filePath);
+
+            FileChunksTransport fileChunksTransport = new FileChunksTransport(this.fileTransportService);
+            FileChunksMeta fileChunksMeta = fileChunksTransport.upload(filePath, topic, this.groupId, overwrite);
+            return fileChunksMeta;
+        } else {
+            // publish ftp file
+            FtpClientService ftpClientService = new FtpClientService();
+            ftpClientService.connect(this.ftpInfo.host, this.ftpInfo.port, this.ftpInfo.userName, this.ftpInfo.passWord);
+            ftpClientService.downLoadFile(filePath, this.localReceivePath);
+
+            FileChunksTransport fileChunksTransport = new FileChunksTransport(this.fileTransportService);
+            FileChunksMeta fileChunksMeta = fileChunksTransport.upload(this.localReceivePath + filePath.substring(filePath.indexOf('/')), topic, this.groupId, overwrite);
+            return fileChunksMeta;
+        }
     }
 
     /**
@@ -176,7 +216,9 @@ public class WeEventFileClient implements IWeEventFileClient {
     public void openTransport4Receiver(String topic, FileListener fileListener) throws BrokerException {
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
 
-        amopChannel.subTopic(topic, fileListener);
+        FileEventListener fileEventListener = new FileEventListener(this.localReceivePath, this.ftpInfo, fileListener);
+
+        amopChannel.subTopic(topic, fileEventListener);
     }
 
     /**
@@ -189,7 +231,9 @@ public class WeEventFileClient implements IWeEventFileClient {
         // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
 
-        amopChannel.subTopic(topic, groupId, privatePem, fileListener);
+        FileEventListener fileEventListener = new FileEventListener(this.localReceivePath, this.ftpInfo, fileListener);
+
+        amopChannel.subTopic(topic, groupId, privatePem, fileEventListener);
     }
 
     /**
@@ -215,7 +259,11 @@ public class WeEventFileClient implements IWeEventFileClient {
      */
     public void closeTransport(String topic) {
         AMOPChannel channel = this.fileTransportService.getChannel();
+        // unSubscribe topic
         channel.unSubTopic(topic);
+
+        // delete transport
+        channel.deleteTransport(topic);
     }
 
     /**
@@ -261,7 +309,7 @@ public class WeEventFileClient implements IWeEventFileClient {
     public List<FileChunksMeta> listFiles(String topic) throws BrokerException {
         // get json from disk
         List<File> fileList = new ArrayList<>();
-        File file = new File(this.filePath);
+        File file = new File(this.localReceivePath);
         File[] files = file.listFiles();
         for (File f : files) {
             if (f.isFile() && f.getName().endsWith(".json")) {
@@ -270,7 +318,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
 
         List<FileChunksMeta> fileChunksMetaList = new ArrayList<>();
-        DiskFiles diskFiles = new DiskFiles(this.filePath);
+        DiskFiles diskFiles = new DiskFiles(this.localReceivePath);
         for (File f : fileList) {
             FileChunksMeta fileChunksMeta = diskFiles.loadFileMeta(f);
             if (fileChunksMeta.getTopic().equals(topic)) {
@@ -307,6 +355,46 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
         if (!(new File(filePath)).exists()) {
             throw new BrokerException(ErrorCode.LOCAL_FILE_NOT_EXIST);
+        }
+    }
+
+    static class FileEventListener implements EventListener{
+        private String receivePath;
+        private final FtpInfo ftpInfo;
+        private final FileListener fileListener;
+
+        public FileEventListener(String receivePath, FtpInfo ftpInfo, FileListener fileListener) {
+            this.receivePath = receivePath;
+            this.ftpInfo = ftpInfo;
+            this.fileListener = fileListener;
+        }
+
+        @Override
+        public void onEvent(String topic, String fileName) {
+            // upload file to ftp
+            if (this.ftpInfo != null) {
+                try {
+                    FtpClientService ftpClientService = new FtpClientService();
+                    ftpClientService.connect(this.ftpInfo.host, this.ftpInfo.port, this.ftpInfo.userName, this.ftpInfo.passWord);
+                    if (StringUtils.isBlank(this.ftpInfo.ftpReceivePath)) {
+                        log.info("upload file to ftp server, file：{}", fileName);
+                        ftpClientService.upLoadFile(this.receivePath + PATH_SEPARATOR + fileName);
+                    } else {
+                        // specify upload directory
+                        log.info("upload file to ftp server, to path: {}, file：{}", this.ftpInfo.ftpReceivePath, fileName);
+                        ftpClientService.upLoadFile(this.ftpInfo.ftpReceivePath, this.receivePath + PATH_SEPARATOR + fileName);
+                    }
+
+                } catch (BrokerException e) {
+                    e.printStackTrace();
+                }
+            }
+            fileListener.onFile(topic, fileName);
+        }
+
+        @Override
+        public void onException(Throwable e) {
+            this.fileListener.onException(e);
         }
     }
 }
