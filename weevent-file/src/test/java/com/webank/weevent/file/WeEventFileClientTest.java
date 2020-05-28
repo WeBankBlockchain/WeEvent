@@ -92,7 +92,7 @@ public class WeEventFileClientTest {
         Thread.sleep(1000*10);
 
         FileChunksMeta fileChunksMeta = weEventFileClient.publishFile(this.topicName,
-                new File("src/main/resources/log4j2.xml").getAbsolutePath(), true);
+                new File("src/main/resources/ca.crt").getAbsolutePath(), true);
 
         Assert.assertNotNull(fileChunksMeta);
     }
