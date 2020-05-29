@@ -260,10 +260,14 @@ public class WeEventFileClient implements IWeEventFileClient {
     public void closeTransport(String topic) {
         AMOPChannel channel = this.fileTransportService.getChannel();
         // unSubscribe topic
-        channel.unSubTopic(topic);
-
-        // delete transport
-        channel.deleteTransport(topic);
+        if (!channel.getSubTopics().isEmpty()) {
+            channel.unSubTopic(topic);
+        } else {
+            if (!channel.getSenderTopics().isEmpty()) {
+                // delete transport
+                channel.deleteTransport(topic);
+            }
+        }
     }
 
     /**
