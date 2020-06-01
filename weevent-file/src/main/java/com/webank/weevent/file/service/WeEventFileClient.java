@@ -276,7 +276,7 @@ public class WeEventFileClient implements IWeEventFileClient {
      */
     @Override
     public FileTransportStats status(String topicName) {
-        FileTransportStats fileTransportStats = this.fileTransportService.stats(true, this.groupId);
+        FileTransportStats fileTransportStats = this.fileTransportService.stats(true, this.groupId, topicName);
         if (fileTransportStats == null) {
             log.error("get status error");
             return null;
@@ -382,11 +382,11 @@ public class WeEventFileClient implements IWeEventFileClient {
                     ftpClientService.connect(this.ftpInfo.host, this.ftpInfo.port, this.ftpInfo.userName, this.ftpInfo.passWord);
                     if (StringUtils.isBlank(this.ftpInfo.ftpReceivePath)) {
                         log.info("upload file to ftp server, file：{}", fileName);
-                        ftpClientService.upLoadFile(this.receivePath + PATH_SEPARATOR + fileName);
+                        ftpClientService.upLoadFile(this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
                     } else {
                         // specify upload directory
                         log.info("upload file to ftp server, to path: {}, file：{}", this.ftpInfo.ftpReceivePath, fileName);
-                        ftpClientService.upLoadFile(this.ftpInfo.ftpReceivePath, this.receivePath + PATH_SEPARATOR + fileName);
+                        ftpClientService.upLoadFile(this.ftpInfo.ftpReceivePath, this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
                     }
 
                 } catch (BrokerException e) {

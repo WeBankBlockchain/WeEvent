@@ -112,7 +112,7 @@ public class FileTransportService {
                 && "json".equals(event.getExtensions().get(WeEvent.WeEvent_FORMAT));
     }
 
-    public FileTransportStats stats(boolean all, String groupId) {
+    public FileTransportStats stats(boolean all, String groupId, String topicName) {
         FileTransportStats fileTransportStats = new FileTransportStats();
 
         // sender
@@ -127,7 +127,7 @@ public class FileTransportService {
         fileTransportStats.getSender().put(groupId, senders);
 
         // receiver
-        List<FileChunksMeta> localFiles = this.diskFiles.listNotCompleteFiles(all);
+        List<FileChunksMeta> localFiles = this.diskFiles.listNotCompleteFiles(all, topicName);
         Map<String, List<FileChunksMetaStatus>> receivers = new HashMap<>();
         for (String topic : channel.getSubTopics()) {
             List<FileChunksMetaStatus> filePlus = localFiles.stream()

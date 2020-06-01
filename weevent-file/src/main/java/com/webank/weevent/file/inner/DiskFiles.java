@@ -44,7 +44,7 @@ public class DiskFiles {
         if (fileChunksMeta == null) {
             log.error("the fileChunksMeta corresponding to fieldId not exist, {}", fileId);
         }
-        return this.path + "/" + fileChunksMeta.getFileName();
+        return this.path + "/" + fileChunksMeta.getTopic() + "/" + fileChunksMeta.getFileName();
     }
 
     private String genLocalMetaFileName(String fileId) {
@@ -100,9 +100,11 @@ public class DiskFiles {
 
     public void createFixedLengthFile(FileChunksMeta fileChunksMeta) throws BrokerException {
         // ensure path exist and disk space
-        File path = new File(this.path);
+        String filePath = this.path + "/" + fileChunksMeta.getTopic();
+        File path = new File(filePath);
+        path.mkdirs();
         if (!path.exists()) {
-            log.error("not exist local file path, {}", this.path);
+            log.error("not exist local file path, {}", filePath);
             throw new BrokerException(ErrorCode.FILE_NOT_EXIST_PATH);
         } else {
             // This file exists in the directory, and do not allow overwriting
@@ -217,12 +219,13 @@ public class DiskFiles {
         this.deleteFile(this.genLocalMetaFileName(fileId));
     }
 
-    public List<FileChunksMeta> listNotCompleteFiles(boolean all) {
+    public List<FileChunksMeta> listNotCompleteFiles(boolean all, String topicName) {
         List<FileChunksMeta> fileChunksMetas = new ArrayList<>();
 
-        File topPath = new File(this.path);
+        String filePath = this.path + "/" + topicName;
+        File topPath = new File(filePath);
         if (!topPath.exists()) {
-            log.error("not exist path: {}", path);
+            log.error("not exist path: {}", filePath);
             return fileChunksMetas;
         }
 

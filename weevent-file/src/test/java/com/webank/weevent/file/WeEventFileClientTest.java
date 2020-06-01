@@ -222,6 +222,8 @@ public class WeEventFileClientTest {
                     System.out.println("sender speed:" + fileChunksMetaStatusList.get(0).getSpeed() + "   "
                             + "send chunk:" + fileChunksMetaStatusList.get(0).getReadyChunk() + "   "
                             + "send time cost:" + fileChunksMetaStatusList.get(0).getTime());
+                } else {
+                    System.out.println("get status failed, fileChunksMetaStatusList size = 0");
                 }
             } else {
                 fileChunksMetaStatusList = fileTransportStats.getReceiver().get(groupId).get(topic);
@@ -229,6 +231,8 @@ public class WeEventFileClientTest {
                     System.out.println("receiver speed:" + fileChunksMetaStatusList.get(0).getSpeed() + "   "
                             + "receive chunk:" + fileChunksMetaStatusList.get(0).getReadyChunk() + "   "
                             + "receive time cost:" + fileChunksMetaStatusList.get(0).getTime());
+                } else {
+                    System.out.println("get status failed, fileChunksMetaStatusList size = 0");
                 }
             }
 
@@ -320,7 +324,7 @@ public class WeEventFileClientTest {
             @Override
             public void onFile(String topicName, String fileName) {
                 log.info("+++++++topic name: {}, file name: {}", topicName, fileName);
-                System.out.println(new File(localReceivePath + "/" + fileName).getPath());
+                System.out.println(new File(localReceivePath + "/" + topicName + "/" + fileName).getPath());
             }
 
             @Override
