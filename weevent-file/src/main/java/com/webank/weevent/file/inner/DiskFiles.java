@@ -224,6 +224,7 @@ public class DiskFiles {
 
         String filePath = this.path + "/" + topicName;
         File topPath = new File(filePath);
+        topPath.mkdirs();
         if (!topPath.exists()) {
             log.error("not exist path: {}", filePath);
             return fileChunksMetas;
