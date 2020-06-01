@@ -94,21 +94,21 @@ public class Topic extends Contract {
                                                         List<String> lastSender) {
         final Function function = new Function(
                 FUNC_FLUSHSNAPSHOT, 
-                Arrays.<Type>asList(topicName.isEmpty()?org.fisco.bcos.web3j.abi.datatypes.DynamicArray.empty("string[]"):
-                        new org.fisco.bcos.web3j.abi.datatypes.DynamicArray<org.fisco.bcos.web3j.abi.datatypes.Utf8String>(
-                        org.fisco.bcos.web3j.abi.Utils.typeMap(topicName, org.fisco.bcos.web3j.abi.datatypes.Utf8String.class)), 
-                lastSequence.isEmpty()?org.fisco.bcos.web3j.abi.datatypes.DynamicArray.empty("uint256[]"):
-                    new org.fisco.bcos.web3j.abi.datatypes.DynamicArray<org.fisco.bcos.web3j.abi.datatypes.generated.Uint256>(
-                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastSequence, org.fisco.bcos.web3j.abi.datatypes.generated.Uint256.class)), 
-                lastBlock.isEmpty()?org.fisco.bcos.web3j.abi.datatypes.DynamicArray.empty("uint256[]"):
-                    new org.fisco.bcos.web3j.abi.datatypes.DynamicArray<org.fisco.bcos.web3j.abi.datatypes.generated.Uint256>(
-                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastBlock, org.fisco.bcos.web3j.abi.datatypes.generated.Uint256.class)), 
-                lastTimestamp.isEmpty()?org.fisco.bcos.web3j.abi.datatypes.DynamicArray.empty("uint256[]"):
-                    new org.fisco.bcos.web3j.abi.datatypes.DynamicArray<org.fisco.bcos.web3j.abi.datatypes.generated.Uint256>(
-                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastTimestamp, org.fisco.bcos.web3j.abi.datatypes.generated.Uint256.class)), 
-                lastSender.isEmpty()?org.fisco.bcos.web3j.abi.datatypes.DynamicArray.empty("address[]"):
-                    new org.fisco.bcos.web3j.abi.datatypes.DynamicArray<org.fisco.bcos.web3j.abi.datatypes.Address>(
-                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastSender, org.fisco.bcos.web3j.abi.datatypes.Address.class))), 
+                Arrays.<Type>asList(topicName.isEmpty()?DynamicArray.empty("string[]"):
+                        new DynamicArray<Utf8String>(
+                        org.fisco.bcos.web3j.abi.Utils.typeMap(topicName, Utf8String.class)),
+                lastSequence.isEmpty()?DynamicArray.empty("uint256[]"):
+                    new DynamicArray<Uint256>(
+                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastSequence, Uint256.class)),
+                lastBlock.isEmpty()?DynamicArray.empty("uint256[]"):
+                    new DynamicArray<Uint256>(
+                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastBlock, Uint256.class)),
+                lastTimestamp.isEmpty()?DynamicArray.empty("uint256[]"):
+                    new DynamicArray<Uint256>(
+                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastTimestamp, Uint256.class)),
+                lastSender.isEmpty()?DynamicArray.empty("address[]"):
+                    new DynamicArray<Address>(
+                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastSender, Address.class))),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
@@ -117,21 +117,21 @@ public class Topic extends Contract {
                               List<BigInteger> lastTimestamp, List<String> lastSender, TransactionSucCallback callback) {
         final Function function = new Function(
                 FUNC_FLUSHSNAPSHOT, 
-                Arrays.<Type>asList(topicName.isEmpty()?org.fisco.bcos.web3j.abi.datatypes.DynamicArray.empty("string[]"):
-                        new org.fisco.bcos.web3j.abi.datatypes.DynamicArray<org.fisco.bcos.web3j.abi.datatypes.Utf8String>(
-                        org.fisco.bcos.web3j.abi.Utils.typeMap(topicName, org.fisco.bcos.web3j.abi.datatypes.Utf8String.class)), 
-                lastSequence.isEmpty()?org.fisco.bcos.web3j.abi.datatypes.DynamicArray.empty("uint256[]"):
-                    new org.fisco.bcos.web3j.abi.datatypes.DynamicArray<org.fisco.bcos.web3j.abi.datatypes.generated.Uint256>(
-                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastSequence, org.fisco.bcos.web3j.abi.datatypes.generated.Uint256.class)), 
-                lastBlock.isEmpty()?org.fisco.bcos.web3j.abi.datatypes.DynamicArray.empty("uint256[]"):
-                    new org.fisco.bcos.web3j.abi.datatypes.DynamicArray<org.fisco.bcos.web3j.abi.datatypes.generated.Uint256>(
-                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastBlock, org.fisco.bcos.web3j.abi.datatypes.generated.Uint256.class)), 
-                lastTimestamp.isEmpty()?org.fisco.bcos.web3j.abi.datatypes.DynamicArray.empty("uint256[]"):
-                    new org.fisco.bcos.web3j.abi.datatypes.DynamicArray<org.fisco.bcos.web3j.abi.datatypes.generated.Uint256>(
-                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastTimestamp, org.fisco.bcos.web3j.abi.datatypes.generated.Uint256.class)), 
-                lastSender.isEmpty()?org.fisco.bcos.web3j.abi.datatypes.DynamicArray.empty("address[]"):
-                    new org.fisco.bcos.web3j.abi.datatypes.DynamicArray<org.fisco.bcos.web3j.abi.datatypes.Address>(
-                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastSender, org.fisco.bcos.web3j.abi.datatypes.Address.class))), 
+                Arrays.<Type>asList(topicName.isEmpty()?DynamicArray.empty("string[]"):
+                        new DynamicArray<Utf8String>(
+                        org.fisco.bcos.web3j.abi.Utils.typeMap(topicName, Utf8String.class)),
+                lastSequence.isEmpty()?DynamicArray.empty("uint256[]"):
+                    new DynamicArray<Uint256>(
+                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastSequence, Uint256.class)),
+                lastBlock.isEmpty()?DynamicArray.empty("uint256[]"):
+                    new DynamicArray<Uint256>(
+                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastBlock, Uint256.class)),
+                lastTimestamp.isEmpty()?DynamicArray.empty("uint256[]"):
+                    new DynamicArray<Uint256>(
+                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastTimestamp, Uint256.class)),
+                lastSender.isEmpty()?DynamicArray.empty("address[]"):
+                    new DynamicArray<Address>(
+                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastSender, Address.class))),
                 Collections.<TypeReference<?>>emptyList());
         asyncExecuteTransaction(function, callback);
     }
@@ -139,21 +139,21 @@ public class Topic extends Contract {
     public String flushSnapshotSeq(List<String> topicName, List<BigInteger> lastSequence, List<BigInteger> lastBlock, List<BigInteger> lastTimestamp, List<String> lastSender) {
         final Function function = new Function(
                 FUNC_FLUSHSNAPSHOT, 
-                Arrays.<Type>asList(topicName.isEmpty()?org.fisco.bcos.web3j.abi.datatypes.DynamicArray.empty("string[]"):
-                        new org.fisco.bcos.web3j.abi.datatypes.DynamicArray<org.fisco.bcos.web3j.abi.datatypes.Utf8String>(
-                        org.fisco.bcos.web3j.abi.Utils.typeMap(topicName, org.fisco.bcos.web3j.abi.datatypes.Utf8String.class)), 
-                lastSequence.isEmpty()?org.fisco.bcos.web3j.abi.datatypes.DynamicArray.empty("uint256[]"):
-                    new org.fisco.bcos.web3j.abi.datatypes.DynamicArray<org.fisco.bcos.web3j.abi.datatypes.generated.Uint256>(
-                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastSequence, org.fisco.bcos.web3j.abi.datatypes.generated.Uint256.class)), 
-                lastBlock.isEmpty()?org.fisco.bcos.web3j.abi.datatypes.DynamicArray.empty("uint256[]"):
-                    new org.fisco.bcos.web3j.abi.datatypes.DynamicArray<org.fisco.bcos.web3j.abi.datatypes.generated.Uint256>(
-                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastBlock, org.fisco.bcos.web3j.abi.datatypes.generated.Uint256.class)), 
-                lastTimestamp.isEmpty()?org.fisco.bcos.web3j.abi.datatypes.DynamicArray.empty("uint256[]"):
-                    new org.fisco.bcos.web3j.abi.datatypes.DynamicArray<org.fisco.bcos.web3j.abi.datatypes.generated.Uint256>(
-                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastTimestamp, org.fisco.bcos.web3j.abi.datatypes.generated.Uint256.class)), 
-                lastSender.isEmpty()?org.fisco.bcos.web3j.abi.datatypes.DynamicArray.empty("address[]"):
-                    new org.fisco.bcos.web3j.abi.datatypes.DynamicArray<org.fisco.bcos.web3j.abi.datatypes.Address>(
-                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastSender, org.fisco.bcos.web3j.abi.datatypes.Address.class))), 
+                Arrays.<Type>asList(topicName.isEmpty()?DynamicArray.empty("string[]"):
+                        new DynamicArray<Utf8String>(
+                        org.fisco.bcos.web3j.abi.Utils.typeMap(topicName, Utf8String.class)),
+                lastSequence.isEmpty()?DynamicArray.empty("uint256[]"):
+                    new DynamicArray<Uint256>(
+                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastSequence, Uint256.class)),
+                lastBlock.isEmpty()?DynamicArray.empty("uint256[]"):
+                    new DynamicArray<Uint256>(
+                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastBlock, Uint256.class)),
+                lastTimestamp.isEmpty()?DynamicArray.empty("uint256[]"):
+                    new DynamicArray<Uint256>(
+                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastTimestamp, Uint256.class)),
+                lastSender.isEmpty()?DynamicArray.empty("address[]"):
+                    new DynamicArray<Address>(
+                        org.fisco.bcos.web3j.abi.Utils.typeMap(lastSender, Address.class))),
                 Collections.<TypeReference<?>>emptyList());
         return createTransactionSeq(function);
     }
@@ -168,7 +168,7 @@ public class Topic extends Contract {
                     new TypeReference<DynamicArray<Uint256>>() {},
                     new TypeReference<DynamicArray<Uint256>>() {},
                     new TypeReference<DynamicArray<Address>>() {}));
-        List<Type> results = FunctionReturnDecoder.decode(data, function.getOutputParameters());;
+        List<Type> results = FunctionReturnDecoder.decode(data, function.getOutputParameters());
         return new Tuple5<List<String>, List<BigInteger>, List<BigInteger>, List<BigInteger>, List<String>>(
 
                 convertToNative((List<Utf8String>) results.get(0).getValue()), 
@@ -182,8 +182,8 @@ public class Topic extends Contract {
     public RemoteCall<TransactionReceipt> addOperator(String topicName, String operatorAddress) {
         final Function function = new Function(
                 FUNC_ADDOPERATOR, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName), 
-                new org.fisco.bcos.web3j.abi.datatypes.Address(operatorAddress)), 
+                Arrays.<Type>asList(new Utf8String(topicName),
+                new Address(operatorAddress)),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
@@ -191,8 +191,8 @@ public class Topic extends Contract {
     public void addOperator(String topicName, String operatorAddress, TransactionSucCallback callback) {
         final Function function = new Function(
                 FUNC_ADDOPERATOR, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName), 
-                new org.fisco.bcos.web3j.abi.datatypes.Address(operatorAddress)), 
+                Arrays.<Type>asList(new Utf8String(topicName),
+                new Address(operatorAddress)),
                 Collections.<TypeReference<?>>emptyList());
         asyncExecuteTransaction(function, callback);
     }
@@ -200,8 +200,8 @@ public class Topic extends Contract {
     public String addOperatorSeq(String topicName, String operatorAddress) {
         final Function function = new Function(
                 FUNC_ADDOPERATOR, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName), 
-                new org.fisco.bcos.web3j.abi.datatypes.Address(operatorAddress)), 
+                Arrays.<Type>asList(new Utf8String(topicName),
+                new Address(operatorAddress)),
                 Collections.<TypeReference<?>>emptyList());
         return createTransactionSeq(function);
     }
@@ -234,9 +234,9 @@ public class Topic extends Contract {
     public RemoteCall<TransactionReceipt> publishWeEvent(String topicName, String eventContent, String extensions) {
         final Function function = new Function(
                 FUNC_PUBLISHWEEVENT, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName), 
-                new org.fisco.bcos.web3j.abi.datatypes.Utf8String(eventContent), 
-                new org.fisco.bcos.web3j.abi.datatypes.Utf8String(extensions)), 
+                Arrays.<Type>asList(new Utf8String(topicName),
+                new Utf8String(eventContent),
+                new Utf8String(extensions)),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
@@ -244,9 +244,9 @@ public class Topic extends Contract {
     public void publishWeEvent(String topicName, String eventContent, String extensions, TransactionSucCallback callback) {
         final Function function = new Function(
                 FUNC_PUBLISHWEEVENT, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName), 
-                new org.fisco.bcos.web3j.abi.datatypes.Utf8String(eventContent), 
-                new org.fisco.bcos.web3j.abi.datatypes.Utf8String(extensions)), 
+                Arrays.<Type>asList(new Utf8String(topicName),
+                new Utf8String(eventContent),
+                new Utf8String(extensions)),
                 Collections.<TypeReference<?>>emptyList());
         asyncExecuteTransaction(function, callback);
     }
@@ -254,9 +254,9 @@ public class Topic extends Contract {
     public String publishWeEventSeq(String topicName, String eventContent, String extensions) {
         final Function function = new Function(
                 FUNC_PUBLISHWEEVENT, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName), 
-                new org.fisco.bcos.web3j.abi.datatypes.Utf8String(eventContent), 
-                new org.fisco.bcos.web3j.abi.datatypes.Utf8String(extensions)), 
+                Arrays.<Type>asList(new Utf8String(topicName),
+                new Utf8String(eventContent),
+                new Utf8String(extensions)),
                 Collections.<TypeReference<?>>emptyList());
         return createTransactionSeq(function);
     }
@@ -293,8 +293,8 @@ public class Topic extends Contract {
     public RemoteCall<TransactionReceipt> delOperator(String topicName, String operatorAddress) {
         final Function function = new Function(
                 FUNC_DELOPERATOR, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName), 
-                new org.fisco.bcos.web3j.abi.datatypes.Address(operatorAddress)), 
+                Arrays.<Type>asList(new Utf8String(topicName),
+                new Address(operatorAddress)),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
@@ -302,8 +302,8 @@ public class Topic extends Contract {
     public void delOperator(String topicName, String operatorAddress, TransactionSucCallback callback) {
         final Function function = new Function(
                 FUNC_DELOPERATOR, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName), 
-                new org.fisco.bcos.web3j.abi.datatypes.Address(operatorAddress)), 
+                Arrays.<Type>asList(new Utf8String(topicName),
+                new Address(operatorAddress)),
                 Collections.<TypeReference<?>>emptyList());
         asyncExecuteTransaction(function, callback);
     }
@@ -311,8 +311,8 @@ public class Topic extends Contract {
     public String delOperatorSeq(String topicName, String operatorAddress) {
         final Function function = new Function(
                 FUNC_DELOPERATOR, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName), 
-                new org.fisco.bcos.web3j.abi.datatypes.Address(operatorAddress)), 
+                Arrays.<Type>asList(new Utf8String(topicName),
+                new Address(operatorAddress)),
                 Collections.<TypeReference<?>>emptyList());
         return createTransactionSeq(function);
     }
@@ -344,7 +344,7 @@ public class Topic extends Contract {
 
     public RemoteCall<Tuple4<BigInteger, BigInteger, BigInteger, String>> getSnapshot(String topicName) {
         final Function function = new Function(FUNC_GETSNAPSHOT, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName)), 
+                Arrays.<Type>asList(new Utf8String(topicName)),
                 Arrays.<TypeReference<?>>asList(
                     new TypeReference<Uint256>() {},
                     new TypeReference<Uint256>() {},
@@ -367,8 +367,8 @@ public class Topic extends Contract {
     public RemoteCall<TransactionReceipt> addTopicACL(String topicName, String ownerAddress) {
         final Function function = new Function(
                 FUNC_ADDTOPICACL, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName), 
-                new org.fisco.bcos.web3j.abi.datatypes.Address(ownerAddress)), 
+                Arrays.<Type>asList(new Utf8String(topicName),
+                new Address(ownerAddress)),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
@@ -376,8 +376,8 @@ public class Topic extends Contract {
     public void addTopicACL(String topicName, String ownerAddress, TransactionSucCallback callback) {
         final Function function = new Function(
                 FUNC_ADDTOPICACL, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName), 
-                new org.fisco.bcos.web3j.abi.datatypes.Address(ownerAddress)), 
+                Arrays.<Type>asList(new Utf8String(topicName),
+                new Address(ownerAddress)),
                 Collections.<TypeReference<?>>emptyList());
         asyncExecuteTransaction(function, callback);
     }
@@ -385,8 +385,8 @@ public class Topic extends Contract {
     public String addTopicACLSeq(String topicName, String ownerAddress) {
         final Function function = new Function(
                 FUNC_ADDTOPICACL, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName), 
-                new org.fisco.bcos.web3j.abi.datatypes.Address(ownerAddress)), 
+                Arrays.<Type>asList(new Utf8String(topicName),
+                new Address(ownerAddress)),
                 Collections.<TypeReference<?>>emptyList());
         return createTransactionSeq(function);
     }
@@ -418,7 +418,7 @@ public class Topic extends Contract {
 
     public RemoteCall<Tuple2<BigInteger, List<String>>> listOperator(String topicName) {
         final Function function = new Function(FUNC_LISTOPERATOR, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(topicName)), 
+                Arrays.<Type>asList(new Utf8String(topicName)),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}, new TypeReference<DynamicArray<Address>>() {}));
         return new RemoteCall<Tuple2<BigInteger, List<String>>>(
                 new Callable<Tuple2<BigInteger, List<String>>>() {
