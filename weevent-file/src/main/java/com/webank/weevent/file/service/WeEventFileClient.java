@@ -313,7 +313,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     public List<FileChunksMeta> listFiles(String topic) throws BrokerException {
         // get json from disk
         List<File> fileList = new ArrayList<>();
-        File file = new File(this.localReceivePath);
+        String filePath = this.localReceivePath + PATH_SEPARATOR + topic;
+        File file = new File(filePath);
         File[] files = file.listFiles();
         for (File f : files) {
             if (f.isFile() && f.getName().endsWith(".json")) {
