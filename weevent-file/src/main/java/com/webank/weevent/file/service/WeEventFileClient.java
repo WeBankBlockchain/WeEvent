@@ -323,7 +323,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
 
         List<FileChunksMeta> fileChunksMetaList = new ArrayList<>();
-        DiskFiles diskFiles = new DiskFiles(this.localReceivePath);
+        DiskFiles diskFiles = new DiskFiles(filePath);
         for (File f : fileList) {
             FileChunksMeta fileChunksMeta = diskFiles.loadFileMeta(f);
             if (fileChunksMeta.getTopic().equals(topic)) {
