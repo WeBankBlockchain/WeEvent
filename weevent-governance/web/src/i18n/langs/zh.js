@@ -110,7 +110,8 @@ module.exports = {
     'ruleMana': '规则管理',
     'ruleDetail': '规则详情',
     'sources': '数据源设置',
-    'timerSchedule': '任务列表'
+    'timerSchedule': '任务列表',
+    'fileTranspoart': '文件上传'
   },
   overview: {
     'nodeNum': '节点数量',
@@ -315,5 +316,30 @@ module.exports = {
     'editOptionDes': '用户可以通过选择Key并设置相应的关系符及值即可生成相应的条件语句，同时还支持内置函数对key进行处理。<br/>例如: abs(age) >= 20',
     'optionMap': '条件语句结构编辑',
     'optionMapDes': '对于复杂的条件语句，该页面现在不仅支持条件语句的水平关联，还支持条件语句的嵌套。单击每个条件栏末尾的“添加”按钮以生成相应的子选项栏, 该选项栏将与其父级形成嵌套关系<br/>例如: (abs(age) >= 20 and name != "Kevin") or age >= 30'
+  },
+  file: {
+    'creatTime': '创建时间',
+    'creater': '创建人',
+    'roles': '操作角色',
+    'options': '操作',
+    'sender': '发送方',
+    'receiver': '接收方',
+    'upload': '上传文件',
+    'download': '下载文件',
+    'publicKey': '公钥',
+    'privateKey': '私钥',
+    'isDelete': '删除通道',
+    'deleteTopic': '确认删除该通道?',
+    'uploadList': '上传列表',
+    'noFile': '暂无上传文件',
+    'overwrite': '是否覆盖文件?',
+    'transpoartList': '通道列表',
+    'certified': '已认证',
+    'uncertified': '未认证',
+    'certification': '认证操作',
+    'fileName': '文件名',
+    'downloadFile': '下载',
+    'downloadList': '下载列表',
+    'fileuploadList': '当前传输列表'
   }
 }
