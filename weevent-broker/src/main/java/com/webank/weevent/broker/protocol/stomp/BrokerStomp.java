@@ -234,8 +234,8 @@ public class BrokerStomp extends TextWebSocketHandler {
             tag = "";
         }
 
-        // is file
-        boolean isFile = stompHeaderAccessor.getFirstNativeHeader(WeEvent.WeEvent_FILE) != null;
+        // is ephemeral
+        boolean ephemeral = stompHeaderAccessor.getFirstNativeHeader(WeEvent.WeEvent_EPHEMERAL) != null;
 
         try {
             String simpDestination = stompHeaderAccessor.getDestination();
@@ -246,7 +246,7 @@ public class BrokerStomp extends TextWebSocketHandler {
                     subEventId,
                     continueSubscriptionIdStr,
                     tag,
-                    isFile);
+                    ephemeral);
 
             // send response
             StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
@@ -388,7 +388,7 @@ public class BrokerStomp extends TextWebSocketHandler {
      * @param subEventId event id
      * @param continueSubscriptionId subscription id
      * @param tag weevent-tag
-     * @param isFile is binding file
+     * @param ephemeral is ephemeral
      * @return String consumer subscription id, return "" if error
      * @throws BrokerException Exception
      */
@@ -399,7 +399,7 @@ public class BrokerStomp extends TextWebSocketHandler {
                                    String subEventId,
                                    String continueSubscriptionId,
                                    String tag,
-                                   boolean isFile) throws BrokerException {
+                                   boolean ephemeral) throws BrokerException {
         log.info("topic: {} group id: {} header subscription id: {}", topic, groupId, headerIdStr);
 
         String[] curTopicList;
@@ -423,12 +423,19 @@ public class BrokerStomp extends TextWebSocketHandler {
             remoteIp = session.getRemoteAddress().getAddress().getHostAddress();
         }
         ext.put(IConsumer.SubscribeExt.RemoteIP, remoteIp);
+
         if (!StringUtils.isBlank(continueSubscriptionId)) {
             log.info("continueSubscriptionId: {}", continueSubscriptionId);
             ext.put(IConsumer.SubscribeExt.SubscriptionId, continueSubscriptionId);
         }
+
         if (!StringUtils.isBlank(tag)) {
             ext.put(IConsumer.SubscribeExt.TopicTag, tag);
+        }
+
+        if (ephemeral) {
+            log.info("ephemeral subscription");
+            ext.put(IConsumer.SubscribeExt.Ephemeral, "1");
         }
 
         IConsumer.ConsumerListener listener;

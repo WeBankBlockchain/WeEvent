@@ -42,6 +42,7 @@ public class WeEvent {
     public static final String WeEvent_TAG = "weevent-tag";
     public static final String WeEvent_SIGN = "weevent-sign";
     public static final String WeEvent_FILE = "weevent-file";
+    public static final String WeEvent_EPHEMERAL = "weevent-ephemeral";
 
     /**
      * block chain information, see WeEventPlus
