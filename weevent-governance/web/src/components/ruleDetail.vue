@@ -130,7 +130,7 @@
 </template>
 <script>
 import API from '../API/resource'
-import tree from './tree.vue'
+import tree from './tool/tree.vue'
 import ruleDes from './ruleDes'
 import { checkRule } from '../utils/checkRule'
 import { checkLoad } from '../utils/checkLoad'
@@ -316,7 +316,7 @@ export default {
       functionArray: []
     }
   },
-  components: { tree, ruleDes },
+  components: {tree, ruleDes},
   computed: {
     brokerId () {
       return this.$store.state.brokerId
