@@ -6,6 +6,15 @@
   <el-container>
     <el-aside width='auto'>
       <sideBar :contraction='arrow' @selecChange='menuChange'></sideBar>
+      <el-popover
+        placement="bottom-end"
+        trigger="click"
+        v-model="showUpList">
+        <globalUploader @addFile='addNums' @pop='showPop'></globalUploader>
+        <el-badge :value="fileNum" slot="reference" class="el-icon-sort-item" type='primary' :hidden="fileNum === 0">
+          <i class='el-icon-upload2'></i>
+        </el-badge>
+      </el-popover>
     </el-aside>
     <el-main>
       <el-breadcrumb separator-class="el-icon-arrow-right">
@@ -19,15 +28,19 @@
 <script>
 import headerBar from '../components/headerBar'
 import sideBar from '../components/sideBar'
+import globalUploader from '../components/tool/globalUploader.vue'
 export default {
   components: {
     headerBar,
-    sideBar
+    sideBar,
+    globalUploader
   },
   data () {
     return {
       arrow: true,
-      input: ''
+      input: '',
+      fileNum: 0,
+      showUpList: false
     }
   },
   methods: {
@@ -68,6 +81,10 @@ export default {
         case '4-3':
           this.$store.commit('set_menu', [this.$t('sideBar.engine'), this.$t('sideBar.timerSchedule')])
           this.$router.push('./timerSchedule')
+          break
+        case '5-1':
+          this.$store.commit('set_menu', [this.$t('sideBar.fileTranspoart'), this.$t('file.transpoartList')])
+          this.$router.push('./fileTranspoart')
           break
       }
     },
@@ -123,7 +140,17 @@ export default {
           this.$store.commit('set_active', '4-3')
           this.$store.commit('set_menu', [this.$t('sideBar.engine'), this.$t('sideBar.timerSchedule')])
           break
+        case '/fileTranspoart':
+          this.$store.commit('set_active', '5-1')
+          this.$store.commit('set_menu', [this.$t('sideBar.fileTranspoart'), this.$t('file.transpoartList')])
+          break
       }
+    },
+    addNums (e) {
+      this.fileNum = e
+    },
+    showPop (e) {
+      this.showUpList = true
     }
   },
   mounted () {
