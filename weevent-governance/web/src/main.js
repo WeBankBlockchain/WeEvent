@@ -8,7 +8,8 @@ import 'element-ui/lib/theme-chalk/index.css'
 import VueClipboard from 'vue-clipboard2'
 import store from './store/index'
 import i18n from './i18n/index'
-
+import uploader from 'vue-simple-uploader'
+Vue.use(uploader)
 Vue.use(ElementUI)
 Vue.config.productionTip = false
 Vue.use(VueClipboard)

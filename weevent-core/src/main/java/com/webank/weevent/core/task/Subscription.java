@@ -358,7 +358,7 @@ public class Subscription {
      * @param pattern mqtt pattern with wildcard
      * @return true if match
      */
-    private static boolean patternMatch(String topic, String pattern) {
+    public static boolean patternMatch(String topic, String pattern) {
         String[] topicLayer = topic.split(WeEvent.LAYER_SEPARATE);
         String[] patternLayer = pattern.split(WeEvent.LAYER_SEPARATE);
 
