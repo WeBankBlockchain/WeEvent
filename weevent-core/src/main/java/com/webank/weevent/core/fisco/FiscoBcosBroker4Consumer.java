@@ -32,6 +32,11 @@ import org.apache.commons.lang3.StringUtils;
 @Slf4j
 public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements IConsumer, IBlockChain, FiscoBcosDelegate.IBlockEventListener {
     /**
+     * Group ID <-> Subscription over AMOP
+     */
+    private final Map<Long, AMOPSubscription> AMOPSubscriptions;
+
+    /**
      * Subscription ID <-> Subscription
      */
     private final Map<String, Subscription> subscriptions = new ConcurrentHashMap<>();
@@ -59,6 +64,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     public FiscoBcosBroker4Consumer(FiscoBcosDelegate fiscoBcosDelegate) {
         super(fiscoBcosDelegate);
 
+        this.AMOPSubscriptions = fiscoBcosDelegate.initAMOP();
         this.executor = fiscoBcosDelegate.getThreadPool();
         this.idleTime = fiscoBcosDelegate.getFiscoConfig().getConsumerIdleTime();
         fiscoBcosDelegate.setListener(this);
@@ -150,6 +156,12 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     }
 
     private String subscribeTopic(String[] topics, Long groupId, String offset, Map<SubscribeExt, String> ext, ConsumerListener listener) throws BrokerException {
+        // support Ephemeral
+        if (ext.containsKey(SubscribeExt.Ephemeral)) {
+            AMOPSubscription amopSubscription = this.AMOPSubscriptions.get(groupId);
+            return amopSubscription.addTopic(topics[0], listener);
+        }
+
         // external params
         String interfaceType = "";
         if (ext.containsKey(SubscribeExt.InterfaceType)) {
@@ -204,6 +216,14 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     public boolean unSubscribe(String subscriptionId) throws BrokerException {
         if (StringUtils.isBlank(subscriptionId)) {
             throw new BrokerException(ErrorCode.SUBSCRIPTIONID_IS_BLANK);
+        }
+
+        // support Ephemeral
+        String[] tokens = subscriptionId.split(AMOPSubscription.SEPARATE);
+        if (tokens.length == 2) {
+            AMOPSubscription amopSubscription = this.AMOPSubscriptions.get(Long.valueOf(tokens[0]));
+            amopSubscription.removeTopic(subscriptionId);
+            return true;
         }
 
         if (!this.subscriptions.containsKey(subscriptionId)) {
