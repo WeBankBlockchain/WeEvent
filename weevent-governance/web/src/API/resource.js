@@ -154,6 +154,24 @@ class ResoruceService extends BaseModel {
   cornCheck (data) {
     return this.request(api.cornCheck, data)
   }
+  openTransport (data) {
+    return this.request(api.openTransport, data)
+  }
+  deleteTransport (data) {
+    return this.request(api.deleteTransport, data)
+  }
+  listTransport (data) {
+    return this.request(api.listTransport, data)
+  }
+  deleteStatus (data) {
+    return this.request(api.deleteStatus, data)
+  }
+  listFile (data) {
+    return this.request(api.listFile, data)
+  }
+  fileStatus (data) {
+    return this.request(api.fileStatus, data)
+  }
 }
 
 export default new ResoruceService()
