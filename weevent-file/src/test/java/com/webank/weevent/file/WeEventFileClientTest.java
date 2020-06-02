@@ -6,6 +6,7 @@ import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.file.dto.FileChunksMetaPlus;
 import com.webank.weevent.file.dto.FileChunksMetaStatus;
 import com.webank.weevent.file.dto.FileTransportStats;
+import com.webank.weevent.file.inner.DiskFiles;
 import com.webank.weevent.file.service.FileChunksMeta;
 import com.webank.weevent.file.service.WeEventFileClient;
 import lombok.extern.slf4j.Slf4j;
@@ -305,6 +306,14 @@ public class WeEventFileClientTest {
         // verify
         FileChunksMetaPlus fileChunksMetaPlus = weEventFileClient.verify(sendResult.getEventId(), this.groupId);
         Assert.assertNotNull(fileChunksMetaPlus);
+    }
+
+    @Test
+    @Ignore
+    public void testGetDiskFiles() {
+        WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
+        DiskFiles diskFiles = weEventFileClient.getDiskFiles();
+        Assert.assertNotNull(diskFiles);
     }
 
     @Test

@@ -39,7 +39,7 @@ public class DiskFiles {
         this.path = path;
     }
 
-    private String genLocalFileName(String fileId) {
+    public String genLocalFileName(String fileId) {
         FileChunksMeta fileChunksMeta = fileIdChunksMeta.get(fileId);
         if (fileChunksMeta == null) {
             log.error("the fileChunksMeta corresponding to fieldId not exist, {}", fileId);
@@ -139,7 +139,8 @@ public class DiskFiles {
         }
     }
 
-    public void writeChunkData(String fileId, int chunkIndex, byte[] chunkData) throws BrokerException {
+    public synchronized void writeChunkData(String fileId, int chunkIndex, byte[] chunkData) throws BrokerException {
+
         // believe FileChunksMeta in local file
         FileChunksMeta fileChunksMeta = this.loadFileMeta(fileId);
         if (chunkIndex >= fileChunksMeta.getChunkNum()) {

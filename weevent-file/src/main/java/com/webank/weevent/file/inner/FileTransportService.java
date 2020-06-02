@@ -16,7 +16,6 @@ import com.webank.weevent.file.service.FileChunksMeta;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.dto.ChannelResponse;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,14 +77,8 @@ public class FileTransportService {
         return fiscoConfig;
     }
 
-    public List<FileChunksMeta> getFileChunksMeta(String topic) {
-        List<FileChunksMeta> fileChunksMetaList = new ArrayList<>();
-        for (FileChunksMeta fileChunksMeta : this.fileTransportContexts.values()) {
-            if (fileChunksMeta.getTopic().equals(topic)) {
-                fileChunksMetaList.add(fileChunksMeta);
-            }
-        }
-        return fileChunksMetaList;
+    public DiskFiles getDiskFiles() {
+        return this.diskFiles;
     }
 
     public FileChunksMetaPlus verify(String eventId, String groupId) throws BrokerException {

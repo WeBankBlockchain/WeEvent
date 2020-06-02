@@ -315,11 +315,17 @@ public class WeEventFileClient implements IWeEventFileClient {
         List<File> fileList = new ArrayList<>();
         String filePath = this.localReceivePath + PATH_SEPARATOR + topic;
         File file = new File(filePath);
+        file.mkdirs();
         File[] files = file.listFiles();
-        for (File f : files) {
-            if (f.isFile() && f.getName().endsWith(".json")) {
-                fileList.add(f);
+        if (files != null) {
+            for (File f : files) {
+                if (f.isFile() && f.getName().endsWith(".json")) {
+                    fileList.add(f);
+                }
             }
+        } else {
+            log.error("the directory is empty, {}.", filePath);
+            throw new BrokerException(ErrorCode.FILE_NOT_EXIST);
         }
 
         List<FileChunksMeta> fileChunksMetaList = new ArrayList<>();
@@ -352,6 +358,14 @@ public class WeEventFileClient implements IWeEventFileClient {
     public FileChunksMetaPlus verify(String eventId, String groupId) throws BrokerException {
         return this.fileTransportService.verify(eventId, groupId);
 
+    }
+
+    /**
+     * get DiskFiles
+     * @return DiskFiles
+     */
+    public DiskFiles getDiskFiles() {
+        return this.fileTransportService.getDiskFiles();
     }
 
     private static void validateLocalFile(String filePath) throws BrokerException {
