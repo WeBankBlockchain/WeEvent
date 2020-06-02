@@ -1,11 +1,11 @@
 package com.webank.weevent.core;
 
 
+import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.core.fisco.FiscoBcosBroker4Consumer;
 import com.webank.weevent.core.fisco.FiscoBcosBroker4Producer;
 import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegate;
-import com.webank.weevent.client.BrokerException;
 
 /**
  * FISCO-BCOS instance.
@@ -57,7 +57,7 @@ import com.webank.weevent.client.BrokerException;
  * @since 2020/03/01
  */
 public class FiscoBcosInstance {
-    private FiscoBcosDelegate fiscoBcosDelegate;
+    private final FiscoBcosDelegate fiscoBcosDelegate;
 
     public FiscoBcosInstance(FiscoConfig config) throws BrokerException {
         this.fiscoBcosDelegate = new FiscoBcosDelegate();
