@@ -21,6 +21,7 @@ import com.webank.weevent.core.dto.ListPage;
 import com.webank.weevent.core.dto.TbBlock;
 import com.webank.weevent.core.dto.TbNode;
 import com.webank.weevent.core.dto.TbTransHash;
+import com.webank.weevent.core.fisco.AMOPSubscription;
 import com.webank.weevent.core.fisco.constant.WeEventConstants;
 import com.webank.weevent.core.fisco.util.ParamCheckUtils;
 import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
@@ -28,6 +29,7 @@ import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.utils.Async;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
@@ -43,7 +45,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Slf4j
 public class FiscoBcosDelegate {
     // access to version 2.x
-    private Map<Long, FiscoBcos2> fiscoBcos2Map = new ConcurrentHashMap<>();
+    private final Map<Long, FiscoBcos2> fiscoBcos2Map = new ConcurrentHashMap<>();
+
+    // AMOP subscription
+    private final Map<Long, AMOPSubscription> AMOPSubscriptions = new ConcurrentHashMap<>();
 
     // binding thread pool
     public ThreadPoolTaskExecutor threadPool;
@@ -53,6 +58,8 @@ public class FiscoBcosDelegate {
 
     // fiscoConfig
     private FiscoConfig fiscoConfig;
+
+    private Async asyncHelper;
 
     /**
      * notify from web3sdk2.x when new block mined
@@ -84,7 +91,7 @@ public class FiscoBcosDelegate {
             log.info("Notice: FISCO-BCOS's version is 2.x");
 
             // set web3sdk.Async thread pool, special thread for sendAsync
-            new org.fisco.bcos.web3j.utils.Async(threadPool);
+            this.asyncHelper = new org.fisco.bcos.web3j.utils.Async(threadPool);
 
             // 1 is always exist
             Long defaultGId = Long.valueOf(WeEvent.DEFAULT_GROUP_ID);
@@ -145,33 +152,19 @@ public class FiscoBcosDelegate {
         return new ArrayList<>(this.groupIdList);
     }
 
-    private void checkVersion(Long groupId) throws BrokerException {
-        if (!this.fiscoBcos2Map.containsKey(groupId)) {
-            throw new BrokerException(ErrorCode.WEB3SDK_VERSION_NOT_SUPPORT);
-        }
-    }
-
     public boolean createTopic(String topicName, Long groupId) throws BrokerException {
-        checkVersion(groupId);
-
         return this.fiscoBcos2Map.get(groupId).createTopic(topicName);
     }
 
     public boolean isTopicExist(String topicName, Long groupId) throws BrokerException {
-        checkVersion(groupId);
-
         return this.fiscoBcos2Map.get(groupId).isTopicExist(topicName);
     }
 
     public ListPage<String> listTopicName(Integer pageIndex, Integer pageSize, Long groupId) throws BrokerException {
-        checkVersion(groupId);
-
         return this.fiscoBcos2Map.get(groupId).listTopicName(pageIndex, pageSize);
     }
 
     public TopicInfo getTopicInfo(String topicName, Long groupId, boolean skipCache) throws BrokerException {
-        checkVersion(groupId);
-
         Optional<TopicInfo> topicInfo = this.fiscoBcos2Map.get(groupId).getTopicInfo(topicName, skipCache);
         if (!topicInfo.isPresent()) {
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
@@ -180,28 +173,20 @@ public class FiscoBcosDelegate {
     }
 
     public WeEvent getEvent(String eventId, Long groupId) throws BrokerException {
-        checkVersion(groupId);
-
         return this.fiscoBcos2Map.get(groupId).getEvent(eventId);
     }
 
     public CompletableFuture<SendResult> publishEvent(String topicName, Long groupId, String eventContent, String extensions) throws BrokerException {
-        checkVersion(groupId);
-
         return this.fiscoBcos2Map.get(groupId).publishEvent(topicName, eventContent, extensions);
     }
 
     public CompletableFuture<SendResult> sendRawTransaction(String topicName, Long groupId, String transactionHex) throws BrokerException {
-        checkVersion(groupId);
         ParamCheckUtils.validateTransactionHex(transactionHex);
 
         return this.fiscoBcos2Map.get(groupId).sendRawTransaction(topicName, transactionHex);
     }
 
-
     public Long getBlockHeight(Long groupId) throws BrokerException {
-        checkVersion(groupId);
-
         return this.fiscoBcos2Map.get(groupId).getBlockHeight();
     }
 
@@ -214,8 +199,6 @@ public class FiscoBcosDelegate {
      * @throws BrokerException BrokerException
      */
     public List<WeEvent> loop(Long blockNum, Long groupId) throws BrokerException {
-        checkVersion(groupId);
-
         List<WeEvent> events = new ArrayList<>();
         if (blockNum <= 0) {
             return events;
@@ -228,26 +211,18 @@ public class FiscoBcosDelegate {
     }
 
     public GroupGeneral getGroupGeneral(Long groupId) throws BrokerException {
-        checkVersion(groupId);
-
         return this.fiscoBcos2Map.get(groupId).getGroupGeneral();
     }
 
     public ListPage<TbTransHash> queryTransList(Long groupId, String transHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize) throws BrokerException {
-        checkVersion(groupId);
-
         return this.fiscoBcos2Map.get(groupId).queryTransList(transHash, blockNumber, pageIndex, pageSize);
     }
 
     public ListPage<TbBlock> queryBlockList(Long groupId, String transHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize) throws BrokerException {
-        checkVersion(groupId);
-
         return this.fiscoBcos2Map.get(groupId).queryBlockList(transHash, blockNumber, pageIndex, pageSize);
     }
 
     public ListPage<TbNode> queryNodeList(Long groupId) throws BrokerException {
-        checkVersion(groupId);
-
         return this.fiscoBcos2Map.get(groupId).queryNodeList();
     }
 
@@ -256,28 +231,39 @@ public class FiscoBcosDelegate {
     }
 
     public ContractContext getContractContext(Long groupId) throws BrokerException {
-        checkVersion(groupId);
-
         return this.fiscoBcos2Map.get(groupId).getContractContext();
     }
 
     public boolean addOperator(Long groupId, String topicName, String operatorAddress) throws BrokerException {
-        checkVersion(groupId);
         ParamCheckUtils.validateAddress(operatorAddress);
 
         return this.fiscoBcos2Map.get(groupId).addOperator(topicName, operatorAddress);
     }
 
     public boolean delOperator(Long groupId, String topicName, String operatorAddress) throws BrokerException {
-        checkVersion(groupId);
         ParamCheckUtils.validateAddress(operatorAddress);
 
         return this.fiscoBcos2Map.get(groupId).delOperator(topicName, operatorAddress);
     }
 
     public List<String> listOperator(Long groupId, String topicName) throws BrokerException {
-        checkVersion(groupId);
-
         return this.fiscoBcos2Map.get(groupId).listOperator(topicName);
+    }
+
+    public CompletableFuture<SendResult> sendAMOP(String topicName, Long groupId, String content) {
+        return this.fiscoBcos2Map.get(groupId).sendAMOP(topicName, content);
+    }
+
+    public Map<Long, AMOPSubscription> initAMOP() {
+        Map<Long, AMOPSubscription> AMOPSubscriptions = new ConcurrentHashMap<>();
+
+        for (Map.Entry<Long, FiscoBcos2> entry : this.fiscoBcos2Map.entrySet()) {
+            log.info("init AMOP for group: {}", entry.getKey());
+
+            AMOPSubscription amopSubscription = new AMOPSubscription(String.valueOf(entry.getKey()), entry.getValue().getService());
+            AMOPSubscriptions.put(entry.getKey(), amopSubscription);
+        }
+
+        return AMOPSubscriptions;
     }
 }
