@@ -77,7 +77,9 @@ public interface IConsumer extends IEventTopic {
         // from which protocol
         InterfaceType,
         // remote client ip
-        RemoteIP;
+        RemoteIP,
+        // Ephemeral notify
+        Ephemeral,
     }
 
     /**

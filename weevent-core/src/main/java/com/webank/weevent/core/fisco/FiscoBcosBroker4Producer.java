@@ -3,13 +3,13 @@ package com.webank.weevent.core.fisco;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 
-import com.webank.weevent.core.IProducer;
-import com.webank.weevent.core.fisco.util.ParamCheckUtils;
-import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.client.SendResult;
 import com.webank.weevent.client.WeEvent;
+import com.webank.weevent.core.IProducer;
+import com.webank.weevent.core.fisco.util.ParamCheckUtils;
+import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegate;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -44,10 +44,15 @@ public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IPr
                     Long.parseLong(groupId),
                     new String(event.getContent(), StandardCharsets.UTF_8));
         } else {
-            return fiscoBcosDelegate.publishEvent(event.getTopic(),
-                    Long.parseLong(groupId),
-                    new String(event.getContent(), StandardCharsets.UTF_8),
-                    JsonHelper.object2Json(event.getExtensions()));
+            if (event.getExtensions().containsKey(WeEvent.WeEvent_EPHEMERAL)) {
+                log.info("ephemeral event");
+                return fiscoBcosDelegate.sendAMOP(event.getTopic(), Long.parseLong(groupId), JsonHelper.object2Json(event));
+            } else {
+                return fiscoBcosDelegate.publishEvent(event.getTopic(),
+                        Long.parseLong(groupId),
+                        new String(event.getContent(), StandardCharsets.UTF_8),
+                        JsonHelper.object2Json(event.getExtensions()));
+            }
         }
     }
 }
