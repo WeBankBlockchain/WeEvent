@@ -168,5 +168,29 @@
   "cornCheck": {
     "method": "get",
     "url": "weevent-processor/timerScheduler/checkCorn"
+  },
+  "listTransport": {
+    "method": "get",
+    "url": "file/listTransport"
+  },
+  "openTransport": {
+    "method": "post",
+    "url": "file/openTransport"
+  },
+  "deleteTransport": {
+    "method": "post",
+    "url": "file/closeTransport"
+  },
+  "deleteStatus": {
+    "method": "post",
+    "url": "file/status"
+  },
+  "listFile": {
+    "method": "get",
+    "url": "file/listFile"
+  },
+  "fileStatus": {
+    "method": "get",
+    "url": "file/status"
   }
 }
