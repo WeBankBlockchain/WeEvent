@@ -25,25 +25,25 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MainEventLoop extends StoppableTask {
     // daemon Executor
-    private Executor executor;
+    private final Executor executor;
 
     // block chain
-    private IBlockChain blockChain;
+    private final IBlockChain blockChain;
 
     // binding group
-    private String groupId;
+    private final String groupId;
 
     // last well done block
     private Long lastBlock;
 
     // Subscription ID <-> Subscription
-    private Map<String, Subscription> subscriptions = new ConcurrentHashMap<>();
+    private final Map<String, Subscription> subscriptions = new ConcurrentHashMap<>();
 
     // subscription in main loop
-    private List<String> mainSubscriptionIds = new ArrayList<>();
+    private final List<String> mainSubscriptionIds = new ArrayList<>();
 
     // subscription in history loop
-    private List<String> historySubscriptionIds = new ArrayList<>();
+    private final List<String> historySubscriptionIds = new ArrayList<>();
 
     // new block notified
     private BlockingDeque<Long> blockNotifyQueue;
