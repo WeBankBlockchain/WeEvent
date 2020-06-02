@@ -1,11 +1,16 @@
 <template>
   <div id="app">
     <router-view/>
+    <!-- <global-uploader></global-uploader> -->
   </div>
 </template>
 <script>
+// import globalUploader from './components/tool/globalUploader.vue'
 export default {
   name: 'App',
+  components: {
+    // globalUploader
+  },
   beforeCreate () {
     if (self === top) {
       let antiCLickjack = document.getElementById('app')

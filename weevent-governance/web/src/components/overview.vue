@@ -30,7 +30,7 @@
 </template>
 <script>
 import API from '../API/resource.js'
-import chart from './chart.vue'
+import chart from './tool/chart.vue'
 export default {
   components: {
     chart
