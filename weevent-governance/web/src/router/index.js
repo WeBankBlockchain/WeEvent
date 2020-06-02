@@ -19,6 +19,7 @@ import dataBase from '../components/dataBase'
 import statistics from '../components/statistics'
 import ruleStatic from '../components/ruleStatic'
 import timerSchedule from '../components/timerSchedule'
+import fileTranspoart from '../components/fileTranspoart'
 
 Vue.use(Router)
 
@@ -73,6 +74,10 @@ export default new Router({
         path: '/statistics',
         name: 'statistics',
         component: statistics
+      }, {
+        path: '/fileTranspoart',
+        name: 'fileTranspoart',
+        component: fileTranspoart
       }]
     }, {
       path: '/servers',

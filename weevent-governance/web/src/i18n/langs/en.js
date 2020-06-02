@@ -110,7 +110,8 @@ module.exports = {
     'ruleMana': 'Rule Engine',
     'ruleDetail': 'Rule Detail',
     'sources': 'DataBase Resources',
-    'timerSchedule': 'Timer Schedule'
+    'timerSchedule': 'Timer Schedule',
+    'fileTranspoart': 'File Transpoart'
   },
   overview: {
     'nodeNum': 'Nodes',
@@ -315,5 +316,28 @@ module.exports = {
     'editOptionDes': 'The user can select the corresponding key and set its corresponding content interval. At the same time, it supports the selection of built-in functions (optional) to perform corresponding function processing on the key.<br/>E.g: abs(age) >= 20',
     'optionMap': 'Conditional structure content editing',
     'optionMapDes': 'For complex conditional statements, the page now supports not only the horizontal association of conditional statements, but also the nesting of conditional statements Click the "Add" button at the end of each condition bar to generate a corresponding sub-option bar. Changing the option bar will form a nesting relationship with its parent<br/>E.g: (abs(age) >= 20 and name != "Kevin") or age >= 30'
+  },
+  file: {
+    'creatTime': 'Creat Time',
+    'creater': 'Creater',
+    'roles': 'Roles',
+    'options': 'Options',
+    'sender': 'Sender',
+    'receiver': 'Receiver',
+    'upload': 'Upload',
+    'download': 'Download',
+    'publicKey': 'Public Key',
+    'privateKey': 'Private Key',
+    'isDelete': 'Delete Topic',
+    'deleteTopic': 'Sure to delete?',
+    'overwrite': 'Cover Files?',
+    'transpoartList': 'Transpoart List',
+    'certified': 'Certified',
+    'uncertified': 'Uncertified',
+    'certification': 'Certification',
+    'fileName': 'File Name',
+    'downloadFile': 'Download',
+    'downloadList': 'Download List',
+    'fileuploadList': 'File Upload List'
   }
 }
