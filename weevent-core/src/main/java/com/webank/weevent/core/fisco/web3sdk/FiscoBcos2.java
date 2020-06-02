@@ -39,7 +39,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.fisco.bcos.channel.client.ChannelResponseCallback2;
+import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.client.TransactionSucCallback;
+import org.fisco.bcos.channel.dto.ChannelRequest;
+import org.fisco.bcos.channel.dto.ChannelResponse;
 import org.fisco.bcos.web3j.abi.FunctionReturnDecoder;
 import org.fisco.bcos.web3j.abi.TypeReference;
 import org.fisco.bcos.web3j.abi.Utils;
@@ -67,12 +71,13 @@ import org.fisco.bcos.web3j.utils.BlockLimit;
 @Slf4j
 public class FiscoBcos2 {
     // config
-    private FiscoConfig fiscoConfig;
+    private final FiscoConfig fiscoConfig;
 
     // tx account
     private Credentials credentials;
 
     // real handler
+    private Service service;
     private Web3j web3j;
     private int timeout;
 
@@ -83,15 +88,20 @@ public class FiscoBcos2 {
     private Topic topic;
 
     // topic info list in local memory, some fields may be expired
-    private Map<String, TopicInfo> topicInfo = new ConcurrentHashMap<>();
+    private final Map<String, TopicInfo> topicInfo = new ConcurrentHashMap<>();
 
     // history topic, (address <-> Contract)
-    private Map<String, Contract> historyTopicContract = new ConcurrentHashMap<>();
+    private final Map<String, Contract> historyTopicContract = new ConcurrentHashMap<>();
+
     // history topic, (address <-> version)
-    private Map<String, Long> historyTopicVersion = new ConcurrentHashMap<>();
+    private final Map<String, Long> historyTopicVersion = new ConcurrentHashMap<>();
 
     public FiscoBcos2(FiscoConfig fiscoConfig) {
         this.fiscoConfig = fiscoConfig;
+    }
+
+    public Service getService() {
+        return this.service;
     }
 
     public void init(Long groupId) throws BrokerException {
@@ -99,7 +109,8 @@ public class FiscoBcos2 {
 
         if (this.topicController == null) {
             this.credentials = Web3SDKConnector.getCredentials(this.fiscoConfig);
-            this.web3j = Web3SDKConnector.initWeb3j(Web3SDKConnector.initService(groupId, this.fiscoConfig));
+            this.service = Web3SDKConnector.initService(groupId, this.fiscoConfig);
+            this.web3j = Web3SDKConnector.initWeb3j(this.service);
             this.timeout = this.fiscoConfig.getWeb3sdkTimeout();
 
             CRUDAddress crudAddress = new CRUDAddress(this.web3j, this.credentials);
@@ -525,5 +536,37 @@ public class FiscoBcos2 {
         }
 
         return tuple2.getValue2();
+    }
+
+    public CompletableFuture<SendResult> sendAMOP(String topicName, String content) {
+        ChannelRequest channelRequest = new ChannelRequest();
+        channelRequest.setToTopic(topicName);
+        channelRequest.setMessageID(this.service.newSeq());
+        channelRequest.setTimeout(this.service.getConnectSeconds() * 1000);
+        channelRequest.setContent(content);
+
+        log.info("send amop request, topic: {} content length: {} id: {}", topicName, content.length(), channelRequest.getMessageID());
+
+        StopWatch sw = StopWatch.createStarted();
+        CompletableFuture<SendResult> future = new CompletableFuture<>();
+        this.service.asyncSendChannelMessage2(channelRequest, new ChannelResponseCallback2() {
+            @Override
+            public void onResponseMessage(ChannelResponse response) {
+                sw.stop();
+                log.info("receive amop response, id: {} result: {}-{} cost: {}", response.getMessageID(), response.getErrorCode(), response.getErrorMessage(), sw.getTime());
+
+                SendResult sendResult = new SendResult();
+                sendResult.setTopic(topicName);
+                sendResult.setEventId(response.getMessageID());
+
+                if (response.getErrorCode() == 0) {
+                    sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+                } else {
+                    sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+                }
+                future.complete(sendResult);
+            }
+        });
+        return future;
     }
 }

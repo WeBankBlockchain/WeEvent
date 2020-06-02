@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public abstract class StoppableTask implements Runnable {
-    private String name;
+    private final String name;
 
     // flag to exit task
     private volatile boolean exit = false;
