@@ -27,20 +27,20 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Getter
 public class NotifyTask extends StoppableTask {
-    private String subscriptionId;
-    private IConsumer.ConsumerListener consumerListener;
-    private int idleTime;
+    private final String subscriptionId;
+    private final IConsumer.ConsumerListener consumerListener;
+    private final int idleTime;
 
-    private BlockingDeque<WeEvent> eventQueue = new LinkedBlockingDeque<>();
+    private final BlockingDeque<WeEvent> eventQueue = new LinkedBlockingDeque<>();
     private long notifiedCount = 0;
-    private Date lastTimeStamp = new Date();
+    private final Date lastTimeStamp = new Date();
 
     // (eventId <-> timestamp), value is not used yet
-    private Map<String, Long> mergeCache = new FixedFIFOCache<>(1024);
+    private final Map<String, Long> mergeCache = new FixedFIFOCache<>(1024);
 
     // fixed size FIFO cache
     static class FixedFIFOCache<K, V> extends LinkedHashMap<K, V> {
-        private int capacity;
+        private final int capacity;
 
         public FixedFIFOCache(int capacity) {
             super(capacity, 0.8f, false);
