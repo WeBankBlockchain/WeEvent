@@ -22,7 +22,7 @@ public class HistoryEventLoop extends StoppableTask {
     /**
      * block chain
      */
-    private IBlockChain blockChain;
+    private final IBlockChain blockChain;
 
     /**
      * Last detected block.
@@ -37,7 +37,7 @@ public class HistoryEventLoop extends StoppableTask {
     /**
      * binding to dispatch event
      */
-    private Subscription subscription;
+    private final Subscription subscription;
 
     public Long getLastBlock() {
         return this.lastBlock;
