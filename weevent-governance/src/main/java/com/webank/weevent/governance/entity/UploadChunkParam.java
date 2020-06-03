@@ -1,6 +1,5 @@
 package com.webank.weevent.governance.entity;
 
-import com.webank.weevent.file.inner.DiskFiles;
 import com.webank.weevent.file.service.FileChunksMeta;
 
 import lombok.Getter;
@@ -19,8 +18,6 @@ public class UploadChunkParam {
     private byte[] chunkData;
 
     private FileChunksMeta fileChunksMeta;
-
-    private DiskFiles diskFiles;
 
     @Override
     public String toString() {
