@@ -41,4 +41,7 @@ public class GovernanceConfig {
 
     @Value("${jwt.private.secret:PrivateSecret}")
     private String PrivateSecret;
+
+    @Value("${file.transport.path:./logs}")
+    private String fileTransportPath;
 }

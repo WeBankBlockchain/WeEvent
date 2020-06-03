@@ -50,4 +50,17 @@ public class ConstantProperties {
 
     //process timerScheduler url end ===========================================================
 
+    public final static String RECEIVER_FILE_PATH = "./logs";
+    // chunk size 1MB
+    public final static int FILE_CHUNK_SIZE = 1048576;
+    public final static String UPLOAD = "upload";
+    public final static String DOWNLOAD = "download";
+
+    public final static String TRANSPORT_RECEIVER = "0";
+    public final static String TRANSPORT_SENDER = "1";
+
+    // retry times when upload failed
+    public final static int UPLOAD_CHUNK_FAIL_RETRY_COUNT = 5;
+    public final static long WAIT1S = 1000;
+
 }
