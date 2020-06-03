@@ -8,5 +8,6 @@ include "weevent-governance"
 include "weevent-processor"
 include "weevent-gateway"
 include "weevent-jmeter"
+include 'weevent-jms'
 include 'weevent-file'
 
