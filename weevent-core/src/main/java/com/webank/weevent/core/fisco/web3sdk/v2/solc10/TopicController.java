@@ -115,28 +115,28 @@ public class TopicController extends Contract {
                                                          List<BigInteger> lastTimestamp, List<String> lastSender) {
         final Function function = new Function(
                 FUNC_FLUSHTOPICINFO, 
-                Arrays.<Type>asList(topicName.isEmpty()?DynamicArray.empty("string[]"):
+                Arrays.<Type>asList(topicName.isEmpty()? DynamicArray.empty("string[]"):
                         new DynamicArray<Utf8String>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(topicName, Utf8String.class)),
-                topicSender.isEmpty()?DynamicArray.empty("address[]"):
+                topicSender.isEmpty()? DynamicArray.empty("address[]"):
                     new DynamicArray<Address>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(topicSender, Address.class)),
-                topicTimestamp.isEmpty()?DynamicArray.empty("uint256[]"):
+                topicTimestamp.isEmpty()? DynamicArray.empty("uint256[]"):
                     new DynamicArray<Uint256>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(topicTimestamp, Uint256.class)),
-                topicBlock.isEmpty()?DynamicArray.empty("uint256[]"):
+                topicBlock.isEmpty()? DynamicArray.empty("uint256[]"):
                     new DynamicArray<Uint256>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(topicBlock, Uint256.class)),
-                lastSequence.isEmpty()?DynamicArray.empty("uint256[]"):
+                lastSequence.isEmpty()? DynamicArray.empty("uint256[]"):
                     new DynamicArray<Uint256>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(lastSequence, Uint256.class)),
-                lastBlock.isEmpty()?DynamicArray.empty("uint256[]"):
+                lastBlock.isEmpty()? DynamicArray.empty("uint256[]"):
                     new DynamicArray<Uint256>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(lastBlock, Uint256.class)),
-                lastTimestamp.isEmpty()?DynamicArray.empty("uint256[]"):
+                lastTimestamp.isEmpty()? DynamicArray.empty("uint256[]"):
                     new DynamicArray<Uint256>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(lastTimestamp, Uint256.class)),
-                lastSender.isEmpty()?DynamicArray.empty("address[]"):
+                lastSender.isEmpty()? DynamicArray.empty("address[]"):
                     new DynamicArray<Address>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(lastSender, Address.class))),
                 Collections.<TypeReference<?>>emptyList());
@@ -148,28 +148,28 @@ public class TopicController extends Contract {
                                List<BigInteger> lastTimestamp, List<String> lastSender, TransactionSucCallback callback) {
         final Function function = new Function(
                 FUNC_FLUSHTOPICINFO, 
-                Arrays.<Type>asList(topicName.isEmpty()?DynamicArray.empty("string[]"):
+                Arrays.<Type>asList(topicName.isEmpty()? DynamicArray.empty("string[]"):
                         new DynamicArray<Utf8String>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(topicName, Utf8String.class)),
-                topicSender.isEmpty()?DynamicArray.empty("address[]"):
+                topicSender.isEmpty()? DynamicArray.empty("address[]"):
                     new DynamicArray<Address>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(topicSender, Address.class)),
-                topicTimestamp.isEmpty()?DynamicArray.empty("uint256[]"):
+                topicTimestamp.isEmpty()? DynamicArray.empty("uint256[]"):
                     new DynamicArray<Uint256>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(topicTimestamp, Uint256.class)),
-                topicBlock.isEmpty()?DynamicArray.empty("uint256[]"):
+                topicBlock.isEmpty()? DynamicArray.empty("uint256[]"):
                     new DynamicArray<Uint256>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(topicBlock, Uint256.class)),
-                lastSequence.isEmpty()?DynamicArray.empty("uint256[]"):
+                lastSequence.isEmpty()? DynamicArray.empty("uint256[]"):
                     new DynamicArray<Uint256>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(lastSequence, Uint256.class)),
-                lastBlock.isEmpty()?DynamicArray.empty("uint256[]"):
+                lastBlock.isEmpty()? DynamicArray.empty("uint256[]"):
                     new DynamicArray<Uint256>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(lastBlock, Uint256.class)),
-                lastTimestamp.isEmpty()?DynamicArray.empty("uint256[]"):
+                lastTimestamp.isEmpty()? DynamicArray.empty("uint256[]"):
                     new DynamicArray<Uint256>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(lastTimestamp, Uint256.class)),
-                lastSender.isEmpty()?DynamicArray.empty("address[]"):
+                lastSender.isEmpty()? DynamicArray.empty("address[]"):
                     new DynamicArray<Address>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(lastSender, Address.class))),
                 Collections.<TypeReference<?>>emptyList());
@@ -179,28 +179,28 @@ public class TopicController extends Contract {
     public String flushTopicInfoSeq(List<String> topicName, List<String> topicSender, List<BigInteger> topicTimestamp, List<BigInteger> topicBlock, List<BigInteger> lastSequence, List<BigInteger> lastBlock, List<BigInteger> lastTimestamp, List<String> lastSender) {
         final Function function = new Function(
                 FUNC_FLUSHTOPICINFO, 
-                Arrays.<Type>asList(topicName.isEmpty()?DynamicArray.empty("string[]"):
+                Arrays.<Type>asList(topicName.isEmpty()? DynamicArray.empty("string[]"):
                         new DynamicArray<Utf8String>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(topicName, Utf8String.class)),
-                topicSender.isEmpty()?DynamicArray.empty("address[]"):
+                topicSender.isEmpty()? DynamicArray.empty("address[]"):
                     new DynamicArray<Address>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(topicSender, Address.class)),
-                topicTimestamp.isEmpty()?DynamicArray.empty("uint256[]"):
+                topicTimestamp.isEmpty()? DynamicArray.empty("uint256[]"):
                     new DynamicArray<Uint256>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(topicTimestamp, Uint256.class)),
-                topicBlock.isEmpty()?DynamicArray.empty("uint256[]"):
+                topicBlock.isEmpty()? DynamicArray.empty("uint256[]"):
                     new DynamicArray<Uint256>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(topicBlock, Uint256.class)),
-                lastSequence.isEmpty()?DynamicArray.empty("uint256[]"):
+                lastSequence.isEmpty()? DynamicArray.empty("uint256[]"):
                     new DynamicArray<Uint256>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(lastSequence, Uint256.class)),
-                lastBlock.isEmpty()?DynamicArray.empty("uint256[]"):
+                lastBlock.isEmpty()? DynamicArray.empty("uint256[]"):
                     new DynamicArray<Uint256>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(lastBlock, Uint256.class)),
-                lastTimestamp.isEmpty()?DynamicArray.empty("uint256[]"):
+                lastTimestamp.isEmpty()? DynamicArray.empty("uint256[]"):
                     new DynamicArray<Uint256>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(lastTimestamp, Uint256.class)),
-                lastSender.isEmpty()?DynamicArray.empty("address[]"):
+                lastSender.isEmpty()? DynamicArray.empty("address[]"):
                     new DynamicArray<Address>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(lastSender, Address.class))),
                 Collections.<TypeReference<?>>emptyList());
@@ -221,7 +221,7 @@ public class TopicController extends Contract {
                     new TypeReference<DynamicArray<Uint256>>() {},
                     new TypeReference<DynamicArray<Uint256>>() {},
                     new TypeReference<DynamicArray<Address>>() {}));
-        List<Type> results = FunctionReturnDecoder.decode(data, function.getOutputParameters());
+        List<Type> results = FunctionReturnDecoder.decode(data, function.getOutputParameters());;
         return new Tuple8<List<String>, List<String>, List<BigInteger>, List<BigInteger>, List<BigInteger>, List<BigInteger>, List<BigInteger>, List<String>>(
 
                 convertToNative((List<Utf8String>) results.get(0).getValue()), 
