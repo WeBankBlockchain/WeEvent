@@ -1,6 +1,5 @@
 package com.webank.weevent.file.inner;
 
-
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.JsonHelper;
@@ -48,7 +47,7 @@ public class AMOPChannel extends ChannelPushCallback {
     // topic not verify
     public List<String> subTopics = new ArrayList<>();
 
-    public Map<String, IWeEventFileClient.FileListener> topicListenerMap = new ConcurrentHashMap<>();
+    public Map<String, IWeEventFileClient.EventListener> topicListenerMap = new ConcurrentHashMap<>();
 
     /**
      * Create a AMOP channel on service for subscribe topic
@@ -99,7 +98,7 @@ public class AMOPChannel extends ChannelPushCallback {
 
 
     // Receiver call subscribe topic
-    public void subTopic(String topic,IWeEventFileClient.FileListener fileListener) throws BrokerException {
+    public void subTopic(String topic, IWeEventFileClient.EventListener eventListener) throws BrokerException {
         if (this.senderTopics.contains(topic) || senderVerifyTopics.containsKey(topic)) {
             log.error("this is already sender side for topic: {}", topic);
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
@@ -107,7 +106,7 @@ public class AMOPChannel extends ChannelPushCallback {
 
         if (!this.subTopics.contains(topic)) {
             log.info("subscribe topic on AMOP channel, {}", topic);
-            this.topicListenerMap.put(topic, fileListener);
+            this.topicListenerMap.put(topic, eventListener);
             this.subTopics.add(topic);
             Set<String> topicSet = new HashSet<>(this.subTopics);
             this.service.setTopics(topicSet);
@@ -116,7 +115,7 @@ public class AMOPChannel extends ChannelPushCallback {
     }
 
     // Receiver call subscribe verify topic
-    public void subTopic(String topic, String groupId, InputStream privatePem,IWeEventFileClient.FileListener fileListener) throws BrokerException {
+    public void subTopic(String topic, String groupId, InputStream privatePem, IWeEventFileClient.EventListener eventListener) throws BrokerException {
         if (this.senderTopics.contains(topic) || senderVerifyTopics.containsKey(topic)) {
             log.error("this is already sender side for topic: {}", topic);
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
@@ -151,7 +150,7 @@ public class AMOPChannel extends ChannelPushCallback {
         service.updateTopicsToNode();
 
         log.info("subscribe verify topic on AMOP channel, {}", topic);
-        this.topicListenerMap.put(topic, fileListener);
+        this.topicListenerMap.put(topic, eventListener);
 
         // put <topic-service> to map in AMOPChannel
         this.subVerifyTopics.put(topic, service);
@@ -170,6 +169,22 @@ public class AMOPChannel extends ChannelPushCallback {
                 this.subTopics.remove(topic);
                 this.topicListenerMap.remove(topic);
                 Set<String> topicSet = new HashSet<>(this.subTopics);
+                this.service.setTopics(topicSet);
+                this.service.updateTopicsToNode();
+            }
+        }
+    }
+
+    public void deleteTransport(String topic) {
+        if (senderVerifyTopics.containsKey(topic)) {
+            log.info("delete verify topic on AMOP channel, {}", topic);
+            service = this.senderVerifyTopics.remove(topic);
+            service = null;
+        } else {
+            if (this.senderTopics.contains(topic)) {
+                log.info("delete topic on AMOP channel, {}", topic);
+                this.senderTopics.remove(topic);
+                Set<String> topicSet = new HashSet<>(this.senderTopics);
                 this.service.setTopics(topicSet);
                 this.service.updateTopicsToNode();
             }
@@ -319,8 +334,8 @@ public class AMOPChannel extends ChannelPushCallback {
                     channelResponse = AMOPChannel.toChannelResponse(ErrorCode.SUCCESS, json);
 
                     //
-                    IWeEventFileClient.FileListener fileListener= this.topicListenerMap.get(fileChunksMeta.getTopic());
-                    fileListener.onFile(fileChunksMeta.getTopic(),fileChunksMeta.getFileName());
+                    IWeEventFileClient.EventListener eventListener = this.topicListenerMap.get(fileChunksMeta.getTopic());
+                    new Thread(new uploadFile2Ftp(fileChunksMeta.getTopic(), fileChunksMeta.getFileName(), eventListener),"thread upload").start();
                 } catch (BrokerException e) {
                     log.error("clean up not complete file failed", e);
                     channelResponse = AMOPChannel.toChannelResponse(e);
@@ -363,5 +378,23 @@ public class AMOPChannel extends ChannelPushCallback {
             return new BrokerException(reply.getErrorCode(), ErrorCode.getDescByCode(reply.getErrorCode()));
         }
 
+    }
+
+    // new class for upload file to ftp server
+    static class uploadFile2Ftp implements Runnable {
+        private final String topic;
+        private final String fileName;
+        private final IWeEventFileClient.EventListener eventListener;
+
+
+        public uploadFile2Ftp(String topic, String fileName, IWeEventFileClient.EventListener eventListener){
+            this.topic = topic;
+            this.fileName = fileName;
+            this.eventListener = eventListener;
+        }
+        @Override
+        public void run() {
+            eventListener.onEvent(this.topic, this.fileName);
+        }
     }
 }
