@@ -95,7 +95,7 @@ public class Subscription {
     private NotifyTask notifyTask;
 
     /**
-     * optional, if offset != WeEvent.OFFSET_LAST then need a event loop to fetch history event
+     * optional, if offset != WeEvent.OFFSET_LAST then need an event loop to fetch history event
      */
     @ToString.Exclude
     private HistoryEventLoop historyEventLoop;

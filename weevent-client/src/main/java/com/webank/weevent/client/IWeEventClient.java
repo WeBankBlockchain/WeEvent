@@ -1,6 +1,7 @@
 package com.webank.weevent.client;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 import lombok.NonNull;
 
@@ -94,13 +95,22 @@ public interface IWeEventClient {
     boolean exist(String topic) throws BrokerException;
 
     /**
-     * Publish an event to topic.
+     * Publish an event to topic in synchronize way.
      *
      * @param weEvent WeEvent(String topic, byte[] content, Map extensions)
      * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
      * @throws BrokerException broker exception
      */
     SendResult publish(WeEvent weEvent) throws BrokerException;
+
+    /**
+     * Publish an event to topic in asynchronous way.
+     *
+     * @param weEvent WeEvent(String topic, byte[] content, Map extensions)
+     * @return send result, SendResult.SUCCESS if success, and SendResult.eventId
+     * @throws BrokerException broker exception
+     */
+    CompletableFuture<SendResult> publishAsync(WeEvent weEvent) throws BrokerException;
 
     /**
      * Interface for event notify callback
