@@ -72,7 +72,7 @@ public class CRUDJobs implements Job {
             if (StringUtils.isEmpty(context.getJobDetail().getJobDataMap().get("ruleBak"))) {
                 ruleBak = (Pair<CEPRule, CEPRule>) context.getJobDetail().getJobDataMap().get("ruleBak");
             }
-            log.info("{}", rule);
+            log.info("{}, {}, {}", rule, jobName, type);
             // check the status,when the status equal 1,then update
             if (RuleStatusEnum.RUNNING.getCode().equals(rule.getStatus()) || RuleStatusEnum.NOT_STARTED.getCode().equals(rule.getStatus()) || RuleStatusEnum.IS_DELETED.getCode().equals(rule.getStatus())) {
                 CEPRuleCache.updateCEPRule(rule, ruleBak);

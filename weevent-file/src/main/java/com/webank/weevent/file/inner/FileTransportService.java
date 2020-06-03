@@ -16,7 +16,6 @@ import com.webank.weevent.file.service.FileChunksMeta;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.dto.ChannelResponse;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,12 +43,13 @@ public class FileTransportService {
     private Map<String, FileChunksMeta> fileTransportContexts = new ConcurrentHashMap<>();
 
     // fileTransportService for common transport
-    public FileTransportService(FiscoConfig fiscoConfig,
-                                IProducer iProducer,
-                                String host,
-                                String filePath,
-                                int fileChunkSize,
-                                String groupId) throws BrokerException {
+    public FileTransportService(
+            FiscoConfig fiscoConfig,
+            IProducer iProducer,
+            String host,
+            String filePath,
+            int fileChunkSize,
+            String groupId) throws BrokerException {
         this.fiscoConfig = fiscoConfig;
         this.producer = iProducer;
         this.timeout = fiscoConfig.getWeb3sdkTimeout();
@@ -77,14 +77,8 @@ public class FileTransportService {
         return fiscoConfig;
     }
 
-    public List<FileChunksMeta> getFileChunksMeta(String topic) {
-        List<FileChunksMeta> fileChunksMetaList = new ArrayList<>();
-        for (FileChunksMeta fileChunksMeta : this.fileTransportContexts.values()) {
-            if (fileChunksMeta.getTopic().equals(topic)) {
-                fileChunksMetaList.add(fileChunksMeta);
-            }
-        }
-        return fileChunksMetaList;
+    public DiskFiles getDiskFiles() {
+        return this.diskFiles;
     }
 
     public FileChunksMetaPlus verify(String eventId, String groupId) throws BrokerException {
@@ -111,7 +105,7 @@ public class FileTransportService {
                 && "json".equals(event.getExtensions().get(WeEvent.WeEvent_FORMAT));
     }
 
-    public FileTransportStats stats(boolean all, String groupId) {
+    public FileTransportStats stats(boolean all, String groupId, String topicName) {
         FileTransportStats fileTransportStats = new FileTransportStats();
 
         // sender
@@ -126,7 +120,7 @@ public class FileTransportService {
         fileTransportStats.getSender().put(groupId, senders);
 
         // receiver
-        List<FileChunksMeta> localFiles = this.diskFiles.listNotCompleteFiles(all);
+        List<FileChunksMeta> localFiles = this.diskFiles.listNotCompleteFiles(all, topicName);
         Map<String, List<FileChunksMetaStatus>> receivers = new HashMap<>();
         for (String topic : channel.getSubTopics()) {
             List<FileChunksMetaStatus> filePlus = localFiles.stream()
