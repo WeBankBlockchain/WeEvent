@@ -46,6 +46,9 @@ dependencies {
     //JWT
     implementation("com.auth0:java-jwt:${JWTVersion}")
 
+    // fileupload
+    implementation("commons-fileupload:commons-fileupload:${apacheCommonsVersion.fileupload}")
+
     implementation(project(":weevent-client"))
     implementation(project(":weevent-file"))
     implementation(project(":weevent-core"))
