@@ -45,6 +45,17 @@
         {{$t('sideBar.timerSchedule')}}
       </el-menu-item>
     </el-submenu>
+    <el-submenu index="5">
+      <template slot='title'>
+        <i class="el-icon-folder"></i>
+        <span slot="title">
+          {{$t('sideBar.fileTranspoart')}}
+        </span>
+      </template>
+      <el-menu-item index='5-1'>
+        {{$t('file.transpoartList')}}
+      </el-menu-item>
+    </el-submenu>
   </el-menu>
 </template>
 <script>
