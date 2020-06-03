@@ -39,8 +39,8 @@ $ ./install-all.sh -p /usr/local/weevent/
 ## 项目贡献
 *   开发环境  
 git，gradle 4.10，java 1.8，nodejs 10.16，推荐使用IntelliJ IDEA。
-*   [项目计划](https://github.com/WeBankFinTech/WeEvent/wiki/Project-RoadMap)  
-*   [代码提交](https://github.com/WeBankFinTech/WeEvent/wiki/Project-WorkFlow)  
+*   [项目计划](https://github.com/WeBankFinTech/WeEvent/wiki/project-road-map)  
+*   [代码提交](https://github.com/WeBankFinTech/WeEvent/wiki/project-git-flow)  
 
 WeEvent爱贡献者！请阅读[贡献文档](https://github.com/WeBankFinTech/WeEvent/blob/master/CONTRIBUTING.md)，了解如何贡献代码，并提交你的贡献。
 
