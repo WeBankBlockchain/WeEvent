@@ -132,7 +132,6 @@ public class CommonUtil {
 
 
     public static List<String> getKeys(String objJson) {
-        List<String> keys = new ArrayList<>();
         try {
             Map<String, Object> map = JsonHelper.json2Object(objJson, new TypeReference<Map<String, Object>>() {
             });
