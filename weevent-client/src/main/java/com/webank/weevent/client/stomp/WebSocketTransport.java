@@ -70,9 +70,6 @@ public class WebSocketTransport extends WebSocketClient {
     // is reconnect thread already exist
     private boolean connectFlag = false;
 
-    // async stomp send timeout
-    private final long transactionTimeout = 5;
-
     class ResponseFuture implements Future<StompHeaderAccessor> {
         private CountDownLatch latch = new CountDownLatch(1);
 
@@ -273,7 +270,7 @@ public class WebSocketTransport extends WebSocketClient {
     private StompHeaderAccessor getStompHeaderAccessor(WeEventStompCommand stompCommand, String req, Long asyncSeq, String commandStr) throws BrokerException {
         StompHeaderAccessor stompHeaderAccessor;
         try {
-            stompHeaderAccessor = this.stompRequestAsync(req, asyncSeq).get(this.transactionTimeout, TimeUnit.SECONDS);
+            stompHeaderAccessor = this.stompRequestAsync(req, asyncSeq).get(this.timeout, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             log.error("{} over stomp execute error", commandStr, e);
             throw new BrokerException(ErrorCode.SDK_EXCEPTION_STOMP_EXECUTE);
