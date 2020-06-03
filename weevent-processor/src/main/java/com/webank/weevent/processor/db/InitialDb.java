@@ -34,7 +34,7 @@ public class InitialDb implements AutoCloseable {
             initialDb.createDataBase();
         } catch (Exception e) {
             log.error("create database fail", e);
-            throw new Exception("create database fail", e);
+            throw e;
         }
 
     }
