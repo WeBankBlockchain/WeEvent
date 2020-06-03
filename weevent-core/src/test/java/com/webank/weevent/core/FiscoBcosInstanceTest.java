@@ -65,13 +65,19 @@ public class FiscoBcosInstanceTest extends JUnitTestBase {
         Assert.assertTrue(iConsumer.isStarted());
 
         String subscriptionId = iConsumer.subscribe(this.topicName, this.groupId, WeEvent.OFFSET_LAST, new HashMap<>(), new IConsumer.ConsumerListener() {
+            /**
+             * @param subscriptionId binding which subscription
+             * @param event the event
+             */
             @Override
             public void onEvent(String subscriptionId, WeEvent event) {
+                // Called while new event arrived.
 
             }
 
             @Override
             public void onException(Throwable e) {
+                // Called while raise exception.
 
             }
         });
