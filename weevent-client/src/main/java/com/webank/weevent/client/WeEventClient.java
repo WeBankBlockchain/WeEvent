@@ -1,7 +1,6 @@
 package com.webank.weevent.client;
 
 
-import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -13,6 +12,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -149,27 +149,24 @@ public class WeEventClient implements IWeEventClient {
         validateWeEvent(weEvent);
         log.info("start to publish: {}", weEvent);
 
-        SendResult sendResult = new SendResult();
-        sendResult.setTopic(weEvent.getTopic());
-        try {
-            TopicContent weEventTopic = new TopicContent(weEvent.getTopic());
-            weEventTopic.setGroupId(this.groupId);
+        TopicContent weEventTopic = new TopicContent(weEvent.getTopic());
+        weEventTopic.setGroupId(this.groupId);
 
-            // publish
-            checkConnected();
-            String eventId = this.transport.stompSend(weEventTopic, weEvent);
+        checkConnected();
+        // publish
+        return this.transport.stompSend(weEventTopic, weEvent);
+    }
 
-            // return
-            sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
-            sendResult.setEventId(eventId);
+    @Override
+    public CompletableFuture<SendResult> publishAsync(WeEvent weEvent) throws BrokerException {
+        validateWeEvent(weEvent);
+        log.info("start to publish event by async: {}", weEvent);
 
-            log.info("publish success, eventID: {}", eventId);
-        } catch (Exception e) {
-            log.error("publish failed", e);
-            sendResult.setStatus(SendResult.SendResultStatus.ERROR);
-        }
+        TopicContent weEventTopic = new TopicContent(weEvent.getTopic());
+        weEventTopic.setGroupId(this.groupId);
 
-        return sendResult;
+        checkConnected();
+        return this.transport.stompSendAsync(weEventTopic, weEvent);
     }
 
     @Override
