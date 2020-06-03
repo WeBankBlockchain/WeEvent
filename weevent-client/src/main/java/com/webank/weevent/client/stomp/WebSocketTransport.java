@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
@@ -16,6 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.IWeEventClient;
+import com.webank.weevent.client.SendResult;
 import com.webank.weevent.client.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
@@ -68,11 +70,11 @@ public class WebSocketTransport extends WebSocketClient {
     // is reconnect thread already exist
     private boolean connectFlag = false;
 
-    class ResponseFuture implements Future<Message<?>> {
+    class ResponseFuture implements Future<StompHeaderAccessor> {
         private CountDownLatch latch = new CountDownLatch(1);
 
         private Long key;
-        private Message<?> response;
+        private StompHeaderAccessor stompHeaderAccessor;
 
         ResponseFuture(Long key) {
             this.key = key;
@@ -80,7 +82,7 @@ public class WebSocketTransport extends WebSocketClient {
         }
 
         public void setResponse(Message<?> response) {
-            this.response = response;
+            this.stompHeaderAccessor = StompHeaderAccessor.wrap(response);
             futures.remove(this.key);
 
             this.latch.countDown();
@@ -104,16 +106,17 @@ public class WebSocketTransport extends WebSocketClient {
         }
 
         @Override
-        public Message<?> get() throws InterruptedException {
+        public StompHeaderAccessor get() throws InterruptedException {
             latch.await();
-            return this.response;
+
+            return this.stompHeaderAccessor;
         }
 
         @Override
-        public Message<?> get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
+        public StompHeaderAccessor get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
             if (latch.await(timeout, unit)) {
-                if (this.response != null) {
-                    return this.response;
+                if (this.stompHeaderAccessor != null) {
+                    return this.stompHeaderAccessor;
                 } else {
                     log.error("empty response");
                     throw new TimeoutException();
@@ -141,36 +144,25 @@ public class WebSocketTransport extends WebSocketClient {
     }
 
     // Stomp command
-    public Message<?> stompRequest(String req, Long asyncSeq) throws BrokerException {
+    private ResponseFuture stompRequestAsync(String req, Long asyncSeq) {
         log.info("stomp request, seq: {} size: {}", asyncSeq, req.length());
 
-        try {
-            // asyncSeq use for synchronous to asynchronous
-            ResponseFuture response = new ResponseFuture(asyncSeq);
-
-            // .send(String text) is Text Message, .send(byte[] data) is Binary Message
-            log.debug("STOMP post text: {}", req);
-            this.send(req);
-            return response.get(this.timeout, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            log.error("stomp command invoke Interrupted, seq: " + asyncSeq);
-            Thread.currentThread().interrupt();
-            return null;
-        } catch (TimeoutException e) {
-            log.error("stomp command invoke timeout, seq: " + asyncSeq, e);
-            throw new BrokerException(ErrorCode.SDK_JMS_EXCEPTION_STOMP_TIMEOUT);
-        }
+        // asyncSeq use for synchronous to asynchronous
+        ResponseFuture response = new ResponseFuture(asyncSeq);
+        // .send(String text) is Text Message, .send(byte[] data) is Binary Message
+        log.debug("STOMP post text: {}", req);
+        this.send(req);
+        return response;
     }
-
 
     public void stompConnect(String userName, String password) throws BrokerException {
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         String req = stompCommand.encodeConnect(userName, password);
 
         this.sequence2Id.put(Long.toString(0L), 0L);
-        Message<?> stompResponse = this.stompRequest(req, 0L);
-        StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(stompResponse);
-        stompCommand.checkError(stompHeaderAccessor);
+        getStompHeaderAccessor(stompCommand, req, 0L, "stompConnect");
+        log.info("stomp connect success.");
+
         this.account = Pair.of(userName, password);
 
         // initialize connection context
@@ -186,25 +178,59 @@ public class WebSocketTransport extends WebSocketClient {
         String req = stompCommand.encodeDisConnect(asyncSeq);
         this.sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
 
-        Message<?> stompResponse = this.stompRequest(req, asyncSeq);
-        StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(stompResponse);
-        stompCommand.checkError(stompHeaderAccessor);
+        getStompHeaderAccessor(stompCommand, req, asyncSeq, "stompDisconnect");
+        log.info("stomp disconnect success.");
     }
 
     // return eventId
-    public String stompSend(TopicContent topic, WeEvent event) throws BrokerException {
+    public SendResult stompSend(TopicContent topic, WeEvent event) {
         // header id equal asyncSeq
         WeEventStompCommand stompCommand = new WeEventStompCommand();
         Long asyncSeq = (this.sequence.incrementAndGet());
         String req = stompCommand.encodeSend(asyncSeq, topic, event);
         this.sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
 
-        Message<?> stompResponse = this.stompRequest(req, asyncSeq);
-        StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(stompResponse);
-        stompCommand.checkError(stompHeaderAccessor);
+        SendResult sendResult = new SendResult();
+        sendResult.setTopic(event.getTopic());
+        try {
+            StompHeaderAccessor stompHeaderAccessor = getStompHeaderAccessor(stompCommand, req, asyncSeq, "publish");
+            sendResult.setEventId(stompHeaderAccessor.getFirstNativeHeader("eventId"));
+            sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+            log.info("publish success, event: {}, eventID: {}", event, sendResult.getEventId());
+        } catch (BrokerException e) {
+            if (ErrorCode.SDK_EXCEPTION_STOMP_TIMEOUT.getCode() == e.getCode()) {
+                sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
+            } else {
+                sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+            }
+        }
+        return sendResult;
+    }
 
-        // handler stompResponse
-        return stompHeaderAccessor.getFirstNativeHeader("eventId");
+    // return CompletableFuture
+    public CompletableFuture<SendResult> stompSendAsync(TopicContent topic, WeEvent event) {
+        // header id equal asyncSeq
+        WeEventStompCommand stompCommand = new WeEventStompCommand();
+        Long asyncSeq = (this.sequence.incrementAndGet());
+        String req = stompCommand.encodeSend(asyncSeq, topic, event);
+        this.sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
+
+        return CompletableFuture.supplyAsync(() -> {
+            SendResult sendResult = new SendResult();
+            sendResult.setTopic(event.getTopic());
+            try {
+                StompHeaderAccessor stompHeaderAccessor = this.stompRequestAsync(req, asyncSeq).get();
+
+                stompCommand.checkError(stompHeaderAccessor);
+                sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
+                sendResult.setEventId(stompHeaderAccessor.getFirstNativeHeader("eventId"));
+                log.info("publish async success, event: {}, eventID: {}", event, sendResult.getEventId());
+            } catch (BrokerException | InterruptedException e) {
+                log.error("stomp command invoke error, seq: " + asyncSeq, e);
+                sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+            }
+            return sendResult;
+        });
     }
 
     // return subscriptionId
@@ -214,9 +240,7 @@ public class WebSocketTransport extends WebSocketClient {
         String req = stompCommand.encodeSubscribe(topic, asyncSeq);
         this.sequence2Id.put(Long.toString(asyncSeq), asyncSeq);
 
-        Message<?> stompResponse = this.stompRequest(req, asyncSeq);
-        StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(stompResponse);
-        stompCommand.checkError(stompHeaderAccessor);
+        StompHeaderAccessor stompHeaderAccessor = getStompHeaderAccessor(stompCommand, req, asyncSeq, "subscribe");
 
         // cache the subscription id and the WeEventTopic,the subscription2EventCache which can use for reconnect
         String subscriptionId = stompHeaderAccessor.getFirstNativeHeader("subscription-id");
@@ -226,6 +250,7 @@ public class WebSocketTransport extends WebSocketClient {
         // map the receipt id and the subscription id
         this.receiptId2SubscriptionId.put(String.valueOf(asyncSeq), subscriptionId);
         this.subscriptionId2ReceiptId.put(subscriptionId, String.valueOf(asyncSeq));
+        log.info("subscribe success, topic: {}", topic.getTopicName());
 
         return subscriptionId;
 
@@ -238,9 +263,23 @@ public class WebSocketTransport extends WebSocketClient {
         Long asyncSeq = this.sequence.incrementAndGet();
         this.sequence2Id.put(headerId, asyncSeq);
 
-        Message<?> stompResponse = this.stompRequest(req, asyncSeq);
-        StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(stompResponse);
+        getStompHeaderAccessor(stompCommand, req, asyncSeq, "unsubscribe");
+        log.info("unsubscribe success, subscriptionId: {}", subscriptionId);
+    }
+
+    private StompHeaderAccessor getStompHeaderAccessor(WeEventStompCommand stompCommand, String req, Long asyncSeq, String commandStr) throws BrokerException {
+        StompHeaderAccessor stompHeaderAccessor;
+        try {
+            stompHeaderAccessor = this.stompRequestAsync(req, asyncSeq).get(this.timeout, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            log.error("{} over stomp execute error", commandStr, e);
+            throw new BrokerException(ErrorCode.SDK_EXCEPTION_STOMP_EXECUTE);
+        } catch (TimeoutException e) {
+            log.error("{} over stomp timeout", commandStr, e);
+            throw new BrokerException(ErrorCode.SDK_EXCEPTION_STOMP_TIMEOUT);
+        }
         stompCommand.checkError(stompHeaderAccessor);
+        return stompHeaderAccessor;
     }
 
     private void handleFrame(Message<byte[]> stompMsg) {
