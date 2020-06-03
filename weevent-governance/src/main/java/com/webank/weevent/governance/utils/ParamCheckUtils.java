@@ -8,9 +8,11 @@ import com.webank.weevent.governance.common.GovernanceException;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * @author websterchen
- * @version 1.0
- * @since 2019/1/28
+ * param check utils.
+ *
+ * @author v_wbhwliu
+ * @version 1.3
+ * @since 2020/5/25
  */
 public class ParamCheckUtils {
     public static void validateFileName(String fileName) throws GovernanceException {
