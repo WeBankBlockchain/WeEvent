@@ -300,7 +300,7 @@ public class FileService {
             return GovernanceResult.ok(this.chunkUploadedList(fileChunksMeta));
         }
 
-        FileChunksMeta fileChunksMeta = new FileChunksMeta(fileId, filename, totalSize, "", topic, groupId, false);
+        FileChunksMeta fileChunksMeta = new FileChunksMeta(fileId, filename, totalSize, "", topic, groupId, true);
         fileChunksMeta.initChunkSize(chunkSize);
         DiskFiles diskFiles = new DiskFiles(this.uploadPath + File.separator + fileId);
         try {
