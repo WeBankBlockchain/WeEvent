@@ -129,7 +129,7 @@ public class WeEventStompCommand {
             if (!StringUtils.isEmpty(message)) {
                 throw new BrokerException(message);
             } else {
-                throw new BrokerException(ErrorCode.SDK_JMS_EXCEPTION_STOMP_EXECUTE);
+                throw new BrokerException(ErrorCode.SDK_EXCEPTION_STOMP_EXECUTE);
             }
         }
     }

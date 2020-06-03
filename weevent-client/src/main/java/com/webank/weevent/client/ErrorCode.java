@@ -49,8 +49,8 @@ public enum ErrorCode {
 
     SDK_TLS_INIT_FAILED(101001, "init tsl ca failed"),
     SDK_JMS_INIT_FAILED(101002, "init jms connection factory failed"),
-    SDK_JMS_EXCEPTION_STOMP_EXECUTE(101003, "stomp command execute failed"),
-    SDK_JMS_EXCEPTION_STOMP_TIMEOUT(101004, "stomp command invoke timeout"),
+    SDK_EXCEPTION_STOMP_EXECUTE(101003, "stomp command execute failed"),
+    SDK_EXCEPTION_STOMP_TIMEOUT(101004, "stomp command invoke timeout"),
     SDK_STOMP_CONNECTION_BREAKDOWN(101005, "stomp connection is breakdown"),
     SDK_JMS_EXCEPTION(101010, "jms exception"),
     USER_PASSWORD_ISBLANK(101011, "stomp password is blank"),
