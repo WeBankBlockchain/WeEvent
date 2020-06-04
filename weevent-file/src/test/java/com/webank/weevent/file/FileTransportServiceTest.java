@@ -62,7 +62,6 @@ public class FileTransportServiceTest {
      * Method: getChannel()
      */
     @Test
-    @Ignore
     public void testGetChannel() {
         AMOPChannel channel = this.fileTransportService.getChannel();
         Assert.assertNotNull(channel);
@@ -72,7 +71,6 @@ public class FileTransportServiceTest {
      * Method: getFiscoConfig()
      */
     @Test
-    @Ignore
     public void testGetFiscoConfig() {
         FiscoConfig fiscoConfig = this.fileTransportService.getFiscoConfig();
         Assert.assertNotNull(fiscoConfig);
@@ -82,7 +80,6 @@ public class FileTransportServiceTest {
      * Method: getDiskFiles()
      */
     @Test
-    @Ignore
     public void testGetDiskFiles() {
         DiskFiles diskFiles = this.fileTransportService.getDiskFiles();
         Assert.assertNotNull(diskFiles);
@@ -92,7 +89,6 @@ public class FileTransportServiceTest {
      * Method: stats(boolean all, String groupId, String topicName)
      */
     @Test
-    @Ignore
     public void testStats() {
         this.fileTransportService.stats(true, this.fileChunksMeta.getGroupId(), this.fileChunksMeta.getTopic());
         Assert.assertTrue(true);
@@ -102,7 +98,6 @@ public class FileTransportServiceTest {
      * Method: sendSign(FileChunksMeta fileChunksMeta)
      */
     @Test
-    @Ignore
     public void testSendSign() throws BrokerException {
         SendResult sendResult = this.fileTransportService.sendSign(this.fileChunksMeta);
         Assert.assertNotNull(sendResult);
@@ -112,7 +107,6 @@ public class FileTransportServiceTest {
      * Method: prepareReceiveFile(FileChunksMeta fileChunksMeta)
      */
     @Test
-    @Ignore
     public void testPrepareReceiveFile() throws BrokerException {
         FileChunksMeta prepareFileRet = this.fileTransportService.prepareReceiveFile(this.fileChunksMeta);
         Assert.assertNotNull(prepareFileRet);
@@ -122,7 +116,6 @@ public class FileTransportServiceTest {
      * Method: loadFileChunksMeta(String fileId)
      */
     @Test
-    @Ignore
     public void testLoadFileChunksMeta() throws BrokerException {
         FileChunksMeta prepareFileRet = this.fileTransportService.prepareReceiveFile(this.fileChunksMeta);
         Assert.assertNotNull(prepareFileRet);
@@ -134,7 +127,6 @@ public class FileTransportServiceTest {
      * Method: cleanUpReceivedFile(String fileId)
      */
     @Test
-    @Ignore
     public void testCleanUpReceivedFile() throws BrokerException {
         FileChunksMeta prepareFileRet = this.fileTransportService.prepareReceiveFile(this.fileChunksMeta);
         Assert.assertNotNull(prepareFileRet);
@@ -146,7 +138,6 @@ public class FileTransportServiceTest {
      * Method: writeChunkData(FileEvent fileEvent)
      */
     @Test
-    @Ignore
     public void testWriteChunkData() throws BrokerException {
         FileChunksMeta prepareFileRet = this.fileTransportService.prepareReceiveFile(this.fileChunksMeta);
         Assert.assertNotNull(prepareFileRet);

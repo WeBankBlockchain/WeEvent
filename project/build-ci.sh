@@ -33,6 +33,7 @@ function installFisco(){
     #copy file
     cp ${HOME}/fisco/nodes/127.0.0.1/sdk/* ${current_path}/weevent-broker/src/main/resources/
     cp ${HOME}/fisco/nodes/127.0.0.1/sdk/* ${current_path}/weevent-core/src/main/resources/
+    cp ${HOME}/fisco/nodes/127.0.0.1/sdk/* ${current_path}/weevent-file/src/main/resources/
 }
 
 function installZookeeper(){

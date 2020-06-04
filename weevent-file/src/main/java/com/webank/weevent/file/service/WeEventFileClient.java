@@ -187,7 +187,7 @@ public class WeEventFileClient implements IWeEventFileClient {
      *
      * @param topic binding topic
      * @param filePath local file to be send
-     * @return send result, SendResult.SUCCESS if success, and return SendResult.eventId
+     * @return FileChunksMeta
      * @throws BrokerException broker exception
      * @throws IOException IOException
      * @throws InterruptedException InterruptedException

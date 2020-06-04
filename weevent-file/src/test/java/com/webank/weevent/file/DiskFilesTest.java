@@ -1,12 +1,12 @@
 package com.webank.weevent.file;
 
+import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.core.fisco.util.WeEventUtils;
 import com.webank.weevent.file.inner.DiskFiles;
 import com.webank.weevent.file.service.FileChunksMeta;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -159,9 +159,10 @@ public class DiskFilesTest {
      * Method: listNotCompleteFiles(boolean all, String topicName)
      */
     @Test
-    @Ignore
-    public void testListNotCompleteFiles() {
+    public void testListNotCompleteFiles() throws BrokerException {
+        this.diskFiles.createFixedLengthFile(this.fileChunksMeta);
+
         List<FileChunksMeta> fileChunksMetaList = this.diskFiles.listNotCompleteFiles(true, "com.weevent.file");
-        Assert.assertTrue(!fileChunksMetaList.isEmpty());
+        Assert.assertTrue(fileChunksMetaList.isEmpty());
     }
 }
