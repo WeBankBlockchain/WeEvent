@@ -101,6 +101,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
+     * open transport for sender.
+     *
      * @param topic topic name
      */
     public void openTransport4Sender(String topic) {
@@ -110,6 +112,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
+     * open transport for authentication sender.
+     *
      * @param topic topic name
      * @param publicPem public pem inputstream
      * @throws BrokerException exception
@@ -159,6 +163,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
+     * open a channel for authentication sender.
+     *
      * @param topic topic name
      * @param publicPemPath public pem path string
      * @throws BrokerException exception
@@ -209,6 +215,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
+     * open transport for receiver.
+     *
      * @param topic topic name
      * @param fileListener notify interface
      * @throws BrokerException broker exception
@@ -222,6 +230,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
+     * open transport for authentication receiver.
+     *
      * @param topic topic name
      * @param fileListener notify interface
      * @param privatePem private key pem inputstream
@@ -237,6 +247,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
+     * open transport for authentication receiver.
+     *
      * @param topic topic name
      * @param fileListener notify interface
      * @param privatePemPath private key pem path string
@@ -255,6 +267,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
+     * close transport.
+     *
      * @param topic topic name
      */
     public void closeTransport(String topic) {
@@ -271,6 +285,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
+     * query transport status.
+     *
      * @param topicName topic name
      * @return transport status
      */
@@ -306,6 +322,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
+     * list received files.
+     *
      * @param topic topic name
      * @return filechunksmeta  filechunksmeta
      * @throws BrokerException broker exception
@@ -315,7 +333,9 @@ public class WeEventFileClient implements IWeEventFileClient {
         List<File> fileList = new ArrayList<>();
         String filePath = this.localReceivePath + PATH_SEPARATOR + topic;
         File file = new File(filePath);
-        file.mkdirs();
+        if (!file.exists()) {
+            file.mkdirs();
+        }
         File[] files = file.listFiles();
         if (files != null) {
             for (File f : files) {
@@ -332,7 +352,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         DiskFiles diskFiles = new DiskFiles(filePath);
         for (File f : fileList) {
             FileChunksMeta fileChunksMeta = diskFiles.loadFileMeta(f);
-            if (fileChunksMeta.getTopic().equals(topic)) {
+            if (fileChunksMeta.getTopic().equals(topic) && fileChunksMeta.checkChunkFull()) {
                 fileChunksMetaList.add(fileChunksMeta);
             }
         }
@@ -341,6 +361,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
+     * sign a file transport event.
+     *
      * @param fileChunksMeta fileChunksMeta
      * @return send result and eventId
      * @throws BrokerException broker exception
@@ -350,6 +372,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
+     * verify a file transport event.
+     *
      * @param eventId eventId return by sign
      * @param groupId group id
      * @return file and block information
@@ -361,7 +385,7 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
-     * get DiskFiles
+     * get DiskFiles.
      * @return DiskFiles
      */
     public DiskFiles getDiskFiles() {

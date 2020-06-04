@@ -23,11 +23,15 @@ public interface IWeEventFileClient {
     }
 
     /**
+     * open transport for sender.
+     *
      * @param topic topic name
      */
     void openTransport4Sender(String topic);
 
     /**
+     * open transport for authentication sender.
+     *
      * @param topic topic name
      * @param publicPem public pem inputstream
      * @throws BrokerException broker exception
@@ -35,6 +39,8 @@ public interface IWeEventFileClient {
     void openTransport4Sender(String topic, InputStream publicPem) throws BrokerException;
 
     /**
+     * open transport for authentication sender.
+     *
      * @param topic topic name
      * @param publicPem public pem path string
      * @throws BrokerException broker exception
@@ -77,6 +83,8 @@ public interface IWeEventFileClient {
     }
 
     /**
+     * open transport for receiver.
+     *
      * @param topic topic name
      * @param fileListener notify interface
      * @throws BrokerException broker exception
@@ -84,6 +92,8 @@ public interface IWeEventFileClient {
     void openTransport4Receiver(String topic, FileListener fileListener) throws BrokerException;
 
     /**
+     * open transport for authentication receiver.
+     *
      * @param topic topic name
      * @param fileListener notify interface
      * @param privatePem private key pem inputstream
@@ -92,6 +102,8 @@ public interface IWeEventFileClient {
     void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem) throws BrokerException;
 
     /**
+     * open transport for authentication receiver.
+     *
      * @param topic topic name
      * @param fileListener notify interface
      * @param privatePem private key pem path string
@@ -122,19 +134,23 @@ public interface IWeEventFileClient {
     }
 
     /**
-     * invoke unSubTopic
+     * close transport.
      *
      * @param topic topic name
      */
     void closeTransport(String topic);
 
     /**
+     * query transport status.
+     *
      * @param topic topic name
      * @return filetransportstatus
      */
     FileTransportStats status(String topic);
 
     /**
+     * list received files.
+     *
      * @param topic topic name
      * @return filechunksmeta list
      * @throws BrokerException broker exception
@@ -142,6 +158,8 @@ public interface IWeEventFileClient {
     List<FileChunksMeta> listFiles(String topic) throws BrokerException;
 
     /**
+     * sign a file transport event.
+     *
      * @param fileChunksMeta fileChunksMeta
      * @return send result and eventId
      * @throws BrokerException broker exception
@@ -149,6 +167,8 @@ public interface IWeEventFileClient {
     SendResult sign(FileChunksMeta fileChunksMeta) throws BrokerException;
 
     /**
+     * verify a file transport event.
+     *
      * @param eventId eventId return by sign
      * @param groupId group id
      * @return file and block information
@@ -157,7 +177,7 @@ public interface IWeEventFileClient {
     FileChunksMetaPlus verify(String eventId, String groupId) throws BrokerException;
 
     /**
-     * get DiskFiles
+     * get DiskFiles.
      * @return DiskFiles
      */
     DiskFiles getDiskFiles();
