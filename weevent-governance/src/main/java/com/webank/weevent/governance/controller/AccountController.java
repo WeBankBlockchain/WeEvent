@@ -60,7 +60,6 @@ public class AccountController {
         int index = url.indexOf("weevent-governance");
         String emailSendUrl = url.substring(0, index + "weevent-governance".length());
         emailSendUrl = emailSendUrl + "/#/reset?username=" + username;
-        System.out.println(emailSendUrl);
         return accountService.forgetPassword(username, emailSendUrl);
     }
 

@@ -114,6 +114,15 @@ public class BrokerControllerTest extends JUnitTestBase {
         Assert.assertNotNull(contentAsString);
     }
 
+    @Test
+    public void testCheckServerByUrl() throws Exception {
+        String content = "{\"id\":" + this.brokerIdMap.get("brokerId") + ",\"brokerUrl\":\""+ this.brokerUrl + "\"}";
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/checkServer").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
+                .andReturn().getResponse();
+        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        String contentAsString = response.getContentAsString();
+        Assert.assertNotNull(contentAsString);
+    }
 
     //delete broker by id
     public void deleteBroker() throws Exception {

@@ -84,6 +84,16 @@ public class TopicHistoricalTest extends JUnitTestBase {
         Assert.assertEquals(governanceResult.getStatus().toString(), "200");
     }
 
+    @Test
+    public void testInsertHistoricalData() throws Exception {
+        String content = "{\"brokerId\":1,\"groupId\":\"1\",\"weevent\":{\"eventId\":\"1\",\"extensions\":{},\"topic\":\"com.weevent.rest\"}}";
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/historicalData/insertHistoricalData")
+                .contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content)).andReturn();
+        MockHttpServletResponse response = mvcResult.getResponse();
+        String result = response.getContentAsString();
+        Assert.assertNotNull(result);
+    }
+
     //delete broker by id
     public void deleteBroker() throws Exception {
         String content = "{\"id\":" + this.brokerIdMap.get("brokerId") + ",\"userId\":\"1\"}";

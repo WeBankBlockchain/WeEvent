@@ -119,6 +119,28 @@ public class TopicControllerTest extends JUnitTestBase {
         Assert.assertEquals(Boolean.valueOf(contentAsString), true);
     }
 
+    @Test
+    public void testGetTopicInfo() throws Exception {
+        String content = "{\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\",\"topic\":\"com.weevent.rest\",\"groupId\":\"1\"}";
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/topic/openTopic").contentType(MediaType.APPLICATION_JSON_UTF8).content(content).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token))
+                .andReturn().getResponse();
+        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        Assert.assertNotNull(response.getContentAsString());
+        Map jsonObject = JsonHelper.json2Object(response.getContentAsString(), Map.class);
+        Assert.assertEquals(jsonObject.get("status").toString(), "100109");
+    }
+
+    @Test
+    public void testDestinationList() throws Exception {
+        String content = "{\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\"}";
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/topic/destinationList").contentType(MediaType.APPLICATION_JSON_UTF8).content(content).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token))
+                .andReturn().getResponse();
+        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        Assert.assertNotNull(response.getContentAsString());
+        Map jsonObject = JsonHelper.json2Object(response.getContentAsString(), Map.class);
+        Assert.assertEquals(jsonObject.get("code").toString(), "100107");	// PageSize{1-100}
+    }
+
     //delete broker by id
     public void deleteBroker() throws Exception {
         String content = "{\"id\":" + this.brokerIdMap.get("brokerId") + ",\"userId\":\"1\"}";
