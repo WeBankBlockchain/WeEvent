@@ -163,6 +163,6 @@ public class DiskFilesTest {
         this.diskFiles.createFixedLengthFile(this.fileChunksMeta);
 
         List<FileChunksMeta> fileChunksMetaList = this.diskFiles.listNotCompleteFiles(true, "com.weevent.file");
-        Assert.assertTrue(fileChunksMetaList.isEmpty());
+        Assert.assertTrue(!fileChunksMetaList.isEmpty());
     }
 }
