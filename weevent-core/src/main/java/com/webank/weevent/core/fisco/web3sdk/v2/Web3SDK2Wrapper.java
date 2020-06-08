@@ -259,7 +259,11 @@ public class Web3SDK2Wrapper {
             }
 
             return events;
-        } catch (ExecutionException | NullPointerException | InterruptedException | TimeoutException e) { // Web3sdk's rpc return null
+        } catch (TimeoutException e) {
+            log.error("loop block failed due to timeout", e);
+            return null;
+        }
+        catch (ExecutionException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
             log.error("loop block failed due to web3sdk rpc error", e);
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
