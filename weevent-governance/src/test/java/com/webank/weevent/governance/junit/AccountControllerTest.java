@@ -132,7 +132,7 @@ public class AccountControllerTest extends JUnitTestBase {
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         Map jsonObject = JsonHelper.json2Object(response.getContentAsString(), Map.class);
         Assert.assertNotNull(jsonObject);
-        Assert.assertEquals(jsonObject.get("code").toString(), "200");
+        Assert.assertEquals(jsonObject.get("code").toString(), "100102");
     }
 
     @Test
