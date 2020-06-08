@@ -58,9 +58,11 @@ public class Utils {
      */
     public static boolean removeLocalFile(String localFilePath) {
         File localFile = new File(localFilePath);
+
         if (!localFile.exists()) {
             return false;
         }
+
 
         if (localFile.isFile()) {
             return localFile.delete();

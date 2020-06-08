@@ -45,6 +45,17 @@ public class JsonHelper {
     }
 
     /**
+     * convert object to String
+     *
+     * @param object java object
+     * @return json data
+     * @throws BrokerException BrokerException
+     */
+    public static <T> T object2Dto(Object object, TypeReference<T> typeReference) throws BrokerException {
+        return OBJECT_MAPPER.convertValue(object, typeReference);
+    }
+
+    /**
      * convert object to byte[]
      *
      * @param object java object
