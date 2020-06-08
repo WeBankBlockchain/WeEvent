@@ -138,7 +138,7 @@ public class TopicControllerTest extends JUnitTestBase {
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         Assert.assertNotNull(response.getContentAsString());
         Map jsonObject = JsonHelper.json2Object(response.getContentAsString(), Map.class);
-        Assert.assertEquals(jsonObject.get("code").toString(), "100107");	// PageSize{1-100}
+        Assert.assertEquals(jsonObject.get("code").toString(), "100107");    // PageSize{1-100}
     }
 
     //delete broker by id
