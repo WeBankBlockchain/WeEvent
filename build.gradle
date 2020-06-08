@@ -22,7 +22,8 @@ ext {
             pool2       : "2.7.0",
             collections4: "4.1",
             dbcp2       : "2.6.0",
-            commonsIo   : "2.4"
+            commonsIo   : "2.4",
+            fileupload  : "1.4"
     ]
     // org slf4j
     slf4jVersion = "1.7.26"
@@ -115,6 +116,8 @@ allprojects {
     }
 
     repositories {
+        // jms.jar
+        maven { url "http://repository.jboss.org/nexus/content/groups/public/"}
         maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
         // "org.ethereum.solcJ-all-0.4.25"
         // maven { url "https://dl.bintray.com/ethereum/maven/" }

@@ -49,8 +49,8 @@ public enum ErrorCode {
 
     SDK_TLS_INIT_FAILED(101001, "init tsl ca failed"),
     SDK_JMS_INIT_FAILED(101002, "init jms connection factory failed"),
-    SDK_JMS_EXCEPTION_STOMP_EXECUTE(101003, "stomp command execute failed"),
-    SDK_JMS_EXCEPTION_STOMP_TIMEOUT(101004, "stomp command invoke timeout"),
+    SDK_EXCEPTION_STOMP_EXECUTE(101003, "stomp command execute failed"),
+    SDK_EXCEPTION_STOMP_TIMEOUT(101004, "stomp command invoke timeout"),
     SDK_STOMP_CONNECTION_BREAKDOWN(101005, "stomp connection is breakdown"),
     SDK_JMS_EXCEPTION(101010, "jms exception"),
     USER_PASSWORD_ISBLANK(101011, "stomp password is blank"),
@@ -147,6 +147,19 @@ public enum ErrorCode {
     MQTT_CONNECT_CONFLICT(200610, "connect command conflict with specification 3.1.1"),
     MQTT_UNKNOWN_CLIENT_ID(200611, "unknown client id"),
     MQTT_NOT_SUPPORT_QOS2(200612, "do not support qos=2"),
+
+    FTP_INVALID_USERNAME_PASSWD(200700, "invalid username or password"),
+    FTP_INVALID_HOST_PORT(200701, "invalid host or port"),
+    FTP_LOGIN_FAILED(200702, "ftp login failed"),
+    FTP_CLIENT_NOT_CONNECT_TO_SERVER(200703, "ftp client not connected to a server"),
+    FTP_NOT_EXIST_PATH(200704, "ftp not exist file path"),
+    FTP_UPLOAD_FILE_FAILED(200705, "ftp upload file failed"),
+    FTP_CHANGE_WORKING_DIR_FAILED(200706, "ftp change working directory failed"),
+    FTP_MAKE_DIR_FAILED(200707, "make directory failed"),
+    FTP_UNKNOWN_ERROR(200708, "unknown ftp error"),
+    FTP_INVALID_REMOTE_PATH(200709, "remote path invalid"),
+    FTP_RETRIEVE_FILE_FAILED(200710, "remote path invalid"),
+    FTP_UNKNOWN_REMOTE_FILE(200711, "unknown remote file"),
     ;
 
     /**
