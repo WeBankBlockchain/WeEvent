@@ -112,26 +112,6 @@ public class FileControllerTest extends JUnitTestBase {
         Assert.assertEquals(String.valueOf(ErrorCode.TRANSPORT_ALREADY_EXISTS.getCode()), map.get("code"));
     }
 
-//    /**
-//     * test close transport
-//     *
-//     * @throws Exception Exception
-//     */
-//    @Test
-//    public void testCloseTransport() throws Exception {
-//        String content = "{\"brokerId\":\"" + this.brokerIdMap.get("brokerId")
-//                + "\",\"groupId\":\"" + this.defaultGroupId
-//                + "\",\"topicName\":\"" + this.senderTransport + "\"}";
-//
-//        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/file/closeTransport").contentType(MediaType.APPLICATION_JSON_UTF8).content(content).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token)).andReturn();
-//        MockHttpServletResponse response = mvcResult.getResponse();
-//        String result = response.getContentAsString();
-//        Assert.assertNotNull(result);
-//        GovernanceResult governanceResult = JsonHelper.json2Object(result, GovernanceResult.class);
-//        Boolean isSuccess = (Boolean) governanceResult.getData();
-//        Assert.assertTrue(isSuccess);
-//    }
-
     /**
      * test list transport
      *
