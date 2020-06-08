@@ -51,7 +51,6 @@ public class FileController {
     @ResponseBody
     public GovernanceResult openTransport(@RequestBody FileTransportEntity fileTransport) throws GovernanceException {
         log.info("openTransport, fileTransport:{}.", fileTransport.toString());
-
         return this.fileService.openTransport(fileTransport);
     }
 
