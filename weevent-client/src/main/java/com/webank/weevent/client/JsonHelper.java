@@ -45,13 +45,14 @@ public class JsonHelper {
     }
 
     /**
-     * convert object to String
+     * convert object to Dto
      *
      * @param object java object
-     * @return json data
-     * @throws BrokerException BrokerException
+     * @param typeReference typeReference
+     * @param <T> template type
+     * @return class instance
      */
-    public static <T> T object2Dto(Object object, TypeReference<T> typeReference) throws BrokerException {
+    public static <T> T object2Dto(Object object, TypeReference<T> typeReference) {
         return OBJECT_MAPPER.convertValue(object, typeReference);
     }
 
