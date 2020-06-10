@@ -45,18 +45,6 @@ public class JsonHelper {
     }
 
     /**
-     * convert object to Dto
-     *
-     * @param object java object
-     * @param typeReference typeReference
-     * @param <T> template type
-     * @return class instance
-     */
-    public static <T> T object2Dto(Object object, TypeReference<T> typeReference) {
-        return OBJECT_MAPPER.convertValue(object, typeReference);
-    }
-
-    /**
      * convert object to byte[]
      *
      * @param object java object

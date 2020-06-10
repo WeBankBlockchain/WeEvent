@@ -118,6 +118,7 @@ public class FileControllerTest extends JUnitTestBase {
      * @throws Exception Exception
      */
     @Test
+    @SuppressWarnings("unchecked")
     public void testListTransport() throws Exception {
         String url = "/file/listTransport?brokerId=" + brokerIdMap.get("brokerId") + "&groupId=" + this.defaultGroupId;
 
@@ -127,8 +128,7 @@ public class FileControllerTest extends JUnitTestBase {
         Assert.assertNotNull(result);
         GovernanceResult governanceResult = JsonHelper.json2Object(result, GovernanceResult.class);
         Assert.assertEquals(200, (int) governanceResult.getStatus());
-        List<FileTransportEntity> transportList = JsonHelper.object2Dto(governanceResult.getData(), new TypeReference<List<FileTransportEntity>>() {
-        });
+        List<FileTransportEntity> transportList = (List<FileTransportEntity>) governanceResult.getData();
         Assert.assertNotNull(transportList);
         Assert.assertTrue(transportList.size() > 0);
     }
