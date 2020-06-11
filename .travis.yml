@@ -36,6 +36,8 @@ script:
   - /bin/bash project/build-ci.sh
   - chmod +x ./gradlew
   - ./gradlew test
+  - echo "=================================="
+  - cat ${current_path}/weevent-governance/logs/weevent-governance.log | grep "addBroker"
   - ./gradlew check
   - ./gradlew codeCoverageReport
 after_success:
