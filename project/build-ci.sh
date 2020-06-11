@@ -76,8 +76,12 @@ function startBrokerService() {
         sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" broker.sh
     fi
 
+    echo "start broker... "
     # start broker for gateway and so on
     bash broker.sh start
+
+    echo "=================================="
+    cat ${current_path}/weevent-governance/logs/weevent-governance.log | grep "addBroker"
 
     # open mqtt tcp port for junit test
     cd ${current_path}/weevent-broker
