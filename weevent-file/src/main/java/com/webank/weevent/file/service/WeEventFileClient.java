@@ -13,6 +13,7 @@ import com.webank.weevent.file.dto.FileChunksMetaPlus;
 import com.webank.weevent.file.dto.FileChunksMetaStatus;
 import com.webank.weevent.file.dto.FileTransportStats;
 import com.webank.weevent.file.ftpclient.FtpClientService;
+import com.webank.weevent.file.ftpclient.FtpInfo;
 import com.webank.weevent.file.inner.AMOPChannel;
 import com.webank.weevent.file.inner.DiskFiles;
 import com.webank.weevent.file.inner.FileTransportService;
@@ -64,22 +65,6 @@ public class WeEventFileClient implements IWeEventFileClient {
     private int fileChunkSize;
     private FtpInfo ftpInfo;
 
-    public class FtpInfo {
-        private String host;
-        private int port;
-        private String userName;
-        private String passWord;
-        private String ftpReceivePath;
-
-        public FtpInfo(String host, int port, String userName, String passWord, String ftpReceivePath) {
-            this.host = host;
-            this.port = port;
-            this.userName = userName;
-            this.passWord = passWord;
-            this.ftpReceivePath = ftpReceivePath;
-        }
-    }
-
     public WeEventFileClient(String groupId, String localReceivePath, int fileChunkSize, FiscoConfig fiscoConfig) {
         this.groupId = groupId;
         this.localReceivePath = localReceivePath;
@@ -88,10 +73,10 @@ public class WeEventFileClient implements IWeEventFileClient {
         init();
     }
 
-    public WeEventFileClient(String groupId, String localReceivePath, String host, int port, String userName, String passWord, String ftpReceivePath, int fileChunkSize, FiscoConfig fiscoConfig) {
+    public WeEventFileClient(String groupId, String localReceivePath, FtpInfo ftpInfo, int fileChunkSize, FiscoConfig fiscoConfig) {
         this.groupId = groupId;
         this.localReceivePath = localReceivePath;
-        this.ftpInfo = new FtpInfo(host, port, userName, passWord, ftpReceivePath);
+        this.ftpInfo = ftpInfo;
         this.fileChunkSize = fileChunkSize;
         this.config = fiscoConfig;
         init();
@@ -224,7 +209,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         } else {
             // publish ftp file
             FtpClientService ftpClientService = new FtpClientService();
-            ftpClientService.connect(this.ftpInfo.host, this.ftpInfo.port, this.ftpInfo.userName, this.ftpInfo.passWord);
+            ftpClientService.connect(this.ftpInfo.getHost(), this.ftpInfo.getPort(), this.ftpInfo.getUserName(), this.ftpInfo.getPassWord());
             ftpClientService.downLoadFile(filePath, this.localReceivePath);
 
             FileChunksTransport fileChunksTransport = new FileChunksTransport(this.fileTransportService);
@@ -415,7 +400,7 @@ public class WeEventFileClient implements IWeEventFileClient {
      * generate pem key pair.
      *
      * @param filePath output pem file path
-     * @throws BrokerException
+     * @throws BrokerException BrokerException
      */
     public void genPemFile(String filePath) throws BrokerException {
         validateLocalFile(filePath);
@@ -469,14 +454,14 @@ public class WeEventFileClient implements IWeEventFileClient {
             if (this.ftpInfo != null) {
                 try {
                     FtpClientService ftpClientService = new FtpClientService();
-                    ftpClientService.connect(this.ftpInfo.host, this.ftpInfo.port, this.ftpInfo.userName, this.ftpInfo.passWord);
-                    if (StringUtils.isBlank(this.ftpInfo.ftpReceivePath)) {
+                    ftpClientService.connect(this.ftpInfo.getHost(), this.ftpInfo.getPort(), this.ftpInfo.getUserName(), this.ftpInfo.getPassWord());
+                    if (StringUtils.isBlank(this.ftpInfo.getFtpReceivePath())) {
                         log.info("upload file to ftp server, file：{}", fileName);
                         ftpClientService.upLoadFile(this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
                     } else {
                         // specify upload directory
-                        log.info("upload file to ftp server, to path: {}, file：{}", this.ftpInfo.ftpReceivePath, fileName);
-                        ftpClientService.upLoadFile(this.ftpInfo.ftpReceivePath, this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
+                        log.info("upload file to ftp server, to path: {}, file：{}", this.ftpInfo.getFtpReceivePath(), fileName);
+                        ftpClientService.upLoadFile(this.ftpInfo.getFtpReceivePath(), this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
                     }
 
                 } catch (BrokerException e) {

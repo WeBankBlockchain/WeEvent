@@ -98,6 +98,7 @@ public class FileTransportServiceTest {
      * Method: sendSign(FileChunksMeta fileChunksMeta)
      */
     @Test
+    @Ignore
     public void testSendSign() throws BrokerException {
         this.fileTransportService.sendSign(this.fileChunksMeta);
         Assert.assertNotNull(true);

@@ -5,6 +5,7 @@ import com.webank.weevent.client.SendResult;
 import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.file.dto.FileChunksMetaPlus;
 import com.webank.weevent.file.dto.FileTransportStats;
+import com.webank.weevent.file.ftpclient.FtpInfo;
 import com.webank.weevent.file.inner.DiskFiles;
 import com.webank.weevent.file.service.FileChunksMeta;
 import com.webank.weevent.file.service.WeEventFileClient;
@@ -18,8 +19,8 @@ public interface IWeEventFileClient {
         return new WeEventFileClient(groupId, filePath, fileChunkSize, fiscoConfig);
     }
 
-    public static IWeEventFileClient build(String groupId, String filePath, String host, int port, String userName, String passWord, String ftpReceivePath, int fileChunkSize, FiscoConfig fiscoConfig) {
-        return new WeEventFileClient(groupId, filePath, host, port, userName, passWord, ftpReceivePath, fileChunkSize, fiscoConfig);
+    public static IWeEventFileClient build(String groupId, String filePath, FtpInfo ftpInfo, int fileChunkSize, FiscoConfig fiscoConfig) {
+        return new WeEventFileClient(groupId, filePath, ftpInfo, fileChunkSize, fiscoConfig);
     }
 
     /**
@@ -186,7 +187,7 @@ public interface IWeEventFileClient {
      * generate pem key pair.
      *
      * @param filePath output pem file path
-     * @throws BrokerException
+     * @throws BrokerException BrokerException
      */
     void genPemFile(String filePath) throws BrokerException;
 }

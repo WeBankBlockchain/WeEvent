@@ -6,6 +6,7 @@ import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.file.dto.FileChunksMetaPlus;
 import com.webank.weevent.file.dto.FileChunksMetaStatus;
 import com.webank.weevent.file.dto.FileTransportStats;
+import com.webank.weevent.file.ftpclient.FtpInfo;
 import com.webank.weevent.file.inner.DiskFiles;
 import com.webank.weevent.file.service.FileChunksMeta;
 import com.webank.weevent.file.service.WeEventFileClient;
@@ -319,7 +320,8 @@ public class WeEventFileClientTest {
     @Test
     @Ignore
     public void testPublishFileFromFtp() throws Exception {
-        WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.host, this.port, this.userName, this.passWd, "",  this.fileChunkSize, this.fiscoConfig);
+        FtpInfo ftpInfo = new FtpInfo(this.host, this.port, this.userName, this.passWd, "");
+        WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, ftpInfo,  this.fileChunkSize, this.fiscoConfig);
 
         weEventFileClient.openTransport4Sender(topicName);
         FileChunksMeta fileChunksMeta = weEventFileClient.publishFile(this.topicName, "./test/build_chain.sh", true);
@@ -342,7 +344,8 @@ public class WeEventFileClientTest {
             }
         };
 
-        WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.host, this.port, this.userName, this.passWd, "./2020052811", this.fileChunkSize, this.fiscoConfig);
+        FtpInfo ftpInfo = new FtpInfo(this.host, this.port, this.userName, this.passWd, "./2020052811");
+        WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, ftpInfo, this.fileChunkSize, this.fiscoConfig);
         weEventFileClient.openTransport4Receiver(this.topicName, fileListener);
 
         Thread.sleep(1000*60*5);
@@ -351,7 +354,8 @@ public class WeEventFileClientTest {
 
     @Test
     public void test() throws BrokerException {
-        WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.host, this.port, this.userName, this.passWd, "./2020052811", this.fileChunkSize, this.fiscoConfig);
+        FtpInfo ftpInfo = new FtpInfo(this.host, this.port, this.userName, this.passWd, "./2020052811");
+        WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, ftpInfo, this.fileChunkSize, this.fiscoConfig);
 
         weEventFileClient.genPemFile("./logs");
     }
