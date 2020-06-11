@@ -181,4 +181,12 @@ public interface IWeEventFileClient {
      * @return DiskFiles
      */
     DiskFiles getDiskFiles();
+
+    /**
+     * generate pem key pair.
+     *
+     * @param filePath output pem file path
+     * @throws BrokerException
+     */
+    void genPemFile(String filePath) throws BrokerException;
 }

@@ -7,6 +7,7 @@ import com.webank.weevent.file.service.FileChunksMeta;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -159,6 +160,7 @@ public class DiskFilesTest {
      * Method: listNotCompleteFiles(boolean all, String topicName)
      */
     @Test
+    @Ignore
     public void testListNotCompleteFiles() throws BrokerException {
         this.diskFiles.createFixedLengthFile(this.fileChunksMeta);
 

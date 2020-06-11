@@ -140,6 +140,7 @@ public enum ErrorCode {
     FILE_EXIST_CONTEXT(200510, "exist file context"),
     FILE_INIT_VERIFY_FAILED(200511, "initialize PEM for verify topic failed"),
     FILE_EXIST_AND_NOT_ALLOW_OVERWRITE(200512, "The file already exists in the directory, and do not allow overwrite"),
+    FILE_GEN_PEM_BC_FAILED(200513,"generate pem file failed due to bouncy castle exception."),
 
     MQTT_UNKNOWN_COMMAND(200600, "unknown mqtt command"),
     MQTT_ENCODE_FAILED(200601, "encode mqtt message failed"),

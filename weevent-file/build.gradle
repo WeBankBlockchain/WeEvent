@@ -19,6 +19,15 @@ dependencies {
 
     // https://mvnrepository.com/artifact/commons-net/commons-net
     compile group: 'commons-net', name: 'commons-net', version: '3.6'
+
+// https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on
+    compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.60'
+
+    // https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk15on
+    compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.60'
+
+    // https://mvnrepository.com/artifact/org.bouncycastle/bcmail-jdk15on
+    compile group: 'org.bouncycastle', name: 'bcmail-jdk15on', version: '1.60'
 }
 
 

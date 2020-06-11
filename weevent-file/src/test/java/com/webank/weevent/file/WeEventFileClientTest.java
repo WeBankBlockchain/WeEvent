@@ -348,4 +348,11 @@ public class WeEventFileClientTest {
         Thread.sleep(1000*60*5);
         Assert.assertTrue(true);
     }
+
+    @Test
+    public void test() throws BrokerException {
+        WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.host, this.port, this.userName, this.passWd, "./2020052811", this.fileChunkSize, this.fiscoConfig);
+
+        weEventFileClient.genPemFile("./logs");
+    }
 }

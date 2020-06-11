@@ -16,8 +16,12 @@ import com.webank.weevent.file.ftpclient.FtpClientService;
 import com.webank.weevent.file.inner.AMOPChannel;
 import com.webank.weevent.file.inner.DiskFiles;
 import com.webank.weevent.file.inner.FileTransportService;
+import com.webank.weevent.file.inner.PemFile;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.jce.ECNamedCurveTable;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.handler.AMOPVerifyKeyInfo;
 import org.fisco.bcos.channel.handler.AMOPVerifyTopicToKeyInfo;
@@ -28,6 +32,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +49,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WeEventFileClient implements IWeEventFileClient {
 
     private static final String PATH_SEPARATOR = "/";
+    private static final String PRIVATE_KEY_SUFFIX = ".pem";
+    private static final String PUBLIC_KEY_SUFFIX = ".pub.pem";
+    private static final String HEX_HEADER = "0x";
+    private static final String PRIVATE_KEY_DESC = "PRIVATE KEY";
+    private static final String PUBLIC_KEY_DESC = "PUBLIC KEY";
+    private static final String ALGORITHM = "ECDSA";
+    private static final String CURVE_TYPE = "SECP256k1";
+
     private final String groupId;
     private String localReceivePath = "";
     private FiscoConfig config;
@@ -390,6 +409,38 @@ public class WeEventFileClient implements IWeEventFileClient {
      */
     public DiskFiles getDiskFiles() {
         return this.fileTransportService.getDiskFiles();
+    }
+
+    /**
+     * generate pem key pair.
+     *
+     * @param filePath output pem file path
+     * @throws BrokerException
+     */
+    public void genPemFile(String filePath) throws BrokerException {
+        validateLocalFile(filePath);
+        try {
+            BouncyCastleProvider prov = new BouncyCastleProvider();
+            Security.addProvider(prov);
+
+            ECNamedCurveParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(CURVE_TYPE);
+            KeyPairGenerator generator = KeyPairGenerator.getInstance(ALGORITHM, prov.getName());
+            generator.initialize(ecSpec, new SecureRandom());
+            KeyPair pair = generator.generateKeyPair();
+            String pubKey = pair.getPublic().toString();
+            String account = HEX_HEADER + pubKey.substring(pubKey.indexOf("[") + 1, pubKey.indexOf("]")).replace(":", "");
+
+            PemFile privatePemFile = new PemFile(pair.getPrivate(), PRIVATE_KEY_DESC);
+            PemFile publicPemFile = new PemFile(pair.getPublic(), PUBLIC_KEY_DESC);
+
+
+            System.out.println(filePath + PATH_SEPARATOR + account + PRIVATE_KEY_SUFFIX);
+            privatePemFile.write(filePath + PATH_SEPARATOR + account + PRIVATE_KEY_SUFFIX);
+            publicPemFile.write(filePath + PATH_SEPARATOR + account + PUBLIC_KEY_SUFFIX);
+        } catch (IOException | NoSuchProviderException | NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
+            log.error("generate pem file error");
+            throw new BrokerException(ErrorCode.FILE_GEN_PEM_BC_FAILED);
+        }
     }
 
     private static void validateLocalFile(String filePath) throws BrokerException {
