@@ -265,7 +265,7 @@ public class FileControllerTest extends JUnitTestBase {
         String contentAsString = response.getContentAsString();
         Assert.assertEquals(Boolean.valueOf(contentAsString), true);
 
-        url = "/topic/close?brokerId=" + brokerIdMap.get("brokerId") + "&topic=" + this.receiverTransport + "&groupId=0";
+        url = "/topic/close?brokerId=" + brokerIdMap.get("brokerId") + "&topic=" + this.receiverTransport + "&groupId=1";
         response = mockMvc.perform(MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
