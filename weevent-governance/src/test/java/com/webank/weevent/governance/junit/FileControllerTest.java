@@ -258,14 +258,14 @@ public class FileControllerTest extends JUnitTestBase {
     }
 
     private void closeTopic() throws Exception {
-        String url = "/topic/close?brokerId=" + brokerIdMap.get("brokerId") + this.senderTransport + "&groupId=1";
+        String url = "/topic/close?brokerId=" + brokerIdMap.get("brokerId") + "&topic=" + this.senderTransport + "&groupId=1";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         String contentAsString = response.getContentAsString();
         Assert.assertEquals(Boolean.valueOf(contentAsString), true);
 
-        url = "/topic/close?brokerId=" + brokerIdMap.get("brokerId") + this.senderTransport + "&groupId=1";
+        url = "/topic/close?brokerId=" + brokerIdMap.get("brokerId") + "&topic=" + this.senderTransport + "&groupId=1";
         response = mockMvc.perform(MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
