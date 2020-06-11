@@ -37,9 +37,8 @@ script:
   - chmod +x ./gradlew
   - ./gradlew test
   - echo "=================================="
-  - echo "pwd: ${pwd}"
   - ls ${pwd}
-  - cat ${current_path}/weevent-governance/logs/weevent-governance.log | grep "addBroker"
+  - ls weevent-governance/logs/
   - ./gradlew check
   - ./gradlew codeCoverageReport
 after_success:
