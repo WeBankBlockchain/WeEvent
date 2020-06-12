@@ -88,7 +88,6 @@ public class FileService {
         }
 
         this.transportRepository.save(fileTransport);
-        log.info("open transport success, topic:{}, role:{}", fileTransport.getTopicName(), fileTransport.getRole());
         return GovernanceResult.ok(true);
     }
 
