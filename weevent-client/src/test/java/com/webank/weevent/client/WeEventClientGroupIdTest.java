@@ -339,14 +339,6 @@ public class WeEventClientGroupIdTest {
     }
 
     /**
-     * Method: testGetEventGroupId(String eventId,String groupId)
-     */
-    @Test(expected = BrokerException.class)
-    public void testGetEventGroupId() throws Exception {
-        this.weEventClient.getEvent("not exist");
-    }
-
-    /**
      * Method: getEvent(String eventId)
      */
     @Test(expected = BrokerException.class)
