@@ -4,6 +4,8 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -68,11 +70,10 @@ public class FileController {
                                               @RequestParam(name = "topicName") String topicName,
                                               @RequestParam(name = "totalChunks") Integer totalChunks,
                                               @RequestParam(name = "totalSize") long totalSize,
-                                              @RequestParam(name = "chunkNumber") Integer chunkNumber,
                                               @RequestParam(name = "chunkSize") Integer chunkSize,
                                               @RequestParam(name = "filename") String filename) throws GovernanceException {
-        log.info("prepareUploadFile, groupId:{}, fileId:{}, filename:{}, topic:{}, totalSize:{}, totalChunks:{}, chunkNumber:{}",
-                groupId, fileId, filename, topicName, totalSize, totalChunks, chunkNumber);
+        log.info("prepareUploadFile, groupId:{}, fileId:{}, filename:{}, topic:{}, totalSize:{}, totalChunks:{}",
+                groupId, fileId, filename, topicName, totalSize, totalChunks);
 
         return this.fileService.prepareUploadFile(fileId, filename, topicName, groupId, totalSize, chunkSize);
     }
@@ -81,7 +82,8 @@ public class FileController {
     public void download(@RequestParam(name = "groupId") String groupId,
                          @RequestParam(name = "brokerId") Integer brokerId,
                          @RequestParam(name = "fileId") String fileId,
-                         HttpServletResponse response) throws GovernanceException {
+                         HttpServletRequest request,
+                         HttpServletResponse response) throws GovernanceException, UnsupportedEncodingException {
         log.info("download file, groupId:{}, brokerId:{}, fileId:{}.", groupId, brokerId, fileId);
         response.setHeader("content-type", "application/octet-stream");
         response.setContentType("application/octet-stream");
@@ -92,6 +94,19 @@ public class FileController {
             throw new GovernanceException("download file not exist");
         }
         String fileName = downloadFile.substring(downloadFile.lastIndexOf("/") + 1);
+
+        String userAgent = request.getHeader("User-Agent");
+        try {
+            if (userAgent.contains("MSIE") || userAgent.contains("Trident")) {
+                fileName = URLEncoder.encode(fileName, "UTF-8");
+            } else {
+                fileName = new String(fileName.getBytes("UTF-8"), "ISO-8859-1");
+            }
+        } catch (UnsupportedEncodingException e) {
+            log.error("encode fileName error.", e);
+        }
+
+
         response.setHeader("fileName", fileName);
 
         byte[] buffer = new byte[1024];
