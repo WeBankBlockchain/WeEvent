@@ -213,9 +213,7 @@ public class FileControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        log.info("addBroker response:{}", response.getContentAsString());
         GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
-        log.info("addBroker governanceResult.getData:{}", governanceResult.getData());
         brokerIdMap.put("brokerId", (Integer) governanceResult.getData());
         Assert.assertEquals(governanceResult.getStatus().toString(), "200");
     }
