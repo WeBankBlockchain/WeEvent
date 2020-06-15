@@ -194,10 +194,7 @@ public class WeEventClient implements IWeEventClient {
         TopicContent weEventTopic = new TopicContent(topic);
         weEventTopic.setOffset(offset);
         weEventTopic.setGroupId(this.groupId);
-        if (Objects.isNull(extension)) {
-            extension = new HashMap<>();
-        }
-        weEventTopic.setExtension(extension);
+        weEventTopic.setExtension(Objects.isNull(extension) ? new HashMap<>() : extension);
 
         // create subscriber
         String subscribeId = this.transport.stompSubscribe(weEventTopic, listener);
