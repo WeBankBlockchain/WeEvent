@@ -1,6 +1,8 @@
 package com.webank.weevent.client.stomp;
 
 
+import java.util.Map;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,7 +19,7 @@ public class TopicContent {
 
     private String offset;
     private String groupId;
-    private String continueSubscriptionId;
+    private Map<String, String> extension;
     private boolean isFile;
 
     public TopicContent(String topicName) {

@@ -11,7 +11,10 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 import javax.net.ssl.SSLContext;
@@ -170,34 +173,19 @@ public class WeEventClient implements IWeEventClient {
     }
 
     @Override
-    public String subscribe(String topic, String offset, @NonNull EventListener listener) throws BrokerException {
-
-        return dealSubscribe(topic, offset, null, listener);
+    public String subscribe(String topic, String offset, Map<String, String> extension, @NonNull EventListener listener) throws BrokerException {
+        return dealSubscribe(topic, offset, extension, listener);
     }
 
-    @Override
-    public String subscribe(String topic, String offset, String subscriptionId,
-                            @NonNull EventListener listener) throws BrokerException {
-
-        return dealSubscribe(topic, offset, subscriptionId, listener);
-    }
 
     @Override
-    public String subscribe(String[] topics, String offset, @NonNull EventListener listener) throws BrokerException {
-
+    public String subscribe(String[] topics, String offset, Map<String, String> extension, @NonNull EventListener listener) throws BrokerException {
         String topic = StringUtils.join(topics, WeEvent.MULTIPLE_TOPIC_SEPARATOR);
-        return dealSubscribe(topic, offset, "", listener);
-    }
-
-    @Override
-    public String subscribe(String[] topics, String offset, String subscriptionId,
-                            @NonNull EventListener listener) throws BrokerException {
-        String topic = StringUtils.join(topics, WeEvent.MULTIPLE_TOPIC_SEPARATOR);
-        return dealSubscribe(topic, offset, subscriptionId, listener);
+        return dealSubscribe(topic, offset, extension, listener);
     }
 
 
-    private String dealSubscribe(String topic, String offset, String subscriptionId, EventListener
+    private String dealSubscribe(String topic, String offset, Map<String, String> extension, EventListener
             listener) throws BrokerException {
         validateParam(topic);
         validateParam(offset);
@@ -206,9 +194,10 @@ public class WeEventClient implements IWeEventClient {
         TopicContent weEventTopic = new TopicContent(topic);
         weEventTopic.setOffset(offset);
         weEventTopic.setGroupId(this.groupId);
-        if (StringUtils.isNotBlank(subscriptionId)) {
-            weEventTopic.setContinueSubscriptionId(subscriptionId);
+        if (Objects.isNull(extension)) {
+            extension = new HashMap<>();
         }
+        weEventTopic.setExtension(extension);
 
         // create subscriber
         String subscribeId = this.transport.stompSubscribe(weEventTopic, listener);
