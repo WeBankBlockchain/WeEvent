@@ -75,6 +75,10 @@ ext {
     // jackson
     jacksonVersion = "2.9.10.1"
 
+    commonsNetVersion = "3.6"
+
+    bouncycastleVersion = "1.60"
+
 }
 
 buildscript {
