@@ -13,11 +13,17 @@ import com.webank.weevent.file.dto.FileChunksMetaPlus;
 import com.webank.weevent.file.dto.FileChunksMetaStatus;
 import com.webank.weevent.file.dto.FileTransportStats;
 import com.webank.weevent.file.ftpclient.FtpClientService;
+import com.webank.weevent.file.ftpclient.FtpInfo;
 import com.webank.weevent.file.inner.AMOPChannel;
 import com.webank.weevent.file.inner.DiskFiles;
 import com.webank.weevent.file.inner.FileTransportService;
+import com.webank.weevent.file.inner.PemFile;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.jce.ECNamedCurveTable;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.handler.AMOPVerifyKeyInfo;
 import org.fisco.bcos.channel.handler.AMOPVerifyTopicToKeyInfo;
@@ -28,6 +34,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,28 +52,20 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WeEventFileClient implements IWeEventFileClient {
 
     private static final String PATH_SEPARATOR = "/";
+    private static final String PRIVATE_KEY_SUFFIX = ".pem";
+    private static final String PUBLIC_KEY_SUFFIX = ".pub.pem";
+    private static final String HEX_HEADER = "0x";
+    private static final String PRIVATE_KEY_DESC = "PRIVATE KEY";
+    private static final String PUBLIC_KEY_DESC = "PUBLIC KEY";
+    private static final String ALGORITHM = "ECDSA";
+    private static final String CURVE_TYPE = "SECP256k1";
+
     private final String groupId;
     private String localReceivePath = "";
     private FiscoConfig config;
     private FileTransportService fileTransportService;
     private int fileChunkSize;
     private FtpInfo ftpInfo;
-
-    public class FtpInfo {
-        private String host;
-        private int port;
-        private String userName;
-        private String passWord;
-        private String ftpReceivePath;
-
-        public FtpInfo(String host, int port, String userName, String passWord, String ftpReceivePath) {
-            this.host = host;
-            this.port = port;
-            this.userName = userName;
-            this.passWord = passWord;
-            this.ftpReceivePath = ftpReceivePath;
-        }
-    }
 
     public WeEventFileClient(String groupId, String localReceivePath, int fileChunkSize, FiscoConfig fiscoConfig) {
         this.groupId = groupId;
@@ -69,10 +75,10 @@ public class WeEventFileClient implements IWeEventFileClient {
         init();
     }
 
-    public WeEventFileClient(String groupId, String localReceivePath, String host, int port, String userName, String passWord, String ftpReceivePath, int fileChunkSize, FiscoConfig fiscoConfig) {
+    public WeEventFileClient(String groupId, String localReceivePath, FtpInfo ftpInfo, int fileChunkSize, FiscoConfig fiscoConfig) {
         this.groupId = groupId;
         this.localReceivePath = localReceivePath;
-        this.ftpInfo = new FtpInfo(host, port, userName, passWord, ftpReceivePath);
+        this.ftpInfo = ftpInfo;
         this.fileChunkSize = fileChunkSize;
         this.config = fiscoConfig;
         init();
@@ -101,6 +107,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
+     * open transport for sender.
+     *
      * @param topic topic name
      */
     public void openTransport4Sender(String topic) {
@@ -110,11 +118,28 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
+     * open transport for authentication sender.
+     *
      * @param topic topic name
      * @param publicPem public pem inputstream
      * @throws BrokerException exception
      */
     public void openTransport4Sender(String topic, InputStream publicPem) throws BrokerException {
+        // publicPem is public key
+        try {
+            if (publicPem == null) {
+                log.error("public key pem inputstream is null.");
+                throw new BrokerException(ErrorCode.PARAM_ISNULL);
+            }
+            String publicKey = IOUtils.toString(publicPem, StandardCharsets.UTF_8);
+            if (!publicKey.contains(PUBLIC_KEY_DESC)) {
+                log.error("inputStream is not a public key.");
+                throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
+            }
+        } catch (IOException e) {
+            log.error("public key inputStream is invalid.");
+            throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
+        }
 
         // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
@@ -159,12 +184,18 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
+     * open a channel for authentication sender.
+     *
      * @param topic topic name
      * @param publicPemPath public pem path string
      * @throws BrokerException exception
      * @throws IOException exception
      */
     public void openTransport4Sender(String topic, String publicPemPath) throws BrokerException, IOException {
+        if (StringUtils.isBlank(publicPemPath)) {
+            log.error("public key pem path is blank.");
+            throw new BrokerException(ErrorCode.PARAM_ISNULL);
+        }
         File file = new File(publicPemPath);
         if (!file.isFile()) {
             log.error("public key file path string isn't a file.");
@@ -181,7 +212,7 @@ public class WeEventFileClient implements IWeEventFileClient {
      *
      * @param topic binding topic
      * @param filePath local file to be send
-     * @return send result, SendResult.SUCCESS if success, and return SendResult.eventId
+     * @return FileChunksMeta
      * @throws BrokerException broker exception
      * @throws IOException IOException
      * @throws InterruptedException InterruptedException
@@ -199,7 +230,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         } else {
             // publish ftp file
             FtpClientService ftpClientService = new FtpClientService();
-            ftpClientService.connect(this.ftpInfo.host, this.ftpInfo.port, this.ftpInfo.userName, this.ftpInfo.passWord);
+            ftpClientService.connect(this.ftpInfo.getHost(), this.ftpInfo.getPort(), this.ftpInfo.getUserName(), this.ftpInfo.getPassWord());
             ftpClientService.downLoadFile(filePath, this.localReceivePath);
 
             FileChunksTransport fileChunksTransport = new FileChunksTransport(this.fileTransportService);
@@ -209,6 +240,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
+     * open transport for receiver.
+     *
      * @param topic topic name
      * @param fileListener notify interface
      * @throws BrokerException broker exception
@@ -222,12 +255,30 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
+     * open transport for authentication receiver.
+     *
      * @param topic topic name
      * @param fileListener notify interface
      * @param privatePem private key pem inputstream
      * @throws BrokerException broker exception
      */
     public void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem) throws BrokerException {
+        // privatePem is private  key
+        try {
+            if (privatePem == null) {
+                log.error("private key pem inputstream is null.");
+                throw new BrokerException(ErrorCode.PARAM_ISNULL);
+            }
+            String publicKey = IOUtils.toString(privatePem, StandardCharsets.UTF_8);
+            if (!publicKey.contains(PRIVATE_KEY_DESC)) {
+                log.error("inputStream is not a private key.");
+                throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
+            }
+        } catch (IOException e) {
+            log.error("private key inputStream is invalid.");
+            throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
+        }
+
         // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
 
@@ -237,6 +288,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
+     * open transport for authentication receiver.
+     *
      * @param topic topic name
      * @param fileListener notify interface
      * @param privatePemPath private key pem path string
@@ -244,6 +297,10 @@ public class WeEventFileClient implements IWeEventFileClient {
      * @throws BrokerException InterruptedException
      */
     public void openTransport4Receiver(String topic, FileListener fileListener, String privatePemPath) throws IOException, BrokerException {
+        if (StringUtils.isBlank(privatePemPath)) {
+            log.error("private key pem path is blank.");
+            throw new BrokerException(ErrorCode.PARAM_ISNULL);
+        }
         File file = new File(privatePemPath);
         if (!file.isFile()) {
             log.error("private key file path string isn't a file.");
@@ -255,6 +312,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
+     * close transport.
+     *
      * @param topic topic name
      */
     public void closeTransport(String topic) {
@@ -271,6 +330,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
+     * query transport status.
+     *
      * @param topicName topic name
      * @return transport status
      */
@@ -306,6 +367,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
+     * list received files.
+     *
      * @param topic topic name
      * @return filechunksmeta  filechunksmeta
      * @throws BrokerException broker exception
@@ -315,7 +378,9 @@ public class WeEventFileClient implements IWeEventFileClient {
         List<File> fileList = new ArrayList<>();
         String filePath = this.localReceivePath + PATH_SEPARATOR + topic;
         File file = new File(filePath);
-        file.mkdirs();
+        if (!file.exists()) {
+            file.mkdirs();
+        }
         File[] files = file.listFiles();
         if (files != null) {
             for (File f : files) {
@@ -332,7 +397,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         DiskFiles diskFiles = new DiskFiles(filePath);
         for (File f : fileList) {
             FileChunksMeta fileChunksMeta = diskFiles.loadFileMeta(f);
-            if (fileChunksMeta.getTopic().equals(topic)) {
+            if (fileChunksMeta.getTopic().equals(topic) && fileChunksMeta.checkChunkFull()) {
                 fileChunksMetaList.add(fileChunksMeta);
             }
         }
@@ -341,6 +406,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
+     * sign a file transport event.
+     *
      * @param fileChunksMeta fileChunksMeta
      * @return send result and eventId
      * @throws BrokerException broker exception
@@ -350,6 +417,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
+     * verify a file transport event.
+     *
      * @param eventId eventId return by sign
      * @param groupId group id
      * @return file and block information
@@ -361,11 +430,43 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     /**
-     * get DiskFiles
+     * get DiskFiles.
      * @return DiskFiles
      */
     public DiskFiles getDiskFiles() {
         return this.fileTransportService.getDiskFiles();
+    }
+
+    /**
+     * generate pem key pair.
+     *
+     * @param filePath output pem file path
+     * @throws BrokerException BrokerException
+     */
+    public void genPemFile(String filePath) throws BrokerException {
+        validateLocalFile(filePath);
+        try {
+            BouncyCastleProvider prov = new BouncyCastleProvider();
+            Security.addProvider(prov);
+
+            ECNamedCurveParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(CURVE_TYPE);
+            KeyPairGenerator generator = KeyPairGenerator.getInstance(ALGORITHM, prov.getName());
+            generator.initialize(ecSpec, new SecureRandom());
+            KeyPair pair = generator.generateKeyPair();
+            String pubKey = pair.getPublic().toString();
+            String account = HEX_HEADER + pubKey.substring(pubKey.indexOf("[") + 1, pubKey.indexOf("]")).replace(":", "");
+
+            PemFile privatePemFile = new PemFile(pair.getPrivate(), PRIVATE_KEY_DESC);
+            PemFile publicPemFile = new PemFile(pair.getPublic(), PUBLIC_KEY_DESC);
+
+
+            System.out.println(filePath + PATH_SEPARATOR + account + PRIVATE_KEY_SUFFIX);
+            privatePemFile.write(filePath + PATH_SEPARATOR + account + PRIVATE_KEY_SUFFIX);
+            publicPemFile.write(filePath + PATH_SEPARATOR + account + PUBLIC_KEY_SUFFIX);
+        } catch (IOException | NoSuchProviderException | NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
+            log.error("generate pem file error");
+            throw new BrokerException(ErrorCode.FILE_GEN_PEM_BC_FAILED);
+        }
     }
 
     private static void validateLocalFile(String filePath) throws BrokerException {
@@ -394,14 +495,14 @@ public class WeEventFileClient implements IWeEventFileClient {
             if (this.ftpInfo != null) {
                 try {
                     FtpClientService ftpClientService = new FtpClientService();
-                    ftpClientService.connect(this.ftpInfo.host, this.ftpInfo.port, this.ftpInfo.userName, this.ftpInfo.passWord);
-                    if (StringUtils.isBlank(this.ftpInfo.ftpReceivePath)) {
+                    ftpClientService.connect(this.ftpInfo.getHost(), this.ftpInfo.getPort(), this.ftpInfo.getUserName(), this.ftpInfo.getPassWord());
+                    if (StringUtils.isBlank(this.ftpInfo.getFtpReceivePath())) {
                         log.info("upload file to ftp server, file：{}", fileName);
                         ftpClientService.upLoadFile(this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
                     } else {
                         // specify upload directory
-                        log.info("upload file to ftp server, to path: {}, file：{}", this.ftpInfo.ftpReceivePath, fileName);
-                        ftpClientService.upLoadFile(this.ftpInfo.ftpReceivePath, this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
+                        log.info("upload file to ftp server, to path: {}, file：{}", this.ftpInfo.getFtpReceivePath(), fileName);
+                        ftpClientService.upLoadFile(this.ftpInfo.getFtpReceivePath(), this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
                     }
 
                 } catch (BrokerException e) {
