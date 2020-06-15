@@ -19,6 +19,7 @@ import com.webank.weevent.file.inner.DiskFiles;
 import com.webank.weevent.file.inner.FileTransportService;
 import com.webank.weevent.file.inner.PemFile;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -33,6 +34,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -123,6 +125,17 @@ public class WeEventFileClient implements IWeEventFileClient {
      * @throws BrokerException exception
      */
     public void openTransport4Sender(String topic, InputStream publicPem) throws BrokerException {
+        // publicPem is public key
+        try {
+            String publicKey = IOUtils.toString(publicPem, StandardCharsets.UTF_8);
+            if (!publicKey.contains(PUBLIC_KEY_DESC)) {
+                log.error("inputStream is not a public key.");
+                throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
+            }
+        } catch (IOException e) {
+            log.error("public key inputStream is invalid.");
+            throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
+        }
 
         // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
@@ -242,6 +255,18 @@ public class WeEventFileClient implements IWeEventFileClient {
      * @throws BrokerException broker exception
      */
     public void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem) throws BrokerException {
+        // privatePem is private  key
+        try {
+            String publicKey = IOUtils.toString(privatePem, StandardCharsets.UTF_8);
+            if (!publicKey.contains(PRIVATE_KEY_DESC)) {
+                log.error("inputStream is not a private key.");
+                throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
+            }
+        } catch (IOException e) {
+            log.error("private key inputStream is invalid.");
+            throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
+        }
+
         // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
 
