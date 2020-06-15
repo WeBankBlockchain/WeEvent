@@ -127,6 +127,10 @@ public class WeEventFileClient implements IWeEventFileClient {
     public void openTransport4Sender(String topic, InputStream publicPem) throws BrokerException {
         // publicPem is public key
         try {
+            if (publicPem == null) {
+                log.error("public key pem inputstream is null.");
+                throw new BrokerException(ErrorCode.PARAM_ISNULL);
+            }
             String publicKey = IOUtils.toString(publicPem, StandardCharsets.UTF_8);
             if (!publicKey.contains(PUBLIC_KEY_DESC)) {
                 log.error("inputStream is not a public key.");
@@ -188,6 +192,10 @@ public class WeEventFileClient implements IWeEventFileClient {
      * @throws IOException exception
      */
     public void openTransport4Sender(String topic, String publicPemPath) throws BrokerException, IOException {
+        if (StringUtils.isBlank(publicPemPath)) {
+            log.error("public key pem path is blank.");
+            throw new BrokerException(ErrorCode.PARAM_ISNULL);
+        }
         File file = new File(publicPemPath);
         if (!file.isFile()) {
             log.error("public key file path string isn't a file.");
@@ -257,6 +265,10 @@ public class WeEventFileClient implements IWeEventFileClient {
     public void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem) throws BrokerException {
         // privatePem is private  key
         try {
+            if (privatePem == null) {
+                log.error("private key pem inputstream is null.");
+                throw new BrokerException(ErrorCode.PARAM_ISNULL);
+            }
             String publicKey = IOUtils.toString(privatePem, StandardCharsets.UTF_8);
             if (!publicKey.contains(PRIVATE_KEY_DESC)) {
                 log.error("inputStream is not a private key.");
@@ -285,6 +297,10 @@ public class WeEventFileClient implements IWeEventFileClient {
      * @throws BrokerException InterruptedException
      */
     public void openTransport4Receiver(String topic, FileListener fileListener, String privatePemPath) throws IOException, BrokerException {
+        if (StringUtils.isBlank(privatePemPath)) {
+            log.error("private key pem path is blank.");
+            throw new BrokerException(ErrorCode.PARAM_ISNULL);
+        }
         File file = new File(privatePemPath);
         if (!file.isFile()) {
             log.error("private key file path string isn't a file.");
