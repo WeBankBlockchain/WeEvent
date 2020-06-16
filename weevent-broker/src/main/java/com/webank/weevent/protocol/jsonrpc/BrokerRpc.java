@@ -14,7 +14,6 @@ import com.webank.weevent.sdk.TopicPage;
 import com.webank.weevent.sdk.WeEvent;
 import com.webank.weevent.sdk.jsonrpc.IBrokerRpc;
 
-import com.alibaba.fastjson.JSON;
 import com.googlecode.jsonrpc4j.JsonRpcParam;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +59,7 @@ public class BrokerRpc implements IBrokerRpc {
                               @JsonRpcParam(value = "groupId") String groupId,
                               @JsonRpcParam(value = "content") byte[] content,
                               @JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException {
-        log.info("jsonrpc protocol publish interface topic:{} groupId:{} contentLength:{} extensions:{}", topic, groupId, content.length, JSON.toJSONString(extensions));
+        log.info("jsonrpc protocol publish interface topic:{} groupId:{} contentLength:{}", topic, groupId, content.length);
         return this.producer.publish(new WeEvent(topic, content, extensions), groupId);
     }
 
@@ -68,7 +67,7 @@ public class BrokerRpc implements IBrokerRpc {
     public SendResult publish(@JsonRpcParam(value = "topic") String topic,
                               @JsonRpcParam(value = "content") byte[] content,
                               @JsonRpcParam(value = "extensions") Map<String, String> extensions) throws BrokerException {
-        log.info("jsonrpc protocol publish interface topic:{} contentLength:{} extensions:{}", topic, content.length, JSON.toJSONString(extensions));
+        log.info("jsonrpc protocol publish interface topic:{} contentLength:{}", topic, content.length);
         return this.producer.publish(new WeEvent(topic, content, extensions), WeEventConstants.DEFAULT_GROUP_ID);
     }
 

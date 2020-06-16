@@ -3,6 +3,7 @@ package com.webank.weevent.broker.plugin;
 
 import java.util.Map;
 
+import com.webank.weevent.broker.fisco.dto.SubscriptionInfo;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.WeEvent;
 
@@ -173,5 +174,5 @@ public interface IConsumer extends IEventTopic {
      *
      * @return boolean true if success
      */
-    Map<String, Object> listSubscription();
+    Map<String, SubscriptionInfo> listSubscription();
 }

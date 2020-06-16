@@ -328,8 +328,8 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     }
 
     @Override
-    public synchronized Map<String, Object> listSubscription() {
-        Map<String, Object> subscribeIdList = new HashMap<>();
+    public synchronized Map<String, SubscriptionInfo> listSubscription() {
+        Map<String, SubscriptionInfo> subscribeIdList = new HashMap<>();
         for (Map.Entry<String, Subscription> entry : this.subscriptions.entrySet()) {
             Subscription subscription = entry.getValue();
             SubscriptionInfo subscriptionInfo = new SubscriptionInfo();
