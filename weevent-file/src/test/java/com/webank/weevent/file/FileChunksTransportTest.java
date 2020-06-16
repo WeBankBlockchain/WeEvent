@@ -1,6 +1,5 @@
 package com.webank.weevent.file;
 
-import com.webank.weevent.client.SendResult;
 import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.file.service.FileChunksMeta;
 import com.webank.weevent.file.service.FileChunksTransport;

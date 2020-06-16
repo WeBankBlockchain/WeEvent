@@ -5,6 +5,8 @@ import com.webank.weevent.client.SendResult;
 import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.file.dto.FileChunksMetaPlus;
 import com.webank.weevent.file.dto.FileTransportStats;
+import com.webank.weevent.file.ftpclient.FtpInfo;
+import com.webank.weevent.file.inner.DiskFiles;
 import com.webank.weevent.file.service.FileChunksMeta;
 import com.webank.weevent.file.service.WeEventFileClient;
 
@@ -17,12 +19,20 @@ public interface IWeEventFileClient {
         return new WeEventFileClient(groupId, filePath, fileChunkSize, fiscoConfig);
     }
 
+    public static IWeEventFileClient build(String groupId, String filePath, FtpInfo ftpInfo, int fileChunkSize, FiscoConfig fiscoConfig) {
+        return new WeEventFileClient(groupId, filePath, ftpInfo, fileChunkSize, fiscoConfig);
+    }
+
     /**
+     * open transport for sender.
+     *
      * @param topic topic name
      */
     void openTransport4Sender(String topic);
 
     /**
+     * open transport for authentication sender.
+     *
      * @param topic topic name
      * @param publicPem public pem inputstream
      * @throws BrokerException broker exception
@@ -30,6 +40,8 @@ public interface IWeEventFileClient {
     void openTransport4Sender(String topic, InputStream publicPem) throws BrokerException;
 
     /**
+     * open transport for authentication sender.
+     *
      * @param topic topic name
      * @param publicPem public pem path string
      * @throws BrokerException broker exception
@@ -52,6 +64,28 @@ public interface IWeEventFileClient {
     FileChunksMeta publishFile(String topic, String localFile, boolean overwrite) throws BrokerException, IOException, InterruptedException;
 
     /**
+     * Interface for event notify callback
+     */
+    interface EventListener {
+        /**
+         * Called while new event arrived.
+         *
+         * @param topic topic name
+         * @param fileName file name
+         */
+        void onEvent(String topic, String fileName);
+
+        /**
+         * Called while raise exception.
+         *
+         * @param e the e
+         */
+        void onException(Throwable e);
+    }
+
+    /**
+     * open transport for receiver.
+     *
      * @param topic topic name
      * @param fileListener notify interface
      * @throws BrokerException broker exception
@@ -59,6 +93,8 @@ public interface IWeEventFileClient {
     void openTransport4Receiver(String topic, FileListener fileListener) throws BrokerException;
 
     /**
+     * open transport for authentication receiver.
+     *
      * @param topic topic name
      * @param fileListener notify interface
      * @param privatePem private key pem inputstream
@@ -67,6 +103,8 @@ public interface IWeEventFileClient {
     void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem) throws BrokerException;
 
     /**
+     * open transport for authentication receiver.
+     *
      * @param topic topic name
      * @param fileListener notify interface
      * @param privatePem private key pem path string
@@ -97,19 +135,23 @@ public interface IWeEventFileClient {
     }
 
     /**
-     * invoke unSubTopic
+     * close transport.
      *
      * @param topic topic name
      */
     void closeTransport(String topic);
 
     /**
+     * query transport status.
+     *
      * @param topic topic name
      * @return filetransportstatus
      */
     FileTransportStats status(String topic);
 
     /**
+     * list received files.
+     *
      * @param topic topic name
      * @return filechunksmeta list
      * @throws BrokerException broker exception
@@ -117,6 +159,8 @@ public interface IWeEventFileClient {
     List<FileChunksMeta> listFiles(String topic) throws BrokerException;
 
     /**
+     * sign a file transport event.
+     *
      * @param fileChunksMeta fileChunksMeta
      * @return send result and eventId
      * @throws BrokerException broker exception
@@ -124,10 +168,26 @@ public interface IWeEventFileClient {
     SendResult sign(FileChunksMeta fileChunksMeta) throws BrokerException;
 
     /**
+     * verify a file transport event.
+     *
      * @param eventId eventId return by sign
      * @param groupId group id
      * @return file and block information
      * @throws BrokerException broker exception
      */
     FileChunksMetaPlus verify(String eventId, String groupId) throws BrokerException;
+
+    /**
+     * get DiskFiles.
+     * @return DiskFiles
+     */
+    DiskFiles getDiskFiles();
+
+    /**
+     * generate pem key pair.
+     *
+     * @param filePath output pem file path
+     * @throws BrokerException BrokerException
+     */
+    void genPemFile(String filePath) throws BrokerException;
 }

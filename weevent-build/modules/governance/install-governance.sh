@@ -6,6 +6,12 @@ function governance_setup() {
     #create governance list
     mkdir -p ${out_path}
     cp -r ./* ${out_path}/
+
+    install_top_path=$(dirname ${out_path})
+    cp ${install_top_path}/broker/conf/ca.crt ${out_path}/conf/
+    cp ${install_top_path}/broker/conf/sdk.* ${out_path}/conf/
+    cp ${install_top_path}/broker/conf/fisco.properties ${out_path}/conf/
+
     rm -f ${out_path}/install-governance.sh
 
     application_properties=${out_path}/conf/application-prod.properties

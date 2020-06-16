@@ -43,8 +43,8 @@ public class WeEventConnectionFactory implements ConnectionFactory, QueueConnect
     // Client id
     private String clientID;
 
-    // stomp timeout
-    private int timeout = 10;
+    // client timeout
+    private int timeout = 5000;
 
     public static JMSException error2JMSException(ErrorCode errorCode) {
         return new JMSException(errorCode.getCodeDesc(), String.valueOf(errorCode.getCode()));

@@ -105,7 +105,7 @@ public class WeEventClientGroupIdTest {
     }
 
     /**
-     * test empty content、extensions
+     * test empty content and extensions
      */
     @Test(expected = BrokerException.class)
     public void testPublish001() throws Exception {
@@ -336,14 +336,6 @@ public class WeEventClientGroupIdTest {
     public void testState() throws Exception {
         TopicInfo topicInfo = this.weEventClient.state(this.topicName);
         Assert.assertEquals(topicInfo.getTopicName(), this.topicName);
-    }
-
-    /**
-     * Method: testGetEventGroupId(String eventId,String groupId)
-     */
-    @Test(expected = BrokerException.class)
-    public void testGetEventGroupId() throws Exception {
-        this.weEventClient.getEvent("not exist");
     }
 
     /**

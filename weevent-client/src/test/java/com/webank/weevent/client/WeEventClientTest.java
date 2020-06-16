@@ -1,15 +1,14 @@
 package com.webank.weevent.client;
 
-import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -26,6 +25,7 @@ public class WeEventClientTest {
 
     private Map<String, String> extensions = new HashMap<>();
     private final long FIVE_SECOND= 5000L;
+    private final long transactionTimeout = 10;
 
     @Rule
     public TestName testName = new TestName();
@@ -52,12 +52,23 @@ public class WeEventClientTest {
 
 
     /**
-     * Method: publish( WeEvent weEvent)
+     * Method: publish(WeEvent weEvent)
      */
     @Test
     public void testPublish() throws Exception {
         WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
         SendResult sendResult = this.weEventClient.publish(weEvent);
+        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
+        Assert.assertFalse(sendResult.getEventId().isEmpty());
+    }
+
+    /**
+     * Method: publishAsync(WeEvent weEvent)
+     */
+    @Test
+    public void testPublishAsync() throws Exception {
+        WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
+        SendResult sendResult = this.weEventClient.publishAsync(weEvent).get(this.transactionTimeout, TimeUnit.SECONDS);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
         Assert.assertFalse(sendResult.getEventId().isEmpty());
     }
@@ -76,7 +87,7 @@ public class WeEventClientTest {
 
             @Override
             public void onException(Throwable e) {
-                log.error("onException", e);
+                log.error("onException:", e);
                 Assert.fail();
             }
         });
@@ -155,13 +166,5 @@ public class WeEventClientTest {
     public void testState() throws Exception {
         TopicInfo topicInfo = this.weEventClient.state(this.topicName);
         Assert.assertEquals(topicInfo.getTopicName(), this.topicName);
-    }
-
-    /**
-     * Method: getEvent(String eventId)
-     */
-    @Test(expected = BrokerException.class)
-    public void testGetEvent() throws Exception {
-        this.weEventClient.getEvent("not exist");
     }
 }

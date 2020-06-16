@@ -28,9 +28,9 @@ import com.webank.weevent.processor.model.CEPRule;
 import com.fasterxml.jackson.core.type.TypeReference;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.dbcp2.BasicDataSourceFactory;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 @Slf4j
@@ -132,7 +132,6 @@ public class CommonUtil {
 
 
     public static List<String> getKeys(String objJson) {
-        List<String> keys = new ArrayList<>();
         try {
             Map<String, Object> map = JsonHelper.json2Object(objJson, new TypeReference<Map<String, Object>>() {
             });

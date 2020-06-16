@@ -2,9 +2,10 @@ println("Notice: current gradle version is " + gradle.gradleVersion + ", WeEvent
 
 ext {
     // spring
-    spring5Version = "5.1.0.RELEASE"
+    springVersion = "5.1.15.RELEASE"
+    springMqttVersion = "5.1.11.RELEASE"
     // data.spring-data-commons
-    springDataCommonsVersion = "2.1.10.RELEASE"
+    springBootVersion = "2.1.14.RELEASE"
     // spring cloud
     springCloudVersion = "Greenwich.SR5"
 
@@ -22,16 +23,17 @@ ext {
             pool2       : "2.7.0",
             collections4: "4.1",
             dbcp2       : "2.6.0",
-            commonsIo   : "2.4"
+            commonsIo   : "2.4",
+            fileupload  : "1.4"
     ]
     // org slf4j
-    slf4jVersion = "1.7.26"
+    slf4jVersion = "1.7.30"
     // logging.log4j
-    log4jVersion = "2.11.1"
+    log4jVersion = "2.13.3"
 
     // org.fisco-bcos.web3sdk
     web3sdkVersion = [
-            fisco: "2.2.3"
+            fisco: "2.2.4"
     ]
     // fabric
     fabricVersion = "1.4.4"
@@ -43,7 +45,7 @@ ext {
     // junit
     junitVersion = "4.12"
     // netty-all
-    nettyVersion = "4.1.15.Final"
+    nettyVersion = "4.1.44.Final"
     // jsonrpc
     jsonrpc4jVersion = "1.5.3"
     // JMS
@@ -59,7 +61,7 @@ ext {
     // jsoup
     jsoupVersion = "1.9.2"
     // fastjson
-    fastjsonVersion = "1.2.60"
+    fastjsonVersion = "1.2.70"
     // quartz
     quartzVersion = "2.3.0"
     // Java-WebSocket
@@ -72,6 +74,10 @@ ext {
     jmeterVersion = "5.0"
     // jackson
     jacksonVersion = "2.9.10.1"
+
+    commonsNetVersion = "3.6"
+
+    bouncycastleVersion = "1.60"
 
 }
 
@@ -87,7 +93,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.10.RELEASE")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.14.RELEASE")
         classpath("gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.1.0")
     }
 }
@@ -98,7 +104,7 @@ List lombok = [
 
 allprojects {
     group "com.webank.weevent"
-    version "1.2.0"
+    version "1.3.0"
 
     apply plugin: "java"
     apply plugin: "maven"
@@ -115,6 +121,8 @@ allprojects {
     }
 
     repositories {
+        // jms.jar
+        maven { url "http://repository.jboss.org/nexus/content/groups/public/"}
         maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
         // "org.ethereum.solcJ-all-0.4.25"
         // maven { url "https://dl.bintray.com/ethereum/maven/" }
@@ -159,7 +167,7 @@ allprojects {
         resolutionStrategy {
             // fix security bug
             force "com.alibaba:fastjson:${fastjsonVersion}"
-            // force use netty 4.1
+            // force use netty
             force "io.netty:netty-all:${nettyVersion}"
             force "org.apache.zookeeper:zookeeper:${zookeeperVersion}"
         }

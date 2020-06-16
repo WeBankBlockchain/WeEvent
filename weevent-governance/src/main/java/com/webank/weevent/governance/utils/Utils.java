@@ -1,7 +1,11 @@
 package com.webank.weevent.governance.utils;
 
 
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 import org.springframework.cloud.client.ServiceInstance;
@@ -33,5 +37,39 @@ public class Utils {
         }
         ServiceInstance serviceInstance = serviceInstances.get(new Random().nextInt(serviceInstances.size()));
         return serviceInstance.getUri().toString();
+    }
+
+    /**
+     * Date to string
+     *
+     * @param dateDate date
+     * @return dateStr
+     */
+    public static String dateToStr(Date dateDate) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return formatter.format(dateDate);
+    }
+
+    /**
+     * remove directory and file
+     *
+     * @param localFilePath filePath
+     * @return remove result
+     */
+    public static boolean removeLocalFile(String localFilePath) {
+        File localFile = new File(localFilePath);
+        if (!localFile.exists()) {
+            return false;
+        }
+
+        if (localFile.isFile()) {
+            return localFile.delete();
+        } else {
+            for (File file : Objects.requireNonNull(localFile.listFiles())) {
+                removeLocalFile(file.getAbsolutePath());
+            }
+        }
+
+        return localFile.delete();
     }
 }

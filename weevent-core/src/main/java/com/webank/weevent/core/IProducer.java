@@ -34,7 +34,7 @@ public interface IProducer extends IEventTopic {
     boolean shutdownProducer();
 
     /**
-     * Publish a event in asynchronous way.
+     * Publish an event in asynchronous way.
      *
      * @param event the event
      * @param groupId group id
@@ -44,7 +44,7 @@ public interface IProducer extends IEventTopic {
     CompletableFuture<SendResult> publish(WeEvent event, String groupId) throws BrokerException;
 
     /**
-     * Publish a event in synchronize way
+     * Publish an event in synchronize way
      *
      * @param event the event
      * @param groupId group id
