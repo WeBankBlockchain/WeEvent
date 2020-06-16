@@ -13,9 +13,10 @@ coverage:
       default:
         enabled: no
         if_not_found: success
-codecov:
-  ignore:
-    - "weevent-jmeter/**/*"  # ignore folders and all its contents
+
+ignore:
+  - "./weevent-jmeter/**/*"  # ignore folders and all its contents
+  - "./weevent-core/src/main/java/com/webank/weevent/core/fabric/**/*"  # ignore folders
 
 comment:
   layout: "reach, diff, flags, files"
