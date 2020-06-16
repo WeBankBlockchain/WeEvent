@@ -183,7 +183,7 @@ module.exports = {
     'delete': '删除',
     'creatRuleRemark': '数据流转类型的规则可以对设备上报的数据进行简单处理，并将处理后的数据流转到其他Topic，支持JSON数据格式',
     'dataType': '数据格式',
-    'enterPayload': '请填写规则的主要内容',
+    'enterPayload': '请填写规则的主要内容,例如:{"name":"kevin","age": 20}',
     'commit': '提交',
     'errorType': '格式错误',
     'isStart': '已启动',
@@ -340,6 +340,7 @@ module.exports = {
     'fileName': '文件名',
     'downloadFile': '下载',
     'downloadList': '下载列表',
-    'fileuploadList': '当前传输列表'
+    'fileuploadList': '当前传输列表',
+    'fileCover': '该通道已设置覆盖同文件'
   }
 }

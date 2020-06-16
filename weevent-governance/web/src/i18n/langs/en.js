@@ -183,7 +183,7 @@ module.exports = {
     'read': 'View',
     'delete': 'Delete',
     'dataType': 'Data type',
-    'enterPayload': 'Please input event payload samples',
+    'enterPayload': 'Please input event payload sample,Examples:{"name":"kevin","age": 20}',
     'commit': 'Commit',
     'errorType': 'Invalid format',
     'isStart': 'Started',
@@ -338,6 +338,7 @@ module.exports = {
     'fileName': 'File Name',
     'downloadFile': 'Download',
     'downloadList': 'Download List',
-    'fileuploadList': 'File Upload List'
+    'fileuploadList': 'File Upload List',
+    'fileCover': 'Cover File'
   }
 }

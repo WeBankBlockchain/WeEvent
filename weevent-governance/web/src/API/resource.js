@@ -172,6 +172,9 @@ class ResoruceService extends BaseModel {
   fileStatus (data) {
     return this.request(api.fileStatus, data)
   }
+  checkUpload (data) {
+    return this.request(api.checkUpload, data)
+  }
 }
 
 export default new ResoruceService()
