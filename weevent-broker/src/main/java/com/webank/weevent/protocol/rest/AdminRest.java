@@ -1,15 +1,17 @@
 package com.webank.weevent.protocol.rest;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.webank.weevent.BrokerApplication;
+import com.webank.weevent.broker.fisco.dto.SubscriptionInfo;
 import com.webank.weevent.broker.fisco.util.SystemInfoUtils;
 import com.webank.weevent.broker.plugin.IConsumer;
-import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.JsonHelper;
 
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -38,12 +40,12 @@ public class AdminRest extends RestHA {
     }
 
     @RequestMapping(path = "/listSubscription")
-    public Map<String, Object> listSubscription() throws BrokerException {
+    public Map<String, List<SubscriptionInfo>> listSubscription() {
         String url = "";
-        Map<String, Object> nodesInfo = new HashMap<>();
+        Map<String, List<SubscriptionInfo>> nodesInfo = new HashMap<>();
         if (this.masterJob.getClient() == null) {
             nodesInfo.put(SystemInfoUtils.getCurrentIp() + ":" + SystemInfoUtils.getCurrentPort(),
-                    this.consumer.listSubscription());
+                    new ArrayList<>(this.consumer.listSubscription().values()));
         } else {
             try {
                 List<String> ipList = this.masterJob.getClient().getChildren().forPath(BrokerApplication.weEventConfig.getZookeeperPath() + "/nodes");
@@ -56,8 +58,10 @@ public class AdminRest extends RestHA {
                     log.info("url:{}", url);
 
                     ResponseEntity<String> rsp = rest.getForEntity(url, String.class);
-                    log.debug("innerListSubscription:{}", JSON.parse(rsp.getBody()));
-                    nodesInfo.put(new String(ip), JSON.parse(rsp.getBody()));
+                    Map<String, SubscriptionInfo> data = JsonHelper.json2Object(rsp.getBody(), new TypeReference<Map<String, SubscriptionInfo>>() {
+                    });
+                    log.debug("innerListSubscription:{}", data);
+                    nodesInfo.put(new String(ip), new ArrayList<>(data.values()));
                 }
             } catch (Exception e) {
                 log.error(e.toString());
@@ -69,7 +73,7 @@ public class AdminRest extends RestHA {
     }
 
     @RequestMapping(path = "/innerListSubscription")
-    public Map<String, Object> innerListSubscription() throws BrokerException {
+    public Map<String, SubscriptionInfo> innerListSubscription() {
         return this.consumer.listSubscription();
     }
 }

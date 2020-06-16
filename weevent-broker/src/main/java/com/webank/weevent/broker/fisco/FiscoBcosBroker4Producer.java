@@ -5,10 +5,10 @@ import java.nio.charset.StandardCharsets;
 import com.webank.weevent.broker.fisco.util.ParamCheckUtils;
 import com.webank.weevent.broker.plugin.IProducer;
 import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.JsonHelper;
 import com.webank.weevent.sdk.SendResult;
 import com.webank.weevent.sdk.WeEvent;
 
-import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -38,7 +38,7 @@ public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IPr
         SendResult sendResult = fiscoBcosDelegate.publishEvent(event.getTopic(),
                 Long.parseLong(groupId),
                 new String(event.getContent(), StandardCharsets.UTF_8),
-                JSON.toJSONString(event.getExtensions()));
+                JsonHelper.object2Json(event.getExtensions()));
 
         log.info("publish result: {}", sendResult);
         return sendResult;
