@@ -7,17 +7,17 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.0.RELEASE")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.14.RELEASE")
     }
 }
 
 List lombok = [
-        "org.projectlombok:lombok:1.16.14"
+        "org.projectlombok:lombok:1.18.12"
 ]
 
 allprojects {
     group "com.webank.weevent"
-    version "1.0.0"
+    version "1.0.1"
 
     apply plugin: "java"
     apply plugin: "maven"
@@ -31,7 +31,8 @@ allprojects {
 
     repositories {
         maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
-        maven { url "https://dl.bintray.com/ethereum/maven/" }
+        // "org.ethereum.solcJ-all-0.4.25"
+        // maven { url "https://dl.bintray.com/ethereum/maven/" }
         // maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         mavenLocal()
         mavenCentral()
@@ -71,9 +72,9 @@ allprojects {
 
         resolutionStrategy {
             // fix security bug
-            force "com.alibaba:fastjson:1.2.58"
-            // force use netty 4.1
-            force "io.netty:netty-all:4.1.15.Final"
+            force "com.alibaba:fastjson:1.2.70"
+            // force use netty
+            force "io.netty:netty-all:4.1.44.Final"
         }
     }
 
@@ -87,7 +88,7 @@ allprojects {
         implementation("org.apache.commons:commons-collections4:4.1")
 
         // self4j logger
-        implementation("org.slf4j:slf4j-api:1.7.26")
+        implementation("org.slf4j:slf4j-api:1.7.30")
 
         // junit test
         testImplementation("junit:junit:4.12")
