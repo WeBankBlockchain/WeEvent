@@ -19,6 +19,8 @@ ignore:
   - "weevent-core/src/main/java/com/webank/weevent/core/fabric/FabricBroker4Consumer.java"  # ignore fabric code
   - "weevent-core/src/main/java/com/webank/weevent/core/fabric/FabricBroker4Producer.java"  # ignore fabric code
   - "weevent-core/src/main/java/com/webank/weevent/core/fabric/FabricTopicAdmin.java"  # ignore fabric code
+  - "weevent-core/src/main/java/com/webank/weevent/core/FabricInstance.java"  # ignore fabric code
+
 
 comment:
   layout: "reach, diff, flags, files"
