@@ -3,7 +3,7 @@ coverage:
     project:
       default:
         target: 30%
-        threshold: null
+        threshold: 0%
         if_not_found: success
     patch:
       default:
@@ -15,8 +15,8 @@ coverage:
         if_not_found: success
 
 ignore:
-  - "./weevent-jmeter/**/*"  # ignore folders and all its contents
-  - "./weevent-core/src/main/java/com/webank/weevent/core/fabric/**/*"  # ignore folders
+  - "weevent-jmeter/src/main/java/com/webank/weevent/jmeter/**/*"  # ignore folders and all its contents
+  - "weevent-core/src/main/java/com/webank/weevent/core/fabric/**/*"  # ignore folders
 
 comment:
   layout: "reach, diff, flags, files"
