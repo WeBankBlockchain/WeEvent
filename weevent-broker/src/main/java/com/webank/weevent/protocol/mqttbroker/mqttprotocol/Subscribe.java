@@ -12,9 +12,9 @@ import com.webank.weevent.protocol.mqttbroker.store.ISessionStore;
 import com.webank.weevent.protocol.mqttbroker.store.ISubscribeStore;
 import com.webank.weevent.protocol.mqttbroker.store.dto.SubscribeStore;
 import com.webank.weevent.sdk.BrokerException;
+import com.webank.weevent.sdk.JsonHelper;
 import com.webank.weevent.sdk.WeEvent;
 
-import com.alibaba.fastjson.JSON;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttFixedHeader;
@@ -79,8 +79,12 @@ public class Subscribe {
                             @Override
                             public void onEvent(String subscriptionId, WeEvent event) {
                                 log.info("consumer onEvent, subscriptionId: {} event: {}", subscriptionId, event);
-                                // send to subscribe
-                                sendPublishMessage(topicFilter, mqttQoS, JSON.toJSON(event).toString().getBytes(), false, false);
+                                try {
+                                    // send to subscribe
+                                    sendPublishMessage(topicFilter, mqttQoS, JsonHelper.object2JsonBytes(event), false, false);
+                                } catch (BrokerException e) {
+                                    log.error("send publish message failed:{}", e.getMessage());
+                                }
                             }
 
                             @Override

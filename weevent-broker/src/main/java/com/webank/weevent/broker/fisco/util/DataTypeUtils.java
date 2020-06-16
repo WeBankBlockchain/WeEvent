@@ -7,8 +7,9 @@ import java.util.Map;
 import com.webank.weevent.broker.fisco.constant.WeEventConstants;
 import com.webank.weevent.sdk.BrokerException;
 import com.webank.weevent.sdk.ErrorCode;
+import com.webank.weevent.sdk.JsonHelper;
 
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.util.encoders.Hex;
@@ -127,7 +128,8 @@ public final class DataTypeUtils {
         }
 
         try {
-            return (Map<String, String>) JSON.parse(json);
+            return JsonHelper.json2Object(json, new TypeReference<Map<String, String>>() {
+            });
         } catch (Exception e) {
             log.error("parse extensions failed");
             return null;
