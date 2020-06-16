@@ -16,7 +16,9 @@ coverage:
 
 ignore:
   - "weevent-jmeter/src/main/java/com/webank/weevent/jmeter/**/*"  # ignore folders and all its contents
-  - "weevent-core/src/main/java/com/webank/weevent/core/fabric/**/*"  # ignore folders
+  - "weevent-core/src/main/java/com/webank/weevent/core/fabric/FabricBroker4Consumer.java"  # ignore fabric code
+  - "weevent-core/src/main/java/com/webank/weevent/core/fabric/FabricBroker4Producer.java"  # ignore fabric code
+  - "weevent-core/src/main/java/com/webank/weevent/core/fabric/FabricTopicAdmin.java"  # ignore fabric code
 
 comment:
   layout: "reach, diff, flags, files"
