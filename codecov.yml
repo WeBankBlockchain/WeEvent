@@ -17,17 +17,6 @@ coverage:
 ignore:
   - "weevent-jmeter/src/main/java/com/webank/weevent/jmeter/**/*"  # ignore folders and all its contents
   - "weevent-core/src/main/java/com/webank/weevent/core/fabric/**/*"  # ignore fabric code
-  - "weevent-core/src/main/java/com/webank/weevent/core/fabric/FabricBroker4Consumer.java"  # ignore fabric code
-  - "weevent-core/src/main/java/com/webank/weevent/core/fabric/FabricBroker4Producer.java"  # ignore fabric code
-  - "weevent-core/src/main/java/com/webank/weevent/core/fabric/FabricTopicAdmin.java"  # ignore fabric code
-  - "weevent-core/src/main/java/com/webank/weevent/core/FabricInstance.java"  # ignore fabric code
-  - "weevent-core/src/main/java/com/webank/weevent/core/fabric/sdk/Fabric.java"  # ignore fabric code
-  - "weevent-core/src/main/java/com/webank/weevent/core/fabric/sdk/FabricDelegate.java"  # ignore fabric code
-  - "weevent-core/src/main/java/com/webank/weevent/core/fabric/sdk/FabricSDKWrapper.java"  # ignore fabric code
-  - "weevent-core/src/main/java/com/webank/weevent/core/fabric/util/FabricDeployContractUtil.java"  # ignore fabric code
-  - "weevent-core/src/main/java/com/webank/weevent/core/fabric/util/FabricUpdateContractUtil.java"  # ignore fabric code
-  - "weevent-core/src/main/java/com/webank/weevent/core/fabric/util/FabricUser.java"  # ignore fabric code
-  - "weevent-core/src/main/java/com/webank/weevent/core/fabric/dto/TransactionInfo.java"  # ignore fabric code
 
 
 comment:
