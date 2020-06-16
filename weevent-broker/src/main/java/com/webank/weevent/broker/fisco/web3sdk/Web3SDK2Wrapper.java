@@ -303,13 +303,13 @@ public class Web3SDK2Wrapper {
             }
 
             return events;
-        } catch (ExecutionException | TimeoutException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
-            // Web3sdk send async will arise InterruptedException
-            log.error("loop block failed due to ExecutionException|TimeoutException|NullPointerException|InterruptedException", e);
+        } catch (TimeoutException e) {
+            log.warn("loop block failed due to web3sdk rpc timeout");
             return null;
-        } catch (RuntimeException e) {
-            log.error("loop block failed due to RuntimeException", e);
-            throw new BrokerException("loop block failed due to RuntimeException", e);
+        } catch (ExecutionException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
+            // Web3sdk send async will arise InterruptedException
+            log.error("loop block failed due to due to web3sdk rpc error", e);
+            throw new BrokerException("loop block failed due to web3sdk rpc error", e);
         }
     }
 }
