@@ -330,6 +330,8 @@ module.exports = {
     'privateKey': 'Private Key',
     'isDelete': 'Delete Topic',
     'deleteTopic': 'Sure to delete?',
+    'uploadList': 'Upload List',
+    'noFile': 'No Data',
     'overwrite': 'Cover Files?',
     'transpoartList': 'Transpoart List',
     'certified': 'Certified',
