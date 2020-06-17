@@ -466,7 +466,8 @@ export default {
       xhr.onload = function (e) {
         if (this.status === 200) {
           let blob = this.response
-          const filename = this.getResponseHeader('filename')
+          const f = this.getResponseHeader('filename')
+          const filename = decodeURI(f)
           if (window.navigator.msSaveOrOpenBlob) {
             navigator.msSaveBlob(blob, filename)
           } else {
