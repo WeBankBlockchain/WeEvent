@@ -1,6 +1,9 @@
 package com.webank.weevent.broker.sample;
 
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.IWeEventClient;
 import com.webank.weevent.client.SendResult;
@@ -19,6 +22,7 @@ public class JavaSDK {
         try {
             // get client
             IWeEventClient client = IWeEventClient.builder().brokerUrl("http://localhost:7000/weevent-broker").groupId(WeEvent.DEFAULT_GROUP_ID).build();
+            Map<String, String> ext = new HashMap<>();
 
             // ensure topic exist
             String topicName = "com.weevent.test";
@@ -30,7 +34,7 @@ public class JavaSDK {
             System.out.println(sendResult);
 
             // subscribe topic
-            String subscriptionId = client.subscribe(topicName, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
+            String subscriptionId = client.subscribe(topicName, WeEvent.OFFSET_LAST, ext, new IWeEventClient.EventListener() {
                 @Override
                 public void onEvent(WeEvent event) {
                     System.out.println("received event: " + event);

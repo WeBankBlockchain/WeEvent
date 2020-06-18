@@ -30,6 +30,7 @@ public enum ErrorCode {
     FILE_CHUNK_DATA_IS_NULL(102008, "the upload file chunk data is null"),
     FILE_UPLOAD_FAILED(102009, "file upload failed"),
     FILE_DOWNLOAD_ERROR(102011, "file download failed"),
+    GENERATE_PEM_FAILED(102012, "generate pem key failed"),
 
     PARSE_CHUNK_REQUEST_ERROR(102020, "parse chunk request error"),
     ;
