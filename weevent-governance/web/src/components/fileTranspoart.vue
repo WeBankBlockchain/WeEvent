@@ -352,12 +352,12 @@ export default {
           let list = res.data.data
           let newList = []
           list.forEach(item => {
-            let e = {
-              'fileName': item.file.fileName,
-              'fileSize': item.file.fileSize,
-              'fileMd5': item.file.fileMd5,
-              'process': item.process,
-              'speed': item.speed
+            const e = {
+              fileName: item.file.fileName,
+              fileSize: item.file.fileSize,
+              fileMd5: item.file.fileMd5,
+              process: item.process,
+              speed: item.speed
             }
             newList.push(e)
           })
