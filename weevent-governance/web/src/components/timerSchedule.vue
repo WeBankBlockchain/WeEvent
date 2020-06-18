@@ -179,10 +179,10 @@ export default {
       let vm = this
       vm.$refs.form.validate((valid) => {
         let data = {
-          'schedulerName': this.form.schedulerName,
-          'ruleDatabaseId': this.form.ruleDatabaseId,
-          'periodParams': this.form.periodParams,
-          'parsingSql': this.form.parsingSql
+          schedulerName: this.form.schedulerName,
+          ruleDatabaseId: this.form.ruleDatabaseId,
+          periodParams: this.form.periodParams,
+          parsingSql: this.form.parsingSql
         }
         if (valid) {
           if (vm.type === 1) {

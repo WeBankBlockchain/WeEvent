@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Message } from 'element-ui'
+import {Message} from 'element-ui'
 import qs from 'qs'
 import store from '../store'
 import i18n from '../i18n/index'
