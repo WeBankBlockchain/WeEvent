@@ -24,7 +24,7 @@ import org.junit.rules.TestName;
 public class WeEventClientTest {
 
     private Map<String, String> extensions = new HashMap<>();
-    private final long FIVE_SECOND= 5000L;
+    private final long FIVE_SECOND = 5000L;
     private final long transactionTimeout = 10;
 
     @Rule
@@ -76,7 +76,7 @@ public class WeEventClientTest {
     @Test
     public void testSubscribe() throws Exception {
         // create subscriber
-        String subscribeId = this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
+        String subscribeId = this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, extensions, new IWeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
                 log.info("onEvent: {}", event.toString());
