@@ -127,21 +127,27 @@ public class AccountControllerTest extends JUnitTestBase {
 
     @Test
     public void testForgetPassword() throws Exception {
+        log.info("============================================================================================");
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/user/forget?username=zjy05").contentType(MediaType.APPLICATION_JSON_UTF8)).andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
+        log.info("response:{}", response.getStatus());
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         Map jsonObject = JsonHelper.json2Object(response.getContentAsString(), Map.class);
+        log.info("response.getContentAsString:{}", response.getContentAsString());
         Assert.assertNotNull(jsonObject);
         Assert.assertEquals(jsonObject.get("code").toString(), "100102");
     }
 
     @Test
     public void testGetUserId() throws Exception {
+        log.info("============================================================================================");
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/user/getUserId?username=zjy05").contentType(MediaType.APPLICATION_JSON_UTF8)).andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
+        log.info("response:{}", response.getStatus());
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         Map jsonObject = JsonHelper.json2Object(response.getContentAsString(), Map.class);
         Assert.assertNotNull(jsonObject);
+        log.info("response.getContentAsString:{}", response.getContentAsString());
         Assert.assertEquals(jsonObject.get("status").toString(), "200");
     }
 
