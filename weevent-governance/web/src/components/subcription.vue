@@ -120,16 +120,16 @@ export default {
                 }
               } else {
                 const item = {
-                  'ip': key,
-                  'interfaceType': '—',
-                  'notifyingEventCount': '—',
-                  'notifyTimeStamp': '—',
-                  'subscribeId': '—',
-                  'topicName': '—',
-                  'notifiedEventCount': '—',
-                  'childs': 0,
-                  'remoteIp': '—',
-                  'createTimeStamp': '—'
+                  ip: key,
+                  interfaceType: '—',
+                  notifyingEventCount: '—',
+                  notifyTimeStamp: '—',
+                  subscribeId: '—',
+                  topicName: '—',
+                  notifiedEventCount: '—',
+                  childs: 0,
+                  remoteIp: '—',
+                  createTimeStamp: '—'
                 }
                 list.push(item)
               }
