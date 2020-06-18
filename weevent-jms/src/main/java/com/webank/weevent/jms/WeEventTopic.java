@@ -1,6 +1,8 @@
 package com.webank.weevent.jms;
 
 
+import java.util.Map;
+
 import javax.jms.Topic;
 
 /**
@@ -14,7 +16,7 @@ public class WeEventTopic implements Topic {
 
     private String offset;
     private String groupId;
-    private String continueSubscriptionId;
+    private Map<String, String> extension;
     private boolean isFile;
 
     public WeEventTopic(String topicName) {
@@ -42,12 +44,12 @@ public class WeEventTopic implements Topic {
         this.groupId = groupId;
     }
 
-    public String getContinueSubscriptionId() {
-        return this.continueSubscriptionId;
+    public Map<String, String> getExtension() {
+        return this.extension;
     }
 
-    public void setContinueSubscriptionId(String continueSubscriptionId) {
-        this.continueSubscriptionId = continueSubscriptionId;
+    public void setExtension(Map<String, String> extension) {
+        this.extension = extension;
     }
 
     public boolean isFile() {
