@@ -215,14 +215,14 @@ export default {
       let vm = this
       vm.$refs.form.validate((valid) => {
         let data = {
-          'datasourceName': vm.form.datasourceName,
-          'databaseType': vm.form.databaseType,
-          'username': vm.form.username,
-          'password': vm.form.password,
-          'optionalParameter': vm.form.optionalParameter,
-          'databaseIp': vm.form.databaseIp,
-          'databasePort': vm.form.databasePort,
-          'databaseName': vm.form.databaseName
+          datasourceName: vm.form.datasourceName,
+          databaseType: vm.form.databaseType,
+          username: vm.form.username,
+          password: vm.form.password,
+          optionalParameter: vm.form.optionalParameter,
+          databaseIp: vm.form.databaseIp,
+          databasePort: vm.form.databasePort,
+          databaseName: vm.form.databaseName
         }
         if (valid) {
           if (vm.type === 1) {
@@ -289,7 +289,7 @@ export default {
         type: 'warning'
       }).then(() => {
         let data = {
-          'id': e.id
+          id: e.id
         }
         API.dbDelete(data).then(res => {
           if (res.data.status === 200) {

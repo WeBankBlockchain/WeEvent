@@ -111,7 +111,7 @@ export default {
       localStorage.setItem('groupId', e)
     },
     getServer () {
-      let brokerId = localStorage.getItem('brokerId')
+      const brokerId = localStorage.getItem('brokerId')
       let vm = this
       API.getServer('').then(res => {
         if (res.status === 200) {
