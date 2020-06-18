@@ -2,6 +2,8 @@ package com.webank.weevent.jmeter.consumer;
 
 
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.IWeEventClient;
@@ -68,11 +70,12 @@ public class WeEventConsumer extends AbstractJavaSamplerClient {
     // Jmeter runs once runTest to calculate a thing, it will run repeatedly
     @Override
     public SampleResult runTest(JavaSamplerContext context) {
+        Map<String, String> ext = new HashMap<>();
         SampleResult result = new SampleResult();
         result.setSampleLabel("consumer");
         try {
             result.sampleStart();
-            String subscribeId = this.weEventClient.subscribe(this.topic, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
+            String subscribeId = this.weEventClient.subscribe(this.topic, WeEvent.OFFSET_LAST, ext, new IWeEventClient.EventListener() {
                 @Override
                 public void onEvent(WeEvent event) {
                     getNewLogger().info("eventId,{}", event.getEventId());

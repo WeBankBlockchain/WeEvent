@@ -242,6 +242,7 @@ public class FileService {
     }
 
     public GovernanceResult listFile(String groupId, Integer brokerId, String topic) throws GovernanceException {
+
         IWeEventFileClient fileClient = getIWeEventFileClient(groupId, brokerId);
         try {
             List<FileChunksMeta> fileChunksMetas = fileClient.listFiles(topic);
@@ -312,6 +313,16 @@ public class FileService {
         this.fileChunksMap.put(fileId, new Pair<>(fileChunksMeta, diskFiles));
 
         return GovernanceResult.ok(chunkUploadedList(fileChunksMeta));
+    }
+
+    public void genPemFile(String groupId, Integer brokerId, String pemPath) throws GovernanceException {
+        IWeEventFileClient fileClient = getIWeEventFileClient(groupId, brokerId);
+        try {
+            fileClient.genPemFile(pemPath);
+        } catch (BrokerException e) {
+            log.error("genPemFile error, pemPath:{}.", pemPath, e);
+            throw new GovernanceException(ErrorCode.GENERATE_PEM_FAILED);
+        }
     }
 
     private IWeEventFileClient buildIWeEventFileClient(String groupId, Integer brokerId) {
@@ -443,5 +454,4 @@ public class FileService {
         }
         return uploadedChunks;
     }
-
 }

@@ -3,6 +3,7 @@ package com.webank.weevent.processor.mq;
 import java.nio.charset.StandardCharsets;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingDeque;
@@ -137,6 +138,7 @@ public class CEPRuleMQ {
     private static void subscribeMsg(CEPRule rule, Map<String, CEPRule> ruleMap, IWeEventClient clientOld, String subId) {
         try {
             IWeEventClient client;
+            Map<String, String> ext = new HashMap<>();
 
             if (null == clientOld) {
                 client = getClient(rule);
@@ -150,14 +152,15 @@ public class CEPRuleMQ {
             ExtendEventLister eventLister = new ExtendEventLister(client, ruleMap, statisticWeEvent);
             if (!StringUtils.isEmpty(subId)) {
                 log.info("update use old subId:{}", subId);
+                ext.put(WeEvent.WeEvent_SubscriptionId, subId);
 
                 // if empty,get the new
                 offSet = StringUtils.isEmpty(rule.getOffSet()) ? WeEvent.OFFSET_LAST : rule.getOffSet();
-                subscriptionId = client.subscribe(rule.getFromDestination(), offSet, subId, eventLister);
+                subscriptionId = client.subscribe(rule.getFromDestination(), offSet, ext, eventLister);
             } else {
                 // if empty,get the new
                 offSet = StringUtils.isEmpty(rule.getOffSet()) ? WeEvent.OFFSET_LAST : rule.getOffSet();
-                subscriptionId = client.subscribe(rule.getFromDestination(), offSet, eventLister);
+                subscriptionId = client.subscribe(rule.getFromDestination(), offSet, ext, eventLister);
             }
 
             log.info("subscriptionIdMap:{},rule.getId() :{} getFromDestination:{}--->subscriptionId:{}", subscriptionIdMap.size(), rule.getId(), rule.getFromDestination(), subscriptionId);

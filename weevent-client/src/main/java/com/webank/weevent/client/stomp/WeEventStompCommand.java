@@ -91,8 +91,14 @@ public class WeEventStompCommand {
         }
 
         // keep the original SubscriptionId
-        if (!StringUtils.isBlank(topic.getContinueSubscriptionId())) {
-            accessor.setNativeHeader(WeEvent.WeEvent_SubscriptionId, topic.getContinueSubscriptionId());
+        if (topic.getExtension().containsKey(WeEvent.WeEvent_SubscriptionId)) {
+            accessor.setNativeHeader(WeEvent.WeEvent_SubscriptionId, topic.getExtension().get(WeEvent.WeEvent_SubscriptionId));
+        }
+        if (topic.getExtension().containsKey(WeEvent.WeEvent_TAG)) {
+            accessor.setNativeHeader(WeEvent.WeEvent_TAG, topic.getExtension().get(WeEvent.WeEvent_TAG));
+        }
+        if (topic.getExtension().containsKey(WeEvent.WeEvent_EPHEMERAL)) {
+            accessor.setNativeHeader(WeEvent.WeEvent_EPHEMERAL, topic.getExtension().get(WeEvent.WeEvent_EPHEMERAL));
         }
         return encodeRaw(accessor);
     }
