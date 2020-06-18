@@ -85,10 +85,13 @@
     </el-table-column>
     <el-table-column
       :label="$t('file.options')"
-      width='200'
+      width='300'
       >
       <template  slot-scope="scope">
         <el-button size='mini' type='primary' @click.stop='fileOption(scope.row)' v-show="scope.row.role || scope.row.role === '1'">{{scope.row.role === '1' ? $t('file.upload') : $t('file.download')}}</el-button>
+        <el-tooltip v-show="scope.row.overWrite === '1'" class="item" effect="dark" :content="$t('file.fileCover')" placement="top">
+          <i class='el-icon-warning' style='font-size:18px;color:#006cff'></i>
+        </el-tooltip>
         <a class='el-icon-delete-solid' style='font-size:18px;margin-left:10px;cursor:pointer' @click.stop='deleteItem(scope.row)'></a>
       </template>
     </el-table-column>
@@ -262,14 +265,16 @@ export default {
             privateKey: ''
           }
           if (data.role === '1') {
+            data.publicKey = this.form.publicKey
+            data.privateKey = ''
             this.$nextTick(fun => {
               this.form.privateKey = ''
-              data.publicKey = this.form.publicKey
             })
           } else {
+            data.privateKey = this.form.privateKey
+            data.publicKey = ''
             this.$nextTick(fun => {
               this.form.publicKey = ''
-              data.privateKey = this.form.privateKey
             })
           }
           API.openTransport(data).then(res => {
@@ -347,12 +352,12 @@ export default {
           let list = res.data.data
           let newList = []
           list.forEach(item => {
-            let e = {
-              'fileName': item.file.fileName,
-              'fileSize': item.file.fileSize,
-              'fileMd5': item.file.fileMd5,
-              'process': item.process,
-              'speed': item.speed
+            const e = {
+              fileName: item.file.fileName,
+              fileSize: item.file.fileSize,
+              fileMd5: item.file.fileMd5,
+              process: item.process,
+              speed: item.speed
             }
             newList.push(e)
           })
@@ -442,8 +447,12 @@ export default {
       }
       API.topicList(data).then(res => {
         if (res.status === 200) {
-          vm.total = res.data.total
-          vm.listTopic = [].concat(res.data.topicInfoList)
+          if (res.data.total) {
+            vm.total = res.data.total
+          }
+          if (res.data.topicInfoList) {
+            vm.listTopic = [].concat(res.data.topicInfoList)
+          }
         }
       })
     },
@@ -457,7 +466,8 @@ export default {
       xhr.onload = function (e) {
         if (this.status === 200) {
           let blob = this.response
-          const filename = this.getResponseHeader('filename')
+          const f = this.getResponseHeader('filename')
+          const filename = decodeURI(f)
           if (window.navigator.msSaveOrOpenBlob) {
             navigator.msSaveBlob(blob, filename)
           } else {

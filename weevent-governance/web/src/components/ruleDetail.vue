@@ -198,7 +198,7 @@ export default {
         if (!value) {
           callback(new Error(this.$t('rule.enterTableName')))
         } else {
-          let list = this.dbList
+          const list = this.dbList
           let id = this.sqlOption.ruleDataBaseId
           list.forEach(e => {
             if (e.id === id) {
@@ -413,7 +413,7 @@ export default {
       if (!x[y].children) {
         x[y].children = []
       }
-      let item = x[y].children
+      const item = x[y].children
       if (item && item.length > 0) {
         vm.checkSQLData(item, 0, index)
       } else {
