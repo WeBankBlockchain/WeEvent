@@ -36,7 +36,6 @@ script:
   - /bin/bash project/build-ci.sh
   - chmod +x ./gradlew
   - ./gradlew test
-  - cat weevent-governance/logs/weevent-governance.log
   - ./gradlew check
   - ./gradlew codeCoverageReport
 after_success:
