@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.jms.BytesMessage;
 import javax.jms.ConnectionConsumer;
@@ -93,10 +94,10 @@ public class WeEventTopicConnection implements TopicConnection {
             if (StringUtils.isBlank(topic.getOffset())) {
                 topic.setOffset(WeEvent.OFFSET_LAST);
             }
-            if (StringUtils.isBlank(topic.getContinueSubscriptionId())) {
-                topic.setContinueSubscriptionId("");
+            if (Objects.isNull(topic.getExtension())) {
+                topic.setExtension(new HashMap<>());
             }
-            String subscriptionId = this.client.subscribe(topic.getTopicName(), topic.getOffset(), topic.getContinueSubscriptionId(), new IWeEventClient.EventListener() {
+            String subscriptionId = this.client.subscribe(topic.getTopicName(), topic.getOffset(), topic.getExtension(), new IWeEventClient.EventListener() {
                 @Override
                 public void onEvent(WeEvent event) {
                     log.info("onEvent: {}", event.toString());
