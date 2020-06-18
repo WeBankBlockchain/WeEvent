@@ -1,6 +1,6 @@
 package com.webank.weevent.client;
 
-import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import lombok.NonNull;
@@ -136,46 +136,25 @@ public interface IWeEventClient {
      *
      * @param topic topic name
      * @param offset from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
+     * @param extension extension params
      * @param listener notify interface
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
-    String subscribe(String topic, String offset, @NonNull EventListener listener) throws BrokerException;
+    String subscribe(String topic, String offset, Map<String, String> extension, @NonNull EventListener listener) throws BrokerException;
 
     /**
      * Subscribe events from topic.
      *
-     * @param topic topic name
-     * @param offset from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
-     * @param subscriptionId keep last subscribe
-     * @param listener notify interface
-     * @return subscription Id
-     * @throws BrokerException invalid input param
-     */
-    String subscribe(String topic, String offset, String subscriptionId, @NonNull EventListener listener) throws BrokerException;
-
-    /**
-     * Subscribe events from multiple topic.
-     *
      * @param topics topic list
      * @param offset from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
+     * @param extension extension params
      * @param listener notify interface
      * @return subscription Id
      * @throws BrokerException invalid input param
      */
-    String subscribe(String[] topics, String offset, @NonNull EventListener listener) throws BrokerException;
+    String subscribe(String[] topics, String offset, Map<String, String> extension, @NonNull EventListener listener) throws BrokerException;
 
-    /**
-     * Subscribe events from multiple topic.
-     *
-     * @param topics topic list
-     * @param offset from next event after this offset(an event id), WeEvent.OFFSET_FIRST if from head of queue, WeEvent.OFFSET_LAST if from tail of queue
-     * @param subscriptionId keep last subscribe
-     * @param listener notify interface
-     * @return subscription Id
-     * @throws BrokerException invalid input param
-     */
-    String subscribe(String[] topics, String offset, String subscriptionId, @NonNull EventListener listener) throws BrokerException;
 
     /**
      * Unsubscribe an exist subscription subscribed by subscribe interface.

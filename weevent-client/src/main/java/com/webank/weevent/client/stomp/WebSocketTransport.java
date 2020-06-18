@@ -244,7 +244,7 @@ public class WebSocketTransport extends WebSocketClient {
 
         // cache the subscription id and the WeEventTopic,the subscription2EventCache which can use for reconnect
         String subscriptionId = stompHeaderAccessor.getFirstNativeHeader("subscription-id");
-        topic.setContinueSubscriptionId(subscriptionId);
+        topic.getExtension().put(WeEvent.WeEvent_SubscriptionId, subscriptionId);
 
         this.subscription2EventCache.put(subscriptionId, Pair.of(topic, listener));
         // map the receipt id and the subscription id
