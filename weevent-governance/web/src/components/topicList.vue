@@ -144,10 +144,10 @@ export default {
             if (res.status === 200) {
               let listData = res.data.topicInfoList.reverse()
               let det = {
-                'topicName': '',
-                'createdTimestamp': '',
-                'topicAddress': '',
-                'lastTimestamp': ''
+                topicName: '',
+                createdTimestamp: '',
+                topicAddress: '',
+                lastTimestamp: ''
               }
               listData.forEach(item => {
                 vm.$set(item, 'detail', det)

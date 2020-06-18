@@ -192,5 +192,9 @@
   "fileStatus": {
     "method": "get",
     "url": "file/status"
+  },
+  "checkUpload": {
+    "method": "get",
+    "url": "file/checkUploaded"
   }
 }
