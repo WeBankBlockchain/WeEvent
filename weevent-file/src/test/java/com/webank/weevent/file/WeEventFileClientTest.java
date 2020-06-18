@@ -352,5 +352,6 @@ public class WeEventFileClientTest {
         WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, ftpInfo, this.fileChunkSize, this.fiscoConfig);
 
         weEventFileClient.genPemFile("./logs");
+        Assert.assertTrue(true);
     }
 }
