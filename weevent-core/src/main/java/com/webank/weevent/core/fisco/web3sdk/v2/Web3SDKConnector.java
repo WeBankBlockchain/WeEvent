@@ -171,7 +171,6 @@ public class Web3SDKConnector {
             log.info("SM2_TYPE");
             // set encrypt type for web3sdk
             EncryptType encryptType = new EncryptType(EncryptType.SM2_TYPE);
-            encryptType.setEncryptType(EncryptType.SM2_TYPE);
 
             try {
                 PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
