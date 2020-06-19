@@ -273,7 +273,7 @@ public class FileService {
     public GovernanceResult listTransport(String groupId, Integer brokerId) {
         List<FileTransportEntity> fileTransportList = this.transportRepository.queryByBrokerIdAndGroupId(brokerId, groupId);
         fileTransportList.forEach(fileTransport -> {
-            fileTransport.setCreateTime(Utils.dateToStr(fileTransport.getCreateDate()));
+            fileTransport.setCreateTime(Utils.dateToStr(fileTransport.getCreate_at()));
             if (StringUtils.isNotBlank(fileTransport.getPublicKey()) || StringUtils.isNotBlank(fileTransport.getPrivateKey())) {
                 fileTransport.setVerified(true);
             }

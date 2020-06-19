@@ -121,7 +121,7 @@ public class RuleDatabaseService {
             //check databaseUrl
             getDataBaseUrl(ruleDatabaseEntity);
             commonService.checkDataBaseUrl(ruleDatabaseEntity.getDatabaseType(), ruleDatabaseEntity.getDatabaseUrl(), null, ruleDatabaseEntity.getUsername(), ruleDatabaseEntity.getPassword());
-            ruleDatabaseEntity.setLastUpdate(new Date());
+            ruleDatabaseEntity.setUpdate_at(new Date());
             ruleDatabaseRepository.save(ruleDatabaseEntity);
         } catch (Exception e) {
             log.error("update ruleDatabase fail", e);

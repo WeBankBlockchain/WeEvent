@@ -10,6 +10,9 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GenerationTime;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,7 +24,6 @@ import lombok.Setter;
  */
 @Setter
 @Getter
-@EqualsAndHashCode(callSuper = false)
 @MappedSuperclass
 public class BaseEntity {
 
@@ -33,15 +35,15 @@ public class BaseEntity {
     @Column(name = "id")
     private Integer id;
 
-    @org.hibernate.annotations.CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "create_date", updatable = false, columnDefinition = "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP")
-    private Date createDate;
+    @Generated(GenerationTime.INSERT)
+    @Column(insertable = false, updatable = false)
+    private Date create_at;
 
-    @org.hibernate.annotations.UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "last_update", columnDefinition = "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP")
-    private Date lastUpdate;
+    @Generated(GenerationTime.ALWAYS)
+    @Column(insertable = false, updatable = false)
+    private Date update_at;
 
 
 }

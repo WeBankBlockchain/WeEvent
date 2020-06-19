@@ -91,7 +91,7 @@ public class RuleEngineService {
                 ruleEngineEntities = ruleEngineMapper.getRuleEnginePage(ruleEngineEntity, startIndex, endIndex);
 
                 for (RuleEngineEntity it : ruleEngineEntities) {
-                    it.setCreateDateStr(simpleDateFormat.format(it.getCreateDate()));
+                    it.setCreateDateStr(simpleDateFormat.format(it.getCreate_at()));
                     String payload = it.getPayload();
                     it.setPayloadMap(payload == null ? new HashMap<>() : JsonHelper.json2Object(payload, Map.class));
                 }
@@ -116,8 +116,8 @@ public class RuleEngineService {
             if (ruleEngineEntity.getPayloadType() == null || ruleEngineEntity.getPayloadType() == 0) {
                 ruleEngineEntity.setPayloadType(PayloadEnum.JSON.getCode());
             }
-            ruleEngineEntity.setCreateDate(new Date());
-            ruleEngineEntity.setLastUpdate(new Date());
+            ruleEngineEntity.setCreate_at(new Date());
+            ruleEngineEntity.setUpdate_at(new Date());
 
             //check rule
             this.checkRule(ruleEngineEntity);
@@ -195,7 +195,7 @@ public class RuleEngineService {
             //set payload
             String payload = JsonHelper.object2Json(ruleEngineEntity.getPayloadMap());
             ruleEngineEntity.setPayload(payload);
-            ruleEngineEntity.setLastUpdate(new Date());
+            ruleEngineEntity.setUpdate_at(new Date());
             // check sql condition
             boolean flag = validationConditions(request, ruleEngineEntity);
             if (!flag) {
@@ -262,8 +262,8 @@ public class RuleEngineService {
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_UPDATE_CEP_RULE).toString();
             String jsonString = JsonHelper.object2Json(ruleEngineEntity);
             Map map = JsonHelper.json2Object(jsonString, Map.class);
-            map.put("updatedTime", ruleEngineEntity.getLastUpdate());
-            map.put("createdTime", oldRule.getCreateDate());
+            map.put("updatedTime", ruleEngineEntity.getUpdate_at());
+            map.put("createdTime", oldRule.getCreate_at());
             //updateCEPRuleById
             log.info("update rule begin====map:{}", JsonHelper.object2Json(map));
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JsonHelper.object2Json(map));
@@ -295,7 +295,7 @@ public class RuleEngineService {
         BeanUtils.copyProperties(rule, ruleEngineEntity, "status");
         try {
             //set payload
-            ruleEngineEntity.setLastUpdate(new Date());
+            ruleEngineEntity.setUpdate_at(new Date());
 
             //set ruleDataBaseUrl
             setRuleDataBaseUrl(ruleEngineEntity);
@@ -323,8 +323,8 @@ public class RuleEngineService {
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_STOP_CEP_RULE).toString();
             String jsonString = JsonHelper.object2Json(ruleEngineEntity);
             Map map = JsonHelper.json2Object(jsonString, Map.class);
-            map.put("updatedTime", ruleEngineEntity.getLastUpdate());
-            map.put("createdTime", oldRule.getCreateDate());
+            map.put("updatedTime", ruleEngineEntity.getUpdate_at());
+            map.put("createdTime", oldRule.getCreate_at());
             //updateCEPRuleById
             log.info("stop rule begin====map:{}", JsonHelper.object2Json(map));
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JsonHelper.object2Json(map));
@@ -367,7 +367,7 @@ public class RuleEngineService {
             BrokerEntity broker = brokerService.getBroker(rule.getBrokerId());
             rule.setBrokerUrl(broker.getBrokerUrl());
             rule.setStatus(StatusEnum.RUNNING.getCode());
-            rule.setLastUpdate(new Date());
+            rule.setUpdate_at(new Date());
             //set dataBaseUrl
             setRuleDataBaseUrl(rule);
 
@@ -394,8 +394,8 @@ public class RuleEngineService {
             }
             String jsonString = JsonHelper.object2Json(rule);
             Map map = JsonHelper.json2Object(jsonString, Map.class);
-            map.put("updatedTime", rule.getLastUpdate());
-            map.put("createdTime", rule.getCreateDate());
+            map.put("updatedTime", rule.getUpdate_at());
+            map.put("createdTime", rule.getCreate_at());
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.PROCESSOR_START_CEP_RULE).toString();
             map.put("systemTag", rule.getSystemTag() ? "1" : "0");
             log.info("start rule begin====map:{}", JsonHelper.object2Json(map));

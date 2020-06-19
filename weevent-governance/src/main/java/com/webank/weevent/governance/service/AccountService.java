@@ -158,7 +158,7 @@ public class AccountService {
 
         //     String password = passwordEncoder.encode(user.getPassword());
         //   storeUser.setPassword(password);
-        storeUser.setLastUpdate(new Date());
+        storeUser.setUpdate_at(new Date());
         accountRepository.save(storeUser);
         return GovernanceResult.ok(true);
     }

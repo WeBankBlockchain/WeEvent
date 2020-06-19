@@ -200,7 +200,7 @@ public class BrokerService {
         if (!repeat) {
             return new GovernanceResult(ErrorCode.BROKER_REPEAT);
         }
-        brokerEntity.setLastUpdate(new Date());
+        brokerEntity.setUpdate_at(new Date());
         /**
          * Determine if it is the original URL.
          * If it is, do not perform rules.

@@ -102,8 +102,8 @@ public class TimerSchedulerService {
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.TIMER_SCHEDULER_INSERT).toString();
             String jsonString = JsonHelper.object2Json(timerSchedulerEntity);
             Map map = JsonHelper.json2Object(jsonString, Map.class);
-            map.put("updatedTime", timerSchedulerEntity.getLastUpdate());
-            map.put("createdTime", timerSchedulerEntity.getCreateDate());
+            map.put("updatedTime", timerSchedulerEntity.getUpdate_at());
+            map.put("createdTime", timerSchedulerEntity.getCreate_at());
             //updateCEPRuleById
             log.info("insert timerScheduler ====map:{}", JsonHelper.object2Json(map));
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JsonHelper.object2Json(map));
@@ -130,7 +130,7 @@ public class TimerSchedulerService {
     public void updateTimerScheduler(TimerSchedulerEntity timerSchedulerEntity, HttpServletRequest request, HttpServletResponse response) throws GovernanceException {
         try {
             //check params
-            timerSchedulerEntity.setLastUpdate(new Date());
+            timerSchedulerEntity.setUpdate_at(new Date());
             this.updateTimerScheduler(request, timerSchedulerEntity);
             timerSchedulerRepository.save(timerSchedulerEntity);
         } catch (Exception e) {
@@ -150,8 +150,8 @@ public class TimerSchedulerService {
             String url = new StringBuffer(this.getProcessorUrl()).append(ConstantProperties.TIMER_SCHEDULER_UPDATE).toString();
             String jsonString = JsonHelper.object2Json(timerSchedulerEntity);
             Map map = JsonHelper.json2Object(jsonString, Map.class);
-            map.put("updatedTime", timerSchedulerEntity.getLastUpdate());
-            map.put("createdTime", timerSchedulerEntity.getCreateDate());
+            map.put("updatedTime", timerSchedulerEntity.getUpdate_at());
+            map.put("createdTime", timerSchedulerEntity.getCreate_at());
             //updateCEPRuleById
             log.info("update timerScheduler ====map:{}", JsonHelper.object2Json(map));
             CloseableHttpResponse closeResponse = commonService.getCloseResponse(request, url, JsonHelper.object2Json(map));
