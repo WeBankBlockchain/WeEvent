@@ -80,7 +80,7 @@ public class Web3sdkUtils {
         systemExit(0);
     }
 
-    private static boolean deployV2Contract(FiscoConfig fiscoConfig) throws BrokerException {
+    public static boolean deployV2Contract(FiscoConfig fiscoConfig) throws BrokerException {
         org.fisco.bcos.web3j.crypto.Credentials credentials = Web3SDKConnector.getCredentials(fiscoConfig);
 
         Map<Long, org.fisco.bcos.web3j.protocol.Web3j> groups = new HashMap<>();
