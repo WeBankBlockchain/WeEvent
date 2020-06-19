@@ -37,7 +37,7 @@ import org.junit.Test;
  * @since 11/08/2018
  */
 @Slf4j
-public class FiscoBcosTopicAdminTest extends JUnitTestBase {
+public class FiscoTopicAdminTest extends JUnitTestBase {
     private final String groupId = WeEvent.DEFAULT_GROUP_ID;
     private final String topicName = "com.weevent.test";
 
