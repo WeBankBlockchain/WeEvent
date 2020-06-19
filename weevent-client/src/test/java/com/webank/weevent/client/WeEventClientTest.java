@@ -1,6 +1,5 @@
 package com.webank.weevent.client;
 
-import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -26,7 +24,7 @@ import org.junit.rules.TestName;
 public class WeEventClientTest {
 
     private Map<String, String> extensions = new HashMap<>();
-    private final long FIVE_SECOND= 5000L;
+    private final long FIVE_SECOND = 5000L;
     private final long transactionTimeout = 10;
 
     @Rule
@@ -78,7 +76,7 @@ public class WeEventClientTest {
     @Test
     public void testSubscribe() throws Exception {
         // create subscriber
-        String subscribeId = this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, new IWeEventClient.EventListener() {
+        String subscribeId = this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, extensions, new IWeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
                 log.info("onEvent: {}", event.toString());
@@ -168,13 +166,5 @@ public class WeEventClientTest {
     public void testState() throws Exception {
         TopicInfo topicInfo = this.weEventClient.state(this.topicName);
         Assert.assertEquals(topicInfo.getTopicName(), this.topicName);
-    }
-
-    /**
-     * Method: getEvent(String eventId)
-     */
-    @Test(expected = BrokerException.class)
-    public void testGetEvent() throws Exception {
-        this.weEventClient.getEvent("not exist");
     }
 }
