@@ -30,6 +30,7 @@ import org.fisco.bcos.channel.handler.AMOPVerifyTopicToKeyInfo;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -126,16 +127,19 @@ public class WeEventFileClient implements IWeEventFileClient {
      */
     public void openTransport4Sender(String topic, InputStream publicPem) throws BrokerException {
         // publicPem is public key
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(publicPem);
         try {
             if (publicPem == null) {
                 log.error("public key pem inputstream is null.");
                 throw new BrokerException(ErrorCode.PARAM_ISNULL);
             }
-            String publicKey = IOUtils.toString(publicPem, StandardCharsets.UTF_8);
+            bufferedInputStream.mark(bufferedInputStream.available() + 1);
+            String publicKey = IOUtils.toString(bufferedInputStream, StandardCharsets.UTF_8);
             if (!publicKey.contains(PUBLIC_KEY_DESC)) {
                 log.error("inputStream is not a public key.");
                 throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
             }
+            bufferedInputStream.reset();
         } catch (IOException e) {
             log.error("public key inputStream is invalid.");
             throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
@@ -159,7 +163,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         AMOPVerifyKeyInfo verifyKeyInfo = new AMOPVerifyKeyInfo();
 
         // set private pem for service
-        InputStreamResource inputStreamResource = new InputStreamResource(publicPem);
+        InputStreamResource inputStreamResource = new InputStreamResource(bufferedInputStream);
         List<Resource> publicPemList = new ArrayList<>();
         publicPemList.add(inputStreamResource);
 
@@ -264,16 +268,19 @@ public class WeEventFileClient implements IWeEventFileClient {
      */
     public void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem) throws BrokerException {
         // privatePem is private  key
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(privatePem);
         try {
             if (privatePem == null) {
                 log.error("private key pem inputstream is null.");
                 throw new BrokerException(ErrorCode.PARAM_ISNULL);
             }
-            String publicKey = IOUtils.toString(privatePem, StandardCharsets.UTF_8);
+            bufferedInputStream.mark(bufferedInputStream.available() + 1);
+            String publicKey = IOUtils.toString(bufferedInputStream, StandardCharsets.UTF_8);
             if (!publicKey.contains(PRIVATE_KEY_DESC)) {
                 log.error("inputStream is not a private key.");
                 throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
             }
+            bufferedInputStream.reset();
         } catch (IOException e) {
             log.error("private key inputStream is invalid.");
             throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
@@ -284,7 +291,7 @@ public class WeEventFileClient implements IWeEventFileClient {
 
         FileEventListener fileEventListener = new FileEventListener(this.localReceivePath, this.ftpInfo, fileListener);
 
-        amopChannel.subTopic(topic, groupId, privatePem, fileEventListener);
+        amopChannel.subTopic(topic, groupId, bufferedInputStream, fileEventListener);
     }
 
     /**

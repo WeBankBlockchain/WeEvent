@@ -1,7 +1,6 @@
 package com.webank.weevent.file;
 
 import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.client.SendResult;
 import com.webank.weevent.core.FiscoBcosInstance;
 import com.webank.weevent.core.IConsumer;
 import com.webank.weevent.core.IProducer;
@@ -21,7 +20,6 @@ import org.junit.Test;
 @Slf4j
 public class FileTransportServiceTest {
     private FileTransportService fileTransportService;
-    private FiscoConfig fiscoConfig;
     private String localReceivePath = "./logs";
     private int fileChunkSize = 1024 * 1024;
     private String groupId = "1";
@@ -31,8 +29,8 @@ public class FileTransportServiceTest {
     @Before
     public void before() throws BrokerException {
 
-        this.fiscoConfig = new FiscoConfig();
-        this.fiscoConfig.load("");
+        FiscoConfig fiscoConfig = new FiscoConfig();
+        fiscoConfig.load("");
         // create fisco instance
         FiscoBcosInstance fiscoBcosInstance = new FiscoBcosInstance(fiscoConfig);
 
@@ -45,7 +43,7 @@ public class FileTransportServiceTest {
         iConsumer.startConsumer();
 
         // create FileTransportService instance
-        FileTransportService fileTransportService = new FileTransportService(this.fiscoConfig, iProducer, "", this.localReceivePath, this.fileChunkSize, this.groupId);
+        FileTransportService fileTransportService = new FileTransportService(fiscoConfig, iProducer, "", this.localReceivePath, this.fileChunkSize, this.groupId);
         this.fileTransportService = fileTransportService;
 
         this.fileChunksMeta = new FileChunksMeta(WeEventUtils.generateUuid(),
