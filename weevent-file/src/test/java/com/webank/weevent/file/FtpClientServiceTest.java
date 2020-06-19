@@ -8,6 +8,10 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @Slf4j
 public class FtpClientServiceTest {
@@ -86,6 +90,15 @@ public class FtpClientServiceTest {
         ftpClientService.downLoadDirectory("./fisco/nodes/cert/", "D:\\bigFileTest");
 
         Assert.assertTrue(true);
+    }
+
+    @Test
+    public void testGetFileList() throws IOException {
+        FtpClientService ftpClientService = mock(FtpClientService.class);
+        String[] fileList = {"test1.txt", "test2.txt"};
+        when(ftpClientService.getFileList("./")).thenReturn(fileList);
+        String[] ret = ftpClientService.getFileList("./");
+        Assert.assertArrayEquals(ret, fileList);
     }
 
 }
