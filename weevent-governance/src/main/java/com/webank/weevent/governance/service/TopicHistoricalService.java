@@ -211,8 +211,8 @@ public class TopicHistoricalService {
         ruleEngineEntity.setStatus(StatusEnum.NOT_STARTED.getCode());
         ruleEngineEntity.setUserId(brokerEntity.getUserId());
         ruleEngineEntity.setGroupId(groupId);
-        ruleEngineEntity.setCreate_at(new Date());
-        ruleEngineEntity.setUpdate_at(new Date());
+        ruleEngineEntity.setCreateDate(new Date());
+        ruleEngineEntity.setLastUpdate(new Date());
         ruleEngineEntity.setBrokerUrl(brokerEntity.getBrokerUrl() + "?groupId=" + groupId);
         ruleEngineEntity.setSelectField(selectField);
         ruleEngineEntity.setPayload(JsonHelper.object2Json(map));
