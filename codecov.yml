@@ -3,7 +3,7 @@ coverage:
     project:
       default:
         target: 30%
-        threshold: null
+        threshold: 0%
         if_not_found: success
     patch:
       default:
@@ -13,9 +13,16 @@ coverage:
       default:
         enabled: no
         if_not_found: success
-codecov:
-  ignore:
-    - "weevent-jmeter/**/*"  # ignore folders and all its contents
+
+ignore:
+  - "weevent-jmeter/src/main/java/com/webank/weevent/jmeter/**/*"  # ignore folders and all its contents
+  - "weevent-core/src/main/java/com/webank/weevent/core/fabric/**/*"  # ignore fabric code
+  - "weevent-core/src/main/java/com/webank/weevent/core/fabric/FabricBroker4Consumer.java"  # ignore fabric code
+  - "weevent-core/src/main/java/com/webank/weevent/core/fabric/FabricBroker4Producer.java"  # ignore fabric code
+  - "weevent-core/src/main/java/com/webank/weevent/core/fabric/FabricTopicAdmin.java"  # ignore fabric code
+  - "weevent-core/src/main/java/com/webank/weevent/core/FabricInstance.java"  # ignore fabric code
+  - "weevent-core/src/main/java/com/webank/weevent/core/config/FabricConfig.java"  # ignore fabric code
+
 
 comment:
   layout: "reach, diff, flags, files"

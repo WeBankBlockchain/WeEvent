@@ -18,6 +18,7 @@ import org.fisco.bcos.channel.handler.AMOPVerifyKeyInfo;
 import org.fisco.bcos.channel.handler.AMOPVerifyTopicToKeyInfo;
 import org.springframework.core.io.InputStreamResource;
 
+import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -115,7 +116,7 @@ public class AMOPChannel extends ChannelPushCallback {
     }
 
     // Receiver call subscribe verify topic
-    public void subTopic(String topic, String groupId, InputStream privatePem, IWeEventFileClient.EventListener eventListener) throws BrokerException {
+    public void subTopic(String topic, String groupId, BufferedInputStream privatePem, IWeEventFileClient.EventListener eventListener) throws BrokerException {
         if (this.senderTopics.contains(topic) || senderVerifyTopics.containsKey(topic)) {
             log.error("this is already sender side for topic: {}", topic);
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
