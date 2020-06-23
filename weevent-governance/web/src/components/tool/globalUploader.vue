@@ -11,7 +11,7 @@
       @file-removed='onRemoved'
       class="uploader-app">
       <uploader-unsupport></uploader-unsupport>
-      <uploader-btn id="global-uploader-btn" :attrs="attrs" ref="uploadBtn">file</uploader-btn>
+      <uploader-btn id="global-uploader-btn" ref="uploadBtn">file</uploader-btn>
       <uploader-list>
         <div class="file-panel" slot-scope="props" :class="{'collapse': collapse}">
           <div class="file-title">
@@ -31,7 +31,6 @@
   </div>
 </template>
 <script>
-import { ACCEPT_CONFIG } from './js/config'
 import Bus from './js/bus'
 import SparkMD5 from 'spark-md5'
 import $ from 'jquery'
@@ -60,9 +59,6 @@ export default {
           Authorization: localStorage.getItem('token')
         },
         query () {}
-      },
-      attrs: {
-        accept: ACCEPT_CONFIG.getAll()
       },
       collapse: false
     }
@@ -137,7 +133,7 @@ export default {
           // 实时展示MD5的计算进度
           this.$nextTick(() => {
             $(`.myStatus_${file.id}`).text(
-              'Check MD5' + (currentChunk / chunks * 100).toFixed(0) + '%'
+              'Check MD5 ' + (currentChunk / chunks * 100).toFixed(0) + '%'
             )
           })
         } else {

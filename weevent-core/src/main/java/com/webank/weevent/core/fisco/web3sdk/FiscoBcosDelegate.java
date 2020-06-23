@@ -48,7 +48,7 @@ public class FiscoBcosDelegate {
     private final Map<Long, FiscoBcos2> fiscoBcos2Map = new ConcurrentHashMap<>();
 
     // AMOP subscription
-    private final Map<Long, AMOPSubscription> AMOPSubscriptions = new ConcurrentHashMap<>();
+    //private final Map<Long, AMOPSubscription> AMOPSubscriptions = new ConcurrentHashMap<>();
 
     // binding thread pool
     public ThreadPoolTaskExecutor threadPool;
@@ -91,7 +91,7 @@ public class FiscoBcosDelegate {
             log.info("Notice: FISCO-BCOS's version is 2.x");
 
             // set web3sdk.Async thread pool, special thread for sendAsync
-            this.asyncHelper = new org.fisco.bcos.web3j.utils.Async(threadPool);
+            this.asyncHelper = new Async(threadPool);
 
             // 1 is always exist
             Long defaultGId = Long.valueOf(WeEvent.DEFAULT_GROUP_ID);
