@@ -37,7 +37,6 @@ public class AccountService {
                 accountEntity = new AccountEntity();
                 accountEntity.setUsername("admin");
                 accountEntity.setPassword("AC0E7D037817094E9E0B4441F9BAE3209D67B02FA484917065F71B16109A1A78");
-                // accountEntity.setEmail("admin@xxx.com");
                 accountRepository.save(accountEntity);
             }
         } catch (Exception e) {
