@@ -7,7 +7,12 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
-import com.webank.weevent.governance.common.ErrorCode;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.AccountEntity;
@@ -15,21 +20,10 @@ import com.webank.weevent.governance.enums.IsDeleteEnum;
 import com.webank.weevent.governance.repository.AccountRepository;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.jsoup.helper.StringUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service
 @Slf4j
 public class AccountService {
-
-
-    @Autowired
-    private MailService mailService;
-
 
     @Autowired
     private AccountRepository accountRepository;
@@ -43,7 +37,7 @@ public class AccountService {
                 accountEntity = new AccountEntity();
                 accountEntity.setUsername("admin");
                 accountEntity.setPassword("AC0E7D037817094E9E0B4441F9BAE3209D67B02FA484917065F71B16109A1A78");
-                accountEntity.setEmail("admin@xxx.com");
+                // accountEntity.setEmail("admin@xxx.com");
                 accountRepository.save(accountEntity);
             }
         } catch (Exception e) {
@@ -119,27 +113,6 @@ public class AccountService {
         storeUser.setPassword(user.getPassword());
         accountRepository.save(storeUser);
         return GovernanceResult.ok();
-    }
-
-    public GovernanceResult forgetPassword(String username, String emailSendUrl) throws GovernanceException {
-        GovernanceResult result = checkData(username, 1);
-        // user not exist
-        if ((boolean) result.getData()) {
-            return GovernanceResult.build(400, "username not exists");
-        }
-        // get user by username
-        List<AccountEntity> accountList = this.findAllByUsernameAndDeleteAt(username);
-        AccountEntity user = accountList.get(0);
-        if (StringUtil.isBlank(user.getEmail())) {
-            throw new GovernanceException(ErrorCode.NO_MAILBOX_CONFIGURED);
-        }
-        String content = "reset url is : " + emailSendUrl;
-        try {
-            mailService.sendSimpleMail(user.getEmail(), "Reset Password url", content);
-        } catch (Exception e) {
-            throw new GovernanceException(ErrorCode.SEND_EMAIL_ERROR);
-        }
-        return GovernanceResult.ok(user.getEmail());
     }
 
     public GovernanceResult getUserId(String username) {
