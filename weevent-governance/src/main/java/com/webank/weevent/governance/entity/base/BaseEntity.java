@@ -13,6 +13,8 @@ import javax.persistence.TemporalType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GenerationTime;
 
 /**
  * BaseEntity class
@@ -30,18 +32,17 @@ public class BaseEntity {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(insertable = false, updatable = false)
     private Integer id;
 
-    @org.hibernate.annotations.CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "create_date", updatable = false, columnDefinition = "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP")
+    @Generated(GenerationTime.INSERT)
+    @Column(insertable = false, updatable = false)
     private Date createDate;
 
-    @org.hibernate.annotations.UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "last_update", columnDefinition = "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP")
+    @Generated(GenerationTime.ALWAYS)
+    @Column(insertable = false, updatable = false)
     private Date lastUpdate;
-
 
 }
