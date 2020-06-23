@@ -10,7 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
@@ -180,28 +179,49 @@ public class FileService {
         }
 
         if (chunkParam.getFileChunksMeta().checkChunkFull()) {
-            CompletableFuture.runAsync(() -> {
-                String fileId = chunkParam.getFileChunksMeta().getFileId();
-                String filePath = this.uploadPath.concat(File.separator).concat(fileId).concat(File.separator).concat(chunkParam
-                        .getFileChunksMeta().getTopic()).concat(File.separator).concat(chunkParam.getFileChunksMeta().getFileName());
-                boolean overWrite = this.transportMap.get(chunkParam.getBrokerId()).get(chunkParam.getFileChunksMeta().getGroupId())
-                        .get(chunkParam.getFileChunksMeta().getTopic());
+//            CompletableFuture.runAsync(() -> {
+//                String fileId = chunkParam.getFileChunksMeta().getFileId();
+//                String filePath = this.uploadPath.concat(File.separator).concat(fileId).concat(File.separator).concat(chunkParam
+//                        .getFileChunksMeta().getTopic()).concat(File.separator).concat(chunkParam.getFileChunksMeta().getFileName());
+//                boolean overWrite = this.transportMap.get(chunkParam.getBrokerId()).get(chunkParam.getFileChunksMeta().getGroupId())
+//                        .get(chunkParam.getFileChunksMeta().getTopic());
+//
+//                log.info("all chunks has uploaded success, start publish file, filePath:{}", filePath);
+//                try {
+//                    fileClient.publishFile(chunkParam.getFileChunksMeta().getTopic(), filePath, overWrite);
+//                    log.info("publish file success, topic:{}, fileName:{}.", chunkParam.getFileChunksMeta().getTopic(),
+//                            chunkParam.getFileChunksMeta().getFileName());
+//                } catch (BrokerException | IOException | InterruptedException e) {
+//                    log.error("publish file error, fileName:{}.", chunkParam.getFileChunksMeta().getFileName(), e);
+//                } finally {
+//                    // remove local file after publish
+//                    Utils.removeLocalFile(this.uploadPath.concat(File.separator).concat(fileId));
+//                    this.fileChunksMap.remove(fileId);
+//                    log.info("remove local file after publish, fileName:topic:{}, fileName:{}.",
+//                            chunkParam.getFileChunksMeta().getTopic(), chunkParam.getFileChunksMeta().getFileName());
+//                }
+//            });
+            String fileId = chunkParam.getFileChunksMeta().getFileId();
+            String filePath = this.uploadPath.concat(File.separator).concat(fileId).concat(File.separator).concat(chunkParam
+                    .getFileChunksMeta().getTopic()).concat(File.separator).concat(chunkParam.getFileChunksMeta().getFileName());
+            boolean overWrite = this.transportMap.get(chunkParam.getBrokerId()).get(chunkParam.getFileChunksMeta().getGroupId())
+                    .get(chunkParam.getFileChunksMeta().getTopic());
 
-                log.info("all chunks has uploaded success, start publish file, filePath:{}", filePath);
-                try {
-                    fileClient.publishFile(chunkParam.getFileChunksMeta().getTopic(), filePath, overWrite);
-                    log.info("publish file success, topic:{}, fileName:{}.", chunkParam.getFileChunksMeta().getTopic(),
-                            chunkParam.getFileChunksMeta().getFileName());
-                } catch (BrokerException | IOException | InterruptedException e) {
-                    log.error("publish file error, fileName:{}.", chunkParam.getFileChunksMeta().getFileName(), e);
-                } finally {
-                    // remove local file after publish
-                    Utils.removeLocalFile(this.uploadPath.concat(File.separator).concat(fileId));
-                    this.fileChunksMap.remove(fileId);
-                    log.info("remove local file after publish, fileName:topic:{}, fileName:{}.",
-                            chunkParam.getFileChunksMeta().getTopic(), chunkParam.getFileChunksMeta().getFileName());
-                }
-            });
+            log.info("all chunks has uploaded success, start publish file, filePath:{}", filePath);
+            try {
+                fileClient.publishFile(chunkParam.getFileChunksMeta().getTopic(), filePath, overWrite);
+                log.info("publish file success, topic:{}, fileName:{}.", chunkParam.getFileChunksMeta().getTopic(),
+                        chunkParam.getFileChunksMeta().getFileName());
+            } catch (BrokerException | IOException | InterruptedException e) {
+                log.error("publish file error, fileName:{}.", chunkParam.getFileChunksMeta().getFileName(), e);
+                return GovernanceResult.build(ErrorCode.FILE_UPLOAD_FAILED.getCode(), e.getMessage());
+            } finally {
+                // remove local file after publish
+                Utils.removeLocalFile(this.uploadPath.concat(File.separator).concat(fileId));
+                this.fileChunksMap.remove(fileId);
+                log.info("remove local file after publish, fileName:topic:{}, fileName:{}.",
+                        chunkParam.getFileChunksMeta().getTopic(), chunkParam.getFileChunksMeta().getFileName());
+            }
         }
 
         return GovernanceResult.ok(true);
@@ -236,9 +256,15 @@ public class FileService {
         return chunkParam;
     }
 
-    public String downloadFile(String groupId, Integer brokerId, String fileId) {
-        DiskFiles diskFiles = this.getDiskFiles(groupId, brokerId);
-        return diskFiles.genLocalFileName(fileId);
+    public String downloadFile(String topic, String fileName) throws GovernanceException {
+//        DiskFiles diskFiles = this.getDiskFiles(groupId, brokerId);
+//        return diskFiles.genLocalFileName(fileId);
+        String filePath = this.downloadPath.concat(File.separator).concat(topic).concat(File.separator).concat(fileName);
+        if (!new File(filePath).exists()) {
+            log.error("file not exist, topic:{}, fileName:{}", topic, fileName);
+            throw new GovernanceException(ErrorCode.FILE_NOT_EXIST);
+        }
+        return filePath;
     }
 
     public GovernanceResult listFile(String groupId, Integer brokerId, String topic) throws GovernanceException {

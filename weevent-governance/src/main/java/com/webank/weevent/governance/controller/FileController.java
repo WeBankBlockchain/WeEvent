@@ -80,20 +80,19 @@ public class FileController {
     }
 
     @RequestMapping(path = "/download")
-    public void download(@RequestParam(name = "groupId") String groupId,
-                         @RequestParam(name = "brokerId") Integer brokerId,
-                         @RequestParam(name = "fileId") String fileId,
+    public void download(@RequestParam(name = "topic") String topic,
+                         @RequestParam(name = "fileName") String fileName,
                          HttpServletResponse response) throws GovernanceException {
-        log.info("download file, groupId:{}, brokerId:{}, fileId:{}.", groupId, brokerId, fileId);
+        log.info("download file, topic:{}, fileName:{}.", topic, fileName);
         response.setHeader("content-type", "application/octet-stream");
         response.setContentType("application/octet-stream; charset=UTF-8");
 
-        ParamCheckUtils.validateFileId(fileId);
-        String downloadFile = this.fileService.downloadFile(groupId, brokerId, fileId);
+        ParamCheckUtils.validateFileName(fileName);
+        String downloadFile = this.fileService.downloadFile(topic, fileName);
         if (StringUtils.isBlank(downloadFile)) {
             throw new GovernanceException("download file not exist");
         }
-        String fileName = downloadFile.substring(downloadFile.lastIndexOf("/") + 1);
+//        String fileName = downloadFile.substring(downloadFile.lastIndexOf("/") + 1);
         try {
             response.setHeader("filename", URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString()));
         } catch (UnsupportedEncodingException e) {
@@ -110,9 +109,9 @@ public class FileController {
                 os.flush();
                 i = bis.read(buffer);
             }
-            log.info("download file success, fileId:{}, fileName:{}", fileId, fileName);
+            log.info("download file success, topic:{}, fileName:{}", topic, fileName);
         } catch (IOException e) {
-            log.error("download file error, groupId:{} fileId:{}", groupId, fileId, e);
+            log.error("download file error, topic:{} fileName:{}", topic, fileName, e);
             throw new GovernanceException("download file error", e);
         }
     }
