@@ -63,6 +63,16 @@ public class RuleEngineControllerTest extends JUnitTestBase {
         ruleMap.put("brokerId", (Integer) governanceResult.getData());
     }
 
+    @Test
+    public void testCheckData() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/user/check/test/1").contentType(MediaType.APPLICATION_JSON_UTF8)).andReturn();
+        MockHttpServletResponse response = mvcResult.getResponse();
+        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        Map jsonObject = JsonHelper.json2Object(response.getContentAsString(), Map.class);
+        Assert.assertNotNull(jsonObject);
+        Assert.assertEquals(jsonObject.get("status").toString(), "200");
+    }
+
     public void testAddRuleEngine() throws Exception {
         String content = "{\"ruleName\":\"tempera_ture-alaa23\",\"payloadType\":\"1\",\"payloadMap\":{\"temperate\":30,\"humidity\":0.5}," +
                 "\"userId\":\"1\",\"brokerId\":\"" + this.ruleMap.get("brokerId") + "\",\"groupId\":\"1\"}";
@@ -150,6 +160,15 @@ public class RuleEngineControllerTest extends JUnitTestBase {
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
         Map jsonObject = JsonHelper.json2Object(response.getContentAsString(), Map.class);
         Assert.assertEquals(jsonObject.get("code").toString(), "-1");
+    }
+
+    @Test
+    public void testUpdateRuleEngineStatus() throws Exception {
+        String content = "{\"id\":\"" + ruleMap.get("ruleId") + "\",\"status\":1}";
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/updateStatus").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content)).andReturn().getResponse();
+        Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        Map jsonObject = JsonHelper.json2Object(response.getContentAsString(), Map.class);
+        Assert.assertEquals(jsonObject.get("status").toString(), "200");
     }
 
 
