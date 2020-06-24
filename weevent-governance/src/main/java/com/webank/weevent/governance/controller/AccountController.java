@@ -53,17 +53,6 @@ public class AccountController {
         return accountService.resetPassword(user);
     }
 
-    @GetMapping("/forget")
-    public GovernanceResult forgetPassword(@RequestParam String username, HttpServletRequest request,
-                                           HttpServletResponse response) throws GovernanceException {
-        String url = request.getRequestURL().toString();
-        int index = url.indexOf("weevent-governance");
-        String emailSendUrl = url.substring(0, index + "weevent-governance".length());
-        emailSendUrl = emailSendUrl + "/#/reset?username=" + username;
-        System.out.println(emailSendUrl);
-        return accountService.forgetPassword(username, emailSendUrl);
-    }
-
     @GetMapping("/getUserId")
     public GovernanceResult getUserId(@RequestParam String username) {
         return accountService.getUserId(username);
