@@ -2,9 +2,7 @@ package com.webank.weevent.governance.junit;
 
 import java.security.Security;
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
 
-import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.governance.JUnitTestBase;
 import com.webank.weevent.governance.common.GovernanceResult;
@@ -52,7 +50,7 @@ public class AccountControllerTest extends JUnitTestBase {
     }
 
     public void testRegister() throws Exception {
-        String content = "{\"username\":\"zjy05\",\"email\":\"admin@test.com\",\"password\":\"123456\"}";
+        String content = "{\"username\":\"zjy05\",\"password\":\"123456\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/user/register").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
@@ -77,7 +75,7 @@ public class AccountControllerTest extends JUnitTestBase {
 
     @Test
     public void testRegisterException001() throws Exception {
-        String content = "{\"username\":\"zjy05\",\"email\":\"admin@test.com\",\"password\":\"123456\"}";
+        String content = "{\"username\":\"zjy05\",\"password\":\"123456\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/user/register").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
@@ -87,7 +85,7 @@ public class AccountControllerTest extends JUnitTestBase {
 
     @Test
     public void testRegisterException002() throws Exception {
-        String content = "{\"username\":\"zjy05\",\"email\":\"admin@test.com\",\"password\":\"12346\"}";
+        String content = "{\"username\":\"zjy05\",\"password\":\"12346\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/user/register").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
@@ -97,7 +95,7 @@ public class AccountControllerTest extends JUnitTestBase {
 
     @Test
     public void testRegisterException003() throws Exception {
-        String content = "{\"username\":\"\",\"email\":\"admin@test.com\",\"password\":\"123456\"}";
+        String content = "{\"username\":\"\",\"password\":\"123456\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/user/register").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
@@ -107,7 +105,7 @@ public class AccountControllerTest extends JUnitTestBase {
 
     @Test
     public void testRegisterException004() throws Exception {
-        String content = "{\"username\":\"test\",\"email\":\"admin@test.com\",\"password\":\"\"}";
+        String content = "{\"username\":\"test\",\"password\":\"\"}";
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/user/register").contentType(MediaType.APPLICATION_JSON_UTF8).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
