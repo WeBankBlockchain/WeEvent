@@ -15,7 +15,6 @@
         </el-form-item>
         <el-form-item label='' prop='passWord'>
           <el-input v-model.trim='form.passWord' auto-complete="off" type='password' prefix-icon='el-icon-lock' :placeholder="$t('userSet.passWord')"></el-input>
-          <span class='forget' @click='changePass'>{{$t('userSet.forgetPassWord')}}</span>
         </el-form-item>
         <el-form-item>
           <el-button type='primary' @click='onSubmit()'>{{$t('userSet.login')}}</el-button>
@@ -23,20 +22,6 @@
         </el-form-item>
       </el-form>
     </div>
-    <el-dialog
-      :title="$t('userSet.resetPassWord')"
-      :visible.sync="getPass"
-      width='420px'
-      :close-on-click-modal='false'
-    >
-      <p class='input_title'>{{$t('userSet.enterUserName') + ' :'}}</p>
-      <el-input v-model='userName'></el-input>
-      <p class='input_warning'><i>*</i>{{$t('userSet.mailWarning')}}</p>
-      <span slot='footer' class='dialog-footer'>
-        <el-button @click='getPass=false'>{{$t('common.cancel')}}</el-button>
-        <el-button type='primary' @click='getPassWord'>{{$t('common.ok')}}</el-button>
-      </span>
-    </el-dialog>
   </div>
 </template>
 <script>
@@ -60,7 +45,6 @@ export default {
       callback()
     }
     return {
-      getPass: false,
       show_error: false,
       userName: '',
       form: {
@@ -77,27 +61,20 @@ export default {
       }
     }
   },
-  watch: {
-    getPass (nVal) {
-      if (!nVal) {
-        this.userName = ''
-      }
-    }
-  },
   methods: {
     onSubmit () {
-      let sha256 = require('js-sha256').sha256
-      let password = sha256(this.form.name + this.form.passWord)
-      let data = {
-        'username': this.form.name,
-        'password': password.toUpperCase()
+      const sha256 = require('js-sha256').sha256
+      const password = sha256(this.form.name + this.form.passWord)
+      const data = {
+        username: this.form.name,
+        password: password.toUpperCase()
       }
       this.$refs.loginForm.validate((valid) => {
         if (valid) {
           // login
           API.login(data).then(res => {
             if (res.status === 200 && res.data.code === 0) {
-              let base = JSON.parse(res.data.data)
+              const base = JSON.parse(res.data.data)
               localStorage.setItem('user', base.username)
               localStorage.setItem('token', base.Authorization)
               this.show_error = false
@@ -116,50 +93,12 @@ export default {
     },
     registered () {
       this.$router.push({ path: './registered', query: { reset: 1 } })
-    },
-    getPassWord () {
-      let url = '?username=' + this.userName
-      API.forget(url).then(res => {
-        if (res.status === 200) {
-          if (res.data.status === 400) {
-            this.$store.commit('set_Msg', this.$message({
-              type: 'warning',
-              message: this.$t('userSet.noUser'),
-              duration: 0,
-              showClose: true
-            }))
-          } else if (res.data.status === 100107 || res.data.status === 100102) {
-            this.$store.commit('set_Msg', this.$message({
-              type: 'warning',
-              message: this.$t('userSet.sendMailFail'),
-              duration: 0,
-              showClose: true
-            }))
-          } else {
-            this.$message({
-              type: 'success',
-              message: this.$t('userSet.sendMailSuccess')
-            })
-          }
-        } else {
-          this.$store.commit('set_Msg', this.$message({
-            type: 'warning',
-            message: this.$t('userSet.sendMailFail'),
-            duration: 0,
-            showClose: true
-          }))
-        }
-      })
-    },
-    changePass () {
-      this.getPass = true
-      this.userName = this.form.name
     }
   },
   mounted () {
     localStorage.removeItem('brokerId')
     this.$store.commit('back', false)
-    let vm = this
+    const vm = this
     this.$nextTick(fun => {
       document.addEventListener('keyup', function (e) {
         if (e.keyCode === 13) {
