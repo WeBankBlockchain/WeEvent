@@ -12,13 +12,13 @@
         <el-form-item :label="$t('userSet.confirmPassWord')" prop="checkPass" >
           <el-input type="password" v-model.trim="ruleForm.checkPass" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item
+        <!-- <el-form-item
           :label="$t('userSet.mail')"
           prop='email'
           v-show='reset'
           >
           <el-input type="email" v-model.trim="ruleForm.email" autocomplete="off"></el-input>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item v-show='reset'>
           <el-button type="primary" @click="submitForm('ruleForm')">{{$t('userSet.registered')}}</el-button>
         </el-form-item>
@@ -50,14 +50,14 @@ import API from '../API/resource'
 export default {
   data () {
     var checkName = (rule, value, callback) => {
-      let regex = /^[0-9A-Za-z]{6,20}$/
+      const regex = /^[0-9A-Za-z]{6,20}$/
       if (!value) {
         return callback(new Error(this.$t('userSet.emptyUserName')))
       } else {
         if (!regex.exec(value)) {
           return callback(new Error(this.$t('userSet.errorUserName')))
         } else {
-          let url = '/' + value + '/1'
+          const url = '/' + value + '/1'
           API.checkExsit(url).then(res => {
             if (res.data.data) {
               callback()
@@ -100,24 +100,11 @@ export default {
         callback()
       }
     }
-    var checkEmail = (rule, value, callback) => {
-      let reg = new RegExp(/^([a-zA-Z0-9._-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-])+/)
-      if (!value) {
-        callback()
-      } else {
-        if (reg.test(value)) {
-          callback()
-        } else {
-          callback(new Error(this.$t('userSet.errorEail')))
-        }
-      }
-    }
     return {
       ruleForm: {
         name: '',
         pass: '',
-        checkPass: '',
-        email: ''
+        checkPass: ''
       },
       ruleForm2: {
         name: localStorage.getItem('user'),
@@ -134,9 +121,6 @@ export default {
         ],
         checkPass: [
           { validator: checkPass, trigger: 'blur' }
-        ],
-        email: [
-          { validator: checkEmail, trigger: 'blur' }
         ]
       },
       rules2: {
@@ -154,15 +138,15 @@ export default {
   },
   methods: {
     submitForm (formName) {
-      let sha256 = require('js-sha256').sha256
+      const sha256 = require('js-sha256').sha256
       this.$refs[formName].validate((valid) => {
         if (valid) {
           let password = sha256(this.ruleForm.name + this.ruleForm.pass)
           password = password.toUpperCase()
-          let data = {
-            'username': this.ruleForm.name,
-            'password': password,
-            'email': this.ruleForm.email
+          const data = {
+            username: this.ruleForm.name,
+            password: password,
+            email: this.ruleForm.email
           }
           API.register(data).then(res => {
             if (res.data.status === 200) {
@@ -170,11 +154,10 @@ export default {
                 type: 'success',
                 message: this.$t('userSet.regSuccess')
               })
-              let e = {
-                'username': this.ruleForm.name,
-                'password': password
+              const e = {
+                username: this.ruleForm.name,
+                password: password
               }
-              console.log('aa')
               setTimeout(fun => {
                 this.login(e)
               }, 1000)
@@ -201,9 +184,9 @@ export default {
         passWord = passWord.toUpperCase()
         if (valid) {
           let data = {
-            'username': this.ruleForm2.name,
-            'oldPassword': oldPass,
-            'password': passWord
+            username: this.ruleForm2.name,
+            oldPassword: oldPass,
+            password: passWord
           }
           API.update(data).then(res => {
             if (res.status === 200) {
@@ -235,7 +218,7 @@ export default {
     login (e) {
       API.login(e).then(res => {
         if (res.status === 200 && res.data.code === 0) {
-          let base = JSON.parse(res.data.data)
+          const base = JSON.parse(res.data.data)
           localStorage.setItem('user', base.username)
           localStorage.setItem('token', base.Authorization)
           this.$router.push('./index')
