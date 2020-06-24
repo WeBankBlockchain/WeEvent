@@ -34,14 +34,14 @@ public class BaseEntity {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "create_date", insertable = false, updatable = false, columnDefinition = "Date default CURRENT_DATE")
+    @Column(name = "create_date", insertable = false, updatable = false, columnDefinition = "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP")
     @org.hibernate.annotations.Generated(value = GenerationTime.INSERT)
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date createDate;
 
-    @Column(name = "last_update", insertable = false, updatable = false, columnDefinition = "Date default CURRENT_DATE")
-    @org.hibernate.annotations.Generated(value = GenerationTime.INSERT)
-    @Temporal(TemporalType.DATE)
+    @Column(name = "last_update", insertable = false, updatable = false, columnDefinition = "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP")
+    @org.hibernate.annotations.Generated(value = GenerationTime.ALWAYS)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date lastUpdate;
 
 
