@@ -489,7 +489,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
     }
 
-    static class FileEventListener implements EventListener{
+    static class FileEventListener implements EventListener {
         private String receivePath;
         private final FtpInfo ftpInfo;
         private final FileListener fileListener;
@@ -501,19 +501,41 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
 
         @Override
-        public void onEvent(String topic, String fileName) {
+        public boolean onEvent(String topic, String fileName, boolean checkFile) {
             // upload file to ftp
+            boolean checkRet = false;
             if (this.ftpInfo != null) {
                 try {
                     FtpClientService ftpClientService = new FtpClientService();
                     ftpClientService.connect(this.ftpInfo.getHost(), this.ftpInfo.getPort(), this.ftpInfo.getUserName(), this.ftpInfo.getPassWord());
-                    if (StringUtils.isBlank(this.ftpInfo.getFtpReceivePath())) {
-                        log.info("upload file to ftp server, file：{}", fileName);
-                        ftpClientService.upLoadFile(this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
+
+                    if (checkFile) {
+                        // check file exist
+                        if (StringUtils.isBlank(this.ftpInfo.getFtpReceivePath())) {
+                            String[] files = ftpClientService.getFileList("./");
+                            for (String file : files) {
+                                if (file.equals(fileName)) {
+                                    checkRet = true;
+                                }
+                            }
+                        } else {
+                            String[] files = ftpClientService.getFileList(this.ftpInfo.getFtpReceivePath());
+                            for (String file : files) {
+                                if (file.equals(fileName)) {
+                                    checkRet = true;
+                                }
+                            }
+                        }
                     } else {
-                        // specify upload directory
-                        log.info("upload file to ftp server, to path: {}, file：{}", this.ftpInfo.getFtpReceivePath(), fileName);
-                        ftpClientService.upLoadFile(this.ftpInfo.getFtpReceivePath(), this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
+                        // upload file
+                        if (StringUtils.isBlank(this.ftpInfo.getFtpReceivePath())) {
+                            log.info("upload file to ftp server, file：{}", fileName);
+                            ftpClientService.upLoadFile(this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
+                        } else {
+                            // specify upload directory
+                            log.info("upload file to ftp server, to path: {}, file：{}", this.ftpInfo.getFtpReceivePath(), fileName);
+                            ftpClientService.upLoadFile(this.ftpInfo.getFtpReceivePath(), this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
+                        }
                     }
 
                 } catch (BrokerException e) {
@@ -521,6 +543,7 @@ public class WeEventFileClient implements IWeEventFileClient {
                 }
             }
             fileListener.onFile(topic, fileName);
+            return checkRet;
         }
 
         @Override

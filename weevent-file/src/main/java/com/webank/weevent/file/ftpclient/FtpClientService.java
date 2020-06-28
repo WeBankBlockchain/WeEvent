@@ -60,21 +60,26 @@ public class FtpClientService {
     /**
      * @param fileDir FTP file directory
      * @return list of file and directory in fileDir
-     * @throws IOException IOException
+     * @throws BrokerException BrokerException
      */
-    public String[] getFileList(String fileDir) throws IOException {
-        ftpClient.enterLocalPassiveMode();
-
-        FTPFile[] ftpFiles = ftpClient.listFiles(fileDir);
-
+    public String[] getFileList(String fileDir) throws BrokerException {
         String[] files = null;
-        if (ftpFiles != null) {
-            files = new String[ftpFiles.length];
-            for (int i = 0; i < ftpFiles.length; i++) {
-                files[i] = ftpFiles[i].getName();
+        try {
+            ftpClient.enterLocalPassiveMode();
+
+            FTPFile[] ftpFiles = ftpClient.listFiles(fileDir);
+
+            if (ftpFiles != null) {
+                files = new String[ftpFiles.length];
+                for (int i = 0; i < ftpFiles.length; i++) {
+                    files[i] = ftpFiles[i].getName();
+                }
             }
+            this.ftpClient.disconnect();
+        } catch (IOException e) {
+            log.error("list file error");
+            throw new BrokerException(ErrorCode.FTP_LIST_FILE_FAILED);
         }
-        this.ftpClient.disconnect();
         return files;
     }
 

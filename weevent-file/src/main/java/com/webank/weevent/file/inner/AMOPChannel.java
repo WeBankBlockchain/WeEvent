@@ -19,9 +19,17 @@ import org.fisco.bcos.channel.handler.AMOPVerifyTopicToKeyInfo;
 import org.springframework.core.io.InputStreamResource;
 
 import java.io.BufferedInputStream;
-import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * AMOP channel for file transport.
@@ -351,9 +359,10 @@ public class AMOPChannel extends ChannelPushCallback {
                     byte[] json = JsonHelper.object2JsonBytes(fileChunksMeta);
                     channelResponse = AMOPChannel.toChannelResponse(ErrorCode.SUCCESS, json);
 
-                    //
+                    // new thread upload file to ftp server
                     IWeEventFileClient.EventListener eventListener = this.topicListenerMap.get(fileChunksMeta.getTopic());
-                    new Thread(new uploadFile2Ftp(fileChunksMeta.getTopic(), fileChunksMeta.getFileName(), eventListener),"thread upload").start();
+                    ThreadPoolExecutor4FTP tpeFtp = new ThreadPoolExecutor4FTP();
+                    tpeFtp.start(fileChunksMeta.getTopic(), fileChunksMeta.getFileName(), false, eventListener);
                 } catch (BrokerException e) {
                     log.error("clean up not complete file failed", e);
                     channelResponse = AMOPChannel.toChannelResponse(e);
@@ -364,9 +373,16 @@ public class AMOPChannel extends ChannelPushCallback {
             case FileChannelExist: {
                 log.info("get {}, check if the file exists", fileEvent.getEventType());
                 try {
-                    boolean fileExist = this.fileTransportService.checkFileExist(fileEvent.getFileChunksMeta());
-                    log.info("check if the file exists success, fileName: {}, file existence: {}", fileEvent.getFileChunksMeta().getFileName(), fileExist);
-                    channelResponse = AMOPChannel.toChannelResponse(ErrorCode.SUCCESS, fileExist ? BOOLEAN_TRUE.getBytes() : BOOLEAN_FALSE.getBytes());
+                    FileChunksMeta fileChunksMeta = fileEvent.getFileChunksMeta();
+                    boolean fileExistLocal = this.fileTransportService.checkFileExist(fileChunksMeta);
+                    log.info("check if the file exists success, fileName: {}, local file existence: {}", fileChunksMeta.getFileName(), fileExistLocal);
+
+                    IWeEventFileClient.EventListener eventListener = this.topicListenerMap.get(fileChunksMeta.getTopic());
+                    ThreadPoolExecutor4FTP tpeFtp = new ThreadPoolExecutor4FTP();
+                    boolean fileExistFtp = tpeFtp.start(fileChunksMeta.getTopic(), fileChunksMeta.getFileName(), true, eventListener);
+                    log.info("check if the file exists success, ftp fileName: {}, file existence: {}", fileChunksMeta.getFileName(), fileExistFtp);
+
+                    channelResponse = AMOPChannel.toChannelResponse(ErrorCode.SUCCESS, fileExistLocal || fileExistFtp ? BOOLEAN_TRUE.getBytes() : BOOLEAN_FALSE.getBytes());
                 } catch (BrokerException e) {
                     log.error("check if the file exists failed", e);
                     channelResponse = AMOPChannel.toChannelResponse(e);
@@ -411,21 +427,41 @@ public class AMOPChannel extends ChannelPushCallback {
 
     }
 
-    // new class for upload file to ftp server
-    static class uploadFile2Ftp implements Runnable {
+    static class FtpTask implements Callable<Boolean> {
         private final String topic;
         private final String fileName;
+        private final boolean checkFile;
         private final IWeEventFileClient.EventListener eventListener;
 
-
-        public uploadFile2Ftp(String topic, String fileName, IWeEventFileClient.EventListener eventListener){
+        public FtpTask(String topic, String fileName, boolean checkFile, IWeEventFileClient.EventListener eventListener) {
             this.topic = topic;
             this.fileName = fileName;
+            this.checkFile = checkFile;
             this.eventListener = eventListener;
         }
+
         @Override
-        public void run() {
-            eventListener.onEvent(this.topic, this.fileName);
+        public Boolean call() {
+            return eventListener.onEvent(this.topic, this.fileName, checkFile);
+        }
+    }
+
+    public static class ThreadPoolExecutor4FTP {
+
+        public boolean start(String topic, String fileName, boolean checkFile , IWeEventFileClient.EventListener eventListener) throws BrokerException {
+            try {
+                ThreadPoolExecutor tpe = new ThreadPoolExecutor(5, 10, 0,
+                        TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(),
+                        new ThreadPoolExecutor.CallerRunsPolicy());
+
+                FtpTask ftpTask = new FtpTask(topic, fileName, checkFile, eventListener);
+                Future<Boolean> ret = tpe.submit(ftpTask);
+                tpe.shutdown();
+                return ret.get();
+            } catch (Exception e) {
+                log.error("execute thread task error.");
+                throw new BrokerException(ErrorCode.UNKNOWN_ERROR);
+            }
         }
     }
 }

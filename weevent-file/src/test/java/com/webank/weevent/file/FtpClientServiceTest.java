@@ -8,7 +8,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -45,7 +44,7 @@ public class FtpClientServiceTest {
 
     @Test
     @Ignore
-    public void testFtpUpLoad() throws  BrokerException {
+    public void testFtpUpLoad() throws BrokerException {
         FtpClientService ftpClientService = new FtpClientService();
         ftpClientService.connect(this.ftpHost, this.ftpPort, this.ftpUser, this.ftpPassWord);
 
@@ -93,7 +92,7 @@ public class FtpClientServiceTest {
     }
 
     @Test
-    public void testGetFileList() throws IOException {
+    public void testGetFileList() throws BrokerException {
         FtpClientService ftpClientService = mock(FtpClientService.class);
         String[] fileList = {"test1.txt", "test2.txt"};
         when(ftpClientService.getFileList("./")).thenReturn(fileList);
