@@ -21,7 +21,7 @@ public class FtpClientServiceTest {
     private String ftpHost = "127.0.0.1";
     private int ftpPort = 21;
     private String ftpUser = "ftpuser";
-    private String ftpPassWord = "abcd1234";
+    private String ftpPassWord = "";
 
 
     @Test

@@ -28,14 +28,14 @@ public class WeEventFileClientTest {
     private String topicName = "com.weevent.file";
     private String groupId = "1";
     private String localReceivePath = "./logs";
-    // chunk size 1MB
+    // chunk size 1MB12
     private int fileChunkSize = 1048576;
     private FiscoConfig fiscoConfig;
 
     private String host = "127.0.0.1";
     private int port = 21;
     private String userName = "ftpuser";
-    private String passWd = "abcd1234";
+    private String passWd = "";
 
 
 
