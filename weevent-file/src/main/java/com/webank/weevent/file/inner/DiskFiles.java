@@ -247,4 +247,26 @@ public class DiskFiles {
 
         return fileChunksMetas;
     }
+
+    public boolean checkFileExist(FileChunksMeta fileChunksMeta) throws BrokerException {
+        // ensure path exist and disk space
+        String filePath = this.path + "/" + fileChunksMeta.getTopic();
+        File path = new File(filePath);
+        path.mkdirs();
+        if (!path.exists()) {
+            log.error("not exist local file path, {}", filePath);
+            throw new BrokerException(ErrorCode.FILE_NOT_EXIST_PATH);
+        } else {
+            // check if file exists
+            File[] fileList = path.listFiles();
+            if (fileList != null) {
+                for (File file : fileList) {
+                    if (file.getName().equals(fileChunksMeta.getFileName())) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 }

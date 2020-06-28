@@ -476,6 +476,10 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
     }
 
+    public boolean getFileExistence(String fileName, String topic, String groupId) throws BrokerException {
+        return this.fileTransportService.getFileExistence(fileName, topic, groupId);
+    }
+
     private static void validateLocalFile(String filePath) throws BrokerException {
         if (StringUtils.isBlank(filePath)) {
             throw new BrokerException(ErrorCode.LOCAL_FILE_IS_EMPTY);

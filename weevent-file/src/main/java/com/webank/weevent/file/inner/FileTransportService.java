@@ -15,7 +15,13 @@ import com.webank.weevent.file.dto.FileTransportStats;
 import com.webank.weevent.file.service.FileChunksMeta;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.dto.ChannelResponse;
+import org.springframework.util.DigestUtils;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -133,6 +139,13 @@ public class FileTransportService {
 
 
         return fileTransportStats;
+    }
+
+    public boolean getFileExistence(String fileName, String topic, String groupId) throws BrokerException {
+
+        FileChunksMeta fileChunksMeta = new FileChunksMeta("", fileName, 0, "", topic, groupId, false);
+
+        return channel.getFileExistence(fileChunksMeta);
     }
 
     public FileChunksMeta openChannel(FileChunksMeta fileChunksMeta) throws BrokerException {
@@ -278,5 +291,12 @@ public class FileTransportService {
 
     public void writeChunkData(FileEvent fileEvent) throws BrokerException {
         this.diskFiles.writeChunkData(fileEvent.getFileId(), fileEvent.getChunkIndex(), fileEvent.getChunkData());
+    }
+
+    public boolean checkFileExist(FileChunksMeta fileChunksMeta) throws BrokerException {
+        log.info("check if the file exists, fileName: {}", fileChunksMeta.getFileName());
+
+        // create local file
+        return  this.diskFiles.checkFileExist(fileChunksMeta);
     }
 }

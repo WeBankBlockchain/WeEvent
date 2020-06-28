@@ -190,4 +190,6 @@ public interface IWeEventFileClient {
      * @throws BrokerException BrokerException
      */
     void genPemFile(String filePath) throws BrokerException;
+
+    boolean getFileExistence(String fileName, String topic, String groupId) throws BrokerException;
 }

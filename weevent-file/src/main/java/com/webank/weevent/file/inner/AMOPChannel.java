@@ -34,6 +34,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 public class AMOPChannel extends ChannelPushCallback {
+    private static final String BOOLEAN_TRUE = "true";
+    private static final String BOOLEAN_FALSE = "false";
     private final FileTransportService fileTransportService;
     public Service service;
 
@@ -236,6 +238,21 @@ public class AMOPChannel extends ChannelPushCallback {
         throw toBrokerException(rsp);
     }
 
+    public boolean getFileExistence(FileChunksMeta fileChunksMeta) throws BrokerException {
+        log.info("send AMOP message to Check file existence");
+        FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileChannelExist, fileChunksMeta.getFileId());
+        fileEvent.setFileChunksMeta(fileChunksMeta);
+        ChannelResponse rsp = this.sendEvent(fileChunksMeta.getTopic(), fileEvent);
+        if (rsp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
+            log.info("Check file existence success");
+            String resString =  JsonHelper.json2Object(rsp.getContentByteArray(), String.class);
+            return resString.equals(BOOLEAN_TRUE);
+        }
+
+        log.error("Check file existence failed");
+        throw toBrokerException(rsp);
+    }
+
     public ChannelResponse sendEvent(String topic, FileEvent fileEvent) throws BrokerException {
         if (this.subTopics.contains(topic) || this.subVerifyTopics.containsKey(topic)) {
             log.error("this is already receiver side for topic: {}", topic);
@@ -339,6 +356,19 @@ public class AMOPChannel extends ChannelPushCallback {
                     new Thread(new uploadFile2Ftp(fileChunksMeta.getTopic(), fileChunksMeta.getFileName(), eventListener),"thread upload").start();
                 } catch (BrokerException e) {
                     log.error("clean up not complete file failed", e);
+                    channelResponse = AMOPChannel.toChannelResponse(e);
+                }
+            }
+            break;
+
+            case FileChannelExist: {
+                log.info("get {}, check if the file exists", fileEvent.getEventType());
+                try {
+                    boolean fileExist = this.fileTransportService.checkFileExist(fileEvent.getFileChunksMeta());
+                    log.info("check if the file exists success, fileName: {}, file existence: {}", fileEvent.getFileChunksMeta().getFileName(), fileExist);
+                    channelResponse = AMOPChannel.toChannelResponse(ErrorCode.SUCCESS, fileExist ? BOOLEAN_TRUE.getBytes() : BOOLEAN_FALSE.getBytes());
+                } catch (BrokerException e) {
+                    log.error("check if the file exists failed", e);
                     channelResponse = AMOPChannel.toChannelResponse(e);
                 }
             }
