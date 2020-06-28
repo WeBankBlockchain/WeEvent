@@ -194,6 +194,21 @@ public class FileControllerTest extends JUnitTestBase {
         String filePath = rootPath + "logs" + File.separator + "upload" + File.separator + fileId;
         Assert.assertTrue(Utils.removeLocalFile(filePath));
     }
+    
+    @Test
+    public void testGenPemFile() throws Exception {
+        String rootPath = System.getProperty("user.dir") + File.separator;
+        String fileId = UUID.randomUUID().toString().replace("-", "");
+        String filePath = rootPath + "logs" + File.separator + "upload" + File.separator + fileId;
+        String url = "/file/genPemFile?groupId=" + 1 + "&brokerId=" + 1 + "&filePath="+ filePath;
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token))
+                .andReturn().getResponse();
+        String result = response.getContentAsString();
+        Assert.assertNotNull(result);
+        Map<String, String> map = JsonHelper.json2Object(result, new TypeReference<Map<String, String>>() {
+        });
+        Assert.assertEquals(String.valueOf(ErrorCode.GENERATE_PEM_FAILED.getCode()), map.get("code"));
+    }
 
     private void openTopic() throws Exception {
         String content = "{\"brokerId\":\"" + this.brokerIdMap.get("brokerId") + "\",\"topic\":\"" + this.senderTransport + "\",\"userId\":\"1\",\"creater\":\"1\",\"groupId\":\"1\"}";
