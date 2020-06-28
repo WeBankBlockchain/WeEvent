@@ -207,7 +207,7 @@ public class FileControllerTest extends JUnitTestBase {
         Assert.assertNotNull(result);
         Map<String, String> map = JsonHelper.json2Object(result, new TypeReference<Map<String, String>>() {
         });
-        Assert.assertEquals(String.valueOf(ErrorCode.GENERATE_PEM_FAILED.getCode()), map.get("code"));
+        Assert.assertEquals(String.valueOf(ErrorCode.TRANSPORT_NOT_EXISTS.getCode()), map.get("code"));
     }
 
     private void openTopic() throws Exception {
