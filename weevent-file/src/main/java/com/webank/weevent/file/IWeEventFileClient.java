@@ -72,8 +72,10 @@ public interface IWeEventFileClient {
          *
          * @param topic topic name
          * @param fileName file name
+         * @param checkFile is check file
+         * @return check file result
          */
-        void onEvent(String topic, String fileName);
+        boolean onEvent(String topic, String fileName, boolean checkFile);
 
         /**
          * Called while raise exception.

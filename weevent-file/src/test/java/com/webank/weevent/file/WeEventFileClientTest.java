@@ -32,10 +32,10 @@ public class WeEventFileClientTest {
     private int fileChunkSize = 1048576;
     private FiscoConfig fiscoConfig;
 
-    private String host = "127.0.0.1";
-    private int port = 21;
+    private String host = "10.107.105.203";
+    private int port = 21000;
     private String userName = "ftpuser";
-    private String passWd = "abcd1234";
+    private String passWd = "61657jchan";
 
 
 
@@ -359,6 +359,6 @@ public class WeEventFileClientTest {
     public void testGetFileExistence() throws BrokerException {
         WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
         boolean ret = weEventFileClient.getFileExistence("ca.crt", this.topicName, this.groupId);
-        Assert.assertTrue(ret);
+        Assert.assertFalse(ret);
     }
 }

@@ -93,7 +93,7 @@ public class FtpClientServiceTest {
     }
 
     @Test
-    public void testGetFileList() throws IOException {
+    public void testGetFileList() throws BrokerException {
         FtpClientService ftpClientService = mock(FtpClientService.class);
         String[] fileList = {"test1.txt", "test2.txt"};
         when(ftpClientService.getFileList("./")).thenReturn(fileList);
