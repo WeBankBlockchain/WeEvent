@@ -47,7 +47,7 @@ public class WeEventFileClientTest {
 
 
     @Test
-    //@Ignore
+    @Ignore
     public void testPublishFile() throws Exception {
         WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
 
@@ -75,7 +75,7 @@ public class WeEventFileClientTest {
         WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
         weEventFileClient.openTransport4Receiver(this.topicName, fileListener);
 
-        Thread.sleep(1000*60);
+        Thread.sleep(1000);
         Assert.assertTrue(true);
     }
 
@@ -119,7 +119,7 @@ public class WeEventFileClientTest {
         WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
         weEventFileClient.openTransport4Receiver(this.topicName, fileListener, resource.getInputStream());
 
-        Thread.sleep(1000*60);
+        Thread.sleep(1000);
         Assert.assertTrue(true);
     }
 
@@ -348,14 +348,13 @@ public class WeEventFileClientTest {
 
     @Test
     public void testGetPemFile() throws BrokerException {
-        FtpInfo ftpInfo = new FtpInfo(this.host, this.port, this.userName, this.passWd, "./2020052811");
         WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
-
         weEventFileClient.genPemFile("./logs");
         Assert.assertTrue(true);
     }
 
     @Test
+    @Ignore
     public void testGetFileExistence() throws BrokerException {
         WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
         boolean ret = weEventFileClient.getFileExistence("ca.crt", this.topicName, this.groupId);
