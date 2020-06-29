@@ -48,22 +48,22 @@ public class WebSocketTransport extends WebSocketClient {
     private boolean connected = false;
 
     // atomic sequence on connection
-    private AtomicLong sequence = new AtomicLong(0);
+    private final AtomicLong sequence = new AtomicLong(0);
 
     // stomp command response (receipt <-> ResponseFuture)
-    private Map<Long, ResponseFuture> futures = new ConcurrentHashMap<>();
+    private final Map<Long, ResponseFuture> futures = new ConcurrentHashMap<>();
 
     // (receiptId in stomp <-> subscriptionId in biz)
-    private Map<String, String> subscriptionId2ReceiptId = new ConcurrentHashMap<>();
+    private final Map<String, String> subscriptionId2ReceiptId = new ConcurrentHashMap<>();
 
     // (receiptId <-> subscriptionId)
-    private Map<String, String> receiptId2SubscriptionId = new ConcurrentHashMap<>();
+    private final Map<String, String> receiptId2SubscriptionId = new ConcurrentHashMap<>();
 
     // (headerId in stomp <-> asyncSeq in biz )
-    private Map<String, Long> sequence2Id = new ConcurrentHashMap<>();
+    private final Map<String, Long> sequence2Id = new ConcurrentHashMap<>();
 
     //(subscription <-> <WeEvent topic, IWeEventClient.EventListener>)
-    private Map<String, Pair<TopicContent, IWeEventClient.EventListener>> subscription2EventCache = new ConcurrentHashMap<>();
+    private final Map<String, Pair<TopicContent, IWeEventClient.EventListener>> subscription2EventCache = new ConcurrentHashMap<>();
 
     private Pair<String, String> account;
 
@@ -71,9 +71,9 @@ public class WebSocketTransport extends WebSocketClient {
     private boolean connectFlag = false;
 
     class ResponseFuture implements Future<StompHeaderAccessor> {
-        private CountDownLatch latch = new CountDownLatch(1);
+        private final CountDownLatch latch = new CountDownLatch(1);
 
-        private Long key;
+        private final Long key;
         private StompHeaderAccessor stompHeaderAccessor;
 
         ResponseFuture(Long key) {
@@ -272,7 +272,8 @@ public class WebSocketTransport extends WebSocketClient {
         try {
             stompHeaderAccessor = this.stompRequestAsync(req, asyncSeq).get(this.timeout, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            log.error("{} over stomp execute error", commandStr, e);
+            log.error("{} over stomp execute Interrupted", commandStr, e);
+            Thread.currentThread().interrupt();
             throw new BrokerException(ErrorCode.SDK_EXCEPTION_STOMP_EXECUTE);
         } catch (TimeoutException e) {
             log.error("{} over stomp timeout", commandStr, e);
