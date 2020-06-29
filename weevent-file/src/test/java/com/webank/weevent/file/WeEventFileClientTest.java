@@ -35,7 +35,7 @@ public class WeEventFileClientTest {
     private String host = "127.0.0.1";
     private int port = 21;
     private String userName = "ftpuser";
-    private String passWd = "abcd1234";
+    private String passWd = "";
 
 
 
@@ -75,7 +75,7 @@ public class WeEventFileClientTest {
         WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
         weEventFileClient.openTransport4Receiver(this.topicName, fileListener);
 
-        Thread.sleep(1000*60);
+        Thread.sleep(1000);
         Assert.assertTrue(true);
     }
 
@@ -83,7 +83,7 @@ public class WeEventFileClientTest {
     @Ignore
     public void testPublishFileWithVerify() throws Exception {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        Resource resource = resolver.getResource("classpath:" + "0x2809a9902e47d6fcaabe6d0183855d9201c93af1.pub.pem");
+        Resource resource = resolver.getResource("classpath:" + "0x2809a9902e47d6fcaabe6d0183855d9201c93af1.public.pem");
 
         WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
 
@@ -119,7 +119,7 @@ public class WeEventFileClientTest {
         WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
         weEventFileClient.openTransport4Receiver(this.topicName, fileListener, resource.getInputStream());
 
-        Thread.sleep(1000*60);
+        Thread.sleep(1000);
         Assert.assertTrue(true);
     }
 
@@ -347,11 +347,17 @@ public class WeEventFileClientTest {
     }
 
     @Test
-    public void test() throws BrokerException {
-        FtpInfo ftpInfo = new FtpInfo(this.host, this.port, this.userName, this.passWd, "./2020052811");
-        WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, ftpInfo, this.fileChunkSize, this.fiscoConfig);
-
+    public void testGetPemFile() throws BrokerException {
+        WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
         weEventFileClient.genPemFile("./logs");
         Assert.assertTrue(true);
+    }
+
+    @Test
+    @Ignore
+    public void testIsFileExist() throws BrokerException {
+        WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
+        boolean ret = weEventFileClient.isFileExist("ca.crt", this.topicName, this.groupId);
+        Assert.assertTrue(ret);
     }
 }
