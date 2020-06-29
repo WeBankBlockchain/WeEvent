@@ -161,14 +161,15 @@ public class MQTTOverWebSocketTest extends JUnitTestBase {
     }
 
     @Test
-    public void testPing() {
+    public void testPing() throws InterruptedException {
         try {
-            Thread.sleep(this.actionTimeout * 3);
+            Thread.sleep((long) this.actionTimeout * 3);
 
             Assert.assertTrue(true);
         } catch (InterruptedException e) {
             log.error("exception", e);
             Assert.fail();
+            throw e;
         }
     }
 
