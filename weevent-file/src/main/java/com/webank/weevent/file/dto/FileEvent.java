@@ -28,6 +28,8 @@ public class FileEvent {
         FileChannelData(12),
         // end to a file transport
         FileChannelEnd(13),
+
+        FileChannelExist(14),
         ;
 
         private final int code;
