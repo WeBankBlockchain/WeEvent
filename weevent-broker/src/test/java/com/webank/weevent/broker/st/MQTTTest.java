@@ -167,14 +167,15 @@ public class MQTTTest extends JUnitTestBase {
     }
 
     @Test
-    public void testPing() {
+    public void testPing() throws InterruptedException {
         try {
-            Thread.sleep(this.actionTimeout * 3);
+            Thread.sleep((long) this.actionTimeout * 3);
 
             Assert.assertTrue(true);
         } catch (InterruptedException e) {
             log.error("exception", e);
             Assert.fail();
+            throw e;
         }
     }
 
@@ -448,7 +449,7 @@ public class MQTTTest extends JUnitTestBase {
         // reconnect subscribe get the offline message
         try {
             Thread.sleep(this.actionTimeout);
-            
+
             MqttClient client2 = new MqttClient(this.url, clientId, null);
             client2.connect(this.persistOptions);
 
