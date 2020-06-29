@@ -39,8 +39,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 @Slf4j
 public class AMOPChannel extends ChannelPushCallback {
-    private static final String BOOLEAN_TRUE = "true";
-    private static final String BOOLEAN_FALSE = "false";
     private final FileTransportService fileTransportService;
     public Service service;
     public ThreadPoolTaskExecutor threadPool;
@@ -62,12 +60,12 @@ public class AMOPChannel extends ChannelPushCallback {
      * Create a AMOP channel on service for subscribe topic
      *
      * @param fileTransportService component class
-     * @param groupId              group id
+     * @param groupId group id
      * @throws BrokerException exception
      */
     public AMOPChannel(FileTransportService fileTransportService, String groupId) throws BrokerException {
         this.fileTransportService = fileTransportService;
-        this.threadPool = this.initThreadPool(5, 10, 10);
+        this.threadPool = this.initThreadPool(1, 10);
 
         // new service
         this.service = Web3SDKConnector.initService(Long.valueOf(groupId), this.fileTransportService.getFiscoConfig());
@@ -422,12 +420,11 @@ public class AMOPChannel extends ChannelPushCallback {
 
     }
 
-    private ThreadPoolTaskExecutor initThreadPool(int core, int max, int keepalive) {
+    private ThreadPoolTaskExecutor initThreadPool(int core, int keepalive) {
         // init thread pool
         ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
         pool.setThreadNamePrefix("ftp service-");
         pool.setCorePoolSize(core);
-        pool.setMaxPoolSize(max);
         // queue conflict with thread pool scale up, forbid it
         pool.setQueueCapacity(0);
         pool.setKeepAliveSeconds(keepalive);

@@ -355,7 +355,7 @@ public class WeEventFileClientTest {
 
     @Test
     @Ignore
-    public void testGetFileExistence() throws BrokerException {
+    public void testIsFileExist() throws BrokerException {
         WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
         boolean ret = weEventFileClient.isFileExist("ca.crt", this.topicName, this.groupId);
         Assert.assertTrue(ret);

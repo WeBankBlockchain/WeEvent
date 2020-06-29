@@ -192,7 +192,7 @@ public class FtpClientService {
      * download a single file
      *
      * @param remoteFilePath file path in ftp server
-     * @param localPath      local path for download file
+     * @param localPath local path for download file
      * @throws BrokerException BrokerException
      */
     public void downLoadFile(String remoteFilePath, String localPath) throws BrokerException {
