@@ -163,6 +163,7 @@ public enum ErrorCode {
     FTP_RETRIEVE_FILE_FAILED(200710, "remote path invalid"),
     FTP_UNKNOWN_REMOTE_FILE(200711, "unknown remote file"),
     FTP_NOT_FILE(200712, "it's not a file"),
+    FTP_LIST_FILE_FAILED(20013, "list file error"),
     ;
 
     /**

@@ -1,5 +1,9 @@
 package com.webank.weevent.file;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.FiscoBcosInstance;
@@ -10,18 +14,14 @@ import com.webank.weevent.core.fisco.util.WeEventUtils;
 import com.webank.weevent.file.inner.FileTransportService;
 import com.webank.weevent.file.service.FileChunksMeta;
 import com.webank.weevent.file.service.FileChunksTransport;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * FileChunks Tester.
