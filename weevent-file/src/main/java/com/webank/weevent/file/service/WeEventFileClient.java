@@ -1,35 +1,5 @@
 package com.webank.weevent.file.service;
 
-import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.client.ErrorCode;
-import com.webank.weevent.client.SendResult;
-import com.webank.weevent.core.FiscoBcosInstance;
-import com.webank.weevent.core.IConsumer;
-import com.webank.weevent.core.IProducer;
-import com.webank.weevent.core.config.FiscoConfig;
-import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
-import com.webank.weevent.file.IWeEventFileClient;
-import com.webank.weevent.file.dto.FileChunksMetaPlus;
-import com.webank.weevent.file.dto.FileChunksMetaStatus;
-import com.webank.weevent.file.dto.FileTransportStats;
-import com.webank.weevent.file.ftpclient.FtpClientService;
-import com.webank.weevent.file.ftpclient.FtpInfo;
-import com.webank.weevent.file.inner.AMOPChannel;
-import com.webank.weevent.file.inner.DiskFiles;
-import com.webank.weevent.file.inner.FileTransportService;
-import com.webank.weevent.file.inner.PemFile;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.bouncycastle.jce.ECNamedCurveTable;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
-import org.fisco.bcos.channel.client.Service;
-import org.fisco.bcos.channel.handler.AMOPVerifyKeyInfo;
-import org.fisco.bcos.channel.handler.AMOPVerifyTopicToKeyInfo;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
-
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -48,6 +18,37 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
+import com.webank.weevent.client.SendResult;
+import com.webank.weevent.core.FiscoBcosInstance;
+import com.webank.weevent.core.IConsumer;
+import com.webank.weevent.core.IProducer;
+import com.webank.weevent.core.config.FiscoConfig;
+import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
+import com.webank.weevent.file.IWeEventFileClient;
+import com.webank.weevent.file.dto.FileChunksMetaPlus;
+import com.webank.weevent.file.dto.FileChunksMetaStatus;
+import com.webank.weevent.file.dto.FileTransportStats;
+import com.webank.weevent.file.ftpclient.FtpClientService;
+import com.webank.weevent.file.ftpclient.FtpInfo;
+import com.webank.weevent.file.inner.AMOPChannel;
+import com.webank.weevent.file.inner.DiskFiles;
+import com.webank.weevent.file.inner.FileTransportService;
+import com.webank.weevent.file.inner.PemFile;
+
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.jce.ECNamedCurveTable;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
+import org.fisco.bcos.channel.client.Service;
+import org.fisco.bcos.channel.handler.AMOPVerifyKeyInfo;
+import org.fisco.bcos.channel.handler.AMOPVerifyTopicToKeyInfo;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 
 @Slf4j
 public class WeEventFileClient implements IWeEventFileClient {
@@ -107,24 +108,12 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
     }
 
-    /**
-     * open transport for sender.
-     *
-     * @param topic topic name
-     */
     public void openTransport4Sender(String topic) {
         if (!this.fileTransportService.getChannel().senderTopics.contains(topic)) {
             this.fileTransportService.getChannel().senderTopics.add(topic);
         }
     }
 
-    /**
-     * open transport for authentication sender.
-     *
-     * @param topic topic name
-     * @param publicPem public pem inputstream
-     * @throws BrokerException exception
-     */
     public void openTransport4Sender(String topic, InputStream publicPem) throws BrokerException {
         // publicPem is public key
         BufferedInputStream bufferedInputStream = new BufferedInputStream(publicPem);
@@ -187,14 +176,6 @@ public class WeEventFileClient implements IWeEventFileClient {
         amopChannel.senderVerifyTopics.put(topic, service);
     }
 
-    /**
-     * open a channel for authentication sender.
-     *
-     * @param topic topic name
-     * @param publicPemPath public pem path string
-     * @throws BrokerException exception
-     * @throws IOException exception
-     */
     public void openTransport4Sender(String topic, String publicPemPath) throws BrokerException, IOException {
         if (StringUtils.isBlank(publicPemPath)) {
             log.error("public key pem path is blank.");
@@ -210,17 +191,6 @@ public class WeEventFileClient implements IWeEventFileClient {
         openTransport4Sender(topic, inputStream);
     }
 
-    /**
-     * Publish a file to topic.
-     * The file's data DO NOT stored in block chain. Yes, it's not persist, may be deleted sometime after subscribe notify.
-     *
-     * @param topic binding topic
-     * @param filePath local file to be send
-     * @return FileChunksMeta
-     * @throws BrokerException broker exception
-     * @throws IOException IOException
-     * @throws InterruptedException InterruptedException
-     */
     @Override
     public FileChunksMeta publishFile(String topic, String filePath, boolean overwrite) throws BrokerException, IOException, InterruptedException {
 
@@ -243,13 +213,6 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
     }
 
-    /**
-     * open transport for receiver.
-     *
-     * @param topic topic name
-     * @param fileListener notify interface
-     * @throws BrokerException broker exception
-     */
     public void openTransport4Receiver(String topic, FileListener fileListener) throws BrokerException {
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
 
@@ -258,22 +221,10 @@ public class WeEventFileClient implements IWeEventFileClient {
         amopChannel.subTopic(topic, fileEventListener);
     }
 
-    /**
-     * open transport for authentication receiver.
-     *
-     * @param topic topic name
-     * @param fileListener notify interface
-     * @param privatePem private key pem inputstream
-     * @throws BrokerException broker exception
-     */
     public void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem) throws BrokerException {
         // privatePem is private  key
         BufferedInputStream bufferedInputStream = new BufferedInputStream(privatePem);
         try {
-            if (privatePem == null) {
-                log.error("private key pem inputstream is null.");
-                throw new BrokerException(ErrorCode.PARAM_ISNULL);
-            }
             bufferedInputStream.mark(bufferedInputStream.available() + 1);
             String publicKey = IOUtils.toString(bufferedInputStream, StandardCharsets.UTF_8);
             if (!publicKey.contains(PRIVATE_KEY_DESC)) {
@@ -294,15 +245,6 @@ public class WeEventFileClient implements IWeEventFileClient {
         amopChannel.subTopic(topic, groupId, bufferedInputStream, fileEventListener);
     }
 
-    /**
-     * open transport for authentication receiver.
-     *
-     * @param topic topic name
-     * @param fileListener notify interface
-     * @param privatePemPath private key pem path string
-     * @throws IOException IOException
-     * @throws BrokerException InterruptedException
-     */
     public void openTransport4Receiver(String topic, FileListener fileListener, String privatePemPath) throws IOException, BrokerException {
         if (StringUtils.isBlank(privatePemPath)) {
             log.error("private key pem path is blank.");
@@ -318,11 +260,6 @@ public class WeEventFileClient implements IWeEventFileClient {
         openTransport4Receiver(topic, fileListener, inputStream);
     }
 
-    /**
-     * close transport.
-     *
-     * @param topic topic name
-     */
     public void closeTransport(String topic) {
         AMOPChannel channel = this.fileTransportService.getChannel();
         // unSubscribe topic
@@ -336,12 +273,6 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
     }
 
-    /**
-     * query transport status.
-     *
-     * @param topicName topic name
-     * @return transport status
-     */
     @Override
     public FileTransportStats status(String topicName) {
         FileTransportStats fileTransportStats = this.fileTransportService.stats(true, this.groupId, topicName);
@@ -373,13 +304,6 @@ public class WeEventFileClient implements IWeEventFileClient {
         return retFileTransportStats;
     }
 
-    /**
-     * list received files.
-     *
-     * @param topic topic name
-     * @return filechunksmeta  filechunksmeta
-     * @throws BrokerException broker exception
-     */
     public List<FileChunksMeta> listFiles(String topic) throws BrokerException {
         // get json from disk
         List<File> fileList = new ArrayList<>();
@@ -412,13 +336,6 @@ public class WeEventFileClient implements IWeEventFileClient {
         return fileChunksMetaList;
     }
 
-    /**
-     * sign a file transport event.
-     *
-     * @param fileChunksMeta fileChunksMeta
-     * @return send result and eventId
-     * @throws BrokerException broker exception
-     */
     public SendResult sign(FileChunksMeta fileChunksMeta) throws BrokerException {
         return this.fileTransportService.sendSign(fileChunksMeta);
     }
@@ -436,20 +353,10 @@ public class WeEventFileClient implements IWeEventFileClient {
 
     }
 
-    /**
-     * get DiskFiles.
-     * @return DiskFiles
-     */
     public DiskFiles getDiskFiles() {
         return this.fileTransportService.getDiskFiles();
     }
 
-    /**
-     * generate pem key pair.
-     *
-     * @param filePath output pem file path
-     * @throws BrokerException BrokerException
-     */
     public void genPemFile(String filePath) throws BrokerException {
         validateLocalFile(filePath);
         try {
@@ -489,8 +396,36 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
     }
 
-    static class FileEventListener implements EventListener {
-        private String receivePath;
+    /**
+     * Interface for event notify callback
+     */
+    public interface EventListener {
+        /**
+         * check if file exists at ftp server.
+         *
+         * @param fileName file name
+         * @return true if file exist.
+         */
+        boolean checkFile(String fileName);
+
+        /**
+         * Called while new event arrived.
+         *
+         * @param topic topic name
+         * @param fileName file name
+         */
+        void onEvent(String topic, String fileName);
+
+        /**
+         * Called while raise exception.
+         *
+         * @param e the e
+         */
+        void onException(Throwable e);
+    }
+
+    static class FileEventListener implements EventListener{
+        private final String receivePath;
         private final FtpInfo ftpInfo;
         private final FileListener fileListener;
 
@@ -500,53 +435,59 @@ public class WeEventFileClient implements IWeEventFileClient {
             this.fileListener = fileListener;
         }
 
-        @Override
-        public boolean onEvent(String topic, String fileName, boolean checkFile) {
-            // upload file to ftp
-            boolean checkRet = false;
+        public boolean checkFile(String fileName) {
+            boolean ret = false;
             if (this.ftpInfo != null) {
                 try {
                     FtpClientService ftpClientService = new FtpClientService();
                     ftpClientService.connect(this.ftpInfo.getHost(), this.ftpInfo.getPort(), this.ftpInfo.getUserName(), this.ftpInfo.getPassWord());
 
-                    if (checkFile) {
-                        // check file exist
-                        if (StringUtils.isBlank(this.ftpInfo.getFtpReceivePath())) {
-                            String[] files = ftpClientService.getFileList("./");
-                            for (String file : files) {
-                                if (file.equals(fileName)) {
-                                    checkRet = true;
-                                }
-                            }
-                        } else {
-                            String[] files = ftpClientService.getFileList(this.ftpInfo.getFtpReceivePath());
-                            for (String file : files) {
-                                if (file.equals(fileName)) {
-                                    checkRet = true;
-                                }
+                    // check file exist
+                    if (StringUtils.isBlank(this.ftpInfo.getFtpReceivePath())) {
+                        String[] files = ftpClientService.getFileList("./");
+                        for (String file : files) {
+                            if (file.equals(fileName)) {
+                                ret = true;
                             }
                         }
                     } else {
-                        // upload file
-                        if (StringUtils.isBlank(this.ftpInfo.getFtpReceivePath())) {
-                            log.info("upload file to ftp server, file：{}", fileName);
-                            ftpClientService.upLoadFile(this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
-                        } else {
-                            // specify upload directory
-                            log.info("upload file to ftp server, to path: {}, file：{}", this.ftpInfo.getFtpReceivePath(), fileName);
-                            ftpClientService.upLoadFile(this.ftpInfo.getFtpReceivePath(), this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
+                        String[] files = ftpClientService.getFileList(this.ftpInfo.getFtpReceivePath());
+                        for (String file : files) {
+                            if (file.equals(fileName)) {
+                                ret = true;
+                            }
                         }
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            return ret;
+        }
 
+        @Override
+        public void onEvent(String topic, String fileName) {
+            // upload file to ftp
+            if (this.ftpInfo != null) {
+                try {
+                    FtpClientService ftpClientService = new FtpClientService();
+                    ftpClientService.connect(this.ftpInfo.getHost(), this.ftpInfo.getPort(), this.ftpInfo.getUserName(), this.ftpInfo.getPassWord());
+                    // upload file
+                    if (StringUtils.isBlank(this.ftpInfo.getFtpReceivePath())) {
+                        log.info("upload file to ftp server, file：{}", fileName);
+                        ftpClientService.upLoadFile(this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
+                    } else {
+                        // specify upload directory
+                        log.info("upload file to ftp server, to path: {}, file：{}", this.ftpInfo.getFtpReceivePath(), fileName);
+                        ftpClientService.upLoadFile(this.ftpInfo.getFtpReceivePath(), this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
+                    }
                 } catch (BrokerException e) {
                     e.printStackTrace();
                 }
             }
             fileListener.onFile(topic, fileName);
-            return checkRet;
         }
 
-        @Override
         public void onException(Throwable e) {
             this.fileListener.onException(e);
         }

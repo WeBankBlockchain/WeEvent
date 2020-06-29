@@ -1,5 +1,9 @@
 package com.webank.weevent.file;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.SendResult;
 import com.webank.weevent.core.config.FiscoConfig;
@@ -10,16 +14,12 @@ import com.webank.weevent.file.inner.DiskFiles;
 import com.webank.weevent.file.service.FileChunksMeta;
 import com.webank.weevent.file.service.WeEventFileClient;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-
 public interface IWeEventFileClient {
-    public static IWeEventFileClient build(String groupId, String filePath, int fileChunkSize, FiscoConfig fiscoConfig) {
+    static IWeEventFileClient build(String groupId, String filePath, int fileChunkSize, FiscoConfig fiscoConfig) {
         return new WeEventFileClient(groupId, filePath, fileChunkSize, fiscoConfig);
     }
 
-    public static IWeEventFileClient build(String groupId, String filePath, FtpInfo ftpInfo, int fileChunkSize, FiscoConfig fiscoConfig) {
+    static IWeEventFileClient build(String groupId, String filePath, FtpInfo ftpInfo, int fileChunkSize, FiscoConfig fiscoConfig) {
         return new WeEventFileClient(groupId, filePath, ftpInfo, fileChunkSize, fiscoConfig);
     }
 
@@ -64,28 +64,6 @@ public interface IWeEventFileClient {
     FileChunksMeta publishFile(String topic, String localFile, boolean overwrite) throws BrokerException, IOException, InterruptedException;
 
     /**
-     * Interface for event notify callback
-     */
-    interface EventListener {
-        /**
-         * Called while new event arrived.
-         *
-         * @param topic topic name
-         * @param fileName file name
-         * @param checkFile is check file
-         * @return check file result
-         */
-        boolean onEvent(String topic, String fileName, boolean checkFile);
-
-        /**
-         * Called while raise exception.
-         *
-         * @param e the e
-         */
-        void onException(Throwable e);
-    }
-
-    /**
      * open transport for receiver.
      *
      * @param topic topic name
@@ -115,9 +93,9 @@ public interface IWeEventFileClient {
      */
     void openTransport4Receiver(String topic, FileListener fileListener, String privatePem) throws IOException, BrokerException;
 
-    /**
 
-     * Interface for file notify callback
+    /**
+     * Interface for file notify callback.
      */
     interface FileListener {
         /**

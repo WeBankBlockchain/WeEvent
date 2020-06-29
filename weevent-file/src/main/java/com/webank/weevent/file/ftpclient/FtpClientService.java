@@ -1,14 +1,5 @@
 package com.webank.weevent.file.ftpclient;
 
-import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.client.ErrorCode;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.net.ftp.FTP;
-import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPFile;
-import org.apache.commons.net.ftp.FTPReply;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -16,6 +7,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
+
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
+import org.apache.commons.net.ftp.FTPReply;
 
 @Slf4j
 public class FtpClientService {
@@ -133,7 +134,7 @@ public class FtpClientService {
                     // is directory, upload recursively
                     if (eachFile.isDirectory()) {
                         upLoadFile(eachFile);
-                         // subdirectory upload finished, change work directory
+                        // subdirectory upload finished, change work directory
                         boolean changeToParentDir = this.ftpClient.changeToParentDirectory();
                         if (!changeToParentDir) {
                             log.error("change to parent directory failed");
@@ -169,7 +170,7 @@ public class FtpClientService {
     }
 
     /**
-     * @param remotePath ftp server file path
+     * @param remotePath     ftp server file path
      * @param uploadFilePath upload file path
      * @throws BrokerException BrokerException
      */
@@ -231,7 +232,7 @@ public class FtpClientService {
      * download a single file
      *
      * @param remoteFilePath file path in ftp server
-     * @param localPath local path for download file
+     * @param localPath      local path for download file
      * @throws BrokerException BrokerException
      */
     public void downLoadFile(String remoteFilePath, String localPath) throws BrokerException {
@@ -312,8 +313,8 @@ public class FtpClientService {
     /**
      * download a directory
      *
-     * @param remoteDirPath  download directory
-     * @param localPath local path
+     * @param remoteDirPath download directory
+     * @param localPath     local path
      * @throws BrokerException BrokerException
      */
     public void downLoadDirectory(String remoteDirPath, String localPath) throws BrokerException {
@@ -351,8 +352,8 @@ public class FtpClientService {
      * get all file in the path
      *
      * @param remoteDirPath ftp server file path
-     * @param filePathList param
-     * @param first first invoke flag
+     * @param filePathList  param
+     * @param first         first invoke flag
      * @return all file list
      * @throws BrokerException
      */
@@ -365,7 +366,7 @@ public class FtpClientService {
                     throw new BrokerException(ErrorCode.FTP_CHANGE_WORKING_DIR_FAILED);
                 }
             } else {
-                String nextPath = remoteDirPath.substring(remoteDirPath.lastIndexOf('/')+1);
+                String nextPath = remoteDirPath.substring(remoteDirPath.lastIndexOf('/') + 1);
                 boolean changeDir = ftpClient.changeWorkingDirectory(nextPath);
                 if (!changeDir) {
                     log.error("change working directory failed, {}", nextPath);

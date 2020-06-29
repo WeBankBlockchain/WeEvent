@@ -28,7 +28,7 @@ public class WeEventFileClientTest {
     private String topicName = "com.weevent.file";
     private String groupId = "1";
     private String localReceivePath = "./logs";
-    // chunk size 1MB12
+    // chunk size 1MB
     private int fileChunkSize = 1048576;
     private FiscoConfig fiscoConfig;
 
@@ -83,7 +83,7 @@ public class WeEventFileClientTest {
     @Ignore
     public void testPublishFileWithVerify() throws Exception {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        Resource resource = resolver.getResource("classpath:" + "0x2809a9902e47d6fcaabe6d0183855d9201c93af1.pub.pem");
+        Resource resource = resolver.getResource("classpath:" + "0x2809a9902e47d6fcaabe6d0183855d9201c93af1.public.pem");
 
         WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
 
@@ -358,6 +358,6 @@ public class WeEventFileClientTest {
     public void testGetFileExistence() throws BrokerException {
         WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
         boolean ret = weEventFileClient.getFileExistence("ca.crt", this.topicName, this.groupId);
-        Assert.assertFalse(ret);
+        Assert.assertTrue(ret);
     }
 }

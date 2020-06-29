@@ -1,12 +1,21 @@
 package com.webank.weevent.file.inner;
 
+import java.io.BufferedInputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
-import com.webank.weevent.file.IWeEventFileClient;
 import com.webank.weevent.file.dto.FileEvent;
 import com.webank.weevent.file.service.FileChunksMeta;
+import com.webank.weevent.file.service.WeEventFileClient;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
 import org.fisco.bcos.channel.client.ChannelPushCallback;
@@ -17,19 +26,7 @@ import org.fisco.bcos.channel.dto.ChannelResponse;
 import org.fisco.bcos.channel.handler.AMOPVerifyKeyInfo;
 import org.fisco.bcos.channel.handler.AMOPVerifyTopicToKeyInfo;
 import org.springframework.core.io.InputStreamResource;
-
-import java.io.BufferedInputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * AMOP channel for file transport.
@@ -46,6 +43,7 @@ public class AMOPChannel extends ChannelPushCallback {
     private static final String BOOLEAN_FALSE = "false";
     private final FileTransportService fileTransportService;
     public Service service;
+    public ThreadPoolTaskExecutor threadPool;
 
     // verify topic in AMOP(WeEvent's topic hash) <-> service correspond to topic
     public Map<String, Service> senderVerifyTopics = new ConcurrentHashMap<>();
@@ -58,17 +56,18 @@ public class AMOPChannel extends ChannelPushCallback {
     // topic not verify
     public List<String> subTopics = new ArrayList<>();
 
-    public Map<String, IWeEventFileClient.EventListener> topicListenerMap = new ConcurrentHashMap<>();
+    public Map<String, WeEventFileClient.EventListener> topicListenerMap = new ConcurrentHashMap<>();
 
     /**
      * Create a AMOP channel on service for subscribe topic
      *
      * @param fileTransportService component class
-     * @param groupId group id
+     * @param groupId              group id
      * @throws BrokerException exception
      */
     public AMOPChannel(FileTransportService fileTransportService, String groupId) throws BrokerException {
         this.fileTransportService = fileTransportService;
+        this.threadPool = this.initThreadPool(5, 10, 10);
 
         // new service
         Service service = Web3SDKConnector.initService(Long.valueOf(groupId), this.fileTransportService.getFiscoConfig());
@@ -109,7 +108,7 @@ public class AMOPChannel extends ChannelPushCallback {
 
 
     // Receiver call subscribe topic
-    public void subTopic(String topic, IWeEventFileClient.EventListener eventListener) throws BrokerException {
+    public void subTopic(String topic, WeEventFileClient.EventListener eventListener) throws BrokerException {
         if (this.senderTopics.contains(topic) || senderVerifyTopics.containsKey(topic)) {
             log.error("this is already sender side for topic: {}", topic);
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
@@ -126,7 +125,7 @@ public class AMOPChannel extends ChannelPushCallback {
     }
 
     // Receiver call subscribe verify topic
-    public void subTopic(String topic, String groupId, BufferedInputStream privatePem, IWeEventFileClient.EventListener eventListener) throws BrokerException {
+    public void subTopic(String topic, String groupId, BufferedInputStream privatePem, WeEventFileClient.EventListener eventListener) throws BrokerException {
         if (this.senderTopics.contains(topic) || senderVerifyTopics.containsKey(topic)) {
             log.error("this is already sender side for topic: {}", topic);
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
@@ -253,7 +252,7 @@ public class AMOPChannel extends ChannelPushCallback {
         ChannelResponse rsp = this.sendEvent(fileChunksMeta.getTopic(), fileEvent);
         if (rsp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
             log.info("Check file existence success");
-            String resString =  JsonHelper.json2Object(rsp.getContentByteArray(), String.class);
+            String resString = JsonHelper.json2Object(rsp.getContentByteArray(), String.class);
             return resString.equals(BOOLEAN_TRUE);
         }
 
@@ -360,9 +359,8 @@ public class AMOPChannel extends ChannelPushCallback {
                     channelResponse = AMOPChannel.toChannelResponse(ErrorCode.SUCCESS, json);
 
                     // new thread upload file to ftp server
-                    IWeEventFileClient.EventListener eventListener = this.topicListenerMap.get(fileChunksMeta.getTopic());
-                    ThreadPoolExecutor4FTP tpeFtp = new ThreadPoolExecutor4FTP();
-                    tpeFtp.start(fileChunksMeta.getTopic(), fileChunksMeta.getFileName(), false, eventListener);
+                    WeEventFileClient.EventListener eventListener = this.topicListenerMap.get(fileChunksMeta.getTopic());
+                    threadPool.execute(() -> eventListener.onEvent(fileChunksMeta.getTopic(), fileChunksMeta.getFileName()));
                 } catch (BrokerException e) {
                     log.error("clean up not complete file failed", e);
                     channelResponse = AMOPChannel.toChannelResponse(e);
@@ -377,10 +375,9 @@ public class AMOPChannel extends ChannelPushCallback {
                     boolean fileExistLocal = this.fileTransportService.checkFileExist(fileChunksMeta);
                     log.info("check if the file exists success, fileName: {}, local file existence: {}", fileChunksMeta.getFileName(), fileExistLocal);
 
-                    IWeEventFileClient.EventListener eventListener = this.topicListenerMap.get(fileChunksMeta.getTopic());
-                    ThreadPoolExecutor4FTP tpeFtp = new ThreadPoolExecutor4FTP();
-                    boolean fileExistFtp = tpeFtp.start(fileChunksMeta.getTopic(), fileChunksMeta.getFileName(), true, eventListener);
-                    log.info("check if the file exists success, ftp fileName: {}, file existence: {}", fileChunksMeta.getFileName(), fileExistFtp);
+                    WeEventFileClient.EventListener eventListener = this.topicListenerMap.get(fileChunksMeta.getTopic());
+                    boolean fileExistFtp = eventListener.checkFile(fileChunksMeta.getFileName());
+                    log.info("check if the file exists success, fileName: {}, ftp file existence: {}", fileChunksMeta.getFileName(), fileExistFtp);
 
                     channelResponse = AMOPChannel.toChannelResponse(ErrorCode.SUCCESS, fileExistLocal || fileExistFtp ? BOOLEAN_TRUE.getBytes() : BOOLEAN_FALSE.getBytes());
                 } catch (BrokerException e) {
@@ -427,41 +424,21 @@ public class AMOPChannel extends ChannelPushCallback {
 
     }
 
-    static class FtpTask implements Callable<Boolean> {
-        private final String topic;
-        private final String fileName;
-        private final boolean checkFile;
-        private final IWeEventFileClient.EventListener eventListener;
+    private ThreadPoolTaskExecutor initThreadPool(int core, int max, int keepalive) {
+        // init thread pool
+        ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
+        pool.setThreadNamePrefix("ftp service-");
+        pool.setCorePoolSize(core);
+        pool.setMaxPoolSize(max);
+        // queue conflict with thread pool scale up, forbid it
+        pool.setQueueCapacity(0);
+        pool.setKeepAliveSeconds(keepalive);
+        // abort policy
+        pool.setRejectedExecutionHandler(null);
+        pool.setDaemon(true);
+        pool.initialize();
 
-        public FtpTask(String topic, String fileName, boolean checkFile, IWeEventFileClient.EventListener eventListener) {
-            this.topic = topic;
-            this.fileName = fileName;
-            this.checkFile = checkFile;
-            this.eventListener = eventListener;
-        }
-
-        @Override
-        public Boolean call() {
-            return eventListener.onEvent(this.topic, this.fileName, checkFile);
-        }
-    }
-
-    public static class ThreadPoolExecutor4FTP {
-
-        public boolean start(String topic, String fileName, boolean checkFile , IWeEventFileClient.EventListener eventListener) throws BrokerException {
-            try {
-                ThreadPoolExecutor tpe = new ThreadPoolExecutor(5, 10, 0,
-                        TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(),
-                        new ThreadPoolExecutor.CallerRunsPolicy());
-
-                FtpTask ftpTask = new FtpTask(topic, fileName, checkFile, eventListener);
-                Future<Boolean> ret = tpe.submit(ftpTask);
-                tpe.shutdown();
-                return ret.get();
-            } catch (Exception e) {
-                log.error("execute thread task error.");
-                throw new BrokerException(ErrorCode.UNKNOWN_ERROR);
-            }
-        }
+        log.info("init ThreadPoolTaskExecutor");
+        return pool;
     }
 }

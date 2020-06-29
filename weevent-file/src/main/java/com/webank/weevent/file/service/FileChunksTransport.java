@@ -13,6 +13,7 @@ import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.core.fisco.util.ParamCheckUtils;
 import com.webank.weevent.core.fisco.util.WeEventUtils;
 import com.webank.weevent.file.inner.FileTransportService;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.DigestUtils;
 
@@ -33,7 +34,7 @@ public class FileChunksTransport {
         this.fileTransportService = fileTransportService;
     }
 
-    public FileChunksMeta upload(String localFile, String topic, String groupId, boolean overwrite) throws BrokerException, IOException, InterruptedException {
+    public FileChunksMeta upload(String localFile, String topic, String groupId, boolean overwrite) throws BrokerException, IOException {
         log.info("try to upload file {}", localFile);
 
         File file = new File(localFile);
@@ -146,7 +147,7 @@ public class FileChunksTransport {
         return fileChunksMeta;
     }
 
-    private boolean checkChunkFullUpload(RandomAccessFile f, FileChunksMeta local) throws InterruptedException {
+    private boolean checkChunkFullUpload(RandomAccessFile f, FileChunksMeta local) {
         boolean isFullUpload = false;
         for (int i = 0; i <= CHUNK_RETRY_COUNT; i++) {
             try {

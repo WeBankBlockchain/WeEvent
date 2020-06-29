@@ -1,20 +1,16 @@
 package com.webank.weevent.file;
 
+import java.io.File;
+
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.file.ftpclient.FtpClientService;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.io.File;
-import java.io.IOException;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @Slf4j
 public class FtpClientServiceTest {
