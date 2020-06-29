@@ -28,7 +28,6 @@ import org.fisco.bcos.channel.handler.ChannelConnections;
 import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
-import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
@@ -169,9 +168,6 @@ public class Web3SDKConnector {
         String privateKey;
         if (fiscoConfig.getWeb3sdkEncryptType().equals("SM2_TYPE")) {
             log.info("SM2_TYPE");
-            // set encrypt type for web3sdk
-            EncryptType encryptType = new EncryptType(EncryptType.SM2_TYPE);
-
             try {
                 PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
                 Resource resource = resolver.getResource("classpath:" + fiscoConfig.getPemKeyPath());

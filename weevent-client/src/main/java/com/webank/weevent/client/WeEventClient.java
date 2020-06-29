@@ -237,10 +237,12 @@ public class WeEventClient implements IWeEventClient {
             X509TrustManager x509TrustManager = new X509TrustManager() {
                 @Override
                 public void checkClientTrusted(X509Certificate[] x509Certificates, String s) {
+                    // NOOP
                 }
 
                 @Override
                 public void checkServerTrusted(X509Certificate[] x509Certificates, String s) {
+                    // NOOP
                 }
 
                 @Override

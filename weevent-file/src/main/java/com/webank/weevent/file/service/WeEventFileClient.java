@@ -1,5 +1,15 @@
 package com.webank.weevent.file.service;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.SendResult;
@@ -16,6 +26,7 @@ import com.webank.weevent.file.ftpclient.FtpClientService;
 import com.webank.weevent.file.inner.AMOPChannel;
 import com.webank.weevent.file.inner.DiskFiles;
 import com.webank.weevent.file.inner.FileTransportService;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.client.Service;
@@ -23,16 +34,6 @@ import org.fisco.bcos.channel.handler.AMOPVerifyKeyInfo;
 import org.fisco.bcos.channel.handler.AMOPVerifyTopicToKeyInfo;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class WeEventFileClient implements IWeEventFileClient {
@@ -100,20 +101,12 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
     }
 
-    /**
-     * @param topic topic name
-     */
     public void openTransport4Sender(String topic) {
         if (!this.fileTransportService.getChannel().senderTopics.contains(topic)) {
             this.fileTransportService.getChannel().senderTopics.add(topic);
         }
     }
 
-    /**
-     * @param topic topic name
-     * @param publicPem public pem inputstream
-     * @throws BrokerException exception
-     */
     public void openTransport4Sender(String topic, InputStream publicPem) throws BrokerException {
 
         // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
@@ -158,12 +151,6 @@ public class WeEventFileClient implements IWeEventFileClient {
         amopChannel.senderVerifyTopics.put(topic, service);
     }
 
-    /**
-     * @param topic topic name
-     * @param publicPemPath public pem path string
-     * @throws BrokerException exception
-     * @throws IOException exception
-     */
     public void openTransport4Sender(String topic, String publicPemPath) throws BrokerException, IOException {
         File file = new File(publicPemPath);
         if (!file.isFile()) {
@@ -175,19 +162,8 @@ public class WeEventFileClient implements IWeEventFileClient {
         openTransport4Sender(topic, inputStream);
     }
 
-    /**
-     * Publish a file to topic.
-     * The file's data DO NOT stored in block chain. Yes, it's not persist, may be deleted sometime after subscribe notify.
-     *
-     * @param topic binding topic
-     * @param filePath local file to be send
-     * @return send result, SendResult.SUCCESS if success, and return SendResult.eventId
-     * @throws BrokerException broker exception
-     * @throws IOException IOException
-     * @throws InterruptedException InterruptedException
-     */
     @Override
-    public FileChunksMeta publishFile(String topic, String filePath, boolean overwrite) throws BrokerException, IOException, InterruptedException {
+    public FileChunksMeta publishFile(String topic, String filePath, boolean overwrite) throws BrokerException, IOException {
 
         if (this.ftpInfo == null) {
             // publish local file
@@ -208,11 +184,6 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
     }
 
-    /**
-     * @param topic topic name
-     * @param fileListener notify interface
-     * @throws BrokerException broker exception
-     */
     public void openTransport4Receiver(String topic, FileListener fileListener) throws BrokerException {
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
 
@@ -221,12 +192,6 @@ public class WeEventFileClient implements IWeEventFileClient {
         amopChannel.subTopic(topic, fileEventListener);
     }
 
-    /**
-     * @param topic topic name
-     * @param fileListener notify interface
-     * @param privatePem private key pem inputstream
-     * @throws BrokerException broker exception
-     */
     public void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem) throws BrokerException {
         // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
@@ -236,13 +201,6 @@ public class WeEventFileClient implements IWeEventFileClient {
         amopChannel.subTopic(topic, groupId, privatePem, fileEventListener);
     }
 
-    /**
-     * @param topic topic name
-     * @param fileListener notify interface
-     * @param privatePemPath private key pem path string
-     * @throws IOException IOException
-     * @throws BrokerException InterruptedException
-     */
     public void openTransport4Receiver(String topic, FileListener fileListener, String privatePemPath) throws IOException, BrokerException {
         File file = new File(privatePemPath);
         if (!file.isFile()) {
@@ -254,9 +212,6 @@ public class WeEventFileClient implements IWeEventFileClient {
         openTransport4Receiver(topic, fileListener, inputStream);
     }
 
-    /**
-     * @param topic topic name
-     */
     public void closeTransport(String topic) {
         AMOPChannel channel = this.fileTransportService.getChannel();
         // unSubscribe topic
@@ -270,10 +225,6 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
     }
 
-    /**
-     * @param topicName topic name
-     * @return transport status
-     */
     @Override
     public FileTransportStats status(String topicName) {
         FileTransportStats fileTransportStats = this.fileTransportService.stats(true, this.groupId, topicName);
@@ -305,11 +256,6 @@ public class WeEventFileClient implements IWeEventFileClient {
         return retFileTransportStats;
     }
 
-    /**
-     * @param topic topic name
-     * @return filechunksmeta  filechunksmeta
-     * @throws BrokerException broker exception
-     */
     public List<FileChunksMeta> listFiles(String topic) throws BrokerException {
         // get json from disk
         List<File> fileList = new ArrayList<>();
@@ -340,30 +286,15 @@ public class WeEventFileClient implements IWeEventFileClient {
         return fileChunksMetaList;
     }
 
-    /**
-     * @param fileChunksMeta fileChunksMeta
-     * @return send result and eventId
-     * @throws BrokerException broker exception
-     */
     public SendResult sign(FileChunksMeta fileChunksMeta) throws BrokerException {
         return this.fileTransportService.sendSign(fileChunksMeta);
     }
 
-    /**
-     * @param eventId eventId return by sign
-     * @param groupId group id
-     * @return file and block information
-     * @throws BrokerException broker exception
-     */
     public FileChunksMetaPlus verify(String eventId, String groupId) throws BrokerException {
         return this.fileTransportService.verify(eventId, groupId);
 
     }
 
-    /**
-     * get DiskFiles
-     * @return DiskFiles
-     */
     public DiskFiles getDiskFiles() {
         return this.fileTransportService.getDiskFiles();
     }
@@ -377,7 +308,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
     }
 
-    static class FileEventListener implements EventListener{
+    static class FileEventListener implements EventListener {
         private String receivePath;
         private final FtpInfo ftpInfo;
         private final FileListener fileListener;

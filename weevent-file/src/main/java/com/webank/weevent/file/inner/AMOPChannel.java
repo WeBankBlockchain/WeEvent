@@ -1,5 +1,13 @@
 package com.webank.weevent.file.inner;
 
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.JsonHelper;
@@ -7,6 +15,7 @@ import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
 import com.webank.weevent.file.IWeEventFileClient;
 import com.webank.weevent.file.dto.FileEvent;
 import com.webank.weevent.file.service.FileChunksMeta;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
 import org.fisco.bcos.channel.client.ChannelPushCallback;
@@ -17,10 +26,6 @@ import org.fisco.bcos.channel.dto.ChannelResponse;
 import org.fisco.bcos.channel.handler.AMOPVerifyKeyInfo;
 import org.fisco.bcos.channel.handler.AMOPVerifyTopicToKeyInfo;
 import org.springframework.core.io.InputStreamResource;
-
-import java.io.InputStream;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * AMOP channel for file transport.
@@ -60,8 +65,7 @@ public class AMOPChannel extends ChannelPushCallback {
         this.fileTransportService = fileTransportService;
 
         // new service
-        Service service = Web3SDKConnector.initService(Long.valueOf(groupId), this.fileTransportService.getFiscoConfig());
-        this.service = service;
+        this.service = Web3SDKConnector.initService(Long.valueOf(groupId), this.fileTransportService.getFiscoConfig());
         this.service.setPushCallback(this);
         try {
             this.service.run();
@@ -335,7 +339,7 @@ public class AMOPChannel extends ChannelPushCallback {
 
                     //
                     IWeEventFileClient.EventListener eventListener = this.topicListenerMap.get(fileChunksMeta.getTopic());
-                    new Thread(new uploadFile2Ftp(fileChunksMeta.getTopic(), fileChunksMeta.getFileName(), eventListener),"thread upload").start();
+                    new Thread(new uploadFile2Ftp(fileChunksMeta.getTopic(), fileChunksMeta.getFileName(), eventListener), "thread upload").start();
                 } catch (BrokerException e) {
                     log.error("clean up not complete file failed", e);
                     channelResponse = AMOPChannel.toChannelResponse(e);
@@ -387,11 +391,12 @@ public class AMOPChannel extends ChannelPushCallback {
         private final IWeEventFileClient.EventListener eventListener;
 
 
-        public uploadFile2Ftp(String topic, String fileName, IWeEventFileClient.EventListener eventListener){
+        public uploadFile2Ftp(String topic, String fileName, IWeEventFileClient.EventListener eventListener) {
             this.topic = topic;
             this.fileName = fileName;
             this.eventListener = eventListener;
         }
+
         @Override
         public void run() {
             eventListener.onEvent(this.topic, this.fileName);

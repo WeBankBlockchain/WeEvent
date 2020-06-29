@@ -59,11 +59,11 @@ public class FileService {
     // file download root path
     private String downloadPath;
     // <brokerId, <groupId, <IWeEventFileClient, DiskFiles>>>
-    private Map<Integer, Map<String, Pair<IWeEventFileClient, DiskFiles>>> fileClientMap = new ConcurrentHashMap<>();
+    private final Map<Integer, Map<String, Pair<IWeEventFileClient, DiskFiles>>> fileClientMap = new ConcurrentHashMap<>();
     // <brokerId, <groupId, <topic, overwrite>>>
-    private Map<Integer, Map<String, Map<String, Boolean>>> transportMap = new ConcurrentHashMap<>();
+    private final Map<Integer, Map<String, Map<String, Boolean>>> transportMap = new ConcurrentHashMap<>();
     // upload local file to governance server, <fileId, FileChunksMeta>
-    private Map<String, Pair<FileChunksMeta, DiskFiles>> fileChunksMap = new ConcurrentHashMap<>();
+    private final Map<String, Pair<FileChunksMeta, DiskFiles>> fileChunksMap = new ConcurrentHashMap<>();
 
 
     @Autowired
@@ -163,18 +163,12 @@ public class FileService {
         IWeEventFileClient fileClient = this.getIWeEventFileClient(chunkParam.getFileChunksMeta().getGroupId(), chunkParam.getBrokerId());
         boolean isSuccess = this.uploadChunks(chunkParam.getFileChunksMeta(), chunkParam.getChunkNumber(), chunkParam.getChunkData());
 
-        try {
-            // if chunk upload failed, sleep and retry again
-            for (int i = 1; i <= ConstantProperties.UPLOAD_CHUNK_FAIL_RETRY_COUNT; i++) {
-                if (isSuccess) {
-                    break;
-                }
-                Thread.sleep(ConstantProperties.WAIT1S);
-                isSuccess = this.uploadChunks(chunkParam.getFileChunksMeta(), chunkParam.getChunkNumber(), chunkParam.getChunkData());
+        // if chunk upload failed, sleep and retry again
+        for (int i = 1; i <= ConstantProperties.UPLOAD_CHUNK_FAIL_RETRY_COUNT; i++) {
+            if (isSuccess) {
+                break;
             }
-        } catch (InterruptedException e) {
-            log.error("upload file failed, topic:{}, fileId:{}.", chunkParam.getFileChunksMeta().getTopic(), chunkParam.getFileId());
-            throw new GovernanceException(e.getMessage());
+            isSuccess = this.uploadChunks(chunkParam.getFileChunksMeta(), chunkParam.getChunkNumber(), chunkParam.getChunkData());
         }
         if (!isSuccess) {
             throw new GovernanceException(ErrorCode.FILE_UPLOAD_FAILED);
@@ -193,7 +187,7 @@ public class FileService {
                     fileClient.publishFile(chunkParam.getFileChunksMeta().getTopic(), filePath, overWrite);
                     log.info("publish file success, topic:{}, fileName:{}.", chunkParam.getFileChunksMeta().getTopic(),
                             chunkParam.getFileChunksMeta().getFileName());
-                } catch (BrokerException | IOException | InterruptedException e) {
+                } catch (BrokerException | IOException e) {
                     log.error("publish file error, fileName:{}.", chunkParam.getFileChunksMeta().getFileName(), e);
                 } finally {
                     // remove local file after publish
